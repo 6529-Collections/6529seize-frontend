@@ -1,19 +1,30 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT,
   PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
   PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
+  requestProfileCmsGallerySnapshot,
   runProfileCmsBuilderAction,
   type ProfileCmsBuilderAction,
   type ProfileCmsBuilderActionCode,
   type ProfileCmsBuilderActionResult,
 } from "@/lib/profile-cms/builder/api";
+import {
+  WALLET_GALLERY_FIXTURE_WARNING_CODES,
+  parseWalletGallerySources,
+  type WalletGalleryBuilderState,
+  type WalletGallerySnapshotAsset,
+  type WalletGallerySnapshotCollection,
+} from "@/lib/profile-cms/builder/gallery";
 import {
   createBuilderBlock,
   createBuilderStateFromPackage,
@@ -24,10 +35,13 @@ import {
   type CmsBuilderBlock,
   type CmsBuilderBlockKind,
   type CmsBuilderState,
+  type CmsBuilderTemplate,
 } from "@/lib/profile-cms/builder/package";
 import type { CmsValidationIssueV1 } from "@/lib/profile-cms/protocol/v1";
+import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
 
 type BuilderTab = "editor" | "preview" | "json";
+type GallerySnapshotStatus = "idle" | "loading" | "ready" | "error";
 
 const BLOCK_OPTIONS: ReadonlyArray<{
   readonly kind: CmsBuilderBlockKind;
@@ -62,7 +76,11 @@ export default function ProfileCmsBuilder({
     useState<ProfileCmsBuilderActionResult | null>(null);
   const [draftId, setDraftId] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [gallerySnapshotStatus, setGallerySnapshotStatus] =
+    useState<GallerySnapshotStatus>("idle");
+  const [gallerySnapshotError, setGallerySnapshotError] = useState("");
   const actionRequestIdRef = useRef(0);
+  const gallerySnapshotRequestIdRef = useRef(0);
   const stateVersionRef = useRef(0);
   const { activeProfileProxy, connectedProfile } = useAuth();
 
@@ -84,6 +102,43 @@ export default function ProfileCmsBuilder({
     clearActionResult();
   };
 
+  const selectTemplate = (template: CmsBuilderTemplate) => {
+    setState((current) => {
+      if (current.template === template) {
+        return current;
+      }
+
+      return {
+        ...current,
+        template,
+        ...(template === "wallet_gallery"
+          ? {
+              siteTitle: current.siteTitle.endsWith("Gallery")
+                ? current.siteTitle
+                : `${current.handle} Gallery`,
+              siteDescription:
+                current.siteDescription ||
+                "Generated gallery from reviewed wallet snapshot.",
+              themeAccent: "#00a86b",
+            }
+          : {}),
+      };
+    });
+    clearActionResult();
+  };
+
+  const updateGallery = (patch: Partial<WalletGalleryBuilderState>) => {
+    setState((current) => ({
+      ...current,
+      template: "wallet_gallery",
+      gallery: {
+        ...current.gallery,
+        ...patch,
+      },
+    }));
+    clearActionResult();
+  };
+
   const updateBlock = (index: number, patch: Partial<CmsBuilderBlock>) => {
     setState((current) => ({
       ...current,
@@ -92,6 +147,69 @@ export default function ProfileCmsBuilder({
       ),
     }));
     clearActionResult();
+  };
+
+  const requestGallerySnapshot = async () => {
+    const parsed = parseWalletGallerySources(state.gallery.walletInput);
+    if (!parsed.ok) {
+      setGallerySnapshotStatus("error");
+      setGallerySnapshotError(
+        parsed.errors.includes("missing_wallet")
+          ? t(locale, "profileCms.builder.gallery.wallets.emptyError")
+          : t(locale, "profileCms.builder.gallery.wallets.invalidError", {
+              entries: parsed.errors.join(", "),
+            })
+      );
+      return;
+    }
+
+    const requestId = gallerySnapshotRequestIdRef.current + 1;
+    gallerySnapshotRequestIdRef.current = requestId;
+    setGallerySnapshotStatus("loading");
+    setGallerySnapshotError("");
+    clearActionResult();
+
+    try {
+      const snapshot = await requestProfileCmsGallerySnapshot({
+        handle: state.handle,
+        profileId: canUseBuilderApi ? profileId : undefined,
+        sources: parsed.sources,
+      });
+      if (requestId !== gallerySnapshotRequestIdRef.current) {
+        return;
+      }
+
+      setState((current) => ({
+        ...current,
+        template: "wallet_gallery",
+        siteTitle: current.siteTitle.endsWith("Gallery")
+          ? current.siteTitle
+          : `${current.handle} Gallery`,
+        siteDescription:
+          current.siteDescription ||
+          "Generated gallery from reviewed wallet snapshot.",
+        gallery: {
+          ...current.gallery,
+          snapshot,
+          hiddenAssetIds: [],
+          featuredAssetIds: snapshot.assets[0] ? [snapshot.assets[0].id] : [],
+          featuredCollectionIds: snapshot.collections[0]
+            ? [snapshot.collections[0].id]
+            : [],
+          orderedAssetIds: snapshot.assets.map((asset) => asset.id),
+        },
+      }));
+      stateVersionRef.current += 1;
+      setGallerySnapshotStatus("ready");
+    } catch {
+      if (requestId !== gallerySnapshotRequestIdRef.current) {
+        return;
+      }
+      setGallerySnapshotStatus("error");
+      setGallerySnapshotError(
+        t(locale, "profileCms.builder.gallery.snapshot.failed")
+      );
+    }
   };
 
   const addBlock = (kind: CmsBuilderBlockKind) => {
@@ -128,17 +246,11 @@ export default function ProfileCmsBuilder({
   };
 
   const runAction = async (action: ProfileCmsBuilderAction) => {
-    if (
-      (action === "save_draft" || action === "validate") &&
-      !canUseBuilderApi
-    ) {
+    if (!canUseBuilderApi) {
       setActionResult({
         ok: false,
         action,
-        expectedEndpoint:
-          action === "save_draft"
-            ? PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT
-            : PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
+        expectedEndpoint: getExpectedBuilderEndpoint(action, draftId),
         code: "profile_not_authorized",
       });
       return;
@@ -248,10 +360,15 @@ export default function ProfileCmsBuilder({
           {activeTab === "editor" ? (
             <EditorPanel
               addBlock={addBlock}
+              gallerySnapshotError={gallerySnapshotError}
+              gallerySnapshotStatus={gallerySnapshotStatus}
               locale={locale}
+              onRequestGallerySnapshot={() => void requestGallerySnapshot()}
               removeBlock={removeBlock}
+              selectTemplate={selectTemplate}
               state={state}
               updateBlock={updateBlock}
+              updateGallery={updateGallery}
               updateState={updateState}
             />
           ) : null}
@@ -298,20 +415,30 @@ export default function ProfileCmsBuilder({
 
 function EditorPanel({
   addBlock,
+  gallerySnapshotError,
+  gallerySnapshotStatus,
   locale,
+  onRequestGallerySnapshot,
   removeBlock,
+  selectTemplate,
   state,
   updateBlock,
+  updateGallery,
   updateState,
 }: {
   readonly addBlock: (kind: CmsBuilderBlockKind) => void;
+  readonly gallerySnapshotError: string;
+  readonly gallerySnapshotStatus: GallerySnapshotStatus;
   readonly locale: SupportedLocale;
+  readonly onRequestGallerySnapshot: () => void;
   readonly removeBlock: (index: number) => void;
+  readonly selectTemplate: (template: CmsBuilderTemplate) => void;
   readonly state: CmsBuilderState;
   readonly updateBlock: (
     index: number,
     patch: Partial<CmsBuilderBlock>
   ) => void;
+  readonly updateGallery: (patch: Partial<WalletGalleryBuilderState>) => void;
   readonly updateState: (patch: Partial<CmsBuilderState>) => void;
 }) {
   return (
@@ -322,19 +449,28 @@ function EditorPanel({
         </h2>
         <div className="tw-flex tw-flex-col tw-gap-2">
           <button
-            className="tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500/10 tw-p-3 tw-text-left tw-text-sm tw-font-semibold tw-text-white"
+            aria-pressed={state.template === "homepage"}
+            className={`tw-border tw-border-solid tw-p-3 tw-text-left tw-text-sm tw-font-semibold ${
+              state.template === "homepage"
+                ? "tw-border-primary-400 tw-bg-primary-500/10 tw-text-white"
+                : "tw-border-iron-800 tw-bg-black tw-text-iron-300 hover:tw-border-primary-400"
+            }`}
+            onClick={() => selectTemplate("homepage")}
             type="button"
           >
             {t(locale, "profileCms.builder.templates.homepage")}
           </button>
           <button
-            aria-disabled="true"
-            className="tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3 tw-text-left tw-text-sm tw-text-iron-500"
-            disabled
+            aria-pressed={state.template === "wallet_gallery"}
+            className={`tw-border tw-border-solid tw-p-3 tw-text-left tw-text-sm tw-font-semibold ${
+              state.template === "wallet_gallery"
+                ? "tw-border-primary-400 tw-bg-primary-500/10 tw-text-white"
+                : "tw-border-iron-800 tw-bg-black tw-text-iron-300 hover:tw-border-primary-400"
+            }`}
+            onClick={() => selectTemplate("wallet_gallery")}
             type="button"
           >
-            {t(locale, "profileCms.builder.templates.walletGallery")}{" "}
-            {t(locale, "profileCms.builder.templates.status.comingSoon")}
+            {t(locale, "profileCms.builder.templates.walletGallery")}
           </button>
           <button
             aria-disabled="true"
@@ -348,90 +484,666 @@ function EditorPanel({
         </div>
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-6 tw-p-4">
-        <Fieldset title={t(locale, "profileCms.builder.siteSettings")}>
-          <TextInput
-            id="cms-builder-site-title"
-            label={t(locale, "profileCms.builder.field.siteTitle")}
-            onChange={(siteTitle) => updateState({ siteTitle })}
-            value={state.siteTitle}
-          />
-          <TextArea
-            id="cms-builder-site-description"
-            label={t(locale, "profileCms.builder.field.siteDescription")}
-            onChange={(siteDescription) => updateState({ siteDescription })}
-            rows={3}
-            value={state.siteDescription}
-          />
-          <TextInput
-            id="cms-builder-theme-accent"
-            label={t(locale, "profileCms.builder.field.themeAccent")}
-            onChange={(themeAccent) => updateState({ themeAccent })}
-            type="color"
-            value={state.themeAccent}
-          />
-        </Fieldset>
+      {state.template === "wallet_gallery" ? (
+        <WalletGalleryPanel
+          gallery={state.gallery}
+          locale={locale}
+          onRequestSnapshot={onRequestGallerySnapshot}
+          snapshotError={gallerySnapshotError}
+          snapshotStatus={gallerySnapshotStatus}
+          updateGallery={updateGallery}
+          updateState={updateState}
+          state={state}
+        />
+      ) : (
+        <div className="tw-flex tw-flex-col tw-gap-6 tw-p-4">
+          <Fieldset title={t(locale, "profileCms.builder.siteSettings")}>
+            <TextInput
+              id="cms-builder-site-title"
+              label={t(locale, "profileCms.builder.field.siteTitle")}
+              onChange={(siteTitle) => updateState({ siteTitle })}
+              value={state.siteTitle}
+            />
+            <TextArea
+              id="cms-builder-site-description"
+              label={t(locale, "profileCms.builder.field.siteDescription")}
+              onChange={(siteDescription) => updateState({ siteDescription })}
+              rows={3}
+              value={state.siteDescription}
+            />
+            <TextInput
+              id="cms-builder-theme-accent"
+              label={t(locale, "profileCms.builder.field.themeAccent")}
+              onChange={(themeAccent) => updateState({ themeAccent })}
+              type="color"
+              value={state.themeAccent}
+            />
+          </Fieldset>
 
-        <Fieldset title={t(locale, "profileCms.builder.pageSettings")}>
-          <TextInput
-            id="cms-builder-page-title"
-            label={t(locale, "profileCms.builder.field.pageTitle")}
-            onChange={(pageTitle) => updateState({ pageTitle })}
-            value={state.pageTitle}
-          />
-          <TextArea
-            id="cms-builder-page-description"
-            label={t(locale, "profileCms.builder.field.pageDescription")}
-            onChange={(pageDescription) => updateState({ pageDescription })}
-            rows={3}
-            value={state.pageDescription}
-          />
-          <TextInput
-            id="cms-builder-social-image"
-            label={t(locale, "profileCms.builder.field.socialImageAsset")}
-            onChange={(socialImageAssetId) =>
-              updateState({ socialImageAssetId })
-            }
-            placeholder="asset-image-1"
-            value={state.socialImageAssetId}
-          />
-          <TextInput
-            id="cms-builder-navigation-label"
-            label={t(locale, "profileCms.builder.field.navigationLabel")}
-            onChange={(navigationLabel) => updateState({ navigationLabel })}
-            value={state.navigationLabel}
-          />
-        </Fieldset>
+          <Fieldset title={t(locale, "profileCms.builder.pageSettings")}>
+            <TextInput
+              id="cms-builder-page-title"
+              label={t(locale, "profileCms.builder.field.pageTitle")}
+              onChange={(pageTitle) => updateState({ pageTitle })}
+              value={state.pageTitle}
+            />
+            <TextArea
+              id="cms-builder-page-description"
+              label={t(locale, "profileCms.builder.field.pageDescription")}
+              onChange={(pageDescription) => updateState({ pageDescription })}
+              rows={3}
+              value={state.pageDescription}
+            />
+            <TextInput
+              id="cms-builder-social-image"
+              label={t(locale, "profileCms.builder.field.socialImageAsset")}
+              onChange={(socialImageAssetId) =>
+                updateState({ socialImageAssetId })
+              }
+              placeholder="asset-image-1"
+              value={state.socialImageAssetId}
+            />
+            <TextInput
+              id="cms-builder-navigation-label"
+              label={t(locale, "profileCms.builder.field.navigationLabel")}
+              onChange={(navigationLabel) => updateState({ navigationLabel })}
+              value={state.navigationLabel}
+            />
+          </Fieldset>
 
-        <Fieldset title={t(locale, "profileCms.builder.blocks.title")}>
-          <div className="tw-flex tw-flex-wrap tw-gap-2">
-            {BLOCK_OPTIONS.map((option) => (
-              <button
-                className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 hover:tw-border-primary-400"
-                key={option.kind}
-                onClick={() => addBlock(option.kind)}
-                type="button"
-              >
-                {t(locale, option.labelKey)}
-              </button>
-            ))}
-          </div>
-          <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-4">
-            {state.blocks.map((block, index) => (
-              <BlockEditor
-                block={block}
-                index={index}
-                key={block.id}
-                locale={locale}
-                onChange={(patch) => updateBlock(index, patch)}
-                onRemove={() => removeBlock(index)}
-              />
-            ))}
-          </div>
-        </Fieldset>
-      </div>
+          <Fieldset title={t(locale, "profileCms.builder.blocks.title")}>
+            <div className="tw-flex tw-flex-wrap tw-gap-2">
+              {BLOCK_OPTIONS.map((option) => (
+                <button
+                  className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 hover:tw-border-primary-400"
+                  key={option.kind}
+                  onClick={() => addBlock(option.kind)}
+                  type="button"
+                >
+                  {t(locale, option.labelKey)}
+                </button>
+              ))}
+            </div>
+            <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-4">
+              {state.blocks.map((block, index) => (
+                <BlockEditor
+                  block={block}
+                  index={index}
+                  key={block.id}
+                  locale={locale}
+                  onChange={(patch) => updateBlock(index, patch)}
+                  onRemove={() => removeBlock(index)}
+                />
+              ))}
+            </div>
+          </Fieldset>
+        </div>
+      )}
     </div>
   );
+}
+
+function WalletGalleryPanel({
+  gallery,
+  locale,
+  onRequestSnapshot,
+  snapshotError,
+  snapshotStatus,
+  state,
+  updateGallery,
+  updateState,
+}: {
+  readonly gallery: WalletGalleryBuilderState;
+  readonly locale: SupportedLocale;
+  readonly onRequestSnapshot: () => void;
+  readonly snapshotError: string;
+  readonly snapshotStatus: GallerySnapshotStatus;
+  readonly state: CmsBuilderState;
+  readonly updateGallery: (patch: Partial<WalletGalleryBuilderState>) => void;
+  readonly updateState: (patch: Partial<CmsBuilderState>) => void;
+}) {
+  const snapshot = gallery.snapshot;
+  const orderedAssets = snapshot
+    ? orderGalleryAssets(snapshot.assets, gallery.orderedAssetIds)
+    : [];
+  const hiddenAssetIds = new Set(gallery.hiddenAssetIds);
+  const visibleAssets = orderedAssets.filter(
+    (asset) => !hiddenAssetIds.has(asset.id)
+  );
+  const partialMediaCount = orderedAssets.filter(
+    (asset) => asset.mediaState !== "ready" || !asset.imageUri
+  ).length;
+
+  const toggleHiddenAsset = (assetId: string) => {
+    updateGallery({
+      hiddenAssetIds: toggleString(gallery.hiddenAssetIds, assetId),
+    });
+  };
+  const toggleFeaturedAsset = (assetId: string) => {
+    updateGallery({
+      featuredAssetIds: toggleString(gallery.featuredAssetIds, assetId),
+    });
+  };
+  const toggleFeaturedCollection = (collectionId: string) => {
+    updateGallery({
+      featuredCollectionIds: toggleString(
+        gallery.featuredCollectionIds,
+        collectionId
+      ),
+    });
+  };
+  const moveAsset = (assetId: string, direction: -1 | 1) => {
+    const currentOrder =
+      gallery.orderedAssetIds.length > 0
+        ? gallery.orderedAssetIds
+        : orderedAssets.map((asset) => asset.id);
+    updateGallery({
+      orderedAssetIds: moveString(currentOrder, assetId, direction),
+    });
+  };
+
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-6 tw-p-4">
+      <Fieldset title={t(locale, "profileCms.builder.gallery.settings")}>
+        <TextInput
+          id="cms-builder-gallery-site-title"
+          label={t(locale, "profileCms.builder.field.siteTitle")}
+          onChange={(siteTitle) => updateState({ siteTitle })}
+          value={state.siteTitle}
+        />
+        <TextInput
+          id="cms-builder-gallery-theme-accent"
+          label={t(locale, "profileCms.builder.field.themeAccent")}
+          onChange={(themeAccent) => updateState({ themeAccent })}
+          type="color"
+          value={state.themeAccent}
+        />
+        <TextArea
+          id="cms-builder-gallery-site-description"
+          label={t(locale, "profileCms.builder.field.siteDescription")}
+          onChange={(siteDescription) => updateState({ siteDescription })}
+          rows={3}
+          value={state.siteDescription}
+        />
+      </Fieldset>
+
+      <Fieldset title={t(locale, "profileCms.builder.gallery.wallets.title")}>
+        <TextArea
+          id="cms-builder-gallery-wallets"
+          label={t(locale, "profileCms.builder.gallery.wallets.label")}
+          onChange={(walletInput) => updateGallery({ walletInput })}
+          rows={5}
+          value={gallery.walletInput}
+        />
+        <div className="tw-flex tw-flex-col tw-gap-2 md:tw-col-span-2">
+          <div>
+            <BuilderActionButton
+              disabled={snapshotStatus === "loading"}
+              label={
+                snapshotStatus === "loading"
+                  ? t(locale, "profileCms.builder.gallery.snapshot.loading")
+                  : t(locale, "profileCms.builder.gallery.snapshot.request")
+              }
+              onClick={onRequestSnapshot}
+              variant="primary"
+            />
+          </div>
+          <p className="tw-text-sm tw-leading-6 tw-text-iron-400">
+            {t(locale, "profileCms.builder.gallery.wallets.help")}
+          </p>
+          {snapshotStatus === "loading" ? (
+            <p className="tw-text-primary-200 tw-text-sm" role="status">
+              {t(locale, "profileCms.builder.gallery.snapshot.loadingDetail")}
+            </p>
+          ) : null}
+          {snapshotError ? (
+            <p
+              className="tw-border tw-border-solid tw-border-red tw-bg-red/10 tw-p-3 tw-text-sm tw-text-red"
+              role="alert"
+            >
+              {snapshotError}
+            </p>
+          ) : null}
+        </div>
+      </Fieldset>
+
+      <section
+        aria-labelledby="cms-builder-gallery-review-title"
+        className="tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-4"
+      >
+        <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
+          <div>
+            <h2
+              className="tw-text-base tw-font-semibold tw-text-white"
+              id="cms-builder-gallery-review-title"
+            >
+              {t(locale, "profileCms.builder.gallery.review.title")}
+            </h2>
+            <p className="tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(locale, "profileCms.builder.gallery.review.description")}
+            </p>
+          </div>
+          {snapshot ? (
+            <p className="tw-text-primary-200 tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500/10 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold">
+              {snapshot.source === "fixture"
+                ? t(locale, "profileCms.builder.gallery.snapshot.fixture")
+                : t(locale, "profileCms.builder.gallery.snapshot.api")}
+            </p>
+          ) : null}
+        </div>
+
+        {!snapshot ? (
+          <EmptyGalleryReview locale={locale} />
+        ) : (
+          <div className="tw-mt-5 tw-flex tw-flex-col tw-gap-5">
+            <GallerySnapshotSummary
+              hiddenCount={gallery.hiddenAssetIds.length}
+              locale={locale}
+              partialMediaCount={partialMediaCount}
+              snapshot={snapshot}
+              visibleCount={visibleAssets.length}
+            />
+            <GalleryCollectionReviewList
+              collections={snapshot.collections}
+              featuredCollectionIds={gallery.featuredCollectionIds}
+              locale={locale}
+              onToggleFeatured={toggleFeaturedCollection}
+              visibleAssets={visibleAssets}
+            />
+            <GalleryAssetReviewList
+              assets={orderedAssets}
+              featuredAssetIds={gallery.featuredAssetIds}
+              hiddenAssetIds={gallery.hiddenAssetIds}
+              locale={locale}
+              onMoveAsset={moveAsset}
+              onToggleFeatured={toggleFeaturedAsset}
+              onToggleHidden={toggleHiddenAsset}
+            />
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function EmptyGalleryReview({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <div className="tw-mt-5 tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-300">
+      {t(locale, "profileCms.builder.gallery.review.empty")}
+    </div>
+  );
+}
+
+function GallerySnapshotSummary({
+  hiddenCount,
+  locale,
+  partialMediaCount,
+  snapshot,
+  visibleCount,
+}: {
+  readonly hiddenCount: number;
+  readonly locale: SupportedLocale;
+  readonly partialMediaCount: number;
+  readonly snapshot: NonNullable<WalletGalleryBuilderState["snapshot"]>;
+  readonly visibleCount: number;
+}) {
+  return (
+    <div className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4">
+      <dl className="tw-grid tw-grid-cols-1 tw-gap-3 tw-text-sm sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+        <SummaryItem
+          label={t(locale, "profileCms.builder.gallery.summary.wallets")}
+          value={formatInteger(locale, snapshot.wallets.length)}
+        />
+        <SummaryItem
+          label={t(locale, "profileCms.builder.gallery.summary.visible")}
+          value={formatInteger(locale, visibleCount)}
+        />
+        <SummaryItem
+          label={t(locale, "profileCms.builder.gallery.summary.hidden")}
+          value={formatInteger(locale, hiddenCount)}
+        />
+        <SummaryItem
+          label={t(locale, "profileCms.builder.gallery.summary.partial")}
+          value={formatInteger(locale, partialMediaCount)}
+        />
+      </dl>
+      {snapshot.warnings.length ? (
+        <ul className="tw-mt-4 tw-flex tw-flex-col tw-gap-2">
+          {snapshot.warnings.map((warning) => (
+            <li
+              className="tw-text-primary-100 tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500/10 tw-p-3 tw-text-sm tw-leading-6"
+              key={warning}
+            >
+              {formatGallerySnapshotWarning(locale, warning)}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+function formatGallerySnapshotWarning(
+  locale: SupportedLocale,
+  warning: string
+): string {
+  switch (warning) {
+    case WALLET_GALLERY_FIXTURE_WARNING_CODES.backendDisabled:
+      return t(
+        locale,
+        "profileCms.builder.gallery.snapshot.warning.fixtureBackendDisabled"
+      );
+    case WALLET_GALLERY_FIXTURE_WARNING_CODES.partialMedia:
+      return t(
+        locale,
+        "profileCms.builder.gallery.snapshot.warning.partialMedia"
+      );
+    default:
+      return warning;
+  }
+}
+
+function SummaryItem({
+  label,
+  value,
+}: {
+  readonly label: string;
+  readonly value: string;
+}) {
+  return (
+    <div>
+      <dt className="tw-text-iron-500">{label}</dt>
+      <dd className="tw-mt-1 tw-text-lg tw-font-semibold tw-text-white">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function GalleryCollectionReviewList({
+  collections,
+  featuredCollectionIds,
+  locale,
+  onToggleFeatured,
+  visibleAssets,
+}: {
+  readonly collections: readonly WalletGallerySnapshotCollection[];
+  readonly featuredCollectionIds: readonly string[];
+  readonly locale: SupportedLocale;
+  readonly onToggleFeatured: (collectionId: string) => void;
+  readonly visibleAssets: readonly WalletGallerySnapshotAsset[];
+}) {
+  return (
+    <section aria-labelledby="cms-builder-gallery-collections-title">
+      <h3
+        className="tw-text-sm tw-font-semibold tw-uppercase tw-text-primary-300"
+        id="cms-builder-gallery-collections-title"
+      >
+        {t(locale, "profileCms.builder.gallery.collections.title")}
+      </h3>
+      <ul className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2">
+        {collections.map((collection) => {
+          const visibleCount = visibleAssets.filter(
+            (asset) => asset.collectionId === collection.id
+          ).length;
+          const featured = featuredCollectionIds.includes(collection.id);
+          return (
+            <li
+              className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4"
+              key={collection.id}
+            >
+              <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
+                <div>
+                  <p className="tw-text-sm tw-font-semibold tw-text-white">
+                    {collection.name}
+                  </p>
+                  <p className="tw-mt-1 tw-text-xs tw-text-iron-500">
+                    {t(locale, "profileCms.builder.gallery.collections.count", {
+                      count: formatInteger(locale, visibleCount),
+                    })}
+                  </p>
+                </div>
+                <button
+                  aria-pressed={featured}
+                  className="tw-min-h-9 tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400"
+                  onClick={() => onToggleFeatured(collection.id)}
+                  type="button"
+                >
+                  {featured
+                    ? t(
+                        locale,
+                        "profileCms.builder.gallery.collections.unfeature"
+                      )
+                    : t(
+                        locale,
+                        "profileCms.builder.gallery.collections.feature"
+                      )}
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+function GalleryAssetReviewList({
+  assets,
+  featuredAssetIds,
+  hiddenAssetIds,
+  locale,
+  onMoveAsset,
+  onToggleFeatured,
+  onToggleHidden,
+}: {
+  readonly assets: readonly WalletGallerySnapshotAsset[];
+  readonly featuredAssetIds: readonly string[];
+  readonly hiddenAssetIds: readonly string[];
+  readonly locale: SupportedLocale;
+  readonly onMoveAsset: (assetId: string, direction: -1 | 1) => void;
+  readonly onToggleFeatured: (assetId: string) => void;
+  readonly onToggleHidden: (assetId: string) => void;
+}) {
+  if (!assets.length) {
+    return (
+      <div className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-text-sm tw-text-iron-300">
+        {t(locale, "profileCms.builder.gallery.assets.empty")}
+      </div>
+    );
+  }
+
+  return (
+    <section aria-labelledby="cms-builder-gallery-assets-title">
+      <h3
+        className="tw-text-sm tw-font-semibold tw-uppercase tw-text-primary-300"
+        id="cms-builder-gallery-assets-title"
+      >
+        {t(locale, "profileCms.builder.gallery.assets.title")}
+      </h3>
+      <ul className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3">
+        {assets.map((asset, index) => (
+          <GalleryAssetReviewCard
+            asset={asset}
+            canMoveDown={index < assets.length - 1}
+            canMoveUp={index > 0}
+            featured={featuredAssetIds.includes(asset.id)}
+            hidden={hiddenAssetIds.includes(asset.id)}
+            key={asset.id}
+            locale={locale}
+            onMoveAsset={onMoveAsset}
+            onToggleFeatured={onToggleFeatured}
+            onToggleHidden={onToggleHidden}
+          />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function GalleryAssetReviewCard({
+  asset,
+  canMoveDown,
+  canMoveUp,
+  featured,
+  hidden,
+  locale,
+  onMoveAsset,
+  onToggleFeatured,
+  onToggleHidden,
+}: {
+  readonly asset: WalletGallerySnapshotAsset;
+  readonly canMoveDown: boolean;
+  readonly canMoveUp: boolean;
+  readonly featured: boolean;
+  readonly hidden: boolean;
+  readonly locale: SupportedLocale;
+  readonly onMoveAsset: (assetId: string, direction: -1 | 1) => void;
+  readonly onToggleFeatured: (assetId: string) => void;
+  readonly onToggleHidden: (assetId: string) => void;
+}) {
+  const imageUrl = resolveCmsUri(asset.imageUri);
+  return (
+    <li
+      className={`tw-grid tw-grid-cols-1 tw-gap-4 tw-border tw-border-solid tw-p-4 md:tw-grid-cols-[7rem_minmax(0,1fr)] ${
+        hidden
+          ? "tw-border-iron-800 tw-bg-iron-950 tw-opacity-70"
+          : "tw-border-iron-700 tw-bg-black"
+      }`}
+    >
+      <div className="tw-flex tw-min-h-28 tw-items-center tw-justify-center tw-bg-iron-950">
+        {imageUrl ? (
+          <Image
+            alt={asset.altText}
+            className="tw-h-28 tw-w-full tw-object-contain"
+            height={112}
+            src={imageUrl}
+            unoptimized
+            width={112}
+          />
+        ) : (
+          <div className="tw-p-3 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "profileCms.builder.gallery.assets.mediaPartial")}
+          </div>
+        )}
+      </div>
+      <div className="tw-min-w-0">
+        <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
+          <div>
+            <h4 className="tw-text-base tw-font-semibold tw-text-white">
+              {asset.title}
+            </h4>
+            <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
+              {asset.collectionName}
+            </p>
+            <p className="tw-mt-1 tw-break-all tw-text-xs tw-text-iron-500">
+              {t(locale, "profileCms.builder.gallery.assets.owner", {
+                owner: asset.owner,
+              })}
+            </p>
+          </div>
+          <p
+            className={`tw-border tw-border-solid tw-px-2 tw-py-1 tw-text-xs tw-font-semibold ${
+              asset.mediaState === "ready" && imageUrl
+                ? "tw-border-green tw-bg-green/10 tw-text-green"
+                : "tw-text-primary-200 tw-border-primary-400 tw-bg-primary-500/10"
+            }`}
+          >
+            {asset.mediaState === "ready" && imageUrl
+              ? t(locale, "profileCms.builder.gallery.assets.mediaReady")
+              : t(locale, "profileCms.builder.gallery.assets.mediaPartial")}
+          </p>
+        </div>
+        <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-2">
+          <button
+            aria-pressed={hidden}
+            className="tw-min-h-9 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 hover:tw-border-primary-400"
+            onClick={() => onToggleHidden(asset.id)}
+            type="button"
+          >
+            {hidden
+              ? t(locale, "profileCms.builder.gallery.assets.unhide")
+              : t(locale, "profileCms.builder.gallery.assets.hide")}
+          </button>
+          <button
+            aria-pressed={featured}
+            className="tw-min-h-9 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 hover:tw-border-primary-400"
+            onClick={() => onToggleFeatured(asset.id)}
+            type="button"
+          >
+            {featured
+              ? t(locale, "profileCms.builder.gallery.assets.unfeature")
+              : t(locale, "profileCms.builder.gallery.assets.feature")}
+          </button>
+          <button
+            className="tw-min-h-9 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 hover:tw-border-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+            disabled={!canMoveUp}
+            onClick={() => onMoveAsset(asset.id, -1)}
+            type="button"
+          >
+            {t(locale, "profileCms.builder.gallery.assets.moveUp")}
+          </button>
+          <button
+            className="tw-min-h-9 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 hover:tw-border-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+            disabled={!canMoveDown}
+            onClick={() => onMoveAsset(asset.id, 1)}
+            type="button"
+          >
+            {t(locale, "profileCms.builder.gallery.assets.moveDown")}
+          </button>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function orderGalleryAssets(
+  assets: readonly WalletGallerySnapshotAsset[],
+  orderedAssetIds: readonly string[]
+): readonly WalletGallerySnapshotAsset[] {
+  if (!orderedAssetIds.length) {
+    return assets;
+  }
+
+  const position = new Map(orderedAssetIds.map((id, index) => [id, index]));
+  return [...assets].sort((left, right) => {
+    const leftPosition = position.get(left.id) ?? Number.MAX_SAFE_INTEGER;
+    const rightPosition = position.get(right.id) ?? Number.MAX_SAFE_INTEGER;
+    if (leftPosition !== rightPosition) {
+      return leftPosition - rightPosition;
+    }
+    return assets.indexOf(left) - assets.indexOf(right);
+  });
+}
+
+function toggleString(values: readonly string[], value: string): string[] {
+  return values.includes(value)
+    ? values.filter((item) => item !== value)
+    : [...values, value];
+}
+
+function moveString(
+  values: readonly string[],
+  value: string,
+  direction: -1 | 1
+): string[] {
+  const next = [...values];
+  const currentIndex = next.indexOf(value);
+  if (currentIndex < 0) {
+    return next;
+  }
+
+  const targetIndex = currentIndex + direction;
+  if (targetIndex < 0 || targetIndex >= next.length) {
+    return next;
+  }
+
+  const [item] = next.splice(currentIndex, 1);
+  if (!item) {
+    return next;
+  }
+  next.splice(targetIndex, 0, item);
+  return next;
 }
 
 function BlockEditor({
@@ -787,6 +1499,23 @@ function getActionResultMessage(
       return t(locale, "profileCms.builder.api.serverValidationCompleted");
     case "draft_saved":
       return t(locale, "profileCms.builder.api.draftSaved");
+  }
+}
+
+function getExpectedBuilderEndpoint(
+  action: ProfileCmsBuilderAction,
+  draftId: string | undefined
+): string {
+  switch (action) {
+    case "save_draft":
+      return PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT;
+    case "validate":
+      return PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT;
+    case "publish":
+      return PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT.replace(
+        "{id}",
+        draftId ? encodeURIComponent(draftId) : ":id"
+      );
   }
 }
 

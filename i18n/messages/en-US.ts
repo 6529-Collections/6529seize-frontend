@@ -680,6 +680,51 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.templates.walletGallery": "Wallet gallery",
   "profileCms.builder.templates.gallery": "Gallery",
   "profileCms.builder.templates.status.comingSoon": "Coming soon",
+  "profileCms.builder.gallery.settings": "Gallery settings",
+  "profileCms.builder.gallery.wallets.title": "Wallet sources",
+  "profileCms.builder.gallery.wallets.label": "Wallets or ENS names",
+  "profileCms.builder.gallery.wallets.help":
+    "Paste one or more ETH addresses or ENS names, separated by commas, spaces, or new lines.",
+  "profileCms.builder.gallery.wallets.emptyError":
+    "Enter at least one ETH address or ENS name.",
+  "profileCms.builder.gallery.wallets.invalidError":
+    "These wallet entries need attention: {entries}",
+  "profileCms.builder.gallery.snapshot.request": "Request snapshot",
+  "profileCms.builder.gallery.snapshot.loading": "Requesting...",
+  "profileCms.builder.gallery.snapshot.loadingDetail":
+    "Collecting holdings and media candidates for review.",
+  "profileCms.builder.gallery.snapshot.failed":
+    "Gallery snapshot could not be created.",
+  "profileCms.builder.gallery.snapshot.fixture": "Fixture snapshot",
+  "profileCms.builder.gallery.snapshot.api": "Backend snapshot",
+  "profileCms.builder.gallery.snapshot.warning.fixtureBackendDisabled":
+    "Fixture snapshot used until the gallery backend snapshot endpoint is enabled.",
+  "profileCms.builder.gallery.snapshot.warning.partialMedia":
+    "Some media may be pending or unavailable in the reviewed snapshot.",
+  "profileCms.builder.gallery.review.title": "Snapshot review",
+  "profileCms.builder.gallery.review.description":
+    "Review the frozen wallet snapshot before saving the generated gallery package.",
+  "profileCms.builder.gallery.review.empty":
+    "Request a wallet snapshot to review assets, collections, media status, and generated preview.",
+  "profileCms.builder.gallery.summary.wallets": "Wallets",
+  "profileCms.builder.gallery.summary.visible": "Visible works",
+  "profileCms.builder.gallery.summary.hidden": "Hidden works",
+  "profileCms.builder.gallery.summary.partial": "Partial media",
+  "profileCms.builder.gallery.collections.title": "Featured collections",
+  "profileCms.builder.gallery.collections.count": "{count} visible works",
+  "profileCms.builder.gallery.collections.feature": "Feature collection",
+  "profileCms.builder.gallery.collections.unfeature": "Unfeature collection",
+  "profileCms.builder.gallery.assets.title": "Works",
+  "profileCms.builder.gallery.assets.empty": "No works were found.",
+  "profileCms.builder.gallery.assets.mediaReady": "Media ready",
+  "profileCms.builder.gallery.assets.mediaPartial": "Media pending",
+  "profileCms.builder.gallery.assets.owner": "Owner: {owner}",
+  "profileCms.builder.gallery.assets.hide": "Hide",
+  "profileCms.builder.gallery.assets.unhide": "Unhide",
+  "profileCms.builder.gallery.assets.feature": "Feature work",
+  "profileCms.builder.gallery.assets.unfeature": "Unfeature work",
+  "profileCms.builder.gallery.assets.moveUp": "Move up",
+  "profileCms.builder.gallery.assets.moveDown": "Move down",
   "profileCms.builder.siteSettings": "Site settings",
   "profileCms.builder.pageSettings": "Homepage settings",
   "profileCms.builder.field.siteTitle": "Site title",

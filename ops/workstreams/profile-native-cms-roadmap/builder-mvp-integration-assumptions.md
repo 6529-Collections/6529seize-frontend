@@ -1,6 +1,6 @@
 # Builder MVP Integration Assumptions
 
-Last updated: 2026-06-17.
+Last updated: 2026-06-18.
 
 ## Scope
 
@@ -68,6 +68,74 @@ Frontend endpoint constants:
   "profile-cms/packages/validate"`
 - `PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT =
   "profile-cms/packages/{id}/publish"`
+- `PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT =
+  "profile-cms/gallery/snapshots"`
+
+## Wallet Gallery Snapshot And Generator Contract
+
+The frontend gallery builder shell requests a reviewed wallet snapshot through
+`lib/profile-cms/builder/api.ts` and keeps the package-generation fallback under
+`lib/profile-cms/builder/gallery.ts` deliberately temporary.
+
+Expected snapshot endpoint:
+
+```ts
+POST /api/profile-cms/gallery/snapshots
+body: {
+  profile_id?: string,
+  wallets: Array<{
+    kind: "address" | "ens",
+    input: string,
+    normalized: string
+  }>
+}
+returns: {
+  snapshot_id: string,
+  source: "backend" | "fixture" | string,
+  wallets: Array<{ kind: "address" | "ens", input: string, normalized: string }>,
+  captured_at: string,
+  block_number?: number,
+  assets: Array<{
+    id: string,
+    title: string,
+    collection_id: string,
+    collection_name: string,
+    contract: string,
+    token_id: string,
+    owner: string,
+    image_uri?: string,
+    media_state: "ready" | "partial" | "missing",
+    metadata_uri?: string,
+    permalink?: string
+  }>,
+  collections: Array<{
+    id: string,
+    name: string,
+    contract?: string,
+    description?: string,
+    asset_count: number
+  }>,
+  warnings?: string[]
+}
+```
+
+The backend Phase 5 deterministic wallet-snapshot -> CMS V1 package generator
+is the durable source of truth for generated packages. Until that generator is
+available to this frontend lane, the local fallback only converts the reviewed
+snapshot plus simple UI choices into an existing `CmsPackageV1` shape for
+preview. It must not introduce new CMS package fields or a second permanent
+generation contract.
+
+Replacement path when the backend generator lands:
+
+- Keep the wallet parser and snapshot review controls.
+- Send the reviewed snapshot id plus hidden, featured, and priority choices to
+  the backend generator endpoint once the exact BE model is merged.
+- Replace `buildWalletGalleryCmsPackage(...)` preview fallback with the backend
+  generated `CmsPackageV1`, then continue using `CmsSiteRenderer` and the
+  existing builder save/validate/publish shell.
+- Keep tests that verify snake_case snapshot fields normalize cleanly into the
+  frontend review model.
 
 The route resolves the profile handle to `profile_id` server-side through the
 existing identity lookup before mounting the builder. If that lookup cannot
@@ -94,21 +162,28 @@ storage flow and exact BE publish body are wired.
   profile authority and real decentralized storage receipts.
 - Backend publish must reject schema/hash drift and unsafe URI violations.
 - Storage upload and content-addressed receipt creation are out of scope here.
-- Wallet gallery generation, NFT indexing, 3D rooms, and AI-agent MCP flows are
-  out of scope here.
+- Production wallet gallery generation, NFT indexing, 3D rooms, and AI-agent
+  MCP flows remain owned by their backend/specialist lanes. The current FE
+  gallery shell uses a fixture-backed preview fallback only while waiting for
+  the deterministic backend generator.
 
 ## Localization Follow-Up
 
 - Route: `/{handle}/cms/builder`
 - Current source locale: `en-US`
 - Current fallback behavior: partial locale dictionaries fall back to `en-US`
-  for the builder chrome.
+  for the builder chrome. Frontend-authored wallet gallery fixture warning codes
+  render through `profileCms.builder.gallery.snapshot.warning.*` keys before
+  they appear in the snapshot review summary.
 - User impact while feature-flagged: authors using `en-GB`, `fr-FR`, `es-ES`,
   or `de-DE` see English-only builder chrome and English starter package
-  content. Starter package text is treated as editable authored content, not
-  translated runtime chrome.
+  content. The temporary wallet gallery preview generator also emits English
+  block, callout, metadata, and fixture alt text in the Preview tab. Starter and
+  preview package text is treated as editable authored content, not translated
+  runtime chrome.
 - Owner/follow-up: frontend CMS builder lane should add partial-locale builder
   keys before the route exits hidden feature-flag status.
 - Remediation: translate `profileCms.builder.*` chrome keys and decide whether
-  seed package copy should remain authored defaults or move to locale-specific
-  starter templates.
+  seed package copy should remain authored defaults, move to locale-specific
+  starter templates, or be replaced by the backend Phase 5 deterministic
+  generator output once that durable source of truth is wired.

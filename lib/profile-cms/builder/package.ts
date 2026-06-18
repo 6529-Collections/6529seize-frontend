@@ -10,6 +10,13 @@ import {
   validateCmsPackageV1,
   withComputedCmsHashes,
 } from "@/lib/profile-cms/protocol/v1";
+import {
+  buildWalletGalleryCmsPackage,
+  createDefaultWalletGalleryBuilderState,
+  type WalletGalleryBuilderState,
+} from "./gallery";
+
+export type CmsBuilderTemplate = "homepage" | "wallet_gallery";
 
 export type CmsBuilderBlockKind =
   | "heading"
@@ -32,6 +39,7 @@ export type CmsBuilderBlock = {
 };
 
 export type CmsBuilderState = {
+  readonly template: CmsBuilderTemplate;
   readonly handle: string;
   readonly siteTitle: string;
   readonly siteDescription: string;
@@ -41,6 +49,7 @@ export type CmsBuilderState = {
   readonly themeAccent: string;
   readonly socialImageAssetId: string;
   readonly blocks: readonly CmsBuilderBlock[];
+  readonly gallery: WalletGalleryBuilderState;
 };
 
 export type CmsBuilderValidation = {
@@ -60,6 +69,7 @@ export function createDefaultCmsBuilderState(
 ): CmsBuilderState {
   const normalizedHandle = normalizeHandle(handle);
   return {
+    template: "homepage",
     handle: normalizedHandle,
     siteTitle: normalizedHandle,
     siteDescription: `A profile-native website for ${normalizedHandle}.`,
@@ -78,6 +88,7 @@ export function createDefaultCmsBuilderState(
         url: `/${normalizedHandle}`,
       }),
     ],
+    gallery: createDefaultWalletGalleryBuilderState(normalizedHandle),
   };
 }
 
@@ -105,6 +116,23 @@ export function buildCmsPackageCandidate(
   now = new Date()
 ): CmsPackageV1 {
   const handle = normalizeHandle(state.handle);
+  if (state.template === "wallet_gallery") {
+    return buildWalletGalleryCmsPackage({
+      handle,
+      siteTitle: state.siteTitle.trim() || `${handle} Gallery`,
+      siteDescription:
+        state.siteDescription.trim() ||
+        "Generated gallery from reviewed wallet snapshot.",
+      themeAccent: state.themeAccent,
+      snapshot: state.gallery.snapshot,
+      hiddenAssetIds: state.gallery.hiddenAssetIds,
+      featuredAssetIds: state.gallery.featuredAssetIds,
+      featuredCollectionIds: state.gallery.featuredCollectionIds,
+      orderedAssetIds: state.gallery.orderedAssetIds,
+      now,
+    });
+  }
+
   const path = `/${handle}/index.html`;
   const createdAt = now.toISOString();
   const blocks = state.blocks.map((block, index) => toCmsBlock(block, index));
@@ -258,8 +286,10 @@ export function createBuilderStateFromPackage(
   cmsPackage: CmsPackageV1
 ): CmsBuilderState {
   const page = cmsPackage.payload.pages[0];
+  const handle = normalizeHandle(cmsPackage.profile.handle);
   return {
-    handle: normalizeHandle(cmsPackage.profile.handle),
+    template: "homepage",
+    handle,
     siteTitle: cmsPackage.site.title,
     siteDescription: cmsPackage.site.description ?? "",
     pageTitle: page?.metadata.title ?? cmsPackage.site.title,
@@ -273,6 +303,7 @@ export function createBuilderStateFromPackage(
     blocks: (page?.blocks ?? []).map((block, index) =>
       createBuilderBlockFromCmsBlock(block, cmsPackage, index)
     ),
+    gallery: createDefaultWalletGalleryBuilderState(handle),
   };
 }
 
