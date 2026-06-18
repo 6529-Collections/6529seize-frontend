@@ -43,6 +43,7 @@ Examples:
 - [Runtime Bridge Integration Assumptions](runtime-bridge-integration-assumptions.md)
 - [Builder MVP Integration Assumptions](builder-mvp-integration-assumptions.md)
 - [Phase 6 Art Display Excellence](phase-6-art-display/README.md)
+- [Phase 5-8 QA Checklist](phase-5-8-qa-checklist.md)
 - [Active Context](active-context.md)
 - [Run Log](run-log.md)
 
