@@ -17,66 +17,99 @@ function readRequiredFile(filePath) {
   }
 }
 
-function stripComments(source) {
-  let result = "";
-  let quote = null;
+function isQuote(char) {
+  return char === '"' || char === "'" || char === "`";
+}
 
-  for (let index = 0; index < source.length; index += 1) {
+function readQuotedString(source, startIndex) {
+  const quote = source[startIndex];
+  let text = quote;
+  let index = startIndex + 1;
+
+  while (index < source.length) {
     const char = source[index];
-    const nextChar = source[index + 1];
+    text += char;
 
-    if (quote !== null) {
-      result += char;
-
-      if (char === "\\" && nextChar !== undefined) {
-        result += nextChar;
-        index += 1;
-        continue;
-      }
-
-      if (char === quote) {
-        quote = null;
-      }
-
+    if (char === "\\" && index + 1 < source.length) {
+      text += source[index + 1];
+      index += 2;
       continue;
     }
 
-    if (char === '"' || char === "'" || char === "`") {
-      quote = char;
-      result += char;
+    index += 1;
+
+    if (char === quote) {
+      break;
+    }
+  }
+
+  return { text, nextIndex: index };
+}
+
+function readLineCommentReplacement(source, startIndex) {
+  let index = startIndex + 2;
+
+  while (index < source.length && source[index] !== "\n") {
+    index += 1;
+  }
+
+  return {
+    text: index < source.length ? "\n" : "",
+    nextIndex: index < source.length ? index + 1 : index,
+  };
+}
+
+function readBlockCommentReplacement(source, startIndex) {
+  let index = startIndex + 2;
+  let text = "";
+
+  while (
+    index < source.length &&
+    !(source[index] === "*" && source[index + 1] === "/")
+  ) {
+    if (source[index] === "\n") {
+      text += "\n";
+    }
+    index += 1;
+  }
+
+  return {
+    text,
+    nextIndex: index < source.length ? index + 2 : index,
+  };
+}
+
+function stripComments(source) {
+  let result = "";
+  let index = 0;
+
+  while (index < source.length) {
+    const char = source[index];
+    const nextChar = source[index + 1];
+
+    if (isQuote(char)) {
+      const quoted = readQuotedString(source, index);
+      result += quoted.text;
+      index = quoted.nextIndex;
       continue;
     }
 
     if (char === "/" && nextChar === "/") {
-      while (index < source.length && source[index] !== "\n") {
-        index += 1;
-      }
-
-      if (index < source.length) {
-        result += "\n";
-      }
-
+      const comment = readLineCommentReplacement(source, index);
+      result += comment.text;
+      index = comment.nextIndex;
       continue;
     }
 
     if (char === "/" && nextChar === "*") {
-      index += 2;
-
-      while (
-        index < source.length &&
-        !(source[index] === "*" && source[index + 1] === "/")
-      ) {
-        if (source[index] === "\n") {
-          result += "\n";
-        }
-        index += 1;
-      }
-
-      index += 1;
+      const comment = readBlockCommentReplacement(source, index);
+      result += comment.text;
+      index = comment.nextIndex;
       continue;
     }
 
     result += char;
+    index += 1;
   }
 
   return result;
