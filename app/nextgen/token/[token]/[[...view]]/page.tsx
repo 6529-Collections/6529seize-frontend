@@ -11,6 +11,15 @@ import { notFound } from "next/navigation";
 import NextGenTokenPageClient from "./NextGenTokenPageClient";
 import { fetchTokenData, getContentView } from "./page-utils";
 
+const isUsableImageSource = (
+  source: string | null | undefined
+): source is string =>
+  source !== null && source !== undefined && source.trim().length > 0;
+
+const getFirstUsableImage = (
+  ...sources: readonly (string | null | undefined)[]
+): string | undefined => sources.find(isUsableImageSource);
+
 export async function generateMetadata({
   params,
 }: {
@@ -39,9 +48,11 @@ export async function generateMetadata({
   const resolvedView = getContentView(view?.[0] ?? "");
   const viewDisplay =
     resolvedView !== NextgenCollectionView.ABOUT ? resolvedView : "";
+  const displayId = data.token?.normalised_id;
   const baseTitle =
     data.token?.name ?? `${data.collection.name} - #${data.tokenId}`;
-  const title = viewDisplay ? `${baseTitle} | ${viewDisplay}` : baseTitle;
+  const title =
+    viewDisplay.length > 0 ? `${baseTitle} | ${viewDisplay}` : baseTitle;
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title,
@@ -51,13 +62,17 @@ export async function generateMetadata({
         badge: "NextGen",
         collection: data.collection.name,
         contract: NEXTGEN_CONTRACT,
+        displayId,
         id: data.tokenId,
-        image:
-          data.token?.thumbnail_url ||
-          data.token?.image_url ||
-          data.collection.banner ||
-          data.collection.image,
-        subtitle: `${data.collection.name} #${data.tokenId} | NextGen`,
+        image: getFirstUsableImage(
+          data.token?.thumbnail_url,
+          data.token?.image_url,
+          data.collection.banner,
+          data.collection.image
+        ),
+        subtitle: `${data.collection.name} #${
+          displayId ?? data.tokenId
+        } | NextGen`,
         title,
       }),
       ogImageAlt: `${title} social card`,

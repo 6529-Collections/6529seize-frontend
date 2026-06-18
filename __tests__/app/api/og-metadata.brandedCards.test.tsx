@@ -53,6 +53,46 @@ const collectTextNodes = (node: React.ReactNode): string[] => {
   );
 };
 
+type ElementRecord = {
+  readonly childCount: number;
+  readonly props: {
+    readonly children?: React.ReactNode;
+    readonly style?: Record<string, unknown>;
+  };
+};
+
+const collectElementRecords = (node: React.ReactNode): ElementRecord[] => {
+  if (!React.isValidElement(node)) {
+    return [];
+  }
+
+  if (typeof node.type === "function") {
+    return collectElementRecords(node.type(node.props));
+  }
+
+  const props = node.props as ElementRecord["props"];
+  const current = {
+    childCount: React.Children.count(props.children),
+    props,
+  };
+  const children = React.Children.toArray(props.children).flatMap((child) =>
+    collectElementRecords(child)
+  );
+
+  return [current, ...children];
+};
+
+const getStyleNumber = (
+  style: Record<string, unknown>,
+  key: string
+): number => {
+  const value = style[key];
+  if (typeof value !== "number") {
+    throw new Error(`Expected numeric style ${key}.`);
+  }
+  return value;
+};
+
 describe("branded OG card renderers", () => {
   it("renders NFT card art through the OG image proxy", () => {
     const element = renderBrandedNftOgImage({
@@ -204,5 +244,71 @@ describe("branded OG card renderers", () => {
     });
 
     expect(collectTextNodes(element)).toEqual(expect.arrayContaining(["# 5 "]));
+  });
+
+  it("uses displayId for the visible NFT id label", () => {
+    const element = renderBrandedNftOgImage({
+      collection: "Pebbles",
+      contract: "0x45882f9bc325e14fbb298a1df930c43a874b83ae",
+      displayId: "42",
+      id: "10000000042",
+      title: "Pebbles #42",
+    });
+    const textNodes = collectTextNodes(element);
+
+    expect(textNodes).toContain("#42");
+    expect(textNodes).not.toContain("#10,000,000,042");
+  });
+
+  it("positions NFT metadata below long subtitles", () => {
+    const element = renderBrandedNftOgImage({
+      artist: "A Very Long Artist Name",
+      badge: "Long Text",
+      collection: "The Memes",
+      contract: "0xabc",
+      id: "999",
+      imageUrl: "/memes-preview.png",
+      subtitle:
+        "This subtitle is also intentionally long so QA can verify the generated image still returns successfully with wrapped text",
+      title:
+        "This is a very long NFT title that should wrap cleanly inside the branded social card without escaping its content column or causing the image route to fail",
+    });
+    const records = collectElementRecords(element);
+    const subtitleRecord = records.find(({ props }) => {
+      const style = props.style;
+      return (
+        style?.color === "#D5D5DC" &&
+        style.fontSize === 34 &&
+        style.lineHeight === 1.18
+      );
+    });
+    const metadataRecord = records.find(({ props }) => {
+      const style = props.style;
+      return (
+        style?.color === "#9A9AA5" && style.fontSize === 30 && style.gap === 16
+      );
+    });
+
+    expect(subtitleRecord).toBeDefined();
+    expect(metadataRecord).toBeDefined();
+    if (!subtitleRecord?.props.style || !metadataRecord?.props.style) {
+      throw new Error("Expected subtitle and metadata records.");
+    }
+
+    const subtitleTop = getStyleNumber(subtitleRecord.props.style, "top");
+    const subtitleFontSize = getStyleNumber(
+      subtitleRecord.props.style,
+      "fontSize"
+    );
+    const subtitleLineHeight = getStyleNumber(
+      subtitleRecord.props.style,
+      "lineHeight"
+    );
+    const subtitleBottom =
+      subtitleTop +
+      subtitleRecord.childCount * subtitleFontSize * subtitleLineHeight;
+    const metadataTop = getStyleNumber(metadataRecord.props.style, "top");
+
+    expect(metadataTop).toBeGreaterThanOrEqual(subtitleBottom + 18);
   });
 });

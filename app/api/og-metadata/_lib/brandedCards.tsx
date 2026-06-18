@@ -35,14 +35,21 @@ const SUBTITLE_MAX_LINES = 3;
 const BADGE_TOP = 62;
 const NFT_TITLE_TOP = 154;
 const NFT_META_TOP = 404;
+const NFT_SUBTITLE_TOP = NFT_META_TOP - 78;
+const NFT_TITLE_SUBTITLE_GAP = 26;
+const NFT_SUBTITLE_META_GAP = 18;
 const COLLECTION_TITLE_TOP = 156;
 const COLLECTION_SUBTITLE_TOP = 338;
+
+// ImageResponse markup renders raw image elements; next/image is unavailable in generated OG image trees.
+const OgRawImage = "img";
 
 export type BrandedNftOgImageModel = {
   readonly artist?: string | null | undefined;
   readonly badge?: string | null | undefined;
   readonly collection?: string | null | undefined;
   readonly contract: string;
+  readonly displayId?: string | null | undefined;
   readonly id: string;
   readonly imageUrl?: string | null | undefined;
   readonly origin?: string | undefined;
@@ -131,6 +138,77 @@ const getSubtitleLines = (
     ellipsize: true,
   });
 
+const getKeyedLines = (
+  lines: readonly string[]
+): readonly {
+  readonly key: string;
+  readonly value: string;
+}[] => {
+  const seenCounts = new Map<string, number>();
+
+  return lines.map((value) => {
+    const count = seenCounts.get(value) ?? 0;
+    seenCounts.set(value, count + 1);
+
+    return {
+      key: count === 0 ? value : `${value}-${count}`,
+      value,
+    };
+  });
+};
+
+const getLineBlockHeight = ({
+  lineCount,
+  fontSize,
+  lineHeight,
+}: {
+  readonly lineCount: number;
+  readonly fontSize: number;
+  readonly lineHeight: number;
+}): number => lineCount * fontSize * lineHeight;
+
+const getNftLayout = ({
+  subtitleLines,
+  titleLines,
+}: {
+  readonly subtitleLines: readonly string[];
+  readonly titleLines: readonly string[];
+}): {
+  readonly metaTop: number;
+  readonly subtitleTop: number;
+} => {
+  const titleHeight = getLineBlockHeight({
+    lineCount: titleLines.length,
+    fontSize: TITLE_FONT_SIZE,
+    lineHeight: TITLE_LINE_HEIGHT,
+  });
+  const subtitleTop = Math.max(
+    NFT_SUBTITLE_TOP,
+    NFT_TITLE_TOP + titleHeight + NFT_TITLE_SUBTITLE_GAP
+  );
+
+  if (subtitleLines.length === 0) {
+    return {
+      metaTop: Math.max(NFT_META_TOP, subtitleTop),
+      subtitleTop,
+    };
+  }
+
+  const subtitleHeight = getLineBlockHeight({
+    lineCount: subtitleLines.length,
+    fontSize: SUBTITLE_FONT_SIZE,
+    lineHeight: SUBTITLE_LINE_HEIGHT,
+  });
+
+  return {
+    metaTop: Math.max(
+      NFT_META_TOP,
+      subtitleTop + subtitleHeight + NFT_SUBTITLE_META_GAP
+    ),
+    subtitleTop,
+  };
+};
+
 const CardLogo = () => (
   <div
     style={{
@@ -142,7 +220,7 @@ const CardLogo = () => (
       width: LOGO_SIZE,
     }}
   >
-    <img
+    <OgRawImage
       alt=""
       height={LOGO_SIZE}
       src={LOGO_URL}
@@ -181,7 +259,7 @@ const CardMedia = ({
     }}
   >
     {imageUrl ? (
-      <img
+      <OgRawImage
         alt=""
         height={MEDIA_SIZE}
         src={imageUrl}
@@ -272,9 +350,9 @@ const TitleLines = ({
       width: CONTENT_WIDTH,
     }}
   >
-    {lines.map((line, index) => (
+    {getKeyedLines(lines).map(({ key, value }) => (
       <div
-        key={`${line}-${index}`}
+        key={key}
         style={{
           display: "flex",
           overflow: "hidden",
@@ -282,7 +360,7 @@ const TitleLines = ({
           width: CONTENT_WIDTH,
         }}
       >
-        {line}
+        {value}
       </div>
     ))}
   </div>
@@ -310,9 +388,9 @@ const SubtitleLines = ({
       width: CONTENT_WIDTH,
     }}
   >
-    {lines.map((line, index) => (
+    {getKeyedLines(lines).map(({ key, value }) => (
       <div
-        key={`${line}-${index}`}
+        key={key}
         style={{
           display: "flex",
           overflow: "hidden",
@@ -320,7 +398,7 @@ const SubtitleLines = ({
           width: CONTENT_WIDTH,
         }}
       >
-        {line}
+        {value}
       </div>
     ))}
   </div>
@@ -331,6 +409,7 @@ export const renderBrandedNftOgImage = ({
   badge,
   collection,
   contract,
+  displayId,
   id,
   imageUrl,
   origin = publicEnv.BASE_ENDPOINT,
@@ -350,12 +429,14 @@ export const renderBrandedNftOgImage = ({
     origin,
     width: MEDIA_SIZE,
   });
+  const { metaTop, subtitleTop } = getNftLayout({ subtitleLines, titleLines });
   const artistLabel = getUsableText(artist);
-  const numericId = /^(0|[1-9]\d*)$/.test(id) ? Number(id) : null;
+  const visibleId = getUsableText(displayId) === null ? id : (displayId ?? id);
+  const numericId = /^(0|[1-9]\d*)$/.test(visibleId) ? Number(visibleId) : null;
   const idLabel =
     numericId !== null && Number.isSafeInteger(numericId)
-      ? `#${formatInteger(numericId) ?? id}`
-      : `#${id}`;
+      ? `#${formatInteger(numericId) ?? visibleId}`
+      : `#${visibleId}`;
 
   return (
     <div
@@ -378,7 +459,7 @@ export const renderBrandedNftOgImage = ({
         lines={titleLines}
         top={NFT_TITLE_TOP}
       />
-      <SubtitleLines lines={subtitleLines} top={NFT_META_TOP - 78} />
+      <SubtitleLines lines={subtitleLines} top={subtitleTop} />
       <div
         style={{
           color: MUTED_TEXT,
@@ -391,7 +472,7 @@ export const renderBrandedNftOgImage = ({
           letterSpacing: 0,
           lineHeight: 1,
           position: "absolute",
-          top: NFT_META_TOP,
+          top: metaTop,
           width: CONTENT_WIDTH,
         }}
       >

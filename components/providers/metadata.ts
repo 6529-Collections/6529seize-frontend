@@ -93,6 +93,7 @@ export function getNftSocialCardImagePath({
   badge,
   collection,
   contract,
+  displayId,
   id,
   image,
   subtitle,
@@ -102,6 +103,7 @@ export function getNftSocialCardImagePath({
   readonly badge?: SocialCardQueryValue;
   readonly collection?: SocialCardQueryValue;
   readonly contract: string;
+  readonly displayId?: SocialCardQueryValue;
   readonly id: string | number;
   readonly image?: SocialCardQueryValue;
   readonly subtitle?: SocialCardQueryValue;
@@ -115,6 +117,7 @@ export function getNftSocialCardImagePath({
       artist,
       badge,
       collection,
+      displayId,
       image,
       subtitle,
       title,
@@ -123,11 +126,11 @@ export function getNftSocialCardImagePath({
 }
 
 export function getLargeSocialCardMetadata<
-  Metadata extends LargeSocialCardMetadata,
+  SocialCardMetadata extends LargeSocialCardMetadata,
 >(
-  metadata: Metadata,
+  metadata: SocialCardMetadata,
   baseEndpoint = publicEnv.BASE_ENDPOINT
-): Omit<Metadata, "ogImage"> &
+): Omit<SocialCardMetadata, "ogImage"> &
   Pick<
     PageSSRMetadata,
     "ogImage" | "ogImageHeight" | "ogImageWidth" | "twitterCard"
@@ -152,7 +155,12 @@ const getOpenGraphImages = ({
   readonly ogImageWidth?: number | undefined;
   readonly ogImageAlt?: string | undefined;
 }): string[] | OgImageDescriptor[] => {
-  if (!ogImageHeight || !ogImageWidth) {
+  if (
+    ogImageHeight === undefined ||
+    ogImageWidth === undefined ||
+    ogImageHeight <= 0 ||
+    ogImageWidth <= 0
+  ) {
     return [ogImage];
   }
 
@@ -162,7 +170,7 @@ const getOpenGraphImages = ({
     height: ogImageHeight,
   };
 
-  if (ogImageAlt) {
+  if (ogImageAlt !== undefined && ogImageAlt.trim().length > 0) {
     return [{ ...image, alt: ogImageAlt }];
   }
 

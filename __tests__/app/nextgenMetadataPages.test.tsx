@@ -80,7 +80,7 @@ const token: NextGenToken = {
   handle: "6529er",
   hodl_rate: 0,
   icon_url: "https://cdn.test/icon.png",
-  id: 123,
+  id: 10000000042,
   image_url: "https://cdn.test/token.png",
   last_sale_date: new Date("2024-01-01T00:00:00Z"),
   last_sale_value: 0,
@@ -93,9 +93,9 @@ const token: NextGenToken = {
   mint_data: "{}",
   mint_date: new Date("2024-01-01T00:00:00Z"),
   mint_price: 0,
-  name: "Pebble #123",
+  name: "Pebble #42",
   normalised_handle: "6529er",
-  normalised_id: 123,
+  normalised_id: 42,
   opensea_price: 0,
   opensea_royalty: 0,
   owner: "0xowner",
@@ -144,10 +144,10 @@ const getSocialImage = (metadata: Metadata) => {
 const mockNextgenFetches = () => {
   (commonApiFetch as jest.Mock).mockImplementation(
     ({ endpoint }: { endpoint: string }) => {
-      if (endpoint === "nextgen/tokens/123") {
+      if (endpoint === "nextgen/tokens/10000000042") {
         return Promise.resolve(token);
       }
-      if (endpoint === "nextgen/tokens/123/traits") {
+      if (endpoint === "nextgen/tokens/10000000042/traits") {
         return Promise.resolve([{ token_count: 100 }]);
       }
       if (
@@ -250,27 +250,30 @@ describe("NextGen metadata", () => {
 
     const metadata = await generateNextGenTokenMetadata({
       params: Promise.resolve({
-        token: "123",
+        token: "10000000042",
         view: ["provenance"],
       }),
     });
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
-    expect(metadata.title).toBe("Pebble #123 | Provenance");
+    expect(metadata.title).toBe("Pebble #42 | Provenance");
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(image).toMatchObject({
-      alt: "Pebble #123 | Provenance social card",
+      alt: "Pebble #42 | Provenance social card",
       height: 630,
       width: 1200,
     });
-    expect(url.pathname).toBe(`/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/123`);
+    expect(url.pathname).toBe(
+      `/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/10000000042`
+    );
     expect(url.searchParams.get("artist")).toBe("6529er");
     expect(url.searchParams.get("badge")).toBe("NextGen");
     expect(url.searchParams.get("collection")).toBe("Pebbles");
+    expect(url.searchParams.get("displayId")).toBe("42");
     expect(url.searchParams.get("image")).toBe("https://cdn.test/thumb.png");
-    expect(url.searchParams.get("subtitle")).toBe("Pebbles #123 | NextGen");
-    expect(url.searchParams.get("title")).toBe("Pebble #123 | Provenance");
+    expect(url.searchParams.get("subtitle")).toBe("Pebbles #42 | NextGen");
+    expect(url.searchParams.get("title")).toBe("Pebble #42 | Provenance");
   });
 
   it("falls back to a branded NextGen token card when token data is missing", async () => {

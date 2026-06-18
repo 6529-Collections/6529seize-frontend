@@ -204,13 +204,14 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
           badge: "The Memes",
           collection: "The Memes",
           contract: "0xabc/def",
+          displayId: 42,
           id: "1/2",
           image: "https://cdn.test/image.png",
           subtitle: "The Memes #1 | Collections",
           title: "Seize the Memes",
         })
       ).toBe(
-        "/api/og-metadata/nfts/0xabc%2Fdef/1%2F2?artist=6529er&badge=The+Memes&collection=The+Memes&image=https%3A%2F%2Fcdn.test%2Fimage.png&subtitle=The+Memes+%231+%7C+Collections&title=Seize+the+Memes"
+        "/api/og-metadata/nfts/0xabc%2Fdef/1%2F2?artist=6529er&badge=The+Memes&collection=The+Memes&displayId=42&image=https%3A%2F%2Fcdn.test%2Fimage.png&subtitle=The+Memes+%231+%7C+Collections&title=Seize+the+Memes"
       );
     });
   });

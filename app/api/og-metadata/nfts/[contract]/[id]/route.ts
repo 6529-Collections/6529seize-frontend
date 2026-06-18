@@ -43,6 +43,7 @@ const getNftCardModel = ({
     badge: getQueryText(searchParams, "badge") ?? collection,
     collection,
     contract,
+    displayId: getQueryText(searchParams, "displayId"),
     id,
     imageUrl: getQueryText(searchParams, "image"),
     origin: getOgImageRequestOrigin(request),
