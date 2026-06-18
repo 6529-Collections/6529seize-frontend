@@ -17,17 +17,86 @@ function readRequiredFile(filePath) {
   }
 }
 
-const bootstrapScss = readRequiredFile(bootstrapScssPath);
-const nextConfig = readRequiredFile(nextConfigPath);
+function stripComments(source) {
+  let result = "";
+  let quote = null;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    const nextChar = source[index + 1];
+
+    if (quote !== null) {
+      result += char;
+
+      if (char === "\\" && nextChar !== undefined) {
+        result += nextChar;
+        index += 1;
+        continue;
+      }
+
+      if (char === quote) {
+        quote = null;
+      }
+
+      continue;
+    }
+
+    if (char === '"' || char === "'" || char === "`") {
+      quote = char;
+      result += char;
+      continue;
+    }
+
+    if (char === "/" && nextChar === "/") {
+      while (index < source.length && source[index] !== "\n") {
+        index += 1;
+      }
+
+      if (index < source.length) {
+        result += "\n";
+      }
+
+      continue;
+    }
+
+    if (char === "/" && nextChar === "*") {
+      index += 2;
+
+      while (
+        index < source.length &&
+        !(source[index] === "*" && source[index + 1] === "/")
+      ) {
+        if (source[index] === "\n") {
+          result += "\n";
+        }
+        index += 1;
+      }
+
+      index += 1;
+      continue;
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+const bootstrapScss = stripComments(readRequiredFile(bootstrapScssPath));
+const nextConfig = stripComments(readRequiredFile(nextConfigPath));
 const failures = [];
 
-if (!/@use\s+["']bootstrap\/scss\/bootstrap["']/.test(bootstrapScss)) {
+if (!/(^|\n)\s*@use\s+["']bootstrap\/scss\/bootstrap["']/.test(bootstrapScss)) {
   failures.push(
     `${bootstrapScssPath} must import Bootstrap with @use "bootstrap/scss/bootstrap".`
   );
 }
 
-if (/node_modules\/bootstrap\/scss\/bootstrap/.test(bootstrapScss)) {
+if (
+  /(^|\n)\s*@(use|import)\s+["'][^"']*node_modules\/bootstrap\/scss\/bootstrap["']/.test(
+    bootstrapScss
+  )
+) {
   failures.push(
     `${bootstrapScssPath} must not import Bootstrap through a node_modules path.`
   );
@@ -40,11 +109,11 @@ if (!/const\s+SASS_LOAD_PATHS\s*=\s*\[[\s\S]*node_modules/.test(nextConfig)) {
 }
 
 const sassOptionsUsesLoadPaths =
-  /sassOptions\s*:\s*{[^}]*loadPaths\s*:\s*SASS_LOAD_PATHS[^}]*}/s.test(
-    nextConfig
-  );
+  /\bsassOptions\s*:/.test(nextConfig) &&
+  /\bloadPaths\s*:\s*SASS_LOAD_PATHS\b/.test(nextConfig);
 const sassOptionsUsesQuietDeps =
-  /sassOptions\s*:\s*{[^}]*quietDeps\s*:\s*true[^}]*}/s.test(nextConfig);
+  /\bsassOptions\s*:/.test(nextConfig) &&
+  /\bquietDeps\s*:\s*true\b/.test(nextConfig);
 
 if (!sassOptionsUsesLoadPaths || !sassOptionsUsesQuietDeps) {
   failures.push(
