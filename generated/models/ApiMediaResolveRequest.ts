@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export class ApiMediaResolveRequest {
     'inputs': Array<string>;
     'include_external_fallbacks'?: boolean;
