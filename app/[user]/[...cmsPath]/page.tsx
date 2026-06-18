@@ -47,7 +47,7 @@ export default async function ProfileCmsPage({
   }
 
   if (!context.site) {
-    return notFound();
+    return <ProfileCmsEmptyState locale={locale} />;
   }
 
   const routeResolution = resolveCmsRoute(
@@ -180,7 +180,11 @@ async function getProfileCmsRouteContext(
     headers,
   });
   if (!site) {
-    return null;
+    return {
+      cmsPath: requestCmsPath,
+      redirectTo: null,
+      site: null,
+    };
   }
 
   if (site.cmsPackage.profile.handle.toLowerCase() !== canonicalHandle) {
