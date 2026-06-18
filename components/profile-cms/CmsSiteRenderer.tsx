@@ -2,10 +2,17 @@ import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
 import { publicEnv } from "@/config/env";
+import CmsThreeDViewer from "@/components/profile-cms/CmsThreeDViewer";
+import type {
+  CmsThreeDAsset,
+  CmsThreeDPlacement,
+  CmsThreeDViewerConfig,
+} from "@/components/profile-cms/CmsThreeDTypes";
 import {
   getCmsNavigationItems,
   getCmsPagePath,
 } from "@/lib/profile-cms/runtime/routes";
+import { getCmsPerformanceBudgetBytes } from "@/lib/profile-cms/runtime/threeD";
 import {
   isExternalCmsHref,
   resolveCmsUri,
@@ -1315,10 +1322,39 @@ function ObjectViewerBlock({
   readonly context: RendererContext;
 }) {
   const asset = getAsset(context, getString(block, "asset_id"));
+  const objectAsset = toThreeDAsset(asset);
   const fallbackAsset = getAsset(
     context,
     block.interactive_policy?.fallback_asset_id
   );
+  const posterAsset =
+    getAsset(context, getString(block, "poster_asset_id")) ?? fallbackAsset;
+  const poster = toThreeDAsset(posterAsset);
+
+  if (asset && objectAsset && isRenderableModelAsset(asset)) {
+    const config: CmsThreeDViewerConfig = {
+      asset: objectAsset,
+      budgetBytes: getCmsPerformanceBudgetBytes(
+        block.interactive_policy?.performance_budget
+      ),
+      description: t(
+        context.locale,
+        "profileCms.interactive.object.description"
+      ),
+      kind: "object",
+      poster,
+      requiresActivation:
+        block.interactive_policy?.requires_user_activation ?? true,
+      sourceHref: resolveAssetUrl(asset) ?? undefined,
+      title:
+        getString(block, "title") ??
+        asset.alt_text ??
+        t(context.locale, "profileCms.interactive.object.title"),
+    };
+
+    return <CmsThreeDViewer config={config} locale={context.locale} />;
+  }
+
   return (
     <InteractiveFallback
       context={context}
@@ -1345,6 +1381,31 @@ function RoomViewerBlock({
   const fallbackHref = room?.fallback_page_id
     ? getCmsPagePath(context.cmsPackage, room.fallback_page_id)
     : null;
+  const placements =
+    room?.placements
+      .map((placement) => toThreeDPlacement(placement, context))
+      .filter((placement): placement is CmsThreeDPlacement => !!placement) ??
+    [];
+
+  if (room && placements.length) {
+    const config: CmsThreeDViewerConfig = {
+      budgetBytes: getCmsPerformanceBudgetBytes(
+        block.interactive_policy?.performance_budget
+      ),
+      description: t(context.locale, "profileCms.interactive.room.description"),
+      fallbackHref: fallbackHref ?? undefined,
+      kind: "room",
+      placements,
+      poster: toThreeDAsset(poster),
+      preset: room.room_type,
+      requiresActivation:
+        block.interactive_policy?.requires_user_activation ?? true,
+      title: room.title,
+    };
+
+    return <CmsThreeDViewer config={config} locale={context.locale} />;
+  }
+
   return (
     <InteractiveFallback
       context={context}
@@ -1356,6 +1417,52 @@ function RoomViewerBlock({
       href={fallbackHref}
     />
   );
+}
+
+function toThreeDPlacement(
+  placement: CmsExhibitionRoomV1["placements"][number],
+  context: RendererContext
+): CmsThreeDPlacement | null {
+  const asset = toThreeDAsset(getAsset(context, placement.asset_id));
+  const detailHref = getCmsPagePath(
+    context.cmsPackage,
+    placement.detail_page_id
+  );
+
+  if (!asset || !detailHref) {
+    return null;
+  }
+
+  return {
+    asset,
+    detailHref,
+    displayMode: placement.display_mode,
+    id: placement.id,
+    label: placement.label ?? asset.alt,
+    position: placement.position,
+    rotation: placement.rotation,
+    size: placement.size,
+  };
+}
+
+function toThreeDAsset(
+  asset: CmsAssetV1 | null | undefined
+): CmsThreeDAsset | undefined {
+  const url = resolveAssetUrl(asset);
+  if (!asset || !url) {
+    return undefined;
+  }
+
+  return {
+    alt: asset.decorative ? "" : (asset.alt_text ?? asset.id),
+    fileSizeBytes: asset.file_size_bytes,
+    height: asset.height,
+    id: asset.id,
+    mimeType: asset.mime_type,
+    title: asset.alt_text,
+    url,
+    width: asset.width,
+  };
 }
 
 function AssetImage({
@@ -2186,6 +2293,17 @@ function getAsset(
 
 function resolveAssetUrl(asset: CmsAssetV1 | null | undefined): string | null {
   return resolveCmsUri(asset?.uri);
+}
+
+function isRenderableModelAsset(asset: CmsAssetV1): boolean {
+  const mimeType = asset.mime_type.toLowerCase();
+  return (
+    asset.kind === "model" ||
+    mimeType === "model/gltf-binary" ||
+    mimeType === "model/gltf+json" ||
+    asset.uri.toLowerCase().endsWith(".glb") ||
+    asset.uri.toLowerCase().endsWith(".gltf")
+  );
 }
 
 function resolveTrustedEmbedAssetUrl(

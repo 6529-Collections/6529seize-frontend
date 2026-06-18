@@ -91,4 +91,49 @@ describe("profile CMS builder package helpers", () => {
       })
     );
   });
+
+  it("builds an editable 3D room package with a faithful 2D detail route", () => {
+    const state = {
+      ...createDefaultCmsBuilderState("punk6529"),
+      blocks: [
+        createBuilderBlock("room_viewer", 0, {
+          altText: "A square room work",
+          assetUri: "ipfs://bafyroom/work.png",
+          roomStyle: "white_cube",
+          title: "Room Work",
+        }),
+      ],
+    };
+    const cmsPackage = buildCmsPackageCandidate(
+      state,
+      new Date("2026-06-17T00:00:00.000Z")
+    );
+
+    expect(validateCmsBuilderState(state).result.valid).toBe(true);
+    expect(cmsPackage.payload.exhibition_rooms?.[0]).toEqual(
+      expect.objectContaining({
+        room_type: "white_cube",
+        fallback_page_id: "page-room-work-1",
+      })
+    );
+    expect(cmsPackage.payload.routes).toEqual(
+      expect.arrayContaining([
+        {
+          kind: "page",
+          page_id: "page-room-work-1",
+          path: "/punk6529/rooms/work-1/index.html",
+        },
+      ])
+    );
+
+    const imported = createBuilderStateFromPackage(cmsPackage);
+    expect(imported.blocks[0]).toEqual(
+      expect.objectContaining({
+        assetUri: "ipfs://bafyroom/work.png",
+        kind: "room_viewer",
+        roomStyle: "white_cube",
+        title: "Room Work",
+      })
+    );
+  });
 });
