@@ -281,6 +281,7 @@ test("polls followed activity when the sidebar is in joined mode", () => {
         excludeFollowed: true,
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
+        refetchInterval: false,
       }),
       expect.objectContaining({
         pageSize: 20,
@@ -288,6 +289,7 @@ test("polls followed activity when the sidebar is in joined mode", () => {
         excludeFollowed: true,
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
+        refetchInterval: false,
       }),
     ])
   );
@@ -411,7 +413,60 @@ test("keeps highly rated and all quality sections in joined mode", () => {
   result.current.fetchNextPage();
 
   expect(fetchNextAllQualityPage).toHaveBeenCalled();
-  expect(fetchNextFollowedActivityPage).not.toHaveBeenCalled();
+  expect(fetchNextFollowedActivityPage).toHaveBeenCalled();
+});
+
+test("paginates followed activity when joined discovery rows are empty", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+
+  const followedWave = createSidebarWave({
+    id: "followed",
+    latestDropTimestamp: 500,
+    subscribed: true,
+  });
+  const fetchNextAllQualityPage = jest.fn();
+  const fetchNextFollowedActivityPage = jest.fn();
+
+  useWavesV2Mock.mockImplementation(({ overviewType, pageSize }) => ({
+    waves:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? [followedWave]
+        : [],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo ||
+      pageSize === 20,
+    fetchNextPage:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? fetchNextFollowedActivityPage
+        : pageSize === 20
+          ? fetchNextAllQualityPage
+          : jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  }));
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "followed",
+  ]);
+  expect(result.current.hasNextPage).toBe(true);
+
+  result.current.fetchNextPage();
+
+  expect(fetchNextFollowedActivityPage).toHaveBeenCalled();
+  expect(fetchNextAllQualityPage).toHaveBeenCalled();
 });
 
 test("puts highly rated discovery before followed activity", () => {

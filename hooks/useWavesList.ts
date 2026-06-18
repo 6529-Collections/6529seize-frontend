@@ -103,7 +103,9 @@ const useWavesList = () => {
     pinned: nonPinnedFilter,
     scoreSort: ApiWaveScoreSort.Quality,
     viewerIdentityKey,
-    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchInterval: following
+      ? false
+      : SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
     enabled: true,
   });
@@ -125,7 +127,9 @@ const useWavesList = () => {
     pinned: nonPinnedFilter,
     scoreSort: ApiWaveScoreSort.Quality,
     viewerIdentityKey,
-    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchInterval: following
+      ? false
+      : SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
     enabled: true,
   });
@@ -174,22 +178,44 @@ const useWavesList = () => {
     isAllQualityWavesFetching ||
     isHighlyRatedWavesFetching ||
     isFollowedActivityWavesFetching;
-  const shouldPaginateAllQualityWaves = !following || allQualityWaves.length > 0;
-  const isMainWavesFetchingNextPage = shouldPaginateAllQualityWaves
-    ? isAllQualityWavesFetchingNextPage
-    : isFollowedActivityWavesFetchingNextPage;
-  const hasMainWavesNextPage = shouldPaginateAllQualityWaves
-    ? hasAllQualityWavesNextPage
-    : hasFollowedActivityWavesNextPage;
-  const fetchNextMainWavesPage = shouldPaginateAllQualityWaves
-    ? fetchNextAllQualityWavesPage
-    : fetchNextFollowedActivityWavesPage;
-  const mainWavesStatus = shouldPaginateAllQualityWaves
-    ? allQualityWavesStatus
-    : followedActivityWavesStatus;
-  const mainWavesRefetch = shouldPaginateAllQualityWaves
-    ? allQualityWavesRefetch
-    : followedActivityWavesRefetch;
+  const isMainWavesFetchingNextPage =
+    isAllQualityWavesFetchingNextPage ||
+    (following && isFollowedActivityWavesFetchingNextPage);
+  const hasMainWavesNextPage =
+    hasAllQualityWavesNextPage ||
+    (following && hasFollowedActivityWavesNextPage);
+  const fetchNextMainWavesPage = useCallback(() => {
+    if (!following) {
+      return fetchNextAllQualityWavesPage();
+    }
+
+    const nextPageRequests = [];
+    if (hasFollowedActivityWavesNextPage) {
+      nextPageRequests.push(fetchNextFollowedActivityWavesPage());
+    }
+    if (hasAllQualityWavesNextPage) {
+      nextPageRequests.push(fetchNextAllQualityWavesPage());
+    }
+
+    return Promise.all(nextPageRequests);
+  }, [
+    following,
+    fetchNextAllQualityWavesPage,
+    fetchNextFollowedActivityWavesPage,
+    hasAllQualityWavesNextPage,
+    hasFollowedActivityWavesNextPage,
+  ]);
+  const mainWavesStatus =
+    following && followedActivityWavesStatus === "error"
+      ? followedActivityWavesStatus
+      : allQualityWavesStatus;
+  const mainWavesRefetch = useCallback(() => {
+    if (following) {
+      void followedActivityWavesRefetch();
+    }
+
+    return allQualityWavesRefetch();
+  }, [following, allQualityWavesRefetch, followedActivityWavesRefetch]);
   const trackedAnnouncementWave = useMemo(
     () =>
       mainWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
