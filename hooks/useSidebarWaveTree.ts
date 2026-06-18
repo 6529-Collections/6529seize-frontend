@@ -1,6 +1,7 @@
 "use client";
 
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { compareSubwavesByLatestActivity } from "@/helpers/waves/subwave-activity.helpers";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type SidebarWaveDepth = 0 | 1;
@@ -91,7 +92,7 @@ const buildSubwavesByParentId = (waves: readonly MinimalWave[]) => {
   }
 
   for (const subwaves of map.values()) {
-    subwaves.sort((a, b) => a.createdAt - b.createdAt);
+    subwaves.sort(compareSubwavesByLatestActivity);
   }
 
   return map;

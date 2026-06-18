@@ -11,25 +11,52 @@ jest.mock("@/services/api/waves-v2-api", () => ({
   fetchWaveSubwavesPage: jest.fn(),
 }));
 
-const fetchWaveSubwavesPageMock =
-  fetchWaveSubwavesPage as jest.MockedFunction<typeof fetchWaveSubwavesPage>;
+const fetchWaveSubwavesPageMock = fetchWaveSubwavesPage as jest.MockedFunction<
+  typeof fetchWaveSubwavesPage
+>;
 
-const createSubwave = (id: string) => ({ id }) as SidebarWave;
+const createSubwave = ({
+  id,
+  createdAt = 0,
+  latestDropTimestamp = null,
+  name = id,
+}: {
+  readonly id: string;
+  readonly createdAt?: number | undefined;
+  readonly latestDropTimestamp?: number | null | undefined;
+  readonly name?: string | undefined;
+}) =>
+  ({
+    id,
+    name,
+    createdAt,
+    latestDropTimestamp,
+  }) as SidebarWave;
 
 describe("fetchAllWaveSubwaves", () => {
   beforeEach(() => {
     fetchWaveSubwavesPageMock.mockReset();
   });
 
-  it("loads every subwave page until the endpoint reports no next page", async () => {
+  it("loads every page and returns subwaves by latest activity", async () => {
     fetchWaveSubwavesPageMock
       .mockResolvedValueOnce({
-        waves: [createSubwave("child-1")],
+        waves: [
+          createSubwave({
+            id: "child-1",
+            latestDropTimestamp: 100,
+          }),
+        ],
         page: 1,
         next: true,
       })
       .mockResolvedValueOnce({
-        waves: [createSubwave("child-2")],
+        waves: [
+          createSubwave({
+            id: "child-2",
+            latestDropTimestamp: 300,
+          }),
+        ],
         page: 2,
         next: false,
       });
@@ -53,12 +80,38 @@ describe("fetchAllWaveSubwaves", () => {
       pageSize: 100,
       sort: ApiSubwavesSort.CreatedAt,
     });
-    expect(subwaves.map((wave) => wave.id)).toEqual(["child-1", "child-2"]);
+    expect(subwaves.map((wave) => wave.id)).toEqual(["child-2", "child-1"]);
+  });
+
+  it("falls back to newest created time when subwaves have no drops", async () => {
+    fetchWaveSubwavesPageMock.mockResolvedValueOnce({
+      waves: [
+        createSubwave({
+          id: "older-empty-child",
+          createdAt: 100,
+        }),
+        createSubwave({
+          id: "newer-empty-child",
+          createdAt: 300,
+        }),
+      ],
+      page: 1,
+      next: false,
+    });
+
+    const subwaves = await fetchAllWaveSubwaves({
+      parentWaveId: "parent-wave",
+    });
+
+    expect(subwaves.map((wave) => wave.id)).toEqual([
+      "newer-empty-child",
+      "older-empty-child",
+    ]);
   });
 
   it("stops after the first page when there is no next page", async () => {
     fetchWaveSubwavesPageMock.mockResolvedValueOnce({
-      waves: [createSubwave("child-1")],
+      waves: [createSubwave({ id: "child-1" })],
       page: 1,
       next: false,
     });
