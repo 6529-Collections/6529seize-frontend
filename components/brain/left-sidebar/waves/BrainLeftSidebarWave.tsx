@@ -269,13 +269,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
         }`}
       >
-        <Link
-          href={href}
-          prefetch={false}
-          onClick={handleWaveClick}
-          tabIndex={-1}
+        <div
           aria-hidden="true"
-          className="tw-relative tw-flex-shrink-0 tw-no-underline"
+          data-testid="sidebar-wave-avatar"
+          className="tw-relative tw-flex-shrink-0"
         >
           <div
             className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
@@ -324,7 +321,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
             />
           )}
-        </Link>
+        </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div
             className={`tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 ${

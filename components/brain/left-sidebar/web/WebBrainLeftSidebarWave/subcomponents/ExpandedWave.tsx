@@ -168,13 +168,10 @@ export const ExpandedWave = ({
             : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
         }`}
       >
-        <Link
-          href={href}
-          prefetch={false}
-          onClick={onClick}
-          tabIndex={-1}
+        <div
           aria-hidden="true"
-          className="tw-relative tw-flex-shrink-0 tw-no-underline"
+          data-testid="sidebar-wave-avatar"
+          className="tw-relative tw-flex-shrink-0"
         >
           <WaveAvatar
             isActive={isActive}
@@ -189,7 +186,7 @@ export const ExpandedWave = ({
               className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
             />
           )}
-        </Link>
+        </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div
             className={`-tw-mt-1 tw-mb-1 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 ${

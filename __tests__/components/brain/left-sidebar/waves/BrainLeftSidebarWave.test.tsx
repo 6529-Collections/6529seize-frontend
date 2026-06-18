@@ -263,15 +263,10 @@ describe("BrainLeftSidebarWave", () => {
     const titleLink = screen.getByRole("link", { name: "Chat Wave" });
     expect(titleLink.nextElementSibling).toBe(expandButton);
     expect(expandButton.parentElement).toContainElement(titleLink);
-    expect(
-      screen.getByRole("link", { hidden: true, name: "" })
-    ).toHaveAttribute("aria-hidden", "true");
-    expect(
-      screen.getByRole("link", { hidden: true, name: "" })
-    ).toHaveAttribute("tabindex", "-1");
-    expect(
-      screen.getByRole("link", { hidden: true, name: "" })
-    ).toHaveAttribute("href", "/waves/1");
+    const avatar = screen.getByTestId("sidebar-wave-avatar");
+    expect(avatar).toHaveAttribute("aria-hidden", "true");
+    expect(avatar.closest("a")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(
       screen.getByRole("link", { name: "Chat Wave" }).closest(".tw-pr-7")
     ).not.toBeNull();
