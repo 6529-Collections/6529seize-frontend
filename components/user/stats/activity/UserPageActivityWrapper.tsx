@@ -133,10 +133,7 @@ function UserPageActivityContent({
           aria-labelledby={getActivityTabId(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY)}
           tabIndex={0}
         >
-          <UserPageStatsActivityTDHHistory
-            profile={profile}
-            locale={locale}
-          />
+          <UserPageStatsActivityTDHHistory profile={profile} locale={locale} />
         </section>
       )}
     </div>

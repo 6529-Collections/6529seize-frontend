@@ -161,7 +161,9 @@ describe("OpenGraphPreview", () => {
       />
     );
 
-    expect(screen.getByTestId("youtube-video-preview-card")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("youtube-video-preview-card")
+    ).toBeInTheDocument();
     expect(screen.getByText("YouTube")).toBeInTheDocument();
     expect(screen.getByText("by Channel 6529")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "A Good Video" })).toHaveAttribute(
@@ -221,10 +223,7 @@ describe("OpenGraphPreview", () => {
     expect(screen.queryByTestId("youtube-video-embed")).toBeNull();
     expect(
       screen.getByRole("link", { name: "YouTube thumbnail for A Good Video" })
-    ).toHaveAttribute(
-      "href",
-      "https://www.youtube.com/watch?v=abc123XYZ_0"
-    );
+    ).toHaveAttribute("href", "https://www.youtube.com/watch?v=abc123XYZ_0");
   });
 
   it("uses localized YouTube fallbacks for sparse server data", () => {
@@ -293,9 +292,10 @@ describe("OpenGraphPreview", () => {
       screen.getByTestId("farcaster-embed-preview-card")
     ).toBeInTheDocument();
     expect(screen.getAllByText("Mini App").length).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("link", { name: "Example Mini" })
-    ).toHaveAttribute("href", "https://mini.example/app");
+    expect(screen.getByRole("link", { name: "Example Mini" })).toHaveAttribute(
+      "href",
+      "https://mini.example/app"
+    );
     expect(screen.getByText("Launch the example app")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Launch" })).toHaveAttribute(
       "href",
@@ -333,9 +333,10 @@ describe("OpenGraphPreview", () => {
       />
     );
 
-    expect(
-      screen.getByRole("link", { name: "Legacy Frame" })
-    ).toHaveAttribute("href", "https://legacy.example/frame");
+    expect(screen.getByRole("link", { name: "Legacy Frame" })).toHaveAttribute(
+      "href",
+      "https://legacy.example/frame"
+    );
     expect(screen.getByText("Legacy Example")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "View" })).toHaveAttribute(
       "href",

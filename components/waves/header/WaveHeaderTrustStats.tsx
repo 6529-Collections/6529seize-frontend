@@ -166,7 +166,7 @@ export default function WaveHeaderTrustStats({
               <dt className="tw-truncate tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400">
                 {stat.label}
               </dt>
-              <dd className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-current">
+              <dd className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-current">
                 {stat.value}
               </dd>
             </div>

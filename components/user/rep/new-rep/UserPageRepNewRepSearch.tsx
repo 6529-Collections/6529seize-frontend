@@ -316,9 +316,7 @@ export default function UserPageRepNewRepSearch({
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         className="tw-will-change-transform md:tw-absolute md:tw-left-0 md:tw-right-0 md:tw-top-full md:tw-z-10 md:tw-mt-1"
                       >
-                        <div
-                          className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/10"
-                        >
+                        <div className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/10">
                           <UserPageRepNewRepSearchDropdown
                             categories={categoriesToDisplay}
                             state={repSearchState}

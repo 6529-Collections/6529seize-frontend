@@ -357,7 +357,9 @@ describe("ContentTabContext", () => {
     );
 
     expect(result.current.availableTabs).not.toContain(MyStreamWaveTab.OUTCOME);
-    expect(result.current.availableTabs).not.toContain(MyStreamWaveTab.MY_VOTES);
+    expect(result.current.availableTabs).not.toContain(
+      MyStreamWaveTab.MY_VOTES
+    );
   });
 
   it("normalizes stored LEADERBOARD to SUBMISSIONS once voting ends", () => {

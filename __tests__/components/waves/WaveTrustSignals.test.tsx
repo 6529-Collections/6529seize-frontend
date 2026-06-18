@@ -74,11 +74,13 @@ describe("WaveTrustSignals", () => {
       screen.getByRole("button", { name: /^Wave score 83\./ })
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /^Wave score 83\./ }));
+    expect(screen.getByRole("link", { name: "Learn more" })).toHaveAttribute(
+      "href",
+      "/network/wave-score"
+    );
     expect(
-      screen.getByRole("link", { name: "Learn more" })
-    ).toHaveAttribute("href", "/network/wave-score");
-    expect(screen.getByRole("dialog", { name: "Wave score details" }))
-      .toBeInTheDocument();
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Quality")).toBeInTheDocument();
     expect(screen.getByText("Hotness")).toBeInTheDocument();
     expect(screen.getByText("Wave REP")).toBeInTheDocument();

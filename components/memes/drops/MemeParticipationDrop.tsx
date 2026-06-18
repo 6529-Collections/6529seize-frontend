@@ -18,11 +18,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import {
-  useCallback,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
+import { useCallback, type MouseEvent, type ReactNode } from "react";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";

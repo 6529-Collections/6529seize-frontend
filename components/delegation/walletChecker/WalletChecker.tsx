@@ -429,8 +429,9 @@ export default function WalletCheckerComponent(
 
   const normalizedWalletAddress = walletAddress.trim();
   const normalizedWalletAddressLower = normalizedWalletAddress.toLowerCase();
-  const walletAddressIsValidEthAddress =
-    isValidEthAddress(normalizedWalletAddress);
+  const walletAddressIsValidEthAddress = isValidEthAddress(
+    normalizedWalletAddress
+  );
   const walletAddressLooksLikeEns =
     normalizedWalletAddressLower.endsWith(".eth");
 

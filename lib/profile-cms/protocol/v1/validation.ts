@@ -216,7 +216,11 @@ function validateSemantics(
   validatePages(cmsPackage, context);
   validateAssets(payload.assets, issues);
   validateNftMediaProfiles(payload.nft_media_profiles ?? [], assetMap, issues);
-  validateDeepZoomManifests(payload.deep_zoom_manifests ?? [], assetMap, issues);
+  validateDeepZoomManifests(
+    payload.deep_zoom_manifests ?? [],
+    assetMap,
+    issues
+  );
   validateExhibitionRooms(
     payload.exhibition_rooms ?? [],
     pageMap,
@@ -241,7 +245,9 @@ function validateRoutes(
 ): void {
   const routePaths = new Map<string, number>();
   const canonicalProfilePath = `/${cmsPackage.profile.handle}/index.html`;
-  const routePathSet = new Set(cmsPackage.payload.routes.map((route) => route.path));
+  const routePathSet = new Set(
+    cmsPackage.payload.routes.map((route) => route.path)
+  );
 
   cmsPackage.payload.routes.forEach((route, index) => {
     if (routePaths.has(route.path)) {
@@ -262,7 +268,11 @@ function validateRoutes(
       issues,
       "route.profile_namespace"
     );
-    validateReservedRouteRoot(route.path, `/payload/routes/${index}/path`, issues);
+    validateReservedRouteRoot(
+      route.path,
+      `/payload/routes/${index}/path`,
+      issues
+    );
 
     if (route.kind === "page") {
       if (!route.page_id) {
@@ -375,7 +385,11 @@ function validateSiteManifest(
     issues,
     "site.profile_namespace"
   );
-  validateReservedRouteRoot(cmsPackage.site.base_path, "/site/base_path", issues);
+  validateReservedRouteRoot(
+    cmsPackage.site.base_path,
+    "/site/base_path",
+    issues
+  );
 
   if (
     cmsPackage.site.search?.manifest_asset_id &&
@@ -406,7 +420,9 @@ function validatePages(
   context: SemanticValidationContext
 ): void {
   const { assetMap, issues, sourcePacketMap } = context;
-  const routePaths = new Set(cmsPackage.payload.routes.map((route) => route.path));
+  const routePaths = new Set(
+    cmsPackage.payload.routes.map((route) => route.path)
+  );
 
   cmsPackage.payload.pages.forEach((page, pageIndex) => {
     const pagePath = `/payload/pages/${pageIndex}`;
@@ -474,7 +490,8 @@ function validateBlocks(
   pageContext: PageValidationContext,
   context: SemanticValidationContext
 ): void {
-  const { assetMap, deepZoomMap, issues, nftProfileMap, pageMap, roomMap } = context;
+  const { assetMap, deepZoomMap, issues, nftProfileMap, pageMap, roomMap } =
+    context;
   const blockIds = new Set<string>();
 
   blocks.forEach((block, blockIndex) => {
@@ -561,7 +578,13 @@ function validateBlocks(
       issues
     );
     validateBlockUrls(record, blockPath, pageContext.pageId, block.id, issues);
-    validateHeavyMediaBlock(block, assetMap, blockPath, pageContext.pageId, issues);
+    validateHeavyMediaBlock(
+      block,
+      assetMap,
+      blockPath,
+      pageContext.pageId,
+      issues
+    );
   });
 }
 
@@ -571,7 +594,13 @@ function validateAssets(
 ): void {
   assets.forEach((asset, index) => {
     const path = `/payload/assets/${index}`;
-    validateSafeUri(asset.uri, `${path}/uri`, issues, "asset.unsafe_uri", false);
+    validateSafeUri(
+      asset.uri,
+      `${path}/uri`,
+      issues,
+      "asset.unsafe_uri",
+      false
+    );
 
     if (
       ["image", "video", "social_image"].includes(asset.kind) &&
@@ -768,7 +797,13 @@ function validateNavigationItem(
   );
 
   if (item.url) {
-    validateSafeUri(item.url, `${path}/url`, issues, "navigation.unsafe_url", true);
+    validateSafeUri(
+      item.url,
+      `${path}/url`,
+      issues,
+      "navigation.unsafe_url",
+      true
+    );
   }
 
   if (!item.page_id && !item.url && !item.children?.length) {
@@ -780,7 +815,12 @@ function validateNavigationItem(
   }
 
   item.children?.forEach((child, childIndex) => {
-    validateNavigationItem(child, pageMap, `${path}/children/${childIndex}`, issues);
+    validateNavigationItem(
+      child,
+      pageMap,
+      `${path}/children/${childIndex}`,
+      issues
+    );
   });
 }
 
@@ -808,7 +848,10 @@ function validateSignatures(
   issues: CmsValidationIssueV1[]
 ): void {
   cmsPackage.signatures.forEach((signature, index) => {
-    if (signature.type === "fixture" && options.allowFixtureSignatures === false) {
+    if (
+      signature.type === "fixture" &&
+      options.allowFixtureSignatures === false
+    ) {
       addIssue(issues, {
         code: "signature.fixture_not_allowed",
         message: "Fixture signatures are not valid for production publish.",
@@ -845,12 +888,22 @@ function validateStorage(
 
   cmsPackage.storage.forEach((receipt, index) => {
     const path = `/storage/${index}`;
-    validateSafeUri(receipt.uri, `${path}/uri`, issues, "storage.unsafe_uri", false);
+    validateSafeUri(
+      receipt.uri,
+      `${path}/uri`,
+      issues,
+      "storage.unsafe_uri",
+      false
+    );
 
-    if (receipt.provider === "fixture" && options.allowFixtureStorage === false) {
+    if (
+      receipt.provider === "fixture" &&
+      options.allowFixtureStorage === false
+    ) {
       addIssue(issues, {
         code: "storage.fixture_not_allowed",
-        message: "Fixture storage receipts are not valid for production publish.",
+        message:
+          "Fixture storage receipts are not valid for production publish.",
         path: `${path}/provider`,
       });
     }
@@ -858,7 +911,8 @@ function validateStorage(
     if (receipt.provider === "s3" && receipt.canonical) {
       addIssue(issues, {
         code: "storage.s3_cannot_be_canonical",
-        message: "S3 may accelerate delivery, but it cannot be canonical storage.",
+        message:
+          "S3 may accelerate delivery, but it cannot be canonical storage.",
         path: `${path}/canonical`,
       });
     }
@@ -988,7 +1042,15 @@ function validateBlockUrls(
     }
 
     if (typeof value === "string") {
-      validateSafeUri(value, path, issues, "block.unsafe_url", true, pageId, blockId);
+      validateSafeUri(
+        value,
+        path,
+        issues,
+        "block.unsafe_url",
+        true,
+        pageId,
+        blockId
+      );
     }
   });
 }
@@ -1019,7 +1081,8 @@ function validateHeavyMediaBlock(
   if (!hasPoster && !hasFallback) {
     addIssue(issues, {
       code: "media.fallback_required",
-      message: "Heavy media blocks need a poster_asset_id or fallback_asset_id.",
+      message:
+        "Heavy media blocks need a poster_asset_id or fallback_asset_id.",
       path: blockPath,
       pageId,
       blockId: block.id,
@@ -1085,7 +1148,15 @@ function validateAssetReference(
   pageId?: string,
   blockId?: string
 ): void {
-  validateOptionalReference(assetId, assetMap, path, issues, code, pageId, blockId);
+  validateOptionalReference(
+    assetId,
+    assetMap,
+    path,
+    issues,
+    code,
+    pageId,
+    blockId
+  );
 }
 
 function validateOptionalAssetReference(
@@ -1097,7 +1168,15 @@ function validateOptionalAssetReference(
   pageId?: string,
   blockId?: string
 ): void {
-  validateOptionalReference(assetId, assetMap, path, issues, code, pageId, blockId);
+  validateOptionalReference(
+    assetId,
+    assetMap,
+    path,
+    issues,
+    code,
+    pageId,
+    blockId
+  );
 }
 
 function validatePageReference(
@@ -1213,7 +1292,9 @@ function isSafeRelativeUri(value: string): boolean {
   }
 
   const lowercaseValue = value.toLowerCase();
-  return !lowercaseValue.startsWith("/%2f") && !lowercaseValue.startsWith("/%5c");
+  return (
+    !lowercaseValue.startsWith("/%2f") && !lowercaseValue.startsWith("/%5c")
+  );
 }
 
 function validateEthereumAddress(
@@ -1299,10 +1380,7 @@ function mapZodIssue(issue: ZodIssue): CmsValidationIssueV1 {
   });
 }
 
-function addIssue(
-  issues: CmsValidationIssueV1[],
-  input: IssueInput
-): void {
+function addIssue(issues: CmsValidationIssueV1[], input: IssueInput): void {
   issues.push(issueFromInput(input));
 }
 
@@ -1342,7 +1420,9 @@ function escapePointerSegment(segment: string): string {
   return segment.replaceAll("~", "~0").replaceAll("/", "~1");
 }
 
-function getTarget(input: unknown): CmsValidationResultV1["target"] | undefined {
+function getTarget(
+  input: unknown
+): CmsValidationResultV1["target"] | undefined {
   if (!isRecord(input)) {
     return undefined;
   }

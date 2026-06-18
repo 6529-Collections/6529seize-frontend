@@ -364,9 +364,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const hasFollowingRows = animatedFollowingRows.length > 0;
   const hasAllRows = animatedAllRows.length > 0;
-  const virtualizedRows = hasAllRows
-    ? animatedAllRows
-    : animatedFollowingRows;
+  const virtualizedRows = hasAllRows ? animatedAllRows : animatedFollowingRows;
   const staticFollowingRows = hasAllRows ? animatedFollowingRows : [];
   const virtualizedAriaLabel = hasAllRows
     ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
@@ -388,9 +386,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
   const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
     items: virtualizedRows,
-    key: hasAllRows
-      ? "web-unified-waves-all"
-      : "web-unified-waves-following",
+    key: hasAllRows ? "web-unified-waves-all" : "web-unified-waves-following",
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
     rowHeight: getSidebarRowHeight,

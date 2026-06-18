@@ -62,10 +62,7 @@ interface GithubAccent {
 
 const GITHUB_NUMBER_PATTERN = /^\d+$/;
 
-const GITHUB_ACCENTS: Record<
-  GithubLinkKind,
-  Omit<GithubAccent, "kind">
-> = {
+const GITHUB_ACCENTS: Record<GithubLinkKind, Omit<GithubAccent, "kind">> = {
   pull: {
     railColor: "#8b5cf6",
     borderColor: "rgba(139, 92, 246, 0.32)",
@@ -391,8 +388,7 @@ const compactFacts = (
   facts: readonly (GithubFact | null)[]
 ): readonly GithubFact[] =>
   facts.filter(
-    (fact): fact is GithubFact =>
-      fact !== null && fact.value.trim().length > 0
+    (fact): fact is GithubFact => fact !== null && fact.value.trim().length > 0
   );
 
 const getKindLabel = (
@@ -653,7 +649,10 @@ const getMetaText = (preview: GithubPreviewResponse | null): string | null => {
   }
 
   if (preview.type === "github.file" || preview.type === "github.directory") {
-    return joinMetaParts([preview.path, preview.ref ? `ref ${preview.ref}` : null]);
+    return joinMetaParts([
+      preview.path,
+      preview.ref ? `ref ${preview.ref}` : null,
+    ]);
   }
 
   return null;
@@ -671,7 +670,9 @@ const getAssigneeLabel = (
     return null;
   }
 
-  return rest.length > 0 ? `@${firstAssignee} +${rest.length}` : `@${firstAssignee}`;
+  return rest.length > 0
+    ? `@${firstAssignee} +${rest.length}`
+    : `@${firstAssignee}`;
 };
 
 const getPreviewLabels = (
@@ -734,13 +735,19 @@ const getPreviewFacts = (
             }
           : null,
         formatCount(preview.changedFiles, "file")
-          ? { label: "Files", value: formatCount(preview.changedFiles, "file")! }
+          ? {
+              label: "Files",
+              value: formatCount(preview.changedFiles, "file")!,
+            }
           : null,
         formatCount(preview.commits, "commit")
           ? { label: "Commits", value: formatCount(preview.commits, "commit")! }
           : null,
         formatCount(preview.comments, "comment")
-          ? { label: "Comments", value: formatCount(preview.comments, "comment")! }
+          ? {
+              label: "Comments",
+              value: formatCount(preview.comments, "comment")!,
+            }
           : null,
       ]);
     }
@@ -750,7 +757,10 @@ const getPreviewFacts = (
           ? { label: "Assignees", value: getAssigneeLabel(preview.assignees)! }
           : null,
         formatCount(preview.comments, "comment")
-          ? { label: "Comments", value: formatCount(preview.comments, "comment")! }
+          ? {
+              label: "Comments",
+              value: formatCount(preview.comments, "comment")!,
+            }
           : null,
         preview.closedAt
           ? { label: "Closed", value: formatDate(preview.closedAt) ?? "" }
@@ -758,7 +768,9 @@ const getPreviewFacts = (
       ]);
     case "github.repository":
       return compactFacts([
-        preview.language ? { label: "Language", value: preview.language } : null,
+        preview.language
+          ? { label: "Language", value: preview.language }
+          : null,
         formatCompactNumber(preview.stars)
           ? { label: "Stars", value: formatCompactNumber(preview.stars)! }
           : null,
@@ -772,7 +784,9 @@ const getPreviewFacts = (
       ]);
     case "github.file":
       return compactFacts([
-        preview.language ? { label: "Language", value: preview.language } : null,
+        preview.language
+          ? { label: "Language", value: preview.language }
+          : null,
         preview.ref ? { label: "Ref", value: preview.ref } : null,
         formatBytes(preview.size)
           ? { label: "Size", value: formatBytes(preview.size)! }
@@ -809,7 +823,9 @@ const getPreviewFacts = (
     case "github.commit":
       return compactFacts([
         { label: "SHA", value: preview.shortSha },
-        preview.author ? { label: "Author", value: `@${preview.author}` } : null,
+        preview.author
+          ? { label: "Author", value: `@${preview.author}` }
+          : null,
         formatDate(preview.committedAt)
           ? { label: "Date", value: formatDate(preview.committedAt)! }
           : null,
@@ -820,7 +836,10 @@ const getPreviewFacts = (
             }
           : null,
         formatCount(preview.changedFiles, "file")
-          ? { label: "Files", value: formatCount(preview.changedFiles, "file")! }
+          ? {
+              label: "Files",
+              value: formatCount(preview.changedFiles, "file")!,
+            }
           : null,
       ]);
     case "github.release":
@@ -852,13 +871,20 @@ const getPreviewFacts = (
       ]);
     case "github.discussion":
       return compactFacts([
-        preview.number ? { label: "Discussion", value: `#${preview.number}` } : null,
-        preview.category ? { label: "Category", value: preview.category } : null,
+        preview.number
+          ? { label: "Discussion", value: `#${preview.number}` }
+          : null,
+        preview.category
+          ? { label: "Category", value: preview.category }
+          : null,
         titleCase(preview.state)
           ? { label: "State", value: titleCase(preview.state)! }
           : null,
         formatCount(preview.comments, "comment")
-          ? { label: "Comments", value: formatCount(preview.comments, "comment")! }
+          ? {
+              label: "Comments",
+              value: formatCount(preview.comments, "comment")!,
+            }
           : null,
       ]);
   }
@@ -890,8 +916,7 @@ const UnavailableStatus = () => (
 
 const FACT_TONE_CLASSES: Record<NonNullable<GithubFact["tone"]>, string> = {
   default: "tw-border-iron-800 tw-bg-iron-950/55 tw-text-iron-100",
-  success:
-    "tw-border-emerald-500/25 tw-bg-emerald-500/10 tw-text-emerald-100",
+  success: "tw-border-emerald-500/25 tw-bg-emerald-500/10 tw-text-emerald-100",
   warning: "tw-border-amber-400/30 tw-bg-amber-500/10 tw-text-amber-100",
   danger: "tw-border-rose-400/30 tw-bg-rose-500/10 tw-text-rose-100",
 };
