@@ -690,10 +690,12 @@ describe("SeizeVideoPlayer", () => {
     }
 
     expect(video.muted).toBe(false);
+    expect(video.defaultMuted).toBe(false);
 
     await userEvent.click(screen.getByRole("button", { name: "Mute video" }));
 
     expect(video.muted).toBe(true);
+    expect(video.defaultMuted).toBe(true);
   });
 
   it("stays paused when play is rejected", async () => {

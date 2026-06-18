@@ -147,6 +147,18 @@ export default function WaveRepRatingModal({
         queryKey: [QueryKey.WAVE_REP_CREDIT],
       });
       queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE_REP_OVERVIEW],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE_REP_CATEGORIES],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE_REP_LOGS],
+      });
+      queryClient.invalidateQueries({
         queryKey: [QueryKey.WAVE],
       });
       queryClient.invalidateQueries({

@@ -6,6 +6,8 @@ import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
 import { ProfileActivityLogRatingEditContentChangeReason } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -25,6 +27,10 @@ const LOG_MATTER_STR: Record<RateMatter, string> = {
   [RateMatter.REP]: "Rep",
   [RateMatter.NIC]: "NIC",
   [RateMatter.DROP_REP]: "Drop Rep",
+  [RateMatter.WAVE_REP]: t(
+    DEFAULT_LOCALE,
+    "profileActivity.rate.matter.waveRep"
+  ),
 };
 
 const TO_FROM: Record<ProfileActivityLogRateType, string> = {
@@ -95,7 +101,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-normal tw-text-iron-500 tw-no-underline"
+          className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline lg:tw-text-base"
         >
           (Proxy for {proxyHandle})
         </Link>
@@ -104,21 +110,22 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-emerald-400" : "tw-text-rose-400"
-        } tw-text-sm lg:tw-text-base tw-font-semibold`}
+        } tw-text-sm tw-font-semibold lg:tw-text-base`}
       >
         {changeStr}
       </span>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-semibold`}
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold lg:tw-text-base`}
       >
         (total {newRatingStr})
       </span>
-      {log.contents.rating_matter === RateMatter.REP && (
-        <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
+      {(log.contents.rating_matter === RateMatter.REP ||
+        log.contents.rating_matter === RateMatter.WAVE_REP) && (
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base">
           {log.contents.rating_category}
         </span>
       )}
-      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300 empty:tw-hidden">
+      <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 empty:tw-hidden lg:tw-text-base">
         {LOG_MATTER_STR[log.contents.rating_matter]}
       </span>
 
@@ -133,7 +140,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && !isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-normal tw-text-iron-500 tw-no-underline"
+          className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline lg:tw-text-base"
         >
           (Proxy: {proxyHandle})
         </Link>

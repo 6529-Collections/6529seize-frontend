@@ -151,7 +151,7 @@ export default function WaveHeaderTrustStats({
         WAVE_HEADER_TRUST_LOCALE,
         "waves.score.details.statsAriaLabel"
       )}
-      className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4"
+      className="tw-grid tw-grid-cols-2 tw-gap-2"
     >
       {stats.map((stat) => {
         const Icon = stat.icon;

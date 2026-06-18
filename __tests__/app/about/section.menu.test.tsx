@@ -63,4 +63,15 @@ describe("AboutMenu subscriptions row", () => {
     render(element, { wrapper: Wrapper });
     expect(screen.getAllByText("Subscriptions").length).toBeGreaterThan(0);
   });
+
+  it("does not link to retired release notes page", async () => {
+    country = "US";
+    const element = await AboutPage({
+      params: Promise.resolve({ section: AboutSection.MEMES }),
+    } as any);
+
+    render(element, { wrapper: Wrapper });
+
+    expect(screen.queryByText("Release Notes")).toBeNull();
+  });
 });

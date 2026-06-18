@@ -835,7 +835,13 @@ export default function SeizeVideoPlayer({
   function toggleMuted(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setMutedState({ prop: resolvedTemplate.muted, src, value: !isMuted });
+    const nextMuted = !isMuted;
+    const video = internalVideoRef.current;
+    if (video) {
+      video.muted = nextMuted;
+      video.defaultMuted = nextMuted;
+    }
+    setMutedState({ prop: resolvedTemplate.muted, src, value: nextMuted });
     revealControls();
   }
 
@@ -1053,6 +1059,15 @@ export default function SeizeVideoPlayer({
     // Browser playback is an imperative media side effect of visibility policy.
     syncOwnedAutoplay();
   }, [directSrc, syncOwnedAutoplay]);
+
+  useEffect(() => {
+    if (!videoElement) {
+      return;
+    }
+
+    videoElement.muted = isMuted;
+    videoElement.defaultMuted = isMuted;
+  }, [isMuted, videoElement]);
 
   return (
     <div

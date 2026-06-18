@@ -258,6 +258,18 @@ describe("WaveRepRatingModal", () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_REP_CREDIT],
     });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_REP_OVERVIEW],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_REP_CATEGORIES],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_REP_LOGS],
+    });
   });
 
   it("can remove an existing category rating by saving zero", async () => {
