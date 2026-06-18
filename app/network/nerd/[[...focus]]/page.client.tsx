@@ -1,11 +1,10 @@
 "use client";
 
 import Leaderboard from "@/components/leaderboard/Leaderboard";
+import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
-import styles from "@/styles/Home.module.scss";
 import { LeaderboardFocus } from "@/types/enums";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Col, Container, Row } from "react-bootstrap";
 
 const TDH_VIEW_PARAM = "tdh_view";
 
@@ -83,19 +82,13 @@ export default function CommunityNerdPageClient({
   };
 
   return (
-    <main className={styles["main"]}>
-      <Container fluid>
-        <Row>
-          <Col>
-            <Leaderboard
-              focus={focus}
-              setFocus={handleSetFocus}
-              tdhView={tdhView}
-              setTdhView={handleSetTdhView}
-            />
-          </Col>
-        </Row>
-      </Container>
-    </main>
+    <NetworkPageLayout>
+      <Leaderboard
+        focus={focus}
+        setFocus={handleSetFocus}
+        tdhView={tdhView}
+        setTdhView={handleSetTdhView}
+      />
+    </NetworkPageLayout>
   );
 }

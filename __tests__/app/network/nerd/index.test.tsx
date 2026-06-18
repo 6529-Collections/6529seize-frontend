@@ -28,6 +28,13 @@ jest.mock("@/components/leaderboard/Leaderboard", () => {
   };
 });
 
+jest.mock("@/components/network/NetworkPageLayout", () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="network-page-layout">{children}</div>
+  ),
+}));
+
 // 🧪 Mock next/navigation
 const replaceMock = jest.fn();
 const usePathnameMock = jest.fn(() => "/network/nerd");

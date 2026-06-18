@@ -141,20 +141,6 @@ const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
     section: "Network",
     icon: UsersIcon,
   },
-  {
-    name: "Network Nerd Cards Collected",
-    href: "/network/nerd/cards-collected",
-    section: "Network",
-    subsection: "Network Nerd",
-    icon: UsersIcon,
-  },
-  {
-    name: "Network Nerd Interactions",
-    href: "/network/nerd/interactions",
-    section: "Network",
-    subsection: "Network Nerd",
-    icon: UsersIcon,
-  },
 ];
 
 const MIN_SEARCH_LENGTH = 3;
@@ -588,17 +574,6 @@ const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
     "Collector leaderboard",
     "TDH leaderboard",
     "Cards collected leaderboard",
-    "Interactions leaderboard",
-  ],
-  "/network/nerd/cards-collected": [
-    "Network leaderboard",
-    "Collector leaderboard",
-    "TDH leaderboard",
-    "Cards collected leaderboard",
-  ],
-  "/network/nerd/interactions": [
-    "Network leaderboard",
-    "Collector leaderboard",
     "Interactions leaderboard",
     "Purchases sales transfers",
   ],

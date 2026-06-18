@@ -12,15 +12,15 @@
 }
 
 .networkPage {
-  padding-top: 2rem;
+  padding-top: 0;
 }
 
 .networkHeader {
-  align-items: end;
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding-bottom: 2rem;
+  align-items: center;
+  display: flex;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
 }
 
 .networkTitleBlock {
@@ -29,9 +29,9 @@
 
 .networkTitle {
   color: white;
-  font-size: 3rem;
-  font-weight: 800;
-  line-height: 1;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
   margin-bottom: 0;
 }
 
@@ -39,6 +39,7 @@
   display: grid;
   gap: 0.75rem;
   grid-template-columns: repeat(3, minmax(150px, auto));
+  margin-left: auto;
 }
 
 .networkStat {
@@ -67,6 +68,29 @@
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
+}
+
+@media only screen and (max-width: 1100px) {
+  .networkHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .networkStats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .networkStat {
+    min-width: 0;
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  .networkStats {
+    grid-template-columns: 1fr;
+  }
 }
 
 .networkToolbar {
