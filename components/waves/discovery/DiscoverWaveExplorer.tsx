@@ -236,11 +236,8 @@ function DiscoverWaveControls({
   const scoreFiltersEnabled = isScoreSort(activeSort);
 
   return (
-    <div
-      role="group"
-      aria-label="Discovery controls"
-      className="tw-flex tw-w-full tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-black/20 tw-p-1.5 tw-ring-1 tw-ring-inset tw-ring-white/5 xl:tw-flex-row xl:tw-items-center"
-    >
+    <fieldset className="tw-m-0 tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-black/20 tw-p-1.5 tw-ring-1 tw-ring-inset tw-ring-white/5 xl:tw-flex-row xl:tw-items-center">
+      <legend className="tw-sr-only">Discovery controls</legend>
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 xl:tw-flex-row xl:tw-items-center xl:tw-gap-x-4">
         <div className="tw-min-w-0">
           <CommonTabs<DiscoverSort>
@@ -300,7 +297,7 @@ function DiscoverWaveControls({
           <ScoreFormulaLink />
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 }
 
