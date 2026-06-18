@@ -37,7 +37,8 @@ describe("NewVersionToast", () => {
 
     const { container } = render(<NewVersionToast />);
     expect(screen.getByText(/new version/i)).toBeInTheDocument();
-    expect(container.firstChild).toHaveClass("newVersionWrapperApp");
+    expect(screen.getByText("Yes, again!")).toBeInTheDocument();
+    expect(container.firstChild).toHaveClass("tw-bottom-24");
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
@@ -57,7 +58,7 @@ describe("NewVersionToast", () => {
     mockedUseDeviceInfo.mockReturnValue({ isApp: false });
 
     const { container } = render(<NewVersionToast />);
-    expect(container.firstChild).toHaveClass("newVersionWrapper");
-    expect(container.firstChild).not.toHaveClass("newVersionWrapperApp");
+    expect(container.firstChild).toHaveClass("tw-bottom-4");
+    expect(container.firstChild).not.toHaveClass("tw-bottom-24");
   });
 });
