@@ -24,9 +24,14 @@ import type {
   CmsPageV1,
 } from "@/lib/profile-cms/protocol/v1";
 import {
+  getCmsArtGalleryFrameClassName,
+  getCmsArtGalleryGridClassName,
+  getCmsArtGalleryImageClassName,
+  type CmsArtGridMode,
+} from "@/components/profile-cms/cmsArtGalleryClasses";
+import {
   CmsArtGalleryGrid,
   CmsInspectableArtwork,
-  type CmsArtGridMode,
   type CmsArtInspectionItem,
   type CmsArtInspectionMetadata,
   type CmsArtInspectorLabels,
@@ -45,6 +50,7 @@ type CmsSourcePacketV1 = NonNullable<
   CmsPackageV1["payload"]["source_packets"]
 >[number];
 type CmsDisplayVariantV1 = CmsNftMediaProfileV1["display_variants"][number];
+type CmsPackageSignatureV1 = CmsPackageV1["signatures"][number];
 
 type NftTrait = {
   readonly label: string;
@@ -60,6 +66,12 @@ type PagePreviewCard = {
 type ReferenceMetadataItem = {
   readonly label: string;
   readonly value: string;
+};
+
+type LabelValueRow = {
+  readonly label: string;
+  readonly value: string | undefined;
+  readonly href?: string | undefined;
 };
 
 type RendererContext = {
@@ -135,7 +147,7 @@ export default function CmsSiteRenderer({
       <article className="tw-mx-auto tw-flex tw-max-w-6xl tw-flex-col tw-gap-8 tw-px-4 tw-py-8 sm:tw-px-6 md:tw-py-10 lg:tw-px-8">
         <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-6">
           <p className="tw-mb-2 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
-            {page.type.replaceAll("_", " ")}
+            {getPageTypeLabel(locale, page.type)}
           </p>
           <h2 className="tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white sm:tw-text-4xl">
             {page.metadata.title}
@@ -773,10 +785,11 @@ function NftDetailPage({
       })
     : null;
   const traits = getNftTraits(nftBlock, sourcePacket);
+  const traitRows = getUniqueLabelValueRows(traits);
   const collectionContext = getNftCollectionContext(context, page, nftBlock);
   const supplementalBlocks = page.blocks.filter(
     (block) =>
-      block.id !== nftBlock?.id &&
+      block.block_type !== "nft_reference" &&
       !(
         block.block_type === "image" &&
         getString(block, "asset_id") === displayAsset?.id
@@ -878,10 +891,10 @@ function NftDetailPage({
                 {t(context.locale, "profileCms.nft.traits")}
               </h4>
               <dl className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-2 lg:tw-grid-cols-1 xl:tw-grid-cols-2">
-                {traits.map((trait) => (
+                {traitRows.map((trait) => (
                   <div
                     className="tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3"
-                    key={`${trait.label}-${trait.value}`}
+                    key={trait.key}
                   >
                     <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
                       {trait.label}
@@ -991,17 +1004,14 @@ function NftProvenancePanel({
           {
             label: t(context.locale, "profileCms.provenance.storage"),
             value: storage
-              ? `${storage.provider}: ${storage.uri}`
+              ? formatProviderUri(context.locale, storage.provider, storage.uri)
               : t(context.locale, "profileCms.provenance.unknown"),
           },
           {
             label: t(context.locale, "profileCms.provenance.sourceSnapshot"),
-            value: sourcePacket
-              ? `${sourcePacket.source_type} ${formatCmsDate(
-                  context.locale,
-                  sourcePacket.captured_at
-                )}`
-              : page.source?.source_packet_id,
+            value:
+              formatSourceSnapshot(context.locale, sourcePacket) ??
+              page.source?.source_packet_id,
           },
           {
             label: t(context.locale, "profileCms.provenance.payloadHash"),
@@ -1039,13 +1049,19 @@ function NftProvenancePanel({
             {
               label: t(context.locale, "profileCms.provenance.signature"),
               value: context.cmsPackage.signatures
-                .map((signature) => `${signature.type}: ${signature.signer}`)
+                .map((signature) => formatSignature(context.locale, signature))
                 .join(", "),
             },
             {
               label: t(context.locale, "profileCms.provenance.storage"),
               value: context.cmsPackage.storage
-                .map((receipt) => `${receipt.provider}: ${receipt.uri}`)
+                .map((receipt) =>
+                  formatProviderUri(
+                    context.locale,
+                    receipt.provider,
+                    receipt.uri
+                  )
+                )
                 .join(", "),
             },
           ]}
@@ -1117,7 +1133,7 @@ function FeaturedPageGrid({
   }
 
   return (
-    <div className={getPreviewGridClassName(mode)}>
+    <div className={getCmsArtGalleryGridClassName(mode)}>
       {cards.map((card) => (
         <article
           className="tw-min-w-0 tw-border tw-border-solid tw-border-iron-800 tw-bg-black"
@@ -1125,8 +1141,8 @@ function FeaturedPageGrid({
         >
           {card.item ? (
             <CmsInspectableArtwork
-              frameClassName={getPreviewFrameClassName(mode)}
-              imageClassName={getPreviewImageClassName(mode)}
+              frameClassName={getCmsArtGalleryFrameClassName(mode)}
+              imageClassName={getCmsArtGalleryImageClassName(mode)}
               item={card.item}
               labels={getArtInspectorLabels(context.locale)}
             />
@@ -1168,7 +1184,9 @@ function DefinitionGrid({
     readonly href?: string | undefined;
   }[];
 }) {
-  const visibleItems = items.filter((item) => item.value);
+  const visibleItems = getUniqueLabelValueRows(
+    items.filter((item) => item.value)
+  );
   if (!visibleItems.length) {
     return null;
   }
@@ -1180,7 +1198,7 @@ function DefinitionGrid({
       {visibleItems.map((item) => (
         <div
           className="tw-min-w-0 tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3"
-          key={`${item.label}-${item.value}`}
+          key={item.key}
         >
           <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
             {item.label}
@@ -1203,6 +1221,23 @@ function DefinitionGrid({
       ))}
     </dl>
   );
+}
+
+function getUniqueLabelValueRows<T extends LabelValueRow>(
+  items: readonly T[]
+): ReadonlyArray<T & { readonly key: string }> {
+  const seen = new Map<string, number>();
+
+  return items.map((item) => {
+    const baseKey = `${item.label}-${item.value ?? ""}-${item.href ?? ""}`;
+    const occurrence = (seen.get(baseKey) ?? 0) + 1;
+    seen.set(baseKey, occurrence);
+
+    return {
+      ...item,
+      key: `${baseKey}-${occurrence}`,
+    };
+  });
 }
 
 function DeepZoomBlock({
@@ -1420,6 +1455,8 @@ function ReferencePanel({
   readonly subtitle?: string | undefined;
   readonly title: string;
 }) {
+  const metadataRows = getUniqueLabelValueRows(metadata);
+
   return (
     <section className="tw-grid tw-gap-4 tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 md:tw-grid-cols-[minmax(0,1fr)_14rem]">
       <div>
@@ -1444,8 +1481,8 @@ function ReferencePanel({
         ) : null}
         {metadata.length ? (
           <dl className="tw-mt-4 tw-grid tw-gap-2 tw-text-sm sm:tw-grid-cols-2">
-            {metadata.map((item) => (
-              <div key={`${item.label}-${item.value}`}>
+            {metadataRows.map((item) => (
+              <div key={item.key}>
                 <dt className="tw-text-iron-500">{item.label}</dt>
                 <dd className="tw-break-all tw-text-iron-100">{item.value}</dd>
               </div>
@@ -1573,8 +1610,7 @@ function createArtInspectionItem({
     },
     {
       label: t(context.locale, "profileCms.art.metadata.dimensions"),
-      value:
-        asset.width && asset.height ? `${asset.width} x ${asset.height}` : "",
+      value: formatAssetDimensions(context.locale, asset),
     },
     {
       href: src,
@@ -1630,6 +1666,55 @@ function compactMetadataEntries(
   return entries.filter(
     (entry) => typeof entry.value === "string" && entry.value.trim().length > 0
   );
+}
+
+function formatAssetDimensions(
+  locale: SupportedLocale,
+  asset: CmsAssetV1
+): string {
+  if (!asset.width || !asset.height) {
+    return "";
+  }
+
+  return t(locale, "profileCms.art.metadata.dimensionsValue", {
+    height: formatInteger(locale, asset.height),
+    width: formatInteger(locale, asset.width),
+  });
+}
+
+function formatProviderUri(
+  locale: SupportedLocale,
+  provider: string,
+  uri: string
+): string {
+  return t(locale, "profileCms.provenance.providerUri", {
+    provider,
+    uri,
+  });
+}
+
+function formatSignature(
+  locale: SupportedLocale,
+  signature: CmsPackageSignatureV1
+): string {
+  return t(locale, "profileCms.provenance.signatureValue", {
+    signer: signature.signer,
+    type: signature.type,
+  });
+}
+
+function formatSourceSnapshot(
+  locale: SupportedLocale,
+  sourcePacket: CmsSourcePacketV1 | undefined
+): string | undefined {
+  if (!sourcePacket) {
+    return undefined;
+  }
+
+  return t(locale, "profileCms.provenance.sourceSnapshotValue", {
+    date: formatCmsDate(locale, sourcePacket.captured_at),
+    type: sourcePacket.source_type,
+  });
 }
 
 function getArtInspectorLabels(locale: SupportedLocale): CmsArtInspectorLabels {
@@ -1729,10 +1814,53 @@ function getPrimaryNftProfileForPage(
 
   if (page.type === "nft_detail" || page.type === "card_detail") {
     const profiles = Array.from(context.nftProfileMap.values());
-    return profiles.length === 1 ? profiles[0] : undefined;
+    return (
+      getNftProfileForPageRoute(page, profiles) ??
+      (profiles.length === 1 ? profiles[0] : undefined)
+    );
   }
 
   return undefined;
+}
+
+function getNftProfileForPageRoute(
+  page: CmsPageV1,
+  profiles: readonly CmsNftMediaProfileV1[]
+): CmsNftMediaProfileV1 | undefined {
+  const routeCandidates = [page.path, page.metadata.canonical_url].filter(
+    (value): value is string => typeof value === "string" && value.length > 0
+  );
+
+  return profiles.find((profile) =>
+    routeCandidates.some((route) => routeMatchesNftProfile(route, profile))
+  );
+}
+
+function routeMatchesNftProfile(
+  route: string,
+  profile: CmsNftMediaProfileV1
+): boolean {
+  const normalizedRoute = route.toLowerCase();
+  if (!normalizedRoute.includes(profile.contract.toLowerCase())) {
+    return false;
+  }
+
+  const routeParts = normalizedRoute.split(/[/?#&=]+/).filter(Boolean);
+  return getNftRouteTokenCandidates(profile.token_id).some((candidate) =>
+    routeParts.includes(candidate)
+  );
+}
+
+function getNftRouteTokenCandidates(tokenId: string): readonly string[] {
+  const normalizedTokenId = tokenId.trim().toLowerCase();
+  if (!normalizedTokenId) {
+    return [];
+  }
+
+  const encodedTokenId = encodeURIComponent(normalizedTokenId).toLowerCase();
+  return encodedTokenId === normalizedTokenId
+    ? [normalizedTokenId]
+    : [normalizedTokenId, encodedTokenId];
 }
 
 function getNftReferenceBlock(
@@ -1807,12 +1935,7 @@ function getNftAssetMetadataEntries(
     },
     {
       label: t(context.locale, "profileCms.provenance.sourceSnapshot"),
-      value: sourcePacket
-        ? `${sourcePacket.source_type} ${formatCmsDate(
-            context.locale,
-            sourcePacket.captured_at
-          )}`
-        : "",
+      value: formatSourceSnapshot(context.locale, sourcePacket) ?? "",
     },
     {
       href: resolveAssetUrl(originalAsset) ?? undefined,
@@ -1982,42 +2105,6 @@ function getPagePreviewAsset(
   );
 }
 
-function getPreviewGridClassName(mode: CmsArtGridMode): string {
-  switch (mode) {
-    case "editorial":
-      return "tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-2";
-    case "dense":
-      return "tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-5";
-    case "contact_sheet":
-      return "tw-grid tw-grid-cols-3 tw-gap-2 sm:tw-grid-cols-4 lg:tw-grid-cols-6";
-    case "clean":
-      return "tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3";
-  }
-}
-
-function getPreviewFrameClassName(mode: CmsArtGridMode): string {
-  switch (mode) {
-    case "editorial":
-      return "tw-min-h-[18rem]";
-    case "dense":
-    case "contact_sheet":
-      return "tw-aspect-square";
-    case "clean":
-      return "tw-min-h-[14rem]";
-  }
-}
-
-function getPreviewImageClassName(mode: CmsArtGridMode): string {
-  switch (mode) {
-    case "dense":
-    case "contact_sheet":
-      return "tw-object-cover";
-    case "editorial":
-    case "clean":
-      return "tw-object-contain";
-  }
-}
-
 function getPageTypeLabel(
   locale: SupportedLocale,
   pageType: CmsPageV1["type"]
@@ -2039,6 +2126,8 @@ function getPageTypeLabel(
       return t(locale, "profileCms.pageType.post");
     case "page":
       return t(locale, "profileCms.pageType.page");
+    default:
+      return (pageType as string).replaceAll("_", " ");
   }
 }
 

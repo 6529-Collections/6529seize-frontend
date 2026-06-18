@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
+import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
 import artMediaPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/art-media.package.json";
 import collectionPagePackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/collection-page.package.json";
 import minimalPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/minimal-profile-homepage.package.json";
@@ -43,12 +44,16 @@ const nftDetailPage = nftDetailCmsPackage.payload.pages.find(
 const walletGalleryPage = walletGalleryCmsPackage.payload.pages.find(
   (page) => page.id === "page-gallery"
 );
+const walletNftPage2 = walletGalleryCmsPackage.payload.pages.find(
+  (page) => page.id === "page-nft-2"
+);
 if (
   !minimalPage ||
   !artPage ||
   !collectionPage ||
   !nftDetailPage ||
-  !walletGalleryPage
+  !walletGalleryPage ||
+  !walletNftPage2
 ) {
   throw new Error("Expected CMS fixture pages.");
 }
@@ -139,14 +144,26 @@ describe("CmsSiteRenderer", () => {
 
     await user.click(firstWork);
 
-    expect(
-      screen.getByRole("dialog", {
-        name: "The Memes by 6529 card number 1",
-      })
-    ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Show metadata" }));
+    const dialog = screen.getByRole("dialog", {
+      name: "The Memes by 6529 card number 1",
+    });
+    expect(dialog).toBeInTheDocument();
+    const closeButton = screen.getByRole("button", { name: "Close" });
+    expect(closeButton).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Previous" })).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(closeButton).toHaveFocus();
+
+    const metadataButton = screen.getByRole("button", {
+      name: "Show metadata",
+    });
+    await user.click(metadataButton);
     expect(screen.getByText("Media metadata")).toBeInTheDocument();
     expect(screen.getAllByText("Original asset").length).toBeGreaterThan(0);
+    await user.keyboard("m");
+    expect(screen.getByText("Media metadata")).toBeInTheDocument();
 
     await user.keyboard("{ArrowRight}");
     expect(
@@ -156,6 +173,15 @@ describe("CmsSiteRenderer", () => {
     ).toBeInTheDocument();
 
     await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(firstWork).toHaveFocus();
+
+    await user.click(firstWork);
+    await user.click(
+      screen.getByRole("dialog", {
+        name: "The Memes by 6529 card number 1",
+      })
+    );
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
@@ -210,6 +236,48 @@ describe("CmsSiteRenderer", () => {
     expect(
       screen.getByAltText("Grid derivative for The Memes by 6529 card number 2")
     ).toBeInTheDocument();
+  });
+
+  it("resolves multi-profile NFT detail pages from route paths when blocks omit profile ids", () => {
+    const pageWithoutProfileId = {
+      ...walletNftPage2,
+      blocks: walletNftPage2.blocks.map((block) => {
+        if (block.block_type !== "nft_reference") {
+          return block;
+        }
+
+        const { nft_media_profile_id: _nftMediaProfileId, ...rest } =
+          block as Record<string, unknown>;
+        return rest as typeof block;
+      }),
+    };
+    const cmsPackage: CmsPackageV1 = {
+      ...walletGalleryCmsPackage,
+      payload: {
+        ...walletGalleryCmsPackage.payload,
+        pages: walletGalleryCmsPackage.payload.pages.map((page) =>
+          page.id === pageWithoutProfileId.id ? pageWithoutProfileId : page
+        ),
+      },
+    };
+
+    render(
+      <CmsSiteRenderer cmsPackage={cmsPackage} page={pageWithoutProfileId} />
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: "Inspect: The Memes #2",
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Provenance")).toBeInTheDocument();
+    expect(screen.getAllByText("2").length).toBeGreaterThan(0);
+    expect(screen.queryByText("NFT reference unavailable")).toBeNull();
+  });
+
+  it("rejects unsafe package URI schemes before rendering CMS links", () => {
+    expect(resolveCmsUri("javascript:alert(1)")).toBeNull();
+    expect(resolveCmsUri("data:text/html,<svg></svg>")).toBeNull();
   });
 
   it("renders audio media with poster fallback and caption transcript text", () => {
@@ -299,5 +367,19 @@ describe("CmsSiteRenderer", () => {
     );
 
     expect(screen.getByText("Unsupported block")).toBeInTheDocument();
+  });
+
+  it("uses a readable fallback label for unknown future page types", () => {
+    const futurePage = {
+      ...minimalPage,
+      type: "future_page" as CmsPackageV1["payload"]["pages"][number]["type"],
+      blocks: [],
+    };
+
+    render(
+      <CmsSiteRenderer cmsPackage={minimalCmsPackage} page={futurePage} />
+    );
+
+    expect(screen.getByText("future page")).toBeInTheDocument();
   });
 });

@@ -7,10 +7,20 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent,
+  type MouseEvent,
   type Ref,
 } from "react";
 
-export type CmsArtGridMode = "editorial" | "dense" | "contact_sheet" | "clean";
+import {
+  getCmsArtGalleryCaptionClassName,
+  getCmsArtGalleryCardClassName,
+  getCmsArtGalleryFrameClassName,
+  getCmsArtGalleryGridClassName,
+  getCmsArtGalleryImageClassName,
+  type CmsArtGridMode,
+} from "@/components/profile-cms/cmsArtGalleryClasses";
+
+export type { CmsArtGridMode } from "@/components/profile-cms/cmsArtGalleryClasses";
 
 export type CmsArtInspectionMetadata = {
   readonly label: string;
@@ -133,21 +143,21 @@ export function CmsArtGalleryGrid({
           ) : null}
         </div>
       ) : null}
-      <div className={getGalleryGridClassName(mode)}>
+      <div className={getCmsArtGalleryGridClassName(mode)}>
         {items.map((item, index) => (
           <figure
-            className={getGalleryCardClassName(mode, index)}
+            className={getCmsArtGalleryCardClassName(mode, index)}
             key={item.id}
           >
             <ArtworkButton
-              frameClassName={getGalleryFrameClassName(mode)}
-              imageClassName={getGalleryImageClassName(mode)}
+              frameClassName={getCmsArtGalleryFrameClassName(mode)}
+              imageClassName={getCmsArtGalleryImageClassName(mode)}
               item={item}
               labels={labels}
               loading={index === 0 ? "eager" : "lazy"}
               onOpen={() => setOpenIndex(index)}
             />
-            <figcaption className={getGalleryCaptionClassName(mode)}>
+            <figcaption className={getCmsArtGalleryCaptionClassName(mode)}>
               <span className="tw-block tw-font-semibold tw-text-iron-100">
                 {item.title}
               </span>
@@ -236,6 +246,9 @@ function ArtworkDialog({
   const activeItem =
     activeIndex === null ? undefined : (items[activeIndex] ?? undefined);
   const titleId = activeItem ? `cms-art-lightbox-title-${activeItem.id}` : "";
+  const metadataRows = activeItem
+    ? getUniqueMetadataRows(activeItem.metadata)
+    : [];
 
   const close = useCallback(() => {
     onClose();
@@ -262,7 +275,7 @@ function ArtworkDialog({
       return;
     }
 
-    previousFocusRef.current =
+    previousFocusRef.current ??=
       globalThis.document?.activeElement instanceof HTMLElement
         ? globalThis.document.activeElement
         : null;
@@ -274,37 +287,54 @@ function ArtworkDialog({
       return;
     }
 
-    const onKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        close();
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        goToIndex(activeIndex + 1);
-      } else if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        goToIndex(activeIndex - 1);
-      } else if (event.key === "+" || event.key === "=") {
-        event.preventDefault();
-        setZoom((current) => Math.min(current + 0.25, 4));
-      } else if (event.key === "-") {
-        event.preventDefault();
-        setZoom((current) => Math.max(current - 0.25, 1));
-      } else if (event.key === "0") {
-        event.preventDefault();
-        setZoom(1);
-      } else if (event.key.toLowerCase() === "m") {
-        event.preventDefault();
-        setShowMetadata((current) => !current);
-      } else if (event.key.toLowerCase() === "f") {
-        event.preventDefault();
-        toggleFullscreen(dialogRef.current);
-      }
-    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-    globalThis.window?.addEventListener("keydown", onKeyDown);
-    return () => globalThis.window?.removeEventListener("keydown", onKeyDown);
-  }, [activeIndex, close, goToIndex]);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [activeIndex]);
+
+  const handleDialogKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Tab") {
+      trapFocus(event, dialogRef.current);
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      close();
+      return;
+    }
+
+    if (isTextEntryTarget(event.target)) {
+      return;
+    }
+
+    if (activeIndex === null) {
+      return;
+    }
+
+    if (event.key === "ArrowRight" && items.length > 1) {
+      event.preventDefault();
+      goToIndex(activeIndex + 1);
+      return;
+    }
+
+    if (event.key === "ArrowLeft" && items.length > 1) {
+      event.preventDefault();
+      goToIndex(activeIndex - 1);
+      return;
+    }
+
+    stopNestedSpaceScroll(event);
+  };
+
+  const handleBackdropMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      close();
+    }
+  };
 
   if (activeIndex === null || !activeItem) {
     return null;
@@ -315,9 +345,11 @@ function ArtworkDialog({
       aria-labelledby={titleId}
       aria-modal="true"
       className="tw-fixed tw-inset-0 tw-z-[1100] tw-flex tw-bg-black/95 tw-text-iron-100"
-      onKeyDown={(event) => stopNestedSpaceScroll(event)}
+      onKeyDown={handleDialogKeyDown}
+      onMouseDown={handleBackdropMouseDown}
       ref={dialogRef}
       role="dialog"
+      tabIndex={-1}
     >
       <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-col">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3">
@@ -410,8 +442,8 @@ function ArtworkDialog({
                 </p>
               ) : null}
               <dl className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-text-sm">
-                {activeItem.metadata.map((entry) => (
-                  <div key={`${entry.label}-${entry.value}`}>
+                {metadataRows.map((entry) => (
+                  <div key={entry.key}>
                     <dt className="tw-text-iron-500">{entry.label}</dt>
                     <dd className="tw-break-all tw-text-iron-100">
                       {entry.href ? (
@@ -482,6 +514,75 @@ function stopNestedSpaceScroll(event: KeyboardEvent<HTMLDivElement>): void {
   event.preventDefault();
 }
 
+const FOCUSABLE_ELEMENT_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function trapFocus(
+  event: KeyboardEvent<HTMLDivElement>,
+  container: HTMLElement | null
+): void {
+  if (!container) {
+    return;
+  }
+
+  const focusableElements = Array.from(
+    container.querySelectorAll<HTMLElement>(FOCUSABLE_ELEMENT_SELECTOR)
+  ).filter((element) => element.getAttribute("aria-hidden") !== "true");
+
+  if (!focusableElements.length) {
+    event.preventDefault();
+    container.focus();
+    return;
+  }
+
+  const firstElement = focusableElements[0]!;
+  const lastElement = focusableElements[focusableElements.length - 1]!;
+  const activeElement = globalThis.document?.activeElement ?? null;
+
+  if (event.shiftKey) {
+    if (activeElement === firstElement || !container.contains(activeElement)) {
+      event.preventDefault();
+      lastElement.focus();
+    }
+    return;
+  }
+
+  if (activeElement === lastElement || !container.contains(activeElement)) {
+    event.preventDefault();
+    firstElement.focus();
+  }
+}
+
+function isTextEntryTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target.isContentEditable
+  );
+}
+
+function getUniqueMetadataRows(
+  entries: readonly CmsArtInspectionMetadata[]
+): ReadonlyArray<CmsArtInspectionMetadata & { readonly key: string }> {
+  const seen = new Map<string, number>();
+
+  return entries.map((entry) => {
+    const baseKey = `${entry.label}-${entry.value}-${entry.href ?? ""}`;
+    const occurrence = (seen.get(baseKey) ?? 0) + 1;
+    seen.set(baseKey, occurrence);
+
+    return {
+      ...entry,
+      key: `${baseKey}-${occurrence}`,
+    };
+  });
+}
+
 function getArtworkFrameStyle(item: CmsArtInspectionItem): CSSProperties {
   const style: CSSProperties = {};
 
@@ -493,57 +594,4 @@ function getArtworkFrameStyle(item: CmsArtInspectionItem): CSSProperties {
   }
 
   return style;
-}
-
-function getGalleryGridClassName(mode: CmsArtGridMode): string {
-  switch (mode) {
-    case "editorial":
-      return "tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-2";
-    case "dense":
-      return "tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-5";
-    case "contact_sheet":
-      return "tw-grid tw-grid-cols-3 tw-gap-2 sm:tw-grid-cols-4 lg:tw-grid-cols-6";
-    case "clean":
-      return "tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3";
-  }
-}
-
-function getGalleryCardClassName(mode: CmsArtGridMode, index: number): string {
-  if (mode === "editorial" && index === 0) {
-    return "tw-bg-iron-950 md:tw-col-span-2";
-  }
-
-  return "tw-bg-iron-950";
-}
-
-function getGalleryFrameClassName(mode: CmsArtGridMode): string {
-  switch (mode) {
-    case "editorial":
-      return "tw-min-h-[18rem]";
-    case "dense":
-      return "tw-aspect-square";
-    case "contact_sheet":
-      return "tw-aspect-square";
-    case "clean":
-      return "tw-min-h-[16rem]";
-  }
-}
-
-function getGalleryImageClassName(mode: CmsArtGridMode): string {
-  switch (mode) {
-    case "dense":
-    case "contact_sheet":
-      return "tw-object-cover";
-    case "editorial":
-    case "clean":
-      return "tw-object-contain";
-  }
-}
-
-function getGalleryCaptionClassName(mode: CmsArtGridMode): string {
-  if (mode === "contact_sheet") {
-    return "tw-sr-only";
-  }
-
-  return "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-leading-6";
 }

@@ -23,9 +23,22 @@ stacked on `codex/profile-cms-builder-mvp`.
   extension fields.
 - Source packet extension data remains optional and renderer-tolerant.
 
+## I18n Fallback Debt
+
+- Touched surface: `components/profile-cms/CmsSiteRenderer.tsx`,
+  `components/profile-cms/CmsArtLightbox.tsx`, and new `profileCms.*` message
+  keys in `i18n/messages/en-US.ts`.
+- Current fallback behavior: English CMS renderer labels remain the source of
+  truth until locale packs add matching `profileCms.*` translations. New
+  dimension, provider URI, signature, and source snapshot composites are
+  interpolated messages so future locales can control word order.
+- User impact: non-English locale QA may see English labels in profile CMS art,
+  NFT detail, provenance, and inspection controls until the localization pass is
+  scheduled.
+- Follow-up issue: not yet filed; keep this debt tracked here until the
+  localization owner opens a locale-pack follow-up for `profileCms.*`.
+
 ## Status
 
-- Focused renderer and changed-file validation passed locally.
-- Browser screenshot smoke was attempted but blocked by the local dependency
-  junction shape, not by a tracked renderer error.
-- Next action is to push a signed PR targeting `codex/profile-cms-builder-mvp`.
+- Follow-up review fixes for PR #2734 are locally validated.
+- Next action is to commit, push, and request `/6529bot followup`.
