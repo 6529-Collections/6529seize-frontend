@@ -130,6 +130,8 @@ Follow-up after 6529bot review feedback:
   fallback, surfacing room placement budget warnings, and documenting that
   builder-generated `/{handle}/rooms/work-{n}/index.html` pages are canonical
   CMS detail routes for authored room works until NFT chain metadata exists.
+- The legacy media-query fallback uses a narrow structural type so the runtime
+  fallback remains available without calling deprecated DOM signatures directly.
 - Re-ran focused validation:
   - `seize run format:changed`
   - `seize run test:no-coverage -- --testMatch "**/*.test.ts"

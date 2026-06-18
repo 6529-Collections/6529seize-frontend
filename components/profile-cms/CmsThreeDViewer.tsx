@@ -52,6 +52,11 @@ type CmsThreeDRuntime = {
   readonly scene: Scene;
 };
 
+type LegacyMediaQueryList = {
+  readonly addListener?: ((listener: () => void) => void) | undefined;
+  readonly removeListener?: ((listener: () => void) => void) | undefined;
+};
+
 const MOBILE_FALLBACK_QUERY = "(max-width: 767px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -466,8 +471,9 @@ function addMediaQueryChangeListener(
     return () => query.removeEventListener("change", listener);
   }
 
-  query.addListener(listener);
-  return () => query.removeListener(listener);
+  const legacyQuery = query as LegacyMediaQueryList;
+  legacyQuery.addListener?.(listener);
+  return () => legacyQuery.removeListener?.(listener);
 }
 
 function getSelectedCmsThreeDClickable({
