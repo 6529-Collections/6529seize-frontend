@@ -41,9 +41,6 @@ export enum Collector {
   NEXTGEN = "NextGen",
 }
 
-let cachedLastTDH: TDHCalc | undefined;
-let cachedGlobalTdhHistory: GlobalTDHHistory | undefined;
-
 function getSelectedNetworkTdh(
   globalTdhHistory: GlobalTDHHistory | undefined,
   isUnboostedTdhView: boolean
@@ -87,9 +84,7 @@ export default function Leaderboard(
   const [seasons, setSeasons] = useState<MemeSeason[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<number>(0);
 
-  const [lastTDH, setLastTDH] = useState<TDHCalc | undefined>(
-    () => cachedLastTDH
-  );
+  const [lastTDH, setLastTDH] = useState<TDHCalc>();
 
   const pathname = usePathname();
   const isNetworkPage = pathname.startsWith("/network");
@@ -98,9 +93,7 @@ export default function Leaderboard(
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
-  const [globalTdhHistory, setGlobalTdhHistory] = useState<
-    GlobalTDHHistory | undefined
-  >(() => cachedGlobalTdhHistory);
+  const [globalTdhHistory, setGlobalTdhHistory] = useState<GlobalTDHHistory>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const isUnboostedTdhView = props.tdhView === ApiConsolidatedTdhView.Unboosted;
   const selectedNetworkTdh = getSelectedNetworkTdh(
@@ -136,15 +129,12 @@ export default function Leaderboard(
             block: response.data[0]?.block_number!,
             date: new Date(response.data[0]?.timestamp!),
           };
-          cachedLastTDH = latestTDH;
           setLastTDH(latestTDH);
         }
       })
       .catch((error) => {
         console.error("Failed to fetch latest TDH block", error);
-        if (!cachedLastTDH) {
-          setLastTDH(undefined);
-        }
+        setLastTDH(undefined);
       });
 
     commonApiFetch<MemeSeason[]>({
@@ -159,14 +149,11 @@ export default function Leaderboard(
     fetchUrl(url)
       .then((response: DBResponse) => {
         const tdhH = response.data[0];
-        cachedGlobalTdhHistory = tdhH;
         setGlobalTdhHistory(tdhH);
       })
       .catch((error) => {
         console.error("Failed to fetch global TDH history", error);
-        if (!cachedGlobalTdhHistory) {
-          setGlobalTdhHistory(undefined);
-        }
+        setGlobalTdhHistory(undefined);
       });
   }, []);
 

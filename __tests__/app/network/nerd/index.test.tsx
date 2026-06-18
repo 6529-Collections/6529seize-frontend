@@ -83,9 +83,8 @@ describe("ClientCommunityNerdPage", () => {
     renderPage(LeaderboardFocus.TDH);
     fireEvent.click(screen.getByTestId("set-focus"));
 
-    expect(replaceMock).toHaveBeenCalledWith("/network/nerd/interactions", {
-      scroll: false,
-    });
+    expect(replaceMock).not.toHaveBeenCalled();
+    expect(globalThis.location.pathname).toBe("/network/nerd/interactions");
   });
 });
 

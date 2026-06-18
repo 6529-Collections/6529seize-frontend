@@ -71,9 +71,8 @@ describe("ClientCommunityNerdPage", () => {
   it("updates path when focus changes", () => {
     renderPage(LeaderboardFocus.TDH);
     act(() => capturedProps.setFocus(LeaderboardFocus.INTERACTIONS));
-    expect(replaceMock).toHaveBeenCalledWith("/network/nerd/interactions", {
-      scroll: false,
-    });
+    expect(replaceMock).not.toHaveBeenCalled();
+    expect(globalThis.location.pathname).toBe("/network/nerd/interactions");
   });
 
   it("reads tdh view from search params", () => {

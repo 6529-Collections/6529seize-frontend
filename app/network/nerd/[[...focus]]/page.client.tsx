@@ -5,6 +5,7 @@ import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { LeaderboardFocus } from "@/types/enums";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const TDH_VIEW_PARAM = "tdh_view";
 
@@ -32,11 +33,7 @@ function getFocusFromPathname(
     return LeaderboardFocus.INTERACTIONS;
   }
 
-  if (pathname.includes("/cards-collected")) {
-    return LeaderboardFocus.TDH;
-  }
-
-  if (pathname === "/network/nerd") {
+  if (pathname.startsWith("/network/nerd")) {
     return LeaderboardFocus.TDH;
   }
 
@@ -66,13 +63,22 @@ export default function CommunityNerdPageClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const focus = getFocusFromPathname(pathname, initialFocus);
+  const [focus, setFocus] = useState<LeaderboardFocus>(
+    () => getFocusFromPathname(pathname, initialFocus)
+  );
   const tdhView = getTdhViewFromSearchParams(searchParams);
 
+  useEffect(() => {
+    setFocus(getFocusFromPathname(pathname, initialFocus));
+  }, [pathname, initialFocus]);
+
   const handleSetFocus = (newFocus: LeaderboardFocus) => {
-    router.replace(getNextUrl(getFocusPath(newFocus), tdhView, searchParams), {
-      scroll: false,
-    });
+    setFocus(newFocus);
+    window.history.replaceState(
+      null,
+      "",
+      getNextUrl(getFocusPath(newFocus), tdhView, searchParams)
+    );
   };
 
   const handleSetTdhView = (newTdhView: ApiConsolidatedTdhView) => {
