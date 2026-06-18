@@ -5,6 +5,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { ApiGlobalRepCategoryWave } from "@/generated/models/ApiGlobalRepCategoryWave";
 import type { ApiGlobalRepCategoryWaveContributor } from "@/generated/models/ApiGlobalRepCategoryWaveContributor";
+import type { ApiGlobalRepCategoryWaveOverview } from "@/generated/models/ApiGlobalRepCategoryWaveOverview";
 import type { ApiGlobalRepCategoryWaveRef } from "@/generated/models/ApiGlobalRepCategoryWaveRef";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -28,6 +29,16 @@ import {
 } from "./globalRepCategory.helpers";
 
 type WaveRepTab = "waves" | "contributors";
+
+type WaveRowWithRank = {
+  readonly item: ApiGlobalRepCategoryWave;
+  readonly rank: number;
+};
+
+type ContributorRowWithRank = {
+  readonly item: ApiGlobalRepCategoryWaveContributor;
+  readonly rank: number;
+};
 
 const WAVE_REP_TABS: ReadonlyArray<{
   readonly id: WaveRepTab;
@@ -91,6 +102,10 @@ function StateBlock({
       )}
     </div>
   );
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
 }
 
 function LoadMoreSentinel({
@@ -248,10 +263,7 @@ function WavesTable({
   rows,
 }: {
   readonly category: string;
-  readonly rows: Array<{
-    readonly item: ApiGlobalRepCategoryWave;
-    readonly rank: number;
-  }>;
+  readonly rows: WaveRowWithRank[];
 }) {
   return (
     <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08]">
@@ -300,10 +312,7 @@ function ContributorsTable({
   rows,
 }: {
   readonly category: string;
-  readonly rows: Array<{
-    readonly item: ApiGlobalRepCategoryWaveContributor;
-    readonly rank: number;
-  }>;
+  readonly rows: ContributorRowWithRank[];
 }) {
   return (
     <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08]">
@@ -372,6 +381,199 @@ function SortControls({
         </button>
       ))}
     </div>
+  );
+}
+
+function WaveRepRowsContent({
+  activeTab,
+  category,
+  contributorRows,
+  error,
+  isError,
+  isPending,
+  onRetry,
+  waveRows,
+}: {
+  readonly activeTab: WaveRepTab;
+  readonly category: string;
+  readonly contributorRows: ContributorRowWithRank[];
+  readonly error: unknown;
+  readonly isError: boolean;
+  readonly isPending: boolean;
+  readonly onRetry: () => void;
+  readonly waveRows: WaveRowWithRank[];
+}) {
+  if (isPending) {
+    return (
+      <output
+        aria-label={`Loading Wave REP ${activeTab}`}
+        className="tw-flex tw-justify-center tw-py-8"
+      >
+        <CircleLoader size={CircleLoaderSize.LARGE} />
+      </output>
+    );
+  }
+
+  if (isError) {
+    return (
+      <StateBlock
+        title="Could not load Wave REP rows"
+        message={getErrorMessage(error, "Wave REP rows failed to load.")}
+        onRetry={onRetry}
+      />
+    );
+  }
+
+  if (activeTab === "waves") {
+    return <WavesTable category={category} rows={waveRows} />;
+  }
+
+  return <ContributorsTable category={category} rows={contributorRows} />;
+}
+
+function WaveRepLoadedContent({
+  activeTab,
+  category,
+  contributorRows,
+  loadMoreActiveRows,
+  onSortChange,
+  overview,
+  rowsError,
+  rowsIsError,
+  rowsIsFetchingNextPage,
+  rowsIsPending,
+  rowsHasNextPage,
+  rowsRetry,
+  sort,
+  setActiveTab,
+  waveRows,
+}: {
+  readonly activeTab: WaveRepTab;
+  readonly category: string;
+  readonly contributorRows: ContributorRowWithRank[];
+  readonly loadMoreActiveRows: () => void;
+  readonly onSortChange: (sort: GlobalRepCategorySort) => void;
+  readonly overview: ApiGlobalRepCategoryWaveOverview;
+  readonly rowsError: unknown;
+  readonly rowsIsError: boolean;
+  readonly rowsIsFetchingNextPage: boolean;
+  readonly rowsIsPending: boolean;
+  readonly rowsHasNextPage: boolean;
+  readonly rowsRetry: () => void;
+  readonly sort: GlobalRepCategorySort;
+  readonly setActiveTab: (tab: WaveRepTab) => void;
+  readonly waveRows: WaveRowWithRank[];
+}) {
+  if (overview.wave_count === 0) {
+    return (
+      <StateBlock
+        title="No Wave REP found"
+        message="This category has not been used for Wave REP yet."
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
+        <section>
+          <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+            Waves preview
+          </h3>
+          <div className="tw-flex tw-flex-col tw-gap-2">
+            {overview.top_waves.map((wave) => (
+              <div
+                key={wave.wave.id}
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5"
+              >
+                <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+                  <WaveLink wave={wave.wave} />
+                  <span className="tw-flex-shrink-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+                    {formatNumberWithCommas(wave.total_rep)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section>
+          <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+            Contributors preview
+          </h3>
+          <div className="tw-flex tw-flex-col tw-gap-2">
+            {overview.top_contributors.map((contributor) => (
+              <div
+                key={`${contributor.wave.id}-${contributor.profile.id}`}
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5"
+              >
+                <div className="tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:tw-items-center">
+                  <ContributorLink contributor={contributor} />
+                  <WaveLink wave={contributor.wave} />
+                  <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                    {formatNumberWithCommas(contributor.contribution)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2">
+        <div
+          role="tablist"
+          aria-label="Wave REP category sections"
+          className="tw-flex tw-gap-2"
+        >
+          {WAVE_REP_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
+                activeTab === tab.id
+                  ? "tw-border-white/20 tw-bg-white/10 tw-text-white"
+                  : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <SortControls sort={sort} onSortChange={onSortChange} />
+      </div>
+
+      <WaveRepRowsContent
+        activeTab={activeTab}
+        category={category}
+        contributorRows={contributorRows}
+        error={rowsError}
+        isError={rowsIsError}
+        isPending={rowsIsPending}
+        onRetry={rowsRetry}
+        waveRows={waveRows}
+      />
+
+      {rowsHasNextPage && (
+        <>
+          <LoadMoreSentinel
+            canLoadMore={rowsHasNextPage}
+            isLoading={rowsIsFetchingNextPage}
+            onLoadMore={loadMoreActiveRows}
+          />
+          <button
+            type="button"
+            disabled={rowsIsFetchingNextPage}
+            onClick={loadMoreActiveRows}
+            className="tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
+          >
+            {rowsIsFetchingNextPage ? "Loading..." : "Load more"}
+          </button>
+        </>
+      )}
+    </>
   );
 }
 
@@ -461,11 +663,10 @@ export default function GlobalRepCategoryWaveScope({
     return (
       <StateBlock
         title="Could not load Wave REP"
-        message={
-          overviewQuery.error instanceof Error
-            ? overviewQuery.error.message
-            : "Wave REP for this category failed to load."
-        }
+        message={getErrorMessage(
+          overviewQuery.error,
+          "Wave REP for this category failed to load."
+        )}
         onRetry={() => {
           overviewQuery.refetch().catch(() => undefined);
         }}
@@ -482,128 +683,25 @@ export default function GlobalRepCategoryWaveScope({
         <WaveMetric label="Waves" value={overview.wave_count} />
         <WaveMetric label="Contributors" value={overview.contributor_count} />
       </div>
-
-      {overview.wave_count === 0 ? (
-        <StateBlock
-          title="No Wave REP found"
-          message="This category has not been used for Wave REP yet."
-        />
-      ) : (
-        <>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
-            <section>
-              <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-                Waves preview
-              </h3>
-              <div className="tw-flex tw-flex-col tw-gap-2">
-                {overview.top_waves.map((wave) => (
-                  <div
-                    key={wave.wave.id}
-                    className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5"
-                  >
-                    <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-                      <WaveLink wave={wave.wave} />
-                      <span className="tw-flex-shrink-0 tw-text-sm tw-font-semibold tw-text-iron-200">
-                        {formatNumberWithCommas(wave.total_rep)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-            <section>
-              <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-                Contributors preview
-              </h3>
-              <div className="tw-flex tw-flex-col tw-gap-2">
-                {overview.top_contributors.map((contributor) => (
-                  <div
-                    key={`${contributor.wave.id}-${contributor.profile.id}`}
-                    className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5"
-                  >
-                    <div className="tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:tw-items-center">
-                      <ContributorLink contributor={contributor} />
-                      <WaveLink wave={contributor.wave} />
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                        {formatNumberWithCommas(contributor.contribution)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2">
-            <div
-              role="tablist"
-              aria-label="Wave REP category sections"
-              className="tw-flex tw-gap-2"
-            >
-              {WAVE_REP_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
-                    activeTab === tab.id
-                      ? "tw-border-white/20 tw-bg-white/10 tw-text-white"
-                      : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-            <SortControls sort={sort} onSortChange={setSort} />
-          </div>
-
-          {activeQuery.isPending ? (
-            <output
-              aria-label={`Loading Wave REP ${activeTab}`}
-              className="tw-flex tw-justify-center tw-py-8"
-            >
-              <CircleLoader size={CircleLoaderSize.LARGE} />
-            </output>
-          ) : activeQuery.isError ? (
-            <StateBlock
-              title="Could not load Wave REP rows"
-              message={
-                activeQuery.error instanceof Error
-                  ? activeQuery.error.message
-                  : "Wave REP rows failed to load."
-              }
-              onRetry={() => {
-                activeQuery.refetch().catch(() => undefined);
-              }}
-            />
-          ) : activeTab === "waves" ? (
-            <WavesTable category={category} rows={waveRows} />
-          ) : (
-            <ContributorsTable category={category} rows={contributorRows} />
-          )}
-
-          {activeQuery.hasNextPage && (
-            <>
-              <LoadMoreSentinel
-                canLoadMore={activeQuery.hasNextPage}
-                isLoading={activeQuery.isFetchingNextPage}
-                onLoadMore={loadMoreActiveRows}
-              />
-              <button
-                type="button"
-                disabled={activeQuery.isFetchingNextPage}
-                onClick={loadMoreActiveRows}
-                className="tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
-              >
-                {activeQuery.isFetchingNextPage ? "Loading..." : "Load more"}
-              </button>
-            </>
-          )}
-        </>
-      )}
+      <WaveRepLoadedContent
+        activeTab={activeTab}
+        category={category}
+        contributorRows={contributorRows}
+        loadMoreActiveRows={loadMoreActiveRows}
+        onSortChange={setSort}
+        overview={overview}
+        rowsError={activeQuery.error}
+        rowsIsError={activeQuery.isError}
+        rowsIsFetchingNextPage={activeQuery.isFetchingNextPage}
+        rowsIsPending={activeQuery.isPending}
+        rowsHasNextPage={activeQuery.hasNextPage}
+        rowsRetry={() => {
+          activeQuery.refetch().catch(() => undefined);
+        }}
+        sort={sort}
+        setActiveTab={setActiveTab}
+        waveRows={waveRows}
+      />
     </div>
   );
 }

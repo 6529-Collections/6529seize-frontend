@@ -199,7 +199,7 @@ export default function RepCategoryExplorer() {
       return;
     }
 
-    const animationFrame = window.requestAnimationFrame(() => {
+    const animationFrame = globalThis.requestAnimationFrame(() => {
       detailRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -208,7 +208,7 @@ export default function RepCategoryExplorer() {
       setScrollTargetCategory(null);
     });
 
-    return () => window.cancelAnimationFrame(animationFrame);
+    return () => globalThis.cancelAnimationFrame(animationFrame);
   }, [scrollTargetCategory, selectedCategory]);
 
   const showPrompt = input.trim().length < MIN_CATEGORY_SEARCH_LENGTH;
