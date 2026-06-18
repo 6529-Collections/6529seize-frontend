@@ -138,22 +138,28 @@ used.
 
 ### `ghdeploy`
 
-`ghdeploy` triggers the production deploy workflow for the current branch:
+`ghdeploy` triggers the production deploy workflow from a clean, upstream-synced
+`main` branch:
 
 ```bash
 ghdeploy
 ```
 
-Run it from the repository root. Before triggering
-`.github/workflows/build-upload-deploy-prod.yml`, it checks that:
+Run it from the repository root while checked out on `main`. The production
+workflow has a hard guard that rejects every non-`main` ref. Before triggering
+`.github/workflows/build-upload-deploy-prod.yml`, `ghdeploy` checks that:
 
-- the current branch is not detached
+- the current branch is not detached and should be `main` for production
 - the working tree is fully clean, including no untracked files
 - the current branch has an upstream
 - the current branch is exactly in sync with its upstream after a fetch
 
 If those checks pass, it asks for confirmation before running the production
-workflow against the current branch.
+workflow against `main`.
+
+For release-lane ownership, staging-bus cadence, shared validation, backend
+coordination, and production promotion gates, use
+[`deployment-bus-process.md`](deployment-bus-process.md).
 
 ## Guardrails in this repo
 

@@ -38,11 +38,25 @@ Available now:
   `art-nft-display-best-practices.md`.
 - A phase-based agentic storm execution plan now exists at
   `agentic-storm-execution-plan.md`.
+- Wave 1 frontend runtime bridge work is green in PR #2720 on
+  `codex/profile-cms-runtime-bridge`: App Router support for
+  `/{handle}/index.html`, a narrow primary-site API adapter, a V1 static
+  renderer, and profile Website link plumbing.
+- The next stacked FE lane is the CMS Builder + Publish UI MVP on
+  `codex/profile-cms-builder-mvp`: a hidden feature-flagged
+  `/{handle}/cms/builder` route, guided homepage editor, real renderer preview,
+  local V1 validation checklist, JSON import/export, and save/validate/publish
+  adapter stubs.
 
 Important limits:
 
-- No runtime CMS route, renderer, builder, publish endpoint, storage adapter, or
-  pointer implementation has been landed by this Phase 0/1 pass.
+- No production publish endpoint, storage upload adapter, or backend write model
+  is landed in frontend. The builder MVP documents its expected backend write
+  endpoints in `builder-mvp-integration-assumptions.md` and must not fake a
+  production publish.
+- The frontend runtime adapter assumes `GET /api/profile-cms/:handle/primary`
+  and documents that boundary in
+  `runtime-bridge-integration-assumptions.md`.
 - The broader schema is ahead of any authoring experience.
 - Real IPFS and Arweave upload adapters are still needed.
 - Real wallet signature verification is still needed.
@@ -70,18 +84,19 @@ Important limits:
 
 ## Next Implementation Slice
 
-The highest leverage next slice is Wave 1 from `phase-0/pr-wave-plan.md`:
+The active critical-path slice is the FE Builder + Publish UI MVP stacked on
+PR #2720:
 
-1. Decide whether this executable protocol stays in FE temporarily or moves to
-   a shared 6529mono package before BE adoption.
-2. Add backend tests that consume the same Phase 1 fixture corpus and validation
-   result shape.
-3. Start the `/{handle}/index.html` route and native static renderer behind a
-   feature flag.
-4. Add profile-page website button plumbing for profiles with a published CMS
-   pointer.
-5. Only then fan out publish/storage, builder, wallet-gallery generation, art
-   display, 3D rooms, and AI-agent affordances.
+1. Keep the builder route hidden behind `PROFILE_CMS_BUILDER_ENABLED` or
+   `NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED`.
+2. Use the existing V1 protocol helpers without changing hash or
+   canonicalization semantics.
+3. Let users create a simple homepage package, preview it with
+   `CmsSiteRenderer`, validate it locally, and export/import JSON.
+4. Wire save, server-validate, and publish CTAs through a narrow adapter that
+   stays unavailable unless backend endpoints are explicitly enabled.
+5. Do not start wallet gallery generation, NFT indexing, storage upload, 3D
+   rooms, or AI-agent MCP work in this lane.
 
 ## Decisions To Make Before Coding More
 

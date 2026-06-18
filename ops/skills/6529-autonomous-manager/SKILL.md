@@ -15,6 +15,7 @@ Choose one primary mode, then add others only when the work requires it:
 - **PR review manager**: Inspect reviewer, CodeRabbit, Claude, CI, and local findings; fix valid feedback; push updates when requested. Use `ops/skills/write-prs/SKILL.md` for PR creation, bot iteration, readiness, and merge preparation. Use `ops/skills/deploy-6529/SKILL.md` when the user requests merge/deploy execution.
 - **Docs/skills manager**: Create or update user-facing docs under `ops/docs/` and repo-local skills under `ops/skills/`, keeping current-state language and navigable structure.
 - **Release manager**: Carry an already-approved change through merge, staging, production, and smoke validation only when explicitly asked. Use `ops/skills/deploy-6529/SKILL.md` as the authority for merge, deployment, E2E validation, backend coordination, and cross-agent coordination.
+- **Deployment-bus manager**: Own a shared staging or production lane for a batch of PRs, assign validation slices to PR owners, keep the candidate SHA and included release set explicit, and use `ops/docs/developer/deployment-bus-process.md` plus `ops/skills/deploy-6529/SKILL.md` as the authority.
 - **Investigation manager**: Diagnose an issue, gather evidence, identify ownership, and turn findings into a concrete fix or handoff.
 
 ## Load Order
