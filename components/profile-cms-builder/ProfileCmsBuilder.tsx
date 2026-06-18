@@ -5,12 +5,20 @@ import { useMemo, useRef, useState, type ReactNode } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
+import {
+  ProfileCmsAgentPanel,
+  downloadJsonFile,
+} from "@/components/profile-cms-builder/ProfileCmsAgentPanel";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
-  PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT,
+  createCmsBuilderSchemaBundle,
+  createCmsBuilderSourcePacket,
+} from "@/lib/profile-cms/builder/agent";
+import {
   PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
+  PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT,
   PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
   requestProfileCmsGallerySnapshot,
   runProfileCmsBuilderAction,
@@ -37,10 +45,13 @@ import {
   type CmsBuilderState,
   type CmsBuilderTemplate,
 } from "@/lib/profile-cms/builder/package";
-import type { CmsValidationIssueV1 } from "@/lib/profile-cms/protocol/v1";
+import type {
+  CmsPackageV1,
+  CmsValidationIssueV1,
+} from "@/lib/profile-cms/protocol/v1";
 import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
 
-type BuilderTab = "editor" | "preview" | "json";
+type BuilderTab = "editor" | "preview" | "json" | "agent";
 type GallerySnapshotStatus = "idle" | "loading" | "ready" | "error";
 
 const BLOCK_OPTIONS: ReadonlyArray<{
@@ -92,7 +103,29 @@ export default function ProfileCmsBuilder({
   );
   const canUseBuilderApi =
     !!profileId && connectedProfile?.id === profileId && !activeProfileProxy;
-
+  const sourcePacket = useMemo(
+    () =>
+      createCmsBuilderSourcePacket({
+        canUseBuilderApi,
+        cmsPackage: validation.cmsPackage,
+        draftId,
+        draftVersion: stateVersionRef.current,
+        profileId,
+        validation: validation.result,
+      }),
+    [
+      canUseBuilderApi,
+      draftId,
+      profileId,
+      validation.cmsPackage,
+      validation.result,
+    ]
+  );
+  const schemaBundle = useMemo(
+    () =>
+      createCmsBuilderSchemaBundle(validation.cmsPackage.provenance.created_at),
+    [validation.cmsPackage.provenance.created_at]
+  );
   const clearActionResult = () => {
     stateVersionRef.current += 1;
     setActionResult(null);
@@ -246,6 +279,11 @@ export default function ProfileCmsBuilder({
     }
   };
 
+  const applyAgentPackage = (cmsPackage: CmsPackageV1) => {
+    setState(createBuilderStateFromPackage(cmsPackage));
+    clearActionResult();
+  };
+
   const runAction = async (action: ProfileCmsBuilderAction) => {
     if (!canUseBuilderApi) {
       setActionResult({
@@ -356,6 +394,11 @@ export default function ProfileCmsBuilder({
                 setActiveTab("json");
               }}
             />
+            <TabButton
+              active={activeTab === "agent"}
+              label={t(locale, "profileCms.builder.tab.agent")}
+              onClick={() => setActiveTab("agent")}
+            />
           </div>
 
           {activeTab === "editor" ? (
@@ -386,11 +429,41 @@ export default function ProfileCmsBuilder({
 
           {activeTab === "json" ? (
             <JsonPanel
+              onDownloadPackage={() =>
+                downloadJsonFile(
+                  `${state.handle}-cms-package.json`,
+                  validation.cmsPackage
+                )
+              }
+              onDownloadSchemaBundle={() =>
+                downloadJsonFile(
+                  `${state.handle}-cms-schema-bundle.json`,
+                  schemaBundle
+                )
+              }
+              onDownloadSourcePacket={() =>
+                downloadJsonFile(
+                  `${state.handle}-cms-source-packet.json`,
+                  sourcePacket
+                )
+              }
               importError={importError}
               jsonDraft={jsonDraft || packageJson}
               locale={locale}
               onChange={setJsonDraft}
               onImport={importJson}
+            />
+          ) : null}
+
+          {activeTab === "agent" ? (
+            <ProfileCmsAgentPanel
+              canUseBuilderApi={canUseBuilderApi}
+              currentDraftVersion={stateVersionRef.current}
+              draftId={draftId}
+              locale={locale}
+              onApplyPackage={applyAgentPackage}
+              profileId={profileId}
+              validation={validation}
             />
           ) : null}
         </section>
@@ -1354,12 +1427,18 @@ function JsonPanel({
   jsonDraft,
   locale,
   onChange,
+  onDownloadPackage,
+  onDownloadSchemaBundle,
+  onDownloadSourcePacket,
   onImport,
 }: {
   readonly importError: string;
   readonly jsonDraft: string;
   readonly locale: SupportedLocale;
   readonly onChange: (value: string) => void;
+  readonly onDownloadPackage: () => void;
+  readonly onDownloadSchemaBundle: () => void;
+  readonly onDownloadSourcePacket: () => void;
   readonly onImport: () => void;
 }) {
   return (
@@ -1374,6 +1453,29 @@ function JsonPanel({
           type="button"
         >
           {t(locale, "profileCms.builder.json.import")}
+        </button>
+      </div>
+      <div className="tw-flex tw-flex-wrap tw-gap-2">
+        <button
+          className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400"
+          onClick={onDownloadPackage}
+          type="button"
+        >
+          {t(locale, "profileCms.builder.json.downloadPackage")}
+        </button>
+        <button
+          className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400"
+          onClick={onDownloadSourcePacket}
+          type="button"
+        >
+          {t(locale, "profileCms.builder.json.downloadSourcePacket")}
+        </button>
+        <button
+          className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400"
+          onClick={onDownloadSchemaBundle}
+          type="button"
+        >
+          {t(locale, "profileCms.builder.json.downloadSchemaBundle")}
         </button>
       </div>
       {importError ? (
