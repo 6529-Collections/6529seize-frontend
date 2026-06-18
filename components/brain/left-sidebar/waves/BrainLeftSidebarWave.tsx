@@ -338,20 +338,20 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           </div>
           {shouldShowTrustSignalsRow && (
             <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
+              {latestDropTimestamp !== null && (
+                <span className="tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
+                  <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
+                </span>
+              )}
               {hasSummaryScore && (
                 <WaveTrustSignals
                   waveRep={wave.waveRep}
                   waveScore={wave.waveScore}
                   variant="sidebar-inline"
                   mode="summary"
-                  className="tw-shrink-0"
+                  className="tw-ml-auto tw-shrink-0"
                   tooltipId={trustSignalsTooltipId}
                 />
-              )}
-              {latestDropTimestamp !== null && (
-                <span className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
-                  <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
-                </span>
               )}
             </div>
           )}
