@@ -13,9 +13,8 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiWaveScoreVisibilityComponentWeights {
-    'quality_score': number;
-    'gated_hotness_score': number;
+export class ApiArchiveProfileCmsPackageRequest {
+    'expected_package_hash'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,20 +22,14 @@ export class ApiWaveScoreVisibilityComponentWeights {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "quality_score",
-            "baseName": "quality_score",
-            "type": "number",
-            "format": "double"
-        },
-        {
-            "name": "gated_hotness_score",
-            "baseName": "gated_hotness_score",
-            "type": "number",
-            "format": "double"
+            "name": "expected_package_hash",
+            "baseName": "expected_package_hash",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveScoreVisibilityComponentWeights.attributeTypeMap;
+        return ApiArchiveProfileCmsPackageRequest.attributeTypeMap;
     }
 
     public constructor() {

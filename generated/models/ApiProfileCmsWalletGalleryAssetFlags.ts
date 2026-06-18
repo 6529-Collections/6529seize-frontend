@@ -13,9 +13,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiWaveScoreVisibilityComponentWeights {
-    'quality_score': number;
-    'gated_hotness_score': number;
+export class ApiProfileCmsWalletGalleryAssetFlags {
+    'spam': boolean;
+    'excluded': boolean;
+    'exclusion_reason': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,20 +24,26 @@ export class ApiWaveScoreVisibilityComponentWeights {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "quality_score",
-            "baseName": "quality_score",
-            "type": "number",
-            "format": "double"
+            "name": "spam",
+            "baseName": "spam",
+            "type": "boolean",
+            "format": ""
         },
         {
-            "name": "gated_hotness_score",
-            "baseName": "gated_hotness_score",
-            "type": "number",
-            "format": "double"
+            "name": "excluded",
+            "baseName": "excluded",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "exclusion_reason",
+            "baseName": "exclusion_reason",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveScoreVisibilityComponentWeights.attributeTypeMap;
+        return ApiProfileCmsWalletGalleryAssetFlags.attributeTypeMap;
     }
 
     public constructor() {

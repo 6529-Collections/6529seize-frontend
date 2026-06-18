@@ -16,6 +16,30 @@ import { HttpFile } from '../http/http';
 export class ApiPublishProfileCmsPackageRequest {
     'expected_package_hash'?: string;
     'expected_payload_hash'?: string;
+    /**
+    * EOA wallet or Safe contract address expected to verify the CMS publish signature.
+    */
+    'signer_address': string;
+    /**
+    * EIP-712 signature over the ProfileCmsPublish typed data.
+    */
+    'signature': string;
+    /**
+    * EIP-712 domain chain id; Safe/EIP-1271 verification uses this same RPC chain.
+    */
+    'chain_id': number;
+    /**
+    * Unix epoch milliseconds. Must be in the future and no more than 15 minutes from server receipt.
+    */
+    'deadline': number;
+    /**
+    * Set true only for Safe/EIP-1271 contract signatures.
+    */
+    'is_safe_signature'?: boolean;
+    /**
+    * Optional EIP-712 domain verifyingContract. Omit or pass null when the client signed without one.
+    */
+    'verifying_contract'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -31,6 +55,42 @@ export class ApiPublishProfileCmsPackageRequest {
         {
             "name": "expected_payload_hash",
             "baseName": "expected_payload_hash",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "signer_address",
+            "baseName": "signer_address",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "signature",
+            "baseName": "signature",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "chain_id",
+            "baseName": "chain_id",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "deadline",
+            "baseName": "deadline",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "is_safe_signature",
+            "baseName": "is_safe_signature",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "verifying_contract",
+            "baseName": "verifying_contract",
             "type": "string",
             "format": ""
         }    ];

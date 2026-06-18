@@ -11,18 +11,20 @@
  * Do not edit the class manually.
  */
 
-import { ApiWaveRepCategorySummary } from '../models/ApiWaveRepCategorySummary';
 import { HttpFile } from '../http/http';
 
-export class ApiWaveRepSummary {
-    'total_rep': number;
-    'positive_rep': number;
-    'negative_rep': number;
-    'contributor_count': number;
-    'positive_contributor_count': number;
-    'negative_contributor_count': number;
-    'authenticated_user_contribution': number | null;
-    'categories': Array<ApiWaveRepCategorySummary>;
+export class ApiProfileCmsWalletGalleryTotals {
+    'requested_wallets': number;
+    'resolved_wallets': number;
+    'unresolved_wallets': number;
+    'indexed_assets': number;
+    'visible_assets': number;
+    'excluded_assets': number;
+    /**
+    * Reserved for indexed spam flags; currently zero for the MVP source.
+    */
+    'spam_assets': number;
+    'truncated': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -30,56 +32,56 @@ export class ApiWaveRepSummary {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "total_rep",
-            "baseName": "total_rep",
+            "name": "requested_wallets",
+            "baseName": "requested_wallets",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "positive_rep",
-            "baseName": "positive_rep",
+            "name": "resolved_wallets",
+            "baseName": "resolved_wallets",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "negative_rep",
-            "baseName": "negative_rep",
+            "name": "unresolved_wallets",
+            "baseName": "unresolved_wallets",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "contributor_count",
-            "baseName": "contributor_count",
+            "name": "indexed_assets",
+            "baseName": "indexed_assets",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "positive_contributor_count",
-            "baseName": "positive_contributor_count",
+            "name": "visible_assets",
+            "baseName": "visible_assets",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "negative_contributor_count",
-            "baseName": "negative_contributor_count",
+            "name": "excluded_assets",
+            "baseName": "excluded_assets",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "authenticated_user_contribution",
-            "baseName": "authenticated_user_contribution",
+            "name": "spam_assets",
+            "baseName": "spam_assets",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "categories",
-            "baseName": "categories",
-            "type": "Array<ApiWaveRepCategorySummary>",
+            "name": "truncated",
+            "baseName": "truncated",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveRepSummary.attributeTypeMap;
+        return ApiProfileCmsWalletGalleryTotals.attributeTypeMap;
     }
 
     public constructor() {
