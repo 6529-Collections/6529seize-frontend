@@ -35,3 +35,18 @@ Typed `farcaster.miniapp` responses render as a native card with:
 - App title, description, source, optional splash image, and launch button.
 
 The card is responsive in chat, tablet, mobile, and home-feed variants.
+
+## Localization
+
+Fallback debt:
+
+- Route or component: `components/waves/OpenGraphPreview.tsx`
+- Untranslated surface: Farcaster embed badges, CTAs, image alt fallbacks, and
+  link-unavailable fallback text in partial locale dictionaries.
+- Current fallback behavior: `en-GB`, `de-DE`, `es-ES`, and `fr-FR` fall back to
+  canonical `en-US` messages for `linkPreview.*` keys not present locally.
+- User impact: non-English locale users may see English Farcaster preview labels.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: add translated `linkPreview.farcaster.*` and
+  `linkPreview.unavailable` keys to partial locale dictionaries when this
+  surface is localized beyond `en-US`.

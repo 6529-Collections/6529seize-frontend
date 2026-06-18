@@ -521,6 +521,7 @@ describe("open-graph API route", () => {
       expect.objectContaining({
         type: "farcaster.miniapp",
         embedKind: "miniapp",
+        url: "https://mini.example/app",
         title: "Example Mini",
         appName: "Example Mini",
         buttonTitle: "Launch",
@@ -608,6 +609,63 @@ describe("open-graph API route", () => {
     );
   });
 
+  it("keeps the canonical URL when Mini App actions point to another host", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Cross Host Mini",
+          url: "https://launch.example/app",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Cross Host Mini" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "Cross Host Mini",
+      description: null,
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        url: "https://mini.example/app",
+        actionUrl: "https://launch.example/app",
+      })
+    );
+  });
+
   it("returns typed previews for legacy Farcaster frame metadata", async () => {
     const html = `
       <html>
@@ -652,7 +710,7 @@ describe("open-graph API route", () => {
         type: "farcaster.frame",
         embedKind: "legacy-frame",
         title: "Legacy Frame",
-        appName: "Legacy Example",
+        appName: null,
         buttonTitle: "Mint",
         actionUrl: "https://legacy.example/mint",
         imageUrl: "https://legacy.example/legacy.png",
@@ -764,7 +822,65 @@ describe("open-graph API route", () => {
     await expect(response.json()).resolves.toEqual(
       expect.objectContaining({
         type: "farcaster.miniapp",
+        actionType: "launch_miniapp",
         actionUrl: "https://mini.example/app",
+      })
+    );
+  });
+
+  it("drops unknown Mini App action types", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "surprise_action",
+          name: "Unknown Action Mini",
+          url: "https://mini.example/launch",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Unknown Action Mini" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "Unknown Action Mini",
+      description: null,
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        actionType: null,
+        actionUrl: "https://mini.example/launch",
       })
     );
   });

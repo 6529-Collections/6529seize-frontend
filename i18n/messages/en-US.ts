@@ -694,6 +694,7 @@ const LINK_PREVIEW_MESSAGES = namespaceMessages("linkPreview", [
   ["farcaster.titleFallback", "Farcaster Mini App"],
   ["mediaType.article", "Article"],
   ["mediaType.website", "Website"],
+  ["unavailable", "Link unavailable"],
   ["youtube.providerFallback", "YouTube"],
   ["youtube.playVideo", "Play YouTube video: {title}"],
   ["youtube.thumbnailAlt", "YouTube thumbnail for {title}"],

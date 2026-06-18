@@ -18,6 +18,11 @@ const TEXT_MAX_CHARS = 180;
 const ACTION_URL_MAX_CHARS = 2048;
 const MAX_LEGACY_FRAME_BUTTONS = 4;
 const COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+const MINIAPP_ACTION_TYPES = new Set([
+  "launch_frame",
+  "launch_miniapp",
+  "view_token",
+]);
 
 const MINIAPP_META_KEYS = ["fc:miniapp"] as const;
 const FRAME_META_KEYS = ["fc:frame"] as const;
@@ -188,6 +193,11 @@ function normalizeSplashColor(value: unknown): string | null {
   return color && COLOR_PATTERN.test(color) ? color : null;
 }
 
+function readMiniAppActionType(value: unknown): string | null {
+  const actionType = readString(value, 64);
+  return actionType && MINIAPP_ACTION_TYPES.has(actionType) ? actionType : null;
+}
+
 function createImageEntry(imageUrl: string | null): LinkPreviewMedia | null {
   return imageUrl
     ? {
@@ -237,7 +247,7 @@ function buildPreview({
     ...basePreview,
     type: responseType,
     requestUrl: basePreview.requestUrl ?? url.toString(),
-    url: actionUrl ?? basePreview.url ?? url.toString(),
+    url: basePreview.url ?? url.toString(),
     title: resolvedTitle,
     description: description ?? basePreview.description ?? null,
     siteName,
@@ -277,7 +287,7 @@ async function buildJsonPreview(
   const button = metadata.button;
   const action = button?.action;
   const buttonTitle = readString(button?.title, 64);
-  const actionType = readString(action?.type, 64);
+  const actionType = readMiniAppActionType(action?.type);
   const appName = readString(action?.name, 96);
   const actionUrl =
     (await resolvePublicUrl(
@@ -358,7 +368,7 @@ async function buildLegacyFramePreview(
 
   return buildPreview({
     actionUrl: firstLinkButton?.target ?? url.toString(),
-    appName: siteName,
+    appName: null,
     basePreview,
     buttonTitle: firstLinkButton?.label ?? buttonLabels[0] ?? null,
     buttons: buttonLabels,

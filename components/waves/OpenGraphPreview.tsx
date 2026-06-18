@@ -1588,6 +1588,7 @@ function UnavailableOpenGraphPreview({
   variant,
   hideActions,
   domain,
+  locale,
 }: {
   readonly href: string;
   readonly effectiveHref: string;
@@ -1596,6 +1597,7 @@ function UnavailableOpenGraphPreview({
   readonly variant: LinkPreviewVariant;
   readonly hideActions: boolean;
   readonly domain?: string | null | undefined;
+  readonly locale: SupportedLocale;
 }) {
   if (variant === "home") {
     return (
@@ -1615,7 +1617,7 @@ function UnavailableOpenGraphPreview({
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900/30 tw-via-black/20 tw-to-iron-900/30" />
           <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-gap-1 tw-p-4">
             <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-              Link unavailable
+              {t(locale, "linkPreview.unavailable")}
             </span>
             <span className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition tw-duration-200 hover:tw-text-white">
               {wrapLongUnbrokenSegments(domain ?? href)}
@@ -1638,7 +1640,7 @@ function UnavailableOpenGraphPreview({
       >
         <div className="tw-max-h-full tw-space-y-2 tw-overflow-y-auto tw-text-center">
           <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
-            Link unavailable
+            {t(locale, "linkPreview.unavailable")}
           </p>
           <Link
             href={effectiveHref}
@@ -1742,6 +1744,7 @@ export default function OpenGraphPreview({
         variant={resolvedVariant}
         hideActions={hideActions}
         domain={domain}
+        locale={locale}
       />
     );
   }
