@@ -4,6 +4,7 @@ import {
   type BrandedCollectionOgImageModel,
 } from "@/app/api/og-metadata/_lib/brandedCards";
 import {
+  getQueryImageUrl,
   getQueryText,
   OG_CACHE_CONTROL,
   OG_IMAGE_SIZE,
@@ -65,7 +66,7 @@ const getCollectionCardModel = ({
 
   return {
     badge: getQueryText(searchParams, "badge"),
-    imageUrl: getQueryText(searchParams, "image") ?? defaults?.imageUrl,
+    imageUrl: getQueryImageUrl(searchParams, "image") ?? defaults?.imageUrl,
     origin: getOgImageRequestOrigin(request),
     slug,
     subtitle:

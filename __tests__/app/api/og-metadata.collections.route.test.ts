@@ -32,6 +32,28 @@ jest.mock("@/app/api/og-metadata/profiles/[identity]/font", () => ({
 }));
 
 import { GET } from "@/app/api/og-metadata/collections/[collection]/route";
+import React from "react";
+
+const collectImageSrcs = (node: React.ReactNode): string[] => {
+  if (!React.isValidElement(node)) {
+    return [];
+  }
+
+  if (typeof node.type === "function") {
+    return collectImageSrcs(node.type(node.props));
+  }
+
+  const props = node.props as {
+    readonly src?: string | undefined;
+    readonly children?: React.ReactNode;
+  };
+  const current = typeof props.src === "string" ? [props.src] : [];
+  const children = React.Children.toArray(props.children).flatMap((child) =>
+    collectImageSrcs(child)
+  );
+
+  return [...current, ...children];
+};
 
 describe("/api/og-metadata/collections/[collection]", () => {
   beforeEach(() => {
@@ -68,6 +90,35 @@ describe("/api/og-metadata/collections/[collection]", () => {
       },
     });
     expect(response).toBe(mockImageResponse.mock.results[0]?.value);
+  });
+
+  it("preserves long image URLs without text truncation", async () => {
+    const imageUrl = `https://cdn.test/collections/${"preview-".repeat(
+      26
+    )}card.png?signature=${"signed-".repeat(35)}`;
+
+    await GET(
+      {
+        url:
+          "https://6529.test/api/og-metadata/collections/the-memes" +
+          `?image=${encodeURIComponent(imageUrl)}`,
+      } as Request,
+      {
+        params: Promise.resolve({ collection: "the-memes" }),
+      }
+    );
+
+    const element = mockImageResponse.mock.calls[0]?.[0] as React.ReactNode;
+    const proxiedSrc = collectImageSrcs(element).find((src) =>
+      src.includes("/api/og-metadata/image?")
+    );
+
+    expect(imageUrl.length).toBeGreaterThan(180);
+    expect(proxiedSrc).toBeDefined();
+    if (proxiedSrc === undefined) {
+      throw new Error("Expected long image URL to be proxied.");
+    }
+    expect(new URL(proxiedSrc).searchParams.get("url")).toBe(imageUrl);
   });
 
   it("returns 400 when the collection param is missing", async () => {

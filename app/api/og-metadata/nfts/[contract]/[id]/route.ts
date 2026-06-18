@@ -4,6 +4,7 @@ import {
   type BrandedNftOgImageModel,
 } from "@/app/api/og-metadata/_lib/brandedCards";
 import {
+  getQueryImageUrl,
   getQueryText,
   OG_CACHE_CONTROL,
   OG_IMAGE_SIZE,
@@ -45,7 +46,7 @@ const getNftCardModel = ({
     contract,
     displayId: getQueryText(searchParams, "displayId"),
     id,
-    imageUrl: getQueryText(searchParams, "image"),
+    imageUrl: getQueryImageUrl(searchParams, "image"),
     origin: getOgImageRequestOrigin(request),
     subtitle: getQueryText(searchParams, "subtitle"),
     title,
