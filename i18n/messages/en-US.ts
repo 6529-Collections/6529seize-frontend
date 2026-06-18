@@ -11,6 +11,7 @@ import {
   THE_MEMES_DETAIL_TIMELINE_MESSAGES,
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
+import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -431,97 +432,6 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
     "This report is split by repository. Use this index to jump directly to the area you want, or read through from the frontend app work into backend, Stream contracts, Safe app hardening, and review bot updates.",
 } as const);
 
-const PROFILE_CMS_ART_DISPLAY_MESSAGES = Object.assign(
-  {},
-  namespaceMessages("profileCms.gallery.mode", [
-    ["editorial", "Editorial grid"],
-    ["dense", "Dense grid"],
-    ["contactSheet", "Contact sheet"],
-    ["clean", "Clean gallery"],
-  ] as const),
-  namespaceMessages("profileCms.art", [
-    ["inspect", "Inspect"],
-    ["close", "Close"],
-    ["previous", "Previous"],
-    ["next", "Next"],
-    ["zoomIn", "Zoom in"],
-    ["zoomOut", "Zoom out"],
-    ["resetZoom", "Reset zoom"],
-    ["fullscreen", "Fullscreen"],
-    ["showMetadata", "Show metadata"],
-    ["hideMetadata", "Hide metadata"],
-  ] as const),
-  namespaceMessages("profileCms.art.role", [
-    ["original", "Original asset"],
-    ["derivative", "Display derivative"],
-    ["poster", "Poster/fallback"],
-    ["display", "Display asset"],
-  ] as const),
-  namespaceMessages("profileCms.art.metadata", [
-    ["title", "Media metadata"],
-    ["role", "Role"],
-    ["assetId", "Asset id"],
-    ["kind", "Kind"],
-    ["mimeType", "MIME type"],
-    ["dimensions", "Dimensions"],
-    ["dimensionsValue", "{width} x {height} px"],
-  ] as const),
-  namespaceMessages("profileCms.art.metadata", [
-    ["displayMedia", "Display media"],
-    ["originalMedia", "Original media"],
-    ["sourceAsset", "Source asset"],
-    ["contentHash", "Content hash"],
-    ["rights", "Rights"],
-  ] as const),
-  namespaceMessages("profileCms.provenance", [
-    ["title", "Provenance"],
-    [
-      "description",
-      "Source, media, package, and snapshot facts for this work.",
-    ],
-    ["unknown", "Unknown"],
-    ["chain", "Chain"],
-    ["contract", "Contract"],
-    ["tokenId", "Token ID"],
-    ["ownerSnapshot", "Owner snapshot"],
-    ["snapshotBlock", "Snapshot block"],
-  ] as const),
-  namespaceMessages("profileCms.provenance", [
-    ["capturedAt", "Captured"],
-    ["metadataUri", "Metadata URI"],
-    ["metadataHash", "Metadata hash"],
-    ["originalMedia", "Original media"],
-    ["storage", "Storage"],
-    ["providerUri", "{provider}: {uri}"],
-    ["sourceSnapshot", "Source snapshot"],
-    ["sourceSnapshotValue", "{type} captured {date}"],
-  ] as const),
-  namespaceMessages("profileCms.provenance", [
-    ["payloadHash", "Payload hash"],
-    ["packageDetails", "Package details"],
-    ["packageId", "Package id"],
-    ["builder", "Builder"],
-    ["builderVersion", "Builder version"],
-    ["createdAt", "Created"],
-    ["signature", "Signature"],
-    ["signatureValue", "{type}: {signer}"],
-  ] as const),
-  namespaceMessages("profileCms.related", [
-    ["title", "Related works"],
-    ["description", "Collection context around token {tokenId}."],
-  ] as const),
-  namespaceMessages("profileCms.pageType", [
-    ["page", "Page"],
-    ["post", "Post"],
-    ["gallery", "Gallery"],
-    ["collection", "Collection"],
-    ["nftDetail", "NFT detail"],
-    ["cardDetail", "Card detail"],
-    ["room", "Room"],
-    ["transaction", "Transaction"],
-  ] as const)
-);
-
 export const EN_US_MESSAGES = {
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted post",
@@ -742,8 +652,7 @@ export const EN_US_MESSAGES = {
   "profileCms.walletGallery.summary.many": "{count} wallets",
   "profileCms.walletGallery.blockNumber": "Block",
   "profileCms.walletGallery.capturedAt": "Captured",
-  "profileCms.nft.traits": "Traits",
-  ...PROFILE_CMS_ART_DISPLAY_MESSAGES,
+  ...profileCmsArtDisplayMessages,
   "profileCms.interactive.deepZoom.title": "Deep zoom preview",
   "profileCms.interactive.deepZoom.description":
     "This V1 renderer keeps deep zoom static until the interactive viewer is enabled.",

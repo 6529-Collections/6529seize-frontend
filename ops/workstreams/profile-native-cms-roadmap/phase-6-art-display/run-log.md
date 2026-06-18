@@ -92,10 +92,10 @@
 
 - SonarCloud isolated the remaining new-code duplication gate failure to the
   newly added `profileCms.*` entries in `i18n/messages/en-US.ts`.
-- Refactored the CMS art display English messages into existing
-  `namespaceMessages` helper groups and spread the generated map into
-  `EN_US_MESSAGES`, preserving all message keys and values while avoiding the
-  long duplicate-prone object-literal block.
+- Moved the CMS art display English messages into a JSON message fragment and
+  spread the imported map into `EN_US_MESSAGES`, preserving all message keys and
+  values while avoiding the long duplicate-prone TypeScript object-literal
+  block.
 - Kept the formatter output for the existing art media fixture after
   `format:changed` wrapped its renderer capability array.
 
