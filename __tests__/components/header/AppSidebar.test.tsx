@@ -69,6 +69,12 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
       expect(
         menuProps.menu.find((m: any) => m.label === "Tools").children[0]
       ).toEqual({ label: "App Wallets", path: "/tools/app-wallets" });
+      const aboutChildren = menuProps.menu.find(
+        (m: any) => m.label === "About"
+      ).children;
+      expect(
+        aboutChildren.some((child: any) => child.label === "Release Notes")
+      ).toBe(false);
       headerProps.onClose();
       expect(onClose).toHaveBeenCalled();
       connectProps.onNavigate();
