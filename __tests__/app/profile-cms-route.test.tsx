@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 
-import ProfileCmsPage from "@/app/[user]/[...cmsPath]/page";
+import ProfileCmsPage, {
+  generateMetadata,
+} from "@/app/[user]/[...cmsPath]/page";
 import exhibitionRoomPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/exhibition-room.package.json";
 import minimalPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/minimal-profile-homepage.package.json";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
@@ -128,6 +130,19 @@ describe("profile CMS App Router catch-all", () => {
         }),
       })
     ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+
+  it("does not throw from metadata when no primary CMS site exists", async () => {
+    getProfileCmsPrimarySiteMock.mockResolvedValueOnce(null);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({
+        user: "punk6529",
+        cmsPath: ["index.html"],
+      }),
+    });
+
+    expect(metadata.title).toBeDefined();
   });
 
   it("shows an empty state for published packages missing a route", async () => {
