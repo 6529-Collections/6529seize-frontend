@@ -1237,7 +1237,7 @@ describe("Auth component", () => {
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
     });
 
-    it("shows a sign flow with shared-connection guidance when browser wallet is disconnected", async () => {
+    it("shows a connect flow with shared-connection guidance when browser wallet is disconnected", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       canSignActiveWallet = false;
@@ -1274,9 +1274,10 @@ describe("Auth component", () => {
         screen.getByText(/If this is a shared connection, reshare/i)
       ).toBeInTheDocument();
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
+      expect(screen.queryByText("Sign")).not.toBeInTheDocument();
 
       const user = userEvent.setup();
-      await user.click(screen.getByText("Sign"));
+      await user.click(screen.getByText("Connect"));
 
       expect(mockSeizeConnect).toHaveBeenCalled();
     });
