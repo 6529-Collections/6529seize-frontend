@@ -70,6 +70,7 @@ function getQuickVoteArtworkMediaContent({
       disableModal={hasTouchScreen}
       htmlPreviewImageUrl={htmlPreviewImageUrl}
       loadStrategy={loadStrategy}
+      videoAlign="center"
     />
   );
 }

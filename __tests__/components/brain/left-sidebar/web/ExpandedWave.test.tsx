@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ExpandedWave } from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/ExpandedWave";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
+import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -18,8 +19,8 @@ jest.mock("next/link", () => ({
   ),
 }));
 
-jest.mock("@/components/waves/WavePicture", () => (props: any) => (
-  <img data-testid="wave-picture" alt={props.name} />
+jest.mock("@/components/waves/WavePicture", () => () => (
+  <span data-testid="wave-picture" />
 ));
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime",
@@ -34,6 +35,12 @@ const baseWave = createMockMinimalWave({
   id: "1",
   name: "Chat Wave",
 });
+const waveScore = {
+  visibility_score: 83,
+  quality_score: 78,
+  hotness_score: 92,
+  rep_sort_score: 41,
+} as ApiWaveScore;
 
 const renderExpandedWave = (
   overrides: Partial<React.ComponentProps<typeof ExpandedWave>> = {}
@@ -177,6 +184,26 @@ describe("ExpandedWave", () => {
     expect(expandButton).toHaveClass("tw-bg-iron-700/60");
     expect(expandButton).toHaveClass("tw-text-iron-300");
     expect(expandButton).toHaveClass("tw-opacity-100");
+  });
+
+  it("places the timestamp below the title and pushes score to the far edge", () => {
+    renderExpandedWave({
+      wave: createMockMinimalWave({
+        id: "1",
+        name: "Chat Wave",
+        waveScore,
+      }),
+    });
+
+    const timestamp = screen.getByTestId("drop-time");
+    const timestampWrapper = timestamp.parentElement;
+    const metadataRow = timestampWrapper?.parentElement;
+    const score = screen.getByText("83").closest("[aria-label]")?.parentElement;
+
+    expect(metadataRow?.children[0]).toBe(timestampWrapper);
+    expect(metadataRow?.children[1]).toBe(score);
+    expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
+    expect(score).toHaveClass("tw-ml-auto");
   });
 
   it("overlaps non-final child rails to avoid visible line gaps", () => {
