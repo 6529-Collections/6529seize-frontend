@@ -28,7 +28,8 @@ export default function Follower({
   const followerHandle = follower.identity.handle;
   const followerProfileRoute =
     followerHandle ?? follower.identity.primary_address;
-  const followerProfileName = followerHandle ?? follower.identity.primary_address;
+  const followerProfileName =
+    followerHandle ?? follower.identity.primary_address;
   const normalizedFollowerHandle = followerHandle?.toLowerCase() ?? null;
   const normalizedConnectedHandle =
     connectedProfile?.handle?.toLowerCase() ?? null;

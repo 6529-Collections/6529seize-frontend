@@ -28,15 +28,15 @@ describe("shouldUseOpenGraphPreview", () => {
   });
 
   it("falls back for other paths on Art Blocks domains", () => {
-    expect(
-      shouldUseOpenGraphPreview("https://artblocks.io/token/662000")
-    ).toBe(false);
+    expect(shouldUseOpenGraphPreview("https://artblocks.io/token/662000")).toBe(
+      false
+    );
   });
 
   it("allows shared previews for supported YouTube video URLs", () => {
-    expect(
-      shouldUseOpenGraphPreview("https://youtu.be/abc123XYZ_0")
-    ).toBe(true);
+    expect(shouldUseOpenGraphPreview("https://youtu.be/abc123XYZ_0")).toBe(
+      true
+    );
     expect(
       shouldUseOpenGraphPreview(
         "https://music.youtube.com/watch?v=abc123XYZ_0&t=42"

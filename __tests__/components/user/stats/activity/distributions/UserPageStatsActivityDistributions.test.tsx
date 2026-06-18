@@ -89,10 +89,7 @@ test("hydrates the page from query params and updates the url on page change", a
     })
   ).toBeInTheDocument();
   expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
-  expect(screen.getByTestId("wrapper")).toHaveAttribute(
-    "data-locale",
-    "de-DE"
-  );
+  expect(screen.getByTestId("wrapper")).toHaveAttribute("data-locale", "de-DE");
 
   await userEvent.click(screen.getByTestId("set-page"));
 

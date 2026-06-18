@@ -26,8 +26,7 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => ({
 }));
 
 const drop = { id: "drop", type: DropSize.FULL } as any;
-const TOUCH_ACTION_SHEET_SELECT_NONE_CLASS =
-  "touch-action-sheet-select-none";
+const TOUCH_ACTION_SHEET_SELECT_NONE_CLASS = "touch-action-sheet-select-none";
 
 const isMobileMock = useIsMobileDevice as jest.Mock;
 const isTouchDeviceMock = useIsTouchDevice as jest.Mock;

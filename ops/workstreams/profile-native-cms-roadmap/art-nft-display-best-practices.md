@@ -841,4 +841,3 @@ Security:
 - Should C2PA/content credentials be displayed in V1 or later?
 - How aggressive should we be about copying remote NFT media into decentralized
   package storage?
-

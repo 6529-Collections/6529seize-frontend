@@ -136,9 +136,7 @@ export function useAnimatedSidebarWaveRows(
       for (const row of rows) {
         const previousRow = previousRowsByKey.get(row.key);
         const animationState =
-          row.depth === 1 && previousRow === undefined
-            ? "entering"
-            : "entered";
+          row.depth === 1 && previousRow === undefined ? "entering" : "entered";
 
         nextRows.push({
           ...row,

@@ -6,7 +6,8 @@ const NEW_VERSION_TOAST_MESSAGE_KEYS = [
   "newVersionToast.eyebrow",
 ] as const satisfies readonly MessageKey[];
 
-type NewVersionToastMessageKey = (typeof NEW_VERSION_TOAST_MESSAGE_KEYS)[number];
+type NewVersionToastMessageKey =
+  (typeof NEW_VERSION_TOAST_MESSAGE_KEYS)[number];
 
 const buildNewVersionToastMessages = (
   values: readonly [string, string, string]

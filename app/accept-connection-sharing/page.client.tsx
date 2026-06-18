@@ -59,7 +59,10 @@ function AcceptConnectionSharing(
         !!redeemResponse.token &&
         areEqualAddresses(redeemResponse.address, address);
       if (!hasValidRedeemResponse) {
-        setToast({ message: "This connection response is not valid.", type: "error" });
+        setToast({
+          message: "This connection response is not valid.",
+          type: "error",
+        });
         setAcceptingConnection(false);
         return;
       }
@@ -92,7 +95,10 @@ function AcceptConnectionSharing(
       router.push("/");
     } catch (error) {
       console.error(error);
-      setToast({ message: "Couldn't accept this connection. Please try again.", type: "error" });
+      setToast({
+        message: "Couldn't accept this connection. Please try again.",
+        type: "error",
+      });
       setAcceptingConnection(false);
     }
   };

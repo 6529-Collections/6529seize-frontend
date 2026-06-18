@@ -9,7 +9,8 @@ const mockTheMemesComponent = jest.fn(
 
 jest.mock("@/components/the-memes/TheMemes", () => ({
   __esModule: true,
-  default: (props: { readonly locale?: string }) => mockTheMemesComponent(props),
+  default: (props: { readonly locale?: string }) =>
+    mockTheMemesComponent(props),
 }));
 
 jest.mock("@/lib/structured-data/json-ld", () => ({
