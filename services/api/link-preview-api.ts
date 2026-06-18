@@ -24,6 +24,11 @@ interface LinkPreviewBase {
   readonly favicons?: readonly string[] | null | undefined;
   readonly image?: LinkPreviewMedia | null | undefined;
   readonly images?: readonly LinkPreviewMedia[] | null | undefined;
+  readonly source?: string | null | undefined;
+  readonly author?: string | null | undefined;
+  readonly publishedTime?: string | null | undefined;
+  readonly modifiedTime?: string | null | undefined;
+  readonly section?: string | null | undefined;
   readonly [key: string]: unknown;
 }
 

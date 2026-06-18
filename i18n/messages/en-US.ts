@@ -682,6 +682,13 @@ const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
   ["unsupported", "Your browser does not support the video tag."],
 ] as const);
 
+const LINK_PREVIEW_MESSAGES = namespaceMessages("linkPreview", [
+  ["externalSourceFallback", "External link"],
+  ["byline", "by {author}"],
+  ["mediaType.article", "Article"],
+  ["mediaType.website", "Website"],
+] as const);
+
 export const EN_US_MESSAGES = {
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted post",
@@ -896,6 +903,7 @@ export const EN_US_MESSAGES = {
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
+  ...LINK_PREVIEW_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

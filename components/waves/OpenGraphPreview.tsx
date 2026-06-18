@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
+import { formatDate } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   GithubPreviewEnvelope,
   GithubPreviewResponse,
@@ -31,10 +34,20 @@ export interface OpenGraphPreviewData {
   imageUrl?: unknown | undefined;
   image_url?: unknown | undefined;
   images?: unknown | undefined;
+  favicon?: unknown | undefined;
+  favicons?: unknown | undefined;
   ogImage?: unknown | undefined;
   og_image?: unknown | undefined;
   thumbnailUrl?: unknown | undefined;
   thumbnail_url?: unknown | undefined;
+  author?: unknown | undefined;
+  byline?: unknown | undefined;
+  publishedTime?: unknown | undefined;
+  published_time?: unknown | undefined;
+  datePublished?: unknown | undefined;
+  date_published?: unknown | undefined;
+  mediaType?: unknown | undefined;
+  type?: unknown | undefined;
   [key: string]: unknown;
 }
 
@@ -50,7 +63,8 @@ type MaybeRecord = Record<string, unknown>;
 
 const TITLE_KEYS = ["title", "ogTitle", "name"];
 const DESCRIPTION_KEYS = ["description", "ogDescription", "summary"];
-const DOMAIN_KEYS = ["domain", "siteName", "site_name", "source"];
+const DOMAIN_KEYS = ["siteName", "site_name", "domain"];
+const SOURCE_KEYS = ["source"];
 const URL_KEYS = ["url", "canonicalUrl", "canonical_url"];
 const IMAGE_KEYS = [
   "image",
@@ -65,7 +79,51 @@ const IMAGE_KEYS = [
   "secureUrl",
 ];
 const IMAGE_COLLECTION_KEYS = ["images", "ogImages", "og_images", "thumbnails"];
+const IMAGE_ALT_KEYS = ["imageAlt", "image_alt", "ogImageAlt", "og_image_alt"];
+const FAVICON_KEYS = ["favicon"];
+const FAVICON_COLLECTION_KEYS = ["favicons"];
+const AUTHOR_KEYS = ["author", "byline"];
+const PUBLISHED_TIME_KEYS = [
+  "publishedTime",
+  "published_time",
+  "datePublished",
+  "date_published",
+];
+const MEDIA_TYPE_KEYS = ["mediaType", "type"];
 const LONG_UNBROKEN_SEGMENT_THRESHOLD = 32;
+const GENERIC_LINK_PREVIEW_LOCALE = DEFAULT_LOCALE;
+const PUBLISHED_DATE_FORMAT_OPTIONS = {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+  year: "numeric",
+} satisfies Intl.DateTimeFormatOptions;
+const MONTH_INDEX_BY_NAME: Readonly<Record<string, number>> = {
+  jan: 0,
+  january: 0,
+  feb: 1,
+  february: 1,
+  mar: 2,
+  march: 2,
+  apr: 3,
+  april: 3,
+  may: 4,
+  jun: 5,
+  june: 5,
+  jul: 6,
+  july: 6,
+  aug: 7,
+  august: 7,
+  sep: 8,
+  sept: 8,
+  september: 8,
+  oct: 9,
+  october: 9,
+  nov: 10,
+  november: 10,
+  dec: 11,
+  december: 11,
+};
 
 export type FirstPartyOpenGraphPreviewKind = "profile" | "drop" | "wave";
 
@@ -81,8 +139,7 @@ const FIRST_PARTY_OG_KIND_LABELS: Record<
 function isFirstParty6529Hostname(hostname: string): boolean {
   const normalizedHostname = hostname.toLowerCase();
   return (
-    normalizedHostname === "6529.io" ||
-    normalizedHostname.endsWith(".6529.io")
+    normalizedHostname === "6529.io" || normalizedHostname.endsWith(".6529.io")
   );
 }
 
@@ -145,6 +202,34 @@ function extractImageFromValue(value: unknown): string | undefined {
   return undefined;
 }
 
+function extractStringFromValue(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function extractImageAltFromValue(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const extracted = extractImageAltFromValue(entry);
+      if (extracted) {
+        return extracted;
+      }
+    }
+    return undefined;
+  }
+
+  if (typeof value === "object" && value !== null) {
+    const record = value as MaybeRecord;
+    return extractStringFromValue(record["alt"]);
+  }
+
+  return undefined;
+}
+
 function extractImageUrl(
   data: OpenGraphPreviewData | null | undefined
 ): string | undefined {
@@ -163,6 +248,59 @@ function extractImageUrl(
     const imageUrl = extractImageFromValue(data[key]);
     if (imageUrl) {
       return imageUrl;
+    }
+  }
+
+  return undefined;
+}
+
+function extractImageAlt(
+  data: OpenGraphPreviewData | null | undefined
+): string | undefined {
+  if (!data) {
+    return undefined;
+  }
+
+  const topLevelAlt = readFirstString(data, IMAGE_ALT_KEYS);
+  if (topLevelAlt) {
+    return topLevelAlt;
+  }
+
+  for (const key of IMAGE_KEYS) {
+    const imageAlt = extractImageAltFromValue(data[key]);
+    if (imageAlt) {
+      return imageAlt;
+    }
+  }
+
+  for (const key of IMAGE_COLLECTION_KEYS) {
+    const imageAlt = extractImageAltFromValue(data[key]);
+    if (imageAlt) {
+      return imageAlt;
+    }
+  }
+
+  return undefined;
+}
+
+function extractFaviconUrl(
+  data: OpenGraphPreviewData | null | undefined
+): string | undefined {
+  if (!data) {
+    return undefined;
+  }
+
+  for (const key of FAVICON_KEYS) {
+    const faviconUrl = extractImageFromValue(data[key]);
+    if (faviconUrl) {
+      return faviconUrl;
+    }
+  }
+
+  for (const key of FAVICON_COLLECTION_KEYS) {
+    const faviconUrl = extractImageFromValue(data[key]);
+    if (faviconUrl) {
+      return faviconUrl;
     }
   }
 
@@ -287,7 +425,278 @@ function deriveDomain(
   return (
     readFirstString(preview, DOMAIN_KEYS) ??
     extractDomainFromUrl(readFirstString(preview, URL_KEYS)) ??
+    readFirstString(preview, SOURCE_KEYS) ??
     extractDomainFromUrl(href)
+  );
+}
+
+function formatPublishedDate(
+  value: string | undefined,
+  locale: SupportedLocale
+): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const timestamp = parseSupportedPublishedTimestamp(value);
+  if (timestamp === undefined) {
+    return value;
+  }
+
+  return formatDate(locale, timestamp, PUBLISHED_DATE_FORMAT_OPTIONS);
+}
+
+function getPublishedDateTime(value: string | undefined): string | undefined {
+  const timestamp = parseSupportedPublishedTimestamp(value);
+  if (timestamp === undefined) {
+    return undefined;
+  }
+
+  return new Date(timestamp).toISOString();
+}
+
+function parseUtcCalendarDate(
+  year: number,
+  monthIndex: number,
+  day: number
+): number | undefined {
+  const timestamp = Date.UTC(year, monthIndex, day);
+  const parsed = new Date(timestamp);
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== monthIndex ||
+    parsed.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+
+  return timestamp;
+}
+
+function parseNamedMonthDate(value: string): number | undefined {
+  const monthFirstMatch = value.match(
+    /^([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/
+  );
+  if (monthFirstMatch) {
+    const monthIndex =
+      MONTH_INDEX_BY_NAME[monthFirstMatch[1]!.toLowerCase()];
+    return typeof monthIndex === "number"
+      ? parseUtcCalendarDate(
+          Number(monthFirstMatch[3]),
+          monthIndex,
+          Number(monthFirstMatch[2])
+        )
+      : undefined;
+  }
+
+  const dayFirstMatch = value.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
+  if (dayFirstMatch) {
+    const monthIndex = MONTH_INDEX_BY_NAME[dayFirstMatch[2]!.toLowerCase()];
+    return typeof monthIndex === "number"
+      ? parseUtcCalendarDate(
+          Number(dayFirstMatch[3]),
+          monthIndex,
+          Number(dayFirstMatch[1])
+        )
+      : undefined;
+  }
+
+  return undefined;
+}
+
+function parseSupportedPublishedTimestamp(
+  value: string | undefined
+): number | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const dateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dateOnlyMatch) {
+    return parseUtcCalendarDate(
+      Number(dateOnlyMatch[1]),
+      Number(dateOnlyMatch[2]) - 1,
+      Number(dateOnlyMatch[3])
+    );
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:?\d{2})$/.test(trimmed)) {
+    const timestamp = Date.parse(trimmed);
+    return Number.isNaN(timestamp) ? undefined : timestamp;
+  }
+
+  return parseNamedMonthDate(trimmed);
+}
+
+function normalizeMediaTypeLabel(
+  value: string | undefined,
+  locale: SupportedLocale
+): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (!normalized || normalized.includes(".")) {
+    return undefined;
+  }
+
+  if (normalized.includes("article")) {
+    return t(locale, "linkPreview.mediaType.article");
+  }
+
+  if (normalized === "website" || normalized === "webpage") {
+    return t(locale, "linkPreview.mediaType.website");
+  }
+
+  return undefined;
+}
+
+function GenericOpenGraphMetaRow({
+  author,
+  publishedDate,
+  publishedDateTime,
+  locale,
+}: {
+  readonly author?: string | undefined;
+  readonly publishedDate?: string | undefined;
+  readonly publishedDateTime?: string | undefined;
+  readonly locale: SupportedLocale;
+}) {
+  if (!author && !publishedDate) {
+    return null;
+  }
+
+  const byline = author
+    ? t(locale, "linkPreview.byline", {
+        author,
+      })
+    : undefined;
+
+  return (
+    <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-leading-5 tw-text-iron-400">
+      {byline && (
+        <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-baseline tw-gap-1">
+          <span className="tw-truncate tw-font-medium tw-text-iron-200">
+            {wrapLongUnbrokenSegments(byline)}
+          </span>
+        </span>
+      )}
+      {author && publishedDate && (
+        <span className="tw-text-iron-600" aria-hidden="true">
+          /
+        </span>
+      )}
+      {publishedDate && (
+        <time className="tw-flex-shrink-0" dateTime={publishedDateTime}>
+          {publishedDate}
+        </time>
+      )}
+    </div>
+  );
+}
+
+function GenericOpenGraphPreviewCard({
+  effectiveHref,
+  linkTarget,
+  linkRel,
+  imageUrl,
+  imageAlt,
+  faviconUrl,
+  title,
+  description,
+  domain,
+  mediaTypeLabel,
+  author,
+  publishedDate,
+  publishedDateTime,
+  locale,
+}: {
+  readonly effectiveHref: string;
+  readonly linkTarget?: "_blank" | undefined;
+  readonly linkRel?: string | undefined;
+  readonly imageUrl?: string | undefined;
+  readonly imageAlt?: string | undefined;
+  readonly faviconUrl?: string | undefined;
+  readonly title: string;
+  readonly description?: string | undefined;
+  readonly domain?: string | undefined;
+  readonly mediaTypeLabel?: string | undefined;
+  readonly author?: string | undefined;
+  readonly publishedDate?: string | undefined;
+  readonly publishedDateTime?: string | undefined;
+  readonly locale: SupportedLocale;
+}) {
+  const sourceLabel = domain ?? t(locale, "linkPreview.externalSourceFallback");
+
+  return (
+    <Link
+      href={effectiveHref}
+      target={linkTarget}
+      rel={linkRel}
+      className={[
+        "tw-group/og-card tw-relative tw-grid tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950/70 tw-p-3 tw-pr-12 tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-transition tw-duration-200 hover:tw-border-sky-400/40 hover:tw-bg-iron-900/80 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-pr-14",
+        imageUrl
+          ? "tw-grid-cols-[6rem,minmax(0,1fr)] tw-gap-3 sm:tw-grid-cols-[8rem,minmax(0,1fr)] md:tw-grid-cols-[10.5rem,minmax(0,1fr)]"
+          : "tw-grid-cols-1",
+      ].join(" ")}
+      data-testid="og-preview-card"
+    >
+      <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 tw-bg-sky-400/70" />
+      {imageUrl && (
+        <span className="tw-relative tw-block tw-aspect-[16/10] tw-h-full tw-min-h-[6.5rem] tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-black/40 sm:tw-min-h-[7.5rem]">
+          <Image
+            src={imageUrl}
+            alt={imageAlt ?? title}
+            fill
+            className="tw-object-cover tw-transition tw-duration-300 group-hover/og-card:tw-scale-[1.02]"
+            loading="lazy"
+            sizes="(max-width: 640px) 6rem, (max-width: 768px) 8rem, 10.5rem"
+            unoptimized
+          />
+        </span>
+      )}
+      <span className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden">
+        <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+          {faviconUrl && (
+            <span className="tw-relative tw-block tw-h-4 tw-w-4 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-sm tw-bg-iron-800">
+              <Image
+                src={faviconUrl}
+                alt=""
+                fill
+                className="tw-object-contain"
+                loading="lazy"
+                sizes="16px"
+                unoptimized
+              />
+            </span>
+          )}
+          <span className="tw-min-w-0 tw-truncate tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300">
+            {wrapLongUnbrokenSegments(sourceLabel)}
+          </span>
+          {mediaTypeLabel && (
+            <span className="tw-flex-shrink-0 tw-rounded-md tw-border tw-border-sky-400/25 tw-bg-sky-400/10 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-sky-100">
+              {mediaTypeLabel}
+            </span>
+          )}
+        </span>
+        <span className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 tw-transition tw-duration-200 group-hover/og-card:tw-text-white md:tw-text-lg">
+          {wrapLongUnbrokenSegments(title)}
+        </span>
+        <GenericOpenGraphMetaRow
+          author={author}
+          publishedDate={publishedDate}
+          publishedDateTime={publishedDateTime}
+          locale={locale}
+        />
+        {description && (
+          <span className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-text-xs tw-leading-5 tw-text-iron-300 md:tw-text-sm">
+            {wrapLongUnbrokenSegments(description)}
+          </span>
+        )}
+      </span>
+    </Link>
   );
 }
 
@@ -442,13 +851,15 @@ function FirstPartyOpenGraphPreviewCard({
     <div
       className="tw-relative tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-3 sm:tw-p-4"
       data-testid="og-preview-card"
-      data-og-kind={kind}>
+      data-og-kind={kind}
+    >
       <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-gap-2 lg:tw-flex-row lg:tw-gap-3">
         <Link
           href={effectiveHref}
           target={linkTarget}
           rel={linkRel}
-          className="tw-relative tw-block tw-h-28 tw-w-full tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-black/35 lg:tw-h-full lg:tw-w-72 xl:tw-w-80">
+          className="tw-relative tw-block tw-h-28 tw-w-full tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-black/35 lg:tw-h-full lg:tw-w-72 xl:tw-w-80"
+        >
           {/* Generated 6529 OG images are already complete cards; preserve them. */}
           <Image
             src={imageUrl}
@@ -468,7 +879,7 @@ function FirstPartyOpenGraphPreviewCard({
                 {wrapLongUnbrokenSegments(domain)}
               </span>
             )}
-            <span className="tw-flex-shrink-0 tw-rounded-full tw-border tw-border-primary-400/35 tw-bg-primary-400/10 tw-px-2 tw-py-0.5 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-200">
+            <span className="tw-text-primary-200 tw-flex-shrink-0 tw-rounded-full tw-border tw-border-primary-400/35 tw-bg-primary-400/10 tw-px-2 tw-py-0.5 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-wide">
               {kindLabel}
             </span>
           </div>
@@ -477,7 +888,8 @@ function FirstPartyOpenGraphPreviewCard({
             href={effectiveHref}
             target={linkTarget}
             rel={linkRel}
-            className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+            className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+          >
             {wrapLongUnbrokenSegments(title)}
           </Link>
 
@@ -512,7 +924,9 @@ function SeizeCollectionPreviewCard({
   const imageUrl = extractImageUrl(preview);
   const people = Array.isArray(preview.people) ? preview.people : [];
   const facts = Array.isArray(preview.facts) ? preview.facts : [];
-  const traits = Array.isArray(preview.traits) ? preview.traits.slice(0, 3) : [];
+  const traits = Array.isArray(preview.traits)
+    ? preview.traits.slice(0, 3)
+    : [];
   const resolvedVariant = variant ?? "chat";
   const isHome = resolvedVariant === "home";
 
@@ -579,13 +993,13 @@ function SeizeCollectionPreviewCard({
             </Link>
             {people.length > 0 && (
               <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-overflow-hidden tw-text-xs tw-leading-5 md:tw-text-sm">
-                {people.map((person, index) => {
+                {people.map((person) => {
                   const personHref = person.href ?? undefined;
                   const personIsExternal = isExternalHref(personHref);
 
                   return (
                     <span
-                      key={`${person.label ?? "person"}-${person.name}-${index}`}
+                      key={`${person.label ?? "person"}-${person.name}-${person.href ?? "display"}`}
                       className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-baseline tw-gap-1"
                     >
                       {person.label && (
@@ -667,6 +1081,7 @@ export default function OpenGraphPreview({
   const isExternalLink = !relativeHref;
   const linkTarget = isExternalLink ? "_blank" : undefined;
   const linkRel = isExternalLink ? "noopener noreferrer" : undefined;
+  const locale = GENERIC_LINK_PREVIEW_LOCALE;
 
   if (typeof preview === "undefined") {
     if (resolvedVariant === "home") {
@@ -715,7 +1130,17 @@ export default function OpenGraphPreview({
   const title = readFirstString(preview, TITLE_KEYS);
   const description = readFirstString(preview, DESCRIPTION_KEYS);
   const imageUrl = extractImageUrl(preview);
+  const imageAlt = extractImageAlt(preview);
+  const faviconUrl = extractFaviconUrl(preview);
   const domain = deriveDomain(href, preview);
+  const author = readFirstString(preview, AUTHOR_KEYS);
+  const publishedDateRaw = readFirstString(preview, PUBLISHED_TIME_KEYS);
+  const publishedDate = formatPublishedDate(publishedDateRaw, locale);
+  const publishedDateTime = getPublishedDateTime(publishedDateRaw);
+  const mediaTypeLabel = normalizeMediaTypeLabel(
+    readFirstString(preview, MEDIA_TYPE_KEYS),
+    locale
+  );
   const githubPreview = extractGithubPreview(preview);
   const seizePreview = extractSeizeCollectionPreview(preview);
   const hasContent = Boolean(title ?? description ?? imageUrl);
@@ -898,66 +1323,29 @@ export default function OpenGraphPreview({
           </div>
         </Link>
       ) : (
-        <div
-          className="tw-relative tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
-          data-testid="og-preview-card"
-        >
+        <div className="tw-relative tw-h-full tw-min-h-0 tw-w-full">
           {isGithubStatusPreviewResponse(githubPreview) && (
             <GithubPreviewStatusBadge
               href={href}
               initialPreview={githubPreview}
             />
           )}
-          <div
-            className={
-              imageUrl
-                ? "tw-flex tw-h-full tw-min-h-0 tw-flex-row tw-gap-3"
-                : "tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-gap-3 md:tw-flex-row"
-            }
-          >
-            {imageUrl && (
-              <Link
-                href={effectiveHref}
-                target={linkTarget}
-                rel={linkRel}
-                className="tw-block tw-h-full tw-w-28 tw-flex-shrink-0 sm:tw-w-32 md:tw-w-44"
-              >
-                <div className="tw-h-full tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
-                  {/* OG image hosts are arbitrary, so many are not in Next remotePatterns. */}
-                  <Image
-                    src={imageUrl}
-                    alt={title ?? domain ?? "Link preview"}
-                    width={1200}
-                    height={630}
-                    className="tw-h-full tw-w-full tw-object-cover"
-                    loading="lazy"
-                    sizes="(max-width: 640px) 7rem, (max-width: 768px) 8rem, 176px"
-                    unoptimized
-                  />
-                </div>
-              </Link>
-            )}
-            <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-y-1.5 tw-overflow-hidden">
-              {domain && (
-                <span className="tw-line-clamp-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-                  {wrapLongUnbrokenSegments(domain)}
-                </span>
-              )}
-              <Link
-                href={effectiveHref}
-                target={linkTarget}
-                rel={linkRel}
-                className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
-              >
-                {wrapLongUnbrokenSegments(title ?? domain ?? href)}
-              </Link>
-              {description && (
-                <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-text-xs tw-text-iron-300">
-                  {wrapLongUnbrokenSegments(description)}
-                </p>
-              )}
-            </div>
-          </div>
+          <GenericOpenGraphPreviewCard
+            effectiveHref={effectiveHref}
+            linkTarget={linkTarget}
+            linkRel={linkRel}
+            imageUrl={imageUrl}
+            imageAlt={imageAlt}
+            faviconUrl={faviconUrl}
+            title={title ?? domain ?? href}
+            description={description}
+            domain={domain}
+            mediaTypeLabel={mediaTypeLabel}
+            author={author}
+            publishedDate={publishedDate}
+            publishedDateTime={publishedDateTime}
+            locale={locale}
+          />
         </div>
       )}
     </LinkPreviewCardLayout>

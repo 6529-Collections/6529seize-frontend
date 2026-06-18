@@ -195,9 +195,7 @@ async function loadRoute(): Promise<void> {
   ) as {
     createTransientPlan: jest.Mock;
   };
-  firstParty6529 = jest.requireMock(
-    "@/app/api/open-graph/6529/service"
-  ) as {
+  firstParty6529 = jest.requireMock("@/app/api/open-graph/6529/service") as {
     createFirstParty6529Plan: jest.Mock;
   };
   ensRouteModule = jest.requireMock("@/app/api/open-graph/ens") as {
@@ -398,6 +396,72 @@ describe("open-graph API route", () => {
       html,
       "text/html",
       "https://cdn.safe.example/page"
+    );
+  });
+
+  it("passes through richer generic article metadata from the parser", async () => {
+    const html =
+      "<html><head><title>Article</title></head><body></body></html>";
+    const responsePayload = {
+      requestUrl: "https://news.example/articles/richer-card",
+      url: "https://news.example/articles/richer-card",
+      title: "A richer generic link preview",
+      description: "Article dek from destination metadata.",
+      siteName: "Example News",
+      mediaType: "article",
+      contentType: "text/html; charset=utf-8",
+      favicon: "https://news.example/favicon.ico",
+      favicons: ["https://news.example/favicon.ico"],
+      image: {
+        url: "https://news.example/images/richer-card.jpg",
+        secureUrl: "https://news.example/images/richer-card.jpg",
+        alt: "Article hero image",
+      },
+      images: [
+        {
+          url: "https://news.example/images/richer-card.jpg",
+          secureUrl: "https://news.example/images/richer-card.jpg",
+          alt: "Article hero image",
+        },
+      ],
+      author: "Example Reporter",
+      publishedTime: "2026-06-16T12:00:00.000Z",
+    };
+
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html; charset=utf-8" },
+      body: html,
+      url: "https://news.example/articles/richer-card",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        expect(url).toEqual(
+          new URL("https://news.example/articles/richer-card")
+        );
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
+    utils.buildResponse.mockReturnValue(responsePayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://news.example/articles/richer-card"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(responsePayload);
+    expect(utils.buildResponse).toHaveBeenCalledWith(
+      new URL("https://news.example/articles/richer-card"),
+      html,
+      "text/html; charset=utf-8",
+      "https://news.example/articles/richer-card"
     );
   });
 
