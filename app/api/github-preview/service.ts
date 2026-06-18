@@ -1,5 +1,11 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
 import { serverEnv } from "@/config/serverEnv";
+import {
+  detectExternalFileKind,
+  getDefaultMimeTypeForExtension,
+  getFileExtension,
+  isBinaryFileKind,
+} from "@/lib/link-preview/fileKinds";
 import type {
   GithubActionsPreviewResponse,
   GithubPreviewChecks,
@@ -1123,7 +1129,7 @@ const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
 };
 
 const getFileLanguage = (path: string | null | undefined): string | null => {
-  const extension = path?.split(".").pop()?.toLowerCase();
+  const extension = getFileExtension(path);
   return extension ? (EXTENSION_LANGUAGE_MAP[extension] ?? null) : null;
 };
 
@@ -1136,7 +1142,9 @@ const truncateExcerptLine = (line: string): string => {
   return `${normalized.slice(0, CONTENT_EXCERPT_MAX_LINE_LENGTH - 3)}...`;
 };
 
-const decodeTextContent = (content: GithubContentApiItem): string | null => {
+function decodeGithubContentBuffer(
+  content: GithubContentApiItem
+): Buffer | null {
   if (
     content.encoding !== "base64" ||
     !content.content ||
@@ -1146,24 +1154,59 @@ const decodeTextContent = (content: GithubContentApiItem): string | null => {
   }
 
   try {
-    return Buffer.from(content.content.replace(/\s/g, ""), "base64").toString(
-      "utf8"
-    );
+    return Buffer.from(content.content.replace(/\s/g, ""), "base64");
   } catch {
     return null;
   }
+}
+
+function hasBinaryBytePattern(buffer: Buffer): boolean {
+  if (buffer.includes(0)) {
+    return true;
+  }
+
+  if (buffer.length === 0) {
+    return false;
+  }
+
+  let controlByteCount = 0;
+  for (const byte of buffer) {
+    const isAllowedControl = byte === 9 || byte === 10 || byte === 13;
+    if (byte < 32 && !isAllowedControl) {
+      controlByteCount += 1;
+    }
+  }
+
+  return controlByteCount / buffer.length > 0.05;
+}
+
+const decodeTextContent = (
+  content: GithubContentApiItem,
+  isBinary: boolean
+): string | null => {
+  if (isBinary) {
+    return null;
+  }
+
+  const buffer = decodeGithubContentBuffer(content);
+  if (!buffer || hasBinaryBytePattern(buffer)) {
+    return null;
+  }
+
+  return buffer.toString("utf8");
 };
 
 const buildContentExcerpt = (
   content: GithubContentApiItem,
-  resource: GithubContentResource
+  resource: GithubContentResource,
+  isBinary: boolean
 ): {
   readonly lineCount: number | null;
   readonly excerpt: readonly string[] | null;
   readonly lineStart: number | null;
   readonly lineEnd: number | null;
 } => {
-  const decoded = decodeTextContent(content);
+  const decoded = decodeTextContent(content, isBinary);
   if (!decoded) {
     return {
       lineCount: null,
@@ -1231,6 +1274,10 @@ const buildContentPreview = (
       ref: candidate.ref,
       size: null,
       itemCount: content.length,
+      extension: null,
+      fileKind: null,
+      mimeType: null,
+      isBinary: null,
       language: null,
       lineCount: null,
       excerpt: null,
@@ -1245,22 +1292,36 @@ const buildContentPreview = (
     content.type === "dir" || resource.mode === "tree"
       ? "github.directory"
       : "github.file";
+  const path = content.path ?? (candidate.path || null);
+  const extension = type === "github.file" ? getFileExtension(path) : null;
+  const mimeType =
+    type === "github.file" ? getDefaultMimeTypeForExtension(extension) : null;
+  const fileKind =
+    type === "github.file"
+      ? detectExternalFileKind({ extension, contentType: mimeType })
+      : null;
+  const isBinary =
+    type === "github.file" && fileKind ? isBinaryFileKind(fileKind) : null;
 
   return {
     type,
     owner: resource.owner,
     repo: resource.repo,
     title: content.name ?? getFallbackContentTitle(resource, candidate.path),
-    path: content.path ?? (candidate.path || null),
+    path,
     ref: candidate.ref,
     size: typeof content.size === "number" ? content.size : null,
     itemCount: null,
+    extension,
+    fileKind,
+    mimeType,
+    isBinary,
     language:
       type === "github.file"
-        ? getFileLanguage(content.path ?? candidate.path)
+        ? getFileLanguage(path)
         : null,
     ...(type === "github.file"
-      ? buildContentExcerpt(content, resource)
+      ? buildContentExcerpt(content, resource, Boolean(isBinary))
       : {
           lineCount: null,
           excerpt: null,

@@ -1,4 +1,7 @@
 import DropAttachmentDisplay from "@/components/drops/view/item/content/attachments/DropAttachmentDisplay";
+import { ApiAttachmentSafetyScanner } from "@/generated/models/ApiAttachmentSafetyScanner";
+import { ApiAttachmentSafetyStatus } from "@/generated/models/ApiAttachmentSafetyStatus";
+import { ApiAttachmentSafetyValidation } from "@/generated/models/ApiAttachmentSafetyValidation";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -140,6 +143,41 @@ describe("DropAttachmentDisplay", () => {
 
     expect(screen.getByText("sample.pdf")).toBeInTheDocument();
     expect(screen.queryByText("original.pdf")).not.toBeInTheDocument();
+  });
+
+  it("shows scanned safety metadata only when provided by the attachment API", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="https://example.com/files/paper.pdf"
+        fileName="paper.pdf"
+        safety={{
+          status: ApiAttachmentSafetyStatus.ScannedValidated,
+          scanner: ApiAttachmentSafetyScanner.Guardduty,
+          validation: ApiAttachmentSafetyValidation.PublicIpfsValidated,
+          size_bytes: 2048,
+          sha256: "abc123def456",
+        }}
+      />
+    );
+
+    expect(screen.getByText("Scanned and validated")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Scanned and validated attachment",
+      })
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Attachment options" })
+    );
+    await user.click(screen.getByRole("button", { name: "View metadata" }));
+
+    expect(screen.getByText("Attachment safety")).toBeInTheDocument();
+    expect(screen.getByText("Size 2 KB")).toBeInTheDocument();
+    expect(screen.getByText("abc123def456")).toBeInTheDocument();
   });
 
   it("renders a CSV preview after the user requests it", async () => {
@@ -290,7 +328,10 @@ describe("DropAttachmentDisplay", () => {
     );
 
     expect(screen.getByTitle("sample.pdf")).toBeInTheDocument();
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalledWith(
+      "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json",
+      expect.anything()
+    );
     expect(screen.queryByText(/"name": "Sample"/)).not.toBeInTheDocument();
   });
 
@@ -303,6 +344,10 @@ describe("DropAttachmentDisplay", () => {
     });
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
+      headers: { get: () => null },
+      arrayBuffer: async () =>
+        new TextEncoder().encode(JSON.stringify({ name: "Sample", edition: 1 }))
+          .buffer,
       text: async () => JSON.stringify({ name: "Sample", edition: 1 }),
     } as Response);
 
@@ -320,11 +365,16 @@ describe("DropAttachmentDisplay", () => {
     await user.click(screen.getByRole("button", { name: "View metadata" }));
 
     await waitFor(() => {
-      expect(screen.getByText(/"name": "Sample"/)).toBeInTheDocument();
+      expect(screen.getByText('"name"')).toBeInTheDocument();
     });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json",
-      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    expect(screen.getByText('"Sample"')).toBeInTheDocument();
+    const metadataFetch = (globalThis.fetch as jest.Mock).mock.calls.find(
+      ([url]) =>
+        url === "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json"
+    );
+    expect(metadataFetch).toBeDefined();
+    expect(metadataFetch?.[1]).toEqual(
+      expect.objectContaining({ signal: expect.objectContaining({}) })
     );
 
     const copyMetadataButton = screen.getByRole("button", {
@@ -339,13 +389,17 @@ describe("DropAttachmentDisplay", () => {
     await user.click(
       screen.getByRole("button", { name: "Close attachment details" })
     );
-    expect(screen.queryByText(/"name": "Sample"/)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('"Sample"')).not.toBeInTheDocument();
+    });
   });
 
   it("shows a metadata not found message when metadata cannot load", async () => {
     const user = userEvent.setup();
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
+      headers: { get: () => null },
+      arrayBuffer: async () => new ArrayBuffer(0),
       text: async () => "",
     } as Response);
 

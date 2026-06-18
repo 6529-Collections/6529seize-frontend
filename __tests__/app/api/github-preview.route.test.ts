@@ -293,6 +293,36 @@ describe("github-preview API route", () => {
     });
   });
 
+  it("maps GitHub PDF files as metadata-only previews", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "plan.pdf",
+        path: "docs/plan.pdf",
+        size: 4096,
+        encoding: "base64",
+        content: Buffer.from("%PDF-1.7\nbinary").toString("base64"),
+        html_url: "https://github.com/o/r/blob/main/docs/plan.pdf",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/docs/plan.pdf")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      title: "plan.pdf",
+      path: "docs/plan.pdf",
+      extension: "pdf",
+      fileKind: "pdf",
+      mimeType: "application/pdf",
+      isBinary: true,
+      lineCount: null,
+      excerpt: null,
+    });
+  });
+
   it("tries longer ref splits for file links on slash-named branches", async () => {
     fetchMock
       .mockResolvedValueOnce(

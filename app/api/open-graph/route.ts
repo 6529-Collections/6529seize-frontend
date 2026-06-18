@@ -20,7 +20,16 @@ import {
 } from "@/lib/security/urlGuard";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import LruTtlCache from "@/lib/cache/lruTtl";
-import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import {
+  detectExternalFileKind,
+  getFileExtension,
+  getNormalizedMimeType,
+  isClearlyFileLikeUrl,
+} from "@/lib/link-preview/fileKinds";
+import type {
+  ExternalFileLinkPreviewResponse,
+  LinkPreviewResponse,
+} from "@/services/api/link-preview-api";
 import {
   HTML_ACCEPT_HEADER,
   LINK_PREVIEW_USER_AGENT,
@@ -341,11 +350,9 @@ async function extractHtmlResponse(
 }
 
 /**
- * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
+ * Fetches remote generic preview content through the public URL guard.
  */
-async function fetchHtml(
-  url: URL
-): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
+async function fetchGenericResponse(url: URL): Promise<Response> {
   const response = await fetchPublicUrl(
     url,
     {},
@@ -359,7 +366,148 @@ async function fetchHtml(
 
   ensureSuccessfulResponse(response);
 
+  return response;
+}
+
+/**
+ * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
+ */
+async function fetchHtml(
+  url: URL
+): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
+  const response = await fetchGenericResponse(url);
   return extractHtmlResponse(response, url);
+}
+
+function isHtmlDocumentContentType(contentType: string | null): boolean {
+  if (!contentType) {
+    return false;
+  }
+
+  const mimeType = getNormalizedMimeType(contentType);
+  return (
+    mimeType === "text/html" ||
+    mimeType === "application/xhtml+xml" ||
+    mimeType === "application/xml" ||
+    mimeType === "text/xml" ||
+    Boolean(mimeType?.endsWith("+xml"))
+  );
+}
+
+function parseContentLength(headers: Headers): number | null {
+  const rawContentLength = headers.get("content-length")?.trim();
+  if (!rawContentLength || !/^\d+$/.test(rawContentLength)) {
+    return null;
+  }
+
+  const parsed = Number(rawContentLength);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+}
+
+async function cancelResponseBody(response: Response): Promise<void> {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Best effort: file previews intentionally do not consume response bodies.
+  }
+}
+
+function decodeHeaderValue(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function sanitizeFileName(value: string | null | undefined): string | null {
+  const normalized = value
+    ?.replace(/[\u0000-\u001f\u007f]/g, "")
+    .split(/[\\/]/)
+    .filter(Boolean)
+    .at(-1)
+    ?.trim();
+
+  if (!normalized) {
+    return null;
+  }
+
+  return normalized.slice(0, 180);
+}
+
+function getContentDispositionFileName(headers: Headers): string | null {
+  const contentDisposition = headers.get("content-disposition");
+  if (!contentDisposition) {
+    return null;
+  }
+
+  const encodedMatch = contentDisposition.match(
+    /filename\*\s*=\s*(?:UTF-8'')?([^;]+)/i
+  );
+  if (encodedMatch?.[1]) {
+    return sanitizeFileName(
+      decodeHeaderValue(encodedMatch[1].trim().replace(/^"|"$/g, ""))
+    );
+  }
+
+  const quotedMatch = contentDisposition.match(/filename\s*=\s*"([^"]+)"/i);
+  if (quotedMatch?.[1]) {
+    return sanitizeFileName(quotedMatch[1]);
+  }
+
+  const plainMatch = contentDisposition.match(/filename\s*=\s*([^;]+)/i);
+  return sanitizeFileName(plainMatch?.[1]);
+}
+
+function getUrlFileName(url: URL): string | null {
+  return sanitizeFileName(
+    decodeHeaderValue(url.pathname.split("/").at(-1) ?? "")
+  );
+}
+
+function getSourceHost(url: URL): string {
+  return url.hostname.replace(/^www\./i, "");
+}
+
+function shouldUseExternalFilePreview(
+  response: Response,
+  finalUrl: URL
+): boolean {
+  if (isClearlyFileLikeUrl(finalUrl)) {
+    return true;
+  }
+
+  const contentType = response.headers.get("content-type");
+  return Boolean(contentType) && !isHtmlDocumentContentType(contentType);
+}
+
+function buildExternalFileResponse(
+  response: Response,
+  finalUrl: URL
+): ExternalFileLinkPreviewResponse {
+  const contentType = response.headers.get("content-type")?.trim() ?? null;
+  const fileName =
+    getContentDispositionFileName(response.headers) ??
+    getUrlFileName(finalUrl) ??
+    getSourceHost(finalUrl);
+  const extension =
+    getFileExtension(fileName) ?? getFileExtension(finalUrl.pathname);
+  const fileKind = detectExternalFileKind({ extension, contentType });
+
+  return {
+    type: "external.file",
+    title: fileName,
+    fileName,
+    extension,
+    fileKind,
+    contentType,
+    sizeBytes: parseContentLength(response.headers),
+    sourceHost: getSourceHost(finalUrl),
+    trust: "external_unscanned",
+    links: {
+      open: finalUrl.toString(),
+    },
+  };
 }
 
 function handleGuardError(error: unknown, fallbackStatus = 400) {
@@ -407,9 +555,22 @@ function createGenericPlan(url: URL): PreviewPlan {
   return {
     cacheKey: `generic:${url.toString()}`,
     execute: async () => {
-      const { html, contentType, finalUrl } = await fetchHtml(url);
+      const response = await fetchGenericResponse(url);
+      const finalUrl = response.url || url.toString();
       const finalUrlInstance = new URL(finalUrl);
       await assertPublicUrl(finalUrlInstance, PUBLIC_URL_OPTIONS);
+
+      if (shouldUseExternalFilePreview(response, finalUrlInstance)) {
+        const data = buildExternalFileResponse(response, finalUrlInstance);
+        await cancelResponseBody(response);
+        return { data, ttl: CACHE_TTL_MS };
+      }
+
+      const {
+        html,
+        contentType,
+        finalUrl: htmlFinalUrl,
+      } = await extractHtmlResponse(response, url);
       const googleWorkspace = await buildGoogleWorkspaceResponse(
         finalUrlInstance,
         html,
@@ -423,7 +584,7 @@ function createGenericPlan(url: URL): PreviewPlan {
         finalUrlInstance,
         html,
         contentType,
-        finalUrl
+        htmlFinalUrl
       );
       const farcasterEmbed = await buildFarcasterEmbedResponse(
         finalUrlInstance,

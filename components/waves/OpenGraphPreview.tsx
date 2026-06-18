@@ -1,9 +1,4 @@
-import {
-  Fragment,
-  useState,
-  type ReactElement,
-  type ReactNode,
-} from "react";
+import { Fragment, useState, type ReactElement, type ReactNode } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -18,10 +13,16 @@ import type {
   GithubStatusPreviewResponse,
 } from "@/services/api/github-preview-api";
 import type {
+  ExternalFileLinkPreviewResponse,
   FarcasterEmbedLinkPreview,
   SeizeCollectionLinkPreview,
   YoutubeVideoLinkPreview,
 } from "@/services/api/link-preview-api";
+import {
+  getFileKindLabel,
+  getNormalizedMimeType,
+  type ExternalFileKind,
+} from "@/lib/link-preview/fileKinds";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 import GithubPreviewStatusBadge from "./GithubPreviewStatusBadge";
 import {
@@ -106,6 +107,7 @@ const TRUSTED_YOUTUBE_EMBED_HOSTS = [
   "youtube.com",
 ] as const;
 const FARCASTER_EMBED_TYPES = new Set(["miniapp", "frame", "legacy-frame"]);
+const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB"] as const;
 const PUBLISHED_DATE_FORMAT_OPTIONS = {
   day: "numeric",
   month: "short",
@@ -492,8 +494,7 @@ function parseNamedMonthDate(value: string): number | undefined {
     /^([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/
   );
   if (monthFirstMatch) {
-    const monthIndex =
-      MONTH_INDEX_BY_NAME[monthFirstMatch[1]!.toLowerCase()];
+    const monthIndex = MONTH_INDEX_BY_NAME[monthFirstMatch[1]!.toLowerCase()];
     return typeof monthIndex === "number"
       ? parseUtcCalendarDate(
           Number(monthFirstMatch[3]),
@@ -714,6 +715,191 @@ function GenericOpenGraphPreviewCard({
   );
 }
 
+const FILE_KIND_ACCENTS: Record<
+  ExternalFileKind,
+  {
+    readonly rail: string;
+    readonly badge: string;
+  }
+> = {
+  pdf: {
+    rail: "tw-bg-rose-500",
+    badge: "tw-border-rose-400/30 tw-bg-rose-500/10 tw-text-rose-100",
+  },
+  csv: {
+    rail: "tw-bg-emerald-500",
+    badge: "tw-border-emerald-400/30 tw-bg-emerald-500/10 tw-text-emerald-100",
+  },
+  text: {
+    rail: "tw-bg-sky-500",
+    badge: "tw-border-sky-400/30 tw-bg-sky-500/10 tw-text-sky-100",
+  },
+  code: {
+    rail: "tw-bg-sky-500",
+    badge: "tw-border-sky-400/30 tw-bg-sky-500/10 tw-text-sky-100",
+  },
+  image: {
+    rail: "tw-bg-fuchsia-500",
+    badge: "tw-border-fuchsia-400/30 tw-bg-fuchsia-500/10 tw-text-fuchsia-100",
+  },
+  audio: {
+    rail: "tw-bg-violet-500",
+    badge: "tw-border-violet-400/30 tw-bg-violet-500/10 tw-text-violet-100",
+  },
+  video: {
+    rail: "tw-bg-violet-500",
+    badge: "tw-border-violet-400/30 tw-bg-violet-500/10 tw-text-violet-100",
+  },
+  archive: {
+    rail: "tw-bg-amber-500",
+    badge: "tw-border-amber-400/30 tw-bg-amber-500/10 tw-text-amber-100",
+  },
+  document: {
+    rail: "tw-bg-blue-500",
+    badge: "tw-border-blue-400/30 tw-bg-blue-500/10 tw-text-blue-100",
+  },
+  spreadsheet: {
+    rail: "tw-bg-emerald-500",
+    badge: "tw-border-emerald-400/30 tw-bg-emerald-500/10 tw-text-emerald-100",
+  },
+  presentation: {
+    rail: "tw-bg-orange-500",
+    badge: "tw-border-orange-400/30 tw-bg-orange-500/10 tw-text-orange-100",
+  },
+  binary: {
+    rail: "tw-bg-iron-500",
+    badge: "tw-border-iron-500/40 tw-bg-iron-700/30 tw-text-iron-100",
+  },
+  unknown: {
+    rail: "tw-bg-iron-500",
+    badge: "tw-border-iron-500/40 tw-bg-iron-700/30 tw-text-iron-100",
+  },
+};
+
+function formatBytes(value: number | null | undefined): string | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return undefined;
+  }
+
+  if (value === 0) {
+    return "0 B";
+  }
+
+  const unitIndex = Math.min(
+    Math.floor(Math.log(value) / Math.log(1024)),
+    FILE_SIZE_UNITS.length - 1
+  );
+  const size = value / 1024 ** unitIndex;
+  const formatted =
+    unitIndex === 0 || size >= 10
+      ? size.toFixed(0)
+      : size.toFixed(1).replace(/\.0$/, "");
+  return `${formatted} ${FILE_SIZE_UNITS[unitIndex]}`;
+}
+
+function truncateMiddle(value: string, maxLength = 86): string {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  const tailLength = Math.floor((maxLength - 3) / 2);
+  const headLength = maxLength - 3 - tailLength;
+  return `${value.slice(0, headLength)}...${value.slice(-tailLength)}`;
+}
+
+function ExternalFilePreviewCard({
+  href,
+  preview,
+  effectiveHref,
+  linkTarget,
+  linkRel,
+  variant,
+  hideActions,
+}: {
+  readonly href: string;
+  readonly preview: ExternalFileLinkPreviewResponse;
+  readonly effectiveHref: string;
+  readonly linkTarget?: "_blank" | undefined;
+  readonly linkRel?: string | undefined;
+  readonly variant: LinkPreviewVariant;
+  readonly hideActions: boolean;
+}) {
+  const accent = FILE_KIND_ACCENTS[preview.fileKind];
+  const kindLabel = getFileKindLabel(preview.fileKind);
+  const mimeType = getNormalizedMimeType(preview.contentType);
+  const fileSize = formatBytes(preview.sizeBytes);
+  const facts = [
+    mimeType ? { label: "MIME", value: mimeType } : null,
+    fileSize ? { label: "Size", value: fileSize } : null,
+  ].filter((fact): fact is { label: string; value: string } => Boolean(fact));
+
+  return (
+    <LinkPreviewCardLayout
+      href={href}
+      variant={variant}
+      hideActions={hideActions}
+    >
+      <Link
+        href={preview.links.open || effectiveHref}
+        target={linkTarget}
+        rel={linkRel}
+        onClick={(event) => event.stopPropagation()}
+        className={[
+          "tw-group/file-card tw-relative tw-block tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950/75 tw-p-3 tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-transition tw-duration-200 hover:tw-border-iron-600 hover:tw-bg-iron-900/80 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-p-4",
+          !hideActions ? "tw-pr-12 sm:tw-pr-14" : "",
+        ].join(" ")}
+        data-testid="external-file-preview-card"
+      >
+        <span
+          className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 ${accent.rail}`}
+        />
+        <span className="tw-grid tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-[4.25rem,minmax(0,1fr)] sm:tw-items-center">
+          <span className="tw-flex tw-h-16 tw-w-16 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-black/30 tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] sm:tw-h-[4.25rem] sm:tw-w-[4.25rem]">
+            <span
+              className={`tw-inline-flex tw-max-w-full tw-items-center tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-1 tw-text-xs tw-font-bold tw-leading-4 ${accent.badge}`}
+            >
+              {kindLabel}
+            </span>
+          </span>
+          <span className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-2 tw-overflow-hidden">
+            <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+              <span className="tw-min-w-0 tw-truncate tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300">
+                {preview.sourceHost}
+              </span>
+              <span className="tw-flex-shrink-0 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/80 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300">
+                External source
+              </span>
+            </span>
+            <span className="tw-min-w-0 tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 sm:tw-text-lg">
+              <span className="tw-block tw-truncate">
+                {truncateMiddle(preview.title || preview.fileName)}
+              </span>
+            </span>
+            <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-2">
+              {facts.map((fact) => (
+                <span
+                  key={`${fact.label}-${fact.value}`}
+                  className="tw-inline-flex tw-max-w-full tw-items-baseline tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/70 tw-px-2 tw-py-1 tw-text-xs tw-leading-4"
+                >
+                  <span className="tw-flex-shrink-0 tw-text-iron-500">
+                    {fact.label}
+                  </span>
+                  <span className="tw-min-w-0 tw-truncate tw-font-semibold tw-text-iron-200">
+                    {fact.value}
+                  </span>
+                </span>
+              ))}
+              <span className="tw-inline-flex tw-max-w-full tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-black/20 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-200 tw-transition group-hover/file-card:tw-border-sky-400/35 group-hover/file-card:tw-text-white">
+                Open source
+              </span>
+            </span>
+          </span>
+        </span>
+      </Link>
+    </LinkPreviewCardLayout>
+  );
+}
+
 function isGithubPreviewResponse(
   value: unknown
 ): value is GithubPreviewResponse {
@@ -741,6 +927,28 @@ function extractGithubPreview(
   const githubPreview = (preview as GithubPreviewEnvelope | null | undefined)
     ?.githubPreview;
   return isGithubPreviewResponse(githubPreview) ? githubPreview : null;
+}
+
+function isExternalFilePreview(
+  value: unknown
+): value is ExternalFileLinkPreviewResponse {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const record = value as {
+    readonly type?: unknown;
+    readonly links?: { readonly open?: unknown } | undefined;
+  };
+  return (
+    record.type === "external.file" && typeof record.links?.open === "string"
+  );
+}
+
+function extractExternalFilePreview(
+  preview: OpenGraphPreviewData | null | undefined
+): ExternalFileLinkPreviewResponse | null {
+  return isExternalFilePreview(preview) ? preview : null;
 }
 
 function isGithubStatusPreviewResponse(
@@ -920,6 +1128,10 @@ export function hasOpenGraphContent(
   }
 
   if (isFarcasterEmbedPreview(preview)) {
+    return true;
+  }
+
+  if (isExternalFilePreview(preview)) {
     return true;
   }
 
@@ -1404,7 +1616,7 @@ function YoutubeVideoPreviewCard({
         ].join(" ")}
         data-testid="youtube-video-preview-card"
       >
-        <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 tw-bg-red-500/80" />
+        <span className="tw-bg-red-500/80 tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1" />
         <div
           className={[
             "tw-grid tw-h-full tw-w-full tw-min-w-0 tw-items-center tw-gap-3 tw-p-3 sm:tw-gap-4",
@@ -1456,7 +1668,7 @@ function YoutubeVideoPreviewCard({
                 <span className="tw-absolute tw-inset-0 tw-bg-black/20 tw-transition tw-duration-200 group-hover/youtube-play:tw-bg-black/10" />
                 <span
                   aria-hidden="true"
-                  className="tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-h-12 tw-w-12 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-bg-red-600 tw-shadow-lg tw-shadow-black/30 tw-transition tw-duration-200 group-hover/youtube-play:tw-scale-105"
+                  className="tw-bg-red-600 tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-h-12 tw-w-12 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-shadow-lg tw-shadow-black/30 tw-transition tw-duration-200 group-hover/youtube-play:tw-scale-105"
                 >
                   <span className="tw-ml-1 tw-block tw-h-0 tw-w-0 tw-border-y-[8px] tw-border-l-[13px] tw-border-y-transparent tw-border-l-white" />
                 </span>
@@ -1491,7 +1703,7 @@ function YoutubeVideoPreviewCard({
 
           <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden">
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-              <span className="tw-flex-shrink-0 tw-rounded-md tw-border tw-border-red-500/25 tw-bg-red-500/10 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-red-100">
+              <span className="tw-border-red-500/25 tw-bg-red-500/10 tw-text-red-100 tw-flex-shrink-0 tw-rounded-md tw-border tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4">
                 {providerLabel}
               </span>
               {author && (
@@ -1514,9 +1726,9 @@ function YoutubeVideoPreviewCard({
               target={linkTarget}
               rel={linkRel}
               onClick={(event) => event.stopPropagation()}
-              className="tw-inline-flex tw-w-fit tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition tw-duration-200 hover:tw-border-red-500/40 hover:tw-text-white"
+              className="hover:tw-border-red-500/40 tw-inline-flex tw-w-fit tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
             >
-              <span className="tw-h-1.5 tw-w-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-red-500" />
+              <span className="tw-bg-red-500 tw-h-1.5 tw-w-1.5 tw-flex-shrink-0 tw-rounded-full" />
               <span className="tw-truncate">{watchLabel}</span>
             </Link>
           </div>
@@ -1695,6 +1907,7 @@ export default function OpenGraphPreview({
     locale
   );
   const githubPreview = extractGithubPreview(preview);
+  const externalFilePreview = extractExternalFilePreview(preview);
   const seizePreview = extractSeizeCollectionPreview(preview);
   const youtubePreview = extractYoutubeVideoPreview(preview);
   const farcasterEmbedPreview = extractFarcasterEmbedPreview(preview);
@@ -1787,6 +2000,20 @@ export default function OpenGraphPreview({
         variant={resolvedVariant}
         hideActions={hideActions}
         locale={locale}
+      />
+    );
+  }
+
+  if (!imageOnly && externalFilePreview) {
+    return (
+      <ExternalFilePreviewCard
+        href={href}
+        preview={externalFilePreview}
+        effectiveHref={effectiveHref}
+        linkTarget={linkTarget}
+        linkRel={linkRel}
+        variant={resolvedVariant}
+        hideActions={hideActions}
       />
     );
   }

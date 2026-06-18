@@ -11,6 +11,10 @@ export * from '../models/ApiAggregatedActivityPage';
 export * from '../models/ApiArtistNameItem';
 export * from '../models/ApiAttachment';
 export * from '../models/ApiAttachmentKind';
+export * from '../models/ApiAttachmentSafety';
+export * from '../models/ApiAttachmentSafetyScanner';
+export * from '../models/ApiAttachmentSafetyStatus';
+export * from '../models/ApiAttachmentSafetyValidation';
 export * from '../models/ApiAttachmentStatus';
 export * from '../models/ApiAttachmentUploadMimeType';
 export * from '../models/ApiAvailableRatingCredit';
@@ -419,8 +423,12 @@ import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
 import { ApiAggregatedActivityPage } from '../models/ApiAggregatedActivityPage';
 import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
-import { ApiAttachment        } from '../models/ApiAttachment';
+import { ApiAttachment         } from '../models/ApiAttachment';
 import { ApiAttachmentKind } from '../models/ApiAttachmentKind';
+import { ApiAttachmentSafety      } from '../models/ApiAttachmentSafety';
+import { ApiAttachmentSafetyScanner } from '../models/ApiAttachmentSafetyScanner';
+import { ApiAttachmentSafetyStatus } from '../models/ApiAttachmentSafetyStatus';
+import { ApiAttachmentSafetyValidation } from '../models/ApiAttachmentSafetyValidation';
 import { ApiAttachmentStatus } from '../models/ApiAttachmentStatus';
 import { ApiAttachmentUploadMimeType } from '../models/ApiAttachmentUploadMimeType';
 import { ApiAvailableRatingCredit } from '../models/ApiAvailableRatingCredit';
@@ -834,6 +842,9 @@ let primitives = [
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
     "ApiAttachmentKind",
+    "ApiAttachmentSafetyScanner",
+    "ApiAttachmentSafetyStatus",
+    "ApiAttachmentSafetyValidation",
     "ApiAttachmentStatus",
     "ApiAttachmentUploadMimeType",
     "ApiCommunityMembersSortOption",
@@ -897,6 +908,7 @@ let typeMap: {[index: string]: any} = {
     "ApiAggregatedActivityPage": ApiAggregatedActivityPage,
     "ApiArtistNameItem": ApiArtistNameItem,
     "ApiAttachment": ApiAttachment,
+    "ApiAttachmentSafety": ApiAttachmentSafety,
     "ApiAvailableRatingCredit": ApiAvailableRatingCredit,
     "ApiBlockItem": ApiBlockItem,
     "ApiBlocksPage": ApiBlocksPage,

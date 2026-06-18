@@ -10,6 +10,8 @@ import {
 } from "@/lib/media/decentralized-media";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import JsonPreview from "@/components/drops/view/item/content/attachments/JsonPreview";
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { ApiAttachmentSafetyStatus } from "@/generated/models/ApiAttachmentSafetyStatus";
 import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -68,6 +70,10 @@ function getAttachmentMetadataUrl(rawUrl: string): string | null {
   try {
     const base = globalThis.window?.location?.origin || "https://6529.io";
     const parsed = new URL(trimmedUrl, base);
+    if (parsed.protocol === "ipfs:" && parsed.hostname) {
+      return `ipfs://${parsed.hostname}/metadata.json`;
+    }
+
     const pathSegments = parsed.pathname.split("/");
     const ipfsIndex = pathSegments.indexOf("ipfs");
 
@@ -131,7 +137,7 @@ function TrustedAttachmentBadge({
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
         className={`${TRUSTED_BADGE_BUTTON_CLASS} ${buttonSizeClassName}`}
-        aria-label="Trusted attachment"
+        aria-label="Scanned and validated attachment"
         aria-describedby={describedById}
         {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
       >
@@ -150,7 +156,7 @@ function TrustedAttachmentBadge({
           style={TOOLTIP_STYLES}
           isOpen={isTooltipOpen}
         >
-          <span className="tw-text-xs">Trusted — still use caution</span>
+          <span className="tw-text-xs">Scanned and validated</span>
         </Tooltip>
       )}
     </>
@@ -332,6 +338,38 @@ function resolveCsvPreviewErrorMessage(
 }
 
 const ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
+const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB"] as const;
+
+type AttachmentSafety = ApiAttachment["safety"];
+
+function formatAttachmentSize(sizeBytes: number | null | undefined): string | null {
+  if (
+    typeof sizeBytes !== "number" ||
+    !Number.isFinite(sizeBytes) ||
+    sizeBytes < 0
+  ) {
+    return null;
+  }
+
+  let size = sizeBytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < FILE_SIZE_UNITS.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+
+  const formatted =
+    unitIndex === 0 || size >= 10
+      ? Math.round(size).toString()
+      : size.toFixed(1).replace(/\.0$/, "");
+  return `${formatted} ${FILE_SIZE_UNITS[unitIndex]}`;
+}
+
+function isScannedValidatedAttachment(
+  safety: AttachmentSafety
+): boolean {
+  return safety?.status === ApiAttachmentSafetyStatus.ScannedValidated;
+}
 
 function getPathnameFileExtension(url: string): string | null {
   try {
@@ -779,11 +817,13 @@ export default function DropAttachmentDisplay({
   mimeType,
   attachmentUrl,
   fileName: providedFileName,
+  safety,
   disableMediaInteraction = false,
 }: {
   readonly mimeType: string;
   readonly attachmentUrl: string;
   readonly fileName?: string | undefined;
+  readonly safety?: AttachmentSafety | undefined;
   readonly disableMediaInteraction?: boolean | undefined;
 }) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -803,6 +843,10 @@ export default function DropAttachmentDisplay({
     const metadataUrl = getAttachmentMetadataUrl(attachmentUrl);
     return metadataUrl ? getSafeAttachmentUrl(metadataUrl) : null;
   }, [attachmentUrl]);
+  const isScannedValidated = isScannedValidatedAttachment(safety);
+  const safetySize = formatAttachmentSize(safety?.size_bytes);
+  const hasSafetyMetadata = Boolean(safetySize || safety?.sha256);
+  const hasDetails = safeMetadataUrl !== null || hasSafetyMetadata;
   const isRendered = isPreviewOpen;
   const { renderType, fileName, label, canRender, Icon } = useMemo(() => {
     const nextRenderType = getAttachmentRenderType(mimeType, attachmentUrl);
@@ -965,12 +1009,17 @@ export default function DropAttachmentDisplay({
             <div className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
               {fileName}
             </div>
-            <div className="tw-flex-shrink-0">
-              <TrustedAttachmentBadge />
-            </div>
+            {isScannedValidated && (
+              <div className="tw-flex-shrink-0">
+                <TrustedAttachmentBadge />
+              </div>
+            )}
           </div>
-          <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-            {label}
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0.5 tw-text-xs tw-font-medium tw-text-iron-500">
+            <span>{label}</span>
+            {isScannedValidated && (
+              <span className="tw-text-emerald-300">Scanned and validated</span>
+            )}
           </div>
         </div>
         {!disableMediaInteraction && (
@@ -997,7 +1046,7 @@ export default function DropAttachmentDisplay({
             {safeAttachmentUrl && (
               <AttachmentMoreMenu
                 isOpen={isMoreMenuOpen}
-                hasMetadata={safeMetadataUrl !== null}
+                hasMetadata={hasDetails}
                 isDetailsOpen={isDetailsOpen}
                 copiedLink={copiedLink}
                 isDownloading={isDownloading}
@@ -1011,13 +1060,35 @@ export default function DropAttachmentDisplay({
           </div>
         )}
       </div>
-      <AnimatedAttachmentPanel isOpen={isDetailsOpen && !!safeMetadataUrl}>
-        {safeMetadataUrl && (
+      <AnimatedAttachmentPanel isOpen={isDetailsOpen && hasDetails}>
+        {hasDetails && (
           <div className="tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950">
-            <JsonPreview
-              link={safeMetadataUrl}
-              onClose={() => setIsDetailsOpen(false)}
-            />
+            {hasSafetyMetadata && (
+              <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-p-4">
+                <div className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+                  Attachment safety
+                </div>
+                <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
+                  {safetySize && (
+                    <span className="tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200">
+                      Size {safetySize}
+                    </span>
+                  )}
+                  {safety?.sha256 && (
+                    <span className="tw-max-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-200">
+                      <span className="tw-text-iron-500">SHA-256 </span>
+                      <span className="tw-break-all">{safety.sha256}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            {safeMetadataUrl && (
+              <JsonPreview
+                link={safeMetadataUrl}
+                onClose={() => setIsDetailsOpen(false)}
+              />
+            )}
           </div>
         )}
       </AnimatedAttachmentPanel>

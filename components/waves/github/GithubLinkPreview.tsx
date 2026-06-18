@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 import GithubPreviewStatusBadge from "@/components/waves/GithubPreviewStatusBadge";
+import { getFileKindLabel } from "@/lib/link-preview/fileKinds";
 import {
   fetchGithubPreview,
   type GithubPreviewChecks,
@@ -440,8 +441,13 @@ const getKindLabelFromPreview = (
       return "Pull request";
     case "github.repository":
       return "Repository";
-    case "github.file":
-      return "File";
+    case "github.file": {
+      if (!preview.fileKind) {
+        return "File";
+      }
+      const fileKindLabel = getFileKindLabel(preview.fileKind);
+      return fileKindLabel === "File" ? "File" : `${fileKindLabel} file`;
+    }
     case "github.directory":
       return "Directory";
     case "github.commit":
@@ -560,6 +566,9 @@ const getDetailText = (
     return joinDetailParts([
       repoLabel,
       preview.path,
+      preview.type === "github.file" && preview.fileKind
+        ? getFileKindLabel(preview.fileKind)
+        : null,
       preview.ref,
       preview.type === "github.file" ? formatBytes(preview.size) : null,
       preview.type === "github.directory" && preview.itemCount !== null
@@ -772,7 +781,15 @@ const getPreviewFacts = (
       ]);
     case "github.file":
       return compactFacts([
+        preview.fileKind
+          ? { label: "Type", value: getFileKindLabel(preview.fileKind) }
+          : null,
         preview.language ? { label: "Language", value: preview.language } : null,
+        preview.mimeType &&
+        preview.fileKind !== "code" &&
+        preview.fileKind !== "text"
+          ? { label: "MIME", value: preview.mimeType }
+          : null,
         preview.ref ? { label: "Ref", value: preview.ref } : null,
         formatBytes(preview.size)
           ? { label: "Size", value: formatBytes(preview.size)! }
