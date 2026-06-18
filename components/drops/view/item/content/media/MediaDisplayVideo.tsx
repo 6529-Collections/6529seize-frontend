@@ -5,6 +5,7 @@ import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import clsx from "clsx";
 import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import { useMediaActions } from "./useMediaActions";
 
@@ -12,12 +13,14 @@ interface Props {
   readonly src: string;
   readonly mimeType?: string | undefined;
   readonly showControls?: boolean | undefined;
+  readonly fillContainer?: boolean | undefined;
 }
 
 const MediaDisplayVideo: React.FC<Props> = ({
   src,
   mimeType,
   showControls = false,
+  fillContainer = false,
 }) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
@@ -105,15 +108,28 @@ const MediaDisplayVideo: React.FC<Props> = ({
   }, [isApp, videoRef]);
 
   return (
-    <div ref={wrapperRef} className="tw-flex tw-w-full tw-justify-start">
+    <div
+      ref={wrapperRef}
+      className={clsx(
+        "tw-flex tw-w-full tw-items-start",
+        fillContainer
+          ? "tw-h-full tw-max-h-full tw-justify-center"
+          : "tw-justify-start"
+      )}
+    >
       <SeizeVideoPlayer
         videoRef={videoRef}
         template="ambient-media"
+        layout={fillContainer ? "fill" : "natural"}
+        align={fillContainer ? "center" : "left"}
         showActions={showControls}
         onDownload={showControls ? downloadMedia : undefined}
         onOpen={showControls ? openMedia : undefined}
         openLabel={showControls ? openLabel : undefined}
         isDownloading={isDownloading}
+        onVideoClick={(event) => {
+          event.preventDefault();
+        }}
       />
     </div>
   );

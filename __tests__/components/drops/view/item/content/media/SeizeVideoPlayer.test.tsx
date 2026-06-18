@@ -51,15 +51,15 @@ function mockPrefersReducedMotion(matches: boolean) {
   jest.spyOn(globalThis, "matchMedia").mockImplementation(
     (query: string) =>
       ({
-      addEventListener: jest.fn(),
-      addListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-      matches,
-      media: query,
-      onchange: null,
-      removeEventListener: jest.fn(),
-      removeListener: jest.fn(),
-    }) as MediaQueryList
+        addEventListener: jest.fn(),
+        addListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+        matches,
+        media: query,
+        onchange: null,
+        removeEventListener: jest.fn(),
+        removeListener: jest.fn(),
+      }) as MediaQueryList
   );
 }
 
@@ -337,9 +337,9 @@ describe("SeizeVideoPlayer", () => {
   });
 
   it("uses the mounted player wrapper as its fullscreen target", async () => {
-    const requestFullscreen = jest.fn().mockImplementation(function (this:
-      | HTMLElement
-      | undefined) {
+    const requestFullscreen = jest.fn().mockImplementation(function (
+      this: HTMLElement | undefined
+    ) {
       Object.defineProperty(document, "fullscreenElement", {
         configurable: true,
         value: this,
@@ -432,9 +432,8 @@ describe("SeizeVideoPlayer", () => {
     });
     fireEvent.play(video);
 
-    const pauseCallsBeforeClick = jest.mocked(
-      HTMLMediaElement.prototype.pause
-    ).mock.calls.length;
+    const pauseCallsBeforeClick = jest.mocked(HTMLMediaElement.prototype.pause)
+      .mock.calls.length;
 
     fireEvent.click(video);
 
@@ -596,7 +595,9 @@ describe("SeizeVideoPlayer", () => {
     const playSpy = jest.spyOn(HTMLMediaElement.prototype, "play");
     render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
 
-    await userEvent.click(screen.getAllByRole("button", { name: "Play video" })[0]);
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Play video" })[0]
+    );
 
     expect(playSpy).toHaveBeenCalled();
   });
@@ -689,10 +690,12 @@ describe("SeizeVideoPlayer", () => {
     }
 
     expect(video.muted).toBe(false);
+    expect(video.defaultMuted).toBe(false);
 
     await userEvent.click(screen.getByRole("button", { name: "Mute video" }));
 
     expect(video.muted).toBe(true);
+    expect(video.defaultMuted).toBe(true);
   });
 
   it("stays paused when play is rejected", async () => {
