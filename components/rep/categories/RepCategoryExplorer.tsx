@@ -208,25 +208,28 @@ export default function RepCategoryExplorer() {
 
     let secondFrame: number | undefined;
     let timeout: ReturnType<typeof setTimeout> | undefined;
-    const firstFrame = globalThis.requestAnimationFrame(() => {
-      secondFrame = globalThis.requestAnimationFrame(() => {
-        timeout = globalThis.setTimeout(() => {
-          const detail = detailRef.current;
-          if (!detail) {
-            return;
-          }
+    const scrollToDetail = () => {
+      const detail = detailRef.current;
+      if (!detail) {
+        return;
+      }
 
-          const scrollTop =
-            detail.getBoundingClientRect().top + globalThis.scrollY - 96;
-          globalThis.scrollTo({
-            top: Math.max(0, scrollTop),
-            behavior: "smooth",
-          });
-          detail.focus({ preventScroll: true });
-          setScrollTargetCategory(null);
-        }, 50);
+      const scrollTop =
+        detail.getBoundingClientRect().top + globalThis.scrollY - 96;
+      globalThis.scrollTo({
+        top: Math.max(0, scrollTop),
+        behavior: "smooth",
       });
-    });
+      detail.focus({ preventScroll: true });
+      setScrollTargetCategory(null);
+    };
+    const scheduleScroll = () => {
+      timeout = globalThis.setTimeout(scrollToDetail, 50);
+    };
+    const scheduleSecondFrame = () => {
+      secondFrame = globalThis.requestAnimationFrame(scheduleScroll);
+    };
+    const firstFrame = globalThis.requestAnimationFrame(scheduleSecondFrame);
 
     return () => {
       globalThis.cancelAnimationFrame(firstFrame);

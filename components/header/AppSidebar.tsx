@@ -186,11 +186,11 @@ export default function AppSidebar({
     };
 
     const touchOptions: AddEventListenerOptions = { passive: true };
-    window.addEventListener("touchstart", onTouchStart, touchOptions);
-    window.addEventListener("touchend", onTouchEnd, touchOptions);
+    globalThis.addEventListener("touchstart", onTouchStart, touchOptions);
+    globalThis.addEventListener("touchend", onTouchEnd, touchOptions);
     return () => {
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchend", onTouchEnd);
+      globalThis.removeEventListener("touchstart", onTouchStart);
+      globalThis.removeEventListener("touchend", onTouchEnd);
     };
   }, [open, handleClose]);
 
