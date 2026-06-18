@@ -49,6 +49,9 @@
   keeping the ref as the async request guard.
 - Routed Agent rejection messages, source packet row labels, and yes/no values
   through `en-US` message keys, then recorded non-source locale fallback debt.
-- Follow-up validation passed: focused Jest (3 suites, 25 tests),
+- Added a required `base_package_hash` target check, a non-`href` unsafe URL
+  validation test, and a patch-upload size guard after reviewing the security
+  pass on the original head.
+- Follow-up validation passed: focused Jest (3 suites, 28 tests),
   `seize run lint:changed`, `seize run typecheck:changed`,
   `seize run react-doctor:diff`, and `codex-diff-check`.

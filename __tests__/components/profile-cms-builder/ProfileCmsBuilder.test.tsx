@@ -229,6 +229,31 @@ describe("ProfileCmsBuilder", () => {
     ).toBeDisabled();
   });
 
+  it("rejects oversized uploaded agent patch files", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.click(screen.getByRole("button", { name: "Agent" }));
+    const file = new File(["{}"], "oversized-patch.json", {
+      type: "application/json",
+    });
+    Object.defineProperty(file, "size", {
+      configurable: true,
+      value: 2 * 1024 * 1024 + 1,
+    });
+
+    fireEvent.change(screen.getByLabelText("Upload patch"), {
+      target: { files: [file] },
+    });
+
+    expect(
+      await screen.findByText(
+        "Patch file is too large. Paste a smaller JSON patch."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Agent patch JSON")).toHaveValue("");
+  });
+
   it("does not turn agent patch import into backend authority", async () => {
     const user = userEvent.setup();
     process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";

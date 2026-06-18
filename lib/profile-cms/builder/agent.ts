@@ -433,8 +433,13 @@ function validatePatchTarget({
     });
   }
 
-  if (
-    patch.target.base_package_hash &&
+  if (!patch.target.base_package_hash) {
+    errors.push({
+      code: "patch.base_hash_missing",
+      message: "patch.base_hash_missing",
+      path: "/target/base_package_hash",
+    });
+  } else if (
     patch.target.base_package_hash !== currentPackage.integrity.package_hash
   ) {
     errors.push({

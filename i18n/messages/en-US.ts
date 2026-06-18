@@ -814,6 +814,8 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.agent.patch.description":
     "Paste or upload an agent patch, review the diff, then apply it to this draft.",
   "profileCms.builder.agent.patch.upload": "Upload patch",
+  "profileCms.builder.agent.patch.fileTooLarge":
+    "Patch file is too large. Paste a smaller JSON patch.",
   "profileCms.builder.agent.patch.review": "Review patch",
   "profileCms.builder.agent.patch.apply": "Apply to draft",
   "profileCms.builder.agent.patch.label": "Agent patch JSON",
@@ -832,6 +834,8 @@ export const EN_US_MESSAGES = {
     "Patch target draft id does not match the current draft.",
   "profileCms.builder.agent.error.baseVersionMismatch":
     "Patch target base version is stale for the current draft.",
+  "profileCms.builder.agent.error.baseHashMissing":
+    "Patch target package hash is required.",
   "profileCms.builder.agent.error.baseHashMismatch":
     "Patch target package hash does not match the current draft.",
   "profileCms.builder.agent.error.operationUnsupported":

@@ -202,6 +202,48 @@ describe("profile CMS builder agent helpers", () => {
     );
   });
 
+  it("requires agent patches to include the target package hash", () => {
+    const validation = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529"),
+      new Date("2026-06-18T00:00:00.000Z")
+    );
+    const patchJson = JSON.stringify({
+      schema: CMS_AGENT_PATCH_SCHEMA,
+      patch_id: "patch-missing-hash",
+      target: {
+        draft_id: CMS_BUILDER_LOCAL_DRAFT_ID,
+        base_version: 0,
+      },
+      operations: [
+        {
+          op: "update_theme",
+          path: "/site/theme/accent",
+          value: "#ffffff",
+        },
+      ],
+      provenance: {
+        created_at: "2026-06-18T00:00:00.000Z",
+        author_type: "user_agent",
+      },
+    });
+
+    const review = reviewCmsAgentPatch({
+      currentDraftVersion: 0,
+      currentPackage: validation.cmsPackage,
+      patchJson,
+    });
+
+    expect(review.ok).toBe(false);
+    expect(review.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "patch.base_hash_missing",
+          path: "/target/base_package_hash",
+        }),
+      ])
+    );
+  });
+
   it("rejects metadata object patches with unsupported fields", () => {
     const validation = validateCmsBuilderState(
       createDefaultCmsBuilderState("punk6529"),
@@ -385,6 +427,53 @@ describe("profile CMS builder agent helpers", () => {
         expect.objectContaining({
           code: "patch.block_duplicate_id",
           path: "/operations/0/value/id",
+        }),
+      ])
+    );
+  });
+
+  it("rejects unsafe URL schemes on non-href block fields", () => {
+    const validation = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529"),
+      new Date("2026-06-18T00:00:00.000Z")
+    );
+    const patchJson = JSON.stringify({
+      schema: CMS_AGENT_PATCH_SCHEMA,
+      patch_id: "patch-unsafe-uri",
+      target: {
+        draft_id: CMS_BUILDER_LOCAL_DRAFT_ID,
+        base_version: 0,
+        base_package_hash: validation.cmsPackage.integrity.package_hash,
+      },
+      operations: [
+        {
+          op: "add_block",
+          path: "/payload/pages/0/blocks/-",
+          value: {
+            id: "block-unsafe-uri",
+            block_type: "image",
+            uri: "data:text/html,<script>alert(1)</script>",
+          },
+        },
+      ],
+      provenance: {
+        created_at: "2026-06-18T00:00:00.000Z",
+        author_type: "user_agent",
+      },
+    });
+
+    const review = reviewCmsAgentPatch({
+      currentDraftVersion: 0,
+      currentPackage: validation.cmsPackage,
+      patchJson,
+    });
+
+    expect(review.ok).toBe(false);
+    expect(review.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "block.unsafe_url",
+          path: "/payload/pages/0/blocks/3/uri",
         }),
       ])
     );

@@ -15,6 +15,8 @@ import {
 import type { CmsBuilderValidation } from "@/lib/profile-cms/builder/package";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 
+const MAX_AGENT_PATCH_FILE_BYTES = 2 * 1024 * 1024;
+
 export function ProfileCmsAgentPanel({
   canUseBuilderApi,
   currentDraftVersion,
@@ -46,9 +48,11 @@ export function ProfileCmsAgentPanel({
     null
   );
   const [statusMessage, setStatusMessage] = useState("");
+  const [uploadErrorMessage, setUploadErrorMessage] = useState("");
 
   const reviewPatch = () => {
     setStatusMessage("");
+    setUploadErrorMessage("");
     setPatchReview(
       reviewCmsAgentPatch({
         currentDraftId: draftId,
@@ -77,7 +81,17 @@ export function ProfileCmsAgentPanel({
     }
 
     setStatusMessage("");
+    setUploadErrorMessage("");
     setPatchReview(null);
+    if (file.size > MAX_AGENT_PATCH_FILE_BYTES) {
+      setPatchDraft("");
+      setUploadErrorMessage(
+        t(locale, "profileCms.builder.agent.patch.fileTooLarge")
+      );
+      event.currentTarget.value = "";
+      return;
+    }
+
     setPatchDraft(await file.text());
     event.currentTarget.value = "";
   };
@@ -145,6 +159,11 @@ export function ProfileCmsAgentPanel({
             {statusMessage}
           </p>
         ) : null}
+        {uploadErrorMessage ? (
+          <p className="tw-border tw-border-solid tw-border-red tw-bg-red/10 tw-p-3 tw-text-sm tw-text-red">
+            {uploadErrorMessage}
+          </p>
+        ) : null}
         <label
           className="tw-text-sm tw-font-medium tw-text-iron-300"
           htmlFor="cms-builder-agent-patch"
@@ -158,6 +177,7 @@ export function ProfileCmsAgentPanel({
             setPatchDraft(event.target.value);
             setPatchReview(null);
             setStatusMessage("");
+            setUploadErrorMessage("");
           }}
           spellCheck={false}
           value={patchDraft}
@@ -493,6 +513,8 @@ function getPatchErrorMessage(
       return t(locale, "profileCms.builder.agent.error.targetDraftMismatch");
     case "patch.base_version_mismatch":
       return t(locale, "profileCms.builder.agent.error.baseVersionMismatch");
+    case "patch.base_hash_missing":
+      return t(locale, "profileCms.builder.agent.error.baseHashMissing");
     case "patch.base_hash_mismatch":
       return t(locale, "profileCms.builder.agent.error.baseHashMismatch");
     case "patch.operation_unsupported":
