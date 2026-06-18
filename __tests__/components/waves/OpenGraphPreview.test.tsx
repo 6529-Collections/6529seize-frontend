@@ -25,7 +25,7 @@ jest.mock("next/image", () => ({
     fill: _fill,
     ...rest
   }: any) {
-    return <img alt={alt} {...rest} />;
+    return React.createElement("img", { alt, ...rest });
   },
 }));
 
@@ -106,7 +106,10 @@ describe("OpenGraphPreview", () => {
           title: "Example Title",
           description: "An example description",
           siteName: "Example.com",
-          image: "https://cdn.example.com/preview.png",
+          image: {
+            url: "https://cdn.example.com/preview.png",
+            alt: "Example article hero",
+          },
         }}
       />
     );
@@ -114,33 +117,111 @@ describe("OpenGraphPreview", () => {
     const card = screen.getByTestId("og-preview-card");
     expect(card).toBeInTheDocument();
     expect(card).toHaveClass("tw-h-full");
-    expect(card.firstElementChild).toHaveClass(
-      "tw-flex-row",
-      "tw-h-full",
-      "tw-min-h-0"
+    expect(card).toHaveClass(
+      "tw-grid-cols-[6rem,minmax(0,1fr)]",
+      "sm:tw-grid-cols-[8rem,minmax(0,1fr)]",
+      "md:tw-grid-cols-[10.5rem,minmax(0,1fr)]"
     );
     expect(screen.getByText("Example.com")).toBeInTheDocument();
-    const titleLinks = screen.getAllByRole("link", { name: "Example Title" });
-    expect(titleLinks).toHaveLength(2);
-    expect(titleLinks[0]).toHaveClass(
-      "tw-h-full",
-      "tw-w-28",
-      "sm:tw-w-32",
-      "md:tw-w-44"
-    );
-    const titleLink = titleLinks[1];
-    expect(titleLink).toHaveAttribute("href", "/article");
-    expect(titleLink).not.toHaveAttribute("target");
-    const image = screen.getByAltText("Example Title");
+    expect(card).toHaveAttribute("href", "/article");
+    expect(card).not.toHaveAttribute("target");
+    const image = screen.getByAltText("Example article hero");
     expect(image).toHaveAttribute("src", "https://cdn.example.com/preview.png");
     expect(image).toHaveAttribute(
       "sizes",
-      "(max-width: 640px) 7rem, (max-width: 768px) 8rem, 176px"
+      "(max-width: 640px) 6rem, (max-width: 768px) 8rem, 10.5rem"
     );
-    expect(image.parentElement).toHaveClass("tw-h-full", "tw-w-full");
-    expect(image.parentElement).not.toHaveClass("tw-aspect-[16/9]");
+    expect(image.parentElement).toHaveClass(
+      "tw-aspect-[16/10]",
+      "tw-bg-black/40"
+    );
     expect(screen.getByText("An example description")).toBeInTheDocument();
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
+  });
+
+  it("renders sparse article metadata with a source label and no empty fields", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/research/notes");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/research/notes"
+        preview={{
+          type: "article",
+          title: "Research Notes",
+          source: "Example Journal",
+          author: "Ada Lovelace",
+          publishedTime: "2026-06-16T12:00:00.000Z",
+          favicon: "https://journal.example/favicon.ico",
+        }}
+      />
+    );
+
+    const card = screen.getByTestId("og-preview-card");
+    expect(card).toBeInTheDocument();
+    expect(screen.getByText("Example Journal")).toBeInTheDocument();
+
+    expect(card).toHaveAttribute("href", "/research/notes");
+    expect(card).not.toHaveAttribute("target");
+    expect(screen.getByText("Research Notes")).toBeInTheDocument();
+    expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
+    expect(screen.getByText("Jun 16, 2026")).toBeInTheDocument();
+    expect(screen.queryByText("Link unavailable")).toBeNull();
+  });
+
+  it("renders free-text published dates without invalid datetime attributes", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/dispatch"
+        preview={{
+          title: "Field Dispatch",
+          source: "Example Journal",
+          publishedTime: "Spring 2026",
+        }}
+      />
+    );
+
+    const date = screen.getByText("Spring 2026");
+    expect(date.tagName).toBe("TIME");
+    expect(date).not.toHaveAttribute("datetime");
+  });
+
+  it("renders partially parseable published dates without invalid datetime attributes", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/dispatch"
+        preview={{
+          title: "Field Dispatch",
+          source: "Example Journal",
+          publishedTime: "Jun 16 2026 after publication",
+        }}
+      />
+    );
+
+    const date = screen.getByText("Jun 16 2026 after publication");
+    expect(date.tagName).toBe("TIME");
+    expect(date).not.toHaveAttribute("datetime");
+  });
+
+  it("does not render generic badges for dotted provider-style types", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/provider");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/provider"
+        preview={{
+          title: "Provider Payload",
+          source: "Example Journal",
+          type: "github.repository",
+        }}
+      />
+    );
+
+    expect(screen.getByText("Provider Payload")).toBeInTheDocument();
+    expect(screen.queryByText("Github Repository")).toBeNull();
   });
 
   it("preserves generated 6529 profile cards instead of cropping them", () => {
@@ -336,11 +417,12 @@ describe("OpenGraphPreview", () => {
       />
     );
 
-    expect(screen.getByTestId("6529-collection-preview-card")).toBeInTheDocument();
-    expect(screen.getByTestId("6529-collection-preview-image-frame")).toHaveClass(
-      "tw-bg-black",
-      "tw-border-black"
-    );
+    expect(
+      screen.getByTestId("6529-collection-preview-card")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("6529-collection-preview-image-frame")
+    ).toHaveClass("tw-bg-black", "tw-border-black");
     expect(screen.getByAltText("The Collective Synapse")).toHaveClass(
       "tw-object-contain"
     );
@@ -394,12 +476,15 @@ describe("OpenGraphPreview", () => {
       />
     );
 
-    expect(screen.getByTestId("6529-collection-preview-card")).toBeInTheDocument();
-    expect(screen.getByTestId("6529-collection-preview-image-frame")).toHaveClass(
-      "tw-bg-black",
-      "tw-border-black"
+    expect(
+      screen.getByTestId("6529-collection-preview-card")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("6529-collection-preview-image-frame")
+    ).toHaveClass("tw-bg-black", "tw-border-black");
+    expect(screen.getByAltText("Pebbles #514")).toHaveClass(
+      "tw-object-contain"
     );
-    expect(screen.getByAltText("Pebbles #514")).toHaveClass("tw-object-contain");
     expect(screen.getByText("Pebbles #514")).toBeInTheDocument();
     expect(screen.getByText("NextGen \u00b7 Pebbles")).toBeInTheDocument();
     expect(screen.getByText("Rarity")).toBeInTheDocument();

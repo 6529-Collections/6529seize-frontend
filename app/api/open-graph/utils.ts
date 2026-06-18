@@ -1,4 +1,3 @@
-import { escapeRegExp } from "@/lib/text/regex";
 import type {
   GoogleDocsLinkPreview,
   GoogleSheetsLinkPreview,
@@ -6,6 +5,7 @@ import type {
   GoogleWorkspaceLinkPreview,
   LinkPreviewResponse,
 } from "@/services/api/link-preview-api";
+import { load, type CheerioAPI } from "cheerio";
 
 const TITLE_KEYS = ["og:title", "twitter:title", "title"] as const;
 const DESCRIPTION_KEYS = [
@@ -19,17 +19,33 @@ const TYPE_KEYS = ["og:type"] as const;
 const IMAGE_KEYS = [
   "og:image",
   "og:image:url",
+  "og:image:secure_url",
   "twitter:image",
   "twitter:image:src",
 ] as const;
-
-const ESCAPE_HTML_ENTITIES: Record<string, string> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-};
+const AUTHOR_KEYS = [
+  "author",
+  "article:author",
+  "twitter:creator",
+  "parsely-author",
+  "sailthru.author",
+  "dc.creator",
+] as const;
+const PUBLISHED_TIME_KEYS = [
+  "article:published_time",
+  "date",
+  "datePublished",
+  "datepublished",
+  "pubdate",
+  "publishdate",
+] as const;
+const MODIFIED_TIME_KEYS = [
+  "article:modified_time",
+  "og:updated_time",
+  "dateModified",
+  "datemodified",
+] as const;
+const ARTICLE_SECTION_KEYS = ["article:section"] as const;
 
 export const HTML_ACCEPT_HEADER =
   "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
@@ -44,6 +60,10 @@ const GOOGLE_THUMBNAIL_BASE = "https://drive.google.com/thumbnail";
 const GOOGLE_PREVIEW_TIMEOUT_MS = 3000;
 const GOOGLE_PREVIEW_BYTE_LIMIT = 64 * 1024;
 const GOOGLE_TITLE_MAX_LENGTH = 160;
+const JSON_LD_SCRIPT_MAX_CHARS = 128 * 1024;
+const JSON_LD_MAX_NODES = 64;
+const JSON_LD_MAX_DEPTH = 8;
+const JSON_LD_IMAGE_MAX_CANDIDATES = 16;
 
 type GoogleWorkspaceKind = "docs" | "sheets" | "slides";
 
@@ -179,93 +199,118 @@ function validateGooglePreviewUrl(rawUrl: string): URL | null {
   return parsed;
 }
 
-function decodeHtmlEntities(value: string): string {
-  return value.replaceAll(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_, entity: string) => {
-    if (entity.startsWith("#x") || entity.startsWith("#X")) {
-      const codePoint = parseInt(entity.slice(2), 16);
-      return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
+function normalizeWhitespace(value: string | undefined): string | undefined {
+  const trimmed = value?.replace(/\s+/g, " ").trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
+}
+
+function getMetaIdentifier(
+  $: CheerioAPI,
+  element: unknown
+): string | undefined {
+  const tag = $(element);
+  return normalizeWhitespace(
+    tag.attr("property") ?? tag.attr("name") ?? tag.attr("itemprop")
+  )?.toLowerCase();
+}
+
+function collectMetaContent(
+  $: CheerioAPI,
+  keys: readonly string[]
+): Map<string, string[]> {
+  const keySet = new Set(keys.map((key) => key.toLowerCase()));
+  const results = new Map<string, string[]>();
+
+  $("meta").each((_, element) => {
+    const identifier = getMetaIdentifier($, element);
+    if (!identifier || !keySet.has(identifier)) {
+      return;
     }
-    if (entity.startsWith("#")) {
-      const codePoint = parseInt(entity.slice(1), 10);
-      return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
+
+    const content = normalizeWhitespace($(element).attr("content"));
+    if (!content) {
+      return;
     }
-    return ESCAPE_HTML_ENTITIES[entity] ?? "";
+
+    const values = results.get(identifier) ?? [];
+    values.push(content);
+    results.set(identifier, values);
   });
+
+  return results;
 }
 
 function extractFirstMetaContent(
-  html: string,
+  $: CheerioAPI,
   keys: readonly string[]
 ): string | undefined {
+  const metadata = collectMetaContent($, keys);
   for (const key of keys) {
-    const pattern = new RegExp(
-      `<meta[^>]+(?:property|name)=['"]${escapeRegExp(key)}['"][^>]*content=['"]([^'"]+)['"][^>]*>`,
-      "i"
-    );
-    const match = pattern.exec(html);
-    if (match && match[1]) {
-      return decodeHtmlEntities(match[1].trim());
+    const [first] = metadata.get(key.toLowerCase()) ?? [];
+    if (first) {
+      return first;
     }
   }
   return undefined;
 }
 
-function extractAllMetaContent(
-  html: string,
-  keys: readonly string[]
-): string[] {
-  const results = new Set<string>();
+function extractTitleTag($: CheerioAPI): string | undefined {
+  return normalizeWhitespace($("title").first().text());
+}
 
-  for (const key of keys) {
-    const pattern = new RegExp(
-      `<meta[^>]+(?:property|name)=['"]${escapeRegExp(key)}['"][^>]*content=['"]([^'"]+)['"][^>]*>`,
-      "gi"
-    );
-    let match: RegExpExecArray | null;
-    while ((match = pattern.exec(html))) {
-      if (match[1]) {
-        results.add(decodeHtmlEntities(match[1].trim()));
-      }
+function extractCanonicalUrl($: CheerioAPI, baseUrl: URL): string | undefined {
+  const href = normalizeWhitespace(
+    $('link[rel~="canonical"]').first().attr("href")
+  );
+  return resolveUrl(baseUrl, href);
+}
+
+function iconPreferenceScore(rel: string, href: string): number {
+  const normalizedRel = rel.toLowerCase();
+  const normalizedHref = href.toLowerCase();
+  if (normalizedRel.includes("shortcut icon")) {
+    return 4;
+  }
+  if (/\bicon\b/.test(normalizedRel) && !normalizedRel.includes("apple")) {
+    return 3;
+  }
+  if (normalizedHref.endsWith(".svg")) {
+    return 2;
+  }
+  if (normalizedRel.includes("apple-touch-icon")) {
+    return 1;
+  }
+  return 0;
+}
+
+function extractIconLinks($: CheerioAPI, baseUrl: URL): string[] {
+  const byUrl = new Map<string, number>();
+
+  $("link").each((_, element) => {
+    const tag = $(element);
+    const rel = normalizeWhitespace(tag.attr("rel")) ?? "";
+    const href = normalizeWhitespace(tag.attr("href"));
+    if (!href || !iconRelPattern.test(rel)) {
+      return;
     }
-  }
 
-  return Array.from(results);
-}
-
-function extractTitleTag(html: string): string | undefined {
-  const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-  return match && match[1] ? decodeHtmlEntities(match[1].trim()) : undefined;
-}
-
-function extractCanonicalUrl(html: string, baseUrl: URL): string | undefined {
-  const pattern = /<link[^>]*rel=['"]canonical['"][^>]*href=['"]([^'"]+)['"][^>]*>/i;
-  const match = pattern.exec(html);
-  if (match && match[1]) {
-    return resolveUrl(baseUrl, decodeHtmlEntities(match[1].trim()));
-  }
-  return undefined;
-}
-
-function extractIconLinks(html: string, baseUrl: URL): string[] {
-  const results = new Set<string>();
-  const pattern = /<link[^>]*rel=['"]([^'"]+)['"][^>]*href=['"]([^'"]+)['"][^>]*>/gi;
-  let match: RegExpExecArray | null;
-
-  while ((match = pattern.exec(html))) {
-    const rel = match[1];
-    const href = match[2];
-    if (rel && href && iconRelPattern.test(rel)) {
-      const resolved = resolveUrl(baseUrl, decodeHtmlEntities(href.trim()));
-      if (resolved) {
-        results.add(resolved);
-      }
+    const resolved = resolveUrl(baseUrl, href);
+    if (!resolved) {
+      return;
     }
-  }
 
-  return Array.from(results);
+    byUrl.set(resolved, iconPreferenceScore(rel, href));
+  });
+
+  return Array.from(byUrl.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([url]) => url);
 }
 
-function resolveUrl(baseUrl: URL, value: string | undefined): string | undefined {
+function resolveUrl(
+  baseUrl: URL,
+  value: string | undefined
+): string | undefined {
   if (!value) {
     return undefined;
   }
@@ -275,6 +320,243 @@ function resolveUrl(baseUrl: URL, value: string | undefined): string | undefined
   } catch {
     return undefined;
   }
+}
+
+function parsePositiveInteger(value: string | undefined): number | undefined {
+  if (!value || !/^\d+$/.test(value)) {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+type JsonLdNode = Record<string, unknown>;
+type ImageCandidate = {
+  readonly url: string;
+  readonly source: "json-ld" | "og" | "twitter";
+};
+
+function safeParseJsonLd(raw: string): unknown {
+  if (raw.length > JSON_LD_SCRIPT_MAX_CHARS) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function asRecord(value: unknown): JsonLdNode | null {
+  return typeof value === "object" && value !== null
+    ? (value as JsonLdNode)
+    : null;
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === "string" ? normalizeWhitespace(value) : undefined;
+}
+
+function flattenJsonLdNodes(
+  value: unknown,
+  depth = 0,
+  budget: { remaining: number } = { remaining: JSON_LD_MAX_NODES }
+): JsonLdNode[] {
+  if (depth > JSON_LD_MAX_DEPTH || budget.remaining <= 0) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    const nodes: JsonLdNode[] = [];
+    for (const entry of value) {
+      nodes.push(...flattenJsonLdNodes(entry, depth + 1, budget));
+      if (budget.remaining <= 0) {
+        break;
+      }
+    }
+    return nodes;
+  }
+
+  const record = asRecord(value);
+  if (!record) {
+    return [];
+  }
+
+  budget.remaining -= 1;
+  const graph = record["@graph"];
+  const nodes = [record];
+
+  if (Array.isArray(graph) && budget.remaining > 0) {
+    for (const entry of graph) {
+      nodes.push(...flattenJsonLdNodes(entry, depth + 1, budget));
+      if (budget.remaining <= 0) {
+        break;
+      }
+    }
+  }
+
+  return nodes;
+}
+
+function getJsonLdType(node: JsonLdNode): string {
+  const type = node["@type"];
+  if (Array.isArray(type)) {
+    return type.map((entry) => String(entry).toLowerCase()).join(" ");
+  }
+  return typeof type === "string" ? type.toLowerCase() : "";
+}
+
+function pickJsonLdNode(nodes: readonly JsonLdNode[]): JsonLdNode | null {
+  return (
+    nodes.find((node) =>
+      /\b(article|newsarticle|blogposting|report|creativework)\b/.test(
+        getJsonLdType(node)
+      )
+    ) ??
+    nodes.find((node) => /\b(webpage|website)\b/.test(getJsonLdType(node))) ??
+    nodes[0] ??
+    null
+  );
+}
+
+function extractJsonLdNodes($: CheerioAPI): JsonLdNode[] {
+  const nodes: JsonLdNode[] = [];
+
+  $('script[type="application/ld+json"]').each((_, element) => {
+    const parsed = safeParseJsonLd($(element).contents().text());
+    nodes.push(...flattenJsonLdNodes(parsed));
+  });
+
+  return nodes;
+}
+
+function extractJsonLdImage(
+  node: JsonLdNode | null,
+  baseUrl: URL,
+  depth = 0,
+  budget: { remaining: number } = { remaining: JSON_LD_IMAGE_MAX_CANDIDATES }
+): string | undefined {
+  if (!node || depth > JSON_LD_MAX_DEPTH || budget.remaining <= 0) {
+    return undefined;
+  }
+
+  const candidate = node["image"] ?? node["thumbnailUrl"] ?? node["thumbnail"];
+  if (typeof candidate === "string") {
+    budget.remaining -= 1;
+    return resolveUrl(baseUrl, candidate);
+  }
+
+  if (Array.isArray(candidate)) {
+    for (const entry of candidate) {
+      const image = extractJsonLdImage(
+        { image: entry },
+        baseUrl,
+        depth + 1,
+        budget
+      );
+      if (image) {
+        return image;
+      }
+      if (budget.remaining <= 0) {
+        break;
+      }
+    }
+  }
+
+  const record = asRecord(candidate);
+  if (record) {
+    budget.remaining -= 1;
+  }
+  return resolveUrl(
+    baseUrl,
+    asString(record?.["url"]) ?? asString(record?.["contentUrl"])
+  );
+}
+
+function extractJsonLdAuthor(node: JsonLdNode | null): string | undefined {
+  const author = node?.["author"] ?? node?.["creator"];
+  if (typeof author === "string") {
+    return normalizeWhitespace(author);
+  }
+
+  if (Array.isArray(author)) {
+    const names = author
+      .map((entry) => asString(asRecord(entry)?.["name"]) ?? asString(entry))
+      .filter((name): name is string => Boolean(name));
+    return names.length > 0 ? names.join(", ") : undefined;
+  }
+
+  return asString(asRecord(author)?.["name"]);
+}
+
+function getImageSource(key: string): ImageCandidate["source"] {
+  return key.toLowerCase().startsWith("twitter:") ? "twitter" : "og";
+}
+
+function extractImageCandidates(
+  $: CheerioAPI,
+  baseUrl: URL,
+  jsonLdImage: string | undefined
+): ImageCandidate[] {
+  const imageMetadata = collectMetaContent($, IMAGE_KEYS);
+  const byUrl = new Map<string, ImageCandidate>();
+
+  for (const key of IMAGE_KEYS) {
+    for (const value of imageMetadata.get(key.toLowerCase()) ?? []) {
+      const resolved = resolveUrl(baseUrl, value);
+      if (!resolved || byUrl.has(resolved)) {
+        continue;
+      }
+
+      byUrl.set(resolved, {
+        url: resolved,
+        source: getImageSource(key),
+      });
+    }
+  }
+
+  if (jsonLdImage && !byUrl.has(jsonLdImage)) {
+    byUrl.set(jsonLdImage, {
+      url: jsonLdImage,
+      source: "json-ld",
+    });
+  }
+
+  return Array.from(byUrl.values());
+}
+
+function extractImageMetadataForSource(
+  $: CheerioAPI,
+  source: ImageCandidate["source"] | undefined
+): {
+  readonly alt?: string | undefined;
+  readonly width?: number | undefined;
+  readonly height?: number | undefined;
+} {
+  if (source === "json-ld" || !source) {
+    return {};
+  }
+
+  const keys =
+    source === "twitter"
+      ? {
+          alt: ["twitter:image:alt"] as const,
+          width: ["twitter:image:width"] as const,
+          height: ["twitter:image:height"] as const,
+        }
+      : {
+          alt: ["og:image:alt"] as const,
+          width: ["og:image:width"] as const,
+          height: ["og:image:height"] as const,
+        };
+
+  return {
+    alt: extractFirstMetaContent($, keys.alt),
+    width: parsePositiveInteger(extractFirstMetaContent($, keys.width)),
+    height: parsePositiveInteger(extractFirstMetaContent($, keys.height)),
+  };
 }
 
 function parseHashParams(hash: string): URLSearchParams {
@@ -314,7 +596,8 @@ function normalizeGoogleWorkspaceUrl(
   const hashParams = parseHashParams(url.hash);
 
   const gid = searchParams.get("gid") ?? hashParams.get("gid") ?? undefined;
-  const range = searchParams.get("range") ?? hashParams.get("range") ?? undefined;
+  const range =
+    searchParams.get("range") ?? hashParams.get("range") ?? undefined;
   const widget = searchParams.get("widget") ?? undefined;
   const headers = searchParams.get("headers") ?? undefined;
   const chrome = searchParams.get("chrome") ?? undefined;
@@ -339,7 +622,11 @@ function normalizeGoogleWorkspaceUrl(
   };
 }
 
-function buildSheetsPreviewUrl(base: string, gid: string, range?: string): string {
+function buildSheetsPreviewUrl(
+  base: string,
+  gid: string,
+  range?: string
+): string {
   const preview = new URL(`${base}/htmlview`);
   preview.searchParams.set("gid", gid);
   if (range) {
@@ -369,7 +656,10 @@ function buildGoogleThumbnailUrl(fileId: string): string {
   return `${GOOGLE_THUMBNAIL_BASE}?id=${encodeURIComponent(fileId)}&sz=w1000`;
 }
 
-function clampGoogleTitle(value: string | undefined | null, fallback: string): string {
+function clampGoogleTitle(
+  value: string | undefined | null,
+  fallback: string
+): string {
   const trimmed = typeof value === "string" ? value.trim() : "";
   const base = trimmed.length > 0 ? trimmed : fallback;
   if (base.length <= GOOGLE_TITLE_MAX_LENGTH) {
@@ -384,7 +674,9 @@ function isGoogleAccessRestricted(html: string | null | undefined): boolean {
   }
 
   const normalized = html.toLowerCase();
-  return GOOGLE_ACCESS_DENIED_PATTERNS.some((pattern) => normalized.includes(pattern));
+  return GOOGLE_ACCESS_DENIED_PATTERNS.some((pattern) =>
+    normalized.includes(pattern)
+  );
 }
 
 function truncateToLimit(value: string, byteLimit: number): string {
@@ -462,7 +754,10 @@ async function fetchGooglePreviewHtml(url: string): Promise<{
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), GOOGLE_PREVIEW_TIMEOUT_MS);
+  const timeout = setTimeout(
+    () => controller.abort(),
+    GOOGLE_PREVIEW_TIMEOUT_MS
+  );
 
   try {
     const response = await fetch(validatedUrl.toString(), {
@@ -508,11 +803,9 @@ function buildTitleCandidates(html: string | null): Array<string | undefined> {
   if (!html) {
     return [];
   }
+  const $ = load(html);
 
-  return [
-    extractFirstMetaContent(html, TITLE_KEYS),
-    extractTitleTag(html),
-  ];
+  return [extractFirstMetaContent($, TITLE_KEYS), extractTitleTag($)];
 }
 
 function pickGoogleTitle(
@@ -676,21 +969,49 @@ export function buildResponse(
   contentType: string | null,
   _finalUrl?: string
 ): LinkPreviewResponse {
-
-
+  const $ = load(html);
+  const jsonLdNode = pickJsonLdNode(extractJsonLdNodes($));
   const title =
-    extractFirstMetaContent(html, TITLE_KEYS) ?? extractTitleTag(html);
-  const description = extractFirstMetaContent(html, DESCRIPTION_KEYS);
-  const siteName = extractFirstMetaContent(html, SITE_NAME_KEYS);
-  const resolvedImageUrls = extractAllMetaContent(html, IMAGE_KEYS)
-    .map((src) => resolveUrl(url, src))
-    .filter((src): src is string => Boolean(src));
+    extractFirstMetaContent($, TITLE_KEYS) ??
+    asString(jsonLdNode?.["headline"]) ??
+    asString(jsonLdNode?.["name"]) ??
+    extractTitleTag($);
+  const description =
+    extractFirstMetaContent($, DESCRIPTION_KEYS) ??
+    asString(jsonLdNode?.["description"]);
+  const siteName =
+    extractFirstMetaContent($, SITE_NAME_KEYS) ??
+    asString(asRecord(jsonLdNode?.["publisher"])?.["name"]);
+  const jsonLdImage = extractJsonLdImage(jsonLdNode, url);
+  const imageCandidates = extractImageCandidates($, url, jsonLdImage);
   const canonicalUrl =
-    extractFirstMetaContent(html, URL_KEYS) ?? extractCanonicalUrl(html, url);
-  const type = extractFirstMetaContent(html, TYPE_KEYS);
-  const favicons = extractIconLinks(html, url);
+    extractFirstMetaContent($, URL_KEYS) ?? extractCanonicalUrl($, url);
+  const type = extractFirstMetaContent($, TYPE_KEYS);
+  const favicons = extractIconLinks($, url);
+  const author =
+    extractFirstMetaContent($, AUTHOR_KEYS) ?? extractJsonLdAuthor(jsonLdNode);
+  const publishedTime =
+    extractFirstMetaContent($, PUBLISHED_TIME_KEYS) ??
+    asString(jsonLdNode?.["datePublished"]);
+  const modifiedTime =
+    extractFirstMetaContent($, MODIFIED_TIME_KEYS) ??
+    asString(jsonLdNode?.["dateModified"]);
+  const section = extractFirstMetaContent($, ARTICLE_SECTION_KEYS);
+  const primaryImage = imageCandidates[0];
+  const primaryImageMetadata = extractImageMetadataForSource(
+    $,
+    primaryImage?.source
+  );
 
-  const primaryImage = resolvedImageUrls[0];
+  const primaryImageData = primaryImage
+    ? {
+        url: primaryImage.url,
+        secureUrl: primaryImage.url,
+        width: primaryImageMetadata.width ?? null,
+        height: primaryImageMetadata.height ?? null,
+        alt: primaryImageMetadata.alt ?? null,
+      }
+    : null;
 
   return {
     requestUrl: url.toString(),
@@ -702,9 +1023,18 @@ export function buildResponse(
     contentType: contentType ?? null,
     favicon: favicons[0] ?? null,
     favicons,
-    image: primaryImage
-      ? { url: primaryImage, secureUrl: primaryImage }
-      : null,
-    images: resolvedImageUrls.map((src) => ({ url: src, secureUrl: src })),
+    image: primaryImageData,
+    images: imageCandidates.map((candidate, index) => ({
+      url: candidate.url,
+      secureUrl: candidate.url,
+      width: index === 0 ? (primaryImageMetadata.width ?? null) : null,
+      height: index === 0 ? (primaryImageMetadata.height ?? null) : null,
+      alt: index === 0 ? (primaryImageMetadata.alt ?? null) : null,
+    })),
+    source: siteName ?? url.hostname.replace(/^www\./i, ""),
+    author: author ?? null,
+    publishedTime: publishedTime ?? null,
+    modifiedTime: modifiedTime ?? null,
+    section: section ?? null,
   };
 }
