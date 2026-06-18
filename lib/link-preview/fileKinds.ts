@@ -205,37 +205,6 @@ export function isClearlyFileLikeUrl(url: URL): boolean {
   return getFileKindFromExtension(url.pathname) !== null;
 }
 
-export function getFileKindLabel(kind: ExternalFileKind): string {
-  switch (kind) {
-    case "pdf":
-      return "PDF";
-    case "csv":
-      return "CSV";
-    case "text":
-      return "Text";
-    case "code":
-      return "Code";
-    case "image":
-      return "Image";
-    case "audio":
-      return "Audio";
-    case "video":
-      return "Video";
-    case "archive":
-      return "Archive";
-    case "document":
-      return "Document";
-    case "spreadsheet":
-      return "Spreadsheet";
-    case "presentation":
-      return "Presentation";
-    case "binary":
-      return "Binary";
-    case "unknown":
-      return "File";
-  }
-}
-
 export function isBinaryFileKind(kind: ExternalFileKind): boolean {
-  return !["code", "csv", "text"].includes(kind);
+  return !["code", "csv", "text", "unknown"].includes(kind);
 }

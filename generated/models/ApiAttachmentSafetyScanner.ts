@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export enum ApiAttachmentSafetyScanner {
     Guardduty = 'guardduty'
 }

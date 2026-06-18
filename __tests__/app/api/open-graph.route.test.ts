@@ -1636,6 +1636,75 @@ describe("open-graph API route", () => {
     expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 
+  it("returns metadata-only file previews for explicit JSON responses", async () => {
+    const fetchResponse = createResponse(200, {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "18",
+      },
+      body: '{"ok":true}',
+      url: "https://api.example/data",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://api.example/data"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      type: "external.file",
+      title: "data",
+      fileName: "data",
+      extension: null,
+      fileKind: "code",
+      contentType: "application/json; charset=utf-8",
+      sizeBytes: 18,
+      sourceHost: "api.example",
+      trust: "external_unscanned",
+      links: {
+        open: "https://api.example/data",
+      },
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("rejects missing-content-type non-HTML bodies instead of parsing OpenGraph", async () => {
+    const fetchResponse = createResponse(200, {
+      body: "\u0000\u0001not-html",
+      url: "https://files.example/download",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://files.example/download"
+      ),
+    } as any);
+
+    expect(response.status).toBe(415);
+    expect(await response.json()).toEqual({
+      error: "Preview URL did not return readable HTML metadata.",
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
   it("uses sanitized content-disposition filenames for external files", async () => {
     const fetchResponse = createResponse(200, {
       headers: {
@@ -1677,6 +1746,43 @@ describe("open-graph API route", () => {
       },
     });
     expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("strips charset and language prefixes from encoded content-disposition filenames", async () => {
+    const fetchResponse = createResponse(200, {
+      headers: {
+        "content-type": "application/pdf",
+        "content-disposition":
+          "attachment; filename*=iso-8859-1'en-US'Report%20Q2.pdf",
+      },
+      body: "%PDF",
+      url: "https://files.example/download",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://files.example/download"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        type: "external.file",
+        title: "Report Q2.pdf",
+        fileName: "Report Q2.pdf",
+        extension: "pdf",
+        fileKind: "pdf",
+      })
+    );
   });
 
   it("uses compound plan when available", async () => {

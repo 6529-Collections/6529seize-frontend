@@ -293,6 +293,36 @@ describe("github-preview API route", () => {
     });
   });
 
+  it("keeps excerpts for extensionless GitHub text files", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "LICENSE",
+        path: "LICENSE",
+        size: 24,
+        encoding: "base64",
+        content: Buffer.from("Permission is hereby granted\n").toString(
+          "base64"
+        ),
+        html_url: "https://github.com/o/r/blob/main/LICENSE",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/LICENSE")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      title: "LICENSE",
+      extension: null,
+      fileKind: "unknown",
+      isBinary: false,
+      lineCount: 2,
+      excerpt: ["Permission is hereby granted", ""],
+    });
+  });
+
   it("maps GitHub PDF files as metadata-only previews", async () => {
     fetchMock.mockResolvedValueOnce(
       jsonResponse({

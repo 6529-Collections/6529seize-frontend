@@ -7,7 +7,9 @@ import Link from "next/link";
 
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 import GithubPreviewStatusBadge from "@/components/waves/GithubPreviewStatusBadge";
-import { getFileKindLabel } from "@/lib/link-preview/fileKinds";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import type { ExternalFileKind } from "@/lib/link-preview/fileKinds";
 import {
   fetchGithubPreview,
   type GithubPreviewChecks,
@@ -62,6 +64,7 @@ interface GithubAccent {
 }
 
 const GITHUB_NUMBER_PATTERN = /^\d+$/;
+const GITHUB_PREVIEW_LOCALE = DEFAULT_LOCALE;
 
 const GITHUB_ACCENTS: Record<
   GithubLinkKind,
@@ -351,6 +354,53 @@ const joinDetailParts = (
 const joinMetaParts = (parts: readonly (string | null | undefined)[]): string =>
   parts.filter((part): part is string => Boolean(part)).join(" / ");
 
+function getFileKindLabel(
+  kind: ExternalFileKind,
+  locale: SupportedLocale = GITHUB_PREVIEW_LOCALE
+): string {
+  switch (kind) {
+    case "pdf":
+      return t(locale, "linkPreview.file.kind.pdf");
+    case "csv":
+      return t(locale, "linkPreview.file.kind.csv");
+    case "text":
+      return t(locale, "linkPreview.file.kind.text");
+    case "code":
+      return t(locale, "linkPreview.file.kind.code");
+    case "image":
+      return t(locale, "linkPreview.file.kind.image");
+    case "audio":
+      return t(locale, "linkPreview.file.kind.audio");
+    case "video":
+      return t(locale, "linkPreview.file.kind.video");
+    case "archive":
+      return t(locale, "linkPreview.file.kind.archive");
+    case "document":
+      return t(locale, "linkPreview.file.kind.document");
+    case "spreadsheet":
+      return t(locale, "linkPreview.file.kind.spreadsheet");
+    case "presentation":
+      return t(locale, "linkPreview.file.kind.presentation");
+    case "binary":
+      return t(locale, "linkPreview.file.kind.binary");
+    case "unknown":
+      return t(locale, "linkPreview.file.kind.unknown");
+  }
+}
+
+function getGithubFileKindLabel(
+  kind: ExternalFileKind,
+  locale: SupportedLocale = GITHUB_PREVIEW_LOCALE
+): string {
+  if (kind === "unknown") {
+    return t(locale, "linkPreview.file.kind.unknown");
+  }
+
+  return t(locale, "linkPreview.github.fileKind", {
+    kind: getFileKindLabel(kind, locale),
+  });
+}
+
 const getChecksLabel = (
   checks: GithubPreviewChecks | null | undefined
 ): string | null => {
@@ -445,8 +495,7 @@ const getKindLabelFromPreview = (
       if (!preview.fileKind) {
         return "File";
       }
-      const fileKindLabel = getFileKindLabel(preview.fileKind);
-      return fileKindLabel === "File" ? "File" : `${fileKindLabel} file`;
+      return getGithubFileKindLabel(preview.fileKind);
     }
     case "github.directory":
       return "Directory";
@@ -782,17 +831,26 @@ const getPreviewFacts = (
     case "github.file":
       return compactFacts([
         preview.fileKind
-          ? { label: "Type", value: getFileKindLabel(preview.fileKind) }
+          ? {
+              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.github.fact.type"),
+              value: getFileKindLabel(preview.fileKind),
+            }
           : null,
         preview.language ? { label: "Language", value: preview.language } : null,
         preview.mimeType &&
         preview.fileKind !== "code" &&
         preview.fileKind !== "text"
-          ? { label: "MIME", value: preview.mimeType }
+          ? {
+              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.github.fact.mime"),
+              value: preview.mimeType,
+            }
           : null,
         preview.ref ? { label: "Ref", value: preview.ref } : null,
         formatBytes(preview.size)
-          ? { label: "Size", value: formatBytes(preview.size)! }
+          ? {
+              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.file.fact.size"),
+              value: formatBytes(preview.size)!,
+            }
           : null,
         formatCount(preview.lineCount, "line")
           ? { label: "Lines", value: formatCount(preview.lineCount, "line")! }

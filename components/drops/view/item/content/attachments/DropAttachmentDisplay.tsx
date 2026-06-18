@@ -4,6 +4,9 @@ import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { formatNumber } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   parseDecentralizedMediaRef,
   toNativeUri,
@@ -113,6 +116,7 @@ const CSV_PREVIEW_TIMEOUT_MESSAGE =
   "CSV preview timed out. Please download the file.";
 const CSV_PREVIEW_SIZE_MESSAGE =
   "CSV preview exceeds the browser size limit. Please download the file.";
+const ATTACHMENT_LOCALE = DEFAULT_LOCALE;
 
 function TrustedAttachmentBadge({
   size = "default",
@@ -129,6 +133,7 @@ function TrustedAttachmentBadge({
   const describedById = showTooltip && isTooltipOpen ? tooltipId : undefined;
   const buttonSizeClassName = TRUSTED_BADGE_BUTTON_SIZE_CLASS_BY_SIZE[size];
   const iconSizeClassName = TRUSTED_BADGE_ICON_SIZE_CLASS_BY_SIZE[size];
+  const badgeLabel = t(ATTACHMENT_LOCALE, "attachment.safety.badge");
 
   return (
     <>
@@ -137,7 +142,7 @@ function TrustedAttachmentBadge({
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
         className={`${TRUSTED_BADGE_BUTTON_CLASS} ${buttonSizeClassName}`}
-        aria-label="Scanned and validated attachment"
+        aria-label={t(ATTACHMENT_LOCALE, "attachment.safety.ariaLabel")}
         aria-describedby={describedById}
         {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
       >
@@ -156,7 +161,7 @@ function TrustedAttachmentBadge({
           style={TOOLTIP_STYLES}
           isOpen={isTooltipOpen}
         >
-          <span className="tw-text-xs">Scanned and validated</span>
+          <span className="tw-text-xs">{badgeLabel}</span>
         </Tooltip>
       )}
     </>
@@ -342,7 +347,26 @@ const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB"] as const;
 
 type AttachmentSafety = ApiAttachment["safety"];
 
-function formatAttachmentSize(sizeBytes: number | null | undefined): string | null {
+function getAttachmentFileSizeUnitLabel(
+  locale: SupportedLocale,
+  unit: (typeof FILE_SIZE_UNITS)[number]
+): string {
+  switch (unit) {
+    case "B":
+      return t(locale, "linkPreview.file.size.unit.B");
+    case "KB":
+      return t(locale, "linkPreview.file.size.unit.KB");
+    case "MB":
+      return t(locale, "linkPreview.file.size.unit.MB");
+    case "GB":
+      return t(locale, "linkPreview.file.size.unit.GB");
+  }
+}
+
+function formatAttachmentSize(
+  sizeBytes: number | null | undefined,
+  locale: SupportedLocale
+): string | null {
   if (
     typeof sizeBytes !== "number" ||
     !Number.isFinite(sizeBytes) ||
@@ -358,11 +382,13 @@ function formatAttachmentSize(sizeBytes: number | null | undefined): string | nu
     unitIndex += 1;
   }
 
-  const formatted =
-    unitIndex === 0 || size >= 10
-      ? Math.round(size).toString()
-      : size.toFixed(1).replace(/\.0$/, "");
-  return `${formatted} ${FILE_SIZE_UNITS[unitIndex]}`;
+  const formatted = formatNumber(locale, size, {
+    maximumFractionDigits: unitIndex === 0 || size >= 10 ? 0 : 1,
+  });
+  return t(locale, "linkPreview.file.size.value", {
+    value: formatted,
+    unit: getAttachmentFileSizeUnitLabel(locale, FILE_SIZE_UNITS[unitIndex]!),
+  });
 }
 
 function isScannedValidatedAttachment(
@@ -844,10 +870,14 @@ export default function DropAttachmentDisplay({
     return metadataUrl ? getSafeAttachmentUrl(metadataUrl) : null;
   }, [attachmentUrl]);
   const isScannedValidated = isScannedValidatedAttachment(safety);
-  const safetySize = formatAttachmentSize(safety?.size_bytes);
+  const safetySize = formatAttachmentSize(
+    safety?.size_bytes,
+    ATTACHMENT_LOCALE
+  );
   const hasSafetyMetadata = Boolean(safetySize || safety?.sha256);
   const hasDetails = safeMetadataUrl !== null || hasSafetyMetadata;
   const isRendered = isPreviewOpen;
+  const safetyLabel = t(ATTACHMENT_LOCALE, "attachment.safety.badge");
   const { renderType, fileName, label, canRender, Icon } = useMemo(() => {
     const nextRenderType = getAttachmentRenderType(mimeType, attachmentUrl);
     const fileInfo = getFileInfoFromUrl(attachmentUrl);
@@ -1018,7 +1048,7 @@ export default function DropAttachmentDisplay({
           <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0.5 tw-text-xs tw-font-medium tw-text-iron-500">
             <span>{label}</span>
             {isScannedValidated && (
-              <span className="tw-text-emerald-300">Scanned and validated</span>
+              <span className="tw-text-emerald-300">{safetyLabel}</span>
             )}
           </div>
         </div>
@@ -1066,17 +1096,21 @@ export default function DropAttachmentDisplay({
             {hasSafetyMetadata && (
               <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-p-4">
                 <div className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-                  Attachment safety
+                  {t(ATTACHMENT_LOCALE, "attachment.safety.heading")}
                 </div>
                 <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
                   {safetySize && (
                     <span className="tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200">
-                      Size {safetySize}
+                      {t(ATTACHMENT_LOCALE, "attachment.safety.size", {
+                        size: safetySize,
+                      })}
                     </span>
                   )}
                   {safety?.sha256 && (
                     <span className="tw-max-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-200">
-                      <span className="tw-text-iron-500">SHA-256 </span>
+                      <span className="tw-text-iron-500">
+                        {t(ATTACHMENT_LOCALE, "attachment.safety.sha256")}{" "}
+                      </span>
                       <span className="tw-break-all">{safety.sha256}</span>
                     </span>
                   )}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
-import { formatDate } from "@/i18n/format";
+import { formatDate, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -19,7 +19,6 @@ import type {
   YoutubeVideoLinkPreview,
 } from "@/services/api/link-preview-api";
 import {
-  getFileKindLabel,
   getNormalizedMimeType,
   type ExternalFileKind,
 } from "@/lib/link-preview/fileKinds";
@@ -776,13 +775,35 @@ const FILE_KIND_ACCENTS: Record<
   },
 };
 
-function formatBytes(value: number | null | undefined): string | undefined {
+function getFileSizeUnitLabel(
+  locale: SupportedLocale,
+  unit: (typeof FILE_SIZE_UNITS)[number]
+): string {
+  switch (unit) {
+    case "B":
+      return t(locale, "linkPreview.file.size.unit.B");
+    case "KB":
+      return t(locale, "linkPreview.file.size.unit.KB");
+    case "MB":
+      return t(locale, "linkPreview.file.size.unit.MB");
+    case "GB":
+      return t(locale, "linkPreview.file.size.unit.GB");
+  }
+}
+
+function formatBytes(
+  value: number | null | undefined,
+  locale: SupportedLocale
+): string | undefined {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
     return undefined;
   }
 
   if (value === 0) {
-    return "0 B";
+    return t(locale, "linkPreview.file.size.value", {
+      value: formatNumber(locale, 0, { maximumFractionDigits: 0 }),
+      unit: getFileSizeUnitLabel(locale, "B"),
+    });
   }
 
   const unitIndex = Math.min(
@@ -790,11 +811,13 @@ function formatBytes(value: number | null | undefined): string | undefined {
     FILE_SIZE_UNITS.length - 1
   );
   const size = value / 1024 ** unitIndex;
-  const formatted =
-    unitIndex === 0 || size >= 10
-      ? size.toFixed(0)
-      : size.toFixed(1).replace(/\.0$/, "");
-  return `${formatted} ${FILE_SIZE_UNITS[unitIndex]}`;
+  const formatted = formatNumber(locale, size, {
+    maximumFractionDigits: unitIndex === 0 || size >= 10 ? 0 : 1,
+  });
+  return t(locale, "linkPreview.file.size.value", {
+    value: formatted,
+    unit: getFileSizeUnitLabel(locale, FILE_SIZE_UNITS[unitIndex]!),
+  });
 }
 
 function truncateMiddle(value: string, maxLength = 86): string {
@@ -807,6 +830,40 @@ function truncateMiddle(value: string, maxLength = 86): string {
   return `${value.slice(0, headLength)}...${value.slice(-tailLength)}`;
 }
 
+function getFileKindLabel(
+  locale: SupportedLocale,
+  kind: ExternalFileKind
+): string {
+  switch (kind) {
+    case "pdf":
+      return t(locale, "linkPreview.file.kind.pdf");
+    case "csv":
+      return t(locale, "linkPreview.file.kind.csv");
+    case "text":
+      return t(locale, "linkPreview.file.kind.text");
+    case "code":
+      return t(locale, "linkPreview.file.kind.code");
+    case "image":
+      return t(locale, "linkPreview.file.kind.image");
+    case "audio":
+      return t(locale, "linkPreview.file.kind.audio");
+    case "video":
+      return t(locale, "linkPreview.file.kind.video");
+    case "archive":
+      return t(locale, "linkPreview.file.kind.archive");
+    case "document":
+      return t(locale, "linkPreview.file.kind.document");
+    case "spreadsheet":
+      return t(locale, "linkPreview.file.kind.spreadsheet");
+    case "presentation":
+      return t(locale, "linkPreview.file.kind.presentation");
+    case "binary":
+      return t(locale, "linkPreview.file.kind.binary");
+    case "unknown":
+      return t(locale, "linkPreview.file.kind.unknown");
+  }
+}
+
 function ExternalFilePreviewCard({
   href,
   preview,
@@ -815,6 +872,7 @@ function ExternalFilePreviewCard({
   linkRel,
   variant,
   hideActions,
+  locale,
 }: {
   readonly href: string;
   readonly preview: ExternalFileLinkPreviewResponse;
@@ -823,14 +881,19 @@ function ExternalFilePreviewCard({
   readonly linkRel?: string | undefined;
   readonly variant: LinkPreviewVariant;
   readonly hideActions: boolean;
+  readonly locale: SupportedLocale;
 }) {
   const accent = FILE_KIND_ACCENTS[preview.fileKind];
-  const kindLabel = getFileKindLabel(preview.fileKind);
+  const kindLabel = getFileKindLabel(locale, preview.fileKind);
   const mimeType = getNormalizedMimeType(preview.contentType);
-  const fileSize = formatBytes(preview.sizeBytes);
+  const fileSize = formatBytes(preview.sizeBytes, locale);
   const facts = [
-    mimeType ? { label: "MIME", value: mimeType } : null,
-    fileSize ? { label: "Size", value: fileSize } : null,
+    mimeType
+      ? { label: t(locale, "linkPreview.file.fact.mime"), value: mimeType }
+      : null,
+    fileSize
+      ? { label: t(locale, "linkPreview.file.fact.size"), value: fileSize }
+      : null,
   ].filter((fact): fact is { label: string; value: string } => Boolean(fact));
 
   return (
@@ -867,7 +930,7 @@ function ExternalFilePreviewCard({
                 {preview.sourceHost}
               </span>
               <span className="tw-flex-shrink-0 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/80 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300">
-                External source
+                {t(locale, "linkPreview.file.externalSource")}
               </span>
             </span>
             <span className="tw-min-w-0 tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 sm:tw-text-lg">
@@ -890,7 +953,7 @@ function ExternalFilePreviewCard({
                 </span>
               ))}
               <span className="tw-inline-flex tw-max-w-full tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-black/20 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-200 tw-transition group-hover/file-card:tw-border-sky-400/35 group-hover/file-card:tw-text-white">
-                Open source
+                {t(locale, "linkPreview.file.openSource")}
               </span>
             </span>
           </span>
@@ -2014,6 +2077,7 @@ export default function OpenGraphPreview({
         linkRel={linkRel}
         variant={resolvedVariant}
         hideActions={hideActions}
+        locale={locale}
       />
     );
   }

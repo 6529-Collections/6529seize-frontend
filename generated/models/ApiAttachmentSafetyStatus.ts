@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export enum ApiAttachmentSafetyStatus {
     Pending = 'pending',
     ScannedValidated = 'scanned_validated',

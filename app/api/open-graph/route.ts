@@ -331,6 +331,9 @@ async function extractHtmlResponse(
       { allowMissing: true }
     );
     const html = await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
+    if (contentType === null && !looksLikeHtmlDocument(html)) {
+      throw new UnsupportedContentTypeError(null, "HTML");
+    }
     const finalUrl = response.url || fallbackUrl.toString();
 
     return {
@@ -347,6 +350,12 @@ async function extractHtmlResponse(
       cause: error,
     });
   }
+}
+
+function looksLikeHtmlDocument(value: string): boolean {
+  return /^\s*(?:<!doctype\s+html\b|<html\b|<head\b|<body\b|<meta\b|<title\b|<!--)/i.test(
+    value
+  );
 }
 
 /**
@@ -420,6 +429,15 @@ function decodeHeaderValue(value: string): string {
   }
 }
 
+function normalizeContentDispositionFilenameStar(value: string): string {
+  const trimmed = value.trim().replace(/^"|"$/g, "");
+  const parts = trimmed.split("'");
+  if (parts.length >= 3 && parts[0]) {
+    return parts.slice(2).join("'");
+  }
+  return trimmed;
+}
+
 function sanitizeFileName(value: string | null | undefined): string | null {
   const normalized = value
     ?.replace(/[\u0000-\u001f\u007f]/g, "")
@@ -442,11 +460,13 @@ function getContentDispositionFileName(headers: Headers): string | null {
   }
 
   const encodedMatch = contentDisposition.match(
-    /filename\*\s*=\s*(?:UTF-8'')?([^;]+)/i
+    /filename\*\s*=\s*([^;]+)/i
   );
   if (encodedMatch?.[1]) {
     return sanitizeFileName(
-      decodeHeaderValue(encodedMatch[1].trim().replace(/^"|"$/g, ""))
+      decodeHeaderValue(
+        normalizeContentDispositionFilenameStar(encodedMatch[1])
+      )
     );
   }
 
@@ -478,6 +498,8 @@ function shouldUseExternalFilePreview(
   }
 
   const contentType = response.headers.get("content-type");
+  // Explicit non-HTML payloads, including JSON, are metadata-only file
+  // previews; external bodies are not proxied or decoded here.
   return Boolean(contentType) && !isHtmlDocumentContentType(contentType);
 }
 
