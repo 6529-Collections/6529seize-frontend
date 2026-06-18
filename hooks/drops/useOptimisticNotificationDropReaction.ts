@@ -59,7 +59,7 @@ const getQueryKeyNotificationsIdentity = (
   }
 
   const normalizedIdentity = identity.trim().toLowerCase();
-  return normalizedIdentity ? normalizedIdentity : null;
+  return normalizedIdentity || null;
 };
 
 const isIdentityNotificationsQueryKeyForIdentity = (
