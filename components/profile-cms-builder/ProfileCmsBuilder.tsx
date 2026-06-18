@@ -19,6 +19,7 @@ import {
   type ProfileCmsBuilderActionResult,
 } from "@/lib/profile-cms/builder/api";
 import {
+  WALLET_GALLERY_FIXTURE_WARNING_CODES,
   parseWalletGallerySources,
   type WalletGalleryBuilderState,
   type WalletGallerySnapshotAsset,
@@ -813,13 +814,33 @@ function GallerySnapshotSummary({
               className="tw-text-primary-100 tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500/10 tw-p-3 tw-text-sm tw-leading-6"
               key={warning}
             >
-              {warning}
+              {formatGallerySnapshotWarning(locale, warning)}
             </li>
           ))}
         </ul>
       ) : null}
     </div>
   );
+}
+
+function formatGallerySnapshotWarning(
+  locale: SupportedLocale,
+  warning: string
+): string {
+  switch (warning) {
+    case WALLET_GALLERY_FIXTURE_WARNING_CODES.backendDisabled:
+      return t(
+        locale,
+        "profileCms.builder.gallery.snapshot.warning.fixtureBackendDisabled"
+      );
+    case WALLET_GALLERY_FIXTURE_WARNING_CODES.partialMedia:
+      return t(
+        locale,
+        "profileCms.builder.gallery.snapshot.warning.partialMedia"
+      );
+    default:
+      return warning;
+  }
 }
 
 function SummaryItem({

@@ -172,13 +172,18 @@ storage flow and exact BE publish body are wired.
 - Route: `/{handle}/cms/builder`
 - Current source locale: `en-US`
 - Current fallback behavior: partial locale dictionaries fall back to `en-US`
-  for the builder chrome.
+  for the builder chrome. Frontend-authored wallet gallery fixture warning codes
+  render through `profileCms.builder.gallery.snapshot.warning.*` keys before
+  they appear in the snapshot review summary.
 - User impact while feature-flagged: authors using `en-GB`, `fr-FR`, `es-ES`,
   or `de-DE` see English-only builder chrome and English starter package
-  content. Starter package text is treated as editable authored content, not
-  translated runtime chrome.
+  content. The temporary wallet gallery preview generator also emits English
+  block, callout, metadata, and fixture alt text in the Preview tab. Starter and
+  preview package text is treated as editable authored content, not translated
+  runtime chrome.
 - Owner/follow-up: frontend CMS builder lane should add partial-locale builder
   keys before the route exits hidden feature-flag status.
 - Remediation: translate `profileCms.builder.*` chrome keys and decide whether
-  seed package copy should remain authored defaults or move to locale-specific
-  starter templates.
+  seed package copy should remain authored defaults, move to locale-specific
+  starter templates, or be replaced by the backend Phase 5 deterministic
+  generator output once that durable source of truth is wired.

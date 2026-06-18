@@ -697,6 +697,10 @@ export const EN_US_MESSAGES = {
     "Gallery snapshot could not be created.",
   "profileCms.builder.gallery.snapshot.fixture": "Fixture snapshot",
   "profileCms.builder.gallery.snapshot.api": "Backend snapshot",
+  "profileCms.builder.gallery.snapshot.warning.fixtureBackendDisabled":
+    "Fixture snapshot used until the gallery backend snapshot endpoint is enabled.",
+  "profileCms.builder.gallery.snapshot.warning.partialMedia":
+    "Some media may be pending or unavailable in the reviewed snapshot.",
   "profileCms.builder.gallery.review.title": "Snapshot review",
   "profileCms.builder.gallery.review.description":
     "Review the frozen wallet snapshot before saving the generated gallery package.",

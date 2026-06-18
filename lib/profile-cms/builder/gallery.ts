@@ -94,6 +94,11 @@ export type WalletGalleryPackageOptions = {
   readonly now?: Date | undefined;
 };
 
+export const WALLET_GALLERY_FIXTURE_WARNING_CODES = {
+  backendDisabled: "fixture_snapshot_backend_disabled",
+  partialMedia: "fixture_snapshot_partial_media",
+} as const;
+
 const FIXTURE_ZERO_HASH =
   "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 const DEFAULT_COLLECTION_CONTRACT =
@@ -243,8 +248,8 @@ export function createMockWalletGallerySnapshot({
       },
     ],
     warnings: [
-      "Fixture snapshot used until the gallery backend snapshot endpoint is enabled.",
-      "Some media may be pending or unavailable in the reviewed snapshot.",
+      WALLET_GALLERY_FIXTURE_WARNING_CODES.backendDisabled,
+      WALLET_GALLERY_FIXTURE_WARNING_CODES.partialMedia,
     ],
   };
 }
