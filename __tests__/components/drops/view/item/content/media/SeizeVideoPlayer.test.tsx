@@ -407,6 +407,87 @@ describe("SeizeVideoPlayer", () => {
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
   });
 
+  it("places minimal playback on the left and mute on the right", () => {
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay />);
+
+    const pauseButton = screen.getByRole("button", { name: "Pause video" });
+    const muteButton = screen.getByRole("button", { name: "Unmute video" });
+
+    expect(pauseButton.parentElement).toHaveClass("tw-left-3");
+    expect(muteButton.parentElement).toHaveClass("tw-right-3");
+  });
+
+  it("toggles minimal playback from video clicks", () => {
+    let paused = false;
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => paused,
+    });
+
+    fireEvent.click(video);
+
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+
+    paused = true;
+    fireEvent.click(video);
+
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+  });
+
+  it("does not toggle playback from native-control video clicks", () => {
+    const { container } = render(
+      <SeizeVideoPlayer
+        src="https://example.com/video.mp4"
+        template="watch-media"
+      />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      value: false,
+    });
+
+    fireEvent.click(video);
+
+    expect(HTMLMediaElement.prototype.pause).not.toHaveBeenCalled();
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+
+  it("seeks minimal videos from the footer timeline", () => {
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      value: 200,
+    });
+    video.currentTime = 0;
+
+    fireEvent.durationChange(video);
+
+    const seek = screen.getByRole("slider", { name: "Seek video" });
+    expect(seek).not.toBeDisabled();
+
+    fireEvent.change(seek, { target: { value: "25" } });
+
+    expect(video.currentTime).toBe(50);
+    expect(seek).toHaveValue("25");
+  });
+
   it("uses native controls for watch media and suppresses custom controls", () => {
     const { container } = render(
       <SeizeVideoPlayer
