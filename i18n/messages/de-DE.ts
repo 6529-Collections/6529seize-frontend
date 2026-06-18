@@ -1,3 +1,4 @@
+import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const DE_DE_MESSAGES = {
@@ -15,6 +16,7 @@ export const DE_DE_MESSAGES = {
   "media.video.unmute": "Videoton einschalten",
   "media.video.unsupported":
     "Ihr Browser unterstuetzt das Video-Tag nicht.",
+  ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
   "theMemes.sorting.regionLabel": "Meme-Sortierung",
