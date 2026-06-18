@@ -2,6 +2,8 @@
 
 import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
@@ -198,6 +200,28 @@ function ScoreSortIcon({ sort }: { readonly sort: DiscoverSort }) {
   }
 }
 
+const SORT_ITEMS: readonly CommonSelectItem<DiscoverSort>[] = SORT_OPTIONS.map(
+  (option) => ({
+    key: option.value,
+    label: option.label,
+    value: option.value,
+    icon: <ScoreSortIcon sort={option.value} />,
+  })
+);
+
+function ScoreFormulaLink() {
+  return (
+    <Link
+      href="/network/wave-score"
+      aria-label="View wave score formula"
+      className="tw-inline-flex tw-h-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+    >
+      <CalculatorIcon className="tw-size-4" aria-hidden="true" />
+      Score formula
+    </Link>
+  );
+}
+
 function DiscoverWaveControls({
   activeFilter,
   activeSort,
@@ -212,90 +236,68 @@ function DiscoverWaveControls({
   const scoreFiltersEnabled = isScoreSort(activeSort);
 
   return (
-    <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 md:tw-w-auto md:tw-items-end">
-      <Link
-        href="/network/wave-score"
-        className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-gap-1.5 tw-self-start tw-rounded-md tw-bg-iron-950 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-200 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white md:tw-self-end"
-      >
-        <CalculatorIcon className="tw-size-4" aria-hidden="true" />
-        Score formula
-      </Link>
-      <div
-        role="radiogroup"
-        className="tw-grid tw-w-full tw-grid-cols-2 tw-gap-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-white/10 sm:tw-grid-cols-3 md:tw-w-auto xl:tw-grid-cols-6"
-        aria-label="Wave discovery sort"
-      >
-        {SORT_OPTIONS.map((option) => {
-          const selected = activeSort === option.value;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              tabIndex={selected ? 0 : -1}
-              data-radio-value={option.value}
-              onClick={() => onSortChange(option.value)}
-              onKeyDown={(event) =>
-                onRadioKeyDown({
-                  activeValue: activeSort,
-                  event,
-                  onChange: onSortChange,
-                  options: SORT_OPTIONS,
-                })
-              }
-              className={`tw-inline-flex tw-h-9 tw-min-w-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs tw-font-medium tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                selected
-                  ? "tw-bg-iron-700 tw-text-white"
-                  : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-              }`}
-            >
-              <ScoreSortIcon sort={option.value} />
-              <span className="tw-truncate">{option.label}</span>
-            </button>
-          );
-        })}
+    <fieldset className="tw-m-0 tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-black/20 tw-p-1.5 tw-ring-1 tw-ring-inset tw-ring-white/5 xl:tw-flex-row xl:tw-items-center">
+      <legend className="tw-sr-only">Discovery controls</legend>
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 xl:tw-flex-row xl:tw-items-center xl:tw-gap-x-4">
+        <div className="tw-min-w-0">
+          <CommonTabs<DiscoverSort>
+            items={SORT_ITEMS}
+            activeItem={activeSort}
+            filterLabel="Wave discovery sort"
+            setSelected={onSortChange}
+            size="sm"
+            fill={false}
+          />
+        </div>
+        <div
+          className="tw-hidden tw-h-6 tw-w-px tw-flex-shrink-0 tw-bg-white/10 xl:tw-block"
+          aria-hidden="true"
+        />
+        <div className="horizontal-menu-hide-scrollbar tw-flex tw-min-w-0 tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60">
+          <div
+            role="radiogroup"
+            className={`tw-flex tw-flex-shrink-0 tw-flex-nowrap tw-gap-1.5 tw-transition-opacity ${
+              scoreFiltersEnabled ? "tw-opacity-100" : "tw-opacity-70"
+            }`}
+            aria-label="Wave score threshold"
+            aria-disabled={!scoreFiltersEnabled}
+          >
+            {FILTER_OPTIONS.map((option) => {
+              const selected = activeFilter === option.value;
+              const visuallySelected = selected && scoreFiltersEnabled;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  disabled={!scoreFiltersEnabled}
+                  tabIndex={scoreFiltersEnabled && selected ? 0 : -1}
+                  data-radio-value={option.value}
+                  onClick={() => onFilterChange(option.value)}
+                  onKeyDown={(event) =>
+                    onRadioKeyDown({
+                      activeValue: activeFilter,
+                      event,
+                      onChange: onFilterChange,
+                      options: FILTER_OPTIONS,
+                    })
+                  }
+                  className={`tw-flex tw-h-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+                    visuallySelected
+                      ? "tw-border-primary-500/50 tw-bg-primary-500/10 tw-text-primary-400 desktop-hover:hover:tw-border-primary-400/70 desktop-hover:hover:tw-bg-primary-500/15 desktop-hover:hover:tw-text-primary-300"
+                      : "tw-border-white/5 tw-bg-iron-950 tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+          <ScoreFormulaLink />
+        </div>
       </div>
-      <div
-        role="radiogroup"
-        className={`tw-flex tw-w-full tw-flex-wrap tw-gap-1.5 tw-transition-opacity md:tw-justify-end ${
-          scoreFiltersEnabled ? "tw-opacity-100" : "tw-opacity-55"
-        }`}
-        aria-label="Wave score filters"
-        aria-disabled={!scoreFiltersEnabled}
-      >
-        {FILTER_OPTIONS.map((option) => {
-          const selected = activeFilter === option.value;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              disabled={!scoreFiltersEnabled}
-              tabIndex={scoreFiltersEnabled && selected ? 0 : -1}
-              data-radio-value={option.value}
-              onClick={() => onFilterChange(option.value)}
-              onKeyDown={(event) =>
-                onRadioKeyDown({
-                  activeValue: activeFilter,
-                  event,
-                  onChange: onFilterChange,
-                  options: FILTER_OPTIONS,
-                })
-              }
-              className={`tw-h-8 tw-rounded-md tw-border-0 tw-px-2.5 tw-text-xs tw-font-medium tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                selected
-                  ? "tw-text-primary-100 tw-bg-primary-500/20 tw-ring-1 tw-ring-inset tw-ring-primary-400/40"
-                  : "tw-bg-iron-950 tw-text-iron-400 tw-ring-1 tw-ring-inset tw-ring-white/10 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-950 disabled:tw-text-iron-600 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-              }`}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    </fieldset>
   );
 }
 
