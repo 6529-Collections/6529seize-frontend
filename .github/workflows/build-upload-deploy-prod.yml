@@ -2,6 +2,10 @@ name: Web Deploy - PROD
 
 on: workflow_dispatch
 
+concurrency:
+  group: web-deploy-prod
+  cancel-in-progress: false
+
 env:
   AWS_BUCKET: "seize-web"
   COMMIT_SHA: "${{ github.sha }}"
@@ -20,8 +24,25 @@ env:
   ASSETS_FROM_S3: "true"
 
 jobs:
-  build-upload-deploy:
+  assert-main-ref:
+    name: Assert main ref
     runs-on: ubuntu-latest
+    permissions: {}
+
+    steps:
+      - name: Assert production deploy runs from main
+        run: |
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "::error::Production deploys must be run from the main branch. Selected ref: ${GITHUB_REF_NAME} (${GITHUB_SHA})."
+            exit 1
+          fi
+
+  build-upload-deploy:
+    needs: assert-main-ref
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment: production
 
     steps:
       - name: Checkout code
