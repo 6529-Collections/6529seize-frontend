@@ -2,6 +2,7 @@ import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useEmoji } from "@/contexts/EmojiContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import * as commonApi from "@/services/api/common-api";
 import { __resetDropReactionMonitoringForTests } from "@/utils/monitoring/dropReactionMonitoring";
@@ -393,7 +394,7 @@ describe("WaveDropReactions", () => {
           profiles: [{ handle: "alice", id: "profile-1" }],
         },
       ],
-    });
+    }) as ApiDrop;
     const notificationQuery: MockNotificationQuery = {
       queryKey: [AppQueryKey.IDENTITY_NOTIFICATIONS, { identity: "alice" }],
       state: {
@@ -421,7 +422,7 @@ describe("WaveDropReactions", () => {
     );
     (commonApi.commonApiDelete as jest.Mock).mockResolvedValueOnce({});
 
-    render(<WaveDropReactions drop={drop as any} />);
+    render(<WaveDropReactions drop={drop} />);
 
     fireEvent.click(screen.getByRole("button"));
 

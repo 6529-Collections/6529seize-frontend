@@ -586,7 +586,14 @@ function WaveDropReaction({
 
   const refreshCanonicalDropAfterLatestFailure = useCallback(async () => {
     try {
-      const apiDrop = await fetchDropByIdBatched(drop.id);
+      // Keep the recovery path defensive if no canonical drop is available.
+      const apiDrop = (await fetchDropByIdBatched(drop.id)) as
+        | ApiDrop
+        | null
+        | undefined;
+      if (apiDrop === null || apiDrop === undefined) {
+        return;
+      }
 
       updateDropInCachedDrops(queryClient, apiDrop);
       updateNotificationQueriesWithCanonicalDrop(apiDrop);
