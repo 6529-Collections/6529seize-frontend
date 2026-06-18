@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { publicEnv } from "@/config/env";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { setAuthJwt } from "@/services/auth/auth.utils";
 import {
@@ -44,14 +45,21 @@ jest.mock("@/services/auth/native-refresh-token-storage", () => ({
 }));
 
 describe("session-v2.utils", () => {
+  const originalApiEndpoint = publicEnv.API_ENDPOINT;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    publicEnv.API_ENDPOINT = "https://api.staging.6529.io/api";
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     (commonApiFetch as jest.Mock).mockResolvedValue(undefined);
     (commonApiPost as jest.Mock).mockResolvedValue(undefined);
     (getNativeRefreshToken as jest.Mock).mockResolvedValue(null);
     (isNativeSecureStorageAvailable as jest.Mock).mockReturnValue(true);
     (setAuthJwt as jest.Mock).mockReturnValue(true);
+  });
+
+  afterEach(() => {
+    publicEnv.API_ENDPOINT = originalApiEndpoint;
   });
 
   it("requests web session nonce with only session-v2 query params", async () => {
@@ -134,7 +142,59 @@ describe("session-v2.utils", () => {
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
-  it("posts the strict session-login request contract", async () => {
+  it("marks persisted web auth as session v2", async () => {
+    await expect(
+      persistSessionResponse({
+        client_type: "web",
+        address: "0xabc",
+        role: null,
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      })
+    ).resolves.toBe(true);
+
+    expect(setAuthJwt).toHaveBeenCalledWith(
+      "0xabc",
+      "access-token",
+      null,
+      undefined,
+      { authSessionVersion: "v2" }
+    );
+  });
+
+  it("posts the strict session-login request contract without credentials for cross-origin web login", async () => {
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(
+      loginWithSessionV2({
+        serverSignature: "server-signature",
+        clientSignature: "client-signature",
+        signerAddress: "0xabc",
+        role: null,
+      })
+    ).resolves.toBe(sessionResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-login",
+      body: {
+        client_type: "web",
+        server_signature: "server-signature",
+        client_signature: "client-signature",
+        client_address: "0xabc",
+      },
+      credentials: undefined,
+    });
+  });
+
+  it("includes credentials for same-origin web session-login", async () => {
+    publicEnv.API_ENDPOINT = `${globalThis.window.location.origin}/api`;
     const sessionResponse = {
       client_type: "web",
       address: "0xabc",
@@ -165,7 +225,42 @@ describe("session-v2.utils", () => {
     });
   });
 
+  it("includes credentials for native session-login", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    const sessionResponse = {
+      client_type: "native",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "native-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(
+      loginWithSessionV2({
+        serverSignature: "server-signature",
+        clientSignature: "client-signature",
+        signerAddress: "0xabc",
+        role: null,
+      })
+    ).resolves.toBe(sessionResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-login",
+      body: {
+        client_type: "native",
+        server_signature: "server-signature",
+        client_signature: "client-signature",
+        client_address: "0xabc",
+      },
+      credentials: "include",
+    });
+  });
+
   it("revokes a web session cookie when auth persistence fails", async () => {
+    publicEnv.API_ENDPOINT = `${globalThis.window.location.origin}/api`;
     (setAuthJwt as jest.Mock).mockReturnValue(false);
 
     await expect(
@@ -189,7 +284,14 @@ describe("session-v2.utils", () => {
     });
   });
 
+  it("does not attempt cross-origin web session refresh", async () => {
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
   it("treats unauthorized web refresh as an invalid session", async () => {
+    publicEnv.API_ENDPOINT = `${globalThis.window.location.origin}/api`;
     const unauthorizedError = Object.assign(new Error("Unauthorized"), {
       status: 401,
       response: { status: 401 },
@@ -272,7 +374,15 @@ describe("session-v2.utils", () => {
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
-  it("attempts web session logout", async () => {
+  it("does not attempt cross-origin web session logout", async () => {
+    await logoutSessionV2({ address: "0xabc", allSessions: true });
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it("attempts same-origin web session logout", async () => {
+    publicEnv.API_ENDPOINT = `${globalThis.window.location.origin}/api`;
+
     await logoutSessionV2({ address: "0xabc", allSessions: true });
 
     expect(commonApiPost).toHaveBeenCalledWith({
@@ -305,7 +415,7 @@ describe("session-v2.utils", () => {
       body: {
         target_client_type: "native",
       },
-      credentials: "include",
+      credentials: undefined,
       signal: undefined,
     });
   });
@@ -336,7 +446,7 @@ describe("session-v2.utils", () => {
         connection_share_code: "share-code",
         target_client_type: "native",
       },
-      credentials: "include",
+      credentials: undefined,
     });
   });
 });

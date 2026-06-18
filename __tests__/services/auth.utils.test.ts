@@ -7,6 +7,7 @@ import {
   getRefreshToken,
   getStagingAuth,
   getWalletAddress,
+  hasActiveSessionV2Auth,
   isAuthAddressAuthorized,
   removeAuthJwt,
   setActiveWalletAccount,
@@ -147,6 +148,30 @@ describe("auth.utils", () => {
     publicEnv.USE_DEV_AUTH = "false";
     (Cookies.get as jest.Mock).mockReturnValue("cookie");
     expect(getAuthJwt()).toBe("cookie");
+  });
+
+  it("getAuthJwt falls back to the active account jwt when the cookie is unavailable", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+    (Cookies.get as jest.Mock).mockReturnValue(undefined);
+
+    setAuthJwt("0xAaA", "jwt-a", null, "role-a");
+
+    expect(getAuthJwt()).toBe("jwt-a");
+  });
+
+  it("tracks whether the active account was authenticated with session v2", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", null, "role-a", {
+      authSessionVersion: "v2",
+    });
+
+    expect(hasActiveSessionV2Auth({ address: "0xaaa" })).toBe(true);
+    expect(hasActiveSessionV2Auth({ address: "0xbbb" })).toBe(false);
   });
 
   it("getStagingAuth returns cookie or env", () => {

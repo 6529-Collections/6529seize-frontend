@@ -8,6 +8,7 @@ import { removeNativeRefreshToken } from "./native-refresh-token-storage";
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const WALLET_ACCOUNTS_UPDATED_EVENT = "6529-wallet-accounts-updated";
 export const PROFILE_SWITCHED_EVENT = "6529-profile-switched";
+export type AuthSessionVersion = "v2";
 
 const WALLET_ADDRESS_STORAGE_KEY = "6529-wallet-address";
 const WALLET_REFRESH_TOKEN_STORAGE_KEY = "6529-wallet-refresh-token";
@@ -22,6 +23,7 @@ export interface ConnectedWalletAccount {
   readonly jwt: string | null;
   readonly profileId: string | null;
   readonly profileHandle: string | null;
+  readonly authSessionVersion?: AuthSessionVersion | null;
 }
 
 const COOKIE_OPTIONS = {
@@ -146,6 +148,7 @@ const toStoredAccount = (
   profileId: typeof record.profileId === "string" ? record.profileId : null,
   profileHandle:
     typeof record.profileHandle === "string" ? record.profileHandle : null,
+  authSessionVersion: record.authSessionVersion === "v2" ? "v2" : null,
 });
 
 const readAccountsFromStorage = (): ConnectedWalletAccount[] => {
@@ -267,6 +270,7 @@ const migrateLegacyStorageIfNeeded = (): void => {
     jwt: legacyJwt,
     profileId: null,
     profileHandle: null,
+    authSessionVersion: null,
   };
 
   writeAccountsToStorage([legacyAccount]);
@@ -360,7 +364,10 @@ export const setAuthJwt = (
   address: string,
   jwt: string,
   refreshToken: string | null,
-  role?: string
+  role?: string,
+  options: {
+    readonly authSessionVersion?: AuthSessionVersion | null;
+  } = {}
 ): boolean => {
   const storedAccounts = getStoredAccounts();
   const existingAccount =
@@ -376,6 +383,8 @@ export const setAuthJwt = (
     jwt,
     profileId: existingAccount?.profileId ?? null,
     profileHandle: existingAccount?.profileHandle ?? null,
+    authSessionVersion:
+      options.authSessionVersion ?? existingAccount?.authSessionVersion ?? null,
   };
 
   const accountIndex = storedAccounts.findIndex(
@@ -411,7 +420,23 @@ export const getAuthJwt = () => {
   if (publicEnv.USE_DEV_AUTH === "true") {
     return publicEnv.DEV_MODE_AUTH_JWT ?? null;
   }
-  return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
+  return (
+    Cookies.get(WALLET_AUTH_COOKIE) ??
+    getActiveAccountFromAccounts(getStoredAccounts())?.jwt ??
+    null
+  );
+};
+
+export const hasActiveSessionV2Auth = ({
+  address,
+}: {
+  readonly address: string;
+}): boolean => {
+  const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
+  return (
+    activeAccount?.authSessionVersion === "v2" &&
+    normalizeAddress(activeAccount.address) === normalizeAddress(address)
+  );
 };
 
 export const getRefreshToken = () => {

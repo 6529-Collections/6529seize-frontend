@@ -21,6 +21,7 @@ const mockValidateRoleForAuthentication =
 describe("validateAuthImmediate", () => {
   const mockCallbacks = {
     onShowSignModal: jest.fn(),
+    onSessionUpgradeRequired: jest.fn(),
     onInvalidateCache: jest.fn(),
     onReset: jest.fn(),
     onRemoveJwt: jest.fn(),
@@ -157,6 +158,55 @@ describe("validateAuthImmediate", () => {
   });
 
   describe("Invalid JWT Handling", () => {
+    it("should prompt for session-v2 upgrade without removing the current JWT", async () => {
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+        requiresSessionUpgrade: true,
+      });
+
+      const result = await validateAuthImmediate({
+        params: baseParams,
+        callbacks: mockCallbacks,
+      });
+
+      expect(result).toEqual({
+        validationCompleted: true,
+        wasCancelled: false,
+        shouldShowModal: true,
+      });
+
+      expect(mockCallbacks.onRemoveJwt).not.toHaveBeenCalled();
+      expect(mockCallbacks.onInvalidateCache).not.toHaveBeenCalled();
+      expect(mockCallbacks.onSessionUpgradeRequired).toHaveBeenCalled();
+      expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
+    });
+
+    it("should reset disconnected users that need session-v2 upgrade", async () => {
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+        requiresSessionUpgrade: true,
+      });
+
+      const result = await validateAuthImmediate({
+        params: {
+          ...baseParams,
+          isConnected: false,
+        },
+        callbacks: mockCallbacks,
+      });
+
+      expect(result).toEqual({
+        validationCompleted: true,
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+
+      expect(mockCallbacks.onReset).toHaveBeenCalled();
+      expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
+    });
+
     it("should call reset when JWT is invalid and user is not connected", async () => {
       mockValidateJwt.mockResolvedValue({
         isValid: false,

@@ -21,6 +21,7 @@ interface ImmediateValidationParams {
 
 interface ImmediateValidationCallbacks {
   onShowSignModal: (show: boolean) => void;
+  onSessionUpgradeRequired?: (() => void) | undefined;
   onInvalidateCache: () => void;
   onReset: () => void;
   onRemoveJwt: () => void | Promise<void>;
@@ -95,6 +96,7 @@ const createValidationResult = (
 const handleJwtValidationResult = async (
   isValid: boolean,
   wasCancelled: boolean,
+  requiresSessionUpgrade: boolean | undefined,
   isConnected: boolean,
   abortSignal: AbortSignal,
   callbacks: ImmediateValidationCallbacks
@@ -105,6 +107,15 @@ const handleJwtValidationResult = async (
 
   if (isValid) {
     return createValidationResult(true, false, false);
+  }
+
+  if (requiresSessionUpgrade) {
+    if (isConnected) {
+      callbacks.onSessionUpgradeRequired?.();
+    } else {
+      handleInvalidJwtWhenDisconnected(callbacks);
+    }
+    return createValidationResult(true, false, isConnected);
   }
 
   // Handle invalid JWT
@@ -179,16 +190,18 @@ export const validateAuthImmediate = async ({
       return createCancelledResult();
     }
 
-    const { isValid, wasCancelled } = await validateJwt({
-      jwt,
-      wallet: currentAddress,
-      role: activeProfileProxy
-        ? validateRoleForAuthentication(activeProfileProxy)
-        : null,
-      operationId,
-      abortSignal,
-      activeProfileProxy,
-    });
+    const { isValid, wasCancelled, requiresSessionUpgrade } = await validateJwt(
+      {
+        jwt,
+        wallet: currentAddress,
+        role: activeProfileProxy
+          ? validateRoleForAuthentication(activeProfileProxy)
+          : null,
+        operationId,
+        abortSignal,
+        activeProfileProxy,
+      }
+    );
 
     // Post-validation check
     if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
@@ -198,6 +211,7 @@ export const validateAuthImmediate = async ({
     return await handleJwtValidationResult(
       isValid,
       wasCancelled,
+      requiresSessionUpgrade,
       isConnected,
       abortSignal,
       callbacks

@@ -2,6 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import {
   getWalletAddress,
   getWalletRole,
+  hasActiveSessionV2Auth,
   syncWalletRoleWithServer,
 } from "./auth.utils";
 import { persistSessionResponse, refreshSessionV2 } from "./session-v2.utils";
@@ -36,6 +37,7 @@ interface ValidateJwtParams {
 interface ValidateJwtResult {
   isValid: boolean;
   wasCancelled: boolean;
+  requiresSessionUpgrade?: boolean;
 }
 
 type RefreshedSession = NonNullable<
@@ -55,6 +57,12 @@ const CANCELLED_JWT_RESULT: ValidateJwtResult = {
 const VALID_JWT_RESULT: ValidateJwtResult = {
   isValid: true,
   wasCancelled: false,
+};
+
+const SESSION_UPGRADE_REQUIRED_RESULT: ValidateJwtResult = {
+  isValid: false,
+  wasCancelled: false,
+  requiresSessionUpgrade: true,
 };
 
 export const getRole = (jwt: string | null): string | null => {
@@ -253,19 +261,34 @@ export const validateJwt = async ({
     return CANCELLED_JWT_RESULT;
   }
 
-  // Validate the current JWT
-  const isValid = doJWTValidation({ jwt, wallet, role });
+  const hasValidLocalJwt = doJWTValidation({ jwt, wallet, role });
 
-  // If JWT is valid, return success
-  if (isValid) {
+  let refreshedResult: ValidateJwtResult;
+  try {
+    refreshedResult = await handleTokenRefresh({
+      wallet,
+      role,
+      abortSignal,
+      activeProfileProxy,
+    });
+  } catch (error: unknown) {
+    if (hasValidLocalJwt) {
+      return SESSION_UPGRADE_REQUIRED_RESULT;
+    }
+    throw error;
+  }
+
+  if (refreshedResult.isValid || refreshedResult.wasCancelled) {
+    return refreshedResult;
+  }
+
+  if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
     return VALID_JWT_RESULT;
   }
 
-  // JWT is invalid, attempt token refresh
-  return await handleTokenRefresh({
-    wallet,
-    role,
-    abortSignal,
-    activeProfileProxy,
-  });
+  if (hasValidLocalJwt) {
+    return SESSION_UPGRADE_REQUIRED_RESULT;
+  }
+
+  return INVALID_JWT_RESULT;
 };
