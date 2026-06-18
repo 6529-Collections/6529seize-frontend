@@ -28,6 +28,7 @@ export const publicEnvSchema = z.object({
   // REQUIRED
   ALLOWLIST_API_ENDPOINT: z.string().url(),
   API_ENDPOINT: z.string().url(),
+  WEB_SESSION_CREDENTIAL_API_ORIGINS: z.string().optional(),
   BASE_ENDPOINT: z
     .string({
       required_error:

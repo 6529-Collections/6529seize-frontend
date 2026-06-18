@@ -46,10 +46,13 @@ jest.mock("@/services/auth/native-refresh-token-storage", () => ({
 
 describe("session-v2.utils", () => {
   const originalApiEndpoint = publicEnv.API_ENDPOINT;
+  const originalCredentialApiOrigins =
+    publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS;
 
   beforeEach(() => {
     jest.resetAllMocks();
     publicEnv.API_ENDPOINT = "https://api.staging.6529.io/api";
+    publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS = undefined;
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     (commonApiFetch as jest.Mock).mockResolvedValue(undefined);
     (commonApiPost as jest.Mock).mockResolvedValue(undefined);
@@ -60,6 +63,7 @@ describe("session-v2.utils", () => {
 
   afterEach(() => {
     publicEnv.API_ENDPOINT = originalApiEndpoint;
+    publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS = originalCredentialApiOrigins;
   });
 
   it("requests web session nonce with only session-v2 query params", async () => {
@@ -162,7 +166,7 @@ describe("session-v2.utils", () => {
     );
   });
 
-  it("posts the strict session-login request contract without credentials for cross-origin web login", async () => {
+  it("posts the strict session-login request contract without credentials for untrusted cross-origin web login", async () => {
     const sessionResponse = {
       client_type: "web",
       address: "0xabc",
@@ -190,6 +194,39 @@ describe("session-v2.utils", () => {
         client_address: "0xabc",
       },
       credentials: undefined,
+    });
+  });
+
+  it("includes credentials for trusted cross-origin web session-login", async () => {
+    publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS =
+      "https://api.staging.6529.io";
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(
+      loginWithSessionV2({
+        serverSignature: "server-signature",
+        clientSignature: "client-signature",
+        signerAddress: "0xabc",
+        role: null,
+      })
+    ).resolves.toBe(sessionResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-login",
+      body: {
+        client_type: "web",
+        server_signature: "server-signature",
+        client_signature: "client-signature",
+        client_address: "0xabc",
+      },
+      credentials: "include",
     });
   });
 
@@ -284,10 +321,37 @@ describe("session-v2.utils", () => {
     });
   });
 
-  it("does not attempt cross-origin web session refresh", async () => {
+  it("does not attempt untrusted cross-origin web session refresh", async () => {
     await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
 
     expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it("attempts trusted cross-origin web session refresh", async () => {
+    publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS =
+      "https://api.staging.6529.io";
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBe(
+      sessionResponse
+    );
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-refresh",
+      body: {
+        client_type: "web",
+      },
+      signal: undefined,
+      credentials: "include",
+      errorMode: "structured",
+    });
   });
 
   it("treats unauthorized web refresh as an invalid session", async () => {
@@ -374,10 +438,27 @@ describe("session-v2.utils", () => {
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
-  it("does not attempt cross-origin web session logout", async () => {
+  it("does not attempt untrusted cross-origin web session logout", async () => {
     await logoutSessionV2({ address: "0xabc", allSessions: true });
 
     expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it("attempts trusted cross-origin web session logout", async () => {
+    publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS =
+      "https://api.staging.6529.io";
+
+    await logoutSessionV2({ address: "0xabc", allSessions: true });
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-logout",
+      body: {
+        client_type: "web",
+        all_sessions: true,
+      },
+      credentials: "include",
+      parseJson: false,
+    });
   });
 
   it("attempts same-origin web session logout", async () => {
@@ -416,6 +497,32 @@ describe("session-v2.utils", () => {
         target_client_type: "native",
       },
       credentials: undefined,
+      signal: undefined,
+    });
+  });
+
+  it("includes credentials for trusted cross-origin connection sharing", async () => {
+    publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS =
+      "https://api.staging.6529.io";
+    const shareResponse = {
+      connection_share_code: "share-code",
+      expires_at: "2026-06-10T00:00:00.000Z",
+      address: "0xabc",
+      role: null,
+      target_client_type: "native",
+      deep_link_path:
+        "/accept-connection-sharing?connection_share_code=share-code",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(shareResponse);
+
+    await expect(createConnectionShare({})).resolves.toBe(shareResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/connection-share",
+      body: {
+        target_client_type: "native",
+      },
+      credentials: "include",
       signal: undefined,
     });
   });
