@@ -1,6 +1,6 @@
 # Art And NFT Display Best Practices
 
-Last updated: 2026-06-17.
+Last updated: 2026-06-18.
 
 ## Purpose
 
@@ -749,6 +749,19 @@ Fields:
 - `performance_budget`.
 
 ## Recommended V1 Scope
+
+Current frontend MVP status:
+
+- The CMS renderer can now mount a deferred Three.js object viewer for GLB/glTF
+  model assets and a simple exhibition room renderer for `exhibition_room`
+  placements.
+- The room renderer supports deterministic presets, framed 2D works, faithful
+  unlit art surfaces, poster/static preview, mobile fallback, and click/tap
+  links to canonical 2D detail pages.
+- The builder MVP can create a simple single-work 3D room package with a
+  matching faithful 2D detail route.
+- This is not a full room editor, game engine, AR/VR surface, or automatic NFT
+  gallery generator.
 
 2D:
 

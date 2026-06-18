@@ -21,8 +21,11 @@ canonicalization semantics.
 
 ## Builder Package Behavior
 
-- The builder emits a V1 `CmsPackageV1` candidate with one homepage route:
+- The builder emits a V1 `CmsPackageV1` candidate with a homepage route:
   `/{handle}/index.html`.
+- If the author adds a 3D room block, the candidate also emits one faithful 2D
+  detail route per room work at `/{handle}/rooms/work-{n}/index.html`, plus a
+  matching `exhibition_room` payload entry and display asset.
 - The candidate uses the existing `withComputedCmsHashes` helper and validates
   with `validateCmsPackageV1(..., { allowFixtureSignatures: true,
   allowFixtureStorage: true, enforceHashes: true })`.
@@ -33,6 +36,9 @@ canonicalization semantics.
 - The live preview uses `CmsSiteRenderer`; there is no separate fake preview
   renderer.
 - JSON export/import exists for debugging, portability, and backend handoff.
+- The 3D room primitive is deliberately simple: room preset, one artwork asset,
+  deferred viewer policy, poster/fallback asset, and a canonical 2D detail
+  route. It does not imply wallet gallery generation or automated NFT indexing.
 
 ## Expected Backend Write API
 
@@ -162,10 +168,12 @@ storage flow and exact BE publish body are wired.
   profile authority and real decentralized storage receipts.
 - Backend publish must reject schema/hash drift and unsafe URI violations.
 - Storage upload and content-addressed receipt creation are out of scope here.
-- Production wallet gallery generation, NFT indexing, 3D rooms, and AI-agent
-  MCP flows remain owned by their backend/specialist lanes. The current FE
-  gallery shell uses a fixture-backed preview fallback only while waiting for
-  the deterministic backend generator.
+- Production wallet gallery generation, NFT indexing, full 3D world editing,
+  multi-room navigation, and AI-agent MCP flows remain owned by their
+  backend/specialist lanes. The current FE gallery shell uses a fixture-backed
+  preview fallback only while waiting for the deterministic backend generator,
+  and the 3D lane is limited to bounded viewer primitives rather than a full
+  world editor.
 
 ## Localization Follow-Up
 

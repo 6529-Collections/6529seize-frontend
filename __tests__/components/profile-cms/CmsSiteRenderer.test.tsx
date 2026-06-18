@@ -6,6 +6,7 @@ import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
 import artMediaPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/art-media.package.json";
 import collectionPagePackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/collection-page.package.json";
+import exhibitionRoomPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/exhibition-room.package.json";
 import minimalPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/minimal-profile-homepage.package.json";
 import nftDetailPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/nft-detail.package.json";
 import walletGalleryPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/wallet-gallery.package.json";
@@ -28,13 +29,21 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
 const minimalCmsPackage = minimalPackage as unknown as CmsPackageV1;
 const artCmsPackage = artMediaPackage as unknown as CmsPackageV1;
 const collectionCmsPackage = collectionPagePackage as unknown as CmsPackageV1;
+const roomCmsPackage = exhibitionRoomPackage as unknown as CmsPackageV1;
 const nftDetailCmsPackage = nftDetailPackage as unknown as CmsPackageV1;
 const walletGalleryCmsPackage = walletGalleryPackage as unknown as CmsPackageV1;
 const minimalPage = minimalCmsPackage.payload.pages[0];
 const artPage = artCmsPackage.payload.pages[0];
+const roomPage = roomCmsPackage.payload.pages[0];
 const collectionPage = collectionCmsPackage.payload.pages.find(
   (page) => page.id === "page-collection"
 );
@@ -50,6 +59,7 @@ const walletNftPage2 = walletGalleryCmsPackage.payload.pages.find(
 if (
   !minimalPage ||
   !artPage ||
+  !roomPage ||
   !collectionPage ||
   !nftDetailPage ||
   !walletGalleryPage ||
@@ -394,5 +404,23 @@ describe("CmsSiteRenderer", () => {
     );
 
     expect(screen.getByText("future page")).toBeInTheDocument();
+  });
+
+  it("renders the 3D room poster, canvas target, and canonical work links", () => {
+    render(<CmsSiteRenderer cmsPackage={roomCmsPackage} page={roomPage} />);
+
+    expect(screen.getByTestId("cms-3d-canvas")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Enter room" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Room Work Detail" })
+    ).toHaveAttribute(
+      "href",
+      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html"
+    );
+    expect(
+      screen.getByAltText("Poster for a simple 3D exhibition room")
+    ).toBeInTheDocument();
   });
 });

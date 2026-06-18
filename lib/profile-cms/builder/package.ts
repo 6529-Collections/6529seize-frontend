@@ -11,6 +11,10 @@ import {
   withComputedCmsHashes,
 } from "@/lib/profile-cms/protocol/v1";
 import {
+  isCmsRoomPreset,
+  type CmsRoomPreset,
+} from "@/lib/profile-cms/runtime/threeD";
+import {
   buildWalletGalleryCmsPackage,
   createDefaultWalletGalleryBuilderState,
   type WalletGalleryBuilderState,
@@ -24,7 +28,8 @@ export type CmsBuilderBlockKind =
   | "button_link"
   | "image"
   | "callout"
-  | "quote";
+  | "quote"
+  | "room_viewer";
 
 export type CmsBuilderBlock = {
   readonly id: string;
@@ -34,6 +39,7 @@ export type CmsBuilderBlock = {
   readonly url: string;
   readonly assetUri: string;
   readonly altText: string;
+  readonly roomStyle: CmsRoomPreset;
   readonly tone: string;
   readonly citation: string;
 };
@@ -61,6 +67,7 @@ export type CmsBuilderValidation = {
 };
 
 const DEFAULT_HANDLE = "punk6529";
+const DEFAULT_ROOM_STYLE: CmsRoomPreset = "wall";
 const FIXTURE_ZERO_HASH =
   "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -105,6 +112,7 @@ export function createBuilderBlock(
     url: "",
     assetUri: "",
     altText: "",
+    roomStyle: DEFAULT_ROOM_STYLE,
     tone: kind === "callout" ? "Note" : "",
     citation: "",
     ...overrides,
@@ -137,6 +145,38 @@ export function buildCmsPackageCandidate(
   const createdAt = now.toISOString();
   const blocks = state.blocks.map((block, index) => toCmsBlock(block, index));
   const assets = buildAssets(state);
+  const roomDetailPages = buildRoomDetailPages(state, handle, createdAt);
+  const pages = [
+    {
+      id: "page-home",
+      type: "page" as const,
+      path,
+      metadata: {
+        title: state.pageTitle.trim() || state.siteTitle.trim() || handle,
+        description: state.pageDescription.trim(),
+        locale: "en",
+        canonical_url: `https://6529.io${path}`,
+        ...(state.socialImageAssetId.trim()
+          ? { social_image_asset_id: state.socialImageAssetId.trim() }
+          : {}),
+        navigation_label: state.navigationLabel.trim() || "Home",
+        search: "include" as const,
+        robots: "index" as const,
+        last_updated: createdAt,
+      },
+      blocks,
+    },
+    ...roomDetailPages.pages,
+  ];
+  const routes = [
+    {
+      path,
+      kind: "page" as const,
+      page_id: "page-home",
+    },
+    ...roomDetailPages.routes,
+  ];
+  const exhibitionRooms = buildExhibitionRooms(state);
   const packageWithoutHashes: CmsPackageV1 = {
     schema: CMS_PACKAGE_SCHEMA,
     package_id: `pkg-${handle}-builder-mvp`,
@@ -158,35 +198,10 @@ export function buildCmsPackageCandidate(
     },
     payload: {
       schema: CMS_PAYLOAD_SCHEMA,
-      routes: [
-        {
-          path,
-          kind: "page",
-          page_id: "page-home",
-        },
-      ],
-      pages: [
-        {
-          id: "page-home",
-          type: "page",
-          path,
-          metadata: {
-            title: state.pageTitle.trim() || state.siteTitle.trim() || handle,
-            description: state.pageDescription.trim(),
-            locale: "en",
-            canonical_url: `https://6529.io${path}`,
-            ...(state.socialImageAssetId.trim()
-              ? { social_image_asset_id: state.socialImageAssetId.trim() }
-              : {}),
-            navigation_label: state.navigationLabel.trim() || "Home",
-            search: "include",
-            robots: "index",
-            last_updated: createdAt,
-          },
-          blocks,
-        },
-      ],
+      routes,
+      pages,
       assets,
+      ...(exhibitionRooms.length ? { exhibition_rooms: exhibitionRooms } : {}),
       navigation: [
         {
           id: "nav-main",
@@ -201,7 +216,7 @@ export function buildCmsPackageCandidate(
       build_manifest: {
         renderer: "6529-cms-builder-mvp",
         renderer_version: "0.1.0",
-        route_count: 1,
+        route_count: routes.length,
         asset_count: assets.length,
         warnings: [],
       },
@@ -381,28 +396,159 @@ function toCmsBlock(block: CmsBuilderBlock, index: number): CmsBlockV1 {
         quote: block.text,
         citation: block.citation.trim(),
       } as CmsBlockV1;
+    case "room_viewer":
+      return {
+        id,
+        block_type: "room_viewer",
+        room_id: getRoomId(index),
+        interactive_policy: {
+          hydration: "deferred_island",
+          requires_user_activation: true,
+          fallback_asset_id: getRoomAssetId(index),
+          performance_budget: {
+            max_asset_bytes: 2500000,
+          },
+        },
+      } as CmsBlockV1;
   }
 }
 
 function buildAssets(
   state: CmsBuilderState
 ): CmsPackageV1["payload"]["assets"] {
+  return state.blocks.flatMap<CmsPackageV1["payload"]["assets"][number]>(
+    (block, index) => {
+      if (block.kind === "image") {
+        return [
+          {
+            id: getImageAssetId(index),
+            kind: "image" as const,
+            uri:
+              block.assetUri.trim() ||
+              "https://media.6529.io/ipfs/bafy-builder-placeholder/image.png",
+            content_hash: FIXTURE_ZERO_HASH,
+            mime_type: "image/png",
+            width: 1200,
+            height: 1200,
+            roles: ["detail" as const],
+            alt_text: block.altText.trim() || block.title.trim() || "Image",
+          },
+        ];
+      }
+
+      if (block.kind === "room_viewer") {
+        return [
+          {
+            id: getRoomAssetId(index),
+            kind: "image" as const,
+            uri:
+              block.assetUri.trim() ||
+              "https://media.6529.io/ipfs/bafy-builder-placeholder/room-work.png",
+            content_hash: FIXTURE_ZERO_HASH,
+            mime_type: "image/png",
+            width: 1200,
+            height: 1200,
+            file_size_bytes: 350000,
+            roles: [
+              "original" as const,
+              "detail" as const,
+              "fullscreen" as const,
+              "poster" as const,
+              "fallback" as const,
+            ],
+            alt_text:
+              block.altText.trim() ||
+              block.title.trim() ||
+              "Artwork displayed in the 3D room",
+          },
+        ];
+      }
+
+      return [];
+    }
+  );
+}
+
+function buildRoomDetailPages(
+  state: CmsBuilderState,
+  handle: string,
+  createdAt: string
+): {
+  readonly pages: CmsPackageV1["payload"]["pages"];
+  readonly routes: CmsPackageV1["payload"]["routes"];
+} {
+  const pages: CmsPackageV1["payload"]["pages"] = [];
+  const routes: CmsPackageV1["payload"]["routes"] = [];
+
+  state.blocks.forEach((block, index) => {
+    if (block.kind !== "room_viewer") {
+      return;
+    }
+
+    const path = getRoomDetailPath(handle, index);
+    const pageId = getRoomDetailPageId(index);
+    routes.push({
+      kind: "page",
+      page_id: pageId,
+      path,
+    });
+    pages.push({
+      blocks: [
+        {
+          asset_id: getRoomAssetId(index),
+          block_type: "image",
+          id: `${getRoomId(index)}-detail-image`,
+        } as CmsBlockV1,
+      ],
+      id: pageId,
+      metadata: {
+        canonical_url: `https://6529.io${path}`,
+        description:
+          block.text.trim() || "Faithful 2D detail page for this room artwork.",
+        last_updated: createdAt,
+        locale: "en",
+        navigation_label: block.title.trim() || "Room work",
+        robots: "index",
+        search: "include",
+        social_image_asset_id: getRoomAssetId(index),
+        title: block.title.trim() || "Room work",
+      },
+      path,
+      type: "nft_detail",
+    });
+  });
+
+  return { pages, routes };
+}
+
+function buildExhibitionRooms(
+  state: CmsBuilderState
+): NonNullable<CmsPackageV1["payload"]["exhibition_rooms"]> {
   return state.blocks.flatMap((block, index) => {
-    if (block.kind !== "image") {
+    if (block.kind !== "room_viewer") {
       return [];
     }
 
     return [
       {
-        id: getImageAssetId(index),
-        kind: "image" as const,
-        uri:
-          block.assetUri.trim() ||
-          "https://media.6529.io/ipfs/bafy-builder-placeholder/image.png",
-        content_hash: FIXTURE_ZERO_HASH,
-        mime_type: "image/png",
-        roles: ["detail" as const],
-        alt_text: block.altText.trim() || block.title.trim() || "Image",
+        fallback_page_id: getRoomDetailPageId(index),
+        id: getRoomId(index),
+        navigation_mode: "guided_hotspots" as const,
+        placements: [
+          {
+            asset_id: getRoomAssetId(index),
+            detail_page_id: getRoomDetailPageId(index),
+            display_mode: "faithful" as const,
+            id: `${getRoomId(index)}-placement`,
+            label: block.title.trim() || "Room work",
+            position: [0, 1.5, -2.42],
+            rotation: [0, 0, 0],
+            size: [1.35, 1.35],
+          },
+        ],
+        poster_asset_id: getRoomAssetId(index),
+        room_type: block.roomStyle,
+        title: block.title.trim() || "3D room",
       },
     ];
   });
@@ -416,8 +562,16 @@ function createBuilderBlockFromCmsBlock(
   const kind = isBuilderBlockKind(block.block_type)
     ? block.block_type
     : "rich_text";
+  const room =
+    block.block_type === "room_viewer"
+      ? cmsPackage.payload.exhibition_rooms?.find(
+          (item) => item.id === getStringField(block, "room_id")
+        )
+      : undefined;
+  const roomPlacement = room?.placements[0];
   const asset = cmsPackage.payload.assets.find(
-    (item) => item.id === getStringField(block, "asset_id")
+    (item) =>
+      item.id === (getStringField(block, "asset_id") ?? roomPlacement?.asset_id)
   );
 
   return createBuilderBlock(kind, index, {
@@ -425,16 +579,22 @@ function createBuilderBlockFromCmsBlock(
     title:
       getStringField(block, "title") ??
       getStringField(block, "caption") ??
+      room?.title ??
+      roomPlacement?.label ??
       getDefaultBlockTitle(kind),
     text:
       getStringField(block, "text") ??
       getStringField(block, "content") ??
       getStringField(block, "quote") ??
       getStringField(block, "label") ??
+      (block.block_type === "room_viewer"
+        ? "Preview a simple exhibition room."
+        : undefined) ??
       "",
     url: getStringField(block, "href") ?? getStringField(block, "url") ?? "",
     assetUri: asset?.uri ?? "",
     altText: asset?.alt_text ?? "",
+    roomStyle: normalizeRoomStyle(room?.room_type),
     tone: getStringField(block, "tone") ?? "",
     citation: getStringField(block, "citation") ?? "",
   });
@@ -448,6 +608,7 @@ function isBuilderBlockKind(value: string): value is CmsBuilderBlockKind {
     "image",
     "callout",
     "quote",
+    "room_viewer",
   ].includes(value);
 }
 
@@ -461,6 +622,22 @@ function getStringField(
 
 function getImageAssetId(index: number): string {
   return `asset-image-${index + 1}`;
+}
+
+function getRoomId(index: number): string {
+  return `room-builder-${index + 1}`;
+}
+
+function getRoomAssetId(index: number): string {
+  return `asset-room-work-${index + 1}`;
+}
+
+function getRoomDetailPageId(index: number): string {
+  return `page-room-work-${index + 1}`;
+}
+
+function getRoomDetailPath(handle: string, index: number): string {
+  return `/${handle}/rooms/work-${index + 1}/index.html`;
 }
 
 function getDefaultBlockTitle(kind: CmsBuilderBlockKind): string {
@@ -477,6 +654,8 @@ function getDefaultBlockTitle(kind: CmsBuilderBlockKind): string {
       return "Callout";
     case "quote":
       return "Quote";
+    case "room_viewer":
+      return "3D room";
   }
 }
 
@@ -494,6 +673,8 @@ function getDefaultBlockText(kind: CmsBuilderBlockKind): string {
       return "Add a short callout.";
     case "quote":
       return "Add a quote.";
+    case "room_viewer":
+      return "Preview a simple exhibition room.";
   }
 }
 
@@ -512,4 +693,8 @@ function normalizeId(value: string, fallback: string): string {
 
 function normalizeAccent(value: string): string {
   return /^#[0-9a-fA-F]{6}$/.test(value.trim()) ? value.trim() : "#2f7df6";
+}
+
+function normalizeRoomStyle(value: string | undefined): CmsRoomPreset {
+  return isCmsRoomPreset(value) ? value : DEFAULT_ROOM_STYLE;
 }

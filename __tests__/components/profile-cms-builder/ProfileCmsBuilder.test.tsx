@@ -38,6 +38,12 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
 const useAuthMock = useAuth as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
 
@@ -337,5 +343,26 @@ describe("ProfileCmsBuilder", () => {
     expect(
       screen.getByText("profile-cms/packages/:id/publish")
     ).toBeInTheDocument();
+  });
+
+  it("adds a 3D room primitive and previews it through the CMS renderer", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.click(screen.getAllByRole("button", { name: "3D room" })[0]);
+    await user.selectOptions(screen.getByLabelText("Room style"), "white_cube");
+    await user.clear(screen.getByLabelText("Room work title"));
+    await user.type(
+      screen.getByLabelText("Room work title"),
+      "Builder Room Work"
+    );
+    await user.click(screen.getByRole("button", { name: "Preview" }));
+
+    expect(
+      screen.getByRole("button", { name: "Enter room" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Builder Room Work" })
+    ).toHaveAttribute("href", "/punk6529/rooms/work-4/index.html");
   });
 });
