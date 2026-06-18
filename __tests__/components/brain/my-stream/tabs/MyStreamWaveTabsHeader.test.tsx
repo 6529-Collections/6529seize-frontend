@@ -101,4 +101,23 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(scoreActions).toHaveClass("-tw-ml-1.5");
     expect(scoreActions).toHaveClass("tw-mt-1");
   });
+
+  it("keeps the compact mobile header to score only", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={true}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    expect(screen.getByTestId("wave-score")).toBeInTheDocument();
+    expect(screen.queryByText("Add REP")).toBeNull();
+  });
 });
