@@ -19,9 +19,7 @@ import {
   CMS_VALIDATION_RESULT_SCHEMA,
 } from "./constants";
 
-const idSchema = z
-  .string()
-  .regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]{1,127}$/);
+const idSchema = z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]{1,127}$/);
 const slugSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{0,127}$/);
 const cmsPathSchema = z
   .string()
@@ -126,9 +124,7 @@ export const interactivePolicySchema = z
     requires_user_activation: z.boolean().optional(),
     fallback_asset_id: idSchema.optional(),
     sandbox_permissions: z.array(z.string()).optional(),
-    performance_budget: z
-      .record(z.union([z.number(), z.string()]))
-      .optional(),
+    performance_budget: z.record(z.union([z.number(), z.string()])).optional(),
   })
   .strict();
 

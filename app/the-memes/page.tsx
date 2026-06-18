@@ -1,6 +1,10 @@
 import styles from "@/styles/Home.module.scss";
 
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import TheMemesComponent from "@/components/the-memes/TheMemes";
 import {
   getTheMemesRouteLocale,
@@ -51,10 +55,12 @@ export async function generateMetadata({
 }: TheMemesPageProps = {}): Promise<Metadata> {
   const locale = await getRouteLocale(searchParams);
 
-  return getAppMetadata({
-    title: "The Memes",
-    ogImage: `${publicEnv.BASE_ENDPOINT}/memes-preview.png`,
-    description: t(locale, "theMemes.description.collections"),
-    twitterCard: "summary_large_image",
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: "The Memes",
+      ogImage: getCollectionSocialCardImagePath("the-memes"),
+      ogImageAlt: "The Memes collection social card",
+      description: t(locale, "theMemes.description.collections"),
+    })
+  );
 }

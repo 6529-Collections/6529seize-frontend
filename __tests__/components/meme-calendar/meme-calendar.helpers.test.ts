@@ -53,10 +53,8 @@ const DIVISION_DATE_FORMAT = {
   timeZone: "UTC",
 } satisfies Intl.DateTimeFormatOptions;
 
-const formatDivisionDate = (
-  date: Date,
-  locale: string
-): string => new Intl.DateTimeFormat(locale, DIVISION_DATE_FORMAT).format(date);
+const formatDivisionDate = (date: Date, locale: string): string =>
+  new Intl.DateTimeFormat(locale, DIVISION_DATE_FORMAT).format(date);
 
 const formatDivisionNumber = (value: number, locale: string): string =>
   new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);

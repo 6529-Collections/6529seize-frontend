@@ -101,6 +101,7 @@ describe("Helpers utility functions", () => {
     expect(metadata).toMatchObject({
       title: "phoebeum",
       description: "Identity",
+      ogImageAlt: "phoebeum profile social card",
       ogImageHeight: 630,
       ogImageWidth: 1200,
       twitterCard: "summary_large_image",

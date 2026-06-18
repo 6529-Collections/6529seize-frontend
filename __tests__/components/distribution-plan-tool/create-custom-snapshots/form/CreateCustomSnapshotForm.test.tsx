@@ -1,27 +1,52 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import CreateCustomSnapshotForm from '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotForm';
-import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
-import { distributionPlanApiPost } from '@/services/distribution-plan-api';
-import type { CustomTokenPoolParamsToken } from '@/components/allowlist-tool/allowlist-tool.types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import CreateCustomSnapshotForm from "@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotForm";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { distributionPlanApiPost } from "@/services/distribution-plan-api";
+import type { CustomTokenPoolParamsToken } from "@/components/allowlist-tool/allowlist-tool.types";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 let mockUploadedTokens: CustomTokenPoolParamsToken[] = [];
 
-jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload', () => () => <div data-testid="upload" />);
-jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable', () => ({ tokens }: any) => <div data-testid="table">{tokens.length}</div>);
-jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormAddWalletsModal', () => ({ addUploadedTokens, onClose, tokens }: any) => (
-  <div data-testid="modal">
-    <span data-testid="count">{tokens.length}</span>
-    <button onClick={() => { addUploadedTokens(mockUploadedTokens); onClose(); }}>upload</button>
-  </div>
-));
-jest.mock('@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper', () => ({ __esModule: true, AllowlistToolModalSize: { X_LARGE: 'X_LARGE' }, default: ({ children }: any) => <div data-testid="wrapper">{children}</div> }));
+jest.mock(
+  "@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload",
+  () => () => <div data-testid="upload" />
+);
+jest.mock(
+  "@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable",
+  () =>
+    ({ tokens }: any) => <div data-testid="table">{tokens.length}</div>
+);
+jest.mock(
+  "@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormAddWalletsModal",
+  () =>
+    ({ addUploadedTokens, onClose, tokens }: any) => (
+      <div data-testid="modal">
+        <span data-testid="count">{tokens.length}</span>
+        <button
+          onClick={() => {
+            addUploadedTokens(mockUploadedTokens);
+            onClose();
+          }}
+        >
+          upload
+        </button>
+      </div>
+    )
+);
+jest.mock(
+  "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper",
+  () => ({
+    __esModule: true,
+    AllowlistToolModalSize: { X_LARGE: "X_LARGE" },
+    default: ({ children }: any) => <div data-testid="wrapper">{children}</div>,
+  })
+);
 
-jest.mock('@/services/distribution-plan-api');
+jest.mock("@/services/distribution-plan-api");
 
 const ctx = {
-  distributionPlan: { id: 'd1' },
+  distributionPlan: { id: "d1" },
   setToasts: jest.fn(),
   fetchOperations: jest.fn(),
 };
@@ -45,60 +70,75 @@ const renderWithProviders = () => {
   return { queryClient, ...view };
 };
 
-describe('CreateCustomSnapshotForm', () => {
+describe("CreateCustomSnapshotForm", () => {
   beforeEach(() => {
-    mockUploadedTokens = [{ owner: '0x0000000000000000000000000000000000000001' }];
-    (distributionPlanApiPost as jest.Mock).mockResolvedValue({ success: true, data: null });
+    mockUploadedTokens = [
+      { owner: "0x0000000000000000000000000000000000000001" },
+    ];
+    (distributionPlanApiPost as jest.Mock).mockResolvedValue({
+      success: true,
+      data: null,
+    });
     (distributionPlanApiPost as jest.Mock).mockClear();
     (ctx.setToasts as jest.Mock).mockClear();
     (ctx.fetchOperations as jest.Mock).mockClear();
   });
 
-  it('adds uploaded tokens and submits form', async () => {
+  it("adds uploaded tokens and submits form", async () => {
     const { queryClient } = renderWithProviders();
 
-    await userEvent.click(screen.getByRole('button', { name: /add wallets/i }));
-    await waitFor(() => expect(screen.getByTestId('modal')).toBeInTheDocument());
-    await userEvent.click(screen.getByRole('button', { name: 'upload' }));
-    await waitFor(() => expect(screen.queryByTestId('modal')).not.toBeInTheDocument());
-    await waitFor(() => expect(screen.getByTestId('table')).toHaveTextContent('1'));
+    await userEvent.click(screen.getByRole("button", { name: /add wallets/i }));
+    await waitFor(() =>
+      expect(screen.getByTestId("modal")).toBeInTheDocument()
+    );
+    await userEvent.click(screen.getByRole("button", { name: "upload" }));
+    await waitFor(() =>
+      expect(screen.queryByTestId("modal")).not.toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("table")).toHaveTextContent("1")
+    );
     await waitFor(() =>
       expect(
         screen.getByText(/will split .* into 1 custom snapshot/i)
       ).toBeInTheDocument()
     );
 
-    const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'Snap');
+    const input = screen.getByRole("textbox");
+    await userEvent.type(input, "Snap");
     await userEvent.click(
-      screen.getByRole('button', { name: /add .*custom snapshots?/i })
+      screen.getByRole("button", { name: /add .*custom snapshots?/i })
     );
 
-    await waitFor(() => expect(distributionPlanApiPost).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(distributionPlanApiPost).toHaveBeenCalledTimes(1)
+    );
     const call = (distributionPlanApiPost as jest.Mock).mock.calls[0][0];
-    expect(call.body.params.name).toBe('Snap-1');
+    expect(call.body.params.name).toBe("Snap-1");
     expect(call.body.params.tokens).toHaveLength(1);
-    await waitFor(() => expect(ctx.fetchOperations).toHaveBeenCalledWith('d1'));
+    await waitFor(() => expect(ctx.fetchOperations).toHaveBeenCalledWith("d1"));
     await waitFor(() =>
       expect(ctx.setToasts).toHaveBeenCalledWith({
-        messages: ['Created 1 custom snapshot.'],
-        type: 'success',
+        messages: ["Created 1 custom snapshot."],
+        type: "success",
       })
     );
 
     queryClient.clear();
   });
 
-  it('splits uploads into 5,000 row chunks', async () => {
+  it("splits uploads into 5,000 row chunks", async () => {
     mockUploadedTokens = Array.from({ length: 11000 }, (_, index) => ({
-      owner: `0x${(index + 1).toString(16).padStart(40, '0')}`,
+      owner: `0x${(index + 1).toString(16).padStart(40, "0")}`,
     }));
 
     const { queryClient } = renderWithProviders();
 
-    await userEvent.click(screen.getByRole('button', { name: /add wallets/i }));
-    await waitFor(() => expect(screen.getByTestId('modal')).toBeInTheDocument());
-    await userEvent.click(screen.getByRole('button', { name: 'upload' }));
+    await userEvent.click(screen.getByRole("button", { name: /add wallets/i }));
+    await waitFor(() =>
+      expect(screen.getByTestId("modal")).toBeInTheDocument()
+    );
+    await userEvent.click(screen.getByRole("button", { name: "upload" }));
     await waitFor(() =>
       expect(
         screen.getByText(/will split .* into 3 custom snapshots/i)
@@ -106,28 +146,30 @@ describe('CreateCustomSnapshotForm', () => {
     );
     await waitFor(() =>
       expect(
-        screen.getByRole('button', { name: /add 3 custom snapshots/i })
+        screen.getByRole("button", { name: /add 3 custom snapshots/i })
       ).toBeInTheDocument()
     );
 
-    const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'BulkSnap');
+    const input = screen.getByRole("textbox");
+    await userEvent.type(input, "BulkSnap");
     await userEvent.click(
-      screen.getByRole('button', { name: /add .*custom snapshots?/i })
+      screen.getByRole("button", { name: /add .*custom snapshots?/i })
     );
 
-    await waitFor(() => expect(distributionPlanApiPost).toHaveBeenCalledTimes(3));
+    await waitFor(() =>
+      expect(distributionPlanApiPost).toHaveBeenCalledTimes(3)
+    );
     const calls = (distributionPlanApiPost as jest.Mock).mock.calls;
-    expect(calls[0][0].body.params.name).toBe('BulkSnap-1');
+    expect(calls[0][0].body.params.name).toBe("BulkSnap-1");
     expect(calls[0][0].body.params.tokens).toHaveLength(5000);
-    expect(calls[1][0].body.params.name).toBe('BulkSnap-2');
+    expect(calls[1][0].body.params.name).toBe("BulkSnap-2");
     expect(calls[1][0].body.params.tokens).toHaveLength(5000);
-    expect(calls[2][0].body.params.name).toBe('BulkSnap-3');
+    expect(calls[2][0].body.params.name).toBe("BulkSnap-3");
     expect(calls[2][0].body.params.tokens).toHaveLength(1000);
     await waitFor(() =>
       expect(ctx.setToasts).toHaveBeenCalledWith({
-        messages: ['Created 3 custom snapshots.'],
-        type: 'success',
+        messages: ["Created 3 custom snapshots."],
+        type: "success",
       })
     );
 

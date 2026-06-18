@@ -45,8 +45,8 @@ const useQueryClientMock = useQueryClient as jest.Mock;
 const useSeizeConnectContextMock = useSeizeConnectContext as jest.Mock;
 const useSeizeSettingsOptionalMock = useSeizeSettingsOptional as jest.Mock;
 const fetchWavesV2PageMock = fetchWavesV2Page as jest.Mock;
-const useOfficialWavesMock =
-  require("@/hooks/useOfficialWaves").useOfficialWaves as jest.Mock;
+const useOfficialWavesMock = require("@/hooks/useOfficialWaves")
+  .useOfficialWaves as jest.Mock;
 
 const queryClientMock = {
   cancelQueries: jest.fn().mockResolvedValue(undefined),

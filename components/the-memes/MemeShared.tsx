@@ -5,7 +5,11 @@ import { areEqualAddresses, idStringToDisplay } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
-import { getAppMetadata } from "../providers/metadata";
+import {
+  getAppMetadata,
+  getLargeSocialCardMetadata,
+  getNftSocialCardImagePath,
+} from "../providers/metadata";
 
 export enum MEME_FOCUS {
   LIVE = "live",
@@ -81,23 +85,29 @@ async function getMetadataProps(
 ) {
   let urlPath = "nfts";
   const idDisplay = idStringToDisplay(id);
+  let collection = "The Memes";
   let name = `The Memes #${idDisplay}`;
   let description = "Collections";
   if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
     urlPath = "nfts_memelab";
+    collection = "Meme Lab";
     name = `Meme Lab #${idDisplay}`;
   }
+  const query = new URLSearchParams({ contract, id }).toString();
   const response = await fetchUrl(
-    `${publicEnv.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
+    `${publicEnv.API_ENDPOINT}/api/${urlPath}?${query}`
   );
-  let image = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
+  let artist: string | null = null;
+  let image: string | null = null;
   if (response?.data?.length > 0) {
+    const nft = response.data[0];
     description = `${name} | ${description}`;
-    name = `${response.data[0].name}`;
-    if (response.data[0].thumbnail) {
-      image = response.data[0].thumbnail;
-    } else if (response.data[0].image) {
-      image = response.data[0].image;
+    name = `${nft.name}`;
+    artist = nft.artist ?? null;
+    if (nft.thumbnail) {
+      image = nft.thumbnail;
+    } else if (nft.image) {
+      image = nft.image;
     }
   }
 
@@ -112,7 +122,17 @@ async function getMetadataProps(
   return {
     title: name,
     description: description,
-    ogImage: image,
+    ogImage: getNftSocialCardImagePath({
+      artist,
+      badge: collection,
+      collection,
+      contract,
+      id,
+      image,
+      subtitle: description,
+      title: name,
+    }),
+    ogImageAlt: `${name} social card`,
   };
 }
 
@@ -123,7 +143,7 @@ export async function getSharedAppServerSideProps(
   isDistribution: boolean = false,
   locale: SupportedLocale = DEFAULT_LOCALE
 ) {
-  const { title, description, ogImage } = await getMetadataProps(
+  const { title, description, ogImage, ogImageAlt } = await getMetadataProps(
     contract,
     id,
     focus,
@@ -131,12 +151,14 @@ export async function getSharedAppServerSideProps(
     locale
   );
 
-  return getAppMetadata({
-    title,
-    description: description,
-    ogImage,
-    twitterCard: "summary",
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title,
+      description,
+      ogImage,
+      ogImageAlt,
+    })
+  );
 }
 
 export function getMemeTabTitle(

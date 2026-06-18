@@ -192,7 +192,8 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       const { success } = await requestAuth();
       if (!success) {
         setToast({
-          message: "Couldn't authenticate. Reconnect your wallet and try again.",
+          message:
+            "Couldn't authenticate. Reconnect your wallet and try again.",
           type: "error",
         });
         setIsProcessing(false);

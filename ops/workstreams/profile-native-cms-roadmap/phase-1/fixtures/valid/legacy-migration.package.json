@@ -149,7 +149,9 @@
       "renderer_version": "0.0.0-fixture",
       "route_count": 3,
       "asset_count": 1,
-      "warnings": ["in-profile legacy alias route included for migration coverage"]
+      "warnings": [
+        "in-profile legacy alias route included for migration coverage"
+      ]
     }
   },
   "integrity": {
