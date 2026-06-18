@@ -1,6 +1,9 @@
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import TheMemesMint from "@/components/the-memes/TheMemesMint";
-import { publicEnv } from "@/config/env";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -21,10 +24,15 @@ export default async function TheMemesMintPage() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: "Mint | The Memes",
-    ogImage: `${publicEnv.BASE_ENDPOINT}/memes-preview.png`,
-    description: "Collections",
-    twitterCard: "summary_large_image",
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: "Mint | The Memes",
+      ogImage: getCollectionSocialCardImagePath("the-memes", {
+        title: "Mint | The Memes",
+        subtitle: "Latest The Memes mint on 6529.io",
+      }),
+      ogImageAlt: "The Memes mint social card",
+      description: "Collections",
+    })
+  );
 }
