@@ -13,10 +13,11 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiProfileCmsWalletGalleryExcludedAsset {
+    'contract': string;
+    'token_id': number;
+    'owner_wallet': string;
+    'reason': ApiProfileCmsWalletGalleryExcludedAssetReasonEnum;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +25,40 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
-            "format": ""
-        },
-        {
-            "name": "client_address",
-            "baseName": "client_address",
+            "name": "contract",
+            "baseName": "contract",
             "type": "string",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
+            "name": "token_id",
+            "baseName": "token_id",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "owner_wallet",
+            "baseName": "owner_wallet",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "reason",
+            "baseName": "reason",
+            "type": "ApiProfileCmsWalletGalleryExcludedAssetReasonEnum",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiProfileCmsWalletGalleryExcludedAsset.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
+export enum ApiProfileCmsWalletGalleryExcludedAssetReasonEnum {
+    ContractExcluded = 'contract_excluded',
+    AssetExcluded = 'asset_excluded'
 }
 

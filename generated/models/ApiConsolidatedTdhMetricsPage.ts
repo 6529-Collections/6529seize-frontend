@@ -11,12 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiConsolidatedTdhMetricsPage {
+    'data': Array<ApiConsolidatedTdhMetrics>;
+    'count': number;
+    'page': number;
+    'next': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +26,34 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiConsolidatedTdhMetrics>",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
-            "type": "string",
-            "format": ""
+            "name": "count",
+            "baseName": "count",
+            "type": "number",
+            "format": "int64"
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiConsolidatedTdhMetricsPage.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

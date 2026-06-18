@@ -13,10 +13,11 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiValidateProfileCmsPackageRequest {
+    'cms_package': { [key: string]: any; };
+    'allow_fixture_signatures'?: boolean;
+    'allow_fixture_storage'?: boolean;
+    'enforce_hashes'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +25,34 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "cms_package",
+            "baseName": "cms_package",
+            "type": "{ [key: string]: any; }",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
-            "type": "string",
+            "name": "allow_fixture_signatures",
+            "baseName": "allow_fixture_signatures",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
-            "type": "string",
+            "name": "allow_fixture_storage",
+            "baseName": "allow_fixture_storage",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "enforce_hashes",
+            "baseName": "enforce_hashes",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiValidateProfileCmsPackageRequest.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

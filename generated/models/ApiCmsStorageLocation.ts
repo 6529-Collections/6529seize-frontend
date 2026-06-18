@@ -13,10 +13,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiCmsStorageLocation {
+    'provider': string;
+    'uri': string;
+    'pinned': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +24,28 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
-            "format": ""
-        },
-        {
-            "name": "client_address",
-            "baseName": "client_address",
+            "name": "provider",
+            "baseName": "provider",
             "type": "string",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
+            "name": "uri",
+            "baseName": "uri",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "pinned",
+            "baseName": "pinned",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiCmsStorageLocation.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

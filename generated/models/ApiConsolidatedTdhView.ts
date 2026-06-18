@@ -13,8 +13,7 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiDecentralizedMediaProtocol {
-    Ipfs = 'ipfs',
-    Ipns = 'ipns',
-    Arweave = 'arweave'
+export enum ApiConsolidatedTdhView {
+    Boosted = 'boosted',
+    Unboosted = 'unboosted'
 }

@@ -13,10 +13,17 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+/**
+* Opaque package signature envelope for this vertical slice. The server stores it and verifies hash consistency with package_json; wallet signature verification is a future publish-adapter responsibility.
+*/
+export class ApiCmsSignatureEnvelope {
+    'signature_type': string;
+    'signing_wallet': string;
+    /**
+    * Client-supplied signing timestamp stored as envelope metadata.
+    */
+    'signed_at': string;
+    'signature': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +31,34 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
-            "format": ""
-        },
-        {
-            "name": "client_address",
-            "baseName": "client_address",
+            "name": "signature_type",
+            "baseName": "signature_type",
             "type": "string",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
+            "name": "signing_wallet",
+            "baseName": "signing_wallet",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "signed_at",
+            "baseName": "signed_at",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "signature",
+            "baseName": "signature",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiCmsSignatureEnvelope.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

@@ -11,12 +11,12 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiCreateNewProfileProxyPublishCmsAction {
+    'action_type': ApiProfileProxyActionType;
+    'end_time': number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +24,24 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "action_type",
+            "baseName": "action_type",
+            "type": "ApiProfileProxyActionType",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
-            "type": "string",
-            "format": ""
+            "name": "end_time",
+            "baseName": "end_time",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiCreateNewProfileProxyPublishCmsAction.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
 

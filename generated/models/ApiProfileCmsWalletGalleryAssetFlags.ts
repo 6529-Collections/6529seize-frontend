@@ -13,10 +13,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiProfileCmsWalletGalleryAssetFlags {
+    'spam': boolean;
+    'excluded': boolean;
+    'exclusion_reason': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +24,28 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "spam",
+            "baseName": "spam",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
-            "type": "string",
+            "name": "excluded",
+            "baseName": "excluded",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
+            "name": "exclusion_reason",
+            "baseName": "exclusion_reason",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiProfileCmsWalletGalleryAssetFlags.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

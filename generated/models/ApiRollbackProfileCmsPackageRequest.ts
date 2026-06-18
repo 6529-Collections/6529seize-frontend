@@ -13,10 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiRollbackProfileCmsPackageRequest {
+    'expected_current_package_id': string;
+    'expected_current_package_hash'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +23,22 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
-            "format": ""
-        },
-        {
-            "name": "client_address",
-            "baseName": "client_address",
+            "name": "expected_current_package_id",
+            "baseName": "expected_current_package_id",
             "type": "string",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
+            "name": "expected_current_package_hash",
+            "baseName": "expected_current_package_hash",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiRollbackProfileCmsPackageRequest.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

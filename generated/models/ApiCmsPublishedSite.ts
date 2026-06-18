@@ -11,12 +11,13 @@
  * Do not edit the class manually.
  */
 
+import { ApiCmsPublishedPackage } from '../models/ApiCmsPublishedPackage';
+import { ApiCmsSite } from '../models/ApiCmsSite';
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiCmsPublishedSite {
+    'site': ApiCmsSite;
+    'published_package': ApiCmsPublishedPackage;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +25,22 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "site",
+            "baseName": "site",
+            "type": "ApiCmsSite",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
-            "type": "string",
+            "name": "published_package",
+            "baseName": "published_package",
+            "type": "ApiCmsPublishedPackage",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiCmsPublishedSite.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

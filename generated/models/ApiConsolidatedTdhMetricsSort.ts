@@ -13,8 +13,12 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiDecentralizedMediaProtocol {
-    Ipfs = 'ipfs',
-    Ipns = 'ipns',
-    Arweave = 'arweave'
+export enum ApiConsolidatedTdhMetricsSort {
+    Level = 'level',
+    Balance = 'balance',
+    UniqueMemes = 'unique_memes',
+    MemesCardsSets = 'memes_cards_sets',
+    Tdh = 'tdh',
+    BoostedTdh = 'boosted_tdh',
+    DayChange = 'day_change'
 }

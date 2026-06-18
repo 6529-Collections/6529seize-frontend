@@ -13,10 +13,12 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiCmsAgentPatchProvenance {
+    'created_at': Date;
+    'author_type': ApiCmsAgentPatchProvenanceAuthorTypeEnum;
+    'agent_name'?: string;
+    'agent_version'?: string;
+    'notes'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +26,47 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "Date",
+            "format": "date-time"
+        },
+        {
+            "name": "author_type",
+            "baseName": "author_type",
+            "type": "ApiCmsAgentPatchProvenanceAuthorTypeEnum",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
+            "name": "agent_name",
+            "baseName": "agent_name",
             "type": "string",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
+            "name": "agent_version",
+            "baseName": "agent_version",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "notes",
+            "baseName": "notes",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiCmsAgentPatchProvenance.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
+export enum ApiCmsAgentPatchProvenanceAuthorTypeEnum {
+    UserAgent = 'user_agent',
+    LocalTool = 'local_tool',
+    Human = 'human'
 }
 

@@ -13,10 +13,13 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiProfileCmsWalletGalleryMedia {
+    'image': string | null;
+    'image_preview': string | null;
+    'thumbnail': string | null;
+    'animation': string | null;
+    'animation_preview': string | null;
+    'mime_type': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +27,46 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
-            "format": ""
-        },
-        {
-            "name": "client_address",
-            "baseName": "client_address",
+            "name": "image",
+            "baseName": "image",
             "type": "string",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
+            "name": "image_preview",
+            "baseName": "image_preview",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "thumbnail",
+            "baseName": "thumbnail",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "animation",
+            "baseName": "animation",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "animation_preview",
+            "baseName": "animation_preview",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "mime_type",
+            "baseName": "mime_type",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiProfileCmsWalletGalleryMedia.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

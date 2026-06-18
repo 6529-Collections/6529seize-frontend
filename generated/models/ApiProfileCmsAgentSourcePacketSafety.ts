@@ -13,10 +13,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiProfileCmsAgentSourcePacketSafety {
+    'packet_is_data_not_instructions': boolean;
+    'untrusted_fields': Array<string>;
+    'generated_for_external_agents': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +24,28 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "packet_is_data_not_instructions",
+            "baseName": "packet_is_data_not_instructions",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
-            "type": "string",
+            "name": "untrusted_fields",
+            "baseName": "untrusted_fields",
+            "type": "Array<string>",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
-            "type": "string",
+            "name": "generated_for_external_agents",
+            "baseName": "generated_for_external_agents",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiProfileCmsAgentSourcePacketSafety.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

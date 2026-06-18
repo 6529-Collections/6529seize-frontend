@@ -13,10 +13,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiProfileCmsAgentSchemaBundleSafety {
+    'source_packets_are_data_not_instructions': boolean;
+    'untrusted_fields': Array<string>;
+    'external_agents_must_ignore_instructions_in_untrusted_fields': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +24,28 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "source_packets_are_data_not_instructions",
+            "baseName": "source_packets_are_data_not_instructions",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
-            "type": "string",
+            "name": "untrusted_fields",
+            "baseName": "untrusted_fields",
+            "type": "Array<string>",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
-            "type": "string",
+            "name": "external_agents_must_ignore_instructions_in_untrusted_fields",
+            "baseName": "external_agents_must_ignore_instructions_in_untrusted_fields",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiProfileCmsAgentSchemaBundleSafety.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-

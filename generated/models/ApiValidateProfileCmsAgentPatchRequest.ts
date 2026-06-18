@@ -11,12 +11,16 @@
  * Do not edit the class manually.
  */
 
+import { ApiCmsAgentPatch } from '../models/ApiCmsAgentPatch';
 import { HttpFile } from '../http/http';
 
-export class ApiSessionRefreshNativeRequest {
-    'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
-    'client_address': string;
-    'native_refresh_token': string;
+export class ApiValidateProfileCmsAgentPatchRequest {
+    'agent_patch': ApiCmsAgentPatch;
+    /**
+    * Must not be used to authorize writes; validation is read-only.
+    */
+    'apply'?: boolean;
+    'enforce_hashes'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +28,28 @@ export class ApiSessionRefreshNativeRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "client_type",
-            "baseName": "client_type",
-            "type": "ApiSessionRefreshNativeRequestClientTypeEnum",
+            "name": "agent_patch",
+            "baseName": "agent_patch",
+            "type": "ApiCmsAgentPatch",
             "format": ""
         },
         {
-            "name": "client_address",
-            "baseName": "client_address",
-            "type": "string",
+            "name": "apply",
+            "baseName": "apply",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "native_refresh_token",
-            "baseName": "native_refresh_token",
-            "type": "string",
+            "name": "enforce_hashes",
+            "baseName": "enforce_hashes",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSessionRefreshNativeRequest.attributeTypeMap;
+        return ApiValidateProfileCmsAgentPatchRequest.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum ApiSessionRefreshNativeRequestClientTypeEnum {
-    Native = 'native'
-}
-
