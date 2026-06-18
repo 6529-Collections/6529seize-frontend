@@ -14,6 +14,7 @@ const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.NIC]: "NIC rate",
   [RateMatter.REP]: "give Rep for",
   [RateMatter.DROP_REP]: "give Drop Rep for",
+  [RateMatter.WAVE_REP]: "give Wave REP for",
 };
 
 enum RaterContext {
@@ -52,6 +53,7 @@ export default function UserPageRateWrapper({
             action.action_type === ApiProfileProxyActionType.AllocateRep
         );
       case RateMatter.DROP_REP:
+      case RateMatter.WAVE_REP:
         return false;
       default:
         assertUnreachable(type);
@@ -99,11 +101,12 @@ export default function UserPageRateWrapper({
     }
   };
 
-  const [raterContext, setRaterContext] =
-    useState<RaterContext>(getRaterContext());
+  const [raterContext, setRaterContext] = useState<RaterContext>(() =>
+    getRaterContext()
+  );
 
   const [raterContextMessage, setRaterContextMessage] = useState<string | null>(
-    getRaterContextMessage(raterContext)
+    () => getRaterContextMessage(raterContext)
   );
 
   useEffect(() => {

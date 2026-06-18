@@ -2,6 +2,7 @@ import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import {
   ProfileActivityFilterTargetType,
   ProfileActivityLogType,
+  RateMatter,
 } from "@/types/enums";
 
 describe("convertActivityLogParams", () => {
@@ -89,6 +90,15 @@ describe("convertActivityLogParams", () => {
     const res = convertActivityLogParams({ params, disableActiveGroup: false });
     expect(res.log_type).toBe("DROP_CREATED,HANDLE_EDIT");
     expect(res.rating_matter).toBe("FUN");
+  });
+
+  it("passes Wave REP rating matter through", () => {
+    const res = convertActivityLogParams({
+      params: { ...base, matter: RateMatter.WAVE_REP },
+      disableActiveGroup: false,
+    });
+
+    expect(res.rating_matter).toBe("WAVE_REP");
   });
 
   it("converts numbers to strings", () => {

@@ -5,7 +5,6 @@ import type {
 import {
   ProfileActivityFilterTargetType,
   ProfileActivityLogType,
-  RateMatter,
 } from "@/types/enums";
 
 const DISABLED_LOG_TYPES = [
@@ -57,7 +56,7 @@ export const convertActivityLogParams = ({
       : "",
   };
 
-  if (params.matter === RateMatter.REP) {
+  if (params.matter) {
     converted.rating_matter = params.matter;
   }
   if (params.groupId && !params.handleOrWallet && !disableActiveGroup) {
