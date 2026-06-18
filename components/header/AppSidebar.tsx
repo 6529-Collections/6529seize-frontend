@@ -16,6 +16,8 @@ import {
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
 import DiscoverIcon from "../common/icons/DiscoverIcon";
@@ -65,9 +67,16 @@ const MENU: SidebarMenu = [
       { label: "Memes Subscriptions", path: "/tools/subscriptions-report" },
       { label: "Meme Accounting", path: "/meme-accounting?focus=the-memes" },
       { label: "Meme Gas", path: "/meme-gas?focus=the-memes" },
-      { label: "Other Tools", section: true, dividerBefore: true },
-      { label: "REP Categories", path: "/rep/categories" },
-      { label: "API", path: "/tools/api" },
+      {
+        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.otherTools"),
+        section: true,
+        dividerBefore: true,
+      },
+      {
+        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.repCategories"),
+        path: "/rep/categories",
+      },
+      { label: t(DEFAULT_LOCALE, "rep.categories.sidebar.api"), path: "/tools/api" },
       { label: "EMMA", path: "/emma" },
       { label: "Block Finder", path: "/tools/block-finder" },
       { label: "Open Data", path: "/open-data" },
@@ -173,8 +182,9 @@ export default function AppSidebar({
       startX = null;
     };
 
-    window.addEventListener("touchstart", onTouchStart);
-    window.addEventListener("touchend", onTouchEnd);
+    const touchOptions: AddEventListenerOptions = { passive: true };
+    window.addEventListener("touchstart", onTouchStart, touchOptions);
+    window.addEventListener("touchend", onTouchEnd, touchOptions);
     return () => {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);

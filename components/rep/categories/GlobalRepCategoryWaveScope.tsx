@@ -9,6 +9,8 @@ import type { ApiGlobalRepCategoryWaveOverview } from "@/generated/models/ApiGlo
 import type { ApiGlobalRepCategoryWaveRef } from "@/generated/models/ApiGlobalRepCategoryWaveRef";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -35,6 +37,7 @@ import {
 } from "./RepCategoryUi";
 
 type WaveRepTab = "waves" | "contributors";
+const REP_CATEGORY_LOCALE = DEFAULT_LOCALE;
 
 type WaveRowWithRank = {
   readonly item: ApiGlobalRepCategoryWave;
@@ -48,19 +51,22 @@ type ContributorRowWithRank = {
 
 const WAVE_REP_TABS: ReadonlyArray<{
   readonly id: WaveRepTab;
-  readonly label: string;
+  readonly labelKey: MessageKey;
 }> = [
-  { id: "waves", label: "Waves" },
-  { id: "contributors", label: "Contributors" },
+  { id: "waves", labelKey: "rep.categories.wave.tabs.waves" },
+  {
+    id: "contributors",
+    labelKey: "rep.categories.wave.tabs.contributors",
+  },
 ];
 
 const WAVE_REP_SORTS: ReadonlyArray<{
   readonly id: GlobalRepCategorySort;
-  readonly label: string;
+  readonly labelKey: MessageKey;
 }> = [
-  { id: "rep_desc", label: "REP impact high" },
-  { id: "rep_asc", label: "REP impact low" },
-  { id: "recent", label: "Recent" },
+  { id: "rep_desc", labelKey: "rep.categories.wave.sort.repDesc" },
+  { id: "rep_asc", labelKey: "rep.categories.wave.sort.repAsc" },
+  { id: "recent", labelKey: "rep.categories.wave.sort.recent" },
 ];
 
 function WaveLink({ wave }: { readonly wave: ApiGlobalRepCategoryWaveRef }) {
@@ -99,7 +105,11 @@ function TopContributors({
   readonly contributors: ApiGlobalRepCategoryWaveContributor[];
 }) {
   if (contributors.length === 0) {
-    return <span className="tw-text-sm tw-text-iron-500">None yet</span>;
+    return (
+      <span className="tw-text-sm tw-text-iron-500">
+        {t(REP_CATEGORY_LOCALE, "rep.categories.wave.empty.contributors")}
+      </span>
+    );
   }
 
   return (
@@ -185,27 +195,32 @@ function WavesTable({
     <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08]">
       <table className="tw-w-full tw-min-w-[54rem] tw-border-collapse tw-bg-white/[0.02] tw-text-left">
         <caption className="tw-sr-only">
-          Waves using REP category {category}
+          {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.wavesCaption", {
+            category,
+          })}
         </caption>
         <thead className="tw-bg-white/[0.04] tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
           <tr>
             <th scope="col" className="tw-w-16 tw-px-4 tw-py-3">
-              Rank
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.rank")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3">
-              Wave
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.wave")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
-              REP
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.rep")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
-              Contributors
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.contributors")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3">
-              Leading contributors
+              {t(
+                REP_CATEGORY_LOCALE,
+                "rep.categories.wave.table.leadingContributors"
+              )}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3">
-              Last modified
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.lastModified")}
             </th>
           </tr>
         </thead>
@@ -234,24 +249,28 @@ function ContributorsTable({
     <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08]">
       <table className="tw-w-full tw-min-w-[44rem] tw-border-collapse tw-bg-white/[0.02] tw-text-left">
         <caption className="tw-sr-only">
-          Wave REP contributors for category {category}
+          {t(
+            REP_CATEGORY_LOCALE,
+            "rep.categories.wave.table.contributorsCaption",
+            { category }
+          )}
         </caption>
         <thead className="tw-bg-white/[0.04] tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
           <tr>
             <th scope="col" className="tw-w-16 tw-px-4 tw-py-3">
-              Rank
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.rank")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3">
-              Contributor
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.contributor")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3">
-              Wave
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.wave")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
-              REP
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.rep")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3">
-              Last modified
+              {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.lastModified")}
             </th>
           </tr>
         </thead>
@@ -279,7 +298,7 @@ function SortControls({
   return (
     <div
       className="tw-inline-flex tw-flex-wrap tw-gap-2"
-      aria-label="Sort Wave REP rows"
+      aria-label={t(REP_CATEGORY_LOCALE, "rep.categories.wave.sort.label")}
     >
       {WAVE_REP_SORTS.map((option) => (
         <button
@@ -293,7 +312,7 @@ function SortControls({
               : "tw-border-white/10 tw-bg-white/[0.03] tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-200"
           }`}
         >
-          {option.label}
+          {t(REP_CATEGORY_LOCALE, option.labelKey)}
         </button>
       ))}
     </div>
@@ -322,7 +341,14 @@ function WaveRepRowsContent({
   if (isPending) {
     return (
       <output
-        aria-label={`Loading Wave REP ${activeTab}`}
+        aria-label={t(REP_CATEGORY_LOCALE, "rep.categories.wave.loading.rows", {
+          tab: t(
+            REP_CATEGORY_LOCALE,
+            activeTab === "waves"
+              ? "rep.categories.wave.tabs.waves"
+              : "rep.categories.wave.tabs.contributors"
+          ),
+        })}
         className="tw-flex tw-justify-center tw-py-8"
       >
         <CircleLoader size={CircleLoaderSize.LARGE} />
@@ -333,8 +359,11 @@ function WaveRepRowsContent({
   if (isError) {
     return (
       <StateBlock
-        title="Could not load Wave REP rows"
-        message={getErrorMessage(error, "Wave REP rows failed to load.")}
+        title={t(REP_CATEGORY_LOCALE, "rep.categories.wave.error.rowsTitle")}
+        message={getErrorMessage(
+          error,
+          t(REP_CATEGORY_LOCALE, "rep.categories.wave.error.rowsMessage")
+        )}
         onRetry={onRetry}
       />
     );
@@ -383,8 +412,8 @@ function WaveRepLoadedContent({
   if (overview.wave_count === 0) {
     return (
       <StateBlock
-        title="No Wave REP found"
-        message="This category has not been used for Wave REP yet."
+        title={t(REP_CATEGORY_LOCALE, "rep.categories.wave.empty.title")}
+        message={t(REP_CATEGORY_LOCALE, "rep.categories.wave.empty.message")}
       />
     );
   }
@@ -394,7 +423,7 @@ function WaveRepLoadedContent({
       <div className="tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
         <section>
           <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-            Waves preview
+            {t(REP_CATEGORY_LOCALE, "rep.categories.wave.preview.waves")}
           </h3>
           <div className="tw-flex tw-flex-col tw-gap-2">
             {overview.top_waves.map((wave) => (
@@ -414,7 +443,7 @@ function WaveRepLoadedContent({
         </section>
         <section>
           <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-            Contributors preview
+            {t(REP_CATEGORY_LOCALE, "rep.categories.wave.preview.contributors")}
           </h3>
           <div className="tw-flex tw-flex-col tw-gap-2">
             {overview.top_contributors.map((contributor) => (
@@ -437,16 +466,17 @@ function WaveRepLoadedContent({
 
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2">
         <div
-          role="tablist"
-          aria-label="Wave REP category sections"
+          aria-label={t(
+            REP_CATEGORY_LOCALE,
+            "rep.categories.wave.sections.label"
+          )}
           className="tw-flex tw-gap-2"
         >
           {WAVE_REP_TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
-              role="tab"
-              aria-selected={activeTab === tab.id}
+              aria-pressed={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
                 activeTab === tab.id
@@ -454,7 +484,7 @@ function WaveRepLoadedContent({
                   : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
               }`}
             >
-              {tab.label}
+              {t(REP_CATEGORY_LOCALE, tab.labelKey)}
             </button>
           ))}
         </div>
@@ -485,7 +515,9 @@ function WaveRepLoadedContent({
             onClick={loadMoreActiveRows}
             className="tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
           >
-            {rowsIsFetchingNextPage ? "Loading..." : "Load more"}
+            {rowsIsFetchingNextPage
+              ? t(REP_CATEGORY_LOCALE, "rep.categories.wave.loadingMore")
+              : t(REP_CATEGORY_LOCALE, "rep.categories.wave.loadMore")}
           </button>
         </>
       )}
@@ -567,7 +599,10 @@ export default function GlobalRepCategoryWaveScope({
   if (overviewQuery.isPending) {
     return (
       <output
-        aria-label="Loading Wave REP category overview"
+        aria-label={t(
+          REP_CATEGORY_LOCALE,
+          "rep.categories.wave.loading.overview"
+        )}
         className="tw-flex tw-justify-center tw-py-12"
       >
         <CircleLoader size={CircleLoaderSize.XXLARGE} />
@@ -578,10 +613,13 @@ export default function GlobalRepCategoryWaveScope({
   if (overviewQuery.isError) {
     return (
       <StateBlock
-        title="Could not load Wave REP"
+        title={t(
+          REP_CATEGORY_LOCALE,
+          "rep.categories.wave.error.overviewTitle"
+        )}
         message={getErrorMessage(
           overviewQuery.error,
-          "Wave REP for this category failed to load."
+          t(REP_CATEGORY_LOCALE, "rep.categories.wave.error.overviewMessage")
         )}
         onRetry={() => {
           overviewQuery.refetch().catch(() => undefined);
@@ -595,9 +633,21 @@ export default function GlobalRepCategoryWaveScope({
   return (
     <div className="tw-flex tw-flex-col tw-gap-5">
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3">
-        <MetricTile label="Wave REP" value={overview.total_rep} />
-        <MetricTile label="Waves" value={overview.wave_count} />
-        <MetricTile label="Contributors" value={overview.contributor_count} />
+        <MetricTile
+          label={t(REP_CATEGORY_LOCALE, "rep.categories.wave.metrics.rep")}
+          value={overview.total_rep}
+        />
+        <MetricTile
+          label={t(REP_CATEGORY_LOCALE, "rep.categories.wave.metrics.waves")}
+          value={overview.wave_count}
+        />
+        <MetricTile
+          label={t(
+            REP_CATEGORY_LOCALE,
+            "rep.categories.wave.metrics.contributors"
+          )}
+          value={overview.contributor_count}
+        />
       </div>
       <WaveRepLoadedContent
         activeTab={activeTab}

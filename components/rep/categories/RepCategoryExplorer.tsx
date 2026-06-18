@@ -5,6 +5,8 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { ApiGlobalRepCategorySuggestedCategory } from "@/generated/models/ApiGlobalRepCategorySuggestedCategory";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "react-use";
@@ -17,6 +19,7 @@ import {
 } from "./globalRepCategory.api";
 
 const MIN_CATEGORY_SEARCH_LENGTH = 3;
+const REP_CATEGORY_LOCALE = DEFAULT_LOCALE;
 
 function RepCategorySearchResults({
   showPrompt,
@@ -34,7 +37,7 @@ function RepCategorySearchResults({
   if (showPrompt) {
     return (
       <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-        Type at least 3 characters to search.
+        {t(REP_CATEGORY_LOCALE, "rep.categories.search.minChars")}
       </p>
     );
   }
@@ -42,7 +45,7 @@ function RepCategorySearchResults({
   if (isPending) {
     return (
       <output
-        aria-label="Searching REP categories"
+        aria-label={t(REP_CATEGORY_LOCALE, "rep.categories.search.loading")}
         className="tw-flex tw-justify-center tw-py-4"
       >
         <CircleLoader size={CircleLoaderSize.MEDIUM} />
@@ -53,7 +56,7 @@ function RepCategorySearchResults({
   if (isError) {
     return (
       <p className="tw-mb-0 tw-text-sm tw-text-error">
-        Could not search REP categories.
+        {t(REP_CATEGORY_LOCALE, "rep.categories.search.error")}
       </p>
     );
   }
@@ -61,7 +64,7 @@ function RepCategorySearchResults({
   if (!categories || categories.length === 0) {
     return (
       <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-        No matching categories found.
+        {t(REP_CATEGORY_LOCALE, "rep.categories.search.empty")}
       </p>
     );
   }
@@ -77,7 +80,7 @@ function RepCategorySearchResults({
           >
             <span className="tw-min-w-0 tw-break-words">{category}</span>
             <span className="tw-flex-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
-              View
+              {t(REP_CATEGORY_LOCALE, "rep.categories.search.view")}
             </span>
           </button>
         </li>
@@ -105,7 +108,7 @@ function SuggestedCategoryButton({
       <span className="tw-grid tw-w-full tw-grid-cols-2 tw-gap-2 tw-text-xs tw-text-iron-400">
         <span>
           <span className="tw-block tw-font-semibold tw-uppercase tw-text-iron-500">
-            REP
+            {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.rep")}
           </span>
           <span className="tw-text-primary-300">
             {formatNumberWithCommas(item.total_rep)}
@@ -113,7 +116,7 @@ function SuggestedCategoryButton({
         </span>
         <span>
           <span className="tw-block tw-font-semibold tw-uppercase tw-text-iron-500">
-            Ratings
+            {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.ratings")}
           </span>
           <span>{formatNumberWithCommas(item.rating_count)}</span>
         </span>
@@ -135,19 +138,23 @@ function SuggestedCategories({
 }) {
   if (isPending) {
     return (
-      <output
-        aria-label="Loading active REP categories"
+      <div
+        role="status"
+        aria-live="polite"
         className="tw-flex tw-justify-center tw-py-8"
       >
         <CircleLoader size={CircleLoaderSize.LARGE} />
-      </output>
+        <span className="tw-sr-only">
+          {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.loading")}
+        </span>
+      </div>
     );
   }
 
   if (isError) {
     return (
       <p className="tw-mb-0 tw-text-sm tw-text-error">
-        Could not load active REP categories.
+        {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.error")}
       </p>
     );
   }
@@ -155,7 +162,7 @@ function SuggestedCategories({
   if (!categories || categories.length === 0) {
     return (
       <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-        No active REP categories found yet.
+        {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.empty")}
       </p>
     );
   }
@@ -211,7 +218,7 @@ export default function RepCategoryExplorer() {
     return () => globalThis.cancelAnimationFrame(animationFrame);
   }, [scrollTargetCategory, selectedCategory]);
 
-  const showPrompt = input.trim().length < MIN_CATEGORY_SEARCH_LENGTH;
+  const showPrompt = trimmedInput.length < MIN_CATEGORY_SEARCH_LENGTH;
   const selectCategory = (category: string) => {
     setSelectedCategory(category);
     setScrollTargetCategory(category);
@@ -224,7 +231,7 @@ export default function RepCategoryExplorer() {
           htmlFor="global-rep-category-search"
           className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-200"
         >
-          Search REP categories
+          {t(REP_CATEGORY_LOCALE, "rep.categories.search.label")}
         </label>
         <input
           id="global-rep-category-search"
@@ -232,14 +239,20 @@ export default function RepCategoryExplorer() {
           value={input}
           onChange={(event) => setInput(event.target.value)}
           className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm"
-          placeholder="Type a category name"
+          placeholder={t(
+            REP_CATEGORY_LOCALE,
+            "rep.categories.search.placeholder"
+          )}
           autoComplete="off"
         />
 
         <section
           className="tw-mt-4"
           aria-live="polite"
-          aria-label="REP category search results"
+          aria-label={t(
+            REP_CATEGORY_LOCALE,
+            "rep.categories.search.resultsLabel"
+          )}
         >
           <RepCategorySearchResults
             showPrompt={showPrompt}
@@ -255,10 +268,10 @@ export default function RepCategoryExplorer() {
         <section className="tw-flex tw-flex-col tw-gap-4">
           <div>
             <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-white">
-              Active REP categories
+              {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.title")}
             </h2>
             <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-              Categories with the most profile REP activity.
+              {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.description")}
             </p>
           </div>
           <SuggestedCategories
