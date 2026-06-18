@@ -181,6 +181,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     wave.id,
   ]);
 
+  const handleRowMouseEnter = useCallback(() => {
+    scheduleSubwavePrefetch();
+    onWaveHover();
+  }, [onWaveHover, scheduleSubwavePrefetch]);
+
   useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   const handleWaveClick = useCallback(
@@ -223,12 +228,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 
   const isChildRow = depth === 1;
   const shouldShowExpandControl = canExpand && depth === 0;
-  const shouldReserveExpandControlSpace = shouldShowExpandControl;
   const shouldShowPinButton = showPin && depth === 0;
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
-      shouldReserveExpandControlSpace,
       variant: "app",
     });
   const avatarSizeClasses = isChildRow ? "tw-size-7" : "tw-size-8";
@@ -242,7 +245,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   return (
     <div
       {...(!hasTouchScreen && {
-        onMouseEnter: scheduleSubwavePrefetch,
+        onMouseEnter: handleRowMouseEnter,
         onMouseLeave: cancelSubwavePrefetch,
       })}
       className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
@@ -251,15 +254,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
-      <SidebarWaveExpandControl
-        formattedWaveName={formattedWaveName}
-        isExpanded={isExpanded}
-        onBlur={cancelSubwavePrefetch}
-        onClick={handleToggleExpand}
-        onFocus={scheduleSubwavePrefetch}
-        shouldReserveSpace={shouldReserveExpandControlSpace}
-        shouldShowButton={shouldShowExpandControl}
-      />
       {isChildRow && (
         <span
           aria-hidden="true"
@@ -268,18 +262,21 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           }`}
         />
       )}
-      <Link
-        href={href}
-        prefetch={false}
-        {...(!hasTouchScreen && { onMouseEnter: onWaveHover })}
-        onClick={handleWaveClick}
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+      <div
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
         }`}
       >
-        <div className="tw-relative">
+        <Link
+          href={href}
+          prefetch={false}
+          onClick={handleWaveClick}
+          tabIndex={-1}
+          aria-hidden="true"
+          className="tw-relative tw-flex-shrink-0 tw-no-underline"
+        >
           <div
             className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
               isActive
@@ -327,14 +324,35 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
             />
           )}
-        </div>
+        </Link>
         <div className="tw-min-w-0 tw-flex-1">
           <div
-            className={`tw-truncate tw-text-sm tw-font-medium ${
+            className={`tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 ${
               shouldShowPinButton ? "tw-pr-7" : ""
             }`}
           >
-            {formattedWaveName}
+            <Link
+              href={href}
+              prefetch={false}
+              onClick={handleWaveClick}
+              className={`tw-min-w-0 tw-flex-shrink tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+                isActive
+                  ? "tw-text-white desktop-hover:group-hover:tw-text-white"
+                  : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+              }`}
+            >
+              <span className="tw-block tw-truncate tw-text-sm tw-font-medium">
+                {formattedWaveName}
+              </span>
+            </Link>
+            <SidebarWaveExpandControl
+              formattedWaveName={formattedWaveName}
+              isExpanded={isExpanded}
+              onBlur={cancelSubwavePrefetch}
+              onClick={handleToggleExpand}
+              onFocus={scheduleSubwavePrefetch}
+              shouldShowButton={shouldShowExpandControl}
+            />
           </div>
           {shouldShowTrustSignalsRow && (
             <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
@@ -356,7 +374,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             </div>
           )}
         </div>
-      </Link>
+      </div>
       {shouldShowPinButton && (
         <BrainLeftSidebarWavePin
           waveId={wave.id}
