@@ -159,6 +159,9 @@ For every worker PR that claims visual readiness, capture:
 - For 3D, canvas pixel result or explicit mobile fallback result.
 - For social preview, metadata values and rendered card/image output where a
   route exists.
+- For localized worker branches, migrate brittle English smoke selectors to
+  stable locale-independent contracts, such as roles by semantic meaning or
+  agreed test ids.
 
 Failures should be actionable: include the route, selector or state that failed,
 viewport, screenshot name, and whether the failure is fixture, backend, or UI

@@ -951,3 +951,29 @@ Updated:
 - Existing Playwright specs in `tests/` import `../testHelpers`, but no tracked
   `tests/testHelpers.ts` is present in this checkout. The new Phase 5-8 smoke
   spec imports Playwright directly to avoid depending on that missing helper.
+
+## 2026-06-18 - Phase 5-8 QA Review Follow-Up
+
+### Feedback Addressed
+
+- 6529bot general review requested a stronger smoke harness after PR #2733 was
+  opened as a draft.
+- Updated the Playwright smoke helper to settle briefly and re-assert collected
+  page/console errors after navigation and after route-level assertions.
+- Replaced the implicit `/` route fallback with an explicit missing-env failure
+  when smoke is enabled.
+- Named the horizontal overflow tolerance and documented why it exists.
+- Added a WebGL `readPixels` caveat to blank-canvas failure messages so 3D
+  worker branches inspect the screenshot before treating the result as proof of
+  an empty render.
+- Added a checklist note to migrate English smoke selectors to stable
+  locale-independent contracts when localized worker branches land.
+
+### Validation
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --testMatch "**/__tests__/components/profile-cms/CmsSiteRenderer.phase5-8.test.tsx" --runInBand`
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `seize exec playwright test tests/profile-cms/phase5-8-smoke.spec.ts --list`
