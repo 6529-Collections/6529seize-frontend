@@ -532,6 +532,15 @@ function buildExternalFileResponse(
   };
 }
 
+function getFetchedFinalUrl(response: Response, fallbackUrl: URL): URL {
+  const finalUrl = response.url || fallbackUrl.toString();
+  try {
+    return new URL(finalUrl);
+  } catch {
+    throw new UrlGuardError("Invalid redirect URL", "invalid-url", 502);
+  }
+}
+
 function handleGuardError(error: unknown, fallbackStatus = 400) {
   if (isUrlGuardError(error)) {
     return NextResponse.json(
@@ -578,8 +587,7 @@ function createGenericPlan(url: URL): PreviewPlan {
     cacheKey: `generic:${url.toString()}`,
     execute: async () => {
       const response = await fetchGenericResponse(url);
-      const finalUrl = response.url || url.toString();
-      const finalUrlInstance = new URL(finalUrl);
+      const finalUrlInstance = getFetchedFinalUrl(response, url);
       await assertPublicUrl(finalUrlInstance, PUBLIC_URL_OPTIONS);
 
       if (shouldUseExternalFilePreview(response, finalUrlInstance)) {
@@ -592,7 +600,7 @@ function createGenericPlan(url: URL): PreviewPlan {
         html,
         contentType,
         finalUrl: htmlFinalUrl,
-      } = await extractHtmlResponse(response, url);
+      } = await extractHtmlResponse(response, finalUrlInstance);
       const googleWorkspace = await buildGoogleWorkspaceResponse(
         finalUrlInstance,
         html,

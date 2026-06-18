@@ -4,9 +4,9 @@ import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { formatNumber } from "@/i18n/format";
-import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { formatFileSizeLabel } from "@/lib/link-preview/filePreviewI18n";
 import {
   parseDecentralizedMediaRef,
   toNativeUri,
@@ -343,53 +343,8 @@ function resolveCsvPreviewErrorMessage(
 }
 
 const ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
-const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB"] as const;
 
 type AttachmentSafety = ApiAttachment["safety"];
-
-function getAttachmentFileSizeUnitLabel(
-  locale: SupportedLocale,
-  unit: (typeof FILE_SIZE_UNITS)[number]
-): string {
-  switch (unit) {
-    case "B":
-      return t(locale, "linkPreview.file.size.unit.B");
-    case "KB":
-      return t(locale, "linkPreview.file.size.unit.KB");
-    case "MB":
-      return t(locale, "linkPreview.file.size.unit.MB");
-    case "GB":
-      return t(locale, "linkPreview.file.size.unit.GB");
-  }
-}
-
-function formatAttachmentSize(
-  sizeBytes: number | null | undefined,
-  locale: SupportedLocale
-): string | null {
-  if (
-    typeof sizeBytes !== "number" ||
-    !Number.isFinite(sizeBytes) ||
-    sizeBytes < 0
-  ) {
-    return null;
-  }
-
-  let size = sizeBytes;
-  let unitIndex = 0;
-  while (size >= 1024 && unitIndex < FILE_SIZE_UNITS.length - 1) {
-    size /= 1024;
-    unitIndex += 1;
-  }
-
-  const formatted = formatNumber(locale, size, {
-    maximumFractionDigits: unitIndex === 0 || size >= 10 ? 0 : 1,
-  });
-  return t(locale, "linkPreview.file.size.value", {
-    value: formatted,
-    unit: getAttachmentFileSizeUnitLabel(locale, FILE_SIZE_UNITS[unitIndex]!),
-  });
-}
 
 function isScannedValidatedAttachment(
   safety: AttachmentSafety
@@ -870,7 +825,7 @@ export default function DropAttachmentDisplay({
     return metadataUrl ? getSafeAttachmentUrl(metadataUrl) : null;
   }, [attachmentUrl]);
   const isScannedValidated = isScannedValidatedAttachment(safety);
-  const safetySize = formatAttachmentSize(
+  const safetySize = formatFileSizeLabel(
     safety?.size_bytes,
     ATTACHMENT_LOCALE
   );
