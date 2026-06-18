@@ -78,6 +78,9 @@ jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
 const mockUseAuth = useAuth as jest.Mock;
 const mockUseMyStream = useMyStream as jest.Mock;
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
+const {
+  updateDropInCachedDrops,
+} = require("@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops");
 const mutationResultFor = (mutationId: string) => ({
   isLatestMutation: mutationId === "mutation-2",
   supersededByMutationId: mutationId === "mutation-1" ? "mutation-2" : null,
@@ -154,14 +157,18 @@ const mockDrop = {
   stableHash: "hash-drop-1",
 } as unknown as ExtendedDrop;
 
-const createNotificationQuery = () => {
+const createNotificationQuery = ({
+  relatedDrops = [mockDrop as unknown as ApiDrop],
+}: {
+  readonly relatedDrops?: ApiDrop[];
+} = {}) => {
   const data = {
     pages: [
       {
         notifications: [
           {
             id: 1,
-            related_drops: [mockDrop as unknown as ApiDrop],
+            related_drops: relatedDrops,
           },
         ],
       },
@@ -309,6 +316,37 @@ describe("useDropReaction", () => {
         ],
       })
     );
+  });
+
+  it("leaves cached notifications unchanged when the drop is not related", async () => {
+    const notificationQuery = createNotificationQuery({
+      relatedDrops: [
+        {
+          ...(mockDrop as unknown as ApiDrop),
+          id: "another-drop",
+        },
+      ],
+    });
+    mockQueryCacheFindAll.mockImplementation(
+      ({
+        predicate,
+      }: {
+        readonly predicate: (
+          query: ReturnType<typeof createNotificationQuery>
+        ) => boolean;
+      }) => [notificationQuery].filter((query) => predicate(query))
+    );
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(mockSetQueryData).not.toHaveBeenCalled();
   });
 
   it("rolls back cached notification drops on reaction failure", async () => {
@@ -613,5 +651,24 @@ describe("useDropReaction", () => {
     expect(
       dropReactionMonitoring.recordReactionRollbackApplied
     ).toHaveBeenCalledTimes(1);
+  });
+
+  it("skips canonical cache refresh when the failed reaction drop is unavailable", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      new Error("network down")
+    );
+    (fetchDropByIdBatched as jest.Mock).mockResolvedValueOnce(null);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("drop-1");
+    expect(updateDropInCachedDrops).not.toHaveBeenCalled();
+    expect(applyOptimisticDropUpdateMock).toHaveBeenCalledTimes(1);
   });
 });

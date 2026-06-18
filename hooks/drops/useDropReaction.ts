@@ -405,7 +405,10 @@ const useRefreshCanonicalDropAfterLatestFailure = ({
 }) =>
   useCallback(async () => {
     try {
-      const apiDrop = await fetchDropByIdBatched(dropId);
+      const apiDrop = (await fetchDropByIdBatched(dropId)) as ApiDrop | null;
+      if (apiDrop === null) {
+        return;
+      }
 
       updateDropInCachedDrops(queryClient, apiDrop);
       applyOptimisticDropUpdate({

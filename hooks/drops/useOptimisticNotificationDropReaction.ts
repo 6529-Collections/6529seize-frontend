@@ -123,11 +123,11 @@ const updateNotificationWithDropReaction = ({
     return { notification, changed: false };
   }
 
-  const matchingIndex = notification.related_drops.findIndex(
+  const hasMatchingDrop = notification.related_drops.some(
     (relatedDrop) => relatedDrop.id === dropId
   );
 
-  if (matchingIndex < 0) {
+  if (!hasMatchingDrop) {
     return { notification, changed: false };
   }
 
