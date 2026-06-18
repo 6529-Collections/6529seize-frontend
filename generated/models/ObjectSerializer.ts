@@ -1027,6 +1027,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiDecentralizedMediaProtocol",
     "ApiCreateConnectionShareRequestTargetClientTypeEnum",
     "ApiCreateConnectionShareResponseTargetClientTypeEnum",
+    "ApiDecentralizedMediaProtocol",
     "ApiDropGroupMention",
     "ApiDropMainType",
     "ApiDropMediaStatus",

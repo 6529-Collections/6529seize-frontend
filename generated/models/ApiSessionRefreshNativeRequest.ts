@@ -11,6 +11,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export class ApiSessionRefreshNativeRequest {
     'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
     'client_address': string;

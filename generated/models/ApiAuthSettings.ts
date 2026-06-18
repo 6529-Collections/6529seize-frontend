@@ -11,6 +11,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export class ApiAuthSettings {
     /**
     * True when backend strict structured wallet signature enforcement is enabled. Frontend clients should treat legacy auth as no longer acceptable when this is true.
