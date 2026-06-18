@@ -96,7 +96,6 @@ const MENU: SidebarMenu = [
       { label: "Data Decentralization", path: "/about/data-decentralization" },
       { label: "ENS", path: "/about/ens" },
       { label: "License", path: "/about/license" },
-      { label: "Release Notes", path: "/about/release-notes" },
     ],
   },
 ];

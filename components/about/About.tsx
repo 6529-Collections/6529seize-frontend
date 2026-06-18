@@ -26,7 +26,6 @@ import AboutNakamotoThreshold from "./AboutNakamotoThreshold";
 import AboutNFTDelegation from "./AboutNFTDelegation";
 import AboutPrimaryAddress from "./AboutPrimaryAddress";
 import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
-import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTech from "./tech/AboutTech";
 import AboutTermsOfService from "./AboutTermsOfService";
@@ -51,8 +50,6 @@ export default function About({ section }: { readonly section: AboutSection }) {
         return <AboutApply />;
       case AboutSection.CONTACT_US:
         return <AboutContactUs />;
-      case AboutSection.RELEASE_NOTES:
-        return <AboutReleaseNotes />;
       case AboutSection.TECH:
         return <AboutTech />;
       case AboutSection.TERMS_OF_SERVICE:
@@ -196,11 +193,6 @@ export function AboutMenu({
       <MenuItem
         section={AboutSection.CONTACT_US}
         title="Contact Us"
-        currentSection={currentSection}
-      />
-      <MenuItem
-        section={AboutSection.RELEASE_NOTES}
-        title="Release Notes"
         currentSection={currentSection}
       />
       <MenuItem
