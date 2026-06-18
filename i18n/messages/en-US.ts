@@ -171,6 +171,12 @@ const USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES = objectMessages(
   } as const
 );
 
+const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
+  refreshAction: "Refresh page",
+  title: "A new version is available",
+  eyebrow: "Yes, again!",
+} as const);
+
 const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.walletActivity",
   {
@@ -685,8 +691,16 @@ const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
 const LINK_PREVIEW_MESSAGES = namespaceMessages("linkPreview", [
   ["externalSourceFallback", "External link"],
   ["byline", "by {author}"],
+  ["farcaster.frameBadge", "Frame"],
+  ["farcaster.imageAlt", "Farcaster embed preview for {title}"],
+  ["farcaster.imageFallbackAlt", "Farcaster embed preview"],
+  ["farcaster.miniAppBadge", "Mini App"],
+  ["farcaster.openFrame", "Open Frame"],
+  ["farcaster.openMiniApp", "Open Mini App"],
+  ["farcaster.titleFallback", "Farcaster Mini App"],
   ["mediaType.article", "Article"],
   ["mediaType.website", "Website"],
+  ["unavailable", "Link unavailable"],
   ["youtube.providerFallback", "YouTube"],
   ["youtube.playVideo", "Play YouTube video: {title}"],
   ["youtube.thumbnailAlt", "YouTube thumbnail for {title}"],
@@ -910,6 +924,7 @@ export const EN_US_MESSAGES = {
   ...REMEMES_DETAIL_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
+  ...NEW_VERSION_TOAST_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

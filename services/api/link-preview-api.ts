@@ -125,6 +125,22 @@ export interface YoutubeVideoLinkPreview extends LinkPreviewBase {
   readonly startSeconds?: number | null | undefined;
 }
 
+export type FarcasterEmbedKind = "miniapp" | "frame" | "legacy-frame";
+export type FarcasterEmbedType = "farcaster.miniapp" | "farcaster.frame";
+
+export interface FarcasterEmbedLinkPreview extends LinkPreviewBase {
+  readonly type: FarcasterEmbedType;
+  readonly embedKind: FarcasterEmbedKind;
+  readonly appName?: string | null | undefined;
+  readonly buttonTitle?: string | null | undefined;
+  readonly actionType?: string | null | undefined;
+  readonly actionUrl?: string | null | undefined;
+  readonly imageUrl?: string | null | undefined;
+  readonly splashImageUrl?: string | null | undefined;
+  readonly splashBackgroundColor?: string | null | undefined;
+  readonly buttons?: readonly string[] | null | undefined;
+}
+
 interface ManifoldListingDetails {
   readonly listingId: string;
   readonly creatorHandle?: string | null | undefined;
@@ -148,7 +164,8 @@ export type LinkPreviewResponse =
   | ManifoldListingLinkPreview
   | SeizeCollectionLinkPreview
   | GoogleWorkspaceLinkPreview
-  | YoutubeVideoLinkPreview;
+  | YoutubeVideoLinkPreview
+  | FarcasterEmbedLinkPreview;
 
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;
