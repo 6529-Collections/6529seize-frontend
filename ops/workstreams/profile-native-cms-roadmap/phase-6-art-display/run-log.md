@@ -73,6 +73,9 @@
 - Added regression coverage that dialog root/gutter, toolbar, and artwork
   content mouse-down events do not dismiss the lightbox; only an intentional
   image-stage backdrop click closes it.
+- Switched the lightbox root to a native `<dialog>`, made the image-stage
+  backdrop a pointer-only native button, and applied the small Sonar
+  `.at(-1)`/`Set.has()` suggestions to clear reliability/readability findings.
 
 ## Second Follow-up Validation Evidence
 

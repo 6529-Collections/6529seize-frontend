@@ -1845,9 +1845,9 @@ function routeMatchesNftProfile(
     return false;
   }
 
-  const routeParts = normalizedRoute.split(/[/?#&=]+/).filter(Boolean);
+  const routeParts = new Set(normalizedRoute.split(/[/?#&=]+/).filter(Boolean));
   return getNftRouteTokenCandidates(profile.token_id).some((candidate) =>
-    routeParts.includes(candidate)
+    routeParts.has(candidate)
   );
 }
 

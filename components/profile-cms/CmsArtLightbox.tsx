@@ -7,7 +7,6 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent,
-  type MouseEvent,
   type Ref,
 } from "react";
 
@@ -241,7 +240,7 @@ function ArtworkDialog({
   const [showMetadata, setShowMetadata] = useState(false);
   const [zoom, setZoom] = useState(1);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const activeItem =
     activeIndex === null ? undefined : (items[activeIndex] ?? undefined);
@@ -295,7 +294,7 @@ function ArtworkDialog({
     };
   }, [activeIndex]);
 
-  const handleDialogKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const handleDialogKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.key === "Tab") {
       trapFocus(event, dialogRef.current);
       return;
@@ -330,24 +329,18 @@ function ArtworkDialog({
     stopNestedSpaceScroll(event);
   };
 
-  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      close();
-    }
-  };
-
   if (activeIndex === null || !activeItem) {
     return null;
   }
 
   return (
-    <div
+    <dialog
       aria-labelledby={titleId}
       aria-modal="true"
-      className="tw-fixed tw-inset-0 tw-z-[1100] tw-flex tw-bg-black/95 tw-text-iron-100"
+      className="tw-fixed tw-inset-0 tw-z-[1100] tw-m-0 tw-flex tw-h-auto tw-max-h-none tw-w-auto tw-max-w-none tw-border-0 tw-bg-black/95 tw-p-0 tw-text-iron-100"
       onKeyDown={handleDialogKeyDown}
+      open
       ref={dialogRef}
-      role="dialog"
       tabIndex={-1}
     >
       <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-col">
@@ -414,18 +407,22 @@ function ArtworkDialog({
               : "tw-grid-cols-1"
           }`}
         >
-          <div
-            className="tw-min-h-0 tw-overflow-auto tw-p-4"
-            data-testid="cms-art-lightbox-backdrop"
-            onClick={handleBackdropClick}
-          >
+          <div className="tw-relative tw-min-h-0 tw-overflow-auto tw-p-4">
+            <button
+              aria-hidden="true"
+              className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-p-0"
+              data-testid="cms-art-lightbox-backdrop"
+              onClick={close}
+              tabIndex={-1}
+              type="button"
+            />
             <div
-              className="tw-flex tw-min-h-full tw-items-center tw-justify-center"
+              className="tw-pointer-events-none tw-relative tw-flex tw-min-h-full tw-items-center tw-justify-center"
               style={getArtworkFrameStyle(activeItem)}
             >
               <img
                 alt={activeItem.alt}
-                className="tw-max-h-[calc(100dvh-8rem)] tw-max-w-full tw-object-contain"
+                className="tw-pointer-events-auto tw-max-h-[calc(100dvh-8rem)] tw-max-w-full tw-object-contain"
                 height={activeItem.height}
                 src={activeItem.src}
                 style={{
@@ -472,7 +469,7 @@ function ArtworkDialog({
           ) : null}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -508,7 +505,7 @@ function toggleFullscreen(element: HTMLElement | null): void {
   void element.requestFullscreen?.();
 }
 
-function stopNestedSpaceScroll(event: KeyboardEvent<HTMLDivElement>): void {
+function stopNestedSpaceScroll(event: KeyboardEvent<HTMLElement>): void {
   if (event.key !== " ") {
     return;
   }
@@ -524,7 +521,7 @@ const FOCUSABLE_ELEMENT_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function trapFocus(
-  event: KeyboardEvent<HTMLDivElement>,
+  event: KeyboardEvent<HTMLElement>,
   container: HTMLElement | null
 ): void {
   if (!container) {
@@ -542,7 +539,7 @@ function trapFocus(
   }
 
   const firstElement = focusableElements[0]!;
-  const lastElement = focusableElements[focusableElements.length - 1]!;
+  const lastElement = focusableElements.at(-1)!;
   const activeElement = globalThis.document?.activeElement ?? null;
 
   if (event.shiftKey) {
