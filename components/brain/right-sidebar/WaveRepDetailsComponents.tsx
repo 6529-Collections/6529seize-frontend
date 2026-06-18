@@ -16,11 +16,7 @@ import { useMemo, useState } from "react";
 
 export const ALL_CATEGORY_OPTION_ID = "__all__";
 const WAVE_REP_DETAILS_LOCALE = DEFAULT_LOCALE;
-const ACTIVE_CATEGORY_LABEL = "Category";
-const ACTIVE_CATEGORY_ARIA_LABEL = "Choose active Wave REP category";
-const BROWSE_CATEGORIES_LABEL = "Show all categories";
-const CATEGORY_SEARCH_PLACEHOLDER = "Search categories";
-const NO_CATEGORY_MATCHES_LABEL = "No matching categories";
+const CATEGORY_OPTION_ID_PREFIX = "category:";
 const CHANGE_REASON_MESSAGE_KEYS: Record<string, MessageKey> = {
   LOST_TDH: "waves.rep.details.activity.reason.lostTdh",
 };
@@ -88,8 +84,14 @@ function getFallbackInitial(display: string): string {
   return display.trim().charAt(0).toUpperCase() || "?";
 }
 
+function normalizeOptionalHandle(handle: string | null | undefined): string {
+  return handle?.trim() ?? "";
+}
+
 export function getCategoryOptionId(category: string | null): string {
-  return category ?? ALL_CATEGORY_OPTION_ID;
+  return category === null
+    ? ALL_CATEGORY_OPTION_ID
+    : `${CATEGORY_OPTION_ID_PREFIX}${category}`;
 }
 
 function getVisibleReason(reason: string | null | undefined): string | null {
@@ -263,7 +265,7 @@ export function CategoryMenu({
             id: "no-category-matches",
             label: (
               <span className="tw-text-xs tw-font-medium tw-text-iron-500">
-                {NO_CATEGORY_MATCHES_LABEL}
+                {detailText("waves.rep.details.categories.noMatches")}
               </span>
             ),
             disabled: true,
@@ -285,7 +287,7 @@ export function CategoryMenu({
           <span className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3">
             <span className="tw-min-w-0">
               <span className="tw-block tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-text-iron-500">
-                {ACTIVE_CATEGORY_LABEL}
+                {detailText("waves.rep.details.categories.active")}
               </span>
               <span
                 title={selectedOption.label}
@@ -313,7 +315,7 @@ export function CategoryMenu({
         ) : (
           <span className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3">
             <span className="tw-text-xs tw-font-semibold tw-text-white">
-              {BROWSE_CATEGORIES_LABEL}
+              {detailText("waves.rep.details.categories.browse")}
             </span>
             <span
               aria-hidden="true"
@@ -327,6 +329,9 @@ export function CategoryMenu({
       header={
         <input
           type="search"
+          aria-label={detailText(
+            "waves.rep.details.categories.searchAriaLabel"
+          )}
           value={categorySearch}
           onChange={(event) => setCategorySearch(event.currentTarget.value)}
           onClick={(event) => event.stopPropagation()}
@@ -335,7 +340,9 @@ export function CategoryMenu({
               event.stopPropagation();
             }
           }}
-          placeholder={CATEGORY_SEARCH_PLACEHOLDER}
+          placeholder={detailText(
+            "waves.rep.details.categories.searchPlaceholder"
+          )}
           className="tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-white tw-outline-none tw-transition placeholder:tw-text-iron-500 focus:tw-border-primary-400"
         />
       }
@@ -351,7 +358,7 @@ export function CategoryMenu({
       anchor="bottom end"
       activeItemId={selectedOption.id}
       closeOnSelect
-      aria-label={ACTIVE_CATEGORY_ARIA_LABEL}
+      aria-label={detailText("waves.rep.details.categories.activeAriaLabel")}
     />
   );
 }
@@ -404,7 +411,7 @@ export function LogRow({
   const changeClass = getRepTextClass(change);
   const oldRatingClass = getRepTextClass(log.contents.old_rating);
   const newRatingClass = getRepTextClass(log.contents.new_rating);
-  const raterHandle = log.profile_handle.trim();
+  const raterHandle = normalizeOptionalHandle(log.profile_handle);
   const rater =
     raterHandle || detailText("waves.rep.details.activity.unknownRater");
   const raterHref = raterHandle

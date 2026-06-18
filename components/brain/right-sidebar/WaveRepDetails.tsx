@@ -38,7 +38,6 @@ const LOG_PAGE_SIZE = 20;
 const INLINE_CATEGORY_LIMIT = 4;
 const STALE_TIME_MS = 60_000;
 const RETRY_ACTION_MESSAGE_KEY = "waves.rep.details.actions.retry";
-const ACTIVITY_DESCRIPTION = "Recent edits across all categories";
 
 type RepDetailView = "contributors" | "activity";
 
@@ -534,7 +533,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 {contributorDescription}
               </p>
             </div>
-            {(contributorsQuery.isPending || isShowingPreviousContributors) && (
+            {contributorsQuery.isPending && !isShowingPreviousContributors && (
               <CircleLoader size={CircleLoaderSize.MEDIUM} />
             )}
           </div>
@@ -634,7 +633,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 {detailText("waves.rep.details.activity.title")}
               </h3>
               <p className="tw-mb-0 tw-mt-0.5 tw-text-xs tw-text-iron-500">
-                {ACTIVITY_DESCRIPTION}
+                {detailText("waves.rep.details.activity.description")}
               </p>
             </div>
             {logsQuery.isPending && (
