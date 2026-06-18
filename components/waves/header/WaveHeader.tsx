@@ -16,6 +16,7 @@ import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
+import WaveHeaderTrustStats from "./WaveHeaderTrustStats";
 
 interface WaveHeaderProps {
   readonly wave: ApiWave;
@@ -73,6 +74,7 @@ export default function WaveHeader({
     normalizedWaveAuthorHandle !== null &&
     normalizedConnectedHandle !== normalizedWaveAuthorHandle;
   const showOptions = showOwnerOptions || showCreateSubwaveOption;
+  const showPinAction = !isSubwave;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
 
   return (
@@ -147,6 +149,11 @@ export default function WaveHeader({
               <div className="tw-shrink-0">
                 <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
               </div>
+              {showPinAction && (
+                <div className="tw-shrink-0">
+                  <WaveHeaderPinButton waveId={wave.id} />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -155,17 +162,14 @@ export default function WaveHeader({
           <div className="tw-min-w-0 tw-flex-1">
             <WaveHeaderName wave={wave} />
           </div>
-          {(showOptions || !isSubwave) && (
+          {showOptions && (
             <div
               className={`tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-1.5 ${titleActionAlignmentClass}`}
             >
-              {showOptions && (
-                <WaveHeaderOptions
-                  wave={wave}
-                  showOwnerActions={showOwnerOptions}
-                />
-              )}
-              {!isSubwave && <WaveHeaderPinButton waveId={wave.id} />}
+              <WaveHeaderOptions
+                wave={wave}
+                showOwnerActions={showOwnerOptions}
+              />
             </div>
           )}
         </div>
@@ -195,12 +199,13 @@ export default function WaveHeader({
                 </div>
               )}
             </div>
-            {showWaveRepAction && (
-              <div className="tw-shrink-0">
-                <WaveRepButton wave={wave} />
-              </div>
-            )}
           </div>
+          <WaveHeaderTrustStats wave={wave} />
+          {showWaveRepAction && (
+            <div className="tw-flex">
+              <WaveRepButton wave={wave} />
+            </div>
+          )}
         </div>
       </div>
     </div>
