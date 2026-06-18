@@ -2406,6 +2406,67 @@ paths:
                 $ref: "#/components/schemas/ApiDropAndWave"
         "404":
           description: Drop not found
+  /v2/drops/{id}/replies:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 replies to a drop.
+      description: Returns the reply thread for a drop using V2 drop and wave shapes.
+      operationId: getDropRepliesV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetDropRepliesV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: serial_no_limit
+          in: query
+          required: false
+          description: Serial number anchor for paginating replies.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: search_strategy
+          in: query
+          required: false
+          description: >-
+            Use in combination with serial_no_limit. If this is not set then
+            FIND_OLDER is used.
+          schema:
+            $ref: "#/components/schemas/ApiDropSearchStrategy"
+        - name: drop_type
+          in: query
+          description: Filter by drop type
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiDropType"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveDropsFeedV2"
+        "400":
+          description: Invalid reply feed query params
+        "404":
+          description: Drop not found
   /v2/drops/{id}/metadata:
     get:
       tags:
@@ -3080,6 +3141,39 @@ paths:
                 $ref: "#/components/schemas/ApiIdentityActivity"
         "404":
           description: Identity not found
+  /media/resolve:
+    post:
+      tags:
+        - Media
+      summary: Resolve decentralized media references
+      description: >-
+        Resolves native IPFS, IPNS, Arweave, 6529 media resolver, and recognized
+        third-party gateway URLs into canonical native URIs, 6529 resolver URLs,
+        and optional external fallback URLs. Unrecognized HTTP(S) URLs are
+        returned as unrecognized items instead of failing the batch.
+      operationId: resolveDecentralizedMedia
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/media/decentralized-media.handlers"
+          name: handleResolveDecentralizedMedia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMediaResolveRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMediaResolveResponse"
+        "400":
+          description: Invalid request shape
   /memes-mint-stats:
     get:
       tags:
@@ -6223,7 +6317,9 @@ paths:
             type: string
         - name: from_identity
           in: query
-          description: If omitted, the authenticated profile is used. Anonymous requests without from_identity return 0.
+          description: >-
+            If omitted, the authenticated profile is used. Anonymous requests
+            without from_identity return 0.
           required: false
           schema:
             type: string
@@ -7071,7 +7167,10 @@ paths:
         - Waves
       summary: Get drops related to wave or parent drop
       deprecated: true
-      description: Deprecated. Use GET /v2/waves/{id}/drops instead.
+      description: >-
+        Deprecated. Use GET /v2/waves/{id}/drops for the wave timeline feed, GET
+        /v2/drops/{id}/replies for reply threads, and GET
+        /v2/waves/{id}/curations/{curation_id}/drops for curation drops.
       operationId: getDropsOfWave
       parameters:
         - name: id
@@ -7881,8 +7980,9 @@ paths:
         - name: exclude_followed
           in: query
           description: >-
-            HOT view only. If true then result excludes waves the authenticated
-            user already follows.
+            HOT view and OVERVIEW view with
+            overview_type=SCORED_RECENTLY_DROPPED_TO only. If true then result
+            excludes waves the authenticated user already follows.
           required: false
           schema:
             type: boolean
@@ -8006,7 +8106,12 @@ paths:
     get:
       tags:
         - WavesV2
-      summary: Get V2 drops related to wave
+      summary: Get V2 timeline drops for a wave
+      description: >-
+        Returns the timeline feed for a wave. This endpoint does not accept
+        reply-thread or curation filters. Use GET /v2/drops/{id}/replies for
+        reply threads and GET /v2/waves/{id}/curations/{curation_id}/drops for
+        curation drops.
       operationId: getWaveDropsV2
       x-6529-router:
         enabled: true
@@ -8028,7 +8133,7 @@ paths:
             format: int64
             minimum: 1
             maximum: 200
-            default: 20
+            default: 50
         - name: serial_no_limit
           in: query
           required: false
@@ -8036,6 +8141,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
         - name: search_strategy
           in: query
           required: false
@@ -8057,6 +8163,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeedV2"
+        "400":
+          description: Invalid wave timeline feed query params
   /v2/waves/{id}/polls:
     get:
       tags:
@@ -9309,6 +9417,26 @@ components:
       enum:
         - application/pdf
         - text/csv
+    ApiAuthSettings:
+      type: object
+      required:
+        - structured_signatures_required
+        - session_v2_migration_deadline
+      properties:
+        structured_signatures_required:
+          type: boolean
+          description: >-
+            True when backend strict structured wallet signature enforcement is
+            enabled. Frontend clients should treat legacy auth as no longer
+            acceptable when this is true.
+        session_v2_migration_deadline:
+          type: string
+          nullable: true
+          description: >-
+            Optional global deadline for frontend v1-auth to session-v2
+            migration prompts, formatted as an ISO datetime with timezone. Null
+            means no migration prompt should be shown unless strict structured
+            signatures are required.
     ApiAvailableRatingCredit:
       type: object
       required:
@@ -10748,6 +10876,44 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiCurationDrop"
+    ApiDecentralizedMediaProtocol:
+      type: string
+      enum:
+        - ipfs
+        - ipns
+        - arweave
+    ApiDecentralizedMediaResolution:
+      type: object
+      required:
+        - input
+        - recognized
+        - external_fallback_urls
+        - warnings
+      properties:
+        input:
+          type: string
+        recognized:
+          type: boolean
+        protocol:
+          $ref: "#/components/schemas/ApiDecentralizedMediaProtocol"
+        native_uri:
+          type: string
+        id:
+          type: string
+        path:
+          type: string
+        resolver_url:
+          type: string
+          format: uri
+        external_fallback_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        warnings:
+          type: array
+          items:
+            type: string
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -12391,6 +12557,29 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+    ApiMediaResolveRequest:
+      type: object
+      required:
+        - inputs
+      properties:
+        inputs:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+        include_external_fallbacks:
+          type: boolean
+          default: true
+    ApiMediaResolveResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDecentralizedMediaResolution"
     ApiMediaUploadMimeType:
       type: string
       enum:
@@ -14269,26 +14458,6 @@ components:
         rating:
           type: number
           format: int64
-    ApiAuthSettings:
-      type: object
-      required:
-        - structured_signatures_required
-        - session_v2_migration_deadline
-      properties:
-        structured_signatures_required:
-          type: boolean
-          description: >-
-            True when backend strict structured wallet signature enforcement is
-            enabled. Frontend clients should treat legacy auth as no longer
-            acceptable when this is true.
-        session_v2_migration_deadline:
-          type: string
-          nullable: true
-          description: >-
-            Optional global deadline for frontend v1-auth to session-v2
-            migration prompts, formatted as an ISO datetime with timezone. Null
-            means no migration prompt should be shown unless strict structured
-            signatures are required.
     ApiSeizeSettings:
       type: object
       required:

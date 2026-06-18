@@ -81,6 +81,8 @@ export * from '../models/ApiCreateWaveOutcomeDistributionItem';
 export * from '../models/ApiCuratedProfileWaveDropsPage';
 export * from '../models/ApiCurationDrop';
 export * from '../models/ApiCurationDropsPage';
+export * from '../models/ApiDecentralizedMediaProtocol';
+export * from '../models/ApiDecentralizedMediaResolution';
 export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
 export * from '../models/ApiDistributionAirdropsUploadResponse';
 export * from '../models/ApiDrop';
@@ -164,6 +166,8 @@ export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
+export * from '../models/ApiMediaResolveRequest';
+export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
 export * from '../models/ApiMemesMintStat';
 export * from '../models/ApiMemesMintStatsPage';
@@ -508,6 +512,8 @@ import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOut
 import { ApiCuratedProfileWaveDropsPage } from '../models/ApiCuratedProfileWaveDropsPage';
 import { ApiCurationDrop                                 } from '../models/ApiCurationDrop';
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
+import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaProtocol';
+import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentralizedMediaResolution';
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
 import { ApiDrop                                 } from '../models/ApiDrop';
@@ -591,6 +597,8 @@ import { ApiLightDrop             } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
+import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
+import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
 import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
@@ -873,6 +881,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCommunityMembersSortOption",
     "ApiCreateConnectionShareRequestTargetClientTypeEnum",
     "ApiCreateConnectionShareResponseTargetClientTypeEnum",
+    "ApiDecentralizedMediaProtocol",
     "ApiDropGroupMention",
     "ApiDropMainType",
     "ApiDropSearchStrategy",
@@ -1014,6 +1023,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCuratedProfileWaveDropsPage": ApiCuratedProfileWaveDropsPage,
     "ApiCurationDrop": ApiCurationDrop,
     "ApiCurationDropsPage": ApiCurationDropsPage,
+    "ApiDecentralizedMediaResolution": ApiDecentralizedMediaResolution,
     "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
     "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
     "ApiDrop": ApiDrop,
@@ -1087,6 +1097,8 @@ let typeMap: {[index: string]: any} = {
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
+    "ApiMediaResolveRequest": ApiMediaResolveRequest,
+    "ApiMediaResolveResponse": ApiMediaResolveResponse,
     "ApiMemesMintStat": ApiMemesMintStat,
     "ApiMemesMintStatsPage": ApiMemesMintStatsPage,
     "ApiMemesMintStatsTotals": ApiMemesMintStatsTotals,

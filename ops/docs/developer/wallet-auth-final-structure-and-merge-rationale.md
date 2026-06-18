@@ -124,7 +124,7 @@ The response is a native session response. The redeemed client stores the return
 
 ## Frontend Configuration
 
-The frontend no longer gates this implementation behind session-v2, legacy-refresh, or structured-signature rollout flags. Backend settings from `/api/settings.auth` decide when legacy v1 sessions should prompt for migration, and backend environment controls still decide which origins are allowed, whether connection sharing is enabled server-side, and when structured signatures become mandatory.
+The frontend no longer gates this implementation behind session-v2, legacy-refresh, or structured-signature rollout flags. Backend settings from `/api/settings.auth` decide when legacy v1 sessions should prompt for migration, and backend environment controls still decide which origins are allowed, whether connection sharing is explicitly disabled server-side, and when structured signatures become mandatory.
 
 ## Reviewer Checklist
 
