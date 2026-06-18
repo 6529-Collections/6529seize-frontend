@@ -222,7 +222,7 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
     ["collectors.uniqueExBurntAndMuseum", "% Unique ex. burnt and 6529 museum"],
     [
       "collectors.uniqueTooltip",
-      "Unique % represents collectors diversity. Higher percentage means more different collectors.",
+      "Unique % represents collector diversity. Higher percentage means more different collectors.",
     ],
     ["edition.editionSize", "Edition size"],
     ["edition.burnt", "burnt"],
