@@ -9,6 +9,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 interface MyStreamWaveMyVotesResetProps {
@@ -58,8 +59,10 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't reset this vote.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
       throw error;
     },

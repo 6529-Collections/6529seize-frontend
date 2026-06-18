@@ -5,6 +5,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -53,21 +54,21 @@ export default function UserPageSubscriptionsMode(
       });
       const responseAuto = response.automatic;
       setIsAuto(responseAuto);
-      const message = `Subscription Mode set to ${
-        responseAuto ? `Automatic` : `Manual`
-      }. ${
-        responseAuto ? `Subscribed for` : `Unsubscribed from`
-      } all upcoming drops`;
       setToast({
-        message: message,
+        title: "Subscription mode updated.",
+        description: responseAuto
+          ? "Automatic mode is on for upcoming drops."
+          : "Manual mode is on for upcoming drops.",
         type: "success",
       });
       props.refresh();
     } catch (e: any) {
       setIsUpdating(false);
       setToast({
-        message: e ?? "Failed to set subscription mode",
         type: "error",
+        title: "Couldn't update subscription mode.",
+        description: "Please try again.",
+        details: getToastErrorDetails(e, "Could not set subscription mode."),
       });
       return;
     } finally {

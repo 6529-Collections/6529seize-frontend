@@ -12,16 +12,18 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiAvailableRatingCredit } from "@/generated/models/ApiAvailableRatingCredit";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { GroupCardRateMatter } from "../GroupCard";
+
 export default function GroupCardActionStats({
   matter,
   membersCount,
   loadingMembersCount,
 }: {
-  readonly matter: ApiRateMatter;
+  readonly matter: GroupCardRateMatter;
   readonly membersCount: number | null;
   readonly loadingMembersCount: boolean;
 }) {
-  const MATTER_LABEL: Record<ApiRateMatter, string> = {
+  const MATTER_LABEL: Record<GroupCardRateMatter, string> = {
     [ApiRateMatter.Rep]: "Rep",
     [ApiRateMatter.Cic]: "Nic",
   };

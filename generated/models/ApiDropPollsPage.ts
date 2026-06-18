@@ -15,6 +15,7 @@ import { ApiDropV2 } from '../models/ApiDropV2';
 import { HttpFile } from '../http/http';
 
 export class ApiDropPollsPage {
+    'open_unanswered': number;
     'data': Array<ApiDropV2>;
     'count': number;
     'page': number;
@@ -25,6 +26,12 @@ export class ApiDropPollsPage {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "open_unanswered",
+            "baseName": "open_unanswered",
+            "type": "number",
+            "format": "int64"
+        },
         {
             "name": "data",
             "baseName": "data",

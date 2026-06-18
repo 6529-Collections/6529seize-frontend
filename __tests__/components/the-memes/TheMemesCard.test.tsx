@@ -58,7 +58,8 @@ import NFTImage from "@/components/nft-image/NFTImage";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
 import { VolumeType, type NFTWithMemesExtendedData } from "@/entities/INFT";
-import { printMintDate } from "@/helpers/Helpers";
+import { formatDate } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { MemesSort } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
@@ -138,7 +139,9 @@ describe("TheMemesCard", () => {
       />
     );
 
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/the-memes/6529");
+    expect(
+      screen.getByRole("link", { name: "View Test Meme, card #6,529" })
+    ).toHaveAttribute("href", "/the-memes/6529");
     expect(screen.getByTestId("nft-image")).toHaveAttribute("data-id", "6529");
     expect(screen.getByTestId("nft-image")).toHaveAttribute(
       "data-show-balance",
@@ -211,11 +214,29 @@ describe("TheMemesCard", () => {
     ).toBe(balance.parentElement?.parentElement);
 
     const date = screen.getByText(
-      printMintDate(nft.mint_date).replace(/\s+/g, " ").trim()
+      formatDate(DEFAULT_LOCALE, nft.mint_date).replace(/\s+/g, " ").trim()
     );
     expect(date).toHaveClass("tw-w-full", "tw-text-center", "tw-text-iron-500");
     expect(date).not.toBe(
       screen.getByText("#6529").parentElement?.parentElement
     );
+  });
+
+  it("renders localized card metrics and link names when a locale is provided", () => {
+    render(
+      <TheMemesCard
+        nft={nft}
+        sort={MemesSort.EDITION_SIZE}
+        volumeType={VolumeType.ALL_TIME}
+        hasConnectedProfile={false}
+        locale="de-DE"
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Test Meme, Karte #6.529 ansehen" })
+    ).toHaveAttribute("href", "/the-memes/6529?locale=de-DE");
+    expect(screen.getByText("Editionsgröße:")).toBeInTheDocument();
+    expect(screen.getByText("1.000")).toHaveClass("tw-text-iron-200");
   });
 });

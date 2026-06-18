@@ -9,6 +9,7 @@ import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmation
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { DropCurationMembership } from "@/hooks/drops/useDropCurations";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { invalidateProfileWaveQueries } from "@/hooks/useProfileWave";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
@@ -82,7 +83,9 @@ export default function MyStreamWaveCurationTabMenu({
     onError: (error) => {
       setToast({
         type: "error",
-        message: getErrorMessage(error),
+        title: "Couldn't delete this curation.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, getErrorMessage(error)),
       });
     },
   });

@@ -33,15 +33,15 @@ export function NftSuggestList({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
 
-  const virtualization = useVirtualizedWaves<Suggestion>(
+  const virtualization = useVirtualizedWaves<Suggestion>({
     items,
-    "nft-picker-suggestions",
+    key: "nft-picker-suggestions",
     scrollContainerRef,
     listContainerRef,
-    ROW_HEIGHT,
-    OVERSCAN,
-    isOpen
-  );
+    rowHeight: ROW_HEIGHT,
+    overscan: OVERSCAN,
+    isActive: isOpen,
+  });
 
   useEffect(() => {
     if (activeIndex >= 0 && scrollContainerRef.current) {
@@ -66,7 +66,7 @@ export function NftSuggestList({
   return (
     <div
       ref={scrollContainerRef}
-      className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-py-2 tw-shadow-2xl tw-ring-1 tw-ring-black/50 tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900 desktop-hover:hover:tw-scrollbar-thumb-iron-600"
+      className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-py-2 tw-shadow-2xl tw-ring-1 tw-ring-black/50 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600"
     >
       {/* 
         We render two lists:
@@ -85,7 +85,10 @@ export function NftSuggestList({
       />
 
       {hideSpam && (
-        <NftSuggestFooter hiddenCount={hiddenCount} onToggleSpam={onToggleSpam} />
+        <NftSuggestFooter
+          hiddenCount={hiddenCount}
+          onToggleSpam={onToggleSpam}
+        />
       )}
     </div>
   );

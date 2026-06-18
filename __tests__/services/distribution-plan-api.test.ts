@@ -22,7 +22,7 @@ describe("distribution-plan-api", () => {
     global.fetch = jest.fn().mockResolvedValue({ status: 401, json: jest.fn() }) as any;
     const res = await distributionPlanApiFetch<any>("/x");
     expect(removeAuthJwt).toHaveBeenCalled();
-    expect(makeErrorToast).toHaveBeenCalledWith("Unauthorized");
+    expect(makeErrorToast).toHaveBeenCalledWith("Please reconnect your wallet.");
     expect(res.success).toBe(false);
   });
 

@@ -2,6 +2,7 @@ import { useContext, useState, type RefObject } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { getCreateWaveDisplayMetadataRequests } from "@/helpers/waves/wave-metadata.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
@@ -9,7 +10,6 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { createWaveMetadata } from "@/services/api/waves-v2-api";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
 import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
@@ -23,24 +23,14 @@ interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
   readonly onSuccess?: (() => void) | undefined;
+  readonly parentWaveId?: string | null | undefined;
 }
-
-const getErrorMessage = (error: unknown, fallback: string): string => {
-  if (typeof error === "string") {
-    return error;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return fallback;
-};
 
 export function useCreateWaveSubmission({
   config,
   descriptionRef,
   onSuccess,
+  parentWaveId,
 }: UseCreateWaveSubmissionParams) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
@@ -91,8 +81,10 @@ export function useCreateWaveSubmission({
     },
     onError: (error) => {
       setToast({
-        message: error as string,
         type: "error",
+        title: "Couldn't create this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -117,8 +109,10 @@ export function useCreateWaveSubmission({
     if (!result.ok) {
       if (result.reason !== "auth") {
         setToast({
-          message: result.error,
           type: "error",
+          title: "Couldn't create this group.",
+          description: "Please check the group setup and try again.",
+          details: result.error,
         });
       }
       return null;
@@ -152,7 +146,7 @@ export function useCreateWaveSubmission({
 
       if (hasPendingInlineImageUploadDrop(drop)) {
         setToast({
-          message: "Please wait for image uploads to finish.",
+          message: "Wait for image uploads to finish.",
           type: "error",
         });
         setSubmitting(false);
@@ -165,9 +159,10 @@ export function useCreateWaveSubmission({
         handle: connectedProfile?.handle ?? undefined,
         onError: (error) => {
           setToast({
-            message:
-              typeof error === "string" ? error : "Failed to get admin group",
             type: "error",
+            title: "Couldn't get the admin group.",
+            description: "Please check the group setup and try again.",
+            details: getToastErrorDetails(error, "Could not get admin group."),
           });
         },
       });
@@ -192,13 +187,12 @@ export function useCreateWaveSubmission({
         config: submissionConfig,
         picture: picture?.url ?? null,
         drop: dropRequest,
+        parentWaveId,
       });
-      const displayMetadataRequests =
-        submissionConfig.overview.type === ApiWaveType.Approve
-          ? getCreateWaveDisplayMetadataRequests(
-              submissionConfig.display.approve
-            )
-          : [];
+      const displayMetadataRequests = getCreateWaveDisplayMetadataRequests({
+        display: submissionConfig.display,
+        waveType: submissionConfig.overview.type,
+      });
 
       mutationStarted = true;
       await addWaveMutation.mutateAsync({
@@ -208,8 +202,10 @@ export function useCreateWaveSubmission({
     } catch (error) {
       if (!mutationStarted) {
         setToast({
-          message: getErrorMessage(error, "Failed to create wave"),
           type: "error",
+          title: "Couldn't create this wave.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error, "Could not create wave."),
         });
         setSubmitting(false);
       }

@@ -8,6 +8,8 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildProfilePageJsonLd } from "@/lib/structured-data/profile";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -151,10 +153,24 @@ export function createUserTabPage<
       ? await getTabProps({ profile, query })
       : ({} as TExtra);
 
+    const canonicalUser =
+      profile.handle ?? profile.primary_wallet ?? normalizedUser;
+    const profilePath = `/${encodeURIComponent(canonicalUser)}${
+      subroute ? `/${subroute}` : ""
+    }`;
+
     const TabComponent = (
-      <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
-        <Tab profile={profile} {...extraProps} />
-      </UserPageLayout>
+      <>
+        <JsonLdScript
+          data={buildProfilePageJsonLd({
+            profile,
+            path: profilePath,
+          })}
+        />
+        <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
+          <Tab profile={profile} {...extraProps} />
+        </UserPageLayout>
+      </>
     );
 
     if (enableTransfer) {

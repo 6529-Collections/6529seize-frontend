@@ -18,6 +18,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -505,7 +506,7 @@ export default function CreateDrop({
         curationComposerVariant === "leaderboard"
       ) {
         setToast({
-          message: "Drop submitted successfully",
+          message: "Drop submitted.",
           type: "success",
         });
       }
@@ -518,8 +519,10 @@ export default function CreateDrop({
         }
       }, 0);
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't submit this drop.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
       body.onError?.(error);
     },

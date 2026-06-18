@@ -101,7 +101,7 @@ export default function PushNotificationSettings({
           } else {
             console.error("Error fetching push notification settings:", error);
             setToast({
-              message: "Failed to load notification settings",
+              message: "Couldn't load notification settings. Please try again.",
               type: "error",
             });
           }
@@ -146,7 +146,7 @@ export default function PushNotificationSettings({
     onSuccess: () => {
       setOriginalSettings(currentSettings);
       setToast({
-        message: "Notification settings updated",
+        message: "Notification settings saved.",
         type: "success",
       });
       onClose();
@@ -154,7 +154,7 @@ export default function PushNotificationSettings({
     onError: (error: unknown) => {
       console.error("Error saving push notification settings:", error);
       setToast({
-        message: "Failed to save notification settings",
+        message: "Couldn't save notification settings. Please try again.",
         type: "error",
       });
     },

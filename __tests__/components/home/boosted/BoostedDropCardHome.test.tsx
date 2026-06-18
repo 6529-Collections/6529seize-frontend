@@ -1,12 +1,6 @@
 import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import { AuthContext } from "@/components/auth/Auth";
-import {
-  act,
-  createEvent,
-  fireEvent,
-  render,
-  screen,
-} from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import {
   createElement,
   type ImgHTMLAttributes,
@@ -198,24 +192,6 @@ const getBoostPill = (): HTMLElement => {
   return pill as HTMLElement;
 };
 
-const getBoostedCard = (): HTMLElement => {
-  const card = screen.getByText("+2").closest('[role="button"]');
-
-  expect(card).not.toBeNull();
-
-  return card as HTMLElement;
-};
-
-const firePointerDown = (element: HTMLElement, pointerType: string) => {
-  const event = createEvent.pointerDown(element);
-
-  Object.defineProperty(event, "pointerType", {
-    value: pointerType,
-  });
-
-  fireEvent(element, event);
-};
-
 describe("BoostedDropCardHome", () => {
   beforeEach(() => {
     mockBoostedDropLinkPreview.mockClear();
@@ -243,7 +219,7 @@ describe("BoostedDropCardHome", () => {
     );
   });
 
-  it("hides chat header metadata and the wave pill", () => {
+  it("uses a quiet boosted header in the chat variant", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop()}
@@ -256,10 +232,14 @@ describe("BoostedDropCardHome", () => {
     expect(screen.queryByText("#2")).not.toBeInTheDocument();
     expect(screen.queryByText("1m")).not.toBeInTheDocument();
     expect(screen.queryByText("Spec Wave")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Boost" })).toBeInTheDocument();
+    expect(screen.getByText("Boosted post")).toBeInTheDocument();
+    expect(screen.getByText("7 boosts")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Boost post by alice" })
+    ).toBeInTheDocument();
   });
 
-  it("adds chat-only hover fade classes to the boost pill", () => {
+  it("keeps the chat boost metadata out of the old overlay fade treatment", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop()}
@@ -269,142 +249,23 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
-    expect(getBoostPill()).toHaveClass(
+    expect(screen.getByText("7 boosts")).not.toHaveClass(
       "desktop-hover:group-hover:tw-opacity-0",
-      "tw-transition-opacity",
-      "tw-duration-150",
+      "tw-opacity-0",
       "tw-pointer-events-none"
     );
   });
 
-  it("temporarily hides the chat boost pill on touch pointer press", () => {
-    jest.useFakeTimers();
-    const view = renderWithAuth(
-      <BoostedDropCardHome
-        drop={createDrop()}
-        onClick={jest.fn()}
-        variant="chat"
-        rank={2}
-      />
-    );
-
-    try {
-      const pill = getBoostPill();
-
-      expect(pill).not.toHaveClass("tw-opacity-0");
-
-      firePointerDown(getBoostedCard(), "touch");
-
-      expect(pill).toHaveClass("tw-opacity-0");
-
-      act(() => {
-        jest.advanceTimersByTime(2999);
-      });
-
-      expect(pill).toHaveClass("tw-opacity-0");
-
-      act(() => {
-        jest.advanceTimersByTime(1);
-      });
-
-      expect(pill).not.toHaveClass("tw-opacity-0");
-    } finally {
-      view.unmount();
-      jest.useRealTimers();
-    }
-  });
-
-  it("uses touch start as a fallback to hide the chat boost pill", () => {
-    jest.useFakeTimers();
-    const view = renderWithAuth(
-      <BoostedDropCardHome
-        drop={createDrop()}
-        onClick={jest.fn()}
-        variant="chat"
-        rank={2}
-      />
-    );
-
-    try {
-      const pill = getBoostPill();
-
-      fireEvent.touchStart(getBoostedCard());
-
-      expect(pill).toHaveClass("tw-opacity-0");
-
-      act(() => {
-        jest.advanceTimersByTime(3000);
-      });
-
-      expect(pill).not.toHaveClass("tw-opacity-0");
-    } finally {
-      view.unmount();
-      jest.useRealTimers();
-    }
-  });
-
-  it("does not hide the chat boost pill on mouse pointer press", () => {
-    renderWithAuth(
-      <BoostedDropCardHome
-        drop={createDrop()}
-        onClick={jest.fn()}
-        variant="chat"
-        rank={2}
-      />
-    );
-
-    const pill = getBoostPill();
-
-    firePointerDown(getBoostedCard(), "mouse");
-
-    expect(pill).not.toHaveClass("tw-opacity-0");
-  });
-
-  it("keeps the outer card click after touch pointer press", () => {
-    jest.useFakeTimers();
-    const onClick = jest.fn();
-
-    const view = renderWithAuth(
-      <BoostedDropCardHome
-        drop={createDrop()}
-        onClick={onClick}
-        variant="chat"
-        rank={2}
-      />
-    );
-
-    try {
-      const card = getBoostedCard();
-
-      firePointerDown(card, "touch");
-      fireEvent.click(card);
-
-      expect(onClick).toHaveBeenCalledTimes(1);
-    } finally {
-      view.unmount();
-      jest.useRealTimers();
-    }
-  });
-
-  it("does not add chat-only hide behavior to the home variant", () => {
+  it("does not add chat-only boosted metadata to the home variant", () => {
     renderWithAuth(
       <BoostedDropCardHome drop={createDrop()} onClick={jest.fn()} />
     );
 
     const pill = getBoostPill();
 
-    for (const className of [
-      "desktop-hover:group-hover:tw-opacity-0",
-      "tw-pointer-events-none",
-      "tw-transition-opacity",
-      "tw-duration-150",
-    ]) {
-      expect(pill).not.toHaveClass(className);
-    }
-
-    firePointerDown(getBoostedCard(), "touch");
-
-    expect(pill).not.toHaveClass("tw-opacity-0");
+    expect(screen.queryByText("Boosted post")).not.toBeInTheDocument();
+    expect(screen.queryByText("7 boosts")).not.toBeInTheDocument();
+    expect(pill).toBeInTheDocument();
   });
 
   it("uses a capped auto-height text frame in the chat variant", () => {
@@ -498,7 +359,7 @@ describe("BoostedDropCardHome", () => {
     );
   });
 
-  it("reuses the homepage preview variant for standalone urls in chat boosted cards", () => {
+  it("uses the compact chat preview variant for standalone urls in chat boosted cards", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop({
@@ -518,12 +379,14 @@ describe("BoostedDropCardHome", () => {
     expect(mockBoostedDropLinkPreview).toHaveBeenLastCalledWith(
       expect.objectContaining({
         href: "https://example.com/article",
-        variant: "home",
+        variant: "chat",
       })
     );
 
     expect(screen.getByTestId("boosted-drop-content-frame")).toHaveClass(
-      "tw-max-h-[11rem]"
+      "tw-max-h-[15rem]",
+      "tw-bg-black/20",
+      "tw-p-3"
     );
     expect(screen.getByTestId("boosted-drop-content-frame")).not.toHaveClass(
       "tw-aspect-[2/1]"
@@ -548,7 +411,7 @@ describe("BoostedDropCardHome", () => {
     );
 
     expect(screen.getByTestId("boosted-drop-content-frame")).toHaveClass(
-      "tw-max-h-[11rem]"
+      "tw-max-h-[15rem]"
     );
     expect(screen.getByTestId("boosted-drop-content-frame")).not.toHaveClass(
       "tw-aspect-[2/1]"
@@ -684,13 +547,15 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Boost" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Boost post by alice" })
+    );
 
     expect(mockToggleBoost).toHaveBeenCalledTimes(1);
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it("does not trigger the outer card keyboard handler from the author link", () => {
+  it("opens the card from its semantic open control", () => {
     const onClick = jest.fn();
 
     renderWithAuth(
@@ -702,9 +567,28 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
-    fireEvent.keyDown(screen.getByRole("link", { name: /alice/i }), {
-      key: "Enter",
+    const openButton = screen.getByRole("button", {
+      name: "Open boosted post from alice",
     });
+
+    fireEvent.click(openButton);
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not trigger the outer card click from the author link", () => {
+    const onClick = jest.fn();
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop()}
+        onClick={onClick}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("link", { name: /alice/i }));
 
     expect(onClick).not.toHaveBeenCalled();
   });

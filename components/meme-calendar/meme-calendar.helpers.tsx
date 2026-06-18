@@ -3,6 +3,9 @@ import {
   SKIPPED_MINT_UTC_DAYS,
 } from "./meme-calendar.overrides";
 import { HISTORICAL_MINTS } from "./meme-calendar.szn1";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 // Constants for division sizes
 export const SEASONS_PER_YEAR = 4;
@@ -573,7 +576,7 @@ export function getMonthWeeks(
   const weeks: (number | null)[][] = [];
   let week: (number | null)[] = [];
 
-  // ⭐ Monday-first: convert Sunday(0) to 7, then pad (dow-1) nulls
+  // Monday-first: convert Sunday(0) to 7, then pad (dow - 1) nulls.
   const dow = firstDay.getUTCDay();
   const monFirstIndex = dow === 0 ? 7 : dow; // 1..7 (Mon..Sun)
   for (let i = 1; i < monFirstIndex; i++) week.push(null);
@@ -609,8 +612,8 @@ export function ymd(d: Date): string {
 // Display timezone toggle type
 export type DisplayTz = "local" | "utc";
 
-export function formatMint(n: number): string {
-  return `#${n.toLocaleString()}`;
+export function formatMint(n: number, locale = "en-US"): string {
+  return `#${n.toLocaleString(locale)}`;
 }
 
 export function formatUtcMonth(
@@ -632,8 +635,12 @@ export function formatUtcMonthYear(
   return `${formatUtcMonth(d, style, locale)} ${d.getUTCFullYear()}`;
 }
 
-export function formatFullDate(d: Date, mode: DisplayTz = "local"): string {
-  return d.toLocaleDateString(undefined, {
+export function formatFullDate(
+  d: Date,
+  mode: DisplayTz = "local",
+  locale = "en-US"
+): string {
+  return d.toLocaleDateString(locale, {
     weekday: "short",
     year: "numeric",
     month: "short",
@@ -643,9 +650,10 @@ export function formatFullDate(d: Date, mode: DisplayTz = "local"): string {
 }
 export const formatFullDateTime = (
   d: Date,
-  mode: DisplayTz = "local"
+  mode: DisplayTz = "local",
+  locale = "en-US"
 ): string => {
-  const s = d.toLocaleString(undefined, {
+  const s = d.toLocaleString(locale, {
     weekday: "short",
     year: "numeric",
     month: "short",
@@ -707,12 +715,33 @@ function createIcsDataUrl(
   return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
 }
 
+type CalendarInviteLabels = {
+  readonly addToCalendar: string;
+  readonly addToGoogleCalendar: string;
+};
+
+const DEFAULT_CALENDAR_INVITE_LABELS: CalendarInviteLabels = {
+  addToCalendar: "Add to Calendar",
+  addToGoogleCalendar: "Add to Google Calendar",
+};
+
+function escapeHtmlAttribute(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 // Accept either a UTC day (mint day) or an instant; always emit timed links at the correct mint instant
 export function printCalendarInvites(
   dateOrInstant: Date,
   mintNumber: number,
   fontColor: string = "#fff",
-  size: number = 22
+  size: number = 22,
+  labels: CalendarInviteLabels = DEFAULT_CALENDAR_INVITE_LABELS,
+  locale = "en-US"
 ): string {
   // Normalize to mint instant in UTC
   const utcDay = startOfUtcDay(dateOrInstant);
@@ -722,36 +751,51 @@ export function printCalendarInvites(
     : new Date(dateOrInstant);
   const mintEndUtc = mintEndInstantUtcForMintDay(utcDay);
 
-  const title = `Meme ${formatMint(mintNumber)}`;
-  const fullLocal = formatFullDateTime(mintStartUtc, "local");
-  const fullUtc = formatFullDateTime(mintStartUtc, "utc");
+  const title = `Meme ${formatMint(mintNumber, locale)}`;
+  const fullLocal = formatFullDateTime(mintStartUtc, "local", locale);
+  const fullUtc = formatFullDateTime(mintStartUtc, "utc", locale);
   const desc = `${title} — ${fullLocal} / ${fullUtc}\n\nhttps://6529.io/the-memes/mint`;
 
   const gUrl = createGoogleCalendarUrl(mintStartUtc, mintEndUtc, title, desc);
   const icsUrl = createIcsDataUrl(mintStartUtc, mintEndUtc, title, desc);
+  const addToCalendarLabel = escapeHtmlAttribute(labels.addToCalendar);
+  const addToGoogleCalendarLabel = escapeHtmlAttribute(
+    labels.addToGoogleCalendar
+  );
+  const safeFontColor = escapeHtmlAttribute(fontColor);
 
   return `
     <div style="display:flex; gap:15px; align-items:center;">
-      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" title="Add to Calendar" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${fontColor};">
-        <img src="/calendar-ics.png" style="width:${size}px;height:${size}px" />
+      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" aria-label="${addToCalendarLabel}" title="${addToCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
+        <img src="/calendar-ics.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
       </a>
-      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" title="Add to Google Calendar" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${fontColor};">
-        <img src="/calendar-google.png" style="width:${size}px;height:${size}px" />
+      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" aria-label="${addToGoogleCalendarLabel}" title="${addToGoogleCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
+        <img src="/calendar-google.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
       </a>
     </div>`;
 }
 
 // Helper: get label for a date range using mint numbers (locale formatted)
-export function getRangeLabel(start: Date, end: Date): string {
+export function getRangeLabel(
+  start: Date,
+  end: Date,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string {
   const startMintDate = nextMintDateOnOrAfter(start);
   const endMintDate = prevMintDateOnOrBefore(end);
   if (startMintDate.getTime() > endMintDate.getTime()) return "—";
-  const startMint = getMintNumberForMintDate(startMintDate).toLocaleString();
-  const endMint = getMintNumberForMintDate(endMintDate).toLocaleString();
-  return `Memes #${startMint} - #${endMint}`;
+  const startMint = getMintNumberForMintDate(startMintDate);
+  const endMint = getMintNumberForMintDate(endMintDate);
+  return t(locale, "memeCalendar.grid.memeRange", {
+    start: formatInteger(locale, startMint),
+    end: formatInteger(locale, endMint),
+  });
 }
 
-export function formatToFullDivision(d: Date): React.ReactNode {
+export function formatToFullDivision(
+  d: Date,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): React.ReactNode {
   const idx = getSeasonIndexForDate(d);
   const eon = displayedEonNumberFromIndex(idx);
   const era = displayedEraNumberFromIndex(idx);
@@ -761,7 +805,7 @@ export function formatToFullDivision(d: Date): React.ReactNode {
   const szn = displayedSeasonNumberFromIndex(idx);
 
   const fmt = (date: Date) =>
-    date.toLocaleDateString(undefined, {
+    date.toLocaleDateString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -779,26 +823,57 @@ export function formatToFullDivision(d: Date): React.ReactNode {
   return (
     <table className="tw-inline-table tw-w-auto tw-table-auto tw-border-collapse">
       <tbody>
-        {printDivision("SZN", szn, range(seasonDates.start, seasonDates.end))}
-        {printDivision("Year", year, range(yearDates.start, yearDates.end))}
-        {printDivision("Epoch", epoch, range(epochDates.start, epochDates.end))}
+        {printDivision(
+          "SZN",
+          szn,
+          range(seasonDates.start, seasonDates.end),
+          locale
+        )}
+        {printDivision(
+          "Year",
+          year,
+          range(yearDates.start, yearDates.end),
+          locale
+        )}
+        {printDivision(
+          "Epoch",
+          epoch,
+          range(epochDates.start, epochDates.end),
+          locale
+        )}
         {printDivision(
           "Period",
           period,
-          range(periodDates.start, periodDates.end)
+          range(periodDates.start, periodDates.end),
+          locale
         )}
-        {printDivision("Era", era, range(eraDates.start, eraDates.end))}
-        {printDivision("Eon", eon, range(eonDates.start, eonDates.end))}
+        {printDivision(
+          "Era",
+          era,
+          range(eraDates.start, eraDates.end),
+          locale
+        )}
+        {printDivision(
+          "Eon",
+          eon,
+          range(eonDates.start, eonDates.end),
+          locale
+        )}
       </tbody>
     </table>
   );
 }
 
-function printDivision(label: string, number: number, range: string) {
+function printDivision(
+  label: string,
+  number: number,
+  range: string,
+  locale: SupportedLocale
+) {
   return (
     <tr>
       <td className="tw-whitespace-nowrap tw-py-1 tw-pr-4 tw-font-semibold">
-        {label} {number.toLocaleString()}
+        {label} {formatInteger(locale, number)}
       </td>
       <td className="tw-whitespace-nowrap tw-py-1">
         <span className="tw-text-gray-400">{range}</span>

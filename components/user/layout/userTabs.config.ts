@@ -1,3 +1,5 @@
+import { getUserProfileTabsMessage } from "./user-tabs.messages";
+
 export type UserPageVisibilityContext = {
   readonly showWaves: boolean;
   readonly hasProfileWave: boolean;
@@ -7,10 +9,10 @@ export type UserPageVisibilityContext = {
 
 type UserPageTabDefinition = {
   readonly id: string;
-  readonly title: string;
+  readonly titleKey: Parameters<typeof getUserProfileTabsMessage>[0];
   readonly route: string;
-  readonly metaLabel?: string | undefined;
-  readonly badge?: string | undefined;
+  readonly metaLabelKey?: Parameters<typeof getUserProfileTabsMessage>[0];
+  readonly badgeKey?: Parameters<typeof getUserProfileTabsMessage>[0];
   readonly isVisible?:
     | ((context: UserPageVisibilityContext) => boolean)
     | undefined;
@@ -19,41 +21,41 @@ type UserPageTabDefinition = {
 const TAB_DEFINITIONS = [
   {
     id: "rep",
-    title: "Identity",
+    titleKey: "user.profile.tabs.identity",
     route: "",
   },
   {
     id: "brain",
-    title: "Brain",
+    titleKey: "user.profile.tabs.brain",
     route: "brain",
     isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
   },
   {
     id: "waves",
-    title: "Curation",
+    titleKey: "user.profile.tabs.curation",
     route: "curations",
   },
   {
     id: "collected",
-    title: "Collected",
+    titleKey: "user.profile.tabs.collected",
     route: "collected",
   },
   {
     id: "xtdh",
-    title: "xTDH",
+    titleKey: "user.profile.tabs.xtdh",
     route: "xtdh",
-    badge: "Beta",
+    badgeKey: "user.profile.tabs.badges.beta",
   },
   {
     id: "subscriptions",
-    title: "Subscriptions",
+    titleKey: "user.profile.tabs.subscriptions",
     route: "subscriptions",
     isVisible: ({ hideSubscriptions }: UserPageVisibilityContext) =>
       !hideSubscriptions,
   },
   {
     id: "proxy",
-    title: "Proxy",
+    titleKey: "user.profile.tabs.proxy",
     route: "proxy",
     isVisible: ({ isOwnProfile }: UserPageVisibilityContext) => isOwnProfile,
   },
@@ -66,15 +68,19 @@ export type UserPageTabKey = (typeof TAB_DEFINITIONS)[number]["id"];
 
 export type UserPageTabConfig = Omit<
   UserPageTabDefinition,
-  "id" | "metaLabel"
+  "id" | "titleKey" | "metaLabelKey" | "badgeKey"
 > & {
   readonly id: UserPageTabKey;
+  readonly title: string;
   readonly metaLabel: string;
+  readonly badge?: string | undefined;
 };
 
 export const USER_PAGE_TABS = USER_PAGE_TAB_DEFINITIONS.map((tab) => ({
   ...tab,
-  metaLabel: tab.metaLabel ?? tab.title,
+  title: getUserProfileTabsMessage(tab.titleKey),
+  metaLabel: getUserProfileTabsMessage(tab.metaLabelKey ?? tab.titleKey),
+  badge: tab.badgeKey ? getUserProfileTabsMessage(tab.badgeKey) : undefined,
 })) as readonly UserPageTabConfig[];
 
 export const USER_PAGE_TAB_MAP: Record<UserPageTabKey, UserPageTabConfig> =

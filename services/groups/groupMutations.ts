@@ -26,7 +26,7 @@ export const toErrorMessage = (error: unknown): string => {
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return "Something went wrong";
+  return "Couldn't save this group. Please try again.";
 };
 
 const sanitiseGroupPayload = (

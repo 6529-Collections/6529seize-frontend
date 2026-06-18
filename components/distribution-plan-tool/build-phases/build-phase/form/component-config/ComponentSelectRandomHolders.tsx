@@ -97,7 +97,7 @@ export default function ComponentSelectRandomHolders({
   const onRandomHolders = () => {
     if (typeof value !== "number") {
       setToasts({
-        messages: ["Please insert value."],
+        messages: ["Enter a value."],
         type: "error",
       });
       return;
@@ -121,7 +121,7 @@ export default function ComponentSelectRandomHolders({
 
     if (!seed.length) {
       setToasts({
-        messages: ["Please insert seed."],
+        messages: ["Enter a seed."],
         type: "error",
       });
       return;

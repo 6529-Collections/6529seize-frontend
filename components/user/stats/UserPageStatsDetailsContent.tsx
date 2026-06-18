@@ -4,6 +4,7 @@ import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { SupportedLocale } from "@/i18n/locales";
 import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
 import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
@@ -16,6 +17,7 @@ export default function UserPageStatsDetailsContent({
   tdh,
   ownerBalance,
   balanceMemes,
+  locale,
 }: {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
@@ -23,6 +25,7 @@ export default function UserPageStatsDetailsContent({
   readonly tdh: ConsolidatedTDH | TDH | undefined;
   readonly ownerBalance: OwnerBalance | undefined;
   readonly balanceMemes: OwnerBalanceMemes[];
+  readonly locale: SupportedLocale;
 }) {
   return (
     <div className="tw-mt-4">
@@ -30,19 +33,22 @@ export default function UserPageStatsDetailsContent({
         ownerBalance={ownerBalance}
         balanceMemes={balanceMemes}
         seasons={seasons}
+        locale={locale}
       />
 
       <UserPageStatsActivityOverview
         profile={profile}
         activeAddress={activeAddress}
+        locale={locale}
       />
 
       <UserPageActivityWrapper
         profile={profile}
         activeAddress={activeAddress}
+        locale={locale}
       />
 
-      <UserPageStatsBoostBreakdown tdh={tdh} />
+      <UserPageStatsBoostBreakdown tdh={tdh} locale={locale} />
     </div>
   );
 }

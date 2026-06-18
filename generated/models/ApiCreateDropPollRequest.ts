@@ -16,6 +16,8 @@ import { HttpFile } from '../http/http';
 export class ApiCreateDropPollRequest {
     'options': Set<string>;
     'multichoice': boolean;
+    'anonymous'?: boolean;
+    'only_droppers_can_respond'?: boolean;
     /**
     * Future Unix timestamp in milliseconds.
     */
@@ -35,6 +37,18 @@ export class ApiCreateDropPollRequest {
         {
             "name": "multichoice",
             "baseName": "multichoice",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "anonymous",
+            "baseName": "anonymous",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "only_droppers_can_respond",
+            "baseName": "only_droppers_can_respond",
             "type": "boolean",
             "format": ""
         },

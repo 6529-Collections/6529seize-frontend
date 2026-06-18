@@ -8,6 +8,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPut } from "@/services/api/common-api";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 import ProxyCreateActionConfigEndTimeSwitch from "@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch";
 import { Time } from "@/helpers/time";
@@ -55,15 +56,17 @@ export default function ProfileProxyEndTimeEdit({
         profileProxyId: profileProxy.id
       });
       setToast({
-        message: "Action end time updated successfully!",
+        message: "Action end time updated.",
         type: "success",
       });
       setViewMode();
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update the action end time.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

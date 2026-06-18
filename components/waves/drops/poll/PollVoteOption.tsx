@@ -73,7 +73,7 @@ export function PollVoteOption({
         )}
       </span>
       <span
-        className={`tw-relative tw-z-10 tw-min-w-0 tw-break-words tw-text-sm tw-leading-5 tw-transition-colors tw-duration-300 ${
+        className={`tw-[overflow-wrap:anywhere] tw-relative tw-z-10 tw-min-w-0 tw-break-words tw-text-sm tw-leading-5 tw-transition-colors tw-duration-300 ${
           checked
             ? "tw-font-medium tw-text-iron-50"
             : "tw-font-medium tw-text-iron-100 desktop-hover:group-hover/vote:tw-text-iron-50"

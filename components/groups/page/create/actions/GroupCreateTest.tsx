@@ -78,8 +78,10 @@ export default function GroupCreateTest({
     if (!result.ok) {
       if (result.reason !== "auth") {
         setToast({
-          message: result.error,
           type: "error",
+          title: "Couldn't test this group.",
+          description: "Please check the group setup and try again.",
+          details: result.error,
         });
       }
       return;

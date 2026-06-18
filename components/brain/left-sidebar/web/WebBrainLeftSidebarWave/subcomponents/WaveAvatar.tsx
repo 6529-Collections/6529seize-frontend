@@ -8,11 +8,12 @@ interface WaveAvatarProps {
   readonly isDropWave: boolean;
   readonly showNewDropsBadge: boolean;
   readonly wave: MinimalWave;
+  readonly size?: "default" | "sm" | undefined;
 }
 
-const DROP_ICON = (
+const DropIcon = ({ className }: { readonly className: string }) => (
   <svg
-    className="tw-size-2.5 tw-flex-shrink-0 tw-text-[#E8D48A]"
+    className={className}
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 576 512"
@@ -25,24 +26,39 @@ const DROP_ICON = (
 );
 
 const MAX_DISPLAY_COUNT = 99;
+const DROP_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0 tw-text-[#E8D48A]";
+const UNREAD_BADGE_CLASSES =
+  "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_6px_14px_rgba(0,0,0,0.32)]";
+const MUTED_BADGE_CLASSES =
+  "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm";
+const MUTED_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0";
 
 export const WaveAvatar = ({
   isActive,
   isDropWave,
   showNewDropsBadge,
   wave,
+  size = "default",
 }: WaveAvatarProps) => {
   const showBadge =
     !wave.isMuted && (wave.unreadDropsCount > 0 || showNewDropsBadge);
   const rawCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
   const displayCount =
     rawCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : rawCount;
+  const isSmall = size === "sm";
+  const avatarSizeClasses = isSmall ? "tw-size-7" : "tw-size-8";
+  const activeRingClasses = isSmall
+    ? "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
+    : "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-2 tw-ring-offset-iron-950";
+  const dropBadgeClasses = isSmall
+    ? "tw-absolute tw-bottom-[-1px] tw-right-[-1px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg"
+    : "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg";
 
   return (
     <div
-      className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
+      className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
         isActive
-          ? "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-2 tw-ring-offset-iron-950"
+          ? activeRingClasses
           : "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100"
       }`}
     >
@@ -52,21 +68,14 @@ export const WaveAvatar = ({
         contributors={wave.contributors}
       />
       {isDropWave && (
-        <div className="tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg">
-          {DROP_ICON}
+        <div className={dropBadgeClasses}>
+          <DropIcon className={DROP_ICON_CLASSES} />
         </div>
       )}
-      {showBadge && (
-        <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
-          {displayCount}
-        </div>
-      )}
+      {showBadge && <div className={UNREAD_BADGE_CLASSES}>{displayCount}</div>}
       {wave.isMuted && (
-        <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm">
-          <FontAwesomeIcon
-            icon={faBellSlash}
-            className="tw-size-2.5 tw-flex-shrink-0"
-          />
+        <div className={MUTED_BADGE_CLASSES}>
+          <FontAwesomeIcon icon={faBellSlash} className={MUTED_ICON_CLASSES} />
         </div>
       )}
     </div>

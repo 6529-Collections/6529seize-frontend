@@ -45,13 +45,12 @@ describe("CreateDropSelectedFilePreview", () => {
       <CreateDropSelectedFilePreview file={file} />
     );
 
+    const video = container.querySelector("video");
     await waitFor(() => {
-      expect(container.querySelector("source")).toHaveAttribute(
-        "src",
-        "blob:preview"
-      );
+      expect(video).toHaveAttribute("src", "blob:preview");
     });
-    expect(container.querySelector("video")).toBeInTheDocument();
+    expect(video).toBeInTheDocument();
+    expect(video).toHaveAttribute("controls");
     expect(createObjectURLMock).toHaveBeenCalledTimes(1);
 
     rerender(<CreateDropSelectedFilePreview file={file} />);

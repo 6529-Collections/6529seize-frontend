@@ -4,6 +4,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { Distribution } from "@/entities/IDistribution";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -15,14 +16,17 @@ import {
   getActivityWalletsParam,
   WALLET_DISTRIBUTION_PAGE_PARAM,
 } from "../activity.helpers";
+import { getDistributionsMessage } from "./distributions.messages";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
 export default function UserPageStatsActivityDistributions({
   profile,
   activeAddress,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -105,7 +109,11 @@ export default function UserPageStatsActivityDistributions({
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          Distributions
+          {getDistributionsMessage(
+            "user.collected.stats.distributions.title",
+            undefined,
+            locale
+          )}
         </h3>
       </div>
       <UserPageStatsActivityDistributionsTableWrapper
@@ -116,6 +124,7 @@ export default function UserPageStatsActivityDistributions({
         page={currentPage}
         totalPages={totalPages}
         setPage={onPageFilter}
+        locale={locale}
       />
     </div>
   );

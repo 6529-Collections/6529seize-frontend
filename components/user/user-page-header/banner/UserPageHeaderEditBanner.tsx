@@ -11,6 +11,7 @@ import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   getBannerColorValue,
   getBannerImageUrl,
@@ -115,8 +116,10 @@ export default function UserPageHeaderEditBanner({
     },
     onError: (error: unknown) => {
       setToast({
-        message: error as string,
         type: "error",
+        title: "Couldn't update this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
   });
@@ -156,7 +159,7 @@ export default function UserPageHeaderEditBanner({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in to save settings",
+        message: "Log in to save settings.",
         type: "error",
       });
       return;
@@ -168,7 +171,7 @@ export default function UserPageHeaderEditBanner({
     if (editMode === "image") {
       if (!bannerFile && !initialBannerImageUrl) {
         setToast({
-          message: "Please select an image to use as your banner",
+          message: "Select an image to use as your banner.",
           type: "error",
         });
         return;

@@ -5,6 +5,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
@@ -154,17 +155,18 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       });
       setVoteDraftState(null);
       setToast({
-        message: "Vote updated",
+        message: "Vote updated.",
         type: "success",
       });
       invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update your vote.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
-      throw error;
     },
   });
 
@@ -190,7 +192,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       const { success } = await requestAuth();
       if (!success) {
         setToast({
-          message: "Authentication failed",
+          message: "Couldn't authenticate. Reconnect your wallet and try again.",
           type: "error",
         });
         setIsProcessing(false);
@@ -202,13 +204,6 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       });
     } catch (error) {
       console.error("Failed to submit vote:", error);
-
-      const errorMessage =
-        error instanceof Error ? error.message : "Something went wrong";
-      setToast({
-        message: errorMessage,
-        type: "error",
-      });
     } finally {
       setIsProcessing(false);
     }

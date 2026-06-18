@@ -7,7 +7,8 @@ Open Data docs cover dataset download routes under `/open-data/*`.
 - Hub route: `/open-data`.
 - Dataset routes:
   `/open-data/network-metrics`, `/open-data/meme-subscriptions`,
-  `/open-data/rememes`, `/open-data/team`, and `/open-data/royalties`.
+  `/open-data/6529bot`, `/open-data/rememes`, `/open-data/team`, and
+  `/open-data/royalties`.
 - Entry paths:
   - Web sidebar (desktop and mobile web): `Tools -> Open Data -> Open Data`
   - Native app menu: `Tools -> Open Data`
@@ -27,12 +28,14 @@ Open Data docs cover dataset download routes under `/open-data/*`.
   - API + pagination + loading/error banners: Network Metrics, Rememes, Royalties.
   - API + pagination without inline loading/error banners: Meme Subscriptions
     (heading-only while first request is loading or fails).
+  - Server-fetched aggregate dashboard: 6529bot Usage.
   - Static links table: Team.
 
 ## Features
 
 - [Open Data Hub](feature-open-data-hub.md)
 - [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
+- [6529bot Usage](feature-6529bot-usage.md)
 - [Meme Subscriptions](feature-meme-subscriptions.md)
 - [Rememes Downloads](feature-rememes-uploads.md)
 - [Team Downloads](feature-team-downloads.md)
@@ -55,3 +58,4 @@ Open Data docs cover dataset download routes under `/open-data/*`.
 - [Docs Home](../README.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Network Index](../network/README.md)
+- [6529bot Admin](../api-tool/feature-6529bot-admin.md)

@@ -68,16 +68,56 @@ function NaturalHeightImage({
   );
 }
 
+function FillContainerImage({
+  imgRef,
+  primarySrc,
+  fallbackSrc,
+  retryTick,
+  onLoad,
+  onFinalError,
+  imageObjectPosition,
+}: {
+  readonly imgRef: React.RefObject<HTMLImageElement | null>;
+  readonly primarySrc: string;
+  readonly fallbackSrc: string;
+  readonly retryTick: number;
+  readonly onLoad: () => void;
+  readonly onFinalError: () => void;
+  readonly imageObjectPosition: string;
+}) {
+  return (
+    <span className="tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden">
+      {/* Drop media can come from hosts outside next.config.ts image remotePatterns. */}
+      <FallbackImage
+        key={retryTick}
+        ref={imgRef}
+        primarySrc={primarySrc}
+        fallbackSrc={fallbackSrc}
+        alt="Drop media"
+        fill
+        sizes="(max-width: 768px) 100vw, 768px"
+        optimize={false}
+        className="tw-object-contain"
+        style={{ objectPosition: imageObjectPosition }}
+        onLoad={onLoad}
+        onError={onFinalError}
+      />
+    </span>
+  );
+}
+
 export default function WaveDropPartContentMediaImage({
   src,
   imageScale = ImageScale.AUTOx450,
   imageObjectPosition = "center",
   galleryItemId,
+  fillContainer = false,
 }: {
   readonly src: string;
   readonly imageScale?: ImageScale | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly galleryItemId?: string | undefined;
+  readonly fillContainer?: boolean | undefined;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -149,9 +189,38 @@ export default function WaveDropPartContentMediaImage({
     );
   }
 
+  const primarySrc = getScaledImageUri(src, imageScale);
+  const image = fillContainer ? (
+    <FillContainerImage
+      key={retryTick}
+      imgRef={imgRef}
+      primarySrc={primarySrc}
+      fallbackSrc={src}
+      retryTick={retryTick}
+      onLoad={handleImageLoad}
+      onFinalError={handleError}
+      imageObjectPosition={imageObjectPosition}
+    />
+  ) : (
+    <NaturalHeightImage
+      key={retryTick}
+      imgRef={imgRef}
+      primarySrc={primarySrc}
+      fallbackSrc={src}
+      retryTick={retryTick}
+      onLoad={handleImageLoad}
+      onFinalError={handleError}
+      imageObjectPosition={imageObjectPosition}
+    />
+  );
+
   return (
     <>
-      <div className="tw-relative tw-w-full tw-min-w-0">
+      <div
+        className={`tw-relative tw-w-full tw-min-w-0 ${
+          fillContainer ? "tw-h-full" : ""
+        }`}
+      >
         <InlineMediaActions
           variant="image"
           onOpen={openMedia}
@@ -165,18 +234,11 @@ export default function WaveDropPartContentMediaImage({
           type="button"
           onClick={handleOpenModal}
           aria-label="Open drop media"
-          className="tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
+          className={`tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 ${
+            fillContainer ? "tw-h-full" : ""
+          }`}
         >
-          <NaturalHeightImage
-            key={retryTick}
-            imgRef={imgRef}
-            primarySrc={getScaledImageUri(src, imageScale)}
-            fallbackSrc={src}
-            retryTick={retryTick}
-            onLoad={handleImageLoad}
-            onFinalError={handleError}
-            imageObjectPosition={imageObjectPosition}
-          />
+          {image}
         </button>
       </div>
 

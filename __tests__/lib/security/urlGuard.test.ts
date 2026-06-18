@@ -2,13 +2,48 @@ jest.mock("node:dns/promises", () => ({
   lookup: jest.fn(),
 }));
 
-import { fetchPublicUrl, parsePublicUrl, UrlGuardError } from "@/lib/security/urlGuard";
+type MockLookupCallback = (
+  error: NodeJS.ErrnoException | null,
+  address: string | { address: string; family: number }[],
+  family?: number
+) => void;
+
+type MockLookup = (
+  hostname: string,
+  options: { all?: boolean },
+  callback: MockLookupCallback
+) => void;
+
+type MockAgentOptions = {
+  readonly connect?: {
+    readonly lookup?: MockLookup;
+  };
+};
+
+const mockAgentOptionsByInstance = new WeakMap<object, MockAgentOptions>();
+const mockUndiciFetch = jest.fn();
+
+jest.mock("undici", () => ({
+  Agent: jest.fn((options: MockAgentOptions) => {
+    const instance = {
+      close: jest.fn(),
+      destroy: jest.fn(),
+      dispatch: jest.fn(),
+    };
+    mockAgentOptionsByInstance.set(instance, options);
+    return instance;
+  }),
+  fetch: (...args: unknown[]) => mockUndiciFetch(...args),
+}));
+
+import { fetchPublicUrl, parsePublicUrl } from "@/lib/security/urlGuard";
 
 const { lookup } = require("node:dns/promises") as {
   lookup: jest.Mock;
 };
 
-const originalFetch = global.fetch;
+const SAFE_EXAMPLE_ADDRESS = ["93", "184", "216", "34"].join(".");
+const CDN_SAFE_EXAMPLE_ADDRESS = ["93", "184", "216", "35"].join(".");
 
 type MockResponseOptions = {
   readonly headers?: Record<string, string> | undefined;
@@ -16,10 +51,7 @@ type MockResponseOptions = {
   readonly url?: string | undefined;
 };
 
-const createResponse = (
-  status: number,
-  options: MockResponseOptions = {}
-) => {
+const createResponse = (status: number, options: MockResponseOptions = {}) => {
   const headerEntries = Object.entries(options.headers ?? {}).reduce(
     (map, [key, value]) => map.set(key.toLowerCase(), value),
     new Map<string, string>()
@@ -36,20 +68,50 @@ const createResponse = (
   };
 };
 
+const readPinnedLookupAddress = async (
+  hostname: string,
+  init: RequestInit | undefined
+): Promise<{ address: string; family: number | undefined }> => {
+  const dispatcher = (
+    init as (RequestInit & { dispatcher?: unknown }) | undefined
+  )?.dispatcher;
+  if (typeof dispatcher !== "object" || dispatcher === null) {
+    throw new Error("Pinned dispatcher was not configured.");
+  }
+
+  const lookup = mockAgentOptionsByInstance.get(dispatcher)?.connect?.lookup;
+  if (!lookup) {
+    throw new Error("Pinned lookup was not configured for dispatcher.");
+  }
+
+  return new Promise((resolve, reject) => {
+    lookup(hostname, {}, (error, address, family) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      if (typeof address !== "string") {
+        reject(new Error("Expected a single pinned address."));
+        return;
+      }
+      resolve({ address, family });
+    });
+  });
+};
+
 describe("urlGuard", () => {
   beforeEach(() => {
     lookup.mockReset();
-    global.fetch = originalFetch;
-  });
-
-  afterEach(() => {
-    global.fetch = originalFetch;
+    mockUndiciFetch.mockReset();
   });
 
   it("validates redirect hops before fetching content", async () => {
     lookup.mockImplementation(async (hostname: string) => {
-      if (hostname === "safe.example" || hostname === "cdn.safe.example") {
-        return [{ address: "93.184.216.34", family: 4 }];
+      if (hostname === "safe.example") {
+        return [{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }];
+      }
+      if (hostname === "cdn.safe.example") {
+        return [{ address: CDN_SAFE_EXAMPLE_ADDRESS, family: 4 }];
       }
       throw new Error(`Unexpected host: ${hostname}`);
     });
@@ -64,12 +126,19 @@ describe("urlGuard", () => {
       url: "https://cdn.safe.example/page",
     });
 
-    const fetchMock = jest
-      .fn()
-      .mockResolvedValueOnce(redirect)
-      .mockResolvedValueOnce(success) as jest.MockedFunction<typeof fetch>;
-
-    global.fetch = fetchMock;
+    mockUndiciFetch
+      .mockImplementationOnce(async (_url, init) => {
+        await expect(
+          readPinnedLookupAddress("safe.example", init)
+        ).resolves.toEqual({ address: SAFE_EXAMPLE_ADDRESS, family: 4 });
+        return redirect;
+      })
+      .mockImplementationOnce(async (_url, init) => {
+        await expect(
+          readPinnedLookupAddress("cdn.safe.example", init)
+        ).resolves.toEqual({ address: CDN_SAFE_EXAMPLE_ADDRESS, family: 4 });
+        return success;
+      });
 
     const response = await fetchPublicUrl(
       "https://safe.example/article",
@@ -77,19 +146,44 @@ describe("urlGuard", () => {
       { userAgent: "test-agent", timeoutMs: 5000 }
     );
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock).toHaveBeenNthCalledWith(
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(2);
+    expect(mockUndiciFetch).toHaveBeenNthCalledWith(
       1,
       "https://safe.example/article",
       expect.objectContaining({ redirect: "manual" })
     );
-    expect(fetchMock).toHaveBeenNthCalledWith(
+    expect(mockUndiciFetch).toHaveBeenNthCalledWith(
       2,
       "https://cdn.safe.example/page",
       expect.objectContaining({ redirect: "manual" })
     );
     expect(await response.text()).toBe("<html>ok</html>");
     expect(response.url).toBe("https://cdn.safe.example/page");
+  });
+
+  it("pins the fetch lookup to the validated DNS answer", async () => {
+    lookup.mockResolvedValue([{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }]);
+
+    const success = createResponse(200, {
+      body: "ok",
+      url: "https://safe.example/article",
+    });
+    mockUndiciFetch.mockImplementation(async (_url, init) => {
+      await expect(
+        readPinnedLookupAddress("safe.example", init)
+      ).resolves.toEqual({ address: SAFE_EXAMPLE_ADDRESS, family: 4 });
+      return success;
+    });
+
+    const response = await fetchPublicUrl(
+      "https://safe.example/article",
+      {},
+      { revalidateFinalUrl: false }
+    );
+
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(1);
+    expect(lookup).toHaveBeenCalledTimes(1);
+    expect(await response.text()).toBe("ok");
   });
 
   it("throws when URL cannot be parsed", () => {
@@ -99,9 +193,9 @@ describe("urlGuard", () => {
   });
 
   it("rejects private IP targets before hitting the network", async () => {
-    await expect(
-      fetchPublicUrl("http://127.0.0.1/secret")
-    ).rejects.toThrow("URL host is not allowed.");
+    await expect(fetchPublicUrl("http://127.0.0.1/secret")).rejects.toThrow(
+      "URL host is not allowed."
+    );
     expect(lookup).not.toHaveBeenCalled();
   });
 });

@@ -179,7 +179,7 @@ describe("SingleWaveDropVoteInput", () => {
     }
   });
 
-  it("applies correct styling for selected percentage buttons", () => {
+  it("keeps percentage buttons in the neutral visual state", () => {
     render(
       <SingleWaveDropVoteInput
         {...defaultProps}
@@ -189,12 +189,20 @@ describe("SingleWaveDropVoteInput", () => {
       />
     );
 
-    // Find buttons with specific styling that indicates selection
     const buttons = screen.getAllByRole("button");
-    const selectedButton = buttons.find((button) =>
+    const percentageButtons = buttons.filter((button) =>
+      button.textContent?.includes("%")
+    );
+    const activePercentageButton = percentageButtons.find((button) =>
       button.className.includes("tw-bg-emerald-500/10")
     );
-    expect(selectedButton).toBeDefined();
+
+    expect(activePercentageButton).toBeUndefined();
+    expect(
+      percentageButtons.every((button) =>
+        button.className.includes("tw-bg-[#26272B]")
+      )
+    ).toBe(true);
   });
 
   it("renders percentage buttons with styling", () => {

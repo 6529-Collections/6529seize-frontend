@@ -1,0 +1,4 @@
+interface:
+  display_name: "WCAG 2.2 AA"
+  short_description: "Audit and improve 6529 frontend UI against WCAG 2.2 AA."
+  default_prompt: "Use $wcag-22-aa to review the touched frontend UI for accessibility issues and summarize required fixes."

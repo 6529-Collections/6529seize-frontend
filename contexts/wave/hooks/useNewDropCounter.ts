@@ -76,43 +76,79 @@ function useNewDropCounter(
   const [newDropsCounts, setNewDropsCounts] = useState<
     Record<string, MinimalWaveNewDropsCount>
   >({});
+  const wavesRef = useRef(waves);
   const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
 
+  useEffect(() => {
+    wavesRef.current = waves;
+  }, [waves]);
+
   // Reset counts for a specific wave
-  const resetWaveNewDropsCount = useCallback(
-    (waveId: string) => {
-      setNewDropsCounts((prev) => ({
+  const resetWaveNewDropsCount = useCallback((waveId: string) => {
+    setNewDropsCounts((prev) => {
+      const previous = prev[waveId];
+      const next: MinimalWaveNewDropsCount = {
+        count: 0,
+        latestDropTimestamp: getNewestTimestamp(
+          previous?.latestDropTimestamp,
+          wavesRef.current.find((wave) => wave.id === waveId)
+            ?.latestDropTimestamp ?? null
+        ),
+        firstUnreadSerialNo: null,
+      };
+
+      if (
+        previous?.count === next.count &&
+        previous.latestDropTimestamp === next.latestDropTimestamp &&
+        previous.firstUnreadSerialNo === next.firstUnreadSerialNo
+      ) {
+        return prev;
+      }
+
+      return {
         ...prev,
-        [waveId]: {
-          count: 0,
-          latestDropTimestamp: getNewestTimestamp(
-            prev[waveId]?.latestDropTimestamp,
-            waves.find((wave) => wave.id === waveId)?.latestDropTimestamp ??
-              null
-          ),
-          firstUnreadSerialNo: null,
-        },
-      }));
-    },
-    [waves]
-  );
+        [waveId]: next,
+      };
+    });
+  }, []);
+
   // Reset counts for all waves
   const resetAllWavesNewDropsCount = useCallback(() => {
     setNewDropsCounts((prev) => {
       const newCounts: Record<string, MinimalWaveNewDropsCount> = {};
-      waves.forEach((wave) => {
-        newCounts[wave.id] = {
+      const nextWaveIds = new Set<string>();
+      let changed = false;
+
+      wavesRef.current.forEach((wave) => {
+        nextWaveIds.add(wave.id);
+        const previous = prev[wave.id];
+        const next: MinimalWaveNewDropsCount = {
           count: 0,
           latestDropTimestamp: getNewestTimestamp(
-            prev[wave.id]?.latestDropTimestamp,
+            previous?.latestDropTimestamp,
             wave.latestDropTimestamp ?? null
           ),
           firstUnreadSerialNo: null,
         };
+
+        if (
+          previous?.count !== next.count ||
+          previous.latestDropTimestamp !== next.latestDropTimestamp ||
+          previous.firstUnreadSerialNo !== next.firstUnreadSerialNo
+        ) {
+          changed = true;
+        }
+
+        newCounts[wave.id] = next;
       });
-      return newCounts;
+
+      if (Object.keys(prev).some((waveId) => !nextWaveIds.has(waveId))) {
+        changed = true;
+      }
+
+      return changed ? newCounts : prev;
     });
-  }, [waves]);
+  }, []);
 
   // Handle visibility changes for active wave
   useEffect(() => {

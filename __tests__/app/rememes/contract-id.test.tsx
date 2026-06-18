@@ -8,12 +8,19 @@ import React from "react";
 jest.mock("@/services/6529api");
 jest.mock("@/helpers/Helpers");
 
+const mockRememePage = jest.fn(
+  (props: { contract: string; id: string; locale: string }) => (
+    <div data-testid="rememe-page-component" data-locale={props.locale}>
+      RememePageComponent
+    </div>
+  )
+);
+
 jest.mock("@/components/rememes/RememePage", () => {
   return {
     __esModule: true,
-    default: () => (
-      <div data-testid="rememe-page-component">RememePageComponent</div>
-    ),
+    default: (props: { contract: string; id: string; locale: string }) =>
+      mockRememePage(props),
   };
 });
 
@@ -66,6 +73,25 @@ describe("ReMeme page", () => {
     expect(
       await screen.findByTestId("rememe-page-component")
     ).toBeInTheDocument();
+    expect(mockRememePage).toHaveBeenCalledWith({
+      contract: "0x123abc",
+      id: "456",
+      locale: "en-US",
+    });
+  });
+
+  it("passes supported locale search params to RememePage", async () => {
+    const resolved = await ReMeme({
+      params: Promise.resolve({ contract: "0x123abc", id: "456" }),
+      searchParams: Promise.resolve({ locale: "de-DE" }),
+    });
+
+    render(<TestProvider>{resolved}</TestProvider>);
+
+    expect(await screen.findByTestId("rememe-page-component")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
   });
 
   it("sets page title on mount", () => {
@@ -120,12 +146,27 @@ describe("ReMeme generateMetadata", () => {
     expect(mockFetchUrl).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/rememes?contract=0x123abc&id=456"
     );
-    expect(result.title).toBe("Custom ReMeme Name");
+    expect(result.title).toBe("Custom ReMeme Name | ReMemes");
     expect(result.description).toContain("ReMemes");
     const imgs = Array.isArray(result.openGraph?.images)
       ? result.openGraph?.images
       : [result.openGraph?.images];
     expect(imgs?.[0]).toBe("https://test.6529.io/custom-image.png");
+  });
+
+  it("encodes reserved route params before fetching metadata", async () => {
+    mockFetchUrl.mockResolvedValue({ data: [] });
+
+    await generateMetadata({
+      params: Promise.resolve({
+        contract: "collection/alpha",
+        id: "token#1",
+      }),
+    });
+
+    expect(mockFetchUrl).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/rememes?contract=collection%2Falpha&id=token%231"
+    );
   });
 
   it("returns metadata with default name and image when API returns empty data", async () => {
@@ -137,7 +178,7 @@ describe("ReMeme generateMetadata", () => {
     });
 
     expect(mockFormatAddress).toHaveBeenCalledWith("0x123abc");
-    expect(result.title).toBe("0x123...abc #456");
+    expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imgs2 = Array.isArray(result.openGraph?.images)
       ? result.openGraph?.images
       : [result.openGraph?.images];
@@ -151,7 +192,7 @@ describe("ReMeme generateMetadata", () => {
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
-    expect(result.title).toBe("0x123...abc #456");
+    expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imgs3 = Array.isArray(result.openGraph?.images)
       ? result.openGraph?.images
       : [result.openGraph?.images];
@@ -173,7 +214,7 @@ describe("ReMeme generateMetadata", () => {
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
-    expect(result.title).toBe("0x123...abc #456");
+    expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imgs4 = Array.isArray(result.openGraph?.images)
       ? result.openGraph?.images
       : [result.openGraph?.images];

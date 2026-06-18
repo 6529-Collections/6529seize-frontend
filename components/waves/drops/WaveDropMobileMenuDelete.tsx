@@ -8,6 +8,7 @@ import { commonApiDelete } from "@/services/api/common-api";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 interface WaveDropMobileMenuDeleteProps {
   readonly drop: ApiDrop;
@@ -39,8 +40,10 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't delete this drop.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

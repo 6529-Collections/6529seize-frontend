@@ -1,4 +1,5 @@
 import UserPageTabs from "@/components/user/layout/UserPageTabs";
+import { getUserProfileTabsMessage } from "@/components/user/layout/user-tabs.messages";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { render, screen, waitFor } from "@testing-library/react";
 import {
@@ -26,6 +27,10 @@ const capacitorMock = jest.fn();
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => capacitorMock(),
+}));
+const useIdentityMock = jest.fn();
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: () => useIdentityMock(),
 }));
 jest.mock("@/components/user/layout/UserPageTab", () => ({
   __esModule: true,
@@ -96,6 +101,10 @@ const renderTabs = ({
     connectedProfile,
     fetchingProfile,
   });
+  useIdentityMock.mockReturnValue({
+    profile: { profile_wave_id: null },
+    isLoading: false,
+  });
   useSeizeConnectContextMock.mockReturnValue({
     address,
     connectionState,
@@ -109,6 +118,11 @@ const renderTabs = ({
 describe("UserPageTabs", () => {
   it("filters tabs based on context and platform", () => {
     renderTabs({ showWaves: false, isIos: false });
+    expect(
+      screen.getByRole("navigation", {
+        name: getUserProfileTabsMessage("user.profile.tabs.navigationLabel"),
+      })
+    ).toBeInTheDocument();
     const tabs = getTabIds();
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.BRAIN);
     expect(tabs).not.toContain("stats");

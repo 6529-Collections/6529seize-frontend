@@ -5,6 +5,7 @@ import type { FilePreviewProps } from "../reducers/types";
 import VideoFallbackPreview from "./VideoFallbackPreview";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faCube } from "@fortawesome/free-solid-svg-icons";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
 // Dynamically import GLB viewer to avoid SSR issues
 const MediaDisplayGLB = dynamic(
@@ -67,10 +68,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   );
 
   const renderVideoPreview = () => (
-    <video
+    <SeizeVideoPlayer
       src={url}
-      className="tw-max-h-full tw-max-w-full tw-object-contain tw-shadow-lg"
-      controls
+      template="watch-media"
+      className="tw-max-h-full tw-max-w-full tw-shadow-lg"
+      preload="metadata"
+      layout="prominent"
+      align="center"
+      showActions={false}
       onError={(e) => {
         console.error("Video playback error:", e);
       }}

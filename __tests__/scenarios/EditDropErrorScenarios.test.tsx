@@ -92,7 +92,7 @@ describe("Edit Drop Error Scenarios", () => {
   const expectGenericErrorToast = async () => {
     await waitFor(() => {
       expect(mockSetToast).toHaveBeenCalledWith({
-        message: "Failed to update drop. Please try again.",
+        message: "Couldn't update this drop. Please try again.",
         type: "error",
       });
     });

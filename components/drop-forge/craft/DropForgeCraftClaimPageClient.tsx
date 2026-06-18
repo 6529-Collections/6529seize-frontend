@@ -448,7 +448,12 @@ export default function DropForgeCraftClaimPageClient({
       ) {
         setError("Claim not found");
       } else {
-        setToast({ message: msg, type: "error" });
+        setToast({
+          type: "error",
+          title: "Couldn't load this claim.",
+          description: "Please try again.",
+          details: msg,
+        });
       }
     } finally {
       setLoading(false);
@@ -704,11 +709,16 @@ function ImageSection({
       const updated = await patchClaim(claimId, body);
       onUpdated(updated);
       clearPendingImageSelection();
-      setToast({ message: "Image updated", type: "success" });
+      setToast({ message: "Image updated.", type: "success" });
     } catch (err) {
       const msg = getErrorMessage(err, "Update failed");
       setFormError(msg);
-      setToast({ message: msg, type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't update this image.",
+        description: "Please try again.",
+        details: msg,
+      });
     } finally {
       setSaving(false);
     }
@@ -953,11 +963,11 @@ function AnimationSection({
       setLinkError("Enter a link");
       return;
     }
-    const url = raw.startsWith("http") ? raw : `https://${raw}`;
+    const url = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
     const canonical = canonicalizeInteractiveMediaUrl(url);
     if (!canonical) {
       setLinkError(
-        "Link must be a valid IPFS or Arweave URL (e.g. https://ipfs.io/ipfs/… or https://arweave.net/…)"
+        "Link must be a valid IPFS or Arweave URL (e.g. ipfs://..., ar://..., or https://media.6529.io/...)"
       );
       return;
     }
@@ -966,7 +976,7 @@ function AnimationSection({
     setLinkError(null);
     setLinkInput("");
     setReplaceMode(null);
-    setToast({ message: "Link set; click Save to apply", type: "success" });
+    setToast({ message: "Link set. Save to apply it.", type: "success" });
   }
 
   function handleRemoveAnimation() {
@@ -1002,11 +1012,16 @@ function AnimationSection({
       setReplaceMode(null);
       setLinkInput("");
       setLinkError(null);
-      setToast({ message: "Animation updated", type: "success" });
+      setToast({ message: "Animation updated.", type: "success" });
     } catch (err) {
       const msg = getErrorMessage(err, "Update failed");
       setFormError(msg);
-      setToast({ message: msg, type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't update this animation.",
+        description: "Please try again.",
+        details: msg,
+      });
     } finally {
       setSaving(false);
     }
@@ -1052,7 +1067,7 @@ function AnimationSection({
           setLinkInput(e.target.value);
           setLinkError(null);
         }}
-        placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
+        placeholder="ipfs://... or ar://..."
         className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
       />
       {linkError && (
@@ -1323,11 +1338,16 @@ function CoreInformationSection({
       if (editionSizeChanged) {
         onEditionSizeSaved();
       }
-      setToast({ message: "Core information updated", type: "success" });
+      setToast({ message: "Core information saved.", type: "success" });
     } catch (e) {
       const msg = getErrorMessage(e, "Update failed");
       setCoreError(msg);
-      setToast({ message: msg, type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't save core information.",
+        description: "Please try again.",
+        details: msg,
+      });
     } finally {
       setCoreSaving(false);
     }
@@ -1523,11 +1543,16 @@ function MetadataSection({
       setTraits(claimToTraitsData(nextClaim));
       setExternalUrl(nextClaim.external_url ?? "");
       onUpdated(nextClaim);
-      setToast({ message: "Metadata updated", type: "success" });
+      setToast({ message: "Metadata updated.", type: "success" });
     } catch (e) {
       const msg = getErrorMessage(e, "Update failed");
       setTraitsError(msg);
-      setToast({ message: msg, type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't save metadata.",
+        description: "Please try again.",
+        details: msg,
+      });
     } finally {
       setTraitsSaving(false);
       if (
@@ -1685,13 +1710,18 @@ function ArweaveSection({
     setLoading(true);
     try {
       await postArweaveUpload(claimId);
-      setToast({ message: "Publishing to Arweave started", type: "success" });
+      setToast({ message: "Publishing to Arweave started.", type: "success" });
       await onStatusRefresh();
     } catch (e) {
       const msg = getErrorMessage(e, "Upload failed");
       setError(msg);
       if (msg !== "Already published" && msg !== "Not authorized") {
-        setToast({ message: msg, type: "error" });
+        setToast({
+          type: "error",
+          title: "Couldn't publish to Arweave.",
+          description: "Please try again.",
+          details: msg,
+        });
       }
     } finally {
       setLoading(false);

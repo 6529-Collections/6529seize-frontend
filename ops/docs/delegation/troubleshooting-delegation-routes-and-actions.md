@@ -29,7 +29,7 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
 
 - `/delegation` opens not-found:
   use `/delegation/delegation-center`. Bare `/delegation` is not a valid page.
-- HTML-backed sections (`Delegation FAQs`, `Wallet Architecture`,
+- HTML-backed sections (`Delegation FAQ`, `Wallet Architecture`,
   `Consolidation Use Cases`) show `404 | PAGE NOT FOUND`: fallback HTML could
   not load. Reopen from menu and retry later.
 - Clicking a Delegation Center card while disconnected does not navigate:
@@ -50,7 +50,8 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
   lock state blocks local lock actions.
 - Toast shows `Switch to Ethereum Mainnet` or `Switch to Sepolia Network`:
   wallet chain does not match the delegation contract chain.
-- Wallet Checker shows `Invalid address`, empty results, or blocked next run:
+- Wallet Checker shows `Enter a valid Ethereum address or ENS name.`, empty
+  results, or blocked next run:
   enter a valid `0x...` or `.eth` (non-`.eth` names are invalid), then use
   `Clear` before the next check.
 

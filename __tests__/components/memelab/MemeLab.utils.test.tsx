@@ -134,4 +134,18 @@ describe("MemeLab utilities", () => {
     );
     expect(container.textContent).toContain("Volume (7 Days):");
   });
+
+  it("prints N/A when volume is unavailable", () => {
+    const nft = {
+      ...createNft(),
+      total_volume_last_7_days: Number.NaN,
+    };
+    const { container } = render(
+      <div>
+        {printNftContent(nft, MemeLabSort.VOLUME, [nftMeta], VolumeType.DAYS_7)}
+      </div>
+    );
+
+    expect(container.textContent).toContain("Volume (7 Days): N/A");
+  });
 });

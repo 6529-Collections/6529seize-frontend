@@ -2544,6 +2544,8 @@ paths:
                 $ref: "#/components/schemas/ApiDropPollVotersPage"
         "400":
           description: Invalid request
+        "403":
+          description: Poll is anonymous
         "404":
           description: Drop, poll, or option not found
   /v2/drops/{id}/poll/vote:
@@ -6011,6 +6013,236 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiTransactionPage"
+  /waves/{id}/rep/rating:
+    post:
+      tags:
+        - WaveREP
+      summary: >-
+        Change wave REP rating. If you are authenticated as proxy, you will be
+        rating on behalf of the profile you are proxying.
+      operationId: rateWaveRep
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiChangeWaveRepRating"
+      responses:
+        "201":
+          description: successful operation
+        "400":
+          description: Invalid request
+        "404":
+          description: Wave not found
+    get:
+      tags:
+        - WaveREP
+      summary: Get wave REP rating
+      operationId: getWaveRepRating
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: from_identity
+          in: query
+          description: If omitted, the authenticated profile is used. Anonymous requests without from_identity return 0.
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveRepRating"
+        "404":
+          description: Wave not found
+  /waves/{id}/rep/ratings/by-rater:
+    get:
+      tags:
+        - WaveREP
+      summary: Get wave REP ratings by rater
+      operationId: getWaveRepRatingsByRater
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 2000
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - last_modified
+              - rating
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRatingWithProfileInfoAndLevelPage"
+        "404":
+          description: Wave not found
+  /waves/{id}/rep/overview:
+    get:
+      tags:
+        - WaveREP
+      summary: Get wave REP overview
+      operationId: getWaveRepOverview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveRepOverview"
+        "404":
+          description: Wave not found
+  /waves/{id}/rep/categories:
+    get:
+      tags:
+        - WaveREP
+      summary: Get wave REP categories
+      operationId: getWaveRepCategories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: top_contributors_limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveRepCategoriesPage"
+        "404":
+          description: Wave not found
+  /waves/{id}/rep/categories/{category}/contributors:
+    get:
+      tags:
+        - WaveREP
+      summary: Get wave REP contributors for category
+      operationId: getWaveRepCategoryContributors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[a-zA-Z0-9?!,."() ]{1,100}$
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveRepContributorsPage"
+        "404":
+          description: Wave not found
   /waves/{waveId}/outcomes:
     get:
       tags:
@@ -7426,6 +7658,56 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/ApiWavesPinFilter"
+        - name: score_sort
+          in: query
+          description: >-
+            Score-aware broad discovery sort. Applies when overview_type is
+            SCORED_RECENTLY_DROPPED_TO.
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiWaveScoreSort"
+        - name: min_visibility_score
+          in: query
+          description: Score-aware overview filter, inclusive 0..100.
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+            maximum: 100
+        - name: min_quality_score
+          in: query
+          description: Score-aware overview filter, inclusive 0..100.
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+            maximum: 100
+        - name: min_hotness_score
+          in: query
+          description: Score-aware overview filter, inclusive 0..100.
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+            maximum: 100
+        - name: min_rep_sort_score
+          in: query
+          description: Score-aware overview filter, inclusive 0..100.
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+            maximum: 100
+        - name: visibility_tier
+          in: query
+          description: Score-aware overview visibility tier filter.
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiWaveVisibilityTier"
         - name: exclude_followed
           in: query
           description: >-
@@ -8868,6 +9150,9 @@ components:
         rep_credit:
           type: number
           format: int64
+        wave_rep_credit:
+          type: number
+          format: int64
     ApiBlockItem:
       type: object
       required:
@@ -8993,6 +9278,20 @@ components:
           type: number
           format: int64
     ApiChangeProfileRepRating:
+      type: object
+      required:
+        - amount
+        - category
+      properties:
+        amount:
+          type: number
+          format: int64
+        category:
+          type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9?!,."() ]{1,100}$
+    ApiChangeWaveRepRating:
       type: object
       required:
         - amount
@@ -9604,6 +9903,12 @@ components:
             maxLength: 500
         multichoice:
           type: boolean
+        anonymous:
+          type: boolean
+          default: false
+        only_droppers_can_respond:
+          type: boolean
+          default: false
         closing_time:
           type: integer
           format: int64
@@ -10696,6 +11001,8 @@ components:
         - options
         - voted
         - multichoice
+        - anonymous
+        - only_droppers_can_respond
         - closing_time
         - is_open
       properties:
@@ -10713,6 +11020,10 @@ components:
             format: int64
             minimum: 1
         multichoice:
+          type: boolean
+        anonymous:
+          type: boolean
+        only_droppers_can_respond:
           type: boolean
         closing_time:
           type: integer
@@ -10740,9 +11051,13 @@ components:
       type: object
       required:
         - data
+        - open_unanswered
       allOf:
         - $ref: "#/components/schemas/ApiPageBase"
       properties:
+        open_unanswered:
+          type: number
+          format: int64
         data:
           type: array
           items:
@@ -13476,6 +13791,7 @@ components:
       enum:
         - REP
         - CIC
+        - WAVE_REP
     ApiRatingWithProfileInfoAndLevel:
       type: object
       required:
@@ -14353,6 +14669,10 @@ components:
           $ref: "#/components/schemas/ApiWaveOverview"
         has_subwaves:
           type: boolean
+        wave_rep:
+          $ref: "#/components/schemas/ApiWaveRepSummary"
+        wave_score:
+          $ref: "#/components/schemas/ApiWaveScore"
     ApiWaveChatConfig:
       type: object
       required:
@@ -15011,6 +15331,7 @@ components:
       required:
         - id
         - name
+        - creator
         - last_drop_time
         - created_at
         - subscribers_count
@@ -15027,6 +15348,8 @@ components:
           type: string
         pfp:
           type: string
+        creator:
+          $ref: "#/components/schemas/ApiProfileMin"
         last_drop_time:
           type: integer
           format: int64
@@ -15059,6 +15382,10 @@ components:
           $ref: "#/components/schemas/ApiWaveOverview"
         has_subwaves:
           type: boolean
+        wave_rep:
+          $ref: "#/components/schemas/ApiWaveRepSummary"
+        wave_score:
+          $ref: "#/components/schemas/ApiWaveScore"
     ApiWaveOverviewContextProfileContext:
       type: object
       required:
@@ -15218,6 +15545,8 @@ components:
         - options
         - voted
         - multichoice
+        - anonymous
+        - only_droppers_can_respond
         - closing_time
         - is_open
       properties:
@@ -15243,11 +15572,162 @@ components:
             minimum: 1
         multichoice:
           type: boolean
+        anonymous:
+          type: boolean
+        only_droppers_can_respond:
+          type: boolean
         closing_time:
           type: integer
           format: int64
         is_open:
           type: boolean
+    ApiWaveRepCategoriesPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveRepCategory"
+    ApiWaveRepCategory:
+      type: object
+      required:
+        - category
+        - total_rep
+        - contributor_count
+        - authenticated_user_contribution
+        - top_contributors
+      properties:
+        category:
+          type: string
+        total_rep:
+          type: number
+          format: int64
+        contributor_count:
+          type: number
+          format: int64
+        authenticated_user_contribution:
+          type: number
+          format: int64
+          nullable: true
+        top_contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveRepContributor"
+    ApiWaveRepCategorySummary:
+      type: object
+      required:
+        - category
+        - total_rep
+        - contributor_count
+      properties:
+        category:
+          type: string
+        total_rep:
+          type: number
+          format: int64
+        contributor_count:
+          type: number
+          format: int64
+    ApiWaveRepContributor:
+      type: object
+      required:
+        - contribution
+        - profile
+      properties:
+        contribution:
+          type: number
+          format: int64
+        profile:
+          $ref: "#/components/schemas/ApiProfileMin"
+    ApiWaveRepContributorsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveRepContributor"
+    ApiWaveRepOverview:
+      type: object
+      required:
+        - total_rep
+        - positive_rep
+        - negative_rep
+        - authenticated_user_contribution
+        - contributor_count
+        - contributors
+      properties:
+        total_rep:
+          type: number
+          format: int64
+        positive_rep:
+          type: number
+          format: int64
+        negative_rep:
+          type: number
+          format: int64
+        authenticated_user_contribution:
+          type: number
+          format: int64
+          nullable: true
+        contributor_count:
+          type: number
+          format: int64
+        contributors:
+          $ref: "#/components/schemas/ApiWaveRepContributorsPage"
+    ApiWaveRepRating:
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: number
+          format: int64
+    ApiWaveRepSummary:
+      type: object
+      required:
+        - total_rep
+        - positive_rep
+        - negative_rep
+        - contributor_count
+        - positive_contributor_count
+        - negative_contributor_count
+        - authenticated_user_contribution
+        - categories
+      properties:
+        total_rep:
+          type: number
+          format: int64
+        positive_rep:
+          type: number
+          format: int64
+        negative_rep:
+          type: number
+          format: int64
+        contributor_count:
+          type: number
+          format: int64
+        positive_contributor_count:
+          type: number
+          format: int64
+        negative_contributor_count:
+          type: number
+          format: int64
+        authenticated_user_contribution:
+          type: number
+          format: int64
+          nullable: true
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveRepCategorySummary"
     ApiWaveRequiredMetadata:
       type: object
       required:
@@ -15270,11 +15750,246 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiGroup"
+    ApiWaveScore:
+      type: object
+      required:
+        - score_version
+        - visibility_tier
+        - quality_score
+        - hotness_score
+        - rep_sort_score
+        - visibility_score
+        - components
+        - penalties
+        - quality_gate
+        - formula
+        - calculated_at
+      properties:
+        score_version:
+          type: string
+        visibility_tier:
+          $ref: "#/components/schemas/ApiWaveVisibilityTier"
+        quality_score:
+          type: number
+          format: double
+        hotness_score:
+          type: number
+          format: double
+        rep_sort_score:
+          type: number
+          format: double
+        visibility_score:
+          type: number
+          format: double
+        components:
+          $ref: "#/components/schemas/ApiWaveScoreComponents"
+        penalties:
+          $ref: "#/components/schemas/ApiWaveScorePenalties"
+        quality_gate:
+          $ref: "#/components/schemas/ApiWaveScoreQualityGate"
+        formula:
+          $ref: "#/components/schemas/ApiWaveScoreFormula"
+        calculated_at:
+          type: integer
+          format: int64
+    ApiWaveScoreComponents:
+      type: object
+      required:
+        - creator_score
+        - level_weighted_participation_score
+        - trusted_diversity_score
+        - wave_rep_component_score
+        - trusted_subscription_score
+        - recent_trusted_activity_score
+      properties:
+        creator_score:
+          type: number
+          format: double
+        level_weighted_participation_score:
+          type: number
+          format: double
+        trusted_diversity_score:
+          type: number
+          format: double
+        wave_rep_component_score:
+          type: number
+          format: double
+        trusted_subscription_score:
+          type: number
+          format: double
+        recent_trusted_activity_score:
+          type: number
+          format: double
+    ApiWaveScoreFormula:
+      type: object
+      required:
+        - max_level_raw_for_score
+        - max_wave_rep_for_score
+        - trusted_level_raw
+        - low_trust_level_raw
+        - recent_activity_window_ms
+        - recent_activity_half_life_ms
+        - participation_saturation_scale
+        - trusted_diversity_saturation_scale
+        - trusted_subscription_saturation_scale
+        - recent_activity_saturation_scale
+        - trusted_visible_min_visibility_score
+        - exploration_neutral_min_visibility_score
+        - demoted_min_visibility_score
+        - quality_component_weights
+        - hotness_component_weights
+        - visibility_component_weights
+      properties:
+        max_level_raw_for_score:
+          type: integer
+          format: int64
+        max_wave_rep_for_score:
+          type: integer
+          format: int64
+        trusted_level_raw:
+          type: integer
+          format: int64
+        low_trust_level_raw:
+          type: integer
+          format: int64
+        recent_activity_window_ms:
+          type: integer
+          format: int64
+        recent_activity_half_life_ms:
+          type: integer
+          format: int64
+        participation_saturation_scale:
+          type: number
+          format: double
+        trusted_diversity_saturation_scale:
+          type: number
+          format: double
+        trusted_subscription_saturation_scale:
+          type: number
+          format: double
+        recent_activity_saturation_scale:
+          type: number
+          format: double
+        trusted_visible_min_visibility_score:
+          type: number
+          format: double
+        exploration_neutral_min_visibility_score:
+          type: number
+          format: double
+        demoted_min_visibility_score:
+          type: number
+          format: double
+        quality_component_weights:
+          $ref: "#/components/schemas/ApiWaveScoreQualityComponentWeights"
+        hotness_component_weights:
+          $ref: "#/components/schemas/ApiWaveScoreHotnessComponentWeights"
+        visibility_component_weights:
+          $ref: "#/components/schemas/ApiWaveScoreVisibilityComponentWeights"
+    ApiWaveScoreHotnessComponentWeights:
+      type: object
+      required:
+        - recent_trusted_activity_score
+        - quality_score
+      properties:
+        recent_trusted_activity_score:
+          type: number
+          format: double
+        quality_score:
+          type: number
+          format: double
+    ApiWaveScorePenalties:
+      type: object
+      required:
+        - single_actor_penalty
+        - low_trust_flood_penalty
+        - cross_post_pressure
+        - cross_post_penalty
+        - negative_rep_penalty
+        - safety_multiplier
+      properties:
+        single_actor_penalty:
+          type: number
+          format: double
+        low_trust_flood_penalty:
+          type: number
+          format: double
+        cross_post_pressure:
+          type: number
+          format: double
+        cross_post_penalty:
+          type: number
+          format: double
+        negative_rep_penalty:
+          type: number
+          format: double
+        safety_multiplier:
+          type: number
+          format: double
+    ApiWaveScoreQualityComponentWeights:
+      type: object
+      required:
+        - creator_score
+        - level_weighted_participation_score
+        - trusted_diversity_score
+        - trusted_subscription_score
+        - wave_rep_component_score
+      properties:
+        creator_score:
+          type: number
+          format: double
+        level_weighted_participation_score:
+          type: number
+          format: double
+        trusted_diversity_score:
+          type: number
+          format: double
+        trusted_subscription_score:
+          type: number
+          format: double
+        wave_rep_component_score:
+          type: number
+          format: double
+    ApiWaveScoreQualityGate:
+      type: object
+      required:
+        - threshold
+        - multiplier
+        - gated_hotness_score
+      properties:
+        threshold:
+          type: number
+          format: double
+        multiplier:
+          type: number
+          format: double
+        gated_hotness_score:
+          type: number
+          format: double
+    ApiWaveScoreSort:
+      type: string
+      enum:
+        - BALANCED
+        - QUALITY
+        - HOTNESS
+        - REP
+    ApiWaveScoreVisibilityComponentWeights:
+      type: object
+      required:
+        - quality_score
+        - gated_hotness_score
+      properties:
+        quality_score:
+          type: number
+          format: double
+        gated_hotness_score:
+          type: number
+          format: double
     ApiWavesOverviewType:
       type: string
       enum:
         - MOST_SUBSCRIBED
         - RECENTLY_DROPPED_TO
+        - SCORED_RECENTLY_DROPPED_TO
     ApiWavesPinFilter:
       type: string
       enum:
@@ -15313,6 +16028,13 @@ components:
       properties:
         scope:
           $ref: "#/components/schemas/ApiWaveScope"
+    ApiWaveVisibilityTier:
+      type: string
+      enum:
+        - TRUSTED_VISIBLE
+        - EXPLORATION_NEUTRAL
+        - DEMOTED
+        - SUPPRESSED
     ApiWaveVoter:
       type: object
       required:

@@ -1,8 +1,13 @@
 "use client";
 
 import type React from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWater } from "@fortawesome/free-solid-svg-icons";
 import { FallbackImage } from "@/components/common/FallbackImage";
@@ -25,6 +30,10 @@ import {
   getWaveHref,
   PREVIEW_DROPS_FETCH_LIMIT,
 } from "./curation-preview/utils";
+import {
+  useWaveCreatorPreviewWaves,
+  WaveCreatorPreviewList,
+} from "./WaveCreatorPreviewList";
 
 const getBannerBackground = ({
   banner1,
@@ -93,6 +102,153 @@ const CurationPreviewBody: React.FC<{
   return <div className="tw-px-4 tw-pb-4 tw-pt-4">{children}</div>;
 };
 
+const getProfileBrainHref = (profileIdentity: string | null): string | null =>
+  profileIdentity ? `/${encodeURIComponent(profileIdentity)}/brain` : null;
+
+const getPreviewLayoutClassNames = ({
+  isExpanded,
+  variant,
+}: {
+  readonly isExpanded: boolean;
+  readonly variant: CurationWavePreviewCardVariant;
+}): {
+  readonly layoutClassName: string;
+  readonly columnClassName: string;
+} => {
+  if (!isExpanded) {
+    return {
+      layoutClassName: "",
+      columnClassName: "",
+    };
+  }
+
+  if (variant === "hovercard") {
+    return {
+      layoutClassName: "tw-flex tw-flex-col min-[760px]:tw-flex-row",
+      columnClassName:
+        "tw-min-w-0 tw-w-full min-[760px]:tw-w-[360px] min-[760px]:tw-flex-shrink-0",
+    };
+  }
+
+  return {
+    layoutClassName: "tw-flex tw-flex-col",
+    columnClassName: "tw-min-w-0 tw-w-full",
+  };
+};
+
+const WavePreviewHeader: React.FC<{
+  readonly hasBannerCover: boolean;
+  readonly picture: string | null | undefined;
+  readonly waveName: string;
+  readonly author: string | null;
+}> = ({ hasBannerCover, picture, waveName, author }) => {
+  const pictureElement = (
+    <WavePreviewPicture
+      picture={picture}
+      sizeClassName="tw-h-10 tw-w-10"
+      iconClassName="tw-h-4 tw-w-4"
+      imageSize="40px"
+    />
+  );
+  const titleElement = (
+    <div className="tw-min-w-0 tw-flex-1">
+      <div className="tw-line-clamp-2 tw-text-base tw-font-bold tw-leading-[1.15] tw-text-zinc-100">
+        {waveName}
+      </div>
+      {author && (
+        <div className="tw-mt-1 tw-truncate tw-text-xs tw-font-medium tw-text-zinc-400">
+          @{author}
+        </div>
+      )}
+    </div>
+  );
+
+  if (hasBannerCover) {
+    return (
+      <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2.5">
+        {pictureElement}
+        {titleElement}
+      </div>
+    );
+  }
+
+  return (
+    <div className="tw-flex tw-items-center tw-gap-3">
+      {pictureElement}
+      {titleElement}
+    </div>
+  );
+};
+
+const CreatedWavesToggleIcon: React.FC<{
+  readonly isExpanded: boolean;
+  readonly variant: CurationWavePreviewCardVariant;
+}> = ({ isExpanded, variant }) => {
+  const Icon = variant === "hovercard" ? ChevronRightIcon : ChevronDownIcon;
+
+  return (
+    <Icon
+      className={`tw-h-3.5 tw-w-3.5 tw-transition-transform tw-duration-300 tw-ease-out ${
+        isExpanded ? "tw-rotate-180" : ""
+      }`}
+      aria-hidden="true"
+    />
+  );
+};
+
+const PreviewActions: React.FC<{
+  readonly waveHref: string;
+  readonly canShowCreatedWavesPanel: boolean;
+  readonly isCreatedWavesExpanded: boolean;
+  readonly createdWavesPanelId: string;
+  readonly onToggleCreatedWaves: () => void;
+  readonly variant: CurationWavePreviewCardVariant;
+}> = ({
+  waveHref,
+  canShowCreatedWavesPanel,
+  isCreatedWavesExpanded,
+  createdWavesPanelId,
+  onToggleCreatedWaves,
+  variant,
+}) => (
+  <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-5 tw-py-3">
+    <Link
+      href={waveHref}
+      prefetch={false}
+      className="tw-group/open-wave tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-primary-300"
+    >
+      Open profile wave
+      <ArrowRightIcon
+        className="tw-h-3.5 tw-w-3.5 tw-transition-transform tw-duration-300 tw-ease-out desktop-hover:group-hover/open-wave:tw-translate-x-0.5"
+        aria-hidden="true"
+      />
+    </Link>
+    {canShowCreatedWavesPanel && (
+      <button
+        type="button"
+        onClick={onToggleCreatedWaves}
+        aria-expanded={isCreatedWavesExpanded}
+        aria-controls={createdWavesPanelId}
+        className="tw-group/show-waves tw-inline-flex tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-50"
+      >
+        {isCreatedWavesExpanded && (
+          <CreatedWavesToggleIcon
+            isExpanded={isCreatedWavesExpanded}
+            variant={variant}
+          />
+        )}
+        {isCreatedWavesExpanded ? "Hide waves" : "Show all waves"}
+        {!isCreatedWavesExpanded && (
+          <CreatedWavesToggleIcon
+            isExpanded={isCreatedWavesExpanded}
+            variant={variant}
+          />
+        )}
+      </button>
+    )}
+  </div>
+);
+
 export const CurationWavePreviewCard: React.FC<
   CurationWavePreviewCardProps
 > = ({
@@ -102,6 +258,8 @@ export const CurationWavePreviewCard: React.FC<
   fallbackPfp,
   variant = "hovercard",
 }) => {
+  const createdWavesPanelId = useId();
+  const [areCreatedWavesOpen, setAreCreatedWavesOpen] = useState(false);
   const normalizedProfileIdentity = getTrimmedText(profileIdentity);
   const { wave, isError: isWaveError } = useWaveById(waveId);
   const resolvedWave = wave?.id === waveId ? wave : undefined;
@@ -173,96 +331,138 @@ export const CurationWavePreviewCard: React.FC<
   const description = getWaveDescriptionPreviewText(resolvedWave);
   const previewItems = getPreviewItems(drops);
   const waveHref = getWaveHref({ waveId, wave: resolvedWave, curationId });
+  const profileBrainHref = getProfileBrainHref(normalizedProfileIdentity);
+  const canShowCreatedWavesPanel =
+    normalizedProfileIdentity !== null && profileBrainHref !== null;
+  const isCreatedWavesExpanded =
+    canShowCreatedWavesPanel && areCreatedWavesOpen;
+  const {
+    layoutClassName: previewLayoutClassName,
+    columnClassName: previewColumnClassName,
+  } = getPreviewLayoutClassNames({
+    isExpanded: isCreatedWavesExpanded,
+    variant,
+  });
   const bannerBackground = getBannerBackground({
     banner1: resolvedWave?.author.banner1_color,
     banner2: resolvedWave?.author.banner2_color,
   });
   const hasBannerCover = bannerBackground !== null;
+  const onToggleCreatedWaves = () =>
+    setAreCreatedWavesOpen((current) => !current);
 
   return (
-    <CurationPreviewShell variant={variant}>
-      {hasBannerCover && (
-        <div
-          className={
-            variant === "sheet"
-              ? "tw-relative tw-h-[68px] tw-w-full tw-overflow-hidden"
-              : "tw-relative tw-h-14 tw-w-full tw-overflow-hidden"
-          }
-          aria-hidden="true"
-        >
-          <div
-            className="tw-absolute tw-inset-0 tw-opacity-85"
-            style={{ background: bannerBackground }}
+    <CurationPreviewShell
+      variant={variant}
+      expanded={variant === "hovercard" && isCreatedWavesExpanded}
+    >
+      <div className={previewLayoutClassName}>
+        <div className={previewColumnClassName}>
+          {hasBannerCover && (
+            <div
+              className={
+                variant === "sheet"
+                  ? "tw-relative tw-h-[68px] tw-w-full tw-overflow-hidden"
+                  : "tw-relative tw-h-14 tw-w-full tw-overflow-hidden"
+              }
+              aria-hidden="true"
+            >
+              <div
+                className="tw-absolute tw-inset-0 tw-opacity-85"
+                style={{ background: bannerBackground }}
+              />
+              <div className="tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.18),transparent_34%),linear-gradient(to_top,#131316_0%,rgba(19,19,22,0.42)_48%,rgba(19,19,22,0.08)_100%)]" />
+            </div>
+          )}
+          <CurationPreviewBody
+            hasBannerCover={hasBannerCover}
+            variant={variant}
+          >
+            <WavePreviewHeader
+              hasBannerCover={hasBannerCover}
+              picture={wavePicture}
+              waveName={waveName}
+              author={author}
+            />
+            {description && (
+              <p className="tw-mb-0 tw-mt-3 tw-line-clamp-2 tw-pr-1 tw-text-xs tw-font-medium tw-leading-[1.45] tw-text-zinc-300">
+                {description}
+              </p>
+            )}
+
+            <PreviewContent
+              isPending={isPreviewPending}
+              previewItems={previewItems}
+            />
+          </CurationPreviewBody>
+
+          <PreviewActions
+            waveHref={waveHref}
+            canShowCreatedWavesPanel={canShowCreatedWavesPanel}
+            isCreatedWavesExpanded={isCreatedWavesExpanded}
+            createdWavesPanelId={createdWavesPanelId}
+            onToggleCreatedWaves={onToggleCreatedWaves}
+            variant={variant}
           />
-          <div className="tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.18),transparent_34%),linear-gradient(to_top,#131316_0%,rgba(19,19,22,0.42)_48%,rgba(19,19,22,0.08)_100%)]" />
         </div>
-      )}
-      <CurationPreviewBody hasBannerCover={hasBannerCover} variant={variant}>
-        {hasBannerCover ? (
-          <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2.5">
-            <WavePreviewPicture
-              picture={wavePicture}
-              sizeClassName="tw-h-10 tw-w-10"
-              iconClassName="tw-h-4 tw-w-4"
-              imageSize="40px"
-            />
-            <div className="tw-min-w-0 tw-flex-1">
-              <div className="tw-line-clamp-2 tw-text-base tw-font-bold tw-leading-[1.15] tw-text-zinc-100">
-                {waveName}
-              </div>
-              {author && (
-                <div className="tw-mt-1 tw-truncate tw-text-xs tw-font-medium tw-text-zinc-400">
-                  @{author}
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="tw-flex tw-items-center tw-gap-3">
-            <WavePreviewPicture
-              picture={wavePicture}
-              sizeClassName="tw-h-10 tw-w-10"
-              iconClassName="tw-h-4 tw-w-4"
-              imageSize="40px"
-            />
-            <div className="tw-min-w-0 tw-flex-1">
-              <div className="tw-line-clamp-2 tw-text-base tw-font-bold tw-leading-[1.15] tw-text-zinc-100">
-                {waveName}
-              </div>
-              {author && (
-                <div className="tw-mt-1 tw-truncate tw-text-xs tw-font-medium tw-text-zinc-400">
-                  @{author}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        {description && (
-          <p className="tw-mb-0 tw-mt-3 tw-line-clamp-2 tw-pr-1 tw-text-xs tw-font-medium tw-leading-[1.45] tw-text-zinc-300">
-            {description}
-          </p>
-        )}
-
-        <PreviewContent
-          isPending={isPreviewPending}
-          previewItems={previewItems}
-        />
-      </CurationPreviewBody>
-
-      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-5 tw-py-3">
-        <Link
-          href={waveHref}
-          prefetch={false}
-          className="tw-group/open-wave tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-bold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-primary-300"
-        >
-          Open wave
-          <ArrowRightIcon
-            className="tw-h-3.5 tw-w-3.5 tw-transition-transform tw-duration-300 tw-ease-out desktop-hover:group-hover/open-wave:tw-translate-x-0.5"
-            aria-hidden="true"
+        {isCreatedWavesExpanded && (
+          <CreatedWavesPanel
+            id={createdWavesPanelId}
+            identity={normalizedProfileIdentity}
+            profileBrainHref={profileBrainHref}
+            variant={variant}
           />
-        </Link>
+        )}
       </div>
     </CurationPreviewShell>
+  );
+};
+
+const CreatedWavesPanel: React.FC<{
+  readonly id: string;
+  readonly identity: string;
+  readonly profileBrainHref: string;
+  readonly variant: CurationWavePreviewCardVariant;
+}> = ({ id, identity, profileBrainHref, variant }) => {
+  const wavesState = useWaveCreatorPreviewWaves({
+    identity,
+    enabled: true,
+  });
+  const isSheet = variant === "sheet";
+
+  return (
+    <section
+      id={id}
+      aria-label="Created waves"
+      className={`tw-min-w-0 ${
+        isSheet
+          ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-4"
+          : "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-p-4 min-[760px]:tw-w-[360px] min-[760px]:tw-flex-shrink-0 min-[760px]:tw-border-l min-[760px]:tw-border-t-0"
+      }`}
+    >
+      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+        <div className="tw-min-w-0">
+          <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+            Created waves
+          </div>
+        </div>
+        <Link
+          href={profileBrainHref}
+          prefetch={false}
+          className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-primary-300"
+        >
+          Show all brain activity
+          <ArrowRightIcon className="tw-h-3 tw-w-3" aria-hidden="true" />
+        </Link>
+      </div>
+      <div
+        className={`tw-mt-3 tw-overflow-y-auto tw-pr-1 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500 ${
+          isSheet ? "tw-max-h-[360px]" : "tw-max-h-[320px]"
+        }`}
+      >
+        <WaveCreatorPreviewList state={wavesState} variant="compact" />
+      </div>
+    </section>
   );
 };
 

@@ -8,11 +8,8 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import GroupCreateTest from "./GroupCreateTest";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import type {
-  SubmitArgs} from "@/hooks/groups/useGroupMutations";
-import {
-  useGroupMutations,
-} from "@/hooks/groups/useGroupMutations";
+import type { SubmitArgs } from "@/hooks/groups/useGroupMutations";
+import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 
 export default function GroupCreateActions({
   originalGroup,
@@ -32,6 +29,9 @@ export default function GroupCreateActions({
 
   const validation = validate(groupConfig);
   const isActionsDisabled = !validation.valid || isSubmitting;
+  const isEditMode = !!originalGroup;
+  const submitLabel = isEditMode ? "Save" : "Create";
+  const successMessage = isEditMode ? "Group saved." : "Group created.";
 
   const onSave = async (): Promise<void> => {
     if (isSubmitting) {
@@ -45,7 +45,7 @@ export default function GroupCreateActions({
     const result = await submit(submitArgs);
     if (result.ok) {
       setToast({
-        message: "Group created.",
+        message: successMessage,
         type: "success",
       });
       onCompleted();
@@ -57,8 +57,12 @@ export default function GroupCreateActions({
     }
 
     setToast({
-      message: result.error,
       type: "error",
+      title: originalGroup
+        ? "Couldn't save this group."
+        : "Couldn't create this group.",
+      description: "Please check the group setup and try again.",
+      details: result.error,
     });
   };
 
@@ -88,7 +92,7 @@ export default function GroupCreateActions({
               } tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out`}>
               <div className="tw-flex tw-items-center tw-justify-center tw-gap-x-2">
                 {isSubmitting && <CircleLoader />}
-                <span>Create</span>
+                <span>{submitLabel}</span>
               </div>
             </button>
           </div>

@@ -12,6 +12,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -479,8 +480,10 @@ export default function QuorumProposalDropModal({
       queuedForSubmit = true;
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't submit this proposal.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       if (!queuedForSubmit) {

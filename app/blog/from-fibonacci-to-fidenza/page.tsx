@@ -1,8 +1,22 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import type { Metadata } from "next";
 export default function BlogFromFibonacciToFidenzaPage() {
   return (
     <div>
+      <JsonLdScript
+        data={buildArticlePageJsonLd({
+          path: "/blog/from-fibonacci-to-fidenza",
+          headline: "From Fibonacci to Fidenza: The Golden Ratio in Generative Art",
+          description: "A look at the golden ratio, Fibonacci, Fidenza, and generative art.",
+          image: "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Fidenza-313.png",
+          author: "Sabrina Khan",
+          datePublished: "2022-11-10T05:29:37+00:00",
+          dateModified: "2022-11-15T18:08:28+00:00",
+          section: "Blog",
+        })}
+      />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta

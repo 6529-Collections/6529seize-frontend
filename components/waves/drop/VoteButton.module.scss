@@ -10,23 +10,27 @@ $btn-dimension: 72px;
   100% {
     transform: scale(1);
     opacity: 0;
-    box-shadow: 0 0 50px var(--theme-secondary, rgba(255, 255, 255, 0.3)), 
-                inset 0 0 10px var(--theme-primary, rgba(255, 255, 255, 0.9));
+    box-shadow:
+      0 0 50px var(--theme-secondary, rgba(255, 255, 255, 0.3)),
+      inset 0 0 10px var(--theme-primary, rgba(255, 255, 255, 0.9));
   }
 }
 
 @keyframes glow {
   0% {
-    box-shadow: 0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
-                0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+    box-shadow:
+      0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+      0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
   50% {
-    box-shadow: 0 0 20px var(--theme-primary, rgba(255, 255, 255, 0.2)),
-                0 0 30px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+    box-shadow:
+      0 0 20px var(--theme-primary, rgba(255, 255, 255, 0.2)),
+      0 0 30px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
   100% {
-    box-shadow: 0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
-                0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+    box-shadow:
+      0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+      0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
 }
 
@@ -66,9 +70,15 @@ $btn-dimension: 72px;
 }
 
 @keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }
 
 @keyframes textScaleOut {
@@ -99,22 +109,27 @@ $btn-dimension: 72px;
   border-radius: 8px;
   width: $btn-dimension;
   height: 40px;
-  background: #E5E5E5;
+  background: #e5e5e5;
   border: 1px solid white;
   outline: none;
-  color: #0A0A0A;
+  color: #0a0a0a;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease-out;
 
   &:not(:disabled):hover {
-    background: #D4D4D4;
-    border-color: #D4D4D4;
+    background: #d4d4d4;
+    border-color: #d4d4d4;
   }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(64, 106, 254, 0.75);
+    outline-offset: 2px;
   }
 }
 
@@ -124,7 +139,17 @@ $btn-dimension: 72px;
   height: 32px;
   font-size: 12px !important;
   border-radius: 6px;
-  
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #0a0a0a;
+  box-shadow: none;
+
+  &:not(:disabled):hover {
+    background: #efeff1;
+    border-color: #efeff1;
+    color: #0a0a0a;
+  }
+
   .buttonContent {
     position: relative;
     width: 100%;
@@ -133,11 +158,79 @@ $btn-dimension: 72px;
     align-items: center;
     justify-content: center;
   }
-  
+
   .spinner {
     width: 18px;
     height: 18px;
     border-width: 1.5px;
+    border-color: rgba(10, 10, 10, 0.2);
+    border-top-color: #0a0a0a;
+    border-right-color: #0a0a0a;
+  }
+}
+
+.voteSubmitFull {
+  width: 100%;
+
+  > div {
+    width: 100%;
+  }
+
+  .voteButton {
+    width: 100%;
+    height: auto;
+    min-height: 40px;
+    padding: 10px 14px;
+    background: transparent;
+    border-color: #26272b;
+    color: #4c4c55;
+    box-shadow: none;
+
+    &:not(:disabled):hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: #37373e;
+      color: #60606c;
+    }
+  }
+
+  .voteButtonPositive {
+    background: #10b981;
+    border-color: #10b981;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: none;
+
+    &:not(:disabled):hover {
+      background: #059669;
+      border-color: #059669;
+      box-shadow: none;
+      color: #fff;
+    }
+  }
+
+  .voteButtonNegative {
+    background: #f43f5e;
+    border-color: #f43f5e;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: none;
+
+    &:not(:disabled):hover {
+      background: #e11d48;
+      border-color: #e11d48;
+      box-shadow: none;
+      color: #fff;
+    }
+  }
+
+  .voteButtonNeutral {
+    background: transparent;
+    border-color: #26272b;
+    color: #4c4c55;
+  }
+
+  .buttonContent {
+    height: 20px;
   }
 }
 
@@ -153,17 +246,18 @@ $btn-dimension: 72px;
 .buttonText {
   position: absolute;
   width: 100%;
+  white-space: nowrap;
   text-align: center;
   transform-style: preserve-3d;
   backface-visibility: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.exit {
-    animation: textScaleOut 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    animation: textScaleOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
   &.enter {
-    animation: textScaleIn 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    animation: textScaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 }
 
@@ -174,19 +268,20 @@ $btn-dimension: 72px;
   height: 24px;
   border: 2px solid rgba(10, 10, 10, 0.2);
   border-radius: 50%;
-  border-top-color: #0A0A0A;
-  border-right-color: #0A0A0A;
-  animation: spinnerEnter 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards,
-             funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
+  border-top-color: #0a0a0a;
+  border-right-color: #0a0a0a;
+  animation:
+    spinnerEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+    funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
 
   &.exit {
-    animation: spinnerExit 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    animation: spinnerExit 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 }
 
 .theme1 {
   color: rgba(255, 215, 0, 0.9);
-  
+
   &:hover {
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.25) !important;
     color: rgba(255, 215, 0, 1) !important;
@@ -197,7 +292,7 @@ $btn-dimension: 72px;
   background: rgba(45, 48, 52, 0.5);
   border-color: rgba(192, 192, 192, 0.15);
   color: rgba(192, 192, 192, 0.9);
-  
+
   &:hover {
     background: rgba(50, 53, 57, 0.6) !important;
     box-shadow: 0 0 20px rgba(192, 192, 192, 0.3) !important;
@@ -208,7 +303,7 @@ $btn-dimension: 72px;
 
 .theme3 {
   color: rgba(205, 127, 50, 0.9);
-  
+
   &:hover {
     box-shadow: 0 0 20px rgba(205, 127, 50, 0.25) !important;
     color: rgba(205, 127, 50, 1) !important;

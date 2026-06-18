@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import type { CollectedCollectionType } from "@/entities/IProfile";
 import { CollectionSort } from "@/entities/IProfile";
 import type { SortDirection } from "@/entities/ISort";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonSelect from "@/components/utils/select/CommonSelect";
+import {
+  getCollectedFilterMessage,
+  getCollectedSortLabel,
+} from "./user-page-collected-filter-labels";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 
 export default function UserPageCollectedFiltersSortBy({
@@ -19,19 +23,11 @@ export default function UserPageCollectedFiltersSortBy({
   readonly collection: CollectedCollectionType | null;
   readonly setSelected: (sort: CollectionSort) => void;
 }) {
-  const labels: { [key in CollectionSort]: string } = {
-    [CollectionSort.TOKEN_ID]: "Token ID",
-    [CollectionSort.TDH]: "TDH",
-    [CollectionSort.RANK]: "Rank",
-    [CollectionSort.XTDH]: "xTDH",
-    [CollectionSort.XTDH_DAY]: "xTDH/day",
-  };
-
-  const getItems = () => {
+  const items = useMemo(() => {
     const items: CommonSelectItem<CollectionSort>[] = Object.values(
       CollectionSort
     ).map((sort) => ({
-      label: labels[sort],
+      label: getCollectedSortLabel(sort),
       value: sort,
       key: sort,
     }));
@@ -48,19 +44,13 @@ export default function UserPageCollectedFiltersSortBy({
         item.value !== CollectionSort.XTDH_DAY
       );
     });
-  };
-  const [items, setItems] =
-    useState<CommonSelectItem<CollectionSort>[]>(getItems());
-
-  useEffect(() => {
-    setItems(getItems());
   }, [collection]);
 
   return (
     <CommonSelect
       items={items}
       activeItem={selected}
-      filterLabel="Sort By"
+      filterLabel={getCollectedFilterMessage("user.collected.filters.sortBy")}
       setSelected={setSelected}
       sortDirection={direction}
       size="sm"

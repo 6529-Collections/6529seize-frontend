@@ -142,6 +142,26 @@ describe("publicEnvSchema BASE_ENDPOINT (Zod)", () => {
   it.each(validCases)("accepts valid BASE_ENDPOINT: %s", (value) => {
     expectParseToSucceed(value);
   });
+
+  it("requires MEDIA_RESOLVER_ENDPOINT to use HTTPS", () => {
+    const schema = freshImportPublicEnvSchema();
+
+    expect(() =>
+      schema.parse(
+        buildInput({ MEDIA_RESOLVER_ENDPOINT: "http://media.example.com" })
+      )
+    ).toThrow("MEDIA_RESOLVER_ENDPOINT must use HTTPS");
+  });
+
+  it("accepts HTTPS MEDIA_RESOLVER_ENDPOINT values", () => {
+    const schema = freshImportPublicEnvSchema();
+
+    expect(
+      schema.parse(
+        buildInput({ MEDIA_RESOLVER_ENDPOINT: "https://media.example.com" })
+      ).MEDIA_RESOLVER_ENDPOINT
+    ).toBe("https://media.example.com");
+  });
 });
 
 describe("config/env.ts publicEnv loader", () => {

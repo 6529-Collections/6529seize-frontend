@@ -1,38 +1,56 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import RememePage from "@/components/rememes/RememePage";
+import {
+  getRememeDetailApiQuery,
+  getRememesRouteLocale,
+  type RememesSearchParams,
+} from "@/components/rememes/rememesRouteParams";
 import { publicEnv } from "@/config/env";
 import { formatAddress } from "@/helpers/Helpers";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import styles from "@/styles/Home.module.scss";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Rememe } from "@/entities/INFT";
 import type { Metadata } from "next";
 
+type RememeDetailSearchParams = Pick<RememesSearchParams, "locale">;
+
+type RememeRouteProps = {
+  readonly params: Promise<{ contract: string; id: string }>;
+  readonly searchParams?: Promise<RememeDetailSearchParams>;
+};
+
+async function getRouteLocale(searchParams: RememeRouteProps["searchParams"]) {
+  return getRememesRouteLocale(searchParams ? await searchParams : {});
+}
+
 export default async function ReMeme({
   params,
-}: {
-  readonly params: Promise<{ contract: string; id: string }>;
-}) {
+  searchParams,
+}: RememeRouteProps) {
   const { contract, id } = await params;
+  const locale = await getRouteLocale(searchParams);
 
   return (
     <main className={styles["main"]}>
-      <RememePage contract={contract} id={id} />
+      <RememePage contract={contract} id={id} locale={locale} />
     </main>
   );
 }
 
 export async function generateMetadata({
   params,
-}: {
-  readonly params: Promise<{ contract: string; id: string }>;
-}): Promise<Metadata> {
+  searchParams,
+}: RememeRouteProps): Promise<Metadata> {
   const { contract, id } = await params;
+  const locale = await getRouteLocale(searchParams);
   let name = `${formatAddress(contract)} #${id}`;
   let image = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
   try {
+    const query = getRememeDetailApiQuery({ contract, id });
     const response = await fetchUrl<DBResponse<Rememe>>(
-      `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
+      `${publicEnv.API_ENDPOINT}/api/rememes?${query}`
     );
 
     if (response?.data?.length > 0) {
@@ -51,9 +69,9 @@ export async function generateMetadata({
   }
 
   return getAppMetadata({
-    title: name,
+    title: t(locale, "rememes.detail.documentTitle", { name }),
     ogImage: image ?? `${publicEnv.BASE_ENDPOINT}/re-memes-b.jpeg`,
-    description: `ReMemes`,
+    description: t(locale, "rememes.title"),
     twitterCard: "summary",
   });
 }

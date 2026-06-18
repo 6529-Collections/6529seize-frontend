@@ -24,7 +24,7 @@ export function useEnsResolution(
 
   const ensNameQuery = useEnsName({
     address:
-      inputValue?.startsWith("0x")
+      inputValue?.toLowerCase().startsWith("0x")
         ? (inputValue as `0x${string}`)
         : undefined,
     chainId,
@@ -32,7 +32,7 @@ export function useEnsResolution(
 
   const ensAddressQuery = useEnsAddress({
     name:
-      inputValue?.endsWith(".eth")
+      inputValue?.toLowerCase().endsWith(".eth")
         ? inputValue
         : undefined,
     chainId,

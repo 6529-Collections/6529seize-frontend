@@ -1,4 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getDelegationAppTitle,
+  getDelegationRouteMetadata,
+} from "@/components/delegation/delegation-page-metadata";
 import { DelegationCenterSection } from "@/types/enums";
 import type { Metadata } from "next";
 import DelegationPageClient from "./page.client";
@@ -55,23 +59,10 @@ export async function generateMetadata({
   readonly params: Promise<{ section: string[] }>;
 }): Promise<Metadata> {
   const { section } = await params;
-  const sectionPath = section;
-  const mySection = sectionPath.length > 1 ? sectionPath : sectionPath[0];
+  const metadata = getDelegationRouteMetadata(section);
 
-  if (
-    mySection &&
-    Object.values(DelegationCenterSection).includes(
-      mySection as DelegationCenterSection
-    )
-  ) {
-    const title = (mySection as string)
-      .replaceAll("-", " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-    return getAppMetadata({
-      title,
-      description: "NFT Delegation",
-    });
-  }
-
-  return getAppMetadata({ title: "Delegation", description: "NFT Delegation" });
+  return getAppMetadata({
+    title: getDelegationAppTitle(metadata),
+    description: metadata.description,
+  });
 }

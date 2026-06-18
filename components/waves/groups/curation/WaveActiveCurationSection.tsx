@@ -26,6 +26,7 @@ import {
   useWaveCurations,
 } from "@/hooks/waves/useWaveCurations";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete, commonApiFetch } from "@/services/api/common-api";
 
 const toScopeGroup = (group: ApiGroupFull): ApiGroup => ({
@@ -158,11 +159,11 @@ export default function WaveActiveCurationSection({
       setSelectedCuration(null);
     },
     onError: (error) => {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete curation.";
       setToast({
         type: "error",
-        message,
+        title: "Couldn't delete this curation.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, "Could not delete curation."),
       });
     },
   });

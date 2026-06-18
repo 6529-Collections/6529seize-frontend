@@ -8,6 +8,10 @@ import {
   displayedYearNumberFromIndex,
   getSeasonIndexForDate,
 } from "@/components/meme-calendar/meme-calendar.helpers";
+import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import clsx from "clsx";
 import Link from "next/link";
 
@@ -17,10 +21,12 @@ const PERIOD_SEPARATOR_CLASS_NAME =
 
 export default function MemeCalendarPeriods({
   id,
+  locale = DEFAULT_LOCALE,
   seasonHref,
   showOnlySeasonOnMobile = false,
 }: {
   readonly id: number;
+  readonly locale?: SupportedLocale | undefined;
   readonly seasonHref?: string | undefined;
   readonly showOnlySeasonOnMobile?: boolean | undefined;
 }) {
@@ -32,38 +38,59 @@ export default function MemeCalendarPeriods({
   const epoch = displayedEpochNumberFromIndex(idx);
   const year = displayedYearNumberFromIndex(idx);
   const szn = displayedSeasonNumberFromIndex(idx);
+  const formattedSeason = formatInteger(locale, szn);
 
   const printSecondaryPeriod = (label: string, number: number) => (
     <span className="tw-inline-flex tw-items-center tw-gap-1 tw-px-1.5 tw-py-0.5 tw-text-[10.5px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
       <span>{label}</span>
-      <span className="tw-font-semibold tw-text-iron-300">{number}</span>
+      <span className="tw-font-semibold tw-text-iron-300">
+        {formatInteger(locale, number)}
+      </span>
     </span>
   );
   const secondaryPeriods = [
-    { label: "YEAR", number: year },
-    { label: "EPOCH", number: epoch },
-    { label: "PERIOD", number: period },
-    { label: "ERA", number: era },
-    { label: "EON", number: eon },
+    {
+      key: "year",
+      label: t(locale, "memeCalendar.periods.year"),
+      number: year,
+    },
+    {
+      key: "epoch",
+      label: t(locale, "memeCalendar.periods.epoch"),
+      number: epoch,
+    },
+    {
+      key: "period",
+      label: t(locale, "memeCalendar.periods.period"),
+      number: period,
+    },
+    { key: "era", label: t(locale, "memeCalendar.periods.era"), number: era },
+    { key: "eon", label: t(locale, "memeCalendar.periods.eon"), number: eon },
   ];
   const seasonContent = (
     <>
-      <span>SZN</span>
-      <span>{szn}</span>
+      <span>{t(locale, "memeCalendar.periods.seasonShort")}</span>
+      <span>{formattedSeason}</span>
     </>
   );
 
   const secondaryPeriodClassName = showOnlySeasonOnMobile
     ? SECONDARY_PERIOD_CLASS_NAME
     : undefined;
+  const seasonLinkHref =
+    seasonHref === undefined
+      ? undefined
+      : getTheMemesRouteHrefWithLocale({ href: seasonHref, locale });
 
   return (
     <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
       {seasonHref ? (
         <Link
-          href={seasonHref}
-          aria-label={`View SZN ${szn} cards`}
-          className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-text-primary-300"
+          href={seasonLinkHref ?? seasonHref}
+          aria-label={t(locale, "memeCalendar.periods.seasonLinkAriaLabel", {
+            season: formattedSeason,
+          })}
+          className="tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         >
           {seasonContent}
         </Link>
@@ -79,17 +106,15 @@ export default function MemeCalendarPeriods({
         /
       </span>
       <span
-        aria-label="Meme calendar position"
+        aria-label={t(locale, "memeCalendar.periods.positionLabel")}
+        role="group"
         className={clsx(
           "tw-flex-wrap tw-items-center tw-gap-1.5",
           secondaryPeriodClassName
         )}
       >
-        {secondaryPeriods.map(({ label, number }, index) => (
-          <span
-            key={label}
-            className="tw-inline-flex tw-items-center tw-gap-1.5"
-          >
+        {secondaryPeriods.map(({ key, label, number }, index) => (
+          <span key={key} className="tw-inline-flex tw-items-center tw-gap-1.5">
             {index > 0 && (
               <span aria-hidden="true" className={PERIOD_SEPARATOR_CLASS_NAME}>
                 /

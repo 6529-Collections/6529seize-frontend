@@ -46,6 +46,7 @@ interface DropProps {
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly showVideoFullscreen?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -79,6 +80,7 @@ export default function Drop({
   mediaImageScale,
   fullWidthMedia,
   fullWidthLinkPreviews,
+  showVideoFullscreen = true,
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
@@ -185,7 +187,10 @@ export default function Drop({
     ),
   };
 
-  const memoizedValue = useMemo(() => ({ drop, location }), [drop, location]);
+  const memoizedValue = useMemo(
+    () => ({ drop, location, showVideoFullscreen }),
+    [drop, location, showVideoFullscreen]
+  );
 
   return (
     <DropContext.Provider value={memoizedValue}>

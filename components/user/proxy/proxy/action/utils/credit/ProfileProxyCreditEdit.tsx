@@ -8,6 +8,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPut } from "@/services/api/common-api";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 import CircleLoader, {
   CircleLoaderSize,
@@ -48,15 +49,17 @@ export default function ProfileProxyCreditEdit({
         profileProxyId: profileProxy.id,
       });
       setToast({
-        message: "Action credit updated successfully!",
+        message: "Action credit updated.",
         type: "success",
       });
       setViewMode();
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update the action credit.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

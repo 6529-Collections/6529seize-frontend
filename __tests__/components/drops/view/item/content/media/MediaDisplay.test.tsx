@@ -96,7 +96,7 @@ describe("MediaDisplay", () => {
     mockSandboxedExternalIframe.mockClear();
     mockGetArweaveGatewayFallbackUrls.mockImplementation((url: string) => {
       if (url === "ipfs://hash") {
-        return ["https://ipfs.io/ipfs/hash"];
+        return ["https://media.6529.io/ipfs/hash"];
       }
       return [url];
     });
@@ -140,7 +140,7 @@ describe("MediaDisplay", () => {
 
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-src",
-      "https://ipfs.io/ipfs/hash"
+      "https://media.6529.io/ipfs/hash"
     );
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-title",
@@ -199,7 +199,7 @@ describe("MediaDisplay", () => {
 
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-src",
-      "https://ipfs.io/ipfs/hash"
+      "https://media.6529.io/ipfs/hash"
     );
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-title",
@@ -226,7 +226,7 @@ describe("MediaDisplay", () => {
 
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-src",
-      "https://ipfs.io/ipfs/hash"
+      "https://media.6529.io/ipfs/hash"
     );
   });
 
@@ -255,7 +255,7 @@ describe("MediaDisplay", () => {
     jest.useFakeTimers();
     mockGetArweaveGatewayFallbackUrls.mockReturnValue([
       "https://ipfs.6529.io/ipfs/hash",
-      "https://ipfs.io/ipfs/hash",
+      "https://media.6529.io/ipfs/hash",
     ]);
     mockShouldUseIframeFallbackTimeout.mockReturnValue(false);
 

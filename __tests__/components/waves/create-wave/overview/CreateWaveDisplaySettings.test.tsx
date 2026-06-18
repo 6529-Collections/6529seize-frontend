@@ -1,11 +1,15 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import CreateWaveDisplaySettings from "@/components/waves/create-wave/overview/CreateWaveDisplaySettings";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 describe("CreateWaveDisplaySettings", () => {
   const baseDisplay = {
-    approvalsTabLabel: "",
-    approvedTabLabel: "",
+    outcomesVisible: true,
+    approve: {
+      approvalsTabLabel: "",
+      approvedTabLabel: "",
+    },
   };
 
   it("shows default approve labels in the preview", () => {
@@ -14,6 +18,7 @@ describe("CreateWaveDisplaySettings", () => {
         display={baseDisplay}
         errors={[]}
         onChange={jest.fn()}
+        waveType={ApiWaveType.Approve}
       />
     );
 
@@ -30,6 +35,7 @@ describe("CreateWaveDisplaySettings", () => {
         display={baseDisplay}
         errors={[]}
         onChange={onChange}
+        waveType={ApiWaveType.Approve}
       />
     );
 
@@ -38,8 +44,33 @@ describe("CreateWaveDisplaySettings", () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      approvalsTabLabel: "Candidates",
-      approvedTabLabel: "",
+      ...baseDisplay,
+      approve: {
+        approvalsTabLabel: "Candidates",
+        approvedTabLabel: "",
+      },
+    });
+  });
+
+  it("shows outcome toggle for rank waves without approve labels", () => {
+    const onChange = jest.fn();
+    render(
+      <CreateWaveDisplaySettings
+        display={baseDisplay}
+        errors={[]}
+        onChange={onChange}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    expect(screen.getByText("Show outcomes")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Approvals tab label")).toBeNull();
+
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...baseDisplay,
+      outcomesVisible: false,
     });
   });
 
@@ -47,13 +78,17 @@ describe("CreateWaveDisplaySettings", () => {
     render(
       <CreateWaveDisplaySettings
         display={{
-          approvalsTabLabel: "Selected",
-          approvedTabLabel: "Selected",
+          ...baseDisplay,
+          approve: {
+            approvalsTabLabel: "Selected",
+            approvedTabLabel: "Selected",
+          },
         }}
         errors={[
           CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE,
         ]}
         onChange={jest.fn()}
+        waveType={ApiWaveType.Approve}
       />
     );
 
@@ -66,11 +101,15 @@ describe("CreateWaveDisplaySettings", () => {
     render(
       <CreateWaveDisplaySettings
         display={{
-          approvalsTabLabel: "Chat",
-          approvedTabLabel: "Selected",
+          ...baseDisplay,
+          approve: {
+            approvalsTabLabel: "Chat",
+            approvedTabLabel: "Selected",
+          },
         }}
         errors={[CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED]}
         onChange={jest.fn()}
+        waveType={ApiWaveType.Approve}
       />
     );
 

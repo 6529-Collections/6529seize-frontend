@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  type JSX,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useAuth } from "@/components/auth/Auth";
@@ -32,6 +26,7 @@ import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import MyStreamWaveSales from "./MyStreamWaveSales";
 import MyStreamWavePolls from "./MyStreamWavePolls";
+import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
@@ -335,6 +330,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const chatSubmitDropLabels = getChatSubmitDropLabels(submissionExperience);
   const isMemesLegacySubmission =
     submissionExperience === WaveSubmissionExperience.MEMES_LEGACY;
+  const outcomesVisible = useWaveOutcomeVisibility(wave);
   const [chatSubmitDropState, setChatSubmitDropState] = useState<{
     readonly waveId: string;
     readonly submissionExperience: WaveSubmissionExperience;
@@ -544,7 +540,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     isMemesLegacySubmission &&
     !isApprovalVotingControlsLocked;
   // Create component instances with wave-specific props and stable measurements
-  const components: Record<MyStreamWaveTab, JSX.Element> = {
+  const components: Record<MyStreamWaveTab, React.ReactNode> = {
     [MyStreamWaveTab.CHAT]: (
       <MyStreamWaveChat
         wave={wave}
@@ -570,7 +566,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     [MyStreamWaveTab.WINNERS]: (
       <WaveWinners wave={wave} onDropClick={onDropClick} />
     ),
-    [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
+    [MyStreamWaveTab.OUTCOME]: outcomesVisible ? (
+      <MyStreamWaveOutcome wave={wave} />
+    ) : null,
     [MyStreamWaveTab.MY_VOTES]: (
       <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
     ),

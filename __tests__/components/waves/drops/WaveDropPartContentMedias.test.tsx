@@ -11,8 +11,15 @@ jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
   () => ({
     __esModule: true,
-    default: (props: { readonly galleryItemId?: string | undefined }) => (
-      <div data-testid="drop-media" data-gallery-item-id={props.galleryItemId} />
+    default: (props: {
+      readonly galleryItemId?: string | undefined;
+      readonly fillVideoContainer?: boolean | undefined;
+    }) => (
+      <div
+        data-testid="drop-media"
+        data-gallery-item-id={props.galleryItemId}
+        data-fill-video-container={String(props.fillVideoContainer)}
+      />
     ),
   })
 );
@@ -21,15 +28,18 @@ jest.mock("@/components/waves/drops/WaveDropPartContentMediaImage", () => ({
   __esModule: true,
   default: ({
     galleryItemId,
+    fillContainer,
     src,
   }: {
     readonly galleryItemId?: string | undefined;
+    readonly fillContainer?: boolean | undefined;
     readonly src: string;
   }) => (
     <div
       data-testid="wave-image-media"
       data-src={src}
       data-gallery-item-id={galleryItemId}
+      data-fill-container={String(fillContainer)}
     />
   ),
 }));
@@ -55,12 +65,19 @@ describe("WaveDropPartContentMedias", () => {
       <WaveDropPartContentMedias activePart={basePart} />
     );
 
-    expect(screen.getByTestId("wave-image-media")).toBeInTheDocument();
-    expect(screen.getByTestId("wave-image-media")).toHaveAttribute(
+    const image = screen.getByTestId("wave-image-media");
+    const video = screen.getByTestId("drop-media");
+
+    expect(image).toBeInTheDocument();
+    expect(image).toHaveAttribute("data-fill-container", "true");
+    expect(image).toHaveAttribute(
       "data-gallery-item-id",
       "drop-image-gallery:media:0:u1"
     );
-    expect(screen.getByTestId("drop-media")).toBeInTheDocument();
+    expect(image.parentElement).toHaveClass("tw-h-64");
+    expect(video).toBeInTheDocument();
+    expect(video).toHaveAttribute("data-fill-video-container", "true");
+    expect(video.parentElement).toHaveClass("tw-h-64");
     expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
   });
 
@@ -89,11 +106,51 @@ describe("WaveDropPartContentMedias", () => {
     expect(
       screen
         .getAllByTestId("wave-image-media")
+        .map((image) => image.getAttribute("data-fill-container"))
+    ).toEqual(["true", "true"]);
+    screen.getAllByTestId("wave-image-media").forEach((image) => {
+      expect(image.parentElement).toHaveClass(
+        "tw-min-w-0",
+        "tw-w-full",
+        "tw-h-64"
+      );
+    });
+    expect(
+      screen
+        .getAllByTestId("wave-image-media")
         .map((image) => image.getAttribute("data-gallery-item-id"))
     ).toEqual([
       "drop-image-gallery:media:0:u1",
       "drop-image-gallery:media:1:u2",
     ]);
+  });
+
+  it("keeps full-width media intrinsic instead of reserving fixed chat height", () => {
+    render(<WaveDropPartContentMedias activePart={basePart} fullWidthMedia />);
+
+    const image = screen.getByTestId("wave-image-media");
+    const video = screen.getByTestId("drop-media");
+
+    expect(image).toHaveAttribute("data-fill-container", "false");
+    expect(image.parentElement).not.toHaveClass("tw-h-64");
+    expect(video).toHaveAttribute("data-fill-video-container", "false");
+    expect(video.parentElement).not.toHaveClass("tw-h-64");
+  });
+
+  it("uses custom reserved height classes for normal image media", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={basePart}
+        mediaContainerHeightClassName="tw-h-96"
+      />
+    );
+
+    expect(screen.getByTestId("wave-image-media").parentElement).toHaveClass(
+      "tw-h-96"
+    );
+    expect(screen.getByTestId("drop-media").parentElement).toHaveClass(
+      "tw-h-96"
+    );
   });
 
   it("uses MediaDisplay when disabled", () => {

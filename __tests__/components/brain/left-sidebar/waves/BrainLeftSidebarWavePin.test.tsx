@@ -74,7 +74,6 @@ function setup(
     canPinWave: jest.fn().mockImplementation(canPinWave),
   });
   mockedUseAuth.mockReturnValue(auth);
-  localStorage.setItem("pinnedWave", JSON.stringify(storedPinned));
   return render(<BrainLeftSidebarWavePin waveId="1" isPinned={isPinned} />);
 }
 

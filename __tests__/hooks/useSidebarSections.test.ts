@@ -2,7 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 
 describe("useSidebarSections", () => {
-  it("places xTDH under Network and removes it from Collections", () => {
+  it("places xTDH and Wave Score under Network and removes xTDH from Collections", () => {
     const { result } = renderHook(() => useSidebarSections(false, false, "US"));
 
     const networkSection = result.current.find(
@@ -19,6 +19,18 @@ describe("useSidebarSections", () => {
         (item) => item.name === "xTDH" && item.href === "/xtdh"
       )
     ).toBe(true);
+    expect(
+      networkSection?.items.some(
+        (item) =>
+          item.name === "Wave Score" && item.href === "/network/wave-score"
+      )
+    ).toBe(true);
+    const xtdhIndex =
+      networkSection?.items.findIndex((item) => item.name === "xTDH") ?? -1;
+    const waveScoreIndex =
+      networkSection?.items.findIndex((item) => item.name === "Wave Score") ??
+      -1;
+    expect(waveScoreIndex).toBe(xtdhIndex + 1);
     expect(
       networkSection?.items.some(
         (item) => item.name === "xTDH" && item.href === "/network/xtdh"

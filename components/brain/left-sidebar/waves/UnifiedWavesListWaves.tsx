@@ -1,53 +1,43 @@
 "use client";
 
-import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
+import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
+import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
 import SectionHeader from "./SectionHeader";
 import JoinedToggle from "./JoinedToggle";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
-
-// VirtualItem interface is now imported from useVirtualizedWaves
-
-// Lightweight type guard that checks essential properties only
-function isValidWave(wave: unknown): wave is MinimalWave {
-  if (wave === null || wave === undefined || typeof wave !== "object") {
-    return false;
-  }
-
-  const w = wave as MinimalWave;
-  // Check only essential properties for performance
-  return (
-    typeof w.id === "string" &&
-    w.id.length > 0 &&
-    typeof w.name === "string" &&
-    typeof w.isPinned === "boolean"
-  );
-}
-
-// Comprehensive validation for debugging purposes only
-function validateWaveDetailed(wave: unknown): wave is MinimalWave {
-  if (!isValidWave(wave)) return false;
-  return (
-    typeof wave.type === "string" &&
-    wave.newDropsCount !== null &&
-    typeof wave.newDropsCount === "object" &&
-    typeof wave.newDropsCount.count === "number" &&
-    (wave.newDropsCount.latestDropTimestamp === null ||
-      typeof wave.newDropsCount.latestDropTimestamp === "number") &&
-    Array.isArray(wave.contributors) &&
-    (wave.picture === null || typeof wave.picture === "string")
-  );
-}
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import {
+  useSidebarWaveTree,
+  type SidebarWaveTreeRow,
+} from "@/hooks/useSidebarWaveTree";
+import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
+import {
+  groupSidebarWaves,
+  isValidSidebarWave,
+  validateSidebarWaveDetailed,
+} from "./sidebarWaveListUtils";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 // Height for empty waves placeholder to maintain consistent layout (matches UnifiedWavesListEmpty)
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 // Virtualization constants
 const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
+const SUBWAVE_ROW_HEIGHT = 54 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
+const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
 // Common styles for positioned elements
 const listContainerStyle = {
@@ -62,6 +52,37 @@ const absolutePositionedStyle = {
 const emptyPlaceholderStyle = {
   minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT,
 } as const satisfies React.CSSProperties;
+
+function SidebarCategoryLabel({ label }: { readonly label: string }) {
+  return (
+    <div className="tw-px-4 tw-pb-1 tw-pt-2 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+      {label}
+    </div>
+  );
+}
+
+const isVisibleStaticRow = ({
+  detailedLabel,
+  row,
+  sectionName,
+}: {
+  readonly detailedLabel: string;
+  readonly row: SidebarWaveTreeRow;
+  readonly sectionName: string;
+}) => {
+  const wave = row.wave;
+
+  if (isValidSidebarWave(wave)) {
+    return true;
+  }
+
+  console.warn(`Invalid ${sectionName} wave object`, wave);
+  if (!validateSidebarWaveDetailed(wave)) {
+    console.warn(`${detailedLabel} wave failed detailed validation:`, wave);
+  }
+
+  return false;
+};
 
 /**
  * Props for the UnifiedWavesListWaves component.
@@ -112,41 +133,96 @@ const UnifiedWavesListWaves = forwardRef<
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
     const seizeSettings = useSeizeSettingsOptional();
+    const { activeWave, waves: streamWaves } = useMyStream();
+    const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
+      waves,
+      activeWaveId: activeWave.id,
+      activeParentWaveId: activeWave.parentWaveId,
+      onParentExpand: streamWaves.loadSubwavesForParent,
+    });
 
-    const { announcementWaves, officialWaves, pinnedWaves, regularWaves } =
-      useMemo(() => {
-        const announcements: MinimalWave[] = [];
-        const official: MinimalWave[] = [];
-        const pinned: MinimalWave[] = [];
-        const regular: MinimalWave[] = [];
+    const {
+      announcementWaves,
+      highlyRatedWaves,
+      pinnedWaves,
+      followingWaves,
+      allWaves,
+    } = useMemo(
+      () =>
+        groupSidebarWaves({
+          isAnnouncementsWave:
+            seizeSettings === null
+              ? undefined
+              : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
+          waves: topLevelWaves,
+        }),
+      [topLevelWaves, seizeSettings]
+    );
 
-        for (const wave of waves) {
-          if (seizeSettings?.isAnnouncementsWave(wave.id)) {
-            announcements.push(wave);
-          } else if (wave.isOfficial) {
-            official.push(wave);
-          } else if (wave.isPinned) {
-            pinned.push(wave);
-          } else {
-            regular.push(wave);
-          }
-        }
+    const announcementRows = useMemo(
+      () => getRows(announcementWaves),
+      [announcementWaves, getRows]
+    );
+    const highlyRatedRows = useMemo(
+      () => getRows(highlyRatedWaves),
+      [highlyRatedWaves, getRows]
+    );
+    const pinnedRows = useMemo(
+      () => getRows(pinnedWaves),
+      [pinnedWaves, getRows]
+    );
+    const followingRows = useMemo(
+      () => getRows(followingWaves),
+      [followingWaves, getRows]
+    );
+    const allRows = useMemo(() => getRows(allWaves), [allWaves, getRows]);
+    const animatedAnnouncementRows =
+      useAnimatedSidebarWaveRows(announcementRows);
+    const animatedHighlyRatedRows =
+      useAnimatedSidebarWaveRows(highlyRatedRows);
+    const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
+    const animatedFollowingRows = useAnimatedSidebarWaveRows(followingRows);
+    const animatedAllRows = useAnimatedSidebarWaveRows(allRows);
+    const virtualizedRows =
+      animatedAllRows.length > 0 ? animatedAllRows : animatedFollowingRows;
+    const staticFollowingRows =
+      animatedAllRows.length > 0 ? animatedFollowingRows : [];
+    const virtualizedAriaLabel =
+      animatedAllRows.length > 0
+        ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
+        : t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
+    const getSidebarRowHeight = useCallback(
+      (row: SidebarWaveTreeRow) =>
+        row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
+      []
+    );
 
-        return {
-          announcementWaves: announcements,
-          officialWaves: official,
-          pinnedWaves: pinned,
-          regularWaves: regular,
-        };
-      }, [waves, seizeSettings]);
-
-    const virtual = useVirtualizedWaves<MinimalWave>(
-      regularWaves,
-      "unified-waves-regular",
+    const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
+      items: virtualizedRows,
+      key:
+        animatedAllRows.length > 0
+          ? "unified-waves-all"
+          : "unified-waves-following",
       scrollContainerRef,
       listContainerRef,
-      WAVE_ROW_HEIGHT,
-      VIRTUALIZATION_OVERSCAN
+      rowHeight: getSidebarRowHeight,
+      overscan: VIRTUALIZATION_OVERSCAN,
+    });
+
+    const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => (
+      <BrainLeftSidebarWave
+        wave={row.wave}
+        onHover={onHover}
+        showPin={showPin && row.depth === 0}
+        isDirectMessage={isDirectMessage}
+        depth={row.depth}
+        canExpand={row.canExpand}
+        isExpanded={row.isExpanded}
+        hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+        isLastSubwave={row.isLastSubwave}
+        onToggleExpand={toggleParent}
+        onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
+      />
     );
 
     useImperativeHandle(ref, () => ({
@@ -160,132 +236,153 @@ const UnifiedWavesListWaves = forwardRef<
         {!hideHeaders && (
           <SectionHeader
             label="All Waves"
+            paddingClassName="tw-px-4"
             rightContent={hideToggle ? undefined : <JoinedToggle />}
           />
         )}
 
-        {announcementWaves.length > 0 && (
-          <section
+        {announcementRows.length > 0 && (
+          <SidebarWaveRowsSection
+            ariaLabel="Announcement waves"
             className="tw-flex tw-flex-col"
-            aria-label="Announcement waves"
-          >
-            {announcementWaves
-              .filter((wave): wave is MinimalWave => {
-                if (!isValidWave(wave)) {
-                  console.warn("Invalid announcement wave object", wave);
-                  if (!validateWaveDetailed(wave)) {
-                    console.warn(
-                      "Announcement wave failed detailed validation:",
-                      wave
-                    );
-                  }
-                  return false;
-                }
-                return true;
+            getRowHeight={getSidebarRowHeight}
+            isRowVisible={(row) =>
+              isVisibleStaticRow({
+                detailedLabel: "Announcement",
+                row,
+                sectionName: "announcement",
               })
-              .map((wave) => (
-                <div key={wave.id}>
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={!hidePin && wave.isPinned}
-                    isDirectMessage={isDirectMessage}
-                  />
-                </div>
-              ))}
-          </section>
+            }
+            renderRow={(row) =>
+              renderWaveRow(row, !hidePin && row.wave.isPinned)
+            }
+            rows={animatedAnnouncementRows}
+          />
         )}
 
         {!hideHeaders &&
-          announcementWaves.length > 0 &&
-          (officialWaves.length > 0 ||
-            pinnedWaves.length > 0 ||
-            regularWaves.length > 0) && (
+          announcementRows.length > 0 &&
+          (highlyRatedRows.length > 0 ||
+            pinnedRows.length > 0 ||
+            followingRows.length > 0 ||
+            allRows.length > 0) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
-        {officialWaves.length > 0 && (
-          <section className="tw-flex tw-flex-col" aria-label="Official waves">
-            {officialWaves
-              .filter((wave): wave is MinimalWave => {
-                if (!isValidWave(wave)) {
-                  console.warn("Invalid official wave object", wave);
-                  if (!validateWaveDetailed(wave)) {
-                    console.warn(
-                      "Official wave failed detailed validation:",
-                      wave
-                    );
-                  }
-                  return false;
-                }
-                return true;
-              })
-              .map((wave) => (
-                <div key={wave.id}>
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={false}
-                    isDirectMessage={isDirectMessage}
-                  />
-                </div>
-              ))}
-          </section>
+        {highlyRatedRows.length > 0 && (
+          <>
+            {!hideHeaders && (
+              <SidebarCategoryLabel
+                label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+              />
+            )}
+            <SidebarWaveRowsSection
+              ariaLabel={t(
+                SIDEBAR_LOCALE,
+                "waves.sidebar.highlyRatedAriaLabel"
+              )}
+              className="tw-flex tw-flex-col"
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleStaticRow({
+                  detailedLabel: "Highly rated",
+                  row,
+                  sectionName: "highly rated",
+                })
+              }
+              renderRow={(row) => renderWaveRow(row, false)}
+              rows={animatedHighlyRatedRows}
+            />
+          </>
         )}
 
         {!hideHeaders &&
-          officialWaves.length > 0 &&
-          (pinnedWaves.length > 0 || regularWaves.length > 0) && (
+          highlyRatedRows.length > 0 &&
+          (pinnedRows.length > 0 ||
+            followingRows.length > 0 ||
+            allRows.length > 0) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
         {/* Conditionally show pinned section */}
-        {!hideHeaders && pinnedWaves.length > 0 && (
-          <section className="tw-flex tw-flex-col" aria-label="Pinned waves">
-            {pinnedWaves
-              .filter((wave): wave is MinimalWave => {
-                if (!isValidWave(wave)) {
-                  console.warn("Invalid pinned wave object", wave);
-                  if (!validateWaveDetailed(wave)) {
-                    console.warn(
-                      "Pinned wave failed detailed validation:",
-                      wave
-                    );
-                  }
-                  return false;
-                }
-                return true;
-              })
-              .map((wave) => (
-                <div key={wave.id}>
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={!hidePin}
-                    isDirectMessage={isDirectMessage}
-                  />
-                </div>
-              ))}
-          </section>
+        {!hideHeaders && pinnedRows.length > 0 && (
+          <>
+            <SidebarCategoryLabel
+              label={t(SIDEBAR_LOCALE, "waves.sidebar.pinned")}
+            />
+            <SidebarWaveRowsSection
+              ariaLabel={t(SIDEBAR_LOCALE, "waves.sidebar.pinnedAriaLabel")}
+              className="tw-flex tw-flex-col"
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleStaticRow({
+                  detailedLabel: "Pinned",
+                  row,
+                  sectionName: "pinned",
+                })
+              }
+              renderRow={(row) => renderWaveRow(row, !hidePin)}
+              rows={animatedPinnedRows}
+            />
+          </>
         )}
 
-        {/* Add divider between pinned and regular waves */}
-        {!hideHeaders && pinnedWaves.length > 0 && regularWaves.length > 0 && (
-          <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+        {!hideHeaders &&
+          pinnedRows.length > 0 &&
+          (followingRows.length > 0 || allRows.length > 0) && (
+            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          )}
+
+        {staticFollowingRows.length > 0 && (
+          <>
+            {!hideHeaders && (
+              <SidebarCategoryLabel
+                label={t(SIDEBAR_LOCALE, "waves.sidebar.following")}
+              />
+            )}
+            <SidebarWaveRowsSection
+              ariaLabel={t(
+                SIDEBAR_LOCALE,
+                "waves.sidebar.followingAriaLabel"
+              )}
+              className="tw-flex tw-flex-col"
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleStaticRow({
+                  detailedLabel: "Following",
+                  row,
+                  sectionName: "following",
+                })
+              }
+              renderRow={(row) => renderWaveRow(row, !hidePin)}
+              rows={staticFollowingRows}
+            />
+          </>
         )}
 
-        {/* Conditionally show regular waves or maintain structure */}
-        {regularWaves.length > 0 ? (
+        {!hideHeaders &&
+          staticFollowingRows.length > 0 &&
+          animatedAllRows.length > 0 && (
+            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          )}
+
+        {!hideHeaders && animatedAllRows.length > 0 && (
+          <SidebarCategoryLabel
+            label={t(SIDEBAR_LOCALE, "waves.sidebar.all")}
+          />
+        )}
+
+        {virtualizedRows.length > 0 ? (
           <section
             ref={listContainerRef}
             style={{
               height: virtual.totalHeight,
               ...listContainerStyle,
             }}
-            aria-label="Regular waves list"
+            aria-label={virtualizedAriaLabel}
           >
             {virtual.virtualItems.map((v: VirtualItem) => {
-              if (v.index === regularWaves.length) {
+              if (v.index === virtualizedRows.length) {
                 return (
                   <div
                     key="sentinel"
@@ -298,31 +395,32 @@ const UnifiedWavesListWaves = forwardRef<
                   />
                 );
               }
-              const wave = regularWaves[v.index];
-              if (!isValidWave(wave)) {
-                console.warn("Invalid wave object at index", v.index, wave);
-                if (!validateWaveDetailed(wave)) {
-                  console.warn("Wave failed detailed validation:", wave);
+              const row = virtualizedRows[v.index];
+              if (!row || !isValidSidebarWave(row.wave)) {
+                console.warn(
+                  "Invalid wave object at index",
+                  v.index,
+                  row?.wave
+                );
+                if (!validateSidebarWaveDetailed(row?.wave)) {
+                  console.warn("Wave failed detailed validation:", row?.wave);
                 }
                 return null;
               }
               // TypeScript now knows wave is definitely MinimalWave
               return (
-                <div
-                  key={wave.id}
+                <SidebarWaveTreeRowTransition
+                  key={row.key}
+                  row={row}
+                  rowHeight={getSidebarRowHeight(row)}
                   style={{
                     ...absolutePositionedStyle,
                     top: v.start,
                     height: v.size,
                   }}
                 >
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={!hidePin}
-                    isDirectMessage={isDirectMessage}
-                  />
-                </div>
+                  {renderWaveRow(row, !hidePin)}
+                </SidebarWaveTreeRowTransition>
               );
             })}
           </section>

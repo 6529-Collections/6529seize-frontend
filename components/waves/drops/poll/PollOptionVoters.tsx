@@ -1,13 +1,10 @@
 "use client";
 
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
 import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
-import {
-  DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE,
-  useDropPollOptionVoters,
-} from "@/hooks/useDropPollOptionVoters";
+import { useDropPollOptionVoters } from "@/hooks/useDropPollOptionVoters";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -67,66 +64,6 @@ function PollVoterRow({ voter }: { readonly voter: ApiIdentityOverview }) {
         </Link>
       </UserProfileTooltipWrapper>
     </div>
-  );
-}
-
-function PollOptionVoterPreviewAvatar({
-  identity,
-}: {
-  readonly identity: ApiIdentityOverview;
-}) {
-  const label = getIdentityLabel(identity);
-  const avatarClassName =
-    "tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-800 tw-object-cover";
-
-  if (!identity.pfp) {
-    return <span className={avatarClassName} aria-hidden="true" />;
-  }
-
-  return (
-    <Image
-      unoptimized
-      src={resolveIpfsUrlSync(identity.pfp)}
-      alt={`${label}'s avatar`}
-      width={20}
-      height={20}
-      className={avatarClassName}
-    />
-  );
-}
-
-export function PollOptionVoterPreviews({
-  dropId,
-  option,
-}: {
-  readonly dropId: string;
-  readonly option: ApiDropPollOption;
-}) {
-  const { voters } = useDropPollOptionVoters({
-    dropId,
-    optionNo: option.option_no,
-    enabled: option.votes > 0,
-    pageSize: DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE,
-  });
-
-  const previewVoters = voters.slice(
-    0,
-    DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE
-  );
-
-  if (previewVoters.length === 0) {
-    return null;
-  }
-
-  return (
-    <span
-      className="tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center -tw-space-x-1.5 tw-opacity-80 tw-transition-opacity desktop-hover:group-hover/result:tw-opacity-100"
-      aria-hidden="true"
-    >
-      {previewVoters.map((voter) => (
-        <PollOptionVoterPreviewAvatar key={voter.id} identity={voter} />
-      ))}
-    </span>
   );
 }
 

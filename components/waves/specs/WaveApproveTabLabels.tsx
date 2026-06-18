@@ -17,6 +17,7 @@ import {
   WAVE_DISPLAY_METADATA_KEYS,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
 import {
   createWaveMetadata,
@@ -156,7 +157,7 @@ export default function WaveApproveTabLabels({
         if (!success) {
           setToast({
             type: "error",
-            message: "Failed to authenticate",
+            message: "Couldn't authenticate. Reconnect your wallet and try again.",
           });
           return;
         }
@@ -176,7 +177,9 @@ export default function WaveApproveTabLabels({
       } catch (error) {
         setToast({
           type: "error",
-          message: getErrorMessage(error),
+          title: "Couldn't save these tab labels.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error, getErrorMessage(error)),
         });
       } finally {
         setIsSaving(false);

@@ -1,0 +1,173 @@
+<div>
+  <h2>Overview</h2>
+  <p>
+    Consolidation is a process to recognize that most NFT users use multiple
+    addresses for their NFTs. In fact, it is generally a good practice to
+    separate "vault", "transaction" and "minting" addresses. Please see an
+    example architecture of this type
+    <a href="/delegation/wallet-architecture" target="_blank" rel="noreferrer noopener">here</a>.
+  </p>
+  <p>
+    For now, for the purposes of The Memes, we will recognize up to 3 addresses
+    as being treated as one, for the purpose of calculating community metrics
+    such as total cards, unique cards, TDH and other metrics.
+  </p>
+  <p>
+    Each address need to sign a "consolidation" transaction with each other
+    address it is consolidated with. Details for how to sign this transaction
+    are in this
+    <a href="/delegation/delegation-faq" target="_blank" rel="noreferrer noopener">
+      Consolidation FAQ</a>.
+  </p>
+  <p>
+    The purpose and spirit of this approach is to support NFT collectors in
+    following safe wallet practices. It is not to support multiple individuals
+    consolidating their TDH. We reserve the right to change the algorithm in the
+    future, eliminate it altogether, apply manual overrides (if we think it is
+    abused) or not apply overrides (even if it is abused).
+  </p>
+  <p>
+    These are analytic metrics, not protocol functions, so the goal is to be
+    roughly right (say 80%) as with all other approaches of this type and should
+    be understood in this spirit. There will always be edge cases that fall
+    outside of the parameters of our approach and that is OK.
+  </p>
+</div>
+<br>
+<div>
+  <h2>Use Case 1</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>I have 2 addresses (for example: vault and transaction)</li>
+    <li>I move my cards between the 2 addresses for various reasons</li>
+    <li>At any point in time any card can be in any of the 2 addresses</li>
+  </ul>
+  <p>Solution</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address B</li>
+      </ul>
+    </li>
+    <li>
+      At all points in time, total cards, unique cards, TDH and other future
+      metrics are treated as if both addresses were consolidated into one
+      address
+    </li>
+  </ul>
+</div>
+<br>
+<div>
+  <h2>Use Case 2</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>I have 3 addresses (for example: vault, transaction and mint)</li>
+    <li>I move my cards between the 3 addresses for various reasons</li>
+    <li>At any point in time any card can be in any of the 3 addresses</li>
+  </ul>
+  <p>Solution</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address B</li>
+        <li>Address B ↔ Address C</li>
+        <li>Address C ↔ Address A</li>
+      </ul>
+    </li>
+    <li>
+      At all points in time, total cards, unique cards, TDH and other future
+      metrics are treated as if all three addresses were consolidated into one
+      address
+    </li>
+  </ul>
+</div>
+<br>
+<div>
+  <h2>Use Case 3</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>I used to have my cards in my hot address (Address A)</li>
+    <li>I moved all my cards to my vault address (Address B)</li>
+    <li>
+      I am now minting cards from my new hot address (Address C) and tranferring
+      them to Address B some days later
+    </li>
+  </ul>
+  <p>Solution</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address B</li>
+        <li>Address B ↔ Address C</li>
+        <li>Address C ↔ Address A</li>
+      </ul>
+    </li>
+    <li>
+      At all points in time, total cards, unique cards, TDH and other future
+      metrics are treated as if all three addresses were consolidated into one
+      address
+    </li>
+  </ul>
+</div>
+<br>
+<div>
+  <h2>Use Case 4</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>
+      I used to have my cards in my hot address (Address A) and accrued
+      significant TDH
+    </li>
+    <li>
+      Address A was compromised so I moved my cards to a new temporary address
+      (Address B)
+    </li>
+    <li>I moved all my cards from Address B to my vault address (Address C)</li>
+    <li>
+      I am now minting cards from my new hot address (Address D) and
+      transferring them to Address C some days later
+    </li>
+    <li>
+      Note: I still have access to Address A (as this access is needed to prove
+      ownership of the address)
+    </li>
+  </ul>
+  <p>Best Solution (in most cases)</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address B</li>
+        <li>Address B ↔ Address C</li>
+        <li>Address C ↔ Address A</li>
+      </ul>
+    </li>
+    <li>
+      At all points in time, total cards, unique cards, TDH and other future
+      metrics are treated as if all three addresses were consolidated into one
+      address. TDH and potentially other metrics will not be counted for the
+      time the NFTs are in Address D but this may still be the best solution if
+      Address A held the NFTs for longer.
+    </li>
+  </ul>
+  <p>Best Solution (in some cases)</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address B ↔ Address C</li>
+        <li>Address C ↔ Address D</li>
+        <li>Address D ↔ Address B</li>
+      </ul>
+    </li>
+    <li>
+      At all points in time, total cards, unique cards, TDH and other future
+      metrics are treated as if all three addresses were consolidated into one
+      address. In this model, metrics from Address A will be ignored but Address
+      D will be consolidated on an ongoing basis.
+    </li>
+  </ul>
+</div>

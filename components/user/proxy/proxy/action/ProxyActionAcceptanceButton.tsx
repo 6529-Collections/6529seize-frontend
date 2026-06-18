@@ -18,6 +18,7 @@ import {
   haveSeenProfileProxyActionAcceptanceModal,
   setSeenProfileProxyActionAcceptanceModal,
 } from "@/helpers/profile-proxy.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import HeaderProxyNewModal from "@/components/header/proxy/HeaderProxyNewModal";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
@@ -103,7 +104,7 @@ export default function ProxyActionAcceptanceButton({
         profileProxyId: profileProxy.id,
       });
       setToast({
-        message: "Action status changed",
+        message: "Action status updated.",
         type: "success",
       });
       if (variables.action === AcceptActionRequestActionEnum.Accept) {
@@ -112,8 +113,10 @@ export default function ProxyActionAcceptanceButton({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update this action.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

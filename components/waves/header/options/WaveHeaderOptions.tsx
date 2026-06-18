@@ -10,8 +10,10 @@ import WaveProfileWaveAction from "./profile-wave/WaveProfileWaveAction";
 
 export default function WaveHeaderOptions({
   wave,
+  showOwnerActions = true,
 }: {
   readonly wave: ApiWave;
+  readonly showOwnerActions?: boolean | undefined;
 }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -43,12 +45,14 @@ export default function WaveHeaderOptions({
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-0.5 tw-py-1">
-            <WaveProfileWaveAction
-              wave={wave}
-              onSuccess={() => setIsOptionsOpen(false)}
-            />
+            {showOwnerActions && (
+              <WaveProfileWaveAction
+                wave={wave}
+                onSuccess={() => setIsOptionsOpen(false)}
+              />
+            )}
             <WaveMute wave={wave} onSuccess={() => setIsOptionsOpen(false)} />
-            <WaveDelete wave={wave} />
+            {showOwnerActions && <WaveDelete wave={wave} />}
           </div>
         </li>
       </CommonDropdownItemsDefaultWrapper>

@@ -46,7 +46,7 @@ export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
     ) {
       setToast({
         type: "error",
-        message: "Slow mode must be at least 1 second",
+        message: "Slow mode must be at least 1 second.",
       });
       return;
     }

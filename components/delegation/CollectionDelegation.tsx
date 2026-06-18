@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Accordion,
   Col,
@@ -51,17 +58,19 @@ import {
   type ContractWalletDelegation,
 } from "./CollectionDelegation.utils";
 import type { DelegationCollection } from "./delegation-constants";
+import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import {
   ALL_USE_CASES,
   ANY_COLLECTION_PATH,
   CONSOLIDATION_USE_CASE,
   DELEGATION_USE_CASES,
+  GRADIENTS_COLLECTION,
   MAX_BULK_ACTIONS,
+  MEME_LAB_COLLECTION,
   MEMES_COLLECTION,
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
-import { DelegationToast } from "./DelegationCenterMenu";
 import DelegationWallet from "./DelegationWallet";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
@@ -78,6 +87,46 @@ interface Props {
 interface Revocation {
   use_case: number;
   wallet: string;
+}
+
+type TransactionHash = `0x${string}`;
+
+function getTransactionAnchor(hash: TransactionHash) {
+  return (
+    <a
+      href={getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles["etherscanLink"]}
+    >
+      view
+    </a>
+  );
+}
+
+function getTransactionToastMessage(
+  hash: TransactionHash,
+  waiting: boolean
+): ReactNode {
+  if (waiting) {
+    return (
+      <>
+        Transaction submitted... {getTransactionAnchor(hash)}
+        <br />
+        Waiting for confirmation...
+      </>
+    );
+  }
+
+  return <>Transaction Successful! {getTransactionAnchor(hash)}</>;
+}
+
+function getTransactionErrorToastMessage(
+  error: { message?: string } | null | undefined,
+  fallback: string
+) {
+  const message = error?.message?.split("Request Arguments")[0]?.trim();
+  return message || fallback;
 }
 
 function getActiveDelegationsReadParams(
@@ -138,9 +187,35 @@ function getActiveKeys(
   }
   return [""];
 }
+
+function getCollectionScopeDescription(collection: DelegationCollection) {
+  if (areEqualAddresses(collection.contract, DELEGATION_ALL_ADDRESS)) {
+    return "Records here apply across every supported delegation collection.";
+  }
+
+  if (areEqualAddresses(collection.contract, MEMES_COLLECTION.contract)) {
+    return "Records here apply only to The Memes collection.";
+  }
+
+  if (areEqualAddresses(collection.contract, MEME_LAB_COLLECTION.contract)) {
+    return "Records here apply only to Meme Lab.";
+  }
+
+  if (areEqualAddresses(collection.contract, GRADIENTS_COLLECTION.contract)) {
+    return "Records here apply only to 6529 Gradient.";
+  }
+
+  return "Records here apply to the selected collection scope.";
+}
+
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
-  const toastRef = useRef<HTMLDivElement>(null);
   const accountResolution = useSeizeConnectContext();
+  const previousAccountAddressRef = useRef<string | undefined>(undefined);
+  // The refs hold the title for the lock write currently in flight. Set them
+  // immediately before each writeContract call so success/error toasts stay tied
+  // to the user action that opened the wallet.
+  const collectionLockToastTitleRef = useRef("Locking Wallet");
+  const useCaseLockToastTitleRef = useRef("Locking Wallet");
   const networkResolution = useChainId();
   const ensResolution = useEnsName({
     address: accountResolution.address as `0x${string}`,
@@ -194,12 +269,15 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return networkResolution === DELEGATION_CONTRACT.chain_id;
   }
 
-  function getSwitchToHtml() {
-    return `<span style="color: red !important;">Switch to ${
-      DELEGATION_CONTRACT.chain_id === 1
-        ? "Ethereum Mainnet"
-        : "Sepolia Network"
-    }</span>`;
+  function getSwitchToMessage() {
+    return (
+      <span className={styles["switchNetworkMessage"]}>
+        Switch to{" "}
+        {DELEGATION_CONTRACT.chain_id === 1
+          ? "Ethereum Mainnet"
+          : "Sepolia Network"}
+      </span>
+    );
   }
 
   const retrieveOutgoingDelegations = useReadContracts({
@@ -373,10 +451,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     hash: contractWriteBatchRevoke.data,
   });
 
-  const [toast, setToast] = useState<
-    { title: string; message: string | undefined } | undefined
-  >(undefined);
-  const [showToast, setShowToast] = useState(false);
+  const {
+    toastRef,
+    toast,
+    showToast,
+    showDelegationToast,
+    clearDelegationToast,
+    setToastVisibility,
+  } = useDelegationToast();
 
   const [delegationKeys, setDelegationKeys] = useState<any[]>([]);
   const [delegationKeysChanged, setDelegationKeysChanged] = useState(false);
@@ -444,222 +526,178 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   useEffect(() => {
     if (contractWriteRevoke.error) {
-      setToast({
+      showDelegationToast({
         title: "Revoking Delegation Failed",
-        message:
-          contractWriteRevoke.error.message.split("Request Arguments")[0],
+        message: getTransactionErrorToastMessage(
+          contractWriteRevoke.error,
+          "Failed to start revoking delegation."
+        ),
       });
     }
     if (contractWriteRevoke.data) {
-      if (contractWriteRevoke.data) {
-        if (waitContractWriteRevoke.isLoading) {
-          setToast({
-            title: "Revoking Delegation",
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteRevoke.data
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className=${styles["etherscanLink"]}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          setToast({
-            title: "Revoking Delegation",
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteRevoke.data
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className=${styles["etherscanLink"]}>
-                    view
-                  </a>`,
-          });
-        }
+      if (waitContractWriteRevoke.isLoading) {
+        showDelegationToast({
+          title: "Revoking Delegation",
+          message: getTransactionToastMessage(contractWriteRevoke.data, true),
+        });
+      } else if (waitContractWriteRevoke.isSuccess) {
+        showDelegationToast({
+          title: "Revoking Delegation",
+          message: getTransactionToastMessage(contractWriteRevoke.data, false),
+        });
+      } else if (waitContractWriteRevoke.isError) {
+        showDelegationToast({
+          title: "Revoking Delegation Failed",
+          message: getTransactionErrorToastMessage(
+            waitContractWriteRevoke.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     contractWriteRevoke.error,
     contractWriteRevoke.data,
+    showDelegationToast,
+    waitContractWriteRevoke.error,
+    waitContractWriteRevoke.isError,
     waitContractWriteRevoke.isLoading,
+    waitContractWriteRevoke.isSuccess,
   ]);
 
   useEffect(() => {
     if (contractWriteBatchRevoke.error) {
-      setToast({
+      showDelegationToast({
         title: "Revoking Delegations Failed",
-        message:
-          contractWriteBatchRevoke.error.message.split("Request Arguments")[0],
+        message: getTransactionErrorToastMessage(
+          contractWriteBatchRevoke.error,
+          "Failed to start revoking delegations."
+        ),
       });
     }
     if (contractWriteBatchRevoke.data) {
-      if (contractWriteBatchRevoke.data) {
-        if (waitContractWriteBatchRevoke.isLoading) {
-          setToast({
-            title: "Batch Revoking Delegations",
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteBatchRevoke.data
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className=${styles["etherscanLink"]}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          setBulkRevocations([]);
-          setToast({
-            title: "Batch Revoking Delegations",
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteBatchRevoke.data
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className=${styles["etherscanLink"]}>
-                    view
-                  </a>`,
-          });
-        }
+      if (waitContractWriteBatchRevoke.isLoading) {
+        showDelegationToast({
+          title: "Batch Revoking Delegations",
+          message: getTransactionToastMessage(
+            contractWriteBatchRevoke.data,
+            true
+          ),
+        });
+      } else if (waitContractWriteBatchRevoke.isSuccess) {
+        setBulkRevocations([]);
+        showDelegationToast({
+          title: "Batch Revoking Delegations",
+          message: getTransactionToastMessage(
+            contractWriteBatchRevoke.data,
+            false
+          ),
+        });
+      } else if (waitContractWriteBatchRevoke.isError) {
+        showDelegationToast({
+          title: "Revoking Delegations Failed",
+          message: getTransactionErrorToastMessage(
+            waitContractWriteBatchRevoke.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     contractWriteBatchRevoke.error,
     contractWriteBatchRevoke.data,
+    showDelegationToast,
+    waitContractWriteBatchRevoke.error,
+    waitContractWriteBatchRevoke.isError,
     waitContractWriteBatchRevoke.isLoading,
+    waitContractWriteBatchRevoke.isSuccess,
   ]);
 
   useEffect(() => {
+    const title = collectionLockToastTitleRef.current;
+
     if (collectionLockWrite.error) {
-      const title = `${
-        collectionLockRead.data ? `Unlocking` : `Locking`
-      } Wallet`;
-      setToast({
+      showDelegationToast({
         title,
-        message:
-          collectionLockWrite.error.message.split("Request Arguments")[0],
+        message: getTransactionErrorToastMessage(
+          collectionLockWrite.error,
+          "Failed to start wallet lock update."
+        ),
       });
     }
     if (collectionLockWrite.data) {
-      if (collectionLockWrite.data) {
-        if (waitCollectionLockWrite.isLoading) {
-          setToast({
-            title: `Locking Wallet`,
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      collectionLockWrite.data
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className=${styles["etherscanLink"]}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          setToast({
-            title: `Locking Wallet`,
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      collectionLockWrite.data
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className=${styles["etherscanLink"]}>
-                    view
-                  </a>`,
-          });
-        }
+      if (waitCollectionLockWrite.isLoading) {
+        showDelegationToast({
+          title,
+          message: getTransactionToastMessage(collectionLockWrite.data, true),
+        });
+      } else if (waitCollectionLockWrite.isSuccess) {
+        showDelegationToast({
+          title,
+          message: getTransactionToastMessage(collectionLockWrite.data, false),
+        });
+      } else if (waitCollectionLockWrite.isError) {
+        showDelegationToast({
+          title: `${title} Failed`,
+          message: getTransactionErrorToastMessage(
+            waitCollectionLockWrite.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     collectionLockWrite.error,
     collectionLockWrite.data,
-    collectionLockRead.data,
+    showDelegationToast,
+    waitCollectionLockWrite.error,
+    waitCollectionLockWrite.isError,
     waitCollectionLockWrite.isLoading,
+    waitCollectionLockWrite.isSuccess,
   ]);
 
   useEffect(() => {
-    const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
-    const title = `${
-      useCaseLockStatuses.data?.[lockUseCaseIndex] ? "Unlocking" : "Locking"
-    } Wallet on Use Case #${useCase?.use_case} - ${useCase?.display}`;
+    const title = useCaseLockToastTitleRef.current;
 
     if (useCaseLockWrite.error) {
-      setToast({
+      showDelegationToast({
         title: title,
-        message: useCaseLockWrite.error.message.split("Request Arguments")[0],
+        message: getTransactionErrorToastMessage(
+          useCaseLockWrite.error,
+          "Failed to start use-case lock update."
+        ),
       });
     }
     if (useCaseLockWrite.data) {
-      if (useCaseLockWrite.data) {
-        if (waitUseCaseLockWrite.isLoading) {
-          setToast({
-            title: title,
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      useCaseLockWrite.data
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className=${styles["etherscanLink"]}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          setToast({
-            title: title,
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      useCaseLockWrite.data
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className=${styles["etherscanLink"]}>
-                    view
-                  </a>`,
-          });
-        }
+      if (waitUseCaseLockWrite.isLoading) {
+        showDelegationToast({
+          title: title,
+          message: getTransactionToastMessage(useCaseLockWrite.data, true),
+        });
+      } else if (waitUseCaseLockWrite.isSuccess) {
+        showDelegationToast({
+          title: title,
+          message: getTransactionToastMessage(useCaseLockWrite.data, false),
+        });
+      } else if (waitUseCaseLockWrite.isError) {
+        showDelegationToast({
+          title: `${title} Failed`,
+          message: getTransactionErrorToastMessage(
+            waitUseCaseLockWrite.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     useCaseLockWrite.error,
     useCaseLockWrite.data,
-    lockUseCaseIndex,
-    useCaseLockStatuses.data,
+    showDelegationToast,
+    waitUseCaseLockWrite.error,
+    waitUseCaseLockWrite.isError,
     waitUseCaseLockWrite.isLoading,
+    waitUseCaseLockWrite.isSuccess,
   ]);
-
-  useEffect(() => {
-    if (!showToast && outgoingDelegationsLoaded && incomingDelegationsLoaded) {
-      setToast(undefined);
-    }
-  }, [incomingDelegationsLoaded, outgoingDelegationsLoaded, showToast]);
-
-  useEffect(() => {
-    if (toast) {
-      setShowToast(true);
-    }
-  }, [toast]);
 
   useEffect(() => {
     if (revokeDelegationParams && !revokeDelegationParams.loading) {
@@ -702,7 +740,23 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     }
   }, [batchRevokeDelegationParams, contractWriteBatchRevoke]);
 
-  const reset = useEffectEvent(() => {
+  function resetDelegationWriteResults() {
+    collectionLockToastTitleRef.current = "Locking Wallet";
+    useCaseLockToastTitleRef.current = "Locking Wallet";
+    useCaseLockWrite.reset();
+    collectionLockWrite.reset();
+    contractWriteRevoke.reset();
+    contractWriteBatchRevoke.reset();
+  }
+
+  function setCollectionToastVisibility(show: boolean) {
+    setToastVisibility(show);
+    if (!show) {
+      resetDelegationWriteResults();
+    }
+  }
+
+  const reset = useEffectEvent((options?: { clearToast?: boolean }) => {
     setOutgoingDelegations([]);
     setOutgoingDelegationsLoaded(false);
     retrieveOutgoingDelegations.refetch();
@@ -713,16 +767,25 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
     setRevokeDelegationParams(undefined);
     setBatchRevokeDelegationParams(undefined);
-    setToast(undefined);
+    if (options?.clearToast) {
+      clearDelegationToast();
+    }
     setLockUseCaseValue(0);
     setLockUseCaseIndex(0);
-    useCaseLockWrite.reset();
-    collectionLockWrite.reset();
-    contractWriteRevoke.reset();
+    resetDelegationWriteResults();
   });
 
   useEffect(() => {
-    reset();
+    const previousAddress = previousAccountAddressRef.current;
+    const currentAddress = accountResolution.address;
+
+    previousAccountAddressRef.current = currentAddress;
+
+    reset({
+      clearToast: Boolean(
+        previousAddress && previousAddress !== currentAddress
+      ),
+    });
   }, [accountResolution.address]);
 
   useEffect(() => {
@@ -786,6 +849,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return (
       <>
         <h5 className="pt-3 pb-1">Delegations</h5>
+        <p className={styles["collectionSectionIntro"]}>
+          Delegations let another wallet use NFT utility for this collection
+          scope without moving the NFT.
+        </p>
         <Accordion
           alwaysOpen
           className={styles["collectionDelegationsAccordion"]}
@@ -805,7 +872,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 setDelegationKeysChanged(true);
               }}
             >
-              Outgoing
+              Outgoing Delegations
             </Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations("delegations", outDelegations)}
@@ -825,7 +892,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 setDelegationKeysChanged(true);
               }}
             >
-              Incoming
+              Incoming Delegations
             </Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations("delegations", inDelegations)}
@@ -839,9 +906,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="pt-4 pb-1">
-          Use A Delegation Manager (For Delegations or Consolidations)
-        </h5>
+        <h5 className="pt-4 pb-1">Delegation Managers</h5>
+        <p className={styles["collectionSectionIntro"]}>
+          Manager rights let another wallet maintain delegations or
+          consolidations for this collection scope.
+        </p>
         <Accordion
           alwaysOpen
           className={`${styles["collectionDelegationsAccordion"]} `}
@@ -863,7 +932,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 setSubDelegationKeysChanged(true);
               }}
             >
-              Outgoing
+              Outgoing Manager Rights
             </Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
@@ -890,7 +959,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 setSubDelegationKeysChanged(true);
               }}
             >
-              Incoming
+              Incoming Manager Rights
             </Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
@@ -911,6 +980,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return (
       <>
         <h5 className="pt-4 pb-1">Consolidations</h5>
+        <p className={styles["collectionSectionIntro"]}>
+          Consolidations link wallets you control so 6529 can treat them
+          together for collection metrics.
+        </p>
         <Accordion
           alwaysOpen
           className={`${styles["collectionDelegationsAccordion"]}`}
@@ -932,7 +1005,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 setConsolidationKeysChanged(true);
               }}
             >
-              Outgoing
+              Outgoing Consolidations
             </Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
@@ -959,7 +1032,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 setConsolidationKeysChanged(true);
               }}
             >
-              Incoming
+              Incoming Consolidations
             </Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
@@ -1149,7 +1222,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     data-tooltip-id={`revoke-${del.useCase.use_case}-${w.wallet}`}
                     onClick={() => {
                       const title = "Revoking Delegation";
-                      let message = "Confirm in your wallet...";
+                      let message: ReactNode = "Confirm in your wallet...";
                       if (chainsMatch()) {
                         setRevokeDelegationParams({
                           collection: areEqualAddresses(
@@ -1162,9 +1235,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                           use_case: del.useCase.use_case,
                         });
                       } else {
-                        message = getSwitchToHtml();
+                        message = getSwitchToMessage();
                       }
-                      setToast({ title, message });
+                      showDelegationToast({ title, message });
                     }}
                   ></FontAwesomeIcon>
                   <Tooltip
@@ -1243,11 +1316,15 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   })
                 ) : !outgoingDelegationsLoaded ? (
                   <tr>
-                    <td colSpan={4}>Fetching outgoing {scope}</td>
+                    <td colSpan={4}>
+                      Fetching outgoing {scope} for {props.collection.title}
+                    </td>
                   </tr>
                 ) : (
                   <tr>
-                    <td colSpan={4}>No outgoing {scope} found</td>
+                    <td colSpan={4}>
+                      No outgoing {scope} found for {props.collection.title}
+                    </td>
                   </tr>
                 )}
                 {delegations > 1 && (
@@ -1267,7 +1344,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                         }`}
                         onClick={() => {
                           const title = "Batch Revoking Delegations";
-                          let message = "Confirm in your wallet...";
+                          let message: ReactNode = "Confirm in your wallet...";
                           if (chainsMatch()) {
                             setBatchRevokeDelegationParams({
                               collections: [...bulkRevocations].map(() =>
@@ -1286,9 +1363,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               ),
                             });
                           } else {
-                            message = getSwitchToHtml();
+                            message = getSwitchToMessage();
                           }
-                          setToast({ title, message });
+                          showDelegationToast({ title, message });
                         }}
                       >
                         Batch Revoke
@@ -1422,11 +1499,15 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   })
                 ) : !incomingDelegationsLoaded ? (
                   <tr>
-                    <td colSpan={4}>Fetching incoming {scope}</td>
+                    <td colSpan={4}>
+                      Fetching incoming {scope} for {props.collection.title}
+                    </td>
                   </tr>
                 ) : (
                   <tr>
-                    <td colSpan={4}>No incoming {scope} found</td>
+                    <td colSpan={4}>
+                      No incoming {scope} found for {props.collection.title}
+                    </td>
                   </tr>
                 )}
                 {incomingDelegationsLoaded &&
@@ -1558,10 +1639,15 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     padding: "4px 8px",
                   }}
                 >
-                  Lock Wallet or Use Case to stop accepting incoming delegations
+                  Locks only block incoming delegations for this collection
+                  scope. They do not revoke outgoing records.
                 </Tooltip>
               </>
             </h4>
+            <p className={styles["collectionSectionIntro"]}>
+              Locks block incoming delegations for this collection scope. They
+              do not stop delegations you already made to other wallets.
+            </p>
           </Col>
         </Row>
         <Row className="pt-2 pb-2">
@@ -1576,7 +1662,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 const title = `${
                   collectionLockRead.data ? `Unlocking` : `Locking`
                 } Wallet`;
-                let message = "Confirm in your wallet...";
+                let message: ReactNode = "Confirm in your wallet...";
+                collectionLockToastTitleRef.current = title;
                 if (chainsMatch()) {
                   collectionLockWrite.writeContract({
                     address: DELEGATION_CONTRACT.contract,
@@ -1586,9 +1673,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     functionName: "setCollectionLock",
                   });
                 } else {
-                  message = getSwitchToHtml();
+                  message = getSwitchToMessage();
                 }
-                setToast({ title, message });
+                showDelegationToast({ title, message });
               }}
             >
               <FontAwesomeIcon
@@ -1630,6 +1717,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 } else {
                   setLockUseCaseIndex(value - 1);
                 }
+                useCaseLockToastTitleRef.current = "Locking Wallet";
                 useCaseLockWrite.reset();
               }}
             >
@@ -1686,7 +1774,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     } Wallet on Use Case #${useCase?.use_case} - ${
                       useCase?.display
                     }`;
-                    let message = "Confirm in your wallet...";
+                    let message: ReactNode = "Confirm in your wallet...";
+                    useCaseLockToastTitleRef.current = title;
 
                     if (chainsMatch()) {
                       useCaseLockWrite.writeContract({
@@ -1701,9 +1790,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                         functionName: "setCollectionUsecaseLock",
                       });
                     } else {
-                      message = getSwitchToHtml();
+                      message = getSwitchToMessage();
                     }
-                    setToast({ title, message });
+                    showDelegationToast({ title, message });
                   }}
                 >
                   <FontAwesomeIcon
@@ -1780,6 +1869,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               <Row className={styles["collectionDelegationTitleRow"]}>
                 <Col>
                   <h1 className="mb-0">{props.collection.title}</h1>
+                  <p className={styles["collectionIntro"]}>
+                    {getCollectionScopeDescription(props.collection)}
+                  </p>
                 </Col>
               </Row>
               {!showUpdateDelegation &&
@@ -1789,27 +1881,53 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 !showAssignPrimaryAddressWithSub &&
                 !showRevokeDelegationWithSub && (
                   <>
-                    {printDelegations()}
-                    {printConsolidations()}
-                    {printSubDelegations()}
-                    {printLocks()}
-                    <Container className="no-padding">
-                      <Row className="pt-5 pb-3">
-                        <Col className="d-flex align-items-center justify-content-start">
-                          <button
-                            className={styles["backBtn"]}
-                            onClick={() =>
-                              props.setSection(DelegationCenterSection.CENTER)
-                            }
-                          >
-                            <FontAwesomeIcon icon={faCircleArrowLeft} />
-                            <span className="font-smaller">
-                              Back to Delegation Center
-                            </span>
-                          </button>
-                        </Col>
-                      </Row>
-                    </Container>
+                    {!accountResolution.isConnected ? (
+                      <section
+                        className={styles["connectRequired"]}
+                        aria-labelledby="collection-connect-heading"
+                      >
+                        <h2 id="collection-connect-heading">
+                          Connect Wallet to Manage {props.collection.title}
+                        </h2>
+                        <p>
+                          Connect the wallet whose outgoing and incoming records
+                          you want to review.
+                        </p>
+                        <button
+                          type="button"
+                          className={styles["connectRequiredButton"]}
+                          onClick={accountResolution.seizeConnect}
+                        >
+                          Connect Wallet
+                        </button>
+                      </section>
+                    ) : (
+                      <>
+                        {printDelegations()}
+                        {printConsolidations()}
+                        {printSubDelegations()}
+                        {printLocks()}
+                        <Container className="no-padding">
+                          <Row className="pt-5 pb-3">
+                            <Col className="d-flex align-items-center justify-content-start">
+                              <button
+                                className={styles["backBtn"]}
+                                onClick={() =>
+                                  props.setSection(
+                                    DelegationCenterSection.CENTER
+                                  )
+                                }
+                              >
+                                <FontAwesomeIcon icon={faCircleArrowLeft} />
+                                <span className="font-smaller">
+                                  Back to Delegation Center
+                                </span>
+                              </button>
+                            </Col>
+                          </Row>
+                        </Container>
+                      </>
+                    )}
                   </>
                 )}
               {showUpdateDelegation &&
@@ -1825,12 +1943,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     onHide={() => {
                       setShowUpdateDelegation(false);
                     }}
-                    onSetToast={(toast: any) => {
-                      setToast({
-                        title: toast.title,
-                        message: toast.message,
-                      });
-                    }}
+                    onSetToast={showDelegationToast}
                   />
                 )}
               {showCreateNewDelegationWithSub &&
@@ -1846,12 +1959,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       setShowCreateNewDelegationWithSub(false);
                       setSubDelegationOriginalDelegator(undefined);
                     }}
-                    onSetToast={(toast: any) => {
-                      setToast({
-                        title: toast.title,
-                        message: toast.message,
-                      });
-                    }}
+                    onSetToast={showDelegationToast}
                   />
                 )}
               {showCreateNewSubDelegationWithSub &&
@@ -1867,12 +1975,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       setShowCreateNewSubDelegationWithSub(false);
                       setSubDelegationOriginalDelegator(undefined);
                     }}
-                    onSetToast={(toast: any) => {
-                      setToast({
-                        title: toast.title,
-                        message: toast.message,
-                      });
-                    }}
+                    onSetToast={showDelegationToast}
                   />
                 )}
               {showCreateNewConsolidationWithSub &&
@@ -1888,12 +1991,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       setShowCreateNewConsolidationWithSub(false);
                       setSubDelegationOriginalDelegator(undefined);
                     }}
-                    onSetToast={(toast: any) => {
-                      setToast({
-                        title: toast.title,
-                        message: toast.message,
-                      });
-                    }}
+                    onSetToast={showDelegationToast}
                   />
                 )}
 
@@ -1910,12 +2008,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       setShowAssignPrimaryAddressWithSub(false);
                       setSubDelegationOriginalDelegator(undefined);
                     }}
-                    onSetToast={(toast: any) => {
-                      setToast({
-                        title: toast.title,
-                        message: toast.message,
-                      });
-                    }}
+                    onSetToast={showDelegationToast}
                   />
                 )}
 
@@ -1932,12 +2025,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       setShowRevokeDelegationWithSub(false);
                       setSubDelegationOriginalDelegator(undefined);
                     }}
-                    onSetToast={(toast: any) => {
-                      setToast({
-                        title: toast.title,
-                        message: toast.message,
-                      });
-                    }}
+                    onSetToast={showDelegationToast}
                   />
                 )}
             </Container>
@@ -1949,7 +2037,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           toastRef={toastRef}
           toast={toast}
           showToast={showToast}
-          setShowToast={setShowToast}
+          setShowToast={setCollectionToastVisibility}
         />
       )}
     </Container>

@@ -32,7 +32,7 @@ describe("CreateDropActionsRow", () => {
     const input = button.querySelector("input") as HTMLInputElement;
     fireEvent.change(input, { target: { files } });
     expect(toast).toHaveBeenCalledWith({
-      message: "You can only upload up to 4 files at a time",
+      message: `Upload ${MAX_DROP_UPLOAD_FILES} or fewer files at a time.`,
       type: "error",
     });
     expect(setFiles).not.toHaveBeenCalled();
