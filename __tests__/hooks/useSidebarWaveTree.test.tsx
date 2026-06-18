@@ -356,4 +356,67 @@ describe("useSidebarWaveTree", () => {
       isExpanded: true,
     });
   });
+
+  it("marks an expanded parent as loading before child rows are available", () => {
+    const onParentExpand = jest.fn();
+    const { result, rerender } = renderHook(
+      ({
+        currentWaves,
+        loadingSubwaveParentIds,
+      }: {
+        readonly currentWaves: readonly MinimalWave[];
+        readonly loadingSubwaveParentIds: readonly string[];
+      }) =>
+        useSidebarWaveTree({
+          waves: currentWaves,
+          activeWaveId: null,
+          loadingSubwaveParentIds,
+          onParentExpand,
+        }),
+      {
+        initialProps: {
+          currentWaves: [waves[0]!],
+          loadingSubwaveParentIds: [],
+        },
+      }
+    );
+
+    act(() => {
+      result.current.toggleParent("parent");
+    });
+
+    rerender({
+      currentWaves: [waves[0]!],
+      loadingSubwaveParentIds: ["parent"],
+    });
+
+    const loadingRows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(loadingRows).toHaveLength(1);
+    expect(loadingRows[0]).toMatchObject({
+      wave: expect.objectContaining({ id: "parent" }),
+      isExpanded: false,
+      isLoadingSubwaves: true,
+    });
+
+    rerender({
+      currentWaves: [
+        waves[0]!,
+        createMockMinimalWave({
+          id: "child",
+          parentWaveId: "parent",
+          createdAt: 30,
+        }),
+      ],
+      loadingSubwaveParentIds: [],
+    });
+
+    const loadedRows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(loadedRows.map((row) => row.wave.id)).toEqual(["parent", "child"]);
+    expect(loadedRows[0]).toMatchObject({
+      isExpanded: true,
+      isLoadingSubwaves: false,
+    });
+  });
 });

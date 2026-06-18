@@ -138,6 +138,7 @@ const UnifiedWavesListWaves = forwardRef<
       waves,
       activeWaveId: activeWave.id,
       activeParentWaveId: activeWave.parentWaveId,
+      loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
       onParentExpand: streamWaves.loadSubwavesForParent,
     });
 
@@ -217,6 +218,7 @@ const UnifiedWavesListWaves = forwardRef<
         depth={row.depth}
         canExpand={row.canExpand}
         isExpanded={row.isExpanded}
+        isLoadingSubwaves={row.isLoadingSubwaves}
         hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
         isLastSubwave={row.isLastSubwave}
         onToggleExpand={toggleParent}
