@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -8,6 +8,7 @@ import {
   reviewCmsAgentPatch,
   type CmsAgentPatchChange,
   type CmsAgentPatchReview,
+  type CmsAgentPatchReviewError,
   type CmsBuilderSchemaBundle,
   type CmsBuilderSourcePacket,
 } from "@/lib/profile-cms/builder/agent";
@@ -39,9 +40,7 @@ export function ProfileCmsAgentPanel({
     profileId,
     validation: validation.result,
   });
-  const schemaBundle = createCmsBuilderSchemaBundle(
-    validation.cmsPackage.provenance.created_at
-  );
+  const schemaBundle = useMemo(() => createCmsBuilderSchemaBundle(), []);
   const [patchDraft, setPatchDraft] = useState("");
   const [patchReview, setPatchReview] = useState<CmsAgentPatchReview | null>(
     null
@@ -238,39 +237,86 @@ function SourcePacketViewer({
     <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2">
       <PacketSection
         items={[
-          ["profile", sourcePacket.facts.profile_handle],
-          ["package", sourcePacket.facts.package_id],
-          ["draft", sourcePacket.draft.draft_id],
-          ["route", sourcePacket.facts.site_base_path],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.profile"),
+            sourcePacket.facts.profile_handle,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.package"),
+            sourcePacket.facts.package_id,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.draft"),
+            sourcePacket.draft.draft_id,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.route"),
+            sourcePacket.facts.site_base_path,
+          ],
         ]}
         title={t(locale, "profileCms.builder.agent.packet.facts")}
       />
       <PacketSection
         items={[
-          ["site", sourcePacket.author_copy.site_title],
-          ["page", sourcePacket.author_copy.page_title],
-          ["nav", sourcePacket.author_copy.navigation_label],
-          ["blocks", String(sourcePacket.author_copy.blocks.length)],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.site"),
+            sourcePacket.author_copy.site_title,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.page"),
+            sourcePacket.author_copy.page_title,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.navigation"),
+            sourcePacket.author_copy.navigation_label,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.blocks"),
+            String(sourcePacket.author_copy.blocks.length),
+          ],
         ]}
         title={t(locale, "profileCms.builder.agent.packet.authorCopy")}
       />
       <PacketSection
         items={[
-          ["canonical", sourcePacket.derived_metadata.canonical_url],
-          ["package hash", sourcePacket.derived_metadata.package_hash],
-          ["payload hash", sourcePacket.derived_metadata.payload_hash],
-          ["assets", String(sourcePacket.derived_metadata.asset_count)],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.canonical"),
+            sourcePacket.derived_metadata.canonical_url,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.packageHash"),
+            sourcePacket.derived_metadata.package_hash,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.payloadHash"),
+            sourcePacket.derived_metadata.payload_hash,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.assets"),
+            String(sourcePacket.derived_metadata.asset_count),
+          ],
         ]}
         title={t(locale, "profileCms.builder.agent.packet.derivedMetadata")}
       />
       <PacketSection
         items={[
-          ["status", validationLabel],
-          ["issues", String(sourcePacket.validation_diagnostics.issues.length)],
-          ["base version", String(sourcePacket.draft.base_version)],
           [
-            "writable",
-            sourcePacket.draft.writable_by_connected_profile ? "yes" : "no",
+            t(locale, "profileCms.builder.agent.packet.label.status"),
+            validationLabel,
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.issues"),
+            String(sourcePacket.validation_diagnostics.issues.length),
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.baseVersion"),
+            String(sourcePacket.draft.base_version),
+          ],
+          [
+            t(locale, "profileCms.builder.agent.packet.label.writable"),
+            sourcePacket.draft.writable_by_connected_profile
+              ? t(locale, "profileCms.builder.agent.packet.value.yes")
+              : t(locale, "profileCms.builder.agent.packet.value.no"),
           ],
         ]}
         title={t(locale, "profileCms.builder.agent.packet.validation")}
@@ -304,7 +350,7 @@ function PacketSection({
       <dl className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 tw-text-sm">
         {items.map(([label, value]) => (
           <div key={label}>
-            <dt className="tw-text-iron-500">{label}</dt>
+            <dt className="tw-break-words tw-text-iron-500">{label}</dt>
             <dd className="tw-break-all tw-text-iron-100">{value}</dd>
           </div>
         ))}
@@ -344,8 +390,14 @@ function PatchReviewPanel({
               className="tw-border tw-border-solid tw-border-red tw-bg-black tw-p-3 tw-text-sm tw-text-red"
               key={`${error.code}-${error.path ?? ""}-${error.message}`}
             >
-              <p className="tw-font-semibold">{error.code}</p>
-              <p className="tw-mt-1 tw-leading-6">{error.message}</p>
+              <p className="tw-break-words tw-font-semibold">
+                {t(locale, "profileCms.builder.agent.error.codeLabel", {
+                  code: error.code,
+                })}
+              </p>
+              <p className="tw-mt-1 tw-leading-6">
+                {getPatchErrorMessage(locale, error)}
+              </p>
               {error.path ? (
                 <p className="tw-mt-1 tw-break-all tw-font-mono tw-text-xs">
                   {error.path}
@@ -426,4 +478,63 @@ function formatPatchValue(value: unknown): string {
   }
 
   return JSON.stringify(value, null, 2);
+}
+
+function getPatchErrorMessage(
+  locale: SupportedLocale,
+  error: CmsAgentPatchReviewError
+): string {
+  switch (error.code) {
+    case "patch.json_invalid":
+      return t(locale, "profileCms.builder.agent.error.jsonInvalid");
+    case "patch.schema_invalid":
+      return t(locale, "profileCms.builder.agent.error.schemaInvalid");
+    case "patch.target_draft_mismatch":
+      return t(locale, "profileCms.builder.agent.error.targetDraftMismatch");
+    case "patch.base_version_mismatch":
+      return t(locale, "profileCms.builder.agent.error.baseVersionMismatch");
+    case "patch.base_hash_mismatch":
+      return t(locale, "profileCms.builder.agent.error.baseHashMismatch");
+    case "patch.operation_unsupported":
+      return t(locale, "profileCms.builder.agent.error.operationUnsupported", {
+        op: getErrorParam(error, "op"),
+      });
+    case "patch.page_missing":
+      return t(locale, "profileCms.builder.agent.error.pageMissing");
+    case "patch.value_invalid":
+      return t(locale, "profileCms.builder.agent.error.valueInvalid");
+    case "patch.path_unsupported":
+      return t(locale, "profileCms.builder.agent.error.pathUnsupported", {
+        path: getErrorParam(error, "path") || error.path || "",
+      });
+    case "patch.metadata_field_unsupported":
+      return t(
+        locale,
+        "profileCms.builder.agent.error.metadataFieldUnsupported",
+        {
+          field: getErrorParam(error, "field"),
+        }
+      );
+    case "patch.block_field_unsupported":
+      return t(locale, "profileCms.builder.agent.error.blockFieldUnsupported", {
+        field: getErrorParam(error, "field"),
+      });
+    case "patch.block_duplicate_id":
+      return t(locale, "profileCms.builder.agent.error.blockDuplicateId", {
+        id: getErrorParam(error, "id"),
+      });
+    case "patch.block_structural_mix":
+      return t(locale, "profileCms.builder.agent.error.blockStructuralMix");
+    case "patch.navigation_missing":
+      return t(locale, "profileCms.builder.agent.error.navigationMissing");
+    default:
+      return t(locale, "profileCms.builder.agent.error.validationRejected", {
+        code: error.code,
+      });
+  }
+}
+
+function getErrorParam(error: CmsAgentPatchReviewError, key: string): string {
+  const value = error.params?.[key];
+  return value === undefined ? "" : String(value);
 }

@@ -36,3 +36,19 @@
   local `PORT_SEARCH_LIMIT=0` Zod validation issue. Direct `seize run dev`
   avoided that issue but ignored the assigned port and failed on occupied port
   `3001`. No screenshot was captured.
+
+## 2026-06-18 Follow-Up
+
+- Addressed 6529bot general/i18n review feedback on PR #2735.
+- Constrained whole-object metadata patches to the `PAGE_METADATA_FIELDS`
+  allow-list and constrained `update_block` to source-packet author-copy fields.
+- Added guards/tests for duplicate and malformed `add_block` payloads.
+- Staged patch diffs transactionally and rejected multi-op patches that mix
+  structural block operations with indexed block updates.
+- Moved draft base version into React state for source packet exports while
+  keeping the ref as the async request guard.
+- Routed Agent rejection messages, source packet row labels, and yes/no values
+  through `en-US` message keys, then recorded non-source locale fallback debt.
+- Follow-up validation passed: focused Jest (3 suites, 25 tests),
+  `seize run lint:changed`, `seize run typecheck:changed`,
+  `seize run react-doctor:diff`, and `codex-diff-check`.

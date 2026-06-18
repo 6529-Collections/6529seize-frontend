@@ -211,6 +211,10 @@ changing the backend write model:
   block, callout, metadata, and fixture alt text in the Preview tab. Starter and
   preview package text is treated as editable authored content, not translated
   runtime chrome.
+- Agent tab fallback debt: `ProfileCmsAgentPanel` source packet labels,
+  workspace copy, and rejection states are now message-backed in `en-US`, but
+  non-source locale dictionaries intentionally fall back to `en-US`. User
+  impact remains limited to the hidden flagged builder route.
 - Owner/follow-up: frontend CMS builder lane should add partial-locale builder
   keys before the route exits hidden feature-flag status.
 - Remediation: translate `profileCms.builder.*` chrome keys and decide whether

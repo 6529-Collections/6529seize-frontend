@@ -87,6 +87,7 @@ export default function ProfileCmsBuilder({
   const [actionResult, setActionResult] =
     useState<ProfileCmsBuilderActionResult | null>(null);
   const [draftId, setDraftId] = useState<string | undefined>(undefined);
+  const [draftVersion, setDraftVersion] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gallerySnapshotStatus, setGallerySnapshotStatus] =
     useState<GallerySnapshotStatus>("idle");
@@ -109,25 +110,24 @@ export default function ProfileCmsBuilder({
         canUseBuilderApi,
         cmsPackage: validation.cmsPackage,
         draftId,
-        draftVersion: stateVersionRef.current,
+        draftVersion,
         profileId,
         validation: validation.result,
       }),
     [
       canUseBuilderApi,
       draftId,
+      draftVersion,
       profileId,
       validation.cmsPackage,
       validation.result,
     ]
   );
-  const schemaBundle = useMemo(
-    () =>
-      createCmsBuilderSchemaBundle(validation.cmsPackage.provenance.created_at),
-    [validation.cmsPackage.provenance.created_at]
-  );
+  const schemaBundle = useMemo(() => createCmsBuilderSchemaBundle(), []);
   const clearActionResult = () => {
-    stateVersionRef.current += 1;
+    const nextDraftVersion = stateVersionRef.current + 1;
+    stateVersionRef.current = nextDraftVersion;
+    setDraftVersion(nextDraftVersion);
     setActionResult(null);
   };
 
@@ -458,7 +458,7 @@ export default function ProfileCmsBuilder({
           {activeTab === "agent" ? (
             <ProfileCmsAgentPanel
               canUseBuilderApi={canUseBuilderApi}
-              currentDraftVersion={stateVersionRef.current}
+              currentDraftVersion={draftVersion}
               draftId={draftId}
               locale={locale}
               onApplyPackage={applyAgentPackage}

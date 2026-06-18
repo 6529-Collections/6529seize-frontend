@@ -108,6 +108,7 @@ export interface CmsAgentPatchReviewError {
   readonly code: string;
   readonly message: string;
   readonly path?: string | undefined;
+  readonly params?: Readonly<Record<string, string | number>> | undefined;
 }
 
 export type CmsAgentPatchReview =
@@ -174,6 +175,7 @@ const AUTHOR_COPY_FIELDS = [
   "citation",
   "caption",
 ] as const;
+const AUTHOR_COPY_FIELD_SET = new Set<string>(AUTHOR_COPY_FIELDS);
 
 const PAGE_METADATA_PATH = "/payload/pages/0/metadata";
 const PAGE_METADATA_FIELDS = [
@@ -318,7 +320,7 @@ export function reviewCmsAgentPatch({
     return failedReview(
       parsedPatch.error.issues.map((issue) => ({
         code: "patch.schema_invalid",
-        message: issue.message,
+        message: "patch.schema_invalid",
         path: toJsonPointer(issue.path.map(String)),
       }))
     );
@@ -353,6 +355,9 @@ export function reviewCmsAgentPatch({
     enforceHashes: true,
     ...(checkedAt ? { checkedAt } : {}),
   });
+  const validationWarnings = validation.issues
+    .filter((issue) => issue.severity === "warning")
+    .map((issue) => `${issue.code}: ${issue.message}`);
   const validationErrors = validation.issues.filter(
     (issue) => issue.severity === "error"
   );
@@ -363,9 +368,7 @@ export function reviewCmsAgentPatch({
       proposedPackage: hashedPackage,
       validation,
       changes,
-      warnings: validation.issues
-        .filter((issue) => issue.severity === "warning")
-        .map((issue) => `${issue.code}: ${issue.message}`),
+      warnings: validationWarnings,
       errors: validationErrors.map(toReviewError),
     };
   }
@@ -376,9 +379,7 @@ export function reviewCmsAgentPatch({
     proposedPackage: hashedPackage,
     validation,
     changes,
-    warnings: validation.issues
-      .filter((issue) => issue.severity === "warning")
-      .map((issue) => `${issue.code}: ${issue.message}`),
+    warnings: validationWarnings,
     errors: [],
   };
 }
@@ -396,7 +397,7 @@ function parsePatchJson(patchJson: string):
       ok: false,
       error: {
         code: "patch.json_invalid",
-        message: "Patch JSON could not be parsed.",
+        message: "patch.json_invalid",
       },
     };
   }
@@ -419,7 +420,7 @@ function validatePatchTarget({
   if (patch.target.draft_id !== expectedDraftId) {
     errors.push({
       code: "patch.target_draft_mismatch",
-      message: "Patch target draft id does not match the current draft.",
+      message: "patch.target_draft_mismatch",
       path: "/target/draft_id",
     });
   }
@@ -427,7 +428,7 @@ function validatePatchTarget({
   if (patch.target.base_version !== currentDraftVersion) {
     errors.push({
       code: "patch.base_version_mismatch",
-      message: "Patch target base version is stale for the current draft.",
+      message: "patch.base_version_mismatch",
       path: "/target/base_version",
     });
   }
@@ -438,7 +439,7 @@ function validatePatchTarget({
   ) {
     errors.push({
       code: "patch.base_hash_mismatch",
-      message: "Patch target package hash does not match the current draft.",
+      message: "patch.base_hash_mismatch",
       path: "/target/base_package_hash",
     });
   }
@@ -451,8 +452,73 @@ function applyAgentPatchOperations(
   operations: readonly CmsAgentPatchOperation[],
   changes: CmsAgentPatchChange[]
 ): CmsAgentPatchReviewError[] {
-  return operations.flatMap((operation, index) =>
-    applyAgentPatchOperation(cmsPackage, operation, index, changes)
+  const blockOperationErrors = validateBlockOperationMix(operations);
+  if (blockOperationErrors.length) {
+    return blockOperationErrors;
+  }
+
+  const stagedChanges: CmsAgentPatchChange[] = [];
+  for (let index = 0; index < operations.length; index += 1) {
+    const operation = operations[index];
+    if (!operation) {
+      continue;
+    }
+
+    const operationErrors = applyAgentPatchOperation(
+      cmsPackage,
+      operation,
+      index,
+      stagedChanges
+    );
+    if (operationErrors.length) {
+      return operationErrors;
+    }
+  }
+
+  changes.push(...stagedChanges);
+  return [];
+}
+
+function validateBlockOperationMix(
+  operations: readonly CmsAgentPatchOperation[]
+): CmsAgentPatchReviewError[] {
+  const structuralBlockOperationCount = operations.filter((operation) =>
+    isStructuralBlockOperation(operation)
+  ).length;
+
+  if (structuralBlockOperationCount > 1) {
+    return [
+      {
+        code: "patch.block_structural_mix",
+        message: "patch.block_structural_mix",
+        path: "/operations",
+      },
+    ];
+  }
+
+  if (
+    structuralBlockOperationCount &&
+    operations.some((operation) => operation.op === "update_block")
+  ) {
+    return [
+      {
+        code: "patch.block_structural_mix",
+        message: "patch.block_structural_mix",
+        path: "/operations",
+      },
+    ];
+  }
+
+  return [];
+}
+
+function isStructuralBlockOperation(
+  operation: CmsAgentPatchOperation
+): boolean {
+  return (
+    operation.op === "add_block" ||
+    operation.op === "remove_block" ||
+    operation.op === "reorder_blocks"
   );
 }
 
@@ -480,21 +546,7 @@ function applyAgentPatchOperation(
         changes
       );
     case "update_navigation":
-      return applyStringFieldOperation(
-        {
-          expectedPath: NAVIGATION_LABEL_PATH,
-          operation,
-          setter: (value) => {
-            const item = cmsPackage.payload.navigation[0]?.items[0];
-            if (item) {
-              item.label = value;
-            }
-          },
-          value: cmsPackage.payload.navigation[0]?.items[0]?.label,
-        },
-        index,
-        changes
-      );
+      return applyNavigationOperation(cmsPackage, operation, index, changes);
     case "add_block":
       return applyAddBlockOperation(cmsPackage, operation, index, changes);
     case "update_block":
@@ -510,8 +562,9 @@ function applyAgentPatchOperation(
       return [
         {
           code: "patch.operation_unsupported",
-          message: `Builder review does not support ${operation.op}.`,
+          message: "patch.operation_unsupported",
           path: `/operations/${index}/op`,
+          params: { op: operation.op },
         },
       ];
   }
@@ -530,11 +583,20 @@ function applyPageMetadataOperation(
 
   if (operation.path === PAGE_METADATA_PATH) {
     if (!isRecord(operation.value)) {
-      return invalidValueError(
+      return invalidValueError(index);
+    }
+
+    const unsupportedField = Object.keys(operation.value).find(
+      (field) => !isPageMetadataField(field)
+    );
+    if (unsupportedField) {
+      return unsupportedFieldError(
         index,
-        "Metadata patch value must be an object."
+        unsupportedField,
+        "patch.metadata_field_unsupported"
       );
     }
+
     const before = { ...page.metadata };
     page.metadata = { ...page.metadata, ...operation.value };
     addChange(changes, operation, before, page.metadata);
@@ -548,6 +610,37 @@ function applyPageMetadataOperation(
 
   const before = page.metadata[field];
   (page.metadata as Record<string, unknown>)[field] = operation.value;
+  addChange(changes, operation, before, operation.value);
+  return [];
+}
+
+function applyNavigationOperation(
+  cmsPackage: CmsPackageV1,
+  operation: CmsAgentPatchOperation,
+  index: number,
+  changes: CmsAgentPatchChange[]
+): CmsAgentPatchReviewError[] {
+  if (operation.path !== NAVIGATION_LABEL_PATH) {
+    return unsupportedPathError(index, operation.path);
+  }
+
+  if (typeof operation.value !== "string") {
+    return invalidValueError(index);
+  }
+
+  const item = cmsPackage.payload.navigation[0]?.items[0];
+  if (!item) {
+    return [
+      {
+        code: "patch.navigation_missing",
+        message: "patch.navigation_missing",
+        path: `/operations/${index}/path`,
+      },
+    ];
+  }
+
+  const before = item.label;
+  item.label = operation.value;
   addChange(changes, operation, before, operation.value);
   return [];
 }
@@ -572,7 +665,7 @@ function applyStringFieldOperation(
   }
 
   if (typeof operation.value !== "string") {
-    return invalidValueError(index, "Patch value must be a string.");
+    return invalidValueError(index);
   }
 
   setter(operation.value);
@@ -592,10 +685,24 @@ function applyAddBlockOperation(
   }
 
   if (!isRecord(operation.value)) {
-    return invalidValueError(index, "Block patch value must be an object.");
+    return invalidValueError(index);
   }
 
   const block = operation.value as CmsBlockV1;
+  if (typeof block.id !== "string" || typeof block.block_type !== "string") {
+    return invalidValueError(index);
+  }
+  if (page.blocks.some((currentBlock) => currentBlock.id === block.id)) {
+    return [
+      {
+        code: "patch.block_duplicate_id",
+        message: "patch.block_duplicate_id",
+        path: `/operations/${index}/value/id`,
+        params: { id: block.id },
+      },
+    ];
+  }
+
   const insertIndex = getInsertBlockIndex(operation.path, page.blocks.length);
   if (insertIndex === undefined) {
     return unsupportedPathError(index, operation.path);
@@ -629,12 +736,31 @@ function applyUpdateBlockOperation(
 
   if (!blockPath.field) {
     if (!isRecord(operation.value)) {
-      return invalidValueError(index, "Block patch value must be an object.");
+      return invalidValueError(index);
+    }
+
+    const unsupportedField = Object.keys(operation.value).find(
+      (field) => !isAuthorCopyField(field)
+    );
+    if (unsupportedField) {
+      return unsupportedFieldError(
+        index,
+        unsupportedField,
+        "patch.block_field_unsupported"
+      );
     }
     const before = { ...block };
     page.blocks[blockPath.index] = { ...block, ...operation.value };
     addChange(changes, operation, before, page.blocks[blockPath.index]);
     return [];
+  }
+
+  if (!isAuthorCopyField(blockPath.field)) {
+    return unsupportedFieldError(
+      index,
+      blockPath.field,
+      "patch.block_field_unsupported"
+    );
   }
 
   const record = block as Record<string, unknown>;
@@ -682,20 +808,14 @@ function applyReorderBlocksOperation(
   }
 
   if (operation.path !== BLOCKS_PATH || !Array.isArray(operation.value)) {
-    return invalidValueError(
-      index,
-      "Reorder patch value must be an array of block ids."
-    );
+    return invalidValueError(index);
   }
 
   const requestedIds = operation.value.filter(
     (value): value is string => typeof value === "string"
   );
   if (requestedIds.length !== operation.value.length) {
-    return invalidValueError(
-      index,
-      "Every reordered block id must be a string."
-    );
+    return invalidValueError(index);
   }
 
   const blockById = new Map(page.blocks.map((block) => [block.id, block]));
@@ -703,10 +823,7 @@ function applyReorderBlocksOperation(
     requestedIds.length !== page.blocks.length ||
     requestedIds.some((id) => !blockById.has(id))
   ) {
-    return invalidValueError(
-      index,
-      "Reorder patch must include each current block id exactly once."
-    );
+    return invalidValueError(index);
   }
 
   const before = page.blocks.map((block) => block.id);
@@ -735,6 +852,10 @@ function getPageMetadataField(path: string): PageMetadataField | undefined {
 
 function isPageMetadataField(value: string): value is PageMetadataField {
   return (PAGE_METADATA_FIELDS as readonly string[]).includes(value);
+}
+
+function isAuthorCopyField(value: string): boolean {
+  return AUTHOR_COPY_FIELD_SET.has(value);
 }
 
 function getInsertBlockIndex(
@@ -820,21 +941,33 @@ function missingPageError(index: number): CmsAgentPatchReviewError[] {
   return [
     {
       code: "patch.page_missing",
-      message: "Builder draft does not contain an editable homepage.",
+      message: "patch.page_missing",
       path: `/operations/${index}/path`,
     },
   ];
 }
 
-function invalidValueError(
-  index: number,
-  message: string
-): CmsAgentPatchReviewError[] {
+function invalidValueError(index: number): CmsAgentPatchReviewError[] {
   return [
     {
       code: "patch.value_invalid",
-      message,
+      message: "patch.value_invalid",
       path: `/operations/${index}/value`,
+    },
+  ];
+}
+
+function unsupportedFieldError(
+  index: number,
+  field: string,
+  code: "patch.metadata_field_unsupported" | "patch.block_field_unsupported"
+): CmsAgentPatchReviewError[] {
+  return [
+    {
+      code,
+      message: code,
+      path: `/operations/${index}/value/${escapePointerSegment(field)}`,
+      params: { field },
     },
   ];
 }
@@ -846,8 +979,9 @@ function unsupportedPathError(
   return [
     {
       code: "patch.path_unsupported",
-      message: `Builder review cannot apply path '${path}'.`,
+      message: "patch.path_unsupported",
       path: `/operations/${index}/path`,
+      params: { path },
     },
   ];
 }

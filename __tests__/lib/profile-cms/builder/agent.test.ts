@@ -123,9 +123,14 @@ describe("profile CMS builder agent helpers", () => {
       },
       operations: [
         {
-          op: "update_block",
-          path: "/payload/pages/0/blocks/2/href",
-          value: "javascript:alert(1)",
+          op: "add_block",
+          path: "/payload/pages/0/blocks/-",
+          value: {
+            id: "block-unsafe-link",
+            block_type: "button_link",
+            label: "Unsafe link",
+            href: "javascript:alert(1)",
+          },
           reason: "Injected link.",
         },
       ],
@@ -148,7 +153,7 @@ describe("profile CMS builder agent helpers", () => {
       expect.arrayContaining([
         expect.objectContaining({
           code: "block.unsafe_url",
-          path: "/payload/pages/0/blocks/2/href",
+          path: "/payload/pages/0/blocks/3/href",
         }),
       ])
     );
@@ -187,10 +192,299 @@ describe("profile CMS builder agent helpers", () => {
     });
 
     expect(review.ok).toBe(false);
+    expect(review.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "patch.target_draft_mismatch",
+          path: "/target/draft_id",
+        }),
+      ])
+    );
+  });
+
+  it("rejects metadata object patches with unsupported fields", () => {
+    const validation = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529"),
+      new Date("2026-06-18T00:00:00.000Z")
+    );
+    const patchJson = JSON.stringify({
+      schema: CMS_AGENT_PATCH_SCHEMA,
+      patch_id: "patch-metadata-object",
+      target: {
+        draft_id: CMS_BUILDER_LOCAL_DRAFT_ID,
+        base_version: 0,
+        base_package_hash: validation.cmsPackage.integrity.package_hash,
+      },
+      operations: [
+        {
+          op: "update_page_metadata",
+          path: "/payload/pages/0/metadata",
+          value: {
+            title: "Allowed title",
+            unexpected_field: "not allowed",
+          },
+        },
+      ],
+      provenance: {
+        created_at: "2026-06-18T00:00:00.000Z",
+        author_type: "user_agent",
+      },
+    });
+
+    const review = reviewCmsAgentPatch({
+      currentDraftVersion: 0,
+      currentPackage: validation.cmsPackage,
+      patchJson,
+    });
+
+    expect(review.ok).toBe(false);
+    expect(review.changes).toHaveLength(0);
+    expect(review.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "patch.metadata_field_unsupported",
+          path: "/operations/0/value/unexpected_field",
+        }),
+      ])
+    );
+  });
+
+  it("rejects block updates outside safe author-copy fields", () => {
+    const validation = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529"),
+      new Date("2026-06-18T00:00:00.000Z")
+    );
+    const patchJson = JSON.stringify({
+      schema: CMS_AGENT_PATCH_SCHEMA,
+      patch_id: "patch-block-type",
+      target: {
+        draft_id: CMS_BUILDER_LOCAL_DRAFT_ID,
+        base_version: 0,
+        base_package_hash: validation.cmsPackage.integrity.package_hash,
+      },
+      operations: [
+        {
+          op: "update_block",
+          path: "/payload/pages/0/blocks/0/block_type",
+          value: "rich_text",
+        },
+      ],
+      provenance: {
+        created_at: "2026-06-18T00:00:00.000Z",
+        author_type: "user_agent",
+      },
+    });
+
+    const review = reviewCmsAgentPatch({
+      currentDraftVersion: 0,
+      currentPackage: validation.cmsPackage,
+      patchJson,
+    });
+
+    expect(review.ok).toBe(false);
+    expect(review.changes).toHaveLength(0);
+    expect(review.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "patch.block_field_unsupported",
+          path: "/operations/0/value/block_type",
+        }),
+      ])
+    );
+  });
+
+  it("rejects invalid add_block payloads before insertion", () => {
+    const validation = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529"),
+      new Date("2026-06-18T00:00:00.000Z")
+    );
+    const patchJson = JSON.stringify({
+      schema: CMS_AGENT_PATCH_SCHEMA,
+      patch_id: "patch-invalid-block",
+      target: {
+        draft_id: CMS_BUILDER_LOCAL_DRAFT_ID,
+        base_version: 0,
+        base_package_hash: validation.cmsPackage.integrity.package_hash,
+      },
+      operations: [
+        {
+          op: "add_block",
+          path: "/payload/pages/0/blocks/-",
+          value: {
+            id: "block-invalid",
+          },
+        },
+      ],
+      provenance: {
+        created_at: "2026-06-18T00:00:00.000Z",
+        author_type: "user_agent",
+      },
+    });
+
+    const review = reviewCmsAgentPatch({
+      currentDraftVersion: 0,
+      currentPackage: validation.cmsPackage,
+      patchJson,
+    });
+
+    expect(review.ok).toBe(false);
+    expect(review.changes).toHaveLength(0);
+    expect(review.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "patch.value_invalid",
+          path: "/operations/0/value",
+        }),
+      ])
+    );
+  });
+
+  it("rejects duplicate add_block ids", () => {
+    const validation = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529"),
+      new Date("2026-06-18T00:00:00.000Z")
+    );
+    const existingBlockId =
+      validation.cmsPackage.payload.pages[0]?.blocks[0]?.id ??
+      "block-heading-1";
+    const patchJson = JSON.stringify({
+      schema: CMS_AGENT_PATCH_SCHEMA,
+      patch_id: "patch-duplicate-block",
+      target: {
+        draft_id: CMS_BUILDER_LOCAL_DRAFT_ID,
+        base_version: 0,
+        base_package_hash: validation.cmsPackage.integrity.package_hash,
+      },
+      operations: [
+        {
+          op: "add_block",
+          path: "/payload/pages/0/blocks/-",
+          value: {
+            id: existingBlockId,
+            block_type: "heading",
+            text: "Duplicate",
+          },
+        },
+      ],
+      provenance: {
+        created_at: "2026-06-18T00:00:00.000Z",
+        author_type: "user_agent",
+      },
+    });
+
+    const review = reviewCmsAgentPatch({
+      currentDraftVersion: 0,
+      currentPackage: validation.cmsPackage,
+      patchJson,
+    });
+
+    expect(review.ok).toBe(false);
+    expect(review.changes).toHaveLength(0);
+    expect(review.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "patch.block_duplicate_id",
+          path: "/operations/0/value/id",
+        }),
+      ])
+    );
+  });
+
+  it("does not return staged changes when a later operation fails", () => {
+    const validation = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529"),
+      new Date("2026-06-18T00:00:00.000Z")
+    );
+    const patchJson = JSON.stringify({
+      schema: CMS_AGENT_PATCH_SCHEMA,
+      patch_id: "patch-partial-failure",
+      target: {
+        draft_id: CMS_BUILDER_LOCAL_DRAFT_ID,
+        base_version: 0,
+        base_package_hash: validation.cmsPackage.integrity.package_hash,
+      },
+      operations: [
+        {
+          op: "update_page_metadata",
+          path: "/payload/pages/0/metadata/title",
+          value: "Staged title",
+        },
+        {
+          op: "update_block",
+          path: "/payload/pages/0/blocks/0/block_type",
+          value: "rich_text",
+        },
+      ],
+      provenance: {
+        created_at: "2026-06-18T00:00:00.000Z",
+        author_type: "user_agent",
+      },
+    });
+
+    const review = reviewCmsAgentPatch({
+      currentDraftVersion: 0,
+      currentPackage: validation.cmsPackage,
+      patchJson,
+    });
+
+    expect(review.ok).toBe(false);
+    expect(review.changes).toHaveLength(0);
+    expect(review.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "patch.block_field_unsupported",
+        }),
+      ])
+    );
+  });
+
+  it("rejects patches that mix structural and indexed block mutations", () => {
+    const validation = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529"),
+      new Date("2026-06-18T00:00:00.000Z")
+    );
+    const patchJson = JSON.stringify({
+      schema: CMS_AGENT_PATCH_SCHEMA,
+      patch_id: "patch-mixed-block-ops",
+      target: {
+        draft_id: CMS_BUILDER_LOCAL_DRAFT_ID,
+        base_version: 0,
+        base_package_hash: validation.cmsPackage.integrity.package_hash,
+      },
+      operations: [
+        {
+          op: "add_block",
+          path: "/payload/pages/0/blocks/-",
+          value: {
+            id: "block-new-heading",
+            block_type: "heading",
+            text: "New heading",
+          },
+        },
+        {
+          op: "update_block",
+          path: "/payload/pages/0/blocks/0/text",
+          value: "Retargeted heading",
+        },
+      ],
+      provenance: {
+        created_at: "2026-06-18T00:00:00.000Z",
+        author_type: "user_agent",
+      },
+    });
+
+    const review = reviewCmsAgentPatch({
+      currentDraftVersion: 0,
+      currentPackage: validation.cmsPackage,
+      patchJson,
+    });
+
+    expect(review.ok).toBe(false);
+    expect(review.changes).toHaveLength(0);
     expect(review.errors).toEqual([
       expect.objectContaining({
-        code: "patch.target_draft_mismatch",
-        path: "/target/draft_id",
+        code: "patch.block_structural_mix",
+        path: "/operations",
       }),
     ]);
   });

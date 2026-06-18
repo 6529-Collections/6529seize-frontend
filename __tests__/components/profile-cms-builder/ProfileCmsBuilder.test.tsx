@@ -135,6 +135,24 @@ describe("ProfileCmsBuilder", () => {
     );
   });
 
+  it("exports source packets with the current draft version after edits", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.clear(screen.getByLabelText("Page title"));
+    await user.type(screen.getByLabelText("Page title"), "Versioned draft");
+    await user.click(screen.getByRole("button", { name: "JSON" }));
+    await user.click(
+      screen.getByRole("button", { name: "Download source packet" })
+    );
+
+    const sourceBlob = createObjectUrlMock.mock.calls[0]?.[0] as Blob;
+    const sourcePacket = JSON.parse(await readBlobText(sourceBlob)) as {
+      draft: { base_version: number };
+    };
+    expect(sourcePacket.draft.base_version).toBeGreaterThan(0);
+  });
+
   it("reviews an agent patch and applies it only after explicit approval", async () => {
     const user = userEvent.setup();
     render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
@@ -186,9 +204,14 @@ describe("ProfileCmsBuilder", () => {
         value: JSON.stringify(
           buildAgentPatch(packageHash, [
             {
-              op: "update_block",
-              path: "/payload/pages/0/blocks/2/href",
-              value: "javascript:alert(1)",
+              op: "add_block",
+              path: "/payload/pages/0/blocks/-",
+              value: {
+                id: "block-unsafe-link",
+                block_type: "button_link",
+                label: "Unsafe link",
+                href: "javascript:alert(1)",
+              },
               reason: "Injected link.",
             },
           ])
@@ -200,7 +223,7 @@ describe("ProfileCmsBuilder", () => {
     expect(
       screen.getByText("Patch was rejected before it could change the draft.")
     ).toBeInTheDocument();
-    expect(screen.getByText("block.unsafe_url")).toBeInTheDocument();
+    expect(screen.getByText("Code: block.unsafe_url")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Apply to draft" })
     ).toBeDisabled();
