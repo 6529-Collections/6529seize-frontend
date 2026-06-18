@@ -12,7 +12,6 @@ const ABOUT_SECTIONS = [
   "6529-gradient",
   "faq",
   "mission",
-  "release-notes",
   "contact-us",
   "terms-of-service",
   "privacy-policy",

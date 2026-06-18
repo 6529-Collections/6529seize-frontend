@@ -114,6 +114,7 @@ describe("next-sitemap config", () => {
     expect(locations).toContain("/nextgen/collection/pebbles");
     expect(locations).toContain("/nextgen/collection/pebbles/art");
     expect(locations).toContain("/waves/5f207393-5418-4a75-8738-e40edb44a94d");
+    expect(locations).not.toContain("/about/release-notes");
   });
 
   it("continues building sitemap paths when one API feed fails", async () => {
