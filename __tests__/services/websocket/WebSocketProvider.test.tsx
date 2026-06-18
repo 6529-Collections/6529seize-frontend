@@ -203,7 +203,7 @@ describe("WebSocketProvider", () => {
       act(() => {
         jest.advanceTimersByTime(8000);
       });
-      expect(ws.close).not.toHaveBeenCalledWith(1011, "Authentication timeout");
+      expect(ws.close).not.toHaveBeenCalledWith(4011, "Authentication timeout");
 
       act(() => {
         ws.triggerClose(1006, "Unexpected close");
@@ -256,7 +256,7 @@ describe("WebSocketProvider", () => {
       });
 
       expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
-      expect(ws.close).toHaveBeenCalledWith(1008, "Authentication failed");
+      expect(ws.close).toHaveBeenCalledWith(4008, "Authentication failed");
 
       act(() => {
         result.current.connect("bad-token");
@@ -265,7 +265,7 @@ describe("WebSocketProvider", () => {
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
 
       act(() => {
-        ws.triggerClose(1008, "Authentication failed");
+        ws.triggerClose(4008, "Authentication failed");
         jest.advanceTimersByTime(10000);
       });
 
@@ -296,16 +296,16 @@ describe("WebSocketProvider", () => {
       act(() => {
         jest.advanceTimersByTime(7999);
       });
-      expect(ws.close).not.toHaveBeenCalledWith(1011, "Authentication timeout");
+      expect(ws.close).not.toHaveBeenCalledWith(4011, "Authentication timeout");
 
       act(() => {
         jest.advanceTimersByTime(1);
       });
 
-      expect(ws.close).toHaveBeenCalledWith(1011, "Authentication timeout");
+      expect(ws.close).toHaveBeenCalledWith(4011, "Authentication timeout");
 
       act(() => {
-        ws.triggerClose(1011, "Authentication timeout");
+        ws.triggerClose(4011, "Authentication timeout");
         jest.advanceTimersByTime(10000);
       });
 

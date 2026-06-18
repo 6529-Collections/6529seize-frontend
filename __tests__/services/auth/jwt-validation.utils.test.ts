@@ -2,6 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import {
   getWalletAddress,
   getWalletRole,
+  hasActiveSessionV2Auth,
   syncWalletRoleWithServer,
 } from "@/services/auth/auth.utils";
 import { getRole, validateJwt } from "@/services/auth/jwt-validation.utils";
@@ -33,6 +34,8 @@ const mockedGetWalletAddress = getWalletAddress as jest.MockedFunction<
 const mockedGetWalletRole = getWalletRole as jest.MockedFunction<
   typeof getWalletRole
 >;
+const mockedHasActiveSessionV2Auth =
+  hasActiveSessionV2Auth as jest.MockedFunction<typeof hasActiveSessionV2Auth>;
 const mockedRefreshSessionV2 = refreshSessionV2 as jest.MockedFunction<
   typeof refreshSessionV2
 >;
@@ -69,6 +72,7 @@ describe("jwt-validation.utils", () => {
     jest.spyOn(Date, "now").mockReturnValue(1000000 * 1000);
     mockedGetWalletAddress.mockReturnValue("0x123");
     mockedGetWalletRole.mockReturnValue(null);
+    mockedHasActiveSessionV2Auth.mockReturnValue(false);
     mockedRefreshSessionV2.mockResolvedValue(null);
     mockedPersistSessionResponse.mockResolvedValue(true);
     mockedAreEqualAddresses.mockReturnValue(true);
@@ -84,14 +88,64 @@ describe("jwt-validation.utils", () => {
     expect(getRole("jwt-token")).toBe("admin");
   });
 
-  it("accepts a currently valid JWT", async () => {
+  it("requires session-v2 upgrade when a current JWT has no v2 session", async () => {
     mockedJwtDecode.mockReturnValue(validPayload);
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: false,
+      wasCancelled: false,
+      requiresSessionUpgrade: true,
+    });
+    expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
+      address: "0x123",
+      abortSignal: validParams.abortSignal,
+    });
+  });
+
+  it("accepts a current session-v2 JWT when web cookie refresh is unavailable", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
       wasCancelled: false,
     });
-    expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
+  });
+
+  it("requires session-v2 upgrade when refresh transport fails but current JWT is valid", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: false,
+      wasCancelled: false,
+      requiresSessionUpgrade: true,
+    });
+  });
+
+  it("throws refresh transport errors when current JWT is invalid", async () => {
+    mockedJwtDecode.mockReturnValue(expiredPayload);
+    mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));
+
+    await expect(validateJwt(validParams)).rejects.toThrow("Failed to fetch");
+  });
+
+  it("migrates a currently valid JWT through session-v2 refresh", async () => {
+    const refreshedSession = {
+      client_type: "web" as const,
+      address: "0x123",
+      role: null,
+      access_token: "fresh-access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedRefreshSessionV2.mockResolvedValue(refreshedSession);
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: true,
+      wasCancelled: false,
+    });
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
   });
 
   it("refreshes expired JWTs through session-v2 and persists the rotated session", async () => {

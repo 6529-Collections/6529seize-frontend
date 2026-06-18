@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { publicEnv } from "@/config/env";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { setAuthJwt } from "./auth.utils";
@@ -78,6 +79,24 @@ function isUnauthorizedApiError(error: unknown): boolean {
   return statusError.status === 401 || statusError.response?.status === 401;
 }
 
+function canUseWebCookieSession(): boolean {
+  if (globalThis.window === undefined) {
+    return true;
+  }
+
+  return (
+    new URL(publicEnv.API_ENDPOINT).origin === globalThis.window.location.origin
+  );
+}
+
+function getSessionCredentialsMode(): RequestCredentials | undefined {
+  if (getSessionClientType() !== "web") {
+    return "include";
+  }
+
+  return canUseWebCookieSession() ? "include" : undefined;
+}
+
 async function rollbackUnpersistedSession(
   response: SessionLoginResponse | SessionRefreshResponse,
   didPersistNativeRefreshToken: boolean
@@ -139,7 +158,7 @@ export async function loginWithSessionV2({
       client_address: signerAddress,
       ...roleBody,
     },
-    credentials: "include",
+    credentials: getSessionCredentialsMode(),
   });
 }
 
@@ -181,6 +200,10 @@ export async function refreshSessionV2({
       }
       throw error;
     }
+  }
+
+  if (!canUseWebCookieSession()) {
+    return null;
   }
 
   try {
@@ -228,7 +251,8 @@ export async function persistSessionResponse(
       response.address,
       response.access_token,
       null,
-      response.role ?? undefined
+      response.role ?? undefined,
+      { authSessionVersion: "v2" }
     );
   } catch (error) {
     await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
@@ -257,7 +281,7 @@ export async function createConnectionShare({
     body: {
       target_client_type: "native",
     },
-    credentials: "include",
+    credentials: getSessionCredentialsMode(),
     signal,
   });
 }
@@ -304,6 +328,10 @@ export async function logoutSessionV2({
     return;
   }
 
+  if (!canUseWebCookieSession()) {
+    return;
+  }
+
   await commonApiPost<
     {
       readonly client_type: "web";
@@ -336,7 +364,7 @@ export async function redeemConnectionShare(
       connection_share_code: connectionShareCode,
       target_client_type: "native",
     },
-    credentials: "include",
+    credentials: getSessionCredentialsMode(),
   });
 
   return {

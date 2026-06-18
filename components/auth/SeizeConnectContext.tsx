@@ -129,6 +129,9 @@ interface SeizeConnectContextType {
   /** Whether a wallet is currently connected to the app */
   isConnected: boolean;
 
+  /** Whether the active wallet has a live signer connection */
+  canSignActiveWallet: boolean;
+
   /** Whether there is an active wallet address, regardless of auth validity */
   hasActiveWalletAddress: boolean;
 
@@ -1282,6 +1285,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAddConnectedAccount,
       seizeConnectOpen: state.open,
       isConnected: isActiveWalletConnected,
+      canSignActiveWallet: isActiveWalletConnected,
       hasActiveWalletAddress,
       hasValidWalletAuth,
       isAuthenticated: hasValidWalletAuth,

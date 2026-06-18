@@ -17,6 +17,7 @@ import {
   AppToastContainer,
   showAppToast,
 } from "@/components/utils/toast/AppToast";
+import { publicEnv } from "@/config/env";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
 import {
   InvalidRoleStateError,
@@ -25,6 +26,7 @@ import {
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
+import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
@@ -109,9 +111,22 @@ type AuthContextType = {
 };
 
 type AuthLoadingState = "idle" | "validating" | "signing";
+type SignModalReason = "auth" | "session-upgrade";
+type SessionUpgradePromptMode = "sign" | "reshare";
 type MutableCurrentRef<T> = {
   current: T;
 };
+
+interface SessionUpgradeReminderState {
+  readonly startedAt: number;
+  readonly dismissedUntil: number;
+}
+
+interface SessionUpgradePromptStatus {
+  readonly shouldShow: boolean;
+  readonly canDismiss: boolean;
+  readonly timeLeftMs: number;
+}
 
 interface RunImmediateAuthValidationParams {
   readonly currentAddress: string;
@@ -120,12 +135,189 @@ interface RunImmediateAuthValidationParams {
   readonly activeValidationOperationIdRef: MutableCurrentRef<string | null>;
   readonly abortControllerRef: MutableCurrentRef<AbortController | null>;
   readonly activeProfileProxy: ApiProfileProxy | null;
-  readonly isConnected: boolean;
+  readonly hasActiveWalletAddress: boolean;
+  readonly canSignActiveWallet: boolean;
   readonly setAuthLoadingState: (state: AuthLoadingState) => void;
+  readonly setSignModalReason: (reason: SignModalReason) => void;
+  readonly setSessionUpgradePromptMode: (
+    mode: SessionUpgradePromptMode
+  ) => void;
+  readonly setSessionUpgradeTimeLeftMs: (timeLeftMs: number) => void;
+  readonly setSessionUpgradeCanDismiss: (canDismiss: boolean) => void;
   readonly setShowSignModal: (show: boolean) => void;
   readonly invalidateAll: () => void;
   readonly reset: () => void;
 }
+
+const SESSION_UPGRADE_REMINDER_STORAGE_KEY =
+  "6529-session-v2-upgrade-reminders";
+const SESSION_UPGRADE_GRACE_MS = 72 * 60 * 60 * 1000;
+const SESSION_UPGRADE_REMINDER_MS = 2 * 60 * 60 * 1000;
+
+const normalizeReminderAddress = (address: string): string =>
+  address.toLowerCase();
+
+const parseSessionUpgradeReminders = (): Record<
+  string,
+  SessionUpgradeReminderState
+> => {
+  const raw = safeLocalStorage.getItem(SESSION_UPGRADE_REMINDER_STORAGE_KEY);
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+
+    const reminders: Record<string, SessionUpgradeReminderState> = {};
+    for (const [address, value] of Object.entries(parsed)) {
+      if (!value || typeof value !== "object") {
+        continue;
+      }
+
+      const record = value as Partial<SessionUpgradeReminderState>;
+      if (
+        typeof record.startedAt === "number" &&
+        Number.isFinite(record.startedAt) &&
+        typeof record.dismissedUntil === "number" &&
+        Number.isFinite(record.dismissedUntil)
+      ) {
+        reminders[address] = {
+          startedAt: record.startedAt,
+          dismissedUntil: record.dismissedUntil,
+        };
+      }
+    }
+    return reminders;
+  } catch {
+    return {};
+  }
+};
+
+const writeSessionUpgradeReminders = (
+  reminders: Readonly<Record<string, SessionUpgradeReminderState>>
+): void => {
+  safeLocalStorage.setItem(
+    SESSION_UPGRADE_REMINDER_STORAGE_KEY,
+    JSON.stringify(reminders)
+  );
+};
+
+const getSessionUpgradeReminder = (
+  address: string
+): SessionUpgradeReminderState | null => {
+  const reminders = parseSessionUpgradeReminders();
+  return reminders[normalizeReminderAddress(address)] ?? null;
+};
+
+const getSessionUpgradeGlobalDeadline = (): number | null => {
+  const configuredDeadline = publicEnv.SESSION_V2_MIGRATION_DEADLINE;
+  if (!configuredDeadline) {
+    return null;
+  }
+
+  const timestamp = Date.parse(configuredDeadline);
+  return Number.isFinite(timestamp) ? timestamp : null;
+};
+
+const getSessionUpgradeEffectiveDeadline = (
+  reminder: SessionUpgradeReminderState
+): number => {
+  const localDeadline = reminder.startedAt + SESSION_UPGRADE_GRACE_MS;
+  const globalDeadline = getSessionUpgradeGlobalDeadline();
+  return globalDeadline === null
+    ? localDeadline
+    : Math.min(localDeadline, globalDeadline);
+};
+
+const setSessionUpgradeReminder = (
+  address: string,
+  state: SessionUpgradeReminderState
+): void => {
+  writeSessionUpgradeReminders({
+    ...parseSessionUpgradeReminders(),
+    [normalizeReminderAddress(address)]: state,
+  });
+};
+
+const clearSessionUpgradeReminder = (address: string): void => {
+  const reminders = parseSessionUpgradeReminders();
+  delete reminders[normalizeReminderAddress(address)];
+  writeSessionUpgradeReminders(reminders);
+};
+
+const getOrCreateSessionUpgradePromptStatus = (
+  address: string,
+  now: number = Date.now()
+): SessionUpgradePromptStatus => {
+  const existingReminder = getSessionUpgradeReminder(address);
+  const reminder = existingReminder ?? {
+    startedAt: now,
+    dismissedUntil: 0,
+  };
+
+  if (!existingReminder) {
+    setSessionUpgradeReminder(address, reminder);
+  }
+
+  const deadline = getSessionUpgradeEffectiveDeadline(reminder);
+  const timeLeftMs = Math.max(0, deadline - now);
+  const canDismiss = timeLeftMs > 0;
+
+  return {
+    shouldShow: !canDismiss || now >= reminder.dismissedUntil,
+    canDismiss,
+    timeLeftMs,
+  };
+};
+
+const dismissSessionUpgradePrompt = (
+  address: string,
+  now: number = Date.now()
+): SessionUpgradePromptStatus => {
+  const reminder = getSessionUpgradeReminder(address) ?? {
+    startedAt: now,
+    dismissedUntil: 0,
+  };
+  const deadline = getSessionUpgradeEffectiveDeadline(reminder);
+  const dismissedUntil = Math.min(now + SESSION_UPGRADE_REMINDER_MS, deadline);
+  const nextReminder = {
+    startedAt: reminder.startedAt,
+    dismissedUntil,
+  };
+
+  setSessionUpgradeReminder(address, nextReminder);
+
+  return {
+    shouldShow: now >= dismissedUntil,
+    canDismiss: deadline > now,
+    timeLeftMs: Math.max(0, deadline - now),
+  };
+};
+
+const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
+  if (timeLeftMs <= 0) {
+    return "0 hours";
+  }
+
+  const totalHours = Math.ceil(timeLeftMs / (60 * 60 * 1000));
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+
+  if (days === 0) {
+    return `${totalHours} ${totalHours === 1 ? "hour" : "hours"}`;
+  }
+
+  const dayText = `${days} ${days === 1 ? "day" : "days"}`;
+  if (hours === 0) {
+    return dayText;
+  }
+
+  return `${dayText} ${hours} ${hours === 1 ? "hour" : "hours"}`;
+};
 
 const isCurrentValidationOperation = ({
   latestAddressRef,
@@ -148,8 +340,13 @@ const runImmediateAuthValidation = async ({
   activeValidationOperationIdRef,
   abortControllerRef,
   activeProfileProxy,
-  isConnected,
+  hasActiveWalletAddress,
+  canSignActiveWallet,
   setAuthLoadingState,
+  setSignModalReason,
+  setSessionUpgradePromptMode,
+  setSessionUpgradeTimeLeftMs,
+  setSessionUpgradeCanDismiss,
   setShowSignModal,
   invalidateAll,
   reset,
@@ -179,12 +376,23 @@ const runImmediateAuthValidation = async ({
             connectionAddress: currentAddress,
             jwt: getAuthJwt(),
             activeProfileProxy,
-            isConnected,
+            isConnected: hasActiveWalletAddress,
             operationId,
             abortSignal: abortController.signal,
           },
           callbacks: {
             onShowSignModal: setShowSignModal,
+            onSessionUpgradeRequired: () => {
+              const status =
+                getOrCreateSessionUpgradePromptStatus(currentAddress);
+              setSignModalReason("session-upgrade");
+              setSessionUpgradePromptMode(
+                canSignActiveWallet ? "sign" : "reshare"
+              );
+              setSessionUpgradeTimeLeftMs(status.timeLeftMs);
+              setSessionUpgradeCanDismiss(status.canDismiss);
+              setShowSignModal(status.shouldShow);
+            },
             onInvalidateCache: invalidateAll,
             onReset: reset,
             onRemoveJwt: () => removeAuthJwt(),
@@ -248,6 +456,8 @@ export default function Auth({
     address,
     hasValidWalletAuth: isAddressAuthorized,
     isConnected,
+    hasActiveWalletAddress,
+    canSignActiveWallet,
     seizeDisconnect,
     seizeDisconnectAndLogout,
     isSafeWallet,
@@ -262,6 +472,13 @@ export default function Auth({
     signatureType: isSafeWallet ? "contract" : "eoa",
   });
   const [showSignModal, setShowSignModal] = useState(false);
+  const [signModalReason, setSignModalReason] =
+    useState<SignModalReason>("auth");
+  const [sessionUpgradePromptMode, setSessionUpgradePromptMode] =
+    useState<SessionUpgradePromptMode>("sign");
+  const [sessionUpgradeTimeLeftMs, setSessionUpgradeTimeLeftMs] = useState(0);
+  const [sessionUpgradeCanDismiss, setSessionUpgradeCanDismiss] =
+    useState(true);
 
   const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity(
     {
@@ -274,6 +491,7 @@ export default function Auth({
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestAddressRef = useRef<string | undefined>(address);
   const activeValidationOperationIdRef = useRef<string | null>(null);
+  const expiredSessionUpgradeAddressRef = useRef<string | null>(null);
   const [authLoadingState, setAuthLoadingState] =
     useState<AuthLoadingState>("idle");
 
@@ -400,6 +618,7 @@ export default function Auth({
 
     if (!isAddressAuthorized) {
       if (isConnected) {
+        setSignModalReason("auth");
         setShowSignModal(true);
       }
       return;
@@ -433,8 +652,13 @@ export default function Auth({
       activeValidationOperationIdRef,
       abortControllerRef,
       activeProfileProxy,
-      isConnected,
+      hasActiveWalletAddress,
+      canSignActiveWallet,
       setAuthLoadingState,
+      setSignModalReason,
+      setSessionUpgradePromptMode,
+      setSessionUpgradeTimeLeftMs,
+      setSessionUpgradeCanDismiss,
       setShowSignModal,
       invalidateAll,
       reset,
@@ -450,6 +674,8 @@ export default function Auth({
     enableWalletAuthentication,
     isAddressAuthorized,
     isConnected,
+    hasActiveWalletAddress,
+    canSignActiveWallet,
     abortCurrentAuthOperation,
     invalidateAll,
     reset,
@@ -701,6 +927,70 @@ export default function Auth({
     return null;
   };
 
+  const showSessionUpgradePrompt = useCallback(
+    (
+      walletAddress: string,
+      { forceShow = false }: { readonly forceShow?: boolean } = {}
+    ): SessionUpgradePromptStatus => {
+      const status = getOrCreateSessionUpgradePromptStatus(walletAddress);
+      setSignModalReason("session-upgrade");
+      setSessionUpgradePromptMode(canSignActiveWallet ? "sign" : "reshare");
+      setSessionUpgradeTimeLeftMs(status.timeLeftMs);
+      setSessionUpgradeCanDismiss(status.canDismiss);
+      setShowSignModal(forceShow ? true : status.shouldShow);
+      return status;
+    },
+    [canSignActiveWallet]
+  );
+
+  const expireSessionUpgradeAuth = useCallback(
+    async (walletAddress: string): Promise<void> => {
+      const normalizedAddress = walletAddress.toLowerCase();
+      if (expiredSessionUpgradeAddressRef.current === normalizedAddress) {
+        return;
+      }
+      expiredSessionUpgradeAddressRef.current = normalizedAddress;
+
+      clearSessionUpgradeReminder(walletAddress);
+      setShowSignModal(false);
+      setSignModalReason("auth");
+      await removeAuthJwt();
+      invalidateAll();
+    },
+    [invalidateAll]
+  );
+
+  useEffect(() => {
+    if (!address || signModalReason !== "session-upgrade") {
+      return;
+    }
+
+    const refreshSessionUpgradePrompt = () => {
+      const status = getOrCreateSessionUpgradePromptStatus(address);
+      setSessionUpgradeTimeLeftMs(status.timeLeftMs);
+      setSessionUpgradeCanDismiss(status.canDismiss);
+      if (status.timeLeftMs <= 0) {
+        void expireSessionUpgradeAuth(address).catch((error) => {
+          logErrorSecurely("session_upgrade_grace_expired_logout", error);
+        });
+        return;
+      }
+      if (status.shouldShow) {
+        setShowSignModal(true);
+      }
+    };
+
+    refreshSessionUpgradePrompt();
+    const interval = globalThis.setInterval(
+      refreshSessionUpgradePrompt,
+      60 * 1000
+    );
+
+    return () => {
+      globalThis.clearInterval(interval);
+    };
+  }, [address, expireSessionUpgradeAuth, signModalReason]);
+
   const authenticateUnauthorizedWallet = async (
     walletAddress: string
   ): Promise<boolean> => {
@@ -727,23 +1017,39 @@ export default function Auth({
   const authenticateAuthorizedWallet = async (
     walletAddress: string
   ): Promise<boolean> => {
-    const abortController = new AbortController();
-    const operationId = `manual-auth-${Date.now()}`;
     const role = activeProfileProxy
       ? validateRoleForAuthentication(activeProfileProxy)
       : null;
 
-    const { isValid } = await validateJwt({
-      jwt: getAuthJwt(),
-      wallet: walletAddress,
-      role,
-      operationId,
-      abortSignal: abortController.signal,
-      activeProfileProxy,
-    });
+    const validationResult =
+      signModalReason === "session-upgrade"
+        ? { isValid: false, requiresSessionUpgrade: true }
+        : await validateJwt({
+            jwt: getAuthJwt(),
+            wallet: walletAddress,
+            role,
+            operationId: `manual-auth-${Date.now()}`,
+            abortSignal: new AbortController().signal,
+            activeProfileProxy,
+          });
 
-    if (!isValid) {
-      await removeAuthJwt();
+    if (!validationResult.isValid) {
+      if (validationResult.requiresSessionUpgrade) {
+        const promptStatus = showSessionUpgradePrompt(walletAddress, {
+          forceShow: true,
+        });
+        if (promptStatus.timeLeftMs <= 0) {
+          await expireSessionUpgradeAuth(walletAddress);
+          return false;
+        }
+        if (!canSignActiveWallet) {
+          return false;
+        }
+      } else {
+        setSignModalReason("auth");
+        await removeAuthJwt();
+      }
+
       const { success } = await requestSignIn({
         signerAddress: walletAddress,
         role,
@@ -751,6 +1057,9 @@ export default function Auth({
 
       if (!success) {
         setShowSignModal(false);
+        if (validationResult.requiresSessionUpgrade) {
+          return false;
+        }
         try {
           await seizeDisconnect();
         } catch (error) {
@@ -760,10 +1069,14 @@ export default function Auth({
       }
 
       invalidateAll();
+      if (validationResult.requiresSessionUpgrade) {
+        clearSessionUpgradeReminder(walletAddress);
+      }
     }
 
     const isSuccess = !!getAuthJwt();
     if (isSuccess) {
+      setSignModalReason("auth");
       setShowSignModal(false);
     }
 
@@ -900,6 +1213,17 @@ export default function Auth({
   }, [connectedProfile?.handle, activeProfileProxy, address]);
 
   const onCancelSignRequest = useCallback(() => {
+    if (signModalReason === "session-upgrade") {
+      if (!address || !sessionUpgradeCanDismiss) {
+        return;
+      }
+      const status = dismissSessionUpgradePrompt(address);
+      setSessionUpgradeTimeLeftMs(status.timeLeftMs);
+      setSessionUpgradeCanDismiss(status.canDismiss);
+      setShowSignModal(false);
+      return;
+    }
+
     setShowSignModal(false);
 
     if (!isAddressAuthorized) {
@@ -912,7 +1236,14 @@ export default function Auth({
     void seizeDisconnectAndLogout().catch((error) => {
       logErrorSecurely("onCancelSignRequest_disconnectAndLogout", error);
     });
-  }, [isAddressAuthorized, seizeDisconnect, seizeDisconnectAndLogout]);
+  }, [
+    address,
+    isAddressAuthorized,
+    seizeDisconnect,
+    seizeDisconnectAndLogout,
+    sessionUpgradeCanDismiss,
+    signModalReason,
+  ]);
 
   // Computed modal visibility to prevent flickering during rapid state changes
   const shouldShowSignModal = useMemo(() => {
@@ -922,6 +1253,14 @@ export default function Auth({
       connectionState === "connected"
     );
   }, [showSignModal, authLoadingState, connectionState]);
+
+  const isSessionUpgradePrompt = signModalReason === "session-upgrade";
+  const isConnectionShareUpgradePrompt =
+    isSessionUpgradePrompt && sessionUpgradePromptMode === "reshare";
+  const sessionUpgradeTimeLeftText = useMemo(
+    () => formatSessionUpgradeTimeLeft(sessionUpgradeTimeLeftMs),
+    [sessionUpgradeTimeLeftMs]
+  );
 
   return (
     <AuthContext.Provider
@@ -947,9 +1286,14 @@ export default function Auth({
           show={shouldShowSignModal}
           onHide={() => {
             // Only allow modal dismissal when not actively validating
-            if (authLoadingState !== "validating") {
-              setShowSignModal(false);
+            if (authLoadingState === "validating") {
+              return;
             }
+            if (isSessionUpgradePrompt) {
+              onCancelSignRequest();
+              return;
+            }
+            setShowSignModal(false);
           }}
           backdrop="static"
           keyboard={false}
@@ -959,48 +1303,63 @@ export default function Auth({
         >
           <Modal.Header className={styles["signModalHeader"]}>
             <div className={styles["signModalTitle"]}>
-              Sign Authentication Request
+              {isConnectionShareUpgradePrompt
+                ? "Connection Update Required"
+                : isSessionUpgradePrompt
+                  ? "Upgrade Authentication"
+                  : "Sign Authentication Request"}
             </div>
           </Modal.Header>
           <Modal.Body className={styles["signModalBody"]}>
             <p className={styles["signModalLead"]}>
-              To connect your wallet, you will need to sign a message to confirm
-              your identity.
+              {isConnectionShareUpgradePrompt
+                ? "This shared connection uses the previous authentication flow. Reshare the connection from a device that is already signed in with the new authentication."
+                : isSessionUpgradePrompt
+                  ? "We have upgraded wallet authentication. Sign once to move this connected wallet to the new secure session."
+                  : "To connect your wallet, you will need to sign a message to confirm your identity."}
             </p>
 
             <ul className={styles["signModalList"]}>
               <li>
-                This signature will be used to generate a secure token (JWT) to
-                authenticate your session.
+                {isConnectionShareUpgradePrompt
+                  ? "Use connection sharing from an active session-v2 web connection, then open the new shared connection on this device."
+                  : isSessionUpgradePrompt
+                    ? "Your current connection will stay available while the new session is created."
+                    : "This signature will be used to generate a secure token (JWT) to authenticate your session."}
               </li>
               <li>
-                Your signature will not cost any gas and is purely for
-                authentication purposes.
+                {isSessionUpgradePrompt
+                  ? `Temporary access time remaining: ${sessionUpgradeTimeLeftText}.`
+                  : "Your signature will not cost any gas and is purely for authentication purposes."}
               </li>
             </ul>
           </Modal.Body>
           <Modal.Footer className={styles["signModalFooter"]}>
-            <Button
-              variant="link"
-              className={styles["signModalCancelButton"]}
-              onClick={onCancelSignRequest}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="link"
-              className={styles["signModalConfirmButton"]}
-              onClick={() => requestAuth()}
-              disabled={isSigningPending}
-            >
-              {isSigningPending ? (
-                <span className={styles["signModalButtonContent"]}>
-                  Confirm in your wallet <DotLoader />
-                </span>
-              ) : (
-                "Sign"
-              )}
-            </Button>
+            {(!isSessionUpgradePrompt || sessionUpgradeCanDismiss) && (
+              <Button
+                variant="link"
+                className={styles["signModalCancelButton"]}
+                onClick={onCancelSignRequest}
+              >
+                {isSessionUpgradePrompt ? "Remind me later" : "Cancel"}
+              </Button>
+            )}
+            {!isConnectionShareUpgradePrompt && (
+              <Button
+                variant="link"
+                className={styles["signModalConfirmButton"]}
+                onClick={() => requestAuth()}
+                disabled={isSigningPending}
+              >
+                {isSigningPending ? (
+                  <span className={styles["signModalButtonContent"]}>
+                    Confirm in your wallet <DotLoader />
+                  </span>
+                ) : (
+                  "Sign"
+                )}
+              </Button>
+            )}
           </Modal.Footer>
         </Modal>
       )}

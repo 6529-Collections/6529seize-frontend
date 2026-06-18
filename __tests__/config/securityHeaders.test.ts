@@ -26,7 +26,7 @@ function findFilesMatching(directory: string, pattern: RegExp): string[] {
 }
 
 function getContentSecurityPolicy(
-  options?: Parameters<typeof createSecurityHeaders>[2]
+  options?: Parameters<typeof createSecurityHeaders>[3]
 ): string {
   return getContentSecurityPolicyFor(
     "https://api.6529.io",
@@ -38,16 +38,30 @@ function getContentSecurityPolicy(
 function getContentSecurityPolicyFor(
   apiEndpoint: string,
   ipfsGatewayEndpoint: string,
-  options?: Parameters<typeof createSecurityHeaders>[2]
+  options?: Parameters<typeof createSecurityHeaders>[3]
 ): string {
   const header = createSecurityHeaders(
     apiEndpoint,
     ipfsGatewayEndpoint,
+    "",
     options
   ).find((candidate) => candidate.key === "Content-Security-Policy");
 
   if (!header) {
     throw new Error("Content-Security-Policy header was not created.");
+  }
+
+  return header.value;
+}
+
+function getPermissionsPolicy(): string {
+  const header = createSecurityHeaders(
+    "https://api.6529.io",
+    "https://ipfs.6529.io"
+  ).find((candidate) => candidate.key === "Permissions-Policy");
+
+  if (!header) {
+    throw new Error("Permissions-Policy header was not created.");
   }
 
   return header.value;
@@ -223,5 +237,15 @@ describe("createSecurityHeaders CSP", () => {
         "http://ipfs.example.com"
       )
     ).not.toContain("http://ipfs.example.com");
+  });
+
+  it("omits browser-rejected permissions policy directives", () => {
+    const permissionsPolicy = getPermissionsPolicy();
+
+    expect(permissionsPolicy).not.toContain("ambient-light-sensor");
+    expect(permissionsPolicy).not.toContain("battery");
+    expect(permissionsPolicy).not.toContain("document-domain");
+    expect(permissionsPolicy).not.toContain("execution-while-not-rendered");
+    expect(permissionsPolicy).not.toContain("execution-while-out-of-viewport");
   });
 });

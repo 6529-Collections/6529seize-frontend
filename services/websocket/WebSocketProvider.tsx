@@ -20,6 +20,8 @@ const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
 const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
 const AUTHENTICATION_TIMEOUT_MS = 8000;
+const AUTHENTICATION_FAILED_CLOSE_CODE = 4008;
+const AUTHENTICATION_TIMEOUT_CLOSE_CODE = 4011;
 
 type WebSocketMessagePayload = {
   readonly type?: unknown;
@@ -170,7 +172,10 @@ export function WebSocketProvider({
           : null;
         setStatus(WebSocketStatus.DISCONNECTED);
         isManualDisconnectRef.current = true;
-        wsRef.current?.close(1008, "Authentication failed");
+        wsRef.current?.close(
+          AUTHENTICATION_FAILED_CLOSE_CODE,
+          "Authentication failed"
+        );
         return;
       }
 
@@ -308,7 +313,10 @@ export function WebSocketProvider({
             authenticationTimerRef.current = setTimeout(() => {
               if (wsRef.current === ws && ws.readyState === WebSocket.OPEN) {
                 isManualDisconnectRef.current = true;
-                ws.close(1011, "Authentication timeout");
+                ws.close(
+                  AUTHENTICATION_TIMEOUT_CLOSE_CODE,
+                  "Authentication timeout"
+                );
               }
             }, AUTHENTICATION_TIMEOUT_MS);
             return;

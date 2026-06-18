@@ -84,6 +84,14 @@ export const publicEnvSchema = z.object({
   DEV_MODE_WALLET_ADDRESS: z.string().optional(),
   MOBILE_APP_SCHEME: z.string().optional(),
   NEXTGEN_CHAIN_ID: z.coerce.number().int().positive().optional(),
+  SESSION_V2_MIGRATION_DEADLINE: z
+    .string()
+    .datetime({
+      offset: true,
+      message:
+        "SESSION_V2_MIGRATION_DEADLINE must be an ISO datetime with timezone, for example 2026-07-01T00:00:00.000Z",
+    })
+    .optional(),
   USE_DEV_AUTH: z.string().optional(),
 
   /**
