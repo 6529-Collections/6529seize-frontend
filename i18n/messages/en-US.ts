@@ -229,6 +229,12 @@ const USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES = objectMessages(
   } as const
 );
 
+const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
+  refreshAction: "Refresh page",
+  title: "A new version is available",
+  eyebrow: "Yes, again!",
+} as const);
+
 const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.walletActivity",
   {
@@ -977,6 +983,7 @@ export const EN_US_MESSAGES = {
   ...REP_CATEGORY_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
+  ...NEW_VERSION_TOAST_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;
