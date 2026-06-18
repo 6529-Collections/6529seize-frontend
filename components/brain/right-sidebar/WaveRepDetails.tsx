@@ -1,40 +1,44 @@
 "use client";
 
-import ProfileAvatar, {
-  ProfileBadgeSize,
-} from "@/components/common/profile/ProfileAvatar";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveRepCategoriesPage } from "@/generated/models/ApiWaveRepCategoriesPage";
 import type { ApiWaveRepCategory } from "@/generated/models/ApiWaveRepCategory";
 import type { ApiWaveRepContributor } from "@/generated/models/ApiWaveRepContributor";
 import type { ApiWaveRepContributorsPage } from "@/generated/models/ApiWaveRepContributorsPage";
 import type { ApiWaveRepOverview } from "@/generated/models/ApiWaveRepOverview";
-import { formatAddress, getTimeAgo } from "@/helpers/Helpers";
 import type { CountlessPage } from "@/helpers/Types";
-import { formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ProfileActivityLogType, RateMatter } from "@/types/enums";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useMemo, useState } from "react";
+import {
+  ALL_CATEGORY_OPTION_ID,
+  CategoryMenu,
+  CategoryRow,
+  ContributorRow,
+  LogRow,
+  SummaryStat,
+  detailText,
+  formatSignedRep,
+  getCategoryOptionId,
+  getContributorCountLabel,
+  getRepTextClass,
+  type WaveRepCategoryOption,
+} from "./WaveRepDetailsComponents";
 
 const CONTRIBUTOR_PAGE_SIZE = 50;
 const CATEGORY_PAGE_SIZE = 100;
 const LOG_PAGE_SIZE = 20;
+const INLINE_CATEGORY_LIMIT = 4;
 const STALE_TIME_MS = 60_000;
-const WAVE_REP_DETAILS_LOCALE = DEFAULT_LOCALE;
-const CHANGE_REASON_MESSAGE_KEYS: Record<string, MessageKey> = {
-  LOST_TDH: "waves.rep.details.activity.reason.lostTdh",
-};
+const RETRY_ACTION_MESSAGE_KEY = "waves.rep.details.actions.retry";
+const ACTIVITY_DESCRIPTION = "Recent edits across all categories";
 
 type RepDetailView = "contributors" | "activity";
 
@@ -49,89 +53,28 @@ interface WaveRepDetailsProps {
   readonly wave: ApiWave;
 }
 
-function detailText(
-  key: MessageKey,
-  params: Record<string, string | number> = {}
-): string {
-  return t(WAVE_REP_DETAILS_LOCALE, key, params);
-}
-
-function formatRepNumber(value: number): string {
-  return formatInteger(WAVE_REP_DETAILS_LOCALE, value);
-}
-
-function formatSignedRep(value: number): string {
-  const formatted = formatRepNumber(value);
-  return value > 0
-    ? detailText("waves.rep.details.rep.positive", { value: formatted })
-    : formatted;
-}
-
-function getContributorCountLabel(count: number): string {
-  return detailText(
-    count === 1
-      ? "waves.rep.details.summary.contributors.one"
-      : "waves.rep.details.summary.contributors.other",
-    { count: formatInteger(WAVE_REP_DETAILS_LOCALE, count) }
-  );
-}
-
-function getRepTextClass(value: number): string {
-  if (value > 0) {
-    return "tw-text-emerald-300";
-  }
-  if (value < 0) {
-    return "tw-text-rose-300";
-  }
-  return "tw-text-iron-300";
-}
-
-function getProfileDisplay(profile: ApiProfileMin): string {
-  const handle = profile.handle?.trim() ?? "";
-  if (handle.length > 0) {
-    return handle;
-  }
-  return formatAddress(profile.primary_address);
-}
-
-function getProfileHref(profile: ApiProfileMin): string {
-  const handle = profile.handle?.trim() ?? "";
-  const routeValue = handle.length > 0 ? handle : profile.primary_address;
-  return `/${encodeURIComponent(routeValue.toLowerCase())}`;
-}
-
-function getFallbackInitial(display: string): string {
-  return display.trim().charAt(0).toUpperCase() || "?";
-}
-
-function getVisibleReason(reason: string | null | undefined): string | null {
-  const normalizedReason = reason?.trim();
-  if (!normalizedReason) {
-    return null;
-  }
-  const machineReason = normalizedReason.toUpperCase().replace(/\s+/g, "_");
-  if (machineReason === "USER_EDIT") {
-    return null;
-  }
-  const reasonMessageKey = CHANGE_REASON_MESSAGE_KEYS[machineReason];
-  if (reasonMessageKey) {
-    return detailText(reasonMessageKey);
-  }
-  return detailText("waves.rep.details.activity.reason.unknown", {
-    reason: normalizedReason,
-  });
-}
-
-function getCreatedAtLabel(createdAt: Date): string {
-  const timestamp = new Date(createdAt).getTime();
-  if (Number.isNaN(timestamp)) {
-    return "";
-  }
-  return getTimeAgo(timestamp);
-}
-
 function runQueryAction(action: () => Promise<unknown>): void {
   action().catch(() => undefined);
+}
+
+function getSelectedCategoryOption({
+  selectedCategoryDetails,
+  allCategoryOption,
+}: {
+  readonly selectedCategoryDetails: ApiWaveRepCategory | null;
+  readonly allCategoryOption: WaveRepCategoryOption;
+}): WaveRepCategoryOption {
+  if (!selectedCategoryDetails) {
+    return allCategoryOption;
+  }
+
+  return {
+    id: getCategoryOptionId(selectedCategoryDetails.category),
+    label: selectedCategoryDetails.category,
+    category: selectedCategoryDetails.category,
+    totalRep: selectedCategoryDetails.total_rep,
+    contributorCount: selectedCategoryDetails.contributor_count,
+  };
 }
 
 async function fetchContributorPage({
@@ -212,172 +155,6 @@ async function fetchLogPage({
   });
 }
 
-function SummaryStat({
-  label,
-  value,
-  toneClassName = "tw-text-white",
-}: {
-  readonly label: string;
-  readonly value: string;
-  readonly toneClassName?: string | undefined;
-}) {
-  return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2">
-      <p className="tw-mb-1 tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-text-iron-500">
-        {label}
-      </p>
-      <p className={`tw-mb-0 tw-text-sm tw-font-semibold ${toneClassName}`}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function CategoryRow({
-  label,
-  totalRep,
-  contributorCount,
-  selected,
-  ariaLabel,
-  onClick,
-}: {
-  readonly label: string;
-  readonly totalRep: number;
-  readonly contributorCount: number;
-  readonly selected: boolean;
-  readonly ariaLabel: string;
-  readonly onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      aria-pressed={selected}
-      title={label}
-      onClick={onClick}
-      className={`tw-grid tw-min-h-[3.25rem] tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-left tw-transition ${
-        selected
-          ? "tw-border-primary-400 tw-bg-primary-400/10"
-          : "tw-border-white/10 tw-bg-white/[0.02] hover:tw-border-white/20 hover:tw-bg-white/[0.05]"
-      }`}
-    >
-      <span className="tw-min-w-0">
-        <span className="tw-block tw-break-words tw-text-xs tw-font-semibold tw-leading-snug tw-text-white">
-          {label}
-        </span>
-        <span className="tw-mt-0.5 tw-block tw-text-[0.6875rem] tw-font-medium tw-text-iron-500">
-          {getContributorCountLabel(contributorCount)}
-        </span>
-      </span>
-      <span
-        className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold ${getRepTextClass(
-          totalRep
-        )}`}
-      >
-        {formatSignedRep(totalRep)}
-      </span>
-    </button>
-  );
-}
-
-function ContributorRow({
-  contributor,
-}: {
-  readonly contributor: ApiWaveRepContributor;
-}) {
-  const display = getProfileDisplay(contributor.profile);
-  const contributionClass = getRepTextClass(contributor.contribution);
-
-  return (
-    <Link
-      href={getProfileHref(contributor.profile)}
-      className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5 tw-no-underline tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.04]"
-    >
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-        <ProfileAvatar
-          pfpUrl={contributor.profile.pfp}
-          size={ProfileBadgeSize.COMPACT}
-          alt={detailText("waves.rep.details.profileAvatarAlt", {
-            profile: display,
-          })}
-          fallbackContent={
-            <span className="tw-text-[0.6875rem] tw-font-semibold tw-text-iron-300">
-              {getFallbackInitial(display)}
-            </span>
-          }
-        />
-        <p className="tw-mb-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-white">
-          {display}
-        </p>
-      </div>
-      <span
-        className={`tw-flex-shrink-0 tw-text-sm tw-font-semibold ${contributionClass}`}
-      >
-        {formatSignedRep(contributor.contribution)}
-      </span>
-    </Link>
-  );
-}
-
-function LogRow({ log }: { readonly log: ProfileActivityLogRatingEdit }) {
-  const change = log.contents.new_rating - log.contents.old_rating;
-  const changeClass = getRepTextClass(change);
-  const oldRatingClass = getRepTextClass(log.contents.old_rating);
-  const newRatingClass = getRepTextClass(log.contents.new_rating);
-  const raterHandle = log.profile_handle?.trim();
-  const rater =
-    raterHandle || detailText("waves.rep.details.activity.unknownRater");
-  const raterHref = raterHandle
-    ? `/${encodeURIComponent(raterHandle.toLowerCase())}`
-    : null;
-  const createdAtLabel = getCreatedAtLabel(log.created_at);
-  const visibleReason = getVisibleReason(log.contents.change_reason);
-
-  return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5">
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-        <div className="tw-min-w-0">
-          {raterHref ? (
-            <Link
-              href={raterHref}
-              className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-text-iron-300"
-            >
-              {rater}
-            </Link>
-          ) : (
-            <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-400">
-              {rater}
-            </span>
-          )}
-          <p className="tw-mb-0 tw-mt-1 tw-flex tw-flex-wrap tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-400">
-            <span className={oldRatingClass}>
-              {formatSignedRep(log.contents.old_rating)}
-            </span>
-            <span aria-hidden="true">-&gt;</span>
-            <span className={newRatingClass}>
-              {formatSignedRep(log.contents.new_rating)}
-            </span>
-            <span className={changeClass}>({formatSignedRep(change)})</span>
-            {log.contents.rating_category && (
-              <span>{log.contents.rating_category}</span>
-            )}
-          </p>
-        </div>
-        {createdAtLabel && (
-          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-500">
-            {createdAtLabel}
-          </span>
-        )}
-      </div>
-      {visibleReason && (
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-500">
-          {visibleReason}
-        </p>
-      )}
-    </div>
-  );
-}
-
 export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<RepDetailView>("contributors");
@@ -437,6 +214,10 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
     () => categoriesQuery.data?.pages.flatMap((page) => page.data) ?? [],
     [categoriesQuery.data?.pages]
   );
+  const visibleCategories = useMemo(
+    () => categories.slice(0, INLINE_CATEGORY_LIMIT),
+    [categories]
+  );
   const contributors = useMemo(
     () => contributorsQuery.data?.pages.flatMap((page) => page.data) ?? [],
     [contributorsQuery.data?.pages]
@@ -457,9 +238,38 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
       wave.wave_rep?.authenticated_user_contribution ??
       null,
   };
+  const allCategoryOption = useMemo<WaveRepCategoryOption>(
+    () => ({
+      id: ALL_CATEGORY_OPTION_ID,
+      label: detailText("waves.rep.details.categories.all"),
+      category: null,
+      totalRep: summary.totalRep,
+      contributorCount: summary.contributorCount,
+    }),
+    [summary.contributorCount, summary.totalRep]
+  );
+  const categoryOptions = useMemo<WaveRepCategoryOption[]>(
+    () => [
+      allCategoryOption,
+      ...categories.map((category) => ({
+        id: getCategoryOptionId(category.category),
+        label: category.category,
+        category: category.category,
+        totalRep: category.total_rep,
+        contributorCount: category.contributor_count,
+      })),
+    ],
+    [allCategoryOption, categories]
+  );
   const selectedCategoryDetails =
     categories.find((category) => category.category === selectedCategory) ??
     null;
+  const selectedCategoryOption = getSelectedCategoryOption({
+    selectedCategoryDetails,
+    allCategoryOption,
+  });
+  const showCategoryBrowser =
+    categories.length > INLINE_CATEGORY_LIMIT || !!categoriesQuery.hasNextPage;
 
   const retryContributors = () => {
     runQueryAction(() => contributorsQuery.refetch());
@@ -489,9 +299,23 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
     setSelectedCategory(null);
   };
 
+  const selectCategoryOption = (option: WaveRepCategoryOption) => {
+    if (option.category === null) {
+      clearSelectedCategory();
+      return;
+    }
+    setSelectedCategory(option.category);
+    setActiveView("contributors");
+  };
+
   const selectCategory = (category: ApiWaveRepCategory) => {
     setSelectedCategory(category.category);
     setActiveView("contributors");
+  };
+
+  const showActivity = () => {
+    clearSelectedCategory();
+    setActiveView("activity");
   };
 
   const contributorHeading = selectedCategory
@@ -509,6 +333,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
     : detailText("waves.rep.details.contributors.description.all", {
         contributors: getContributorCountLabel(summary.contributorCount),
       });
+  const isShowingPreviousContributors = contributorsQuery.isPlaceholderData;
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col tw-gap-5 tw-p-4">
@@ -574,18 +399,13 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             totalRep={summary.totalRep}
             contributorCount={summary.contributorCount}
             selected={selectedCategory === null}
-            ariaLabel={detailText(
-              "waves.rep.details.categories.allAriaLabel",
-              {
-                rep: formatSignedRep(summary.totalRep),
-                contributors: getContributorCountLabel(
-                  summary.contributorCount
-                ),
-              }
-            )}
+            ariaLabel={detailText("waves.rep.details.categories.allAriaLabel", {
+              rep: formatSignedRep(summary.totalRep),
+              contributors: getContributorCountLabel(summary.contributorCount),
+            })}
             onClick={clearSelectedCategory}
           />
-          {categories.map((category) => (
+          {visibleCategories.map((category) => (
             <CategoryRow
               key={category.category}
               label={category.category}
@@ -605,6 +425,14 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               onClick={() => selectCategory(category)}
             />
           ))}
+          {showCategoryBrowser ? (
+            <CategoryMenu
+              options={categoryOptions}
+              selectedOption={selectedCategoryOption}
+              onSelect={selectCategoryOption}
+              variant="browse"
+            />
+          ) : null}
         </div>
 
         {categoriesQuery.status === "success" && categories.length === 0 && (
@@ -623,7 +451,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               onClick={retryCategories}
               className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
             >
-              {detailText("waves.rep.details.actions.retry")}
+              {detailText(RETRY_ACTION_MESSAGE_KEY)}
             </button>
           </div>
         )}
@@ -651,37 +479,45 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         )}
       </section>
 
-      <div
-        role="tablist"
-        aria-label={detailText("waves.rep.details.view.ariaLabel")}
-        className="tw-grid tw-grid-cols-2 tw-gap-1 tw-rounded-md tw-bg-white/[0.04] tw-p-1"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeView === "contributors"}
-          onClick={() => setActiveView("contributors")}
-          className={`tw-cursor-pointer tw-rounded tw-border-none tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
-            activeView === "contributors"
-              ? "tw-bg-white/10 tw-text-white"
-              : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
-          }`}
+      <div className="tw-sticky tw-top-0 tw-z-20 tw--mx-4 tw-flex tw-flex-col tw-gap-2 tw-border-y tw-border-solid tw-border-white/5 tw-bg-iron-950/95 tw-px-4 tw-py-3 tw-backdrop-blur">
+        <CategoryMenu
+          options={categoryOptions}
+          selectedOption={selectedCategoryOption}
+          onSelect={selectCategoryOption}
+          variant="sticky"
+        />
+        <div
+          role="tablist"
+          aria-label={detailText("waves.rep.details.view.ariaLabel")}
+          className="tw-grid tw-grid-cols-2 tw-gap-1 tw-rounded-md tw-bg-white/[0.04] tw-p-1"
         >
-          {detailText("waves.rep.details.view.contributors")}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeView === "activity"}
-          onClick={() => setActiveView("activity")}
-          className={`tw-cursor-pointer tw-rounded tw-border-none tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
-            activeView === "activity"
-              ? "tw-bg-white/10 tw-text-white"
-              : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
-          }`}
-        >
-          {detailText("waves.rep.details.view.activity")}
-        </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeView === "contributors"}
+            onClick={() => setActiveView("contributors")}
+            className={`tw-cursor-pointer tw-rounded tw-border-none tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
+              activeView === "contributors"
+                ? "tw-bg-white/10 tw-text-white"
+                : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
+            }`}
+          >
+            {detailText("waves.rep.details.view.contributors")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeView === "activity"}
+            onClick={showActivity}
+            className={`tw-cursor-pointer tw-rounded tw-border-none tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
+              activeView === "activity"
+                ? "tw-bg-white/10 tw-text-white"
+                : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
+            }`}
+          >
+            {detailText("waves.rep.details.view.activity")}
+          </button>
+        </div>
       </div>
 
       {activeView === "contributors" && (
@@ -698,30 +534,10 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 {contributorDescription}
               </p>
             </div>
-            {contributorsQuery.isPending && (
+            {(contributorsQuery.isPending || isShowingPreviousContributors) && (
               <CircleLoader size={CircleLoaderSize.MEDIUM} />
             )}
           </div>
-
-          {selectedCategory && (
-            <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/10 tw-px-3 tw-py-2">
-              <p
-                title={selectedCategory}
-                className="tw-text-primary-100 tw-mb-0 tw-min-w-0 tw-truncate tw-text-xs tw-font-medium"
-              >
-                {detailText("waves.rep.details.contributors.categoryFilter", {
-                  category: selectedCategory,
-                })}
-              </p>
-              <button
-                type="button"
-                onClick={clearSelectedCategory}
-                className="tw-flex-shrink-0 tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
-              >
-                {detailText("waves.rep.details.contributors.categoryFilterAll")}
-              </button>
-            </div>
-          )}
 
           {contributorsQuery.isLoadingError && (
             <div className="tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/20 tw-bg-rose-400/5 tw-p-3">
@@ -733,12 +549,19 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 onClick={retryContributors}
                 className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
               >
-                {detailText("waves.rep.details.actions.retry")}
+                {detailText(RETRY_ACTION_MESSAGE_KEY)}
               </button>
             </div>
           )}
 
+          {isShowingPreviousContributors && (
+            <div className="tw-flex tw-justify-center tw-py-6">
+              <CircleLoader size={CircleLoaderSize.MEDIUM} />
+            </div>
+          )}
+
           {contributorsQuery.status === "success" &&
+            !isShowingPreviousContributors &&
             contributors.length === 0 && (
               <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-p-4">
                 <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
@@ -752,7 +575,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               </div>
             )}
 
-          {contributors.length > 0 && (
+          {!isShowingPreviousContributors && contributors.length > 0 && (
             <div className="tw-flex tw-flex-col tw-gap-2">
               {contributors.map((contributor) => (
                 <ContributorRow
@@ -770,16 +593,14 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               {contributorsQuery.isFetchNextPageError && (
                 <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/15 tw-bg-rose-400/[0.03] tw-px-3 tw-py-3">
                   <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-                    {detailText(
-                      "waves.rep.details.contributors.loadMoreError"
-                    )}
+                    {detailText("waves.rep.details.contributors.loadMoreError")}
                   </p>
                   <button
                     type="button"
                     onClick={fetchNextContributorsPage}
                     className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
                   >
-                    {detailText("waves.rep.details.actions.retry")}
+                    {detailText(RETRY_ACTION_MESSAGE_KEY)}
                   </button>
                 </div>
               )}
@@ -813,7 +634,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 {detailText("waves.rep.details.activity.title")}
               </h3>
               <p className="tw-mb-0 tw-mt-0.5 tw-text-xs tw-text-iron-500">
-                {detailText("waves.rep.details.activity.description")}
+                {ACTIVITY_DESCRIPTION}
               </p>
             </div>
             {logsQuery.isPending && (
@@ -831,7 +652,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 onClick={retryLogs}
                 className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
               >
-                {detailText("waves.rep.details.actions.retry")}
+                {detailText(RETRY_ACTION_MESSAGE_KEY)}
               </button>
             </div>
           )}
@@ -864,7 +685,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                     onClick={fetchNextLogsPage}
                     className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
                   >
-                    {detailText("waves.rep.details.actions.retry")}
+                    {detailText(RETRY_ACTION_MESSAGE_KEY)}
                   </button>
                 </div>
               )}
