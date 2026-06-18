@@ -6,6 +6,8 @@ import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
 import { ProfileActivityLogRatingEditContentChangeReason } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -25,7 +27,10 @@ const LOG_MATTER_STR: Record<RateMatter, string> = {
   [RateMatter.REP]: "Rep",
   [RateMatter.NIC]: "NIC",
   [RateMatter.DROP_REP]: "Drop Rep",
-  [RateMatter.WAVE_REP]: "Wave REP",
+  [RateMatter.WAVE_REP]: t(
+    DEFAULT_LOCALE,
+    "profileActivity.rate.matter.waveRep"
+  ),
 };
 
 const TO_FROM: Record<ProfileActivityLogRateType, string> = {

@@ -16,12 +16,11 @@ import type { ApiWaveRepCategory } from "@/generated/models/ApiWaveRepCategory";
 import type { ApiWaveRepContributor } from "@/generated/models/ApiWaveRepContributor";
 import type { ApiWaveRepContributorsPage } from "@/generated/models/ApiWaveRepContributorsPage";
 import type { ApiWaveRepOverview } from "@/generated/models/ApiWaveRepOverview";
-import {
-  formatAddress,
-  formatNumberWithCommas,
-  getTimeAgo,
-} from "@/helpers/Helpers";
+import { formatAddress, getTimeAgo } from "@/helpers/Helpers";
 import type { CountlessPage } from "@/helpers/Types";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ProfileActivityLogType, RateMatter } from "@/types/enums";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
@@ -32,6 +31,10 @@ const CONTRIBUTOR_PAGE_SIZE = 50;
 const CATEGORY_PAGE_SIZE = 100;
 const LOG_PAGE_SIZE = 20;
 const STALE_TIME_MS = 60_000;
+const WAVE_REP_DETAILS_LOCALE = DEFAULT_LOCALE;
+const CHANGE_REASON_MESSAGE_KEYS: Record<string, MessageKey> = {
+  LOST_TDH: "waves.rep.details.activity.reason.lostTdh",
+};
 
 type RepDetailView = "contributors" | "activity";
 
@@ -46,9 +49,31 @@ interface WaveRepDetailsProps {
   readonly wave: ApiWave;
 }
 
+function detailText(
+  key: MessageKey,
+  params: Record<string, string | number> = {}
+): string {
+  return t(WAVE_REP_DETAILS_LOCALE, key, params);
+}
+
+function formatRepNumber(value: number): string {
+  return formatInteger(WAVE_REP_DETAILS_LOCALE, value);
+}
+
 function formatSignedRep(value: number): string {
-  const formatted = formatNumberWithCommas(value);
-  return value > 0 ? `+${formatted}` : formatted;
+  const formatted = formatRepNumber(value);
+  return value > 0
+    ? detailText("waves.rep.details.rep.positive", { value: formatted })
+    : formatted;
+}
+
+function getContributorCountLabel(count: number): string {
+  return detailText(
+    count === 1
+      ? "waves.rep.details.summary.contributors.one"
+      : "waves.rep.details.summary.contributors.other",
+    { count: formatInteger(WAVE_REP_DETAILS_LOCALE, count) }
+  );
 }
 
 function getRepTextClass(value: number): string {
@@ -79,15 +104,6 @@ function getFallbackInitial(display: string): string {
   return display.trim().charAt(0).toUpperCase() || "?";
 }
 
-function formatReason(reason: string): string {
-  return reason
-    .toLowerCase()
-    .split("_")
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
-}
-
 function getVisibleReason(reason: string | null | undefined): string | null {
   const normalizedReason = reason?.trim();
   if (!normalizedReason) {
@@ -97,7 +113,13 @@ function getVisibleReason(reason: string | null | undefined): string | null {
   if (machineReason === "USER_EDIT") {
     return null;
   }
-  return formatReason(normalizedReason);
+  const reasonMessageKey = CHANGE_REASON_MESSAGE_KEYS[machineReason];
+  if (reasonMessageKey) {
+    return detailText(reasonMessageKey);
+  }
+  return detailText("waves.rep.details.activity.reason.unknown", {
+    reason: normalizedReason,
+  });
 }
 
 function getCreatedAtLabel(createdAt: Date): string {
@@ -106,6 +128,10 @@ function getCreatedAtLabel(createdAt: Date): string {
     return "";
   }
   return getTimeAgo(timestamp);
+}
+
+function runQueryAction(action: () => Promise<unknown>): void {
+  action().catch(() => undefined);
 }
 
 async function fetchContributorPage({
@@ -240,8 +266,7 @@ function CategoryRow({
           {label}
         </span>
         <span className="tw-mt-0.5 tw-block tw-text-[0.6875rem] tw-font-medium tw-text-iron-500">
-          {formatNumberWithCommas(contributorCount)} contributor
-          {contributorCount === 1 ? "" : "s"}
+          {getContributorCountLabel(contributorCount)}
         </span>
       </span>
       <span
@@ -272,7 +297,9 @@ function ContributorRow({
         <ProfileAvatar
           pfpUrl={contributor.profile.pfp}
           size={ProfileBadgeSize.COMPACT}
-          alt={`${display} profile`}
+          alt={detailText("waves.rep.details.profileAvatarAlt", {
+            profile: display,
+          })}
           fallbackContent={
             <span className="tw-text-[0.6875rem] tw-font-semibold tw-text-iron-300">
               {getFallbackInitial(display)}
@@ -297,8 +324,12 @@ function LogRow({ log }: { readonly log: ProfileActivityLogRatingEdit }) {
   const changeClass = getRepTextClass(change);
   const oldRatingClass = getRepTextClass(log.contents.old_rating);
   const newRatingClass = getRepTextClass(log.contents.new_rating);
-  const rater = log.profile_handle?.trim() || "Unknown";
-  const raterHref = `/${encodeURIComponent(rater.toLowerCase())}`;
+  const raterHandle = log.profile_handle?.trim();
+  const rater =
+    raterHandle || detailText("waves.rep.details.activity.unknownRater");
+  const raterHref = raterHandle
+    ? `/${encodeURIComponent(raterHandle.toLowerCase())}`
+    : null;
   const createdAtLabel = getCreatedAtLabel(log.created_at);
   const visibleReason = getVisibleReason(log.contents.change_reason);
 
@@ -306,12 +337,18 @@ function LogRow({ log }: { readonly log: ProfileActivityLogRatingEdit }) {
     <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-min-w-0">
-          <Link
-            href={raterHref}
-            className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-text-iron-300"
-          >
-            {rater}
-          </Link>
+          {raterHref ? (
+            <Link
+              href={raterHref}
+              className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-text-iron-300"
+            >
+              {rater}
+            </Link>
+          ) : (
+            <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-400">
+              {rater}
+            </span>
+          )}
           <p className="tw-mb-0 tw-mt-1 tw-flex tw-flex-wrap tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-400">
             <span className={oldRatingClass}>
               {formatSignedRep(log.contents.old_rating)}
@@ -425,27 +462,27 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
     null;
 
   const retryContributors = () => {
-    void contributorsQuery.refetch();
+    runQueryAction(() => contributorsQuery.refetch());
   };
 
   const fetchNextContributorsPage = () => {
-    void contributorsQuery.fetchNextPage();
+    runQueryAction(() => contributorsQuery.fetchNextPage());
   };
 
   const fetchNextCategoriesPage = () => {
-    void categoriesQuery.fetchNextPage();
+    runQueryAction(() => categoriesQuery.fetchNextPage());
   };
 
   const retryCategories = () => {
-    void categoriesQuery.refetch();
+    runQueryAction(() => categoriesQuery.refetch());
   };
 
   const fetchNextLogsPage = () => {
-    void logsQuery.fetchNextPage();
+    runQueryAction(() => logsQuery.fetchNextPage());
   };
 
   const retryLogs = () => {
-    void logsQuery.refetch();
+    runQueryAction(() => logsQuery.refetch());
   };
 
   const clearSelectedCategory = () => {
@@ -458,13 +495,20 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
   };
 
   const contributorHeading = selectedCategory
-    ? `Contributors in ${selectedCategory}`
-    : "All contributors by Wave REP";
+    ? detailText("waves.rep.details.contributors.heading.category", {
+        category: selectedCategory,
+      })
+    : detailText("waves.rep.details.contributors.heading.all");
   const contributorDescription = selectedCategoryDetails
-    ? `${formatNumberWithCommas(
-        selectedCategoryDetails.contributor_count
-      )} contributors, ${formatSignedRep(selectedCategoryDetails.total_rep)}`
-    : `${formatNumberWithCommas(summary.contributorCount)} contributors`;
+    ? detailText("waves.rep.details.contributors.description.category", {
+        contributors: getContributorCountLabel(
+          selectedCategoryDetails.contributor_count
+        ),
+        rep: formatSignedRep(selectedCategoryDetails.total_rep),
+      })
+    : detailText("waves.rep.details.contributors.description.all", {
+        contributors: getContributorCountLabel(summary.contributorCount),
+      });
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col tw-gap-5 tw-p-4">
@@ -474,20 +518,20 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             id="wave-rep-summary-heading"
             className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
           >
-            Wave REP
+            {detailText("waves.rep.details.summary.title")}
           </h3>
           <span className="tw-text-xs tw-font-medium tw-text-iron-500">
-            {formatNumberWithCommas(summary.contributorCount)} contributors
+            {getContributorCountLabel(summary.contributorCount)}
           </span>
         </div>
         <div className="tw-grid tw-grid-cols-2 tw-gap-2">
           <SummaryStat
-            label="Total"
+            label={detailText("waves.rep.details.summary.total")}
             value={formatSignedRep(summary.totalRep)}
             toneClassName={getRepTextClass(summary.totalRep)}
           />
           <SummaryStat
-            label="Your REP"
+            label={detailText("waves.rep.details.summary.yourRep")}
             value={
               summary.authenticatedUserContribution === null
                 ? "-"
@@ -498,12 +542,12 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             )}
           />
           <SummaryStat
-            label="Positive"
+            label={detailText("waves.rep.details.summary.positive")}
             value={formatSignedRep(summary.positiveRep)}
             toneClassName={getRepTextClass(summary.positiveRep)}
           />
           <SummaryStat
-            label="Negative"
+            label={detailText("waves.rep.details.summary.negative")}
             value={formatSignedRep(summary.negativeRep)}
             toneClassName={getRepTextClass(summary.negativeRep)}
           />
@@ -516,25 +560,29 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             id="wave-rep-categories-heading"
             className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
           >
-            Categories
+            {detailText("waves.rep.details.categories.title")}
           </h3>
           {categoriesQuery.isPending && (
             <span className="tw-text-xs tw-font-medium tw-text-iron-500">
-              Loading
+              {detailText("waves.rep.details.categories.loading")}
             </span>
           )}
         </div>
         <div className="tw-flex tw-flex-col tw-gap-2">
           <CategoryRow
-            label="All"
+            label={detailText("waves.rep.details.categories.all")}
             totalRep={summary.totalRep}
             contributorCount={summary.contributorCount}
             selected={selectedCategory === null}
-            ariaLabel={`Show all contributors, ${formatSignedRep(
-              summary.totalRep
-            )} Wave REP from ${formatNumberWithCommas(
-              summary.contributorCount
-            )} contributors`}
+            ariaLabel={detailText(
+              "waves.rep.details.categories.allAriaLabel",
+              {
+                rep: formatSignedRep(summary.totalRep),
+                contributors: getContributorCountLabel(
+                  summary.contributorCount
+                ),
+              }
+            )}
             onClick={clearSelectedCategory}
           />
           {categories.map((category) => (
@@ -544,13 +592,16 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               totalRep={category.total_rep}
               contributorCount={category.contributor_count}
               selected={selectedCategory === category.category}
-              ariaLabel={`Show contributors in ${
-                category.category
-              }, ${formatSignedRep(
-                category.total_rep
-              )} Wave REP from ${formatNumberWithCommas(
-                category.contributor_count
-              )} contributors`}
+              ariaLabel={detailText(
+                "waves.rep.details.categories.categoryAriaLabel",
+                {
+                  category: category.category,
+                  rep: formatSignedRep(category.total_rep),
+                  contributors: getContributorCountLabel(
+                    category.contributor_count
+                  ),
+                }
+              )}
               onClick={() => selectCategory(category)}
             />
           ))}
@@ -558,21 +609,21 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
         {categoriesQuery.status === "success" && categories.length === 0 && (
           <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-text-iron-500">
-            No REP categories yet.
+            {detailText("waves.rep.details.categories.empty")}
           </p>
         )}
 
         {categoriesQuery.isLoadingError && (
           <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/15 tw-bg-rose-400/[0.03] tw-px-3 tw-py-3">
             <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-              Could not load categories.
+              {detailText("waves.rep.details.categories.error")}
             </p>
             <button
               type="button"
               onClick={retryCategories}
               className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
             >
-              Retry
+              {detailText("waves.rep.details.actions.retry")}
             </button>
           </div>
         )}
@@ -583,7 +634,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           <div className="tw-mt-3">
             {categoriesQuery.isFetchNextPageError && (
               <p className="tw-mb-2 tw-text-xs tw-text-rose-300">
-                Could not load more categories.
+                {detailText("waves.rep.details.categories.loadMoreError")}
               </p>
             )}
             <button
@@ -593,8 +644,8 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
             >
               {categoriesQuery.isFetchingNextPage
-                ? "Loading categories"
-                : "Load more categories"}
+                ? detailText("waves.rep.details.categories.loadingMore")
+                : detailText("waves.rep.details.categories.loadMore")}
             </button>
           </div>
         )}
@@ -602,7 +653,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
       <div
         role="tablist"
-        aria-label="Wave REP detail view"
+        aria-label={detailText("waves.rep.details.view.ariaLabel")}
         className="tw-grid tw-grid-cols-2 tw-gap-1 tw-rounded-md tw-bg-white/[0.04] tw-p-1"
       >
         <button
@@ -616,7 +667,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
           }`}
         >
-          Contributors
+          {detailText("waves.rep.details.view.contributors")}
         </button>
         <button
           type="button"
@@ -629,7 +680,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
           }`}
         >
-          Activity
+          {detailText("waves.rep.details.view.activity")}
         </button>
       </div>
 
@@ -654,18 +705,20 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
           {selectedCategory && (
             <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/10 tw-px-3 tw-py-2">
-              <p className="tw-text-primary-100 tw-mb-0 tw-min-w-0 tw-truncate tw-text-xs tw-font-medium">
-                Category:{" "}
-                <span title={selectedCategory} className="tw-text-white">
-                  {selectedCategory}
-                </span>
+              <p
+                title={selectedCategory}
+                className="tw-text-primary-100 tw-mb-0 tw-min-w-0 tw-truncate tw-text-xs tw-font-medium"
+              >
+                {detailText("waves.rep.details.contributors.categoryFilter", {
+                  category: selectedCategory,
+                })}
               </p>
               <button
                 type="button"
                 onClick={clearSelectedCategory}
                 className="tw-flex-shrink-0 tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
               >
-                All
+                {detailText("waves.rep.details.contributors.categoryFilterAll")}
               </button>
             </div>
           )}
@@ -673,14 +726,14 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           {contributorsQuery.isLoadingError && (
             <div className="tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/20 tw-bg-rose-400/5 tw-p-3">
               <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-                Could not load contributors.
+                {detailText("waves.rep.details.contributors.error")}
               </p>
               <button
                 type="button"
                 onClick={retryContributors}
                 className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
               >
-                Retry
+                {detailText("waves.rep.details.actions.retry")}
               </button>
             </div>
           )}
@@ -690,8 +743,11 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-p-4">
                 <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
                   {selectedCategory
-                    ? `No contributors in ${selectedCategory} yet.`
-                    : "No Wave REP yet."}
+                    ? detailText(
+                        "waves.rep.details.contributors.empty.category",
+                        { category: selectedCategory }
+                      )
+                    : detailText("waves.rep.details.contributors.empty.all")}
                 </p>
               </div>
             )}
@@ -714,14 +770,16 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               {contributorsQuery.isFetchNextPageError && (
                 <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/15 tw-bg-rose-400/[0.03] tw-px-3 tw-py-3">
                   <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-                    Could not load more contributors.
+                    {detailText(
+                      "waves.rep.details.contributors.loadMoreError"
+                    )}
                   </p>
                   <button
                     type="button"
                     onClick={fetchNextContributorsPage}
                     className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
                   >
-                    Retry
+                    {detailText("waves.rep.details.actions.retry")}
                   </button>
                 </div>
               )}
@@ -735,8 +793,8 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                   className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
                 >
                   {contributorsQuery.isFetchingNextPage
-                    ? "Loading contributors"
-                    : "Load more contributors"}
+                    ? detailText("waves.rep.details.contributors.loadingMore")
+                    : detailText("waves.rep.details.contributors.loadMore")}
                 </button>
               )}
             </div>
@@ -752,10 +810,10 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 id="wave-rep-activity-heading"
                 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
               >
-                Wave REP activity
+                {detailText("waves.rep.details.activity.title")}
               </h3>
               <p className="tw-mb-0 tw-mt-0.5 tw-text-xs tw-text-iron-500">
-                Recent edits and reasons
+                {detailText("waves.rep.details.activity.description")}
               </p>
             </div>
             {logsQuery.isPending && (
@@ -766,21 +824,21 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           {logsQuery.isLoadingError && (
             <div className="tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/20 tw-bg-rose-400/5 tw-p-3">
               <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-                Could not load Wave REP activity.
+                {detailText("waves.rep.details.activity.error")}
               </p>
               <button
                 type="button"
                 onClick={retryLogs}
                 className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
               >
-                Retry
+                {detailText("waves.rep.details.actions.retry")}
               </button>
             </div>
           )}
 
           {logsQuery.status === "success" && logs.length === 0 && (
             <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-              No Wave REP activity yet.
+              {detailText("waves.rep.details.activity.empty")}
             </p>
           )}
 
@@ -799,14 +857,14 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               {logsQuery.isFetchNextPageError && (
                 <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/15 tw-bg-rose-400/[0.03] tw-px-3 tw-py-3">
                   <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-                    Could not load more activity.
+                    {detailText("waves.rep.details.activity.loadMoreError")}
                   </p>
                   <button
                     type="button"
                     onClick={fetchNextLogsPage}
                     className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
                   >
-                    Retry
+                    {detailText("waves.rep.details.actions.retry")}
                   </button>
                 </div>
               )}
@@ -819,8 +877,8 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                   className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
                 >
                   {logsQuery.isFetchingNextPage
-                    ? "Loading activity"
-                    : "Load more activity"}
+                    ? detailText("waves.rep.details.activity.loadingMore")
+                    : detailText("waves.rep.details.activity.loadMore")}
                 </button>
               )}
             </div>

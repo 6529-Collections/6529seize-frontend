@@ -7,6 +7,8 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { amIUser } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
 import { useContext, useEffect, useState } from "react";
 
@@ -14,7 +16,7 @@ const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.NIC]: "NIC rate",
   [RateMatter.REP]: "give Rep for",
   [RateMatter.DROP_REP]: "give Drop Rep for",
-  [RateMatter.WAVE_REP]: "give Wave REP for",
+  [RateMatter.WAVE_REP]: t(DEFAULT_LOCALE, "user.rate.subtitle.waveRep"),
 };
 
 enum RaterContext {

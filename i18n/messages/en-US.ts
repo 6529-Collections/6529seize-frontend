@@ -340,6 +340,64 @@ const WAVE_REP_MODAL_MESSAGES = objectMessages("waves.rep.modal", {
     "No available Wave REP credit for this category. You can adjust existing REP when you have a current contribution, or come back when more credit is available.",
 } as const);
 
+const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
+  "summary.title": "Wave REP",
+  "summary.contributors.one": "{count} contributor",
+  "summary.contributors.other": "{count} contributors",
+  "summary.total": "Total",
+  "summary.yourRep": "Your REP",
+  "summary.positive": "Positive",
+  "summary.negative": "Negative",
+  "categories.title": "Categories",
+  "categories.loading": "Loading",
+  "categories.all": "All",
+  "categories.allAriaLabel":
+    "Show all contributors, {rep} Wave REP from {contributors}",
+  "categories.categoryAriaLabel":
+    "Show contributors in {category}, {rep} Wave REP from {contributors}",
+  "categories.empty": "No REP categories yet.",
+  "categories.error": "Could not load categories.",
+  "categories.loadMoreError": "Could not load more categories.",
+  "categories.loadingMore": "Loading categories",
+  "categories.loadMore": "Load more categories",
+  "view.ariaLabel": "Wave REP detail view",
+  "view.contributors": "Contributors",
+  "view.activity": "Activity",
+  "contributors.heading.all": "All contributors by Wave REP",
+  "contributors.heading.category": "Contributors in {category}",
+  "contributors.description.all": "{contributors}",
+  "contributors.description.category": "{contributors}, {rep}",
+  "contributors.categoryFilter": "Category: {category}",
+  "contributors.categoryFilterAll": "All",
+  "contributors.error": "Could not load contributors.",
+  "contributors.empty.all": "No Wave REP yet.",
+  "contributors.empty.category": "No contributors in {category} yet.",
+  "contributors.loadMoreError": "Could not load more contributors.",
+  "contributors.loadingMore": "Loading contributors",
+  "contributors.loadMore": "Load more contributors",
+  "activity.title": "Wave REP activity",
+  "activity.description": "Recent edits and reasons",
+  "activity.unknownRater": "Unknown",
+  "activity.error": "Could not load Wave REP activity.",
+  "activity.empty": "No Wave REP activity yet.",
+  "activity.loadMoreError": "Could not load more activity.",
+  "activity.loadingMore": "Loading activity",
+  "activity.loadMore": "Load more activity",
+  "activity.reason.lostTdh": "Lost TDH",
+  "activity.reason.unknown": "{reason}",
+  "actions.retry": "Retry",
+  profileAvatarAlt: "{profile} profile",
+  "rep.positive": "+{value}",
+} as const);
+
+const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
+  "matter.waveRep": "Wave REP",
+} as const);
+
+const USER_RATE_MESSAGES = objectMessages("user.rate", {
+  "subtitle.waveRep": "give Wave REP for",
+} as const);
+
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "metadata.title": "Tech",
   "metadata.description": "About",
@@ -932,6 +990,9 @@ export const EN_US_MESSAGES = {
   ...WAVE_SCORE_DETAILS_MESSAGES,
   ...WAVE_REP_ACTION_MESSAGES,
   ...WAVE_REP_MODAL_MESSAGES,
+  ...WAVE_REP_DETAILS_MESSAGES,
+  ...PROFILE_ACTIVITY_RATE_MESSAGES,
+  ...USER_RATE_MESSAGES,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,

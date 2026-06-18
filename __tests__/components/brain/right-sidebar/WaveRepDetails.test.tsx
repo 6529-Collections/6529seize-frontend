@@ -484,7 +484,58 @@ describe("WaveRepDetails", () => {
       )
     );
     expect(await screen.findByText("bob")).toBeInTheDocument();
-    expect(screen.getByText("Lost Tdh")).toBeInTheDocument();
+    expect(screen.getByText("Lost TDH")).toBeInTheDocument();
+  });
+
+  it("renders unknown activity raters without linking to an unknown profile", async () => {
+    commonApiFetchMock.mockImplementation(
+      ({ endpoint }: { endpoint: string }) => {
+        if (endpoint === "waves/wave-1/rep/overview") {
+          return Promise.resolve({
+            total_rep: 42,
+            positive_rep: 47,
+            negative_rep: -5,
+            authenticated_user_contribution: 7,
+            contributor_count: 2,
+            contributors: { data: [], page: 1, next: false },
+          });
+        }
+
+        if (endpoint === "waves/wave-1/rep/categories") {
+          return Promise.resolve({ data: [], page: 1, next: false });
+        }
+
+        if (endpoint === "profile-logs") {
+          return Promise.resolve({
+            data: [
+              {
+                id: "log-unknown",
+                profile_handle: "",
+                created_at: new Date(Date.now() - 60_000),
+                contents: {
+                  old_rating: 0,
+                  new_rating: 10,
+                  rating_category: "quality",
+                  change_reason: "USER_EDIT",
+                  rating_matter: "WAVE_REP",
+                },
+              },
+            ],
+            page: 1,
+            next: false,
+          });
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint ${endpoint}`));
+      }
+    );
+
+    renderDetails();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+
+    const unknownRater = await screen.findByText("Unknown");
+    expect(unknownRater.closest("a")).toBeNull();
   });
 
   it("renders empty states", async () => {
