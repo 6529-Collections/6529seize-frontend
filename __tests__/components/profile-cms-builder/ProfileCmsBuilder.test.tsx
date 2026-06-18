@@ -200,8 +200,8 @@ describe("ProfileCmsBuilder", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Wallet gallery")).toBeInTheDocument();
     expect(
-      screen.getByAltText("The Memes by 6529 card number 1")
-    ).toBeInTheDocument();
+      screen.getAllByAltText("The Memes by 6529 card number 1").length
+    ).toBeGreaterThan(0);
   });
 
   it("validates wallet input before requesting a gallery snapshot", async () => {
@@ -252,8 +252,8 @@ describe("ProfileCmsBuilder", () => {
     await user.click(screen.getByRole("button", { name: "Preview" }));
     expect(screen.queryByAltText("The Memes by 6529 card number 1")).toBeNull();
     expect(
-      screen.getByAltText("The Memes by 6529 card number 2")
-    ).toBeInTheDocument();
+      screen.getAllByAltText("The Memes by 6529 card number 2").length
+    ).toBeGreaterThan(0);
   });
 
   it("does not show a stale save result after edits during the request", async () => {

@@ -1,5 +1,8 @@
 declare module "three" {
   export const DoubleSide: number;
+  export const ACESFilmicToneMapping: number;
+  export const PCFSoftShadowMap: number;
+  export const RepeatWrapping: number;
   export const SRGBColorSpace: string;
 
   export class Vector2 {
@@ -13,6 +16,10 @@ declare module "three" {
     x: number;
     y: number;
     z: number;
+    addScaledVector(vector: Vector3, scale: number): this;
+    lengthSq(): number;
+    multiplyScalar(scale: number): this;
+    normalize(): this;
     set(x: number, y: number, z: number): this;
     setScalar(scale: number): this;
     sub(vector: Vector3): this;
@@ -22,11 +29,17 @@ declare module "three" {
     x: number;
     y: number;
     z: number;
+    order: string;
     set(x: number, y: number, z: number): this;
   }
 
   export class Color {
     constructor(color: string | number);
+  }
+
+  export class Clock {
+    constructor(autoStart?: boolean);
+    getDelta(): number;
   }
 
   export class Object3D {
@@ -49,6 +62,11 @@ declare module "three" {
 
   export class Scene extends Object3D {
     background: Color | null;
+    fog: Fog | null;
+  }
+
+  export class Fog {
+    constructor(color: string | number, near?: number, far?: number);
   }
 
   export class BufferGeometry {
@@ -63,10 +81,30 @@ declare module "three" {
     constructor(width?: number, height?: number, depth?: number);
   }
 
+  export class CylinderGeometry extends BufferGeometry {
+    constructor(
+      radiusTop?: number,
+      radiusBottom?: number,
+      height?: number,
+      radialSegments?: number
+    );
+  }
+
   export class Texture {
     readonly isTexture: boolean;
+    anisotropy: number;
     colorSpace: string;
+    repeat: {
+      set(x: number, y: number): void;
+    };
+    wrapS: number;
+    wrapT: number;
+    clone(): Texture;
     dispose(): void;
+  }
+
+  export class CanvasTexture extends Texture {
+    constructor(canvas: HTMLCanvasElement);
   }
 
   export class TextureLoader {
@@ -83,8 +121,10 @@ declare module "three" {
     color?: string | number | undefined;
     map?: Texture | null | undefined;
     metalness?: number | undefined;
+    opacity?: number | undefined;
     roughness?: number | undefined;
     side?: number | undefined;
+    transparent?: boolean | undefined;
   }
 
   export class MeshBasicMaterial extends Material {
@@ -101,8 +141,10 @@ declare module "three" {
       material?: Material | readonly Material[]
     );
     readonly isMesh: boolean;
+    castShadow: boolean;
     geometry: BufferGeometry;
     material: Material | readonly Material[];
+    receiveShadow: boolean;
   }
 
   export class AmbientLight extends Object3D {
@@ -111,6 +153,49 @@ declare module "three" {
 
   export class DirectionalLight extends Object3D {
     constructor(color?: string | number, intensity?: number);
+    castShadow: boolean;
+    shadow: {
+      mapSize: {
+        height: number;
+        width: number;
+      };
+    };
+  }
+
+  export class HemisphereLight extends Object3D {
+    constructor(
+      skyColor?: string | number,
+      groundColor?: string | number,
+      intensity?: number
+    );
+  }
+
+  export class SpotLight extends Object3D {
+    constructor(
+      color?: string | number,
+      intensity?: number,
+      distance?: number,
+      angle?: number,
+      penumbra?: number,
+      decay?: number
+    );
+    castShadow: boolean;
+    shadow: {
+      mapSize: {
+        height: number;
+        width: number;
+      };
+    };
+    target: Object3D;
+  }
+
+  export class RectAreaLight extends Object3D {
+    constructor(
+      color?: string | number,
+      intensity?: number,
+      width?: number,
+      height?: number
+    );
   }
 
   export class Box3 {
@@ -148,6 +233,12 @@ declare module "three" {
         | undefined;
     });
     outputColorSpace: string;
+    shadowMap: {
+      enabled: boolean;
+      type: number;
+    };
+    toneMapping: number;
+    toneMappingExposure: number;
     dispose(): void;
     render(scene: Scene, camera: Camera): void;
     setPixelRatio(ratio: number): void;
