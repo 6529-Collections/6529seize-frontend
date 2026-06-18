@@ -123,6 +123,50 @@ describe("ReMemes metadata", () => {
     expect(url.searchParams.get("title")).toBe("Community Remix");
   });
 
+  it("uses Alchemy-style media objects for ReMeme detail card images", async () => {
+    (fetchUrl as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          contract_opensea_data: {
+            collectionName: "SEIZING",
+            imageUrl: "https://cdn.test/collection.png",
+          },
+          image: "",
+          media: {
+            cachedUrl: "https://cdn.test/cached.gif",
+            contentType: "image/gif",
+            originalUrl: "https://arweave.test/original",
+            pngUrl: "https://cdn.test/converted.png",
+            size: 9908164,
+            thumbnailUrl: "https://cdn.test/thumb.gif",
+          },
+          metadata: { name: "GDRC #2" },
+          s3_image_original: "",
+          s3_image_scaled: "",
+        },
+      ],
+    });
+
+    const metadata = await generateRememeDetailMetadata({
+      params: Promise.resolve({
+        contract: "0x869a96493d64ed5bbbfc24d96c5e84f95e558cf2",
+        id: "39",
+      }),
+    });
+
+    const image = getSocialImage(metadata);
+    const url = new URL(image.url);
+
+    expect(metadata.title).toBe("GDRC #2");
+    expect(metadata.twitter?.card).toBe("summary_large_image");
+    expect(url.pathname).toBe(
+      "/api/og-metadata/nfts/0x869a96493d64ed5bbbfc24d96c5e84f95e558cf2/39"
+    );
+    expect(url.searchParams.get("collection")).toBe("SEIZING");
+    expect(url.searchParams.get("image")).toBe("https://cdn.test/thumb.gif");
+    expect(url.searchParams.get("title")).toBe("GDRC #2");
+  });
+
   it("falls back to a branded ReMeme NFT card when API data is missing", async () => {
     (fetchUrl as jest.Mock).mockResolvedValue({ data: [] });
 

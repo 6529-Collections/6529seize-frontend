@@ -28,20 +28,50 @@ const getRememeName = (rememe: Rememe): string | undefined => {
     : undefined;
 };
 
+const getNonEmptyRecordText = (
+  record: Record<string, unknown>,
+  key: string
+): string | undefined => {
+  const value = record[key];
+  return typeof value === "string" ? getNonEmptyText(value) : undefined;
+};
+
+const getRememeMediaImage = (media: unknown): string | undefined => {
+  if (Array.isArray(media)) {
+    return media.find((item): item is { gateway: string } => {
+      if (item === null || item === undefined || typeof item !== "object") {
+        return false;
+      }
+      const gateway = (item as Record<string, unknown>)["gateway"];
+      return typeof gateway === "string" && gateway.trim().length > 0;
+    })?.gateway;
+  }
+
+  if (media === null || media === undefined || typeof media !== "object") {
+    return undefined;
+  }
+
+  const mediaRecord = media as Record<string, unknown>;
+  return (
+    getNonEmptyRecordText(mediaRecord, "thumbnailUrl") ??
+    getNonEmptyRecordText(mediaRecord, "cachedUrl") ??
+    getNonEmptyRecordText(mediaRecord, "pngUrl") ??
+    getNonEmptyRecordText(mediaRecord, "originalUrl")
+  );
+};
+
 const getRememeImage = (rememe?: Rememe): string | undefined => {
   if (!rememe) {
     return undefined;
   }
 
-  const mediaGateway = rememe.media.find(
-    (media) => media.gateway.trim().length > 0
-  )?.gateway;
+  const mediaImage = getRememeMediaImage(rememe.media);
 
   return (
     getNonEmptyText(rememe.s3_image_scaled) ??
     getNonEmptyText(rememe.s3_image_original) ??
     getNonEmptyText(rememe.image) ??
-    getNonEmptyText(mediaGateway) ??
+    mediaImage ??
     getNonEmptyText(rememe.contract_opensea_data.imageUrl)
   );
 };
