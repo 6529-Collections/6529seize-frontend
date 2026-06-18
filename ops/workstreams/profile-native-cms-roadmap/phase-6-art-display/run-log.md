@@ -87,3 +87,24 @@
 - `seize run react-doctor:diff` passed with the same two intentional lightbox
   `<img>` warnings for faithful CMS art media rendering.
 - `codex-diff-check`
+
+## 2026-06-18 - PR #2734 Sonar Duplication Follow-up
+
+- SonarCloud isolated the remaining new-code duplication gate failure to the
+  newly added `profileCms.*` entries in `i18n/messages/en-US.ts`.
+- Refactored the CMS art display English messages into existing
+  `namespaceMessages` helper groups and spread the generated map into
+  `EN_US_MESSAGES`, preserving all message keys and values while avoiding the
+  long duplicate-prone object-literal block.
+- Kept the formatter output for the existing art media fixture after
+  `format:changed` wrapped its renderer capability array.
+
+## Sonar Follow-up Validation Evidence
+
+- `seize run format:changed`
+- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx`
+  passed with 11 tests; the temporary Jest config was removed after the run.
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`

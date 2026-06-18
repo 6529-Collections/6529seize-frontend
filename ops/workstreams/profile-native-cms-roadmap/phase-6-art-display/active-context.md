@@ -40,5 +40,6 @@ stacked on `codex/profile-cms-builder-mvp`.
 
 ## Status
 
-- Second follow-up fix for PR #2734 is locally validated.
-- Next action is to commit, push, and request `/6529bot followup`.
+- Sonar duplication follow-up for PR #2734 is locally validated.
+- Next action is to commit, push, and request `/6529bot followup`, then wait
+  for fresh SonarCloud and bot signal on the new head.
