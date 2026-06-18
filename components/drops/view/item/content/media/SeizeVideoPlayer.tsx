@@ -337,11 +337,15 @@ function SeizeVideoMinimalControls({
           min="0"
           max="100"
           step="0.1"
-          value={Number.isFinite(progress) ? progress : 0}
+          value={progress}
           disabled={seekDisabled}
           aria-label={labels.seek}
           onChange={onSeekChange}
+          onClick={(event) => event.stopPropagation()}
           onFocus={onControlsFocus}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
           className="tw-peer tw-absolute tw-inset-0 tw-z-10 tw-h-full tw-w-full tw-cursor-pointer tw-opacity-0 disabled:tw-cursor-default"
         />
         <div
@@ -384,6 +388,8 @@ function SeizeVideoElement({
   onPointerEnter,
   onPointerLeave,
   onPointerMove,
+  onSeeked,
+  onSeeking,
   onTimeUpdate,
   onTouchStart,
   poster,
@@ -420,6 +426,8 @@ function SeizeVideoElement({
   readonly onPointerEnter?: (() => void) | undefined;
   readonly onPointerLeave?: (() => void) | undefined;
   readonly onPointerMove?: (() => void) | undefined;
+  readonly onSeeked: () => void;
+  readonly onSeeking: () => void;
   readonly onTimeUpdate: () => void;
   readonly onTouchStart?: (() => void) | undefined;
   readonly poster?: string | undefined;
@@ -455,6 +463,8 @@ function SeizeVideoElement({
         onEnded={onEnded}
         onError={onError}
         onFocus={onFocus}
+        onSeeked={onSeeked}
+        onSeeking={onSeeking}
         onClick={onClick}
         onPointerEnter={onPointerEnter}
         onPointerMove={onPointerMove}
@@ -622,7 +632,7 @@ export default function SeizeVideoPlayer({
     }
     clearHideControlsTimer();
     hideControlsTimerRef.current = globalThis.window.setTimeout(() => {
-      const video = videoElement;
+      const video = internalVideoRef.current;
       const activeElement = globalThis.document.activeElement;
       const playerHasFocus = activeElement
         ? (wrapperRef.current?.contains(activeElement) ?? false)
@@ -642,7 +652,7 @@ export default function SeizeVideoPlayer({
   }
 
   function updateProgress() {
-    const video = videoElement;
+    const video = internalVideoRef.current;
     if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
       setDurationState((current) =>
         current.src === directSrc && current.value === 0
@@ -678,7 +688,7 @@ export default function SeizeVideoPlayer({
     stopProgressAnimation();
     const tick = () => {
       updateProgress();
-      const video = videoElement;
+      const video = internalVideoRef.current;
       if (video && !video.paused && !video.ended) {
         animationFrameRef.current = globalThis.window.requestAnimationFrame(tick);
       }
@@ -787,7 +797,7 @@ export default function SeizeVideoPlayer({
   }
 
   function togglePlayback() {
-    const video = videoElement;
+    const video = internalVideoRef.current;
     if (!video) return;
 
     if (video.paused || video.ended) {
@@ -814,6 +824,7 @@ export default function SeizeVideoPlayer({
     const clampedProgress = Math.min(100, Math.max(0, nextProgress));
     video.currentTime = (clampedProgress / 100) * video.duration;
     setProgressState({ src: directSrc, value: clampedProgress });
+    updateProgress();
     revealControls();
   }
 
@@ -1082,6 +1093,8 @@ export default function SeizeVideoPlayer({
         onPointerEnter={minimalVideoHandlers.onPointerEnter}
         onPointerLeave={minimalVideoHandlers.onPointerLeave}
         onPointerMove={minimalVideoHandlers.onPointerMove}
+        onSeeked={updateProgress}
+        onSeeking={updateProgress}
         onTimeUpdate={updateProgress}
         onTouchStart={minimalVideoHandlers.onTouchStart}
         poster={poster}

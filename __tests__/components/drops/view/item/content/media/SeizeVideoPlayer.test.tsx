@@ -463,6 +463,12 @@ describe("SeizeVideoPlayer", () => {
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
   });
 
+  it("keeps footer seeking disabled until duration is known", () => {
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
+
+    expect(screen.getByRole("slider", { name: "Seek video" })).toBeDisabled();
+  });
+
   it("seeks minimal videos from the footer timeline", () => {
     const { container } = render(
       <SeizeVideoPlayer src="https://example.com/video.mp4" />
@@ -482,10 +488,23 @@ describe("SeizeVideoPlayer", () => {
     const seek = screen.getByRole("slider", { name: "Seek video" });
     expect(seek).not.toBeDisabled();
 
+    jest.mocked(HTMLMediaElement.prototype.pause).mockClear();
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+
+    fireEvent.click(seek);
+
+    expect(HTMLMediaElement.prototype.pause).not.toHaveBeenCalled();
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+
     fireEvent.change(seek, { target: { value: "25" } });
 
     expect(video.currentTime).toBe(50);
     expect(seek).toHaveValue("25");
+
+    video.currentTime = 100;
+    fireEvent.seeked(video);
+
+    expect(seek).toHaveValue("50");
   });
 
   it("uses native controls for watch media and suppresses custom controls", () => {
