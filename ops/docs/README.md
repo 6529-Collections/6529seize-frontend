@@ -93,6 +93,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/followers`,
   `/{user}/groups`, `/{user}/identity`, `/{user}/proxy`,
   `/{user}/subscriptions`, `/{user}/waves`, `/{user}/xtdh`,
+  `/{user}/cms/builder` when the profile CMS builder flag is enabled,
   `/about/primary-address`
 - Media:
   `/the-memes`, `/the-memes/mint`, `/the-memes/{id}`,
