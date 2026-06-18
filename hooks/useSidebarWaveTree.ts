@@ -1,6 +1,7 @@
 "use client";
 
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { compareSubwavesByLatestActivity } from "@/helpers/waves/subwave-activity.helpers";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type SidebarWaveDepth = 0 | 1;
@@ -91,7 +92,7 @@ const buildSubwavesByParentId = (waves: readonly MinimalWave[]) => {
   }
 
   for (const subwaves of map.values()) {
-    subwaves.sort((a, b) => a.createdAt - b.createdAt);
+    subwaves.sort(compareSubwavesByLatestActivity);
   }
 
   return map;
@@ -128,7 +129,10 @@ const buildSidebarWaveRows = ({
     const canExpand =
       wave.parentWaveId === null && (wave.hasSubwaves || subwaves.length > 0);
     const isExpanded =
-      showExpandedSubwaves && canExpand && getIsExpanded(wave.id);
+      showExpandedSubwaves &&
+      canExpand &&
+      subwaves.length > 0 &&
+      getIsExpanded(wave.id);
     const hasUnreadSubwaves = canExpand && getHasUnreadSubwaves(wave.id);
 
     rows.push({
@@ -263,9 +267,17 @@ export function useSidebarWaveTree({
     [subwavesByParentId]
   );
 
+  const getIsVisiblyExpanded = useCallback(
+    (waveId: string) =>
+      showExpandedSubwaves &&
+      (subwavesByParentId.get(waveId)?.length ?? 0) > 0 &&
+      getIsExpanded(waveId),
+    [getIsExpanded, showExpandedSubwaves, subwavesByParentId]
+  );
+
   const toggleParent = useCallback(
     (waveId: string) => {
-      const isExpanded = getIsExpanded(waveId);
+      const isExpanded = getIsVisiblyExpanded(waveId);
       if (!isExpanded) {
         requestParentExpand(waveId, { force: true });
       }
@@ -294,7 +306,7 @@ export function useSidebarWaveTree({
         return nextState;
       });
     },
-    [getIsExpanded, requestParentExpand]
+    [getIsVisiblyExpanded, requestParentExpand]
   );
 
   const getRows = useCallback(

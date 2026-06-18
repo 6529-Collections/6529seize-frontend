@@ -1,11 +1,18 @@
 import { act, renderHook } from "@testing-library/react";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import { useSidebarWaveTree } from "@/hooks/useSidebarWaveTree";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 describe("useSidebarWaveTree", () => {
   beforeEach(() => {
     globalThis.localStorage.clear();
     globalThis.sessionStorage.clear();
+  });
+
+  const createNewDropsCount = (latestDropTimestamp: number | null) => ({
+    count: 0,
+    latestDropTimestamp,
+    firstUnreadSerialNo: null,
   });
 
   const waves = [
@@ -17,16 +24,18 @@ describe("useSidebarWaveTree", () => {
       id: "newer-child",
       parentWaveId: "parent",
       createdAt: 20,
+      newDropsCount: createNewDropsCount(100),
     }),
     createMockMinimalWave({
       id: "older-child",
       parentWaveId: "parent",
       hasSubwaves: true,
       createdAt: 10,
+      newDropsCount: createNewDropsCount(200),
     }),
   ];
 
-  it("keeps manual expansion in memory and sorts expanded subwaves by created time", () => {
+  it("keeps manual expansion in memory and sorts expanded subwaves by latest activity", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
       useSidebarWaveTree({
@@ -300,15 +309,21 @@ describe("useSidebarWaveTree", () => {
     expect(onParentExpand).toHaveBeenLastCalledWith("parent");
   });
 
-  it("loads a direct active subwave parent before the child is in the list", () => {
+  it("loads a direct active subwave parent without showing it expanded before rows exist", () => {
     const onParentExpand = jest.fn();
-    const { result } = renderHook(() =>
-      useSidebarWaveTree({
-        waves: [waves[0]!],
-        activeWaveId: "direct-child",
-        activeParentWaveId: "parent",
-        onParentExpand,
-      })
+    const { result, rerender } = renderHook(
+      ({ currentWaves }: { readonly currentWaves: readonly MinimalWave[] }) =>
+        useSidebarWaveTree({
+          waves: currentWaves,
+          activeWaveId: "direct-child",
+          activeParentWaveId: "parent",
+          onParentExpand,
+        }),
+      {
+        initialProps: {
+          currentWaves: [waves[0]!],
+        },
+      }
     );
 
     const rows = result.current.getRows(result.current.topLevelWaves);
@@ -317,6 +332,27 @@ describe("useSidebarWaveTree", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       wave: expect.objectContaining({ id: "parent" }),
+      isExpanded: false,
+    });
+
+    rerender({
+      currentWaves: [
+        waves[0]!,
+        createMockMinimalWave({
+          id: "direct-child",
+          parentWaveId: "parent",
+          createdAt: 30,
+        }),
+      ],
+    });
+
+    const loadedRows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(loadedRows.map((row) => row.wave.id)).toEqual([
+      "parent",
+      "direct-child",
+    ]);
+    expect(loadedRows[0]).toMatchObject({
       isExpanded: true,
     });
   });
