@@ -67,7 +67,7 @@ export type CmsBuilderValidation = {
 };
 
 const DEFAULT_HANDLE = "punk6529";
-const DEFAULT_ROOM_STYLE: CmsRoomPreset = "wall";
+const DEFAULT_ROOM_STYLE: CmsRoomPreset = "white_cube";
 const FIXTURE_ZERO_HASH =
   "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 

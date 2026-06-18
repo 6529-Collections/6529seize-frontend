@@ -350,7 +350,7 @@ describe("ProfileCmsBuilder", () => {
     render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
 
     await user.click(screen.getAllByRole("button", { name: "3D room" })[0]);
-    await user.selectOptions(screen.getByLabelText("Room style"), "white_cube");
+    expect(screen.getByLabelText("Room style")).toHaveValue("white_cube");
     await user.clear(screen.getByLabelText("Room work title"));
     await user.type(
       screen.getByLabelText("Room work title"),
