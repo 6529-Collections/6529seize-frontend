@@ -42,16 +42,18 @@ export const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   groupId: null,
 };
 
-const RATING_MATTERS_WITH_API_FILTER = [
+type RatingMatterWithApiFilter = RateMatter.REP | RateMatter.WAVE_REP;
+
+const RATING_MATTERS_WITH_API_FILTER: readonly RateMatter[] = [
   RateMatter.REP,
   RateMatter.WAVE_REP,
 ] as const;
 
 function shouldIncludeRatingMatter(
   matter: ActivityLogParams["matter"]
-): matter is (typeof RATING_MATTERS_WITH_API_FILTER)[number] {
-  return RATING_MATTERS_WITH_API_FILTER.some(
-    (filterMatter) => filterMatter === matter
+): matter is RatingMatterWithApiFilter {
+  return (
+    matter !== null && RATING_MATTERS_WITH_API_FILTER.includes(matter)
   );
 }
 
