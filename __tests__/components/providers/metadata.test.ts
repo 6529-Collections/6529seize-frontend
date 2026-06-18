@@ -6,8 +6,10 @@ import {
   SOCIAL_CARD_IMAGE_WIDTH,
   getAbsoluteOgImageUrl,
   getAppMetadata,
+  getCollectionSocialCardImagePath,
   getDefaultOgImageUrl,
   getLargeSocialCardMetadata,
+  getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
 
 describe("Metadata functionality (migrated from _document.tsx)", () => {
@@ -176,6 +178,40 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
         ogImageWidth: SOCIAL_CARD_IMAGE_WIDTH,
         twitterCard: LARGE_IMAGE_TWITTER_CARD,
       });
+    });
+
+    it("builds collection social-card image paths", () => {
+      expect(getCollectionSocialCardImagePath("the-memes")).toBe(
+        "/api/og-metadata/collections/the-memes"
+      );
+
+      expect(
+        getCollectionSocialCardImagePath("the memes", {
+          badge: "6529",
+          image: "/memes-preview.png",
+          subtitle: "The Memes by 6529",
+          title: "The Memes",
+        })
+      ).toBe(
+        "/api/og-metadata/collections/the%20memes?badge=6529&image=%2Fmemes-preview.png&subtitle=The+Memes+by+6529&title=The+Memes"
+      );
+    });
+
+    it("builds NFT social-card image paths", () => {
+      expect(
+        getNftSocialCardImagePath({
+          artist: "6529er",
+          badge: "The Memes",
+          collection: "The Memes",
+          contract: "0xabc/def",
+          id: "1/2",
+          image: "https://cdn.test/image.png",
+          subtitle: "The Memes #1 | Collections",
+          title: "Seize the Memes",
+        })
+      ).toBe(
+        "/api/og-metadata/nfts/0xabc%2Fdef/1%2F2?artist=6529er&badge=The+Memes&collection=The+Memes&image=https%3A%2F%2Fcdn.test%2Fimage.png&subtitle=The+Memes+%231+%7C+Collections&title=Seize+the+Memes"
+      );
     });
   });
 });
