@@ -48,10 +48,24 @@ const useAuthMock = useAuth as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
 const createObjectUrlMock = jest.fn(() => "blob:cms-export");
 const revokeObjectUrlMock = jest.fn();
+const NativeBlob = globalThis.Blob;
+
+class CapturedBlob extends NativeBlob {
+  readonly parts: readonly BlobPart[];
+
+  constructor(parts: BlobPart[] = [], options?: BlobPropertyBag) {
+    super(parts, options);
+    this.parts = parts;
+  }
+}
 
 describe("ProfileCmsBuilder", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(globalThis, "Blob", {
+      configurable: true,
+      value: CapturedBlob,
+    });
     Object.defineProperty(globalThis.URL, "createObjectURL", {
       configurable: true,
       value: createObjectUrlMock,
@@ -65,6 +79,13 @@ describe("ProfileCmsBuilder", () => {
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: null,
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(globalThis, "Blob", {
+      configurable: true,
+      value: NativeBlob,
     });
   });
 
@@ -605,10 +626,9 @@ function buildAgentPatch(
 }
 
 function readBlobText(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsText(blob);
-  });
+  return Promise.resolve(
+    (blob as CapturedBlob).parts
+      .map((part) => (typeof part === "string" ? part : ""))
+      .join("")
+  );
 }

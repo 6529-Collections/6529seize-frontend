@@ -925,7 +925,21 @@ function getAuthorCopyFields(
 }
 
 function cloneCmsPackage(cmsPackage: CmsPackageV1): CmsPackageV1 {
-  return JSON.parse(JSON.stringify(cmsPackage)) as CmsPackageV1;
+  return cloneJsonValue(cmsPackage) as CmsPackageV1;
+}
+
+function cloneJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(cloneJsonValue);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, cloneJsonValue(entry)])
+    );
+  }
+
+  return value;
 }
 
 function failedReview(

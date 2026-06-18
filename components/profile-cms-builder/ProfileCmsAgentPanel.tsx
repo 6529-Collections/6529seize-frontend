@@ -190,8 +190,8 @@ export function ProfileCmsAgentPanel({
 
 export function downloadJsonFile(filename: string, data: unknown): void {
   if (
-    typeof globalThis.document === "undefined" ||
-    typeof globalThis.URL?.createObjectURL !== "function"
+    globalThis.document === undefined ||
+    globalThis.URL?.createObjectURL === undefined
   ) {
     return;
   }
