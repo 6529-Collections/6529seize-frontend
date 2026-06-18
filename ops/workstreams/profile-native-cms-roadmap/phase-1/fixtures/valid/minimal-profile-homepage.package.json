@@ -1,0 +1,140 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-minimal-profile-homepage-v1",
+  "profile": {
+    "handle": "punk6529",
+    "profile_id": "profile-punk6529",
+    "primary_wallet": "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0"
+  },
+  "site": {
+    "title": "punk6529",
+    "description": "A profile-native 6529 CMS homepage fixture.",
+    "base_path": "/punk6529/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "system",
+      "accent": "#2f7df6"
+    },
+    "navigation_id": "nav-main",
+    "search": {
+      "enabled": true,
+      "manifest_asset_id": "asset-search"
+    },
+    "required_renderer_capabilities": ["static_blocks", "profile_cms_v1"]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/punk6529/index.html",
+        "kind": "page",
+        "page_id": "page-home"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-home",
+        "type": "page",
+        "path": "/punk6529/index.html",
+        "metadata": {
+          "title": "punk6529",
+          "description": "A portable profile website published by punk6529.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "Home",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-heading",
+            "block_type": "heading",
+            "level": 1,
+            "text": "punk6529"
+          },
+          {
+            "id": "block-intro",
+            "block_type": "rich_text",
+            "content": "This is the smallest valid profile CMS homepage fixture."
+          }
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-og",
+        "kind": "social_image",
+        "uri": "ipfs://bafyfixtureminimal/og.png",
+        "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 630,
+        "file_size_bytes": 42000,
+        "roles": ["social"],
+        "alt_text": "Social preview image for punk6529"
+      },
+      {
+        "id": "asset-search",
+        "kind": "search_index",
+        "uri": "ipfs://bafyfixtureminimal/search.json",
+        "content_hash": "sha256:abababababababababababababababababababababababababababababababab",
+        "mime_type": "application/json",
+        "file_size_bytes": 1200,
+        "roles": ["fallback"]
+      }
+    ],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Home",
+            "page_id": "page-home"
+          }
+        ]
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-cms-static",
+      "renderer_version": "0.0.0-fixture",
+      "route_count": 1,
+      "asset_count": 2,
+      "warnings": []
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "package_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "note": "Fixture placeholder hash; replace with generated vector before Phase 2."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:punk6529",
+      "signature": "fixture-signature-minimal",
+      "signed_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://bafyfixtureminimal",
+      "content_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "provider_content_id": "bafyfixtureminimal",
+      "pinned": true,
+      "canonical": true,
+      "recorded_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-fixture",
+    "builder_version": "0.0.0",
+    "created_at": "2026-06-17T00:00:00Z",
+    "notes": "Minimal valid profile homepage fixture."
+  }
+}
+

@@ -1,4 +1,5 @@
 import styles from "./Timeline.module.scss";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -21,16 +22,16 @@ export default function TimelineMediaComponent(props: Readonly<Props>) {
 
   if (props.type === MediaType.VIDEO) {
     return (
-      <video
-        aria-label={t(locale, "timeline.media.videoAriaLabel", { label })}
-        autoPlay
-        muted
-        controls
-        loop
-        playsInline
+      <SeizeVideoPlayer
+        template="ambient-media"
         className={styles["timelineMediaImage"]}
         src={props.url}
-      ></video>
+        autoPlay
+        muted
+        loop
+        align="center"
+        aria-label={t(locale, "timeline.media.videoAriaLabel", { label })}
+      />
     );
   }
   if (props.type === MediaType.HTML) {

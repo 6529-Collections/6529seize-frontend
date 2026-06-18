@@ -40,6 +40,14 @@ describe("frontend i18n helpers", () => {
       })
     ).toBe("Voir Meme, carte n° 1");
     expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
+    expect(t("en-US", "media.video.playPreview")).toBe("Play video preview");
+    expect(t("en-US", "media.video.player")).toBe("Video player");
+    expect(t("en-GB", "media.video.exitFullscreen")).toBe("Exit full screen");
+    expect(t("fr-FR", "media.video.play")).toBe("Lire la video");
+    expect(t("es-ES", "media.video.fullscreen")).toBe("Pantalla completa");
+    expect(t("de-DE", "media.video.unsupported")).toBe(
+      "Ihr Browser unterstuetzt das Video-Tag nicht."
+    );
     expect(t("en-GB", "theMemes.sorting.sortBy")).toBe("Sort by");
     expect(t("fr-FR", "theMemes.detail.tabs.collectors")).toBe("Collectors");
     expect(t("es-ES", "theMemes.detail.heading.card", { tokenId: 1 })).toBe(

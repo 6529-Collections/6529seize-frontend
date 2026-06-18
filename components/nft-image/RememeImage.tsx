@@ -3,6 +3,7 @@ import { Col } from "react-bootstrap";
 import type { Rememe } from "@/entities/INFT";
 import Image from "next/image";
 import { parseIpfsUrl, parseIpfsUrlToGateway } from "@/helpers/Helpers";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
 interface Props {
   nft: Rememe;
@@ -104,21 +105,17 @@ export default function RememeImage(props: Readonly<Props>) {
           props.height === 650 ? styles["height650"] : styles["height300"]
         } d-flex justify-content-center align-items-center`}
       >
-        <video
+        <SeizeVideoPlayer
           id={`${props.nft.contract}-${props.nft.id}`}
+          template="ambient-media"
+          src={videoFallbackUrls[0]}
+          fallbackSources={videoFallbackUrls.slice(1)}
           autoPlay={props.animation}
           muted
-          controls
           loop
-          playsInline
-          src={videoFallbackUrls[0]}
-          onError={({ currentTarget }) => {
-            const nextFallback = videoFallbackUrls.shift();
-            if (nextFallback) {
-              currentTarget.src = nextFallback;
-            }
-          }}
-        ></video>
+          layout={props.height === 650 ? "prominent" : "natural"}
+          align="center"
+        />
       </Col>
     );
   }

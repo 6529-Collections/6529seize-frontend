@@ -10,6 +10,7 @@ import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
 import MediaDisplay from "./MediaDisplay";
 import UnsupportedMediaLink from "./UnsupportedMediaLink";
+import { useOptionalDropContext } from "@/components/waves/drops/DropContext";
 
 enum MediaType {
   IMAGE = "IMAGE",
@@ -54,6 +55,9 @@ export default function DropListItemContentMedia({
   readonly loadStrategy?: MediaLoadStrategy | undefined;
   readonly galleryItemId?: string | undefined;
 }) {
+  const dropContext = useOptionalDropContext();
+  const showVideoFullscreen = dropContext?.showVideoFullscreen ?? true;
+
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
       return MediaType.IMAGE;
@@ -100,6 +104,7 @@ export default function DropListItemContentMedia({
           mimeType={media_mime_type}
           disableAutoPlay={disableAutoPlay}
           fillContainer={fillVideoContainer}
+          showFullscreen={showVideoFullscreen}
         />
       );
     case MediaType.AUDIO:

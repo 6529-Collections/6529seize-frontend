@@ -20,7 +20,7 @@ describe("delegation page server", () => {
     });
     const metadata = await generateMetadata({ params });
     expect(metadata).toEqual(
-      expect.objectContaining({ title: "Delegation Center" })
+      expect.objectContaining({ title: "Delegation Center | 6529.io" })
     );
   });
 

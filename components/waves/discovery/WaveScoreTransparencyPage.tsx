@@ -16,10 +16,13 @@ import { parseSeizeWaveLink } from "@/helpers/SeizeLinkParser";
 import { fetchWaveById, searchWavesByName } from "@/services/api/waves-v2-api";
 import type { SidebarWave } from "@/types/waves.types";
 import {
+  ArrowLongLeftIcon,
   ArrowLongRightIcon,
   ArrowPathIcon,
   CalculatorIcon,
+  CameraIcon,
   ChartBarIcon,
+  ClipboardDocumentIcon,
   FireIcon,
   MagnifyingGlassIcon,
   ScaleIcon,
@@ -27,9 +30,32 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 type CalculatorStatus = "idle" | "loading" | "success" | "error";
+const SHARE_STATUS = {
+  IDLE: "idle",
+  COPIED: "copied",
+  COPY_ERROR: "copy-error",
+  SCREENSHOT_LOADING: "screenshot-loading",
+  SCREENSHOT_READY: "screenshot-ready",
+  SCREENSHOT_ERROR: "screenshot-error",
+} as const;
+
+type ShareStatus = (typeof SHARE_STATUS)[keyof typeof SHARE_STATUS];
+
+type OptionalClipboardNavigator = {
+  readonly clipboard?: {
+    readonly writeText?: (text: string) => Promise<void>;
+  };
+};
+
+const getClipboardNavigator = (): OptionalClipboardNavigator | undefined => {
+  if (typeof globalThis.window !== "undefined") {
+    return globalThis.window.navigator as OptionalClipboardNavigator;
+  }
+  return globalThis.navigator as OptionalClipboardNavigator | undefined;
+};
 
 interface CalculationRow {
   readonly label: string;
@@ -57,6 +83,7 @@ const UUID_REGEX =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 const SCORE_RECONCILIATION_EPSILON = 0.05;
+const DEFAULT_BACK_HREF = "/network";
 
 const DEFAULT_FORMULA: ApiWaveScoreFormula = {
   max_level_raw_for_score: 25000000,
@@ -121,7 +148,7 @@ const formulaSteps: readonly FormulaStep[] = [
     formula:
       "(creator x 20%) + (poster levels x 20%) + (diversity x 15%) + (subscriptions x 10%) + (REP x 35%)",
     description:
-      "The durable trust score. This is where TDH-backed Wave REP has the largest explicit weight.",
+      "The durable trust score for evaluating a new wave. This is where TDH-backed Wave REP has the largest explicit weight.",
     icon: ShieldCheckIcon,
     toneClasses: "tw-bg-sky-500/10 tw-text-sky-200 tw-ring-sky-400/25",
   },
@@ -246,6 +273,55 @@ function getCurrentOrigin(): string {
     return globalThis.location.origin;
   }
   return "https://6529.io";
+}
+
+function sanitizeReturnTo(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed || !trimmed.startsWith("/") || trimmed.startsWith("//")) {
+    return null;
+  }
+  if (trimmed.includes("\\") || /[\u0000-\u001f\u007f]/.test(trimmed)) {
+    return null;
+  }
+
+  try {
+    const url = new URL(trimmed, getCurrentOrigin());
+    if (url.origin !== getCurrentOrigin()) {
+      return null;
+    }
+    const safePath = `${url.pathname}${url.search}${url.hash}`;
+    if (url.pathname === "/network/wave-score") {
+      return null;
+    }
+    return safePath;
+  } catch {
+    return null;
+  }
+}
+
+function getBackLinkLabel(href: string): string {
+  if (href.startsWith("/waves/") || href.startsWith("/messages/")) {
+    return "Back to wave";
+  }
+  if (href !== DEFAULT_BACK_HREF) {
+    return "Back to previous page";
+  }
+  return "Back to Network";
+}
+
+function scrollElementIntoNearestView(element: HTMLElement | null): void {
+  if (!element) {
+    return;
+  }
+
+  const prefersReducedMotion =
+    typeof globalThis.matchMedia === "function" &&
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  element.scrollIntoView({
+    behavior: prefersReducedMotion ? "auto" : "smooth",
+    block: "nearest",
+  });
 }
 
 function sanitizeWaveId(value: string | null): string | null {
@@ -617,7 +693,7 @@ function CalculatorPanel({
               id="wave-score-calculator-input"
               value={input}
               onChange={(event) => onInputChange(event.target.value)}
-              placeholder="meme-chat or https://6529.io/waves/..."
+              placeholder="Memes-Chat or https://6529.io/waves/..."
               aria-invalid={Boolean(error)}
               aria-describedby={error ? errorId : undefined}
               className="tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-black/35 tw-px-10 tw-text-sm tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
@@ -697,9 +773,188 @@ function CalculatorPanel({
   );
 }
 
+function getShareStatusMessage(status: ShareStatus): string {
+  switch (status) {
+    case SHARE_STATUS.COPIED:
+      return "Markdown analysis copied.";
+    case SHARE_STATUS.COPY_ERROR:
+      return "Unable to copy the analysis.";
+    case SHARE_STATUS.SCREENSHOT_LOADING:
+      return "Preparing screenshot.";
+    case SHARE_STATUS.SCREENSHOT_READY:
+      return "Screenshot downloaded.";
+    case SHARE_STATUS.SCREENSHOT_ERROR:
+      return "Unable to create the screenshot.";
+    case SHARE_STATUS.IDLE:
+      return "";
+  }
+}
+
+function getWaveScoreScreenshotName(waveName: string): string {
+  const slugCharacters: string[] = [];
+  let lastWasSeparator = true;
+
+  for (const character of waveName.toLowerCase()) {
+    const codePoint = character.charCodeAt(0);
+    const isDigit = codePoint >= 48 && codePoint <= 57;
+    const isLowercaseLetter = codePoint >= 97 && codePoint <= 122;
+
+    if (isDigit || isLowercaseLetter) {
+      slugCharacters.push(character);
+      lastWasSeparator = false;
+    } else if (!lastWasSeparator && slugCharacters.length < 48) {
+      slugCharacters.push("-");
+      lastWasSeparator = true;
+    }
+
+    if (slugCharacters.length >= 48) {
+      break;
+    }
+  }
+
+  if (slugCharacters[slugCharacters.length - 1] === "-") {
+    slugCharacters.pop();
+  }
+
+  const slug = slugCharacters.join("");
+  return `${slug || "wave"}-score-analysis.png`;
+}
+
+function buildWaveScoreMarkdown({
+  wave,
+  waveHref,
+  score,
+  formula,
+  gate,
+  qualityRows,
+  qualityBeforeSafety,
+  safetyMultiplier,
+  computedQuality,
+  hotnessBeforeSafety,
+  computedHotness,
+  computedVisibility,
+  waveRepTotal,
+  formulaSource,
+  scoreMismatchDetail,
+}: {
+  readonly wave: ApiWave;
+  readonly waveHref: string;
+  readonly score: ApiWaveScore;
+  readonly formula: ApiWaveScoreFormula;
+  readonly gate: ApiWaveScoreQualityGate;
+  readonly qualityRows: readonly CalculationRow[];
+  readonly qualityBeforeSafety: number;
+  readonly safetyMultiplier: number;
+  readonly computedQuality: number;
+  readonly hotnessBeforeSafety: number;
+  readonly computedHotness: number;
+  readonly computedVisibility: number;
+  readonly waveRepTotal: number;
+  readonly formulaSource: string;
+  readonly scoreMismatchDetail: string;
+}): string {
+  const qualityLines = qualityRows.map((row) => {
+    const contribution = row.score * row.weight;
+    return `- ${row.label}: ${formatScore(row.score)} x ${formatWeight(
+      row.weight
+    )} = ${formatScore(contribution)}`;
+  });
+  const mismatchLines = scoreMismatchDetail
+    ? ["", `Formula drift: ${scoreMismatchDetail}`]
+    : [];
+
+  return [
+    `# Wave score analysis: ${wave.name}`,
+    "",
+    `Wave: ${getCurrentOrigin()}${waveHref}`,
+    `Creator: ${getWaveDisplayHandle(wave)}`,
+    `Calculated: ${formatTimestamp(score.calculated_at)}`,
+    `Version: ${score.score_version}`,
+    `Formula source: ${formulaSource}`,
+    "",
+    "## Scores",
+    `- Visibility: ${formatScore(score.visibility_score)} (${score.visibility_tier})`,
+    `- Quality: ${formatScore(score.quality_score)}`,
+    `- Hotness: ${formatScore(score.hotness_score)}`,
+    `- Wave REP: ${formatInteger(waveRepTotal)} raw -> ${formatScore(
+      score.components.wave_rep_component_score
+    )} component`,
+    ...mismatchLines,
+    "",
+    "## Quality",
+    ...qualityLines,
+    `- Base quality: ${formatScore(qualityBeforeSafety)}`,
+    `- Safety multiplier: ${formatScore(safetyMultiplier)}`,
+    `- Final quality: ${formatScore(score.quality_score)} (computed ${formatScore(
+      computedQuality
+    )})`,
+    "",
+    "## Hotness and visibility",
+    `- Recent trusted activity: ${formatScore(
+      score.components.recent_trusted_activity_score
+    )} x ${formatWeight(
+      formula.hotness_component_weights.recent_trusted_activity_score
+    )}`,
+    `- Quality in hotness: ${formatScore(
+      score.quality_score
+    )} x ${formatWeight(formula.hotness_component_weights.quality_score)}`,
+    `- Base hotness: ${formatScore(hotnessBeforeSafety)}`,
+    `- Final hotness: ${formatScore(score.hotness_score)} (computed ${formatScore(
+      computedHotness
+    )})`,
+    `- Quality gate: clamp(${formatScore(score.quality_score)} / ${formatScore(
+      gate.threshold
+    )}, 0, 1) = ${formatScore(gate.multiplier)}`,
+    `- Gated hotness: ${formatScore(gate.gated_hotness_score)}`,
+    `- Visibility: quality x ${formatWeight(
+      formula.visibility_component_weights.quality_score
+    )} + gated hotness x ${formatWeight(
+      formula.visibility_component_weights.gated_hotness_score
+    )} = ${formatScore(score.visibility_score)} (computed ${formatScore(
+      computedVisibility
+    )})`,
+    "",
+    "## Penalties",
+    `- Single actor: ${formatScore(score.penalties.single_actor_penalty)}%`,
+    `- Low trust flood: ${formatScore(score.penalties.low_trust_flood_penalty)}%`,
+    `- Cross-post pressure: ${formatScore(score.penalties.cross_post_pressure)}%`,
+    `- Cross-post penalty: ${formatScore(score.penalties.cross_post_penalty)}%`,
+    `- Negative REP: ${formatScore(score.penalties.negative_rep_penalty)}%`,
+    "",
+    `Formula page: ${getCurrentOrigin()}/network/wave-score`,
+  ].join("\n");
+}
+
 function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
   const score = wave.wave_score;
   const waveHref = getWaveHref(wave);
+  const analysisRef = useRef<HTMLElement>(null);
+  const shareStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const [shareStatus, setShareStatus] = useState<ShareStatus>(
+    SHARE_STATUS.IDLE
+  );
+
+  useEffect(() => {
+    return () => {
+      if (shareStatusTimerRef.current) {
+        clearTimeout(shareStatusTimerRef.current);
+      }
+    };
+  }, []);
+
+  const setTemporaryShareStatus = (nextStatus: ShareStatus) => {
+    setShareStatus(nextStatus);
+    if (shareStatusTimerRef.current) {
+      clearTimeout(shareStatusTimerRef.current);
+    }
+    if (nextStatus !== SHARE_STATUS.SCREENSHOT_LOADING) {
+      shareStatusTimerRef.current = setTimeout(() => {
+        setShareStatus(SHARE_STATUS.IDLE);
+      }, 3000);
+    }
+  };
 
   if (!score) {
     return (
@@ -764,9 +1019,76 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
   const scoreMismatchDetail = scoreMismatches
     .map(formatScoreMismatch)
     .join("; ");
+  const markdownAnalysis = buildWaveScoreMarkdown({
+    wave,
+    waveHref,
+    score,
+    formula,
+    gate,
+    qualityRows,
+    qualityBeforeSafety,
+    safetyMultiplier,
+    computedQuality,
+    hotnessBeforeSafety,
+    computedHotness,
+    computedVisibility,
+    waveRepTotal,
+    formulaSource,
+    scoreMismatchDetail,
+  });
+
+  const handleCopyMarkdown = async () => {
+    try {
+      const clipboard = getClipboardNavigator()?.clipboard;
+      if (typeof clipboard?.writeText !== "function") {
+        throw new Error("Clipboard API unavailable");
+      }
+      await clipboard.writeText(markdownAnalysis);
+      setTemporaryShareStatus(SHARE_STATUS.COPIED);
+    } catch (copyError) {
+      console.error("Wave score markdown copy failed", copyError);
+      setTemporaryShareStatus(SHARE_STATUS.COPY_ERROR);
+    }
+  };
+
+  const handleDownloadScreenshot = async () => {
+    const analysisNode = analysisRef.current;
+    if (!analysisNode) {
+      setTemporaryShareStatus(SHARE_STATUS.SCREENSHOT_ERROR);
+      return;
+    }
+
+    setShareStatus(SHARE_STATUS.SCREENSHOT_LOADING);
+    try {
+      const { toPng } = await import("html-to-image");
+      const dataUrl = await toPng(analysisNode, {
+        backgroundColor: "#050505",
+        cacheBust: true,
+        pixelRatio: 2,
+        filter: (node) =>
+          !(
+            node instanceof HTMLElement &&
+            node.dataset["waveScoreScreenshotExclude"] === "true"
+          ),
+      });
+      const link = globalThis.document.createElement("a");
+      link.href = dataUrl;
+      link.download = getWaveScoreScreenshotName(wave.name);
+      globalThis.document.body.appendChild(link);
+      try {
+        link.click();
+      } finally {
+        link.remove();
+      }
+      setTemporaryShareStatus(SHARE_STATUS.SCREENSHOT_READY);
+    } catch (screenshotError) {
+      console.error("Wave score screenshot failed", screenshotError);
+      setTemporaryShareStatus(SHARE_STATUS.SCREENSHOT_ERROR);
+    }
+  };
 
   return (
-    <section className="tw-space-y-5" aria-live="polite">
+    <section ref={analysisRef} className="tw-space-y-5" aria-live="polite">
       <div className="tw-rounded-lg tw-bg-iron-950/70 tw-p-5 tw-ring-1 tw-ring-inset tw-ring-white/10">
         <div className="tw-flex tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
           <div className="tw-min-w-0">
@@ -799,14 +1121,46 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
               className="tw-mt-4"
             />
           </div>
-          <Link
-            href={waveHref}
-            className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-white/5 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10"
+          <div
+            data-wave-score-screenshot-exclude="true"
+            className="tw-flex tw-flex-col tw-items-stretch tw-gap-2 sm:tw-flex-row lg:tw-items-start"
           >
-            Open wave
-            <ArrowLongRightIcon className="tw-size-4" aria-hidden="true" />
-          </Link>
+            <button
+              type="button"
+              onClick={() => void handleCopyMarkdown()}
+              className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-white/5 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10"
+              aria-label="Copy wave score analysis as Markdown"
+            >
+              <ClipboardDocumentIcon className="tw-size-4" aria-hidden="true" />
+              Copy
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDownloadScreenshot()}
+              disabled={shareStatus === SHARE_STATUS.SCREENSHOT_LOADING}
+              className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-white/5 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60 desktop-hover:hover:tw-bg-white/10"
+              aria-label="Download wave score analysis screenshot"
+            >
+              <CameraIcon className="tw-size-4" aria-hidden="true" />
+              Screenshot
+            </button>
+            <Link
+              href={waveHref}
+              className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-white/5 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10"
+            >
+              Open wave
+              <ArrowLongRightIcon className="tw-size-4" aria-hidden="true" />
+            </Link>
+          </div>
         </div>
+        <p
+          data-wave-score-screenshot-exclude="true"
+          role="status"
+          aria-live="polite"
+          className="tw-mt-3 tw-min-h-5 tw-text-xs tw-font-medium tw-text-iron-300"
+        >
+          {getShareStatusMessage(shareStatus)}
+        </p>
 
         <div className="tw-mt-5 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
           <ScoreStat
@@ -1305,19 +1659,26 @@ function ConstantStat({
   );
 }
 
-export function WaveScoreTransparencyPage() {
-  useSetTitle("Wave Score | Discovery");
+export function WaveScoreTransparencyPage({
+  initialReturnTo,
+}: {
+  readonly initialReturnTo?: string | null | undefined;
+}) {
+  useSetTitle("Wave Score | Network");
 
   const [input, setInput] = useState("");
   const [status, setStatus] = useState<CalculatorStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [wave, setWave] = useState<ApiWave | null>(null);
   const [matches, setMatches] = useState<SidebarWave[]>([]);
+  const returnTo = sanitizeReturnTo(initialReturnTo) ?? DEFAULT_BACK_HREF;
+  const resultContainerRef = useRef<HTMLDivElement>(null);
 
   const currentScore = wave?.wave_score ?? null;
   const apiHasFormulaMetadata = Boolean(
     currentScore?.formula && currentScore?.quality_gate
   );
+  const backLinkLabel = getBackLinkLabel(returnTo);
 
   const loadWave = async (waveId: string) => {
     setStatus("loading");
@@ -1327,6 +1688,15 @@ export function WaveScoreTransparencyPage() {
       const nextWave = await fetchWaveById({ waveId });
       setWave(nextWave);
       setStatus("success");
+      if (typeof globalThis.requestAnimationFrame === "function") {
+        globalThis.requestAnimationFrame(() => {
+          scrollElementIntoNearestView(resultContainerRef.current);
+        });
+      } else {
+        setTimeout(() => {
+          scrollElementIntoNearestView(resultContainerRef.current);
+        }, 0);
+      }
     } catch (loadError) {
       setStatus("error");
       setError(getErrorMessage(loadError));
@@ -1382,27 +1752,27 @@ export function WaveScoreTransparencyPage() {
   return (
     <div className="tw-px-4 tw-pb-16 tw-pt-6 md:tw-px-6 md:tw-pt-8 lg:tw-px-8">
       <div className="tw-mx-auto tw-max-w-7xl tw-space-y-8">
-        <section className="tw-grid tw-gap-6 lg:tw-grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+        <section className="tw-grid tw-gap-6 xl:tw-grid-cols-[minmax(0,0.9fr)_minmax(380px,1.1fr)]">
           <div className="tw-rounded-lg tw-bg-iron-950/50 tw-p-5 tw-ring-1 tw-ring-inset tw-ring-white/10 md:tw-p-6">
             <Link
-              href="/discover"
+              href={returnTo}
               className="tw-text-primary-200 desktop-hover:hover:tw-text-primary-100 tw-inline-flex tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
-              <ArrowLongRightIcon
-                className="tw-size-4 tw-rotate-180"
-                aria-hidden="true"
-              />
-              Back to discovery
+              <ArrowLongLeftIcon className="tw-size-4" aria-hidden="true" />
+              {backLinkLabel}
             </Link>
+            <p className="tw-mt-5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+              Network menu / Wave Score
+            </p>
             <h1 className="tw-mt-5 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white md:tw-text-4xl">
               Wave score transparency
             </h1>
             <p className="tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-              Discovery uses a visibility score made from quality and gated
-              hotness. Quality is where TDH-backed REP, creator level, and the
-              level of posters carry the most weight.
+              This Network page explains the score shown on waves across
+              discovery, the sidebar, home, and wave pages. Find it from the
+              Network menu directly below xTDH whenever you want the formula or
+              a live wave calculation.
             </p>
-            <FormulaPipeline />
           </div>
 
           <CalculatorPanel
@@ -1418,23 +1788,31 @@ export function WaveScoreTransparencyPage() {
           />
         </section>
 
-        <FormulaSummary />
-
-        {currentScore && (
+        {wave && (
           <div
-            className={`tw-rounded-lg tw-p-4 tw-text-sm tw-ring-1 tw-ring-inset ${
-              apiHasFormulaMetadata
-                ? "tw-bg-emerald-500/10 tw-text-emerald-100 tw-ring-emerald-400/25"
-                : "tw-bg-amber-500/10 tw-text-amber-100 tw-ring-amber-400/25"
-            }`}
+            ref={resultContainerRef}
+            className="tw-animate-slideUp tw-space-y-3 motion-reduce:tw-animate-none"
           >
-            {apiHasFormulaMetadata
-              ? "This result is using formula constants returned by the API."
-              : "This result is using the v1 fallback constants because the API response did not include formula metadata yet."}
+            {currentScore && (
+              <div
+                className={`tw-rounded-lg tw-p-4 tw-text-sm tw-ring-1 tw-ring-inset ${
+                  apiHasFormulaMetadata
+                    ? "tw-bg-emerald-500/10 tw-text-emerald-100 tw-ring-emerald-400/25"
+                    : "tw-bg-amber-500/10 tw-text-amber-100 tw-ring-amber-400/25"
+                }`}
+              >
+                {apiHasFormulaMetadata
+                  ? "This result is using formula constants returned by the API."
+                  : "This result is using the v1 fallback constants because the API response did not include formula metadata yet."}
+              </div>
+            )}
+            <WaveScoreResult wave={wave} />
           </div>
         )}
 
-        {wave && <WaveScoreResult wave={wave} />}
+        <FormulaPipeline />
+
+        <FormulaSummary />
       </div>
     </div>
   );

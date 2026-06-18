@@ -8,10 +8,6 @@ jest.mock("@/services/api/twitter-preview-api", () => ({
   fetchTwitterPreview: jest.fn(),
 }));
 
-jest.mock("@/components/waves/LinkPreviewContext", () => ({
-  useLinkPreviewContext: () => ({ hideActions: false }),
-}));
-
 const mockedFetchTwitterPreview = fetchTwitterPreview as jest.MockedFunction<
   typeof fetchTwitterPreview
 >;
@@ -21,6 +17,10 @@ describe("TwitterPreviewCard", () => {
     jest.restoreAllMocks();
     jest
       .spyOn(HTMLMediaElement.prototype, "load")
+      .mockImplementation(() => undefined);
+    jest.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    jest
+      .spyOn(HTMLMediaElement.prototype, "pause")
       .mockImplementation(() => undefined);
     mockedFetchTwitterPreview.mockReset();
     Object.assign(navigator, {
@@ -62,11 +62,18 @@ describe("TwitterPreviewCard", () => {
       expect(screen.getByTestId("twitter-post-preview")).toBeInTheDocument();
     });
 
+    expect(screen.getByText("X")).toBeInTheDocument();
+    expect(screen.getByText("Post")).toBeInTheDocument();
     expect(screen.getByText("Mayudrops")).toBeInTheDocument();
     expect(screen.getByText(/@Mayudropsphotos/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Follow" })).toHaveAttribute(
+    expect(
+      screen.queryByRole("link", { name: "Follow" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Open post on X" })
+    ).toHaveAttribute(
       "href",
-      "https://x.com/intent/follow?screen_name=Mayudropsphotos"
+      "https://x.com/Mayudropsphotos/status/2049202644879565155"
     );
     expect(
       screen.getByText("These jobs won't be here forever.")
@@ -78,23 +85,18 @@ describe("TwitterPreviewCard", () => {
     expect(
       screen.getByRole("img", { name: "These jobs won't be here forever." })
     ).toHaveAttribute("src", "https://pbs.twimg.com/media/example.jpg");
-    expect(screen.getByText(/· Apr 28, 2026/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Like" })).toHaveAttribute(
-      "href",
-      "https://x.com/intent/like?tweet_id=2049202644879565155"
-    );
-    expect(screen.getByRole("link", { name: "Reply" })).toHaveAttribute(
-      "href",
-      "https://x.com/intent/tweet?in_reply_to=2049202644879565155"
-    );
-    expect(screen.getByRole("link", { name: "Repost" })).toHaveAttribute(
-      "href",
-      "https://x.com/intent/retweet?tweet_id=2049202644879565155"
-    );
-    expect(screen.getByLabelText("Bookmarks")).toHaveTextContent("1");
+    expect(screen.getByText(/Apr 28, 2026/)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Like" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Reply" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Repost" })).toBeNull();
+    expect(screen.getByText("Views")).toBeInTheDocument();
+    expect(screen.getByText("137")).toBeInTheDocument();
+    expect(screen.getByText("Likes")).toBeInTheDocument();
     expect(screen.getByText("94.6K")).toBeInTheDocument();
+    expect(screen.getByText("Replies")).toBeInTheDocument();
     expect(screen.getByText("3.9K")).toBeInTheDocument();
-    expect(screen.getByText("137 Views")).toBeInTheDocument();
+    expect(screen.getByText("Reposts")).toBeInTheDocument();
+    expect(screen.getByText("Bookmarks")).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Read 3,951 replies" })
     ).not.toBeInTheDocument();
@@ -110,6 +112,7 @@ describe("TwitterPreviewCard", () => {
       mediaImageUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
       mediaVideoUrl: "https://video.twimg.com/tweet_video/1080x1350.mp4",
       mediaVideoHlsUrl: "https://video.twimg.com/tweet_video/playlist.m3u8",
+      mediaCaptionsUrl: "https://video.twimg.com/tweet_video/captions.vtt",
       mediaPosterUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
       mediaVideoVariants: [
         {
@@ -157,10 +160,20 @@ describe("TwitterPreviewCard", () => {
       "https://pbs.twimg.com/tweet_video_thumb/example.jpg"
     );
     expect(video).toHaveAttribute("controls");
+    expect(video).not.toHaveAttribute("autoplay");
+    expect(
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
     expect(container.querySelector("track")).toHaveAttribute(
       "kind",
       "captions"
     );
+    expect(container.querySelector("track")).toHaveAttribute(
+      "label",
+      "Captions"
+    );
+    expect(container.querySelector("track")).toHaveAttribute("srclang", "und");
+    expect(container.querySelector("track")).not.toHaveAttribute("default");
 
     expect(screen.queryByText("1080p")).not.toBeInTheDocument();
     await userEvent.click(
@@ -185,6 +198,20 @@ describe("TwitterPreviewCard", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Close video quality menu" })
     );
+    expect(
+      screen.queryByRole("dialog", { name: "Video quality" })
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Video quality" })
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Video quality" })
+    ).toBeInTheDocument();
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    await userEvent.click(video);
     expect(
       screen.queryByRole("dialog", { name: "Video quality" })
     ).not.toBeInTheDocument();
@@ -296,14 +323,52 @@ describe("TwitterPreviewCard", () => {
 
     await screen.findByTestId("twitter-post-preview");
     expect(
-      screen.getByRole("link", { name: "Open tweet on X" })
+      screen.getByRole("link", { name: "Open post on X" })
     ).toHaveAttribute(
       "href",
       "https://x.com/Mayudropsphotos/status/2049202644879565155"
     );
+    expect(
+      screen.getAllByRole("link", { name: "Open post on X" })
+    ).toHaveLength(1);
+    expect(screen.queryByRole("link", { name: "Open X post" })).toBeNull();
+  });
+
+  it("renders source fallback and hides empty facts when counts are unavailable", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2049202644879565155",
+      url: "https://x.com/Mayudropsphotos/status/2049202644879565155",
+      authorName: "Mayudrops",
+      authorHandle: "Mayudropsphotos",
+      text: "Post text",
+      favoriteCount: 0,
+      conversationCount: 0,
+      retweetCount: 0,
+      bookmarkCount: 0,
+      viewCount: 0,
+    });
+
+    render(
+      <TwitterPreviewCard
+        href="https://x.com/Mayudropsphotos/status/2049202644879565155"
+        tweetId="2049202644879565155"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+
+    expect(
+      screen.getByText("x.com/Mayudropsphotos/status/2049202644879565155")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Views")).not.toBeInTheDocument();
+    expect(screen.queryByText("Likes")).not.toBeInTheDocument();
+    expect(screen.queryByText("Replies")).not.toBeInTheDocument();
+    expect(screen.queryByText("Reposts")).not.toBeInTheDocument();
+    expect(screen.queryByText("Bookmarks")).not.toBeInTheDocument();
   });
 
   it("renders multiple media items in a gallery grid", async () => {
+    const playMock = jest.mocked(HTMLMediaElement.prototype.play);
     mockedFetchTwitterPreview.mockResolvedValue({
       tweetId: "2058813617554723314",
       url: "https://x.com/Casa_NUA/status/2058813617554723314",
@@ -351,10 +416,15 @@ describe("TwitterPreviewCard", () => {
       2
     );
     await userEvent.click(screen.getByRole("button", { name: "Tweet video" }));
-    expect(container.querySelector("video")).toHaveAttribute(
+    const video = container.querySelector("video");
+    expect(video).toHaveAttribute(
       "src",
       "https://video.twimg.com/ext_tw_video/video-one.mp4"
     );
+    expect(video).toHaveAttribute("controls");
+    expect(video).toHaveAttribute("autoplay");
+    expect(video).toHaveProperty("muted", true);
+    expect(playMock).toHaveBeenCalled();
     expect(
       screen.queryByRole("button", { name: "Video quality" })
     ).not.toBeInTheDocument();
@@ -424,7 +494,7 @@ describe("TwitterPreviewCard", () => {
     );
   });
 
-  it("does not show a copy action in the tweet action row", async () => {
+  it("does not show old tweet intent actions in the preview card", async () => {
     mockedFetchTwitterPreview.mockResolvedValue({
       tweetId: "2049202644879565155",
       url: "https://x.com/Mayudropsphotos/status/2049202644879565155",
@@ -438,6 +508,9 @@ describe("TwitterPreviewCard", () => {
 
     await screen.findByTestId("twitter-post-preview");
     expect(screen.queryByRole("button", { name: /copy/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Like" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Reply" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Repost" })).toBeNull();
   });
 
   it("shows a native fallback card when metadata cannot be fetched", async () => {
@@ -453,7 +526,7 @@ describe("TwitterPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("twitter-post-fallback")).toBeInTheDocument();
     });
-    expect(screen.getByText("Tweet preview unavailable")).toBeInTheDocument();
+    expect(screen.getByText("X post preview unavailable")).toBeInTheDocument();
     expect(
       screen.getByText(
         "https://x.com/Mayudropsphotos/status/2057513333985554492"

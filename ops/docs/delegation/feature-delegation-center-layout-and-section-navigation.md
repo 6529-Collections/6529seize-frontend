@@ -11,7 +11,7 @@ state.
 - Route handler: `/delegation/[...section]`
 - No bare `/delegation` route.
 - Known section routes render delegation UI panels.
-- Unknown or multi-segment paths render HTML fallback content.
+- Unknown or multi-segment paths render manifest-backed HTML fallback content.
 
 ## Entry Points
 
@@ -50,13 +50,13 @@ state.
 
 ## HTML Fallback Behavior
 
-- Unknown sections and multi-segment paths use HTML fallback.
+- Unknown sections and multi-segment paths use manifest-backed HTML fallback.
 - Fallback key is the last URL segment.
   - Example: `/delegation/delegation-faq/security` loads `security.html`.
-- Desktop keeps `Delegation FAQs` highlighted for nested FAQ paths.
-- The mobile full-width menu does not keep that nested-path FAQ highlight.
-- If HTML fetch is not `200`, the panel shows `404 | PAGE NOT FOUND`.
-- HTML panels do not show a dedicated loading indicator.
+- Both menus keep `Delegation FAQ` highlighted for nested FAQ paths.
+- If a manifest article cannot be loaded or its hash does not match, the panel
+  shows `404 | PAGE NOT FOUND`.
+- HTML panels show `Loading article...` while content is loading.
 
 ## Connection Gate on Center Cards
 

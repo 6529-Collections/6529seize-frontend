@@ -5,11 +5,13 @@ import { useEffect, useEffectEvent } from "react";
 import { Form } from "react-bootstrap";
 
 interface EnsAddressInputProps {
+  readonly id?: string | undefined;
   readonly value?: string;
   readonly placeholder?: string;
   readonly disabled?: boolean;
   readonly autoFocus?: boolean;
   readonly className?: string | undefined;
+  readonly ariaDescribedBy?: string | undefined;
   readonly chainId?: number;
   readonly onAddressChange: (address: string) => void;
   readonly onValueChange?: (value: string) => void;
@@ -18,11 +20,13 @@ interface EnsAddressInputProps {
 }
 
 export default function EnsAddressInput({
+  id,
   value = "",
   placeholder = "0x... or ENS",
   disabled = false,
   autoFocus = false,
   className,
+  ariaDescribedBy,
   chainId = 1,
   onAddressChange,
   onValueChange,
@@ -77,9 +81,11 @@ export default function EnsAddressInput({
 
   return (
     <Form.Control
+      id={id}
       disabled={disabled}
       autoFocus={autoFocus}
       placeholder={placeholder}
+      aria-describedby={ariaDescribedBy}
       className={className}
       type="text"
       value={inputValue}

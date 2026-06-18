@@ -1,0 +1,110 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-invalid-route-collision-v1",
+  "profile": {
+    "handle": "punk6529"
+  },
+  "site": {
+    "title": "Invalid Route Collision",
+    "base_path": "/punk6529/index.html",
+    "default_locale": "en",
+    "theme": {
+      "mode": "system",
+      "accent": "#2f7df6"
+    },
+    "navigation_id": "nav-main"
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/punk6529/index.html",
+        "kind": "page",
+        "page_id": "page-home-a"
+      },
+      {
+        "path": "/punk6529/index.html",
+        "kind": "page",
+        "page_id": "page-home-b"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-home-a",
+        "type": "page",
+        "path": "/punk6529/index.html",
+        "metadata": {
+          "title": "Invalid Route A",
+          "description": "This page collides with another route.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/index.html"
+        },
+        "blocks": [
+          {
+            "id": "block-a",
+            "block_type": "heading",
+            "level": 1,
+            "text": "A"
+          }
+        ]
+      },
+      {
+        "id": "page-home-b",
+        "type": "page",
+        "path": "/punk6529/index.html",
+        "metadata": {
+          "title": "Invalid Route B",
+          "description": "This page collides with another route.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/index.html"
+        },
+        "blocks": [
+          {
+            "id": "block-b",
+            "block_type": "heading",
+            "level": 1,
+            "text": "B"
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Home",
+            "page_id": "page-home-a"
+          }
+        ]
+      }
+    ]
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:4545454545454545454545454545454545454545454545454545454545454545",
+    "package_hash": "sha256:4646464646464646464646464646464646464646464646464646464646464646"
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:punk6529",
+      "signature": "fixture-signature-route-collision",
+      "signed_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://bafyfixtureinvalidroute",
+      "content_hash": "sha256:4646464646464646464646464646464646464646464646464646464646464646",
+      "recorded_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-fixture",
+    "created_at": "2026-06-17T00:00:00Z"
+  }
+}

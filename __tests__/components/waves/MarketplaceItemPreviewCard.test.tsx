@@ -22,6 +22,14 @@ jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
   ),
 }));
 
+function getAnchorLink(name: string): HTMLAnchorElement {
+  const link = screen
+    .getAllByRole("link", { name })
+    .find((element) => element instanceof HTMLAnchorElement);
+  expect(link).toBeDefined();
+  return link as HTMLAnchorElement;
+}
+
 describe("MarketplaceItemPreviewCard", () => {
   beforeEach(() => {
     mockClipboardWriteText.mockReset();
@@ -334,9 +342,7 @@ describe("MarketplaceItemPreviewCard", () => {
       </LinkPreviewProvider>
     );
 
-    const ctaLink = screen.getByRole("link", {
-      name: "Open on Manifold",
-    });
+    const ctaLink = getAnchorLink("Open on Manifold");
     expect(ctaLink).toHaveAttribute("aria-label", "Open on Manifold");
     expect(ctaLink.className).toContain("tw-bg-[#E5E5E5]");
     expect(ctaLink.className).toContain("tw-text-[#0A0A0A]");
@@ -396,9 +402,7 @@ describe("MarketplaceItemPreviewCard", () => {
 
     expect(screen.queryByTestId("marketplace-item-footer")).toBeNull();
 
-    const ctaLink = screen.getByRole("link", {
-      name: "Open on Manifold - 1.25 ETH",
-    });
+    const ctaLink = getAnchorLink("Open on Manifold - 1.25 ETH");
     expect(ctaLink).toHaveClass("tw-absolute", "tw-right-3", "tw-top-[5.5rem]");
     expect(ctaLink).toHaveAttribute(
       "aria-label",
@@ -436,9 +440,7 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(
       screen.queryByTestId("marketplace-item-overlay-open-link")
     ).toBeNull();
-    expect(screen.getByRole("link", { name: "Open on Manifold" })).toHaveClass(
-      "tw-top-3"
-    );
+    expect(getAnchorLink("Open on Manifold")).toHaveClass("tw-top-3");
   });
 
   it("renders compact fallback icon CTA when marketplace cannot be resolved", () => {
@@ -458,9 +460,7 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(
       screen.getByTestId("marketplace-item-cta-fallback-icon")
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Open listing - 0.42 ETH" })
-    ).toBeInTheDocument();
+    expect(getAnchorLink("Open listing - 0.42 ETH")).toBeInTheDocument();
     expect(screen.getByText("0.42")).toBeInTheDocument();
     expect(
       screen.getByTestId("marketplace-item-price-currency")

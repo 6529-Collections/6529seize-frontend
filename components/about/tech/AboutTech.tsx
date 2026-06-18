@@ -1,12 +1,19 @@
 import Link from "next/link";
 
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+
 import {
   FOLLOW_THE_REPO_WAVE_URL,
+  TECH_PR_REPORTS,
   TECH_WEEKLY_PR_REPORT,
-  TECH_WEEKLY_PR_TOTAL,
+  getTechReportTotal,
 } from "./reports";
 
 export default function AboutTech() {
+  const locale = DEFAULT_LOCALE;
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-10 tw-text-iron-200">
       <section className="tw-pb-2">
@@ -32,7 +39,8 @@ export default function AboutTech() {
                 className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
               >
                 Follow The Repo
-              </a>. This page is the linkable longer-form shelf beside it.
+              </a>
+              {"."} This page is the linkable longer-form shelf beside it.
             </p>
           </div>
           <div className="tw-border-l-0 tw-border-solid tw-border-iron-800 tw-pt-1 lg:tw-border-l lg:tw-pl-6">
@@ -71,55 +79,35 @@ export default function AboutTech() {
         </div>
 
         <article className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50">
-          <div className="tw-grid tw-gap-0 tw-border-b tw-border-solid tw-border-iron-800 md:tw-grid-cols-[minmax(0,1fr)_12rem]">
-            <div className="tw-p-5">
-              <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                {TECH_WEEKLY_PR_REPORT.dateLabel}
-              </p>
-              <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
-                <Link
-                  href={`/about/tech/${TECH_WEEKLY_PR_REPORT.slug}`}
-                  className="hover:tw-text-primary-200 tw-text-iron-50 tw-no-underline"
-                >
-                  {TECH_WEEKLY_PR_REPORT.title}
-                </Link>
-              </h3>
-              <p className="tw-mb-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
-                {TECH_WEEKLY_PR_REPORT.description}
-              </p>
-            </div>
-            <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-5 md:tw-border-l md:tw-border-t-0">
-              <p className="tw-mb-1 tw-text-3xl tw-font-semibold tw-leading-none tw-text-iron-50">
-                {TECH_WEEKLY_PR_TOTAL}
-              </p>
-              <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                PRs Covered
-              </p>
-            </div>
-          </div>
-
           <ul className="tw-mb-0 tw-list-none tw-divide-y tw-divide-iron-800 tw-p-0">
-            {TECH_WEEKLY_PR_REPORT.repos.map((repo) => (
-              <li
-                key={repo.key}
-                className="tw-grid tw-gap-2 tw-p-4 md:tw-grid-cols-[13rem_minmax(0,1fr)_10rem]"
-              >
-                <p className="tw-mb-0 tw-font-semibold tw-text-iron-100">
-                  <a
-                    href={repo.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:tw-text-primary-200 tw-text-iron-100 tw-no-underline"
-                  >
-                    {repo.name}
-                  </a>
-                </p>
-                <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-                  {repo.focus}
-                </p>
-                <p className="tw-mb-0 tw-text-sm tw-text-iron-400 md:tw-text-right">
-                  {repo.prCount} PRs, {repo.stateSummary}
-                </p>
+            {TECH_PR_REPORTS.map((report) => (
+              <li key={report.slug}>
+                <div className="tw-grid tw-gap-0 md:tw-grid-cols-[minmax(0,1fr)_12rem]">
+                  <div className="tw-p-5">
+                    <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+                      {report.dateLabel}
+                    </p>
+                    <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
+                      <Link
+                        href={`/about/tech/${report.slug}`}
+                        className="hover:tw-text-primary-200 tw-text-iron-50 tw-no-underline"
+                      >
+                        {report.title}
+                      </Link>
+                    </h3>
+                    <p className="tw-mb-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+                      {report.description}
+                    </p>
+                  </div>
+                  <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-5 md:tw-border-l md:tw-border-t-0">
+                    <p className="tw-mb-1 tw-text-3xl tw-font-semibold tw-leading-none tw-text-iron-50">
+                      {formatInteger(locale, getTechReportTotal(report))}
+                    </p>
+                    <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+                      {t(locale, "about.tech.index.prsCovered")}
+                    </p>
+                  </div>
+                </div>
               </li>
             ))}
           </ul>

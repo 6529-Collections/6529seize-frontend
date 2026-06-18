@@ -22,6 +22,7 @@ function getNetworkSection(): SidebarSection {
       { name: "Memes Calendar", href: "/meme-calendar" },
       { name: "TDH", href: "/network/tdh" },
       { name: "xTDH", href: "/xtdh" },
+      { name: "Wave Score", href: "/network/wave-score" },
     ],
     subsections: [
       {
@@ -71,7 +72,7 @@ function getToolsSection(
             name: "Wallet Architecture",
             href: "/delegation/wallet-architecture",
           },
-          { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
+          { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
           {
             name: "Consolidation Use Cases",
             href: "/delegation/consolidation-use-cases",

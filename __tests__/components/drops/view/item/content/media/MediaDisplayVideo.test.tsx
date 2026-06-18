@@ -106,15 +106,20 @@ describe("MediaDisplayVideo", () => {
     );
   });
 
-  it("toggles play state on click when controls hidden", async () => {
+  it("does not add playback toggles from ambient video clicks", async () => {
     const user = userEvent.setup();
     const { container } = render(<MediaDisplayVideo src="foo.mp4" />);
     const video = container.querySelector("video") as HTMLVideoElement;
     Object.defineProperty(video, "paused", { writable: true, value: true });
+
+    const playCallsBeforeClick = playMock.mock.calls.length;
+    const pauseCallsBeforeClick = pauseMock.mock.calls.length;
+
     await user.click(video);
-    expect(playMock).toHaveBeenCalled();
+    expect(playMock).toHaveBeenCalledTimes(playCallsBeforeClick);
+
     (video as any).paused = false;
     await user.click(video);
-    expect(pauseMock).toHaveBeenCalled();
+    expect(pauseMock).toHaveBeenCalledTimes(pauseCallsBeforeClick);
   });
 });

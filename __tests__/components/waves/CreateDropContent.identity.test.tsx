@@ -119,6 +119,7 @@ jest.mock("@/components/waves/CreateDropInput", () => {
   return {
     __esModule: true,
     default: ReactLib.forwardRef((props: any, ref: any) => {
+      const typedContentCountRef = ReactLib.useRef(0);
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: () => undefined,
         focus: () => undefined,
@@ -128,9 +129,24 @@ jest.mock("@/components/waves/CreateDropInput", () => {
         <div data-testid="input">
           <button
             type="button"
-            onClick={() => props.onEditorState({ __markdown: "typed content" })}
+            onClick={() => {
+              typedContentCountRef.current += 1;
+              props.onEditorState({
+                __markdown: `typed content ${typedContentCountRef.current}`,
+              });
+            }}
           >
             type content
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              props.onEditorState({
+                __markdown: "pending ![Seize](loading)",
+              })
+            }
+          >
+            type pending image
           </button>
           <button
             type="button"
@@ -316,10 +332,33 @@ describe("CreateDropContent identity picker flow", () => {
     });
   });
 
+  it("does not submit while an inline image upload is unresolved", async () => {
+    const submitDrop = jest.fn(() => true);
+    renderSubject({ isDropMode: false, submitDrop });
+
+    await userEvent.click(screen.getByText("type pending image"));
+    await userEvent.click(screen.getByText("submit"));
+
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(submitDrop).not.toHaveBeenCalled();
+  });
+
+  it("does not submit a GIF while an inline image upload is unresolved", async () => {
+    const submitDrop = jest.fn(() => true);
+    renderSubject({ isDropMode: false, submitDrop });
+
+    await userEvent.click(screen.getByText("type pending image"));
+    await userEvent.click(screen.getByText("select gif"));
+
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(submitDrop).not.toHaveBeenCalled();
+  });
+
   const baseWave = {
     id: "wave-1",
+    author: { handle: "creator" },
     wave: { type: ApiWaveType.Rank },
-    chat: { enabled: true },
+    chat: { enabled: true, links_disabled: false },
     participation: {
       submission_strategy: {
         config: {
