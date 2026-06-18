@@ -36,6 +36,12 @@ Shared docs cover user-facing behavior reused across multiple product areas.
 - [Browser Zoom and Pinch Scaling](feature-browser-zoom-and-pinch-scaling.md):
   web zoom defaults plus native-wrapper zoom lock and text-entry safeguards.
 
+### Metadata and Sharing
+
+- [Social Card and Open Graph Metadata](feature-social-card-and-open-graph-metadata.md):
+  shared metadata helpers, dynamic OG endpoint families, standardized coverage,
+  and the expansion checklist for new share surfaces.
+
 ### Privacy and Consent
 
 - [Cookie Consent and Performance Analytics](feature-cookie-consent-and-performance-analytics.md):
