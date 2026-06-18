@@ -14,8 +14,7 @@ export const DE_DE_MESSAGES = {
   "media.video.playPreview": "Videovorschau abspielen",
   "media.video.seek": "Videoposition andern",
   "media.video.unmute": "Videoton einschalten",
-  "media.video.unsupported":
-    "Ihr Browser unterstuetzt das Video-Tag nicht.",
+  "media.video.unsupported": "Ihr Browser unterstuetzt das Video-Tag nicht.",
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",

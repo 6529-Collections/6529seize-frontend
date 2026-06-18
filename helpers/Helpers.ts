@@ -2,6 +2,7 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
+import { getLargeSocialCardMetadata } from "@/components/providers/metadata";
 import {
   DEFAULT_USER_PAGE_TAB,
   type UserPageTabKey,
@@ -945,16 +946,12 @@ export const getMetadataForUserPage = (
     profile.handle ??
     profile.primary_wallet ??
     profile.display;
-  return {
+  return getLargeSocialCardMetadata({
     title: pathTitle ? `${display} - ${pathTitle}` : display,
-    ogImage: `${publicEnv.BASE_ENDPOINT}/api/og-metadata/profiles/${encodeURIComponent(
-      imageIdentity
-    )}`,
-    ogImageHeight: 630,
-    ogImageWidth: 1200,
+    ogImage: `/api/og-metadata/profiles/${encodeURIComponent(imageIdentity)}`,
+    ogImageAlt: `${display} profile social card`,
     description: "Identity",
-    twitterCard: "summary_large_image",
-  };
+  });
 };
 
 export async function fetchFileContent(filePath: string): Promise<string> {

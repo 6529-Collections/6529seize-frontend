@@ -58,9 +58,7 @@ const readNumber = (value: unknown): number | undefined => {
   return value;
 };
 
-const readTrustedYoutubeThumbnailUrl = (
-  value: unknown
-): string | undefined => {
+const readTrustedYoutubeThumbnailUrl = (value: unknown): string | undefined => {
   const rawUrl = readString(value);
   if (!rawUrl) {
     return undefined;
@@ -122,7 +120,9 @@ const fetchYoutubeOEmbedUncached = async (
   });
 };
 
-const fetchYoutubeOEmbed = (fetchUrl: string): Promise<YoutubeOEmbedResponse> => {
+const fetchYoutubeOEmbed = (
+  fetchUrl: string
+): Promise<YoutubeOEmbedResponse> => {
   const cached = youtubeOEmbedCache.get(fetchUrl);
   if (cached) {
     return cached;

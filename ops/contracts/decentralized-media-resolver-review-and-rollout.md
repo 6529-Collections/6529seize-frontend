@@ -403,4 +403,3 @@ Remaining direct gateway references should be either:
 2. Frontend PR: consume central FE resolver and contract files.
 
 The frontend PR should not be deployed before the backend API and `media.6529.io` infrastructure are verified.
-

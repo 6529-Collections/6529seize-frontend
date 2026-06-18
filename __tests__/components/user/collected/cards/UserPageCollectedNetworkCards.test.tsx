@@ -5,9 +5,8 @@ import { render, screen, within } from "@testing-library/react";
 import React from "react";
 
 jest.mock("@/i18n/messages", () => {
-  const actual = jest.requireActual<typeof import("@/i18n/messages")>(
-    "@/i18n/messages"
-  );
+  const actual =
+    jest.requireActual<typeof import("@/i18n/messages")>("@/i18n/messages");
   return {
     ...actual,
     t: jest.fn(actual.t),

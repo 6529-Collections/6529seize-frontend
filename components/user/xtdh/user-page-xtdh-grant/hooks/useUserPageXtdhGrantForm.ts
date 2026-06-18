@@ -8,19 +8,15 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { validateGrantForm } from "../utils/validateGrantForm";
-import type {
-  GrantValidationResult,
-  UserPageXtdhGrantForm,
-} from "../types";
+import type { GrantValidationResult, UserPageXtdhGrantForm } from "../types";
 import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
 import type { ApiXTdhCreateGrant } from "@/generated/models/ApiXTdhCreateGrant";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
 
 export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
-  const [contract, setContract] = useState<UserPageXtdhGrantForm["contract"]>(
-    null
-  );
+  const [contract, setContract] =
+    useState<UserPageXtdhGrantForm["contract"]>(null);
   const [selection, setSelection] =
     useState<UserPageXtdhGrantForm["selection"]>(null);
   const [amount, setAmount] = useState<UserPageXtdhGrantForm["amount"]>(null);

@@ -53,8 +53,12 @@ describe("YouTube URL helpers", () => {
   });
 
   it("rejects unsupported YouTube paths and invalid ids", () => {
-    expect(parseYoutubeLink("https://www.youtube.com/channel/UC123")).toBeNull();
+    expect(
+      parseYoutubeLink("https://www.youtube.com/channel/UC123")
+    ).toBeNull();
     expect(parseYoutubeLink("https://www.youtube.com/watch?v=$bad")).toBeNull();
-    expect(parseYoutubeLink("https://notyoutube.example/watch?v=abc123")).toBeNull();
+    expect(
+      parseYoutubeLink("https://notyoutube.example/watch?v=abc123")
+    ).toBeNull();
   });
 });

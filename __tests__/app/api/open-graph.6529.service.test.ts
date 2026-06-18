@@ -48,7 +48,9 @@ function readFetchUrl(input: RequestInfo | URL): URL {
   return new URL(String(input));
 }
 
-function readFetchHeaders(init: RequestInit | undefined): Record<string, string> {
+function readFetchHeaders(
+  init: RequestInit | undefined
+): Record<string, string> {
   return Object.fromEntries(new Headers(init?.headers).entries());
 }
 
@@ -82,9 +84,7 @@ function mockFreshTheMemesLiveCountApis(): void {
       });
     }
 
-    if (
-      url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/509`
-    ) {
+    if (url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/509`) {
       return jsonResponse({ message: "Unauthorized" }, 401);
     }
 
@@ -202,10 +202,7 @@ describe("createFirstParty6529Plan", () => {
         });
       }
 
-      if (
-        url.pathname ===
-        `/api/minting-claims/${MEMES_CONTRACT}/claims/509`
-      ) {
+      if (url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/509`) {
         claimAuthHeader = headers.get("x-6529-auth");
         return jsonResponse({
           name: "The Collective Synapse",
@@ -300,10 +297,7 @@ describe("createFirstParty6529Plan", () => {
         });
       }
 
-      if (
-        url.pathname ===
-        `/api/minting-claims/${MEMES_CONTRACT}/claims/509`
-      ) {
+      if (url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/509`) {
         claimAuthHeader = headers.get("x-6529-auth");
         return jsonResponse({
           name: "The Collective Synapse",
@@ -515,7 +509,9 @@ describe("createFirstParty6529Plan", () => {
       { apiAuth: "bad-staging-auth" }
     );
 
-    await expect(plan!.execute()).rejects.toThrow("The Memes card was not found.");
+    await expect(plan!.execute()).rejects.toThrow(
+      "The Memes card was not found."
+    );
     expect(
       mockFetch.mock.calls.some(
         (call) => readFetchUrl(call[0]).hostname === "api.6529.io"
@@ -537,8 +533,8 @@ describe("createFirstParty6529Plan", () => {
     );
     await plan!.execute();
 
-    const fetchHosts = mockFetch.mock.calls.map((call) =>
-      readFetchUrl(call[0]).host
+    const fetchHosts = mockFetch.mock.calls.map(
+      (call) => readFetchUrl(call[0]).host
     );
     expect(fetchHosts).toEqual([
       "api.6529.io",
@@ -553,14 +549,19 @@ describe("createFirstParty6529Plan", () => {
 
     mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
       const url = readFetchUrl(input);
-      return jsonResponse({}, url.hostname === "api.staging.6529.io" ? 503 : 404);
+      return jsonResponse(
+        {},
+        url.hostname === "api.staging.6529.io" ? 503 : 404
+      );
     });
 
     const plan = createFirstParty6529Plan(
       new URL("https://6529.io/the-memes/509")
     );
 
-    await expect(plan!.execute()).rejects.toThrow("The Memes card was not found.");
+    await expect(plan!.execute()).rejects.toThrow(
+      "The Memes card was not found."
+    );
     expect(
       mockFetch.mock.calls.some(
         (call) => readFetchUrl(call[0]).hostname === "api.6529.io"
@@ -665,10 +666,7 @@ describe("createFirstParty6529Plan", () => {
         });
       }
 
-      if (
-        url.pathname ===
-        `/api/minting-claims/${MEMES_CONTRACT}/claims/509`
-      ) {
+      if (url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/509`) {
         return jsonResponse("Unauthorized", 401);
       }
 
@@ -707,7 +705,9 @@ describe("createFirstParty6529Plan", () => {
       createFirstParty6529Plan(new URL("https://staging.6529.io/the-memes/509"))
     ).not.toBeNull();
     expect(
-      createFirstParty6529Plan(new URL("https://6529.io.evil.com/the-memes/509"))
+      createFirstParty6529Plan(
+        new URL("https://6529.io.evil.com/the-memes/509")
+      )
     ).toBeNull();
     expect(
       createFirstParty6529Plan(new URL("https://evil6529.io/the-memes/509"))
@@ -742,10 +742,7 @@ describe("createFirstParty6529Plan", () => {
         return jsonResponse({ data: [] });
       }
 
-      if (
-        url.pathname ===
-        `/api/minting-claims/${MEMES_CONTRACT}/claims/509`
-      ) {
+      if (url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/509`) {
         return jsonResponse({}, 404);
       }
 
@@ -1106,7 +1103,9 @@ describe("createFirstParty6529Plan", () => {
       new URL("https://6529.io/nextgen/token/42")
     );
 
-    await expect(plan!.execute()).rejects.toThrow("NextGen token was not found.");
+    await expect(plan!.execute()).rejects.toThrow(
+      "NextGen token was not found."
+    );
 
     const fetchUrls = mockFetch.mock.calls.map((call) =>
       readFetchUrl(call[0]).toString()

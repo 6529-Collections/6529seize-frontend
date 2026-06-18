@@ -821,9 +821,13 @@ export function WaveTrustSignals({
             mode,
             getVisibilityToneClasses(variant, waveScore?.visibility_score)
           )}
-          aria-label={t(WAVE_TRUST_LOCALE, "waves.score.details.visibilityAria", {
-            visibilityScore,
-          })}
+          aria-label={t(
+            WAVE_TRUST_LOCALE,
+            "waves.score.details.visibilityAria",
+            {
+              visibilityScore,
+            }
+          )}
           title={visibilityTitle}
           {...getTooltipAttributes(
             shouldUseInlineSidebarTooltip ? inlineSidebarTooltipId : undefined,

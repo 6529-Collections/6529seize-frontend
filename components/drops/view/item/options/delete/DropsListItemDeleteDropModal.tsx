@@ -76,20 +76,20 @@ export default function DropsListItemDeleteDropModal({
   };
 
   return createPortal(
-    <div className="tw-cursor-default tw-relative tw-z-50">
+    <div className="tw-relative tw-z-50 tw-cursor-default">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-50 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
+            className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-xl"
           >
             <div className="tw-flex tw-justify-between">
               <div className="tw-max-w-xl sm:tw-flex sm:tw-space-x-4">
                 <div>
-                  <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-red/10 tw-border tw-border-solid tw-border-red/10">
+                  <span className="tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-red/10 tw-bg-red/10">
                     <svg
-                      className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-red tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-red tw-transition tw-duration-300 tw-ease-out"
                       viewBox="0 0 24 24"
                       fill="none"
                       aria-hidden="true"
@@ -105,21 +105,21 @@ export default function DropsListItemDeleteDropModal({
                     </svg>
                   </span>
                 </div>
-                <div className="tw-mt-3 sm:tw-mt-0 sm:tw-max-w-sm tw-flex tw-flex-col">
-                  <p className=" tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
+                <div className="tw-mt-3 tw-flex tw-flex-col sm:tw-mt-0 sm:tw-max-w-sm">
+                  <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-50">
                     Delete {contentType}
                   </p>
-                  <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-400">
+                  <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
                     Are you sure you want to delete this{" "}
                     {contentType.toLowerCase()}?
                   </p>
                 </div>
               </div>
-              <div className="tw-absolute tw-right-4 tw-top-4 tw-flex tw-justify-between tw-items-center">
+              <div className="tw-absolute tw-right-4 tw-top-4 tw-flex tw-items-center tw-justify-between">
                 <button
                   onClick={closeModal}
                   type="button"
-                  className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950 tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus:tw-outline-none"
                 >
                   <span className="tw-sr-only tw-text-sm">Close</span>
                   <svg
@@ -141,15 +141,15 @@ export default function DropsListItemDeleteDropModal({
             </div>
             <form>
               <div className="tw-mt-8">
-                <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
+                <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
                   <button
                     disabled={mutating}
                     onClick={onDelete}
                     type="button"
-                    className={`tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative  tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+                    className={`tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out sm:tw-w-auto ${
                       mutating
-                        ? "tw-cursor-not-allowed tw-bg-iron-400 tw-border-iron-400"
-                        : "tw-cursor-pointer tw-bg-[#F04438] tw-border-[#F04438] hover:tw-bg-[#D92D20] hover:tw-border-[#D92D20]"
+                        ? "tw-cursor-not-allowed tw-border-iron-400 tw-bg-iron-400"
+                        : "tw-cursor-pointer tw-border-[#F04438] tw-bg-[#F04438] hover:tw-border-[#D92D20] hover:tw-bg-[#D92D20]"
                     }`}
                   >
                     <div
@@ -161,7 +161,7 @@ export default function DropsListItemDeleteDropModal({
                       <svg
                         aria-hidden="true"
                         role="output"
-                        className="tw-inline tw-w-5 tw-h-5 tw-text-[#F04438] tw-animate-spin tw-absolute"
+                        className="tw-absolute tw-inline tw-h-5 tw-w-5 tw-animate-spin tw-text-[#F04438]"
                         viewBox="0 0 100 101"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -182,10 +182,10 @@ export default function DropsListItemDeleteDropModal({
                     disabled={mutating}
                     onClick={closeModal}
                     type="button"
-                    className={`tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
+                    className={`tw-mt-3 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out sm:tw-mt-0 sm:tw-w-auto ${
                       mutating
                         ? "tw-cursor-not-allowed"
-                        : "hover:tw-bg-iron-800 hover:tw-border-iron-700"
+                        : "hover:tw-border-iron-700 hover:tw-bg-iron-800"
                     }`}
                   >
                     Cancel

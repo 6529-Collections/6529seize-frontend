@@ -129,11 +129,7 @@ it("encodes reserved route params before fetching the rememe", async () => {
   render(
     <CookieConsentProvider>
       <TitleProvider>
-        <RememePage
-          contract="collection/alpha"
-          id="token#1"
-          locale="de-DE"
-        />
+        <RememePage contract="collection/alpha" id="token#1" locale="de-DE" />
       </TitleProvider>
     </CookieConsentProvider>
   );
