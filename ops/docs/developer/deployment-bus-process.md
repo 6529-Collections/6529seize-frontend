@@ -1,9 +1,16 @@
 # Staging And Production Deployment Bus
 
-Status: process proposal for team review. This page defines the operating
-model before automation. A later automation PR should add labels, queue
-materialization, GitHub Deployment records, manifests, staging E2E commands,
-and dashboard helpers.
+Status: process authority. This page defines the operating model that
+deployment-bus automation must follow. Automation should be added in reviewable
+slices: durable manifests and GitHub Deployment records first, then queue
+materialization, labels, PR comments, dashboard helpers, and stricter
+production preflight gates.
+
+Implementation note: the first automation slice is documented in
+`ops/docs/developer/deployment-bus-automation.md`. It adds manifest validation,
+GitHub Deployment ledger records, workflow artifacts, deployed-staging smoke
+support, and long-running deployment heartbeats without automating queue
+movement or production promotion.
 
 ## Why This Exists
 
@@ -67,13 +74,13 @@ Backend coordination:
   and that the frontend generated client matches the intended backend contract
   before frontend staging uses new API behavior.
 
-Known current gaps:
+Known current gaps after the first automation slice:
 
-- There is no durable staging bus ledger yet.
-- There is no dedicated deployed-staging E2E command yet. Current Playwright
-  E2E is local by default and starts a local dev server.
-- GitHub Deployment objects are not yet the authoritative ledger for staging or
-  production in this repo.
+- There is no automated queue collector, release label state machine, or release
+  captain dashboard yet.
+- The durable manifest artifact is authoritative for this slice; GitHub
+  Deployment records are the status/history pointer, not the full manifest
+  datastore.
 - Backend coordination is still a cross-repo handoff, not a shared automated
   release train.
 
@@ -172,7 +179,7 @@ status: queued | deploying | validating | passed | failed | held | superseded
 
 Until automation exists, the release captain can keep this manifest in the PR
 description, a deployment wave update, or a workstream note. The automation PR
-should make it a durable artifact and GitHub Deployment payload.
+should make it a durable artifact linked from GitHub Deployment status history.
 
 For production gating, `production_candidate_sha` is the important SHA. If the
 staging branch contains a tree that is not the current `origin/main` production
@@ -279,16 +286,15 @@ Hotfixes use the same lane with a smaller manifest.
 
 ## Automation PR Scope
 
-The follow-up automation PR should implement the process above. Candidate work:
+The first automation PR implements the durable manifest, GitHub Deployment
+status records, deployed-staging Playwright support, and production same-SHA
+preflight. Remaining candidate work:
 
 - `staging:queued`, `staging:deployed`, `staging:passed`, `staging:failed`,
   `release:candidate`, `release:hold`, and `release:blocked` labels
 - risk and area classification policy
 - staging queue collector
-- manifest generation as an artifact
-- GitHub Deployment and deployment status writes for staging and production
 - PR comments that record inclusion, deployed SHA, validation owner, and result
-- deployed-staging Playwright support without starting a local web server
 - a service-by-service backend smoke matrix or handoff template, likely in the
   backend repo first
 - release captain dashboard or CLI for active lane, queue, and production lag

@@ -12,6 +12,8 @@ wrapper expects that location.
 
 - `docs-area-remediator-local/`: local validators and remediation helpers for
   `ops/docs`.
+- `deployment-bus.cjs`: deployment bus manifest, validation, heartbeat,
+  production-preflight, and GitHub Deployment status helper.
 - `run-docs-area-remediator-loop.sh`: iterative docs remediation loop.
 - `process-docs-commit-queue.sh`: docs update queue helper for commit-based
   remediation workflows.

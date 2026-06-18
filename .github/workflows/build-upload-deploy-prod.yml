@@ -2,6 +2,9 @@ name: Web Deploy - PROD
 
 on: workflow_dispatch
 
+permissions:
+  contents: read
+
 concurrency:
   group: web-deploy-prod
   cancel-in-progress: false
@@ -42,14 +45,58 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      deployments: write
     environment: production
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Create deployment bus manifest
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs create-manifest \
+            --environment production \
+            --production-candidate-sha "${COMMIT_SHA}" \
+            --production-eligible true \
+            --release-captain "github-actions/${{ github.actor }}" \
+            --status queued \
+            --phase queued \
+            --message "Production deployment queued for ${COMMIT_SHA}" \
+            --workflow-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --output deployment-bus-manifest.json
+
+      - name: Create GitHub deployment record
+        id: deployment-record
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          deployment_id="$(node ops/scripts/deployment-bus.cjs github-create-deployment \
+            --file deployment-bus-manifest.json \
+            --ref "${COMMIT_SHA}" \
+            --environment production \
+            --task deploy:production \
+            --description "Production deployment bus ${COMMIT_SHA}")"
+          echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
+
+      - name: Mark production deployment queued
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state queued \
+            --description "Production deployment bus queued" \
+            --environment-url "https://6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
 
@@ -144,11 +191,36 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Confirm main did not advance before production mutation
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags origin main
+          latest_main_sha="$(git rev-parse origin/main)"
+          node ops/scripts/deployment-bus.cjs production-preflight \
+            --file deployment-bus-manifest.json \
+            --current-main-sha "$latest_main_sha" \
+            --remote origin \
+            --branch main
+
       - name: Upload assets to S3
         run: aws s3 sync target s3://${{ env.AWS_BUCKET }}/web_build/${{ env.COMMIT_SHA }}/
 
       - name: Get commit message
         run: echo "COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
+
+      - name: Mark production deployment in progress
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state in_progress \
+            --description "Production Elastic Beanstalk deployment starting" \
+            --environment-url "https://6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Create new ElasticBeanstalk Application Version
         run: |
@@ -177,6 +249,10 @@ jobs:
               "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SENTRY_SERVER_INSTRUMENTATION,Value=false"
 
       - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment-record.outputs.deployment_id }}
+          GITHUB_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           echo "Warmup..."
           MAX_RETRIES=20
@@ -187,6 +263,14 @@ jobs:
             ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Status' --output text)
             echo "Environment health: $ENV_HEALTH"
             echo "Environment status: $ENV_STATUS"
+            if [ $((COUNTER % 5)) -eq 0 ]; then
+              node ops/scripts/deployment-bus.cjs github-create-status \
+                --deployment-id "$DEPLOYMENT_ID" \
+                --state in_progress \
+                --description "Production EB health=$ENV_HEALTH status=$ENV_STATUS after $COUNTER checks" \
+                --environment-url "https://6529.io" \
+                --log-url "$RUN_URL" || true
+            fi
             if [[ $ENV_HEALTH == "Green" && $ENV_STATUS == "Ready" ]]; then
               echo "Environment is healthy and ready!"
               break
@@ -212,6 +296,45 @@ jobs:
           else
             echo "Deployed version valid!"
           fi
+
+      - name: Mark production deployment terminal
+        if: always() && steps.deployment-record.outputs.deployment_id != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+
+          case "$JOB_STATUS" in
+            success)
+              state="success"
+              description="Production deployment verified"
+              ;;
+            cancelled)
+              state="error"
+              description="Production deployment cancelled before verification"
+              ;;
+            *)
+              state="failure"
+              description="Production deployment failed before verification"
+              ;;
+          esac
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state "$state" \
+            --description "$description" \
+            --environment-url "https://6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Upload deployment bus manifest
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: deployment-bus-production-${{ env.COMMIT_SHA || github.run_id }}
+          path: deployment-bus-manifest.json
+          if-no-files-found: ignore
+          retention-days: 90
 
       - name: Notify about failure
         uses: sarisia/actions-status-discord@v1
