@@ -420,7 +420,7 @@ describe("SeizeVideoPlayer", () => {
   it("toggles minimal playback from video clicks", () => {
     let paused = false;
     const { container } = render(
-      <SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay />
+      <SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay={false} />
     );
     const video = container.querySelector("video");
     if (!video) {
@@ -430,15 +430,27 @@ describe("SeizeVideoPlayer", () => {
       configurable: true,
       get: () => paused,
     });
+    fireEvent.play(video);
+
+    const pauseCallsBeforeClick = jest.mocked(
+      HTMLMediaElement.prototype.pause
+    ).mock.calls.length;
 
     fireEvent.click(video);
 
-    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledTimes(
+      pauseCallsBeforeClick + 1
+    );
 
     paused = true;
+    const playCallsBeforeClick = jest.mocked(HTMLMediaElement.prototype.play)
+      .mock.calls.length;
+
     fireEvent.click(video);
 
-    expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(
+      playCallsBeforeClick + 1
+    );
   });
 
   it("does not toggle playback from native-control video clicks", () => {
