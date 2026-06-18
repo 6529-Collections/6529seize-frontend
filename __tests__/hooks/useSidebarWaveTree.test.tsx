@@ -9,6 +9,12 @@ describe("useSidebarWaveTree", () => {
     globalThis.sessionStorage.clear();
   });
 
+  const createNewDropsCount = (latestDropTimestamp: number | null) => ({
+    count: 0,
+    latestDropTimestamp,
+    firstUnreadSerialNo: null,
+  });
+
   const waves = [
     createMockMinimalWave({
       id: "parent",
@@ -18,16 +24,18 @@ describe("useSidebarWaveTree", () => {
       id: "newer-child",
       parentWaveId: "parent",
       createdAt: 20,
+      newDropsCount: createNewDropsCount(100),
     }),
     createMockMinimalWave({
       id: "older-child",
       parentWaveId: "parent",
       hasSubwaves: true,
       createdAt: 10,
+      newDropsCount: createNewDropsCount(200),
     }),
   ];
 
-  it("keeps manual expansion in memory and sorts expanded subwaves by created time", () => {
+  it("keeps manual expansion in memory and sorts expanded subwaves by latest activity", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
       useSidebarWaveTree({
