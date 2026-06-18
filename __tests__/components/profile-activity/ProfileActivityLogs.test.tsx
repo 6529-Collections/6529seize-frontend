@@ -78,18 +78,18 @@ describe("convertActivityLogParams", () => {
     expect(res.group_id).toBeUndefined();
   });
 
-  it("adds rating matter and sorts log types", () => {
+  it("adds REP rating matter and sorts log types", () => {
     const params = {
       ...base,
       logTypes: [
         ProfileActivityLogType.HANDLE_EDIT,
         ProfileActivityLogType.DROP_CREATED,
       ],
-      matter: "FUN" as any,
+      matter: RateMatter.REP,
     };
     const res = convertActivityLogParams({ params, disableActiveGroup: false });
     expect(res.log_type).toBe("DROP_CREATED,HANDLE_EDIT");
-    expect(res.rating_matter).toBe("FUN");
+    expect(res.rating_matter).toBe("REP");
   });
 
   it("passes Wave REP rating matter through", () => {
@@ -99,6 +99,20 @@ describe("convertActivityLogParams", () => {
     });
 
     expect(res.rating_matter).toBe("WAVE_REP");
+  });
+
+  it("does not forward rating matter for non-REP profile filters", () => {
+    const nic = convertActivityLogParams({
+      params: { ...base, matter: RateMatter.NIC },
+      disableActiveGroup: false,
+    });
+    const dropRep = convertActivityLogParams({
+      params: { ...base, matter: RateMatter.DROP_REP },
+      disableActiveGroup: false,
+    });
+
+    expect(nic.rating_matter).toBeUndefined();
+    expect(dropRep.rating_matter).toBeUndefined();
   });
 
   it("converts numbers to strings", () => {
