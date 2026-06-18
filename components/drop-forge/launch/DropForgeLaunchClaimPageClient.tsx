@@ -1492,18 +1492,18 @@ export default function DropForgeLaunchClaimPageClient({
 
   const runMetadataLocationOnlyUpdate = useCallback(() => {
     if (!claim) {
-      setToast({ message: "Claim not loaded", type: "error" });
+      setToast({ message: "Claim details are not loaded yet.", type: "error" });
       return;
     }
     if (!claim.metadata_location) {
       setToast({
-        message: "Updated metadata location is missing",
+        message: "Add the updated metadata location before continuing.",
         type: "error",
       });
       return;
     }
     if (!isInitialized || !manifoldClaim) {
-      setToast({ message: "On-chain claim is not initialized", type: "error" });
+      setToast({ message: "Initialize the on-chain claim before continuing.", type: "error" });
       return;
     }
     if (
@@ -1519,7 +1519,7 @@ export default function DropForgeLaunchClaimPageClient({
       manifoldClaim.endDate == null
     ) {
       setToast({
-        message: "On-chain claim parameters are not available yet",
+        message: "On-chain claim parameters are not available yet.",
         type: "error",
       });
       return;
@@ -1761,24 +1761,24 @@ export default function DropForgeLaunchClaimPageClient({
       forceAction?: "initialize" | "update";
     }) => {
       if (!claim) {
-        setToast({ message: "Claim not loaded", type: "error" });
+        setToast({ message: "Claim details are not loaded yet.", type: "error" });
         return;
       }
       if (claim.edition_size == null || claim.edition_size <= 0) {
         setToast({
-          message: "Edition size is missing or invalid",
+          message: "Enter a valid edition size.",
           type: "error",
         });
         return;
       }
       if (!claim.metadata_location) {
-        setToast({ message: "Metadata location is missing", type: "error" });
+        setToast({ message: "Add a metadata location before continuing.", type: "error" });
         return;
       }
 
       const phase = phaseData.find((item) => item.key === phaseKey);
       if (!phase) {
-        setToast({ message: "Phase configuration not found", type: "error" });
+        setToast({ message: "Phase configuration was not found.", type: "error" });
         return;
       }
 
@@ -1788,14 +1788,14 @@ export default function DropForgeLaunchClaimPageClient({
       const endDate = parseLocalDateTimeToUnixSeconds(endInput);
       if (startDate == null || endDate == null) {
         setToast({
-          message: "Phase start/end must be valid local date-time values",
+          message: "Enter valid local start and end dates.",
           type: "error",
         });
         return;
       }
       if (endDate <= startDate) {
         setToast({
-          message: "Phase end must be after phase start",
+          message: "Set the phase end after the phase start.",
           type: "error",
         });
         return;
@@ -1807,7 +1807,7 @@ export default function DropForgeLaunchClaimPageClient({
           : (phase.root?.merkle_root ?? null);
       if (!merkleRoot) {
         setToast({
-          message: "Merkle root is missing for this phase",
+          message: "Add the Merkle root for this phase before continuing.",
           type: "error",
         });
         return;
@@ -1820,7 +1820,7 @@ export default function DropForgeLaunchClaimPageClient({
       try {
         cost = parseEther(priceEth);
       } catch {
-        setToast({ message: "Cost (ETH) is invalid", type: "error" });
+        setToast({ message: "Enter a valid ETH cost.", type: "error" });
         return;
       }
 
@@ -1898,7 +1898,7 @@ export default function DropForgeLaunchClaimPageClient({
     }) => {
       if (!isInitialized) {
         setToast({
-          message: "Claim must be initialized before airdropping",
+          message: "Initialize this claim before airdropping.",
           type: "error",
         });
         return;
@@ -1974,14 +1974,14 @@ export default function DropForgeLaunchClaimPageClient({
     (mintingClaimAction: string | null) => {
       if (!isInitialized) {
         setToast({
-          message: "Claim must be initialized before airdropping",
+          message: "Initialize this claim before airdropping.",
           type: "error",
         });
         return;
       }
       if (researchAirdropCount <= 0) {
         setToast({
-          message: "No research airdrop needed",
+          message: "No research airdrop is needed.",
           type: "error",
         });
         return;
@@ -2001,35 +2001,35 @@ export default function DropForgeLaunchClaimPageClient({
     (mintingClaimAction: string | null) => {
       if (payArtistAddressLoading) {
         setToast({
-          message: "Payment address is still resolving",
+          message: "Wait for the payment address to finish resolving.",
           type: "error",
         });
         return;
       }
       if (!payArtistAmountEth.trim() || payArtistAmountWei == null) {
         setToast({
-          message: "Pay Artist (ETH) is missing or invalid",
+          message: "Enter a valid artist payment in ETH.",
           type: "error",
         });
         return;
       }
       if (payArtistAddressHasEnsError) {
         setToast({
-          message: "Payment address ENS could not be resolved",
+          message: "Couldn't resolve the payment address ENS.",
           type: "error",
         });
         return;
       }
       if (!payArtistResolvedAddressTrimmed) {
         setToast({
-          message: "Payment address is required",
+          message: "Enter a payment address.",
           type: "error",
         });
         return;
       }
       if (!payArtistAddressValid) {
         setToast({
-          message: "Payment address is invalid",
+          message: "Enter a valid payment address.",
           type: "error",
         });
         return;

@@ -17,11 +17,17 @@ interface WaveSmallLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: () => void;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 export const WaveSmallLeaderboardTopThreeDrop: React.FC<
   WaveSmallLeaderboardTopThreeDropProps
-> = ({ drop, onDropClick, contentPresentation = "default" }) => {
+> = ({
+  drop,
+  onDropClick,
+  contentPresentation = "default",
+  outcomesVisible = true,
+}) => {
   const authorLabel = drop.author.handle ?? drop.author.primary_address;
 
   const getRankTextColor = (rank: number | null): string | null => {
@@ -178,7 +184,10 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   />
                 </div>
                 <div className="tw-mt-3">
-                  <WaveSmallLeaderboardItemOutcomes drop={drop} />
+                  <WaveSmallLeaderboardItemOutcomes
+                    drop={drop}
+                    outcomesVisible={outcomesVisible}
+                  />
                 </div>
               </div>
             </div>

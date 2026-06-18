@@ -15,10 +15,12 @@ export default function CreateWave({
   profile,
   onBack,
   onSuccess,
+  parentWaveId,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
+  readonly parentWaveId?: string | null | undefined;
 }) {
   const waveConfig = useWaveConfig();
   const { config, step, selectedOutcomeType, onStep } = waveConfig;
@@ -33,6 +35,7 @@ export default function CreateWave({
     config,
     descriptionRef,
     onSuccess,
+    parentWaveId,
   });
 
   const setStep = (
@@ -44,7 +47,7 @@ export default function CreateWave({
 
   return (
     <CreateWaveFlow
-      title={`Create Wave ${
+      title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
         config.overview.name ? `"${config.overview.name}"` : ""
       }`}
       onBack={onBack}

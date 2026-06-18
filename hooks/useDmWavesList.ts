@@ -8,6 +8,9 @@ import {
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+
+const noopWaveAction = () => {};
 
 const useDmWavesList = () => {
   const { address } = useSeizeConnectContext();
@@ -34,7 +37,7 @@ const useDmWavesList = () => {
     status,
     refetch,
   } = useWavesV2({
-    overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+    overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     directMessage: true,
     viewerIdentityKey,
@@ -50,8 +53,10 @@ const useDmWavesList = () => {
   }, [mainWaves]);
 
   // minimal wrapper to match waves list return signature
-  const addPinnedWave = () => {};
-  const removePinnedWave = () => {};
+  const addPinnedWave = noopWaveAction;
+  const removePinnedWave = noopWaveAction;
+  const loadSubwavesForParent = noopWaveAction;
+  const prefetchSubwavesForParent = noopWaveAction;
 
   const fetchNextPageStable = useCallback(
     () => fetchNextPage(),
@@ -71,6 +76,8 @@ const useDmWavesList = () => {
       hasPinnedWavesError: false,
       addPinnedWave,
       removePinnedWave,
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
       mainWaves,
       missingPinnedIds: [],
       mainWavesRefetch: refetch,

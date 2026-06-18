@@ -12,6 +12,7 @@
  */
 
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
+import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
 import { HttpFile } from '../http/http';
 
 /**
@@ -27,6 +28,7 @@ export class ApiNotificationAdditionalContextV2 {
     'total_vote'?: number;
     'reaction'?: string;
     'reactors'?: Array<ApiNotificationDropReactedReactor>;
+    'poll_options'?: Array<ApiNotificationPollVoteOption>;
     'quote_drop_id'?: string;
     'quote_drop_part'?: number;
     'quoted_drop_id'?: string;
@@ -93,6 +95,12 @@ export class ApiNotificationAdditionalContextV2 {
             "name": "reactors",
             "baseName": "reactors",
             "type": "Array<ApiNotificationDropReactedReactor>",
+            "format": ""
+        },
+        {
+            "name": "poll_options",
+            "baseName": "poll_options",
+            "type": "Array<ApiNotificationPollVoteOption>",
             "format": ""
         },
         {

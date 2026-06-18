@@ -1,7 +1,16 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { publicEnv } from "@/config/env";
+import {
+  BodyTooLargeError,
+  UnsupportedContentTypeError,
+  assertContentType,
+  isHtmlContentType,
+  isTolerantJsonContentType,
+  readLimitedJson,
+  readLimitedText,
+} from "@/lib/fetch/limitedBody";
 import {
   UrlGuardError,
   assertPublicUrl,
@@ -42,6 +51,8 @@ const USER_AGENT =
   "6529seize-farcaster/1.0 (+https://6529.io; Fetching Farcaster metadata)";
 const HTML_ACCEPT_HEADER =
   "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
+const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
+const JSON_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
 
 const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
   blockedHosts: ["localhost", "127.0.0.1", "::1"],
@@ -72,7 +83,10 @@ const channelCache = new LruTtlCache<string, FarcasterChannelPreview | null>({
   max: CACHE_MAX_ITEMS,
   ttlMs: CHANNEL_CACHE_TTL_MS,
 });
-const frameCache = new LruTtlCache<string, FarcasterFramePreview | null>({
+const frameCache = new LruTtlCache<
+  string,
+  FarcasterFramePreview | FarcasterUnsupportedPreview | null
+>({
   max: CACHE_MAX_ITEMS,
   ttlMs: FRAME_CACHE_TTL_MS,
 });
@@ -136,7 +150,10 @@ const fetchWarpcastJson = async <T>(
       throw new Error(`Warpcast request failed with status ${response.status}`);
     }
 
-    return (await response.json()) as T;
+    assertContentType(response.headers, isTolerantJsonContentType, "JSON", {
+      allowMissing: true,
+    });
+    return await readLimitedJson<T>(response, JSON_RESPONSE_MAX_BYTES);
   } catch (error) {
     if ((error as { name?: string | undefined }).name === "AbortError") {
       throw new Error("Warpcast request aborted");
@@ -149,22 +166,32 @@ const fetchWarpcastJson = async <T>(
 };
 
 type WarpcastUserResponse = {
-  readonly result?: {
-    readonly user?: {
-      readonly fid?: number | undefined;
-      readonly username?: string | undefined;
-      readonly displayName?: string | undefined;
-      readonly pfp?: { readonly url?: string | undefined } | undefined;
-      readonly profile?: {
-        readonly bio?: { readonly text?: string | undefined } | undefined;
-      } | undefined;
-    } | undefined;
-  } | undefined;
+  readonly result?:
+    | {
+        readonly user?:
+          | {
+              readonly fid?: number | undefined;
+              readonly username?: string | undefined;
+              readonly displayName?: string | undefined;
+              readonly pfp?: { readonly url?: string | undefined } | undefined;
+              readonly profile?:
+                | {
+                    readonly bio?:
+                      | { readonly text?: string | undefined }
+                      | undefined;
+                  }
+                | undefined;
+            }
+          | undefined;
+      }
+    | undefined;
 };
 
 type WarpcastCastEmbed = {
   readonly url?: string | undefined;
-  readonly castId?: { readonly fid?: number | undefined; readonly hash?: string | undefined } | undefined;
+  readonly castId?:
+    | { readonly fid?: number | undefined; readonly hash?: string | undefined }
+    | undefined;
   readonly metadata?: { readonly image?: string | undefined } | undefined;
   readonly type?: string | undefined;
 };
@@ -177,44 +204,62 @@ type WarpcastCastAuthor = {
 };
 
 type WarpcastCastResponse = {
-  readonly result?: {
-    readonly cast?: {
-      readonly hash?: string | undefined;
-      readonly text?: string | undefined;
-      readonly timestamp?: string | undefined;
-      readonly embeds?: readonly WarpcastCastEmbed[] | undefined;
-      readonly author?: WarpcastCastAuthor | undefined;
-      readonly channel?: {
-        readonly id?: string | undefined;
-        readonly name?: string | undefined;
-        readonly imageUrl?: string | undefined;
-      } | undefined;
-      readonly reactions?: {
-        readonly likes?: number | undefined;
-        readonly recasts?: number | undefined;
-      } | undefined;
-      readonly replies?: {
-        readonly count?: number | undefined;
-      } | undefined;
-    } | undefined;
-  } | undefined;
+  readonly result?:
+    | {
+        readonly cast?:
+          | {
+              readonly hash?: string | undefined;
+              readonly text?: string | undefined;
+              readonly timestamp?: string | undefined;
+              readonly embeds?: readonly WarpcastCastEmbed[] | undefined;
+              readonly author?: WarpcastCastAuthor | undefined;
+              readonly channel?:
+                | {
+                    readonly id?: string | undefined;
+                    readonly name?: string | undefined;
+                    readonly imageUrl?: string | undefined;
+                  }
+                | undefined;
+              readonly reactions?:
+                | {
+                    readonly likes?: number | undefined;
+                    readonly recasts?: number | undefined;
+                  }
+                | undefined;
+              readonly replies?:
+                | {
+                    readonly count?: number | undefined;
+                  }
+                | undefined;
+            }
+          | undefined;
+      }
+    | undefined;
 };
 
 type WarpcastChannelResponse = {
-  readonly result?: {
-    readonly channel?: {
-      readonly id?: string | undefined;
-      readonly name?: string | undefined;
-      readonly description?: string | undefined;
-      readonly imageUrl?: string | undefined;
-    } | undefined;
-    readonly recentCast?: {
-      readonly text?: string | undefined;
-      readonly author?: {
-        readonly username?: string | undefined;
-      } | undefined;
-    } | undefined;
-  } | undefined;
+  readonly result?:
+    | {
+        readonly channel?:
+          | {
+              readonly id?: string | undefined;
+              readonly name?: string | undefined;
+              readonly description?: string | undefined;
+              readonly imageUrl?: string | undefined;
+            }
+          | undefined;
+        readonly recentCast?:
+          | {
+              readonly text?: string | undefined;
+              readonly author?:
+                | {
+                    readonly username?: string | undefined;
+                  }
+                | undefined;
+            }
+          | undefined;
+      }
+    | undefined;
 };
 
 const mapWarpcastUser = (
@@ -496,9 +541,19 @@ const shouldPropagateUrlGuardError = (error: UrlGuardError): boolean =>
   error.kind === "dns-lookup-failed" ||
   error.kind === "ip-not-allowed";
 
-const fetchHtml = async (
-  url: URL
-): Promise<{ html: string; finalUrl: string } | null> => {
+type FetchHtmlResult =
+  | {
+      readonly html: string;
+      readonly finalUrl: string;
+    }
+  | {
+      readonly blockedReason: string;
+    };
+
+/**
+ * Fetches frame HTML with public URL guarding and a bounded response body.
+ */
+const fetchHtml = async (url: URL): Promise<FetchHtmlResult | null> => {
   try {
     const response = await fetchPublicUrl(
       url,
@@ -525,10 +580,27 @@ const fetchHtml = async (
       throw new Error(`Frame fetch failed with status ${response.status}`);
     }
 
-    const html = await response.text();
+    assertContentType(response.headers, isHtmlContentType, "HTML", {
+      allowMissing: true,
+    });
+    const html = await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
     const finalUrl = response.url || url.toString();
     return { html, finalUrl };
   } catch (error) {
+    if (error instanceof BodyTooLargeError) {
+      return {
+        blockedReason:
+          "Farcaster frame response is too large to process safely.",
+      };
+    }
+
+    if (error instanceof UnsupportedContentTypeError) {
+      return {
+        blockedReason:
+          "Farcaster frame URL did not return readable HTML metadata.",
+      };
+    }
+
     if (error instanceof UrlGuardError) {
       if (shouldPropagateUrlGuardError(error)) {
         throw error;
@@ -543,9 +615,12 @@ const fetchHtml = async (
   }
 };
 
+/**
+ * Reads and normalizes a Farcaster frame preview, including blocked outcomes.
+ */
 const detectFramePreview = async (
   url: URL
-): Promise<FarcasterFramePreview | null> => {
+): Promise<FarcasterFramePreview | FarcasterUnsupportedPreview | null> => {
   const cached = frameCache.get(url.toString());
   if (cached !== undefined) {
     return cached;
@@ -555,6 +630,16 @@ const detectFramePreview = async (
   if (!result) {
     frameCache.set(url.toString(), null);
     return null;
+  }
+
+  if ("blockedReason" in result) {
+    const unsupported: FarcasterUnsupportedPreview = {
+      type: "unsupported",
+      canonicalUrl: url.toString(),
+      reason: result.blockedReason,
+    };
+    frameCache.set(url.toString(), unsupported);
+    return unsupported;
   }
 
   const { html, finalUrl } = result;

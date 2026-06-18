@@ -1,8 +1,9 @@
 import Rememes, { RememeSort } from "@/components/rememes/Rememes";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 
 const mockRouterReplace = jest.fn();
 
@@ -53,28 +54,31 @@ const rememeResponse = {
   data: [
     {
       contract: "0x",
-      id: 1,
-      metadata: {},
+      id: "1",
+      metadata: { name: "Example ReMeme" },
       contract_opensea_data: {},
-      replicas: [],
+      replicas: [] as unknown[],
       image: "",
     },
   ],
 };
 
-function mockRememesApi(memes: { id: number; name: string }[] = []) {
+function mockRememesApi(
+  memes: { id: number; name: string }[] = [],
+  response = rememeResponse
+) {
   (fetchUrl as jest.Mock).mockImplementation((url: string) => {
     if (url.includes("memes_lite")) {
       return Promise.resolve({ data: memes });
     }
-    return Promise.resolve(rememeResponse);
+    return Promise.resolve(response);
   });
 }
 
-function renderRememes() {
+function renderRememes(props: ComponentProps<typeof Rememes> = {}) {
   return render(
     <TitleProvider>
-      <Rememes />
+      <Rememes {...props} />
     </TitleProvider>
   );
 }
@@ -94,6 +98,19 @@ describe("Rememes component", () => {
       expect.objectContaining({ signal: expect.any(Object) })
     );
     expect(screen.getByText("#1")).toBeInTheDocument();
+    const resultsList = screen.getByRole("list", {
+      name: "ReMemes results",
+    });
+    expect(within(resultsList).getAllByRole("listitem")).toHaveLength(1);
+    expect(
+      screen.getByRole("link", {
+        name: "View Example ReMeme, ReMeme #1",
+      })
+    ).toHaveAttribute("href", "/rememes/0x/1");
+    expect(screen.getByRole("link", { name: "Add ReMeme" })).toHaveAttribute(
+      "href",
+      "/rememes/add"
+    );
     expect(screen.queryByText("0x #1")).not.toBeInTheDocument();
     const tooltip = screen.getByTestId("react-tooltip");
     expect(tooltip).toHaveAttribute("data-has-inline-style", "true");
@@ -143,9 +160,41 @@ describe("Rememes component", () => {
     await userEvent.click(screen.getByText("#1 - 6529Seizing"));
 
     await waitFor(() =>
+      expect(mockRouterReplace).toHaveBeenLastCalledWith("/rememes?meme_id=1", {
+        scroll: false,
+      })
+    );
+    await waitFor(() =>
       expect(fetchUrl).toHaveBeenLastCalledWith(
         "https://api.test.6529.io/api/rememes?page_size=40&page=1&meme_id=1",
         expect.objectContaining({ signal: expect.any(Object) })
+      )
+    );
+  });
+
+  it("preserves unrelated query params when changing the selected meme", async () => {
+    mockRememesApi([{ id: 1, name: "6529Seizing" }]);
+    renderRememes({
+      locale: "de-DE",
+      searchParams: {
+        locale: "de-DE",
+        utm_source: "newsletter",
+        view: "compact",
+      },
+    });
+    const memeReferenceButton = await screen.findByRole("button", {
+      name: "Meme Reference: All",
+    });
+
+    await userEvent.click(memeReferenceButton);
+    await userEvent.click(screen.getByText("#1 - 6529Seizing"));
+
+    await waitFor(() =>
+      expect(mockRouterReplace).toHaveBeenLastCalledWith(
+        "/rememes?utm_source=newsletter&view=compact&meme_id=1&locale=de-DE",
+        {
+          scroll: false,
+        }
       )
     );
   });
@@ -163,5 +212,73 @@ describe("Rememes component", () => {
       );
       expect(count).not.toHaveClass("tw-text-lg", "tw-text-iron-300");
     });
+  });
+
+  it("uses initial meme id and formats counts with the active locale", async () => {
+    mockRememesApi([], {
+      ...rememeResponse,
+      count: 1234,
+      data: [
+        {
+          ...rememeResponse.data[0],
+          replicas: [{ id: "replica-a" }, { id: "replica-b" }],
+        },
+      ],
+    });
+
+    renderRememes({ initialMemeId: 42, locale: "de-DE" });
+
+    await waitFor(() =>
+      expect(fetchUrl).toHaveBeenLastCalledWith(
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&meme_id=42",
+        expect.objectContaining({ signal: expect.any(Object) })
+      )
+    );
+    expect(screen.getAllByText("(x1.234)")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Add ReMeme" })).toHaveAttribute(
+      "href",
+      "/rememes/add?locale=de-DE"
+    );
+    expect(
+      screen.getAllByText(
+        (_, element) => element?.textContent?.includes("(x2)") ?? false
+      ).length
+    ).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Sort: Random" })).toBeTruthy();
+  });
+
+  it("syncs the selected meme when the initial meme id prop changes", async () => {
+    mockRememesApi([{ id: 1, name: "6529Seizing" }]);
+    const { rerender } = renderRememes({ initialMemeId: 42 });
+
+    await waitFor(() =>
+      expect(fetchUrl).toHaveBeenLastCalledWith(
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&meme_id=42",
+        expect.objectContaining({ signal: expect.any(Object) })
+      )
+    );
+    expect(
+      await screen.findByRole("button", { name: "Meme Reference: 42" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <TitleProvider>
+        <Rememes initialMemeId={1} />
+      </TitleProvider>
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", {
+          name: "Meme Reference: #1 - 6529Seizing",
+        })
+      ).toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(fetchUrl).toHaveBeenLastCalledWith(
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&meme_id=1",
+        expect.objectContaining({ signal: expect.any(Object) })
+      )
+    );
   });
 });

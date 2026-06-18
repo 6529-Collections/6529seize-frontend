@@ -5,8 +5,10 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { CheckIcon } from "@heroicons/react/24/outline";
@@ -74,14 +76,20 @@ const getScopedPollInteractionState = (
 };
 
 const getEffectivePollView = ({
+  canRespond,
   canShowResults,
   isOpen,
   scopedView,
 }: {
+  readonly canRespond: boolean;
   readonly canShowResults: boolean;
   readonly isOpen: boolean;
   readonly scopedView: PollView;
 }): PollView => {
+  if (!canRespond) {
+    return "results";
+  }
+
   if (canShowResults && (!isOpen || scopedView === "results")) {
     return "results";
   }
@@ -160,6 +168,7 @@ const useUpdatedVoteStatus = () => {
 export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
+  const { getEligibility } = useWaveEligibility();
   const myStream = useMyStreamOptional();
   const { clearUpdatedVoteStatus, flashUpdatedVoteStatus, showUpdated } =
     useUpdatedVoteStatus();
@@ -169,6 +178,13 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const poll = localPoll ?? drop.poll;
   const [interactionState, setInteractionState] =
     useState<PollInteractionState | null>(null);
+
+  const waveEligibility = getEligibility(drop.wave.id);
+  const isViewerChatEligible =
+    waveEligibility?.authenticated_user_eligible_to_chat ??
+    drop.wave.authenticated_user_eligible_to_chat;
+  const canRespondToPoll =
+    poll?.only_droppers_can_respond === true ? isViewerChatEligible : true;
 
   const voteMutation = useMutation({
     mutationFn: async (options: readonly number[]) =>
@@ -197,12 +213,19 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
           queryKey: [QueryKey.DROP_POLL_VOTERS],
         })
         .catch(() => undefined);
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.WAVE_POLLS],
+        })
+        .catch(() => undefined);
     },
     onError: (error) => {
       clearUpdatedVoteStatus();
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't submit your poll vote.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
   });
@@ -216,7 +239,11 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         readonly showUpdatedStatus?: boolean;
       } = {}
     ): Promise<boolean> => {
-      if (!poll?.is_open || selectedOptionNos.length === 0) {
+      if (
+        !poll?.is_open ||
+        !canRespondToPoll ||
+        selectedOptionNos.length === 0
+      ) {
         return false;
       }
 
@@ -258,6 +285,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       interactionState,
       localPollOverride,
       poll,
+      canRespondToPoll,
       requestAuth,
       voteMutation,
     ]
@@ -265,7 +293,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
 
   const handleVoteOptionChange = useCallback(
     (optionNo: number) => {
-      if (!poll) {
+      if (!poll || !canRespondToPoll) {
         return;
       }
 
@@ -317,11 +345,11 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         };
       });
     },
-    [poll, submitPollVote]
+    [canRespondToPoll, poll, submitPollVote]
   );
 
   const handleSubmitVote = useCallback(async () => {
-    if (!poll?.is_open) {
+    if (!poll?.is_open || !canRespondToPoll) {
       return;
     }
 
@@ -333,10 +361,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     await submitPollVote(scopedState.selectedOptionNos, {
       showUpdatedStatus: poll.voted.length > 0,
     });
-  }, [interactionState, poll, submitPollVote]);
+  }, [canRespondToPoll, interactionState, poll, submitPollVote]);
 
   const showVoteView = useCallback(() => {
-    if (!poll?.is_open) {
+    if (!poll?.is_open || !canRespondToPoll) {
       return;
     }
 
@@ -349,7 +377,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         expandedOptionNo: null,
       };
     });
-  }, [poll]);
+  }, [canRespondToPoll, poll]);
 
   const cancelVoteChange = useCallback(() => {
     if (!poll) {
@@ -379,8 +407,9 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   }, 0);
   const votedOptionNos = new Set(poll.voted);
   const showSelectionIndicator = votedOptionNos.size > 0;
-  const canShowResults = !poll.is_open || hasVoted;
+  const canShowResults = !poll.is_open || hasVoted || !canRespondToPoll;
   const effectiveView = getEffectivePollView({
+    canRespond: canRespondToPoll,
     canShowResults,
     isOpen: poll.is_open,
     scopedView: scopedState.view,
@@ -391,7 +420,8 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     isPending: voteMutation.isPending,
     hasVoted,
   });
-  const showResultsFooterActions = effectiveView === "results" && hasVoted;
+  const showResultsFooterActions =
+    effectiveView === "results" && hasVoted && canRespondToPoll;
   const showFooterAction = poll.is_open && showResultsFooterActions;
   const isChangingVote = effectiveView === "vote" && hasVoted;
   const showVoteEditFooterAction =
@@ -430,7 +460,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
               checked={selectedOptions.has(option.option_no)}
               multichoice={poll.multichoice}
               groupName={voteOptionGroupName}
-              disabled={voteMutation.isPending}
+              disabled={voteMutation.isPending || !canRespondToPoll}
               onChange={handleVoteOptionChange}
             />
           ))}
@@ -467,15 +497,16 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       ) : (
         <div className="tw-flex tw-flex-col tw-gap-2">
           {poll.options.map((option) => {
+            const canShowOptionVoters = !poll.anonymous && option.votes > 0;
             const isExpanded =
-              option.votes > 0 && expandedOptionNo === option.option_no;
+              canShowOptionVoters && expandedOptionNo === option.option_no;
 
             return (
               <div key={option.option_no}>
                 <PollResultOption
-                  dropId={drop.id}
                   option={option}
                   totalVotes={totalVotes}
+                  canShowVoters={canShowOptionVoters}
                   isSelected={votedOptionNos.has(option.option_no)}
                   isDimmed={hasVoted && !votedOptionNos.has(option.option_no)}
                   isExpanded={isExpanded}
@@ -496,7 +527,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                     })
                   }
                 />
-                {option.votes > 0 && (
+                {canShowOptionVoters && (
                   <div
                     className={`tw-grid tw-transition-all tw-duration-300 tw-ease-out ${
                       isExpanded

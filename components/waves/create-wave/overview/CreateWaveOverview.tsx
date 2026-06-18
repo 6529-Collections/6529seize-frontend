@@ -10,6 +10,7 @@ import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
+  outcomesVisible: true,
   approve: {
     approvalsTabLabel: "",
     approvedTabLabel: "",
@@ -73,16 +74,13 @@ export default function CreateWaveOverview({
           })
         }
       />
-      {overview.type === ApiWaveType.Approve ? (
+      {overview.type === ApiWaveType.Rank ||
+      overview.type === ApiWaveType.Approve ? (
         <CreateWaveDisplaySettings
-          display={display.approve}
+          display={display}
           errors={errors}
-          onChange={(approve) =>
-            setDisplay({
-              ...display,
-              approve,
-            })
-          }
+          onChange={setDisplay}
+          waveType={overview.type}
         />
       ) : null}
     </div>

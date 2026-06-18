@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
 enum FILE_TYPES {
   IMAGE = "IMAGE",
@@ -42,10 +43,14 @@ export default function CreateDropSelectedFilePreview({
       <></>
     ),
     [FILE_TYPES.VIDEO]: previewUrl ? (
-      <video className="tw-h-full tw-w-full" controls>
-        <source src={previewUrl} type={file.type} />
-        Your browser does not support the video tag.
-      </video>
+      <SeizeVideoPlayer
+        src={previewUrl}
+        template="watch-media"
+        muted
+        preload="metadata"
+        layout="fill"
+        showActions={false}
+      />
     ) : (
       <></>
     ),

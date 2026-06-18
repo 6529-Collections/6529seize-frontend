@@ -3,9 +3,7 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
-import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
@@ -13,10 +11,13 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import type { Transaction } from "@/entities/ITransaction";
-import { numberWithCommas } from "@/helpers/Helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
+import { formatNumber, roundTo } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const SECTION_HEADER_TITLE_CLASS =
@@ -41,12 +42,51 @@ type ActivityState = {
   readonly rows: Transaction[];
 };
 
-function formatEthVolume(volume: number) {
+function formatEthVolume(volume: number, locale: SupportedLocale) {
   if (volume <= 0) {
-    return "N/A";
+    return t(locale, "theMemes.detail.activity.volume.unavailable");
   }
 
-  return `${numberWithCommas(Math.round(volume * 100) / 100)} ETH`;
+  return t(locale, "theMemes.detail.activity.volume.ethValue", {
+    value: formatNumber(locale, roundTo(volume, 2), {
+      maximumFractionDigits: 2,
+    }),
+  });
+}
+
+function getActivityTypeItems(locale: SupportedLocale) {
+  return [
+    {
+      key: TypeFilter.ALL,
+      label: t(locale, "theMemes.detail.activity.filters.allTransactions"),
+      value: TypeFilter.ALL,
+    },
+    {
+      key: TypeFilter.AIRDROPS,
+      label: t(locale, "theMemes.detail.activity.filters.airdrops"),
+      value: TypeFilter.AIRDROPS,
+    },
+    {
+      key: TypeFilter.MINTS,
+      label: t(locale, "theMemes.detail.activity.filters.mints"),
+      value: TypeFilter.MINTS,
+    },
+    {
+      key: TypeFilter.SALES,
+      label: t(locale, "theMemes.detail.activity.filters.sales"),
+      value: TypeFilter.SALES,
+    },
+    {
+      key: TypeFilter.TRANSFERS,
+      label: t(locale, "theMemes.detail.activity.filters.transfers"),
+      value: TypeFilter.TRANSFERS,
+    },
+    {
+      key: TypeFilter.BURNS,
+      label: t(locale, "theMemes.detail.activity.filters.burns"),
+      value: TypeFilter.BURNS,
+    },
+  ];
 }
 
 function getActivityFilterParam(typeFilter: TypeFilter) {
@@ -71,6 +111,7 @@ export function MemePageActivity(
     show: boolean;
     nft: NFT | undefined;
     pageSize: number;
+    locale?: SupportedLocale;
   }>
 ) {
   const activitySectionRef = useRef<HTMLElement | null>(null);
@@ -84,6 +125,11 @@ export function MemePageActivity(
     TypeFilter.ALL
   );
   const nftId = props.nft?.id;
+  const locale = props.locale ?? DEFAULT_LOCALE;
+  const activityTypeItems = useMemo(
+    () => getActivityTypeItems(locale),
+    [locale]
+  );
   const activityRequest = useMemo<ActivityRequest | undefined>(() => {
     if (!props.show || nftId === undefined) {
       return undefined;
@@ -98,29 +144,26 @@ export function MemePageActivity(
     };
   }, [props.show, nftId, props.pageSize, activityPage, activityTypeFilter]);
   const activityLoaded = activityState.key === activityRequest?.key;
-  const activity = useMemo(
-    () => (activityLoaded ? activityState.rows : EMPTY_ACTIVITY),
-    [activityLoaded, activityState.rows]
-  );
+  const activity = activityLoaded ? activityState.rows : EMPTY_ACTIVITY;
   const activityTotalResults = activityLoaded ? activityState.totalResults : 0;
   const activityLoading = activityRequest !== undefined && !activityLoaded;
   const volumeStats = props.nft
     ? [
         {
-          label: "24 Hours",
-          value: formatEthVolume(props.nft.total_volume_last_24_hours),
+          label: t(locale, "theMemes.detail.activity.volume.24Hours"),
+          value: formatEthVolume(props.nft.total_volume_last_24_hours, locale),
         },
         {
-          label: "7 Days",
-          value: formatEthVolume(props.nft.total_volume_last_7_days),
+          label: t(locale, "theMemes.detail.activity.volume.7Days"),
+          value: formatEthVolume(props.nft.total_volume_last_7_days, locale),
         },
         {
-          label: "1 Month",
-          value: formatEthVolume(props.nft.total_volume_last_1_month),
+          label: t(locale, "theMemes.detail.activity.volume.1Month"),
+          value: formatEthVolume(props.nft.total_volume_last_1_month, locale),
         },
         {
-          label: "All Time",
-          value: formatEthVolume(props.nft.total_volume),
+          label: t(locale, "theMemes.detail.activity.volume.allTime"),
+          value: formatEthVolume(props.nft.total_volume, locale),
         },
       ]
     : [];
@@ -165,9 +208,14 @@ export function MemePageActivity(
 
   const activityContent = useMemo(() => {
     if (activity.length > 0) {
+      const tableCaption = t(locale, "theMemes.detail.activity.table.caption", {
+        tokenId: props.nft?.id ?? "",
+      });
+
       return (
         <div className="tw-overflow-x-auto">
           <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
+            <caption className="tw-sr-only">{tableCaption}</caption>
             <tbody>
               {activity.map((tr) => (
                 <LatestActivityRow
@@ -186,18 +234,30 @@ export function MemePageActivity(
 
     if (activityLoading) {
       return (
-        <div className="tw-flex tw-items-center tw-justify-center tw-py-4">
+        <output
+          aria-label={t(locale, "theMemes.detail.activity.loading")}
+          className="tw-flex tw-items-center tw-justify-center tw-py-4"
+        >
           <CircleLoader size={CircleLoaderSize.LARGE} />
-        </div>
+        </output>
       );
     }
 
     return (
       <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-py-2">
-        <NothingHereYetSummer />
+        <Image
+          unoptimized
+          loading="eager"
+          width="100"
+          height="100"
+          style={{ height: "auto", width: "100px" }}
+          src="/SummerGlasses.svg"
+          alt=""
+        />{" "}
+        <b>{t(locale, "theMemes.detail.activity.empty")}</b>
       </div>
     );
-  }, [activity, activityLoading, props.nft]);
+  }, [activity, activityLoading, locale, props.nft]);
 
   const handleActivityPageChange = useCallback((newPage: number) => {
     setActivityPage(newPage);
@@ -212,11 +272,19 @@ export function MemePageActivity(
   }
 
   return (
-    <section className="tw-space-y-8">
+    <section
+      aria-label={t(locale, "theMemes.detail.activity.region")}
+      className="tw-space-y-8"
+    >
       <section>
         <div className="tw-flex tw-items-center tw-gap-3">
-          <ChartBarSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
-          <h3 className={SECTION_HEADER_TITLE_CLASS}>Card volumes</h3>
+          <ChartBarSquareIcon
+            aria-hidden="true"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
+          />
+          <h3 className={SECTION_HEADER_TITLE_CLASS}>
+            {t(locale, "theMemes.detail.activity.volume.heading")}
+          </h3>
           <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
         </div>
         <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 sm:tw-gap-x-16">
@@ -232,13 +300,16 @@ export function MemePageActivity(
       <section ref={activitySectionRef} className="tw-scroll-mt-24">
         <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
           <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
-            Card Activity
+            {t(locale, "theMemes.detail.tabs.cardActivity")}
           </h3>
           <div className="tw-w-full tw-shrink-0 md:tw-w-72">
             <CommonDropdown
-              items={ActivityTypeItems}
+              items={activityTypeItems}
               activeItem={activityTypeFilter}
-              filterLabel="Transaction Type"
+              filterLabel={t(
+                locale,
+                "theMemes.detail.activity.transactionType"
+              )}
               setSelected={(filter) => {
                 setActivityPage(1);
                 setActivityTypeFilter(filter);

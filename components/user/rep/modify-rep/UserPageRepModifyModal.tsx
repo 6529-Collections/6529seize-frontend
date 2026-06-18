@@ -7,6 +7,7 @@ import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjus
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -160,8 +161,10 @@ export default function UserPageRepModifyModal({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update this Rep rating.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -178,7 +181,7 @@ export default function UserPageRepModifyModal({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in.",
+        message: "Log in to continue.",
         type: "error",
       });
       setMutating(false);

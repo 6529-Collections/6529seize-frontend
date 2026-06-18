@@ -11,6 +11,7 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
@@ -44,7 +45,7 @@ export default function CreateDirectMessage({
       )
     ) {
       setToast({
-        message: "You are included by default in a Direct Message!",
+        message: "You are already included in this direct message.",
         type: "info",
       });
       return;
@@ -55,7 +56,7 @@ export default function CreateDirectMessage({
   const onRemove = (id: string) => {
     if (areEqualAddresses(id, profile?.primary_wallet)) {
       setToast({
-        message: "You cannot remove yourself from the DM",
+        message: "You can't remove yourself from this direct message.",
         type: "error",
       });
       return;
@@ -81,8 +82,10 @@ export default function CreateDirectMessage({
     } catch (error) {
       console.error(error);
       setToast({
-        message: `Failed to create Direct Message: ${error}`,
         type: "error",
+        title: "Couldn't create this direct message.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
       setIsCreating(false);
     }

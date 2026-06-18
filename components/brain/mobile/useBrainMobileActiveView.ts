@@ -30,6 +30,7 @@ interface UseBrainMobileActiveViewParams {
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
   readonly isApproveWave?: boolean | undefined;
+  readonly showOutcomeView?: boolean | undefined;
   readonly pathname: string;
   readonly searchParams: ReadonlyURLSearchParams;
   readonly wave: ApiWave | null | undefined;
@@ -50,6 +51,7 @@ interface WaveViewState {
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
+  readonly showOutcomeView: boolean;
 }
 
 function getRouteDefaultView({
@@ -125,6 +127,7 @@ function getWaveViewAvailability({
   isCurationWave,
   isMemesWave,
   isRankWave,
+  showOutcomeView,
 }: WaveViewState): Partial<Record<BrainView, boolean>> {
   const isCompetitionWave = isRankWave || isApproveWave;
 
@@ -134,7 +137,8 @@ function getWaveViewAvailability({
     [BrainView.SALES]: isCurationWave,
     [BrainView.WINNERS]:
       isCompetitionWave && (isApproveWave || firstDecisionDone),
-    [BrainView.OUTCOME]: isCompetitionWave && !isCurationWave,
+    [BrainView.OUTCOME]:
+      isCompetitionWave && !isCurationWave && showOutcomeView,
     [BrainView.MY_VOTES]:
       isCompetitionWave && (isCurationWave || hasAuthenticatedProfile),
     [BrainView.POLLS]: hasPolls,
@@ -153,6 +157,7 @@ function normalizeActiveView({
   isMemesWave,
   isRankWave,
   isApproveWave = false,
+  showOutcomeView = true,
   routeDefaultView,
   wave,
 }: {
@@ -166,6 +171,7 @@ function normalizeActiveView({
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
   readonly isApproveWave?: boolean | undefined;
+  readonly showOutcomeView?: boolean | undefined;
   readonly routeDefaultView: BrainView | null;
   readonly wave: ApiWave | null | undefined;
 }): BrainView {
@@ -179,6 +185,7 @@ function normalizeActiveView({
     isCurationWave,
     isMemesWave,
     isRankWave,
+    showOutcomeView,
   };
   const waveDefaultView = getWaveDefaultView({
     hasLoadedWave,
@@ -231,6 +238,7 @@ export function useBrainMobileActiveView({
   isMemesWave,
   isRankWave,
   isApproveWave = false,
+  showOutcomeView = true,
   pathname,
   searchParams,
   wave,
@@ -284,6 +292,7 @@ export function useBrainMobileActiveView({
     isMemesWave,
     isRankWave,
     isApproveWave,
+    showOutcomeView,
     routeDefaultView,
     wave,
   });

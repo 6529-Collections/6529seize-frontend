@@ -129,7 +129,7 @@ export default function SnapshotExcludeComponentWinners({
   const onExcludePreviousWinners = () => {
     if (selectedOptions.length === 0) {
       setToasts({
-        messages: ["Please select at least one component."],
+        messages: ["Select at least one component."],
         type: "error",
       });
       return;

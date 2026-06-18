@@ -2,9 +2,21 @@ import GradientPageComponent from "@/components/6529Gradient/GradientPage";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants/constants";
-import { fetchUrl } from "@/services/6529api";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import {
+  buildNftPageJsonLd,
+  fetchNftForStructuredData,
+} from "@/lib/structured-data/nft";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
+import { cache } from "react";
+
+const loadGradientNft = cache((id: string) =>
+  fetchNftForStructuredData({
+    contract: GRADIENT_CONTRACT,
+    id,
+  })
+);
 
 export default async function GradientPage({
   params,
@@ -12,8 +24,20 @@ export default async function GradientPage({
   readonly params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const nft = await loadGradientNft(id);
+
   return (
     <main className={styles["main"]}>
+      <JsonLdScript
+        data={buildNftPageJsonLd({
+          nft,
+          path: `/6529-gradient/${id}`,
+          fallbackName: `6529 Gradient #${id}`,
+          collectionName: "6529 Gradient",
+          collectionPath: "/6529-gradient",
+          license: null,
+        })}
+      />
       <GradientPageComponent id={id} />
     </main>
   );
@@ -28,20 +52,13 @@ export async function generateMetadata({
 
   let title = `6529 Gradient #${id}`;
   let ogImage = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
-  try {
-    const response = await fetchUrl(
-      `${publicEnv.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
-    );
-    if (response?.data?.length > 0) {
-      if (response.data[0].thumbnail) {
-        ogImage = response.data[0].thumbnail;
-      } else if (response.data[0].image) {
-        ogImage = response.data[0].image;
-      }
-    }
-  } catch (error) {
-    console.error(`Failed to load gradient metadata for id ${id}`, error);
+  const nft = await loadGradientNft(id);
+  if (nft?.thumbnail) {
+    ogImage = nft.thumbnail;
+  } else if (nft?.image) {
+    ogImage = nft.image;
   }
+
   return getAppMetadata({
     title,
     description: "Collections | 6529.io",

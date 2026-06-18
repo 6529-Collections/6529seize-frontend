@@ -1,4 +1,8 @@
-import { getMemeTabTitle, MEME_FOCUS } from "@/components/the-memes/MemeShared";
+import {
+  getMemeFocusLabel,
+  getMemeTabTitle,
+  MEME_FOCUS,
+} from "@/components/the-memes/MemeShared";
 
 jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
 
@@ -11,5 +15,23 @@ describe("getMemeTabTitle", () => {
 
   it("returns original title when no extras", () => {
     expect(getMemeTabTitle("The Memes")).toBe("The Memes");
+  });
+
+  it("uses message-backed focus labels", () => {
+    expect(getMemeFocusLabel(MEME_FOCUS.COLLECTORS, "en-GB")).toBe(
+      "Collectors"
+    );
+    expect(
+      getMemeTabTitle("The Memes", "3", undefined, MEME_FOCUS.YOUR_TRANSACTIONS)
+    ).toBe("The Memes #3 | Your Transactions");
+  });
+
+  it("documents en-US fallback for non-English detail labels", () => {
+    expect(getMemeFocusLabel(MEME_FOCUS.COLLECTORS, "fr-FR")).toBe(
+      "Collectors"
+    );
+    expect(
+      getMemeTabTitle("The Memes", "3", undefined, MEME_FOCUS.HISTORY, "fr-FR")
+    ).toBe("The Memes #3 | History");
   });
 });

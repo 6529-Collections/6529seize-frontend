@@ -54,7 +54,7 @@ export function UploadDistributionPhotosModal(
     files.forEach((file) => {
       if (!ACCEPTED_TYPES.has(file.type)) {
         errors.push(
-          `${file.name}: Invalid file type. Only images are allowed.`
+          `${file.name}: This file type is not supported. Only images are allowed.`
         );
       }
       if (file.size > MAX_FILE_SIZE) {

@@ -20,6 +20,7 @@ import {
   formatNumberWithCommas,
   getStringAsNumberOrZero,
 } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
@@ -42,7 +43,7 @@ const getErrorMessage = (error: unknown): string => {
       return message;
     }
   }
-  return "Something went wrong.";
+  return "Couldn't complete this request. Please try again.";
 };
 
 export default function UserPageRepNewRepSearch({
@@ -171,7 +172,12 @@ export default function UserPageRepNewRepSearch({
       onSuccess?.();
     },
     onError: (error) => {
-      setToast({ message: getErrorMessage(error), type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't update this Rep rating.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, getErrorMessage(error)),
+      });
     },
   });
 
@@ -184,7 +190,7 @@ export default function UserPageRepNewRepSearch({
     try {
       const { success } = await requestAuth();
       if (!success) {
-        setToast({ message: "You must be logged in.", type: "error" });
+        setToast({ message: "Log in to continue.", type: "error" });
         return;
       }
       await addRepMutation.mutateAsync({ amount, category: selectedCategory });
@@ -310,11 +316,8 @@ export default function UserPageRepNewRepSearch({
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         className="tw-will-change-transform md:tw-absolute md:tw-left-0 md:tw-right-0 md:tw-top-full md:tw-z-10 md:tw-mt-1"
                       >
-                        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
                         <div
                           className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/10"
-                          onClick={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => e.stopPropagation()}
                         >
                           <UserPageRepNewRepSearchDropdown
                             categories={categoriesToDisplay}

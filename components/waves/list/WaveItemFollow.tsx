@@ -13,6 +13,7 @@ import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubsc
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import ActionButton from "@/components/utils/button/ActionButton";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 enum WaveItemFollowState {
   FOLLOWING = "FOLLOWING",
@@ -72,8 +73,10 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't follow this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -101,8 +104,10 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't unfollow this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

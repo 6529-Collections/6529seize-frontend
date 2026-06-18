@@ -76,7 +76,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           transition={revealTransition}
           className={
             collapsed
-              ? "tw-z-10 tw-flex tw-flex-shrink-0 tw-justify-center tw-gap-2 tw-px-2 tw-pb-2 tw-pt-1"
+              ? "tw-z-10 tw-flex tw-flex-shrink-0 tw-justify-center tw-gap-2 tw-px-4 tw-pb-2 tw-pt-1"
               : "tw-relative tw-z-20 tw-mt-auto tw-flex-shrink-0"
           }
         >
@@ -105,7 +105,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                       className="tw-pointer-events-none tw-absolute tw-inset-0 -tw-translate-x-full tw-bg-gradient-to-r tw-from-white/0 tw-via-white/[0.08] tw-to-white/0 tw-opacity-50 tw-transition-transform tw-duration-1000 tw-ease-out desktop-hover:group-hover:tw-translate-x-full"
                     />
                     <div className="tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
-                      <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-[#6b7c93]">
+                      <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-iron-400">
                         {buttonTitle}
                       </span>
 
@@ -124,7 +124,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                             leftThisRoundCount
                           )}
                         </span>
-                        <span className="tw-text-[11px] tw-font-medium tw-text-[#6b7c93]">
+                        <span className="tw-text-[11px] tw-font-medium tw-text-iron-400">
                           {formatMemesQuickVoteUnratedText(unratedCount)}
                         </span>
                       </div>

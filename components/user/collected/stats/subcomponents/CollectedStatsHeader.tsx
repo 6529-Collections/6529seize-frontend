@@ -1,5 +1,7 @@
 import { ChartBarIcon } from "@heroicons/react/24/outline";
 import type { CollectedCollectionType } from "@/entities/IProfile";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import type { CollectedHeaderMetric } from "../types";
 
 interface CollectedStatsHeaderProps {
@@ -7,6 +9,7 @@ interface CollectedStatsHeaderProps {
   readonly activeCollection: CollectedCollectionType | null;
   readonly isDetailsOpen: boolean;
   readonly detailsId: string;
+  readonly locale?: SupportedLocale | undefined;
   readonly onToggleDetails: () => void;
   readonly onCollectionShortcut?:
     | ((collection: CollectedCollectionType) => void)
@@ -18,9 +21,17 @@ export function CollectedStatsHeader({
   activeCollection,
   isDetailsOpen,
   detailsId,
+  locale = DEFAULT_LOCALE,
   onToggleDetails,
   onCollectionShortcut,
 }: Readonly<CollectedStatsHeaderProps>) {
+  const detailsLabel = translate(locale, "user.collected.stats.details.show");
+  const hideDetailsLabel = translate(
+    locale,
+    "user.collected.stats.details.hide"
+  );
+  const detailsButtonLabel = isDetailsOpen ? hideDetailsLabel : detailsLabel;
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
       <div className="tw-min-w-0 tw-flex-1">
@@ -133,9 +144,9 @@ export function CollectedStatsHeader({
         ].join(" ")}
       >
         <span className="-tw-ml-1 tw-inline-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0">
-          <ChartBarIcon className="tw-h-full tw-w-full" />
+          <ChartBarIcon aria-hidden="true" className="tw-h-full tw-w-full" />
         </span>
-        <span>{isDetailsOpen ? "Hide Details" : "Details"}</span>
+        <span>{detailsButtonLabel}</span>
       </button>
     </div>
   );

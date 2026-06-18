@@ -53,7 +53,7 @@ Use:
 ```
 
 For more details, read
-[docs/developer/pnpm-and-socket-firewall.md](docs/developer/pnpm-and-socket-firewall.md).
+[ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
 
 ## Safe Disclosure
 

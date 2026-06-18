@@ -11,13 +11,12 @@ import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropReque
 import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
+import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createBreakpoint } from "react-use";
 import type {
   DropIdentityMode,
   DropInteractionParams,
@@ -39,8 +38,6 @@ import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
-
-const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -290,6 +287,7 @@ const clearLongPressTimeout = ({
 }) => {
   if (longPressTimeoutRef.current) {
     clearTimeout(longPressTimeoutRef.current);
+    longPressTimeoutRef.current = null;
   }
 };
 
@@ -450,7 +448,7 @@ const getContentBlock = ({
   handleEditCancel,
   allowLongPress,
   handleLinkCardActionsActiveChange,
-  isMobile,
+  canUseDesktopHoverActions,
   showInteractions,
   showReplyAndQuote,
   handleOnReply,
@@ -493,7 +491,7 @@ const getContentBlock = ({
     actionId: string,
     active: boolean
   ) => void;
-  readonly isMobile: boolean;
+  readonly canUseDesktopHoverActions: boolean;
   readonly showInteractions: boolean;
   readonly showReplyAndQuote: boolean;
   readonly handleOnReply: () => void;
@@ -584,15 +582,18 @@ const getContentBlock = ({
         </div>
       </div>
     </div>
-    {!isMobile && showInteractions && showReplyAndQuote && !isEditing && (
-      <WaveDropActions
-        drop={drop}
-        activePartIndex={activePartIndex}
-        onReply={handleOnReply}
-        onEdit={handleOnEdit}
-        suppressed={hasActiveLinkCardActions}
-      />
-    )}
+    {canUseDesktopHoverActions &&
+      showInteractions &&
+      showReplyAndQuote &&
+      !isEditing && (
+        <WaveDropActions
+          drop={drop}
+          activePartIndex={activePartIndex}
+          onReply={handleOnReply}
+          onEdit={handleOnEdit}
+          suppressed={hasActiveLinkCardActions}
+        />
+      )}
   </>
 );
 
@@ -667,6 +668,12 @@ const WaveDrop = ({
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
+  const {
+    markNextClickForSuppression,
+    releaseSuppressionAfterTouchEnd,
+    clearSuppression,
+    handleClickCapture,
+  } = useLongPressClickSuppression();
   const dropUpdateMutation = useDropUpdateMutation();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
@@ -684,11 +691,9 @@ const WaveDrop = ({
     otherDrop: nextDrop,
   });
 
-  const isMobile = useIsMobileDevice();
-  const hasTouch = useHasTouchInput() || isMobile;
-  const breakpoint = useBreakpoint();
-  const isMdUp = breakpoint === "MD";
-  const allowLongPress = showInteractions && hasTouch && !isMdUp;
+  const { canUseDesktopHoverActions, canUseTouchActionSheet } =
+    useDropActionInteractionMode();
+  const allowLongPress = showInteractions && canUseTouchActionSheet;
   const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
@@ -700,7 +705,7 @@ const WaveDrop = ({
   });
   const showActionsButton = shouldShowTouchActionsButton({
     showInteractions,
-    hasTouch,
+    hasTouch: canUseTouchActionSheet,
     showReplyAndQuote,
     isEditing,
     identityMode,
@@ -721,13 +726,14 @@ const WaveDrop = ({
 
   const handleLongPress = useCallback(() => {
     if (!allowLongPress) return;
+    markNextClickForSuppression();
     // Cancel any active edit mode first
     if (editingDropId) {
       dispatch(setEditingDropId(null));
     }
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [allowLongPress, editingDropId, dispatch]);
+  }, [allowLongPress, editingDropId, dispatch, markNextClickForSuppression]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -748,7 +754,8 @@ const WaveDrop = ({
       longPressTimeoutRef,
       touchStartPosition,
     });
-  }, []);
+    releaseSuppressionAfterTouchEnd();
+  }, [releaseSuppressionAfterTouchEnd]);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
@@ -916,8 +923,20 @@ const WaveDrop = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    clearLongPressTimeout({ longPressTimeoutRef });
+    touchStartPosition.current = null;
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+    clearSuppression();
+  }, [canUseTouchActionSheet, clearSuppression]);
+
   // Derive effective menu state - menu can't be open while editing
-  const effectiveIsSlideUp = isSlideUp && !isEditing;
+  const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
 
   const dropClasses = getDropClasses(
     isActiveDrop,
@@ -948,7 +967,7 @@ const WaveDrop = ({
     handleEditCancel,
     allowLongPress,
     handleLinkCardActionsActiveChange,
-    isMobile,
+    canUseDesktopHoverActions,
     showInteractions,
     showReplyAndQuote,
     handleOnReply,
@@ -1005,7 +1024,9 @@ const WaveDrop = ({
         data-serial-no={drop.serial_no}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         onTouchMove={handleTouchMove}
+        onClickCapture={handleClickCapture}
       >
         {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
         {reactionsRow}

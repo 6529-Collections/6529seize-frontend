@@ -37,7 +37,7 @@ const toErrorMessage = (error: unknown): string => {
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return "Something went wrong";
+  return "Couldn't update the pinned drop. Please try again.";
 };
 
 export function useSetWavePinnedDrop(

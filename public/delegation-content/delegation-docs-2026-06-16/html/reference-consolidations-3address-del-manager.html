@@ -1,0 +1,98 @@
+<div>
+
+  <br> Consolidations are distinct from delegations and are used to establish an on-chain message for Seize.io
+  to treat two or more addresses as one for calculating wallet-related metrics such as total cards held, total unique cards held, and TDH. <br>
+  <br>This allows for a unified view of your NFTs in on-site galleries on seize.io and for any allowlist calculations.<br>
+  <br>You can set consolidations for either "All Collections" or just "The Memes" contract; if both are set, the "The Memes" contract will be used for The Memes.<br>
+  <br> Assuming three sample addresses:<br>
+  <br>
+  <ul>
+    <li>Address A (vault) : 0xAcf42B85eCb77d9332584119FD78a3DE9953c2a0</li><br>
+    <li>Address B (transaction wallet) : 0x3558C942EeA9e9Bb9b1a6A02d272756EDD3A1Fe4</li><br>
+    <li>Address C (minting wallet) : 0xD0f03CB42Fe821c0654846E474c19484865c5B4a</li>
+  </ul>
+  <img src="../assets/diagrams/3-address-consolidation.png" alt="3 address consolidation diagram">
+<br>
+  <br> Below is a process that assumes you have <a href="/delegation/wallet-architecture">TAP</a> and have granted Delegation Management (Sub-delegation) rights from your vault to your transaction wallet.
+<br>
+Before proceeding please make sure that you granted <a href="/delegation/delegation-faq/register-sub-delegation">Delegation Management (Sub-delegation) rights from your vault to your transaction wallet</a>.
+<br>
+</div>
+  <br><b>Using Address B:</b>
+  <ol>
+    <br>
+    <li>Set a consolidation with Address A:<br>
+      <br>
+      <img src="../assets/diagrams/3-address-consolidation-del-man-trans1.png" alt="3 address consolidation del man trans1 diagram">
+    <br>
+      <ul>
+        <li>Navigate to the Delegation Center Section, click 'Register Consolidation,' choose 'The Memes' collection, enter wallet Address A, and execute the transaction.</li>
+      </ul>
+    </li>
+    <br>
+    <li>Set a consolidation with Address C:<br>
+      <br>
+      <img src="../assets/diagrams/3-address-consolidation-del-man-trans2.png" alt="3 address consolidation del man trans2 diagram">
+    <br>
+      <ul>
+        <li>Follow the same steps as above and enter wallet Address C.</li>
+      </ul>
+    </li>
+    <br>
+    <li>Set a consolidation on behalf of Address A with Address B and C (requires Delegation Management (Sub-delegation) from wallet A to wallet B):<br>
+      <br>
+      <ul>
+        <li>Go to Delegation Center Section, click 'View/Manage' in 'The Memes Collection,' and select the Address of wallet A in Delegation Managers (Sub-Delegations) area.</li><br>
+        <li>Click 'Register Consolidation'.</li>
+      </ul>
+    </li>
+    <br>
+    <li>Register consolidation using Delegation Management (Sub-delegation) Rights:<br>
+      <br>
+      <img src="../assets/diagrams/3-address-consolidation-del-man-trans3.png" alt="3 address consolidation del man trans3 diagram">
+    <br>
+      <ul>
+        <li>Choose 'The Memes' collection and enter wallet Address B.</li><br>
+        <li>Execute the transaction.</li>
+      </ul>
+      <br>
+      <img src="../assets/diagrams/3-address-consolidation-del-man-trans4.png" alt="3 address consolidation del man trans4 diagram">
+    <br>
+      <ul>
+        <li>Choose 'The Memes' collection and enter wallet Address C.</li><br>
+        <li>Execute the transaction.</li>
+      </ul>
+    </li>
+  </ol>
+  <br><b>Using Address C:</b>
+  <ol>
+    <br>
+    <li>Set a consolidation with Address A:<br>
+      <br>
+      <img src="../assets/diagrams/3-address-consolidation-del-man-trans5.png" alt="3 address consolidation del man trans5 diagram">
+    <br>
+      <ul>
+        <li>Navigate to the Delegation Center Section, click 'Register Consolidation,' choose 'The Memes' collection, enter wallet Address A, and execute the transaction.</li>
+      </ul>
+    </li>
+    <br>
+    <li>Set a consolidation with Address B:<br>
+      <br>
+      <img src="../assets/diagrams/3-address-consolidation-del-man-trans6.png" alt="3 address consolidation del man trans6 diagram">
+    <br>
+      <ul>
+        <li>Follow the same steps as above and enter wallet Address B.</li>
+      </ul>
+    </li>
+    <br>
+    <li>In the Delegation Center Section, click 'View/Manage' in 'The Memes Collection,' and check the consolidation status in the Consolidations area.<br>
+    </li>
+  </ol>
+  <br><b>Notes</b><br>
+  <ul>
+    <li>More than three addresses can have consolidations, but Seize.io will only count the last three delegations for consolidation purposes (to limit gaming).</li><br>
+    <li>Consolidations allow the safe usage of a 3-address architecture without any penalty in allowlists.</li><br>
+    <li>Within the context of The Memes, the purpose of consolidation is to allow you to consolidate any addresses that you own.  We reserve the right to apply penalties to you or change
+      the system if we believe you are gaming it (e.g. buying consolidation), such as removing your addresses from allowlists or altering the methodology, at our discretion, in any way. </li>
+    </ul>
+  <br>

@@ -19,6 +19,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { useLayout } from "../../my-stream/layout/LayoutContext";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import {
   DEFAULT_ERROR_MESSAGE,
@@ -113,8 +114,10 @@ export const useNotificationsController =
       },
       onError: (error) => {
         setToast({
-          message: error instanceof Error ? error.message : String(error),
           type: "error",
+          title: "Couldn't mark notifications as read.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error),
         });
       },
     });
@@ -182,8 +185,10 @@ export const useNotificationsController =
       },
       onError: (error) => {
         setToast({
-          message: error instanceof Error ? error.message : String(error),
           type: "error",
+          title: "Couldn't mark notifications as read.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error),
         });
       },
     });
@@ -251,7 +256,16 @@ export const useNotificationsController =
       setHasTimedOut(false);
 
       if (!errorToastShownRef.current) {
-        setToast({ message, type: "error" });
+        setToast({
+          type: "error",
+          title: isUnauthorized
+            ? "Please reconnect your wallet."
+            : "Couldn't load notifications.",
+          description: isUnauthorized
+            ? "Your session needs to be refreshed."
+            : "Please try again.",
+          details: getToastErrorDetails(queryError, message),
+        });
         errorToastShownRef.current = true;
       }
 
@@ -327,9 +341,10 @@ export const useNotificationsController =
       requestAuth().catch((error) => {
         console.error("Failed to re-authenticate:", error);
         setToast({
-          message:
-            error instanceof Error ? error.message : DEFAULT_ERROR_MESSAGE,
           type: "error",
+          title: "Couldn't reconnect your wallet.",
+          description: "Check your wallet and try again.",
+          details: getToastErrorDetails(error, DEFAULT_ERROR_MESSAGE),
         });
       });
     }, [requestAuth, setToast]);
@@ -338,11 +353,13 @@ export const useNotificationsController =
       setActiveProfileProxy(null).catch((error) => {
         console.error("Failed to switch to primary profile:", error);
         setToast({
-          message:
-            error instanceof Error
-              ? error.message
-              : "Unable to switch to primary profile. Please try again.",
           type: "error",
+          title: "Couldn't switch to your primary profile.",
+          description: "Please try again.",
+          details: getToastErrorDetails(
+            error,
+            "Unable to switch to primary profile. Please try again."
+          ),
         });
       });
     }, [setActiveProfileProxy, setToast]);

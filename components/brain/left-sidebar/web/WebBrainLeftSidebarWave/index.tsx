@@ -19,6 +19,13 @@ interface WebBrainLeftSidebarWaveProps {
   readonly showPin?: boolean | undefined;
   readonly basePath?: string | undefined;
   readonly collapsed?: boolean | undefined;
+  readonly depth?: 0 | 1 | undefined;
+  readonly canExpand?: boolean | undefined;
+  readonly isExpanded?: boolean | undefined;
+  readonly hasUnreadSubwaves?: boolean | undefined;
+  readonly isLastSubwave?: boolean | undefined;
+  readonly onToggleExpand?: ((waveId: string) => void) | undefined;
+  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 const TOOLTIP_PLACEMENT = "right" as const;
@@ -29,6 +36,13 @@ const WebBrainLeftSidebarWave = ({
   showPin = true,
   basePath = "/waves",
   collapsed = false,
+  depth = 0,
+  canExpand = false,
+  isExpanded = false,
+  hasUnreadSubwaves = false,
+  isLastSubwave = false,
+  onToggleExpand,
+  onPrefetchSubwaves,
 }: WebBrainLeftSidebarWaveProps) => {
   const { activeWave } = useMyStream();
   const pathname = usePathname();
@@ -84,6 +98,7 @@ const WebBrainLeftSidebarWave = ({
         tooltipId={tooltipId}
         tooltipPlacement={TOOLTIP_PLACEMENT}
         wave={wave}
+        hasUnreadSubwaves={hasUnreadSubwaves}
       />
     );
   }
@@ -107,6 +122,13 @@ const WebBrainLeftSidebarWave = ({
       wave={wave}
       waveId={wave.id}
       isPinned={wave.isPinned}
+      depth={depth}
+      canExpand={canExpand}
+      isExpanded={isExpanded}
+      hasUnreadSubwaves={hasUnreadSubwaves}
+      isLastSubwave={isLastSubwave}
+      onToggleExpand={onToggleExpand}
+      onPrefetchSubwaves={hasTouchScreen ? undefined : onPrefetchSubwaves}
     />
   );
 };

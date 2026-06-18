@@ -13,6 +13,7 @@ export function createMockMinimalWave(
     id: "mock-wave-id",
     name: "Mock Wave",
     type: ApiWaveType.Chat,
+    createdAt: 0,
     newDropsCount: {
       count: 0,
       latestDropTimestamp: null,
@@ -21,11 +22,17 @@ export function createMockMinimalWave(
     picture: null,
     contributors: [],
     isPinned: false,
+    isFollowing: false,
     isOfficial: false,
+    parentWaveId: null,
+    hasSubwaves: false,
     unreadDropsCount: 0,
     latestReadTimestamp: 0,
     firstUnreadDropSerialNo: null,
     isMuted: false,
+    waveRep: null,
+    waveScore: null,
+    sidebarSection: null,
     ...overrides,
   };
 }

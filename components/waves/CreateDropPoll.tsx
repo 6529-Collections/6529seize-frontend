@@ -12,6 +12,8 @@ import { useId, useRef, useState } from "react";
 export interface CreateDropPollDraft {
   readonly options: readonly string[];
   readonly multichoice: boolean;
+  readonly anonymous: boolean;
+  readonly onlyDroppersCanRespond: boolean;
   readonly closingTime: string;
 }
 
@@ -44,6 +46,8 @@ const toDateTimeLocalValue = (timestamp: number): string => {
 export const createDefaultDropPollDraft = (): CreateDropPollDraft => ({
   options: ["", ""],
   multichoice: false,
+  anonymous: false,
+  onlyDroppersCanRespond: false,
   closingTime: toDateTimeLocalValue(Date.now() + DEFAULT_POLL_DURATION_MS),
 });
 
@@ -97,6 +101,8 @@ export const validateCreateDropPollDraft = (
     request: {
       options,
       multichoice: draft.multichoice,
+      anonymous: draft.anonymous,
+      only_droppers_can_respond: draft.onlyDroppersCanRespond,
       closing_time: closingTime,
     } as unknown as ApiCreateDropPollRequest,
     error: null,
@@ -113,6 +119,8 @@ export default function CreateDropPoll({
   const canAddOption = draft.options.length < MAX_POLL_OPTIONS;
   const canRemoveOption = draft.options.length > MIN_POLL_OPTIONS;
   const closingTimeInputId = useId();
+  const anonymousInputId = useId();
+  const responderScopeInputId = useId();
   const optionKeyBaseId = useId();
   const closingTimeInputRef = useRef<HTMLInputElement>(null);
   const nextOptionKeyIndexRef = useRef(draft.options.length);
@@ -320,8 +328,8 @@ export default function CreateDropPoll({
           </div>
         </div>
 
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5 sm:tw-flex-row sm:tw-items-center">
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-3">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
             <label
               htmlFor={closingTimeInputId}
               className="tw-mb-0 tw-text-[11px] tw-font-medium tw-text-iron-400"
@@ -330,7 +338,7 @@ export default function CreateDropPoll({
             </label>
             <label
               htmlFor={closingTimeInputId}
-              className="tw-group/closing-time tw-relative tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all focus-within:tw-border-white/30 focus-within:tw-bg-iron-800 hover:tw-border-iron-600 hover:tw-bg-iron-800 sm:tw-w-auto"
+              className="tw-group/closing-time tw-relative tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all focus-within:tw-border-white/30 focus-within:tw-bg-iron-800 hover:tw-border-iron-600 hover:tw-bg-iron-800"
             >
               <input
                 id={closingTimeInputId}
@@ -343,12 +351,61 @@ export default function CreateDropPoll({
                 onChange={(event) =>
                   onChange({ ...draft, closingTime: event.target.value })
                 }
-                className="tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-pr-8 tw-text-[13.5px] tw-font-medium tw-text-iron-100 tw-outline-none tw-transition-all [color-scheme:dark] disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-flex-none [&::-webkit-calendar-picker-indicator]:tw-opacity-0"
+                className="tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-pr-8 tw-text-[13.5px] tw-font-medium tw-text-iron-100 tw-outline-none tw-transition-all [color-scheme:dark] disabled:tw-cursor-not-allowed disabled:tw-opacity-60 [&::-webkit-calendar-picker-indicator]:tw-opacity-0"
               />
               <CalendarIcon
                 className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-300 tw-transition-colors group-hover/closing-time:tw-text-iron-50"
                 aria-hidden="true"
               />
+            </label>
+          </div>
+          <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
+            <label
+              htmlFor={responderScopeInputId}
+              className={`tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all ${
+                disabled
+                  ? "tw-cursor-not-allowed tw-opacity-60"
+                  : "tw-cursor-pointer hover:tw-border-iron-600 hover:tw-bg-iron-800"
+              }`}
+            >
+              <input
+                id={responderScopeInputId}
+                type="checkbox"
+                checked={draft.onlyDroppersCanRespond}
+                disabled={disabled}
+                onChange={(event) =>
+                  onChange({
+                    ...draft,
+                    onlyDroppersCanRespond: event.target.checked,
+                  })
+                }
+                className="tw-size-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-accent-white disabled:tw-cursor-not-allowed"
+              />
+              <span className="tw-text-[12.5px] tw-font-medium tw-leading-4 tw-text-iron-200">
+                Only people who can chat can respond
+              </span>
+            </label>
+            <label
+              htmlFor={anonymousInputId}
+              className={`tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all ${
+                disabled
+                  ? "tw-cursor-not-allowed tw-opacity-60"
+                  : "tw-cursor-pointer hover:tw-border-iron-600 hover:tw-bg-iron-800"
+              }`}
+            >
+              <input
+                id={anonymousInputId}
+                type="checkbox"
+                checked={draft.anonymous}
+                disabled={disabled}
+                onChange={(event) =>
+                  onChange({ ...draft, anonymous: event.target.checked })
+                }
+                className="tw-size-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-accent-white disabled:tw-cursor-not-allowed"
+              />
+              <span className="tw-text-[12.5px] tw-font-medium tw-leading-4 tw-text-iron-200">
+                Anonymous poll
+              </span>
             </label>
           </div>
         </div>

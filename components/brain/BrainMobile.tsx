@@ -18,6 +18,7 @@ import { useWaveData } from "@/hooks/useWaveData";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { useWave } from "@/hooks/useWave";
 import { useWaveHasPolls } from "@/hooks/useWaveHasPolls";
+import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import MemesQuickVoteDialog from "./left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
@@ -33,6 +34,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
+import MobileWaveSubwavesBar from "./mobile/MobileWaveSubwavesBar";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
 import { BrainView } from "./mobile/brainMobileViews";
 import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
@@ -101,6 +103,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
 
   const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =
     useWave(wave);
+  const outcomesVisible = useWaveOutcomeVisibility(wave);
 
   const {
     voting: { isCompleted },
@@ -119,6 +122,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     isMemesWave,
     isRankWave,
     isApproveWave,
+    showOutcomeView: outcomesVisible,
     hasPolls,
     pathname,
     searchParams,
@@ -219,11 +223,13 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           wave={wave}
           waveActive={hasWave}
           hasPolls={hasPolls}
+          outcomesVisible={outcomesVisible}
           showWavesTab={hydrated}
           showStreamBack={hydrated}
           isApp={isApp}
         />
       )}
+      {isApp && wave && <MobileWaveSubwavesBar wave={wave} />}
       <LazyMotion features={domAnimation}>
         <AnimatePresence mode="wait">
           <m.div
@@ -241,6 +247,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
               isMemesWave={isMemesWave}
               isRankWave={isRankWave}
               isApproveWave={isApproveWave}
+              outcomesVisible={outcomesVisible}
               hasPolls={hasPolls}
               onDropClick={onDropClick}
               onOpenQuickVote={quickVote.openQuickVote}

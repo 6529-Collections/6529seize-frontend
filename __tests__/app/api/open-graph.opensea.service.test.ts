@@ -117,7 +117,7 @@ describe("createOpenSeaPlan", () => {
         description: "A clear sky",
         siteName: "OpenSea",
         image: expect.objectContaining({
-          url: "https://ipfs.io/ipfs/QmExampleHash/radar.png",
+          url: "https://media.6529.io/ipfs/QmExampleHash/radar.png",
           type: "image/png",
         }),
       })
@@ -268,7 +268,7 @@ describe("createOpenSeaPlan", () => {
         type: "opensea.nft",
         title: "Template token",
         image: expect.objectContaining({
-          url: "https://ipfs.io/ipfs/QmExampleHash/template.png",
+          url: "https://media.6529.io/ipfs/QmExampleHash/template.png",
         }),
       })
     );

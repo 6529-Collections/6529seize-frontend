@@ -11,6 +11,11 @@ import { useCallback, useState } from "react";
 const DIRECT_OPEN_UNSUPPORTED_EXTENSIONS = new Set(["mov", "qt"]);
 const DIRECT_OPEN_UNSUPPORTED_MIME_TYPES = new Set(["video/quicktime"]);
 
+export type MediaOpenLabels = {
+  readonly openInBrowser?: string | undefined;
+  readonly openInNewTab?: string | undefined;
+};
+
 function getUrlExtension(url: string): string | null {
   try {
     const pathname = new URL(url, globalThis.window.location.origin).pathname;
@@ -49,11 +54,13 @@ export function useMediaActions({
   fallbackFileName,
   dialogTitle = "Save file",
   mimeType,
+  labels,
 }: {
   readonly url: string;
   readonly fallbackFileName: string;
   readonly dialogTitle?: string | undefined;
   readonly mimeType?: string | undefined;
+  readonly labels?: MediaOpenLabels | undefined;
 }) {
   const { isCapacitor } = useCapacitor();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -62,7 +69,9 @@ export function useMediaActions({
   let openLabel: string | undefined;
 
   if (canOpen) {
-    openLabel = isCapacitor ? "Open in browser" : "Open in new tab";
+    openLabel = isCapacitor
+      ? (labels?.openInBrowser ?? "Open in browser")
+      : (labels?.openInNewTab ?? "Open in new tab");
   }
 
   const openMedia = useCallback(() => {

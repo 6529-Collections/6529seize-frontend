@@ -5,11 +5,17 @@ import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 
 interface WaveWinnersDropOutcomeProps {
   readonly winner: ApiWaveDecisionWinner;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 export default function WaveWinnersDropOutcome({
   winner,
+  outcomesVisible = true,
 }: WaveWinnersDropOutcomeProps) {
+  if (!outcomesVisible) {
+    return null;
+  }
+
   const nicOutcomes = winner.awards
     .filter((award) => {
       const amount = award.amount ?? 0;

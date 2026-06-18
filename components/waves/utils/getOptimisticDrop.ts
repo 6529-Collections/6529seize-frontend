@@ -37,6 +37,9 @@ const getOptimisticPoll = (
     })),
     voted: [],
     multichoice: dropRequest.poll.multichoice,
+    anonymous: dropRequest.poll.anonymous ?? false,
+    only_droppers_can_respond:
+      dropRequest.poll.only_droppers_can_respond ?? false,
     closing_time: dropRequest.poll.closing_time,
     is_open: dropRequest.poll.closing_time > Date.now(),
   };

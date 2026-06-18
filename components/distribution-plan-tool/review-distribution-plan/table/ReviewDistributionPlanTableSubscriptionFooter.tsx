@@ -13,6 +13,7 @@ import { DistributionOverview } from "@/generated/models/DistributionOverview";
 import { DistributionPhoto } from "@/generated/models/DistributionPhoto";
 import { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import { formatAddress } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
@@ -51,7 +52,7 @@ function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  return "Something went wrong.";
+  return "Couldn't complete this request. Please try again.";
 }
 
 function getAirdropsAddresses(
@@ -671,7 +672,9 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
     setToast({
       type: "error",
-      message: airdropsDownloadError.errorMessage,
+      title: "Couldn't download the airdrops CSV.",
+      description: "Please try again.",
+      details: airdropsDownloadError.errorMessage,
     });
   }, [airdropsDownloadError, setToast]);
 
@@ -700,13 +703,15 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       });
       setToast({
         type: "success",
-        message: "Subscriptions reset successfully.",
+        message: "Subscriptions reset.",
       });
       await refreshOverview(contract, tokenId);
     } catch (error: unknown) {
       setToast({
         type: "error",
-        message: `Reset failed: ${getErrorMessage(error)}`,
+        title: "Couldn't reset subscriptions.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setIsResetting(false);
@@ -731,19 +736,24 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       if (response.success) {
         setToast({
           type: "success",
-          message: response.message || "Distribution normalized successfully",
+          title: "Distribution normalized.",
+          description: response.message,
         });
         await refreshOverview(contract, tokenId);
       } else {
         setToast({
           type: "error",
-          message: response.error || "Normalization failed",
+          title: "Couldn't normalize this distribution.",
+          description: "Please try again.",
+          details: response.error,
         });
       }
     } catch (error: unknown) {
       setToast({
         type: "error",
-        message: getErrorMessage(error),
+        title: "Couldn't normalize this distribution.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setIsFinalizing(false);
@@ -783,11 +793,19 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         });
         setToast({
           type: "success",
-          message: `Successfully uploaded ${uploadedUrls.length} photo(s)`,
+          title: "Photos uploaded.",
+          description: `${uploadedUrls.length} photo${
+            uploadedUrls.length === 1 ? "" : "s"
+          } uploaded.`,
         });
         await refreshOverview(contract, tokenId);
       } catch (error: unknown) {
-        setToast({ type: "error", message: getErrorMessage(error) });
+        setToast({
+          type: "error",
+          title: "Couldn't upload these photos.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error),
+        });
       } finally {
         setIsUploading(false);
       }
@@ -856,8 +874,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         if (response.success) {
           setToast({
             type: "success",
-            message:
-              response.message || `Successfully uploaded ${phase} airdrops`,
+            title: `${phase} airdrops uploaded.`,
+            description: response.message,
           });
           await refreshOverview(contract, tokenId);
           return true;
@@ -865,12 +883,16 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
         setToast({
           type: "error",
-          message: response.error || "Upload failed",
+          title: `Couldn't upload ${phase} airdrops.`,
+          description: "Please check the CSV and try again.",
+          details: response.error,
         });
       } catch (error: unknown) {
         setToast({
           type: "error",
-          message: getErrorMessage(error),
+          title: `Couldn't upload ${phase} airdrops.`,
+          description: "Please check the CSV and try again.",
+          details: getToastErrorDetails(error),
         });
       } finally {
         setUploadingAirdropsPhase(null);

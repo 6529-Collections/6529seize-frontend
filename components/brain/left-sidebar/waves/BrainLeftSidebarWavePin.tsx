@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { Tooltip } from "react-tooltip";
 import { useAuth } from "@/components/auth/Auth";
@@ -10,15 +8,44 @@ import {
   usePinnedWavesServer,
   MAX_PINNED_WAVES,
 } from "@/hooks/usePinnedWavesServer";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;
   readonly isPinned: boolean;
+  readonly compact?: boolean | undefined;
+  readonly className?: string | undefined;
 }
+
+const WavePinIcon = ({
+  className,
+  filled,
+}: {
+  readonly className: string;
+  readonly filled: boolean;
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    className={className}
+  >
+    <path d="M12 17v5" />
+    <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+  </svg>
+);
 
 const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   waveId,
   isPinned,
+  compact = false,
+  className,
 }) => {
   const { waves } = useMyStream();
   const { pinnedIds, isOperationInProgress, canPinWave } =
@@ -106,12 +133,13 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     } catch (error) {
       console.error("Error updating wave pin status:", error);
 
-      // Show user-friendly error message
-      const errorMessage =
-        error instanceof Error ? error.message : "Something went wrong";
       setToast({
         type: "error",
-        message: `Failed to ${isPinned ? "unpin" : "pin"} wave: ${errorMessage}`,
+        title: isPinned
+          ? "Couldn't unpin this wave."
+          : "Couldn't pin this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     }
   };
@@ -134,7 +162,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
   const getButtonStyles = () => {
     if (isPinned) {
-      return "tw-text-iron-200 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-text-iron-100 tw-opacity-100";
+      return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-iron-100 active:tw-bg-transparent tw-opacity-100";
     }
     return "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700 tw-opacity-70";
   };
@@ -143,31 +171,33 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     return isPinned ? "Unpin wave" : "Pin wave";
   };
 
+  const positionClasses = compact ? "" : "-tw-mr-2 tw-mt-0.5";
+  const sizeClasses = compact ? "tw-size-5" : "tw-size-7 sm:tw-size-6";
+  const iconSizeClasses = compact ? "tw-size-3.5" : "tw-size-4";
+
   return (
     <>
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`-tw-mr-2 tw-mt-0.5 tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-transition-all tw-duration-200 sm:tw-size-6 ${opacityClass} ${getButtonStyles()} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
+        className={`${positionClasses} tw-flex ${sizeClasses} tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()} ${className ?? ""} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
         aria-label={getAriaLabel()}
         data-tooltip-id={`wave-pin-${waveId}`}
+        data-tooltip-content={tooltipContent}
       >
-        <FontAwesomeIcon
-          icon={faThumbtack}
-          className={`tw-size-2.5 tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
+        <WavePinIcon
+          className={`${iconSizeClasses} tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
+          filled={isPinned}
         />
       </button>
       <Tooltip
         id={`wave-pin-${waveId}`}
         place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        <span className="tw-text-xs">{tooltipContent}</span>
-      </Tooltip>
+        offset={8}
+        opacity={1}
+        positionStrategy="fixed"
+        style={TOOLTIP_STYLES}
+      />
     </>
   );
 };

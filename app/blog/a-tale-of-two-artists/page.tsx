@@ -1,8 +1,22 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import type { Metadata } from "next";
 export default function BlogATaleOfTwoArtistsPage() {
   return (
     <div>
+      <JsonLdScript
+        data={buildArticlePageJsonLd({
+          path: "/blog/a-tale-of-two-artists",
+          headline: "A Tale of Two Artists - Van Gogh and XCOPY",
+          description: "A story of persistence, perseverance and belief. Two artists who painted for a decade each before fame found them.",
+          image: "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg",
+          author: "Sabrina Khan",
+          datePublished: "2022-10-12T06:38:11+00:00",
+          dateModified: "2022-11-03T17:07:34+00:00",
+          section: "Blog",
+        })}
+      />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta

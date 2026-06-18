@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
@@ -44,15 +45,21 @@ export default function WaveMute({
           queryKey: [QueryKey.OFFICIAL_WAVES],
         })
         .catch(() => undefined);
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.WAVE_SUBWAVES],
+        })
+        .catch(() => undefined);
       onSuccess?.();
     } catch (error) {
       const defaultMessage = isMuted
         ? "Unable to unmute wave"
         : "Unable to mute wave";
-      const errorMessage = typeof error === "string" ? error : defaultMessage;
       setToast({
-        message: errorMessage,
         type: "error",
+        title: isMuted ? "Couldn't unmute this wave." : "Couldn't mute this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, defaultMessage),
       });
     } finally {
       setLoading(false);

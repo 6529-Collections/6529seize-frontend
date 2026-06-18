@@ -87,6 +87,7 @@ if (!process.env.PUBLIC_RUNTIME) {
     CORE_SCHEME: "testcore6529",
     IPFS_API_ENDPOINT: "https://api-ipfs.test.6529.io",
     IPFS_GATEWAY_ENDPOINT: "https://ipfs.test.6529.io",
+    MEDIA_RESOLVER_ENDPOINT: "https://media.6529.io",
     IPFS_MFS_PATH: "testfiles",
     TENOR_API_KEY: "test-tenor-api-key",
     WS_ENDPOINT: "wss://ws.test.6529.io",

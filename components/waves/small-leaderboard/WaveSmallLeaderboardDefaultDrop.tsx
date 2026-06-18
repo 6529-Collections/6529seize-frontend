@@ -23,6 +23,7 @@ interface WaveSmallLeaderboardDefaultDropProps {
   readonly isApproveWave?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 export const WaveSmallLeaderboardDefaultDrop: React.FC<
@@ -34,6 +35,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
   isApproveWave = false,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  outcomesVisible = true,
 }) => {
   const authorLabel = drop.author.handle ?? drop.author.primary_address;
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
@@ -177,7 +179,10 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                 />
               </div>
               <div className="tw-mt-3">
-                <WaveSmallLeaderboardItemOutcomes drop={drop} />
+                <WaveSmallLeaderboardItemOutcomes
+                  drop={drop}
+                  outcomesVisible={outcomesVisible}
+                />
               </div>
             </div>
           </div>

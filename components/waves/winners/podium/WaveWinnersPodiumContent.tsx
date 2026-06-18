@@ -9,14 +9,18 @@ interface WaveWinnersPodiumContentProps {
   readonly secondPlaceWinner?: ApiWaveDecisionWinner | undefined;
   readonly thirdPlaceWinner?: ApiWaveDecisionWinner | undefined;
   readonly showVoteDetails?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
-export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> = ({
+export const WaveWinnersPodiumContent: React.FC<
+  WaveWinnersPodiumContentProps
+> = ({
   onDropClick,
   firstPlaceWinner,
   secondPlaceWinner,
   thirdPlaceWinner,
   showVoteDetails = true,
+  outcomesVisible = true,
 }) => {
   return (
     <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-6 lg:tw-px-4 tw-bg-iron-950/60">
@@ -29,6 +33,7 @@ export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> =
               position="second"
               customAnimationIndex={1}
               showVoteDetails={showVoteDetails}
+              outcomesVisible={outcomesVisible}
             />
           </div>
           <div>
@@ -38,6 +43,7 @@ export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> =
               position="first"
               customAnimationIndex={0}
               showVoteDetails={showVoteDetails}
+              outcomesVisible={outcomesVisible}
             />
           </div>
           <div>
@@ -47,6 +53,7 @@ export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> =
               position="third"
               customAnimationIndex={2}
               showVoteDetails={showVoteDetails}
+              outcomesVisible={outcomesVisible}
             />
           </div>
         </div>

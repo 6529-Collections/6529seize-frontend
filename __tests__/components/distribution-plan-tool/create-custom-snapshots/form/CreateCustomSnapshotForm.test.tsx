@@ -89,8 +89,8 @@ describe('CreateCustomSnapshotForm', () => {
     queryClient.clear();
   });
 
-  it('splits uploads into 500 row chunks', async () => {
-    mockUploadedTokens = Array.from({ length: 1100 }, (_, index) => ({
+  it('splits uploads into 5,000 row chunks', async () => {
+    mockUploadedTokens = Array.from({ length: 11000 }, (_, index) => ({
       owner: `0x${(index + 1).toString(16).padStart(40, '0')}`,
     }));
 
@@ -119,11 +119,11 @@ describe('CreateCustomSnapshotForm', () => {
     await waitFor(() => expect(distributionPlanApiPost).toHaveBeenCalledTimes(3));
     const calls = (distributionPlanApiPost as jest.Mock).mock.calls;
     expect(calls[0][0].body.params.name).toBe('BulkSnap-1');
-    expect(calls[0][0].body.params.tokens).toHaveLength(500);
+    expect(calls[0][0].body.params.tokens).toHaveLength(5000);
     expect(calls[1][0].body.params.name).toBe('BulkSnap-2');
-    expect(calls[1][0].body.params.tokens).toHaveLength(500);
+    expect(calls[1][0].body.params.tokens).toHaveLength(5000);
     expect(calls[2][0].body.params.name).toBe('BulkSnap-3');
-    expect(calls[2][0].body.params.tokens).toHaveLength(100);
+    expect(calls[2][0].body.params.tokens).toHaveLength(1000);
     await waitFor(() =>
       expect(ctx.setToasts).toHaveBeenCalledWith({
         messages: ['Created 3 custom snapshots.'],

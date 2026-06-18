@@ -62,6 +62,7 @@ export enum AboutSection {
   FAQ = "faq",
   MISSION = "mission",
   RELEASE_NOTES = "release-notes",
+  TECH = "tech",
   CONTACT_US = "contact-us",
   TERMS_OF_SERVICE = "terms-of-service",
   PRIVACY_POLICY = "privacy-policy",

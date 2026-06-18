@@ -76,13 +76,17 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
         >
           {isCollapsed && (
             <div className="tw-sticky tw-top-2 tw-z-20 tw-flex tw-justify-center tw-py-2">
+              <div
+                aria-hidden="true"
+                className="tw-pointer-events-none tw-absolute tw-inset-x-0 -tw-top-2 tw-h-[76px] tw-bg-[linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,0.96)_45%,rgba(0,0,0,0)_100%)]"
+              />
               <button
                 type="button"
                 onClick={closeRightSidebar}
                 onMouseDown={(event) => event.preventDefault()}
                 aria-label={expandLabel}
                 title={expandLabel}
-                className="tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
+                className="tw-relative tw-z-10 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
               >
                 <ChevronDoubleRightIcon
                   strokeWidth={2}

@@ -20,6 +20,8 @@ export enum CreditDirection {
   SUBTRACT = "SUBTRACT",
 }
 
+export type GroupCardRateMatter = ApiRateMatter.Rep | ApiRateMatter.Cic;
+
 export default function GroupCard({
   group,
   activeGroupIdVoteAll,

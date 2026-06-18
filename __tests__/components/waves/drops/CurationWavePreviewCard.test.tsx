@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { CurationWavePreviewCard } from "@/components/waves/drops/CurationWavePreviewCard";
 import type { PreviewDrop } from "@/components/waves/drops/curation-preview/types";
@@ -9,6 +9,7 @@ import { useProfileWave } from "@/hooks/useProfileWave";
 import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveCurationPreviewDrops } from "@/hooks/useWaveCurationPreviewDrops";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
+import { useWaves } from "@/hooks/useWaves";
 
 jest.mock("@/hooks/useProfileWave", () => ({
   useProfileWave: jest.fn(),
@@ -26,6 +27,15 @@ jest.mock("@/hooks/waves/useWaveCurations", () => ({
   useWaveCurations: jest.fn(),
 }));
 
+jest.mock("@/hooks/useWaves", () => ({
+  useWaves: jest.fn(),
+}));
+
+jest.mock("@/components/utils/CommonIntersectionElement", () => ({
+  __esModule: true,
+  default: () => <div data-testid="intersection-sentinel" />,
+}));
+
 jest.mock("@/components/common/FallbackImage", () => ({
   FallbackImage: ({
     alt,
@@ -35,15 +45,14 @@ jest.mock("@/components/common/FallbackImage", () => ({
     readonly alt: string;
     readonly fallbackSrc: string;
     readonly primarySrc: string;
-  }) => (
-    <img
-      alt={alt}
-      src={primarySrc || fallbackSrc}
-      data-testid="fallback-image"
-      data-fallback-src={fallbackSrc}
-      data-primary-src={primarySrc}
-    />
-  ),
+  }) =>
+    React.createElement("img", {
+      alt,
+      src: primarySrc || fallbackSrc,
+      "data-testid": "fallback-image",
+      "data-fallback-src": fallbackSrc,
+      "data-primary-src": primarySrc,
+    }),
 }));
 
 jest.mock("@/helpers/image.helpers", () => ({
@@ -59,7 +68,21 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 }));
 
 jest.mock("@heroicons/react/24/outline", () => ({
-  ArrowRightIcon: () => <span aria-hidden="true" />,
+  ArrowRightIcon: () => (
+    <span aria-hidden="true" data-testid="arrow-right-icon" />
+  ),
+  ArrowTopRightOnSquareIcon: () => (
+    <span aria-hidden="true" data-testid="arrow-top-right-icon" />
+  ),
+  ChatBubbleLeftRightIcon: () => (
+    <span aria-hidden="true" data-testid="chat-icon" />
+  ),
+  ChevronDownIcon: () => (
+    <span aria-hidden="true" data-testid="chevron-down-icon" />
+  ),
+  ChevronRightIcon: () => (
+    <span aria-hidden="true" data-testid="chevron-right-icon" />
+  ),
   LinkIcon: () => <span aria-hidden="true" />,
   PlayIcon: () => <span aria-hidden="true" data-testid="video-play-icon" />,
 }));
@@ -88,6 +111,7 @@ const useWaveByIdMock = useWaveById as jest.Mock;
 const useWaveCurationPreviewDropsMock =
   useWaveCurationPreviewDrops as jest.Mock;
 const useWaveCurationsMock = useWaveCurations as jest.Mock;
+const useWavesMock = useWaves as jest.Mock;
 const getScaledImageUriMock = getScaledImageUri as jest.Mock;
 
 const createWave = (): ApiWave =>
@@ -110,6 +134,23 @@ const createWave = (): ApiWave =>
     },
     description_drop: {
       parts: [],
+    },
+  }) as ApiWave;
+
+const createCreatedWave = (): ApiWave =>
+  ({
+    id: "created-wave-1",
+    name: "Created Wave",
+    picture: null,
+    chat: {
+      scope: {
+        group: {
+          is_direct_message: false,
+        },
+      },
+    },
+    metrics: {
+      latest_drop_timestamp: null,
     },
   }) as ApiWave;
 
@@ -194,6 +235,15 @@ describe("CurationWavePreviewCard", () => {
       isError: false,
       isFetched: false,
     });
+    useWavesMock.mockReturnValue({
+      waves: [],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      error: null,
+    });
   });
 
   it("keeps loading visible while fallback curations have not resolved", () => {
@@ -246,7 +296,79 @@ describe("CurationWavePreviewCard", () => {
       "https://example.com/wave.png",
       ImageScale.W_AUTO_H_50
     );
-    expect(screen.getByRole("link", { name: /open wave/i })).toBeVisible();
+    expect(
+      screen.queryByText("Profile wave", { selector: "span" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Open profile wave" })
+    ).toBeVisible();
+  });
+
+  it("expands created waves in place and keeps profile navigation explicit", () => {
+    useWavesMock.mockReturnValue({
+      waves: [createCreatedWave()],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      error: null,
+    });
+
+    render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
+
+    const showAllButton = screen.getByRole("button", {
+      name: "Show all waves",
+    });
+
+    expect(showAllButton).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("region", { name: "Created waves" })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(showAllButton);
+
+    const createdWavesPanel = screen.getByRole("region", {
+      name: "Created waves",
+    });
+    const hideButton = screen.getByRole("button", { name: "Hide waves" });
+    const controlsId = hideButton.getAttribute("aria-controls");
+
+    expect(hideButton).toHaveAttribute("aria-expanded", "true");
+    expect(controlsId).toBeTruthy();
+    expect(createdWavesPanel).toHaveAttribute("id", controlsId ?? "");
+    expect(
+      within(createdWavesPanel).getByRole("link", {
+        name: "Show all brain activity",
+      })
+    ).toHaveAttribute("href", "/alice/brain");
+    expect(
+      within(createdWavesPanel).getByRole("link", { name: /Created Wave/ })
+    ).toHaveAttribute("href", "/waves/created-wave-1");
+    expect(useWavesMock).toHaveBeenCalledWith({
+      identity: "alice",
+      waveName: null,
+      limit: 20,
+      enabled: true,
+      directMessage: false,
+    });
+
+    fireEvent.click(hideButton);
+
+    expect(
+      screen.getByRole("button", { name: "Show all waves" })
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("region", { name: "Created waves" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("omits the all-waves disclosure without a profile identity", () => {
+    render(<CurationWavePreviewCard waveId="wave-1" />);
+
+    expect(
+      screen.queryByRole("button", { name: "Show all waves" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders image preview media as an image tile", () => {

@@ -36,7 +36,7 @@ export default function CreatePlan({ id }: { readonly id: string }) {
   useEffect(() => {
     if (id) return;
 
-    makeErrorToast("No id found");
+    makeErrorToast("Missing ID. Refresh and try again.");
     setState(null);
     router.push("/emma");
   }, [id, router, setState]);

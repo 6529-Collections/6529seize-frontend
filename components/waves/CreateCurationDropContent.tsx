@@ -4,6 +4,7 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { selectEditingDropId } from "@/store/editSlice";
@@ -284,8 +285,10 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
       });
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't submit this curation drop.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setSubmitting(false);
@@ -413,6 +416,9 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
             onClicked={onDrop}
             loading={submitting}
             disabled={!canSubmit}
+            ariaLabel={
+              submitting ? "Submitting to curation" : "Submit to Curation"
+            }
             padding="tw-w-full tw-px-4 tw-py-2.5"
           >
             <span>Submit to Curation</span>

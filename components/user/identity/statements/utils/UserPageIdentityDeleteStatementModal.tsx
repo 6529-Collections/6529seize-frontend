@@ -4,6 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useRef, useState } from "react";
@@ -34,8 +35,10 @@ export default function UserPageIdentityDeleteStatementModal({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't delete this NIC statement.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSuccess: () => {

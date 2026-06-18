@@ -114,6 +114,18 @@
     }
   }
 
+  /* Prevent native selection/callouts when JS has selected touch-sheet mode. */
+  .touch-action-sheet-select-none {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    -khtml-user-select: none;
+    -o-user-select: none;
+  }
+
   /* Android keyboard adjustments */
   .android-keyboard-adjust {
     padding-bottom: var(--android-keyboard-height);

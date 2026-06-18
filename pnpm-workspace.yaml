@@ -1,12 +1,11 @@
-
 # 7 days, in minutes.
 minimumReleaseAge: 10080
 allowBuilds:
-  '@nestjs/core': true
-  '@openapitools/openapi-generator-cli': true
-  '@parcel/watcher': true
-  '@reown/appkit': true
-  '@sentry/cli': true
+  "@nestjs/core": true
+  "@openapitools/openapi-generator-cli": true
+  "@parcel/watcher": true
+  "@reown/appkit": true
+  "@sentry/cli": true
   bufferutil: true
   esbuild: true
   keccak: true
@@ -14,15 +13,22 @@ allowBuilds:
   unrs-resolver: true
   utf-8-validate: true
 overrides:
-  '@emoji-mart/react>react': $react
-  '@emoji-mart/react>react-dom': $react-dom
-  axios: 1.15.2
+  "@emoji-mart/react>react": $react
+  "@emoji-mart/react>react-dom": $react-dom
+  axios: 1.16.0
+  brace-expansion@>=5.0.0 <5.0.6: 5.0.6
   eslint-plugin-sonarjs>minimatch: 10.2.5
-  get-uri>basic-ftp: '>=5.3.0'
-  minimatch@10.2.4>brace-expansion: 5.0.5
+  get-uri>basic-ftp: ">=5.3.0"
+  hono@<4.12.21: 4.12.21
+  js-cookie: 3.0.7
+  minimatch@10.2.4>brace-expansion: 5.0.6
   minimatch@3.1.5>brace-expansion: 1.1.13
   minimatch@7.4.9>brace-expansion: 2.0.3
   minimatch@9.0.9>brace-expansion: 2.0.3
   postcss: 8.5.12
   react-toggle>react: $react
   react-toggle>react-dom: $react-dom
+  shell-quote@>=1.1.0 <=1.8.3: 1.8.4
+  # uuid <11.1.1 has active advisories; 11.x keeps patched CJS-compatible APIs for wallet transitive deps.
+  uuid@<11.1.1: 11.1.1
+  ws@>=8.0.0 <8.20.1: 8.20.1

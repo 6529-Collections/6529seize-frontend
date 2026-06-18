@@ -119,6 +119,7 @@ const poll = {
   ],
   voted: [2],
   multichoice: false,
+  anonymous: false,
   closing_time: Date.now() + 60_000,
   is_open: true,
 };

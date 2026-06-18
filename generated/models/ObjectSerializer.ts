@@ -24,6 +24,7 @@ export * from '../models/ApiBulkRepTarget';
 export * from '../models/ApiChangeGroupVisibility';
 export * from '../models/ApiChangeProfileCicRating';
 export * from '../models/ApiChangeProfileRepRating';
+export * from '../models/ApiChangeWaveRepRating';
 export * from '../models/ApiCicContributor';
 export * from '../models/ApiCicContributorsPage';
 export * from '../models/ApiCicOverview';
@@ -187,6 +188,7 @@ export * from '../models/ApiNotification';
 export * from '../models/ApiNotificationAdditionalContextV2';
 export * from '../models/ApiNotificationCause';
 export * from '../models/ApiNotificationDropReactedReactor';
+export * from '../models/ApiNotificationPollVoteOption';
 export * from '../models/ApiNotificationV2';
 export * from '../models/ApiNotificationsResponse';
 export * from '../models/ApiNotificationsResponseV2';
@@ -311,12 +313,30 @@ export * from '../models/ApiWaveParticipationSubmissionStrategy';
 export * from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
 export * from '../models/ApiWaveParticipationSubmissionStrategyType';
 export * from '../models/ApiWavePoll';
+export * from '../models/ApiWaveRepCategoriesPage';
+export * from '../models/ApiWaveRepCategory';
+export * from '../models/ApiWaveRepCategorySummary';
+export * from '../models/ApiWaveRepContributor';
+export * from '../models/ApiWaveRepContributorsPage';
+export * from '../models/ApiWaveRepOverview';
+export * from '../models/ApiWaveRepRating';
+export * from '../models/ApiWaveRepSummary';
 export * from '../models/ApiWaveRequiredMetadata';
 export * from '../models/ApiWaveScope';
+export * from '../models/ApiWaveScore';
+export * from '../models/ApiWaveScoreComponents';
+export * from '../models/ApiWaveScoreFormula';
+export * from '../models/ApiWaveScoreHotnessComponentWeights';
+export * from '../models/ApiWaveScorePenalties';
+export * from '../models/ApiWaveScoreQualityComponentWeights';
+export * from '../models/ApiWaveScoreQualityGate';
+export * from '../models/ApiWaveScoreSort';
+export * from '../models/ApiWaveScoreVisibilityComponentWeights';
 export * from '../models/ApiWaveSubscriptionActions';
 export * from '../models/ApiWaveSubscriptionTargetAction';
 export * from '../models/ApiWaveType';
 export * from '../models/ApiWaveVisibilityConfig';
+export * from '../models/ApiWaveVisibilityTier';
 export * from '../models/ApiWaveVoter';
 export * from '../models/ApiWaveVotersPage';
 export * from '../models/ApiWaveVotingConfig';
@@ -414,6 +434,7 @@ import { ApiBulkRepTarget } from '../models/ApiBulkRepTarget';
 import { ApiChangeGroupVisibility } from '../models/ApiChangeGroupVisibility';
 import { ApiChangeProfileCicRating } from '../models/ApiChangeProfileCicRating';
 import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
+import { ApiChangeWaveRepRating } from '../models/ApiChangeWaveRepRating';
 import { ApiCicContributor } from '../models/ApiCicContributor';
 import { ApiCicContributorsPage } from '../models/ApiCicContributorsPage';
 import { ApiCicOverview } from '../models/ApiCicOverview';
@@ -577,6 +598,7 @@ import { ApiNotification        } from '../models/ApiNotification';
 import { ApiNotificationAdditionalContextV2 } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
+import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
 import { ApiNotificationV2         } from '../models/ApiNotificationV2';
 import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
@@ -701,12 +723,30 @@ import { ApiWaveParticipationSubmissionStrategy   } from '../models/ApiWaveParti
 import { ApiWaveParticipationSubmissionStrategyIdentityConf   } from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
 import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
 import { ApiWavePoll } from '../models/ApiWavePoll';
+import { ApiWaveRepCategoriesPage } from '../models/ApiWaveRepCategoriesPage';
+import { ApiWaveRepCategory } from '../models/ApiWaveRepCategory';
+import { ApiWaveRepCategorySummary } from '../models/ApiWaveRepCategorySummary';
+import { ApiWaveRepContributor } from '../models/ApiWaveRepContributor';
+import { ApiWaveRepContributorsPage } from '../models/ApiWaveRepContributorsPage';
+import { ApiWaveRepOverview } from '../models/ApiWaveRepOverview';
+import { ApiWaveRepRating } from '../models/ApiWaveRepRating';
+import { ApiWaveRepSummary } from '../models/ApiWaveRepSummary';
 import { ApiWaveRequiredMetadata   } from '../models/ApiWaveRequiredMetadata';
 import { ApiWaveScope } from '../models/ApiWaveScope';
+import { ApiWaveScore            } from '../models/ApiWaveScore';
+import { ApiWaveScoreComponents } from '../models/ApiWaveScoreComponents';
+import { ApiWaveScoreFormula } from '../models/ApiWaveScoreFormula';
+import { ApiWaveScoreHotnessComponentWeights } from '../models/ApiWaveScoreHotnessComponentWeights';
+import { ApiWaveScorePenalties } from '../models/ApiWaveScorePenalties';
+import { ApiWaveScoreQualityComponentWeights } from '../models/ApiWaveScoreQualityComponentWeights';
+import { ApiWaveScoreQualityGate } from '../models/ApiWaveScoreQualityGate';
+import { ApiWaveScoreSort } from '../models/ApiWaveScoreSort';
+import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVisibilityComponentWeights';
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
+import { ApiWaveVisibilityTier } from '../models/ApiWaveVisibilityTier';
 import { ApiWaveVoter } from '../models/ApiWaveVoter';
 import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
 import { ApiWaveVotingConfig           } from '../models/ApiWaveVotingConfig';
@@ -831,8 +871,10 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted",
     "ApiWaveParticipationRequirement",
     "ApiWaveParticipationSubmissionStrategyType",
+    "ApiWaveScoreSort",
     "ApiWaveSubscriptionTargetAction",
     "ApiWaveType",
+    "ApiWaveVisibilityTier",
     "ApiWavesOverviewType",
     "ApiWavesPinFilter",
     "ApiWavesV2ListType",
@@ -866,6 +908,7 @@ let typeMap: {[index: string]: any} = {
     "ApiChangeGroupVisibility": ApiChangeGroupVisibility,
     "ApiChangeProfileCicRating": ApiChangeProfileCicRating,
     "ApiChangeProfileRepRating": ApiChangeProfileRepRating,
+    "ApiChangeWaveRepRating": ApiChangeWaveRepRating,
     "ApiCicContributor": ApiCicContributor,
     "ApiCicContributorsPage": ApiCicContributorsPage,
     "ApiCicOverview": ApiCicOverview,
@@ -1016,6 +1059,7 @@ let typeMap: {[index: string]: any} = {
     "ApiNotification": ApiNotification,
     "ApiNotificationAdditionalContextV2": ApiNotificationAdditionalContextV2,
     "ApiNotificationDropReactedReactor": ApiNotificationDropReactedReactor,
+    "ApiNotificationPollVoteOption": ApiNotificationPollVoteOption,
     "ApiNotificationV2": ApiNotificationV2,
     "ApiNotificationsResponse": ApiNotificationsResponse,
     "ApiNotificationsResponseV2": ApiNotificationsResponseV2,
@@ -1122,8 +1166,24 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveParticipationSubmissionStrategy": ApiWaveParticipationSubmissionStrategy,
     "ApiWaveParticipationSubmissionStrategyIdentityConf": ApiWaveParticipationSubmissionStrategyIdentityConf,
     "ApiWavePoll": ApiWavePoll,
+    "ApiWaveRepCategoriesPage": ApiWaveRepCategoriesPage,
+    "ApiWaveRepCategory": ApiWaveRepCategory,
+    "ApiWaveRepCategorySummary": ApiWaveRepCategorySummary,
+    "ApiWaveRepContributor": ApiWaveRepContributor,
+    "ApiWaveRepContributorsPage": ApiWaveRepContributorsPage,
+    "ApiWaveRepOverview": ApiWaveRepOverview,
+    "ApiWaveRepRating": ApiWaveRepRating,
+    "ApiWaveRepSummary": ApiWaveRepSummary,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,
     "ApiWaveScope": ApiWaveScope,
+    "ApiWaveScore": ApiWaveScore,
+    "ApiWaveScoreComponents": ApiWaveScoreComponents,
+    "ApiWaveScoreFormula": ApiWaveScoreFormula,
+    "ApiWaveScoreHotnessComponentWeights": ApiWaveScoreHotnessComponentWeights,
+    "ApiWaveScorePenalties": ApiWaveScorePenalties,
+    "ApiWaveScoreQualityComponentWeights": ApiWaveScoreQualityComponentWeights,
+    "ApiWaveScoreQualityGate": ApiWaveScoreQualityGate,
+    "ApiWaveScoreVisibilityComponentWeights": ApiWaveScoreVisibilityComponentWeights,
     "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,
     "ApiWaveVisibilityConfig": ApiWaveVisibilityConfig,
     "ApiWaveVoter": ApiWaveVoter,

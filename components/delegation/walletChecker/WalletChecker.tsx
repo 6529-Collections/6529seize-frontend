@@ -331,6 +331,18 @@ export default function WalletCheckerComponent(
     );
   }, [consolidationsLoaded, consolidations]);
 
+  const resultsLoaded =
+    !!fetchedAddress && delegationsLoaded && consolidationsLoaded;
+  const hasAnyRecords =
+    delegations.length > 0 ||
+    subDelegations.length > 0 ||
+    consolidations.length > 0 ||
+    consolidatedWallets.length > 0;
+  const hasRequestError =
+    delegationsStatus === "error" ||
+    consolidationsStatus === "error" ||
+    consolidatedWalletsStatus === "error";
+
   useEffect(() => {
     if (!consolidationsLoaded || !fetchedAddress) {
       return;
@@ -415,17 +427,34 @@ export default function WalletCheckerComponent(
     }
   }, [delegationsLoaded, consolidationsLoaded]);
 
+  const normalizedWalletAddress = walletAddress.trim();
+  const normalizedWalletAddressLower = normalizedWalletAddress.toLowerCase();
+  const walletAddressIsValidEthAddress =
+    isValidEthAddress(normalizedWalletAddress);
+  const walletAddressLooksLikeEns =
+    normalizedWalletAddressLower.endsWith(".eth");
+
   const formDisabled =
     checking ||
-    !walletAddress ||
-    (!isValidEthAddress(walletAddress) && !walletAddress.endsWith(".eth")) ||
+    !normalizedWalletAddress ||
+    (!walletAddressIsValidEthAddress && !walletAddressLooksLikeEns) ||
     ensLoading;
+  const showAddressError =
+    addressError ||
+    (!!normalizedWalletAddress &&
+      !walletAddressIsValidEthAddress &&
+      !walletAddressLooksLikeEns &&
+      !ensLoading);
 
   return (
     <Container className="pt-3 pb-3">
       <Row>
         <Col>
           <h1>Wallet Checker</h1>
+          <p className={styles["intro"]}>
+            Check delegation, delegation manager, and consolidation records for
+            a wallet. This is read-only and does not require wallet connection.
+          </p>
         </Col>
       </Row>
       <Row>
@@ -439,31 +468,68 @@ export default function WalletCheckerComponent(
             }}
           >
             <Form.Group as={Row}>
-              <Form.Label column sm={12} className="d-flex align-items-center">
-                Wallet Address
+              <Form.Label
+                column
+                sm={12}
+                htmlFor="wallet-checker-address"
+                className="d-flex align-items-center"
+              >
+                Wallet address or ENS name
               </Form.Label>
               <Col sm={12}>
                 <EnsAddressInput
+                  id="wallet-checker-address"
                   disabled={delegationsLoaded || consolidationsLoaded}
                   autoFocus
                   placeholder="0x... or ENS"
                   className={styles["formInput"] ?? ""}
+                  ariaDescribedBy="wallet-checker-help"
                   value={walletInputValue}
                   onAddressChange={(addr) => {
-                    setWalletAddress(addr);
+                    setWalletAddress(addr.trim());
                     setAddressError(false);
                   }}
+                  onValueChange={setWalletInputValue}
                   onLoadingChange={setEnsLoading}
                   onError={setAddressError}
                 />
+                <Form.Text id="wallet-checker-help">
+                  Enter an Ethereum address or ENS name.
+                </Form.Text>
               </Col>
             </Form.Group>
-            {addressError && (
+            {showAddressError && (
               <Form.Group as={Row}>
-                <Form.Text className={styles["error"]}>
-                  Invalid address
+                <Form.Text
+                  className={styles["error"]}
+                  role="alert"
+                  aria-live="assertive"
+                >
+                  Enter a valid Ethereum address or ENS name.
                 </Form.Text>
               </Form.Group>
+            )}
+            {!fetchedAddress && !showAddressError && !checking && (
+              <p className={styles["statusText"]}>
+                Enter a wallet to review current delegation records.
+              </p>
+            )}
+            {checking && (
+              <p className={styles["statusText"]} role="status">
+                Checking delegation records...
+              </p>
+            )}
+            {hasRequestError && (
+              <p className={styles["error"]} role="alert">
+                Some delegation records could not be loaded. Try again in a
+                moment.
+              </p>
+            )}
+            {resultsLoaded && !hasAnyRecords && !hasRequestError && (
+              <p className={styles["statusText"]}>
+                No delegation, delegation manager, or consolidation records
+                found for this wallet.
+              </p>
             )}
             <Form.Group as={Row} className="pt-3 text-center">
               <Col
@@ -474,10 +540,14 @@ export default function WalletCheckerComponent(
                   onClick={() => {
                     setWalletInputValue("");
                     setWalletAddress("");
+                    setFetchedAddress("");
+                    setAddressError(false);
                     setDelegationsLoaded(false);
                     setDelegations([]);
+                    setSubDelegations([]);
                     setConsolidationsLoaded(false);
                     setConsolidations([]);
+                    setConsolidatedWallets([]);
                     setChecking(false);
                     setAddressQuery("");
                   }}
@@ -490,7 +560,7 @@ export default function WalletCheckerComponent(
                   onClick={() => setChecking(true)}
                   className={styles["checkBtn"]}
                 >
-                  {checking ? `Checking...` : `Check`}
+                  {checking ? `Checking...` : `Check Wallet`}
                 </Button>
               </Col>
             </Form.Group>

@@ -35,8 +35,8 @@ const createMockDrop = (overrides = {}): ApiDrop => ({
   serial_no: 1,
   author: { handle: 'testuser' },
   wave: { id: 'wave-123' },
-  created_at: Date.now(),
-  updated_at: Date.now(),
+  created_at: 1781138840000,
+  updated_at: 1781138840000,
   title: null,
   parts: [{ 
     part_id: 1, 
@@ -128,6 +128,9 @@ const executeMutation = async (result: any, params?: Partial<DropUpdateMutationP
     ...params
   };
 
+  if (!mockedCommonApiPost.getMockImplementation()) {
+    mockedCommonApiPost.mockResolvedValue(mockDrop);
+  }
   result.current.mutate(mockParams);
   return { mockDrop, mockRequest, mockParams };
 };
@@ -135,6 +138,8 @@ const executeMutation = async (result: any, params?: Partial<DropUpdateMutationP
 describe('useDropUpdateMutation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedCommonApiPost.mockReset();
+    mockedUseMyStream.mockReset();
   });
 
   describe('Successful mutation', () => {
@@ -160,7 +165,7 @@ describe('useDropUpdateMutation', () => {
 
       await waitFor(() => {
         expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Drop updated successfully',
+          message: 'Drop updated.',
           type: 'success',
         });
       });
@@ -191,7 +196,10 @@ describe('useDropUpdateMutation', () => {
   });
 
   describe('Error handling', () => {
-    const testErrorScenario = async (error: any, expectedMessage = 'Failed to update drop. Please try again.') => {
+    const testErrorScenario = async (
+      error: any,
+      expectedMessage = "Couldn't update this drop. Please try again."
+    ) => {
       const { result, mockSetToast } = setupTestHook();
       mockedCommonApiPost.mockRejectedValue(error);
       await executeMutation(result);
@@ -244,7 +252,7 @@ describe('useDropUpdateMutation', () => {
       });
 
       expect(mockSetToast).toHaveBeenCalledWith({
-        message: 'Drop updated successfully',
+        message: 'Drop updated.',
         type: 'success',
       });
       expect(mockInvalidateDrops).toHaveBeenCalled();
@@ -261,7 +269,7 @@ describe('useDropUpdateMutation', () => {
       });
 
       expect(mockSetToast).toHaveBeenCalledWith({
-        message: 'Drop updated successfully',
+        message: 'Drop updated.',
         type: 'success',
       });
     });

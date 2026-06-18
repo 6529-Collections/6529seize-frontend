@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { ProfileCollectedFilters } from "../UserPageCollected";
+import { getCollectedFilterMessage } from "./user-page-collected-filter-labels";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 import UserPageCollectedFiltersNativeDropdown from "./UserPageCollectedFiltersNativeDropdown";
 import UserPageCollectedFiltersNetworkCollection from "./UserPageCollectedFiltersNetworkCollection";
@@ -69,7 +70,7 @@ export default function UserPageCollectedFilters({
     if (!container) return;
 
     checkScroll();
-    container.addEventListener("scroll", checkScroll);
+    container.addEventListener("scroll", checkScroll, { passive: true });
     window.addEventListener("resize", checkScroll);
 
     const resizeObserver = new ResizeObserver(() => {
@@ -125,12 +126,12 @@ export default function UserPageCollectedFilters({
 
   const mainTabItems: CommonSelectItem<MainTab>[] = [
     {
-      label: "Native",
+      label: getCollectedFilterMessage("user.collected.filters.view.native"),
       value: MainTab.NATIVE,
       key: MainTab.NATIVE,
     },
     {
-      label: "Network",
+      label: getCollectedFilterMessage("user.collected.filters.view.network"),
       value: MainTab.NETWORK,
       key: MainTab.NETWORK,
     },
@@ -163,7 +164,9 @@ export default function UserPageCollectedFilters({
               items={mainTabItems}
               activeItem={activeMainTab}
               setSelected={handleMainTabChange}
-              filterLabel="View"
+              filterLabel={getCollectedFilterMessage(
+                "user.collected.filters.view"
+              )}
               size="sm"
             />
 
@@ -219,7 +222,9 @@ export default function UserPageCollectedFilters({
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollLeft}
-            aria-label="Scroll filters left"
+            aria-label={getCollectedFilterMessage(
+              "user.collected.filters.scrollLeft"
+            )}
             className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
           >
             <FontAwesomeIcon
@@ -234,7 +239,9 @@ export default function UserPageCollectedFilters({
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollRight}
-            aria-label="Scroll filters right"
+            aria-label={getCollectedFilterMessage(
+              "user.collected.filters.scrollRight"
+            )}
             className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
           >
             <FontAwesomeIcon

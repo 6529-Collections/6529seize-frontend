@@ -5,6 +5,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useRef, useState } from "react";
@@ -51,8 +52,10 @@ export default function DropsListItemDeleteDropModal({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: `Couldn't delete this ${contentType.toLowerCase()}.`,
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

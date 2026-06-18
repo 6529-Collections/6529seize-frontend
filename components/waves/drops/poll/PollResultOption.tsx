@@ -1,16 +1,14 @@
 "use client";
 
 import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
-import { usePrefetchDropPollOptionVoters } from "@/hooks/useDropPollOptionVoters";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { CSSProperties, MouseEvent } from "react";
 import { getVoteCountLabel } from "./WaveDropPoll.helpers";
-import { PollOptionVoterPreviews } from "./PollOptionVoters";
 
 interface PollResultOptionProps {
-  readonly dropId: string;
   readonly option: ApiDropPollOption;
   readonly totalVotes: number;
+  readonly canShowVoters: boolean;
   readonly isSelected: boolean;
   readonly isDimmed: boolean;
   readonly isExpanded: boolean;
@@ -107,7 +105,7 @@ function PollResultOptionLabel({
 
   return (
     <span
-      className={`tw-min-w-0 tw-break-words tw-text-[13px] tw-leading-5 tw-transition-colors tw-duration-300 ${labelClassName}`}
+      className={`tw-[overflow-wrap:anywhere] tw-min-w-0 tw-break-words tw-text-[13px] tw-leading-5 tw-transition-colors tw-duration-300 ${labelClassName}`}
     >
       {optionString}
     </span>
@@ -152,14 +150,12 @@ const getPollResultPercentageClassName = ({
 
 function PollResultOptionStats({
   canShowVoters,
-  dropId,
   isExpanded,
   isSelected,
   option,
   percentage,
 }: {
   readonly canShowVoters: boolean;
-  readonly dropId: string;
   readonly isExpanded: boolean;
   readonly isSelected: boolean;
   readonly option: ApiDropPollOption;
@@ -176,11 +172,8 @@ function PollResultOptionStats({
   const chevronClassName = isExpanded ? "tw-rotate-180" : "";
 
   return (
-    <div className="tw-ml-2 tw-flex tw-h-5 tw-flex-shrink-0 tw-translate-x-0 tw-animate-poll-result-stats-in tw-items-center tw-gap-2.5 tw-opacity-100 tw-transition-all tw-duration-500 motion-reduce:tw-animate-none">
+    <div className="tw-ml-0 tw-flex tw-h-5 tw-flex-shrink-0 tw-translate-x-0 tw-animate-poll-result-stats-in tw-items-center tw-gap-2.5 tw-opacity-100 tw-transition-all tw-duration-500 motion-reduce:tw-animate-none sm:tw-ml-2">
       <span className="tw-flex tw-h-5 tw-items-center tw-gap-1.5">
-        {canShowVoters && (
-          <PollOptionVoterPreviews dropId={dropId} option={option} />
-        )}
         <span
           className={`tw-text-[11.5px] tw-font-medium tw-transition-colors ${voteCountClassName}`}
         >
@@ -221,9 +214,9 @@ const getPollResultFillClassName = ({
 };
 
 export function PollResultOption({
-  dropId,
   option,
   totalVotes,
+  canShowVoters,
   isSelected,
   isDimmed,
   isExpanded,
@@ -233,25 +226,18 @@ export function PollResultOption({
   const percentage =
     totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
   const fillScale = Math.max(0, Math.min(100, percentage)) / 100;
-  const prefetchVoters = usePrefetchDropPollOptionVoters();
-  const canShowVoters = option.votes > 0;
-  const handlePrefetchVoters = () =>
-    prefetchVoters({
-      dropId,
-      optionNo: option.option_no,
-      enabled: canShowVoters,
-    });
+  const canShowOptionVoters = canShowVoters && option.votes > 0;
   const handleToggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onToggle(option.option_no);
   };
   const optionClassName = getPollResultOptionClassName({
-    canShowVoters,
+    canShowVoters: canShowOptionVoters,
     isSelected,
     isDimmed,
   });
   const fillClassName = getPollResultFillClassName({
-    canShowVoters,
+    canShowVoters: canShowOptionVoters,
     isSelected,
   });
   const fillStyle = {
@@ -266,18 +252,17 @@ export function PollResultOption({
         style={fillStyle}
         aria-hidden="true"
       />
-      <div className="tw-relative tw-flex tw-w-full tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-px-3.5 tw-py-3">
+      <div className="tw-relative tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-2 tw-px-3.5 tw-py-3 sm:tw-flex-row sm:tw-justify-between sm:tw-gap-3">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-2.5">
           {showSelectionIndicator && isSelected && <PollResultSelectedMarker />}
           <PollResultOptionLabel
-            canShowVoters={canShowVoters}
+            canShowVoters={canShowOptionVoters}
             isSelected={isSelected}
             optionString={option.option_string}
           />
         </div>
         <PollResultOptionStats
-          canShowVoters={canShowVoters}
-          dropId={dropId}
+          canShowVoters={canShowOptionVoters}
           isExpanded={isExpanded}
           isSelected={isSelected}
           option={option}
@@ -289,7 +274,7 @@ export function PollResultOption({
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg">
-      {canShowVoters ? (
+      {canShowOptionVoters ? (
         <button
           type="button"
           aria-expanded={isExpanded}
@@ -299,8 +284,6 @@ export function PollResultOption({
             option.votes
           )}, ${percentage} percent.${selectedAriaLabel}`}
           onClick={handleToggle}
-          onFocus={handlePrefetchVoters}
-          onPointerEnter={handlePrefetchVoters}
           className={optionClassName}
         >
           {optionContent}

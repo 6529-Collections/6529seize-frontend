@@ -201,6 +201,7 @@ describe("useWaveConfig", () => {
 
       act(() => {
         result.current.setDisplay({
+          ...result.current.config.display,
           approve: {
             approvalsTabLabel: "Candidates",
             approvedTabLabel: "Selected",
@@ -243,6 +244,7 @@ describe("useWaveConfig", () => {
         });
         result.current.onApprovalMaxWinnersChange(4);
         result.current.setDisplay({
+          ...result.current.config.display,
           approve: {
             approvalsTabLabel: "Candidates",
             approvedTabLabel: "Selected",
@@ -360,6 +362,7 @@ describe("useWaveConfig", () => {
 
       act(() => {
         result.current.setDisplay({
+          ...result.current.config.display,
           approve: {
             approvalsTabLabel: "Candidates",
             approvedTabLabel: "Selected",

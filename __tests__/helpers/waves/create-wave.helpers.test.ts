@@ -200,6 +200,28 @@ describe("create-wave.helpers", () => {
       expect(res.wave.max_votes_per_identity_to_drop).toBeNull();
     });
 
+    it("adds parent wave id only for subwave creation", () => {
+      const config = createBaseConfig(ApiWaveType.Chat);
+      const drop = createDrop();
+
+      expect(
+        getCreateNewWaveBody({
+          drop,
+          picture: null,
+          config,
+        })
+      ).not.toHaveProperty("parent_wave_id");
+
+      expect(
+        getCreateNewWaveBody({
+          drop,
+          picture: null,
+          config,
+          parentWaveId: "parent-wave",
+        })
+      ).toHaveProperty("parent_wave_id", "parent-wave");
+    });
+
     it("maps allowed negative votes to the inverse backend flag", () => {
       const config = createBaseConfig(ApiWaveType.Rank);
       config.voting.allowNegativeVotes = true;

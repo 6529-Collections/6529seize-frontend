@@ -1,11 +1,22 @@
-import type { RefObject } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import type { MouseEvent, RefObject } from "react";
 import Link from "next/link";
 import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
+import { SidebarWaveExpandControl } from "@/components/brain/left-sidebar/waves/SidebarWaveExpandControl";
+import { getSidebarWaveRowLayoutClasses } from "@/components/brain/left-sidebar/waves/sidebarWaveRowLayout";
+import {
+  hasWaveTrustSummaryScore,
+  WaveTrustSignals,
+} from "@/components/waves/WaveTrustSignals";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { Tooltip } from "react-tooltip";
 import { WaveAvatar } from "./WaveAvatar";
 import type { WaveTooltipPlacement } from "./WaveTooltip";
 import { WaveTooltip } from "./WaveTooltip";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
+const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface ExpandedWaveProps {
   readonly formattedWaveName: string;
@@ -25,6 +36,13 @@ interface ExpandedWaveProps {
   readonly tooltipPlacement: WaveTooltipPlacement;
   readonly wave: MinimalWave;
   readonly waveId: string;
+  readonly depth?: 0 | 1 | undefined;
+  readonly canExpand?: boolean | undefined;
+  readonly isExpanded?: boolean | undefined;
+  readonly hasUnreadSubwaves?: boolean | undefined;
+  readonly isLastSubwave?: boolean | undefined;
+  readonly onToggleExpand?: ((waveId: string) => void) | undefined;
+  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 export const ExpandedWave = ({
@@ -45,6 +63,13 @@ export const ExpandedWave = ({
   tooltipPlacement,
   wave,
   waveId,
+  depth = 0,
+  canExpand = false,
+  isExpanded = false,
+  hasUnreadSubwaves = false,
+  isLastSubwave = false,
+  onToggleExpand,
+  onPrefetchSubwaves,
 }: ExpandedWaveProps) => {
   const tooltipAttributes = showExpandedTooltip
     ? {
@@ -59,21 +84,95 @@ export const ExpandedWave = ({
     Number.isFinite(latestDropTimestamp)
       ? latestDropTimestamp
       : null;
+  const isChildRow = depth === 1;
+  const shouldShowExpandControl = canExpand && depth === 0;
+  const shouldReserveExpandControlSpace = shouldShowExpandControl;
+  const shouldShowPinButton = showPin && depth === 0;
+  const trustSignalsTooltipId = `sidebar-expanded-wave-trust-signals-${waveId}`;
+  const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
+  const shouldShowTrustSignalsRow =
+    hasSummaryScore || presentLatestDropTimestamp !== null;
+  const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
+    getSidebarWaveRowLayoutClasses({
+      isChildRow,
+      shouldReserveExpandControlSpace,
+      variant: "web",
+    });
+  const subwavePrefetchTimerRef = useRef<ReturnType<
+    typeof globalThis.setTimeout
+  > | null>(null);
+  const shouldPrefetchSubwaves = Boolean(
+    shouldShowExpandControl && onPrefetchSubwaves
+  );
+
+  const cancelSubwavePrefetch = useCallback(() => {
+    if (subwavePrefetchTimerRef.current === null) {
+      return;
+    }
+
+    globalThis.clearTimeout(subwavePrefetchTimerRef.current);
+    subwavePrefetchTimerRef.current = null;
+  }, []);
+
+  const scheduleSubwavePrefetch = useCallback(() => {
+    if (!shouldPrefetchSubwaves) {
+      return;
+    }
+
+    cancelSubwavePrefetch();
+    subwavePrefetchTimerRef.current = globalThis.setTimeout(() => {
+      subwavePrefetchTimerRef.current = null;
+      onPrefetchSubwaves?.(waveId);
+    }, SUBWAVE_PREFETCH_HOVER_INTENT_MS);
+  }, [
+    cancelSubwavePrefetch,
+    onPrefetchSubwaves,
+    shouldPrefetchSubwaves,
+    waveId,
+  ]);
+
+  useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
+
+  const handleToggleExpand = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleExpand?.(waveId);
+  };
 
   return (
     <div
-      className={`tw-group tw-flex tw-items-start tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+      onMouseEnter={scheduleSubwavePrefetch}
+      onMouseLeave={cancelSubwavePrefetch}
+      role="group"
+      className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
+      <SidebarWaveExpandControl
+        formattedWaveName={formattedWaveName}
+        isExpanded={isExpanded}
+        onBlur={cancelSubwavePrefetch}
+        onClick={handleToggleExpand}
+        onFocus={scheduleSubwavePrefetch}
+        shouldReserveSpace={shouldReserveExpandControlSpace}
+        shouldShowButton={shouldShowExpandControl}
+      />
+      {isChildRow && (
+        <span
+          aria-hidden="true"
+          className={`tw-absolute -tw-top-1 tw-left-14 tw-w-px tw-bg-iron-700/60 md:tw-left-11 ${
+            isLastSubwave ? "tw-bottom-4" : "-tw-bottom-1"
+          }`}
+        />
+      )}
       <Link
         href={href}
         prefetch={false}
         {...(onMouseEnter ? { onMouseEnter } : {})}
         onClick={onClick}
-        className={`tw-flex tw-min-w-0 tw-flex-1 tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
@@ -85,31 +184,70 @@ export const ExpandedWave = ({
             isDropWave={isDropWave}
             showNewDropsBadge={!isActive && haveNewDrops}
             wave={wave}
+            size={isChildRow ? "sm" : "default"}
           />
+          {hasUnreadSubwaves && (
+            <span
+              aria-hidden="true"
+              className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
+            />
+          )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div
             ref={nameRef}
-            className="-tw-mt-0.5 tw-mb-0.5 tw-truncate tw-text-sm"
+            className={`-tw-mt-1 tw-mb-1 tw-truncate tw-text-sm ${
+              shouldShowPinButton ? "tw-pr-7" : ""
+            }`}
             {...tooltipAttributes}
           >
             {formattedWaveName}
           </div>
-          {presentLatestDropTimestamp !== null && (
-            <div className="tw-text-xs tw-text-iron-500">
-              <span className="tw-pr-1">Last drop:</span>
-              <BrainLeftSidebarWaveDropTime time={presentLatestDropTimestamp} />
+          {shouldShowTrustSignalsRow && (
+            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
+              {hasSummaryScore && (
+                <WaveTrustSignals
+                  waveRep={wave.waveRep}
+                  waveScore={wave.waveScore}
+                  variant="sidebar-inline"
+                  mode="summary"
+                  className="tw-shrink-0"
+                  tooltipId={trustSignalsTooltipId}
+                />
+              )}
+              {presentLatestDropTimestamp !== null && (
+                <span className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
+                  <BrainLeftSidebarWaveDropTime
+                    time={presentLatestDropTimestamp}
+                  />
+                </span>
+              )}
             </div>
           )}
         </div>
       </Link>
-      {showPin && (
-        <BrainLeftSidebarWavePin waveId={waveId} isPinned={isPinned} />
+      {shouldShowPinButton && (
+        <BrainLeftSidebarWavePin
+          waveId={waveId}
+          isPinned={isPinned}
+          compact
+          className="tw-absolute tw-right-3 tw-top-2 tw-z-10"
+        />
       )}
       {showExpandedTooltip && (
         <WaveTooltip id={tooltipId} place={tooltipPlacement}>
           {tooltipContent}
         </WaveTooltip>
+      )}
+      {hasSummaryScore && (
+        <Tooltip
+          id={trustSignalsTooltipId}
+          place="top"
+          offset={8}
+          opacity={1}
+          positionStrategy="fixed"
+          style={TOOLTIP_STYLES}
+        />
       )}
     </div>
   );
