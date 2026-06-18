@@ -137,6 +137,7 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
         {isVideo ? (
           <SeizeVideoPlayer
             src={item.previewUrl}
+            template="poster-gated"
             className={previewClassName}
             muted
             preload="metadata"

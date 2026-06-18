@@ -8,15 +8,15 @@
   },
   "canonicalStorage": {
     "type": "ipfs",
-    "rootCid": null,
-    "note": "Set DELEGATION_DOCS_IPFS_ROOT_CID after the reviewed bundle is published and pinned."
+    "rootCid": "bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq",
+    "note": "Reviewed delegation docs bundle is published and pinned by immutable IPFS CID."
   },
   "acceleration": {
     "primaryGatewayBaseUrl": "https://ipfs.6529.io/ipfs",
     "fallbackGatewayBaseUrls": [
       "https://ipfs.io/ipfs"
     ],
-    "cloudFrontBaseUrl": null,
+    "cloudFrontBaseUrl": "https://d3lqz0a4bldqgf.cloudfront.net/delegation-content/bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq",
     "note": "CloudFront/S3 may be used only as a CID/version-addressed mirror. Runtime verifies article hashes before rendering."
   },
   "localBasePath": "/delegation-content/delegation-docs-2026-06-16",
@@ -353,7 +353,7 @@
       "group": "Reference",
       "path": "html/reference-overview-wallet-architecture.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-overview-wallet-architecture.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/reference-overview-wallet-architecture.html",
       "sha256": "f6837483a872cf36cd92bf7fb9a6d5418d09b0d34a97354c2b1bfee4a78cb6a1"
     },
     "delegation-faq": {
@@ -362,7 +362,7 @@
       "group": "Reference",
       "path": "html/delegation-faq.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/delegation-faq.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/delegation-faq.html",
       "sha256": "525178915ab9a82807baa4367f12689071e822e1579c22ff61cb36a74b444512"
     },
     "consolidation-use-cases": {
@@ -371,7 +371,7 @@
       "group": "Reference",
       "path": "html/consolidation-use-cases.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/consolidation-use-cases.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/consolidation-use-cases.html",
       "sha256": "dea36f29f402ebf42fc1e9714ce6c758aecd9196ab15e0f604e8eb39d4db56d1"
     },
     "register-delegation": {
@@ -380,7 +380,7 @@
       "group": "How to Register",
       "path": "html/register-delegation.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-delegation.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/register-delegation.html",
       "sha256": "39f02aa853204f7f0327db558ba0b8011dbd0a909ebd0897d6277a7476539344"
     },
     "register-sub-delegation": {
@@ -389,7 +389,7 @@
       "group": "How to Register",
       "path": "html/register-sub-delegation.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-sub-delegation.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/register-sub-delegation.html",
       "sha256": "3fcd286098883e5666d57c465395ef59a01bbf5df836989af70c38e63d4c10cd"
     },
     "register-consolidation": {
@@ -398,7 +398,7 @@
       "group": "How to Register",
       "path": "html/register-consolidation.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-consolidation.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/register-consolidation.html",
       "sha256": "3f21039fdd816615c23c828539da9249d0afd36aa1d3a46a8e7e8e75144d7b35"
     },
     "reference-delegations-2address-del-manager": {
@@ -407,7 +407,7 @@
       "group": "How to Register",
       "path": "html/reference-delegations-2address-del-manager.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegations-2address-del-manager.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/reference-delegations-2address-del-manager.html",
       "sha256": "ed4e91330a45276b6a3452351a75a1ace0f73cf1d78636bf9796c6472e881084"
     },
     "reference-delegations-3address-del-manager": {
@@ -416,7 +416,7 @@
       "group": "How to Register",
       "path": "html/reference-delegations-3address-del-manager.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegations-3address-del-manager.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/reference-delegations-3address-del-manager.html",
       "sha256": "9fa7669db4c87684e971f93ba311965c6a9d74ecbd7b8695599e1f7c756752c7"
     },
     "reference-consolidations-2address": {
@@ -425,7 +425,7 @@
       "group": "How to Register",
       "path": "html/reference-consolidations-2address.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-2address.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/reference-consolidations-2address.html",
       "sha256": "c5eb012a780f51bd95ea391b5b38077d3012631c72e9a18f5f5cbb00bb6b3cd9"
     },
     "reference-consolidations-3address": {
@@ -434,7 +434,7 @@
       "group": "How to Register",
       "path": "html/reference-consolidations-3address.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-3address.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/reference-consolidations-3address.html",
       "sha256": "a0a74e85ee2dfea13720c5b1fa8878ae004e60c0d77248d56ba143232c4bac8a"
     },
     "reference-consolidations-3address-del-manager": {
@@ -443,7 +443,7 @@
       "group": "How to Register",
       "path": "html/reference-consolidations-3address-del-manager.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-3address-del-manager.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/reference-consolidations-3address-del-manager.html",
       "sha256": "ee83175ecd7bdcebf6b79e349659de5af9b3e36419ef91235392eb0776826a24"
     },
     "using-safe": {
@@ -452,7 +452,7 @@
       "group": "How to Register",
       "path": "html/using-safe.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/using-safe.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/using-safe.html",
       "sha256": "c75abde346ddb0cad7055f3e4200ab012690aadd2505e657571fe3aff8583595"
     },
     "use-cases-overview": {
@@ -461,7 +461,7 @@
       "group": "How to Register",
       "path": "html/use-cases-overview.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/use-cases-overview.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/use-cases-overview.html",
       "sha256": "5d6f0f17a5b2c2670da128d8489e06596f0f112c00c07e732f0e0941cf6ba1f5"
     },
     "view-delegations": {
@@ -470,7 +470,7 @@
       "group": "How to View",
       "path": "html/view-delegations.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-delegations.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/view-delegations.html",
       "sha256": "6f9a72ff4713ea118c3efa5d3ac318ff41257923a218963f5d1ebceb7af70c27"
     },
     "view-sub-delegations": {
@@ -479,7 +479,7 @@
       "group": "How to View",
       "path": "html/view-sub-delegations.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-sub-delegations.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/view-sub-delegations.html",
       "sha256": "88c2de34d7ad704cd1ab6d88905e0b497065d0ebf32c581790f5d0a6d5d3f9be"
     },
     "view-consolidations": {
@@ -488,7 +488,7 @@
       "group": "How to View",
       "path": "html/view-consolidations.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-consolidations.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/view-consolidations.html",
       "sha256": "b0af143773cdc0cd4c6f86032c12dab3951c34347345782498dce9e77937fe9c"
     },
     "manage-update": {
@@ -497,7 +497,7 @@
       "group": "How to Manage",
       "path": "html/manage-update.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/manage-update.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/manage-update.html",
       "sha256": "91d59c1a14213e5019a618e47f7b29a012023faeb58afc8e261550613e5d6e37"
     },
     "manage-revoke": {
@@ -506,7 +506,7 @@
       "group": "How to Manage",
       "path": "html/manage-revoke.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/manage-revoke.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/manage-revoke.html",
       "sha256": "2179111bb5df8891b81dfa8d2902408bc6aac312a0ba4b48b55e57226005e8ab"
     },
     "register-delegation-using-sub-delegation": {
@@ -515,7 +515,7 @@
       "group": "How to Manage using Delegation Management Rights",
       "path": "html/register-delegation-using-sub-delegation.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-delegation-using-sub-delegation.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/register-delegation-using-sub-delegation.html",
       "sha256": "e21a8bcb7c13c445a04bf73766fce3b388cd916f2d6827eb3adf462c2a42b83b"
     },
     "revoke-delegation-using-sub-delegation": {
@@ -524,7 +524,7 @@
       "group": "How to Manage using Delegation Management Rights",
       "path": "html/revoke-delegation-using-sub-delegation.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/revoke-delegation-using-sub-delegation.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/revoke-delegation-using-sub-delegation.html",
       "sha256": "12c46f3cccc9acae8a41b80f361d5a3ef2dff5346d822d00c095e1588263a9f7"
     },
     "lock-global": {
@@ -533,7 +533,7 @@
       "group": "How to Lock or Unlock Your Wallet",
       "path": "html/lock-global.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-global.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/lock-global.html",
       "sha256": "607a9fa4f66b0de50d38d5b4964ee60dbeb5561706d49d520e668bdf3d6053c7"
     },
     "lock-collection": {
@@ -542,7 +542,7 @@
       "group": "How to Lock or Unlock Your Wallet",
       "path": "html/lock-collection.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-collection.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/lock-collection.html",
       "sha256": "c1fc51dd328544e92920f1d3eed35fd75ed475fd3ccce921c69adb129b397640"
     },
     "lock-use-case": {
@@ -551,7 +551,7 @@
       "group": "How to Lock or Unlock Your Wallet",
       "path": "html/lock-use-case.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-use-case.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/lock-use-case.html",
       "sha256": "ddea428b41d300b0a77b695ff3d58fc4fd8be28ad995f976ca4ba936ce72aab3"
     },
     "unlock-global": {
@@ -560,7 +560,7 @@
       "group": "How to Lock or Unlock Your Wallet",
       "path": "html/unlock-global.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-global.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/unlock-global.html",
       "sha256": "d23b8134255b726c6aa576dc0a8cc3047ebdc8a4f2cdeb5929dce526d9fb6af2"
     },
     "unlock-collection": {
@@ -569,7 +569,7 @@
       "group": "How to Lock or Unlock Your Wallet",
       "path": "html/unlock-collection.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-collection.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/unlock-collection.html",
       "sha256": "24618638441199e17a31f5dd340943a981c27446864eb365398eb05875539f14"
     },
     "unlock-use-case": {
@@ -578,7 +578,7 @@
       "group": "How to Lock or Unlock Your Wallet",
       "path": "html/unlock-use-case.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-use-case.html",
-      "sourceUri": null,
+      "sourceUri": "ipfs://bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq/html/unlock-use-case.html",
       "sha256": "79978ff7b50eec8c5d51ba85f0c67d706eb927fc957b183a01ebdbbf8db6a991"
     }
   }

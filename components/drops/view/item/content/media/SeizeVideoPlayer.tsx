@@ -1,6 +1,5 @@
 "use client";
 
-import { fullScreenSupported } from "@/helpers/Helpers";
 import {
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
@@ -12,21 +11,62 @@ import {
   SpeakerXMarkIcon,
 } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  assignRef,
+  getAspectRatio,
+  getNaturalWidthClassName,
+  getOrientation,
+  resolveSeizeVideoTemplate,
+  useElementInView,
+  usePrefersReducedMotion,
+} from "./SeizeVideoPlayer.config";
+import type {
+  SeizeVideoControls,
+  SeizeVideoMode,
+  SeizeVideoTemplate,
+  VideoAlign,
+  VideoLayout,
+} from "./SeizeVideoPlayer.config";
+import {
+  enterFullscreen,
+  enterNativeVideoFullscreen,
+  exitFullscreen,
+  getFullscreenElement,
+  isFullscreenEnabled,
+} from "./SeizeVideoPlayer.fullscreen";
+import type {
+  FullscreenElement,
+  NativeFullscreenVideo,
+} from "./SeizeVideoPlayer.fullscreen";
 
-type VideoLayout = "natural" | "fill" | "prominent";
-type VideoAlign = "left" | "center";
+export type { SeizeVideoControls, SeizeVideoMode, SeizeVideoTemplate };
 
 interface SeizeVideoPlayerProps {
   readonly src?: string | undefined;
-  readonly videoRef?: React.RefObject<HTMLVideoElement | null> | undefined;
+  readonly videoRef?: React.Ref<HTMLVideoElement | null> | undefined;
   readonly id?: string | undefined;
+  readonly template?: SeizeVideoTemplate | undefined;
+  readonly mode?: SeizeVideoMode | undefined;
+  readonly controls?: SeizeVideoControls | undefined;
   readonly autoPlay?: boolean | undefined;
   readonly muted?: boolean | undefined;
   readonly loop?: boolean | undefined;
   readonly preload?: "auto" | "metadata" | "none" | undefined;
   readonly poster?: string | undefined;
   readonly captionsSrc?: string | undefined;
+  readonly captionsLabel?: string | undefined;
+  readonly captionsLang?: string | undefined;
+  readonly captionsDefault?: boolean | undefined;
+  readonly locale?: SupportedLocale | undefined;
   readonly layout?: VideoLayout | undefined;
   readonly align?: VideoAlign | undefined;
   readonly className?: string | undefined;
@@ -39,7 +79,7 @@ interface SeizeVideoPlayerProps {
   readonly isDownloading?: boolean | undefined;
   readonly fallbackSources?: readonly string[] | undefined;
   readonly onVideoClick?:
-    | ((event: React.MouseEvent<HTMLDivElement>) => void)
+    | ((event: React.MouseEvent<HTMLElement>) => void)
     | undefined;
   readonly onError?: React.ReactEventHandler<HTMLVideoElement> | undefined;
   readonly "aria-label"?: string | undefined;
@@ -49,162 +89,21 @@ interface SeizeVideoPlayerProps {
   readonly "data-disable"?: string | undefined;
 }
 
-const EMPTY_CAPTIONS_SRC = "data:text/vtt,WEBVTT";
 const CONTROL_HIDE_DELAY_MS = 1800;
-
-type FullscreenDocument = Document & {
-  readonly webkitFullscreenElement?: Element | null;
-  readonly mozFullScreenElement?: Element | null;
-  readonly msFullscreenElement?: Element | null;
-  readonly webkitFullscreenEnabled?: boolean | undefined;
-  readonly mozFullScreenEnabled?: boolean | undefined;
-  readonly msFullscreenEnabled?: boolean | undefined;
-  webkitExitFullscreen?: () => Promise<void> | void;
-  mozCancelFullScreen?: () => Promise<void> | void;
-  msExitFullscreen?: () => Promise<void> | void;
-};
-
-type FullscreenElement = HTMLElement & {
-  webkitRequestFullscreen?: () => Promise<void> | void;
-  mozRequestFullScreen?: () => Promise<void> | void;
-  msRequestFullscreen?: () => Promise<void> | void;
-};
-
-type NativeFullscreenVideo = HTMLVideoElement & {
-  webkitEnterFullscreen?: () => void;
-  webkitEnterFullScreen?: () => void;
-};
-
-function getFullscreenElement() {
-  const doc = document as FullscreenDocument;
-  return (
-    document.fullscreenElement ??
-    doc.webkitFullscreenElement ??
-    doc.mozFullScreenElement ??
-    doc.msFullscreenElement ??
-    null
-  );
-}
-
-function isFullscreenEnabled() {
-  const doc = document as FullscreenDocument;
-  if (document.fullscreenEnabled) {
-    return true;
-  }
-  if (doc.webkitFullscreenEnabled === true) {
-    return true;
-  }
-  if (doc.mozFullScreenEnabled === true) {
-    return true;
-  }
-  if (doc.msFullscreenEnabled === true) {
-    return true;
-  }
-  return fullScreenSupported();
-}
-
-async function enterFullscreen(element: FullscreenElement) {
-  if (typeof element.requestFullscreen === "function") {
-    await element.requestFullscreen();
-    return true;
-  } else if (typeof element.webkitRequestFullscreen === "function") {
-    await element.webkitRequestFullscreen();
-    return true;
-  } else if (typeof element.mozRequestFullScreen === "function") {
-    await element.mozRequestFullScreen();
-    return true;
-  } else if (typeof element.msRequestFullscreen === "function") {
-    await element.msRequestFullscreen();
-    return true;
-  }
-  return false;
-}
-
-async function exitFullscreen() {
-  const doc = document as FullscreenDocument;
-  if (typeof document.exitFullscreen === "function") {
-    await document.exitFullscreen();
-  } else if (typeof doc.webkitExitFullscreen === "function") {
-    await doc.webkitExitFullscreen();
-  } else if (typeof doc.mozCancelFullScreen === "function") {
-    await doc.mozCancelFullScreen();
-  } else if (typeof doc.msExitFullscreen === "function") {
-    await doc.msExitFullscreen();
-  }
-}
-
-function enterNativeVideoFullscreen(video: HTMLVideoElement | null) {
-  if (!video) {
-    return false;
-  }
-
-  const nativeFullscreenVideo = video as NativeFullscreenVideo;
-  if (typeof nativeFullscreenVideo.webkitEnterFullscreen === "function") {
-    nativeFullscreenVideo.webkitEnterFullscreen();
-    return true;
-  }
-  if (typeof nativeFullscreenVideo.webkitEnterFullScreen === "function") {
-    nativeFullscreenVideo.webkitEnterFullScreen();
-    return true;
-  }
-  return false;
-}
-
-function getAspectRatio(width: number, height: number): string | undefined {
-  if (!Number.isFinite(width) || !Number.isFinite(height)) {
-    return undefined;
-  }
-  if (width <= 0 || height <= 0) {
-    return undefined;
-  }
-  return `${width} / ${height}`;
-}
-
-function getOrientation(width: number, height: number) {
-  if (width <= 0 || height <= 0) {
-    return "unknown";
-  }
-  if (width > height * 1.08) {
-    return "landscape";
-  }
-  if (height > width * 1.08) {
-    return "portrait";
-  }
-  return "square";
-}
-
-function getNaturalWidthClassName(orientation: string, layout: VideoLayout) {
-  if (layout === "fill") {
-    return "tw-h-full tw-w-full";
-  }
-
-  if (layout === "prominent") {
-    if (orientation === "portrait") {
-      return "tw-w-[min(100%,34rem)]";
-    }
-    if (orientation === "square") {
-      return "tw-w-[min(100%,42rem)]";
-    }
-    return "tw-w-full";
-  }
-
-  if (orientation === "portrait") {
-    return "tw-w-[min(100%,24rem)]";
-  }
-  if (orientation === "square") {
-    return "tw-w-[min(100%,32rem)]";
-  }
-  return "tw-w-full";
-}
+const DEFAULT_CAPTIONS_LANGUAGE = DEFAULT_LOCALE;
 
 function SeizeVideoControlButton({
   label,
   onClick,
+  onFocus,
+  tabIndex,
   children,
   disabled = false,
 }: {
   readonly label: string;
   readonly onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  readonly onFocus?: (() => void) | undefined;
+  readonly tabIndex?: number | undefined;
   readonly children: React.ReactNode;
   readonly disabled?: boolean | undefined;
 }) {
@@ -215,6 +114,8 @@ function SeizeVideoControlButton({
       title={label}
       disabled={disabled}
       onClick={onClick}
+      onFocus={onFocus}
+      tabIndex={tabIndex}
       className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/70 tw-text-white tw-shadow-lg tw-shadow-black/25 tw-backdrop-blur-md tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800/90"
     >
       {children}
@@ -222,16 +123,364 @@ function SeizeVideoControlButton({
   );
 }
 
+interface SeizeVideoLabels {
+  readonly captions: string;
+  readonly download: string;
+  readonly downloading: string;
+  readonly exitFullscreen: string;
+  readonly fullscreen: string;
+  readonly mute: string;
+  readonly pause: string;
+  readonly play: string;
+  readonly player: string;
+  readonly playPreview: string;
+  readonly unmute: string;
+  readonly unsupported: string;
+}
+
+interface MinimalVideoHandlers {
+  readonly onPointerEnter?: (() => void) | undefined;
+  readonly onPointerLeave?: (() => void) | undefined;
+  readonly onPointerMove?: (() => void) | undefined;
+  readonly onTouchStart?: (() => void) | undefined;
+}
+
+function getMinimalVideoHandlers({
+  hideControlsSoon,
+  revealControls,
+  showMinimalControls,
+}: {
+  readonly hideControlsSoon: () => void;
+  readonly revealControls: () => void;
+  readonly showMinimalControls: boolean;
+}): MinimalVideoHandlers {
+  if (!showMinimalControls) {
+    return {};
+  }
+
+  return {
+    onPointerEnter: revealControls,
+    onPointerLeave: hideControlsSoon,
+    onPointerMove: revealControls,
+    onTouchStart: revealControls,
+  };
+}
+
+function SeizeVideoMinimalControls({
+  isAnyFullscreen,
+  isDownloading,
+  isMuted,
+  isPaused,
+  labels,
+  onControlsFocus,
+  onDownloadClick,
+  onFullscreenClick,
+  onMuteClick,
+  onOpenClick,
+  onPlaybackClick,
+  openLabel,
+  progress,
+  showControls,
+  showActions,
+  showFullscreen,
+}: {
+  readonly isAnyFullscreen: boolean;
+  readonly isDownloading: boolean;
+  readonly isMuted: boolean;
+  readonly isPaused: boolean;
+  readonly labels: SeizeVideoLabels;
+  readonly onControlsFocus: () => void;
+  readonly onDownloadClick?:
+    | ((event: React.MouseEvent<HTMLButtonElement>) => void)
+    | undefined;
+  readonly onFullscreenClick: (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => void;
+  readonly onMuteClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  readonly onOpenClick?:
+    | ((event: React.MouseEvent<HTMLButtonElement>) => void)
+    | undefined;
+  readonly onPlaybackClick: (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => void;
+  readonly openLabel?: string | undefined;
+  readonly progress: number;
+  readonly showControls: boolean;
+  readonly showActions: boolean;
+  readonly showFullscreen: boolean;
+}) {
+  const controlsHitTestClass = showControls
+    ? "tw-pointer-events-auto"
+    : "tw-pointer-events-none";
+  const controlsTabIndex = showControls ? undefined : -1;
+
+  return (
+    <>
+      <div
+        className={clsx(
+          "tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-transition-opacity tw-duration-200",
+          showControls ? "tw-opacity-100" : "tw-opacity-0"
+        )}
+      >
+        {isPaused && (
+          <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
+            <button
+              type="button"
+              aria-label={labels.play}
+              title={labels.play}
+              onClick={onPlaybackClick}
+              onFocus={onControlsFocus}
+              tabIndex={controlsTabIndex}
+              className={clsx(
+                controlsHitTestClass,
+                "tw-flex tw-size-16 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/65 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
+              )}
+            >
+              <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
+        <div
+          className={clsx(
+            controlsHitTestClass,
+            "tw-absolute tw-bottom-4 tw-left-3"
+          )}
+        >
+          <SeizeVideoControlButton
+            label={isMuted ? labels.unmute : labels.mute}
+            onClick={onMuteClick}
+            onFocus={onControlsFocus}
+            tabIndex={controlsTabIndex}
+          >
+            {isMuted ? (
+              <SpeakerXMarkIcon className="tw-size-5" aria-hidden="true" />
+            ) : (
+              <SpeakerWaveIcon className="tw-size-5" aria-hidden="true" />
+            )}
+          </SeizeVideoControlButton>
+        </div>
+
+        <div
+          className={clsx(
+            controlsHitTestClass,
+            "tw-absolute tw-bottom-4 tw-right-3 tw-flex tw-items-center tw-gap-2"
+          )}
+        >
+          {!isPaused && (
+            <SeizeVideoControlButton
+              label={labels.pause}
+              onClick={onPlaybackClick}
+              onFocus={onControlsFocus}
+              tabIndex={controlsTabIndex}
+            >
+              <PauseIcon className="tw-size-5" aria-hidden="true" />
+            </SeizeVideoControlButton>
+          )}
+          {showActions && onOpenClick && openLabel && (
+            <SeizeVideoControlButton
+              label={openLabel}
+              onClick={onOpenClick}
+              onFocus={onControlsFocus}
+              tabIndex={controlsTabIndex}
+            >
+              <ArrowTopRightOnSquareIcon
+                className="tw-size-5"
+                aria-hidden="true"
+              />
+            </SeizeVideoControlButton>
+          )}
+          {showActions && onDownloadClick && (
+            <SeizeVideoControlButton
+              label={isDownloading ? labels.downloading : labels.download}
+              onClick={onDownloadClick}
+              onFocus={onControlsFocus}
+              disabled={isDownloading}
+              tabIndex={controlsTabIndex}
+            >
+              <ArrowDownTrayIcon className="tw-size-5" aria-hidden="true" />
+            </SeizeVideoControlButton>
+          )}
+          {showFullscreen && (
+            <SeizeVideoControlButton
+              label={isAnyFullscreen ? labels.exitFullscreen : labels.fullscreen}
+              onClick={onFullscreenClick}
+              onFocus={onControlsFocus}
+              tabIndex={controlsTabIndex}
+            >
+              {isAnyFullscreen ? (
+                <ArrowsPointingInIcon
+                  className="tw-size-5"
+                  aria-hidden="true"
+                />
+              ) : (
+                <ArrowsPointingOutIcon
+                  className="tw-size-5"
+                  aria-hidden="true"
+                />
+              )}
+            </SeizeVideoControlButton>
+          )}
+        </div>
+      </div>
+
+      <div
+        className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-z-30 tw-h-1 tw-bg-white/20"
+        aria-hidden="true"
+      >
+        <div
+          className="tw-h-full tw-bg-primary-400"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </>
+  );
+}
+
+function SeizeVideoElement({
+  ariaLabel,
+  captionsDefault,
+  captionsLabel,
+  captionsLang,
+  captionsSrc,
+  dataDisable,
+  dataMime,
+  dataTestId,
+  dataUrl,
+  id,
+  isMuted,
+  isWrapperFullscreen,
+  labels,
+  loop,
+  onClick,
+  onDurationChange,
+  onEnded,
+  onError,
+  onFocus,
+  onLoadedMetadata,
+  onPause,
+  onPlay,
+  onPointerEnter,
+  onPointerLeave,
+  onPointerMove,
+  onTimeUpdate,
+  onTouchStart,
+  poster,
+  preload,
+  setVideoRef,
+  src,
+  videoAutoPlay,
+  videoClassName,
+  videoControls,
+  videoTabIndex,
+}: {
+  readonly ariaLabel: string;
+  readonly captionsDefault: boolean;
+  readonly captionsLabel: string;
+  readonly captionsLang: string;
+  readonly captionsSrc?: string | undefined;
+  readonly dataDisable?: string | undefined;
+  readonly dataMime?: string | undefined;
+  readonly dataTestId?: string | undefined;
+  readonly dataUrl?: string | undefined;
+  readonly id?: string | undefined;
+  readonly isMuted: boolean;
+  readonly isWrapperFullscreen: boolean;
+  readonly labels: SeizeVideoLabels;
+  readonly loop: boolean;
+  readonly onClick: React.MouseEventHandler<HTMLVideoElement>;
+  readonly onDurationChange: () => void;
+  readonly onEnded: () => void;
+  readonly onError: React.ReactEventHandler<HTMLVideoElement>;
+  readonly onFocus?: React.FocusEventHandler<HTMLVideoElement> | undefined;
+  readonly onLoadedMetadata: React.ReactEventHandler<HTMLVideoElement>;
+  readonly onPause: () => void;
+  readonly onPlay: () => void;
+  readonly onPointerEnter?: (() => void) | undefined;
+  readonly onPointerLeave?: (() => void) | undefined;
+  readonly onPointerMove?: (() => void) | undefined;
+  readonly onTimeUpdate: () => void;
+  readonly onTouchStart?: (() => void) | undefined;
+  readonly poster?: string | undefined;
+  readonly preload: "auto" | "metadata" | "none";
+  readonly setVideoRef: (element: HTMLVideoElement | null) => void;
+  readonly src?: string | undefined;
+  readonly videoAutoPlay: boolean;
+  readonly videoClassName?: string | undefined;
+  readonly videoControls: boolean;
+  readonly videoTabIndex?: number | undefined;
+}) {
+  return (
+    <>
+      {/* NOSONAR: render captions only when a real VTT source exists. */}<video
+        id={id}
+        ref={setVideoRef}
+        src={src}
+        autoPlay={videoAutoPlay}
+        muted={isMuted}
+        loop={loop}
+        playsInline
+        preload={preload}
+        poster={poster}
+        controls={videoControls}
+        tabIndex={videoTabIndex}
+        aria-label={ariaLabel}
+        {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
+        onLoadedMetadata={onLoadedMetadata}
+        onDurationChange={onDurationChange}
+        onTimeUpdate={onTimeUpdate}
+        onPlay={onPlay}
+        onPause={onPause}
+        onEnded={onEnded}
+        onError={onError}
+        onFocus={onFocus}
+        onClick={onClick}
+        onPointerEnter={onPointerEnter}
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
+        onTouchStart={onTouchStart}
+        className={clsx(
+          "tw-block tw-h-full tw-w-full tw-rounded-xl tw-object-contain",
+          isWrapperFullscreen && "tw-rounded-none",
+          videoClassName
+        )}
+        data-testid={dataTestId}
+        data-mime={dataMime}
+        data-url={dataUrl}
+        data-disable={dataDisable}
+      >
+        {captionsSrc && (
+          <track
+            kind="captions"
+            src={captionsSrc}
+            srcLang={captionsLang}
+            label={captionsLabel}
+            default={captionsDefault}
+          />
+        )}
+        {labels.unsupported}
+      </video>
+    </>
+  );
+}
+
 export default function SeizeVideoPlayer({
   src,
   videoRef,
   id,
-  autoPlay = true,
-  muted = true,
-  loop = true,
-  preload = "auto",
+  template = "ambient-media",
+  mode,
+  controls,
+  autoPlay,
+  muted,
+  loop,
+  preload,
   poster,
   captionsSrc,
+  captionsLabel,
+  captionsLang = DEFAULT_CAPTIONS_LANGUAGE,
+  captionsDefault = false,
+  locale = DEFAULT_LOCALE,
   layout = "natural",
   align = "left",
   className,
@@ -251,11 +500,29 @@ export default function SeizeVideoPlayer({
   "data-url": dataUrl,
   "data-disable": dataDisable,
 }: SeizeVideoPlayerProps) {
-  const internalVideoRef = useRef<HTMLVideoElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const hideControlsTimerRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const resolvedVideoRef = videoRef ?? internalVideoRef;
+  const [wrapperElement, setWrapperElement] = useState<HTMLDivElement | null>(
+    null
+  );
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
+    null
+  );
+  const resolvedTemplate = useMemo(
+    () =>
+      resolveSeizeVideoTemplate({
+        autoPlay,
+        controls,
+        loop,
+        mode,
+        muted,
+        preload,
+        template,
+      }),
+    [autoPlay, controls, loop, mode, muted, preload, template]
+  );
+  const prefersReducedMotion = usePrefersReducedMotion();
   const [aspectRatio, setAspectRatio] = useState<string | undefined>();
   const [orientation, setOrientation] = useState("unknown");
   const [mutedState, setMutedState] = useState<{
@@ -263,10 +530,17 @@ export default function SeizeVideoPlayer({
     readonly prop?: boolean | undefined;
     readonly value?: boolean | undefined;
   }>({});
-  const [isPaused, setIsPaused] = useState(!autoPlay);
+  const [isPaused, setIsPaused] = useState(!resolvedTemplate.autoPlay);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
+  const [openPosterGateKey, setOpenPosterGateKey] = useState<string | null>(
+    null
+  );
+  const [userPausedAutoplaySrc, setUserPausedAutoplaySrc] = useState<
+    string | null
+  >(null);
   const [videoSize, setVideoSize] = useState<
     | {
         readonly width: number;
@@ -275,7 +549,8 @@ export default function SeizeVideoPlayer({
     | undefined
   >();
   const [viewportHeight, setViewportHeight] = useState<number | undefined>(
-    () => (typeof window === "undefined" ? undefined : window.innerHeight)
+    () =>
+      globalThis.window === undefined ? undefined : globalThis.window.innerHeight
   );
   const [fallbackState, setFallbackState] = useState<{
     readonly originSrc?: string | undefined;
@@ -288,31 +563,54 @@ export default function SeizeVideoPlayer({
     );
     return Array.from(new Set(sources));
   }, [fallbackSources, src]);
+  const isInView = useElementInView(wrapperElement);
+
+  const setWrapperRef = useCallback((element: HTMLDivElement | null) => {
+    wrapperRef.current = element;
+    setWrapperElement(element);
+  }, []);
+  const setVideoRef = useCallback(
+    (element: HTMLVideoElement | null) => {
+      assignRef(videoRef, element);
+      setVideoElement(element);
+    },
+    [videoRef]
+  );
 
   function clearHideControlsTimer() {
     if (hideControlsTimerRef.current !== null) {
-      window.clearTimeout(hideControlsTimerRef.current);
+      globalThis.window.clearTimeout(hideControlsTimerRef.current);
       hideControlsTimerRef.current = null;
     }
   }
 
   function hideControlsSoon() {
+    if (effectiveControls !== "minimal" || globalThis.window === undefined) {
+      return;
+    }
     clearHideControlsTimer();
-    hideControlsTimerRef.current = window.setTimeout(() => {
-      const video = resolvedVideoRef.current;
-      if (video && !video.paused) {
+    hideControlsTimerRef.current = globalThis.window.setTimeout(() => {
+      const video = videoElement;
+      const activeElement = globalThis.document.activeElement;
+      const playerHasFocus = activeElement
+        ? (wrapperRef.current?.contains(activeElement) ?? false)
+        : false;
+      if (video && !video.paused && !isAnyFullscreen && !playerHasFocus) {
         setControlsVisible(false);
       }
     }, CONTROL_HIDE_DELAY_MS);
   }
 
   function revealControls() {
+    if (effectiveControls !== "minimal") {
+      return;
+    }
     setControlsVisible(true);
     hideControlsSoon();
   }
 
   function updateProgress() {
-    const video = resolvedVideoRef.current;
+    const video = videoElement;
     if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
       setProgress(0);
       return;
@@ -322,7 +620,7 @@ export default function SeizeVideoPlayer({
 
   function stopProgressAnimation() {
     if (animationFrameRef.current !== null) {
-      window.cancelAnimationFrame(animationFrameRef.current);
+      globalThis.window.cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
   }
@@ -331,21 +629,25 @@ export default function SeizeVideoPlayer({
     stopProgressAnimation();
     const tick = () => {
       updateProgress();
-      const video = resolvedVideoRef.current;
+      const video = videoElement;
       if (video && !video.paused && !video.ended) {
-        animationFrameRef.current = window.requestAnimationFrame(tick);
+        animationFrameRef.current = globalThis.window.requestAnimationFrame(tick);
       }
     };
-    animationFrameRef.current = window.requestAnimationFrame(tick);
+    animationFrameRef.current = globalThis.window.requestAnimationFrame(tick);
   }
 
   useEffect(() => {
+    if (globalThis.window === undefined) {
+      return;
+    }
+
     const updateViewportHeight = () => {
-      setViewportHeight(window.innerHeight);
+      setViewportHeight(globalThis.window.innerHeight);
     };
-    window.addEventListener("resize", updateViewportHeight);
+    globalThis.window.addEventListener("resize", updateViewportHeight);
     return () => {
-      window.removeEventListener("resize", updateViewportHeight);
+      globalThis.window.removeEventListener("resize", updateViewportHeight);
     };
   }, []);
 
@@ -376,15 +678,46 @@ export default function SeizeVideoPlayer({
   }, []);
 
   useEffect(() => {
+    const video = videoElement;
+    if (!video) {
+      return;
+    }
+
+    const handleNativeFullscreenBegin = () => {
+      setIsNativeFullscreen(true);
+      setControlsVisible(true);
+    };
+    const handleNativeFullscreenEnd = () => {
+      setIsNativeFullscreen(false);
+      setControlsVisible(true);
+    };
+
+    video.addEventListener(
+      "webkitbeginfullscreen",
+      handleNativeFullscreenBegin
+    );
+    video.addEventListener("webkitendfullscreen", handleNativeFullscreenEnd);
+    return () => {
+      video.removeEventListener(
+        "webkitbeginfullscreen",
+        handleNativeFullscreenBegin
+      );
+      video.removeEventListener(
+        "webkitendfullscreen",
+        handleNativeFullscreenEnd
+      );
+    };
+  }, [videoElement]);
+
+  useEffect(() => {
     return () => {
       clearHideControlsTimer();
       stopProgressAnimation();
     };
   }, []);
 
-  function handleMetadata() {
-    const video = resolvedVideoRef.current;
-    if (!video) return;
+  function handleMetadata(event: React.SyntheticEvent<HTMLVideoElement>) {
+    const video = event.currentTarget;
     setVideoSize({ width: video.videoWidth, height: video.videoHeight });
     setAspectRatio(getAspectRatio(video.videoWidth, video.videoHeight));
     setOrientation(getOrientation(video.videoWidth, video.videoHeight));
@@ -405,21 +738,28 @@ export default function SeizeVideoPlayer({
   }
 
   function togglePlayback() {
-    const video = resolvedVideoRef.current;
+    const video = videoElement;
     if (!video) return;
 
     if (video.paused || video.ended) {
-      video.play().catch(() => undefined);
+      setUserPausedAutoplaySrc(null);
+      video.play().catch(() => {
+        setIsPaused(true);
+        setControlsVisible(true);
+      });
       return;
     }
 
+    if (playerOwnsAutoplay) {
+      setUserPausedAutoplaySrc(directSrc ?? null);
+    }
     video.pause();
   }
 
   function toggleMuted(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setMutedState({ prop: muted, src, value: !isMuted });
+    setMutedState({ prop: resolvedTemplate.muted, src, value: !isMuted });
     revealControls();
   }
 
@@ -427,15 +767,28 @@ export default function SeizeVideoPlayer({
     event.preventDefault();
     event.stopPropagation();
     const wrapper = wrapperRef.current;
-    const video = resolvedVideoRef.current;
+    const video = videoElement;
+    const enterNativeFullscreen = () => {
+      if (enterNativeVideoFullscreen(video)) {
+        setIsNativeFullscreen(true);
+      }
+    };
     if (!wrapper) {
-      enterNativeVideoFullscreen(video);
+      enterNativeFullscreen();
+      revealControls();
+      return;
+    }
+
+    if (isNativeFullscreen) {
+      const nativeFullscreenVideo = video as NativeFullscreenVideo | null;
+      nativeFullscreenVideo?.webkitExitFullscreen?.();
+      setIsNativeFullscreen(false);
       revealControls();
       return;
     }
 
     if (!isFullscreenEnabled()) {
-      enterNativeVideoFullscreen(video);
+      enterNativeFullscreen();
       revealControls();
       return;
     }
@@ -450,27 +803,30 @@ export default function SeizeVideoPlayer({
       wrapper as FullscreenElement
     ).catch(() => false);
     if (!enteredFullscreen) {
-      enterNativeVideoFullscreen(video);
+      enterNativeFullscreen();
     }
     revealControls();
   }
 
-  function handleWrapperClick(event: React.MouseEvent<HTMLDivElement>) {
+  function handleVideoClick(event: React.MouseEvent<HTMLVideoElement>) {
     event.preventDefault();
     event.stopPropagation();
     onVideoClick?.(event);
-    revealControls();
-    togglePlayback();
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (event.key !== " " && event.key !== "Enter") {
-      return;
-    }
+  function openPosterGate(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    revealControls();
-    togglePlayback();
+    setOpenPosterGateKey(posterGateKey);
+    setUserPausedAutoplaySrc(null);
+    const video = videoElement;
+    if (!video) {
+      return;
+    }
+    video.play().catch(() => {
+      setIsPaused(true);
+      setControlsVisible(true);
+    });
   }
 
   function handleError(event: React.SyntheticEvent<HTMLVideoElement, Event>) {
@@ -530,184 +886,180 @@ export default function SeizeVideoPlayer({
 
   const isFillLayout = layout === "fill";
   const widthClassName = getNaturalWidthClassName(orientation, layout);
+  const posterGateIdentity = poster ?? id ?? dataUrl ?? src ?? "";
+  const posterGateKey = `${template}:${posterGateIdentity}`;
+  const isPosterGateClosed =
+    template === "poster-gated" && openPosterGateKey !== posterGateKey;
+  const effectiveControls = isPosterGateClosed
+    ? "none"
+    : resolvedTemplate.controls;
+  const showMinimalControls = effectiveControls === "minimal";
+  const videoControls = effectiveControls === "native";
+  const playerOwnsAutoplay =
+    resolvedTemplate.autoPlay &&
+    (resolvedTemplate.mode === "ambient" ||
+      resolvedTemplate.mode === "inert-preview");
+  const videoAutoPlay =
+    resolvedTemplate.autoPlay && !playerOwnsAutoplay && !isPosterGateClosed;
+  const minimalVideoHandlers = getMinimalVideoHandlers({
+    hideControlsSoon,
+    revealControls,
+    showMinimalControls,
+  });
   const isMuted =
     mutedState.src === src &&
-    mutedState.prop === muted &&
+    mutedState.prop === resolvedTemplate.muted &&
     typeof mutedState.value === "boolean"
       ? mutedState.value
-      : muted;
-  const controlsAreVisible = controlsVisible || isPaused || isFullscreen;
+      : resolvedTemplate.muted;
+  const isAnyFullscreen = isFullscreen || isNativeFullscreen;
+  const isWrapperFullscreen = isFullscreen;
+  const controlsAreVisible = controlsVisible || isPaused || isAnyFullscreen;
   const responsiveMediaStyle = getResponsiveMediaStyle();
   const directSrc =
     fallbackState.originSrc === src ? (fallbackState.source ?? src) : src;
-  const videoSourceProps = directSrc ? { src: directSrc } : {};
+  const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
+  const labels = useMemo<SeizeVideoLabels>(
+    () => ({
+      captions: t(locale, "media.video.captions"),
+      download: t(locale, "media.video.download"),
+      downloading: t(locale, "media.video.downloading"),
+      exitFullscreen: t(locale, "media.video.exitFullscreen"),
+      fullscreen: t(locale, "media.video.fullscreen"),
+      mute: t(locale, "media.video.mute"),
+      pause: t(locale, "media.video.pause"),
+      play: t(locale, "media.video.play"),
+      player: t(locale, "media.video.player"),
+      playPreview: t(locale, "media.video.playPreview"),
+      unmute: t(locale, "media.video.unmute"),
+      unsupported: t(locale, "media.video.unsupported"),
+    }),
+    [locale]
+  );
+  const resolvedCaptionsLabel = captionsLabel ?? labels.captions;
+
+  const syncOwnedAutoplay = useCallback(() => {
+    const video = videoElement;
+    if (!video || !playerOwnsAutoplay) {
+      return;
+    }
+
+    if (!isInView || prefersReducedMotion) {
+      video.pause();
+      return;
+    }
+    if (hasUserPausedOwnedAutoplay) {
+      return;
+    }
+
+    video.play().catch(() => {
+      setIsPaused(true);
+      setControlsVisible(true);
+    });
+  }, [
+    hasUserPausedOwnedAutoplay,
+    isInView,
+    playerOwnsAutoplay,
+    prefersReducedMotion,
+    videoElement,
+  ]);
+
+  useEffect(() => {
+    // Browser playback is an imperative media side effect of visibility policy.
+    syncOwnedAutoplay();
+  }, [directSrc, syncOwnedAutoplay]);
 
   return (
     <div
-      ref={wrapperRef}
-      role="group"
-      tabIndex={0}
-      aria-label={ariaLabel ?? "Video player"}
-      onClick={handleWrapperClick}
-      onKeyDown={handleKeyDown}
-      onMouseMove={revealControls}
-      onMouseEnter={revealControls}
-      onMouseLeave={() => {
-        clearHideControlsTimer();
-        if (!isPaused) {
-          setControlsVisible(false);
-        }
-      }}
-      onTouchStart={revealControls}
+      ref={setWrapperRef}
       className={clsx(
-        "tw-relative tw-max-w-full tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-bg-transparent tw-outline-none tw-ring-primary-400/0 tw-transition focus-visible:tw-ring-2",
+        "tw-relative tw-max-w-full tw-overflow-hidden tw-rounded-xl tw-bg-transparent tw-outline-none tw-transition",
+        showMinimalControls ? "tw-cursor-default" : "tw-cursor-auto",
         widthClassName,
         align === "center" && "tw-mx-auto",
         isFillLayout && "tw-flex tw-items-center tw-justify-center",
-        isFullscreen && "tw-h-screen tw-w-screen tw-rounded-none tw-bg-black",
+        isWrapperFullscreen &&
+          "tw-h-screen tw-w-screen tw-rounded-none tw-bg-black",
         className
       )}
       style={responsiveMediaStyle}
-      data-testid={dataTestId}
-      data-mime={dataMime}
-      data-url={dataUrl}
-      data-disable={dataDisable}
     >
-      <video
+      <SeizeVideoElement
+        ariaLabel={ariaLabel ?? labels.player}
+        captionsDefault={captionsDefault}
+        captionsLabel={resolvedCaptionsLabel}
+        captionsLang={captionsLang}
+        captionsSrc={captionsSrc}
+        dataDisable={dataDisable}
+        dataMime={dataMime}
+        dataTestId={dataTestId}
+        dataUrl={dataUrl}
         id={id}
-        ref={resolvedVideoRef}
-        {...videoSourceProps}
-        autoPlay={autoPlay}
-        muted={isMuted}
-        loop={loop}
-        playsInline
-        preload={preload}
-        poster={poster}
-        controls={false}
-        controlsList="nodownload noplaybackrate"
-        {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
-        onLoadedMetadata={handleMetadata}
+        isMuted={isMuted}
+        isWrapperFullscreen={isWrapperFullscreen}
+        labels={labels}
+        loop={resolvedTemplate.loop}
+        onClick={handleVideoClick}
         onDurationChange={updateProgress}
-        onTimeUpdate={updateProgress}
-        onPlay={handlePlay}
-        onPause={handlePause}
         onEnded={handlePause}
         onError={handleError}
-        className={clsx(
-          "tw-block tw-h-full tw-w-full tw-rounded-xl tw-object-contain",
-          isFullscreen && "tw-rounded-none",
-          videoClassName
-        )}
-      >
-        {directSrc && <source src={directSrc} />}
-        <track
-          kind="captions"
-          src={captionsSrc ?? EMPTY_CAPTIONS_SRC}
-          srcLang="en"
-          label="No captions available"
-        />
-        Your browser does not support the video tag.
-      </video>
+        onFocus={showMinimalControls ? revealControls : undefined}
+        onLoadedMetadata={handleMetadata}
+        onPause={handlePause}
+        onPlay={handlePlay}
+        onPointerEnter={minimalVideoHandlers.onPointerEnter}
+        onPointerLeave={minimalVideoHandlers.onPointerLeave}
+        onPointerMove={minimalVideoHandlers.onPointerMove}
+        onTimeUpdate={updateProgress}
+        onTouchStart={minimalVideoHandlers.onTouchStart}
+        poster={poster}
+        preload={resolvedTemplate.preload}
+        setVideoRef={setVideoRef}
+        src={directSrc}
+        videoAutoPlay={videoAutoPlay}
+        videoClassName={videoClassName}
+        videoControls={videoControls}
+        videoTabIndex={showMinimalControls ? 0 : undefined}
+      />
 
-      <div
-        className={clsx(
-          "tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-transition-opacity tw-duration-200",
-          controlsAreVisible ? "tw-opacity-100" : "tw-opacity-0"
-        )}
-      >
-        {isPaused && (
-          <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
-            <div className="tw-flex tw-size-16 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950/65 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md">
-              <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
-            </div>
-          </div>
-        )}
-
-        <div className="tw-pointer-events-auto tw-absolute tw-bottom-4 tw-left-3">
-          <SeizeVideoControlButton
-            label={isMuted ? "Unmute video" : "Mute video"}
-            onClick={toggleMuted}
+      {isPosterGateClosed && (
+        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-flex tw-items-center tw-justify-center">
+          <button
+            type="button"
+            aria-label={labels.playPreview}
+            onClick={openPosterGate}
+            className="tw-pointer-events-auto tw-flex tw-size-14 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/70 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
           >
-            {isMuted ? (
-              <SpeakerXMarkIcon className="tw-size-5" aria-hidden="true" />
-            ) : (
-              <SpeakerWaveIcon className="tw-size-5" aria-hidden="true" />
-            )}
-          </SeizeVideoControlButton>
+            <PlayIcon className="tw-ml-1 tw-size-7" aria-hidden="true" />
+          </button>
         </div>
+      )}
 
-        <div className="tw-pointer-events-auto tw-absolute tw-bottom-4 tw-right-3 tw-flex tw-items-center tw-gap-2">
-          {isPaused && (
-            <SeizeVideoControlButton
-              label="Play video"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                togglePlayback();
-              }}
-            >
-              <PlayIcon className="tw-ml-0.5 tw-size-5" aria-hidden="true" />
-            </SeizeVideoControlButton>
-          )}
-          {!isPaused && (
-            <SeizeVideoControlButton
-              label="Pause video"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                togglePlayback();
-              }}
-            >
-              <PauseIcon className="tw-size-5" aria-hidden="true" />
-            </SeizeVideoControlButton>
-          )}
-          {showActions && onOpen && openLabel && (
-            <SeizeVideoControlButton
-              label={openLabel}
-              onClick={stopAndRun(onOpen)}
-            >
-              <ArrowTopRightOnSquareIcon
-                className="tw-size-5"
-                aria-hidden="true"
-              />
-            </SeizeVideoControlButton>
-          )}
-          {showActions && onDownload && (
-            <SeizeVideoControlButton
-              label={isDownloading ? "Downloading media" : "Download media"}
-              onClick={stopAndRun(onDownload)}
-              disabled={isDownloading}
-            >
-              <ArrowDownTrayIcon className="tw-size-5" aria-hidden="true" />
-            </SeizeVideoControlButton>
-          )}
-          {showFullscreen && (
-            <SeizeVideoControlButton
-              label={isFullscreen ? "Exit full screen" : "Full screen"}
-              onClick={requestFullscreen}
-            >
-              {isFullscreen ? (
-                <ArrowsPointingInIcon
-                  className="tw-size-5"
-                  aria-hidden="true"
-                />
-              ) : (
-                <ArrowsPointingOutIcon
-                  className="tw-size-5"
-                  aria-hidden="true"
-                />
-              )}
-            </SeizeVideoControlButton>
-          )}
-        </div>
-      </div>
-
-      <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-z-30 tw-h-1 tw-bg-white/20">
-        <div
-          className="tw-h-full tw-bg-primary-400"
-          style={{ width: `${progress}%` }}
+      {showMinimalControls && (
+        <SeizeVideoMinimalControls
+          isAnyFullscreen={isAnyFullscreen}
+          isDownloading={isDownloading}
+          isMuted={isMuted}
+          isPaused={isPaused}
+          labels={labels}
+          onControlsFocus={revealControls}
+          onDownloadClick={onDownload ? stopAndRun(onDownload) : undefined}
+          onFullscreenClick={requestFullscreen}
+          onMuteClick={toggleMuted}
+          onOpenClick={onOpen ? stopAndRun(onOpen) : undefined}
+          onPlaybackClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            togglePlayback();
+            revealControls();
+          }}
+          openLabel={openLabel}
+          progress={progress}
+          showControls={controlsAreVisible}
+          showActions={showActions}
+          showFullscreen={showFullscreen}
         />
-      </div>
+      )}
     </div>
   );
 }

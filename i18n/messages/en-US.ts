@@ -264,6 +264,85 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
 
+const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
+  highlyRated: "Highly Rated",
+  pinned: "Pinned",
+  following: "Following",
+  all: "All",
+  highlyRatedAriaLabel: "Highly rated waves",
+  pinnedAriaLabel: "Pinned waves",
+  followingAriaLabel: "Following waves",
+  followingListAriaLabel: "Following waves list",
+  allQualityRankedAriaLabel: "All quality-ranked waves list",
+} as const);
+
+const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
+  title: "Score",
+  quality: "Quality",
+  hotness: "Hotness",
+  waveRep: "Wave REP",
+  learnMore: "Learn more",
+  detailsAriaLabel: "Wave score details",
+  scoreAria: "Wave score {visibilityScore}",
+  qualityAria: "Quality {qualityScore}, 65% of visibility",
+  hotnessAria: "Hotness {hotnessScore}, gated, 35% of visibility",
+  repRawAndScore: "REP: {rawRep} raw, {repSortScore} score",
+  repRaw: "REP: {rawRep} raw",
+  repScore: "REP score: {repSortScore}",
+  qualityValue: "{qualityScore} / 65%",
+  hotnessValue: "{hotnessScore} / 35% gated",
+  repRawAndScoreValue: "{rawRep} / score {repSortScore}",
+  repScoreValue: "score {repSortScore}",
+} as const);
+
+const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
+  visibilityAria: "Visibility score {visibilityScore} out of 100",
+  hotnessAria: "Hotness score {hotnessScore} out of 100",
+  hotnessTitle: "Hotness score: {hotnessScore}",
+  qualityInput: "Quality input: {qualityScore} (35% of hotness)",
+  recentTrustedActivity: "Recent trusted activity carries the other 65%",
+  hotnessQualityGate: "Hotness is gated by quality before visibility",
+  repRaw: "Wave REP: {rawRep} raw",
+  repScore: "REP score: {repSortScore}",
+  repQualityWeight: "REP contributes 35% of quality",
+  repPositive: "positive {value}",
+  repNegative: "negative {value}",
+  repNeutral: "{value}",
+  repAriaRaw: "Wave REP {value}",
+  repAriaScore: "Wave REP score {repScore} out of 100",
+  scoreLabel: "Score",
+  hotLabel: "Hot",
+  repLabel: "REP",
+} as const);
+
+const WAVE_REP_ACTION_MESSAGES = objectMessages("waves.rep.action", {
+  add: "Add REP",
+  remove: "Remove REP",
+  addAriaLabel: "Add Wave REP to this wave",
+  editRemoveAriaLabel:
+    "Edit or remove your Wave REP for this wave. Current contribution {contribution}",
+} as const);
+
+const WAVE_REP_MODAL_MESSAGES = objectMessages("waves.rep.modal", {
+  remove: "Remove",
+  removeAriaLabel: "Remove Wave REP",
+  noAvailableCredit:
+    "No available Wave REP credit for this category. You can adjust existing REP when you have a current contribution, or come back when more credit is available.",
+} as const);
+
+const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
+  "metadata.title": "Tech",
+  "metadata.description": "About",
+  "index.prsCovered": "PRs Covered",
+  "report.total": "Total",
+  "report.repos": "Repos",
+  "report.daily": "Daily",
+  "report.prCount": "{count} PRs",
+  "report.repoSummary": "{focus}. {count} PRs, {stateSummary}.",
+  "report.tocDescription":
+    "This report is split by repository. Use this index to jump directly to the area you want, or read through from the frontend app work into backend, Stream contracts, Safe app hardening, and review bot updates.",
+} as const);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -594,7 +673,56 @@ const THE_MEMES_DETAIL_ART_MESSAGES = namespaceMessages("theMemes.detail.art", [
   ["values.rank", "#{rank}"],
 ] as const);
 
+const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
+  ["captions", "Captions"],
+  ["download", "Download media"],
+  ["downloading", "Downloading media"],
+  ["exitFullscreen", "Exit full screen"],
+  ["fullscreen", "Full screen"],
+  ["mute", "Mute video"],
+  ["pause", "Pause video"],
+  ["play", "Play video"],
+  ["player", "Video player"],
+  ["playPreview", "Play video preview"],
+  ["unmute", "Unmute video"],
+  ["unsupported", "Your browser does not support the video tag."],
+] as const);
+
+const LINK_PREVIEW_MESSAGES = namespaceMessages("linkPreview", [
+  ["externalSourceFallback", "External link"],
+  ["byline", "by {author}"],
+  ["farcaster.frameBadge", "Frame"],
+  ["farcaster.imageAlt", "Farcaster embed preview for {title}"],
+  ["farcaster.imageFallbackAlt", "Farcaster embed preview"],
+  ["farcaster.miniAppBadge", "Mini App"],
+  ["farcaster.openFrame", "Open Frame"],
+  ["farcaster.openMiniApp", "Open Mini App"],
+  ["farcaster.titleFallback", "Farcaster Mini App"],
+  ["mediaType.article", "Article"],
+  ["mediaType.website", "Website"],
+  ["unavailable", "Link unavailable"],
+  ["youtube.providerFallback", "YouTube"],
+  ["youtube.playVideo", "Play YouTube video: {title}"],
+  ["youtube.thumbnailAlt", "YouTube thumbnail for {title}"],
+  ["youtube.thumbnailFallbackAlt", "YouTube video thumbnail"],
+  ["youtube.titleFallback", "YouTube video"],
+  ["youtube.watchOnYoutube", "Watch on YouTube"],
+] as const);
+
 export const EN_US_MESSAGES = {
+  "home.boostedDrop.anonymousAuthor": "Anonymous",
+  "home.boostedDrop.badge": "Boosted post",
+  "home.boostedDrop.boost": "Boost",
+  "home.boostedDrop.boostDrop": "Boost post by {author}",
+  "home.boostedDrop.boosted": "Boosted",
+  "home.boostedDrop.boostCount.one": "{count} boost",
+  "home.boostedDrop.boostCount.many": "{count} boosts",
+  "home.boostedDrop.internalLinkSource": "{source} link",
+  "home.boostedDrop.internalLinks.networkWaveScoreTitle": "Network: Wave Score",
+  "home.boostedDrop.openDrop": "Open boosted post from {author}",
+  "home.boostedDrop.removeBoost": "Remove boost",
+  "home.boostedDrop.removeBoostFromDrop": "Remove boost from post by {author}",
+  "home.boostedDrop.viewAuthor": "View {author}'s profile",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.title": "The Memes",
@@ -787,8 +915,16 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
+  ...WAVES_SIDEBAR_MESSAGES,
+  ...WAVE_SCORE_SUMMARY_MESSAGES,
+  ...WAVE_SCORE_DETAILS_MESSAGES,
+  ...WAVE_REP_ACTION_MESSAGES,
+  ...WAVE_REP_MODAL_MESSAGES,
+  ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
+  ...MEDIA_VIDEO_MESSAGES,
+  ...LINK_PREVIEW_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

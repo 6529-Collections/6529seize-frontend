@@ -11,6 +11,8 @@ import {
   formatNumberWithCommas,
   getStringAsNumberOrZero,
 } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
@@ -22,6 +24,7 @@ import { createPortal } from "react-dom";
 
 const WAVE_REP_CATEGORY_PATTERN = /^[\p{L}\p{N}?!,.'() ]{1,100}$/u;
 const CATEGORY_SETTLE_DELAY_MS = 350;
+const WAVE_REP_MODAL_LOCALE = DEFAULT_LOCALE;
 
 function getInitialCategory(wave: ApiWave): string {
   return wave.wave_rep?.categories?.[0]?.category ?? "quality";
@@ -43,7 +46,7 @@ export default function WaveRepRatingModal({
   const categoryErrorId = useId();
   const amountInputId = useId();
   const [isMounted, setIsMounted] = useState(false);
-  const [category, setCategory] = useState(getInitialCategory(wave));
+  const [category, setCategory] = useState(() => getInitialCategory(wave));
   const trimmedCategory = category.trim();
   const debouncedCategory = useDebouncedValue(
     trimmedCategory,
@@ -112,6 +115,10 @@ export default function WaveRepRatingModal({
   const isProxyMode = Boolean(activeProfileProxy);
   const isSaveDisabled =
     isProxyMode || mutating || !allocationReady || !amountValid || !haveChanged;
+  const canRemoveRating =
+    !isProxyMode && !mutating && allocationReady && currentRating !== 0;
+  const hasNoAvailableWaveRep =
+    allocationReady && availableWaveRep <= 0 && currentRating === 0;
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -159,8 +166,7 @@ export default function WaveRepRatingModal({
     },
   });
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const saveRating = async (nextAmount: number) => {
     if (isProxyMode) {
       setToast({
         message: "Wave REP can't be changed while acting as proxy.",
@@ -168,7 +174,6 @@ export default function WaveRepRatingModal({
       });
       return;
     }
-    const nextAmount = getStringAsNumberOrZero(amountStr);
     const nextAmountValid =
       nextAmount >= minMaxValues.min && nextAmount <= minMaxValues.max;
     if (
@@ -210,6 +215,20 @@ export default function WaveRepRatingModal({
       setMutating(false);
       if (shouldClose) onClose();
     }
+  };
+
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    await saveRating(getStringAsNumberOrZero(amountStr));
+  };
+
+  const onRemove = async () => {
+    if (!canRemoveRating) {
+      return;
+    }
+    setAmountDirty(true);
+    setAmountStr("0");
+    await saveRating(0);
   };
 
   if (!isMounted || globalThis.document === undefined) {
@@ -323,6 +342,17 @@ export default function WaveRepRatingModal({
               adjustedValue={amount}
               adjustmentType="Wave REP"
             />
+            {hasNoAvailableWaveRep && (
+              <p
+                role="status"
+                className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-amber-200"
+              >
+                {t(
+                  WAVE_REP_MODAL_LOCALE,
+                  "waves.rep.modal.noAvailableCredit"
+                )}
+              </p>
+            )}
           </div>
 
           <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row-reverse">
@@ -346,6 +376,19 @@ export default function WaveRepRatingModal({
                 "Save"
               )}
             </button>
+            {canRemoveRating && (
+              <button
+                type="button"
+                onClick={onRemove}
+                aria-label={t(
+                  WAVE_REP_MODAL_LOCALE,
+                  "waves.rep.modal.removeAriaLabel"
+                )}
+                className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-red/10 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-red tw-transition hover:tw-border-red/70 hover:tw-bg-red/15 sm:tw-w-auto"
+              >
+                {t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.remove")}
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}

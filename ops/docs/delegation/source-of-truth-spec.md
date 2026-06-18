@@ -127,13 +127,26 @@ Use this workflow for article edits.
 4. Run `node ops/scripts/build-delegation-docs-content.mjs`.
 5. Confirm `content/delegation/manifest.json` and the versioned public bundle
    were regenerated.
-6. Publish the versioned public bundle to IPFS from a controlled admin/backend
-   pipeline.
-7. Pin the root CID using 6529-controlled infrastructure.
-8. Set `DELEGATION_DOCS_IPFS_ROOT_CID` and rerun the build script.
-9. If using S3/CloudFront, set `DELEGATION_DOCS_CDN_BASE_URL` to a CID or
-   version-addressed mirror path.
-10. Verify representative article routes in a browser and confirm no hash
+6. Publish the versioned public bundle to IPFS from a controlled ops/CI context
+   using the 6529 internal IPFS node:
+
+   ```bash
+   DELEGATION_DOCS_IPFS_API_ENDPOINT=https://api-ipfs.6529.io \
+     node ops/scripts/publish-delegation-docs-content.mjs
+   ```
+
+   The manual GitHub workflow `Publish Delegation Docs Content` runs the same
+   script with repository secrets/vars.
+7. Pin the root CID using 6529-controlled infrastructure. The publish script
+   uses `pin=true` when calling the internal node.
+8. Save the receipt from `tmp/delegation-docs-publish`. It records the root CID,
+   the file hashes, the IPFS add response, and gateway/CDN verification results.
+9. Set `DELEGATION_DOCS_IPFS_ROOT_CID` from the receipt and rerun the build
+   script.
+10. If using S3/CloudFront, set `DELEGATION_DOCS_CDN_BASE_URL` to a CID or
+    version-addressed mirror path.
+11. Commit the updated manifest/public bundle through normal review.
+12. Verify representative article routes in a browser and confirm no hash
     errors.
 
 Do not treat current imported S3 bodies as permanent editorial quality. They
@@ -286,8 +299,8 @@ Use this status table before starting new delegation work.
 | FAQ child wrapper navigation | Built | React wrapper |
 | Repo-reviewed article package | Built | `content/delegation` |
 | Hash-verified runtime loader | Built | `delegationContent.ts` |
-| IPFS root CID publish | Pending | Admin/backend publish flow |
-| CloudFront/S3 acceleration mirror | Optional pending | CID/version-addressed mirror |
+| IPFS root CID publish | Built, pending credentials/config | `publish-delegation-docs-content.mjs` plus manual workflow |
+| CloudFront/S3 acceleration mirror | Built optional path, pending config | CID/version-addressed mirror |
 | Full article body rewrite package | Pending | `public/delegation-content/{version}/html` |
 | Image caption/alt pass for article bodies | Pending | `public/delegation-content/{version}/html` |
 | Similar S3 content migrations outside delegation | Future | Separate specs |

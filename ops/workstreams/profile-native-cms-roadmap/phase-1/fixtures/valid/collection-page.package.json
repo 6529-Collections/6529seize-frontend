@@ -1,0 +1,189 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-collection-page-v1",
+  "profile": {
+    "handle": "6529museum",
+    "profile_id": "profile-6529museum"
+  },
+  "site": {
+    "title": "6529 Museum Collection Fixture",
+    "description": "A collection page fixture.",
+    "base_path": "/6529museum/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "light",
+      "accent": "#111111"
+    },
+    "navigation_id": "nav-main",
+    "required_renderer_capabilities": ["static_blocks", "taxonomy_terms"]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/6529museum/index.html",
+        "kind": "page",
+        "page_id": "page-home"
+      },
+      {
+        "path": "/6529museum/collections/the-memes/index.html",
+        "kind": "page",
+        "page_id": "page-collection"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-home",
+        "type": "page",
+        "path": "/6529museum/index.html",
+        "metadata": {
+          "title": "6529 Museum",
+          "description": "Museum homepage fixture.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529museum/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "Home",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-home-heading",
+            "block_type": "heading",
+            "level": 1,
+            "text": "6529 Museum"
+          }
+        ]
+      },
+      {
+        "id": "page-collection",
+        "type": "collection",
+        "path": "/6529museum/collections/the-memes/index.html",
+        "metadata": {
+          "title": "The Memes by 6529",
+          "description": "A fixture for a rich collection page.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529museum/collections/the-memes/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes",
+          "search": "include",
+          "robots": "index"
+        },
+        "source": {
+          "source_packet_id": "source-knowledge-the-memes"
+        },
+        "blocks": [
+          {
+            "id": "block-title",
+            "block_type": "heading",
+            "level": 1,
+            "text": "The Memes by 6529"
+          },
+          {
+            "id": "block-summary",
+            "block_type": "rich_text",
+            "content": "Collection context fixture grounded in a knowledge packet."
+          },
+          {
+            "id": "block-collection-ref",
+            "block_type": "collection_reference",
+            "chain_id": 1,
+            "contract": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+            "title": "The Memes by 6529"
+          }
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-og",
+        "kind": "social_image",
+        "uri": "ipfs://bafyfixturecollection/og.png",
+        "content_hash": "sha256:1717171717171717171717171717171717171717171717171717171717171717",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 630,
+        "file_size_bytes": 41000,
+        "roles": ["social"],
+        "alt_text": "The Memes collection social preview"
+      }
+    ],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Home",
+            "page_id": "page-home"
+          },
+          {
+            "label": "The Memes",
+            "page_id": "page-collection"
+          }
+        ]
+      }
+    ],
+    "taxonomies": [
+      {
+        "id": "taxonomy-series",
+        "name": "Series",
+        "terms": [
+          {
+            "slug": "the-memes",
+            "label": "The Memes",
+            "page_id": "page-collection"
+          }
+        ]
+      }
+    ],
+    "source_packets": [
+      {
+        "id": "source-knowledge-the-memes",
+        "source_type": "collection",
+        "captured_at": "2026-06-17T00:00:00Z",
+        "content_hash": "sha256:1818181818181818181818181818181818181818181818181818181818181818",
+        "knowledge_packet": "the-memes-v1"
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-cms-static",
+      "renderer_version": "0.0.0-fixture",
+      "route_count": 2,
+      "asset_count": 1,
+      "warnings": []
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:1919191919191919191919191919191919191919191919191919191919191919",
+    "package_hash": "sha256:2020202020202020202020202020202020202020202020202020202020202020",
+    "note": "Fixture placeholder hash; replace with generated vector before Phase 2."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:6529museum",
+      "signature": "fixture-signature-collection",
+      "signed_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://bafyfixturecollection",
+      "content_hash": "sha256:2020202020202020202020202020202020202020202020202020202020202020",
+      "provider_content_id": "bafyfixturecollection",
+      "pinned": true,
+      "canonical": true,
+      "recorded_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-fixture",
+    "builder_version": "0.0.0",
+    "created_at": "2026-06-17T00:00:00Z",
+    "notes": "Valid collection page fixture."
+  }
+}

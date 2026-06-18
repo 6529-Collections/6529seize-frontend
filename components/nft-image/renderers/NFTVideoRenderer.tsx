@@ -34,6 +34,7 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
       )}
       <SeizeVideoPlayer
         id={props.id ?? `video-${props.nft.id}`}
+        template="ambient-media"
         src={primarySrc}
         fallbackSources={fallbackSources}
         autoPlay

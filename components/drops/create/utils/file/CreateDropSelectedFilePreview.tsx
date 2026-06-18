@@ -45,7 +45,7 @@ export default function CreateDropSelectedFilePreview({
     [FILE_TYPES.VIDEO]: previewUrl ? (
       <SeizeVideoPlayer
         src={previewUrl}
-        autoPlay={false}
+        template="watch-media"
         muted
         preload="metadata"
         layout="fill"

@@ -12,7 +12,6 @@ import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVi
 
 const DEFAULT_TIMEOUT = 10000;
 const SLIDESHOW_ID = "lfg-slideshow";
-const EMPTY_CAPTIONS_SRC = "data:text/vtt,WEBVTT%0A%0A";
 
 const getMediaField = (value: unknown) =>
   typeof value === "string" ? value : "";
@@ -196,11 +195,11 @@ const LFGSlideshow: React.FC<{
         {isVideo(currentAnimation) ? (
           <SeizeVideoPlayer
             videoRef={videoRef}
+            template="slideshow"
             autoPlay
             muted={isMuted}
             src={currentAnimation}
             poster={currentImage.length > 0 ? currentImage : undefined}
-            captionsSrc={EMPTY_CAPTIONS_SRC}
             loop={false}
             layout="fill"
           />

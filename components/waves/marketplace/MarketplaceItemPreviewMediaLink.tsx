@@ -63,8 +63,8 @@ export default function MarketplaceItemPreviewMediaLink({
     mediaContent = (
       <SeizeVideoPlayer
         src={mediaUrl}
+        template="card-preview"
         className="tw-h-full tw-w-full"
-        preload="auto"
         autoPlay
         layout="fill"
         showActions={false}

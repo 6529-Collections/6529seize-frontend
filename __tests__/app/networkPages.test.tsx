@@ -92,16 +92,32 @@ describe("network pages render", () => {
     expect(screen.getByText(/Unique Memes/i)).toBeInTheDocument();
   });
 
-  it("renders Wave Score page in Network", () => {
-    renderWithAuth(<NetworkWaveScorePage />);
+  it("renders Wave Score page in Network", async () => {
+    const page = await NetworkWaveScorePage({});
+    renderWithAuth(page);
     expect(
-      screen.getByRole("heading", { level: 1, name: /Wave score transparency/i })
+      screen.getByRole("heading", {
+        level: 1,
+        name: /Wave score transparency/i,
+      })
     ).toBeInTheDocument();
     expect(screen.getByText("Network menu / Wave Score")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "Calculate a wave" })
     ).toBeInTheDocument();
     expect(screen.getAllByText("Quality").length).toBeGreaterThan(0);
+  });
+
+  it("uses a safe Wave Score return link when provided", async () => {
+    const page = await NetworkWaveScorePage({
+      searchParams: Promise.resolve({ returnTo: "/waves/test-wave" }),
+    });
+    renderWithAuth(page);
+
+    expect(screen.getByRole("link", { name: "Back to wave" })).toHaveAttribute(
+      "href",
+      "/waves/test-wave"
+    );
   });
 
   it("generates metadata for Groups page", async () => {

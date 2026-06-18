@@ -516,9 +516,12 @@ export const createEslintConfig = ({
       },
     },
 
-    // Standalone build/export scripts legitimately use computed paths and stdout logging.
+    // Build/export/publish scripts legitimately use computed paths and stdout logging.
     {
-      files: ["standalone/standalone-memes-mint/scripts/**/*.{js,cjs,mjs}"],
+      files: [
+        "ops/scripts/publish-delegation-docs-content.mjs",
+        "standalone/standalone-memes-mint/scripts/**/*.{js,cjs,mjs}",
+      ],
       rules: {
         "security/detect-non-literal-fs-filename": "off",
         "no-console": "off",

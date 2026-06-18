@@ -123,7 +123,7 @@ function DropListItemContentMediaVideo({
     >
       <SeizeVideoPlayer
         videoRef={videoRef}
-        autoPlay={false}
+        template="ambient-media"
         layout={fillContainer ? "fill" : "natural"}
         showFullscreen={showFullscreen}
         onDownload={downloadMedia}

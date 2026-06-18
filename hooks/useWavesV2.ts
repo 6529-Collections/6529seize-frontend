@@ -23,14 +23,16 @@ interface UseWavesV2Props {
   readonly viewerIdentityKey?: string | null | undefined;
   readonly directMessage?: boolean | undefined;
   readonly pinned?: ApiWavesPinFilter | undefined;
+  readonly excludeFollowed?: boolean | undefined;
   readonly scoreSort?: ApiWaveScoreSort | undefined;
   readonly minVisibilityScore?: number | undefined;
   readonly minQualityScore?: number | undefined;
   readonly minHotnessScore?: number | undefined;
   readonly minRepSortScore?: number | undefined;
   readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
-  readonly refetchInterval?: number | undefined;
+  readonly refetchInterval?: number | false | undefined;
   readonly refetchIntervalInBackground?: boolean | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 export const useWavesV2 = ({
@@ -40,6 +42,7 @@ export const useWavesV2 = ({
   viewerIdentityKey,
   directMessage,
   pinned,
+  excludeFollowed,
   scoreSort,
   minVisibilityScore,
   minQualityScore,
@@ -48,6 +51,7 @@ export const useWavesV2 = ({
   visibilityTier,
   refetchInterval = Infinity,
   refetchIntervalInBackground = false,
+  enabled = true,
 }: UseWavesV2Props) => {
   const queryKeyParams = useMemo(
     () =>
@@ -57,6 +61,7 @@ export const useWavesV2 = ({
         following,
         directMessage,
         pinned,
+        excludeFollowed,
         scoreSort,
         minVisibilityScore,
         minQualityScore,
@@ -71,6 +76,7 @@ export const useWavesV2 = ({
       following,
       directMessage,
       pinned,
+      excludeFollowed,
       scoreSort,
       minVisibilityScore,
       minQualityScore,
@@ -98,6 +104,7 @@ export const useWavesV2 = ({
         following,
         directMessage,
         pinned,
+        excludeFollowed,
         scoreSort,
         minVisibilityScore,
         minQualityScore,
@@ -128,6 +135,7 @@ export const useWavesV2 = ({
     },
     refetchInterval,
     refetchIntervalInBackground,
+    enabled,
     ...getDefaultQueryRetry(handleRetryFailure),
   });
 
