@@ -157,3 +157,76 @@ export default function WordPressLegacyAssets({
     </>
   );
 }
+
+type WordPressLegacyFooterProps = {
+  useButtons?: boolean;
+};
+
+export function WordPressLegacyFooter({
+  useButtons = false,
+}: WordPressLegacyFooterProps) {
+  const pageLoadLink = useButtons ? (
+    <button
+      type="button"
+      className="fusion-one-page-text-link fusion-page-load-link"
+      tabIndex={-1}
+      aria-hidden="true"
+    >
+      Page load link
+    </button>
+  ) : (
+    <a
+      className="fusion-one-page-text-link fusion-page-load-link"
+      tabIndex={-1}
+      href="#"
+      aria-hidden="true"
+    >
+      Page load link
+    </a>
+  );
+
+  const toTopLink = useButtons ? (
+    <button type="button" id="toTop" className="fusion-top-top-link">
+      <span id="awb-to-top-label" className="screen-reader-text">
+        Go to Top
+      </span>
+    </button>
+  ) : (
+    <a href="#" id="toTop" className="fusion-top-top-link">
+      <span id="awb-to-top-label" className="screen-reader-text">
+        Go to Top
+      </span>
+    </a>
+  );
+
+  return (
+    <>
+      {pageLoadLink}
+      <div className="avada-footer-scripts">
+        <div
+          id="sticky-social-icons-container"
+          className="design-sharp alignment-right with-animation"
+        >
+          <ul>
+            <li className="fab-fa-twitter">
+              <a
+                href="https://twitter.com/punk6529"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="fab-fa-twitter"
+              >
+                <i className="fab fa-twitter" />
+              </a>
+            </li>{" "}
+          </ul>
+        </div>
+      </div>
+      <section
+        className="to-top-container to-top-right"
+        aria-labelledby="awb-to-top-label"
+      >
+        {toTopLink}
+      </section>
+    </>
+  );
+}

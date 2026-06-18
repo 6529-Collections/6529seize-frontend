@@ -1,5 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";
+import WordPressLegacyAssets, { WordPressLegacyFooter } from "@/components/legacy-wordpress/WordPressLegacyAssets";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import type { Metadata } from "next";
@@ -622,43 +622,7 @@ This is without question the Real Vision"
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-      <a
-        className="fusion-one-page-text-link fusion-page-load-link"
-        tabIndex={-1}
-        href="#"
-        aria-hidden="true"
-      >
-        Page load link
-      </a>
-      <div className="avada-footer-scripts">
-        <div
-          id="sticky-social-icons-container"
-          className="design-sharp alignment-right with-animation"
-        >
-          <ul>
-            <li className="fab-fa-twitter">
-              <a
-                href="https://twitter.com/punk6529"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="fab-fa-twitter"
-              >
-                <i className="fab fa-twitter" />
-              </a>
-            </li>{" "}
-          </ul>
-        </div>
-      </div>
-      <section
-        className="to-top-container to-top-right"
-        aria-labelledby="awb-to-top-label"
-      >
-        <a href="#" id="toTop" className="fusion-top-top-link">
-          <span id="awb-to-top-label" className="screen-reader-text">
-            Go to Top
-          </span>
-        </a>
-      </section>
+      <WordPressLegacyFooter />
     </div>
   );
 }
