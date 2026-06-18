@@ -2,7 +2,7 @@
 
 import { useContext, useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getTimeAgo, numberWithCommas } from "@/helpers/Helpers";
+import { getTimeAgo } from "@/helpers/Helpers";
 import WaveHeaderFollow, { WaveFollowBtnSize } from "./WaveHeaderFollow";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderOptions from "./options/WaveHeaderOptions";
@@ -16,6 +16,19 @@ import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
+import WaveHeaderTrustStats from "./WaveHeaderTrustStats";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { formatDate, formatInteger } from "@/i18n/format";
+import { t, type MessageKey } from "@/i18n/messages";
+
+const WAVE_HEADER_LOCALE = DEFAULT_LOCALE;
+
+const getPostsCountMessageKey = (count: number): MessageKey => {
+  const pluralCategory = new Intl.PluralRules(WAVE_HEADER_LOCALE).select(count);
+  return pluralCategory === "one"
+    ? "waves.header.postsCount.one"
+    : "waves.header.postsCount.other";
+};
 
 interface WaveHeaderProps {
   readonly wave: ApiWave;
@@ -73,7 +86,22 @@ export default function WaveHeader({
     normalizedWaveAuthorHandle !== null &&
     normalizedConnectedHandle !== normalizedWaveAuthorHandle;
   const showOptions = showOwnerOptions || showCreateSubwaveOption;
+  const showPinAction = !isSubwave;
+  const showTrustStats = !isDirectMessage;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
+  const createdDate = formatDate(
+    WAVE_HEADER_LOCALE,
+    Time.millis(wave.created_at).toDate()
+  );
+  const postsCount = formatInteger(
+    WAVE_HEADER_LOCALE,
+    wave.metrics.drops_count
+  );
+  const postsCountLabel = t(
+    WAVE_HEADER_LOCALE,
+    getPostsCountMessageKey(wave.metrics.drops_count),
+    { count: postsCount }
+  );
 
   return (
     <div
@@ -147,6 +175,11 @@ export default function WaveHeader({
               <div className="tw-shrink-0">
                 <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
               </div>
+              {showPinAction && (
+                <div className="tw-shrink-0">
+                  <WaveHeaderPinButton waveId={wave.id} />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -155,25 +188,24 @@ export default function WaveHeader({
           <div className="tw-min-w-0 tw-flex-1">
             <WaveHeaderName wave={wave} />
           </div>
-          {(showOptions || !isSubwave) && (
+          {showOptions && (
             <div
               className={`tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-1.5 ${titleActionAlignmentClass}`}
             >
-              {showOptions && (
-                <WaveHeaderOptions
-                  wave={wave}
-                  showOwnerActions={showOwnerOptions}
-                />
-              )}
-              {!isSubwave && <WaveHeaderPinButton waveId={wave.id} />}
+              <WaveHeaderOptions
+                wave={wave}
+                showOwnerActions={showOwnerOptions}
+              />
             </div>
           )}
         </div>
 
         <div className="tw-mt-1 tw-text-sm">
           <span className="tw-font-normal tw-text-iron-500">
-            Created {created} ·{" "}
-            {Time.millis(wave.created_at).toDate().toLocaleDateString()}
+            {t(WAVE_HEADER_LOCALE, "waves.header.createdLabel", {
+              relativeTime: created,
+              date: createdDate,
+            })}
           </span>
         </div>
 
@@ -188,19 +220,20 @@ export default function WaveHeader({
                 <div className="tw-flex tw-items-center">
                   <span className="tw-ml-2.5 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
                     <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
-                      {numberWithCommas(wave.metrics.drops_count)}
+                      {postsCount}
                     </span>{" "}
-                    {wave.metrics.drops_count === 1 ? "Post" : "Posts"}
+                    {postsCountLabel}
                   </span>
                 </div>
               )}
             </div>
-            {showWaveRepAction && (
-              <div className="tw-shrink-0">
-                <WaveRepButton wave={wave} />
-              </div>
-            )}
           </div>
+          {showTrustStats && <WaveHeaderTrustStats wave={wave} />}
+          {showWaveRepAction && (
+            <div className="tw-flex">
+              <WaveRepButton wave={wave} />
+            </div>
+          )}
         </div>
       </div>
     </div>
