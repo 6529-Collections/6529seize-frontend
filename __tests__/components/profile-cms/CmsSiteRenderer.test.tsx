@@ -1,9 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import artMediaPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/art-media.package.json";
+import collectionPagePackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/collection-page.package.json";
 import minimalPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/minimal-profile-homepage.package.json";
+import nftDetailPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/nft-detail.package.json";
+import walletGalleryPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/wallet-gallery.package.json";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 
 jest.mock("next/link", () => ({
@@ -25,9 +29,27 @@ jest.mock("next/link", () => ({
 
 const minimalCmsPackage = minimalPackage as unknown as CmsPackageV1;
 const artCmsPackage = artMediaPackage as unknown as CmsPackageV1;
+const collectionCmsPackage = collectionPagePackage as unknown as CmsPackageV1;
+const nftDetailCmsPackage = nftDetailPackage as unknown as CmsPackageV1;
+const walletGalleryCmsPackage = walletGalleryPackage as unknown as CmsPackageV1;
 const minimalPage = minimalCmsPackage.payload.pages[0];
 const artPage = artCmsPackage.payload.pages[0];
-if (!minimalPage || !artPage) {
+const collectionPage = collectionCmsPackage.payload.pages.find(
+  (page) => page.id === "page-collection"
+);
+const nftDetailPage = nftDetailCmsPackage.payload.pages.find(
+  (page) => page.id === "page-nft"
+);
+const walletGalleryPage = walletGalleryCmsPackage.payload.pages.find(
+  (page) => page.id === "page-gallery"
+);
+if (
+  !minimalPage ||
+  !artPage ||
+  !collectionPage ||
+  !nftDetailPage ||
+  !walletGalleryPage
+) {
   throw new Error("Expected CMS fixture pages.");
 }
 
@@ -99,6 +121,110 @@ describe("CmsSiteRenderer", () => {
     );
     expect(iframe).toHaveAttribute("sandbox", "allow-scripts");
     expect(iframe).not.toHaveAttribute("srcdoc");
+  });
+
+  it("renders contact-sheet art grids with keyboard lightbox inspection", async () => {
+    const user = userEvent.setup();
+    render(
+      <CmsSiteRenderer
+        cmsPackage={collectionCmsPackage}
+        page={collectionPage}
+      />
+    );
+
+    expect(screen.getByText("Collection contact sheet")).toBeInTheDocument();
+    const firstWork = screen.getByRole("button", {
+      name: "Inspect: The Memes by 6529 card number 1",
+    });
+
+    await user.click(firstWork);
+
+    expect(
+      screen.getByRole("dialog", {
+        name: "The Memes by 6529 card number 1",
+      })
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Show metadata" }));
+    expect(screen.getByText("Media metadata")).toBeInTheDocument();
+    expect(screen.getAllByText("Original asset").length).toBeGreaterThan(0);
+
+    await user.keyboard("{ArrowRight}");
+    expect(
+      screen.getByRole("heading", {
+        name: "Tall derivative for The Memes by 6529 card number 2",
+      })
+    ).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("renders NFT detail pages with art-first media, traits, provenance, and related context", () => {
+    render(
+      <CmsSiteRenderer cmsPackage={nftDetailCmsPackage} page={nftDetailPage} />
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: "Inspect: The Memes #1",
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Original asset")).toBeInTheDocument();
+    expect(screen.getByText("Traits")).toBeInTheDocument();
+    expect(screen.getByText("Season")).toBeInTheDocument();
+    expect(screen.getByText("Open Metaverse")).toBeInTheDocument();
+    expect(screen.getByText("Provenance")).toBeInTheDocument();
+    expect(screen.getAllByText("Metadata URI")).not.toHaveLength(0);
+    expect(
+      screen.getAllByText("0x33fd426905f149f8376e227d0c9d3340aad17af1")
+    ).not.toHaveLength(0);
+    expect(
+      screen.getAllByRole("link", { name: "The Memes by 6529" }).length
+    ).toBeGreaterThan(0);
+    expect(screen.getByText("Related works")).toBeInTheDocument();
+    expect(screen.getByText("Package details")).toBeInTheDocument();
+  });
+
+  it("renders generated wallet galleries as visual featured-page grids", () => {
+    render(
+      <CmsSiteRenderer
+        cmsPackage={walletGalleryCmsPackage}
+        page={walletGalleryPage}
+      />
+    );
+
+    expect(screen.getByText("Editorial grid")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "The Memes #1" })).toHaveAttribute(
+      "href",
+      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html"
+    );
+    expect(screen.getByRole("link", { name: "The Memes #2" })).toHaveAttribute(
+      "href",
+      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2/index.html"
+    );
+    expect(
+      screen.getByRole("button", {
+        name: "Inspect: The Memes #2",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByAltText("Grid derivative for The Memes by 6529 card number 2")
+    ).toBeInTheDocument();
+  });
+
+  it("renders audio media with poster fallback and caption transcript text", () => {
+    render(<CmsSiteRenderer cmsPackage={artCmsPackage} page={artPage} />);
+
+    expect(
+      screen.getByText(
+        "Audio artwork transcript placeholder for mixed media fixture"
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", {
+        name: "Inspect: Poster fallback for mixed media artwork",
+      }).length
+    ).toBeGreaterThan(0);
   });
 
   it("does not iframe arbitrary external html embed origins", () => {
