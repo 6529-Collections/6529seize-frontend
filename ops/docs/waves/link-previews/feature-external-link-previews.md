@@ -77,6 +77,9 @@ reduce layout shift while loading.
 - Card quality depends on metadata published by the destination.
 - Slow or redirect-heavy destinations can degrade preview quality or fall back to
   non-rich link states.
+- Link-preview chrome uses the app message catalog, but the wave preview stack
+  does not yet pass an active route locale into this component. Until that route
+  migration happens, generic preview labels and dates use the default locale.
 - This page does not cover provider-specific cards.
 
 ## Related Pages

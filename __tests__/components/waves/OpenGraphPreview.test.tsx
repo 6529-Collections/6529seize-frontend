@@ -163,9 +163,66 @@ describe("OpenGraphPreview", () => {
     expect(card).toHaveAttribute("href", "/research/notes");
     expect(card).not.toHaveAttribute("target");
     expect(screen.getByText("Research Notes")).toBeInTheDocument();
-    expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
+    expect(screen.getByText("by Ada Lovelace")).toBeInTheDocument();
     expect(screen.getByText("Jun 16, 2026")).toBeInTheDocument();
     expect(screen.queryByText("Link unavailable")).toBeNull();
+  });
+
+  it("prefers canonical URL domains over source fallbacks", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://canonical.example/article"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://request.example/redirect"
+        preview={{
+          title: "Canonical Source",
+          canonicalUrl: "https://canonical.example/article",
+          source: "request.example",
+        }}
+      />
+    );
+
+    expect(screen.getByText("canonical.example")).toBeInTheDocument();
+    expect(screen.queryByText("request.example")).toBeNull();
+  });
+
+  it("formats supported calendar dates in UTC", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/research/notes");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/research/notes"
+        preview={{
+          title: "Late Dispatch",
+          source: "Example Journal",
+          publishedTime: "2026-06-16T23:30:00-05:00",
+        }}
+      />
+    );
+
+    const date = screen.getByText("Jun 17, 2026");
+    expect(date).toHaveAttribute("datetime", "2026-06-17T04:30:00.000Z");
+  });
+
+  it("renders timezone-ambiguous timestamps without datetime attributes", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/dispatch"
+        preview={{
+          title: "Field Dispatch",
+          source: "Example Journal",
+          publishedTime: "2026-06-16 12:00",
+        }}
+      />
+    );
+
+    const date = screen.getByText("2026-06-16 12:00");
+    expect(date.tagName).toBe("TIME");
+    expect(date).not.toHaveAttribute("datetime");
   });
 
   it("renders free-text published dates without invalid datetime attributes", () => {

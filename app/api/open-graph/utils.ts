@@ -5,7 +5,7 @@ import type {
   GoogleWorkspaceLinkPreview,
   LinkPreviewResponse,
 } from "@/services/api/link-preview-api";
-import { load, type CheerioAPI } from "cheerio";
+import { load } from "cheerio";
 
 const TITLE_KEYS = ["og:title", "twitter:title", "title"] as const;
 const DESCRIPTION_KEYS = [
@@ -66,6 +66,7 @@ const JSON_LD_MAX_DEPTH = 8;
 const JSON_LD_IMAGE_MAX_CANDIDATES = 16;
 
 type GoogleWorkspaceKind = "docs" | "sheets" | "slides";
+type LoadedHtml = ReturnType<typeof load>;
 
 const GOOGLE_RESOURCE_KIND: Record<string, GoogleWorkspaceKind | undefined> = {
   document: "docs",
@@ -205,7 +206,7 @@ function normalizeWhitespace(value: string | undefined): string | undefined {
 }
 
 function getMetaIdentifier(
-  $: CheerioAPI,
+  $: LoadedHtml,
   element: unknown
 ): string | undefined {
   const tag = $(element);
@@ -215,13 +216,13 @@ function getMetaIdentifier(
 }
 
 function collectMetaContent(
-  $: CheerioAPI,
+  $: LoadedHtml,
   keys: readonly string[]
 ): Map<string, string[]> {
   const keySet = new Set(keys.map((key) => key.toLowerCase()));
   const results = new Map<string, string[]>();
 
-  $("meta").each((_, element) => {
+  $("meta").each((_index: number, element: unknown) => {
     const identifier = getMetaIdentifier($, element);
     if (!identifier || !keySet.has(identifier)) {
       return;
@@ -241,7 +242,7 @@ function collectMetaContent(
 }
 
 function extractFirstMetaContent(
-  $: CheerioAPI,
+  $: LoadedHtml,
   keys: readonly string[]
 ): string | undefined {
   const metadata = collectMetaContent($, keys);
@@ -254,11 +255,11 @@ function extractFirstMetaContent(
   return undefined;
 }
 
-function extractTitleTag($: CheerioAPI): string | undefined {
+function extractTitleTag($: LoadedHtml): string | undefined {
   return normalizeWhitespace($("title").first().text());
 }
 
-function extractCanonicalUrl($: CheerioAPI, baseUrl: URL): string | undefined {
+function extractCanonicalUrl($: LoadedHtml, baseUrl: URL): string | undefined {
   const href = normalizeWhitespace(
     $('link[rel~="canonical"]').first().attr("href")
   );
@@ -283,10 +284,10 @@ function iconPreferenceScore(rel: string, href: string): number {
   return 0;
 }
 
-function extractIconLinks($: CheerioAPI, baseUrl: URL): string[] {
+function extractIconLinks($: LoadedHtml, baseUrl: URL): string[] {
   const byUrl = new Map<string, number>();
 
-  $("link").each((_, element) => {
+  $("link").each((_index: number, element: unknown) => {
     const tag = $(element);
     const rel = normalizeWhitespace(tag.attr("rel")) ?? "";
     const href = normalizeWhitespace(tag.attr("href"));
@@ -421,13 +422,15 @@ function pickJsonLdNode(nodes: readonly JsonLdNode[]): JsonLdNode | null {
   );
 }
 
-function extractJsonLdNodes($: CheerioAPI): JsonLdNode[] {
+function extractJsonLdNodes($: LoadedHtml): JsonLdNode[] {
   const nodes: JsonLdNode[] = [];
 
-  $('script[type="application/ld+json"]').each((_, element) => {
-    const parsed = safeParseJsonLd($(element).contents().text());
-    nodes.push(...flattenJsonLdNodes(parsed));
-  });
+  $('script[type="application/ld+json"]').each(
+    (_index: number, element: unknown) => {
+      const parsed = safeParseJsonLd($(element).contents().text());
+      nodes.push(...flattenJsonLdNodes(parsed));
+    }
+  );
 
   return nodes;
 }
@@ -442,6 +445,7 @@ function extractJsonLdImage(
     return undefined;
   }
 
+  // The shared budget limits candidate nodes across nested JSON-LD image arrays.
   const candidate = node["image"] ?? node["thumbnailUrl"] ?? node["thumbnail"];
   if (typeof candidate === "string") {
     budget.remaining -= 1;
@@ -496,7 +500,7 @@ function getImageSource(key: string): ImageCandidate["source"] {
 }
 
 function extractImageCandidates(
-  $: CheerioAPI,
+  $: LoadedHtml,
   baseUrl: URL,
   jsonLdImage: string | undefined
 ): ImageCandidate[] {
@@ -528,7 +532,7 @@ function extractImageCandidates(
 }
 
 function extractImageMetadataForSource(
-  $: CheerioAPI,
+  $: LoadedHtml,
   source: ImageCandidate["source"] | undefined
 ): {
   readonly alt?: string | undefined;

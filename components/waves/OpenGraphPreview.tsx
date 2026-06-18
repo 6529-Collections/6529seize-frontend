@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
+import { formatDate } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   GithubPreviewEnvelope,
   GithubPreviewResponse,
@@ -60,7 +63,8 @@ type MaybeRecord = Record<string, unknown>;
 
 const TITLE_KEYS = ["title", "ogTitle", "name"];
 const DESCRIPTION_KEYS = ["description", "ogDescription", "summary"];
-const DOMAIN_KEYS = ["source", "siteName", "site_name", "domain"];
+const DOMAIN_KEYS = ["siteName", "site_name", "domain"];
+const SOURCE_KEYS = ["source"];
 const URL_KEYS = ["url", "canonicalUrl", "canonical_url"];
 const IMAGE_KEYS = [
   "image",
@@ -87,6 +91,39 @@ const PUBLISHED_TIME_KEYS = [
 ];
 const MEDIA_TYPE_KEYS = ["mediaType", "type"];
 const LONG_UNBROKEN_SEGMENT_THRESHOLD = 32;
+const GENERIC_LINK_PREVIEW_LOCALE = DEFAULT_LOCALE;
+const PUBLISHED_DATE_FORMAT_OPTIONS = {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+  year: "numeric",
+} satisfies Intl.DateTimeFormatOptions;
+const MONTH_INDEX_BY_NAME: Readonly<Record<string, number>> = {
+  jan: 0,
+  january: 0,
+  feb: 1,
+  february: 1,
+  mar: 2,
+  march: 2,
+  apr: 3,
+  april: 3,
+  may: 4,
+  jun: 5,
+  june: 5,
+  jul: 6,
+  july: 6,
+  aug: 7,
+  august: 7,
+  sep: 8,
+  sept: 8,
+  september: 8,
+  oct: 9,
+  october: 9,
+  nov: 10,
+  november: 10,
+  dec: 11,
+  december: 11,
+};
 
 export type FirstPartyOpenGraphPreviewKind = "profile" | "drop" | "wave";
 
@@ -388,11 +425,15 @@ function deriveDomain(
   return (
     readFirstString(preview, DOMAIN_KEYS) ??
     extractDomainFromUrl(readFirstString(preview, URL_KEYS)) ??
+    readFirstString(preview, SOURCE_KEYS) ??
     extractDomainFromUrl(href)
   );
 }
 
-function formatPublishedDate(value: string | undefined): string | undefined {
+function formatPublishedDate(
+  value: string | undefined,
+  locale: SupportedLocale
+): string | undefined {
   if (!value) {
     return undefined;
   }
@@ -402,11 +443,7 @@ function formatPublishedDate(value: string | undefined): string | undefined {
     return value;
   }
 
-  return new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(timestamp));
+  return formatDate(locale, timestamp, PUBLISHED_DATE_FORMAT_OPTIONS);
 }
 
 function getPublishedDateTime(value: string | undefined): string | undefined {
@@ -418,6 +455,55 @@ function getPublishedDateTime(value: string | undefined): string | undefined {
   return new Date(timestamp).toISOString();
 }
 
+function parseUtcCalendarDate(
+  year: number,
+  monthIndex: number,
+  day: number
+): number | undefined {
+  const timestamp = Date.UTC(year, monthIndex, day);
+  const parsed = new Date(timestamp);
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== monthIndex ||
+    parsed.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+
+  return timestamp;
+}
+
+function parseNamedMonthDate(value: string): number | undefined {
+  const monthFirstMatch = value.match(
+    /^([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/
+  );
+  if (monthFirstMatch) {
+    const monthIndex =
+      MONTH_INDEX_BY_NAME[monthFirstMatch[1]!.toLowerCase()];
+    return typeof monthIndex === "number"
+      ? parseUtcCalendarDate(
+          Number(monthFirstMatch[3]),
+          monthIndex,
+          Number(monthFirstMatch[2])
+        )
+      : undefined;
+  }
+
+  const dayFirstMatch = value.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
+  if (dayFirstMatch) {
+    const monthIndex = MONTH_INDEX_BY_NAME[dayFirstMatch[2]!.toLowerCase()];
+    return typeof monthIndex === "number"
+      ? parseUtcCalendarDate(
+          Number(dayFirstMatch[3]),
+          monthIndex,
+          Number(dayFirstMatch[1])
+        )
+      : undefined;
+  }
+
+  return undefined;
+}
+
 function parseSupportedPublishedTimestamp(
   value: string | undefined
 ): number | undefined {
@@ -426,20 +512,26 @@ function parseSupportedPublishedTimestamp(
     return undefined;
   }
 
-  const isIsoLikeDate = /^\d{4}-\d{2}-\d{2}(?:[T\s].*)?$/.test(trimmed);
-  const isMonthFirstDate = /^[A-Za-z]{3,}\s+\d{1,2},?\s+\d{4}$/.test(trimmed);
-  const isDayFirstDate = /^\d{1,2}\s+[A-Za-z]{3,}\s+\d{4}$/.test(trimmed);
-
-  if (!isIsoLikeDate && !isMonthFirstDate && !isDayFirstDate) {
-    return undefined;
+  const dateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dateOnlyMatch) {
+    return parseUtcCalendarDate(
+      Number(dateOnlyMatch[1]),
+      Number(dateOnlyMatch[2]) - 1,
+      Number(dateOnlyMatch[3])
+    );
   }
 
-  const timestamp = Date.parse(trimmed);
-  return Number.isNaN(timestamp) ? undefined : timestamp;
+  if (/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:?\d{2})$/.test(trimmed)) {
+    const timestamp = Date.parse(trimmed);
+    return Number.isNaN(timestamp) ? undefined : timestamp;
+  }
+
+  return parseNamedMonthDate(trimmed);
 }
 
 function normalizeMediaTypeLabel(
-  value: string | undefined
+  value: string | undefined,
+  locale: SupportedLocale
 ): string | undefined {
   if (!value) {
     return undefined;
@@ -451,41 +543,43 @@ function normalizeMediaTypeLabel(
   }
 
   if (normalized.includes("article")) {
-    return "Article";
+    return t(locale, "linkPreview.mediaType.article");
   }
 
   if (normalized === "website" || normalized === "webpage") {
-    return "Website";
+    return t(locale, "linkPreview.mediaType.website");
   }
 
-  return value
-    .replace(/[_:.]+/g, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
+  return undefined;
 }
 
 function GenericOpenGraphMetaRow({
   author,
   publishedDate,
   publishedDateTime,
+  locale,
 }: {
   readonly author?: string | undefined;
   readonly publishedDate?: string | undefined;
   readonly publishedDateTime?: string | undefined;
+  readonly locale: SupportedLocale;
 }) {
   if (!author && !publishedDate) {
     return null;
   }
 
+  const byline = author
+    ? t(locale, "linkPreview.byline", {
+        author,
+      })
+    : undefined;
+
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-leading-5 tw-text-iron-400">
-      {author && (
+      {byline && (
         <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-baseline tw-gap-1">
-          <span className="tw-flex-shrink-0">by</span>
           <span className="tw-truncate tw-font-medium tw-text-iron-200">
-            {wrapLongUnbrokenSegments(author)}
+            {wrapLongUnbrokenSegments(byline)}
           </span>
         </span>
       )}
@@ -517,6 +611,7 @@ function GenericOpenGraphPreviewCard({
   author,
   publishedDate,
   publishedDateTime,
+  locale,
 }: {
   readonly effectiveHref: string;
   readonly linkTarget?: "_blank" | undefined;
@@ -531,8 +626,9 @@ function GenericOpenGraphPreviewCard({
   readonly author?: string | undefined;
   readonly publishedDate?: string | undefined;
   readonly publishedDateTime?: string | undefined;
+  readonly locale: SupportedLocale;
 }) {
-  const sourceLabel = domain ?? "External link";
+  const sourceLabel = domain ?? t(locale, "linkPreview.externalSourceFallback");
 
   return (
     <Link
@@ -592,6 +688,7 @@ function GenericOpenGraphPreviewCard({
           author={author}
           publishedDate={publishedDate}
           publishedDateTime={publishedDateTime}
+          locale={locale}
         />
         {description && (
           <span className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-text-xs tw-leading-5 tw-text-iron-300 md:tw-text-sm">
@@ -984,6 +1081,7 @@ export default function OpenGraphPreview({
   const isExternalLink = !relativeHref;
   const linkTarget = isExternalLink ? "_blank" : undefined;
   const linkRel = isExternalLink ? "noopener noreferrer" : undefined;
+  const locale = GENERIC_LINK_PREVIEW_LOCALE;
 
   if (typeof preview === "undefined") {
     if (resolvedVariant === "home") {
@@ -1037,10 +1135,11 @@ export default function OpenGraphPreview({
   const domain = deriveDomain(href, preview);
   const author = readFirstString(preview, AUTHOR_KEYS);
   const publishedDateRaw = readFirstString(preview, PUBLISHED_TIME_KEYS);
-  const publishedDate = formatPublishedDate(publishedDateRaw);
+  const publishedDate = formatPublishedDate(publishedDateRaw, locale);
   const publishedDateTime = getPublishedDateTime(publishedDateRaw);
   const mediaTypeLabel = normalizeMediaTypeLabel(
-    readFirstString(preview, MEDIA_TYPE_KEYS)
+    readFirstString(preview, MEDIA_TYPE_KEYS),
+    locale
   );
   const githubPreview = extractGithubPreview(preview);
   const seizePreview = extractSeizeCollectionPreview(preview);
@@ -1245,6 +1344,7 @@ export default function OpenGraphPreview({
             author={author}
             publishedDate={publishedDate}
             publishedDateTime={publishedDateTime}
+            locale={locale}
           />
         </div>
       )}
