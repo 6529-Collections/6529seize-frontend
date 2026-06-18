@@ -115,38 +115,57 @@ function stripComments(source) {
   return result;
 }
 
+function getSassImportStatements(source) {
+  return source
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("@use ") || line.startsWith("@import "));
+}
+
+function hasBootstrapPackageUse(source) {
+  return getSassImportStatements(source).some(
+    (line) =>
+      line.startsWith('@use "bootstrap/scss/bootstrap"') ||
+      line.startsWith("@use 'bootstrap/scss/bootstrap'")
+  );
+}
+
+function hasNodeModulesBootstrapStatement(source) {
+  return getSassImportStatements(source).some((line) =>
+    line.includes("node_modules/bootstrap/scss/bootstrap")
+  );
+}
+
 const bootstrapScss = stripComments(readRequiredFile(bootstrapScssPath));
 const nextConfig = stripComments(readRequiredFile(nextConfigPath));
 const failures = [];
 
-if (!/(^|\n)\s*@use\s+["']bootstrap\/scss\/bootstrap["']/.test(bootstrapScss)) {
+if (!hasBootstrapPackageUse(bootstrapScss)) {
   failures.push(
     `${bootstrapScssPath} must import Bootstrap with @use "bootstrap/scss/bootstrap".`
   );
 }
 
-if (
-  /(^|\n)\s*@(use|import)\s+["'][^"']*node_modules\/bootstrap\/scss\/bootstrap["']/.test(
-    bootstrapScss
-  )
-) {
+if (hasNodeModulesBootstrapStatement(bootstrapScss)) {
   failures.push(
     `${bootstrapScssPath} must not import Bootstrap through a node_modules path.`
   );
 }
 
-if (!/const\s+SASS_LOAD_PATHS\s*=\s*\[[\s\S]*node_modules/.test(nextConfig)) {
+if (
+  !nextConfig.includes("const SASS_LOAD_PATHS") ||
+  !nextConfig.includes('"node_modules"')
+) {
   failures.push(
     `${nextConfigPath} must keep SASS_LOAD_PATHS pointed at node_modules.`
   );
 }
 
 const sassOptionsUsesLoadPaths =
-  /\bsassOptions\s*:/.test(nextConfig) &&
-  /\bloadPaths\s*:\s*SASS_LOAD_PATHS\b/.test(nextConfig);
+  nextConfig.includes("sassOptions:") &&
+  nextConfig.includes("loadPaths: SASS_LOAD_PATHS");
 const sassOptionsUsesQuietDeps =
-  /\bsassOptions\s*:/.test(nextConfig) &&
-  /\bquietDeps\s*:\s*true\b/.test(nextConfig);
+  nextConfig.includes("sassOptions:") && nextConfig.includes("quietDeps: true");
 
 if (!sassOptionsUsesLoadPaths || !sassOptionsUsesQuietDeps) {
   failures.push(
