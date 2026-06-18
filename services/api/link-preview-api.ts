@@ -108,6 +108,23 @@ export type GoogleWorkspaceLinkPreview =
   | GoogleSheetsLinkPreview
   | GoogleSlidesLinkPreview;
 
+export interface YoutubeVideoLinkPreview extends LinkPreviewBase {
+  readonly type: "youtube.video";
+  readonly provider?: string | null | undefined;
+  readonly providerUrl?: string | null | undefined;
+  readonly videoId: string;
+  readonly watchUrl: string;
+  readonly embedUrl: string;
+  readonly thumbnailUrl?: string | null | undefined;
+  readonly thumbnailWidth?: number | null | undefined;
+  readonly thumbnailHeight?: number | null | undefined;
+  readonly authorName?: string | null | undefined;
+  readonly authorUrl?: string | null | undefined;
+  readonly playlistId?: string | null | undefined;
+  readonly playlistIndex?: string | null | undefined;
+  readonly startSeconds?: number | null | undefined;
+}
+
 interface ManifoldListingDetails {
   readonly listingId: string;
   readonly creatorHandle?: string | null | undefined;
@@ -130,7 +147,8 @@ export type LinkPreviewResponse =
   | EnsLinkPreviewResponse
   | ManifoldListingLinkPreview
   | SeizeCollectionLinkPreview
-  | GoogleWorkspaceLinkPreview;
+  | GoogleWorkspaceLinkPreview
+  | YoutubeVideoLinkPreview;
 
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;

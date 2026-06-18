@@ -1,4 +1,9 @@
-import { Fragment, type ReactElement, type ReactNode } from "react";
+import {
+  Fragment,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -12,7 +17,10 @@ import type {
   GithubPreviewResponse,
   GithubStatusPreviewResponse,
 } from "@/services/api/github-preview-api";
-import type { SeizeCollectionLinkPreview } from "@/services/api/link-preview-api";
+import type {
+  SeizeCollectionLinkPreview,
+  YoutubeVideoLinkPreview,
+} from "@/services/api/link-preview-api";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 import GithubPreviewStatusBadge from "./GithubPreviewStatusBadge";
 import {
@@ -92,6 +100,10 @@ const PUBLISHED_TIME_KEYS = [
 const MEDIA_TYPE_KEYS = ["mediaType", "type"];
 const LONG_UNBROKEN_SEGMENT_THRESHOLD = 32;
 const GENERIC_LINK_PREVIEW_LOCALE = DEFAULT_LOCALE;
+const TRUSTED_YOUTUBE_EMBED_HOSTS = [
+  "youtube-nocookie.com",
+  "youtube.com",
+] as const;
 const PUBLISHED_DATE_FORMAT_OPTIONS = {
   day: "numeric",
   month: "short",
@@ -754,6 +766,51 @@ function extractSeizeCollectionPreview(
   return isSeizeCollectionPreview(preview) ? preview : null;
 }
 
+function isYoutubeVideoPreview(
+  value: unknown
+): value is YoutubeVideoLinkPreview {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const record = value as {
+    readonly type?: unknown;
+    readonly videoId?: unknown;
+    readonly embedUrl?: unknown;
+  };
+  return (
+    record.type === "youtube.video" &&
+    typeof record.videoId === "string" &&
+    typeof record.embedUrl === "string"
+  );
+}
+
+function extractYoutubeVideoPreview(
+  preview: OpenGraphPreviewData | null | undefined
+): YoutubeVideoLinkPreview | null {
+  return isYoutubeVideoPreview(preview) ? preview : null;
+}
+
+function getTrustedYoutubeEmbedUrl(value: string): string | undefined {
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    return undefined;
+  }
+
+  if (parsed.protocol !== "https:" || !parsed.pathname.startsWith("/embed/")) {
+    return undefined;
+  }
+
+  const hostname = parsed.hostname.replace(/^www\./i, "").toLowerCase();
+  return isTrustedYoutubeEmbedHost(hostname) ? parsed.toString() : undefined;
+}
+
+function isTrustedYoutubeEmbedHost(hostname: string): boolean {
+  return TRUSTED_YOUTUBE_EMBED_HOSTS.some((trustedHost) => hostname === trustedHost);
+}
+
 function getRelativeHref(href: string): string | undefined {
   const relative = removeBaseEndpoint(href);
   if (typeof relative !== "string" || relative.length === 0) {
@@ -812,6 +869,10 @@ export function hasOpenGraphContent(
   }
 
   if (isSeizeCollectionPreview(preview)) {
+    return true;
+  }
+
+  if (isYoutubeVideoPreview(preview)) {
     return true;
   }
 
@@ -1067,6 +1128,187 @@ function SeizeCollectionPreviewCard({
   );
 }
 
+function YoutubeVideoPreviewCard({
+  href,
+  preview,
+  effectiveHref,
+  linkTarget,
+  linkRel,
+  variant,
+  hideActions,
+  locale,
+}: {
+  readonly href: string;
+  readonly preview: YoutubeVideoLinkPreview;
+  readonly effectiveHref: string;
+  readonly linkTarget?: "_blank" | undefined;
+  readonly linkRel?: string | undefined;
+  readonly variant?: LinkPreviewVariant | undefined;
+  readonly hideActions?: boolean | undefined;
+  readonly locale: SupportedLocale;
+}) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const resolvedVariant = variant ?? "chat";
+  const isHome = resolvedVariant === "home";
+  const rawTitle = preview.title?.trim() ?? "";
+  const title = rawTitle || t(locale, "linkPreview.youtube.titleFallback");
+  const thumbnailUrl = preview.thumbnailUrl ?? undefined;
+  const trustedEmbedUrl = getTrustedYoutubeEmbedUrl(preview.embedUrl);
+  const thumbnailAlt =
+    extractImageAlt(preview) ??
+    (rawTitle
+      ? t(locale, "linkPreview.youtube.thumbnailAlt", { title: rawTitle })
+      : t(locale, "linkPreview.youtube.thumbnailFallbackAlt"));
+  const rawAuthor = preview.authorName ?? preview.author;
+  const author =
+    typeof rawAuthor === "string" && rawAuthor.trim().length > 0
+      ? rawAuthor.trim()
+      : undefined;
+  const watchLabel = t(locale, "linkPreview.youtube.watchOnYoutube");
+  const providerLabel =
+    typeof preview.provider === "string" && preview.provider.trim().length > 0
+      ? preview.provider.trim()
+      : t(locale, "linkPreview.youtube.providerFallback");
+  const mediaSizes = isHome
+    ? "(max-width: 768px) 100vw, 480px"
+    : "(max-width: 640px) 100vw, (max-width: 1024px) 14rem, 16rem";
+
+  return (
+    <LinkPreviewCardLayout
+      href={href}
+      variant={resolvedVariant}
+      hideActions={hideActions}
+    >
+      <div
+        className={[
+          "tw-relative tw-flex tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950/80 tw-shadow-sm tw-shadow-black/20",
+          isHome ? "tw-border-white/10" : "tw-border-iron-700",
+          !isHome && !hideActions ? "tw-pr-12 sm:tw-pr-14" : "",
+        ].join(" ")}
+        data-testid="youtube-video-preview-card"
+      >
+        <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 tw-bg-red-500/80" />
+        <div
+          className={[
+            "tw-grid tw-h-full tw-w-full tw-min-w-0 tw-items-center tw-gap-3 tw-p-3 sm:tw-gap-4",
+            isHome
+              ? "tw-grid-cols-1"
+              : "tw-grid-cols-1 sm:tw-grid-cols-[minmax(10rem,14rem),minmax(0,1fr)]",
+          ].join(" ")}
+        >
+          <div className="tw-relative tw-aspect-video tw-w-full tw-min-w-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-black tw-bg-black">
+            {isPlaying && trustedEmbedUrl ? (
+              <iframe
+                className="tw-absolute tw-inset-0 tw-h-full tw-w-full"
+                src={trustedEmbedUrl}
+                title={title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                data-testid="youtube-video-embed"
+              />
+            ) : trustedEmbedUrl ? (
+              <button
+                type="button"
+                aria-label={t(locale, "linkPreview.youtube.playVideo", {
+                  title,
+                })}
+                className="tw-group/youtube-play tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-border-0 tw-bg-black tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIsPlaying(true);
+                }}
+                data-testid="youtube-video-play"
+              >
+                {thumbnailUrl ? (
+                  <Image
+                    src={thumbnailUrl}
+                    alt={thumbnailAlt}
+                    fill
+                    className="tw-object-cover tw-transition tw-duration-300 group-hover/youtube-play:tw-scale-[1.02]"
+                    loading="lazy"
+                    sizes={mediaSizes}
+                    unoptimized
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900 tw-via-black tw-to-iron-950"
+                  />
+                )}
+                <span className="tw-absolute tw-inset-0 tw-bg-black/20 tw-transition tw-duration-200 group-hover/youtube-play:tw-bg-black/10" />
+                <span
+                  aria-hidden="true"
+                  className="tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-h-12 tw-w-12 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-bg-red-600 tw-shadow-lg tw-shadow-black/30 tw-transition tw-duration-200 group-hover/youtube-play:tw-scale-105"
+                >
+                  <span className="tw-ml-1 tw-block tw-h-0 tw-w-0 tw-border-y-[8px] tw-border-l-[13px] tw-border-y-transparent tw-border-l-white" />
+                </span>
+              </button>
+            ) : (
+              <Link
+                href={preview.watchUrl || effectiveHref}
+                target={linkTarget}
+                rel={linkRel}
+                onClick={(event) => event.stopPropagation()}
+                className="tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-no-underline"
+              >
+                {thumbnailUrl ? (
+                  <Image
+                    src={thumbnailUrl}
+                    alt={thumbnailAlt}
+                    fill
+                    className="tw-object-cover"
+                    loading="lazy"
+                    sizes={mediaSizes}
+                    unoptimized
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900 tw-via-black tw-to-iron-950"
+                  />
+                )}
+              </Link>
+            )}
+          </div>
+
+          <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden">
+            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+              <span className="tw-flex-shrink-0 tw-rounded-md tw-border tw-border-red-500/25 tw-bg-red-500/10 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-red-100">
+                {providerLabel}
+              </span>
+              {author && (
+                <span className="tw-min-w-0 tw-truncate tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {t(locale, "linkPreview.byline", { author })}
+                </span>
+              )}
+            </div>
+            <Link
+              href={effectiveHref}
+              target={linkTarget}
+              rel={linkRel}
+              onClick={(event) => event.stopPropagation()}
+              className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white md:tw-text-lg"
+            >
+              {wrapLongUnbrokenSegments(title)}
+            </Link>
+            <Link
+              href={preview.watchUrl || effectiveHref}
+              target={linkTarget}
+              rel={linkRel}
+              onClick={(event) => event.stopPropagation()}
+              className="tw-inline-flex tw-w-fit tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition tw-duration-200 hover:tw-border-red-500/40 hover:tw-text-white"
+            >
+              <span className="tw-h-1.5 tw-w-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-red-500" />
+              <span className="tw-truncate">{watchLabel}</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </LinkPreviewCardLayout>
+  );
+}
+
 export default function OpenGraphPreview({
   href,
   preview,
@@ -1143,6 +1385,7 @@ export default function OpenGraphPreview({
   );
   const githubPreview = extractGithubPreview(preview);
   const seizePreview = extractSeizeCollectionPreview(preview);
+  const youtubePreview = extractYoutubeVideoPreview(preview);
   const hasContent = Boolean(title ?? description ?? imageUrl);
   const firstPartyKind = getFirstPartyOgKindFromImageUrl(imageUrl);
 
@@ -1245,6 +1488,21 @@ export default function OpenGraphPreview({
         linkRel={linkRel}
         variant={resolvedVariant}
         hideActions={hideActions}
+      />
+    );
+  }
+
+  if (!imageOnly && youtubePreview) {
+    return (
+      <YoutubeVideoPreviewCard
+        href={href}
+        preview={youtubePreview}
+        effectiveHref={effectiveHref}
+        linkTarget={linkTarget}
+        linkRel={linkRel}
+        variant={resolvedVariant}
+        hideActions={hideActions}
+        locale={locale}
       />
     );
   }

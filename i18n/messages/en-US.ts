@@ -687,6 +687,12 @@ const LINK_PREVIEW_MESSAGES = namespaceMessages("linkPreview", [
   ["byline", "by {author}"],
   ["mediaType.article", "Article"],
   ["mediaType.website", "Website"],
+  ["youtube.providerFallback", "YouTube"],
+  ["youtube.playVideo", "Play YouTube video: {title}"],
+  ["youtube.thumbnailAlt", "YouTube thumbnail for {title}"],
+  ["youtube.thumbnailFallbackAlt", "YouTube video thumbnail"],
+  ["youtube.titleFallback", "YouTube video"],
+  ["youtube.watchOnYoutube", "Watch on YouTube"],
 ] as const);
 
 export const EN_US_MESSAGES = {

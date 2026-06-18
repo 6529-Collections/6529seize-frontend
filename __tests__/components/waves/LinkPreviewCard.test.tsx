@@ -257,6 +257,41 @@ describe("LinkPreviewCard", () => {
     expect(frame.className).not.toContain("tw-max-h-[12rem]");
   });
 
+  it("lets YouTube video previews grow beyond the generic fixed frame", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      type: "youtube.video",
+      title: "A Good Video",
+      videoId: "abc123XYZ_0",
+      embedUrl: "https://www.youtube-nocookie.com/embed/abc123XYZ_0",
+      watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0",
+      thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://youtu.be/abc123XYZ_0"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({ type: "youtube.video" }),
+        })
+      )
+    );
+
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-min-h-[18rem]",
+      "sm:tw-min-h-[14rem]",
+      "md:tw-min-h-[15rem]"
+    );
+    expect(frame.className).not.toContain("tw-max-h-[10rem]");
+    expect(frame.className).not.toContain("tw-max-h-[11rem]");
+  });
+
   it("does not enforce chat stable frame for home variant", async () => {
     fetchLinkPreview.mockResolvedValue({});
 
