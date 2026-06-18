@@ -73,6 +73,52 @@ PR status:
   - No review threads or actionable bot comments were returned on the latest
     head before handoff.
 
+Follow-up after initial PR publication:
+
+- SonarCloud reported four viewer-local issues on the first PR head:
+  `CmsThreeDViewer` cognitive complexity, two `void` operator usages, and one
+  negated JSX condition.
+- Refactored the viewer overlay and canvas hit-test paths into smaller helpers,
+  replaced fire-and-forget `void` calls with handled promise callbacks, and
+  switched the poster overlay to the repo's `next/image` + `unoptimized`
+  pattern for arbitrary CMS poster URLs.
+- Re-ran focused validation:
+  - `seize run format:changed`
+  - `seize run test:no-coverage -- --testMatch "**/*.test.ts"
+    "**/*.test.tsx" --runTestsByPath
+    __tests__/lib/profile-cms/runtime/threeD.test.ts
+    __tests__/lib/profile-cms/builder/package.test.ts
+    __tests__/components/profile-cms/CmsThreeDViewer.test.tsx
+    __tests__/components/profile-cms/CmsSiteRenderer.test.tsx
+    __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx
+    __tests__/app/profile-cms-route.test.tsx --runInBand` (6 suites,
+    28 tests)
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run react-doctor:diff` (100/100)
+  - `codex-diff-check`
+- Re-ran browser verification on
+  `http://localhost:3142/punk6529/cms/builder` with system Chrome through
+  Playwright:
+  - Desktop poster screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-poster.png`
+  - Desktop ready screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-ready.png`
+  - Desktop canvas screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-canvas.png`
+  - Mobile fallback screenshot:
+    `.codex/artifacts/cms-3d-room-mobile-sonar-fix-fallback.png`
+  - Canvas screenshot pixel check: 670x620, 381,900 nonblack pixels out of
+    415,400 nontransparent pixels (`0.919` ratio).
+  - Canvas center click navigated to
+    `http://localhost:3142/punk6529/rooms/work-4/index.html`.
+  - Mobile fallback stayed at `data-cms-3d-status="mobile-fallback"`, had no
+    `Enter room` button, showed fallback copy, and exposed two canonical
+    `/punk6529/rooms/work-4/index.html` links.
+  - No browser page errors were reported. The local dev page still logged
+    ambient app/provider resource errors for unavailable emoji/API resources in
+    this no-backend smoke setup; those did not affect the 3D assertions.
+
 ## 2026-06-17
 
 ### Current Objective

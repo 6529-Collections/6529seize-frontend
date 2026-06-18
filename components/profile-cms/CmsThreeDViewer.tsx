@@ -7,6 +7,7 @@ import {
   useState,
   type PointerEvent,
 } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type {
   Material,
@@ -111,6 +112,12 @@ export default function CmsThreeDViewer({
     }
   }, [config, disposeRuntime, isMobileFallback, prefersReducedMotion, status]);
 
+  const handleStartViewer = useCallback(() => {
+    startViewer().catch(() => {
+      setStatus("error");
+    });
+  }, [startViewer]);
+
   useEffect(() => {
     const mobileQuery = globalThis.matchMedia?.(MOBILE_FALLBACK_QUERY);
     const motionQuery = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
@@ -131,9 +138,13 @@ export default function CmsThreeDViewer({
   }, []);
 
   useEffect(() => {
-    if (!config.requiresActivation && !isMobileFallback) {
-      void startViewer();
+    if (config.requiresActivation || isMobileFallback) {
+      return;
     }
+
+    startViewer().catch(() => {
+      setStatus("error");
+    });
   }, [config.requiresActivation, isMobileFallback, startViewer]);
 
   useEffect(() => disposeRuntime, [disposeRuntime]);
@@ -146,25 +157,11 @@ export default function CmsThreeDViewer({
         return;
       }
 
-      const rect = canvas.getBoundingClientRect();
-      runtime.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      runtime.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      runtime.raycaster.setFromCamera(runtime.pointer, runtime.camera);
-
-      const intersections = runtime.raycaster.intersectObjects(
-        runtime.clickable.map((item) => item.object),
-        true
-      );
-      const selected = intersections
-        .map((intersection) =>
-          runtime.clickable.find(
-            (item) =>
-              item.object === intersection.object ||
-              item.object === intersection.object.parent
-          )
-        )
-        .find((item): item is CmsThreeDClickable => !!item);
-
+      const selected = getSelectedCmsThreeDClickable({
+        canvas,
+        event,
+        runtime,
+      });
       if (selected) {
         router.push(selected.href);
       }
@@ -172,16 +169,7 @@ export default function CmsThreeDViewer({
     [router]
   );
 
-  const poster = config.poster ?? (config.kind === "object" ? undefined : null);
-  const loadLabel =
-    config.kind === "room"
-      ? t(locale, "profileCms.interactive.enterRoom")
-      : t(locale, "profileCms.interactive.loadObject");
-  const hasBudgetWarning =
-    config.kind === "object" &&
-    config.budgetBytes !== undefined &&
-    config.asset.fileSizeBytes !== undefined &&
-    config.asset.fileSizeBytes > config.budgetBytes;
+  const showOverlay = status !== "ready" || isMobileFallback;
 
   return (
     <section
@@ -200,63 +188,233 @@ export default function CmsThreeDViewer({
         />
       </div>
 
-      {status !== "ready" || isMobileFallback ? (
-        <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-black">
-          {poster?.url ? (
-            <img
-              alt={poster.alt}
-              className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover tw-opacity-70"
-              height={poster.height}
-              loading="lazy"
-              src={poster.url}
-              width={poster.width}
-            />
-          ) : null}
-          <div className="tw-relative tw-z-10 tw-mx-4 tw-max-w-xl tw-bg-black/80 tw-p-5 tw-text-center">
-            <p className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
-              {config.kind === "room"
-                ? t(locale, "profileCms.interactive.room.title")
-                : t(locale, "profileCms.interactive.object.title")}
-            </p>
-            <h3 className="tw-mt-2 tw-text-2xl tw-font-semibold tw-text-white">
-              {config.title}
-            </h3>
-            <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {isMobileFallback
-                ? t(locale, "profileCms.interactive.mobileFallback")
-                : config.description}
-            </p>
-            {hasBudgetWarning ? (
-              <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-amber-300">
-                {t(locale, "profileCms.interactive.budgetWarning")}
-              </p>
-            ) : null}
-            {status === "error" ? (
-              <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-red">
-                {t(locale, "profileCms.interactive.loadError")}
-              </p>
-            ) : null}
-            {!isMobileFallback ? (
-              <button
-                className="tw-mt-5 tw-min-h-11 tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white hover:tw-bg-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-70"
-                disabled={status === "loading"}
-                onClick={() => void startViewer()}
-                type="button"
-              >
-                {status === "loading"
-                  ? t(locale, "profileCms.interactive.loading", {
-                      progress: Math.round(progress),
-                    })
-                  : loadLabel}
-              </button>
-            ) : null}
-          </div>
-        </div>
+      {showOverlay ? (
+        <CmsThreeDOverlay
+          config={config}
+          isMobileFallback={isMobileFallback}
+          locale={locale}
+          onStart={handleStartViewer}
+          progress={progress}
+          status={status}
+        />
       ) : null}
 
       <CmsThreeDLinkTray config={config} locale={locale} />
     </section>
   );
+}
+
+function CmsThreeDOverlay({
+  config,
+  isMobileFallback,
+  locale,
+  onStart,
+  progress,
+  status,
+}: {
+  readonly config: CmsThreeDViewerConfig;
+  readonly isMobileFallback: boolean;
+  readonly locale: SupportedLocale;
+  readonly onStart: () => void;
+  readonly progress: number;
+  readonly status: CmsThreeDStatus;
+}) {
+  return (
+    <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-black">
+      <CmsThreeDPoster poster={config.poster} />
+      <div className="tw-relative tw-z-10 tw-mx-4 tw-max-w-xl tw-bg-black/80 tw-p-5 tw-text-center">
+        <p className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+          {getCmsThreeDEyebrow(config, locale)}
+        </p>
+        <h3 className="tw-mt-2 tw-text-2xl tw-font-semibold tw-text-white">
+          {config.title}
+        </h3>
+        <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {getCmsThreeDDescription({ config, isMobileFallback, locale })}
+        </p>
+        <CmsThreeDStatusMessages
+          hasBudgetWarning={hasCmsThreeDBudgetWarning(config)}
+          locale={locale}
+          status={status}
+        />
+        <CmsThreeDStartControl
+          config={config}
+          isMobileFallback={isMobileFallback}
+          locale={locale}
+          onStart={onStart}
+          progress={progress}
+          status={status}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CmsThreeDPoster({
+  poster,
+}: {
+  readonly poster: CmsThreeDViewerConfig["poster"];
+}) {
+  return poster?.url ? (
+    <Image
+      alt={poster.alt}
+      className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover tw-opacity-70"
+      fill
+      loading="lazy"
+      sizes="100vw"
+      src={poster.url}
+      unoptimized
+    />
+  ) : null;
+}
+
+function CmsThreeDStatusMessages({
+  hasBudgetWarning,
+  locale,
+  status,
+}: {
+  readonly hasBudgetWarning: boolean;
+  readonly locale: SupportedLocale;
+  readonly status: CmsThreeDStatus;
+}) {
+  return (
+    <>
+      {hasBudgetWarning ? (
+        <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-amber-300">
+          {t(locale, "profileCms.interactive.budgetWarning")}
+        </p>
+      ) : null}
+      {status === "error" ? (
+        <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-red">
+          {t(locale, "profileCms.interactive.loadError")}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
+function CmsThreeDStartControl({
+  config,
+  isMobileFallback,
+  locale,
+  onStart,
+  progress,
+  status,
+}: {
+  readonly config: CmsThreeDViewerConfig;
+  readonly isMobileFallback: boolean;
+  readonly locale: SupportedLocale;
+  readonly onStart: () => void;
+  readonly progress: number;
+  readonly status: CmsThreeDStatus;
+}) {
+  if (isMobileFallback) {
+    return null;
+  }
+
+  return (
+    <button
+      className="tw-mt-5 tw-min-h-11 tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white hover:tw-bg-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-70"
+      disabled={status === "loading"}
+      onClick={onStart}
+      type="button"
+    >
+      {getCmsThreeDStartLabel({ config, locale, progress, status })}
+    </button>
+  );
+}
+
+function getCmsThreeDEyebrow(
+  config: CmsThreeDViewerConfig,
+  locale: SupportedLocale
+): string {
+  if (config.kind === "room") {
+    return t(locale, "profileCms.interactive.room.title");
+  }
+
+  return t(locale, "profileCms.interactive.object.title");
+}
+
+function getCmsThreeDDescription({
+  config,
+  isMobileFallback,
+  locale,
+}: {
+  readonly config: CmsThreeDViewerConfig;
+  readonly isMobileFallback: boolean;
+  readonly locale: SupportedLocale;
+}): string {
+  if (isMobileFallback) {
+    return t(locale, "profileCms.interactive.mobileFallback");
+  }
+
+  return config.description;
+}
+
+function getCmsThreeDStartLabel({
+  config,
+  locale,
+  progress,
+  status,
+}: {
+  readonly config: CmsThreeDViewerConfig;
+  readonly locale: SupportedLocale;
+  readonly progress: number;
+  readonly status: CmsThreeDStatus;
+}): string {
+  if (status === "loading") {
+    return t(locale, "profileCms.interactive.loading", {
+      progress: Math.round(progress),
+    });
+  }
+
+  if (config.kind === "room") {
+    return t(locale, "profileCms.interactive.enterRoom");
+  }
+
+  return t(locale, "profileCms.interactive.loadObject");
+}
+
+function hasCmsThreeDBudgetWarning(config: CmsThreeDViewerConfig): boolean {
+  if (config.kind === "room") {
+    return false;
+  }
+
+  return (
+    config.budgetBytes !== undefined &&
+    config.asset.fileSizeBytes !== undefined &&
+    config.asset.fileSizeBytes > config.budgetBytes
+  );
+}
+
+function getSelectedCmsThreeDClickable({
+  canvas,
+  event,
+  runtime,
+}: {
+  readonly canvas: HTMLCanvasElement;
+  readonly event: PointerEvent<HTMLCanvasElement>;
+  readonly runtime: CmsThreeDRuntime;
+}): CmsThreeDClickable | undefined {
+  const rect = canvas.getBoundingClientRect();
+  runtime.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  runtime.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  runtime.raycaster.setFromCamera(runtime.pointer, runtime.camera);
+
+  const intersections = runtime.raycaster.intersectObjects(
+    runtime.clickable.map((item) => item.object),
+    true
+  );
+
+  return intersections
+    .map((intersection) =>
+      runtime.clickable.find(
+        (item) =>
+          item.object === intersection.object ||
+          item.object === intersection.object.parent
+      )
+    )
+    .find((item): item is CmsThreeDClickable => !!item);
 }
 
 function CmsThreeDLinkTray({
