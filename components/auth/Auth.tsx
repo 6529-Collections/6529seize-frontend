@@ -1422,6 +1422,9 @@ export default function Auth({
   const signModalSecondaryListItem = isSessionUpgradePrompt
     ? `Temporary access time remaining: ${sessionUpgradeTimeLeftText}.`
     : "Your signature will not cost any gas and is purely for authentication purposes.";
+  const signModalConfirmText = isDisconnectedWebSessionUpgradePrompt
+    ? "Connect"
+    : "Sign";
   const onConfirmSignRequest = () => {
     if (isDisconnectedWebSessionUpgradePrompt) {
       seizeConnect();
@@ -1505,7 +1508,7 @@ export default function Auth({
                     Confirm in your wallet <DotLoader />
                   </span>
                 ) : (
-                  "Sign"
+                  signModalConfirmText
                 )}
               </Button>
             )}
