@@ -206,16 +206,37 @@ export default function RepCategoryExplorer() {
       return;
     }
 
-    const animationFrame = globalThis.requestAnimationFrame(() => {
-      detailRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
+    let secondFrame: number | undefined;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const firstFrame = globalThis.requestAnimationFrame(() => {
+      secondFrame = globalThis.requestAnimationFrame(() => {
+        timeout = globalThis.setTimeout(() => {
+          const detail = detailRef.current;
+          if (!detail) {
+            return;
+          }
+
+          const scrollTop =
+            detail.getBoundingClientRect().top + globalThis.scrollY - 96;
+          globalThis.scrollTo({
+            top: Math.max(0, scrollTop),
+            behavior: "smooth",
+          });
+          detail.focus({ preventScroll: true });
+          setScrollTargetCategory(null);
+        }, 50);
       });
-      detailRef.current?.focus({ preventScroll: true });
-      setScrollTargetCategory(null);
     });
 
-    return () => globalThis.cancelAnimationFrame(animationFrame);
+    return () => {
+      globalThis.cancelAnimationFrame(firstFrame);
+      if (secondFrame !== undefined) {
+        globalThis.cancelAnimationFrame(secondFrame);
+      }
+      if (timeout) {
+        globalThis.clearTimeout(timeout);
+      }
+    };
   }, [scrollTargetCategory, selectedCategory]);
 
   const showPrompt = trimmedInput.length < MIN_CATEGORY_SEARCH_LENGTH;
@@ -284,7 +305,7 @@ export default function RepCategoryExplorer() {
       )}
 
       {selectedCategory && (
-        <div ref={detailRef} tabIndex={-1} className="tw-scroll-mt-6">
+        <div ref={detailRef} tabIndex={-1} className="tw-scroll-mt-24">
           <GlobalRepCategoryDetail
             key={selectedCategory}
             category={selectedCategory}

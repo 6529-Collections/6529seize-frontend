@@ -8,10 +8,12 @@ import type { ApiGlobalRepCategoryWaveContributor } from "@/generated/models/Api
 import type { ApiGlobalRepCategoryWaveOverview } from "@/generated/models/ApiGlobalRepCategoryWaveOverview";
 import type { ApiGlobalRepCategoryWaveRef } from "@/generated/models/ApiGlobalRepCategoryWaveRef";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
@@ -25,6 +27,7 @@ import {
 import {
   GLOBAL_REP_CATEGORY_PAGE_SIZE,
   formatRepCategoryDate,
+  getProfileAvatarFallback,
   getProfileDisplay,
   getProfileHref,
   type GlobalRepCategorySort,
@@ -69,6 +72,54 @@ const WAVE_REP_SORTS: ReadonlyArray<{
   { id: "recent", labelKey: "rep.categories.wave.sort.recent" },
 ];
 
+function WaveAvatar({ wave }: { readonly wave: ApiGlobalRepCategoryWaveRef }) {
+  return (
+    <span className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+      {wave.pfp ? (
+        <Image
+          unoptimized
+          src={getScaledImageUri(wave.pfp, ImageScale.W_AUTO_H_50)}
+          alt={`${wave.name} wave`}
+          width={32}
+          height={32}
+          className="tw-h-full tw-w-full tw-object-cover"
+        />
+      ) : (
+        <span className="tw-text-[0.6875rem] tw-font-semibold tw-text-iron-300">
+          {wave.name.trim().charAt(0).toUpperCase() || "W"}
+        </span>
+      )}
+    </span>
+  );
+}
+
+function ContributorAvatar({
+  contributor,
+}: {
+  readonly contributor: ApiGlobalRepCategoryWaveContributor;
+}) {
+  const display = getProfileDisplay(contributor.profile);
+
+  return (
+    <span className="tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+      {contributor.profile.pfp ? (
+        <Image
+          unoptimized
+          src={getScaledImageUri(contributor.profile.pfp, ImageScale.W_AUTO_H_50)}
+          alt={`${display} profile`}
+          width={28}
+          height={28}
+          className="tw-h-full tw-w-full tw-object-cover"
+        />
+      ) : (
+        <span className="tw-text-[0.625rem] tw-font-semibold tw-text-iron-300">
+          {getProfileAvatarFallback(contributor.profile)}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function WaveLink({ wave }: { readonly wave: ApiGlobalRepCategoryWaveRef }) {
   return (
     <Link
@@ -77,9 +128,10 @@ function WaveLink({ wave }: { readonly wave: ApiGlobalRepCategoryWaveRef }) {
         isDirectMessage: wave.is_direct_message,
         isApp: false,
       })}
-      className="tw-text-primary-200 hover:tw-text-primary-100 tw-break-words tw-font-semibold tw-no-underline"
+      className="tw-text-primary-200 hover:tw-text-primary-100 tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2 tw-break-words tw-font-semibold tw-no-underline"
     >
-      {wave.name}
+      <WaveAvatar wave={wave} />
+      <span className="tw-min-w-0 tw-break-words">{wave.name}</span>
     </Link>
   );
 }
@@ -92,9 +144,12 @@ function ContributorLink({
   return (
     <Link
       href={getProfileHref(contributor.profile)}
-      className="hover:tw-text-primary-200 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline"
+      className="hover:tw-text-primary-200 tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline"
     >
-      {getProfileDisplay(contributor.profile)}
+      <ContributorAvatar contributor={contributor} />
+      <span className="tw-min-w-0 tw-break-words">
+        {getProfileDisplay(contributor.profile)}
+      </span>
     </Link>
   );
 }

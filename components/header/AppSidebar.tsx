@@ -43,6 +43,10 @@ const MENU: SidebarMenu = [
       { label: "TDH", path: "/network/tdh" },
       { label: "xTDH", path: "/xtdh" },
       { label: "Wave Score", path: "/network/wave-score" },
+      {
+        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.repCategories"),
+        path: "/rep/categories",
+      },
       { label: "Metrics", section: true },
       { label: "Health", path: "/network/health" },
       { label: "Definitions", path: "/network/definitions" },
@@ -73,10 +77,9 @@ const MENU: SidebarMenu = [
         dividerBefore: true,
       },
       {
-        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.repCategories"),
-        path: "/rep/categories",
+        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.api"),
+        path: "/tools/api",
       },
-      { label: t(DEFAULT_LOCALE, "rep.categories.sidebar.api"), path: "/tools/api" },
       { label: "EMMA", path: "/emma" },
       { label: "Block Finder", path: "/tools/block-finder" },
       { label: "Open Data", path: "/open-data" },

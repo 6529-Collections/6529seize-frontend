@@ -23,6 +23,7 @@ function getNetworkSection(): SidebarSection {
       { name: "TDH", href: "/network/tdh" },
       { name: "xTDH", href: "/xtdh" },
       { name: "Wave Score", href: "/network/wave-score" },
+      { name: "REP Categories", href: "/rep/categories" },
     ],
     subsections: [
       {
