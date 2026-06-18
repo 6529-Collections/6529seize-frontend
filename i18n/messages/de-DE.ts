@@ -14,6 +14,9 @@ export const DE_DE_MESSAGES = {
   "media.video.unmute": "Videoton einschalten",
   "media.video.unsupported":
     "Ihr Browser unterstuetzt das Video-Tag nicht.",
+  "newVersionToast.refreshAction": "Seite aktualisieren",
+  "newVersionToast.title": "Eine neue Version ist verfügbar",
+  "newVersionToast.eyebrow": "Ja, schon wieder!",
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
   "theMemes.sorting.regionLabel": "Meme-Sortierung",

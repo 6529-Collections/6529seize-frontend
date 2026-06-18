@@ -14,6 +14,9 @@ export const ES_ES_MESSAGES = {
   "media.video.unmute": "Activar sonido del video",
   "media.video.unsupported":
     "Tu navegador no admite la etiqueta de video.",
+  "newVersionToast.refreshAction": "Actualizar la página",
+  "newVersionToast.title": "Hay una nueva versión disponible",
+  "newVersionToast.eyebrow": "¡Sí, otra vez!",
   "theMemes.documentTitle": "The Memes | Colecciones",
   "theMemes.description.collections": "Colecciones",
   "theMemes.sorting.regionLabel": "Orden de memes",

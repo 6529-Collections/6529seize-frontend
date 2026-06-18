@@ -48,6 +48,22 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "media.video.unsupported")).toBe(
       "Ihr Browser unterstuetzt das Video-Tag nicht."
     );
+    expect(t("en-GB", "newVersionToast.refreshAction")).toBe("Refresh page");
+    expect(t("fr-FR", "newVersionToast.title")).toBe(
+      "Une nouvelle version est disponible"
+    );
+    expect(t("fr-FR", "newVersionToast.eyebrow")).toBe("Oui, encore !");
+    expect(t("es-ES", "newVersionToast.title")).toBe(
+      "Hay una nueva versión disponible"
+    );
+    expect(t("es-ES", "newVersionToast.eyebrow")).toBe("¡Sí, otra vez!");
+    expect(t("de-DE", "newVersionToast.refreshAction")).toBe(
+      "Seite aktualisieren"
+    );
+    expect(t("de-DE", "newVersionToast.title")).toBe(
+      "Eine neue Version ist verfügbar"
+    );
+    expect(t("de-DE", "newVersionToast.eyebrow")).toBe("Ja, schon wieder!");
     expect(t("en-GB", "theMemes.sorting.sortBy")).toBe("Sort by");
     expect(t("fr-FR", "theMemes.detail.tabs.collectors")).toBe("Collectors");
     expect(t("es-ES", "theMemes.detail.heading.card", { tokenId: 1 })).toBe(

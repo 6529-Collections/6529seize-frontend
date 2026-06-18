@@ -13,6 +13,9 @@ export const EN_GB_MESSAGES = {
   "media.video.playPreview": "Play video preview",
   "media.video.unmute": "Unmute video",
   "media.video.unsupported": "Your browser does not support the video tag.",
+  "newVersionToast.refreshAction": "Refresh page",
+  "newVersionToast.title": "A new version is available",
+  "newVersionToast.eyebrow": "Yes, again!",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
 } satisfies Partial<Record<MessageKey, string>>;

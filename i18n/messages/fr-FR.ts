@@ -14,6 +14,9 @@ export const FR_FR_MESSAGES = {
   "media.video.unmute": "Activer le son de la video",
   "media.video.unsupported":
     "Votre navigateur ne prend pas en charge la balise video.",
+  "newVersionToast.refreshAction": "Actualiser la page",
+  "newVersionToast.title": "Une nouvelle version est disponible",
+  "newVersionToast.eyebrow": "Oui, encore !",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.sorting.regionLabel": "Tri des memes",
