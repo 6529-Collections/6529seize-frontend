@@ -93,6 +93,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Use `6529 run build` for build-time, generated API model, Next.js config, route, or deployment-sensitive changes.
 - Use `6529 run test:e2e` for local Playwright E2E when relevant; this repo's default Playwright config starts the app locally on port `3001`.
 - For staging or production validation, inspect the repo's current deploy and E2E configuration before running. If no target-specific E2E command exists, run the strongest available smoke checks and report the gap clearly.
+- For merge, staging, production, or release-lane work, include a deployment-bus handoff when relevant: release set, candidate SHA, included PRs, backend dependencies, validation owners, and held or blocked changes. Use `ops/docs/developer/deployment-bus-process.md` for the current process.
 
 ## Merge And Deploy Gates
 
@@ -100,7 +101,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Use `ops/skills/deploy-6529/SKILL.md` for actual merge execution, staging deployment, production deployment, backend deployment coordination, cross-agent coordination, and deployed-environment E2E validation.
 - Before merging, ensure the PR is agent-happy, bot-happy, required checks are passing or explained, and required approvals are present.
 - Before staging deploy, confirm the merge commit/ref, use the repo-approved staging deployment path, then validate the deployed target. In this repo, the documented fresh-clone staging refresh path is `./bin/6529 staging`.
-- Before production deploy, require successful staging validation unless the user explicitly overrides it. Use the repo-approved production deployment path and verify the deployed version or visible behavior afterward. In this repo, production deploy is the `Web Deploy - PROD` workflow in `.github/workflows/build-upload-deploy-prod.yml`.
+- Before production deploy, require successful staging validation for the same `origin/main` SHA or ordered frontend/backend release set unless the user explicitly overrides it. Use the repo-approved production deployment path and verify the deployed version or visible behavior afterward. In this repo, production deploy is the `Web Deploy - PROD` workflow in `.github/workflows/build-upload-deploy-prod.yml`, and it rejects non-`main` refs.
 - If deployment or E2E fails, hand off to `ops/skills/deploy-6529/SKILL.md` to diagnose, fix, redeploy, and rerun validation before proceeding.
 
 ## Anti-Patterns

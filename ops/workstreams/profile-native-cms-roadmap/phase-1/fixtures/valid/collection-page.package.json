@@ -86,6 +86,14 @@
             "content": "Collection context fixture grounded in a knowledge packet."
           },
           {
+            "id": "block-contact-sheet",
+            "block_type": "lightbox_gallery",
+            "title": "Collection contact sheet",
+            "description": "Uniform scan mode for a generated collection page.",
+            "display_mode": "contact_sheet",
+            "asset_ids": ["asset-card-1", "asset-card-2", "asset-card-3"]
+          },
+          {
             "id": "block-collection-ref",
             "block_type": "collection_reference",
             "chain_id": 1,
@@ -107,6 +115,42 @@
         "file_size_bytes": 41000,
         "roles": ["social"],
         "alt_text": "The Memes collection social preview"
+      },
+      {
+        "id": "asset-card-1",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturecollection/card-1.png",
+        "content_hash": "sha256:3535353535353535353535353535353535353535353535353535353535353535",
+        "mime_type": "image/png",
+        "width": 2400,
+        "height": 2400,
+        "file_size_bytes": 900000,
+        "roles": ["original", "detail", "fullscreen"],
+        "alt_text": "The Memes by 6529 card number 1"
+      },
+      {
+        "id": "asset-card-2",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturecollection/card-2.png",
+        "content_hash": "sha256:3636363636363636363636363636363636363636363636363636363636363636",
+        "mime_type": "image/png",
+        "width": 1800,
+        "height": 2400,
+        "file_size_bytes": 840000,
+        "roles": ["grid", "thumbnail"],
+        "alt_text": "Tall derivative for The Memes by 6529 card number 2"
+      },
+      {
+        "id": "asset-card-3",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturecollection/card-3.png",
+        "content_hash": "sha256:3737373737373737373737373737373737373737373737373737373737373737",
+        "mime_type": "image/png",
+        "width": 3200,
+        "height": 1800,
+        "file_size_bytes": 980000,
+        "roles": ["grid", "thumbnail"],
+        "alt_text": "Wide derivative for The Memes by 6529 card number 3"
       }
     ],
     "navigation": [
@@ -150,7 +194,7 @@
       "renderer": "6529-cms-static",
       "renderer_version": "0.0.0-fixture",
       "route_count": 2,
-      "asset_count": 1,
+      "asset_count": 4,
       "warnings": []
     }
   },
