@@ -128,7 +128,10 @@ const buildSidebarWaveRows = ({
     const canExpand =
       wave.parentWaveId === null && (wave.hasSubwaves || subwaves.length > 0);
     const isExpanded =
-      showExpandedSubwaves && canExpand && getIsExpanded(wave.id);
+      showExpandedSubwaves &&
+      canExpand &&
+      subwaves.length > 0 &&
+      getIsExpanded(wave.id);
     const hasUnreadSubwaves = canExpand && getHasUnreadSubwaves(wave.id);
 
     rows.push({
@@ -263,9 +266,17 @@ export function useSidebarWaveTree({
     [subwavesByParentId]
   );
 
+  const getIsVisiblyExpanded = useCallback(
+    (waveId: string) =>
+      showExpandedSubwaves &&
+      (subwavesByParentId.get(waveId)?.length ?? 0) > 0 &&
+      getIsExpanded(waveId),
+    [getIsExpanded, showExpandedSubwaves, subwavesByParentId]
+  );
+
   const toggleParent = useCallback(
     (waveId: string) => {
-      const isExpanded = getIsExpanded(waveId);
+      const isExpanded = getIsVisiblyExpanded(waveId);
       if (!isExpanded) {
         requestParentExpand(waveId, { force: true });
       }
@@ -294,7 +305,7 @@ export function useSidebarWaveTree({
         return nextState;
       });
     },
-    [getIsExpanded, requestParentExpand]
+    [getIsVisiblyExpanded, requestParentExpand]
   );
 
   const getRows = useCallback(

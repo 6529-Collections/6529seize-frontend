@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import { useSidebarWaveTree } from "@/hooks/useSidebarWaveTree";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 describe("useSidebarWaveTree", () => {
   beforeEach(() => {
@@ -300,15 +301,21 @@ describe("useSidebarWaveTree", () => {
     expect(onParentExpand).toHaveBeenLastCalledWith("parent");
   });
 
-  it("loads a direct active subwave parent before the child is in the list", () => {
+  it("loads a direct active subwave parent without showing it expanded before rows exist", () => {
     const onParentExpand = jest.fn();
-    const { result } = renderHook(() =>
-      useSidebarWaveTree({
-        waves: [waves[0]!],
-        activeWaveId: "direct-child",
-        activeParentWaveId: "parent",
-        onParentExpand,
-      })
+    const { result, rerender } = renderHook(
+      ({ currentWaves }: { readonly currentWaves: readonly MinimalWave[] }) =>
+        useSidebarWaveTree({
+          waves: currentWaves,
+          activeWaveId: "direct-child",
+          activeParentWaveId: "parent",
+          onParentExpand,
+        }),
+      {
+        initialProps: {
+          currentWaves: [waves[0]!],
+        },
+      }
     );
 
     const rows = result.current.getRows(result.current.topLevelWaves);
@@ -317,6 +324,27 @@ describe("useSidebarWaveTree", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       wave: expect.objectContaining({ id: "parent" }),
+      isExpanded: false,
+    });
+
+    rerender({
+      currentWaves: [
+        waves[0]!,
+        createMockMinimalWave({
+          id: "direct-child",
+          parentWaveId: "parent",
+          createdAt: 30,
+        }),
+      ],
+    });
+
+    const loadedRows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(loadedRows.map((row) => row.wave.id)).toEqual([
+      "parent",
+      "direct-child",
+    ]);
+    expect(loadedRows[0]).toMatchObject({
       isExpanded: true,
     });
   });

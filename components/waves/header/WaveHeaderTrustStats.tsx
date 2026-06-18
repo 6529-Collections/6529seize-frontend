@@ -151,7 +151,7 @@ export default function WaveHeaderTrustStats({
         WAVE_HEADER_TRUST_LOCALE,
         "waves.score.details.statsAriaLabel"
       )}
-      className="tw-grid tw-grid-cols-2 tw-gap-2"
+      className="tw-grid tw-grid-cols-2 tw-gap-1.5"
     >
       {stats.map((stat) => {
         const Icon = stat.icon;
@@ -159,14 +159,17 @@ export default function WaveHeaderTrustStats({
           <div
             key={stat.id}
             aria-label={stat.ariaLabel}
-            className={`tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-2 ${toneClasses[stat.tone]}`}
+            className={`tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-1.5 ${toneClasses[stat.tone]}`}
           >
-            <Icon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+            <Icon
+              className="tw-size-3.5 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
             <div className="tw-min-w-0">
-              <dt className="tw-truncate tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400">
+              <dt className="tw-truncate tw-text-[9px] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-wide tw-text-iron-400">
                 {stat.label}
               </dt>
-              <dd className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-current">
+              <dd className="tw-m-0 tw-truncate tw-text-[13px] tw-font-semibold tw-tabular-nums tw-leading-4 tw-text-current">
                 {stat.value}
               </dd>
             </div>
