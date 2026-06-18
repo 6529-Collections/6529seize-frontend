@@ -3,6 +3,7 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiGlobalRepCategoryWave } from "@/generated/models/ApiGlobalRepCategoryWave";
 import type { ApiGlobalRepCategoryWaveContributor } from "@/generated/models/ApiGlobalRepCategoryWaveContributor";
 import type { ApiGlobalRepCategoryWaveOverview } from "@/generated/models/ApiGlobalRepCategoryWaveOverview";
@@ -30,6 +31,7 @@ import {
   getProfileAvatarFallback,
   getProfileDisplay,
   getProfileHref,
+  getProfileTooltipUser,
   type GlobalRepCategorySort,
 } from "./globalRepCategory.helpers";
 import {
@@ -142,15 +144,18 @@ function ContributorLink({
   readonly contributor: ApiGlobalRepCategoryWaveContributor;
 }) {
   return (
-    <Link
-      href={getProfileHref(contributor.profile)}
-      className="hover:tw-text-primary-200 tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline"
-    >
-      <ContributorAvatar contributor={contributor} />
-      <span className="tw-min-w-0 tw-break-words">
-        {getProfileDisplay(contributor.profile)}
-      </span>
-    </Link>
+    <UserProfileTooltipWrapper user={getProfileTooltipUser(contributor.profile)}>
+      <Link
+        href={getProfileHref(contributor.profile)}
+        prefetch={false}
+        className="hover:tw-text-primary-200 tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline"
+      >
+        <ContributorAvatar contributor={contributor} />
+        <span className="tw-min-w-0 tw-break-words">
+          {getProfileDisplay(contributor.profile)}
+        </span>
+      </Link>
+    </UserProfileTooltipWrapper>
   );
 }
 
@@ -174,10 +179,7 @@ function TopContributors({
           key={`${contributor.wave.id}-${contributor.profile.id}-${contributor.contribution}`}
           className="tw-rounded-full tw-bg-white/[0.04] tw-px-2.5 tw-py-1 tw-text-xs tw-text-iron-200"
         >
-          <ContributorLink contributor={contributor} />{" "}
-          <span className="tw-text-iron-400">
-            {formatNumberWithCommas(contributor.contribution)}
-          </span>
+          <ContributorLink contributor={contributor} />
         </li>
       ))}
     </ul>
@@ -193,7 +195,9 @@ function WaveRow({
 }) {
   return (
     <tr className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/5 last:tw-border-b-0">
-      <td className="tw-px-4 tw-py-3 tw-text-sm tw-text-iron-500">{rank}</td>
+      <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-500">
+        {rank}
+      </td>
       <td className="tw-px-4 tw-py-3">
         <WaveLink wave={item.wave} />
       </td>
@@ -206,7 +210,7 @@ function WaveRow({
       <td className="tw-px-4 tw-py-3">
         <TopContributors contributors={item.top_contributors} />
       </td>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-400">
         {formatRepCategoryDate(item.last_modified)}
       </td>
     </tr>
@@ -222,7 +226,9 @@ function ContributorRow({
 }) {
   return (
     <tr className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/5 last:tw-border-b-0">
-      <td className="tw-px-4 tw-py-3 tw-text-sm tw-text-iron-500">{rank}</td>
+      <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-500">
+        {rank}
+      </td>
       <td className="tw-px-4 tw-py-3">
         <ContributorLink contributor={item} />
       </td>
@@ -232,7 +238,7 @@ function ContributorRow({
       <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-semibold tw-text-iron-100">
         {formatNumberWithCommas(item.contribution)}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-400">
         {formatRepCategoryDate(item.last_modified)}
       </td>
     </tr>
@@ -256,7 +262,7 @@ function WavesTable({
         </caption>
         <thead className="tw-bg-white/[0.04] tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
           <tr>
-            <th scope="col" className="tw-w-16 tw-px-4 tw-py-3">
+            <th scope="col" className="tw-w-16 tw-px-4 tw-py-3 tw-text-right">
               {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.rank")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3">
@@ -274,7 +280,7 @@ function WavesTable({
                 "rep.categories.wave.table.leadingContributors"
               )}
             </th>
-            <th scope="col" className="tw-px-4 tw-py-3">
+            <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
               {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.lastModified")}
             </th>
           </tr>
@@ -312,7 +318,7 @@ function ContributorsTable({
         </caption>
         <thead className="tw-bg-white/[0.04] tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
           <tr>
-            <th scope="col" className="tw-w-16 tw-px-4 tw-py-3">
+            <th scope="col" className="tw-w-16 tw-px-4 tw-py-3 tw-text-right">
               {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.rank")}
             </th>
             <th scope="col" className="tw-px-4 tw-py-3">
@@ -324,7 +330,7 @@ function ContributorsTable({
             <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
               {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.rep")}
             </th>
-            <th scope="col" className="tw-px-4 tw-py-3">
+            <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
               {t(REP_CATEGORY_LOCALE, "rep.categories.wave.table.lastModified")}
             </th>
           </tr>

@@ -50,6 +50,23 @@ export function getProfileHref(profile: ApiProfileMin): string {
   return primaryAddress ? `/${encodeURIComponent(primaryAddress)}` : "#";
 }
 
+export function getProfileTooltipUser(profile: ApiProfileMin): string {
+  const handle = profile.handle?.trim();
+
+  if (handle) {
+    return handle;
+  }
+
+  const id = profile.id?.trim();
+
+  if (id) {
+    return id;
+  }
+
+  const primaryAddress = profile.primary_address?.trim();
+  return primaryAddress || getProfileDisplay(profile);
+}
+
 export function getProfileAvatarFallback(profile: ApiProfileMin): string {
   const display = getProfileDisplay(profile).trim();
   return display.charAt(0).toUpperCase() || "?";

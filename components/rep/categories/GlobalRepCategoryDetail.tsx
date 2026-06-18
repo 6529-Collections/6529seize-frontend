@@ -3,6 +3,7 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiGlobalRepCategoryGiver } from "@/generated/models/ApiGlobalRepCategoryGiver";
 import type { ApiGlobalRepCategoryRating } from "@/generated/models/ApiGlobalRepCategoryRating";
 import type { ApiGlobalRepCategoryRecipient } from "@/generated/models/ApiGlobalRepCategoryRecipient";
@@ -27,6 +28,7 @@ import {
   getProfileAvatarFallback,
   getProfileDisplay,
   getProfileHref,
+  getProfileTooltipUser,
   getRepCategoryPath,
   type GlobalRepCategorySort,
   type GlobalRepCategoryTab,
@@ -67,30 +69,33 @@ function ProfileCell({ profile }: { readonly profile: ApiProfileMin }) {
   const display = getProfileDisplay(profile);
 
   return (
-    <Link
-      href={getProfileHref(profile)}
-      className="tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-text-left tw-no-underline"
-    >
-      <span className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
-        {profile.pfp ? (
-          <Image
-            unoptimized
-            src={getScaledImageUri(profile.pfp, ImageScale.W_AUTO_H_50)}
-            alt={`${display} profile`}
-            width={32}
-            height={32}
-            className="tw-h-full tw-w-full tw-object-cover"
-          />
-        ) : (
-          <span className="tw-text-[0.6875rem] tw-font-semibold tw-text-iron-300">
-            {getProfileAvatarFallback(profile)}
-          </span>
-        )}
-      </span>
-      <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-        {display}
-      </span>
-    </Link>
+    <UserProfileTooltipWrapper user={getProfileTooltipUser(profile)}>
+      <Link
+        href={getProfileHref(profile)}
+        prefetch={false}
+        className="tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-text-left tw-no-underline"
+      >
+        <span className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+          {profile.pfp ? (
+            <Image
+              unoptimized
+              src={getScaledImageUri(profile.pfp, ImageScale.W_AUTO_H_50)}
+              alt={`${display} profile`}
+              width={32}
+              height={32}
+              className="tw-h-full tw-w-full tw-object-cover"
+            />
+          ) : (
+            <span className="tw-text-[0.6875rem] tw-font-semibold tw-text-iron-300">
+              {getProfileAvatarFallback(profile)}
+            </span>
+          )}
+        </span>
+        <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+          {display}
+        </span>
+      </Link>
+    </UserProfileTooltipWrapper>
   );
 }
 
@@ -248,7 +253,7 @@ function TableHeader({ tab }: { readonly tab: GlobalRepCategoryTab }) {
   if (tab === "recipients") {
     return (
       <tr>
-        <th scope="col" className="tw-w-16 tw-px-4 tw-py-3 tw-text-left">
+        <th scope="col" className="tw-w-16 tw-px-4 tw-py-3 tw-text-right">
           Rank
         </th>
         <th scope="col" className="tw-px-4 tw-py-3 tw-text-left">
@@ -260,7 +265,7 @@ function TableHeader({ tab }: { readonly tab: GlobalRepCategoryTab }) {
         <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
           Raters
         </th>
-        <th scope="col" className="tw-px-4 tw-py-3 tw-text-left">
+        <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
           Last modified
         </th>
       </tr>
@@ -270,7 +275,7 @@ function TableHeader({ tab }: { readonly tab: GlobalRepCategoryTab }) {
   if (tab === "givers") {
     return (
       <tr>
-        <th scope="col" className="tw-w-16 tw-px-4 tw-py-3 tw-text-left">
+        <th scope="col" className="tw-w-16 tw-px-4 tw-py-3 tw-text-right">
           Rank
         </th>
         <th scope="col" className="tw-px-4 tw-py-3 tw-text-left">
@@ -282,7 +287,7 @@ function TableHeader({ tab }: { readonly tab: GlobalRepCategoryTab }) {
         <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
           Recipients
         </th>
-        <th scope="col" className="tw-px-4 tw-py-3 tw-text-left">
+        <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
           Last modified
         </th>
       </tr>
@@ -291,7 +296,7 @@ function TableHeader({ tab }: { readonly tab: GlobalRepCategoryTab }) {
 
   return (
     <tr>
-      <th scope="col" className="tw-w-16 tw-px-4 tw-py-3 tw-text-left">
+      <th scope="col" className="tw-w-16 tw-px-4 tw-py-3 tw-text-right">
         Rank
       </th>
       <th scope="col" className="tw-px-4 tw-py-3 tw-text-left">
@@ -303,7 +308,7 @@ function TableHeader({ tab }: { readonly tab: GlobalRepCategoryTab }) {
       <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
         REP
       </th>
-      <th scope="col" className="tw-px-4 tw-py-3 tw-text-left">
+      <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
         Last modified
       </th>
     </tr>
@@ -323,7 +328,9 @@ function TableRow({
   if ("recipient" in item) {
     return (
       <tr className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/5 last:tw-border-b-0">
-        <td className="tw-px-4 tw-py-3 tw-text-sm tw-text-iron-500">{rank}</td>
+        <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-500">
+          {rank}
+        </td>
         <td className="tw-px-4 tw-py-3">
           <ProfileCell profile={item.giver} />
         </td>
@@ -333,7 +340,7 @@ function TableRow({
         <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-semibold tw-text-iron-100">
           {formatNumberWithCommas(item.rep)}
         </td>
-        <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+        <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-400">
           {formatRepCategoryDate(item.last_modified)}
         </td>
       </tr>
@@ -342,7 +349,9 @@ function TableRow({
 
   return (
     <tr className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/5 last:tw-border-b-0">
-      <td className="tw-px-4 tw-py-3 tw-text-sm tw-text-iron-500">{rank}</td>
+      <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-500">
+        {rank}
+      </td>
       <td className="tw-px-4 tw-py-3">
         <ProfileCell profile={item.profile} />
       </td>
@@ -354,7 +363,7 @@ function TableRow({
           ? formatNumberWithCommas(item.rater_count)
           : formatNumberWithCommas(item.recipient_count)}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-400">
         {formatRepCategoryDate(item.last_modified)}
       </td>
     </tr>
@@ -438,10 +447,7 @@ function PaginatedTable({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-          Server sorted
-        </p>
+      <div className="tw-flex tw-flex-wrap tw-justify-end tw-gap-3">
         <div
           className="tw-inline-flex tw-flex-wrap tw-gap-2"
           aria-label="Sort category rows"
