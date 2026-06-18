@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
@@ -177,11 +177,24 @@ describe("CmsSiteRenderer", () => {
     expect(firstWork).toHaveFocus();
 
     await user.click(firstWork);
-    await user.click(
-      screen.getByRole("dialog", {
+    const reopenedDialog = screen.getByRole("dialog", {
+      name: "The Memes by 6529 card number 1",
+    });
+
+    fireEvent.mouseDown(reopenedDialog);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    fireEvent.mouseDown(screen.getByTestId("cms-art-lightbox-toolbar"));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    fireEvent.mouseDown(
+      within(reopenedDialog).getByRole("img", {
         name: "The Memes by 6529 card number 1",
       })
     );
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("cms-art-lightbox-backdrop"));
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 

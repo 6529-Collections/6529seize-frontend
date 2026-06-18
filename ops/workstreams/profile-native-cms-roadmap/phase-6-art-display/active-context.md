@@ -40,5 +40,5 @@ stacked on `codex/profile-cms-builder-mvp`.
 
 ## Status
 
-- Follow-up review fixes for PR #2734 are locally validated.
+- Second follow-up fix for PR #2734 is locally validated.
 - Next action is to commit, push, and request `/6529bot followup`.

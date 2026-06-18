@@ -65,3 +65,22 @@
   lightbox `<img>` usage, retained intentionally for faithful CMS art media
   rendering.
 - `codex-diff-check`
+
+## 2026-06-18 - PR #2734 Second Lightbox Follow-up
+
+- Constrained backdrop dismissal to the explicit image-stage backdrop rather
+  than the broad dialog root.
+- Added regression coverage that dialog root/gutter, toolbar, and artwork
+  content mouse-down events do not dismiss the lightbox; only an intentional
+  image-stage backdrop click closes it.
+
+## Second Follow-up Validation Evidence
+
+- `seize exec prettier --write __tests__/components/profile-cms/CmsSiteRenderer.test.tsx components/profile-cms/CmsArtLightbox.tsx`
+- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx`
+  passed with 11 tests; the temporary Jest config was removed after the run.
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff` passed with the same two intentional lightbox
+  `<img>` warnings for faithful CMS art media rendering.
+- `codex-diff-check`

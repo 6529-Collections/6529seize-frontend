@@ -330,7 +330,7 @@ function ArtworkDialog({
     stopNestedSpaceScroll(event);
   };
 
-  const handleBackdropMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
       close();
     }
@@ -346,7 +346,6 @@ function ArtworkDialog({
       aria-modal="true"
       className="tw-fixed tw-inset-0 tw-z-[1100] tw-flex tw-bg-black/95 tw-text-iron-100"
       onKeyDown={handleDialogKeyDown}
-      onMouseDown={handleBackdropMouseDown}
       ref={dialogRef}
       role="dialog"
       tabIndex={-1}
@@ -364,7 +363,10 @@ function ArtworkDialog({
               {activeItem.title}
             </h2>
           </div>
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+          <div
+            className="tw-flex tw-flex-wrap tw-items-center tw-gap-2"
+            data-testid="cms-art-lightbox-toolbar"
+          >
             {items.length > 1 ? (
               <>
                 <LightboxButton
@@ -412,7 +414,11 @@ function ArtworkDialog({
               : "tw-grid-cols-1"
           }`}
         >
-          <div className="tw-min-h-0 tw-overflow-auto tw-p-4">
+          <div
+            className="tw-min-h-0 tw-overflow-auto tw-p-4"
+            data-testid="cms-art-lightbox-backdrop"
+            onClick={handleBackdropClick}
+          >
             <div
               className="tw-flex tw-min-h-full tw-items-center tw-justify-center"
               style={getArtworkFrameStyle(activeItem)}
