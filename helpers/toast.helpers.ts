@@ -51,10 +51,7 @@ const endsWithIgnoreCase = (value: string, suffix: string): boolean =>
 const startsWithIgnoreCase = (value: string, prefix: string): boolean =>
   value.toLowerCase().startsWith(prefix.toLowerCase());
 
-const stripTrailingCharacters = (
-  value: string,
-  characters: string
-): string => {
+const stripTrailingCharacters = (value: string, characters: string): string => {
   let endIndex = value.length;
 
   while (endIndex > 0 && characters.includes(value[endIndex - 1]!)) {
@@ -74,10 +71,8 @@ const replaceTrailingExclamations = (value: string): string => {
 const stripTrailingSentencePunctuation = (value: string): string =>
   stripTrailingCharacters(value, SENTENCE_ENDINGS);
 
-const includesAny = (
-  value: string,
-  fragments: readonly string[]
-): boolean => fragments.some((fragment) => value.includes(fragment));
+const includesAny = (value: string, fragments: readonly string[]): boolean =>
+  fragments.some((fragment) => value.includes(fragment));
 
 const hasInsufficientBalanceMessage = (lowerMessage: string): boolean =>
   includesAny(lowerMessage, ["insufficient balance", "insufficient funds"]) ||
@@ -138,7 +133,9 @@ export const getToastErrorDetails = (
   fallback?: string
 ): string | undefined => {
   const rawSanitized = sanitizeErrorForUser(error).trim();
-  const normalizedFallback = fallback ? normalizeToastText(fallback) : undefined;
+  const normalizedFallback = fallback
+    ? normalizeToastText(fallback)
+    : undefined;
 
   if (!rawSanitized || isGenericErrorMessage(rawSanitized)) {
     return normalizedFallback;
@@ -314,7 +311,9 @@ export const getFriendlyToastContent = ({
     };
   }
 
-  if (includesAny(lowerMessage, ["network", "failed to fetch", "load failed"])) {
+  if (
+    includesAny(lowerMessage, ["network", "failed to fetch", "load failed"])
+  ) {
     return {
       title: "Network error.",
       description: "Check your connection and try again.",

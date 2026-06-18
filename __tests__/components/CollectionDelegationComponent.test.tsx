@@ -72,7 +72,8 @@ describe("CollectionDelegationComponent", () => {
 
   function mockCollectionLockState(collectionLocked: boolean) {
     mockUseReadContract.mockImplementation((params?: { args?: string[] }) => ({
-      data: params?.args?.[0] === collection.contract ? collectionLocked : false,
+      data:
+        params?.args?.[0] === collection.contract ? collectionLocked : false,
     }));
   }
 
@@ -223,6 +224,8 @@ describe("CollectionDelegationComponent", () => {
 
     expect(screen.getByText("Locking Wallet Failed")).toBeInTheDocument();
     expect(screen.getByText("receipt failed")).toBeInTheDocument();
-    expect(screen.queryByText(/Transaction Successful!/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Transaction Successful!/i)
+    ).not.toBeInTheDocument();
   });
 });

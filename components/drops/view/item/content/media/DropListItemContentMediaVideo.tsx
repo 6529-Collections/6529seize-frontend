@@ -133,6 +133,9 @@ function DropListItemContentMediaVideo({
         onOpen={openMedia}
         openLabel={openLabel}
         isDownloading={isDownloading}
+        onVideoClick={(event) => {
+          event.preventDefault();
+        }}
       />
     </div>
   );

@@ -93,10 +93,7 @@ describe("UserPageStatsActivityWalletTableWrapper", () => {
     );
     expect(screen.getByTestId("loader")).toBeInTheDocument();
     expect(screen.getByTestId("table")).toBeInTheDocument();
-    expect(screen.getByTestId("table")).toHaveAttribute(
-      "data-locale",
-      "de-DE"
-    );
+    expect(screen.getByTestId("table")).toHaveAttribute("data-locale", "de-DE");
     expect(screen.getByTestId("pagination")).toHaveAttribute("data-total", "2");
   });
 

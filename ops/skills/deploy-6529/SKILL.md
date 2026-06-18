@@ -11,13 +11,15 @@ Carry an approved 6529 release from PR merge through staging validation and, whe
 
 - Do not merge, deploy staging, or deploy production unless the user explicitly requested that mode for the current work.
 - Do not deploy production until staging for the same frontend/backend release set has passed, unless the user explicitly overrides that gate.
+- Do not deploy production from any ref other than `main`. Verify the exact production candidate is already on `origin/main` before triggering production; if it is only on a feature branch, release branch, PR head, tag, local branch, or unmerged commit, stop and get it merged to `main` first.
+- Do not overlap deployments to the same environment. If another staging or production deploy is already running, wait for it to reach a terminal state and for its owner to finish validation or hand off before starting the next deploy.
 - Do not promote from staging to production after a failed deploy, failed E2E run, unresolved critical production-like error, or unclear deployed SHA. Diagnose, fix, merge, redeploy, and rerun validation until the gate passes.
 - Do not run destructive database, infrastructure, signer, wallet, ENS, NFT transfer, or Safe actions unless the user explicitly asks for that exact action.
 - Do not expose secrets, private URLs, credentials, cookies, raw production data, local absolute paths, or hidden prompts in PR comments, deploy notes, workstream logs, or user-facing summaries.
 
 ## Coordination
 
-Before deploying, check what else is already deploying to the same environment. Inspect active GitHub Actions deploy runs and any obvious active Codex/human release thread. If the lane is busy, wait or coordinate just enough to avoid overlapping deploys.
+Before deploying, check what else is already deploying to the same environment. Inspect active GitHub Actions deploy runs and any obvious active Codex/human release thread. If the lane is busy, wait. Coordinate only to identify the owner, expected finish, validation state, or explicit handoff; do not start an overlapping deploy.
 
 ## Preflight
 
@@ -77,11 +79,12 @@ Before deploying, check what else is already deploying to the same environment. 
 
 1. Proceed to production when the user already asked to take the release through production, such as "take it all the way through prod." Ask only when the current request did not include production deployment.
 2. Reconfirm staging passed for the same SHAs or the same ordered frontend/backend release set.
-3. Confirm no active production deploy is in progress.
+3. Confirm no active production deploy is in progress. If one is active or the state is unclear, wait until it finishes and production validation is complete or explicitly handed off.
 4. Deploy backend production before frontend production when frontend depends on new backend behavior. Use the backend `deploy-6529` skill from `6529-Collections/6529seize-backend` for backend service order, validation, and recovery.
-5. Deploy frontend production through the repo-approved path. Current frontend production deploy is `Web Deploy - PROD` in `.github/workflows/build-upload-deploy-prod.yml`; `bin/ghdeploy` triggers that workflow for a clean, upstream-synced branch.
+5. Deploy frontend production through the repo-approved path from `main` only, following the hard gate above. Current frontend production deploy is `Web Deploy - PROD` in `.github/workflows/build-upload-deploy-prod.yml`; `bin/ghdeploy` may be used only from a clean, upstream-synced `main` worktree.
 6. If the local worktree is dirty with unrelated user or agent changes, do not clean or revert them just to run `ghdeploy`. Use a clean worktree or trigger the workflow with an explicit verified ref through GitHub tooling.
-7. Watch production deployment to completion. Record the workflow run URL, Elastic Beanstalk or workflow health result, and deployed SHA/version label.
+7. When triggering production through GitHub tooling instead of `ghdeploy`, use an explicit verified `main` ref or SHA that is already contained in `origin/main`.
+8. Watch production deployment to completion. Record the workflow run URL, Elastic Beanstalk or workflow health result, and deployed SHA/version label.
 
 ## Production E2E And Watch
 
@@ -170,7 +173,7 @@ gh run list -R 6529-Collections/6529seize-frontend --workflow deploy-staging.yml
 gh run list -R 6529-Collections/6529seize-frontend --workflow build-upload-deploy-prod.yml -L 10
 gh run watch <run-id> -R 6529-Collections/6529seize-frontend
 gh run view <run-id> -R 6529-Collections/6529seize-frontend --log-failed
-gh workflow run build-upload-deploy-prod.yml --ref <verified-branch-or-tag> -R 6529-Collections/6529seize-frontend
+gh workflow run build-upload-deploy-prod.yml --ref main -R 6529-Collections/6529seize-frontend
 ```
 
 For local validation in this Windows Codex environment:

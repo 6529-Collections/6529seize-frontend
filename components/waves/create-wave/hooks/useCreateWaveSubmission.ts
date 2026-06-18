@@ -59,7 +59,8 @@ export function useCreateWaveSubmission({
           );
         } catch {
           setToast({
-            message: "Wave created, but custom display settings were not saved.",
+            message:
+              "Wave created, but custom display settings were not saved.",
             type: "warning",
           });
         }

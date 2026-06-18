@@ -60,4 +60,3 @@ AI-agent affordances:
 - Source packet strips executable/untrusted HTML.
 - Agent patch validation rejects unsafe URLs and route collisions.
 - Publishing cannot be triggered by patch import alone.
-

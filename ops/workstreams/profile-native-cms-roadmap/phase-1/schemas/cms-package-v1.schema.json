@@ -75,12 +75,21 @@
     "site_manifest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["title", "base_path", "default_locale", "theme", "navigation_id"],
+      "required": [
+        "title",
+        "base_path",
+        "default_locale",
+        "theme",
+        "navigation_id"
+      ],
       "properties": {
         "title": { "type": "string", "minLength": 1, "maxLength": 160 },
         "description": { "type": "string", "maxLength": 300 },
         "base_path": { "$ref": "#/$defs/path" },
-        "default_locale": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$" },
+        "default_locale": {
+          "type": "string",
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+        },
         "direction": { "enum": ["ltr", "rtl"] },
         "theme": { "$ref": "#/$defs/theme" },
         "navigation_id": { "$ref": "#/$defs/id" },
@@ -327,7 +336,13 @@
     "nft_media_profile": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "chain_id", "contract", "token_id", "display_variants"],
+      "required": [
+        "id",
+        "chain_id",
+        "contract",
+        "token_id",
+        "display_variants"
+      ],
       "properties": {
         "id": { "$ref": "#/$defs/id" },
         "chain_id": { "type": "integer", "minimum": 1 },
@@ -378,7 +393,13 @@
     "exhibition_room": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title", "room_type", "placements", "fallback_page_id"],
+      "required": [
+        "id",
+        "title",
+        "room_type",
+        "placements",
+        "fallback_page_id"
+      ],
       "properties": {
         "id": { "$ref": "#/$defs/id" },
         "title": { "type": "string", "minLength": 1 },
@@ -429,7 +450,12 @@
       "required": ["hydration"],
       "properties": {
         "hydration": {
-          "enum": ["static", "client_island", "deferred_island", "sandboxed_embed"]
+          "enum": [
+            "static",
+            "client_island",
+            "deferred_island",
+            "sandboxed_embed"
+          ]
         },
         "requires_user_activation": { "type": "boolean" },
         "fallback_asset_id": { "$ref": "#/$defs/id" },
@@ -498,7 +524,14 @@
       "properties": {
         "id": { "$ref": "#/$defs/id" },
         "source_type": {
-          "enum": ["wallet", "nft_metadata", "collection", "transaction", "profile", "import"]
+          "enum": [
+            "wallet",
+            "nft_metadata",
+            "collection",
+            "transaction",
+            "profile",
+            "import"
+          ]
         },
         "captured_at": { "type": "string", "format": "date-time" },
         "content_hash": { "$ref": "#/$defs/hash" }
@@ -541,7 +574,12 @@
     "integrity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["canonicalization", "hash_algorithm", "payload_hash", "package_hash"],
+      "required": [
+        "canonicalization",
+        "hash_algorithm",
+        "payload_hash",
+        "package_hash"
+      ],
       "properties": {
         "canonicalization": { "const": "jcs-rfc8785" },
         "hash_algorithm": { "const": "sha256" },

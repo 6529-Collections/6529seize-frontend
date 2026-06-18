@@ -9,6 +9,13 @@ jest.mock("next/dynamic", () => () => (props: any) => (
   <div data-testid="dynamic" {...props} />
 ));
 
+jest.mock("@/components/the-memes/TheMemesMint", () => ({
+  __esModule: true,
+  default: ({ nft }: { nft: { id: number } }) => (
+    <div data-testid="mint-component" data-nft-id={nft.id} />
+  ),
+}));
+
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn(),
 }));
@@ -50,9 +57,10 @@ describe("TheMemesMintPage", () => {
       <AuthContext.Provider value={{} as any}>{jsx}</AuthContext.Provider>
     );
 
-    const dynamic = await screen.findByTestId("dynamic");
+    const mint = await screen.findByTestId("mint-component");
 
-    expect(dynamic).toBeInTheDocument();
+    expect(mint).toBeInTheDocument();
+    expect(mint).toHaveAttribute("data-nft-id", "1");
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "memes_latest",
       headers: { h: "1" },
@@ -61,19 +69,39 @@ describe("TheMemesMintPage", () => {
 
   it("exports metadata", async () => {
     const metadata = await generateMetadata();
-    expect(metadata).toEqual({
+    const [image] = metadata.openGraph?.images as {
+      alt: string;
+      height: number;
+      url: string;
+      width: number;
+    }[];
+    const url = new URL(image.url);
+
+    expect(metadata).toMatchObject({
       title: "Mint | The Memes",
       description: "Collections | 6529.io",
       icons: { icon: "/favicon.ico" },
-      openGraph: {
-        images: ["https://test.6529.io/memes-preview.png"],
-        title: "Mint | The Memes",
-        description: "Collections | 6529.io",
-      },
       other: { version: "test-version" },
       twitter: {
         card: "summary_large_image",
+        site: "@6529Collections",
       },
     });
+    expect(metadata.openGraph).toMatchObject({
+      type: "website",
+      siteName: "6529.io",
+      title: "Mint | The Memes",
+      description: "Collections | 6529.io",
+    });
+    expect(image).toMatchObject({
+      alt: "The Memes mint social card",
+      height: 630,
+      width: 1200,
+    });
+    expect(url.pathname).toBe("/api/og-metadata/collections/the-memes");
+    expect(url.searchParams.get("subtitle")).toBe(
+      "Latest The Memes mint on 6529.io"
+    );
+    expect(url.searchParams.get("title")).toBe("Mint | The Memes");
   });
 });

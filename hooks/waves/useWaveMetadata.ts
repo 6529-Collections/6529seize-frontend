@@ -50,18 +50,15 @@ export function useWaveOutcomeVisibility(
     enabled: isCompetitionWave,
   });
 
-  return useMemo(
-    () => {
-      if (!isCompetitionWave) {
-        return true;
-      }
+  return useMemo(() => {
+    if (!isCompetitionWave) {
+      return true;
+    }
 
-      if (data === undefined) {
-        return false;
-      }
+    if (data === undefined) {
+      return false;
+    }
 
-      return getWaveOutcomeVisibilityFromMetadata(data);
-    },
-    [data, isCompetitionWave]
-  );
+    return getWaveOutcomeVisibilityFromMetadata(data);
+  }, [data, isCompetitionWave]);
 }
