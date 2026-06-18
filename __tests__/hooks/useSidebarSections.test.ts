@@ -40,4 +40,18 @@ describe("useSidebarSections", () => {
       false
     );
   });
+
+  it("does not include retired release notes links", () => {
+    const { result } = renderHook(() => useSidebarSections(false, false, "US"));
+
+    const allItems = result.current.flatMap((section) => [
+      ...section.items,
+      ...section.subsections.flatMap((subsection) => subsection.items),
+    ]);
+
+    expect(allItems.some((item) => item.name === "Release Notes")).toBe(false);
+    expect(
+      allItems.some((item) => item.href === "/about/release-notes")
+    ).toBe(false);
+  });
 });
