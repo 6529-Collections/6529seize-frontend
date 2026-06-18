@@ -61,11 +61,17 @@ Validation completed so far:
   - No unfiltered browser console or page errors were reported during the final
     3D smoke pass.
 
-Pending before PR:
+PR status:
 
-- `codex-diff-check`.
-- Commit, push, PR to `codex/profile-cms-builder-mvp`, then inspect checks and
-  review feedback.
+- Opened draft PR #2736:
+  `https://github.com/6529-Collections/6529seize-frontend/pull/2736`
+- Base: `codex/profile-cms-builder-mvp`
+- Head: `codex/cms-3d-rooms-mvp`
+- Follow-up verification passed:
+  - `codex-diff-check`
+  - GitHub checks: CodeRabbit, DCO, and `security/snyk (6529)` all pass.
+  - No review threads or actionable bot comments were returned on the latest
+    head before handoff.
 
 ## 2026-06-17
 
