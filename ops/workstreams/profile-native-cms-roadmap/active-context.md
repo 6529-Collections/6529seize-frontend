@@ -38,11 +38,18 @@ Available now:
   `art-nft-display-best-practices.md`.
 - A phase-based agentic storm execution plan now exists at
   `agentic-storm-execution-plan.md`.
+- Wave 1 frontend runtime bridge work is in progress on
+  `codex/profile-cms-runtime-bridge`: App Router support for
+  `/{handle}/index.html`, a narrow primary-site API adapter, a V1 static
+  renderer, and profile Website link plumbing.
 
 Important limits:
 
-- No runtime CMS route, renderer, builder, publish endpoint, storage adapter, or
-  pointer implementation has been landed by this Phase 0/1 pass.
+- No builder, publish endpoint, storage adapter, or backend pointer
+  implementation has been landed by this Phase 0/1 pass.
+- The frontend runtime adapter assumes `GET /api/profile-cms/:handle/primary`
+  and documents that boundary in
+  `runtime-bridge-integration-assumptions.md`.
 - The broader schema is ahead of any authoring experience.
 - Real IPFS and Arweave upload adapters are still needed.
 - Real wallet signature verification is still needed.
@@ -76,10 +83,9 @@ The highest leverage next slice is Wave 1 from `phase-0/pr-wave-plan.md`:
    a shared 6529mono package before BE adoption.
 2. Add backend tests that consume the same Phase 1 fixture corpus and validation
    result shape.
-3. Start the `/{handle}/index.html` route and native static renderer behind a
-   feature flag.
-4. Add profile-page website button plumbing for profiles with a published CMS
-   pointer.
+3. Review and merge the frontend runtime bridge for `/{handle}/index.html`.
+4. Align backend primary pointer response to the documented runtime adapter
+   envelope.
 5. Only then fan out publish/storage, builder, wallet-gallery generation, art
    display, 3D rooms, and AI-agent affordances.
 

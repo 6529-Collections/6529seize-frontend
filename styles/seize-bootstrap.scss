@@ -8,9 +8,9 @@ $orange: #ffa500;
 $yellow: #ffff00;
 // Add any other Bootstrap variables you want to set globally BEFORE the import.
 
-// Import Bootstrap through the Sass load path so dependency deprecation warnings
-// remain silenced by quietDeps.
-@use "bootstrap/scss/bootstrap" with (
+// Import Bootstrap's full SCSS by explicit path so Turbopack/Sass resolves
+// Bootstrap partials before similarly named npm packages.
+@use "../node_modules/bootstrap/scss/bootstrap" with (
   $pink: $pink,
   $green: $green,
   $blue: $blue,

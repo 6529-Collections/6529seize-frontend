@@ -494,3 +494,26 @@ Start with Phase 0 and Phase 1 only:
 
 Only then fan agents out across route/render, publish/storage, builder, wallet
 gallery, art display, 3D, AI-agent affordances, and migration lanes.
+
+## 2026-06-17 - FE Runtime Bridge
+
+- Created isolated branch/worktree `codex/profile-cms-runtime-bridge`.
+- Added frontend runtime bridge scope for profile-native CMS sites only:
+  `/{handle}/index.html` route support, primary-site package adapter,
+  V1 static renderer, and profile Website link plumbing.
+- Documented the expected backend contract:
+  `GET /api/profile-cms/:handle/primary` returning
+  `{ package, package_id, version, package_hash, payload_hash, updated_at,
+  published_at? }`, with `404` for no primary site.
+- Safety notes: API packages enforce V1 hashes and reject fixture artifacts;
+  dev fixture fallback is non-production opt-in; raw HTML is not executed;
+  sandboxed embeds exclude `allow-same-origin`.
+- Focused validation passed:
+  `seize run test:no-coverage -- __tests__/lib/profile-cms/runtime/routes.test.ts __tests__/lib/profile-cms/runtime/fetcher.test.ts __tests__/components/profile-cms/CmsSiteRenderer.test.tsx __tests__/components/user/user-page-header/UserPageHeader.test.tsx __tests__/app/profile-cms-route.test.tsx --runInBand`,
+  `seize run lint:changed`, `seize run typecheck:changed`,
+  `seize run react-doctor:diff`, and `codex-diff-check`.
+- Local browser smoke was timeboxed. The dev server reached Ready on the
+  assigned port, then Turbopack exited because the temporary clean worktree
+  dependency junction points outside the project root. This is a local
+  dependency-shape caveat from avoiding another broad install, not a CMS
+  runtime error.
