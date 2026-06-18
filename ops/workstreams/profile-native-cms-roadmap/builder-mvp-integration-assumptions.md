@@ -180,6 +180,23 @@ storage flow and exact BE publish body are wired.
   and the 3D lane is limited to bounded viewer primitives rather than a full
   world editor.
 
+## AI-Agent Affordance Follow-Up
+
+The Phase 8 builder follow-up adds draft-only BYO-agent affordances without
+changing the backend write model:
+
+- Package, source packet, and schema bundle downloads are client-side exports.
+- Source packets separate facts, author copy, derived metadata, validation
+  diagnostics, and prompt-injection-safe handling rules.
+- Agent patch import accepts `6529.cms.agent_patch.v1` JSON, checks the current
+  draft id/version/hash target, previews the diff, recomputes package hashes,
+  and runs local V1 validation.
+- Patch import never saves, server-validates, signs, stores, or publishes.
+  Users must explicitly apply the patch to the local draft, then separately use
+  owner-gated backend actions.
+- The MCP read-tool contract is documented as a future read-only interface until
+  backend draft storage and authenticated read endpoints exist.
+
 ## Localization Follow-Up
 
 - Route: `/{handle}/cms/builder`
@@ -194,6 +211,10 @@ storage flow and exact BE publish body are wired.
   block, callout, metadata, and fixture alt text in the Preview tab. Starter and
   preview package text is treated as editable authored content, not translated
   runtime chrome.
+- Agent tab fallback debt: `ProfileCmsAgentPanel` source packet labels,
+  workspace copy, and rejection states are now message-backed in `en-US`, but
+  non-source locale dictionaries intentionally fall back to `en-US`. User
+  impact remains limited to the hidden flagged builder route.
 - Owner/follow-up: frontend CMS builder lane should add partial-locale builder
   keys before the route exits hidden feature-flag status.
 - Remediation: translate `profileCms.builder.*` chrome keys and decide whether

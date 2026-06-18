@@ -152,6 +152,64 @@ const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
   } as const
 );
 
+const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
+  "loading.details": "Loading REP category details",
+  "pill.openGlobalAriaLabel": "Open global REP category {category}",
+  "pill.editAriaLabel": "Edit REP category {category}",
+  "sidebar.otherTools": "Other Tools",
+  "sidebar.repCategories": "REP Categories",
+  "sidebar.api": "API",
+  "search.minChars": "Type at least 3 characters to search.",
+  "search.loading": "Searching REP categories",
+  "search.error": "Could not search REP categories.",
+  "search.empty": "No matching categories found.",
+  "search.view": "View",
+  "search.label": "Search REP categories",
+  "search.placeholder": "Type a category name",
+  "search.resultsLabel": "REP category search results",
+  "suggested.loading": "Loading active REP categories",
+  "suggested.error": "Could not load active REP categories.",
+  "suggested.empty": "No active REP categories found yet.",
+  "suggested.rep": "REP",
+  "suggested.ratings": "Ratings",
+  "suggested.title": "Active REP categories",
+  "suggested.description":
+    "Categories with the most profile REP activity.",
+  "wave.tabs.waves": "Waves",
+  "wave.tabs.contributors": "Contributors",
+  "wave.sort.repDesc": "REP impact high",
+  "wave.sort.repAsc": "REP impact low",
+  "wave.sort.recent": "Recent",
+  "wave.metrics.rep": "Wave REP",
+  "wave.metrics.waves": "Waves",
+  "wave.metrics.contributors": "Contributors",
+  "wave.preview.waves": "Waves preview",
+  "wave.preview.contributors": "Contributors preview",
+  "wave.table.wavesCaption": "Waves using REP category {category}",
+  "wave.table.contributorsCaption":
+    "Wave REP contributors for category {category}",
+  "wave.table.rank": "Rank",
+  "wave.table.wave": "Wave",
+  "wave.table.rep": "REP",
+  "wave.table.contributors": "Contributors",
+  "wave.table.leadingContributors": "Leading contributors",
+  "wave.table.lastModified": "Last modified",
+  "wave.table.contributor": "Contributor",
+  "wave.sort.label": "Sort Wave REP rows",
+  "wave.sections.label": "Wave REP category sections",
+  "wave.loading.overview": "Loading Wave REP category overview",
+  "wave.loading.rows": "Loading Wave REP {tab}",
+  "wave.error.overviewTitle": "Could not load Wave REP",
+  "wave.error.overviewMessage": "Wave REP for this category failed to load.",
+  "wave.error.rowsTitle": "Could not load Wave REP rows",
+  "wave.error.rowsMessage": "Wave REP rows failed to load.",
+  "wave.empty.title": "No Wave REP found",
+  "wave.empty.message": "This category has not been used for Wave REP yet.",
+  "wave.empty.contributors": "None yet",
+  "wave.loadMore": "Load more",
+  "wave.loadingMore": "Loading...",
+} as const);
+
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
   {
@@ -686,6 +744,7 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.tab.editor": "Editor",
   "profileCms.builder.tab.preview": "Preview",
   "profileCms.builder.tab.json": "JSON",
+  "profileCms.builder.tab.agent": "Agent",
   "profileCms.builder.cta.saveDraft": "Save draft",
   "profileCms.builder.cta.serverValidate": "Server validate",
   "profileCms.builder.cta.publish": "Publish",
@@ -780,6 +839,83 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.json.label": "Package candidate",
   "profileCms.builder.json.import": "Import JSON",
   "profileCms.builder.json.importFailed": "Package JSON could not be imported.",
+  "profileCms.builder.json.downloadPackage": "Download package JSON",
+  "profileCms.builder.json.downloadSourcePacket": "Download source packet",
+  "profileCms.builder.json.downloadSchemaBundle": "Download schemas",
+  "profileCms.builder.agent.source.title": "Source packet",
+  "profileCms.builder.agent.source.description":
+    "Export draft context for local tools and review the packet boundaries.",
+  "profileCms.builder.agent.packet.facts": "Facts",
+  "profileCms.builder.agent.packet.authorCopy": "Author copy",
+  "profileCms.builder.agent.packet.derivedMetadata": "Derived metadata",
+  "profileCms.builder.agent.packet.validation": "Validation diagnostics",
+  "profileCms.builder.agent.packet.safety": "Source rules",
+  "profileCms.builder.agent.packet.label.profile": "Profile",
+  "profileCms.builder.agent.packet.label.package": "Package",
+  "profileCms.builder.agent.packet.label.draft": "Draft",
+  "profileCms.builder.agent.packet.label.route": "Route",
+  "profileCms.builder.agent.packet.label.site": "Site",
+  "profileCms.builder.agent.packet.label.page": "Page",
+  "profileCms.builder.agent.packet.label.navigation": "Navigation",
+  "profileCms.builder.agent.packet.label.blocks": "Blocks",
+  "profileCms.builder.agent.packet.label.canonical": "Canonical",
+  "profileCms.builder.agent.packet.label.packageHash": "Package hash",
+  "profileCms.builder.agent.packet.label.payloadHash": "Payload hash",
+  "profileCms.builder.agent.packet.label.assets": "Assets",
+  "profileCms.builder.agent.packet.label.status": "Status",
+  "profileCms.builder.agent.packet.label.issues": "Issues",
+  "profileCms.builder.agent.packet.label.baseVersion": "Base version",
+  "profileCms.builder.agent.packet.label.writable": "Writable",
+  "profileCms.builder.agent.packet.value.yes": "Yes",
+  "profileCms.builder.agent.packet.value.no": "No",
+  "profileCms.builder.agent.patch.title": "Patch review",
+  "profileCms.builder.agent.patch.description":
+    "Paste or upload an agent patch, review the diff, then apply it to this draft.",
+  "profileCms.builder.agent.patch.upload": "Upload patch",
+  "profileCms.builder.agent.patch.fileTooLarge":
+    "Patch file is too large. Paste a smaller JSON patch.",
+  "profileCms.builder.agent.patch.review": "Review patch",
+  "profileCms.builder.agent.patch.apply": "Apply to draft",
+  "profileCms.builder.agent.patch.label": "Agent patch JSON",
+  "profileCms.builder.agent.patch.accepted":
+    "Patch validates against the current draft.",
+  "profileCms.builder.agent.patch.rejected":
+    "Patch was rejected before it could change the draft.",
+  "profileCms.builder.agent.patch.applied": "Patch applied to this draft.",
+  "profileCms.builder.agent.patch.diff": "Proposed diff",
+  "profileCms.builder.agent.error.codeLabel": "Code: {code}",
+  "profileCms.builder.agent.error.jsonInvalid":
+    "Patch JSON could not be parsed.",
+  "profileCms.builder.agent.error.schemaInvalid":
+    "Patch JSON does not match the agent patch schema.",
+  "profileCms.builder.agent.error.targetDraftMismatch":
+    "Patch target draft id does not match the current draft.",
+  "profileCms.builder.agent.error.baseVersionMismatch":
+    "Patch target base version is stale for the current draft.",
+  "profileCms.builder.agent.error.baseHashMissing":
+    "Patch target package hash is required.",
+  "profileCms.builder.agent.error.baseHashMismatch":
+    "Patch target package hash does not match the current draft.",
+  "profileCms.builder.agent.error.operationUnsupported":
+    "Builder review does not support {op}.",
+  "profileCms.builder.agent.error.pageMissing":
+    "Builder draft does not contain an editable homepage.",
+  "profileCms.builder.agent.error.valueInvalid":
+    "Patch value is not valid for this operation.",
+  "profileCms.builder.agent.error.pathUnsupported":
+    "Builder review cannot apply path {path}.",
+  "profileCms.builder.agent.error.metadataFieldUnsupported":
+    "Metadata field {field} is not editable by agent patches.",
+  "profileCms.builder.agent.error.blockFieldUnsupported":
+    "Block field {field} is not editable by agent patches.",
+  "profileCms.builder.agent.error.blockDuplicateId":
+    "Block id {id} already exists in this draft.",
+  "profileCms.builder.agent.error.blockStructuralMix":
+    "Structural block operations cannot be combined with other block mutations in one patch.",
+  "profileCms.builder.agent.error.navigationMissing":
+    "Builder draft does not contain an editable navigation item.",
+  "profileCms.builder.agent.error.validationRejected":
+    "Local package validation rejected this change ({code}).",
   "profileCms.builder.validation.title": "Validation",
   "profileCms.builder.validation.valid": "Package candidate is valid.",
   "profileCms.builder.validation.invalid": "Package candidate needs changes.",
@@ -839,6 +975,7 @@ export const EN_US_MESSAGES = {
   ...USER_RATE_MESSAGES,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
+  ...REP_CATEGORY_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
