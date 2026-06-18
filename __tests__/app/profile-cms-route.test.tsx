@@ -119,17 +119,19 @@ describe("profile CMS App Router catch-all", () => {
     );
   });
 
-  it("returns a safe not-found when no primary CMS site exists", async () => {
+  it("returns a safe empty state when no primary CMS site exists", async () => {
     getProfileCmsPrimarySiteMock.mockResolvedValueOnce(null);
 
-    await expect(
-      ProfileCmsPage({
-        params: Promise.resolve({
-          user: "punk6529",
-          cmsPath: ["index.html"],
-        }),
-      })
-    ).rejects.toThrow("NEXT_NOT_FOUND");
+    const page = await ProfileCmsPage({
+      params: Promise.resolve({
+        user: "punk6529",
+        cmsPath: ["index.html"],
+      }),
+    });
+
+    render(page);
+
+    expect(screen.getByText("Website page not found")).toBeInTheDocument();
   });
 
   it("does not throw from metadata when no primary CMS site exists", async () => {
@@ -143,6 +145,17 @@ describe("profile CMS App Router catch-all", () => {
     });
 
     expect(metadata.title).toBeDefined();
+  });
+
+  it("keeps non-CMS profile paths as not-found", async () => {
+    await expect(
+      ProfileCmsPage({
+        params: Promise.resolve({
+          user: "punk6529",
+          cmsPath: ["collected"],
+        }),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
   it("shows an empty state for published packages missing a route", async () => {
