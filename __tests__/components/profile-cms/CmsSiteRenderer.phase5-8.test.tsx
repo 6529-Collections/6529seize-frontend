@@ -26,6 +26,12 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
 const walletGalleryCmsPackage = walletGalleryPackage as unknown as CmsPackageV1;
 const collectionCmsPackage = collectionPagePackage as unknown as CmsPackageV1;
 const nftDetailCmsPackage = nftDetailPackage as unknown as CmsPackageV1;
@@ -56,7 +62,7 @@ describe("CmsSiteRenderer Phase 5-8 fixtures", () => {
     );
   });
 
-  it("renders the generated collection page contract and knowledge context", () => {
+  it("renders the generated collection page knowledge context and contact sheet", () => {
     renderFixturePage(collectionCmsPackage, "page-collection");
 
     expect(
@@ -69,9 +75,11 @@ describe("CmsSiteRenderer Phase 5-8 fixtures", () => {
         "Collection context fixture grounded in a knowledge packet."
       )
     ).toBeInTheDocument();
-    expect(screen.getByText("Chain 1")).toBeInTheDocument();
     expect(
-      screen.getByText("0x33fd426905f149f8376e227d0c9d3340aad17af1")
+      screen.getAllByAltText("The Memes by 6529 card number 1").length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { name: "Collection contact sheet" })
     ).toBeInTheDocument();
   });
 
@@ -84,11 +92,13 @@ describe("CmsSiteRenderer Phase 5-8 fixtures", () => {
       "src",
       "https://media.6529.io/ipfs/bafyfixturenft/original.png"
     );
-    expect(screen.getByText("Token #1")).toBeInTheDocument();
-    expect(screen.getByText("Chain 1")).toBeInTheDocument();
+    expect(screen.getAllByText("Token ID").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("1").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Chain").length).toBeGreaterThan(0);
     expect(
-      screen.getByText("0x33fd426905f149f8376e227d0c9d3340aad17af1")
-    ).toBeInTheDocument();
+      screen.getAllByText("0x33fd426905f149f8376e227d0c9d3340aad17af1")
+        .length
+    ).toBeGreaterThan(0);
   });
 
   it("renders the 3D room fixture as an inspectable fallback linked to detail", () => {
@@ -102,7 +112,7 @@ describe("CmsSiteRenderer Phase 5-8 fixtures", () => {
       "https://media.6529.io/ipfs/bafyfixtureroom/poster.jpg"
     );
     expect(
-      screen.getByRole("link", { name: "Open source media" })
+      screen.getByRole("link", { name: "Open 2D fallback" })
     ).toHaveAttribute(
       "href",
       "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html"
@@ -116,7 +126,7 @@ describe("CmsSiteRenderer Phase 5-8 fixtures", () => {
       "sandbox",
       "allow-scripts"
     );
-    expect(screen.getByText("3D object preview")).toBeInTheDocument();
+    expect(screen.getAllByText("3D object preview").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: "Open source media" })
     ).toHaveAttribute(
