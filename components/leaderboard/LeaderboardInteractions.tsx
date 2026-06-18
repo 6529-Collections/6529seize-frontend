@@ -92,11 +92,7 @@ export default function LeaderboardInteractionsComponent(
         <table className={TABLE_CLASS_NAME}>
           <thead>
             <tr>
-              <th
-                aria-hidden="true"
-                className={HEADER_CELL_CLASS_NAME}
-                colSpan={2}
-              />
+              <th className={HEADER_CELL_CLASS_NAME} colSpan={2} />
               <th
                 className={clsx(
                   HEADER_CELL_CLASS_NAME,
@@ -107,7 +103,6 @@ export default function LeaderboardInteractionsComponent(
                 Primary Purchases
               </th>
               <th
-                aria-hidden="true"
                 className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
               />
               <th
@@ -120,7 +115,6 @@ export default function LeaderboardInteractionsComponent(
                 Secondary Purchases
               </th>
               <th
-                aria-hidden="true"
                 className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
               />
               <th
@@ -133,7 +127,6 @@ export default function LeaderboardInteractionsComponent(
                 Sales
               </th>
               <th
-                aria-hidden="true"
                 className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
               />
               <th
@@ -187,7 +180,6 @@ export default function LeaderboardInteractionsComponent(
                 </span>
               </th>
               <th
-                aria-hidden="true"
                 className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
               />
               {/* secondary purchases */}
@@ -212,7 +204,6 @@ export default function LeaderboardInteractionsComponent(
                 </span>
               </th>
               <th
-                aria-hidden="true"
                 className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
               />
               {/* sales */}
@@ -233,7 +224,6 @@ export default function LeaderboardInteractionsComponent(
                 </span>
               </th>
               <th
-                aria-hidden="true"
                 className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
               />
               {/* transfers */}
@@ -315,7 +305,6 @@ export default function LeaderboardInteractionsComponent(
                     )}
                   </td>
                   <td
-                    aria-hidden="true"
                     className={clsx(BODY_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
                   />
                   <td
@@ -337,7 +326,6 @@ export default function LeaderboardInteractionsComponent(
                     )}
                   </td>
                   <td
-                    aria-hidden="true"
                     className={clsx(BODY_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
                   />
                   <td
@@ -357,7 +345,6 @@ export default function LeaderboardInteractionsComponent(
                     {numberWithCommas(Math.round(lead.sales_value * 100) / 100)}
                   </td>
                   <td
-                    aria-hidden="true"
                     className={clsx(BODY_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
                   />
                   <td
