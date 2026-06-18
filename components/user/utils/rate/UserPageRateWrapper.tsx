@@ -7,6 +7,8 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { amIUser } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
 import { useContext, useEffect, useState } from "react";
 
@@ -14,6 +16,7 @@ const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.NIC]: "NIC rate",
   [RateMatter.REP]: "give Rep for",
   [RateMatter.DROP_REP]: "give Drop Rep for",
+  [RateMatter.WAVE_REP]: t(DEFAULT_LOCALE, "user.rate.subtitle.waveRep"),
 };
 
 enum RaterContext {
@@ -52,6 +55,7 @@ export default function UserPageRateWrapper({
             action.action_type === ApiProfileProxyActionType.AllocateRep
         );
       case RateMatter.DROP_REP:
+      case RateMatter.WAVE_REP:
         return false;
       default:
         assertUnreachable(type);
@@ -99,11 +103,12 @@ export default function UserPageRateWrapper({
     }
   };
 
-  const [raterContext, setRaterContext] =
-    useState<RaterContext>(getRaterContext());
+  const [raterContext, setRaterContext] = useState<RaterContext>(() =>
+    getRaterContext()
+  );
 
   const [raterContextMessage, setRaterContextMessage] = useState<string | null>(
-    getRaterContextMessage(raterContext)
+    () => getRaterContextMessage(raterContext)
   );
 
   useEffect(() => {
