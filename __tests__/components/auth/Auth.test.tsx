@@ -70,11 +70,12 @@ jest.mock("@reown/appkit/react", () => ({
 
 const mockSignMessage = jest.fn();
 const mockReset = jest.fn();
+let mockIsSigningPending = false;
 
 jest.mock("@/hooks/useSecureSign", () => ({
   useSecureSign: jest.fn(() => ({
     signMessage: mockSignMessage,
-    isSigningPending: false,
+    isSigningPending: mockIsSigningPending,
     reset: mockReset,
   })),
   MobileSigningError: class MobileSigningError extends Error {},
@@ -238,6 +239,7 @@ describe("Auth component", () => {
     walletAddress = "0x1";
     connectionState = "connected";
     canSignActiveWallet = true;
+    mockIsSigningPending = false;
     connectedAccountsOverride = null;
     mockAuthSettings = {
       structured_signatures_required: false,
@@ -1194,6 +1196,40 @@ describe("Auth component", () => {
           screen.queryByText("Upgrade Authentication")
         ).not.toBeInTheDocument();
       });
+    });
+
+    it("hides the session upgrade dismiss action while wallet confirmation is pending", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      mockIsSigningPending = true;
+      enableAuthMigrationDeadline();
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+
+      expect(screen.queryByText("Remind me later")).not.toBeInTheDocument();
+      expect(screen.getByText(/Confirm in your wallet/i)).toBeInTheDocument();
     });
 
     it("shows a reshare notice for session upgrade when the active connection cannot sign", async () => {
