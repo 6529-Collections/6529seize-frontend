@@ -252,8 +252,7 @@ describe("EndedParticipationDrop", () => {
     );
 
     const { rerender } = render(renderDrop());
-    const onLongPress = WaveDropContentMock.mock.calls.at(-1)?.[0]
-      ?.onLongPress;
+    const onLongPress = WaveDropContentMock.mock.calls.at(-1)?.[0]?.onLongPress;
 
     act(() => {
       onLongPress();

@@ -22,18 +22,19 @@ jest.mock("next/navigation", () => ({
 
 jest.mock(
   "@/components/user/stats/activity/tabs/UserPageActivityTabs",
-  () => (props: {
-    locale: string;
-    setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
-  }) => (
-    <button
-      data-testid="tab"
-      data-locale={props.locale}
-      onClick={() => props.setActiveTab(USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS)}
-    >
-      tab
-    </button>
-  )
+  () =>
+    (props: {
+      locale: string;
+      setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
+    }) => (
+      <button
+        data-testid="tab"
+        data-locale={props.locale}
+        onClick={() => props.setActiveTab(USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS)}
+      >
+        tab
+      </button>
+    )
 );
 
 jest.mock(
@@ -114,8 +115,5 @@ test("passes locale to the default wallet panel", () => {
     />
   );
 
-  expect(screen.getByTestId("wallet")).toHaveAttribute(
-    "data-locale",
-    "de-DE"
-  );
+  expect(screen.getByTestId("wallet")).toHaveAttribute("data-locale", "de-DE");
 });

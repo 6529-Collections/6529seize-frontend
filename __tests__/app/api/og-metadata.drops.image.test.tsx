@@ -153,8 +153,7 @@ describe("renderDropOgImage", () => {
         id: "drop-1",
         serial_no: 6412,
         drop_type: "CHAT" as any,
-        content:
-          "Color refs for @[prxt0] and #[The Memes - Main Stage] inline",
+        content: "Color refs for @[prxt0] and #[The Memes - Main Stage] inline",
       },
     });
 

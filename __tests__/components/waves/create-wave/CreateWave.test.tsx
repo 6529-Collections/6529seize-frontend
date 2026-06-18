@@ -745,9 +745,9 @@ describe("CreateWave", () => {
           data_value: "Selected",
         },
       });
-      expect(
-        mockedCreateWaveMetadata.mock.invocationCallOrder[0]
-      ).toBeLessThan(mockRouter.push.mock.invocationCallOrder[0]);
+      expect(mockedCreateWaveMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRouter.push.mock.invocationCallOrder[0]
+      );
     });
 
     it("saves hidden outcome display metadata for rank waves", async () => {

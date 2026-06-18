@@ -120,20 +120,20 @@ export default function GroupCardActionStats({
 
   return (
     <div className="tw-mt-4">
-      <p className="tw-text-sm tw-block tw-mb-0 tw-text-iron-50 tw-font-medium">
+      <p className="tw-mb-0 tw-block tw-text-sm tw-font-medium tw-text-iron-50">
         <img
           src="/pepe-xglasses.png"
-          className="-tw-mt-0.5 tw-w-4 tw-h-4 tw-ml-1 tw-mr-1.5 tw-object-contain tw-flex-shrink-0 tw-inline"
+          className="-tw-mt-0.5 tw-ml-1 tw-mr-1.5 tw-inline tw-h-4 tw-w-4 tw-flex-shrink-0 tw-object-contain"
           alt="pepe-xglasses"
         />
         You can grant up to{" "}
-        <span className="tw-text-primary-400 tw-font-semibold">
+        <span className="tw-font-semibold tw-text-primary-400">
           {creditPerMember > 0 && "+-"}
           {formatNumberWithCommas(+creditPerMember.toFixed(0))}
         </span>{" "}
         {MATTER_LABEL[matter]} to each of
         <span>
-          <span className="tw-text-primary-400 tw-font-semibold">
+          <span className="tw-font-semibold tw-text-primary-400">
             {" "}
             {loadingMembersCount ? (
               <CircleLoader size={CircleLoaderSize.SMALL} />

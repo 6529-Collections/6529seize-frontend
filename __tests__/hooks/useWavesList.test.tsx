@@ -602,12 +602,13 @@ test("places highly rated waves below announcements and before known-wave sectio
     "following",
     "all-quality",
   ]);
-  expect(result.current.waves.find((wave: any) => wave.id === "highly-rated"))
-    .toMatchObject({
-      isPinned: false,
-      sidebarSection: "highly-rated",
-      subscribed: false,
-    });
+  expect(
+    result.current.waves.find((wave: any) => wave.id === "highly-rated")
+  ).toMatchObject({
+    isPinned: false,
+    sidebarSection: "highly-rated",
+    subscribed: false,
+  });
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
 });
 

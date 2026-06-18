@@ -42,7 +42,7 @@ export default function GroupCardVoteAllInputs({
       </div>
     ),
     [ApiRateMatter.Rep]: (
-      <div className="tw-w-full tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-gap-x-4 tw-gap-y-4 sm:tw-flex-nowrap">
         <div className="tw-w-full md:tw-w-[58%]">
           <GroupCardActionNumberInput
             label="Rep"

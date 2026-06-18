@@ -847,18 +847,8 @@ export function formatToFullDivision(
           range(periodDates.start, periodDates.end),
           locale
         )}
-        {printDivision(
-          "Era",
-          era,
-          range(eraDates.start, eraDates.end),
-          locale
-        )}
-        {printDivision(
-          "Eon",
-          eon,
-          range(eonDates.start, eonDates.end),
-          locale
-        )}
+        {printDivision("Era", era, range(eraDates.start, eraDates.end), locale)}
+        {printDivision("Eon", eon, range(eonDates.start, eonDates.end), locale)}
       </tbody>
     </table>
   );

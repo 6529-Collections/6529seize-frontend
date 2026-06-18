@@ -60,13 +60,10 @@ const mockUserPageCollectedCards = jest.fn((props: any) => (
   />
 ));
 
-jest.mock(
-  "@/components/user/collected/cards/UserPageCollectedCards",
-  () => ({
-    __esModule: true,
-    default: (props: any) => mockUserPageCollectedCards(props),
-  })
-);
+jest.mock("@/components/user/collected/cards/UserPageCollectedCards", () => ({
+  __esModule: true,
+  default: (props: any) => mockUserPageCollectedCards(props),
+}));
 
 const mockUserPageCollectedNetworkCards = jest.fn((props: any) => (
   <div
@@ -116,13 +113,10 @@ const mockUserPageCollectedStats = jest.fn((props: any) => (
   </div>
 ));
 
-jest.mock(
-  "@/components/user/collected/UserPageCollectedStats",
-  () => ({
-    __esModule: true,
-    default: (props: any) => mockUserPageCollectedStats(props),
-  })
-);
+jest.mock("@/components/user/collected/UserPageCollectedStats", () => ({
+  __esModule: true,
+  default: (props: any) => mockUserPageCollectedStats(props),
+}));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({ address: "0x123" })),
@@ -519,7 +513,9 @@ describe("UserPageCollected", () => {
       if (key === "locale") return "DE-de";
       return null;
     });
-    mockSearchParams.toString.mockReturnValue("collection=network&locale=DE-de");
+    mockSearchParams.toString.mockReturnValue(
+      "collection=network&locale=DE-de"
+    );
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
@@ -548,10 +544,7 @@ describe("UserPageCollected", () => {
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
-    expect(screen.getByTestId("cards")).toHaveAttribute(
-      "data-locale",
-      "de-DE"
-    );
+    expect(screen.getByTestId("cards")).toHaveAttribute("data-locale", "de-DE");
     expect(screen.getByTestId("stats-summary")).toHaveAttribute(
       "data-locale",
       "de-DE"

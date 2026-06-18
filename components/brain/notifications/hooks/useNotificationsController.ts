@@ -86,8 +86,9 @@ export const useNotificationsController =
     const timeoutToastShownRef = useRef(false);
     const lastErrorMessageRef = useRef<string | null>(null);
 
-    const [activeFilter, setActiveFilter] =
-      useState<NotificationFilter | null>(null);
+    const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
+      null
+    );
     const [hasTimedOut, setHasTimedOut] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -382,7 +383,7 @@ export const useNotificationsController =
     const showProxyDisabledState = !!activeProfileProxy;
     const resolvedErrorMessage = hasTimedOut
       ? LOAD_TIMEOUT_MESSAGE
-      : errorMessage ?? DEFAULT_ERROR_MESSAGE;
+      : (errorMessage ?? DEFAULT_ERROR_MESSAGE);
 
     const contentState = useMemo<NotificationsContentState>(
       () => ({

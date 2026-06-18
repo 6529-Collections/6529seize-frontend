@@ -16,7 +16,11 @@
       "accent": "#f6c744"
     },
     "navigation_id": "nav-main",
-    "required_renderer_capabilities": ["media_posters", "sandboxed_embed", "object_viewer"]
+    "required_renderer_capabilities": [
+      "media_posters",
+      "sandboxed_embed",
+      "object_viewer"
+    ]
   },
   "payload": {
     "schema": "6529.cms.payload.v1",

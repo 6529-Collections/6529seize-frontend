@@ -5,18 +5,16 @@ import { DistributionPlanToolContext } from "@/components/distribution-plan-tool
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { useContext, useEffect, useState } from "react";
 import {
-    PhaseConfigStep,
-    RandomHoldersType,
+  PhaseConfigStep,
+  RandomHoldersType,
 } from "../BuildPhaseFormConfigModal";
-import type {
-    BuildPhaseFormConfigModalSidebarOption,
-} from "./BuildPhaseFormConfigModalSidebar";
+import type { BuildPhaseFormConfigModalSidebarOption } from "./BuildPhaseFormConfigModalSidebar";
 import BuildPhaseFormConfigModalSidebar from "./BuildPhaseFormConfigModalSidebar";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import ComponentRandomHoldersWeight, {
-    ComponentRandomHoldersWeightType,
+  ComponentRandomHoldersWeightType,
 } from "./utils/ComponentRandomHoldersWeight";
 
 export default function ComponentSelectRandomHolders({
@@ -227,12 +225,12 @@ export default function ComponentSelectRandomHolders({
               </label>
               <div className="tw-mt-1.5">
                 <div
-                  className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
-                  isError
-                    ? "tw-ring-error focus-within:tw-ring-error"
-                    : "tw-ring-iron-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-iron-700"
-                }`}>
+                  className={`tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-1 focus-within:tw-ring-inset ${
+                    isError
+                      ? "tw-ring-error focus-within:tw-ring-error"
+                      : "tw-ring-iron-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-iron-700"
+                  }`}
+                >
                   <input
                     type="number"
                     value={value}
@@ -241,7 +239,7 @@ export default function ComponentSelectRandomHolders({
                         ? setValue(Number(event.target.value))
                         : setValue("")
                     }
-                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-iron-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-white placeholder:tw-text-iron-500 focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
                     placeholder={inputPlaceholders[randomHoldersType]}
                   />
                 </div>
@@ -253,18 +251,18 @@ export default function ComponentSelectRandomHolders({
               </label>
               <div className="tw-mt-1.5">
                 <div
-                  className={`
-                tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
-                  !seed.length
-                    ? "tw-ring-error focus-within:tw-ring-error"
-                    : "tw-ring-iron-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-iron-700"
-                }`}>
+                  className={`tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-1 focus-within:tw-ring-inset ${
+                    !seed.length
+                      ? "tw-ring-error focus-within:tw-ring-error"
+                      : "tw-ring-iron-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-iron-700"
+                  }`}
+                >
                   <input
                     type="text"
                     value={seed}
                     onChange={(event) => setSeed(event.target.value)}
                     placeholder="Random seed"
-                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-iron-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-white placeholder:tw-text-iron-500 focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
                   />
                 </div>
               </div>
@@ -275,7 +273,8 @@ export default function ComponentSelectRandomHolders({
             showNextBtn={!isDisabled}
             onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
             onNext={onRandomHolders}
-            isDisabled={isDisabled}>
+            isDisabled={isDisabled}
+          >
             <ComponentConfigMeta
               tags={[]}
               walletsCount={localUniqueWalletsCount}
