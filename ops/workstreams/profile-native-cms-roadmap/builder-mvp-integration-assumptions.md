@@ -39,6 +39,11 @@ canonicalization semantics.
 - The 3D room primitive is deliberately simple: room preset, one artwork asset,
   deferred viewer policy, poster/fallback asset, and a canonical 2D detail
   route. It does not imply wallet gallery generation or automated NFT indexing.
+- For that primitive, `/{handle}/rooms/work-{n}/index.html` is the canonical
+  CMS detail route for the authored room work. It is not claiming to be the
+  chain-indexed `/nfts/...` route; a later NFT-aware builder must collect
+  chain/contract/token data and point room placements at the existing NFT detail
+  convention when that data is available.
 
 ## Expected Backend Write API
 

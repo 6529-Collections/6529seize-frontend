@@ -54,6 +54,7 @@ type CmsThreeDRuntime = {
 
 const MOBILE_FALLBACK_QUERY = "(max-width: 767px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+const PLACEHOLDER_TEXTURE_SIZE = 512;
 
 export default function CmsThreeDViewer({
   config,
@@ -64,6 +65,7 @@ export default function CmsThreeDViewer({
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const hasAutoStartedRef = useRef(false);
   const runtimeRef = useRef<CmsThreeDRuntime | null>(null);
   const router = useRouter();
   const [isMobileFallback, setIsMobileFallback] = useState(false);
@@ -128,20 +130,31 @@ export default function CmsThreeDViewer({
     };
 
     syncQueries();
-    mobileQuery?.addEventListener("change", syncQueries);
-    motionQuery?.addEventListener("change", syncQueries);
+    const removeMobileListener = addMediaQueryChangeListener(
+      mobileQuery,
+      syncQueries
+    );
+    const removeMotionListener = addMediaQueryChangeListener(
+      motionQuery,
+      syncQueries
+    );
 
     return () => {
-      mobileQuery?.removeEventListener("change", syncQueries);
-      motionQuery?.removeEventListener("change", syncQueries);
+      removeMobileListener();
+      removeMotionListener();
     };
   }, []);
 
   useEffect(() => {
-    if (config.requiresActivation || isMobileFallback) {
+    if (
+      config.requiresActivation ||
+      isMobileFallback ||
+      hasAutoStartedRef.current
+    ) {
       return;
     }
 
+    hasAutoStartedRef.current = true;
     startViewer().catch(() => {
       setStatus("error");
     });
@@ -376,15 +389,40 @@ function getCmsThreeDStartLabel({
 }
 
 function hasCmsThreeDBudgetWarning(config: CmsThreeDViewerConfig): boolean {
-  if (config.kind === "room") {
+  const budgetBytes = config.budgetBytes;
+  if (budgetBytes === undefined) {
     return false;
   }
 
+  if (config.kind === "room") {
+    return config.placements.some(
+      (placement) =>
+        placement.asset.fileSizeBytes !== undefined &&
+        placement.asset.fileSizeBytes > budgetBytes
+    );
+  }
+
   return (
-    config.budgetBytes !== undefined &&
     config.asset.fileSizeBytes !== undefined &&
-    config.asset.fileSizeBytes > config.budgetBytes
+    config.asset.fileSizeBytes > budgetBytes
   );
+}
+
+function addMediaQueryChangeListener(
+  query: MediaQueryList | undefined,
+  listener: () => void
+): () => void {
+  if (!query) {
+    return () => {};
+  }
+
+  if (typeof query.addEventListener === "function") {
+    query.addEventListener("change", listener);
+    return () => query.removeEventListener("change", listener);
+  }
+
+  query.addListener(listener);
+  return () => query.removeListener(listener);
 }
 
 function getSelectedCmsThreeDClickable({
@@ -671,12 +709,10 @@ async function addArtworkPlacement({
   frame.rotation.set(rotationX, rotationY, rotationZ);
   scene.add(frame);
 
-  const texture = await loadTexture(THREE, placement.asset.url).catch(
-    () => null
+  const texture = await loadTexture(THREE, placement.asset.url).catch(() =>
+    createMissingArtworkTexture(THREE, placement.label)
   );
-  if (texture) {
-    texture.colorSpace = THREE.SRGBColorSpace;
-  }
+  texture.colorSpace = THREE.SRGBColorSpace;
 
   const material =
     placement.displayMode === "faithful"
@@ -758,6 +794,46 @@ function loadTexture(THREE: ThreeModule, url: string): Promise<Texture> {
   const loader = new THREE.TextureLoader();
   loader.setCrossOrigin("anonymous");
   return loader.loadAsync(url);
+}
+
+function createMissingArtworkTexture(
+  THREE: ThreeModule,
+  label: string
+): Texture {
+  const canvas = document.createElement("canvas");
+  canvas.width = PLACEHOLDER_TEXTURE_SIZE;
+  canvas.height = PLACEHOLDER_TEXTURE_SIZE;
+
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.fillStyle = "#20242c";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.strokeStyle = "#c8d0dc";
+    context.lineWidth = 10;
+    context.strokeRect(24, 24, canvas.width - 48, canvas.height - 48);
+    context.strokeStyle = "#ef4444";
+    context.lineWidth = 8;
+    context.setLineDash([18, 14]);
+    context.beginPath();
+    context.moveTo(56, 56);
+    context.lineTo(canvas.width - 56, canvas.height - 56);
+    context.moveTo(canvas.width - 56, 56);
+    context.lineTo(56, canvas.height - 56);
+    context.stroke();
+    context.setLineDash([]);
+    context.fillStyle = "#ffffff";
+    context.font = "700 34px sans-serif";
+    context.textAlign = "center";
+    context.fillText("Image unavailable", canvas.width / 2, 230);
+    context.font = "500 24px sans-serif";
+    context.fillText(trimCanvasLabel(label), canvas.width / 2, 280);
+  }
+
+  return new THREE.CanvasTexture(canvas);
+}
+
+function trimCanvasLabel(label: string): string {
+  return label.length > 28 ? `${label.slice(0, 25)}...` : label;
 }
 
 function resizeRenderer({

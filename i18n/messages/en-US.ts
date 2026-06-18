@@ -678,7 +678,7 @@ export const EN_US_MESSAGES = {
   "profileCms.interactive.roomWorksLabel": "Room artworks",
   "profileCms.interactive.canvasLabel": "Interactive 3D preview",
   "profileCms.interactive.budgetWarning":
-    "This model is above the declared performance budget, so loading may be slow.",
+    "This 3D asset is above the declared performance budget, so loading may be slow.",
   "profileCms.builder.pageTitle": "Profile CMS builder",
   "profileCms.builder.pageDescription":
     "Build and preview a profile-native CMS site package.",

@@ -77,6 +77,34 @@ describe("CmsThreeDViewer", () => {
       screen.getByRole("link", { name: "Open 2D fallback" })
     ).toHaveAttribute("href", "/punk6529/rooms/work-1/index.html");
   });
+
+  it("surfaces room asset budget warnings", () => {
+    mockMatchMedia(false);
+
+    render(
+      <CmsThreeDViewer
+        config={{
+          ...roomConfig,
+          budgetBytes: 1,
+          placements: [
+            {
+              ...roomConfig.placements[0],
+              asset: {
+                ...roomConfig.placements[0].asset,
+                fileSizeBytes: 2,
+              },
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        "This 3D asset is above the declared performance budget, so loading may be slow."
+      )
+    ).toBeInTheDocument();
+  });
 });
 
 function mockMatchMedia(isMobile: boolean): void {

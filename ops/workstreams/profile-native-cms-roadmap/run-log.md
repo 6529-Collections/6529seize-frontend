@@ -119,6 +119,56 @@ Follow-up after initial PR publication:
     ambient app/provider resource errors for unavailable emoji/API resources in
     this no-backend smoke setup; those did not affect the 3D assertions.
 
+Follow-up after 6529bot review feedback:
+
+- Addressed the two Important viewer findings:
+  - Added an explicit one-shot auto-start ref so non-activation viewers cannot
+    re-trigger automatic WebGL loads merely because `status` changed.
+  - Replaced failed room artwork texture loads with a generated visible
+    placeholder texture instead of a blank white clickable plane.
+- Also tightened review nits by adding a legacy `matchMedia.addListener`
+  fallback, surfacing room placement budget warnings, and documenting that
+  builder-generated `/{handle}/rooms/work-{n}/index.html` pages are canonical
+  CMS detail routes for authored room works until NFT chain metadata exists.
+- Re-ran focused validation:
+  - `seize run format:changed`
+  - `seize run test:no-coverage -- --testMatch "**/*.test.ts"
+    "**/*.test.tsx" --runTestsByPath
+    __tests__/lib/profile-cms/runtime/threeD.test.ts
+    __tests__/lib/profile-cms/builder/package.test.ts
+    __tests__/components/profile-cms/CmsThreeDViewer.test.tsx
+    __tests__/components/profile-cms/CmsSiteRenderer.test.tsx
+    __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx
+    __tests__/app/profile-cms-route.test.tsx --runInBand` (6 suites,
+    29 tests)
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run react-doctor:diff` (100/100)
+  - `codex-diff-check`
+- Re-ran browser verification on
+  `http://localhost:3142/punk6529/cms/builder` with system Chrome through
+  Playwright:
+  - Desktop poster screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-review-fix-poster.png`
+  - Desktop ready screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-review-fix-ready.png`
+  - Desktop canvas screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-review-fix-canvas.png`
+  - Mobile fallback screenshot:
+    `.codex/artifacts/cms-3d-room-mobile-review-fix-fallback.png`
+  - Canvas screenshot pixel check: 670x620, 415,400 nonblack pixels out of
+    415,400 nontransparent pixels (`1.0` ratio).
+  - Ready-state DOM link tray passed a Playwright trial click, confirming it
+    remains visible and hit-testable above the canvas.
+  - Canvas center click navigated to
+    `http://localhost:3142/punk6529/rooms/work-4/index.html`.
+  - Mobile fallback stayed at `data-cms-3d-status="mobile-fallback"`, had no
+    `Enter room` button, showed fallback copy, and exposed two canonical
+    `/punk6529/rooms/work-4/index.html` links.
+  - No browser page errors were reported. Ambient provider/API console resource
+    errors remained in this no-backend local smoke setup and did not affect the
+    3D assertions.
+
 ## 2026-06-17
 
 ### Current Objective
