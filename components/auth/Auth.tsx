@@ -128,6 +128,11 @@ interface SessionUpgradePromptStatus {
   readonly timeLeftMs: number;
 }
 
+interface AuthorizedWalletValidationResult {
+  readonly isValid: boolean;
+  readonly requiresSessionUpgrade?: boolean;
+}
+
 interface RunImmediateAuthValidationParams {
   readonly currentAddress: string;
   readonly operationId: string;
@@ -970,7 +975,7 @@ export default function Auth({
       setSessionUpgradeTimeLeftMs(status.timeLeftMs);
       setSessionUpgradeCanDismiss(status.canDismiss);
       if (status.timeLeftMs <= 0) {
-        void expireSessionUpgradeAuth(address).catch((error) => {
+        expireSessionUpgradeAuth(address).catch((error) => {
           logErrorSecurely("session_upgrade_grace_expired_logout", error);
         });
         return;
@@ -1014,6 +1019,77 @@ export default function Auth({
     return true;
   };
 
+  const disconnectAfterFailedSignIn = async (): Promise<void> => {
+    try {
+      await seizeDisconnect();
+    } catch (error) {
+      logErrorSecurely("requestAuth_disconnect_after_failed_signin", error);
+    }
+  };
+
+  const getAuthorizedWalletValidationResult = async ({
+    walletAddress,
+    role,
+  }: {
+    readonly walletAddress: string;
+    readonly role: string | null;
+  }): Promise<AuthorizedWalletValidationResult> => {
+    if (signModalReason === "session-upgrade") {
+      return { isValid: false, requiresSessionUpgrade: true };
+    }
+
+    return await validateJwt({
+      jwt: getAuthJwt(),
+      wallet: walletAddress,
+      role,
+      operationId: `manual-auth-${Date.now()}`,
+      abortSignal: new AbortController().signal,
+      activeProfileProxy,
+    });
+  };
+
+  const prepareAuthorizedWalletReauthentication = async ({
+    walletAddress,
+    validationResult,
+  }: {
+    readonly walletAddress: string;
+    readonly validationResult: AuthorizedWalletValidationResult;
+  }): Promise<boolean> => {
+    if (!validationResult.requiresSessionUpgrade) {
+      setSignModalReason("auth");
+      await removeAuthJwt();
+      return true;
+    }
+
+    const promptStatus = showSessionUpgradePrompt(walletAddress, {
+      forceShow: true,
+    });
+    if (promptStatus.timeLeftMs <= 0) {
+      await expireSessionUpgradeAuth(walletAddress);
+      return false;
+    }
+    return canSignActiveWallet;
+  };
+
+  const handleAuthorizedWalletSignInFailure = async (
+    requiresSessionUpgrade: boolean | undefined
+  ): Promise<false> => {
+    setShowSignModal(false);
+    if (!requiresSessionUpgrade) {
+      await disconnectAfterFailedSignIn();
+    }
+    return false;
+  };
+
+  const finishAuthorizedWalletAuthentication = (): boolean => {
+    const isSuccess = !!getAuthJwt();
+    if (isSuccess) {
+      setSignModalReason("auth");
+      setShowSignModal(false);
+    }
+    return isSuccess;
+  };
+
   const authenticateAuthorizedWallet = async (
     walletAddress: string
   ): Promise<boolean> => {
@@ -1021,33 +1097,18 @@ export default function Auth({
       ? validateRoleForAuthentication(activeProfileProxy)
       : null;
 
-    const validationResult =
-      signModalReason === "session-upgrade"
-        ? { isValid: false, requiresSessionUpgrade: true }
-        : await validateJwt({
-            jwt: getAuthJwt(),
-            wallet: walletAddress,
-            role,
-            operationId: `manual-auth-${Date.now()}`,
-            abortSignal: new AbortController().signal,
-            activeProfileProxy,
-          });
+    const validationResult = await getAuthorizedWalletValidationResult({
+      walletAddress,
+      role,
+    });
 
     if (!validationResult.isValid) {
-      if (validationResult.requiresSessionUpgrade) {
-        const promptStatus = showSessionUpgradePrompt(walletAddress, {
-          forceShow: true,
-        });
-        if (promptStatus.timeLeftMs <= 0) {
-          await expireSessionUpgradeAuth(walletAddress);
-          return false;
-        }
-        if (!canSignActiveWallet) {
-          return false;
-        }
-      } else {
-        setSignModalReason("auth");
-        await removeAuthJwt();
+      const canReauthenticate = await prepareAuthorizedWalletReauthentication({
+        walletAddress,
+        validationResult,
+      });
+      if (!canReauthenticate) {
+        return false;
       }
 
       const { success } = await requestSignIn({
@@ -1056,16 +1117,9 @@ export default function Auth({
       });
 
       if (!success) {
-        setShowSignModal(false);
-        if (validationResult.requiresSessionUpgrade) {
-          return false;
-        }
-        try {
-          await seizeDisconnect();
-        } catch (error) {
-          logErrorSecurely("requestAuth_disconnect_after_failed_signin", error);
-        }
-        return false;
+        return await handleAuthorizedWalletSignInFailure(
+          validationResult.requiresSessionUpgrade
+        );
       }
 
       invalidateAll();
@@ -1074,13 +1128,7 @@ export default function Auth({
       }
     }
 
-    const isSuccess = !!getAuthJwt();
-    if (isSuccess) {
-      setSignModalReason("auth");
-      setShowSignModal(false);
-    }
-
-    return isSuccess;
+    return finishAuthorizedWalletAuthentication();
   };
 
   const requestAuth = async (): Promise<{ success: boolean }> => {
@@ -1261,6 +1309,36 @@ export default function Auth({
     () => formatSessionUpgradeTimeLeft(sessionUpgradeTimeLeftMs),
     [sessionUpgradeTimeLeftMs]
   );
+  const signModalTitle = (() => {
+    if (isConnectionShareUpgradePrompt) {
+      return "Connection Update Required";
+    }
+    if (isSessionUpgradePrompt) {
+      return "Upgrade Authentication";
+    }
+    return "Sign Authentication Request";
+  })();
+  const signModalLead = (() => {
+    if (isConnectionShareUpgradePrompt) {
+      return "This shared connection uses the previous authentication flow. Reshare the connection from a device that is already signed in with the new authentication.";
+    }
+    if (isSessionUpgradePrompt) {
+      return "We have upgraded wallet authentication. Sign once to move this connected wallet to the new secure session.";
+    }
+    return "To connect your wallet, you will need to sign a message to confirm your identity.";
+  })();
+  const signModalPrimaryListItem = (() => {
+    if (isConnectionShareUpgradePrompt) {
+      return "Use connection sharing from an active session-v2 web connection, then open the new shared connection on this device.";
+    }
+    if (isSessionUpgradePrompt) {
+      return "Your current connection will stay available while the new session is created.";
+    }
+    return "This signature will be used to generate a secure token (JWT) to authenticate your session.";
+  })();
+  const signModalSecondaryListItem = isSessionUpgradePrompt
+    ? `Temporary access time remaining: ${sessionUpgradeTimeLeftText}.`
+    : "Your signature will not cost any gas and is purely for authentication purposes.";
 
   return (
     <AuthContext.Provider
@@ -1302,36 +1380,14 @@ export default function Auth({
           contentClassName={styles["signModalSurface"] ?? ""}
         >
           <Modal.Header className={styles["signModalHeader"]}>
-            <div className={styles["signModalTitle"]}>
-              {isConnectionShareUpgradePrompt
-                ? "Connection Update Required"
-                : isSessionUpgradePrompt
-                  ? "Upgrade Authentication"
-                  : "Sign Authentication Request"}
-            </div>
+            <div className={styles["signModalTitle"]}>{signModalTitle}</div>
           </Modal.Header>
           <Modal.Body className={styles["signModalBody"]}>
-            <p className={styles["signModalLead"]}>
-              {isConnectionShareUpgradePrompt
-                ? "This shared connection uses the previous authentication flow. Reshare the connection from a device that is already signed in with the new authentication."
-                : isSessionUpgradePrompt
-                  ? "We have upgraded wallet authentication. Sign once to move this connected wallet to the new secure session."
-                  : "To connect your wallet, you will need to sign a message to confirm your identity."}
-            </p>
+            <p className={styles["signModalLead"]}>{signModalLead}</p>
 
             <ul className={styles["signModalList"]}>
-              <li>
-                {isConnectionShareUpgradePrompt
-                  ? "Use connection sharing from an active session-v2 web connection, then open the new shared connection on this device."
-                  : isSessionUpgradePrompt
-                    ? "Your current connection will stay available while the new session is created."
-                    : "This signature will be used to generate a secure token (JWT) to authenticate your session."}
-              </li>
-              <li>
-                {isSessionUpgradePrompt
-                  ? `Temporary access time remaining: ${sessionUpgradeTimeLeftText}.`
-                  : "Your signature will not cost any gas and is purely for authentication purposes."}
-              </li>
+              <li>{signModalPrimaryListItem}</li>
+              <li>{signModalSecondaryListItem}</li>
             </ul>
           </Modal.Body>
           <Modal.Footer className={styles["signModalFooter"]}>
