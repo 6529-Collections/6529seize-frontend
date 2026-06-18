@@ -685,6 +685,13 @@ const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
 const LINK_PREVIEW_MESSAGES = namespaceMessages("linkPreview", [
   ["externalSourceFallback", "External link"],
   ["byline", "by {author}"],
+  ["farcaster.frameBadge", "Frame"],
+  ["farcaster.imageAlt", "Farcaster embed preview for {title}"],
+  ["farcaster.imageFallbackAlt", "Farcaster embed preview"],
+  ["farcaster.miniAppBadge", "Mini App"],
+  ["farcaster.openFrame", "Open Frame"],
+  ["farcaster.openMiniApp", "Open Mini App"],
+  ["farcaster.titleFallback", "Farcaster Mini App"],
   ["mediaType.article", "Article"],
   ["mediaType.website", "Website"],
   ["youtube.providerFallback", "YouTube"],

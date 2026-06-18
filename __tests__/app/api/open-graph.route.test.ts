@@ -465,6 +465,467 @@ describe("open-graph API route", () => {
     );
   });
 
+  it("returns typed Farcaster Mini App previews from fc:miniapp metadata", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Example Mini",
+          url: "/launch",
+          splashImageUrl: "https://mini.example/splash.png",
+          splashBackgroundColor: "#855dcd",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="OG Example Mini" />
+          <meta property="og:description" content="Launch the example app" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "OG Example Mini",
+      description: "Launch the example app",
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        embedKind: "miniapp",
+        title: "Example Mini",
+        appName: "Example Mini",
+        buttonTitle: "Launch",
+        actionType: "launch_miniapp",
+        actionUrl: "https://mini.example/launch",
+        imageUrl: "https://mini.example/preview.png",
+        splashImageUrl: "https://mini.example/splash.png",
+        splashBackgroundColor: "#855dcd",
+        mediaType: "application",
+      })
+    );
+    expect(body.image).toEqual({
+      url: "https://mini.example/preview.png",
+      secureUrl: "https://mini.example/preview.png",
+    });
+    expect(body.images).toEqual([body.image]);
+    expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+      new URL("https://mini.example/preview.png"),
+      expect.any(Object)
+    );
+    expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+      new URL("https://mini.example/launch"),
+      expect.any(Object)
+    );
+    expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+      new URL("https://mini.example/splash.png"),
+      expect.any(Object)
+    );
+  });
+
+  it("uses JSON fc:frame metadata as a backward-compatible Mini App preview", async () => {
+    const frameMetadata = {
+      version: "1",
+      imageUrl: "https://frame.example/frame.png",
+      button: {
+        title: "Start",
+        action: {
+          type: "launch_frame",
+          name: "Frame Thing",
+          url: "https://frame.example/play",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:frame' content='${JSON.stringify(frameMetadata)}' />
+          <title>Frame fallback title</title>
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://frame.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://frame.example/app",
+      url: "https://frame.example/app",
+      title: "Frame fallback title",
+      description: null,
+      siteName: "Frame Example",
+      source: "frame.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://frame.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        embedKind: "frame",
+        title: "Frame Thing",
+        buttonTitle: "Start",
+        actionUrl: "https://frame.example/play",
+      })
+    );
+  });
+
+  it("returns typed previews for legacy Farcaster frame metadata", async () => {
+    const html = `
+      <html>
+        <head>
+          <meta name="fc:frame" content="vNext" />
+          <meta name="fc:frame:image" content="/legacy.png" />
+          <meta name="fc:frame:button:1" content="Mint" />
+          <meta name="fc:frame:button:1:action" content="link" />
+          <meta name="fc:frame:button:1:target" content="/mint" />
+          <meta property="og:title" content="Legacy Frame" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://legacy.example/frame",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://legacy.example/frame",
+      url: "https://legacy.example/frame",
+      title: "Legacy Frame",
+      description: null,
+      siteName: "Legacy Example",
+      source: "legacy.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://legacy.example/frame"
+      ),
+    } as any);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual(
+      expect.objectContaining({
+        type: "farcaster.frame",
+        embedKind: "legacy-frame",
+        title: "Legacy Frame",
+        appName: "Legacy Example",
+        buttonTitle: "Mint",
+        actionUrl: "https://legacy.example/mint",
+        imageUrl: "https://legacy.example/legacy.png",
+        buttons: ["Mint"],
+      })
+    );
+  });
+
+  it("uses only link-action targets for legacy Farcaster frame navigation", async () => {
+    const html = `
+      <html>
+        <head>
+          <meta name="fc:frame" content="vNext" />
+          <meta name="fc:frame:image" content="/legacy.png" />
+          <meta name="fc:frame:button:1" content="Vote" />
+          <meta name="fc:frame:button:1:action" content="post" />
+          <meta name="fc:frame:button:1:target" content="/vote" />
+          <meta name="fc:frame:button:2" content="View" />
+          <meta name="fc:frame:button:2:action" content="link" />
+          <meta name="fc:frame:button:2:target" content="/view" />
+          <meta property="og:title" content="Legacy Frame" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://legacy.example/frame",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://legacy.example/frame",
+      url: "https://legacy.example/frame",
+      title: "Legacy Frame",
+      description: null,
+      siteName: "Legacy Example",
+      source: "legacy.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://legacy.example/frame"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.frame",
+        embedKind: "legacy-frame",
+        buttonTitle: "View",
+        actionUrl: "https://legacy.example/view",
+        buttons: ["Vote", "View"],
+      })
+    );
+  });
+
+  it("falls back to the Mini App URL when action schemes are unsafe", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Unsafe Action Mini",
+          url: "javascript:alert(1)",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Unsafe Action Mini" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "Unsafe Action Mini",
+      description: null,
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        actionUrl: "https://mini.example/app",
+      })
+    );
+  });
+
+  it("drops Mini App splash images when they are not public", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Private Splash Mini",
+          url: "https://mini.example/launch",
+          splashImageUrl: "http://127.0.0.1/splash.png",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Private Splash Mini" />
+        </head>
+      </html>
+    `;
+    guard.assertPublicUrl.mockImplementation(async (url: URL) => {
+      if (url.hostname === "127.0.0.1") {
+        throw new UrlGuardError("private URL", "private-url", 400);
+      }
+    });
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "Private Splash Mini",
+      description: null,
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        splashImageUrl: null,
+      })
+    );
+  });
+
+  it("falls back to generic metadata when Mini App JSON is malformed", async () => {
+    const html = `
+      <html>
+        <head>
+          <meta name="fc:miniapp" content="{not json" />
+          <meta property="og:title" content="Plain Page" />
+        </head>
+      </html>
+    `;
+    const genericPayload = {
+      requestUrl: "https://plain.example/app",
+      url: "https://plain.example/app",
+      title: "Plain Page",
+      description: null,
+      siteName: "Plain Example",
+      source: "plain.example",
+      image: null,
+      images: [],
+    };
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://plain.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue(genericPayload);
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://plain.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(genericPayload);
+  });
+
+  it("drops Mini App metadata when media URLs are not public", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "http://127.0.0.1/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Private Media Mini",
+          url: "https://private-media.example/launch",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Private Media Mini" />
+        </head>
+      </html>
+    `;
+    const genericPayload = {
+      requestUrl: "https://private-media.example/app",
+      url: "https://private-media.example/app",
+      title: "Private Media Mini",
+      description: null,
+      siteName: "Private Media Example",
+      source: "private-media.example",
+      image: null,
+      images: [],
+    };
+    guard.assertPublicUrl.mockImplementation(async (url: URL) => {
+      if (url.hostname === "127.0.0.1") {
+        throw new UrlGuardError("private URL", "private-url", 400);
+      }
+    });
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://private-media.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue(genericPayload);
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://private-media.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(genericPayload);
+  });
+
   it("returns typed YouTube video previews before generic metadata", async () => {
     const oembedPayload = {
       title: "A Good Video",

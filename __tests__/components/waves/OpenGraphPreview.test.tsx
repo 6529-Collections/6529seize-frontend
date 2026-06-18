@@ -265,6 +265,84 @@ describe("OpenGraphPreview", () => {
     expect(screen.queryByText("by [object Object]")).toBeNull();
   });
 
+  it("renders Farcaster Mini App previews with launch metadata", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://mini.example/app"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://mini.example/app"
+        preview={{
+          type: "farcaster.miniapp",
+          embedKind: "miniapp",
+          title: "Example Mini",
+          appName: "Example Mini",
+          description: "Launch the example app",
+          siteName: "Example Mini",
+          buttonTitle: "Launch",
+          actionUrl: "https://mini.example/launch",
+          imageUrl: "https://mini.example/preview.png",
+          splashImageUrl: "https://mini.example/splash.png",
+          splashBackgroundColor: "#855dcd",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByTestId("farcaster-embed-preview-card")
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Mini App").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "Example Mini" })
+    ).toHaveAttribute("href", "https://mini.example/app");
+    expect(screen.getByText("Launch the example app")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Launch" })).toHaveAttribute(
+      "href",
+      "https://mini.example/launch"
+    );
+    expect(
+      screen.getByRole("img", {
+        name: "Farcaster embed preview for Example Mini",
+      })
+    ).toHaveAttribute("src", "https://mini.example/preview.png");
+    expect(screen.getByAltText("")).toHaveAttribute(
+      "src",
+      "https://mini.example/splash.png"
+    );
+  });
+
+  it("renders legacy Farcaster frame titles before the site label", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://legacy.example/frame"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://legacy.example/frame"
+        preview={{
+          type: "farcaster.frame",
+          embedKind: "legacy-frame",
+          title: "Legacy Frame",
+          appName: "Legacy Example",
+          siteName: "Legacy Example",
+          buttonTitle: "View",
+          actionUrl: "https://legacy.example/view",
+          imageUrl: "https://legacy.example/frame.png",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Legacy Frame" })
+    ).toHaveAttribute("href", "https://legacy.example/frame");
+    expect(screen.getByText("Legacy Example")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View" })).toHaveAttribute(
+      "href",
+      "https://legacy.example/view"
+    );
+  });
+
   it("renders sparse article metadata with a source label and no empty fields", () => {
     (removeBaseEndpoint as jest.Mock).mockReturnValue("/research/notes");
 
