@@ -20,6 +20,12 @@ type ApiSortParams = {
   readonly order_by: "rep" | "last_modified";
 };
 
+type GlobalRepCategoryWaveVisibilityScope = {
+  readonly viewerProfileId: string | null;
+  readonly proxyId: string | null;
+  readonly proxyCanReadWave: boolean;
+};
+
 type GlobalRepCategoryPage =
   | ({ readonly tab: "recipients" } & ApiGlobalRepCategoryRecipientsPage)
   | ({ readonly tab: "givers" } & ApiGlobalRepCategoryGiversPage)
@@ -49,26 +55,42 @@ export const getGlobalRepCategoryPageQueryKey = ({
   readonly sort: GlobalRepCategorySort;
 }) => [QueryKey.GLOBAL_REP_CATEGORY_PAGE, { category, tab, sort }];
 
-export const getGlobalRepCategoryWaveOverviewQueryKey = (category: string) => [
+export const getGlobalRepCategoryWaveOverviewQueryKey = ({
+  category,
+  visibilityScope,
+}: {
+  readonly category: string;
+  readonly visibilityScope: GlobalRepCategoryWaveVisibilityScope;
+}) => [
   QueryKey.GLOBAL_REP_CATEGORY_WAVE_OVERVIEW,
-  { category },
+  { category, visibilityScope },
 ];
 
 export const getGlobalRepCategoryWavesPageQueryKey = ({
   category,
   sort,
+  visibilityScope,
 }: {
   readonly category: string;
   readonly sort: GlobalRepCategorySort;
-}) => [QueryKey.GLOBAL_REP_CATEGORY_WAVES_PAGE, { category, sort }];
+  readonly visibilityScope: GlobalRepCategoryWaveVisibilityScope;
+}) => [
+  QueryKey.GLOBAL_REP_CATEGORY_WAVES_PAGE,
+  { category, sort, visibilityScope },
+];
 
 export const getGlobalRepCategoryWaveContributorsPageQueryKey = ({
   category,
   sort,
+  visibilityScope,
 }: {
   readonly category: string;
   readonly sort: GlobalRepCategorySort;
-}) => [QueryKey.GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE, { category, sort }];
+  readonly visibilityScope: GlobalRepCategoryWaveVisibilityScope;
+}) => [
+  QueryKey.GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE,
+  { category, sort, visibilityScope },
+];
 
 const getSortParams = (sort: GlobalRepCategorySort): ApiSortParams => {
   if (sort === "rep_asc") {

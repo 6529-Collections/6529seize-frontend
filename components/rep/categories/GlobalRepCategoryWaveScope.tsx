@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -8,6 +9,7 @@ import type { ApiGlobalRepCategoryWave } from "@/generated/models/ApiGlobalRepCa
 import type { ApiGlobalRepCategoryWaveContributor } from "@/generated/models/ApiGlobalRepCategoryWaveContributor";
 import type { ApiGlobalRepCategoryWaveOverview } from "@/generated/models/ApiGlobalRepCategoryWaveOverview";
 import type { ApiGlobalRepCategoryWaveRef } from "@/generated/models/ApiGlobalRepCategoryWaveRef";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -107,7 +109,10 @@ function ContributorAvatar({
       {contributor.profile.pfp ? (
         <Image
           unoptimized
-          src={getScaledImageUri(contributor.profile.pfp, ImageScale.W_AUTO_H_50)}
+          src={getScaledImageUri(
+            contributor.profile.pfp,
+            ImageScale.W_AUTO_H_50
+          )}
           alt={`${display} profile`}
           width={28}
           height={28}
@@ -144,7 +149,9 @@ function ContributorLink({
   readonly contributor: ApiGlobalRepCategoryWaveContributor;
 }) {
   return (
-    <UserProfileTooltipWrapper user={getProfileTooltipUser(contributor.profile)}>
+    <UserProfileTooltipWrapper
+      user={getProfileTooltipUser(contributor.profile)}
+    >
       <Link
         href={getProfileHref(contributor.profile)}
         prefetch={false}
@@ -591,16 +598,35 @@ export default function GlobalRepCategoryWaveScope({
 }: {
   readonly category: string;
 }) {
+  const { activeProfileProxy, connectedProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<WaveRepTab>("waves");
   const [sort, setSort] = useState<GlobalRepCategorySort>("rep_desc");
+  const visibilityScope = useMemo(
+    () => ({
+      viewerProfileId: connectedProfile?.id ?? null,
+      proxyId: activeProfileProxy?.id ?? null,
+      proxyCanReadWave:
+        activeProfileProxy?.actions.some(
+          (action) => action.action_type === ApiProfileProxyActionType.ReadWave
+        ) ?? false,
+    }),
+    [activeProfileProxy, connectedProfile?.id]
+  );
 
   const overviewQuery = useQuery({
-    queryKey: getGlobalRepCategoryWaveOverviewQueryKey(category),
+    queryKey: getGlobalRepCategoryWaveOverviewQueryKey({
+      category,
+      visibilityScope,
+    }),
     queryFn: async () => await fetchGlobalRepCategoryWaveOverview(category),
   });
 
   const wavesQuery = useInfiniteQuery({
-    queryKey: getGlobalRepCategoryWavesPageQueryKey({ category, sort }),
+    queryKey: getGlobalRepCategoryWavesPageQueryKey({
+      category,
+      sort,
+      visibilityScope,
+    }),
     queryFn: async ({ pageParam }: { pageParam: number }) =>
       await fetchGlobalRepCategoryWavesPage({
         category,
@@ -616,6 +642,7 @@ export default function GlobalRepCategoryWaveScope({
     queryKey: getGlobalRepCategoryWaveContributorsPageQueryKey({
       category,
       sort,
+      visibilityScope,
     }),
     queryFn: async ({ pageParam }: { pageParam: number }) =>
       await fetchGlobalRepCategoryWaveContributorsPage({

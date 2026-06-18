@@ -5,8 +5,12 @@ import {
   fetchGlobalRepCategoryWaveOverview,
   fetchGlobalRepCategoryWavesPage,
   fetchSuggestedRepCategories,
+  getGlobalRepCategoryWaveContributorsPageQueryKey,
+  getGlobalRepCategoryWaveOverviewQueryKey,
+  getGlobalRepCategoryWavesPageQueryKey,
   searchGlobalRepCategories,
 } from "@/components/rep/categories/globalRepCategory.api";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "@/services/api/common-api";
 
 jest.mock("@/services/api/common-api", () => ({
@@ -136,5 +140,43 @@ describe("globalRepCategory.api", () => {
         page_size: "25",
       },
     });
+  });
+
+  it("partitions Wave REP query keys by viewer visibility scope", () => {
+    const visibilityScope = {
+      viewerProfileId: "viewer-1",
+      proxyId: "proxy-1",
+      proxyCanReadWave: true,
+    };
+
+    expect(
+      getGlobalRepCategoryWaveOverviewQueryKey({
+        category: "Builder",
+        visibilityScope,
+      })
+    ).toEqual([
+      QueryKey.GLOBAL_REP_CATEGORY_WAVE_OVERVIEW,
+      { category: "Builder", visibilityScope },
+    ]);
+    expect(
+      getGlobalRepCategoryWavesPageQueryKey({
+        category: "Builder",
+        sort: "rep_desc",
+        visibilityScope,
+      })
+    ).toEqual([
+      QueryKey.GLOBAL_REP_CATEGORY_WAVES_PAGE,
+      { category: "Builder", sort: "rep_desc", visibilityScope },
+    ]);
+    expect(
+      getGlobalRepCategoryWaveContributorsPageQueryKey({
+        category: "Builder",
+        sort: "recent",
+        visibilityScope,
+      })
+    ).toEqual([
+      QueryKey.GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE,
+      { category: "Builder", sort: "recent", visibilityScope },
+    ]);
   });
 });
