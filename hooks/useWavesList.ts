@@ -105,7 +105,7 @@ const useWavesList = () => {
     viewerIdentityKey,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
-    enabled: !following,
+    enabled: true,
   });
   // Fetch quality-ranked waves for the broad discovery section and pagination.
   const {
@@ -127,7 +127,7 @@ const useWavesList = () => {
     viewerIdentityKey,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
-    enabled: !following,
+    enabled: true,
   });
   // Fetch followed waves by latest post activity for the known-wave sidebar.
   const {
@@ -151,48 +151,45 @@ const useWavesList = () => {
     enabled: isConnectedIdentity,
   });
   const mainWaves = useMemo<SidebarWaveWithDiscoverySection[]>(
-    () =>
-      following
-        ? followedActivityWaves
-        : [
-            ...followedActivityWaves,
-            // Keep the highly-rated slice before the broader all-quality list:
-            // duplicate wave ids retain their first sidebarSection during merge.
-            ...highlyRatedWaves.slice(0, HIGHLY_RATED_WAVE_LIMIT).map(
-              (wave): SidebarWaveWithDiscoverySection => ({
-                ...wave,
-                sidebarSection: "highly-rated",
-              })
-            ),
-            ...allQualityWaves.map(
-              (wave): SidebarWaveWithDiscoverySection => ({
-                ...wave,
-                sidebarSection: "all",
-              })
-            ),
-          ],
-    [following, followedActivityWaves, highlyRatedWaves, allQualityWaves]
+    () => [
+      ...followedActivityWaves,
+      // Keep the highly-rated slice before the broader all-quality list:
+      // duplicate wave ids retain their first sidebarSection during merge.
+      ...highlyRatedWaves.slice(0, HIGHLY_RATED_WAVE_LIMIT).map(
+        (wave): SidebarWaveWithDiscoverySection => ({
+          ...wave,
+          sidebarSection: "highly-rated",
+        })
+      ),
+      ...allQualityWaves.map(
+        (wave): SidebarWaveWithDiscoverySection => ({
+          ...wave,
+          sidebarSection: "all",
+        })
+      ),
+    ],
+    [followedActivityWaves, highlyRatedWaves, allQualityWaves]
   );
-  const isMainWavesFetching = following
-    ? isFollowedActivityWavesFetching
-    : isAllQualityWavesFetching ||
-      isHighlyRatedWavesFetching ||
-      isFollowedActivityWavesFetching;
-  const isMainWavesFetchingNextPage = following
-    ? isFollowedActivityWavesFetchingNextPage
-    : isAllQualityWavesFetchingNextPage;
-  const hasMainWavesNextPage = following
-    ? hasFollowedActivityWavesNextPage
-    : hasAllQualityWavesNextPage;
-  const fetchNextMainWavesPage = following
-    ? fetchNextFollowedActivityWavesPage
-    : fetchNextAllQualityWavesPage;
-  const mainWavesStatus = following
-    ? followedActivityWavesStatus
-    : allQualityWavesStatus;
-  const mainWavesRefetch = following
-    ? followedActivityWavesRefetch
-    : allQualityWavesRefetch;
+  const isMainWavesFetching =
+    isAllQualityWavesFetching ||
+    isHighlyRatedWavesFetching ||
+    isFollowedActivityWavesFetching;
+  const shouldPaginateAllQualityWaves = !following || allQualityWaves.length > 0;
+  const isMainWavesFetchingNextPage = shouldPaginateAllQualityWaves
+    ? isAllQualityWavesFetchingNextPage
+    : isFollowedActivityWavesFetchingNextPage;
+  const hasMainWavesNextPage = shouldPaginateAllQualityWaves
+    ? hasAllQualityWavesNextPage
+    : hasFollowedActivityWavesNextPage;
+  const fetchNextMainWavesPage = shouldPaginateAllQualityWaves
+    ? fetchNextAllQualityWavesPage
+    : fetchNextFollowedActivityWavesPage;
+  const mainWavesStatus = shouldPaginateAllQualityWaves
+    ? allQualityWavesStatus
+    : followedActivityWavesStatus;
+  const mainWavesRefetch = shouldPaginateAllQualityWaves
+    ? allQualityWavesRefetch
+    : followedActivityWavesRefetch;
   const trackedAnnouncementWave = useMemo(
     () =>
       mainWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
