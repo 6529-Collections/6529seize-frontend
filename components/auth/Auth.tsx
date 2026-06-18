@@ -1375,6 +1375,8 @@ export default function Auth({
     );
   }, [showSignModal, authLoadingState, connectionState]);
 
+  const isSignRequestInProgress =
+    isSigningPending || authLoadingState === "signing";
   const isSessionUpgradePrompt = signModalReason === "session-upgrade";
   const isConnectionShareUpgradePrompt =
     isSessionUpgradePrompt && sessionUpgradePromptMode === "reshare";
@@ -1487,21 +1489,22 @@ export default function Auth({
             </ul>
           </Modal.Body>
           <Modal.Footer className={styles["signModalFooter"]}>
-            {(!isSessionUpgradePrompt || sessionUpgradeCanDismiss) && (
-              <Button
-                variant="link"
-                className={styles["signModalCancelButton"]}
-                onClick={onCancelSignRequest}
-              >
-                {isSessionUpgradePrompt ? "Remind me later" : "Cancel"}
-              </Button>
-            )}
+            {!isSignRequestInProgress &&
+              (!isSessionUpgradePrompt || sessionUpgradeCanDismiss) && (
+                <Button
+                  variant="link"
+                  className={styles["signModalCancelButton"]}
+                  onClick={onCancelSignRequest}
+                >
+                  {isSessionUpgradePrompt ? "Remind me later" : "Cancel"}
+                </Button>
+              )}
             {!isConnectionShareUpgradePrompt && (
               <Button
                 variant="link"
                 className={styles["signModalConfirmButton"]}
                 onClick={onConfirmSignRequest}
-                disabled={isSigningPending}
+                disabled={isSignRequestInProgress}
               >
                 {isSigningPending ? (
                   <span className={styles["signModalButtonContent"]}>
