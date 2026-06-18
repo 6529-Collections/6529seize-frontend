@@ -623,3 +623,56 @@ Focused validation passed:
 Local browser smoke passed on `http://localhost:3138/punk6529/cms/builder`
 with viewport screenshots for desktop snapshot review, desktop preview, and
 mobile snapshot review under `.codex/artifacts/`.
+
+## 2026-06-18 - Phase 6 FE Art/NFT Display Excellence
+
+Started worker branch `codex/cms-art-display-excellence`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before validation:
+
+- Narrow `use client` art inspection island with keyboard close/next/previous,
+  zoom controls, fullscreen action, metadata toggle, and mobile-friendly fixed
+  overlay.
+- Art-first gallery rendering for `gallery`, `lightbox_gallery`, and generated
+  wallet gallery blocks, with editorial, dense, contact-sheet, and clean modes
+  driven by existing free-form block fields.
+- NFT/card detail composition with large 2D media, original-vs-derivative
+  badges, traits, collection context, source snapshot facts, package/storage
+  provenance, and related works.
+- Mixed media fallback improvements for audio posters while keeping HTML/model
+  execution behind the existing sandbox/static fallback policies.
+- Fixture expansions for contact-sheet galleries, NFT traits/source packets,
+  multi-work generated galleries, and audio poster fallback.
+
+Contract notes:
+
+- No V1 schema drift. New fixture hints use block/source packet extension
+  fields that are already accepted by the V1 contract.
+- 3D/model blocks remain static fallback in this lane; primary inspection is
+  2D and accessible.
+
+Focused validation completed:
+
+- `seize run format:changed`
+- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx __tests__/lib/profile-cms/protocol/v1/fixtures.test.ts`
+  passed after the temporary config worked around the Windows worktree path
+  regex issue; the temporary config was removed.
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+
+Browser smoke:
+
+- `seize-local-dev start-frontend` reached the assigned port, then the local
+  helper/process environment surfaced `PORT_SEARCH_LIMIT=0`, which the Next
+  env schema rejects.
+- `seize run dev` with a positive `PORT_SEARCH_LIMIT` reached Ready, then
+  Turbopack rejected the temporary `node_modules` junction because it points
+  outside the project root.
+- `seize run dev:webpack` reached Ready on port `3141`, but Playwright
+  screenshots against a temporary local fixture-preview route timed out after
+  webpack chunk loading errors from the same cross-worktree dependency shape.
+- No browser screenshots were produced. Focused renderer tests remain the
+  visual/interaction validation evidence for this local pass.

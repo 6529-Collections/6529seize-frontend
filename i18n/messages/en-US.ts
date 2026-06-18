@@ -11,6 +11,7 @@ import {
   THE_MEMES_DETAIL_TIMELINE_MESSAGES,
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
+import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -651,6 +652,7 @@ export const EN_US_MESSAGES = {
   "profileCms.walletGallery.summary.many": "{count} wallets",
   "profileCms.walletGallery.blockNumber": "Block",
   "profileCms.walletGallery.capturedAt": "Captured",
+  ...profileCmsArtDisplayMessages,
   "profileCms.interactive.deepZoom.title": "Deep zoom preview",
   "profileCms.interactive.deepZoom.description":
     "This V1 renderer keeps deep zoom static until the interactive viewer is enabled.",
