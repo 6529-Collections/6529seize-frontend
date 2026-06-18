@@ -63,6 +63,23 @@ describe("DropListItemContentMediaVideo", () => {
     expect(vid.autoplay).toBe(false); // Component uses useEffect for controlled playback
   });
 
+  it("centers the natural video player when requested", () => {
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    render(<DropListItemContentMediaVideo src="foo.mp4" align="center" />);
+
+    expect(screen.getByRole("group", { name: "Video player" })).toHaveClass(
+      "tw-mx-auto"
+    );
+  });
+
   it("renders video even when not in view (but paused)", () => {
     const ref = {
       current: document.createElement("div"),

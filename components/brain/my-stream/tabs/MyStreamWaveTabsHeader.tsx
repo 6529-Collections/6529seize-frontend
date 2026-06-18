@@ -105,7 +105,7 @@ function MyStreamWaveHeaderIdentity({
   showWaveRepAction,
 }: MyStreamWaveHeaderIdentityProps) {
   const scoreActions = (
-    <span className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5">
+    <span className="-tw-ml-1.5 tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5">
       <WaveTrustSignals
         waveRep={wave.wave_rep}
         waveScore={wave.wave_score}
@@ -239,7 +239,7 @@ export default function MyStreamWaveTabsHeader({
   const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
   const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
-  const waveAuthorHandle = wave.author?.handle?.toLowerCase() ?? null;
+  const waveAuthorHandle = wave.author.handle?.toLowerCase() ?? null;
   const showWaveRepAction =
     connectedHandle !== null &&
     !activeProfileProxy &&

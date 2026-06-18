@@ -35,6 +35,7 @@ export default function DropListItemContentMedia({
   disableModal = false,
   disableAutoPlay = false,
   fillVideoContainer = false,
+  videoAlign,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
   htmlIframeContainerClassName,
@@ -48,6 +49,7 @@ export default function DropListItemContentMedia({
   readonly disableModal?: boolean | undefined;
   readonly disableAutoPlay?: boolean | undefined;
   readonly fillVideoContainer?: boolean | undefined;
+  readonly videoAlign?: "left" | "center" | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly htmlIframeContainerClassName?: string | undefined;
@@ -104,6 +106,7 @@ export default function DropListItemContentMedia({
           mimeType={media_mime_type}
           disableAutoPlay={disableAutoPlay}
           fillContainer={fillVideoContainer}
+          align={videoAlign}
           showFullscreen={showVideoFullscreen}
         />
       );

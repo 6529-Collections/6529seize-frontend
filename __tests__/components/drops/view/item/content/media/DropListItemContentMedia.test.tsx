@@ -13,7 +13,12 @@ jest.mock(
 );
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMediaVideo",
-  () => ({ __esModule: true, default: () => <div data-testid="video" /> })
+  () => ({
+    __esModule: true,
+    default: (props: { readonly align?: string | undefined }) => (
+      <div data-testid="video" data-align={props.align} />
+    ),
+  })
 );
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMediaAudio",
@@ -63,6 +68,17 @@ describe("DropListItemContentMedia", () => {
       <DropListItemContentMedia media_mime_type="video/mp4" media_url="vid" />
     );
     expect(screen.getByTestId("video")).toBeInTheDocument();
+  });
+
+  it("forwards video alignment", () => {
+    render(
+      <DropListItemContentMedia
+        media_mime_type="video/mp4"
+        media_url="vid"
+        videoAlign="center"
+      />
+    );
+    expect(screen.getByTestId("video")).toHaveAttribute("data-align", "center");
   });
 
   it("renders audio component", () => {

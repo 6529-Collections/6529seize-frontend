@@ -13,6 +13,33 @@ import {
 } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
+const NEW_VERSION_TOAST_LOCALE_MESSAGES = [
+  {
+    locale: "en-GB",
+    refreshAction: "Refresh page",
+    title: "A new version is available",
+    eyebrow: "Yes, again!",
+  },
+  {
+    locale: "fr-FR",
+    refreshAction: "Actualiser la page",
+    title: "Une nouvelle version est disponible",
+    eyebrow: "Oui, encore !",
+  },
+  {
+    locale: "es-ES",
+    refreshAction: "Actualizar la página",
+    title: "Hay una nueva versión disponible",
+    eyebrow: "¡Sí, otra vez!",
+  },
+  {
+    locale: "de-DE",
+    refreshAction: "Seite aktualisieren",
+    title: "Eine neue Version ist verfügbar",
+    eyebrow: "Ja, schon wieder!",
+  },
+] as const;
+
 describe("frontend i18n helpers", () => {
   it("defines the initial supported locale set", () => {
     expect(DEFAULT_LOCALE).toBe("en-US");
@@ -42,12 +69,22 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
     expect(t("en-US", "media.video.playPreview")).toBe("Play video preview");
     expect(t("en-US", "media.video.player")).toBe("Video player");
+    expect(t("en-US", "media.video.seek")).toBe("Seek video");
     expect(t("en-GB", "media.video.exitFullscreen")).toBe("Exit full screen");
     expect(t("fr-FR", "media.video.play")).toBe("Lire la video");
     expect(t("es-ES", "media.video.fullscreen")).toBe("Pantalla completa");
     expect(t("de-DE", "media.video.unsupported")).toBe(
       "Ihr Browser unterstuetzt das Video-Tag nicht."
     );
+    for (const messages of NEW_VERSION_TOAST_LOCALE_MESSAGES) {
+      expect(t(messages.locale, "newVersionToast.refreshAction")).toBe(
+        messages.refreshAction
+      );
+      expect(t(messages.locale, "newVersionToast.title")).toBe(messages.title);
+      expect(t(messages.locale, "newVersionToast.eyebrow")).toBe(
+        messages.eyebrow
+      );
+    }
     expect(t("en-GB", "theMemes.sorting.sortBy")).toBe("Sort by");
     expect(t("fr-FR", "theMemes.detail.tabs.collectors")).toBe("Collectors");
     expect(t("es-ES", "theMemes.detail.heading.card", { tokenId: 1 })).toBe(
