@@ -152,6 +152,8 @@ jobs:
 
       - name: Ensure ElasticBeanstalk Application Version
         run: |
+          set -euo pipefail
+
           SOURCE_BUNDLE_KEY="web_build/${COMMIT_SHA}/package.zip"
 
           create_application_version() {
@@ -162,38 +164,33 @@ jobs:
               --description "${COMMIT_MESSAGE}"
           }
 
-          VERSION_COUNT=$(aws elasticbeanstalk describe-application-versions \
+          APPLICATION_VERSION_JSON=$(aws elasticbeanstalk describe-application-versions \
             --application-name "${BEANSTALK_APP_NAME}" \
             --version-labels "${COMMIT_SHA}" \
-            --query 'length(ApplicationVersions)' \
-            --output text)
+            --output json)
+          VERSION_COUNT=$(jq '.ApplicationVersions | length' <<< "$APPLICATION_VERSION_JSON")
 
-          if [ "$VERSION_COUNT" = "0" ]; then
-            echo "Creating Elastic Beanstalk application version ${COMMIT_SHA}."
-            create_application_version
-          else
-            EXISTING_BUCKET=$(aws elasticbeanstalk describe-application-versions \
-              --application-name "${BEANSTALK_APP_NAME}" \
-              --version-labels "${COMMIT_SHA}" \
-              --query 'ApplicationVersions[0].SourceBundle.S3Bucket' \
-              --output text)
-            EXISTING_KEY=$(aws elasticbeanstalk describe-application-versions \
-              --application-name "${BEANSTALK_APP_NAME}" \
-              --version-labels "${COMMIT_SHA}" \
-              --query 'ApplicationVersions[0].SourceBundle.S3Key' \
-              --output text)
-
-            if [ "$EXISTING_BUCKET" = "$AWS_BUCKET" ] && [ "$EXISTING_KEY" = "$SOURCE_BUNDLE_KEY" ]; then
-              echo "Elastic Beanstalk application version ${COMMIT_SHA} already exists with the expected source bundle; reusing it."
-            else
-              echo "::warning::Elastic Beanstalk application version ${COMMIT_SHA} already exists with source s3://${EXISTING_BUCKET}/${EXISTING_KEY}; recreating it with s3://${AWS_BUCKET}/${SOURCE_BUNDLE_KEY}."
-              aws elasticbeanstalk delete-application-version \
-                --application-name "${BEANSTALK_APP_NAME}" \
-                --version-label "${COMMIT_SHA}" \
-                --no-delete-source-bundle
+          case "$VERSION_COUNT" in
+            0)
+              echo "Creating Elastic Beanstalk application version ${COMMIT_SHA}."
               create_application_version
-            fi
-          fi
+              ;;
+            1)
+              EXISTING_BUCKET=$(jq -r '.ApplicationVersions[0].SourceBundle.S3Bucket // ""' <<< "$APPLICATION_VERSION_JSON")
+              EXISTING_KEY=$(jq -r '.ApplicationVersions[0].SourceBundle.S3Key // ""' <<< "$APPLICATION_VERSION_JSON")
+
+              if [ "$EXISTING_BUCKET" = "$AWS_BUCKET" ] && [ "$EXISTING_KEY" = "$SOURCE_BUNDLE_KEY" ]; then
+                echo "Elastic Beanstalk application version ${COMMIT_SHA} already exists with the expected source bundle; reusing it."
+              else
+                echo "::error::Elastic Beanstalk application version ${COMMIT_SHA} already exists with unexpected source s3://${EXISTING_BUCKET}/${EXISTING_KEY}; expected s3://${AWS_BUCKET}/${SOURCE_BUNDLE_KEY}. Refusing to replace an unexpected production version label automatically."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::Expected at most one Elastic Beanstalk application version for ${COMMIT_SHA}, found ${VERSION_COUNT}."
+              exit 1
+              ;;
+          esac
 
       - name: Deploy new Version to ElasticBeanstalk with Runtime Environment Variables
         env:
