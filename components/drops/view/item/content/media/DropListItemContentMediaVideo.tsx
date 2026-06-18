@@ -14,6 +14,7 @@ interface Props {
   readonly mimeType?: string | undefined;
   readonly disableAutoPlay?: boolean | undefined;
   readonly fillContainer?: boolean | undefined;
+  readonly align?: "left" | "center" | undefined;
   readonly showFullscreen?: boolean | undefined;
 }
 
@@ -22,6 +23,7 @@ function DropListItemContentMediaVideo({
   mimeType,
   disableAutoPlay = false,
   fillContainer = false,
+  align = "left",
   showFullscreen = true,
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
@@ -125,6 +127,7 @@ function DropListItemContentMediaVideo({
         videoRef={videoRef}
         autoPlay={false}
         layout={fillContainer ? "fill" : "natural"}
+        align={align}
         showFullscreen={showFullscreen}
         onDownload={downloadMedia}
         onOpen={openMedia}
