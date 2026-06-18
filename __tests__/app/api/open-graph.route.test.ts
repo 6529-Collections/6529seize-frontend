@@ -195,9 +195,7 @@ async function loadRoute(): Promise<void> {
   ) as {
     createTransientPlan: jest.Mock;
   };
-  firstParty6529 = jest.requireMock(
-    "@/app/api/open-graph/6529/service"
-  ) as {
+  firstParty6529 = jest.requireMock("@/app/api/open-graph/6529/service") as {
     createFirstParty6529Plan: jest.Mock;
   };
   ensRouteModule = jest.requireMock("@/app/api/open-graph/ens") as {
@@ -399,6 +397,340 @@ describe("open-graph API route", () => {
       "text/html",
       "https://cdn.safe.example/page"
     );
+  });
+
+  it("passes through richer generic article metadata from the parser", async () => {
+    const html =
+      "<html><head><title>Article</title></head><body></body></html>";
+    const responsePayload = {
+      requestUrl: "https://news.example/articles/richer-card",
+      url: "https://news.example/articles/richer-card",
+      title: "A richer generic link preview",
+      description: "Article dek from destination metadata.",
+      siteName: "Example News",
+      mediaType: "article",
+      contentType: "text/html; charset=utf-8",
+      favicon: "https://news.example/favicon.ico",
+      favicons: ["https://news.example/favicon.ico"],
+      image: {
+        url: "https://news.example/images/richer-card.jpg",
+        secureUrl: "https://news.example/images/richer-card.jpg",
+        alt: "Article hero image",
+      },
+      images: [
+        {
+          url: "https://news.example/images/richer-card.jpg",
+          secureUrl: "https://news.example/images/richer-card.jpg",
+          alt: "Article hero image",
+        },
+      ],
+      author: "Example Reporter",
+      publishedTime: "2026-06-16T12:00:00.000Z",
+    };
+
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html; charset=utf-8" },
+      body: html,
+      url: "https://news.example/articles/richer-card",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        expect(url).toEqual(
+          new URL("https://news.example/articles/richer-card")
+        );
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
+    utils.buildResponse.mockReturnValue(responsePayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://news.example/articles/richer-card"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(responsePayload);
+    expect(utils.buildResponse).toHaveBeenCalledWith(
+      new URL("https://news.example/articles/richer-card"),
+      html,
+      "text/html; charset=utf-8",
+      "https://news.example/articles/richer-card"
+    );
+  });
+
+  it("returns typed YouTube video previews before generic metadata", async () => {
+    const oembedPayload = {
+      title: "A Good Video",
+      author_name: "Channel 6529",
+      author_url: "https://www.youtube.com/@6529",
+      provider_name: "YouTube",
+      provider_url: "https://www.youtube.com/",
+      thumbnail_url: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+      thumbnail_width: 480,
+      thumbnail_height: 360,
+    };
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(oembedPayload),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const youtubeUrl =
+      "https://music.youtube.com/watch?v=abc123XYZ_0&t=1m30s&list=PL123456&index=4";
+    const request = {
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any;
+
+    const response = await GET(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      type: "youtube.video",
+      requestUrl:
+        "https://music.youtube.com/watch?v=abc123XYZ_0&t=1m30s&list=PL123456&index=4",
+      url: "https://www.youtube.com/watch?v=abc123XYZ_0&list=PL123456&index=4&t=90s",
+      title: "A Good Video",
+      description: null,
+      siteName: "YouTube",
+      mediaType: "video",
+      source: "YouTube",
+      provider: "YouTube",
+      providerUrl: "https://www.youtube.com/",
+      videoId: "abc123XYZ_0",
+      watchUrl:
+        "https://www.youtube.com/watch?v=abc123XYZ_0&list=PL123456&index=4&t=90s",
+      embedUrl:
+        "https://www.youtube-nocookie.com/embed/abc123XYZ_0?rel=0&playsinline=1&list=PL123456&index=4&start=90",
+      thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+      thumbnailWidth: 480,
+      thumbnailHeight: 360,
+      image: {
+        url: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+        secureUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+        width: 480,
+        height: 360,
+      },
+      images: [
+        {
+          url: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+          secureUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+          width: 480,
+          height: 360,
+        },
+      ],
+      author: "Channel 6529",
+      authorName: "Channel 6529",
+      authorUrl: "https://www.youtube.com/@6529",
+      playlistId: "PL123456",
+      playlistIndex: "4",
+      startSeconds: 90,
+    });
+    expect(mockFetchPublicUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "https://www.youtube.com/oembed?format=json&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dabc123XYZ_0%26list%3DPL123456%26index%3D4",
+      }),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          accept: "application/json",
+        }),
+      })
+    );
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+    expect(manifold.createManifoldPlan).not.toHaveBeenCalled();
+    expect(foundation.createFoundationPlan).not.toHaveBeenCalled();
+    expect(opensea.createOpenSeaPlan).not.toHaveBeenCalled();
+    expect(transient.createTransientPlan).not.toHaveBeenCalled();
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+  });
+
+  it("drops untrusted YouTube thumbnail hosts from oEmbed responses", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Thumbnail Host Check",
+          author_name: "Channel 6529",
+          thumbnail_url: "https://preview.evil.example/hqdefault.jpg",
+          thumbnail_width: 480,
+          thumbnail_height: 360,
+        }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const youtubeUrl = "https://youtu.be/thumb12345";
+    const request = {
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any;
+
+    const response = await GET(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual(
+      expect.objectContaining({
+        type: "youtube.video",
+        title: "Thumbnail Host Check",
+        thumbnailUrl: null,
+        image: null,
+        images: [],
+      })
+    );
+  });
+
+  it("returns an error when YouTube oEmbed is unavailable", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(404, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ error: "not found" }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const youtubeUrl = "https://youtu.be/missing123";
+    const request = {
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(502);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "YouTube preview unavailable." },
+      { status: 502 }
+    );
+  });
+
+  it("does not cache empty successful YouTube oEmbed responses", async () => {
+    mockFetchPublicUrl
+      .mockResolvedValueOnce(
+        createResponse(200, {
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({}),
+          url: "https://www.youtube.com/oembed",
+        })
+      )
+      .mockResolvedValueOnce(
+        createResponse(200, {
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            title: "Recovered Video",
+            thumbnail_url: "https://i.ytimg.com/vi/recover123/hqdefault.jpg",
+          }),
+          url: "https://www.youtube.com/oembed",
+        })
+      );
+
+    const youtubeUrl = "https://youtu.be/recover123";
+    const firstResponse = await GET({
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any);
+    const secondResponse = await GET({
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any);
+
+    expect(firstResponse.status).toBe(502);
+    expect(secondResponse.status).toBe(200);
+    expect(await secondResponse.json()).toEqual(
+      expect.objectContaining({
+        type: "youtube.video",
+        title: "Recovered Video",
+        thumbnailUrl: "https://i.ytimg.com/vi/recover123/hqdefault.jpg",
+      })
+    );
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects oversized YouTube oEmbed bodies", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Oversized",
+          padding: "x".repeat(70 * 1024),
+        }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const youtubeUrl = "https://youtu.be/oversized1";
+    const request = {
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(413);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "Preview response is too large to process safely." },
+      { status: 413 }
+    );
+  });
+
+  it("keeps separate final cache entries but shares oEmbed fetches for YouTube start times", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Shared Video",
+          thumbnail_url: "https://i.ytimg.com/vi/cache12345/hqdefault.jpg",
+        }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const firstUrl = "https://youtu.be/cache12345?t=42";
+    const secondUrl = "https://youtu.be/cache12345?t=90";
+    const firstResponse = await GET({
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(firstUrl)}`
+      ),
+    } as any);
+    const secondResponse = await GET({
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(secondUrl)}`
+      ),
+    } as any);
+
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(200);
+    expect(await firstResponse.json()).toEqual(
+      expect.objectContaining({
+        title: "Shared Video",
+        startSeconds: 42,
+        watchUrl: "https://www.youtube.com/watch?v=cache12345&t=42s",
+      })
+    );
+    expect(await secondResponse.json()).toEqual(
+      expect.objectContaining({
+        title: "Shared Video",
+        startSeconds: 90,
+        watchUrl: "https://www.youtube.com/watch?v=cache12345&t=90s",
+      })
+    );
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
   });
 
   it("uses first-party 6529 plans before provider and generic plans", async () => {
@@ -968,6 +1300,42 @@ describe("open-graph API route", () => {
           requestUrl: "https://two.example/article",
           title: "Preview two.example",
         },
+      },
+      errors: {},
+    });
+  });
+
+  it("returns typed YouTube previews from batch requests", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Batch Video",
+          author_name: "Batch Channel",
+          thumbnail_url: "https://i.ytimg.com/vi/batch12345/hqdefault.jpg",
+        }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const url = "https://youtu.be/batch12345?t=42";
+    const request = createJsonRequest({
+      urls: [url],
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      results: {
+        [url]: expect.objectContaining({
+          type: "youtube.video",
+          title: "Batch Video",
+          videoId: "batch12345",
+          watchUrl: "https://www.youtube.com/watch?v=batch12345&t=42s",
+          embedUrl:
+            "https://www.youtube-nocookie.com/embed/batch12345?rel=0&playsinline=1&start=42",
+        }),
       },
       errors: {},
     });

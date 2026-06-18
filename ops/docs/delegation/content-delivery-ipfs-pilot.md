@@ -26,7 +26,14 @@ slug/path.
 
 `ops/scripts/build-delegation-docs-content.mjs` packages the reviewed repo bundle by default. It removes active HTML, strips duplicate leading article headings, verifies packaged asset references, rewrites internal delegation links to absolute app routes, and refreshes the public bundle in place. Set `DELEGATION_DOCS_IMPORT_LEGACY_S3=1` only when intentionally refreshing article HTML from the legacy S3 source. Import mode still requires article assets to already exist as reviewed files under `content/delegation/assets`; new or changed remote assets must be downloaded and reviewed separately before rebuilding.
 
-The manifest currently has `canonicalStorage.rootCid: null` because the frontend repo does not have IPFS publishing credentials. After publishing the bundle directory to IPFS, update the manifest with the root CID and regenerate the public copy.
+`ops/scripts/publish-delegation-docs-content.mjs` publishes the reviewed bundle
+to the 6529-controlled internal IPFS node from an ops/CI context. Browser
+runtime code must never publish docs content or call a write-capable IPFS RPC
+endpoint.
+
+The manifest can have `canonicalStorage.rootCid: null` before the first publish.
+After the bundle is published and pinned, use the receipt root CID to update the
+repo manifest in a reviewed commit.
 
 ## Runtime Rules
 
@@ -48,8 +55,34 @@ Similar runtime S3-rendered content exists outside delegation, including About H
 1. Review article edits in `public/delegation-content/{version}/html`.
 2. Review asset edits in `content/delegation/assets`.
 3. Run `node ops/scripts/build-delegation-docs-content.mjs` to rebuild the manifest and public bundle.
-4. Publish `public/delegation-content/{version}` to IPFS from an admin or backend pipeline.
-5. Pin the root CID using 6529-controlled infrastructure.
-6. Set `DELEGATION_DOCS_IPFS_ROOT_CID` and rerun the build script.
-7. If using CloudFront/S3 acceleration, set `DELEGATION_DOCS_CDN_BASE_URL` to a CID or version-addressed mirror path.
+4. Publish `public/delegation-content/{version}` to IPFS through the internal
+   node:
+
+   ```bash
+   DELEGATION_DOCS_IPFS_API_ENDPOINT=https://api-ipfs.6529.io \
+     node ops/scripts/publish-delegation-docs-content.mjs
+   ```
+
+   Use `--dry-run` to build and receipt the file set without publishing.
+5. Keep the generated receipt from `tmp/delegation-docs-publish`. It records the
+   root CID, file hashes, IPFS entries, and byte-exact gateway/CDN verification
+   results for every published file.
+6. Set `DELEGATION_DOCS_IPFS_ROOT_CID` from the receipt and rerun the build
+   script. If using CloudFront/S3 acceleration, also set
+   `DELEGATION_DOCS_CDN_BASE_URL` to a CID or version-addressed mirror path.
+7. Commit the updated manifest/public bundle as a reviewed PR.
 8. Verify representative delegation article routes and confirm hash-verified rendering.
+
+The manual GitHub workflow `Publish Delegation Docs Content` runs the same
+script. Configure these secrets/vars before using it for a real publish:
+
+- `DELEGATION_DOCS_IPFS_API_ENDPOINT` secret: internal IPFS API endpoint.
+- `DELEGATION_DOCS_IPFS_API_BEARER_TOKEN` secret or
+  `DELEGATION_DOCS_IPFS_API_AUTH_HEADER` secret: optional auth for the internal
+  node.
+- `DELEGATION_DOCS_IPFS_GATEWAY_BASE_URL` var: gateway used for post-publish
+  verification, normally `https://ipfs.6529.io/ipfs`.
+- `DELEGATION_DOCS_CDN_S3_URI` var: optional S3 mirror destination. It may use
+  `{cid}` and `{version}` placeholders.
+- `DELEGATION_DOCS_CDN_BASE_URL` var: optional CloudFront base URL for
+  post-sync hash verification. It may use `{cid}` and `{version}` placeholders.

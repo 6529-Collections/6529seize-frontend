@@ -52,8 +52,11 @@ Links that do not match these rules stay regular links.
 3. A tweet-shaped loading state appears.
 4. The app requests `/api/twitter/preview`, which fetches
    `https://publish.twitter.com/oembed` server-side and parses the returned HTML.
-5. If oEmbed metadata loads, the post text and media link render inline.
-6. The card includes X intent actions for liking and replying, plus copy link.
+5. If oEmbed metadata loads, the source, author, post text, media, timestamp,
+   and available engagement facts render inline.
+6. Engagement facts are passive labels. The card links to the original post,
+   while wave side actions provide open/copy controls where that layout supports
+   them.
 7. In wave/DM chat layouts, side actions (open/copy) appear beside the card.
    In home-style layouts, side actions are hidden.
 
@@ -91,8 +94,8 @@ Links that do not match these rules stay regular links.
 - This page covers tweet cards in wave/DM markdown, leaderboard markdown, and
   boosted `/` cards.
 - This page does not cover non-drop tweet surfaces.
-- Real-time X engagement counts are not fetched; actions link out to X intent
-  routes.
+- Real-time X engagement counts are not fetched. Any engagement facts shown come
+  from the preview payload and are not interactive X intent actions.
 
 ## Related Pages
 

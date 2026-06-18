@@ -67,6 +67,26 @@ describe("Twitter preview parsing", () => {
     expect(preview.mediaLink).toBeUndefined();
   });
 
+  it("ignores pic.twitter.com text when the href is not a Twitter media redirect", () => {
+    const preview = parseTwitterOEmbed(
+      {
+        author_name: "Mayudrops",
+        author_url: "https://twitter.com/Mayudropsphotos",
+        html: `<blockquote class="twitter-tweet">
+          <p>
+            Text with a relative non-media link.
+            <a href="/not-twitter-media">pic.twitter.com/not-media</a>
+          </p>
+          <a href="https://twitter.com/Mayudropsphotos/status/2057513333985554492">May 21, 2026</a>
+        </blockquote>`,
+      },
+      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      "2057513333985554492"
+    );
+
+    expect(preview.mediaLink).toBeUndefined();
+  });
+
   it("detects scheme-less pic.twitter.com media text", () => {
     const preview = parseTwitterOEmbed(
       {
@@ -85,5 +105,25 @@ describe("Twitter preview parsing", () => {
     );
 
     expect(preview.mediaLink).toBe("https://t.co/media");
+  });
+
+  it("detects direct pic.twitter.com media hrefs", () => {
+    const preview = parseTwitterOEmbed(
+      {
+        author_name: "Mayudrops",
+        author_url: "https://twitter.com/Mayudropsphotos",
+        html: `<blockquote class="twitter-tweet">
+          <p>
+            Text with direct media.
+            <a href="https://pic.twitter.com/direct-media">pic.twitter.com/direct-media</a>
+          </p>
+          <a href="https://twitter.com/Mayudropsphotos/status/2057513333985554492">May 21, 2026</a>
+        </blockquote>`,
+      },
+      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      "2057513333985554492"
+    );
+
+    expect(preview.mediaLink).toBe("https://pic.twitter.com/direct-media");
   });
 });

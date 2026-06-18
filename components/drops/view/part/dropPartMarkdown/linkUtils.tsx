@@ -7,6 +7,7 @@ import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import { isPepeHost } from "./pepe";
 import { TWITTER_DOMAINS } from "./twitter";
+import { parseYoutubeLink } from "./youtube";
 
 const parseUrl = (href: string): URL | null => {
   try {
@@ -104,17 +105,17 @@ const shouldUseOpenGraphPreview = (
 
   const hostname = url.hostname.toLowerCase();
 
-  if (hostname === "youtu.be") {
-    return false;
+  const isYoutubeUrl =
+    hostname === "youtu.be" ||
+    YOUTUBE_DOMAINS.some((domain) =>
+      matchesDomainOrSubdomain(hostname, domain)
+    );
+
+  if (isYoutubeUrl) {
+    return parseYoutubeLink(href) !== null;
   }
 
   if (isPepeHost(hostname)) {
-    return false;
-  }
-
-  if (
-    YOUTUBE_DOMAINS.some((domain) => matchesDomainOrSubdomain(hostname, domain))
-  ) {
     return false;
   }
 

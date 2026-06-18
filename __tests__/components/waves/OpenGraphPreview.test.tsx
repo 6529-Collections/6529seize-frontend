@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
 import OpenGraphPreview, {
@@ -25,7 +25,7 @@ jest.mock("next/image", () => ({
     fill: _fill,
     ...rest
   }: any) {
-    return <img alt={alt} {...rest} />;
+    return React.createElement("img", { alt, ...rest });
   },
 }));
 
@@ -106,7 +106,10 @@ describe("OpenGraphPreview", () => {
           title: "Example Title",
           description: "An example description",
           siteName: "Example.com",
-          image: "https://cdn.example.com/preview.png",
+          image: {
+            url: "https://cdn.example.com/preview.png",
+            alt: "Example article hero",
+          },
         }}
       />
     );
@@ -114,33 +117,294 @@ describe("OpenGraphPreview", () => {
     const card = screen.getByTestId("og-preview-card");
     expect(card).toBeInTheDocument();
     expect(card).toHaveClass("tw-h-full");
-    expect(card.firstElementChild).toHaveClass(
-      "tw-flex-row",
-      "tw-h-full",
-      "tw-min-h-0"
+    expect(card).toHaveClass(
+      "tw-grid-cols-[6rem,minmax(0,1fr)]",
+      "sm:tw-grid-cols-[8rem,minmax(0,1fr)]",
+      "md:tw-grid-cols-[10.5rem,minmax(0,1fr)]"
     );
     expect(screen.getByText("Example.com")).toBeInTheDocument();
-    const titleLinks = screen.getAllByRole("link", { name: "Example Title" });
-    expect(titleLinks).toHaveLength(2);
-    expect(titleLinks[0]).toHaveClass(
-      "tw-h-full",
-      "tw-w-28",
-      "sm:tw-w-32",
-      "md:tw-w-44"
-    );
-    const titleLink = titleLinks[1];
-    expect(titleLink).toHaveAttribute("href", "/article");
-    expect(titleLink).not.toHaveAttribute("target");
-    const image = screen.getByAltText("Example Title");
+    expect(card).toHaveAttribute("href", "/article");
+    expect(card).not.toHaveAttribute("target");
+    const image = screen.getByAltText("Example article hero");
     expect(image).toHaveAttribute("src", "https://cdn.example.com/preview.png");
     expect(image).toHaveAttribute(
       "sizes",
-      "(max-width: 640px) 7rem, (max-width: 768px) 8rem, 176px"
+      "(max-width: 640px) 6rem, (max-width: 768px) 8rem, 10.5rem"
     );
-    expect(image.parentElement).toHaveClass("tw-h-full", "tw-w-full");
-    expect(image.parentElement).not.toHaveClass("tw-aspect-[16/9]");
+    expect(image.parentElement).toHaveClass(
+      "tw-aspect-[16/10]",
+      "tw-bg-black/40"
+    );
     expect(screen.getByText("An example description")).toBeInTheDocument();
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
+  });
+
+  it("renders YouTube video previews with click-to-play iframe", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://youtu.be/abc123XYZ_0?t=42"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://youtu.be/abc123XYZ_0?t=42"
+        preview={{
+          type: "youtube.video",
+          title: "A Good Video",
+          provider: "YouTube",
+          videoId: "abc123XYZ_0",
+          watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0&t=42s",
+          embedUrl:
+            "https://www.youtube-nocookie.com/embed/abc123XYZ_0?rel=0&playsinline=1&start=42",
+          thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+          authorName: "Channel 6529",
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("youtube-video-preview-card")).toBeInTheDocument();
+    expect(screen.getByText("YouTube")).toBeInTheDocument();
+    expect(screen.getByText("by Channel 6529")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "A Good Video" })).toHaveAttribute(
+      "href",
+      "https://youtu.be/abc123XYZ_0?t=42"
+    );
+    expect(
+      screen.getByRole("link", { name: /watch on youtube/i })
+    ).toHaveAttribute(
+      "href",
+      "https://www.youtube.com/watch?v=abc123XYZ_0&t=42s"
+    );
+    expect(
+      screen.getByRole("img", {
+        name: "YouTube thumbnail for A Good Video",
+      })
+    ).toHaveAttribute(
+      "src",
+      "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg"
+    );
+    expect(screen.queryByTestId("youtube-video-embed")).toBeNull();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Play YouTube video: A Good Video",
+      })
+    );
+
+    const iframe = screen.getByTitle("A Good Video");
+    expect(iframe).toHaveAttribute(
+      "src",
+      "https://www.youtube-nocookie.com/embed/abc123XYZ_0?rel=0&playsinline=1&start=42"
+    );
+  });
+
+  it("does not render an iframe control for untrusted YouTube embed URLs", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://youtu.be/abc123XYZ_0"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://youtu.be/abc123XYZ_0"
+        preview={{
+          type: "youtube.video",
+          title: "A Good Video",
+          provider: "YouTube",
+          videoId: "abc123XYZ_0",
+          watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0",
+          embedUrl: "https://evil.example/embed/abc123XYZ_0",
+          thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+        }}
+      />
+    );
+
+    expect(screen.queryByTestId("youtube-video-play")).toBeNull();
+    expect(screen.queryByTestId("youtube-video-embed")).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "YouTube thumbnail for A Good Video" })
+    ).toHaveAttribute(
+      "href",
+      "https://www.youtube.com/watch?v=abc123XYZ_0"
+    );
+  });
+
+  it("uses localized YouTube fallbacks for sparse server data", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://youtu.be/abc123XYZ_0"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://youtu.be/abc123XYZ_0"
+        preview={
+          {
+            type: "youtube.video",
+            title: null,
+            provider: null,
+            videoId: "abc123XYZ_0",
+            watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0",
+            embedUrl:
+              "https://www.youtube-nocookie.com/embed/abc123XYZ_0?rel=0&playsinline=1",
+            thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+            author: { name: "not renderable" },
+          } as any
+        }
+      />
+    );
+
+    expect(screen.getByText("YouTube")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "YouTube video" })).toHaveAttribute(
+      "href",
+      "https://youtu.be/abc123XYZ_0"
+    );
+    expect(
+      screen.getByRole("img", { name: "YouTube video thumbnail" })
+    ).toHaveAttribute(
+      "src",
+      "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg"
+    );
+    expect(screen.queryByText("by [object Object]")).toBeNull();
+  });
+
+  it("renders sparse article metadata with a source label and no empty fields", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/research/notes");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/research/notes"
+        preview={{
+          type: "article",
+          title: "Research Notes",
+          source: "Example Journal",
+          author: "Ada Lovelace",
+          publishedTime: "2026-06-16T12:00:00.000Z",
+          favicon: "https://journal.example/favicon.ico",
+        }}
+      />
+    );
+
+    const card = screen.getByTestId("og-preview-card");
+    expect(card).toBeInTheDocument();
+    expect(screen.getByText("Example Journal")).toBeInTheDocument();
+
+    expect(card).toHaveAttribute("href", "/research/notes");
+    expect(card).not.toHaveAttribute("target");
+    expect(screen.getByText("Research Notes")).toBeInTheDocument();
+    expect(screen.getByText("by Ada Lovelace")).toBeInTheDocument();
+    expect(screen.getByText("Jun 16, 2026")).toBeInTheDocument();
+    expect(screen.queryByText("Link unavailable")).toBeNull();
+  });
+
+  it("prefers canonical URL domains over source fallbacks", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://canonical.example/article"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://request.example/redirect"
+        preview={{
+          title: "Canonical Source",
+          canonicalUrl: "https://canonical.example/article",
+          source: "request.example",
+        }}
+      />
+    );
+
+    expect(screen.getByText("canonical.example")).toBeInTheDocument();
+    expect(screen.queryByText("request.example")).toBeNull();
+  });
+
+  it("formats supported calendar dates in UTC", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/research/notes");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/research/notes"
+        preview={{
+          title: "Late Dispatch",
+          source: "Example Journal",
+          publishedTime: "2026-06-16T23:30:00-05:00",
+        }}
+      />
+    );
+
+    const date = screen.getByText("Jun 17, 2026");
+    expect(date).toHaveAttribute("datetime", "2026-06-17T04:30:00.000Z");
+  });
+
+  it("renders timezone-ambiguous timestamps without datetime attributes", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/dispatch"
+        preview={{
+          title: "Field Dispatch",
+          source: "Example Journal",
+          publishedTime: "2026-06-16 12:00",
+        }}
+      />
+    );
+
+    const date = screen.getByText("2026-06-16 12:00");
+    expect(date.tagName).toBe("TIME");
+    expect(date).not.toHaveAttribute("datetime");
+  });
+
+  it("renders free-text published dates without invalid datetime attributes", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/dispatch"
+        preview={{
+          title: "Field Dispatch",
+          source: "Example Journal",
+          publishedTime: "Spring 2026",
+        }}
+      />
+    );
+
+    const date = screen.getByText("Spring 2026");
+    expect(date.tagName).toBe("TIME");
+    expect(date).not.toHaveAttribute("datetime");
+  });
+
+  it("renders partially parseable published dates without invalid datetime attributes", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/dispatch"
+        preview={{
+          title: "Field Dispatch",
+          source: "Example Journal",
+          publishedTime: "Jun 16 2026 after publication",
+        }}
+      />
+    );
+
+    const date = screen.getByText("Jun 16 2026 after publication");
+    expect(date.tagName).toBe("TIME");
+    expect(date).not.toHaveAttribute("datetime");
+  });
+
+  it("does not render generic badges for dotted provider-style types", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/provider");
+
+    render(
+      <OpenGraphPreview
+        href="https://journal.example/provider"
+        preview={{
+          title: "Provider Payload",
+          source: "Example Journal",
+          type: "github.repository",
+        }}
+      />
+    );
+
+    expect(screen.getByText("Provider Payload")).toBeInTheDocument();
+    expect(screen.queryByText("Github Repository")).toBeNull();
   });
 
   it("preserves generated 6529 profile cards instead of cropping them", () => {
@@ -336,11 +600,12 @@ describe("OpenGraphPreview", () => {
       />
     );
 
-    expect(screen.getByTestId("6529-collection-preview-card")).toBeInTheDocument();
-    expect(screen.getByTestId("6529-collection-preview-image-frame")).toHaveClass(
-      "tw-bg-black",
-      "tw-border-black"
-    );
+    expect(
+      screen.getByTestId("6529-collection-preview-card")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("6529-collection-preview-image-frame")
+    ).toHaveClass("tw-bg-black", "tw-border-black");
     expect(screen.getByAltText("The Collective Synapse")).toHaveClass(
       "tw-object-contain"
     );
@@ -394,12 +659,15 @@ describe("OpenGraphPreview", () => {
       />
     );
 
-    expect(screen.getByTestId("6529-collection-preview-card")).toBeInTheDocument();
-    expect(screen.getByTestId("6529-collection-preview-image-frame")).toHaveClass(
-      "tw-bg-black",
-      "tw-border-black"
+    expect(
+      screen.getByTestId("6529-collection-preview-card")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("6529-collection-preview-image-frame")
+    ).toHaveClass("tw-bg-black", "tw-border-black");
+    expect(screen.getByAltText("Pebbles #514")).toHaveClass(
+      "tw-object-contain"
     );
-    expect(screen.getByAltText("Pebbles #514")).toHaveClass("tw-object-contain");
     expect(screen.getByText("Pebbles #514")).toBeInTheDocument();
     expect(screen.getByText("NextGen \u00b7 Pebbles")).toBeInTheDocument();
     expect(screen.getByText("Rarity")).toBeInTheDocument();

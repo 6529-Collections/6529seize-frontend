@@ -273,14 +273,8 @@ describe("DropsList", () => {
     const boostedCard = screen.getByTestId("boosted-card");
 
     expect(boostedCard.parentElement).toHaveClass(
-      "tw-rounded-2xl",
-      "tw-bg-iron-900/50",
-      "tw-p-2",
-      "sm:tw-p-3"
-    );
-    expect(boostedCard.parentElement?.parentElement).toHaveClass(
       "tw-px-3",
-      "tw-py-4",
+      "tw-py-3",
       "sm:tw-px-4"
     );
   });

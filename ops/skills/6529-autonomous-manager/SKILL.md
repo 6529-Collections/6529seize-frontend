@@ -12,9 +12,9 @@ Own a bounded 6529 frontend workstream from instruction to evidence-backed close
 Choose one primary mode, then add others only when the work requires it:
 
 - **Implementation manager**: Make a scoped code, test, docs, config, or UI change in this repository.
-- **PR review manager**: Inspect reviewer, CodeRabbit, Claude, CI, and local findings; fix valid feedback; push updates when requested. Use `ops/skills/write-prs/SKILL.md` for PR creation, bot iteration, readiness, merge, and deployment gates.
+- **PR review manager**: Inspect reviewer, CodeRabbit, Claude, CI, and local findings; fix valid feedback; push updates when requested. Use `ops/skills/write-prs/SKILL.md` for PR creation, bot iteration, readiness, and merge preparation. Use `ops/skills/deploy-6529/SKILL.md` when the user requests merge/deploy execution.
 - **Docs/skills manager**: Create or update user-facing docs under `ops/docs/` and repo-local skills under `ops/skills/`, keeping current-state language and navigable structure.
-- **Release manager**: Carry an already-approved change through merge, staging, production, and smoke validation only when explicitly asked. Use `ops/skills/write-prs/SKILL.md` as the authority for merge and deployment gates.
+- **Release manager**: Carry an already-approved change through merge, staging, production, and smoke validation only when explicitly asked. Use `ops/skills/deploy-6529/SKILL.md` as the authority for merge, deployment, E2E validation, backend coordination, and cross-agent coordination.
 - **Investigation manager**: Diagnose an issue, gather evidence, identify ownership, and turn findings into a concrete fix or handoff.
 
 ## Load Order
@@ -27,7 +27,8 @@ Before planning or editing, read only the context that matters:
 4. Current branch, `git status`, and relevant diffs. Preserve unrelated user changes.
 5. Existing manager memory for the workstream, if present.
 6. Narrower repo-local skills when relevant:
-   - `ops/skills/write-prs/SKILL.md` for PR creation, review iteration, merge, or deploy gates.
+   - `ops/skills/write-prs/SKILL.md` for PR creation, review iteration, and readiness.
+   - `ops/skills/deploy-6529/SKILL.md` for merge execution, staging, production, E2E validation, backend coordination, or release coordination.
    - `ops/skills/commit-docs-updater/SKILL.md` for user-facing docs updates from code changes.
    - `ops/skills/sonar-guardrails/SKILL.md` for TypeScript and JavaScript quality-sensitive edits.
    - `ops/skills/react-doctor/SKILL.md` for React, Next.js, hook, routing, or UI state changes.

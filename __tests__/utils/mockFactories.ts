@@ -22,6 +22,7 @@ export function createMockMinimalWave(
     picture: null,
     contributors: [],
     isPinned: false,
+    isFollowing: false,
     isOfficial: false,
     parentWaveId: null,
     hasSubwaves: false,
@@ -29,6 +30,9 @@ export function createMockMinimalWave(
     latestReadTimestamp: 0,
     firstUnreadDropSerialNo: null,
     isMuted: false,
+    waveRep: null,
+    waveScore: null,
+    sidebarSection: null,
     ...overrides,
   };
 }

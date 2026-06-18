@@ -669,8 +669,9 @@ async function main() {
     canonicalStorage: {
       type: "ipfs",
       rootCid: IPFS_ROOT_CID,
-      note:
-        "Set DELEGATION_DOCS_IPFS_ROOT_CID after the reviewed bundle is published and pinned.",
+      note: IPFS_ROOT_CID
+        ? "Reviewed delegation docs bundle is published and pinned by immutable IPFS CID."
+        : "Set DELEGATION_DOCS_IPFS_ROOT_CID after the reviewed bundle is published and pinned.",
     },
     acceleration: {
       primaryGatewayBaseUrl: PRIMARY_GATEWAY_BASE_URL,
