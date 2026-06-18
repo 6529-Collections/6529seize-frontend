@@ -11,6 +11,7 @@ export const FR_FR_MESSAGES = {
   "media.video.play": "Lire la video",
   "media.video.player": "Lecteur video",
   "media.video.playPreview": "Lire l'apercu video",
+  "media.video.seek": "Modifier la position de la video",
   "media.video.unmute": "Activer le son de la video",
   "media.video.unsupported":
     "Votre navigateur ne prend pas en charge la balise video.",
