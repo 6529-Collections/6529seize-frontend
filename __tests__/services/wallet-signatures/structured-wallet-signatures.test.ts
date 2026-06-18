@@ -40,25 +40,18 @@ function createDrop(): ApiCreateDropRequest {
 describe("structured wallet signatures", () => {
   const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
   const originalApiEndpoint = publicEnv.API_ENDPOINT;
-  const originalStructuredFlag = publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED;
 
   beforeEach(() => {
     publicEnv.BASE_ENDPOINT = "https://www.6529.io";
     publicEnv.API_ENDPOINT = "https://api.6529.io";
-    publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = undefined;
   });
 
   afterEach(() => {
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
     publicEnv.API_ENDPOINT = originalApiEndpoint;
-    publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = originalStructuredFlag;
   });
 
-  it("reads the rollout flag explicitly", () => {
-    expect(isStructuredSignaturesEnabled()).toBe(false);
-
-    publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = "true";
-
+  it("enables structured signatures by default", () => {
     expect(isStructuredSignaturesEnabled()).toBe(true);
   });
 
