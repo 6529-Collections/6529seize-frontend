@@ -46,15 +46,46 @@ jest.mock("next/navigation", () => ({
 
 const useAuthMock = useAuth as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
+const createObjectUrlMock = jest.fn(() => "blob:cms-export");
+const revokeObjectUrlMock = jest.fn();
+const NativeBlob = globalThis.Blob;
+
+class CapturedBlob extends NativeBlob {
+  readonly parts: readonly BlobPart[];
+
+  constructor(parts: BlobPart[] = [], options?: BlobPropertyBag) {
+    super(parts, options);
+    this.parts = parts;
+  }
+}
 
 describe("ProfileCmsBuilder", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(globalThis, "Blob", {
+      configurable: true,
+      value: CapturedBlob,
+    });
+    Object.defineProperty(globalThis.URL, "createObjectURL", {
+      configurable: true,
+      value: createObjectUrlMock,
+    });
+    Object.defineProperty(globalThis.URL, "revokeObjectURL", {
+      configurable: true,
+      value: revokeObjectUrlMock,
+    });
     delete process.env["PROFILE_CMS_BUILDER_API_ENABLED"];
     delete process.env["NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED"];
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: null,
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(globalThis, "Blob", {
+      configurable: true,
+      value: NativeBlob,
     });
   });
 
@@ -95,6 +126,199 @@ describe("ProfileCmsBuilder", () => {
     await user.click(screen.getByRole("button", { name: "Import JSON" }));
 
     expect(screen.getByLabelText("Site title")).toHaveValue("Imported site");
+  });
+
+  it("downloads package, source packet, and schema bundle JSON", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.click(screen.getByRole("button", { name: "JSON" }));
+    await user.click(
+      screen.getByRole("button", { name: "Download package JSON" })
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Download source packet" })
+    );
+    await user.click(screen.getByRole("button", { name: "Download schemas" }));
+
+    expect(createObjectUrlMock).toHaveBeenCalledTimes(3);
+    const packageBlob = createObjectUrlMock.mock.calls[0]?.[0] as Blob;
+    const sourceBlob = createObjectUrlMock.mock.calls[1]?.[0] as Blob;
+    const schemaBlob = createObjectUrlMock.mock.calls[2]?.[0] as Blob;
+    await expect(readBlobText(packageBlob)).resolves.toContain(
+      '"schema": "6529.cms.package.v1"'
+    );
+    await expect(readBlobText(sourceBlob)).resolves.toContain(
+      '"schema": "6529.cms.builder_source_packet.v1"'
+    );
+    await expect(readBlobText(schemaBlob)).resolves.toContain(
+      '"schema": "6529.cms.builder_schema_bundle.v1"'
+    );
+  });
+
+  it("exports source packets with the current draft version after edits", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.clear(screen.getByLabelText("Page title"));
+    await user.type(screen.getByLabelText("Page title"), "Versioned draft");
+    await user.click(screen.getByRole("button", { name: "JSON" }));
+    await user.click(
+      screen.getByRole("button", { name: "Download source packet" })
+    );
+
+    const sourceBlob = createObjectUrlMock.mock.calls[0]?.[0] as Blob;
+    const sourcePacket = JSON.parse(await readBlobText(sourceBlob)) as {
+      draft: { base_version: number };
+    };
+    expect(sourcePacket.draft.base_version).toBeGreaterThan(0);
+  });
+
+  it("reviews an agent patch and applies it only after explicit approval", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    const packageHash = await getCurrentPackageHash(user);
+    await user.click(screen.getByRole("button", { name: "Agent" }));
+    fireEvent.change(screen.getByLabelText("Agent patch JSON"), {
+      target: {
+        value: JSON.stringify(
+          buildAgentPatch(packageHash, [
+            {
+              op: "update_page_metadata",
+              path: "/payload/pages/0/metadata/title",
+              value: "Agent reviewed homepage",
+              reason: "Tighten the homepage title.",
+            },
+          ])
+        ),
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "Review patch" }));
+
+    expect(
+      screen.getByText("Patch validates against the current draft.")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Agent reviewed homepage")).toBeInTheDocument();
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Apply to draft" }));
+
+    expect(
+      screen.getByText("Patch applied to this draft.")
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Editor" }));
+    expect(screen.getByLabelText("Page title")).toHaveValue(
+      "Agent reviewed homepage"
+    );
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects unsafe agent patches and keeps apply disabled", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    const packageHash = await getCurrentPackageHash(user);
+    await user.click(screen.getByRole("button", { name: "Agent" }));
+    fireEvent.change(screen.getByLabelText("Agent patch JSON"), {
+      target: {
+        value: JSON.stringify(
+          buildAgentPatch(packageHash, [
+            {
+              op: "add_block",
+              path: "/payload/pages/0/blocks/-",
+              value: {
+                id: "block-unsafe-link",
+                block_type: "button_link",
+                label: "Unsafe link",
+                href: "javascript:alert(1)",
+              },
+              reason: "Injected link.",
+            },
+          ])
+        ),
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "Review patch" }));
+
+    expect(
+      screen.getByText("Patch was rejected before it could change the draft.")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Code: block.unsafe_url")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Apply to draft" })
+    ).toBeDisabled();
+  });
+
+  it("rejects oversized uploaded agent patch files", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.click(screen.getByRole("button", { name: "Agent" }));
+    const file = new File(["{}"], "oversized-patch.json", {
+      type: "application/json",
+    });
+    Object.defineProperty(file, "size", {
+      configurable: true,
+      value: 2 * 1024 * 1024 + 1,
+    });
+
+    fireEvent.change(screen.getByLabelText("Upload patch"), {
+      target: { files: [file] },
+    });
+
+    expect(
+      await screen.findByText(
+        "Patch file is too large. Paste a smaller JSON patch."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Agent patch JSON")).toHaveValue("");
+  });
+
+  it("does not turn agent patch import into backend authority", async () => {
+    const user = userEvent.setup();
+    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-other" },
+    });
+
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
+
+    const packageHash = await getCurrentPackageHash(user);
+    await user.click(screen.getByRole("button", { name: "Agent" }));
+    fireEvent.change(screen.getByLabelText("Agent patch JSON"), {
+      target: {
+        value: JSON.stringify(
+          buildAgentPatch(packageHash, [
+            {
+              op: "update_theme",
+              path: "/site/theme/accent",
+              value: "#ffffff",
+            },
+          ])
+        ),
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "Review patch" }));
+    await user.click(screen.getByRole("button", { name: "Apply to draft" }));
+
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(
+        "Connect as this profile before using backend builder actions."
+      )
+    ).toBeInTheDocument();
   });
 
   it("keeps publish honest when backend writes are disabled", async () => {
@@ -366,3 +590,45 @@ describe("ProfileCmsBuilder", () => {
     ).toHaveAttribute("href", "/punk6529/rooms/work-4/index.html");
   });
 });
+
+async function getCurrentPackageHash(
+  user: ReturnType<typeof userEvent.setup>
+): Promise<string> {
+  await user.click(screen.getByRole("button", { name: "JSON" }));
+  const jsonEditor = screen.getByLabelText(
+    "Package candidate"
+  ) as HTMLTextAreaElement;
+  const exported = JSON.parse(jsonEditor.value) as {
+    integrity: { package_hash: string };
+  };
+  return exported.integrity.package_hash;
+}
+
+function buildAgentPatch(
+  packageHash: string,
+  operations: readonly Record<string, unknown>[]
+): Record<string, unknown> {
+  return {
+    schema: "6529.cms.agent_patch.v1",
+    patch_id: "patch-test",
+    target: {
+      draft_id: "local-draft",
+      base_version: 0,
+      base_package_hash: packageHash,
+    },
+    operations,
+    provenance: {
+      created_at: "2026-06-18T00:00:00.000Z",
+      author_type: "user_agent",
+      agent_name: "component-test-agent",
+    },
+  };
+}
+
+function readBlobText(blob: Blob): Promise<string> {
+  return Promise.resolve(
+    (blob as CapturedBlob).parts
+      .map((part) => (typeof part === "string" ? part : ""))
+      .join("")
+  );
+}
