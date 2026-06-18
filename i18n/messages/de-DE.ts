@@ -11,6 +11,7 @@ export const DE_DE_MESSAGES = {
   "media.video.play": "Video abspielen",
   "media.video.player": "Videoplayer",
   "media.video.playPreview": "Videovorschau abspielen",
+  "media.video.seek": "Videoposition andern",
   "media.video.unmute": "Videoton einschalten",
   "media.video.unsupported":
     "Ihr Browser unterstuetzt das Video-Tag nicht.",
