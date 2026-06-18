@@ -26,9 +26,9 @@ const HEADER_CELL_CLASS_NAME =
 const BODY_CELL_CLASS_NAME =
   "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-leading-10 tw-text-white";
 const HEADER_CONTENT_CLASS_NAME = "tw-flex tw-items-center tw-justify-center";
-const RANK_CELL_CLASS_NAME = "tw-w-[5%] tw-text-center";
-const COLLECTOR_CELL_CLASS_NAME = "tw-w-[40%] tw-text-left";
-const METRIC_CELL_CLASS_NAME = "tw-w-[9.1667%] tw-text-center";
+const RANK_CELL_CLASS_NAME = "tw-w-[4%] tw-text-center";
+const COLLECTOR_CELL_CLASS_NAME = "tw-max-w-0 tw-w-[28%] tw-text-left";
+const METRIC_CELL_CLASS_NAME = "tw-w-[9.7143%] tw-text-center";
 
 function getLeaderboardRowKey(lead: LeaderboardMetrics) {
   return (
