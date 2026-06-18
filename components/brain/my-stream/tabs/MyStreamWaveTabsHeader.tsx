@@ -113,7 +113,9 @@ function MyStreamWaveHeaderIdentity({
         mode="summary"
         learnMoreHref={waveScoreLearnMoreHref}
       />
-      {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
+      {showWaveRepAction && !isCompact && (
+        <WaveRepButton wave={wave} variant="compact" />
+      )}
     </span>
   );
 

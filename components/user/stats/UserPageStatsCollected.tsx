@@ -317,17 +317,13 @@ function UserPageStatsCollectedMemes({
           total: formatInteger(locale, seasonBalance.count),
         })}{" "}
         <span className="!tw-text-[#93939f]">
-          {t(
-            locale,
-            "user.collected.stats.details.uniqueProgressPercent",
-            {
-              percent: formatPercent(
-                locale,
-                balanceMemes.unique / seasonBalance.count,
-                0
-              ),
-            }
-          )}
+          {t(locale, "user.collected.stats.details.uniqueProgressPercent", {
+            percent: formatPercent(
+              locale,
+              balanceMemes.unique / seasonBalance.count,
+              0
+            ),
+          })}
         </span>
       </>
     );
@@ -337,9 +333,7 @@ function UserPageStatsCollectedMemes({
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button className={styles["collectedAccordionButton"]}>
-          <b>
-            {t(locale, "user.collected.stats.details.memesBySeason")}
-          </b>
+          <b>{t(locale, "user.collected.stats.details.memesBySeason")}</b>
         </Accordion.Button>
         <Accordion.Body className={styles["collectedAccordionBody"]}>
           <Container>

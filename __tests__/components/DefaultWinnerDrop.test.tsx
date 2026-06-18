@@ -294,8 +294,7 @@ describe("DefaultWinnerDrop", () => {
     );
 
     const { rerender } = render(renderDrop());
-    const onLongPress = mockWaveDropContent.mock.calls.at(-1)?.[0]
-      ?.onLongPress;
+    const onLongPress = mockWaveDropContent.mock.calls.at(-1)?.[0]?.onLongPress;
 
     act(() => {
       onLongPress();

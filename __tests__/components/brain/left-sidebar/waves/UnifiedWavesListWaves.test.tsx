@@ -353,7 +353,7 @@ it("auto-expands the parent for the active subwave", () => {
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 });
 
-it("loads and expands a direct active subwave parent before the child row is available", async () => {
+it("loads a direct active subwave parent before showing it expanded", async () => {
   mockUseMyStream.mockReturnValue({
     activeWave: { id: "child", parentWaveId: "parent", set: jest.fn() },
     waves: {
@@ -377,7 +377,7 @@ it("loads and expands a direct active subwave parent before the child row is ava
 
   expect(screen.getByTestId("wave-parent")).toHaveAttribute(
     "data-expanded",
-    "true"
+    "false"
   );
   expect(screen.queryByTestId("wave-child")).toBeNull();
 

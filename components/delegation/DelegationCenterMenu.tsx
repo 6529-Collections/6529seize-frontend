@@ -340,13 +340,7 @@ function EtherscanLink() {
       rel="noopener noreferrer"
       className={styles["delegationLink"]}
     >
-      <Image
-        unoptimized
-        src="/etherscan_w.png"
-        alt=""
-        width={30}
-        height={30}
-      />
+      <Image unoptimized src="/etherscan_w.png" alt="" width={30} height={30} />
       <span>Etherscan</span>
     </Link>
   );
@@ -360,13 +354,7 @@ function GithubLink() {
       rel="noopener noreferrer"
       className={styles["delegationLink"]}
     >
-      <Image
-        unoptimized
-        src="/github_w.png"
-        alt=""
-        width={30}
-        height={30}
-      />
+      <Image unoptimized src="/github_w.png" alt="" width={30} height={30} />
       <span>GitHub</span>
     </Link>
   );

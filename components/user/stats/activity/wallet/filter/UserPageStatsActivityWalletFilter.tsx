@@ -112,10 +112,7 @@ export default function UserPageStatsActivityWalletFilter({
                           <UserPageStatsActivityWalletFilterItem
                             key={`nft-activity-${filter}`}
                             filter={filter}
-                            title={getWalletActivityFilterLabel(
-                              filter,
-                              locale
-                            )}
+                            title={getWalletActivityFilterLabel(filter, locale)}
                             ariaLabel={getWalletActivityFilterOptionLabel(
                               filter,
                               locale

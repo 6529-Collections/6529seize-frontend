@@ -39,6 +39,12 @@ Shared docs cover user-facing behavior reused across multiple product areas.
   shared Open Graph/Twitter metadata coverage, existing dynamic card endpoints,
   and the standardization roadmap for public link previews.
 
+### Metadata and Sharing
+
+- [Social Card and Open Graph Metadata](feature-social-card-and-open-graph-metadata.md):
+  shared metadata helpers, dynamic OG endpoint families, standardized coverage,
+  and the expansion checklist for new share surfaces.
+
 ### Privacy and Consent
 
 - [Cookie Consent and Performance Analytics](feature-cookie-consent-and-performance-analytics.md):

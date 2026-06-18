@@ -55,10 +55,7 @@ describe("UserPageStatsActivityDistributionsTableWrapper", () => {
       />
     );
     expect(screen.getByTestId("table")).toHaveAttribute("data-count", "1");
-    expect(screen.getByTestId("table")).toHaveAttribute(
-      "data-locale",
-      "de-DE"
-    );
+    expect(screen.getByTestId("table")).toHaveAttribute("data-locale", "de-DE");
     expect(screen.getByTestId("pagination")).toHaveAttribute("data-page", "1");
   });
 

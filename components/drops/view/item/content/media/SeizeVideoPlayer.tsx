@@ -308,7 +308,9 @@ function SeizeVideoMinimalControls({
           )}
           {showFullscreen && (
             <SeizeVideoControlButton
-              label={isAnyFullscreen ? labels.exitFullscreen : labels.fullscreen}
+              label={
+                isAnyFullscreen ? labels.exitFullscreen : labels.fullscreen
+              }
               onClick={onFullscreenClick}
               onFocus={onControlsFocus}
               tabIndex={controlsTabIndex}
@@ -329,9 +331,7 @@ function SeizeVideoMinimalControls({
         </div>
       </div>
 
-      <div
-        className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-z-30 tw-h-4 tw-overflow-hidden"
-      >
+      <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-z-30 tw-h-4 tw-overflow-hidden">
         <input
           type="range"
           min="0"
@@ -441,7 +441,8 @@ function SeizeVideoElement({
 }) {
   return (
     <>
-      {/* NOSONAR: render captions only when a real VTT source exists. */}<video
+      {/* NOSONAR: render captions only when a real VTT source exists. */}
+      <video
         id={id}
         ref={setVideoRef}
         src={src}
@@ -589,7 +590,9 @@ export default function SeizeVideoPlayer({
   >();
   const [viewportHeight, setViewportHeight] = useState<number | undefined>(
     () =>
-      globalThis.window === undefined ? undefined : globalThis.window.innerHeight
+      globalThis.window === undefined
+        ? undefined
+        : globalThis.window.innerHeight
   );
   const [fallbackState, setFallbackState] = useState<{
     readonly originSrc?: string | undefined;
@@ -690,7 +693,8 @@ export default function SeizeVideoPlayer({
       updateProgress();
       const video = internalVideoRef.current;
       if (video && !video.paused && !video.ended) {
-        animationFrameRef.current = globalThis.window.requestAnimationFrame(tick);
+        animationFrameRef.current =
+          globalThis.window.requestAnimationFrame(tick);
       }
     };
     animationFrameRef.current = globalThis.window.requestAnimationFrame(tick);
@@ -831,7 +835,13 @@ export default function SeizeVideoPlayer({
   function toggleMuted(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setMutedState({ prop: resolvedTemplate.muted, src, value: !isMuted });
+    const nextMuted = !isMuted;
+    const video = internalVideoRef.current;
+    if (video) {
+      video.muted = nextMuted;
+      video.defaultMuted = nextMuted;
+    }
+    setMutedState({ prop: resolvedTemplate.muted, src, value: nextMuted });
     revealControls();
   }
 
@@ -995,10 +1005,8 @@ export default function SeizeVideoPlayer({
   const isWrapperFullscreen = isFullscreen;
   const controlsAreVisible = controlsVisible || isPaused || isAnyFullscreen;
   const responsiveMediaStyle = getResponsiveMediaStyle();
-  const duration =
-    durationState.src === directSrc ? durationState.value : 0;
-  const progress =
-    progressState.src === directSrc ? progressState.value : 0;
+  const duration = durationState.src === directSrc ? durationState.value : 0;
+  const progress = progressState.src === directSrc ? progressState.value : 0;
   const seekDisabled = duration <= 0;
   const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
   const labels = useMemo<SeizeVideoLabels>(
@@ -1051,6 +1059,15 @@ export default function SeizeVideoPlayer({
     // Browser playback is an imperative media side effect of visibility policy.
     syncOwnedAutoplay();
   }, [directSrc, syncOwnedAutoplay]);
+
+  useEffect(() => {
+    if (!videoElement) {
+      return;
+    }
+
+    videoElement.muted = isMuted;
+    videoElement.defaultMuted = isMuted;
+  }, [isMuted, videoElement]);
 
   return (
     <div

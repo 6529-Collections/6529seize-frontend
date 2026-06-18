@@ -81,7 +81,8 @@ const getToastIconClass = (type: TypeOptions): string => {
 const getToastMessageText = (message: ReactNode): string | null => {
   if (typeof message === "string") return message;
   if (typeof message === "number") return String(message);
-  if (!message || isValidElement(message) || Array.isArray(message)) return null;
+  if (!message || isValidElement(message) || Array.isArray(message))
+    return null;
 
   if (typeof message === "object") {
     const maybeMessage = (message as { readonly message?: unknown }).message;
@@ -94,8 +95,7 @@ const getToastMessageText = (message: ReactNode): string | null => {
 const ToastIcon = ({ type }: { readonly type: TypeOptions }) => {
   if (type === "success") return <CheckCircleIcon aria-hidden="true" />;
   if (type === "error") return <ExclamationCircleIcon aria-hidden="true" />;
-  if (type === "warning")
-    return <ExclamationTriangleIcon aria-hidden="true" />;
+  if (type === "warning") return <ExclamationTriangleIcon aria-hidden="true" />;
   return <InformationCircleIcon aria-hidden="true" />;
 };
 
@@ -124,7 +124,7 @@ const normalizeAppToast = (input: AppToastInput): NormalizedAppToast => {
       friendly?.title ??
       (messageText !== null
         ? normalizeToastText(messageText)
-        : DEFAULT_TITLES[input.type] ?? DEFAULT_TITLES["default"]!),
+        : (DEFAULT_TITLES[input.type] ?? DEFAULT_TITLES["default"]!)),
     description:
       input.description ??
       friendly?.description ??

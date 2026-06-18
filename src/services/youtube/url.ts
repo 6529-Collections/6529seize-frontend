@@ -13,9 +13,7 @@ export interface YoutubeLinkInfo {
 }
 
 const isYoutubeDomain = (hostname: string): boolean =>
-  YOUTUBE_DOMAINS.some((domain) =>
-    matchesDomainOrSubdomain(hostname, domain)
-  );
+  YOUTUBE_DOMAINS.some((domain) => matchesDomainOrSubdomain(hostname, domain));
 
 const readSafeParam = (
   searchParams: URLSearchParams,
@@ -47,7 +45,9 @@ export const parseYoutubeStartSeconds = (
     return plainSeconds;
   }
 
-  const match = trimmed.match(/^(?:(\d{1,4})h)?(?:(\d{1,4})m)?(?:(\d{1,5})s?)?$/);
+  const match = trimmed.match(
+    /^(?:(\d{1,4})h)?(?:(\d{1,4})m)?(?:(\d{1,5})s?)?$/
+  );
   if (!match) {
     return undefined;
   }
@@ -130,10 +130,7 @@ const appendYoutubeContextParams = (
   }
 };
 
-const parseOrFallback = (
-  href: string,
-  videoId: string
-): YoutubeLinkInfo => {
+const parseOrFallback = (href: string, videoId: string): YoutubeLinkInfo => {
   return parseYoutubeLink(href) ?? { videoId, url: href };
 };
 
@@ -153,7 +150,9 @@ export const getYoutubeWatchUrl = (href: string, videoId: string): string => {
 
 export const getYoutubeEmbedUrl = (href: string, videoId: string): string => {
   const info = parseOrFallback(href, videoId);
-  const embed = new URL(`https://www.youtube-nocookie.com/embed/${info.videoId}`);
+  const embed = new URL(
+    `https://www.youtube-nocookie.com/embed/${info.videoId}`
+  );
   embed.searchParams.set("rel", "0");
   embed.searchParams.set("playsinline", "1");
 

@@ -44,9 +44,7 @@ describe("ReMemes page", () => {
     });
 
     render(
-      <AuthContext.Provider value={{} as any}>
-        {page}
-      </AuthContext.Provider>
+      <AuthContext.Provider value={{} as any}>{page}</AuthContext.Provider>
     );
   }
 
@@ -100,6 +98,11 @@ describe("ReMemes page", () => {
     const images = Array.isArray(meta.openGraph?.images)
       ? meta.openGraph?.images
       : [meta.openGraph?.images];
-    expect(images?.[0]).toBe("https://test.6529.io/re-memes-b.jpeg");
+    expect(images?.[0]).toMatchObject({
+      alt: "ReMemes collection social card",
+      height: 630,
+      url: "https://test.6529.io/api/og-metadata/collections/rememes",
+      width: 1200,
+    });
   });
 });

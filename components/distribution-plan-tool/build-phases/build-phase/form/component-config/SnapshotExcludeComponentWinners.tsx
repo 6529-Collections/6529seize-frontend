@@ -1,17 +1,12 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import type {
-  AllowlistToolSelectMenuMultipleOption,
-} from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
+import type { AllowlistToolSelectMenuMultipleOption } from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import AllowlistToolSelectMenuMultiple from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
-import type {
-  PhaseGroupSnapshotConfig} from "../BuildPhaseFormConfigModal";
-import {
-  PhaseConfigStep
-} from "../BuildPhaseFormConfigModal";
+import type { PhaseGroupSnapshotConfig } from "../BuildPhaseFormConfigModal";
+import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
@@ -76,7 +71,10 @@ export default function SnapshotExcludeComponentWinners({
       config.excludeComponentWinners.includes(option.value)
     );
 
-    if (selected.length === componentOptions.length && componentOptions.length) {
+    if (
+      selected.length === componentOptions.length &&
+      componentOptions.length
+    ) {
       setSelectedOptions(options);
       return;
     }
@@ -163,7 +161,8 @@ export default function SnapshotExcludeComponentWinners({
         showNextBtn={!!selectedOptions.length}
         isDisabled={!selectedOptions.length}
         onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOKEN_IDS)}
-        onNext={() => onExcludePreviousWinners()}>
+        onNext={() => onExcludePreviousWinners()}
+      >
         <ComponentConfigMeta
           tags={[]}
           walletsCount={config.uniqueWalletsCount}
