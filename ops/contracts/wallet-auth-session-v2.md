@@ -161,7 +161,17 @@ Connection-share codes are short-lived, one-time use, and consumed atomically by
 - Browser code must not manually set the `Origin` header.
 - The backend derives web domain and client origin from the browser request.
 - First-party web origins must be allowed by backend configuration.
+- Production web is expected to call `https://api.6529.io` directly from `https://6529.io`; staging similarly calls `https://api.staging.6529.io` from `https://staging.6529.io`.
+- The frontend treats cross-origin web-cookie auth as trusted only when `API_ENDPOINT`'s origin is present in `WEB_SESSION_CREDENTIAL_API_ORIGINS`.
+- The backend must mirror that trust with exact credentialed CORS through `AUTH_WEB_CREDENTIAL_ORIGINS`.
 - Web refresh/logout remain bound to the same origin that created the session.
+
+Required rollout values:
+
+- Production frontend: `API_ENDPOINT=https://api.6529.io` and `WEB_SESSION_CREDENTIAL_API_ORIGINS=https://api.6529.io`.
+- Production backend: `AUTH_WEB_CREDENTIAL_ORIGINS=https://6529.io`.
+- Staging frontend: `API_ENDPOINT=https://api.staging.6529.io` and `WEB_SESSION_CREDENTIAL_API_ORIGINS=https://api.staging.6529.io`.
+- Staging backend: `AUTH_WEB_CREDENTIAL_ORIGINS=https://staging.6529.io`.
 
 ## Security Requirements
 

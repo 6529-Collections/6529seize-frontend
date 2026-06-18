@@ -84,9 +84,45 @@ function canUseWebCookieSession(): boolean {
     return true;
   }
 
-  return (
-    new URL(publicEnv.API_ENDPOINT).origin === globalThis.window.location.origin
+  return isWebSessionCredentialApiOriginAllowed(
+    new URL(publicEnv.API_ENDPOINT).origin,
+    globalThis.window.location.origin
   );
+}
+
+function isWebSessionCredentialApiOriginAllowed(
+  apiOrigin: string,
+  windowOrigin: string
+): boolean {
+  if (apiOrigin === windowOrigin) {
+    return true;
+  }
+
+  return getConfiguredWebSessionCredentialApiOrigins().includes(apiOrigin);
+}
+
+function getConfiguredWebSessionCredentialApiOrigins(): string[] {
+  return (publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS ?? "")
+    .split(",")
+    .map(normalizeWebSessionCredentialOrigin)
+    .filter((origin): origin is string => origin !== null);
+}
+
+function normalizeWebSessionCredentialOrigin(
+  value: string | null | undefined
+): string | null {
+  if (!value) {
+    return null;
+  }
+  try {
+    const parsed = new URL(value.trim());
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return null;
+    }
+    return parsed.origin;
+  } catch {
+    return null;
+  }
 }
 
 function getSessionCredentialsMode(): RequestCredentials | undefined {
