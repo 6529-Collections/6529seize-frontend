@@ -1,5 +1,5 @@
 import type { SortDirection } from "@/entities/ISort";
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { createBreakpoint } from "react-use";
 import CommonDropdown from "./dropdown/CommonDropdown";
 import CommonTabs from "./tabs/CommonTabs";
@@ -10,6 +10,7 @@ interface ChildComponentProps {
 
 export interface CommonSelectItem<T, U = unknown> {
   readonly label: string;
+  readonly icon?: ReactNode | undefined;
   readonly mobileLabel?: string | undefined;
   readonly value: T;
   readonly key: string;
