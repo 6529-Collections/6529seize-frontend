@@ -18,6 +18,7 @@ import type {
   GithubStatusPreviewResponse,
 } from "@/services/api/github-preview-api";
 import type {
+  FarcasterEmbedLinkPreview,
   SeizeCollectionLinkPreview,
   YoutubeVideoLinkPreview,
 } from "@/services/api/link-preview-api";
@@ -104,6 +105,7 @@ const TRUSTED_YOUTUBE_EMBED_HOSTS = [
   "youtube-nocookie.com",
   "youtube.com",
 ] as const;
+const FARCASTER_EMBED_TYPES = new Set(["miniapp", "frame", "legacy-frame"]);
 const PUBLISHED_DATE_FORMAT_OPTIONS = {
   day: "numeric",
   month: "short",
@@ -791,6 +793,32 @@ function extractYoutubeVideoPreview(
   return isYoutubeVideoPreview(preview) ? preview : null;
 }
 
+function isFarcasterEmbedPreview(
+  value: unknown
+): value is FarcasterEmbedLinkPreview {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const record = value as {
+    readonly type?: unknown;
+    readonly embedKind?: unknown;
+  };
+
+  return (
+    (record.type === "farcaster.miniapp" ||
+      record.type === "farcaster.frame") &&
+    typeof record.embedKind === "string" &&
+    FARCASTER_EMBED_TYPES.has(record.embedKind)
+  );
+}
+
+function extractFarcasterEmbedPreview(
+  preview: OpenGraphPreviewData | null | undefined
+): FarcasterEmbedLinkPreview | null {
+  return isFarcasterEmbedPreview(preview) ? preview : null;
+}
+
 function getTrustedYoutubeEmbedUrl(value: string): string | undefined {
   let parsed: URL;
   try {
@@ -808,7 +836,22 @@ function getTrustedYoutubeEmbedUrl(value: string): string | undefined {
 }
 
 function isTrustedYoutubeEmbedHost(hostname: string): boolean {
-  return TRUSTED_YOUTUBE_EMBED_HOSTS.some((trustedHost) => hostname === trustedHost);
+  return TRUSTED_YOUTUBE_EMBED_HOSTS.some(
+    (trustedHost) => hostname === trustedHost
+  );
+}
+
+function getHttpsHref(value: string | null | undefined): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" ? parsed.toString() : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function getRelativeHref(href: string): string | undefined {
@@ -873,6 +916,10 @@ export function hasOpenGraphContent(
   }
 
   if (isYoutubeVideoPreview(preview)) {
+    return true;
+  }
+
+  if (isFarcasterEmbedPreview(preview)) {
     return true;
   }
 
@@ -1128,6 +1175,176 @@ function SeizeCollectionPreviewCard({
   );
 }
 
+function FarcasterEmbedPreviewCard({
+  href,
+  preview,
+  effectiveHref,
+  linkTarget,
+  linkRel,
+  variant,
+  hideActions,
+  locale,
+}: {
+  readonly href: string;
+  readonly preview: FarcasterEmbedLinkPreview;
+  readonly effectiveHref: string;
+  readonly linkTarget?: "_blank" | undefined;
+  readonly linkRel?: string | undefined;
+  readonly variant?: LinkPreviewVariant | undefined;
+  readonly hideActions?: boolean | undefined;
+  readonly locale: SupportedLocale;
+}) {
+  const resolvedVariant = variant ?? "chat";
+  const isHome = resolvedVariant === "home";
+  const isMiniApp = preview.embedKind === "miniapp";
+  const title =
+    (preview.embedKind === "legacy-frame"
+      ? preview.title?.trim() || preview.appName?.trim()
+      : preview.appName?.trim() || preview.title?.trim()) ||
+    t(locale, "linkPreview.farcaster.titleFallback");
+  const imageUrl = preview.imageUrl ?? extractImageUrl(preview);
+  const imageAlt =
+    extractImageAlt(preview) ??
+    (title
+      ? t(locale, "linkPreview.farcaster.imageAlt", { title })
+      : t(locale, "linkPreview.farcaster.imageFallbackAlt"));
+  const badgeLabel = isMiniApp
+    ? t(locale, "linkPreview.farcaster.miniAppBadge")
+    : t(locale, "linkPreview.farcaster.frameBadge");
+  const ctaLabel =
+    preview.buttonTitle?.trim() ||
+    (isMiniApp
+      ? t(locale, "linkPreview.farcaster.openMiniApp")
+      : t(locale, "linkPreview.farcaster.openFrame"));
+  const actionHref = getHttpsHref(preview.actionUrl) ?? effectiveHref;
+  const sourceLabel =
+    preview.siteName?.trim() ||
+    preview.source?.trim() ||
+    deriveDomain(href, preview);
+  // The API normalizes this to #rrggbb before it reaches the client.
+  const splashColor = preview.splashBackgroundColor ?? "#855dcd";
+  const mediaSizes = isHome
+    ? "(max-width: 768px) 100vw, 480px"
+    : "(max-width: 640px) 100vw, (max-width: 1024px) 13rem, 15rem";
+
+  return (
+    <LinkPreviewCardLayout
+      href={href}
+      variant={resolvedVariant}
+      hideActions={hideActions}
+    >
+      <div
+        className={[
+          "tw-relative tw-flex tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950/80 tw-shadow-sm tw-shadow-black/20",
+          isHome ? "tw-border-white/10" : "tw-border-iron-700",
+          !isHome && !hideActions ? "tw-pr-12 sm:tw-pr-14" : "",
+        ].join(" ")}
+        data-testid="farcaster-embed-preview-card"
+      >
+        <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 tw-bg-[#855dcd]" />
+        <div
+          className={[
+            "tw-grid tw-h-full tw-w-full tw-min-w-0 tw-items-center tw-gap-3 tw-p-3 sm:tw-gap-4",
+            isHome
+              ? "tw-grid-cols-1"
+              : "tw-grid-cols-1 sm:tw-grid-cols-[minmax(9.5rem,13rem),minmax(0,1fr)]",
+          ].join(" ")}
+        >
+          <Link
+            href={actionHref}
+            target={linkTarget}
+            rel={linkRel}
+            onClick={(event) => event.stopPropagation()}
+            className="tw-relative tw-block tw-aspect-[3/2] tw-w-full tw-min-w-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-black tw-bg-black tw-no-underline"
+          >
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={imageAlt}
+                fill
+                className="tw-object-cover tw-transition tw-duration-300 hover:tw-scale-[1.02]"
+                loading="lazy"
+                sizes={mediaSizes}
+                unoptimized
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-[#855dcd]/40 tw-via-black tw-to-iron-950"
+              />
+            )}
+            <span className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-16 tw-bg-gradient-to-t tw-from-black/70 tw-to-transparent" />
+            <span
+              aria-hidden="true"
+              className="tw-absolute tw-bottom-2 tw-left-2 tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-bg-black/70 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-white"
+            >
+              <span
+                aria-hidden="true"
+                className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-[#855dcd]"
+              />
+              {badgeLabel}
+            </span>
+          </Link>
+
+          <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-2 tw-overflow-hidden">
+            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+              {preview.splashImageUrl && (
+                <span
+                  className="tw-relative tw-h-7 tw-w-7 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10"
+                  style={{ backgroundColor: splashColor }}
+                  aria-hidden="true"
+                >
+                  <Image
+                    src={preview.splashImageUrl}
+                    alt=""
+                    fill
+                    className="tw-object-cover"
+                    loading="lazy"
+                    sizes="1.75rem"
+                    unoptimized
+                  />
+                </span>
+              )}
+              <span className="tw-flex-shrink-0 tw-rounded-md tw-border tw-border-[#855dcd]/30 tw-bg-[#855dcd]/15 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-purple-100">
+                {badgeLabel}
+              </span>
+              {sourceLabel && (
+                <span className="tw-min-w-0 tw-truncate tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {sourceLabel}
+                </span>
+              )}
+            </div>
+            <Link
+              href={effectiveHref}
+              target={linkTarget}
+              rel={linkRel}
+              onClick={(event) => event.stopPropagation()}
+              className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white md:tw-text-lg"
+            >
+              {wrapLongUnbrokenSegments(title)}
+            </Link>
+            {preview.description && (
+              <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-text-sm tw-leading-5 tw-text-iron-300">
+                {wrapLongUnbrokenSegments(preview.description)}
+              </p>
+            )}
+            <Link
+              href={actionHref}
+              target={linkTarget}
+              rel={linkRel}
+              onClick={(event) => event.stopPropagation()}
+              className="tw-inline-flex tw-w-fit tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition tw-duration-200 hover:tw-border-[#855dcd]/50 hover:tw-text-white"
+            >
+              <span className="tw-h-1.5 tw-w-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-[#855dcd]" />
+              <span className="tw-truncate">{ctaLabel}</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </LinkPreviewCardLayout>
+  );
+}
+
 function YoutubeVideoPreviewCard({
   href,
   preview,
@@ -1309,6 +1526,134 @@ function YoutubeVideoPreviewCard({
   );
 }
 
+function OpenGraphPreviewSkeleton({
+  href,
+  variant,
+  hideActions,
+}: {
+  readonly href: string;
+  readonly variant: LinkPreviewVariant;
+  readonly hideActions: boolean;
+}) {
+  if (variant === "home") {
+    return (
+      <LinkPreviewCardLayout
+        href={href}
+        variant={variant}
+        hideActions={hideActions}
+      >
+        <div
+          className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30"
+          data-testid="og-preview-skeleton"
+        >
+          <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-bg-gradient-to-br tw-from-iron-900/40 tw-via-iron-800/20 tw-to-iron-900/40" />
+          <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col tw-justify-end tw-gap-2 tw-p-4">
+            <div className="tw-h-3 tw-w-24 tw-rounded tw-bg-iron-800/50" />
+            <div className="tw-h-5 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
+            <div className="tw-h-4 tw-w-2/3 tw-rounded tw-bg-iron-800/30" />
+          </div>
+        </div>
+      </LinkPreviewCardLayout>
+    );
+  }
+
+  return (
+    <LinkPreviewCardLayout
+      href={href}
+      variant={variant}
+      hideActions={hideActions}
+    >
+      <div className="tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+        <div
+          className="tw-flex tw-h-full tw-min-h-0 tw-animate-pulse tw-flex-col tw-justify-end tw-gap-y-3"
+          data-testid="og-preview-skeleton"
+        >
+          <div className="tw-h-16 tw-w-full tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800/60" />
+          <div className="tw-h-4 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
+          <div className="tw-h-3 tw-w-full tw-rounded tw-bg-iron-800/30" />
+          <div className="tw-h-3 tw-w-2/3 tw-rounded tw-bg-iron-800/20" />
+        </div>
+      </div>
+    </LinkPreviewCardLayout>
+  );
+}
+
+function UnavailableOpenGraphPreview({
+  href,
+  effectiveHref,
+  linkTarget,
+  linkRel,
+  variant,
+  hideActions,
+  domain,
+  locale,
+}: {
+  readonly href: string;
+  readonly effectiveHref: string;
+  readonly linkTarget?: "_blank" | undefined;
+  readonly linkRel?: string | undefined;
+  readonly variant: LinkPreviewVariant;
+  readonly hideActions: boolean;
+  readonly domain?: string | null | undefined;
+  readonly locale: SupportedLocale;
+}) {
+  if (variant === "home") {
+    return (
+      <LinkPreviewCardLayout
+        href={href}
+        variant={variant}
+        hideActions={hideActions}
+      >
+        <Link
+          href={effectiveHref}
+          target={linkTarget}
+          rel={linkRel}
+          onClick={(e) => e.stopPropagation()}
+          className="tw-relative tw-flex tw-h-full tw-w-full tw-items-end tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
+          data-testid="og-preview-unavailable"
+        >
+          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900/30 tw-via-black/20 tw-to-iron-900/30" />
+          <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-gap-1 tw-p-4">
+            <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+              {t(locale, "linkPreview.unavailable")}
+            </span>
+            <span className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition tw-duration-200 hover:tw-text-white">
+              {wrapLongUnbrokenSegments(domain ?? href)}
+            </span>
+          </div>
+        </Link>
+      </LinkPreviewCardLayout>
+    );
+  }
+
+  return (
+    <LinkPreviewCardLayout
+      href={href}
+      variant={variant}
+      hideActions={hideActions}
+    >
+      <div
+        className="tw-flex tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
+        data-testid="og-preview-unavailable"
+      >
+        <div className="tw-max-h-full tw-space-y-2 tw-overflow-y-auto tw-text-center">
+          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
+            {t(locale, "linkPreview.unavailable")}
+          </p>
+          <Link
+            href={effectiveHref}
+            target={linkTarget}
+            rel={linkRel}
+            className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+          >
+            {wrapLongUnbrokenSegments(domain ?? href)}
+          </Link>
+        </div>
+      </div>
+    </LinkPreviewCardLayout>
+  );
+}
+
 export default function OpenGraphPreview({
   href,
   preview,
@@ -1326,46 +1671,12 @@ export default function OpenGraphPreview({
   const locale = GENERIC_LINK_PREVIEW_LOCALE;
 
   if (typeof preview === "undefined") {
-    if (resolvedVariant === "home") {
-      return (
-        <LinkPreviewCardLayout
-          href={href}
-          variant={resolvedVariant}
-          hideActions={hideActions}
-        >
-          <div
-            className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30"
-            data-testid="og-preview-skeleton"
-          >
-            <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-bg-gradient-to-br tw-from-iron-900/40 tw-via-iron-800/20 tw-to-iron-900/40" />
-            <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col tw-justify-end tw-gap-2 tw-p-4">
-              <div className="tw-h-3 tw-w-24 tw-rounded tw-bg-iron-800/50" />
-              <div className="tw-h-5 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
-              <div className="tw-h-4 tw-w-2/3 tw-rounded tw-bg-iron-800/30" />
-            </div>
-          </div>
-        </LinkPreviewCardLayout>
-      );
-    }
-
     return (
-      <LinkPreviewCardLayout
+      <OpenGraphPreviewSkeleton
         href={href}
         variant={resolvedVariant}
         hideActions={hideActions}
-      >
-        <div className="tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
-          <div
-            className="tw-flex tw-h-full tw-min-h-0 tw-animate-pulse tw-flex-col tw-justify-end tw-gap-y-3"
-            data-testid="og-preview-skeleton"
-          >
-            <div className="tw-h-16 tw-w-full tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800/60" />
-            <div className="tw-h-4 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
-            <div className="tw-h-3 tw-w-full tw-rounded tw-bg-iron-800/30" />
-            <div className="tw-h-3 tw-w-2/3 tw-rounded tw-bg-iron-800/20" />
-          </div>
-        </div>
-      </LinkPreviewCardLayout>
+      />
     );
   }
 
@@ -1386,6 +1697,7 @@ export default function OpenGraphPreview({
   const githubPreview = extractGithubPreview(preview);
   const seizePreview = extractSeizeCollectionPreview(preview);
   const youtubePreview = extractYoutubeVideoPreview(preview);
+  const farcasterEmbedPreview = extractFarcasterEmbedPreview(preview);
   const hasContent = Boolean(title ?? description ?? imageUrl);
   const firstPartyKind = getFirstPartyOgKindFromImageUrl(imageUrl);
 
@@ -1421,60 +1733,17 @@ export default function OpenGraphPreview({
   }
 
   if (!hasContent) {
-    if (resolvedVariant === "home") {
-      return (
-        <LinkPreviewCardLayout
-          href={href}
-          variant={resolvedVariant}
-          hideActions={hideActions}
-        >
-          <Link
-            href={effectiveHref}
-            target={linkTarget}
-            rel={linkRel}
-            onClick={(e) => e.stopPropagation()}
-            className="tw-relative tw-flex tw-h-full tw-w-full tw-items-end tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
-            data-testid="og-preview-unavailable"
-          >
-            <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900/30 tw-via-black/20 tw-to-iron-900/30" />
-            <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-gap-1 tw-p-4">
-              <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-                Link unavailable
-              </span>
-              <span className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition tw-duration-200 hover:tw-text-white">
-                {wrapLongUnbrokenSegments(domain ?? href)}
-              </span>
-            </div>
-          </Link>
-        </LinkPreviewCardLayout>
-      );
-    }
-
     return (
-      <LinkPreviewCardLayout
+      <UnavailableOpenGraphPreview
         href={href}
+        effectiveHref={effectiveHref}
+        linkTarget={linkTarget}
+        linkRel={linkRel}
         variant={resolvedVariant}
         hideActions={hideActions}
-      >
-        <div
-          className="tw-flex tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
-          data-testid="og-preview-unavailable"
-        >
-          <div className="tw-max-h-full tw-space-y-2 tw-overflow-y-auto tw-text-center">
-            <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
-              Link unavailable
-            </p>
-            <Link
-              href={effectiveHref}
-              target={linkTarget}
-              rel={linkRel}
-              className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
-            >
-              {wrapLongUnbrokenSegments(domain ?? href)}
-            </Link>
-          </div>
-        </div>
-      </LinkPreviewCardLayout>
+        domain={domain}
+        locale={locale}
+      />
     );
   }
 
@@ -1497,6 +1766,21 @@ export default function OpenGraphPreview({
       <YoutubeVideoPreviewCard
         href={href}
         preview={youtubePreview}
+        effectiveHref={effectiveHref}
+        linkTarget={linkTarget}
+        linkRel={linkRel}
+        variant={resolvedVariant}
+        hideActions={hideActions}
+        locale={locale}
+      />
+    );
+  }
+
+  if (!imageOnly && farcasterEmbedPreview) {
+    return (
+      <FarcasterEmbedPreviewCard
+        href={href}
+        preview={farcasterEmbedPreview}
         effectiveHref={effectiveHref}
         linkTarget={linkTarget}
         linkRel={linkRel}

@@ -34,6 +34,7 @@ import { createOpenSeaPlan } from "./opensea/service";
 import { createFirstParty6529Plan } from "./6529/service";
 import { createTransientPlan } from "./transient/service";
 import { createYoutubePlan } from "./youtube/service";
+import { buildFarcasterEmbedResponse } from "./farcaster/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -414,9 +415,26 @@ function createGenericPlan(url: URL): PreviewPlan {
         html,
         url
       );
-      const data =
-        googleWorkspace ??
-        buildResponse(finalUrlInstance, html, contentType, finalUrl);
+      if (googleWorkspace) {
+        return { data: googleWorkspace, ttl: CACHE_TTL_MS };
+      }
+
+      const genericData = buildResponse(
+        finalUrlInstance,
+        html,
+        contentType,
+        finalUrl
+      );
+      const farcasterEmbed = await buildFarcasterEmbedResponse(
+        finalUrlInstance,
+        html,
+        genericData,
+        {
+          assertPublicUrl: (candidate) =>
+            assertPublicUrl(candidate, PUBLIC_URL_OPTIONS),
+        }
+      );
+      const data = farcasterEmbed ?? genericData;
       return { data, ttl: CACHE_TTL_MS };
     },
   };

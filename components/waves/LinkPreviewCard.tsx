@@ -42,6 +42,8 @@ const CHAT_COLLECTION_FRAME_CLASSES =
   "tw-min-h-[11rem] tw-w-full md:tw-min-h-[12rem]";
 const CHAT_VIDEO_FRAME_CLASSES =
   "tw-min-h-[18rem] tw-w-full sm:tw-min-h-[14rem] md:tw-min-h-[15rem]";
+const CHAT_FARCASTER_FRAME_CLASSES =
+  "tw-min-h-[24rem] tw-w-full sm:tw-min-h-[13rem] md:tw-min-h-[14rem]";
 
 const isSeizeCollectionPreview = (
   preview: OpenGraphPreviewData | null | undefined
@@ -50,6 +52,12 @@ const isSeizeCollectionPreview = (
 const isYoutubeVideoPreview = (
   preview: OpenGraphPreviewData | null | undefined
 ): boolean => preview?.["type"] === "youtube.video";
+
+const isFarcasterEmbedPreview = (
+  preview: OpenGraphPreviewData | null | undefined
+): boolean =>
+  preview?.["type"] === "farcaster.miniapp" ||
+  preview?.["type"] === "farcaster.frame";
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
@@ -194,6 +202,8 @@ export default function LinkPreviewCard({
       stableFrameClasses = CHAT_COLLECTION_FRAME_CLASSES;
     } else if (isYoutubeVideoPreview(state.data)) {
       stableFrameClasses = CHAT_VIDEO_FRAME_CLASSES;
+    } else if (isFarcasterEmbedPreview(state.data)) {
+      stableFrameClasses = CHAT_FARCASTER_FRAME_CLASSES;
     }
   }
 
