@@ -4,8 +4,8 @@ import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { numberWithCommas } from "@/helpers/Helpers";
+import clsx from "clsx";
 import { useState } from "react";
-import { Table } from "react-bootstrap";
 import type { Collector, Content } from "./Leaderboard";
 import styles from "./Leaderboard.module.scss";
 import type { LeaderboardMetrics } from "./leaderboard_helpers";
@@ -19,6 +19,16 @@ import LeaderboardFooter from "./LeaderboardDownload";
 import LeaderboardSort from "./LeaderboardSort";
 
 const PAGE_SIZE = 50;
+const TABLE_CLASS_NAME = "tw-mb-0 tw-w-full tw-border-collapse tw-text-white";
+const ROW_CLASS_NAME = "odd:tw-bg-[#1e1e1e] even:tw-bg-transparent";
+const HEADER_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-font-semibold tw-leading-7 tw-text-white";
+const BODY_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-leading-10 tw-text-white";
+const HEADER_CONTENT_CLASS_NAME = "tw-flex tw-items-center tw-justify-center";
+const RANK_CELL_CLASS_NAME = "tw-w-[5%] tw-text-center";
+const COLLECTOR_CELL_CLASS_NAME = "tw-w-[40%] tw-text-left";
+const METRIC_CELL_CLASS_NAME = "tw-w-[9.1667%] tw-text-center";
 
 function getLeaderboardRowKey(lead: LeaderboardMetrics) {
   return (
@@ -110,11 +120,20 @@ export default function LeaderboardCardsCollectedComponent(
   return (
     <>
       <div className={styles["leaderboardTableShell"]}>
-        <Table bordered={false} className={styles["leaderboardTable"]}>
+        <table className={TABLE_CLASS_NAME}>
           <thead>
             <tr>
-              <th className={styles["rank"]}>Rank</th>
-              <th className={`${styles["hodlerContainer"]}`}>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, RANK_CELL_CLASS_NAME)}
+              >
+                Rank
+              </th>
+              <th
+                className={clsx(
+                  HEADER_CELL_CLASS_NAME,
+                  COLLECTOR_CELL_CLASS_NAME
+                )}
+              >
                 <span>Collector</span>
                 <span className={styles["totalResults"]}>
                   {props.isLoading && totalResults === 0
@@ -122,8 +141,10 @@ export default function LeaderboardCardsCollectedComponent(
                     : `x${totalResults.toLocaleString()}`}
                 </span>
               </th>
-              <th className={styles["tdhSub"]}>
-                <span className="d-flex align-items-center justify-content-center">
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
                   Level&nbsp;
                   <LeaderboardSort
                     sort_option={LeaderboardCardsCollectedSort.Level}
@@ -132,8 +153,10 @@ export default function LeaderboardCardsCollectedComponent(
                   />
                 </span>
               </th>
-              <th className={styles["tdhSub"]}>
-                <span className="d-flex align-items-center justify-content-center">
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
                   Cards Collected&nbsp;
                   <LeaderboardSort
                     sort_option={LeaderboardCardsCollectedSort.Balance}
@@ -142,8 +165,10 @@ export default function LeaderboardCardsCollectedComponent(
                   />
                 </span>
               </th>
-              <th className={styles["tdhSub"]}>
-                <span className="d-flex align-items-center justify-content-center">
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
                   Unique Memes&nbsp;
                   <LeaderboardSort
                     sort_option={LeaderboardCardsCollectedSort.UniqueMemes}
@@ -152,8 +177,10 @@ export default function LeaderboardCardsCollectedComponent(
                   />
                 </span>
               </th>
-              <th className={styles["tdhSub"]}>
-                <span className="d-flex align-items-center justify-content-center">
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
                   Sets&nbsp;
                   <LeaderboardSort
                     sort_option={LeaderboardCardsCollectedSort.MemesCardsSets}
@@ -162,8 +189,10 @@ export default function LeaderboardCardsCollectedComponent(
                   />
                 </span>
               </th>
-              <th className={styles["tdhSub"]}>
-                <span className="d-flex align-items-center justify-content-center">
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
                   TDH&nbsp;
                   <LeaderboardSort
                     sort_option={LeaderboardCardsCollectedSort.Tdh}
@@ -172,8 +201,10 @@ export default function LeaderboardCardsCollectedComponent(
                   />
                 </span>
               </th>
-              <th className={styles["tdhSub"]}>
-                <span className="d-flex align-items-center justify-content-center">
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
                   Daily Change&nbsp;
                   <LeaderboardSort
                     sort_option={LeaderboardCardsCollectedSort.DayChange}
@@ -182,8 +213,10 @@ export default function LeaderboardCardsCollectedComponent(
                   />
                 </span>
               </th>
-              <th className={styles["tdhSub"]}>
-                <span className="d-flex align-items-center justify-content-center">
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
                   vs Network&nbsp;
                 </span>
               </th>
@@ -192,11 +225,18 @@ export default function LeaderboardCardsCollectedComponent(
           <tbody>
             {leaderboard.map((lead: LeaderboardMetrics, index) => {
               return (
-                <tr key={getLeaderboardRowKey(lead)}>
-                  <td className={styles["rank"]}>
+                <tr className={ROW_CLASS_NAME} key={getLeaderboardRowKey(lead)}>
+                  <td
+                    className={clsx(BODY_CELL_CLASS_NAME, RANK_CELL_CLASS_NAME)}
+                  >
                     {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
                   </td>
-                  <td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      COLLECTOR_CELL_CLASS_NAME
+                    )}
+                  >
                     <LeaderboardCollector
                       handle={lead.handle ?? ""}
                       consolidationKey={lead.consolidation_key ?? ""}
@@ -206,11 +246,28 @@ export default function LeaderboardCardsCollectedComponent(
                     />
                   </td>
 
-                  <td className={styles["tdhSub"]}>{lead.level ?? 0}</td>
-                  <td className={styles["tdhSub"]}>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {lead.level ?? 0}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
                     {numberWithCommas(lead.balance ?? 0)}
                   </td>
-                  <td className={styles["tdhSub"]}>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
                     {lead.unique_memes
                       ? numberWithCommas(lead.unique_memes)
                       : 0}{" "}
@@ -221,13 +278,28 @@ export default function LeaderboardCardsCollectedComponent(
                     )}
                     )
                   </td>
-                  <td className={styles["tdhSub"]}>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
                     {numberWithCommas(lead.memes_cards_sets ?? 0)}
                   </td>
-                  <td className={styles["tdhSub"]}>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
                     {numberWithCommas(Math.round(lead.tdh ?? 0))}
                   </td>
-                  <td className={styles["tdhSub"]}>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
                     {!lead.day_change ? (
                       "-"
                     ) : (
@@ -242,7 +314,12 @@ export default function LeaderboardCardsCollectedComponent(
                       </>
                     )}
                   </td>
-                  <td className={styles["tdhSub"]}>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
                     {!lead.day_change
                       ? "-"
                       : `${calculateTdhVsCommunity(lead)}`}
@@ -251,7 +328,7 @@ export default function LeaderboardCardsCollectedComponent(
               );
             })}
           </tbody>
-        </Table>
+        </table>
       </div>
       <LeaderboardFooter
         url={myFetchUrl}

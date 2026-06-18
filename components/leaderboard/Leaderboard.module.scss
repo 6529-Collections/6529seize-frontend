@@ -246,16 +246,6 @@
   }
 }
 
-.rank {
-  width: 5%;
-  text-align: center;
-}
-
-.hodlerContainer {
-  width: 40%;
-  text-align: left;
-}
-
 .hodler {
   display: flex;
   flex-direction: column;
@@ -301,11 +291,6 @@
 .tdhSubNote {
   font-size: smaller;
   font-weight: lighter;
-}
-
-.tdhSub {
-  width: calc(55% / 6);
-  text-align: center;
 }
 
 .viewAllLink {
@@ -407,97 +392,6 @@
   }
 }
 
-.gap {
-  height: 5px;
-}
-
-.interactionsFitTable {
-  .hodlerContainer {
-    width: 28%;
-  }
-
-  .tdhSub {
-    width: auto;
-  }
-
-  .rank {
-    width: 4%;
-  }
-}
-
-.interactionsFitTable > :not(caption) > * > * {
-  padding-left: 0.35rem;
-  padding-right: 0.35rem;
-}
-
-.interactionsCollectorCell {
-  max-width: 0;
-}
-
-.leaderboardTable {
-  --bs-table-bg: transparent;
-  --bs-table-border-color: transparent;
-  --bs-table-color: #{variables.$font-color};
-  --bs-table-hover-bg: #{variables.$almost-very-dark-grey};
-  --bs-table-hover-color: #{variables.$font-color};
-
-  color: variables.$font-color;
-  margin-bottom: 0 !important;
-  width: 100%;
-
-  tr td {
-    white-space: nowrap;
-    align-items: center;
-    vertical-align: middle;
-    span {
-      float: left;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      a {
-        line-height: 40px;
-      }
-    }
-  }
-
-  th {
-    color: variables.$font-color;
-    font-weight: 800;
-    white-space: nowrap;
-    line-height: 28px;
-  }
-
-  th span {
-    white-space: nowrap;
-  }
-
-  td {
-    color: variables.$font-color;
-    line-height: 40px;
-  }
-
-  thead tr {
-    background-color: transparent !important;
-  }
-
-  thead > tr > *,
-  tbody > tr > * {
-    border-color: transparent !important;
-    color: variables.$font-color !important;
-  }
-
-  tbody tr:nth-child(odd) {
-    background-color: variables.$almost-very-dark-grey;
-  }
-
-  tbody tr:nth-child(odd) > * {
-    background-color: variables.$almost-very-dark-grey !important;
-  }
-
-  tbody tr:nth-child(even) > * {
-    background-color: transparent !important;
-  }
-}
-
 .leaderboardTableShell {
   overflow-x: auto;
   width: 100%;
@@ -550,21 +444,13 @@
   }
 }
 
-.leaderboardTable > :not(caption) > * > *,
 .nftLeaderboardTable > :not(caption) > * > * {
   padding: 0.5rem;
 }
 
-.leaderboardTable tbody > tr > *,
 .nftLeaderboardTable tbody > tr > * {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-}
-
-.borderBottom {
-  border-bottom: 0.5px solid variables.$font-color !important;
-  padding: 0rem !important;
-  position: relative;
 }
 
 .focusSwitchLabel {

@@ -1,7 +1,7 @@
 "use client";
 
+import clsx from "clsx";
 import { useState } from "react";
-import { Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { SortDirection } from "@/entities/ISort";
@@ -16,6 +16,20 @@ import {
   useFetchLeaderboard,
 } from "./leaderboard_helpers";
 import LeaderboardFooter from "./LeaderboardDownload";
+
+const TABLE_CLASS_NAME = "tw-mb-0 tw-w-full tw-border-collapse tw-text-white";
+const ROW_CLASS_NAME = "odd:tw-bg-[#1e1e1e] even:tw-bg-transparent";
+const HEADER_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-font-semibold tw-leading-7 tw-text-white";
+const BODY_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-leading-10 tw-text-white";
+const HEADER_CONTENT_CLASS_NAME = "tw-flex tw-items-center tw-justify-center";
+const RANK_CELL_CLASS_NAME = "tw-w-[4%] tw-text-center";
+const COLLECTOR_CELL_CLASS_NAME = "tw-max-w-0 tw-w-[28%] tw-text-left";
+const METRIC_CELL_CLASS_NAME = "tw-w-auto tw-text-center";
+const GAP_CELL_CLASS_NAME = "tw-w-2 tw-p-0";
+const GROUP_HEADER_CELL_CLASS_NAME =
+  "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white tw-p-0 tw-text-center";
 
 interface Props {
   block: number | undefined;
@@ -75,186 +89,314 @@ export default function LeaderboardInteractionsComponent(
   return (
     <>
       <div className={styles["leaderboardTableShell"]}>
-        <Table
-          bordered={false}
-          className={`${styles["leaderboardTable"]} ${styles["interactionsFitTable"]}`}
-        >
-              <thead>
-                <tr>
-                  <th colSpan={2}></th>
-                  <th
-                    colSpan={2}
-                    className={`text-center ${styles["borderBottom"]}`}>
-                    Primary Purchases
-                  </th>
-                  <th className={styles["gap"]}></th>
-                  <th
-                    colSpan={2}
-                    className={`text-center ${styles["borderBottom"]}`}>
-                    Secondary Purchases
-                  </th>
-                  <th className={styles["gap"]}></th>
-                  <th
-                    colSpan={2}
-                    className={`text-center ${styles["borderBottom"]}`}>
-                    Sales
-                  </th>
-                  <th className={styles["gap"]}></th>
-                  <th
-                    colSpan={4}
-                    className={`text-center ${styles["borderBottom"]}`}>
-                    Transfers
-                  </th>
+        <table className={TABLE_CLASS_NAME}>
+          <thead>
+            <tr>
+              <th
+                aria-hidden="true"
+                className={HEADER_CELL_CLASS_NAME}
+                colSpan={2}
+              />
+              <th
+                className={clsx(
+                  HEADER_CELL_CLASS_NAME,
+                  GROUP_HEADER_CELL_CLASS_NAME
+                )}
+                colSpan={2}
+              >
+                Primary Purchases
+              </th>
+              <th
+                aria-hidden="true"
+                className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+              />
+              <th
+                className={clsx(
+                  HEADER_CELL_CLASS_NAME,
+                  GROUP_HEADER_CELL_CLASS_NAME
+                )}
+                colSpan={2}
+              >
+                Secondary Purchases
+              </th>
+              <th
+                aria-hidden="true"
+                className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+              />
+              <th
+                className={clsx(
+                  HEADER_CELL_CLASS_NAME,
+                  GROUP_HEADER_CELL_CLASS_NAME
+                )}
+                colSpan={2}
+              >
+                Sales
+              </th>
+              <th
+                aria-hidden="true"
+                className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+              />
+              <th
+                className={clsx(
+                  HEADER_CELL_CLASS_NAME,
+                  GROUP_HEADER_CELL_CLASS_NAME
+                )}
+                colSpan={4}
+              >
+                Transfers
+              </th>
+            </tr>
+            <tr>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, RANK_CELL_CLASS_NAME)}
+              >
+                Rank
+              </th>
+              <th
+                className={clsx(
+                  HEADER_CELL_CLASS_NAME,
+                  COLLECTOR_CELL_CLASS_NAME
+                )}
+              >
+                <span>Collector</span>
+                <span className={styles["totalResults"]}>
+                  {props.isLoading && totalResults === 0
+                    ? "..."
+                    : `x${totalResults.toLocaleString()}`}
+                </span>
+              </th>
+              {/* primary purchases */}
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Count&nbsp;
+                  {printHeader(
+                    LeaderboardInteractionsSort.primary_purchases_count
+                  )}
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Value&nbsp;
+                  {printHeader(
+                    LeaderboardInteractionsSort.primary_purchases_value
+                  )}
+                </span>
+              </th>
+              <th
+                aria-hidden="true"
+                className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+              />
+              {/* secondary purchases */}
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Count&nbsp;
+                  {printHeader(
+                    LeaderboardInteractionsSort.secondary_purchases_count
+                  )}
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Value&nbsp;
+                  {printHeader(
+                    LeaderboardInteractionsSort.secondary_purchases_value
+                  )}
+                </span>
+              </th>
+              <th
+                aria-hidden="true"
+                className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+              />
+              {/* sales */}
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Count&nbsp;
+                  {printHeader(LeaderboardInteractionsSort.sales_count)}
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Value&nbsp;
+                  {printHeader(LeaderboardInteractionsSort.sales_value)}
+                </span>
+              </th>
+              <th
+                aria-hidden="true"
+                className={clsx(HEADER_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+              />
+              {/* transfers */}
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Airdrops&nbsp;
+                  {printHeader(LeaderboardInteractionsSort.airdrops)}
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  In&nbsp;
+                  {printHeader(LeaderboardInteractionsSort.transfers_in)}
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Out&nbsp;
+                  {printHeader(LeaderboardInteractionsSort.transfers_out)}
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Burns&nbsp;
+                  {printHeader(LeaderboardInteractionsSort.burns)}
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.map((lead: LeaderboardInteractions, index) => {
+              return (
+                <tr className={ROW_CLASS_NAME} key={lead.consolidation_key}>
+                  <td
+                    className={clsx(BODY_CELL_CLASS_NAME, RANK_CELL_CLASS_NAME)}
+                  >
+                    {numberWithCommas(
+                      index + 1 + (page - 1) * LEADERBOARD_PAGE_SIZE
+                    )}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      COLLECTOR_CELL_CLASS_NAME
+                    )}
+                  >
+                    <LeaderboardCollector
+                      handle={lead.handle}
+                      consolidationKey={lead.consolidation_key}
+                      consolidationDisplay={lead.consolidation_display}
+                      pfp={lead.pfp_url}
+                      level={lead.level}
+                    />
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.primary_purchases_count)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(
+                      Math.round(lead.primary_purchases_value * 100) / 100
+                    )}
+                  </td>
+                  <td
+                    aria-hidden="true"
+                    className={clsx(BODY_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+                  />
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.secondary_purchases_count)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(
+                      Math.round(lead.secondary_purchases_value * 100) / 100
+                    )}
+                  </td>
+                  <td
+                    aria-hidden="true"
+                    className={clsx(BODY_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+                  />
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.sales_count)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(Math.round(lead.sales_value * 100) / 100)}
+                  </td>
+                  <td
+                    aria-hidden="true"
+                    className={clsx(BODY_CELL_CLASS_NAME, GAP_CELL_CLASS_NAME)}
+                  />
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.airdrops)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.transfers_in)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.transfers_out)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.burns)}
+                  </td>
                 </tr>
-                <tr>
-                  <th className={styles["rank"]}>Rank</th>
-                  <th className={styles["hodlerContainer"]}>
-                    <span>Collector</span>
-                    <span className={styles["totalResults"]}>
-                      {props.isLoading && totalResults === 0
-                        ? "..."
-                        : `x${totalResults.toLocaleString()}`}
-                    </span>
-                  </th>
-                  {/* primary purchases */}
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Count&nbsp;
-                      {printHeader(
-                        LeaderboardInteractionsSort.primary_purchases_count
-                      )}
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Value&nbsp;
-                      {printHeader(
-                        LeaderboardInteractionsSort.primary_purchases_value
-                      )}
-                    </span>
-                  </th>
-                  <th className={styles["gap"]}></th>
-                  {/* secondary purchases */}
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Count&nbsp;
-                      {printHeader(
-                        LeaderboardInteractionsSort.secondary_purchases_count
-                      )}
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Value&nbsp;
-                      {printHeader(
-                        LeaderboardInteractionsSort.secondary_purchases_value
-                      )}
-                    </span>
-                  </th>
-                  <th className={styles["gap"]}></th>
-                  {/* sales */}
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Count&nbsp;
-                      {printHeader(LeaderboardInteractionsSort.sales_count)}
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Value&nbsp;
-                      {printHeader(LeaderboardInteractionsSort.sales_value)}
-                    </span>
-                  </th>
-                  <th className={styles["gap"]}></th>
-                  {/* transfers */}
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Airdrops&nbsp;
-                      {printHeader(LeaderboardInteractionsSort.airdrops)}
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      In&nbsp;
-                      {printHeader(LeaderboardInteractionsSort.transfers_in)}
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Out&nbsp;
-                      {printHeader(LeaderboardInteractionsSort.transfers_out)}
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Burns&nbsp;
-                      {printHeader(LeaderboardInteractionsSort.burns)}
-                    </span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((lead: LeaderboardInteractions, index) => {
-                  return (
-                    <tr key={lead.consolidation_key}>
-                      <td className={styles["rank"]}>
-                        {numberWithCommas(
-                          index + 1 + (page - 1) * LEADERBOARD_PAGE_SIZE
-                        )}
-                      </td>
-                      <td className={styles["interactionsCollectorCell"]}>
-                        <LeaderboardCollector
-                          handle={lead.handle}
-                          consolidationKey={lead.consolidation_key}
-                          consolidationDisplay={lead.consolidation_display}
-                          pfp={lead.pfp_url}
-                          level={lead.level}
-                        />
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.primary_purchases_count)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(
-                          Math.round(lead.primary_purchases_value * 100) / 100
-                        )}
-                      </td>
-                      <th className={styles["gap"]}></th>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.secondary_purchases_count)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(
-                          Math.round(lead.secondary_purchases_value * 100) / 100
-                        )}
-                      </td>
-                      <th className={styles["gap"]}></th>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.sales_count)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(
-                          Math.round(lead.sales_value * 100) / 100
-                        )}
-                      </td>
-                      <th className={styles["gap"]}></th>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.airdrops)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.transfers_in)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.transfers_out)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.burns)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-        </Table>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
       <LeaderboardFooter
         url={myFetchUrl}
