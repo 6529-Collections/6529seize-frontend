@@ -1024,7 +1024,6 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiConsolidatedTdhMetricsContent",
     "ApiConsolidatedTdhMetricsSort",
     "ApiConsolidatedTdhView",
-    "ApiDecentralizedMediaProtocol",
     "ApiCreateConnectionShareRequestTargetClientTypeEnum",
     "ApiCreateConnectionShareResponseTargetClientTypeEnum",
     "ApiDecentralizedMediaProtocol",
