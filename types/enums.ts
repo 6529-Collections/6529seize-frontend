@@ -154,6 +154,7 @@ export enum RateMatter {
   NIC = "NIC",
   REP = "REP",
   DROP_REP = "DROP_REP",
+  WAVE_REP = "WAVE_REP",
 }
 
 export enum ProfileRatersParamsOrderBy {
