@@ -54,7 +54,6 @@ type CmsThreeDRuntime = {
 
 const MOBILE_FALLBACK_QUERY = "(max-width: 767px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-const PLACEHOLDER_TEXTURE_SIZE = 512;
 
 export default function CmsThreeDViewer({
   config,
@@ -72,6 +71,8 @@ export default function CmsThreeDViewer({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<CmsThreeDStatus>("idle");
+  const configRuntimeKey = getCmsThreeDConfigRuntimeKey(config);
+  const previousConfigRuntimeKeyRef = useRef(configRuntimeKey);
 
   const disposeRuntime = useCallback(() => {
     runtimeRef.current?.cleanup();
@@ -144,6 +145,18 @@ export default function CmsThreeDViewer({
       removeMotionListener();
     };
   }, []);
+
+  useEffect(() => {
+    if (previousConfigRuntimeKeyRef.current === configRuntimeKey) {
+      return;
+    }
+
+    previousConfigRuntimeKeyRef.current = configRuntimeKey;
+    hasAutoStartedRef.current = false;
+    setProgress(0);
+    setStatus("idle");
+    disposeRuntime();
+  }, [configRuntimeKey, disposeRuntime]);
 
   useEffect(() => {
     if (
@@ -406,6 +419,38 @@ function hasCmsThreeDBudgetWarning(config: CmsThreeDViewerConfig): boolean {
     config.asset.fileSizeBytes !== undefined &&
     config.asset.fileSizeBytes > budgetBytes
   );
+}
+
+function getCmsThreeDConfigRuntimeKey(config: CmsThreeDViewerConfig): string {
+  if (config.kind === "object") {
+    return [
+      config.kind,
+      config.asset.id,
+      config.asset.url,
+      config.poster?.url ?? "",
+      config.requiresActivation,
+      config.sourceHref ?? "",
+    ].join("|");
+  }
+
+  return [
+    config.kind,
+    config.preset,
+    config.poster?.url ?? "",
+    config.requiresActivation,
+    ...config.placements.map((placement) =>
+      [
+        placement.id,
+        placement.asset.id,
+        placement.asset.url,
+        placement.detailHref,
+        placement.displayMode,
+        placement.position?.join(",") ?? "",
+        placement.rotation?.join(",") ?? "",
+        placement.size?.join(",") ?? "",
+      ].join(":")
+    ),
+  ].join("|");
 }
 
 function addMediaQueryChangeListener(
@@ -709,20 +754,23 @@ async function addArtworkPlacement({
   frame.rotation.set(rotationX, rotationY, rotationZ);
   scene.add(frame);
 
-  const texture = await loadTexture(THREE, placement.asset.url).catch(() =>
-    createMissingArtworkTexture(THREE, placement.label)
+  const texture = await loadTexture(THREE, placement.asset.url).catch(
+    () => null
   );
-  texture.colorSpace = THREE.SRGBColorSpace;
+  if (texture) {
+    texture.colorSpace = THREE.SRGBColorSpace;
+  }
+  const surfaceColor = texture ? "#ffffff" : "#20242c";
 
   const material =
     placement.displayMode === "faithful"
       ? new THREE.MeshBasicMaterial({
-          color: "#ffffff",
+          color: surfaceColor,
           map: texture,
           side: THREE.DoubleSide,
         })
       : new THREE.MeshStandardMaterial({
-          color: "#ffffff",
+          color: surfaceColor,
           map: texture,
           roughness: 0.65,
           side: THREE.DoubleSide,
@@ -736,6 +784,17 @@ async function addArtworkPlacement({
   artwork.rotation.set(rotationX, rotationY, rotationZ);
   artwork.name = placement.label;
   scene.add(artwork);
+  if (!texture) {
+    addMissingArtworkCue({
+      THREE,
+      fitted,
+      rotation: [rotationX, rotationY, rotationZ],
+      scene,
+      x,
+      y,
+      z: z + 0.018,
+    });
+  }
   clickable.push({ href: placement.detailHref, object: artwork });
 }
 
@@ -796,44 +855,78 @@ function loadTexture(THREE: ThreeModule, url: string): Promise<Texture> {
   return loader.loadAsync(url);
 }
 
-function createMissingArtworkTexture(
-  THREE: ThreeModule,
-  label: string
-): Texture {
-  const canvas = document.createElement("canvas");
-  canvas.width = PLACEHOLDER_TEXTURE_SIZE;
-  canvas.height = PLACEHOLDER_TEXTURE_SIZE;
-
-  const context = canvas.getContext("2d");
-  if (context) {
-    context.fillStyle = "#20242c";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.strokeStyle = "#c8d0dc";
-    context.lineWidth = 10;
-    context.strokeRect(24, 24, canvas.width - 48, canvas.height - 48);
-    context.strokeStyle = "#ef4444";
-    context.lineWidth = 8;
-    context.setLineDash([18, 14]);
-    context.beginPath();
-    context.moveTo(56, 56);
-    context.lineTo(canvas.width - 56, canvas.height - 56);
-    context.moveTo(canvas.width - 56, 56);
-    context.lineTo(56, canvas.height - 56);
-    context.stroke();
-    context.setLineDash([]);
-    context.fillStyle = "#ffffff";
-    context.font = "700 34px sans-serif";
-    context.textAlign = "center";
-    context.fillText("Image unavailable", canvas.width / 2, 230);
-    context.font = "500 24px sans-serif";
-    context.fillText(trimCanvasLabel(label), canvas.width / 2, 280);
-  }
-
-  return new THREE.CanvasTexture(canvas);
+function addMissingArtworkCue({
+  THREE,
+  fitted,
+  rotation,
+  scene,
+  x,
+  y,
+  z,
+}: {
+  readonly THREE: ThreeModule;
+  readonly fitted: ReturnType<typeof fitArtworkToFrame>;
+  readonly rotation: readonly [number, number, number];
+  readonly scene: Scene;
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+}): void {
+  const diagonalLength = Math.hypot(fitted.width, fitted.height);
+  const barThickness = Math.max(
+    0.03,
+    Math.min(fitted.width, fitted.height) * 0.06
+  );
+  const angle = Math.atan2(fitted.height, fitted.width);
+  addMissingArtworkCueBar({
+    THREE,
+    angle,
+    diagonalLength,
+    position: [x, y, z],
+    rotation,
+    scene,
+    thickness: barThickness,
+  });
+  addMissingArtworkCueBar({
+    THREE,
+    angle: -angle,
+    diagonalLength,
+    position: [x, y, z + 0.002],
+    rotation,
+    scene,
+    thickness: barThickness,
+  });
 }
 
-function trimCanvasLabel(label: string): string {
-  return label.length > 28 ? `${label.slice(0, 25)}...` : label;
+function addMissingArtworkCueBar({
+  THREE,
+  angle,
+  diagonalLength,
+  position,
+  rotation,
+  scene,
+  thickness,
+}: {
+  readonly THREE: ThreeModule;
+  readonly angle: number;
+  readonly diagonalLength: number;
+  readonly position: readonly [number, number, number];
+  readonly rotation: readonly [number, number, number];
+  readonly scene: Scene;
+  readonly thickness: number;
+}): void {
+  const [x, y, z] = position;
+  const [rotationX, rotationY, rotationZ] = rotation;
+  const bar = new THREE.Mesh(
+    new THREE.PlaneGeometry(diagonalLength, thickness),
+    new THREE.MeshBasicMaterial({
+      color: "#ef4444",
+      side: THREE.DoubleSide,
+    })
+  );
+  bar.position.set(x, y, z);
+  bar.rotation.set(rotationX, rotationY, rotationZ + angle);
+  scene.add(bar);
 }
 
 function resizeRenderer({

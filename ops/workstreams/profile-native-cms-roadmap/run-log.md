@@ -124,8 +124,8 @@ Follow-up after 6529bot review feedback:
 - Addressed the two Important viewer findings:
   - Added an explicit one-shot auto-start ref so non-activation viewers cannot
     re-trigger automatic WebGL loads merely because `status` changed.
-  - Replaced failed room artwork texture loads with a generated visible
-    placeholder texture instead of a blank white clickable plane.
+  - Replaced failed room artwork texture loads with a dark fallback art plane
+    and simple red geometry cue instead of a blank white clickable plane.
 - Also tightened review nits by adding a legacy `matchMedia.addListener`
   fallback, surfacing room placement budget warnings, and documenting that
   builder-generated `/{handle}/rooms/work-{n}/index.html` pages are canonical
@@ -149,13 +149,13 @@ Follow-up after 6529bot review feedback:
   `http://localhost:3142/punk6529/cms/builder` with system Chrome through
   Playwright:
   - Desktop poster screenshot:
-    `.codex/artifacts/cms-3d-room-desktop-review-fix-poster.png`
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-poster.png`
   - Desktop ready screenshot:
-    `.codex/artifacts/cms-3d-room-desktop-review-fix-ready.png`
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-ready.png`
   - Desktop canvas screenshot:
-    `.codex/artifacts/cms-3d-room-desktop-review-fix-canvas.png`
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-canvas.png`
   - Mobile fallback screenshot:
-    `.codex/artifacts/cms-3d-room-mobile-review-fix-fallback.png`
+    `.codex/artifacts/cms-3d-room-mobile-placeholder-geom-fallback.png`
   - Canvas screenshot pixel check: 670x620, 415,400 nonblack pixels out of
     415,400 nontransparent pixels (`1.0` ratio).
   - Ready-state DOM link tray passed a Playwright trial click, confirming it

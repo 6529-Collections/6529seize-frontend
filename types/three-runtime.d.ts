@@ -69,10 +69,6 @@ declare module "three" {
     dispose(): void;
   }
 
-  export class CanvasTexture extends Texture {
-    constructor(canvas: HTMLCanvasElement);
-  }
-
   export class TextureLoader {
     setCrossOrigin(crossOrigin: string): this;
     loadAsync(url: string): Promise<Texture>;
