@@ -13,6 +13,10 @@ import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import { useOptimisticNotificationDropReaction } from "@/hooks/drops/useOptimisticNotificationDropReaction";
+import {
+  applyOptimisticReactionQueryCacheUpdate,
+  EMPTY_DROP_CONTEXT_PROFILE_CONTEXT,
+} from "@/hooks/drops/optimisticReactionQueryCache";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
@@ -65,17 +69,6 @@ type ReactionCachePage = {
 };
 
 type ReactionCacheData = InfiniteData<ReactionCachePage>;
-
-const EMPTY_CONTEXT_PROFILE_CONTEXT: ApiDropContextProfileContext = {
-  rating: 0,
-  min_rating: 0,
-  max_rating: 0,
-  reaction: null,
-  boosted: false,
-  bookmarked: false,
-  curatable: false,
-  curated: false,
-};
 
 const combineRollbacks = (
   rollbacks: readonly OptimisticRollback[]
@@ -203,7 +196,7 @@ const applyReactionToCacheDrop = ({
     context_profile_context: {
       ...(drop.context_profile_context ??
         baseContext ??
-        EMPTY_CONTEXT_PROFILE_CONTEXT),
+        EMPTY_DROP_CONTEXT_PROFILE_CONTEXT),
       reaction: reactionCode,
     },
   };
@@ -298,7 +291,8 @@ const useOptimisticStreamDropReaction = ({
           });
           draft.reactions = [...nextDrop.reactions];
           draft.context_profile_context =
-            nextDrop.context_profile_context ?? EMPTY_CONTEXT_PROFILE_CONTEXT;
+            nextDrop.context_profile_context ??
+            EMPTY_DROP_CONTEXT_PROFILE_CONTEXT;
 
           return draft;
         },
@@ -342,49 +336,18 @@ const useOptimisticCurationDropReaction = ({
         return null;
       }
 
-      const matchingQueries = queryClient.getQueryCache().findAll({
-        predicate: (query) => isReactionCurationQueryKey(query.queryKey),
+      return applyOptimisticReactionQueryCacheUpdate({
+        isTargetQueryKey: isReactionCurationQueryKey,
+        queryClient,
+        updateData: (currentData) =>
+          updateReactionCacheData({
+            baseContext: contextProfileContext,
+            data: currentData,
+            dropId,
+            profileMin,
+            reactionCode,
+          }),
       });
-
-      if (matchingQueries.length === 0) {
-        return null;
-      }
-
-      const snapshots: Array<{
-        readonly queryKey: (typeof matchingQueries)[number]["queryKey"];
-        readonly data: unknown;
-      }> = [];
-
-      for (const query of matchingQueries) {
-        const currentData = query.state.data;
-        const nextData = updateReactionCacheData({
-          baseContext: contextProfileContext,
-          data: currentData,
-          dropId,
-          profileMin,
-          reactionCode,
-        });
-
-        if (nextData === currentData) {
-          continue;
-        }
-
-        snapshots.push({
-          queryKey: query.queryKey,
-          data: currentData,
-        });
-        queryClient.setQueryData(query.queryKey, nextData);
-      }
-
-      if (snapshots.length === 0) {
-        return null;
-      }
-
-      return () => {
-        for (const snapshot of snapshots) {
-          queryClient.setQueryData(snapshot.queryKey, snapshot.data);
-        }
-      };
     },
     [connectedProfile, contextProfileContext, dropId, enabled, queryClient]
   );

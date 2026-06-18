@@ -10,6 +10,10 @@ import {
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import {
+  applyOptimisticReactionQueryCacheUpdate,
+  EMPTY_DROP_CONTEXT_PROFILE_CONTEXT,
+} from "@/hooks/drops/optimisticReactionQueryCache";
 import type {
   TypedNotification,
   TypedNotificationsResponse,
@@ -29,17 +33,6 @@ type NotificationUpdate = {
 type PageUpdate = {
   readonly page: TypedNotificationsResponse;
   readonly changed: boolean;
-};
-
-const EMPTY_CONTEXT_PROFILE_CONTEXT: ApiDropContextProfileContext = {
-  rating: 0,
-  min_rating: 0,
-  max_rating: 0,
-  reaction: null,
-  boosted: false,
-  bookmarked: false,
-  curatable: false,
-  curated: false,
 };
 
 const isIdentityNotificationsQueryKey = (
@@ -100,7 +93,7 @@ const applyReactionToNotificationDrop = ({
     context_profile_context: {
       ...(drop.context_profile_context ??
         baseContext ??
-        EMPTY_CONTEXT_PROFILE_CONTEXT),
+        EMPTY_DROP_CONTEXT_PROFILE_CONTEXT),
       reaction: reactionCode,
     },
   };
@@ -242,49 +235,18 @@ export const useOptimisticNotificationDropReaction = ({
         return null;
       }
 
-      const matchingQueries = queryClient.getQueryCache().findAll({
-        predicate: (query) => isIdentityNotificationsQueryKey(query.queryKey),
+      return applyOptimisticReactionQueryCacheUpdate({
+        isTargetQueryKey: isIdentityNotificationsQueryKey,
+        queryClient,
+        updateData: (currentData) =>
+          updateNotificationsCacheData({
+            baseContext: contextProfileContext,
+            data: currentData,
+            dropId,
+            profileMin,
+            reactionCode,
+          }),
       });
-
-      if (matchingQueries.length === 0) {
-        return null;
-      }
-
-      const snapshots: Array<{
-        readonly queryKey: (typeof matchingQueries)[number]["queryKey"];
-        readonly data: unknown;
-      }> = [];
-
-      for (const query of matchingQueries) {
-        const currentData = query.state.data;
-        const nextData = updateNotificationsCacheData({
-          baseContext: contextProfileContext,
-          data: currentData,
-          dropId,
-          profileMin,
-          reactionCode,
-        });
-
-        if (nextData === currentData) {
-          continue;
-        }
-
-        snapshots.push({
-          queryKey: query.queryKey,
-          data: currentData,
-        });
-        queryClient.setQueryData(query.queryKey, nextData);
-      }
-
-      if (snapshots.length === 0) {
-        return null;
-      }
-
-      return () => {
-        for (const snapshot of snapshots) {
-          queryClient.setQueryData(snapshot.queryKey, snapshot.data);
-        }
-      };
     },
     [connectedProfile, contextProfileContext, dropId, queryClient]
   );
