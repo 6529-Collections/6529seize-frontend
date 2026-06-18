@@ -343,6 +343,33 @@ describe("OpenGraphPreview", () => {
     );
   });
 
+  it("falls Farcaster action links back to the pasted URL for http targets", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://mini.example/app"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://mini.example/app"
+        preview={{
+          type: "farcaster.miniapp",
+          embedKind: "miniapp",
+          title: "Example Mini",
+          appName: "Example Mini",
+          siteName: "Example Mini",
+          buttonTitle: "Launch",
+          actionUrl: "http://mini.example/launch",
+          imageUrl: "https://mini.example/preview.png",
+        }}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "Launch" })).toHaveAttribute(
+      "href",
+      "https://mini.example/app"
+    );
+  });
+
   it("renders sparse article metadata with a source label and no empty fields", () => {
     (removeBaseEndpoint as jest.Mock).mockReturnValue("/research/notes");
 

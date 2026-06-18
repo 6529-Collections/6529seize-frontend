@@ -841,16 +841,14 @@ function isTrustedYoutubeEmbedHost(hostname: string): boolean {
   );
 }
 
-function getHttpHref(value: string | null | undefined): string | undefined {
+function getHttpsHref(value: string | null | undefined): string | undefined {
   if (!value) {
     return undefined;
   }
 
   try {
     const parsed = new URL(value);
-    return parsed.protocol === "https:" || parsed.protocol === "http:"
-      ? parsed.toString()
-      : undefined;
+    return parsed.protocol === "https:" ? parsed.toString() : undefined;
   } catch {
     return undefined;
   }
@@ -1218,7 +1216,7 @@ function FarcasterEmbedPreviewCard({
     (isMiniApp
       ? t(locale, "linkPreview.farcaster.openMiniApp")
       : t(locale, "linkPreview.farcaster.openFrame"));
-  const actionHref = getHttpHref(preview.actionUrl) ?? effectiveHref;
+  const actionHref = getHttpsHref(preview.actionUrl) ?? effectiveHref;
   const sourceLabel =
     preview.siteName?.trim() ||
     preview.source?.trim() ||
