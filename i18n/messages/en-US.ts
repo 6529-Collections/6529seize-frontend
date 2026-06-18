@@ -684,6 +684,7 @@ const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
   ["play", "Play video"],
   ["player", "Video player"],
   ["playPreview", "Play video preview"],
+  ["seek", "Seek video"],
   ["unmute", "Unmute video"],
   ["unsupported", "Your browser does not support the video tag."],
 ] as const);
