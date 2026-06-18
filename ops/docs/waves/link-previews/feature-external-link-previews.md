@@ -7,7 +7,9 @@ Parent: [Link Previews Index](README.md)
 Wave markdown renders generic external-link cards for eligible `http://` and
 `https://` URLs when no provider-specific handler matches first.
 
-Generic cards can show domain, title, description, and image.
+Generic website and article previews can use source/site, title, description,
+image, author, published date, and favicon metadata when the destination
+publishes it. The card omits missing fields instead of reserving empty space.
 In chat and direct-message layouts, cards render in a fixed-height frame to
 reduce layout shift while loading.
 
@@ -29,8 +31,8 @@ reduce layout shift while loading.
 
 1. Open a drop containing an eligible URL.
 2. A loading skeleton appears while preview metadata is fetched.
-3. If metadata resolves, the drop shows a card with title, description, domain,
-   and optional image.
+3. If metadata resolves, the drop shows a card from the available metadata,
+   usually source/site, title, description, and optional image.
 4. In chat/message cards, side actions show copy/open controls; eligible authors
    can also see `Hide link previews`.
 5. In home-style cards, side action buttons are not shown.
@@ -38,6 +40,9 @@ reduce layout shift while loading.
 ## Common Scenarios
 
 - News, blog, and docs URLs render as generic external cards.
+- Article metadata can include author and published date details when the
+  destination exposes standard article metadata.
+- Sites can provide favicon metadata for compact source identification.
 - Repeated views of the same URL can resolve faster because preview responses
   are cached.
 - Long unbroken metadata text wraps inside the card to avoid horizontal overflow.
@@ -72,6 +77,9 @@ reduce layout shift while loading.
 - Card quality depends on metadata published by the destination.
 - Slow or redirect-heavy destinations can degrade preview quality or fall back to
   non-rich link states.
+- Link-preview chrome uses the app message catalog, but the wave preview stack
+  does not yet pass an active route locale into this component. Until that route
+  migration happens, generic preview labels and dates use the default locale.
 - This page does not cover provider-specific cards.
 
 ## Related Pages

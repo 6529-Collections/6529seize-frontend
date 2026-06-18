@@ -33,6 +33,7 @@ import { createManifoldPlan } from "./manifold/service";
 import { createOpenSeaPlan } from "./opensea/service";
 import { createFirstParty6529Plan } from "./6529/service";
 import { createTransientPlan } from "./transient/service";
+import { createYoutubePlan } from "./youtube/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -450,6 +451,7 @@ async function resolveLinkPreview(
 
   const plan =
     firstParty6529Plan ??
+    createYoutubePlan(targetUrl) ??
     createManifoldPlan(targetUrl, {
       fetchHtml,
       assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),

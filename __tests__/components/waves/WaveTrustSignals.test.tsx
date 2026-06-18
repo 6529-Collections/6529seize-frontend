@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ApiWaveRepSummary } from "@/generated/models/ApiWaveRepSummary";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
@@ -42,11 +42,11 @@ describe("WaveTrustSignals", () => {
     expect(summaryBadge).toHaveAttribute(
       "aria-label",
       expect.stringContaining(
-        "Combined score: 83. A quick signal for which waves deserve broad attention. Quality: 78 (65% of visibility). Hotness: 92 (gated, 35% of visibility)."
+        "Wave score 83. Quality 78, 65% of visibility. Hotness 92, gated, 35% of visibility."
       )
     );
     expect(summaryBadge?.getAttribute("aria-label")).toMatch(
-      /^Combined score: 83\. A quick signal for which waves deserve broad attention\. Quality: 78 \(65% of visibility\)\. Hotness: 92 \(gated, 35% of visibility\)\. REP: .+ raw, 41 score\. Open Network > Wave Score for the formula$/
+      /^Wave score 83\. Quality 78, 65% of visibility\. Hotness 92, gated, 35% of visibility\. REP: .+ raw, 41 score$/
     );
     expect(summaryBadge).not.toHaveAttribute("title");
     expect(screen.getByText("Score")).toBeInTheDocument();
@@ -71,16 +71,18 @@ describe("WaveTrustSignals", () => {
     expect(summaryBadge).not.toBeNull();
     expect(summaryBadge).not.toHaveAttribute("title");
     expect(
-      screen.getByRole("button", { name: /^Combined score: 83\./ })
+      screen.getByRole("button", { name: /^Wave score 83\./ })
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^Wave score 83\./ }));
     expect(
-      screen.getByRole("link", { name: "Open full formula" })
+      screen.getByRole("link", { name: "Learn more" })
     ).toHaveAttribute("href", "/network/wave-score");
-    expect(screen.getByText("REP")).toBeInTheDocument();
-    expect(screen.getByText("+1.3K")).toBeInTheDocument();
-    expect(
-      screen.getByText("A quick signal for which waves deserve broad attention")
-    ).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Wave score details" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("Quality")).toBeInTheDocument();
+    expect(screen.getByText("Hotness")).toBeInTheDocument();
+    expect(screen.getByText("Wave REP")).toBeInTheDocument();
+    expect(screen.queryByText("REP")).not.toBeInTheDocument();
   });
 
   it("does not attach hover tooltip content in sidebar summary mode", () => {

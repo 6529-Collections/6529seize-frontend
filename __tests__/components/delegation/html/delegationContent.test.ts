@@ -72,6 +72,11 @@ describe("delegationContent", () => {
   if (!publishedRootCid) {
     throw new Error("Expected delegation content manifest to define rootCid");
   }
+  const publishedCloudFrontBaseUrl =
+    delegationContentManifest.acceleration.cloudFrontBaseUrl;
+  if (!publishedCloudFrontBaseUrl) {
+    throw new Error("Expected delegation content manifest to define CDN URL");
+  }
   const publishedGatewayBaseUrl = `https://ipfs.6529.io/ipfs/${publishedRootCid}`;
 
   it("keeps the reviewed source manifest and public mirror in sync", async () => {
@@ -114,11 +119,12 @@ describe("delegationContent", () => {
     expect(missingAlt).toEqual([]);
   });
 
-  it("uses CID-addressed IPFS gateways, then the local bundle", () => {
+  it("uses CloudFront, CID-addressed IPFS gateways, then the local bundle", () => {
     const article = getDelegationArticle("delegation-faq");
 
     expect(article).toBeDefined();
     expect(buildDelegationArticleUrls(article!)).toEqual([
+      `${publishedCloudFrontBaseUrl}/html/delegation-faq.html`,
       `${publishedGatewayBaseUrl}/html/delegation-faq.html`,
       `https://ipfs.io/ipfs/${publishedRootCid}/html/delegation-faq.html`,
       "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
@@ -195,7 +201,7 @@ describe("delegationContent", () => {
     ).resolves.toMatchObject({
       article,
       html,
-      url: `${publishedGatewayBaseUrl}/html/delegation-faq.html`,
+      url: `${publishedCloudFrontBaseUrl}/html/delegation-faq.html`,
     });
   });
 
@@ -211,9 +217,9 @@ describe("delegationContent", () => {
     await expect(
       fetchDelegationArticleHtml("using-safe", fetchArticle)
     ).resolves.toMatchObject({
-      url: `${publishedGatewayBaseUrl}/html/using-safe.html`,
+      url: `${publishedCloudFrontBaseUrl}/html/using-safe.html`,
       html: expect.stringContaining(
-        `src="${publishedGatewayBaseUrl}/assets/screenshots/safe1.png"`
+        `src="${publishedCloudFrontBaseUrl}/assets/screenshots/safe1.png"`
       ),
     });
   });
@@ -259,7 +265,7 @@ describe("delegationContent", () => {
       fetchDelegationArticleHtml("register-delegation", fetchArticle)
     ).resolves.toMatchObject({
       article,
-      url: `${publishedGatewayBaseUrl}/html/register-delegation.html`,
+      url: `${publishedCloudFrontBaseUrl}/html/register-delegation.html`,
     });
     expect(text).not.toHaveBeenCalled();
   });

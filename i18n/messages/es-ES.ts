@@ -1,6 +1,19 @@
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "media.video.captions": "Subtitulos",
+  "media.video.download": "Descargar multimedia",
+  "media.video.downloading": "Descargando multimedia",
+  "media.video.exitFullscreen": "Salir de pantalla completa",
+  "media.video.fullscreen": "Pantalla completa",
+  "media.video.mute": "Silenciar video",
+  "media.video.pause": "Pausar video",
+  "media.video.play": "Reproducir video",
+  "media.video.player": "Reproductor de video",
+  "media.video.playPreview": "Reproducir vista previa del video",
+  "media.video.unmute": "Activar sonido del video",
+  "media.video.unsupported":
+    "Tu navegador no admite la etiqueta de video.",
   "theMemes.documentTitle": "The Memes | Colecciones",
   "theMemes.description.collections": "Colecciones",
   "theMemes.sorting.regionLabel": "Orden de memes",

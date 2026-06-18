@@ -16,7 +16,7 @@
     "fallbackGatewayBaseUrls": [
       "https://ipfs.io/ipfs"
     ],
-    "cloudFrontBaseUrl": null,
+    "cloudFrontBaseUrl": "https://d3lqz0a4bldqgf.cloudfront.net/delegation-content/bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq",
     "note": "CloudFront/S3 may be used only as a CID/version-addressed mirror. Runtime verifies article hashes before rendering."
   },
   "localBasePath": "/delegation-content/delegation-docs-2026-06-16",

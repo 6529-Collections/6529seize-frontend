@@ -200,6 +200,22 @@ describe("WaveRepRatingModal", () => {
     expect(commonApiPostMock).not.toHaveBeenCalled();
   });
 
+  it("explains when the user has no available Wave REP credit", async () => {
+    useWaveRepAllocationMock.mockReturnValue({
+      currentRating: 0,
+      availableWaveRep: 0,
+      minMaxValues: { min: 0, max: 0 },
+      isLoading: false,
+    });
+
+    renderModal();
+
+    expect(
+      await screen.findByText(/No available Wave REP credit/i)
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save Wave REP" })).toBeDisabled();
+  });
+
   it("shows one mutation error toast and clears the busy state", async () => {
     commonApiPostMock.mockRejectedValue(new Error("failed"));
     const { setToast } = renderModal();
@@ -239,6 +255,23 @@ describe("WaveRepRatingModal", () => {
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_REP_CREDIT],
+    });
+  });
+
+  it("can remove an existing category rating by saving zero", async () => {
+    const { onClose } = renderModal();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Remove Wave REP" })
+    );
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(commonApiPostMock).toHaveBeenCalledWith({
+      body: {
+        amount: 0,
+        category: "quality",
+      },
+      endpoint: "waves/wave-1/rep/rating",
     });
   });
 });

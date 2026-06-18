@@ -108,7 +108,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
     <div ref={wrapperRef} className="tw-flex tw-w-full tw-justify-start">
       <SeizeVideoPlayer
         videoRef={videoRef}
-        autoPlay={false}
+        template="ambient-media"
         showActions={showControls}
         onDownload={showControls ? downloadMedia : undefined}
         onOpen={showControls ? openMedia : undefined}

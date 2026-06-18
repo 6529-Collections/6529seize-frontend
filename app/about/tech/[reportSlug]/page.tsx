@@ -1,7 +1,12 @@
 import { AboutMenu } from "@/components/about/About";
 import TechReportPage from "@/components/about/tech/TechReportPage";
-import { TECH_WEEKLY_PR_REPORT } from "@/components/about/tech/reports";
+import {
+  TECH_PR_REPORTS,
+  getTechReportBySlug,
+} from "@/components/about/tech/reports";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.scss";
 import { AboutSection } from "@/types/enums";
 import type { Metadata } from "next";
@@ -14,8 +19,9 @@ interface Props {
 
 export default async function AboutTechReportRoute(props: Readonly<Props>) {
   const { reportSlug } = await props.params;
+  const report = getTechReportBySlug(reportSlug);
 
-  if (reportSlug !== TECH_WEEKLY_PR_REPORT.slug) {
+  if (!report) {
     notFound();
   }
 
@@ -32,7 +38,7 @@ export default async function AboutTechReportRoute(props: Readonly<Props>) {
                       <AboutMenu currentSection={AboutSection.TECH} />
                     </div>
                     <div className="tw-w-full md:tw-w-4/5">
-                      <TechReportPage />
+                      <TechReportPage report={report} />
                     </div>
                   </div>
 
@@ -51,20 +57,21 @@ export default async function AboutTechReportRoute(props: Readonly<Props>) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { reportSlug } = await params;
+  const report = getTechReportBySlug(reportSlug);
 
-  if (reportSlug !== TECH_WEEKLY_PR_REPORT.slug) {
+  if (!report) {
     return getAppMetadata({
-      title: "Tech",
-      description: "About",
+      title: t(DEFAULT_LOCALE, "about.tech.metadata.title"),
+      description: t(DEFAULT_LOCALE, "about.tech.metadata.description"),
     });
   }
 
   return getAppMetadata({
-    title: TECH_WEEKLY_PR_REPORT.title,
-    description: TECH_WEEKLY_PR_REPORT.description,
+    title: report.title,
+    description: report.description,
   });
 }
 
 export function generateStaticParams() {
-  return [{ reportSlug: TECH_WEEKLY_PR_REPORT.slug }];
+  return TECH_PR_REPORTS.map((report) => ({ reportSlug: report.slug }));
 }

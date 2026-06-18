@@ -214,16 +214,35 @@ describe("WaveHeader", () => {
     wrapper(
       {
         ...baseWave,
-        wave_rep: { total_rep: 1250 },
+        wave_rep: { total_rep: 1250, authenticated_user_contribution: null },
       },
       undefined,
       { connectedProfile: { handle: "alice" } }
     );
 
     expect(
-      screen.getByRole("button", { name: /Add or edit Wave REP/i })
+      screen.getByRole("button", { name: /Add Wave REP to this wave/i })
     ).toBeInTheDocument();
     expect(screen.getByText("Add REP")).toBeInTheDocument();
     expect(screen.getByText("1.3K")).toBeInTheDocument();
+  });
+
+  it("shows a remove REP action when the user already contributed", () => {
+    wrapper(
+      {
+        ...baseWave,
+        wave_rep: {
+          total_rep: 1250,
+          authenticated_user_contribution: 25,
+        },
+      },
+      undefined,
+      { connectedProfile: { handle: "alice" } }
+    );
+
+    expect(
+      screen.getByRole("button", { name: /Edit or remove your Wave REP/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Remove REP")).toBeInTheDocument();
   });
 });

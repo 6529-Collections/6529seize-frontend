@@ -2,12 +2,7 @@
 import React from "react";
 
 import { publicEnv } from "@/config/env";
-import {
-  fetchYoutubePreview,
-  type YoutubeOEmbedResponse,
-} from "@/services/api/youtube";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImageGalleryProvider";
@@ -78,9 +73,6 @@ jest.mock("@/contexts/EmojiContext", () => {
   };
 });
 
-jest.mock("@/services/api/youtube", () => ({
-  fetchYoutubePreview: jest.fn(),
-}));
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMediaImage",
   () => {
@@ -125,10 +117,6 @@ jest.mock(
     };
   }
 );
-
-const mockFetchYoutubePreview = fetchYoutubePreview as jest.MockedFunction<
-  typeof fetchYoutubePreview
->;
 
 const mockLinkPreviewCard = jest.fn(({ renderFallback, href }: any) => (
   <div data-testid="link-preview" data-href={href}>
@@ -723,7 +711,6 @@ describe("DropPartMarkdown", () => {
     );
 
     expect(screen.getByText("@all")).toHaveClass("tw-text-primary-400");
-    expect(screen.getByText("@all")).toHaveClass("tw-align-middle");
 
     rerender(
       <DropPartMarkdown
@@ -928,7 +915,8 @@ describe("DropPartMarkdown", () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    mockTwitterPreviewCard.mockImplementationOnce(() => {
+    const originalImplementation = mockTwitterPreviewCard.getMockImplementation();
+    mockTwitterPreviewCard.mockImplementation(() => {
       throw new Error("boom");
     });
 
@@ -952,27 +940,12 @@ describe("DropPartMarkdown", () => {
         "https://twitter.com/foo/status/1111111111"
       );
     } finally {
+      mockTwitterPreviewCard.mockImplementation(originalImplementation);
       consoleErrorSpy.mockRestore();
     }
   });
 
-  it("renders YouTube previews with thumbnail and iframe interaction", async () => {
-    let resolvePreview:
-      | ((value: YoutubeOEmbedResponse | null) => void)
-      | undefined;
-    const previewPromise = new Promise<YoutubeOEmbedResponse | null>(
-      (resolve) => {
-        resolvePreview = resolve;
-      }
-    );
-    const preview: YoutubeOEmbedResponse = {
-      title: "Sample Video",
-      author_name: "Sample Creator",
-      thumbnail_url: "https://img.youtube.com/vi/sample/hqdefault.jpg",
-      html: '<iframe title="Sample Video" src="https://www.youtube.com/embed/sample"></iframe>',
-    };
-    mockFetchYoutubePreview.mockReturnValue(previewPromise);
-
+  it("routes supported YouTube links through shared link previews", () => {
     const content = "Watch this https://youtu.be/sample";
     render(
       <DropPartMarkdown
@@ -984,48 +957,19 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
-    const mediaFrame = screen.getByTestId("youtube-preview-media-frame");
-    expect(stableFrame).toBeInTheDocument();
-    expect(stableFrame.className).not.toContain("tw-h-[13rem]");
-    expect(stableFrame.className).not.toContain("md:tw-h-[15rem]");
-    expect(mediaFrame.className).toContain("tw-aspect-video");
-
-    resolvePreview?.(preview);
-
-    const previewButton = await screen.findByRole("button", {
-      name: /sample video/i,
-    });
-    const thumbnailImage = await screen.findByRole("img", {
-      name: /sample video/i,
-    });
-    expect(thumbnailImage.getAttribute("src")).toContain(
-      encodeURIComponent(preview.thumbnail_url)
+    expect(mockLinkPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "https://youtu.be/sample",
+      })
     );
-
-    await userEvent.click(previewButton);
-
-    expect(await screen.findByTitle("Sample Video")).toBeInTheDocument();
-    expect(mockFetchYoutubePreview).toHaveBeenCalled();
-    expect(mockFetchYoutubePreview.mock.calls[0]?.[0]).toBe(
-      "https://www.youtube.com/watch?v=sample"
-    );
-
-    const title = screen.getByText("Sample Video");
-    const author = screen.getByText("Sample Creator");
-    expect(title.className).toContain("tw-line-clamp-2");
-    expect(author.className).toContain("tw-line-clamp-1");
+    const preview = screen.getByTestId("link-preview");
+    expect(preview).toHaveAttribute("data-href", "https://youtu.be/sample");
+    expect(
+      screen.getByRole("link", { name: "https://youtu.be/sample" })
+    ).toHaveAttribute("href", "https://youtu.be/sample");
   });
 
-  it("normalizes YouTube URLs before fetching preview data", async () => {
-    const preview: YoutubeOEmbedResponse = {
-      title: "Normalized Video",
-      author_name: "Channel",
-      thumbnail_url: "https://img.youtube.com/vi/abc123XYZ/hqdefault.jpg",
-      html: '<iframe title="Normalized Video" src="https://www.youtube.com/embed/abc123XYZ"></iframe>',
-    };
-    mockFetchYoutubePreview.mockResolvedValue(preview);
-
+  it("supports YouTube subdomains and preserves the original preview href", () => {
     const url =
       "https://music.youtube.com/watch?v=abc123XYZ&t=42&list=PL123456";
 
@@ -1039,27 +983,14 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    await waitFor(() => expect(mockFetchYoutubePreview).toHaveBeenCalled());
-    expect(mockFetchYoutubePreview.mock.calls[0]?.[0]).toBe(
-      "https://www.youtube.com/watch?v=abc123XYZ&list=PL123456"
+    expect(mockLinkPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: url,
+      })
     );
-
-    const previewButton = await screen.findByRole("button", {
-      name: /normalized video/i,
-    });
-    await userEvent.click(previewButton);
-    expect(await screen.findByTitle("Normalized Video")).toBeInTheDocument();
   });
 
-  it("supports additional YouTube path variants", async () => {
-    const preview: YoutubeOEmbedResponse = {
-      title: "Live Video",
-      author_name: "Channel",
-      thumbnail_url: "https://img.youtube.com/vi/liveid123/hqdefault.jpg",
-      html: '<iframe title="Live Video" src="https://www.youtube.com/embed/liveid123"></iframe>',
-    };
-    mockFetchYoutubePreview.mockResolvedValue(preview);
-
+  it("supports additional YouTube path variants", () => {
     const url = "https://www.youtube.com/live/liveid123?si=token";
 
     render(
@@ -1072,15 +1003,14 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    await waitFor(() => expect(mockFetchYoutubePreview).toHaveBeenCalled());
-    expect(mockFetchYoutubePreview.mock.calls[0]?.[0]).toBe(
-      "https://www.youtube.com/watch?v=liveid123"
+    expect(mockLinkPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: url,
+      })
     );
   });
 
-  it("falls back with original URL for nocookie embeds when fetching fails", async () => {
-    mockFetchYoutubePreview.mockRejectedValue(new Error("blocked"));
-
+  it("routes nocookie embeds through shared link previews", () => {
     const url =
       "https://www.youtube-nocookie.com/embed/abcdef12345?rel=0&start=30";
 
@@ -1094,23 +1024,15 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
-    const mediaFrame = screen.getByTestId("youtube-preview-media-frame");
-    expect(stableFrame.className).not.toContain("tw-h-[13rem]");
-    expect(stableFrame.className).not.toContain("md:tw-h-[15rem]");
-    expect(mediaFrame.className).toContain("tw-aspect-video");
-
-    const fallbackLink = await screen.findByTestId(
-      "youtube-preview-fallback-link"
+    expect(mockLinkPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: url,
+      })
     );
-    expect(fallbackLink).toHaveAttribute("href", url);
-    expect(fallbackLink).toHaveTextContent(/failed to load youtube preview/i);
   });
 
-  it("falls back to a link when YouTube preview rejects", async () => {
-    mockFetchYoutubePreview.mockRejectedValue(new Error("network"));
-
-    const url = "https://youtu.be/failure";
+  it("keeps unsupported YouTube URLs as regular links", () => {
+    const url = "https://www.youtube.com/channel/UC123456789";
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
@@ -1121,44 +1043,11 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
-    const mediaFrame = screen.getByTestId("youtube-preview-media-frame");
-    expect(stableFrame.className).not.toContain("tw-h-[13rem]");
-    expect(stableFrame.className).not.toContain("md:tw-h-[15rem]");
-    expect(mediaFrame.className).toContain("tw-aspect-video");
-
-    const fallbackLink = await screen.findByTestId(
-      "youtube-preview-fallback-link"
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    expect(screen.getByRole("link", { name: url })).toHaveAttribute(
+      "href",
+      url
     );
-    expect(fallbackLink).toHaveAttribute("href", url);
-    expect(fallbackLink).toHaveTextContent(/failed to load youtube preview/i);
-  });
-
-  it("falls back to a link when YouTube preview returns null", async () => {
-    mockFetchYoutubePreview.mockResolvedValue(null);
-
-    const url = "https://youtu.be/unknown";
-    render(
-      <DropPartMarkdown
-        mentionedUsers={[]}
-        mentionedWaves={[]}
-        referencedNfts={[]}
-        partContent={`Check ${url}`}
-        onQuoteClick={jest.fn()}
-      />
-    );
-
-    const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
-    const mediaFrame = screen.getByTestId("youtube-preview-media-frame");
-    expect(stableFrame.className).not.toContain("tw-h-[13rem]");
-    expect(stableFrame.className).not.toContain("md:tw-h-[15rem]");
-    expect(mediaFrame.className).toContain("tw-aspect-video");
-
-    const fallbackLink = await screen.findByTestId(
-      "youtube-preview-fallback-link"
-    );
-    expect(fallbackLink).toHaveAttribute("href", url);
-    expect(fallbackLink).toHaveTextContent(/youtube preview unavailable/i);
   });
 
   it("renders plain links when link previews are hidden for the drop", () => {
