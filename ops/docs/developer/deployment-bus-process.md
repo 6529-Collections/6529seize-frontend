@@ -143,8 +143,9 @@ Staging manifest:
 
 ```text
 environment: staging
-candidate_sha: <frontend main or staging branch SHA>
-candidate_branch: 1a-staging
+staging_branch: 1a-staging
+staging_deploy_sha: <actual SHA deployed from 1a-staging>
+production_candidate_sha: <origin/main SHA contained in the staging deploy>
 included_prs:
   - number:
     title:
@@ -172,6 +173,11 @@ status: queued | deploying | validating | passed | failed | held | superseded
 Until automation exists, the release captain can keep this manifest in the PR
 description, a deployment wave update, or a workstream note. The automation PR
 should make it a durable artifact and GitHub Deployment payload.
+
+For production gating, `production_candidate_sha` is the important SHA. If the
+staging branch contains a tree that is not the current `origin/main` production
+candidate, staging can still be useful for exploratory validation, but it does
+not satisfy the production "same SHA passed staging" gate.
 
 ## Multi-Agent Staging Validation
 

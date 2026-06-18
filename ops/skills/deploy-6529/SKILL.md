@@ -31,10 +31,9 @@ shared lane.
 
 - Treat each active staging or production deploy as owned by one release
   captain until the lane is terminal and handed off.
-- If staging is idle and exactly one eligible release set is ready, deploy it
-  immediately. If the lane is busy or a backlog exists, batch ready work and
-  depart when the previous staging cycle is terminal, using 30 minutes as the
-  initial maximum batching window under backlog.
+- Use the staging departure cadence in
+  `ops/docs/developer/deployment-bus-process.md`; keep that process doc as the
+  source of truth when the team tunes the batching window.
 - Record a staging manifest before deployment: candidate SHA, included PRs,
   risk/area notes, backend dependencies, validation owners, required checks,
   and rollback or fix-forward notes.

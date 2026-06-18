@@ -9,7 +9,7 @@ instead of leaving conflicting guidance in place.
 
 ## Agent Release Railway Roadmap
 
-Last reviewed: 2026-06-11 against `origin/main` at `334b02c57`.
+Last reviewed: 2026-06-18 against `origin/main` at `97bb30914`.
 
 The repository is moving from one-human-per-PR review toward a higher-throughput
 agent development model. The operating goal is to stop treating "PR opened" as
@@ -83,9 +83,9 @@ Triggers:
 - PR merged to `main`.
 - Manual dispatch.
 - Applying a staging queue label.
-- A scheduled bus, initially using a 30 minute maximum batching window under
-  backlog. If staging is idle and one eligible release set is ready, deploy
-  immediately instead of waiting for the clock.
+- A scheduled bus that follows the cadence in
+  `ops/docs/developer/deployment-bus-process.md` so the process doc stays the
+  source of truth when the team tunes the batching window.
 
 Behavior:
 
