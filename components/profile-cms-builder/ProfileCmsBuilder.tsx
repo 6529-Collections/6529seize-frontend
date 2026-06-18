@@ -79,6 +79,7 @@ export default function ProfileCmsBuilder({
     useState<GallerySnapshotStatus>("idle");
   const [gallerySnapshotError, setGallerySnapshotError] = useState("");
   const actionRequestIdRef = useRef(0);
+  const gallerySnapshotRequestIdRef = useRef(0);
   const stateVersionRef = useRef(0);
   const { activeProfileProxy, connectedProfile } = useAuth();
 
@@ -161,8 +162,8 @@ export default function ProfileCmsBuilder({
       return;
     }
 
-    const requestId = actionRequestIdRef.current + 1;
-    actionRequestIdRef.current = requestId;
+    const requestId = gallerySnapshotRequestIdRef.current + 1;
+    gallerySnapshotRequestIdRef.current = requestId;
     setGallerySnapshotStatus("loading");
     setGallerySnapshotError("");
     clearActionResult();
@@ -173,7 +174,7 @@ export default function ProfileCmsBuilder({
         profileId: canUseBuilderApi ? profileId : undefined,
         sources: parsed.sources,
       });
-      if (requestId !== actionRequestIdRef.current) {
+      if (requestId !== gallerySnapshotRequestIdRef.current) {
         return;
       }
 
@@ -200,7 +201,7 @@ export default function ProfileCmsBuilder({
       stateVersionRef.current += 1;
       setGallerySnapshotStatus("ready");
     } catch {
-      if (requestId !== actionRequestIdRef.current) {
+      if (requestId !== gallerySnapshotRequestIdRef.current) {
         return;
       }
       setGallerySnapshotStatus("error");

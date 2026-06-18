@@ -59,9 +59,11 @@ export type WalletGallerySnapshotCollection = {
   readonly assetIds: readonly string[];
 };
 
+export type WalletGallerySnapshotSource = "backend" | "fixture";
+
 export type WalletGallerySnapshot = {
   readonly snapshotId: string;
-  readonly source: "api" | "fixture";
+  readonly source: WalletGallerySnapshotSource;
   readonly wallets: readonly WalletGallerySource[];
   readonly capturedAt: string;
   readonly blockNumber?: number | undefined;
@@ -222,8 +224,8 @@ export function createMockWalletGallerySnapshot({
   ];
 
   return {
-    snapshotId: `fixture-${slugify(handle)}-${hashText(
-      fallbackSources.map((source) => source.normalized).join("|")
+    snapshotId: `fixture-${slugify(handle)}-${slugify(
+      fallbackSources.map((source) => source.normalized).join("-")
     )}`,
     source: "fixture",
     wallets: fallbackSources,
@@ -300,6 +302,7 @@ export function buildWalletGalleryCmsPackage({
     featuredAssetIds,
     featuredCollectionIds,
     nftPages,
+    visibleAssets,
   });
   const pages: CmsPackageV1["payload"]["pages"] = [
     {
@@ -343,7 +346,7 @@ export function buildWalletGalleryCmsPackage({
     id: getAssetId(asset),
     kind: "image" as const,
     uri: asset.imageUri ?? "",
-    content_hash: hashForStableId(asset.id),
+    content_hash: FIXTURE_ZERO_HASH,
     mime_type: asset.mimeType ?? "image/png",
     ...(asset.width ? { width: asset.width } : {}),
     ...(asset.height ? { height: asset.height } : {}),
@@ -430,7 +433,7 @@ export function buildWalletGalleryCmsPackage({
           id: "source-wallets",
           source_type: "wallet",
           captured_at: resolvedSnapshot.capturedAt,
-          content_hash: hashForStableId(resolvedSnapshot.snapshotId),
+          content_hash: FIXTURE_ZERO_HASH,
           wallets: resolvedSnapshot.wallets.map((wallet) => wallet.normalized),
           snapshot_id: resolvedSnapshot.snapshotId,
           snapshot_source: resolvedSnapshot.source,
@@ -642,19 +645,31 @@ function getFeaturedPageIds({
   featuredAssetIds,
   featuredCollectionIds,
   nftPages,
+  visibleAssets,
 }: {
   readonly collectionPages: readonly CmsPackageV1["payload"]["pages"][number][];
   readonly featuredAssetIds: readonly string[];
   readonly featuredCollectionIds: readonly string[];
   readonly nftPages: readonly CmsPackageV1["payload"]["pages"][number][];
+  readonly visibleAssets: readonly WalletGallerySnapshotAsset[];
 }): string[] {
   const pageIds = new Set<string>();
+  const nftPageIdsByAssetId = new Map(
+    visibleAssets.flatMap((asset, index) => {
+      const pageId = nftPages[index]?.id;
+      return pageId ? [[asset.id, pageId] as const] : [];
+    })
+  );
+
   featuredCollectionIds.forEach((collectionId) =>
     pageIds.add(getCollectionPageId(collectionId))
   );
-  featuredAssetIds.forEach((assetId, index) =>
-    pageIds.add(getNftPageId(assetId, index))
-  );
+  featuredAssetIds.forEach((assetId) => {
+    const pageId = nftPageIdsByAssetId.get(assetId);
+    if (pageId) {
+      pageIds.add(pageId);
+    }
+  });
   const available = new Set([
     ...collectionPages.map((page) => page.id),
     ...nftPages.map((page) => page.id),
@@ -705,19 +720,6 @@ function getCollectionPageId(collectionId: string): string {
 
 function getNftPageId(assetId: string, index: number): string {
   return `page-nft-${slugify(assetId) || index + 1}`;
-}
-
-function hashForStableId(value: string): string {
-  const seed = hashText(value).padStart(8, "0").slice(0, 8);
-  return `sha256:${seed.repeat(8)}`;
-}
-
-function hashText(value: string): string {
-  let hash = 0;
-  for (const character of value) {
-    hash = (hash * 31 + (character.codePointAt(0) ?? 0)) >>> 0;
-  }
-  return hash.toString(16);
 }
 
 function slugify(value: string): string {

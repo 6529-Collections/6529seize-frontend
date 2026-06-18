@@ -81,9 +81,14 @@ describe("profile CMS wallet gallery builder helpers", () => {
     expect(cmsPackage.payload.assets.map((asset) => asset.id)).toEqual([
       "asset-work-memes-1",
     ]);
+    expect(cmsPackage.payload.assets[0]?.content_hash).toBe(
+      "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    );
     expect(cmsPackage.payload.source_packets?.[0]).toEqual(
       expect.objectContaining({
         snapshot_source: "fixture",
+        content_hash:
+          "sha256:0000000000000000000000000000000000000000000000000000000000000000",
         hidden_asset_ids: ["work-memes-2"],
         featured_asset_ids: ["work-memes-1"],
       })

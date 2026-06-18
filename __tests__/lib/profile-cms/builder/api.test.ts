@@ -39,7 +39,7 @@ describe("profile CMS builder API adapter", () => {
     const sources = parseWalletGallerySources("punk6529.eth").sources;
     commonApiPostMock.mockResolvedValue({
       snapshot_id: "snapshot-1",
-      source: "api",
+      source: "backend",
       wallets: [
         {
           kind: "ens",
@@ -61,16 +61,6 @@ describe("profile CMS builder API adapter", () => {
           owner: "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
           image_uri: "ipfs://backend/work.png",
           media_state: "ready",
-        },
-      ],
-      collections: [
-        {
-          id: "collection-1",
-          name: "Backend Collection",
-          slug: "backend-collection",
-          contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
-          chain_id: 1,
-          asset_ids: ["asset-1"],
         },
       ],
     });
@@ -98,7 +88,7 @@ describe("profile CMS builder API adapter", () => {
     expect(snapshot).toEqual(
       expect.objectContaining({
         snapshotId: "snapshot-1",
-        source: "api",
+        source: "backend",
         blockNumber: 23000000,
       })
     );
@@ -106,6 +96,14 @@ describe("profile CMS builder API adapter", () => {
       expect.objectContaining({
         id: "asset-1",
         imageUri: "ipfs://backend/work.png",
+      })
+    );
+    expect(snapshot.collections[0]).toEqual(
+      expect.objectContaining({
+        id: "collection-1",
+        name: "Backend Collection",
+        slug: "collection-1",
+        assetIds: ["asset-1"],
       })
     );
   });

@@ -4,6 +4,7 @@ import {
   type WalletGallerySnapshot,
   type WalletGallerySnapshotAsset,
   type WalletGallerySnapshotCollection,
+  type WalletGallerySnapshotSource,
   type WalletGallerySource,
 } from "@/lib/profile-cms/builder/gallery";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
@@ -51,7 +52,7 @@ type BuilderActionResponse = {
 
 type GallerySnapshotResponse = {
   readonly snapshot_id?: string | undefined;
-  readonly source?: "api" | "fixture" | undefined;
+  readonly source?: string | undefined;
   readonly wallets?: readonly {
     readonly kind?: "address" | "ens" | undefined;
     readonly input?: string | undefined;
@@ -272,10 +273,11 @@ function normalizeGallerySnapshotResponse(
     response.collections,
     assets
   );
+  const source = normalizeGallerySnapshotSource(response.source);
 
   return {
-    snapshotId: response.snapshot_id ?? `api-${Date.now()}`,
-    source: response.source ?? "api",
+    snapshotId: response.snapshot_id ?? `${source}-${Date.now()}`,
+    source,
     wallets,
     capturedAt: response.captured_at ?? new Date().toISOString(),
     ...(response.block_number !== undefined
@@ -285,6 +287,12 @@ function normalizeGallerySnapshotResponse(
     collections,
     warnings: response.warnings ?? [],
   };
+}
+
+function normalizeGallerySnapshotSource(
+  source: GallerySnapshotResponse["source"]
+): WalletGallerySnapshotSource {
+  return source === "fixture" ? "fixture" : "backend";
 }
 
 function normalizeWallets(
