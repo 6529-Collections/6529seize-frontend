@@ -35,9 +35,37 @@ type PageUpdate = {
   readonly changed: boolean;
 };
 
-const isIdentityNotificationsQueryKey = (
+const getProfileNotificationsIdentity = (
+  connectedProfile: ReturnType<typeof useAuth>["connectedProfile"]
+): string | null => {
+  return connectedProfile?.handle?.trim().toLowerCase() ?? null;
+};
+
+const getQueryKeyNotificationsIdentity = (
   queryKey: readonly unknown[]
-): boolean => queryKey[0] === QueryKey.IDENTITY_NOTIFICATIONS;
+): string | null => {
+  if (queryKey[0] !== QueryKey.IDENTITY_NOTIFICATIONS) {
+    return null;
+  }
+
+  const params = queryKey[1];
+  if (params === null || typeof params !== "object") {
+    return null;
+  }
+
+  const identity = (params as { readonly identity?: unknown }).identity;
+  if (typeof identity !== "string") {
+    return null;
+  }
+
+  const normalizedIdentity = identity.trim().toLowerCase();
+  return normalizedIdentity ? normalizedIdentity : null;
+};
+
+const isIdentityNotificationsQueryKeyForIdentity = (
+  queryKey: readonly unknown[],
+  identity: string
+): boolean => getQueryKeyNotificationsIdentity(queryKey) === identity;
 
 const hasNotificationDrops = (
   notification: TypedNotification
@@ -99,41 +127,35 @@ const applyReactionToNotificationDrop = ({
   };
 };
 
-const updateNotificationWithDropReaction = ({
-  baseContext,
+const updateNotificationDrop = ({
   dropId,
   notification,
-  profileMin,
-  reactionCode,
+  updateDrop,
 }: {
-  readonly baseContext: ApiDropContextProfileContext | null | undefined;
   readonly dropId: string;
   readonly notification: TypedNotification;
-  readonly profileMin: ApiProfileMin;
-  readonly reactionCode: string | null;
+  readonly updateDrop: (drop: ApiDrop) => ApiDrop;
 }): NotificationUpdate => {
   if (!hasNotificationDrops(notification)) {
     return { notification, changed: false };
   }
 
-  const hasMatchingDrop = notification.related_drops.some(
-    (relatedDrop) => relatedDrop.id === dropId
-  );
+  let changed = false;
+  const relatedDrops: ApiDrop[] = [];
 
-  if (!hasMatchingDrop) {
-    return { notification, changed: false };
+  for (const relatedDrop of notification.related_drops) {
+    if (relatedDrop.id !== dropId) {
+      relatedDrops.push(relatedDrop);
+      continue;
+    }
+
+    changed = true;
+    relatedDrops.push(updateDrop(relatedDrop));
   }
 
-  const relatedDrops = notification.related_drops.map((relatedDrop) =>
-    relatedDrop.id === dropId
-      ? applyReactionToNotificationDrop({
-          baseContext,
-          drop: relatedDrop,
-          profileMin,
-          reactionCode,
-        })
-      : relatedDrop
-  );
+  if (!changed) {
+    return { notification, changed: false };
+  }
 
   return {
     notification: {
@@ -144,26 +166,20 @@ const updateNotificationWithDropReaction = ({
   };
 };
 
-const updateNotificationsPage = ({
-  baseContext,
+const updateNotificationsPageDrop = ({
   dropId,
   page,
-  profileMin,
-  reactionCode,
+  updateDrop,
 }: {
-  readonly baseContext: ApiDropContextProfileContext | null | undefined;
   readonly dropId: string;
   readonly page: TypedNotificationsResponse;
-  readonly profileMin: ApiProfileMin;
-  readonly reactionCode: string | null;
+  readonly updateDrop: (drop: ApiDrop) => ApiDrop;
 }): PageUpdate => {
   const updates = page.notifications.map((notification) =>
-    updateNotificationWithDropReaction({
-      baseContext,
+    updateNotificationDrop({
       dropId,
       notification,
-      profileMin,
-      reactionCode,
+      updateDrop,
     })
   );
   const pageChanged = updates.some((update) => update.changed);
@@ -181,7 +197,34 @@ const updateNotificationsPage = ({
   };
 };
 
-const updateNotificationsCacheData = ({
+const updateNotificationsCacheDataDrop = ({
+  data,
+  dropId,
+  updateDrop,
+}: {
+  readonly data: unknown;
+  readonly dropId: string;
+  readonly updateDrop: (drop: ApiDrop) => ApiDrop;
+}): unknown => {
+  if (!isNotificationsCacheData(data)) {
+    return data;
+  }
+
+  const pageUpdates = data.pages.map((page) =>
+    updateNotificationsPageDrop({
+      dropId,
+      page,
+      updateDrop,
+    })
+  );
+  const changed = pageUpdates.some((pageUpdate) => pageUpdate.changed);
+
+  return changed
+    ? { ...data, pages: pageUpdates.map((pageUpdate) => pageUpdate.page) }
+    : data;
+};
+
+const updateNotificationsCacheDataWithReaction = ({
   baseContext,
   data,
   dropId,
@@ -193,26 +236,33 @@ const updateNotificationsCacheData = ({
   readonly dropId: string;
   readonly profileMin: ApiProfileMin;
   readonly reactionCode: string | null;
-}): unknown => {
-  if (!isNotificationsCacheData(data)) {
-    return data;
-  }
+}): unknown =>
+  updateNotificationsCacheDataDrop({
+    data,
+    dropId,
+    updateDrop: (drop) =>
+      applyReactionToNotificationDrop({
+        baseContext,
+        drop,
+        profileMin,
+        reactionCode,
+      }),
+  });
 
-  const pageUpdates = data.pages.map((page) =>
-    updateNotificationsPage({
-      baseContext,
-      dropId,
-      page,
-      profileMin,
-      reactionCode,
-    })
-  );
-  const changed = pageUpdates.some((pageUpdate) => pageUpdate.changed);
-
-  return changed
-    ? { ...data, pages: pageUpdates.map((pageUpdate) => pageUpdate.page) }
-    : data;
-};
+const updateNotificationsCacheDataWithCanonicalDrop = ({
+  data,
+  drop,
+  dropId,
+}: {
+  readonly data: unknown;
+  readonly drop: ApiDrop;
+  readonly dropId: string;
+}): unknown =>
+  updateNotificationsCacheDataDrop({
+    data,
+    dropId,
+    updateDrop: () => drop,
+  });
 
 export const useOptimisticNotificationDropReaction = ({
   connectedProfile,
@@ -230,16 +280,26 @@ export const useOptimisticNotificationDropReaction = ({
 
   return useCallback(
     (reactionCode: string | null): OptimisticRollback => {
+      const notificationsIdentity =
+        getProfileNotificationsIdentity(connectedProfile);
+      if (!notificationsIdentity) {
+        return null;
+      }
+
       const profileMin = toProfileMin(connectedProfile);
       if (!profileMin) {
         return null;
       }
 
       return applyOptimisticReactionQueryCacheUpdate({
-        isTargetQueryKey: isIdentityNotificationsQueryKey,
+        isTargetQueryKey: (queryKey) =>
+          isIdentityNotificationsQueryKeyForIdentity(
+            queryKey,
+            notificationsIdentity
+          ),
         queryClient,
         updateData: (currentData) =>
-          updateNotificationsCacheData({
+          updateNotificationsCacheDataWithReaction({
             baseContext: contextProfileContext,
             data: currentData,
             dropId,
@@ -249,5 +309,41 @@ export const useOptimisticNotificationDropReaction = ({
       });
     },
     [connectedProfile, contextProfileContext, dropId, queryClient]
+  );
+};
+
+export const useCanonicalNotificationDropUpdate = ({
+  connectedProfile,
+  dropId,
+}: {
+  readonly connectedProfile: ReturnType<typeof useAuth>["connectedProfile"];
+  readonly dropId: string;
+}) => {
+  const queryClient = useQueryClient();
+
+  return useCallback(
+    (drop: ApiDrop): void => {
+      const notificationsIdentity =
+        getProfileNotificationsIdentity(connectedProfile);
+      if (!notificationsIdentity) {
+        return;
+      }
+
+      applyOptimisticReactionQueryCacheUpdate({
+        isTargetQueryKey: (queryKey) =>
+          isIdentityNotificationsQueryKeyForIdentity(
+            queryKey,
+            notificationsIdentity
+          ),
+        queryClient,
+        updateData: (currentData) =>
+          updateNotificationsCacheDataWithCanonicalDrop({
+            data: currentData,
+            drop,
+            dropId,
+          }),
+      });
+    },
+    [connectedProfile, dropId, queryClient]
   );
 };

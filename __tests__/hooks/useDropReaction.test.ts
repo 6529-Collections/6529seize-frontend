@@ -158,8 +158,10 @@ const mockDrop = {
 } as unknown as ExtendedDrop;
 
 const createNotificationQuery = ({
+  identity = "user",
   relatedDrops = [mockDrop as unknown as ApiDrop],
 }: {
+  readonly identity?: string;
   readonly relatedDrops?: ApiDrop[];
 } = {}) => {
   const data = {
@@ -177,7 +179,7 @@ const createNotificationQuery = ({
   };
 
   return {
-    queryKey: [AppQueryKey.IDENTITY_NOTIFICATIONS, { identity: "identity-1" }],
+    queryKey: [AppQueryKey.IDENTITY_NOTIFICATIONS, { identity }],
     state: { data },
   };
 };
@@ -185,6 +187,7 @@ const createNotificationQuery = ({
 describe("useDropReaction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSetQueryData.mockReset();
     mockQueryCacheFindAll.mockReturnValue([]);
     applyOptimisticDropUpdateMock.mockReset();
     applyOptimisticDropUpdateMock.mockImplementation(() => ({
@@ -349,6 +352,32 @@ describe("useDropReaction", () => {
     expect(mockSetQueryData).not.toHaveBeenCalled();
   });
 
+  it("does not update cached notifications for another identity", async () => {
+    const notificationQuery = createNotificationQuery({
+      identity: "other-user",
+    });
+    mockQueryCacheFindAll.mockImplementation(
+      ({
+        predicate,
+      }: {
+        readonly predicate: (
+          query: ReturnType<typeof createNotificationQuery>
+        ) => boolean;
+      }) => [notificationQuery].filter((query) => predicate(query))
+    );
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(mockSetQueryData).not.toHaveBeenCalled();
+  });
+
   it("rolls back cached notification drops on reaction failure", async () => {
     const notificationQuery = createNotificationQuery();
     mockQueryCacheFindAll.mockImplementation(
@@ -397,6 +426,86 @@ describe("useDropReaction", () => {
       2,
       notificationQuery.queryKey,
       notificationQuery.state.data
+    );
+  });
+
+  it("refreshes cached notification drops from the canonical drop after the latest failure", async () => {
+    useSequentialMutationIds();
+    mockLatestOnlyMonitoringResults();
+
+    const notificationQuery = createNotificationQuery();
+    mockQueryCacheFindAll.mockImplementation(
+      ({
+        predicate,
+      }: {
+        readonly predicate: (
+          query: ReturnType<typeof createNotificationQuery>
+        ) => boolean;
+      }) => [notificationQuery].filter((query) => predicate(query))
+    );
+    mockSetQueryData.mockImplementation((queryKey, nextData) => {
+      if (queryKey === notificationQuery.queryKey) {
+        notificationQuery.state.data = nextData;
+      }
+    });
+
+    const firstRequest = createDeferred<ApiDrop>();
+    const secondRequest = createDeferred<ApiDrop>();
+    (commonApi.commonApiPost as jest.Mock)
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(secondRequest.promise);
+    (fetchDropByIdBatched as jest.Mock).mockResolvedValueOnce({
+      ...(mockDrop as unknown as ApiDrop),
+      context_profile_context: {
+        ...(mockDrop.context_profile_context as NonNullable<
+          ApiDrop["context_profile_context"]
+        >),
+        reaction: null,
+      },
+      reactions: [],
+    });
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    let firstReaction!: Promise<void>;
+    let secondReaction!: Promise<void>;
+    await act(async () => {
+      firstReaction = result.current.react(":smile:");
+      secondReaction = result.current.react(":wave:");
+    });
+
+    await act(async () => {
+      firstRequest.reject(new Error("first request failed"));
+      await firstReaction;
+    });
+
+    await act(async () => {
+      secondRequest.reject(new Error("second request failed"));
+      await secondReaction;
+    });
+
+    expect(mockSetQueryData).toHaveBeenLastCalledWith(
+      notificationQuery.queryKey,
+      expect.objectContaining({
+        pages: [
+          {
+            notifications: [
+              expect.objectContaining({
+                related_drops: [
+                  expect.objectContaining({
+                    context_profile_context: expect.objectContaining({
+                      reaction: null,
+                    }),
+                    reactions: [],
+                  }),
+                ],
+              }),
+            ],
+          },
+        ],
+      })
     );
   });
 

@@ -12,7 +12,10 @@ import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
-import { useOptimisticNotificationDropReaction } from "@/hooks/drops/useOptimisticNotificationDropReaction";
+import {
+  useCanonicalNotificationDropUpdate,
+  useOptimisticNotificationDropReaction,
+} from "@/hooks/drops/useOptimisticNotificationDropReaction";
 import {
   applyOptimisticReactionQueryCacheUpdate,
   EMPTY_DROP_CONTEXT_PROFILE_CONTEXT,
@@ -357,6 +360,7 @@ const useRefreshCanonicalDropAfterLatestFailure = ({
   applyOptimisticDropUpdate,
   dropId,
   queryClient,
+  updateNotificationQueriesWithCanonicalDrop,
   waveId,
 }: {
   readonly applyOptimisticDropUpdate: ReturnType<
@@ -364,6 +368,7 @@ const useRefreshCanonicalDropAfterLatestFailure = ({
   >["applyOptimisticDropUpdate"];
   readonly dropId: string;
   readonly queryClient: QueryClient;
+  readonly updateNotificationQueriesWithCanonicalDrop: (drop: ApiDrop) => void;
   readonly waveId: string;
 }) =>
   useCallback(async () => {
@@ -374,6 +379,7 @@ const useRefreshCanonicalDropAfterLatestFailure = ({
       }
 
       updateDropInCachedDrops(queryClient, apiDrop);
+      updateNotificationQueriesWithCanonicalDrop(apiDrop);
       applyOptimisticDropUpdate({
         waveId,
         dropId,
@@ -396,7 +402,13 @@ const useRefreshCanonicalDropAfterLatestFailure = ({
         error
       );
     }
-  }, [applyOptimisticDropUpdate, dropId, queryClient, waveId]);
+  }, [
+    applyOptimisticDropUpdate,
+    dropId,
+    queryClient,
+    updateNotificationQueriesWithCanonicalDrop,
+    waveId,
+  ]);
 
 const sendReactionRequest = async ({
   endpoint,
@@ -484,11 +496,17 @@ export function useDropReaction(
       contextProfileContext,
       dropId,
     });
+  const updateNotificationQueriesWithCanonicalDrop =
+    useCanonicalNotificationDropUpdate({
+      connectedProfile,
+      dropId,
+    });
   const refreshCanonicalDropAfterLatestFailure =
     useRefreshCanonicalDropAfterLatestFailure({
       applyOptimisticDropUpdate,
       dropId,
       queryClient,
+      updateNotificationQueriesWithCanonicalDrop,
       waveId,
     });
 
