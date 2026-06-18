@@ -134,12 +134,18 @@ export function ExploreWavesSection({
     : hasNoWaves
       ? (emptyStateLabel ?? `No ${statusLabel}`)
       : `Showing ${waves?.length ?? 0} ${statusLabel}`;
+  const hasHeaderAdditions = Boolean(headerControls);
+  const headerClassName = hasHeaderAdditions
+    ? "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-5"
+    : "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 md:tw-items-end";
+  const titleClassName =
+    "tw-w-full tw-max-w-sm md:tw-mx-auto md:tw-max-w-xl md:tw-text-center lg:tw-max-w-full";
 
   return (
     <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
       <div>
-        <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 md:tw-items-end">
-          <div className="tw-max-w-sm md:tw-mx-auto md:tw-max-w-xl md:tw-text-center lg:tw-max-w-full">
+        <div className={headerClassName}>
+          <div className={titleClassName}>
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
               {title}
             </span>
