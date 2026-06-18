@@ -276,6 +276,12 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   allQualityRankedAriaLabel: "All quality-ranked waves list",
 } as const);
 
+const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
+  createdLabel: "Created {relativeTime} · {date}",
+  "postsCount.one": "{count} Post",
+  "postsCount.other": "{count} Posts",
+} as const);
+
 const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
   title: "Score",
   quality: "Quality",
@@ -296,6 +302,7 @@ const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
 } as const);
 
 const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
+  statsAriaLabel: "Wave trust stats",
   visibilityAria: "Visibility score {visibilityScore} out of 100",
   hotnessAria: "Hotness score {hotnessScore} out of 100",
   hotnessTitle: "Hotness score: {hotnessScore}",
@@ -309,6 +316,7 @@ const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
   repNegative: "negative {value}",
   repNeutral: "{value}",
   repAriaRaw: "Wave REP {value}",
+  repTotalAria: "Wave REP total {value}",
   repAriaScore: "Wave REP score {repScore} out of 100",
   scoreLabel: "Score",
   hotLabel: "Hot",
@@ -317,10 +325,12 @@ const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
 
 const WAVE_REP_ACTION_MESSAGES = objectMessages("waves.rep.action", {
   add: "Add REP",
-  remove: "Remove REP",
+  edit: "Edit REP",
   addAriaLabel: "Add Wave REP to this wave",
-  editRemoveAriaLabel:
-    "Edit or remove your Wave REP for this wave. Current contribution {contribution}",
+  editAriaLabel:
+    "Edit your Wave REP for this wave. Current contribution {contribution}",
+  tooltip:
+    "Add, increase, decrease, or remove your Wave REP using your available TDH-backed REP credit.",
 } as const);
 
 const WAVE_REP_MODAL_MESSAGES = objectMessages("waves.rep.modal", {
@@ -328,6 +338,64 @@ const WAVE_REP_MODAL_MESSAGES = objectMessages("waves.rep.modal", {
   removeAriaLabel: "Remove Wave REP",
   noAvailableCredit:
     "No available Wave REP credit for this category. You can adjust existing REP when you have a current contribution, or come back when more credit is available.",
+} as const);
+
+const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
+  "summary.title": "Wave REP",
+  "summary.contributors.one": "{count} contributor",
+  "summary.contributors.other": "{count} contributors",
+  "summary.total": "Total",
+  "summary.yourRep": "Your REP",
+  "summary.positive": "Positive",
+  "summary.negative": "Negative",
+  "categories.title": "Categories",
+  "categories.loading": "Loading",
+  "categories.all": "All",
+  "categories.allAriaLabel":
+    "Show all contributors, {rep} Wave REP from {contributors}",
+  "categories.categoryAriaLabel":
+    "Show contributors in {category}, {rep} Wave REP from {contributors}",
+  "categories.empty": "No REP categories yet.",
+  "categories.error": "Could not load categories.",
+  "categories.loadMoreError": "Could not load more categories.",
+  "categories.loadingMore": "Loading categories",
+  "categories.loadMore": "Load more categories",
+  "view.ariaLabel": "Wave REP detail view",
+  "view.contributors": "Contributors",
+  "view.activity": "Activity",
+  "contributors.heading.all": "All contributors by Wave REP",
+  "contributors.heading.category": "Contributors in {category}",
+  "contributors.description.all": "{contributors}",
+  "contributors.description.category": "{contributors}, {rep}",
+  "contributors.categoryFilter": "Category: {category}",
+  "contributors.categoryFilterAll": "All",
+  "contributors.error": "Could not load contributors.",
+  "contributors.empty.all": "No Wave REP yet.",
+  "contributors.empty.category": "No contributors in {category} yet.",
+  "contributors.loadMoreError": "Could not load more contributors.",
+  "contributors.loadingMore": "Loading contributors",
+  "contributors.loadMore": "Load more contributors",
+  "activity.title": "Wave REP activity",
+  "activity.description": "Recent edits and reasons",
+  "activity.unknownRater": "Unknown",
+  "activity.error": "Could not load Wave REP activity.",
+  "activity.empty": "No Wave REP activity yet.",
+  "activity.loadMoreError": "Could not load more activity.",
+  "activity.loadingMore": "Loading activity",
+  "activity.loadMore": "Load more activity",
+  "activity.reason.lostTdh": "Lost TDH",
+  "activity.reason.unknown": "{reason}",
+  "actions.retry": "Retry",
+  profileAvatarAlt: "{profile} profile",
+  "rep.positive": "+{value}",
+} as const);
+
+const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
+  "matter.waveRep": "Wave REP",
+} as const);
+
+const USER_RATE_MESSAGES = objectMessages("user.rate", {
+  "subtitle.waveRep": "give Wave REP for",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
@@ -684,6 +752,7 @@ const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
   ["play", "Play video"],
   ["player", "Video player"],
   ["playPreview", "Play video preview"],
+  ["seek", "Seek video"],
   ["unmute", "Unmute video"],
   ["unsupported", "Your browser does not support the video tag."],
 ] as const);
@@ -916,10 +985,14 @@ export const EN_US_MESSAGES = {
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
+  ...WAVE_HEADER_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
   ...WAVE_REP_ACTION_MESSAGES,
   ...WAVE_REP_MODAL_MESSAGES,
+  ...WAVE_REP_DETAILS_MESSAGES,
+  ...PROFILE_ACTIVITY_RATE_MESSAGES,
+  ...USER_RATE_MESSAGES,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,

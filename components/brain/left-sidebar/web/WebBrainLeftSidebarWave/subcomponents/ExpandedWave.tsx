@@ -86,7 +86,6 @@ export const ExpandedWave = ({
       : null;
   const isChildRow = depth === 1;
   const shouldShowExpandControl = canExpand && depth === 0;
-  const shouldReserveExpandControlSpace = shouldShowExpandControl;
   const shouldShowPinButton = showPin && depth === 0;
   const trustSignalsTooltipId = `sidebar-expanded-wave-trust-signals-${waveId}`;
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
@@ -95,7 +94,6 @@ export const ExpandedWave = ({
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
-      shouldReserveExpandControlSpace,
       variant: "web",
     });
   const subwavePrefetchTimerRef = useRef<ReturnType<
@@ -131,6 +129,11 @@ export const ExpandedWave = ({
     waveId,
   ]);
 
+  const handleRowMouseEnter = useCallback(() => {
+    scheduleSubwavePrefetch();
+    onMouseEnter?.();
+  }, [onMouseEnter, scheduleSubwavePrefetch]);
+
   useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   const handleToggleExpand = (event: MouseEvent<HTMLButtonElement>) => {
@@ -141,7 +144,7 @@ export const ExpandedWave = ({
 
   return (
     <div
-      onMouseEnter={scheduleSubwavePrefetch}
+      onMouseEnter={handleRowMouseEnter}
       onMouseLeave={cancelSubwavePrefetch}
       role="group"
       className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
@@ -150,15 +153,6 @@ export const ExpandedWave = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
-      <SidebarWaveExpandControl
-        formattedWaveName={formattedWaveName}
-        isExpanded={isExpanded}
-        onBlur={cancelSubwavePrefetch}
-        onClick={handleToggleExpand}
-        onFocus={scheduleSubwavePrefetch}
-        shouldReserveSpace={shouldReserveExpandControlSpace}
-        shouldShowButton={shouldShowExpandControl}
-      />
       {isChildRow && (
         <span
           aria-hidden="true"
@@ -167,18 +161,18 @@ export const ExpandedWave = ({
           }`}
         />
       )}
-      <Link
-        href={href}
-        prefetch={false}
-        {...(onMouseEnter ? { onMouseEnter } : {})}
-        onClick={onClick}
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+      <div
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
         }`}
       >
-        <div className="tw-relative">
+        <div
+          aria-hidden="true"
+          data-testid="sidebar-wave-avatar"
+          className="tw-relative tw-flex-shrink-0"
+        >
           <WaveAvatar
             isActive={isActive}
             isDropWave={isDropWave}
@@ -195,37 +189,57 @@ export const ExpandedWave = ({
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div
-            ref={nameRef}
-            className={`-tw-mt-1 tw-mb-1 tw-truncate tw-text-sm ${
+            className={`-tw-mt-1 tw-mb-1 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 ${
               shouldShowPinButton ? "tw-pr-7" : ""
             }`}
             {...tooltipAttributes}
           >
-            {formattedWaveName}
+            <Link
+              href={href}
+              prefetch={false}
+              onClick={onClick}
+              className={`tw-min-w-0 tw-flex-shrink tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+                isActive
+                  ? "tw-text-white desktop-hover:group-hover:tw-text-white"
+                  : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+              }`}
+            >
+              <div ref={nameRef} className="tw-truncate tw-text-sm">
+                {formattedWaveName}
+              </div>
+            </Link>
+            <SidebarWaveExpandControl
+              formattedWaveName={formattedWaveName}
+              isExpanded={isExpanded}
+              onBlur={cancelSubwavePrefetch}
+              onClick={handleToggleExpand}
+              onFocus={scheduleSubwavePrefetch}
+              shouldShowButton={shouldShowExpandControl}
+            />
           </div>
           {shouldShowTrustSignalsRow && (
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
+              {presentLatestDropTimestamp !== null && (
+                <span className="tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
+                  <BrainLeftSidebarWaveDropTime
+                    time={presentLatestDropTimestamp}
+                  />
+                </span>
+              )}
               {hasSummaryScore && (
                 <WaveTrustSignals
                   waveRep={wave.waveRep}
                   waveScore={wave.waveScore}
                   variant="sidebar-inline"
                   mode="summary"
-                  className="tw-shrink-0"
+                  className="tw-ml-auto tw-shrink-0"
                   tooltipId={trustSignalsTooltipId}
                 />
-              )}
-              {presentLatestDropTimestamp !== null && (
-                <span className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
-                  <BrainLeftSidebarWaveDropTime
-                    time={presentLatestDropTimestamp}
-                  />
-                </span>
               )}
             </div>
           )}
         </div>
-      </Link>
+      </div>
       {shouldShowPinButton && (
         <BrainLeftSidebarWavePin
           waveId={waveId}

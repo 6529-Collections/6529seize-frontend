@@ -1,3 +1,4 @@
+import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
@@ -11,9 +12,11 @@ export const FR_FR_MESSAGES = {
   "media.video.play": "Lire la video",
   "media.video.player": "Lecteur video",
   "media.video.playPreview": "Lire l'apercu video",
+  "media.video.seek": "Modifier la position de la video",
   "media.video.unmute": "Activer le son de la video",
   "media.video.unsupported":
     "Votre navigateur ne prend pas en charge la balise video.",
+  ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.sorting.regionLabel": "Tri des memes",
