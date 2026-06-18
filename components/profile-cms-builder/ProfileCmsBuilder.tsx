@@ -53,6 +53,7 @@ const BLOCK_OPTIONS: ReadonlyArray<{
   { kind: "image", labelKey: "profileCms.builder.block.image" },
   { kind: "callout", labelKey: "profileCms.builder.block.callout" },
   { kind: "quote", labelKey: "profileCms.builder.block.quote" },
+  { kind: "room_viewer", labelKey: "profileCms.builder.block.roomViewer" },
 ];
 
 export default function ProfileCmsBuilder({
@@ -473,13 +474,11 @@ function EditorPanel({
             {t(locale, "profileCms.builder.templates.walletGallery")}
           </button>
           <button
-            aria-disabled="true"
-            className="tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3 tw-text-left tw-text-sm tw-text-iron-500"
-            disabled
+            className="tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400"
+            onClick={() => addBlock("room_viewer")}
             type="button"
           >
-            {t(locale, "profileCms.builder.templates.gallery")}{" "}
-            {t(locale, "profileCms.builder.templates.status.comingSoon")}
+            {t(locale, "profileCms.builder.templates.room")}
           </button>
         </div>
       </div>
@@ -1287,6 +1286,65 @@ function BlockEditor({
           />
         </div>
       ) : null}
+
+      {block.kind === "room_viewer" ? (
+        <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
+          <SelectInput
+            id={`${fieldId}-room-style`}
+            label={t(locale, "profileCms.builder.block.roomStyle")}
+            onChange={(roomStyle) =>
+              onChange({
+                roomStyle:
+                  roomStyle === "salon" ||
+                  roomStyle === "white_cube" ||
+                  roomStyle === "dark_room"
+                    ? roomStyle
+                    : "wall",
+              })
+            }
+            options={[
+              {
+                label: t(locale, "profileCms.builder.block.roomStyle.wall"),
+                value: "wall",
+              },
+              {
+                label: t(locale, "profileCms.builder.block.roomStyle.salon"),
+                value: "salon",
+              },
+              {
+                label: t(
+                  locale,
+                  "profileCms.builder.block.roomStyle.whiteCube"
+                ),
+                value: "white_cube",
+              },
+              {
+                label: t(locale, "profileCms.builder.block.roomStyle.darkRoom"),
+                value: "dark_room",
+              },
+            ]}
+            value={block.roomStyle}
+          />
+          <TextInput
+            id={`${fieldId}-room-title`}
+            label={t(locale, "profileCms.builder.block.roomTitle")}
+            onChange={(title) => onChange({ title })}
+            value={block.title}
+          />
+          <TextInput
+            id={`${fieldId}-room-image-uri`}
+            label={t(locale, "profileCms.builder.block.roomImageUri")}
+            onChange={(assetUri) => onChange({ assetUri })}
+            value={block.assetUri}
+          />
+          <TextInput
+            id={`${fieldId}-room-image-alt`}
+            label={t(locale, "profileCms.builder.block.imageAlt")}
+            onChange={(altText) => onChange({ altText })}
+            value={block.altText}
+          />
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -1618,6 +1676,46 @@ function TextArea({
         rows={rows}
         value={value}
       />
+    </div>
+  );
+}
+
+function SelectInput({
+  id,
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  readonly id: string;
+  readonly label: string;
+  readonly onChange: (value: string) => void;
+  readonly options: ReadonlyArray<{
+    readonly label: string;
+    readonly value: string;
+  }>;
+  readonly value: string;
+}) {
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-1">
+      <label
+        className="tw-text-sm tw-font-medium tw-text-iron-300"
+        htmlFor={id}
+      >
+        {label}
+      </label>
+      <select
+        className="tw-min-h-11 tw-w-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-white focus:tw-border-primary-400 focus:tw-outline-none"
+        id={id}
+        onChange={(event) => onChange(event.target.value)}
+        value={value}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
