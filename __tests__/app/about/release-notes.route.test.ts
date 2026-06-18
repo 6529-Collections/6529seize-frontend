@@ -38,9 +38,7 @@ describe("/about/release-notes redirect route", () => {
     const response = GET(request);
 
     expect(response.status).toBe(301);
-    expect(response.headers.get("location")).toBe(
-      `${RELEASES_WAVE_URL}?utm_source=sitemap`
-    );
+    expect(response.headers.get("location")).toBe(RELEASES_WAVE_URL);
   });
 
   it("permanently redirects HEAD requests to the Releases wave", () => {
