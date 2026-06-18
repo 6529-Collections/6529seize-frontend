@@ -847,3 +847,42 @@ Browser smoke:
   webpack chunk loading errors from the same cross-worktree dependency shape.
 - No browser screenshots were produced. Focused renderer tests remain the
   visual/interaction validation evidence for this local pass.
+
+## 2026-06-18 - Phase 8 AI-Agent Affordances Lane
+
+Started FE AI-agent affordances on
+`codex/cms-ai-agent-affordances-ui`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before validation:
+
+- Client-side package JSON, source packet JSON, and schema bundle downloads from
+  the builder/package workspaces.
+- Source packet viewer that separates facts, author copy, derived metadata,
+  validation diagnostics, and source handling rules.
+- Draft-only agent patch review UI with paste/upload, schema/target validation,
+  diff preview, local package validation, unsafe URL rejection, and explicit
+  apply-to-draft action.
+- External-agent `SKILL.md`, MCP read-tool interface docs, profile docs, and
+  backend contract notes.
+
+Backend contract note:
+
+- No new backend writes are assumed. Future read tools should be read-only and
+  should not save, sign, store, or publish packages.
+
+Focused validation passed:
+
+- `seize exec jest --testMatch=**/*.test.ts --testMatch=**/*.test.tsx --testPathIgnorePatterns=/node_modules/ --testPathIgnorePatterns=/.next/ --testPathIgnorePatterns=/tests/ --testPathIgnorePatterns=/e2e/ --runTestsByPath __tests__/lib/profile-cms/builder/agent.test.ts __tests__/lib/profile-cms/builder/package.test.ts __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx --runInBand --silent --verbose=false --coverage=false`
+  (3 suites, 18 tests)
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff` (score 99/100; non-blocking warnings remain
+  for existing builder component size/state count)
+
+Browser smoke:
+
+- Attempted on assigned port `3139`, but local dev server startup is blocked by
+  local helper/process env behavior: `seize-local-dev start-frontend` exits on
+  `PORT_SEARCH_LIMIT=0`; direct `seize run dev` starts on occupied port `3001`.
+  No screenshot captured.
