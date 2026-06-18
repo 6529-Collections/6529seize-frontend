@@ -84,6 +84,22 @@ describe("MediaDisplayVideo", () => {
     ).toBeInTheDocument();
   });
 
+  it("fills a reserved media container when requested", () => {
+    const { container } = render(
+      <MediaDisplayVideo src="foo.mp4" fillContainer />
+    );
+
+    const wrapper = container.firstElementChild;
+    const video = container.querySelector("video");
+
+    expect(wrapper).toHaveClass("tw-h-full", "tw-max-h-full");
+    expect(video?.parentElement).toHaveClass(
+      "tw-flex",
+      "tw-items-center",
+      "tw-justify-center"
+    );
+  });
+
   it("downloads the original video source from the custom button", async () => {
     const user = userEvent.setup();
     render(
