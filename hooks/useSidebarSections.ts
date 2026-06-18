@@ -195,10 +195,6 @@ function getAboutSection(hideSubscriptions: boolean): SidebarSection {
           },
           { name: "ENS", href: `/about/${AboutSection.ENS}` },
           { name: "License", href: `/about/${AboutSection.LICENSE}` },
-          {
-            name: "Release Notes",
-            href: `/about/${AboutSection.RELEASE_NOTES}`,
-          },
         ],
       },
     ],
