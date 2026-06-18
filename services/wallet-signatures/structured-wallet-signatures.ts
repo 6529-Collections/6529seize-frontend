@@ -48,7 +48,7 @@ interface BuildStructuredWalletSignatureMessageParams {
 }
 
 export function isStructuredSignaturesEnabled(): boolean {
-  return publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED === "true";
+  return true;
 }
 
 export function getWalletSignatureAudience(): string {

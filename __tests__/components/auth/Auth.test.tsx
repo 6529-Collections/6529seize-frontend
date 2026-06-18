@@ -137,6 +137,19 @@ jest.mock("@/hooks/useIdentity", () => ({
 // Mock TitleContext
 mockTitleContextModule();
 
+let mockAuthSettings = {
+  structured_signatures_required: false,
+  session_v2_migration_deadline: null as string | null,
+};
+
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettingsOptional: () => ({
+    seizeSettings: {
+      auth: mockAuthSettings,
+    },
+  }),
+}));
+
 let walletAddress: string | null = "0x1";
 let connectionState: string = "connected";
 let canSignActiveWallet: boolean = true;
@@ -151,6 +164,7 @@ let connectedAccountsOverride:
 
 const mockSeizeDisconnectAndLogout = jest.fn(() => Promise.resolve());
 const mockSeizeDisconnect = jest.fn(() => Promise.resolve());
+const mockSeizeConnect = jest.fn();
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => {
@@ -179,6 +193,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
       isConnected: !!walletAddress && canSignActiveWallet,
       hasActiveWalletAddress: !!walletAddress,
       canSignActiveWallet,
+      seizeConnect: mockSeizeConnect,
       seizeDisconnect: mockSeizeDisconnect,
       seizeDisconnectAndLogout: mockSeizeDisconnectAndLogout,
       isSafeWallet: false,
@@ -195,6 +210,13 @@ const mockCommonApiPost = commonApiPost as jest.MockedFunction<
 >;
 const mockUseIdentity = require("@/hooks/useIdentity")
   .useIdentity as jest.MockedFunction<any>;
+
+const enableAuthMigrationDeadline = (deadline = "2999-01-01T00:00:00.000Z") => {
+  mockAuthSettings = {
+    structured_signatures_required: false,
+    session_v2_migration_deadline: deadline,
+  };
+};
 
 // Test helper components
 function ShowWaves() {
@@ -217,6 +239,10 @@ describe("Auth component", () => {
     connectionState = "connected";
     canSignActiveWallet = true;
     connectedAccountsOverride = null;
+    mockAuthSettings = {
+      structured_signatures_required: false,
+      session_v2_migration_deadline: null,
+    };
     globalThis.localStorage?.clear();
     jest.clearAllMocks();
 
@@ -231,6 +257,7 @@ describe("Auth component", () => {
       authUtils.canStoreAnotherWalletAccount as jest.MockedFunction<any>;
     const mockSetActiveWalletAccount =
       authUtils.setActiveWalletAccount as jest.MockedFunction<any>;
+    mockSeizeConnect.mockReset();
     mockGetAuthJwt.mockReturnValue(null);
     mockGetWalletAddress.mockReturnValue(null);
     mockCanStoreAnotherWalletAccount.mockReturnValue(true);
@@ -265,7 +292,6 @@ describe("Auth component", () => {
       wasCancelled: false,
       shouldShowModal: false,
     });
-    require("@/config/env").publicEnv.SESSION_V2_MIGRATION_DEADLINE = undefined;
 
     // Reset mock implementations
     mockSignMessage.mockResolvedValue({
@@ -1071,9 +1097,46 @@ describe("Auth component", () => {
       expect(mockSeizeDisconnectAndLogout).toHaveBeenCalled();
     });
 
+    it("keeps v1 session upgrade silent when backend rollout settings are absent", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      const mockRemoveAuthJwt = require("@/services/auth/auth.utils")
+        .removeAuthJwt as jest.MockedFunction<any>;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: false,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalled();
+      });
+
+      expect(
+        screen.queryByText("Upgrade Authentication")
+      ).not.toBeInTheDocument();
+      expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
+    });
+
     it("closes the upgrade modal after successful session-v2 sign-in", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
+      enableAuthMigrationDeadline();
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
       const mockGetAuthJwt = require("@/services/auth/auth.utils")
@@ -1137,8 +1200,11 @@ describe("Auth component", () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       canSignActiveWallet = false;
+      enableAuthMigrationDeadline();
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.getSessionClientType.mockReturnValue("native");
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onSessionUpgradeRequired();
         return {
@@ -1171,9 +1237,54 @@ describe("Auth component", () => {
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
     });
 
+    it("shows a sign flow with shared-connection guidance when browser wallet is disconnected", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      canSignActiveWallet = false;
+      enableAuthMigrationDeadline();
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+
+      expect(
+        screen.getByText(/Reconnect this wallet and sign once/i)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/If this is a shared connection, reshare/i)
+      ).toBeInTheDocument();
+      expect(screen.getByText("Remind me later")).toBeInTheDocument();
+
+      const user = userEvent.setup();
+      await user.click(screen.getByText("Sign"));
+
+      expect(mockSeizeConnect).toHaveBeenCalled();
+    });
+
     it("temporarily dismisses the session upgrade prompt", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
+      enableAuthMigrationDeadline();
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
@@ -1233,8 +1344,7 @@ describe("Auth component", () => {
     it("caps displayed temporary access time by the configured migration deadline", async () => {
       const now = Date.UTC(2026, 5, 17, 12, 0, 0);
       jest.spyOn(Date, "now").mockReturnValue(now);
-      require("@/config/env").publicEnv.SESSION_V2_MIGRATION_DEADLINE =
-        new Date(now + 60 * 60 * 1000).toISOString();
+      enableAuthMigrationDeadline(new Date(now + 60 * 60 * 1000).toISOString());
       walletAddress = "0x1111111111111111111111111111111111111111";
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
@@ -1259,7 +1369,42 @@ describe("Auth component", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("Temporary access time remaining: 1 hour.")
+          screen.getByText("Temporary access time remaining: 60 minutes.")
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("displays multi-day temporary access time in hours", async () => {
+      const now = Date.UTC(2026, 5, 17, 12, 0, 0);
+      jest.spyOn(Date, "now").mockReturnValue(now);
+      enableAuthMigrationDeadline(
+        new Date(now + 7 * 24 * 60 * 60 * 1000).toISOString()
+      );
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Temporary access time remaining: 72 hours.")
         ).toBeInTheDocument();
       });
     });
@@ -1267,8 +1412,7 @@ describe("Auth component", () => {
     it("clears auth when the configured migration deadline has expired", async () => {
       const now = Date.UTC(2026, 5, 17, 12, 0, 0);
       jest.spyOn(Date, "now").mockReturnValue(now);
-      require("@/config/env").publicEnv.SESSION_V2_MIGRATION_DEADLINE =
-        new Date(now - 1).toISOString();
+      enableAuthMigrationDeadline(new Date(now - 1).toISOString());
       walletAddress = "0x1111111111111111111111111111111111111111";
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
