@@ -580,3 +580,46 @@ PR status:
   and server-validate now require the connected non-proxy owner profile before
   any backend request, and the builder route returns `notFound()` unless profile
   lookup returns an id.
+
+## 2026-06-18 - FE Wallet Gallery Builder Flow
+
+Started the Phase 5 frontend wallet gallery builder lane on
+`codex/cms-gallery-builder-flow`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before final validation:
+
+- Enabled the wallet gallery template inside the existing profile CMS builder
+  surface.
+- Added wallet/ENS input, parser validation, snapshot request/review state, and
+  a narrow `profile-cms/gallery/snapshots` adapter.
+- Added a fixture-backed snapshot fallback for local preview while the backend
+  deterministic wallet-snapshot -> CMS V1 generator lands.
+- Added reviewed asset controls for hide/unhide, feature/unfeature, and simple
+  priority ordering.
+- Rendered generated gallery candidates through the existing `CmsSiteRenderer`.
+- Kept save draft, server validate, and publish paths behind the existing
+  connected non-proxy profile-owner gate.
+
+Backend contract notes:
+
+- The backend generator remains the durable source of truth for generated
+  wallet gallery CMS packages.
+- The frontend `buildWalletGalleryCmsPackage(...)` helper is temporary preview
+  fallback only and uses existing `CmsPackageV1` fields.
+- The documented replacement path is to keep snapshot review controls, send
+  reviewed choices to the backend generator once merged, and use the returned
+  `CmsPackageV1` for preview/save/publish.
+
+Focused validation passed:
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --runTestsByPath __tests__/lib/profile-cms/builder/gallery.test.ts __tests__/lib/profile-cms/builder/api.test.ts __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx --testMatch **/*.test.ts --testMatch **/*.test.tsx --testPathIgnorePatterns=node_modules --testPathIgnorePatterns=.next --testPathIgnorePatterns=/tests/ --testPathIgnorePatterns=/e2e/`
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+
+Local browser smoke passed on `http://localhost:3138/punk6529/cms/builder`
+with viewport screenshots for desktop snapshot review, desktop preview, and
+mobile snapshot review under `.codex/artifacts/`.

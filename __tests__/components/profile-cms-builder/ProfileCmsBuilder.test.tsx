@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
@@ -169,6 +176,80 @@ describe("ProfileCmsBuilder", () => {
     ).toBeInTheDocument();
   });
 
+  it("requests a fixture wallet snapshot and previews the generated gallery", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.click(screen.getByRole("button", { name: "Wallet gallery" }));
+    await user.click(screen.getByRole("button", { name: "Request snapshot" }));
+
+    expect(await screen.findByText("Fixture snapshot")).toBeInTheDocument();
+    expect(screen.getByText("The Memes #1")).toBeInTheDocument();
+    expect(screen.getAllByText("Media pending").length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole("button", { name: "Preview" }));
+
+    expect(
+      screen.getByRole("heading", { name: "punk6529 Gallery", level: 2 })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Wallet gallery")).toBeInTheDocument();
+    expect(
+      screen.getByAltText("The Memes by 6529 card number 1")
+    ).toBeInTheDocument();
+  });
+
+  it("validates wallet input before requesting a gallery snapshot", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.click(screen.getByRole("button", { name: "Wallet gallery" }));
+    fireEvent.change(screen.getByLabelText("Wallets or ENS names"), {
+      target: { value: "not_a_wallet!" },
+    });
+    await waitFor(() =>
+      expect(screen.getByLabelText("Wallets or ENS names")).toHaveValue(
+        "not_a_wallet!"
+      )
+    );
+    await user.click(screen.getByRole("button", { name: "Request snapshot" }));
+
+    expect(
+      await screen.findByText(
+        "These wallet entries need attention: not_a_wallet!"
+      )
+    ).toBeInTheDocument();
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+  });
+
+  it("updates hide, feature, and priority controls for reviewed works", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+
+    await user.click(screen.getByRole("button", { name: "Wallet gallery" }));
+    await user.click(screen.getByRole("button", { name: "Request snapshot" }));
+    expect(await screen.findByText("The Memes #1")).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole("button", { name: "Hide" })[0]!);
+    expect(screen.getByRole("button", { name: "Unhide" })).toBeInTheDocument();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Feature work" })[0]!
+    );
+    expect(
+      screen.getAllByRole("button", { name: "Unfeature work" }).length
+    ).toBeGreaterThan(1);
+
+    await user.click(screen.getAllByRole("button", { name: "Move down" })[0]!);
+    const workHeadings = screen.getAllByRole("heading", { level: 4 });
+    expect(workHeadings[0]).toHaveTextContent("The Memes #2");
+
+    await user.click(screen.getByRole("button", { name: "Preview" }));
+    expect(screen.queryByAltText("The Memes by 6529 card number 1")).toBeNull();
+    expect(
+      screen.getByAltText("The Memes by 6529 card number 2")
+    ).toBeInTheDocument();
+  });
+
   it("does not show a stale save result after edits during the request", async () => {
     const user = userEvent.setup();
     process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
@@ -207,6 +288,10 @@ describe("ProfileCmsBuilder", () => {
 
   it("keeps production publish disabled until the signed storage flow exists", async () => {
     const user = userEvent.setup();
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-punk6529" },
+    });
     render(
       <ProfileCmsBuilder
         handle="punk6529"
@@ -220,6 +305,33 @@ describe("ProfileCmsBuilder", () => {
     expect(
       screen.getByText(
         "Publishing needs the signed decentralized storage flow and is not enabled in this MVP."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("profile-cms/packages/:id/publish")
+    ).toBeInTheDocument();
+  });
+
+  it("blocks publish unless the connected profile owns the target", async () => {
+    const user = userEvent.setup();
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-other" },
+    });
+
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Publish" }));
+
+    expect(
+      screen.getByText(
+        "Connect as this profile before using backend builder actions."
       )
     ).toBeInTheDocument();
     expect(
