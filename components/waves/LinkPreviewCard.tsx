@@ -40,10 +40,16 @@ const CHAT_FIRST_PARTY_FRAME_CLASSES =
   "tw-h-[15rem] tw-min-h-[15rem] tw-max-h-[15rem] tw-w-full lg:tw-h-[11rem] lg:tw-min-h-[11rem] lg:tw-max-h-[11rem]";
 const CHAT_COLLECTION_FRAME_CLASSES =
   "tw-min-h-[11rem] tw-w-full md:tw-min-h-[12rem]";
+const CHAT_VIDEO_FRAME_CLASSES =
+  "tw-min-h-[18rem] tw-w-full sm:tw-min-h-[14rem] md:tw-min-h-[15rem]";
 
 const isSeizeCollectionPreview = (
   preview: OpenGraphPreviewData | null | undefined
 ): boolean => preview?.["type"] === "6529.collection";
+
+const isYoutubeVideoPreview = (
+  preview: OpenGraphPreviewData | null | undefined
+): boolean => preview?.["type"] === "youtube.video";
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
@@ -186,6 +192,8 @@ export default function LinkPreviewCard({
       stableFrameClasses = CHAT_FIRST_PARTY_FRAME_CLASSES;
     } else if (isSeizeCollectionPreview(state.data)) {
       stableFrameClasses = CHAT_COLLECTION_FRAME_CLASSES;
+    } else if (isYoutubeVideoPreview(state.data)) {
+      stableFrameClasses = CHAT_VIDEO_FRAME_CLASSES;
     }
   }
 

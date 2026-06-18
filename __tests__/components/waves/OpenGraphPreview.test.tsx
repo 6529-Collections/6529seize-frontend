@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
 import OpenGraphPreview, {
@@ -137,6 +137,132 @@ describe("OpenGraphPreview", () => {
     );
     expect(screen.getByText("An example description")).toBeInTheDocument();
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
+  });
+
+  it("renders YouTube video previews with click-to-play iframe", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://youtu.be/abc123XYZ_0?t=42"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://youtu.be/abc123XYZ_0?t=42"
+        preview={{
+          type: "youtube.video",
+          title: "A Good Video",
+          provider: "YouTube",
+          videoId: "abc123XYZ_0",
+          watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0&t=42s",
+          embedUrl:
+            "https://www.youtube-nocookie.com/embed/abc123XYZ_0?rel=0&playsinline=1&start=42",
+          thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+          authorName: "Channel 6529",
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("youtube-video-preview-card")).toBeInTheDocument();
+    expect(screen.getByText("YouTube")).toBeInTheDocument();
+    expect(screen.getByText("by Channel 6529")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "A Good Video" })).toHaveAttribute(
+      "href",
+      "https://youtu.be/abc123XYZ_0?t=42"
+    );
+    expect(
+      screen.getByRole("link", { name: /watch on youtube/i })
+    ).toHaveAttribute(
+      "href",
+      "https://www.youtube.com/watch?v=abc123XYZ_0&t=42s"
+    );
+    expect(
+      screen.getByRole("img", {
+        name: "YouTube thumbnail for A Good Video",
+      })
+    ).toHaveAttribute(
+      "src",
+      "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg"
+    );
+    expect(screen.queryByTestId("youtube-video-embed")).toBeNull();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Play YouTube video: A Good Video",
+      })
+    );
+
+    const iframe = screen.getByTitle("A Good Video");
+    expect(iframe).toHaveAttribute(
+      "src",
+      "https://www.youtube-nocookie.com/embed/abc123XYZ_0?rel=0&playsinline=1&start=42"
+    );
+  });
+
+  it("does not render an iframe control for untrusted YouTube embed URLs", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://youtu.be/abc123XYZ_0"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://youtu.be/abc123XYZ_0"
+        preview={{
+          type: "youtube.video",
+          title: "A Good Video",
+          provider: "YouTube",
+          videoId: "abc123XYZ_0",
+          watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0",
+          embedUrl: "https://evil.example/embed/abc123XYZ_0",
+          thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+        }}
+      />
+    );
+
+    expect(screen.queryByTestId("youtube-video-play")).toBeNull();
+    expect(screen.queryByTestId("youtube-video-embed")).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "YouTube thumbnail for A Good Video" })
+    ).toHaveAttribute(
+      "href",
+      "https://www.youtube.com/watch?v=abc123XYZ_0"
+    );
+  });
+
+  it("uses localized YouTube fallbacks for sparse server data", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://youtu.be/abc123XYZ_0"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://youtu.be/abc123XYZ_0"
+        preview={
+          {
+            type: "youtube.video",
+            title: null,
+            provider: null,
+            videoId: "abc123XYZ_0",
+            watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0",
+            embedUrl:
+              "https://www.youtube-nocookie.com/embed/abc123XYZ_0?rel=0&playsinline=1",
+            thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+            author: { name: "not renderable" },
+          } as any
+        }
+      />
+    );
+
+    expect(screen.getByText("YouTube")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "YouTube video" })).toHaveAttribute(
+      "href",
+      "https://youtu.be/abc123XYZ_0"
+    );
+    expect(
+      screen.getByRole("img", { name: "YouTube video thumbnail" })
+    ).toHaveAttribute(
+      "src",
+      "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg"
+    );
+    expect(screen.queryByText("by [object Object]")).toBeNull();
   });
 
   it("renders sparse article metadata with a source label and no empty fields", () => {
