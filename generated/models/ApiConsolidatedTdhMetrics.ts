@@ -12,7 +12,6 @@
  */
 
 import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
-import { HttpFile } from '../http/http';
 
 export class ApiConsolidatedTdhMetrics {
     'consolidation_key'?: string;

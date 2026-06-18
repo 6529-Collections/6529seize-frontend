@@ -11,15 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateNewProfileProxyAllocateCicAction } from '../models/ApiCreateNewProfileProxyAllocateCicAction';
-import { ApiCreateNewProfileProxyAllocateRepAction } from '../models/ApiCreateNewProfileProxyAllocateRepAction';
-import { ApiCreateNewProfileProxyCreateWaveAction } from '../models/ApiCreateNewProfileProxyCreateWaveAction';
-import { ApiCreateNewProfileProxyCreateWaveParticipationDropAction } from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropAction';
-import { ApiCreateNewProfileProxyPublishCmsAction } from '../models/ApiCreateNewProfileProxyPublishCmsAction';
-import { ApiCreateNewProfileProxyRateWaveDropAction } from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
-import { ApiCreateNewProfileProxyReadWaveAction } from '../models/ApiCreateNewProfileProxyReadWaveAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
-import { HttpFile } from '../http/http';
 
 export class AddActionToProxyRequest {
     'action_type': ApiProfileProxyActionType;
