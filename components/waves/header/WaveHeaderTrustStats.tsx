@@ -20,44 +20,27 @@ const formatScore = (value: number | null | undefined): string | null => {
   return formatInteger(WAVE_HEADER_TRUST_LOCALE, Math.round(value));
 };
 
-const formatCompactSigned = (
+const formatCompactRepTotal = (
   value: number | null | undefined
 ): string | null => {
   if (value === null || value === undefined || !Number.isFinite(value)) {
     return null;
   }
 
-  const formatted = formatNumber(WAVE_HEADER_TRUST_LOCALE, Math.abs(value), {
+  return formatNumber(WAVE_HEADER_TRUST_LOCALE, value, {
     notation: "compact",
     maximumFractionDigits: 1,
   });
-
-  if (value > 0) {
-    return `+${formatted}`;
-  }
-
-  if (value < 0) {
-    return `-${formatted}`;
-  }
-
-  return formatted;
 };
 
-const formatSignedFullNumber = (
+const formatFullRepTotal = (
   value: number | null | undefined
 ): string | null => {
   if (value === null || value === undefined || !Number.isFinite(value)) {
     return null;
   }
 
-  const formatted = formatInteger(WAVE_HEADER_TRUST_LOCALE, Math.abs(value));
-  if (value > 0) {
-    return `+${formatted}`;
-  }
-  if (value < 0) {
-    return `-${formatted}`;
-  }
-  return formatted;
+  return formatInteger(WAVE_HEADER_TRUST_LOCALE, value);
 };
 
 type TrustStatTone = "score" | "quality" | "hot" | "rep";
@@ -86,8 +69,8 @@ export default function WaveHeaderTrustStats({
   const visibilityScore = formatScore(wave.wave_score?.visibility_score);
   const qualityScore = formatScore(wave.wave_score?.quality_score);
   const hotnessScore = formatScore(wave.wave_score?.hotness_score);
-  const compactWaveRep = formatCompactSigned(wave.wave_rep?.total_rep);
-  const fullWaveRep = formatSignedFullNumber(wave.wave_rep?.total_rep);
+  const compactWaveRep = formatCompactRepTotal(wave.wave_rep?.total_rep);
+  const fullWaveRep = formatFullRepTotal(wave.wave_rep?.total_rep);
   const stats: TrustStat[] = [
     ...(visibilityScore === null
       ? []
@@ -149,7 +132,7 @@ export default function WaveHeaderTrustStats({
             value: compactWaveRep,
             ariaLabel: t(
               WAVE_HEADER_TRUST_LOCALE,
-              "waves.score.details.repAriaRaw",
+              "waves.score.details.repTotalAria",
               { value: fullWaveRep ?? compactWaveRep }
             ),
             icon: ScaleIcon,

@@ -226,8 +226,23 @@ describe("WaveHeader", () => {
     expect(within(stats).getByText("Hot")).toBeInTheDocument();
     expect(within(stats).getByText("98")).toBeInTheDocument();
     expect(within(stats).getByText("Wave REP")).toBeInTheDocument();
-    expect(within(stats).getByText("+494.1K")).toBeInTheDocument();
+    expect(within(stats).getByText("494.1K")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Wave REP/i })).toBeNull();
+  });
+
+  it("does not show wave trust stats for DMs", () => {
+    wrapper({
+      ...baseWave,
+      chat: { scope: { group: { is_direct_message: true } } },
+      wave_score: {
+        visibility_score: 94.9,
+        quality_score: 93.4,
+        hotness_score: 97.69,
+      },
+      wave_rep: { total_rep: 494061, authenticated_user_contribution: null },
+    });
+
+    expect(screen.queryByLabelText("Wave trust stats")).toBeNull();
   });
 
   it("shows a visible Add REP action for eligible non-author waves", () => {
@@ -248,7 +263,7 @@ describe("WaveHeader", () => {
     });
     expect(within(addButton).getByText("Add REP")).toBeInTheDocument();
     expect(within(addButton).queryByText("1.3K")).toBeNull();
-    expect(screen.getByText("+1.3K")).toBeInTheDocument();
+    expect(screen.getByText("1.3K")).toBeInTheDocument();
   });
 
   it("shows an edit REP action when the user already contributed", () => {
