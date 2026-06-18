@@ -1,3 +1,4 @@
+import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
@@ -13,9 +14,7 @@ export const EN_GB_MESSAGES = {
   "media.video.playPreview": "Play video preview",
   "media.video.unmute": "Unmute video",
   "media.video.unsupported": "Your browser does not support the video tag.",
-  "newVersionToast.refreshAction": "Refresh page",
-  "newVersionToast.title": "A new version is available",
-  "newVersionToast.eyebrow": "Yes, again!",
+  ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
 } satisfies Partial<Record<MessageKey, string>>;
