@@ -3,6 +3,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import * as commonApi from "@/services/api/common-api";
@@ -14,6 +15,8 @@ const rollbackMock = jest.fn();
 const applyOptimisticDropUpdateMock = jest.fn(() => ({
   rollback: rollbackMock,
 }));
+const mockQueryCacheFindAll = jest.fn(() => []);
+const mockSetQueryData = jest.fn();
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -41,8 +44,8 @@ jest.mock(
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
-    getQueryCache: jest.fn(() => ({ findAll: jest.fn(() => []) })),
-    setQueryData: jest.fn(),
+    getQueryCache: jest.fn(() => ({ findAll: mockQueryCacheFindAll })),
+    setQueryData: mockSetQueryData,
     setQueriesData: jest.fn(),
   })),
 }));
@@ -102,7 +105,7 @@ const mockLatestOnlyMonitoringResults = () => {
   );
 };
 
-const createDeferred = <T,>() => {
+const createDeferred = <T>() => {
   let resolve!: (value: T) => void;
   let reject!: (reason?: unknown) => void;
   const promise = new Promise<T>((promiseResolve, promiseReject) => {
@@ -151,9 +154,31 @@ const mockDrop = {
   stableHash: "hash-drop-1",
 } as unknown as ExtendedDrop;
 
+const createNotificationQuery = () => {
+  const data = {
+    pages: [
+      {
+        notifications: [
+          {
+            id: 1,
+            related_drops: [mockDrop as unknown as ApiDrop],
+          },
+        ],
+      },
+    ],
+    pageParams: [null],
+  };
+
+  return {
+    queryKey: [AppQueryKey.IDENTITY_NOTIFICATIONS, { identity: "identity-1" }],
+    state: { data },
+  };
+};
+
 describe("useDropReaction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockQueryCacheFindAll.mockReturnValue([]);
     applyOptimisticDropUpdateMock.mockReset();
     applyOptimisticDropUpdateMock.mockImplementation(() => ({
       rollback: rollbackMock,
@@ -233,6 +258,110 @@ describe("useDropReaction", () => {
     });
   });
 
+  it("optimistically updates cached notification drops", async () => {
+    const notificationQuery = createNotificationQuery();
+    mockQueryCacheFindAll.mockImplementation(
+      ({
+        predicate,
+      }: {
+        readonly predicate: (
+          query: ReturnType<typeof createNotificationQuery>
+        ) => boolean;
+      }) => [notificationQuery].filter((query) => predicate(query))
+    );
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(mockSetQueryData).toHaveBeenCalledWith(
+      notificationQuery.queryKey,
+      expect.objectContaining({
+        pages: [
+          {
+            notifications: [
+              expect.objectContaining({
+                related_drops: [
+                  expect.objectContaining({
+                    id: "drop-1",
+                    context_profile_context: expect.objectContaining({
+                      reaction: ":smile:",
+                    }),
+                    reactions: [
+                      expect.objectContaining({
+                        reaction: ":smile:",
+                        count: 1,
+                        profiles: [
+                          expect.objectContaining({ id: "identity-1" }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          },
+        ],
+      })
+    );
+  });
+
+  it("rolls back cached notification drops on reaction failure", async () => {
+    const notificationQuery = createNotificationQuery();
+    mockQueryCacheFindAll.mockImplementation(
+      ({
+        predicate,
+      }: {
+        readonly predicate: (
+          query: ReturnType<typeof createNotificationQuery>
+        ) => boolean;
+      }) => [notificationQuery].filter((query) => predicate(query))
+    );
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      new Error("network down")
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(mockSetQueryData).toHaveBeenNthCalledWith(
+      1,
+      notificationQuery.queryKey,
+      expect.objectContaining({
+        pages: [
+          {
+            notifications: [
+              expect.objectContaining({
+                related_drops: [
+                  expect.objectContaining({
+                    context_profile_context: expect.objectContaining({
+                      reaction: ":smile:",
+                    }),
+                  }),
+                ],
+              }),
+            ],
+          },
+        ],
+      })
+    );
+    expect(mockSetQueryData).toHaveBeenNthCalledWith(
+      2,
+      notificationQuery.queryKey,
+      notificationQuery.state.data
+    );
+  });
+
   it("does not treat a throwing onSuccess callback as a request failure", async () => {
     const onSuccess = jest.fn(() => {
       throw new Error("consumer callback failed");
@@ -282,7 +411,7 @@ describe("useDropReaction", () => {
     });
 
     expect(setToastMock).toHaveBeenCalledWith({
-      message: "second request failed",
+      message: "Error adding reaction",
       type: "error",
     });
   });
@@ -402,7 +531,7 @@ describe("useDropReaction", () => {
     });
 
     expect(setToastMock).toHaveBeenCalledWith({
-      message: "Error adding reaction",
+      message: "second request failed",
       type: "error",
     });
     expect(secondRollback).toHaveBeenCalledTimes(1);

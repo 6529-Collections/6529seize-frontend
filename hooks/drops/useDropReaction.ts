@@ -12,12 +12,13 @@ import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
+import { useOptimisticNotificationDropReaction } from "@/hooks/drops/useOptimisticNotificationDropReaction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
-import type { InfiniteData } from "@tanstack/react-query";
+import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef, type MutableRefObject } from "react";
+import { useCallback, useRef, type RefObject } from "react";
 import {
   applyProfileReactionToEntries,
   cloneReactionEntries,
@@ -51,6 +52,7 @@ type OwnedOptimisticRollback = {
   readonly mutationId: string;
   readonly rollback: () => void;
 } | null;
+type ReactionMutation = ReturnType<typeof beginReactionMutation>;
 
 type ReactionCacheDrop = {
   readonly id: string;
@@ -100,7 +102,7 @@ const toOwnedRollback = (
   rollback === null ? null : { mutationId, rollback };
 
 const clearRollbackForMutation = (
-  rollbackRef: MutableRefObject<OwnedOptimisticRollback>,
+  rollbackRef: RefObject<OwnedOptimisticRollback>,
   mutationId: string
 ): void => {
   if (rollbackRef.current?.mutationId === mutationId) {
@@ -109,7 +111,7 @@ const clearRollbackForMutation = (
 };
 
 const runRollbackForMutation = (
-  rollbackRef: MutableRefObject<OwnedOptimisticRollback>,
+  rollbackRef: RefObject<OwnedOptimisticRollback>,
   mutationId: string
 ): boolean => {
   if (rollbackRef.current?.mutationId !== mutationId) {
@@ -388,6 +390,96 @@ const useOptimisticCurationDropReaction = ({
   );
 };
 
+const useRefreshCanonicalDropAfterLatestFailure = ({
+  applyOptimisticDropUpdate,
+  dropId,
+  queryClient,
+  waveId,
+}: {
+  readonly applyOptimisticDropUpdate: ReturnType<
+    typeof useMyStream
+  >["applyOptimisticDropUpdate"];
+  readonly dropId: string;
+  readonly queryClient: QueryClient;
+  readonly waveId: string;
+}) =>
+  useCallback(async () => {
+    try {
+      const apiDrop = await fetchDropByIdBatched(dropId);
+
+      updateDropInCachedDrops(queryClient, apiDrop);
+      applyOptimisticDropUpdate({
+        waveId,
+        dropId,
+        update: (draft): Drop => {
+          if (draft.type !== DropSize.FULL) {
+            return draft;
+          }
+
+          return {
+            ...apiDrop,
+            type: DropSize.FULL,
+            stableKey: draft.stableKey,
+            stableHash: draft.stableHash,
+          };
+        },
+      });
+    } catch (error) {
+      console.error(
+        "Failed to refresh drop after failed reaction request:",
+        error
+      );
+    }
+  }, [applyOptimisticDropUpdate, dropId, queryClient, waveId]);
+
+const sendReactionRequest = async ({
+  endpoint,
+  isRemoving,
+  mutation,
+  reactionCode,
+}: {
+  readonly endpoint: string;
+  readonly isRemoving: boolean;
+  readonly mutation: ReactionMutation;
+  readonly reactionCode: string;
+}): Promise<void> => {
+  if (isRemoving) {
+    recordReactionRequestSent(mutation, {
+      endpoint,
+      method: "DELETE",
+    });
+    await commonApiDelete({
+      endpoint,
+      errorMode: "structured",
+    });
+    return;
+  }
+
+  recordReactionRequestSent(mutation, {
+    endpoint,
+    method: "POST",
+  });
+  await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+    endpoint,
+    body: { reaction: reactionCode },
+    errorMode: "structured",
+  });
+};
+
+const runReactionSuccessCallback = (
+  onSuccess: (() => void) | undefined
+): void => {
+  if (!onSuccess) {
+    return;
+  }
+
+  try {
+    onSuccess();
+  } catch {
+    // Ignore consumer callback errors so a successful request stays successful.
+  }
+};
+
 export function useDropReaction(
   drop: ExtendedDrop,
   options?: UseDropReactionOptions
@@ -420,37 +512,19 @@ export function useDropReaction(
       dropId,
       enabled: updateCurationCache,
     });
-  const refreshCanonicalDropAfterLatestFailure = useCallback(async () => {
-    try {
-      const apiDrop = await fetchDropByIdBatched(dropId);
-      if (!apiDrop) {
-        return;
-      }
-
-      updateDropInCachedDrops(queryClient, apiDrop);
-      applyOptimisticDropUpdate({
-        waveId,
-        dropId,
-        update: (draft): Drop => {
-          if (draft.type !== DropSize.FULL) {
-            return draft;
-          }
-
-          return {
-            ...apiDrop,
-            type: DropSize.FULL,
-            stableKey: draft.stableKey,
-            stableHash: draft.stableHash,
-          };
-        },
-      });
-    } catch (error) {
-      console.error(
-        "Failed to refresh drop after failed reaction request:",
-        error
-      );
-    }
-  }, [applyOptimisticDropUpdate, dropId, queryClient, waveId]);
+  const applyOptimisticReactionToNotificationQueries =
+    useOptimisticNotificationDropReaction({
+      connectedProfile,
+      contextProfileContext,
+      dropId,
+    });
+  const refreshCanonicalDropAfterLatestFailure =
+    useRefreshCanonicalDropAfterLatestFailure({
+      applyOptimisticDropUpdate,
+      dropId,
+      queryClient,
+      waveId,
+    });
 
   const react = useCallback(
     async (reactionCode: string) => {
@@ -479,6 +553,7 @@ export function useDropReaction(
         combineRollbacks([
           applyOptimisticReaction(intendedReaction),
           applyOptimisticReactionToCurationQueries(intendedReaction),
+          applyOptimisticReactionToNotificationQueries(intendedReaction),
         ])
       );
       recordReactionOptimisticApplied(mutation);
@@ -491,26 +566,12 @@ export function useDropReaction(
 
       try {
         const endpoint = `drops/${drop.id}/reaction`;
-        if (isRemoving) {
-          recordReactionRequestSent(mutation, {
-            endpoint,
-            method: "DELETE",
-          });
-          await commonApiDelete({
-            endpoint,
-            errorMode: "structured",
-          });
-        } else {
-          recordReactionRequestSent(mutation, {
-            endpoint,
-            method: "POST",
-          });
-          await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-            endpoint,
-            body: { reaction: reactionCode },
-            errorMode: "structured",
-          });
-        }
+        await sendReactionRequest({
+          endpoint,
+          isRemoving,
+          mutation,
+          reactionCode,
+        });
         const result = recordReactionRequestSucceeded(mutation);
         if (result.isLatestMutation) {
           clearRollbackForMutation(rollbackRef, mutation.mutationId);
@@ -534,17 +595,14 @@ export function useDropReaction(
       }
 
       if (succeeded) {
-        try {
-          onSuccess?.();
-        } catch {
-          // Ignore consumer callback errors so a successful request stays successful.
-        }
+        runReactionSuccessCallback(onSuccess);
       }
     },
     [
       canReact,
       applyOptimisticReaction,
       applyOptimisticReactionToCurationQueries,
+      applyOptimisticReactionToNotificationQueries,
       connectedProfile?.id,
       contextProfileContext?.reaction,
       drop.id,
