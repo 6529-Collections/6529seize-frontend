@@ -11,14 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
 import { HttpFile } from '../http/http';
 
-export class ApiConsolidatedTdhMetricsPage {
-    'data': Array<ApiConsolidatedTdhMetrics>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+export class ApiCmsCreateSiteRequest {
+    'slug': string;
+    'title': string;
+    'description'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +24,26 @@ export class ApiConsolidatedTdhMetricsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiConsolidatedTdhMetrics>",
+            "name": "slug",
+            "baseName": "slug",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
+            "name": "title",
+            "baseName": "title",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
+            "name": "description",
+            "baseName": "description",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiConsolidatedTdhMetricsPage.attributeTypeMap;
+        return ApiCmsCreateSiteRequest.attributeTypeMap;
     }
 
     public constructor() {

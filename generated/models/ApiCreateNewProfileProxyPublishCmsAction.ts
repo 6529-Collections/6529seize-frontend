@@ -11,14 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
+import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
-export class ApiConsolidatedTdhMetricsPage {
-    'data': Array<ApiConsolidatedTdhMetrics>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+export class ApiCreateNewProfileProxyPublishCmsAction {
+    'action_type': ApiProfileProxyActionType;
+    'end_time': number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,34 +24,24 @@ export class ApiConsolidatedTdhMetricsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiConsolidatedTdhMetrics>",
+            "name": "action_type",
+            "baseName": "action_type",
+            "type": "ApiProfileProxyActionType",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
+            "name": "end_time",
+            "baseName": "end_time",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "string",
-            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiConsolidatedTdhMetricsPage.attributeTypeMap;
+        return ApiCreateNewProfileProxyPublishCmsAction.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+

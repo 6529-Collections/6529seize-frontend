@@ -11,14 +11,11 @@
  * Do not edit the class manually.
  */
 
-import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
 import { HttpFile } from '../http/http';
 
-export class ApiConsolidatedTdhMetricsPage {
-    'data': Array<ApiConsolidatedTdhMetrics>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+export class ApiSaveProfileCmsPackageDraftRequest {
+    'profile_id': string;
+    'cms_package': { [key: string]: any; };
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +23,20 @@ export class ApiConsolidatedTdhMetricsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiConsolidatedTdhMetrics>",
+            "name": "profile_id",
+            "baseName": "profile_id",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "string",
+            "name": "cms_package",
+            "baseName": "cms_package",
+            "type": "{ [key: string]: any; }",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiConsolidatedTdhMetricsPage.attributeTypeMap;
+        return ApiSaveProfileCmsPackageDraftRequest.attributeTypeMap;
     }
 
     public constructor() {

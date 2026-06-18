@@ -13,7 +13,11 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiConsolidatedTdhView {
-    Boosted = 'boosted',
-    Unboosted = 'unboosted'
+export enum ApiProfileCmsPackageStatus {
+    Draft = 'draft',
+    Validating = 'validating',
+    Published = 'published',
+    Failed = 'failed',
+    Archived = 'archived',
+    Superseded = 'superseded'
 }

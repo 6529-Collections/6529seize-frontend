@@ -11,14 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
+import { ApiCmsPublishedPackage } from '../models/ApiCmsPublishedPackage';
+import { ApiCmsSite } from '../models/ApiCmsSite';
 import { HttpFile } from '../http/http';
 
-export class ApiConsolidatedTdhMetricsPage {
-    'data': Array<ApiConsolidatedTdhMetrics>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+export class ApiCmsPublishedSite {
+    'site': ApiCmsSite;
+    'published_package': ApiCmsPublishedPackage;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +25,20 @@ export class ApiConsolidatedTdhMetricsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiConsolidatedTdhMetrics>",
+            "name": "site",
+            "baseName": "site",
+            "type": "ApiCmsSite",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "string",
+            "name": "published_package",
+            "baseName": "published_package",
+            "type": "ApiCmsPublishedPackage",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiConsolidatedTdhMetricsPage.attributeTypeMap;
+        return ApiCmsPublishedSite.attributeTypeMap;
     }
 
     public constructor() {

@@ -11,14 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
 import { HttpFile } from '../http/http';
 
-export class ApiConsolidatedTdhMetricsPage {
-    'data': Array<ApiConsolidatedTdhMetrics>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+export class ApiValidateProfileCmsPackageRequest {
+    'cms_package': { [key: string]: any; };
+    'allow_fixture_signatures'?: boolean;
+    'allow_fixture_storage'?: boolean;
+    'enforce_hashes'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +25,32 @@ export class ApiConsolidatedTdhMetricsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiConsolidatedTdhMetrics>",
+            "name": "cms_package",
+            "baseName": "cms_package",
+            "type": "{ [key: string]: any; }",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
+            "name": "allow_fixture_signatures",
+            "baseName": "allow_fixture_signatures",
+            "type": "boolean",
+            "format": ""
         },
         {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
+            "name": "allow_fixture_storage",
+            "baseName": "allow_fixture_storage",
+            "type": "boolean",
+            "format": ""
         },
         {
-            "name": "next",
-            "baseName": "next",
-            "type": "string",
+            "name": "enforce_hashes",
+            "baseName": "enforce_hashes",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiConsolidatedTdhMetricsPage.attributeTypeMap;
+        return ApiValidateProfileCmsPackageRequest.attributeTypeMap;
     }
 
     public constructor() {

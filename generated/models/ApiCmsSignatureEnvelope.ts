@@ -11,14 +11,19 @@
  * Do not edit the class manually.
  */
 
-import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
 import { HttpFile } from '../http/http';
 
-export class ApiConsolidatedTdhMetricsPage {
-    'data': Array<ApiConsolidatedTdhMetrics>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+/**
+* Opaque package signature envelope for this vertical slice. The server stores it and verifies hash consistency with package_json; wallet signature verification is a future publish-adapter responsibility.
+*/
+export class ApiCmsSignatureEnvelope {
+    'signature_type': string;
+    'signing_wallet': string;
+    /**
+    * Client-supplied signing timestamp stored as envelope metadata.
+    */
+    'signed_at': string;
+    'signature': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +31,32 @@ export class ApiConsolidatedTdhMetricsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiConsolidatedTdhMetrics>",
+            "name": "signature_type",
+            "baseName": "signature_type",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
+            "name": "signing_wallet",
+            "baseName": "signing_wallet",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
+            "name": "signed_at",
+            "baseName": "signed_at",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "next",
-            "baseName": "next",
+            "name": "signature",
+            "baseName": "signature",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiConsolidatedTdhMetricsPage.attributeTypeMap;
+        return ApiCmsSignatureEnvelope.attributeTypeMap;
     }
 
     public constructor() {

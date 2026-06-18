@@ -11,6 +11,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export enum ApiConsolidatedTdhMetricsCollector {
     All = 'All',
     Memes = 'Memes',
