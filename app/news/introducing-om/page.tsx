@@ -111,8 +111,7 @@ const IndexPage = () => (
       fusionCssId="fusion-dynamic-css-css"
       postJsonHref="/wp-json/wp/v2/posts/1214"
       shortlinkHref="/?p=1214"
-      oembedJsonHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fnews%2Fintroducing-om%2F"
-      oembedXmlHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fnews%2Fintroducing-om%2F#038;format=xml"
+      oembedTargetUrl="/news/introducing-om/"
     />
     {/* Google tag (gtag.js) */}
     <a className="skip-link screen-reader-text" href="#content">

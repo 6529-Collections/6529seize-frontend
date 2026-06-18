@@ -3,8 +3,7 @@ type WordPressLegacyAssetsProps = {
   fusionCssId?: string;
   postJsonHref: string;
   shortlinkHref: string;
-  oembedJsonHref: string;
-  oembedXmlHref: string;
+  oembedTargetUrl: string;
 };
 
 const cloudfrontBase = "https://dnclu2fna0b2b.cloudfront.net";
@@ -97,13 +96,20 @@ const icons = [
   ["apple-touch-icon", `${cloudfrontBase}/wp-content/uploads/2021/09/cropped-6529-logo-rev-180x180.png`],
 ] as const;
 
+const buildOEmbedHref = (targetUrl: string, format?: "xml") => {
+  const params = new URLSearchParams({ url: targetUrl });
+  if (format) {
+    params.set("format", format);
+  }
+  return `/wp-json/oembed/1.0/embed?${params.toString()}`;
+};
+
 export default function WordPressLegacyAssets({
   fusionCssHref,
   fusionCssId,
   postJsonHref,
   shortlinkHref,
-  oembedJsonHref,
-  oembedXmlHref,
+  oembedTargetUrl,
 }: WordPressLegacyAssetsProps) {
   return (
     <>
@@ -111,19 +117,25 @@ export default function WordPressLegacyAssets({
         <link key={id} rel="stylesheet" id={id} href={href} type="text/css" media="all" />
       ))}
       {inlineStyles.slice(0, 1).map(([id, css]) => (
-        <style key={id} id={id} type="text/css" dangerouslySetInnerHTML={{ __html: css }} />
+        <style key={id} id={id} type="text/css">
+          {css}
+        </style>
       ))}
       {commonStylesheets.slice(1, 2).map(([id, href]) => (
         <link key={id} rel="stylesheet" id={id} href={href} type="text/css" media="all" />
       ))}
       {inlineStyles.slice(1, 2).map(([id, css]) => (
-        <style key={id} id={id} type="text/css" dangerouslySetInnerHTML={{ __html: css }} />
+        <style key={id} id={id} type="text/css">
+          {css}
+        </style>
       ))}
       {commonStylesheets.slice(2, 4).map(([id, href]) => (
         <link key={id} rel="stylesheet" id={id} href={href} type="text/css" media="all" />
       ))}
       {inlineStyles.slice(2, 5).map(([id, css]) => (
-        <style key={id} id={id} type="text/css" dangerouslySetInnerHTML={{ __html: css }} />
+        <style key={id} id={id} type="text/css">
+          {css}
+        </style>
       ))}
       {commonStylesheets.slice(4).map(([id, href]) => (
         <link key={id} rel="stylesheet" id={id} href={href} type="text/css" media="all" />
@@ -139,13 +151,32 @@ export default function WordPressLegacyAssets({
       <link rel="alternate" title="JSON" type="application/json" href={postJsonHref} />
       <link rel="EditURI" type="application/rsd+xml" title="RSD" href="/xmlrpc.php?rsd" />
       <link rel="shortlink" href={shortlinkHref} />
-      <link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href={oembedJsonHref} />
-      <link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href={oembedXmlHref} />
+      <link
+        rel="alternate"
+        title="oEmbed (JSON)"
+        type="application/json+oembed"
+        href={buildOEmbedHref(oembedTargetUrl)}
+      />
+      <link
+        rel="alternate"
+        title="oEmbed (XML)"
+        type="text/xml+oembed"
+        href={buildOEmbedHref(oembedTargetUrl, "xml")}
+      />
       {fontPreloads.map(([href, type]) => (
-        <link key={href} rel="preload" href={href} as="font" type={type} />
+        <link
+          key={href}
+          rel="preload"
+          href={href}
+          as="font"
+          type={type}
+          crossOrigin="anonymous"
+        />
       ))}
       {inlineStyles.slice(5).map(([id, css]) => (
-        <style key={id} type="text/css" id={id} dangerouslySetInnerHTML={{ __html: css }} />
+        <style key={id} type="text/css" id={id}>
+          {css}
+        </style>
       ))}
       {icons.map(([rel, href, sizes]) => (
         <link key={href} rel={rel} href={href} sizes={sizes} />
@@ -185,13 +216,7 @@ export function WordPressLegacyFooter({
     </a>
   );
 
-  const toTopLink = useButtons ? (
-    <button type="button" id="toTop" className="fusion-top-top-link">
-      <span id="awb-to-top-label" className="screen-reader-text">
-        Go to Top
-      </span>
-    </button>
-  ) : (
+  const toTopLink = (
     <a href="#" id="toTop" className="fusion-top-top-link">
       <span id="awb-to-top-label" className="screen-reader-text">
         Go to Top
@@ -214,8 +239,9 @@ export function WordPressLegacyFooter({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="fab-fa-twitter"
+                aria-label="Follow punk6529 on Twitter"
               >
-                <i className="fab fa-twitter" />
+                <i className="fab fa-twitter" aria-hidden="true" />
               </a>
             </li>{" "}
           </ul>

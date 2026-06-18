@@ -96,8 +96,7 @@ Societies are made up of people – citizens, business leaders, public servants.
         fusionCssId="fusion-dynamic-css-css"
         postJsonHref="/wp-json/wp/v2/pages/33"
         shortlinkHref="/?p=33"
-        oembedJsonHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Feducation%2F"
-        oembedXmlHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Feducation%2F#038;format=xml"
+        oembedTargetUrl="/education/"
       />
       {/* Google tag (gtag.js) */}
       <a className="skip-link screen-reader-text" href="#content">

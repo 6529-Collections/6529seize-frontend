@@ -141,8 +141,7 @@ So, it is startling to imagine that"
         fusionCssHref="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/fusion-styles/c38db8bb1e7b256db5f81185ac0dbf47.min.css?ver=3.11.11"
         postJsonHref="/wp-json/wp/v2/posts/1825"
         shortlinkHref="/?p=1825"
-        oembedJsonHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fblog%2Fa-tale-of-two-artists%2F"
-        oembedXmlHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fblog%2Fa-tale-of-two-artists%2F#038;format=xml"
+        oembedTargetUrl="/blog/a-tale-of-two-artists/"
       />
       {/* Google tag (gtag.js) */}
       <a className="skip-link screen-reader-text" href="#content">

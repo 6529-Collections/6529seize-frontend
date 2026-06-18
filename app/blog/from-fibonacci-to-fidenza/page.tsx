@@ -132,8 +132,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
         fusionCssHref="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/fusion-styles/c38db8bb1e7b256db5f81185ac0dbf47.min.css?ver=3.11.11"
         postJsonHref="/wp-json/wp/v2/posts/1971"
         shortlinkHref="/?p=1971"
-        oembedJsonHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fblog%2Ffrom-fibonacci-to-fidenza%2F"
-        oembedXmlHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fblog%2Ffrom-fibonacci-to-fidenza%2F#038;format=xml"
+        oembedTargetUrl="/blog/from-fibonacci-to-fidenza/"
       />
       {/* Google tag (gtag.js) */}
       <a className="skip-link screen-reader-text" href="#content">

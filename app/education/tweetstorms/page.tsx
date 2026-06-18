@@ -94,8 +94,7 @@ Current Pinned Tweet:"
         fusionCssId="fusion-dynamic-css-css"
         postJsonHref="/wp-json/wp/v2/pages/214"
         shortlinkHref="/?p=214"
-        oembedJsonHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Feducation%2Ftweetstorms%2F"
-        oembedXmlHref="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Feducation%2Ftweetstorms%2F#038;format=xml"
+        oembedTargetUrl="/education/tweetstorms/"
       />
       {/* Google tag (gtag.js) */}
       <a className="skip-link screen-reader-text" href="#content">
