@@ -886,3 +886,94 @@ Browser smoke:
   local helper/process env behavior: `seize-local-dev start-frontend` exits on
   `PORT_SEARCH_LIMIT=0`; direct `seize run dev` starts on occupied port `3001`.
   No screenshot captured.
+## 2026-06-18 - Phase 5-8 QA Integration Lane
+
+### Current Objective
+
+Own the QA/integration lane for Phase 5 wallet gallery, Phase 6 art/NFT
+display, Phase 7 3D rooms, and Phase 8 AI-agent affordances while feature
+workers prepare their branches.
+
+### Output
+
+Added:
+
+- `ops/workstreams/profile-native-cms-roadmap/phase-5-8-qa-checklist.md`
+- `__tests__/components/profile-cms/CmsSiteRenderer.phase5-8.test.tsx`
+- `tests/profile-cms/phase5-8-smoke.spec.ts`
+
+Updated:
+
+- `ops/workstreams/profile-native-cms-roadmap/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+
+### Integration Notes
+
+- QA branch: `codex/cms-phase5-8-qa-integration`.
+- Base branch: `codex/profile-cms-builder-mvp`.
+- Builder MVP reference PR: #2726.
+- Expected worker branches
+  `codex/cms-gallery-builder-flow`, `codex/cms-art-display-excellence`,
+  `codex/cms-3d-rooms-mvp`, and
+  `codex/cms-ai-agent-affordances-ui` currently have no diff from the builder
+  base in this local worktree. An explicit fetch did not find a remote
+  `codex/cms-gallery-builder-flow` ref, so those branches are tracked as
+  expected/local-only until pushed.
+
+### Coverage Prepared
+
+- Fixture regression coverage now renders wallet gallery home, collection page,
+  NFT detail page, mixed media/object fallback, and 3D room fallback packages
+  through `CmsSiteRenderer`.
+- Optional Playwright smoke coverage is prepared for gallery builder flow,
+  generated gallery home, collection page, NFT detail page, social preview
+  metadata, 3D room canvas/mobile fallback, and agent patch review flow. The
+  smoke spec is disabled by default and requires
+  `RUN_PROFILE_CMS_PHASE5_8_E2E=true` plus per-route env vars so it can run
+  against whichever worker branch exposes each surface first.
+
+### Validation
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --testMatch "**/__tests__/components/profile-cms/CmsSiteRenderer.phase5-8.test.tsx" --runInBand`
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `seize exec playwright test tests/profile-cms/phase5-8-smoke.spec.ts --list`
+
+### Remaining Risks
+
+- Browser smoke is not yet evidence of worker functionality because the Phase
+  5-8 worker branches have not landed runnable diffs in this worktree.
+- The current app-level runtime fixture primary only covers the minimal
+  `punk6529` homepage. Full generated gallery/collection/NFT/room browser smoke
+  needs worker routes, a fixture route, or backend/profile data availability.
+- Existing Playwright specs in `tests/` import `../testHelpers`, but no tracked
+  `tests/testHelpers.ts` is present in this checkout. The new Phase 5-8 smoke
+  spec imports Playwright directly to avoid depending on that missing helper.
+
+## 2026-06-18 - Phase 5-8 QA Review Follow-Up
+
+### Feedback Addressed
+
+- 6529bot general review requested a stronger smoke harness after PR #2733 was
+  opened as a draft.
+- Updated the Playwright smoke helper to settle briefly and re-assert collected
+  page/console errors after navigation and after route-level assertions.
+- Replaced the implicit `/` route fallback with an explicit missing-env failure
+  when smoke is enabled.
+- Named the horizontal overflow tolerance and documented why it exists.
+- Added a WebGL `readPixels` caveat to blank-canvas failure messages so 3D
+  worker branches inspect the screenshot before treating the result as proof of
+  an empty render.
+- Added a checklist note to migrate English smoke selectors to stable
+  locale-independent contracts when localized worker branches land.
+
+### Validation
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --testMatch "**/__tests__/components/profile-cms/CmsSiteRenderer.phase5-8.test.tsx" --runInBand`
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `seize exec playwright test tests/profile-cms/phase5-8-smoke.spec.ts --list`
