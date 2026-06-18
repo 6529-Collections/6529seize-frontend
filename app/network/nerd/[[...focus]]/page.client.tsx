@@ -74,7 +74,7 @@ export default function CommunityNerdPageClient({
 
   const handleSetFocus = (newFocus: LeaderboardFocus) => {
     setFocus(newFocus);
-    window.history.replaceState(
+    globalThis.history.replaceState(
       null,
       "",
       getNextUrl(getFocusPath(newFocus), tdhView, searchParams)
