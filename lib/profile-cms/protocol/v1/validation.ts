@@ -640,7 +640,7 @@ function validateNftMediaProfiles(
     }
 
     profile.original_asset_ids?.forEach((assetId, assetIndex) => {
-      validateAssetReference(
+      validateOptionalAssetReference(
         assetId,
         assetMap,
         `${path}/original_asset_ids/${assetIndex}`,
@@ -658,7 +658,7 @@ function validateNftMediaProfiles(
     );
 
     profile.display_variants.forEach((variant, variantIndex) => {
-      validateAssetReference(
+      validateOptionalAssetReference(
         variant.asset_id,
         assetMap,
         `${path}/display_variants/${variantIndex}/asset_id`,
@@ -692,7 +692,7 @@ function validateDeepZoomManifests(
 ): void {
   manifests.forEach((manifest, index) => {
     const path = `/payload/deep_zoom_manifests/${index}`;
-    validateAssetReference(
+    validateOptionalAssetReference(
       manifest.source_asset_id,
       assetMap,
       `${path}/source_asset_id`,
@@ -740,7 +740,7 @@ function validateExhibitionRooms(
 
     room.placements.forEach((placement, placementIndex) => {
       const placementPath = `${path}/placements/${placementIndex}`;
-      validateAssetReference(
+      validateOptionalAssetReference(
         placement.asset_id,
         assetMap,
         `${placementPath}/asset_id`,
@@ -1006,7 +1006,7 @@ function validateInteractivePolicyReferences(
     return;
   }
 
-  validateAssetReference(
+  validateOptionalAssetReference(
     block.interactive_policy.fallback_asset_id,
     assetMap,
     `${blockPath}/interactive_policy/fallback_asset_id`,
@@ -1137,26 +1137,6 @@ function validateBlockReferenceArrayFields<T extends { id: string }>(
       );
     });
   });
-}
-
-function validateAssetReference(
-  assetId: string,
-  assetMap: IdMap<CmsAssetV1>,
-  path: string,
-  issues: CmsValidationIssueV1[],
-  code: string,
-  pageId?: string,
-  blockId?: string
-): void {
-  validateOptionalReference(
-    assetId,
-    assetMap,
-    path,
-    issues,
-    code,
-    pageId,
-    blockId
-  );
 }
 
 function validateOptionalAssetReference(
