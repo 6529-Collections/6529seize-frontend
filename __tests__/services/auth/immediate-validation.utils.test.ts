@@ -182,7 +182,7 @@ describe("validateAuthImmediate", () => {
       expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
     });
 
-    it("should reset disconnected users that need session-v2 upgrade", async () => {
+    it("should prompt disconnected auth-only users that need session-v2 upgrade", async () => {
       mockValidateJwt.mockResolvedValue({
         isValid: false,
         wasCancelled: false,
@@ -200,10 +200,13 @@ describe("validateAuthImmediate", () => {
       expect(result).toEqual({
         validationCompleted: true,
         wasCancelled: false,
-        shouldShowModal: false,
+        shouldShowModal: true,
       });
 
-      expect(mockCallbacks.onReset).toHaveBeenCalled();
+      expect(mockCallbacks.onReset).not.toHaveBeenCalled();
+      expect(mockCallbacks.onRemoveJwt).not.toHaveBeenCalled();
+      expect(mockCallbacks.onInvalidateCache).not.toHaveBeenCalled();
+      expect(mockCallbacks.onSessionUpgradeRequired).toHaveBeenCalled();
       expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
     });
 

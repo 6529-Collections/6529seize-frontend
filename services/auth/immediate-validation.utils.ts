@@ -110,12 +110,8 @@ const handleJwtValidationResult = async (
   }
 
   if (requiresSessionUpgrade) {
-    if (isConnected) {
-      callbacks.onSessionUpgradeRequired?.();
-    } else {
-      handleInvalidJwtWhenDisconnected(callbacks);
-    }
-    return createValidationResult(true, false, isConnected);
+    callbacks.onSessionUpgradeRequired?.();
+    return createValidationResult(true, false, true);
   }
 
   // Handle invalid JWT
