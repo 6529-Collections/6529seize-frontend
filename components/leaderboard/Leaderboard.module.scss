@@ -435,6 +435,13 @@
 }
 
 .leaderboardTable {
+  --bs-table-bg: transparent;
+  --bs-table-border-color: transparent;
+  --bs-table-color: #{variables.$font-color};
+  --bs-table-hover-bg: #{variables.$almost-very-dark-grey};
+  --bs-table-hover-color: #{variables.$font-color};
+
+  color: variables.$font-color;
   margin-bottom: 0 !important;
   width: 100%;
 
@@ -453,6 +460,8 @@
   }
 
   th {
+    color: variables.$font-color;
+    font-weight: 800;
     white-space: nowrap;
     line-height: 28px;
   }
@@ -462,6 +471,7 @@
   }
 
   td {
+    color: variables.$font-color;
     line-height: 40px;
   }
 
@@ -469,8 +479,22 @@
     background-color: transparent !important;
   }
 
+  thead > tr > *,
+  tbody > tr > * {
+    border-color: transparent !important;
+    color: variables.$font-color !important;
+  }
+
   tbody tr:nth-child(odd) {
     background-color: variables.$almost-very-dark-grey;
+  }
+
+  tbody tr:nth-child(odd) > * {
+    background-color: variables.$almost-very-dark-grey !important;
+  }
+
+  tbody tr:nth-child(even) > * {
+    background-color: transparent !important;
   }
 }
 
