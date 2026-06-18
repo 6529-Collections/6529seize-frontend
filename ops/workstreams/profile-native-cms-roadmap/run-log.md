@@ -1,5 +1,176 @@
 # Profile Native CMS Run Log
 
+## 2026-06-18 - Phase 7 FE 3D Rooms And Object Viewer Lane
+
+Started the bounded frontend 3D MVP on `codex/cms-3d-rooms-mvp`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before browser validation:
+
+- Added a deferred Three.js client island for CMS `object_viewer` and
+  `room_viewer` blocks.
+- Added GLB/glTF object-viewer activation when the CMS asset is a model or has
+  a GLB/glTF MIME/extension, with poster/source fallback, progress, error, and
+  performance-budget warning states.
+- Added simple deterministic exhibition room rendering with wall/floor shell,
+  room presets (`wall`, `salon`, `white_cube`, `dark_room`), framed artwork
+  placements, faithful unlit 2D art surfaces, DOM work links, and raycast click
+  navigation to the canonical detail page.
+- Added mobile fallback behavior: mobile users receive the poster/static view
+  and 2D links rather than loading the WebGL room.
+- Extended the builder MVP with a `3D room` primitive so authors can choose a
+  room style, provide artwork, preview the real renderer, and export/import a
+  package with a matching faithful 2D detail route.
+- Added focused tests for aspect fitting, room package generation, runtime
+  route rendering, deferred canvas/poster/link rendering, mobile fallback, and
+  builder preview.
+- Added a narrow local Three.js declaration file because `seize add -D
+  @types/three` was blocked by the secure install firewall bootstrap before
+  dependency resolution; the runtime dependency itself already exists.
+
+Validation completed so far:
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --testMatch "**/*.test.ts" "**/*.test.tsx"
+  --runTestsByPath __tests__/lib/profile-cms/runtime/threeD.test.ts
+  __tests__/lib/profile-cms/builder/package.test.ts
+  __tests__/components/profile-cms/CmsThreeDViewer.test.tsx
+  __tests__/components/profile-cms/CmsSiteRenderer.test.tsx
+  __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx
+  __tests__/app/profile-cms-route.test.tsx --runInBand` (6 suites, 28 tests)
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff` (99/100; non-blocking warnings for existing
+  builder state count and renderer `<img>` pattern)
+- Browser verification on `http://localhost:3142/punk6529/cms/builder` with
+  system Chrome through Playwright:
+  - Desktop poster screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-poster.png`
+  - Desktop ready screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-ready.png`
+  - Desktop canvas screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-canvas.png`
+  - Mobile fallback screenshot:
+    `.codex/artifacts/cms-3d-room-mobile-fallback.png`
+  - Canvas screenshot pixel check: 714x620, 442,680 nonblack pixels out of
+    442,680 (`1.0` ratio).
+  - Canvas center click navigated to
+    `http://localhost:3142/punk6529/rooms/work-4/index.html`.
+  - Mobile fallback had no `Enter room` button and displayed the static
+    fallback copy/2D links.
+  - No unfiltered browser console or page errors were reported during the final
+    3D smoke pass.
+
+PR status:
+
+- Opened draft PR #2736:
+  `https://github.com/6529-Collections/6529seize-frontend/pull/2736`
+- Base: `codex/profile-cms-builder-mvp`
+- Head: `codex/cms-3d-rooms-mvp`
+- Follow-up verification passed:
+  - `codex-diff-check`
+  - GitHub checks: CodeRabbit, DCO, and `security/snyk (6529)` all pass.
+  - No review threads or actionable bot comments were returned on the latest
+    head before handoff.
+
+Follow-up after initial PR publication:
+
+- SonarCloud reported four viewer-local issues on the first PR head:
+  `CmsThreeDViewer` cognitive complexity, two `void` operator usages, and one
+  negated JSX condition.
+- Refactored the viewer overlay and canvas hit-test paths into smaller helpers,
+  replaced fire-and-forget `void` calls with handled promise callbacks, and
+  switched the poster overlay to the repo's `next/image` + `unoptimized`
+  pattern for arbitrary CMS poster URLs.
+- Re-ran focused validation:
+  - `seize run format:changed`
+  - `seize run test:no-coverage -- --testMatch "**/*.test.ts"
+    "**/*.test.tsx" --runTestsByPath
+    __tests__/lib/profile-cms/runtime/threeD.test.ts
+    __tests__/lib/profile-cms/builder/package.test.ts
+    __tests__/components/profile-cms/CmsThreeDViewer.test.tsx
+    __tests__/components/profile-cms/CmsSiteRenderer.test.tsx
+    __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx
+    __tests__/app/profile-cms-route.test.tsx --runInBand` (6 suites,
+    28 tests)
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run react-doctor:diff` (100/100)
+  - `codex-diff-check`
+- Re-ran browser verification on
+  `http://localhost:3142/punk6529/cms/builder` with system Chrome through
+  Playwright:
+  - Desktop poster screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-poster.png`
+  - Desktop ready screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-ready.png`
+  - Desktop canvas screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-canvas.png`
+  - Mobile fallback screenshot:
+    `.codex/artifacts/cms-3d-room-mobile-sonar-fix-fallback.png`
+  - Canvas screenshot pixel check: 670x620, 381,900 nonblack pixels out of
+    415,400 nontransparent pixels (`0.919` ratio).
+  - Canvas center click navigated to
+    `http://localhost:3142/punk6529/rooms/work-4/index.html`.
+  - Mobile fallback stayed at `data-cms-3d-status="mobile-fallback"`, had no
+    `Enter room` button, showed fallback copy, and exposed two canonical
+    `/punk6529/rooms/work-4/index.html` links.
+  - No browser page errors were reported. The local dev page still logged
+    ambient app/provider resource errors for unavailable emoji/API resources in
+    this no-backend smoke setup; those did not affect the 3D assertions.
+
+Follow-up after 6529bot review feedback:
+
+- Addressed the two Important viewer findings:
+  - Added an explicit one-shot auto-start ref so non-activation viewers cannot
+    re-trigger automatic WebGL loads merely because `status` changed.
+  - Replaced failed room artwork texture loads with a dark fallback art plane
+    and simple red geometry cue instead of a blank white clickable plane.
+- Also tightened review nits by adding a legacy `matchMedia.addListener`
+  fallback, surfacing room placement budget warnings, and documenting that
+  builder-generated `/{handle}/rooms/work-{n}/index.html` pages are canonical
+  CMS detail routes for authored room works until NFT chain metadata exists.
+- The legacy media-query fallback uses a narrow structural type so the runtime
+  fallback remains available without calling deprecated DOM signatures directly.
+- Re-ran focused validation:
+  - `seize run format:changed`
+  - `seize run test:no-coverage -- --testMatch "**/*.test.ts"
+    "**/*.test.tsx" --runTestsByPath
+    __tests__/lib/profile-cms/runtime/threeD.test.ts
+    __tests__/lib/profile-cms/builder/package.test.ts
+    __tests__/components/profile-cms/CmsThreeDViewer.test.tsx
+    __tests__/components/profile-cms/CmsSiteRenderer.test.tsx
+    __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx
+    __tests__/app/profile-cms-route.test.tsx --runInBand` (6 suites,
+    29 tests)
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run react-doctor:diff` (100/100)
+  - `codex-diff-check`
+- Re-ran browser verification on
+  `http://localhost:3142/punk6529/cms/builder` with system Chrome through
+  Playwright:
+  - Desktop poster screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-poster.png`
+  - Desktop ready screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-ready.png`
+  - Desktop canvas screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-canvas.png`
+  - Mobile fallback screenshot:
+    `.codex/artifacts/cms-3d-room-mobile-placeholder-geom-fallback.png`
+  - Canvas screenshot pixel check: 670x620, 415,400 nonblack pixels out of
+    415,400 nontransparent pixels (`1.0` ratio).
+  - Ready-state DOM link tray passed a Playwright trial click, confirming it
+    remains visible and hit-testable above the canvas.
+  - Canvas center click navigated to
+    `http://localhost:3142/punk6529/rooms/work-4/index.html`.
+  - Mobile fallback stayed at `data-cms-3d-status="mobile-fallback"`, had no
+    `Enter room` button, showed fallback copy, and exposed two canonical
+    `/punk6529/rooms/work-4/index.html` links.
+  - No browser page errors were reported. Ambient provider/API console resource
+    errors remained in this no-backend local smoke setup and did not affect the
+    3D assertions.
+
 ## 2026-06-17
 
 ### Current Objective
@@ -290,6 +461,7 @@ Added tests:
 Updated docs:
 
 - `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+
 - `ops/workstreams/profile-native-cms-roadmap/phase-1/README.md`
 - `ops/workstreams/profile-native-cms-roadmap/phase-1/schema-index.md`
 - `ops/workstreams/profile-native-cms-roadmap/phase-1/hash-test-vectors.md`
@@ -517,3 +689,161 @@ gallery, art display, 3D, AI-agent affordances, and migration lanes.
   dependency junction points outside the project root. This is a local
   dependency-shape caveat from avoiding another broad install, not a CMS
   runtime error.
+
+## 2026-06-17 - Builder MVP Stacked Lane
+
+Started FE CMS Builder + Publish UI MVP on
+`codex/profile-cms-builder-mvp`, stacked on PR #2720 head
+`d50547de0ad62e36da881659a80173d6cf619059`.
+
+Scope guardrails:
+
+- FE builder/publish UX only.
+- No V1 protocol, hash, or canonicalization changes.
+- No wallet gallery generator, NFT indexer, storage upload, 3D rooms, or
+  AI-agent MCP work.
+- Existing runtime bridge branch remains untouched except as the stacked base.
+
+Implemented locally before validation:
+
+- Hidden feature-flagged `/{handle}/cms/builder` route.
+- Builder package helper that emits a one-page V1 package candidate, computes
+  existing V1 hashes, and validates via the merged V1 validator.
+- Builder UI with template picker, homepage metadata, navigation label, block
+  editor, real `CmsSiteRenderer` preview, validation checklist, JSON
+  import/export, and honest save/validate/publish adapter states.
+- Narrow write adapter boundary and assumptions doc for backend save,
+  server-validate, and publish endpoints.
+
+Focused validation passed:
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- __tests__/lib/profile-cms/builder/package.test.ts __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx __tests__/app/profile-cms-builder-route.test.tsx --runInBand`
+  (3 suites, 9 tests)
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+- Local browser smoke was timeboxed. The assigned dev server reached Ready on
+  the builder worktree port, then exited because the local helper/process
+  environment surfaced `PORT_SEARCH_LIMIT=0`, even though tracked config only
+  declares `PORT_SEARCH_LIMIT` as an optional positive number and the worktree
+  `.env` does not set it. This is being treated as a local helper/process-env
+  caveat, not a tracked CMS builder code defect.
+
+PR status:
+
+- Opened stacked FE PR #2726:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2726
+- Base: `codex/profile-cms-runtime-bridge`
+- Head: `codex/profile-cms-builder-mvp`
+- Initial CodeRabbit status was success, but the explicit review request hit
+  the organization review rate limit. No actionable review findings were
+  returned before handoff.
+- 6529bot review on the first head returned actionable findings. Follow-up
+  hardening gated draft saves to the connected non-proxy owner profile,
+  converted failed profile lookups to `notFound()`, ignored stale async action
+  results after editor changes, localized builder block/severity/error chrome,
+  split template status text, documented builder locale fallback debt, and
+  switched unresolved publish endpoint display to `:id`.
+- 6529bot follow-up asked whether server-validate should share the owner gate
+  and whether profile lookup must return an id. Follow-up tightened both: save
+  and server-validate now require the connected non-proxy owner profile before
+  any backend request, and the builder route returns `notFound()` unless profile
+  lookup returns an id.
+
+## 2026-06-18 - FE Wallet Gallery Builder Flow
+
+Started the Phase 5 frontend wallet gallery builder lane on
+`codex/cms-gallery-builder-flow`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before final validation:
+
+- Enabled the wallet gallery template inside the existing profile CMS builder
+  surface.
+- Added wallet/ENS input, parser validation, snapshot request/review state, and
+  a narrow `profile-cms/gallery/snapshots` adapter.
+- Added a fixture-backed snapshot fallback for local preview while the backend
+  deterministic wallet-snapshot -> CMS V1 generator lands.
+- Added reviewed asset controls for hide/unhide, feature/unfeature, and simple
+  priority ordering.
+- Rendered generated gallery candidates through the existing `CmsSiteRenderer`.
+- Kept save draft, server validate, and publish paths behind the existing
+  connected non-proxy profile-owner gate.
+
+Backend contract notes:
+
+- The backend generator remains the durable source of truth for generated
+  wallet gallery CMS packages.
+- The frontend `buildWalletGalleryCmsPackage(...)` helper is temporary preview
+  fallback only and uses existing `CmsPackageV1` fields.
+- The documented replacement path is to keep snapshot review controls, send
+  reviewed choices to the backend generator once merged, and use the returned
+  `CmsPackageV1` for preview/save/publish.
+
+Focused validation passed:
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --runTestsByPath __tests__/lib/profile-cms/builder/gallery.test.ts __tests__/lib/profile-cms/builder/api.test.ts __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx --testMatch **/*.test.ts --testMatch **/*.test.tsx --testPathIgnorePatterns=node_modules --testPathIgnorePatterns=.next --testPathIgnorePatterns=/tests/ --testPathIgnorePatterns=/e2e/`
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+
+Local browser smoke passed on `http://localhost:3138/punk6529/cms/builder`
+with viewport screenshots for desktop snapshot review, desktop preview, and
+mobile snapshot review under `.codex/artifacts/`.
+
+## 2026-06-18 - Phase 6 FE Art/NFT Display Excellence
+
+Started worker branch `codex/cms-art-display-excellence`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before validation:
+
+- Narrow `use client` art inspection island with keyboard close/next/previous,
+  zoom controls, fullscreen action, metadata toggle, and mobile-friendly fixed
+  overlay.
+- Art-first gallery rendering for `gallery`, `lightbox_gallery`, and generated
+  wallet gallery blocks, with editorial, dense, contact-sheet, and clean modes
+  driven by existing free-form block fields.
+- NFT/card detail composition with large 2D media, original-vs-derivative
+  badges, traits, collection context, source snapshot facts, package/storage
+  provenance, and related works.
+- Mixed media fallback improvements for audio posters while keeping HTML/model
+  execution behind the existing sandbox/static fallback policies.
+- Fixture expansions for contact-sheet galleries, NFT traits/source packets,
+  multi-work generated galleries, and audio poster fallback.
+
+Contract notes:
+
+- No V1 schema drift. New fixture hints use block/source packet extension
+  fields that are already accepted by the V1 contract.
+- 3D/model blocks remain static fallback in this lane; primary inspection is
+  2D and accessible.
+
+Focused validation completed:
+
+- `seize run format:changed`
+- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx __tests__/lib/profile-cms/protocol/v1/fixtures.test.ts`
+  passed after the temporary config worked around the Windows worktree path
+  regex issue; the temporary config was removed.
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+
+Browser smoke:
+
+- `seize-local-dev start-frontend` reached the assigned port, then the local
+  helper/process environment surfaced `PORT_SEARCH_LIMIT=0`, which the Next
+  env schema rejects.
+- `seize run dev` with a positive `PORT_SEARCH_LIMIT` reached Ready, then
+  Turbopack rejected the temporary `node_modules` junction because it points
+  outside the project root.
+- `seize run dev:webpack` reached Ready on port `3141`, but Playwright
+  screenshots against a temporary local fixture-preview route timed out after
+  webpack chunk loading errors from the same cross-worktree dependency shape.
+- No browser screenshots were produced. Focused renderer tests remain the
+  visual/interaction validation evidence for this local pass.

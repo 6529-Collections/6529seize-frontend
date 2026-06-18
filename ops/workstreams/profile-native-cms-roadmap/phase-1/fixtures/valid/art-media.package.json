@@ -54,6 +54,12 @@
             "poster_asset_id": "asset-poster"
           },
           {
+            "id": "block-audio",
+            "block_type": "audio",
+            "asset_id": "asset-audio",
+            "poster_asset_id": "asset-poster"
+          },
+          {
             "id": "block-html",
             "block_type": "html_embed",
             "asset_id": "asset-html",
@@ -122,7 +128,8 @@
         "mime_type": "audio/mpeg",
         "duration_seconds": 33,
         "file_size_bytes": 1200000,
-        "roles": ["original"]
+        "roles": ["original"],
+        "alt_text": "Audio artwork transcript placeholder for mixed media fixture"
       },
       {
         "id": "asset-html",
