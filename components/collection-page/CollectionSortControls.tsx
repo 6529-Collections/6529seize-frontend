@@ -13,11 +13,13 @@ function CollectionSortButton<TSort extends string>({
   currentSort,
   sort,
   select,
+  ariaLabel,
   children,
 }: Readonly<{
   currentSort: TSort;
   sort: TSort;
   select: () => void;
+  ariaLabel?: string | undefined;
   children?: ReactNode;
 }>) {
   const isActive = currentSort === sort;
@@ -27,6 +29,7 @@ function CollectionSortButton<TSort extends string>({
       type="button"
       onClick={select}
       aria-pressed={isActive}
+      aria-label={ariaLabel}
       className={`tw-relative tw-m-0 tw-shrink-0 tw-cursor-pointer tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-sm tw-font-medium tw-leading-5 tw-no-underline tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-shrink ${
         isActive
           ? "tw-text-white after:tw-scale-x-100 after:tw-bg-primary-400"
@@ -46,6 +49,11 @@ export default function CollectionSortControls<TSort extends string>({
   sortOptions,
   setSort,
   getSortLabel,
+  sortByLabel = "Sort by",
+  directionLegend = "Sort direction",
+  ascendingLabel = "Sort ascending",
+  descendingLabel = "Sort descending",
+  getSortButtonAriaLabel,
   children,
 }: Readonly<{
   ariaLabel: string;
@@ -55,6 +63,11 @@ export default function CollectionSortControls<TSort extends string>({
   sortOptions: readonly TSort[];
   setSort: (sort: TSort) => void;
   getSortLabel?: (sort: TSort) => ReactNode;
+  sortByLabel?: string | undefined;
+  directionLegend?: string | undefined;
+  ascendingLabel?: string | undefined;
+  descendingLabel?: string | undefined;
+  getSortButtonAriaLabel?: (sort: TSort) => string;
   children?: ReactNode;
 }>) {
   function printSortDirectionButton(
@@ -89,19 +102,19 @@ export default function CollectionSortControls<TSort extends string>({
       <div className="tw-flex tw-flex-col tw-gap-x-6 tw-gap-y-2 md:tw-flex-row md:tw-items-start">
         <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-1">
           <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
-            Sort by
+            {sortByLabel}
           </span>
           <fieldset className="tw-m-0 tw-flex tw-shrink-0 tw-items-center tw-border-0 tw-p-0">
-            <legend className="tw-sr-only">Sort direction</legend>
+            <legend className="tw-sr-only">{directionLegend}</legend>
             {printSortDirectionButton(
               SortDirection.ASC,
               faChevronCircleUp,
-              "Sort ascending"
+              ascendingLabel
             )}
             {printSortDirectionButton(
               SortDirection.DESC,
               faChevronCircleDown,
-              "Sort descending"
+              descendingLabel
             )}
           </fieldset>
         </div>
@@ -112,6 +125,7 @@ export default function CollectionSortControls<TSort extends string>({
               currentSort={currentSort}
               sort={sortOption}
               select={() => setSort(sortOption)}
+              ariaLabel={getSortButtonAriaLabel?.(sortOption)}
             >
               {getSortLabel?.(sortOption) ?? sortOption}
             </CollectionSortButton>

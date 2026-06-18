@@ -1,10 +1,10 @@
 "use client";
 
-import type { TypeOptions } from "react-toastify";
-import { Slide, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { createContext, useState } from "react";
 
+import type { AppToastInput } from "@/components/utils/toast/AppToast";
+import { showAppToast, showAppToasts } from "@/components/utils/toast/AppToast";
+import type { TypeOptions } from "react-toastify";
 import type {
   AllowlistCustomTokenPool,
   AllowlistDescription,
@@ -14,7 +14,6 @@ import type {
   AllowlistTransferPool,
 } from "../allowlist-tool/allowlist-tool.types";
 import RunOperations from "./run-operations/RunOperations";
-import { getToastAutoClose } from "@/helpers/toast.helpers";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
@@ -54,28 +53,12 @@ type DistributionPlanToolContextType = {
     messages: string[];
     type: TypeOptions;
   }) => void;
+  setToast: (toast: AppToastInput) => void;
   confirmedTokenId: string | null;
   setConfirmedTokenId: (tokenId: string | null) => void;
 };
 
-const setToast = ({
-  message,
-  type,
-}: {
-  message: string;
-  type: TypeOptions;
-}) => {
-  toast(message, {
-    position: "top-right",
-    autoClose: getToastAutoClose(type),
-    hideProgressBar: false,
-    draggable: false,
-    closeOnClick: true,
-    transition: Slide,
-    theme: "dark",
-    type,
-  });
-};
+const setToast = (toast: AppToastInput) => showAppToast(toast);
 
 const setToasts = ({
   messages,
@@ -84,7 +67,7 @@ const setToasts = ({
   messages: string[];
   type: TypeOptions;
 }) => {
-  messages.forEach((message) => setToast({ message, type }));
+  showAppToasts({ messages, type });
 };
 
 export const DistributionPlanToolContext =
@@ -106,6 +89,7 @@ export const DistributionPlanToolContext =
     phases: [],
     setPhases: () => {},
     setToasts: () => {},
+    setToast: () => {},
     confirmedTokenId: null,
     setConfirmedTokenId: () => {},
   });
@@ -247,6 +231,7 @@ export default function DistributionPlanToolContextWrapper({
           phases,
           setPhases,
           setToasts,
+          setToast,
           confirmedTokenId,
           setConfirmedTokenId,
         }}

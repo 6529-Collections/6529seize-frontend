@@ -13,6 +13,20 @@ import type React from "react";
 const BASE_BUTTON_CLASS =
   "tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-100 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700 disabled:tw-cursor-default disabled:tw-opacity-60";
 
+export type MediaActionLabels = {
+  readonly close?: string | undefined;
+  readonly download?: string | undefined;
+  readonly downloading?: string | undefined;
+  readonly fullscreen?: string | undefined;
+};
+
+const DEFAULT_MEDIA_ACTION_LABELS = {
+  close: "Close media",
+  download: "Download media",
+  downloading: "Downloading media",
+  fullscreen: "Full screen",
+} satisfies Required<MediaActionLabels>;
+
 function ToolbarButton({
   label,
   onClick,
@@ -40,6 +54,15 @@ function ToolbarButton({
   );
 }
 
+function getMediaActionLabels(labels?: MediaActionLabels | undefined) {
+  return {
+    close: labels?.close ?? DEFAULT_MEDIA_ACTION_LABELS.close,
+    download: labels?.download ?? DEFAULT_MEDIA_ACTION_LABELS.download,
+    downloading: labels?.downloading ?? DEFAULT_MEDIA_ACTION_LABELS.downloading,
+    fullscreen: labels?.fullscreen ?? DEFAULT_MEDIA_ACTION_LABELS.fullscreen,
+  };
+}
+
 const stopAndRun =
   (handler: () => void) => (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -55,6 +78,7 @@ export function InlineMediaActions({
   fullscreenTargetAvailable,
   variant,
   position = "top-right",
+  labels,
 }: {
   readonly onDownload?: (() => void) | undefined;
   readonly onOpen?: (() => void) | undefined;
@@ -64,7 +88,9 @@ export function InlineMediaActions({
   readonly fullscreenTargetAvailable?: boolean | undefined;
   readonly variant: "image" | "video" | "html";
   readonly position?: "top-right" | "bottom-right" | undefined;
+  readonly labels?: MediaActionLabels | undefined;
 }) {
+  const actionLabels = getMediaActionLabels(labels);
   const canFullscreen =
     (variant === "image" || variant === "html") &&
     Boolean(onFullscreen) &&
@@ -83,7 +109,10 @@ export function InlineMediaActions({
       )}
     >
       {canFullscreen && (
-        <ToolbarButton label="Full screen" onClick={stopAndRun(onFullscreen!)}>
+        <ToolbarButton
+          label={actionLabels.fullscreen}
+          onClick={stopAndRun(onFullscreen!)}
+        >
           <ArrowsPointingOutIcon className="tw-size-4" aria-hidden="true" />
         </ToolbarButton>
       )}
@@ -94,7 +123,9 @@ export function InlineMediaActions({
       )}
       {onDownload && (
         <ToolbarButton
-          label={isDownloading ? "Downloading media" : "Download media"}
+          label={
+            isDownloading ? actionLabels.downloading : actionLabels.download
+          }
           onClick={stopAndRun(onDownload)}
           disabled={isDownloading}
         >
@@ -113,6 +144,7 @@ export function ExpandedMediaToolbar({
   openLabel,
   isDownloading,
   fullscreenTargetAvailable,
+  labels,
 }: {
   readonly onOpen?: (() => void) | undefined;
   readonly onDownload: () => void;
@@ -121,7 +153,9 @@ export function ExpandedMediaToolbar({
   readonly openLabel?: string | undefined;
   readonly isDownloading: boolean;
   readonly fullscreenTargetAvailable?: boolean | undefined;
+  readonly labels?: MediaActionLabels | undefined;
 }) {
+  const actionLabels = getMediaActionLabels(labels);
   const canFullscreen =
     Boolean(onFullscreen) &&
     Boolean(fullscreenTargetAvailable) &&
@@ -132,7 +166,7 @@ export function ExpandedMediaToolbar({
       <div className="tw-flex tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/95 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur">
         {canFullscreen && (
           <ToolbarButton
-            label="Full screen"
+            label={actionLabels.fullscreen}
             onClick={stopAndRun(onFullscreen!)}
           >
             <ArrowsPointingOutIcon className="tw-size-5" aria-hidden="true" />
@@ -147,7 +181,9 @@ export function ExpandedMediaToolbar({
           </ToolbarButton>
         )}
         <ToolbarButton
-          label={isDownloading ? "Downloading media" : "Download media"}
+          label={
+            isDownloading ? actionLabels.downloading : actionLabels.download
+          }
           onClick={stopAndRun(onDownload)}
           disabled={isDownloading}
         >
@@ -156,8 +192,8 @@ export function ExpandedMediaToolbar({
       </div>
       <button
         type="button"
-        aria-label="Close media"
-        title="Close media"
+        aria-label={actionLabels.close}
+        title={actionLabels.close}
         onClick={stopAndRun(onClose)}
         className="tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700"
       >

@@ -4,11 +4,22 @@ import {
   getLargeSocialCardMetadata,
   getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
-import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants/constants";
-import { fetchUrl } from "@/services/6529api";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import {
+  buildNftPageJsonLd,
+  fetchNftForStructuredData,
+} from "@/lib/structured-data/nft";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
+import { cache } from "react";
+
+const loadGradientNft = cache((id: string) =>
+  fetchNftForStructuredData({
+    contract: GRADIENT_CONTRACT,
+    id,
+  })
+);
 
 export default async function GradientPage({
   params,
@@ -16,8 +27,20 @@ export default async function GradientPage({
   readonly params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const nft = await loadGradientNft(id);
+
   return (
     <main className={styles["main"]}>
+      <JsonLdScript
+        data={buildNftPageJsonLd({
+          nft,
+          path: `/6529-gradient/${id}`,
+          fallbackName: `6529 Gradient #${id}`,
+          collectionName: "6529 Gradient",
+          collectionPath: "/6529-gradient",
+          license: null,
+        })}
+      />
       <GradientPageComponent id={id} />
     </main>
   );
@@ -30,23 +53,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
 
-  let title = `6529 Gradient #${id}`;
-  let image: string | null = null;
-  try {
-    const response = await fetchUrl(
-      `${publicEnv.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
-    );
-    if (response?.data?.length > 0) {
-      const nft = response.data[0];
-      if (nft.thumbnail) {
-        image = nft.thumbnail;
-      } else if (nft.image) {
-        image = nft.image;
-      }
-    }
-  } catch (error) {
-    console.error(`Failed to load gradient metadata for id ${id}`, error);
-  }
+  const title = `6529 Gradient #${id}`;
+  const nft = await loadGradientNft(id);
+  const image = nft?.thumbnail ?? nft?.image ?? null;
+
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title,

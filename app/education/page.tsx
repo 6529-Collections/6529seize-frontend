@@ -1,10 +1,24 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import Link from "next/link";
 import type { Metadata } from "next";
 
 export default function EducationPage() {
   return (
     <div>
+      <JsonLdScript
+        data={buildArticlePageJsonLd({
+          path: "/education",
+          headline: "Education",
+          description:
+            "Education is a core 6529 initiative about decentralization, NFTs, and the open metaverse.",
+          image:
+            "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-header-logo.png",
+          dateModified: "2022-04-12T16:21:06+00:00",
+          section: "Education",
+        })}
+      />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta
@@ -271,10 +285,12 @@ Societies are made up of people – citizens, business leaders, public servants.
           <div id="home" style={{ position: "relative", top: "-1px" }} />
           <div
             id="sliders-container"
-            className="fusion-slider-visibility"></div>
+            className="fusion-slider-visibility"
+          ></div>
           <section
             className="avada-page-titlebar-wrapper"
-            aria-label="Page Title Bar">
+            aria-label="Page Title Bar"
+          >
             <div className="fusion-page-title-bar fusion-page-title-bar-none fusion-page-title-bar-center">
               <div className="fusion-page-title-row">
                 <div className="fusion-page-title-wrapper">
@@ -288,13 +304,15 @@ Societies are made up of people – citizens, business leaders, public servants.
           </section>
           <main
             id="main"
-            className="clearfix "
-            style={{ minHeight: "100vh", padding: 30 }}>
+            className="clearfix"
+            style={{ minHeight: "100vh", padding: 30 }}
+          >
             <div className="fusion-row">
               <section id="content" style={{ width: "100%" }}>
                 <div
                   id="post-33"
-                  className="post-33 page type-page status-publish hentry">
+                  className="post-33 page type-page status-publish hentry"
+                >
                   <span className="entry-title rich-snippet-hidden">
                     EDUCATION
                   </span>
@@ -303,7 +321,8 @@ Societies are made up of people – citizens, business leaders, public servants.
                       <Link
                         href="/author/6529er6529-io/"
                         title="Posts by 6529er"
-                        rel="author">
+                        rel="author"
+                      >
                         6529er
                       </Link>
                     </span>
@@ -320,14 +339,16 @@ Societies are made up of people – citizens, business leaders, public servants.
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column"
                           style={{
@@ -337,12 +358,14 @@ Societies are made up of people – citizens, business leaders, public servants.
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
                               <h1
                                 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
-                                style={{ margin: 0, lineHeight: "0.8" }}>
+                                style={{ margin: 0, lineHeight: "0.8" }}
+                              >
                                 EDUCATION IS THE MOST IMPORTANT INITIATIVE AT
                                 6529 AND THE ONE THAT HAS TAKEN MOST OF MY TIME
                               </h1>
@@ -439,20 +462,23 @@ Societies are made up of people – citizens, business leaders, public servants.
         className="fusion-one-page-text-link fusion-page-load-link"
         tabIndex={-1}
         href="#"
-        aria-hidden="true">
+        aria-hidden="true"
+      >
         Page load link
       </a>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
-          className="design-sharp alignment-right with-animation">
+          className="design-sharp alignment-right with-animation"
+        >
           <ul>
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fab-fa-twitter">
+                className="fab-fa-twitter"
+              >
                 <i className="fab fa-twitter" />
               </a>
             </li>{" "}
@@ -461,7 +487,8 @@ Societies are made up of people – citizens, business leaders, public servants.
       </div>
       <section
         className="to-top-container to-top-right"
-        aria-labelledby="awb-to-top-label">
+        aria-labelledby="awb-to-top-label"
+      >
         <a href="#" id="toTop" className="fusion-top-top-link">
           <span id="awb-to-top-label" className="screen-reader-text">
             Go to Top

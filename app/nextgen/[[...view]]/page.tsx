@@ -5,6 +5,8 @@ import {
 } from "@/components/providers/metadata";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildNextgenLandingPageJsonLd } from "@/lib/structured-data/nextgen";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { Metadata } from "next";
 import NextGenPageClient from "./NextGenPageClient";
@@ -53,9 +55,14 @@ export default async function NextGenPage({
   const nextgenView = getNextGenView(view?.[0] ?? "");
 
   return (
-    <NextGenPageClient
-      featuredCollection={featuredCollection}
-      initialView={nextgenView}
-    />
+    <>
+      <JsonLdScript
+        data={buildNextgenLandingPageJsonLd({ featuredCollection })}
+      />
+      <NextGenPageClient
+        featuredCollection={featuredCollection}
+        initialView={nextgenView}
+      />
+    </>
   );
 }

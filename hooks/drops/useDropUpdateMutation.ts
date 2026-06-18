@@ -30,7 +30,7 @@ export const useDropUpdateMutation = () => {
     },
     onSuccess: (updatedDrop) => {
       setToast({
-        message: "Drop updated successfully",
+        message: "Drop updated.",
         type: "success",
       });
 
@@ -59,7 +59,7 @@ export const useDropUpdateMutation = () => {
         });
       } else {
         setToast({
-          message: "Failed to update drop. Please try again.",
+          message: "Couldn't update this drop. Please try again.",
           type: "error",
         });
       }

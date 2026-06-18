@@ -1,8 +1,24 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import type { Metadata } from "next";
 export default function BlogATaleOfTwoArtistsPage() {
   return (
     <div>
+      <JsonLdScript
+        data={buildArticlePageJsonLd({
+          path: "/blog/a-tale-of-two-artists",
+          headline: "A Tale of Two Artists - Van Gogh and XCOPY",
+          description:
+            "A story of persistence, perseverance and belief. Two artists who painted for a decade each before fame found them.",
+          image:
+            "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg",
+          author: "Sabrina Khan",
+          datePublished: "2022-10-12T06:38:11+00:00",
+          dateModified: "2022-11-03T17:07:34+00:00",
+          section: "Blog",
+        })}
+      />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta
@@ -314,16 +330,19 @@ So, it is startling to imagine that"
           <div id="home" style={{ position: "relative", top: "-1px" }} />
           <div
             id="sliders-container"
-            className="fusion-slider-visibility"></div>
+            className="fusion-slider-visibility"
+          ></div>
           <main
             id="main"
-            className="clearfix "
-            style={{ minHeight: "100vh", padding: 30 }}>
+            className="clearfix"
+            style={{ minHeight: "100vh", padding: 30 }}
+          >
             <div className="fusion-row">
               <section id="content" style={{ width: "100%" }}>
                 <article
                   id="post-1825"
-                  className="post post-1825 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                  className="post post-1825 type-post status-publish format-standard has-post-thumbnail hentry category-blog"
+                >
                   <span className="entry-title" style={{ display: "none" }}>
                     A Tale of Two Artists – Van Gogh and XCOPY
                   </span>
@@ -336,14 +355,16 @@ So, it is startling to imagine that"
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column"
                           style={{
@@ -355,18 +376,21 @@ So, it is startling to imagine that"
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-1 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-1 hover-type-none">
                                 <a
                                   className="fusion-no-lightbox"
                                   href="/"
                                   target="_blank"
                                   aria-label="6529-header-logo-beta"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -391,14 +415,16 @@ So, it is startling to imagine that"
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column"
                           style={{
@@ -408,25 +434,29 @@ So, it is startling to imagine that"
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
                               className="fusion-text fusion-text-1"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>A Tale of Two Artists: Van Gogh and XCOPY</b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-2"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   by{" "}
                                   <a
                                     href="https://twitter.com/sabrinaxdoll"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Sabrina Khan
                                   </a>
                                 </b>
@@ -434,7 +464,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-3"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   It is rare to meet someone who does not know
@@ -467,7 +498,8 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/XCOPYART"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     XCOPY
                                   </a>
                                   , who, like Van Gogh, is highly prolific,
@@ -485,14 +517,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-image-element awb-imageframe-style awb-imageframe-style-below awb-imageframe-style-2"
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-2 hover-type-none">
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-2 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/Vincent-Van-Gogh-Self-Portrait-1889-600x730.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[557c1e9fab4a91df2e2]"
                                   data-title="Vincent Van Gogh Self-Portrait (1889)"
-                                  title="Vincent Van Gogh Self-Portrait (1889)">
+                                  title="Vincent Van Gogh Self-Portrait (1889)"
+                                >
                                   <img
                                     loading="lazy"
                                     fetchPriority="high"
@@ -520,7 +554,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-4"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   Van Gogh's Artistic Voice is as Severed from
@@ -530,7 +565,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-5"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Vincent Van Gogh became an artist proper at
@@ -568,15 +604,17 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-image-element awb-imageframe-style awb-imageframe-style-below awb-imageframe-style-3"
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-3 hover-type-none">
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-3 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/Vincent-Van-Gogh-The-Potato-Eaters-600x426.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[6791357a364bfa4fa07]"
                                   data-caption="The Potato Eaters"
                                   data-title="The Potato Eaters (1885)"
-                                  title="The Potato Eaters (1885)">
+                                  title="The Potato Eaters (1885)"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -603,14 +641,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-6"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>Escape to Arles</b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-7"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Frustrated by the bustle of city life, Van
@@ -633,7 +673,8 @@ So, it is startling to imagine that"
                                 <a
                                   href="https://vangoghletters.org/vg/letters/let712/letter.html"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   letter to his brother
                                 </a>{" "}
                                 Van Gogh wrote almost prophetically:
@@ -675,7 +716,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-8"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   The “Red-Headed Madman” Loses His Mind Only to
@@ -685,7 +727,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-9"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Unsurprisingly, after his ear severing
@@ -715,14 +758,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-image-element awb-imageframe-style awb-imageframe-style-below awb-imageframe-style-4"
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-4 hover-type-none">
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-4 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/The-Starry-Night-600x475.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[0b8a7db92c8d7d1ed32]"
                                   data-title="The Starry Night (1889)"
-                                  title="The Starry Night (1889)">
+                                  title="The Starry Night (1889)"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -749,7 +794,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-10"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Upon his release from the asylum, his final
@@ -775,14 +821,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-image-element awb-imageframe-style awb-imageframe-style-below awb-imageframe-style-5"
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-5 hover-type-none">
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-5 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/The-Red-Vineyard-600x468.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[42885dc7309149e6330]"
                                   data-title="The Red Vineyard (1888)"
-                                  title="The Red Vineyard (1888)">
+                                  title="The Red Vineyard (1888)"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -809,7 +857,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-11"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   “The Sadness Will Last Forever”– Van Gogh's
@@ -819,7 +868,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-12"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   A somber one, indeed, as all was cut short,
@@ -854,7 +904,8 @@ So, it is startling to imagine that"
                                   Amsterdam. Today, Van Gogh's paintings are
                                   amongst some of the highest selling paintings
                                   in history: In 1990, his “Portrait of Dr.
-                                  Gachet” sold for $82.5 million at Christie's.{" "}
+                                  Gachet” sold for $82.5 million at
+                                  Christie's.{" "}
                                 </span>
                               </p>
                               <p>
@@ -869,14 +920,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-image-element awb-imageframe-style awb-imageframe-style-below awb-imageframe-style-6"
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-6 hover-type-none">
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-6 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/Portrait-of-Dr.-Gachet-600x738.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[e32e4255bad4bf3f6e6]"
                                   data-title="Portrait of Dr. Gachet (1890)"
-                                  title="Portrait of Dr. Gachet (1890)">
+                                  title="Portrait of Dr. Gachet (1890)"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -903,14 +956,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-13"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>The Van Goghs Of Our Modern World </b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-14"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   That brings us to today: we have artists who
@@ -932,7 +987,8 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://xcopy.tumblr.com/post/172139699716/today-i-sold-my-first-gif-for-1-nothing-can-stop"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     “Today I sold my first gif for £1. Nothing
                                     can stop us tumblr.”
                                   </a>
@@ -953,15 +1009,17 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-image-element awb-imageframe-style awb-imageframe-style-below awb-imageframe-style-7"
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-7 hover-type-none">
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-7 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/Descent.gif"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[a17f6286ac5c4f68d2b]"
                                   data-caption="DE$CENT (1/25) by XCOPY, originally sold for £1"
                                   data-title="DE$CENT (1/25) by XCOPY, originally sold for £1"
-                                  title="DE$CENT (1/25) by XCOPY, originally sold for £1">
+                                  title="DE$CENT (1/25) by XCOPY, originally sold for £1"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -988,14 +1046,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-15"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   On his Tumblr, February 2019, XCOPY wrote:{" "}
                                   <a
                                     href="https://xcopy.tumblr.com/post/182777190451/day-3-trying-to-give-away-crypto-art-on-tumblr"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     “Day 3 trying to give away crypto art on
                                     tumblr.”&nbsp;
                                   </a>
@@ -1012,7 +1072,8 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://www.reddit.com/r/OpenBazaar/comments/86nudn/shameless_self_promotion_thread_friday_323/dw7ry0u/"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     30% off coupon codes
                                   </a>{" "}
                                   to try to sell his pieces and gather as many
@@ -1040,7 +1101,8 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://xcopy.tumblr.com/post/182764132406/2019-mission-convert-some-tumblr-followers-to"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     gave away
                                   </a>{" "}
                                   so many of his pieces that may have been
@@ -1054,14 +1116,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-16"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>A World That Champions the Artist </b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-17"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   But here is where the differences in their
@@ -1084,7 +1148,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-18"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   January 2021: “Is tumblr ready for crypto art
@@ -1094,7 +1159,8 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-19"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Once the world was hungry for this type of
@@ -1135,17 +1201,20 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-image-element awb-imageframe-style awb-imageframe-style-below awb-imageframe-style-8"
-                              style={{ textAlign: "center" }}>
+                              style={{ textAlign: "center" }}
+                            >
                               <div
-                                style={{ display: "inline-block", width: 600 }}>
-                                <span className=" fusion-imageframe imageframe-none imageframe-8 hover-type-none has-aspect-ratio">
+                                style={{ display: "inline-block", width: 600 }}
+                              >
+                                <span className="fusion-imageframe imageframe-none imageframe-8 hover-type-none has-aspect-ratio">
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/RCSA.gif"
                                     className="fusion-lightbox"
                                     data-rel="iLightbox[efcec353f263cab8bcf]"
                                     data-caption="Right-click and Save As guy"
                                     data-title="Right-click and Save As guy"
-                                    title="Right-click and Save As guy">
+                                    title="Right-click and Save As guy"
+                                  >
                                     <img
                                       loading="lazy"
                                       decoding="async"
@@ -1171,14 +1240,16 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-20"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>Two Great Artists, Two Different Worlds</b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-21"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   The parallels are striking, two great artists
@@ -1209,10 +1280,12 @@ So, it is startling to imagine that"
                             </div>
                             <div
                               className="fusion-text fusion-text-22"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <div
                                 style={{ width: 310 }}
-                                className="wp-caption aligncenter">
+                                className="wp-caption aligncenter"
+                              >
                                 <img
                                   loading="lazy"
                                   decoding="async"
@@ -1248,7 +1321,8 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/XCOPYART"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     XCOPY
                                   </a>{" "}
                                   for answering my questions about his work and
@@ -1256,14 +1330,16 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/fredwilson"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Fred Wilson
                                   </a>{" "}
                                   and{" "}
                                   <a
                                     href="https://twitter.com/punk6529"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     punk6529
                                   </a>{" "}
                                   for their helpful comments and
@@ -1281,7 +1357,8 @@ So, it is startling to imagine that"
                       <a
                         href="/author/ladysabrina/"
                         title="Posts by Sabrina Khan"
-                        rel="author">
+                        rel="author"
+                      >
                         Sabrina Khan
                       </a>
                     </span>
@@ -1304,20 +1381,23 @@ So, it is startling to imagine that"
         type="button"
         className="fusion-one-page-text-link fusion-page-load-link"
         tabIndex={-1}
-        aria-hidden="true">
+        aria-hidden="true"
+      >
         Page load link
       </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
-          className="design-sharp alignment-right with-animation">
+          className="design-sharp alignment-right with-animation"
+        >
           <ul>
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fab-fa-twitter">
+                className="fab-fa-twitter"
+              >
                 <i className="fab fa-twitter" />
               </a>
             </li>{" "}
@@ -1326,7 +1406,8 @@ So, it is startling to imagine that"
       </div>
       <section
         className="to-top-container to-top-right"
-        aria-labelledby="awb-to-top-label">
+        aria-labelledby="awb-to-top-label"
+      >
         <button type="button" id="toTop" className="fusion-top-top-link">
           <span id="awb-to-top-label" className="screen-reader-text">
             Go to Top

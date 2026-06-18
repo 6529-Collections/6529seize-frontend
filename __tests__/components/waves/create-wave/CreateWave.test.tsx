@@ -232,6 +232,7 @@ describe("CreateWave", () => {
         maxWinners: null,
       },
       display: {
+        outcomesVisible: true,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",
@@ -704,6 +705,7 @@ describe("CreateWave", () => {
             type: "APPROVE",
           },
           display: {
+            ...mockWaveConfig.config.display,
             approve: {
               approvalsTabLabel: " Candidates ",
               approvedTabLabel: "Selected",
@@ -743,9 +745,92 @@ describe("CreateWave", () => {
           data_value: "Selected",
         },
       });
-      expect(
-        mockedCreateWaveMetadata.mock.invocationCallOrder[0]
-      ).toBeLessThan(mockRouter.push.mock.invocationCallOrder[0]);
+      expect(mockedCreateWaveMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRouter.push.mock.invocationCallOrder[0]
+      );
+    });
+
+    it("saves hidden outcome display metadata for rank waves", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "RANK",
+          },
+          display: {
+            outcomesVisible: false,
+            approve: {
+              approvalsTabLabel: "",
+              approvedTabLabel: "",
+            },
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result, variables);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
+          waveId: "new-wave-id",
+          body: {
+            data_key: "wave_display.outcomes.visible",
+            data_value: "false",
+          },
+        });
+      });
+    });
+
+    it("saves hidden outcome display metadata for approve waves", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "APPROVE",
+          },
+          display: {
+            ...mockWaveConfig.config.display,
+            outcomesVisible: false,
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result, variables);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
+          waveId: "new-wave-id",
+          body: {
+            data_key: "wave_display.outcomes.visible",
+            data_value: "false",
+          },
+        });
+      });
     });
 
     it("uses the display metadata snapshot from submit time", async () => {
@@ -758,6 +843,7 @@ describe("CreateWave", () => {
             type: "APPROVE",
           },
           display: {
+            ...mockWaveConfig.config.display,
             approve: {
               approvalsTabLabel: "Candidates",
               approvedTabLabel: "Selected",
@@ -771,6 +857,7 @@ describe("CreateWave", () => {
         config: {
           ...submittedConfig.config,
           display: {
+            ...submittedConfig.config.display,
             approve: {
               approvalsTabLabel: "Apps",
               approvedTabLabel: "Chosen",
@@ -868,6 +955,7 @@ describe("CreateWave", () => {
             type: "APPROVE",
           },
           display: {
+            ...mockWaveConfig.config.display,
             approve: {
               approvalsTabLabel: "Candidates",
               approvedTabLabel: "",

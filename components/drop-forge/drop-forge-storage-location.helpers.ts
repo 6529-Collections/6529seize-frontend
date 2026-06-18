@@ -1,5 +1,9 @@
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { stripArweaveGatewayUrlPrefix } from "@/lib/media/arweave-gateways";
+import { publicEnv } from "@/config/env";
+import {
+  DecentralizedMediaRef,
+  parseDecentralizedMediaRef,
+  to6529ResolverUrl,
+} from "@/lib/media/decentralized-media";
 
 type DropForgeStorageProvider = "arweave" | "ipfs";
 
@@ -7,95 +11,57 @@ interface DropForgeStorageLocationInfo {
   readonly rawValue: string;
   readonly displayValue: string;
   readonly displayTitle: string;
-  readonly provider: DropForgeStorageProvider;
+  readonly provider: DropForgeStorageProvider | null;
   readonly providerBadgeLabel: string | null;
   readonly openUrl: string | null;
   readonly copyValue: string | null;
 }
 
-const IPFS_PROTOCOL_PREFIX = "ipfs://";
-const ARWEAVE_PROTOCOL_PREFIX = "ar://";
 const IPFS_CIDV0_PATTERN = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
 const IPFS_CIDV1_PATTERN = /^b[a-z2-7]{20,}$/;
+const ARWEAVE_TX_ID_PATTERN = /^[a-zA-Z0-9_-]{43,87}$/;
 
 const isHttpUrl = (value: string): boolean => /^https?:\/\//i.test(value);
 const isBareIpfsCid = (value: string): boolean =>
   IPFS_CIDV0_PATTERN.test(value) || IPFS_CIDV1_PATTERN.test(value);
+const isBareArweaveTxId = (value: string): boolean =>
+  ARWEAVE_TX_ID_PATTERN.test(value);
 
 const toRootIdentifier = (value: string): string => {
   const [identifier] = value.split("/");
   return identifier ?? value;
 };
 
-const normalizeIpfsPath = (value: string): string => {
-  let normalized = value.trim();
-
-  if (normalized.toLowerCase().startsWith(IPFS_PROTOCOL_PREFIX)) {
-    normalized = normalized.slice(IPFS_PROTOCOL_PREFIX.length);
-  }
-
-  normalized = normalized.replace(/^ipfs\/+/i, "");
-  normalized = normalized.replace(/^\/+/, "");
-
-  return normalized;
-};
-
-const getIpfsPathFromUrl = (value: string): string | null => {
-  try {
-    const parsedUrl = new URL(value);
-    const pathSegments = parsedUrl.pathname.split("/").filter(Boolean);
-
-    if (pathSegments[0]?.toLowerCase() !== "ipfs" || !pathSegments[1]) {
-      return null;
-    }
-
-    return pathSegments.slice(1).join("/");
-  } catch {
-    return null;
-  }
-};
-
-const buildIpfsLocationInfo = (
+const buildLocationInfo = (
   rawValue: string,
-  ipfsPath: string
+  ref: DecentralizedMediaRef
 ): DropForgeStorageLocationInfo => {
-  const normalizedPath = normalizeIpfsPath(ipfsPath);
-  const displayValue = toRootIdentifier(normalizedPath);
-  const openUrl = normalizedPath
-    ? resolveIpfsUrlSync(`${IPFS_PROTOCOL_PREFIX}${normalizedPath}`)
-    : null;
+  const displayValue = toRootIdentifier(ref.id);
+  const openUrl = to6529ResolverUrl(ref, publicEnv.MEDIA_RESOLVER_ENDPOINT);
 
   return {
     rawValue,
     displayValue: displayValue || rawValue,
     displayTitle: rawValue,
-    provider: "ipfs",
-    providerBadgeLabel: "IPFS",
+    provider: ref.protocol === "arweave" ? "arweave" : "ipfs",
+    providerBadgeLabel:
+      ref.protocol === "arweave" ? null : ref.protocol.toUpperCase(),
     openUrl,
     copyValue: openUrl,
   };
 };
 
-const buildArweaveLocationInfo = (
-  rawValue: string,
-  identifier: string
-): DropForgeStorageLocationInfo => {
-  const trimmedIdentifier = identifier.trim();
-  const rootIdentifier = toRootIdentifier(trimmedIdentifier);
-  const openUrl = rootIdentifier
-    ? `https://arweave.net/${rootIdentifier}`
-    : null;
-
-  return {
-    rawValue,
-    displayValue: rootIdentifier || rawValue,
-    displayTitle: rawValue,
-    provider: "arweave",
-    providerBadgeLabel: null,
-    openUrl,
-    copyValue: openUrl,
-  };
-};
+const buildRawLocationInfo = (
+  rawValue: string
+): DropForgeStorageLocationInfo => ({
+  rawValue,
+  displayValue: rawValue,
+  displayTitle: rawValue,
+  provider: null,
+  providerBadgeLabel: null,
+  openUrl: null,
+  copyValue: rawValue,
+});
 
 export function getDropForgeStorageLocationInfo(
   location: string | null | undefined
@@ -106,28 +72,30 @@ export function getDropForgeStorageLocationInfo(
     return null;
   }
 
-  if (trimmedValue.toLowerCase().startsWith(IPFS_PROTOCOL_PREFIX)) {
-    return buildIpfsLocationInfo(trimmedValue, trimmedValue);
+  const parsed = parseDecentralizedMediaRef(trimmedValue);
+  if (parsed) {
+    return buildLocationInfo(trimmedValue, parsed);
   }
 
-  if (trimmedValue.toLowerCase().startsWith(ARWEAVE_PROTOCOL_PREFIX)) {
-    return buildArweaveLocationInfo(
-      trimmedValue,
-      trimmedValue.slice(ARWEAVE_PROTOCOL_PREFIX.length)
-    );
+  // CIDv1 base32 strings also satisfy the broad Arweave tx-id shape below.
+  // Keep the bare IPFS CID check first so bare CIDs stay IPFS locations.
+  if (isBareIpfsCid(trimmedValue)) {
+    return buildLocationInfo(trimmedValue, {
+      protocol: "ipfs",
+      id: trimmedValue,
+      path: "",
+    });
   }
 
-  const ipfsPath = getIpfsPathFromUrl(trimmedValue);
-  if (ipfsPath) {
-    return buildIpfsLocationInfo(trimmedValue, ipfsPath);
+  if (isBareArweaveTxId(trimmedValue)) {
+    return buildLocationInfo(trimmedValue, {
+      protocol: "arweave",
+      id: trimmedValue,
+      path: "",
+    });
   }
 
   if (isHttpUrl(trimmedValue)) {
-    const strippedArweavePath = stripArweaveGatewayUrlPrefix(trimmedValue);
-    if (strippedArweavePath !== trimmedValue) {
-      return buildArweaveLocationInfo(trimmedValue, strippedArweavePath);
-    }
-
     return {
       rawValue: trimmedValue,
       displayValue: trimmedValue,
@@ -139,9 +107,5 @@ export function getDropForgeStorageLocationInfo(
     };
   }
 
-  if (isBareIpfsCid(trimmedValue)) {
-    return buildIpfsLocationInfo(trimmedValue, trimmedValue);
-  }
-
-  return buildArweaveLocationInfo(trimmedValue, trimmedValue);
+  return buildRawLocationInfo(trimmedValue);
 }

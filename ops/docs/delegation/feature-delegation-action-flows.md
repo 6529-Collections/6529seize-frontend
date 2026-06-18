@@ -16,9 +16,9 @@ and submit/recovery behavior.
 ## Entry Points
 
 - From `/delegation/delegation-center` action cards:
-  - `Delegation` -> `/delegation/register-delegation`
-  - `Consolidation` -> `/delegation/register-consolidation`
-  - `Delegation Manager` -> `/delegation/register-sub-delegation`
+  - `Register Delegation` -> `/delegation/register-delegation`
+  - `Register Consolidation` -> `/delegation/register-consolidation`
+  - `Register Delegation Manager` -> `/delegation/register-sub-delegation`
 - Open write routes directly by URL.
 - Open prefilled links such as
   `/delegation/register-delegation?collection=<contract>&use_case=<id>`.
@@ -37,7 +37,7 @@ and submit/recovery behavior.
 - `register-consolidation`
   - Required: `Collection`, `Consolidating With`
 - `register-sub-delegation`
-  - Required: `Collection`, `Delegate Manager`
+  - Required: `Collection`, `Manager Address`
 - `assign-primary-address`
   - Required: connected profile
   - Required: consolidation key with more than one wallet
@@ -82,7 +82,7 @@ and submit/recovery behavior.
 
 ## Feedback and Transaction States
 
-- Submit starts with `Confirm in your wallet...`.
+- Action-specific submit buttons start with `Confirm in your wallet...`.
 - After wallet approval, toast shows `Transaction submitted...` with a `view`
   explorer link.
 - After confirmation, toast updates to `Transaction Successful!`.

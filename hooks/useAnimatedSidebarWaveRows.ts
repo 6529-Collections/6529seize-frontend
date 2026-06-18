@@ -121,6 +121,10 @@ export function useAnimatedSidebarWaveRows(
     const nextKeys = new Set(rowKeys);
 
     setAnimatedRows((previousRows) => {
+      if (previousRows.length === 0) {
+        return currentRows.length === 0 ? previousRows : currentRows;
+      }
+
       const previousRowsByKey = new Map(
         previousRows.map((row) => [row.key, row])
       );
@@ -132,9 +136,7 @@ export function useAnimatedSidebarWaveRows(
       for (const row of rows) {
         const previousRow = previousRowsByKey.get(row.key);
         const animationState =
-          row.depth === 1 && previousRow === undefined
-            ? "entering"
-            : "entered";
+          row.depth === 1 && previousRow === undefined ? "entering" : "entered";
 
         nextRows.push({
           ...row,
@@ -166,7 +168,12 @@ export function useAnimatedSidebarWaveRows(
       cancelAfterPaint(enterFrame);
       globalThis.clearTimeout(exitTimer);
     };
-  }, [keepExitingRows, rowKeySignature, rowKeys, rows]);
+  }, [currentRows, keepExitingRows, rowKeySignature, rowKeys, rows]);
 
-  return keepExitingRows ? animatedRows : currentRows;
+  const rowsForInitialHydration =
+    animatedRows.length === 0 && currentRows.length > 0
+      ? currentRows
+      : animatedRows;
+
+  return keepExitingRows ? rowsForInitialHydration : currentRows;
 }

@@ -21,10 +21,7 @@ export default function CreatePlan({ id }: { readonly id: string }) {
 
   const { setState } = useContext(DistributionPlanToolContext);
 
-  const {
-    data: distributionPlanResponse,
-    isError,
-  } = useQuery({
+  const { data: distributionPlanResponse, isError } = useQuery({
     queryKey: ["distribution-plan", id],
     queryFn: () =>
       distributionPlanApiFetch<AllowlistDescription>(`/allowlists/${id}`),
@@ -36,7 +33,7 @@ export default function CreatePlan({ id }: { readonly id: string }) {
   useEffect(() => {
     if (id) return;
 
-    makeErrorToast("No id found");
+    makeErrorToast("Missing ID. Refresh and try again.");
     setState(null);
     router.push("/emma");
   }, [id, router, setState]);
@@ -64,7 +61,7 @@ export default function CreatePlan({ id }: { readonly id: string }) {
   return (
     <div>
       <StepHeader step={DistributionPlanToolStep.CREATE_PLAN} />
-      <div className="tw-text-center tw-mt-12">
+      <div className="tw-mt-12 tw-text-center">
         <AllowlistToolLoader size={AllowlistToolLoaderSize.LARGE} />
       </div>
     </div>

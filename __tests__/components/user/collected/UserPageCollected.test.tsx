@@ -49,20 +49,36 @@ jest.mock(
     }
 );
 
+const mockUserPageCollectedCards = jest.fn((props: any) => (
+  <div
+    data-testid="cards"
+    data-cards-count={props.cards.length}
+    data-total-pages={props.totalPages}
+    data-page={props.page}
+    data-show-data-row={props.showDataRow}
+    data-locale={props.locale}
+  />
+));
+
+jest.mock("@/components/user/collected/cards/UserPageCollectedCards", () => ({
+  __esModule: true,
+  default: (props: any) => mockUserPageCollectedCards(props),
+}));
+
+const mockUserPageCollectedNetworkCards = jest.fn((props: any) => (
+  <div
+    data-testid="network-cards"
+    data-cards-count={props.cards.length}
+    data-locale={props.locale}
+  />
+));
+
 jest.mock(
-  "@/components/user/collected/cards/UserPageCollectedCards",
-  () =>
-    function MockCards(props: any) {
-      return (
-        <div
-          data-testid="cards"
-          data-cards-count={props.cards.length}
-          data-total-pages={props.totalPages}
-          data-page={props.page}
-          data-show-data-row={props.showDataRow}
-        />
-      );
-    }
+  "@/components/user/collected/cards/UserPageCollectedNetworkCards",
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockUserPageCollectedNetworkCards(props),
+  })
 );
 
 jest.mock(
@@ -73,34 +89,34 @@ jest.mock(
     }
 );
 
-jest.mock(
-  "@/components/user/collected/UserPageCollectedStats",
-  () =>
-    function MockCollectedStats(props: any) {
-      return (
-        <div
-          data-testid="stats-summary"
-          data-active-collection={String(props.activeCollection ?? "")}
-          data-active-season-number={String(props.activeSeasonNumber ?? "")}
-        >
-          <button
-            data-testid="stats-collection-shortcut"
-            onClick={() =>
-              props.onCollectionShortcut?.(CollectedCollectionType.NEXTGEN)
-            }
-          >
-            NextGen shortcut
-          </button>
-          <button
-            data-testid="stats-season-shortcut"
-            onClick={() => props.onSeasonShortcut?.(2)}
-          >
-            SZN2 shortcut
-          </button>
-        </div>
-      );
-    }
-);
+const mockUserPageCollectedStats = jest.fn((props: any) => (
+  <div
+    data-testid="stats-summary"
+    data-active-collection={String(props.activeCollection ?? "")}
+    data-active-season-number={String(props.activeSeasonNumber ?? "")}
+    data-locale={props.locale}
+  >
+    <button
+      data-testid="stats-collection-shortcut"
+      onClick={() =>
+        props.onCollectionShortcut?.(CollectedCollectionType.NEXTGEN)
+      }
+    >
+      NextGen shortcut
+    </button>
+    <button
+      data-testid="stats-season-shortcut"
+      onClick={() => props.onSeasonShortcut?.(2)}
+    >
+      SZN2 shortcut
+    </button>
+  </div>
+));
+
+jest.mock("@/components/user/collected/UserPageCollectedStats", () => ({
+  __esModule: true,
+  default: (props: any) => mockUserPageCollectedStats(props),
+}));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({ address: "0x123" })),
@@ -370,12 +386,13 @@ describe("UserPageCollected", () => {
 
     mockSearchParams.get.mockImplementation((key: string) => {
       if (key === "collection") return "network";
+      if (key === "locale") return "DE-de";
       if (key === "sort-by") return "xtdh";
       if (key === "sort-direction") return "desc";
       return null;
     });
     mockSearchParams.toString.mockReturnValue(
-      "collection=network&sort-by=xtdh&sort-direction=desc"
+      "collection=network&locale=DE-de&sort-by=xtdh&sort-direction=desc"
     );
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
@@ -387,6 +404,7 @@ describe("UserPageCollected", () => {
     const params = new URLSearchParams(path?.split("?")[1] ?? "");
 
     expect(params.get("collection")).toBe("nextgen");
+    expect(params.get("locale")).toBe("DE-de");
     expect(params.get("page")).toBeNull();
     expect(params.get("seized")).toBeNull();
     expect(params.get("szn")).toBeNull();
@@ -486,6 +504,56 @@ describe("UserPageCollected", () => {
           "DESC",
         ]),
       })
+    );
+  });
+
+  it("passes normalized locale search params to network cards", () => {
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "collection") return "network";
+      if (key === "locale") return "DE-de";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue(
+      "collection=network&locale=DE-de"
+    );
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    expect(screen.getByTestId("network-cards")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(mockUserPageCollectedNetworkCards).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" })
+    );
+    expect(mockUserPageCollectedStats).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" })
+    );
+  });
+
+  it("passes normalized locale search params to regular cards", () => {
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "locale") return "DE-de";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue("locale=DE-de");
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    expect(screen.getByTestId("cards")).toHaveAttribute("data-locale", "de-DE");
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(mockUserPageCollectedCards).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" })
+    );
+    expect(mockUserPageCollectedStats).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" })
     );
   });
 

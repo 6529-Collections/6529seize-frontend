@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { PlayIcon } from "@heroicons/react/24/solid";
-import { InlineMediaActions } from "./MediaActionToolbar";
+import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import { useMediaActions } from "./useMediaActions";
 
 interface Props {
@@ -22,6 +21,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
 }) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const wasFullscreenRef = useRef(false);
   const { isApp } = useDeviceInfo();
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
@@ -46,8 +46,6 @@ const MediaDisplayVideo: React.FC<Props> = ({
     fallbackSrc: src, // if HLS fails, revert to original
     autoPlay: inView && !isApp, // only autoplay if in view and not in app
   });
-  const showNativeControls = showControls && !isApp;
-
   // Inline attributes for iOS / legacy WebKit
   useEffect(() => {
     const vid = videoRef.current;
@@ -60,6 +58,11 @@ const MediaDisplayVideo: React.FC<Props> = ({
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid || isLoading) return;
+    const fullscreenElement = document.fullscreenElement;
+    if (fullscreenElement?.contains(vid) ?? false) {
+      wasFullscreenRef.current = true;
+      return;
+    }
 
     if (!inView || isApp) {
       vid.pause();
@@ -76,11 +79,20 @@ const MediaDisplayVideo: React.FC<Props> = ({
 
     const pauseWhenFullscreenCloses = () => {
       const vid = videoRef.current;
-      if (!vid || document.fullscreenElement === vid) {
+      if (!vid) {
         return;
       }
 
-      vid.pause();
+      const fullscreenElement = document.fullscreenElement;
+      if (fullscreenElement?.contains(vid) ?? false) {
+        wasFullscreenRef.current = true;
+        return;
+      }
+
+      if (wasFullscreenRef.current) {
+        wasFullscreenRef.current = false;
+        vid.pause();
+      }
     };
 
     document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);
@@ -92,79 +104,17 @@ const MediaDisplayVideo: React.FC<Props> = ({
     };
   }, [isApp, videoRef]);
 
-  const handleVideoClick = () => {
-    if (showControls) {
-      return;
-    }
-
-    const vid = videoRef.current;
-    if (!vid) {
-      return;
-    }
-
-    if (vid.paused) {
-      vid.play().catch(() => {});
-      return;
-    }
-
-    vid.pause();
-  };
-
-  const enterFullscreenAndPlay = () => {
-    const vid = videoRef.current;
-    if (!vid) {
-      return;
-    }
-
-    vid.play().catch(() => undefined);
-    vid.requestFullscreen().catch(() => undefined);
-  };
-
   return (
-    <div
-      ref={wrapperRef}
-      className="tw-relative tw-max-h-64 tw-min-h-[200px] tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-black"
-    >
-      <video
-        ref={videoRef}
-        onClick={() => {
-          if (showControls && isApp) {
-            enterFullscreenAndPlay();
-            return;
-          }
-          handleVideoClick();
-        }}
-        className="tw-h-auto tw-max-h-64 tw-w-full tw-rounded-xl tw-object-contain"
-        muted
-        loop
-        controls={showNativeControls}
-        controlsList="nodownload noplaybackrate"
-        playsInline
-        preload="auto"
+    <div ref={wrapperRef} className="tw-flex tw-w-full tw-justify-start">
+      <SeizeVideoPlayer
+        videoRef={videoRef}
+        template="ambient-media"
+        showActions={showControls}
+        onDownload={showControls ? downloadMedia : undefined}
+        onOpen={showControls ? openMedia : undefined}
+        openLabel={showControls ? openLabel : undefined}
+        isDownloading={isDownloading}
       />
-      {showControls && isApp && (
-        <button
-          type="button"
-          aria-label="Play video"
-          title="Play video"
-          onClick={(event) => {
-            event.stopPropagation();
-            enterFullscreenAndPlay();
-          }}
-          className="tw-absolute tw-left-1/2 tw-top-1/2 tw-z-20 tw-flex tw-size-16 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/75 tw-text-white tw-shadow-lg tw-shadow-black/30 tw-backdrop-blur-sm"
-        >
-          <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
-        </button>
-      )}
-      {showControls && (
-        <InlineMediaActions
-          variant="video"
-          onDownload={downloadMedia}
-          onOpen={openMedia}
-          openLabel={openLabel}
-          isDownloading={isDownloading}
-        />
-      )}
     </div>
   );
 };

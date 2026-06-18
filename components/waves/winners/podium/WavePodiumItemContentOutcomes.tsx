@@ -10,14 +10,24 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface WavePodiumItemContentOutcomesProps {
   readonly winner: ApiWaveDecisionWinner;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 export const WavePodiumItemContentOutcomes: React.FC<
   WavePodiumItemContentOutcomesProps
-> = ({ winner }) => {
+> = ({ winner, outcomesVisible = true }) => {
   // Transform awards into the same format that useDropOutcomes provided
   const { nicOutcomes, repOutcomes, manualOutcomes, haveOutcomes } =
     useMemo(() => {
+      if (!outcomesVisible) {
+        return {
+          nicOutcomes: [],
+          repOutcomes: [],
+          manualOutcomes: [],
+          haveOutcomes: false,
+        };
+      }
+
       const memoizedNicOutcomes = winner.awards
         .filter((award) => {
           const amount = award.amount ?? 0;
@@ -43,12 +53,14 @@ export const WavePodiumItemContentOutcomes: React.FC<
         .filter((award) => {
           const description = award.description;
           return (
-            award.type === ApiWaveOutcomeType.Manual && description.length > 0
+            award.type === ApiWaveOutcomeType.Manual &&
+            typeof description === "string" &&
+            description.length > 0
           );
         })
         .map((award) => ({
           type: ApiWaveOutcomeType.Manual,
-          description: award.description,
+          description: award.description ?? "",
         }));
 
       const memoizedHaveOutcomes =
@@ -62,7 +74,11 @@ export const WavePodiumItemContentOutcomes: React.FC<
         manualOutcomes: memoizedManualOutcomes,
         haveOutcomes: memoizedHaveOutcomes,
       };
-    }, [winner.awards]);
+    }, [outcomesVisible, winner.awards]);
+
+  if (!outcomesVisible) {
+    return null;
+  }
 
   if (!haveOutcomes) {
     return null;

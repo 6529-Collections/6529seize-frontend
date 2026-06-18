@@ -1,6 +1,10 @@
 "use client";
 
-import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronLeftIcon,
+  ScaleIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { FocusTrap } from "focus-trap-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -114,6 +118,12 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
     href: "/discover",
     section: "Main",
     icon: DiscoverIcon,
+  },
+  {
+    name: "Wave Score",
+    href: "/network/wave-score",
+    section: "Network",
+    icon: ScaleIcon,
   },
   {
     name: "Notifications",
@@ -549,6 +559,14 @@ const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
   [DROP_FORGE_PATH]: [DROP_FORGE_TITLE],
   [DROP_FORGE_SECTIONS.CRAFT.path]: [`${DROP_FORGE_TITLE} Craft`],
   [DROP_FORGE_SECTIONS.LAUNCH.path]: [`${DROP_FORGE_TITLE} Launch`],
+  "/network/wave-score": [
+    "Wave scoring",
+    "Wave score formula",
+    "Wave score calculator",
+    "Visibility score",
+    "Hotness score",
+    "Wave REP formula",
+  ],
 };
 
 const singularizePageSearchToken = (token: string): string => {

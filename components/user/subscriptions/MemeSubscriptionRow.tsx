@@ -10,6 +10,7 @@ import {
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import { formatAddress } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -138,11 +139,10 @@ export default function MemeSubscriptionRow(
       });
       const responseSubscribed = response.subscribed;
       setSubscribed(!!responseSubscribed);
-      const detail = responseSubscribed
-        ? "Subscribed for"
-        : "Unsubscribed from";
+      const detail = responseSubscribed ? "Subscribed." : "Unsubscribed.";
       setToast({
-        message: `${detail} ${props.title} #${response.token_id}`,
+        title: detail,
+        description: `${props.title} #${response.token_id}`,
         type: "success",
       });
       props.refresh();
@@ -154,9 +154,13 @@ export default function MemeSubscriptionRow(
       });
     } catch (e: unknown) {
       setToast({
-        message:
-          typeof e === "string" ? e : "Failed to change token subscription.",
         type: "error",
+        title: "Couldn't update this subscription.",
+        description: "Please try again.",
+        details: getToastErrorDetails(
+          e,
+          "Could not change token subscription."
+        ),
       });
       return;
     } finally {
@@ -198,7 +202,8 @@ export default function MemeSubscriptionRow(
       const responseCount = response.count;
       setSelectedCount(responseCount);
       setToast({
-        message: `Subscription count updated to ${responseCount} for ${props.title} #${props.subscription.token_id}`,
+        title: "Subscription count updated.",
+        description: `${props.title} #${props.subscription.token_id}: ${responseCount}.`,
         type: "success",
       });
       props.refresh();
@@ -211,9 +216,13 @@ export default function MemeSubscriptionRow(
     } catch (e: unknown) {
       setSelectedCount(subscribedCount);
       setToast({
-        message:
-          typeof e === "string" ? e : "Failed to update subscription count.",
         type: "error",
+        title: "Couldn't update subscription count.",
+        description: "Please try again.",
+        details: getToastErrorDetails(
+          e,
+          "Could not update subscription count."
+        ),
       });
       return;
     } finally {

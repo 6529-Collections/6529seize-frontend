@@ -107,4 +107,33 @@ describe("useEnhancedWavesListCore", () => {
 
     expect(result.current.waves[0]?.isOfficial).toBe(true);
   });
+
+  it("keeps backend order when requested while still moving muted waves down", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [
+        createSidebarWave({ id: "first", latestDropTimestamp: 1 }),
+        createSidebarWave({
+          id: "muted",
+          latestDropTimestamp: 999,
+          muted: true,
+        }),
+        createSidebarWave({ id: "second", latestDropTimestamp: 500 }),
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: true,
+        preserveBackendWaveOrder: true,
+      })
+    );
+
+    expect(result.current.waves.map((wave) => wave.id)).toEqual([
+      "first",
+      "second",
+      "muted",
+    ]);
+  });
 });

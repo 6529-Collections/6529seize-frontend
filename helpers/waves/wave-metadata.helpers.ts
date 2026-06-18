@@ -1,6 +1,10 @@
 import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
-import type { CreateWaveApproveDisplayConfig } from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type {
+  CreateWaveApproveDisplayConfig,
+  CreateWaveDisplayConfig,
+} from "@/types/waves.types";
 
 export const APPROVE_WAVE_TAB_LABEL_MAX_LENGTH = 24;
 
@@ -20,7 +24,10 @@ const RESERVED_APPROVE_WAVE_TAB_LABELS = [
 export const WAVE_DISPLAY_METADATA_KEYS = {
   approvalsTabLabel: "wave_display.approve.tabs.approvals_label",
   approvedTabLabel: "wave_display.approve.tabs.approved_label",
+  outcomesVisible: "wave_display.outcomes.visible",
 } as const;
+
+const HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE = "false";
 
 type ApproveWaveDisplayMetadataField = {
   readonly displayKey: keyof CreateWaveApproveDisplayConfig;
@@ -53,6 +60,11 @@ interface ApproveWaveTabLabels {
 }
 
 interface ApproveWaveDisplayMetadataUpdate {
+  readonly create: ApiCreateWaveMetadataRequest[];
+  readonly deleteIds: number[];
+}
+
+interface WaveOutcomeVisibilityMetadataUpdate {
   readonly create: ApiCreateWaveMetadataRequest[];
   readonly deleteIds: number[];
 }
@@ -148,27 +160,44 @@ const getMetadataRequest = ({
   };
 };
 
-export const getCreateWaveDisplayMetadataRequests = (
-  display: CreateWaveApproveDisplayConfig | null | undefined
-): ApiCreateWaveMetadataRequest[] => {
-  if (!display) {
+export const getCreateWaveDisplayMetadataRequests = ({
+  display,
+  waveType,
+}: {
+  readonly display: CreateWaveDisplayConfig | null | undefined;
+  readonly waveType: ApiWaveType;
+}): ApiCreateWaveMetadataRequest[] => {
+  if (!display || waveType === ApiWaveType.Chat) {
     return [];
   }
 
-  return [
+  const outcomeVisibilityRequest = getOutcomeVisibilityMetadataRequest(
+    display.outcomesVisible
+  );
+  const requests: ApiCreateWaveMetadataRequest[] = outcomeVisibilityRequest
+    ? [outcomeVisibilityRequest]
+    : [];
+
+  if (waveType !== ApiWaveType.Approve) {
+    return requests;
+  }
+
+  const approveRequests = [
     getMetadataRequest({
       dataKey: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
-      dataValue: display.approvalsTabLabel,
+      dataValue: display.approve.approvalsTabLabel,
       defaultValue: DEFAULT_APPROVE_WAVE_TAB_LABELS.approvals,
     }),
     getMetadataRequest({
       dataKey: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
-      dataValue: display.approvedTabLabel,
+      dataValue: display.approve.approvedTabLabel,
       defaultValue: DEFAULT_APPROVE_WAVE_TAB_LABELS.approved,
     }),
   ].filter(
     (request): request is ApiCreateWaveMetadataRequest => request !== null
   );
+
+  return [...requests, ...approveRequests];
 };
 
 export const getApproveWaveDisplayMetadataRows = ({
@@ -296,4 +325,72 @@ export const getApproveWaveDisplayMetadataUpdate = ({
   }
 
   return { create, deleteIds };
+};
+
+const getOutcomeVisibilityMetadataRequest = (
+  outcomesVisible: boolean | null | undefined
+): ApiCreateWaveMetadataRequest | null => {
+  if (outcomesVisible !== false) {
+    return null;
+  }
+
+  return {
+    data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+    data_value: HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE,
+  };
+};
+
+const parseOutcomeVisibilityMetadataValue = (
+  value: string | null | undefined
+): boolean => {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE) {
+    return false;
+  }
+
+  return true;
+};
+
+export const getWaveOutcomeVisibilityFromMetadata = (
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): boolean =>
+  parseOutcomeVisibilityMetadataValue(
+    getLatestMetadataValue({
+      metadata,
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+    })
+  );
+
+export const getWaveOutcomeVisibilityMetadataUpdate = ({
+  metadata,
+  outcomesVisible,
+}: {
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly outcomesVisible: boolean;
+}): WaveOutcomeVisibilityMetadataUpdate => {
+  const rows = getApproveWaveDisplayMetadataRows({
+    metadata,
+    dataKey: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+  });
+  const latestValue = getLatestMetadataValue({
+    metadata,
+    dataKey: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+  });
+  const request = getOutcomeVisibilityMetadataRequest(outcomesVisible);
+
+  if (request === null) {
+    return {
+      create: [],
+      deleteIds: rows.map((row) => row.id),
+    };
+  }
+
+  if (
+    latestValue?.trim().toLowerCase() ===
+    HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE
+  ) {
+    return { create: [], deleteIds: [] };
+  }
+
+  return { create: [request], deleteIds: [] };
 };

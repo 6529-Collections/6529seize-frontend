@@ -106,7 +106,7 @@ describe("ReMemes metadata", () => {
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
-    expect(metadata.title).toBe("Community Remix");
+    expect(metadata.title).toBe("Community Remix | ReMemes");
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(image).toMatchObject({
       alt: "Community Remix ReMeme social card",
@@ -157,7 +157,7 @@ describe("ReMemes metadata", () => {
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
-    expect(metadata.title).toBe("GDRC #2");
+    expect(metadata.title).toBe("GDRC #2 | ReMemes");
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(url.pathname).toBe(
       "/api/og-metadata/nfts/0x869a96493d64ed5bbbfc24d96c5e84f95e558cf2/39"
@@ -183,7 +183,7 @@ describe("ReMemes metadata", () => {
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
-    expect(metadata.title).toBe("0xabc #8");
+    expect(metadata.title).toBe("0xabc #8 | ReMemes");
     expect(url.pathname).toBe("/api/og-metadata/nfts/0xabc/8");
     expect(url.searchParams.get("badge")).toBe("ReMemes");
     expect(url.searchParams.get("collection")).toBe("ReMemes");

@@ -100,7 +100,7 @@ describe("HeaderQRScanner", () => {
 
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith({
-        message: "Invalid QR code",
+        message: "This QR code is not valid.",
         type: "error",
       })
     );

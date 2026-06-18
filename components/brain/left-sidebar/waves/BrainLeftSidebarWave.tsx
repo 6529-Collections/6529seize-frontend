@@ -1,13 +1,19 @@
 "use client";
 
 import WavePicture from "@/components/waves/WavePicture";
+import {
+  hasWaveTrustSummaryScore,
+  WaveTrustSignals,
+} from "@/components/waves/WaveTrustSignals";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { Tooltip } from "react-tooltip";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import {
   getWaveHomeRoute,
@@ -29,7 +35,6 @@ interface BrainLeftSidebarWaveProps {
   readonly isDirectMessage?: boolean | undefined;
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
-  readonly reserveExpandControlSpace?: boolean | undefined;
   readonly isExpanded?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly isLastSubwave?: boolean | undefined;
@@ -47,7 +52,7 @@ const getPresentNumber = (value: number | null): number | null => {
 
 const DROP_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0 tw-text-[#E8D48A]";
 const UNREAD_BADGE_CLASSES =
-  "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm";
+  "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_6px_14px_rgba(0,0,0,0.32)]";
 const MUTED_BADGE_CLASSES =
   "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm";
 const MUTED_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0";
@@ -91,7 +96,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   isDirectMessage = false,
   depth = 0,
   canExpand = false,
-  reserveExpandControlSpace = false,
   isExpanded = false,
   hasUnreadSubwaves = false,
   isLastSubwave = false,
@@ -109,6 +113,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const latestDropTimestamp = getPresentNumber(
     wave.newDropsCount.latestDropTimestamp
   );
+  const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
+  const shouldShowTrustSignalsRow =
+    hasSummaryScore || latestDropTimestamp !== null;
+  const trustSignalsTooltipId = hasTouchScreen
+    ? undefined
+    : `sidebar-wave-trust-signals-${wave.id}`;
 
   const formattedWaveName = useMemo(() => getFormattedWaveName(wave), [wave]);
 
@@ -171,6 +181,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     wave.id,
   ]);
 
+  const handleRowMouseEnter = useCallback(() => {
+    scheduleSubwavePrefetch();
+    onWaveHover();
+  }, [onWaveHover, scheduleSubwavePrefetch]);
+
   useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   const handleWaveClick = useCallback(
@@ -213,12 +228,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 
   const isChildRow = depth === 1;
   const shouldShowExpandControl = canExpand && depth === 0;
-  const shouldReserveExpandControlSpace =
-    shouldShowExpandControl || (reserveExpandControlSpace && depth === 0);
+  const shouldShowPinButton = showPin && depth === 0;
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
-      shouldReserveExpandControlSpace,
       variant: "app",
     });
   const avatarSizeClasses = isChildRow ? "tw-size-7" : "tw-size-8";
@@ -232,7 +245,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   return (
     <div
       {...(!hasTouchScreen && {
-        onMouseEnter: scheduleSubwavePrefetch,
+        onMouseEnter: handleRowMouseEnter,
         onMouseLeave: cancelSubwavePrefetch,
       })}
       className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
@@ -241,15 +254,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
-      <SidebarWaveExpandControl
-        formattedWaveName={formattedWaveName}
-        isExpanded={isExpanded}
-        onBlur={cancelSubwavePrefetch}
-        onClick={handleToggleExpand}
-        onFocus={scheduleSubwavePrefetch}
-        shouldReserveSpace={shouldReserveExpandControlSpace}
-        shouldShowButton={shouldShowExpandControl}
-      />
       {isChildRow && (
         <span
           aria-hidden="true"
@@ -258,18 +262,18 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           }`}
         />
       )}
-      <Link
-        href={href}
-        prefetch={false}
-        {...(!hasTouchScreen && { onMouseEnter: onWaveHover })}
-        onClick={handleWaveClick}
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+      <div
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
         }`}
       >
-        <div className="tw-relative">
+        <div
+          aria-hidden="true"
+          data-testid="sidebar-wave-avatar"
+          className="tw-relative tw-flex-shrink-0"
+        >
           <div
             className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
               isActive
@@ -319,19 +323,72 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-truncate tw-text-sm tw-font-medium">
-            {formattedWaveName}
+          <div
+            className={`tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 ${
+              shouldShowPinButton ? "tw-pr-7" : ""
+            }`}
+          >
+            <Link
+              href={href}
+              prefetch={false}
+              onClick={handleWaveClick}
+              className={`tw-min-w-0 tw-flex-shrink tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+                isActive
+                  ? "tw-text-white desktop-hover:group-hover:tw-text-white"
+                  : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+              }`}
+            >
+              <span className="tw-block tw-truncate tw-text-sm tw-font-medium">
+                {formattedWaveName}
+              </span>
+            </Link>
+            <SidebarWaveExpandControl
+              formattedWaveName={formattedWaveName}
+              isExpanded={isExpanded}
+              onBlur={cancelSubwavePrefetch}
+              onClick={handleToggleExpand}
+              onFocus={scheduleSubwavePrefetch}
+              shouldShowButton={shouldShowExpandControl}
+            />
           </div>
-          {latestDropTimestamp !== null && (
-            <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
-              <span className="tw-pr-1">Last drop:</span>
-              <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
+          {shouldShowTrustSignalsRow && (
+            <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
+              {latestDropTimestamp !== null && (
+                <span className="tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
+                  <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
+                </span>
+              )}
+              {hasSummaryScore && (
+                <WaveTrustSignals
+                  waveRep={wave.waveRep}
+                  waveScore={wave.waveScore}
+                  variant="sidebar-inline"
+                  mode="summary"
+                  className="tw-ml-auto tw-shrink-0"
+                  tooltipId={trustSignalsTooltipId}
+                />
+              )}
             </div>
           )}
         </div>
-      </Link>
-      {showPin && depth === 0 && (
-        <BrainLeftSidebarWavePin waveId={wave.id} isPinned={!!wave.isPinned} />
+      </div>
+      {shouldShowPinButton && (
+        <BrainLeftSidebarWavePin
+          waveId={wave.id}
+          isPinned={!!wave.isPinned}
+          compact
+          className="tw-absolute tw-right-3 tw-top-3 tw-z-10"
+        />
+      )}
+      {trustSignalsTooltipId !== undefined && hasSummaryScore && (
+        <Tooltip
+          id={trustSignalsTooltipId}
+          place="top"
+          offset={8}
+          opacity={1}
+          positionStrategy="fixed"
+          style={TOOLTIP_STYLES}
+        />
       )}
     </div>
   );

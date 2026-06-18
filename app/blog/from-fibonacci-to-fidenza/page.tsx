@@ -1,8 +1,25 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import type { Metadata } from "next";
 export default function BlogFromFibonacciToFidenzaPage() {
   return (
     <div>
+      <JsonLdScript
+        data={buildArticlePageJsonLd({
+          path: "/blog/from-fibonacci-to-fidenza",
+          headline:
+            "From Fibonacci to Fidenza: The Golden Ratio in Generative Art",
+          description:
+            "A look at the golden ratio, Fibonacci, Fidenza, and generative art.",
+          image:
+            "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Fidenza-313.png",
+          author: "Sabrina Khan",
+          datePublished: "2022-11-10T05:29:37+00:00",
+          dateModified: "2022-11-15T18:08:28+00:00",
+          section: "Blog",
+        })}
+      />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta
@@ -304,16 +321,19 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
           <div id="home" style={{ position: "relative", top: "-1px" }} />
           <div
             id="sliders-container"
-            className="fusion-slider-visibility"></div>
+            className="fusion-slider-visibility"
+          ></div>
           <main
             id="main"
-            className="clearfix "
-            style={{ minHeight: "100vh", padding: 30 }}>
+            className="clearfix"
+            style={{ minHeight: "100vh", padding: 30 }}
+          >
             <div className="fusion-row">
               <section id="content" style={{ width: "100%" }}>
                 <article
                   id="post-1971"
-                  className="post post-1971 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                  className="post post-1971 type-post status-publish format-standard has-post-thumbnail hentry category-blog"
+                >
                   <span className="entry-title" style={{ display: "none" }}>
                     FROM FIBONACCI TO FIDENZA
                   </span>
@@ -326,14 +346,16 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column"
                           style={{
@@ -345,18 +367,21 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-1 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-1 hover-type-none">
                                 <a
                                   className="fusion-no-lightbox"
                                   href="/"
                                   target="_blank"
                                   aria-label="6529-header-logo-beta"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -381,14 +406,16 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column"
                           style={{
@@ -398,25 +425,29 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
                               className="fusion-text fusion-text-1"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>From Fibonacci to Fidenza</b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-2"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   by{" "}
                                   <a
                                     href="https://twitter.com/sabrinaxdoll"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Sabrina Khan
                                   </a>
                                 </b>
@@ -424,7 +455,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-3"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   There is an autonomous artist among us, a
@@ -449,14 +481,16 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://twitter.com/tylerxhobbs"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Tyler Hobbs
                                   </a>
                                   , who dazzled the art scene with his{" "}
                                   <a
                                     href="https://tylerxhobbs.com/fidenza"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Fidenza
                                   </a>{" "}
                                   collection, we are left in the afterglow with
@@ -486,14 +520,16 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-4"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>We Are All in Love With Fibonacci </b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-5"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Our relationship to mathematically rendered
@@ -511,7 +547,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   area, how many rabbits will be born there if
                                   we assume that every month a pair of rabbits
                                   produces another pair, and that rabbits begin
-                                  to bear young two months after their birth?”{" "}
+                                  to bear young two months after their
+                                  birth?”{" "}
                                 </span>
                               </p>
                               <p>
@@ -541,7 +578,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://www.youtube.com/watch?v=z9d1mxgZ0ag"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     sunflower
                                   </a>
                                   .{" "}
@@ -549,15 +587,17 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-2 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-2 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/sunflower-400x300.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[5c7d2fbba7a7340ceb1]"
                                   data-title="Photo credit: Esdras Calderan/Wikipedia (CC BY 2.0)"
-                                  title="Photo credit: Esdras Calderan/Wikipedia (CC BY 2.0)">
+                                  title="Photo credit: Esdras Calderan/Wikipedia (CC BY 2.0)"
+                                >
                                   <img
                                     loading="lazy"
                                     fetchPriority="high"
@@ -575,28 +615,32 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-6"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 Sunflower (
                                 <a
                                   href="https://commons.wikimedia.org/wiki/File:Espiral_de_semillas_de_Girasol.jpg"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   source
                                 </a>
                                 )
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-3 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-3 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/Sunflower-Fibonacci-400x400.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[98e13609051689aff44]"
                                   data-title="Source: momath.org"
-                                  title="Source: momath.org">
+                                  title="Source: momath.org"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -613,13 +657,15 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-7"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 55 Spirals (
                                 <a
                                   href="https://momath.org/home/fibonacci-numbers-of-sunflower-seed-spirals/"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   source
                                 </a>
                                 )
@@ -627,7 +673,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-8"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   At its core, the golden ratio is resplendent,
@@ -646,7 +693,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-9"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   Da Vinci and Dali Join The Fibonacci Fest{" "}
@@ -655,7 +703,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-10"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Inspired by nature's mathematically achieved
@@ -699,15 +748,17 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-4 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-4 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/last-supper-golden-ratio-400x283.gif"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[3d8b8892ae324e847f3]"
                                   data-title="The Last Supper"
-                                  title="The Last Supper">
+                                  title="The Last Supper"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -724,20 +775,23 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-11"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 <em>Last Supper</em>, Leonardo Da Vinci&nbsp;(
                                 <a
                                   href="https://www.phimatrix.com/art-composition-golden-ratio/"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   source)
                                 </a>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-12"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Indisputably, there is a relationship between
@@ -777,20 +831,23 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                 <span style={{ fontWeight: 400 }}>
                                   In “Leda Atomica” Dali uses the divine
                                   proportion to set Leda and the swan within a
-                                  pentagon calculated with the golden ratio.{" "}
+                                  pentagon calculated with the golden
+                                  ratio.{" "}
                                 </span>
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-5 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-5 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/Leda_atomica.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[fc96450ee9ab05c65ba]"
                                   data-title="Leda_atomica"
-                                  title="Leda_atomica">
+                                  title="Leda_atomica"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -807,22 +864,25 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-13"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 <em>Leda Atómica</em>&nbsp;(<em>Atomic Leda</em>
                                 ), Salvador Dalí, 1949
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-6 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-6 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/leda-atomica-divine-235x300.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[5e417e2acf14f62c241]"
                                   data-title="Studies of Leda Atómica, 1947"
-                                  title="Studies of Leda Atómica, 1947">
+                                  title="Studies of Leda Atómica, 1947"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -839,14 +899,16 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-14"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 Studies of&nbsp;<em>Leda Atómica</em>, 1947
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-15"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Dali believed that mathematical equations and
@@ -864,16 +926,19 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-16"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
-                                  Falling for Fidenza, an Inevitable Love Story{" "}
+                                  Falling for Fidenza, an Inevitable Love
+                                  Story{" "}
                                 </b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-17"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Generative artist and coder Tyler Hobbs
@@ -952,15 +1017,17 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-7 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-7 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Fidenza-313-400x480.png"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[3e6fcc24e5a6bfc4892]"
                                   data-title="Fidenza #313"
-                                  title="Fidenza #313">
+                                  title="Fidenza #313"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -977,14 +1044,16 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-18"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 Fidenza #313, “The Tulip”
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-19"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   The same awe-inspiring elements that entrance
@@ -995,7 +1064,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://twitter.com/punk6529"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     p
                                   </a>
                                 </span>
@@ -1028,7 +1098,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-20"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   Hobbs Blazes the Trail for Generative Art{" "}
@@ -1037,7 +1108,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-21"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   For many decades, generative art has been a
@@ -1105,15 +1177,17 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-8 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-8 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/Fidenza-938-400x480.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[b001ed6cf50d3e5f066]"
                                   data-title="Fidenza #938"
-                                  title="Fidenza #938">
+                                  title="Fidenza #938"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -1130,21 +1204,24 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-22"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 Fidenza #938, “God Mode”
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-9 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-9 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/Fidenza-772-400x480.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[9c5878235a5495c2d45]"
                                   data-title="Fidenza #772"
-                                  title="Fidenza #772">
+                                  title="Fidenza #772"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -1161,21 +1238,24 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-23"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 Fidenza #772
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-24"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>Marriage of Man and Machine </b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-25"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Our love of this kind of art is already
@@ -1204,15 +1284,17 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-10 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-10 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/Fidenza-612-400x480.jpg"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[76b82e30fee207ba606]"
                                   data-title="Fidenza #612"
-                                  title="Fidenza #612">
+                                  title="Fidenza #612"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -1229,14 +1311,16 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                             </div>
                             <div
                               className="fusion-text fusion-text-26"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 Fidenza #612
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-27"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 For the soulless autonomous computer, Hobbs is
                                 its soul, as all artists must be, breathing life
@@ -1262,7 +1346,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="/blog/a-tale-of-two-artists/"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     <b>
                                       A Tale of Two Artists: Van Gogh and XCOPY
                                     </b>
@@ -1281,7 +1366,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                       <a
                         href="/author/ladysabrina/"
                         title="Posts by Sabrina Khan"
-                        rel="author">
+                        rel="author"
+                      >
                         Sabrina Khan
                       </a>
                     </span>
@@ -1304,20 +1390,23 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
         type="button"
         className="fusion-one-page-text-link fusion-page-load-link"
         tabIndex={-1}
-        aria-hidden="true">
+        aria-hidden="true"
+      >
         Page load link
       </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
-          className="design-sharp alignment-right with-animation">
+          className="design-sharp alignment-right with-animation"
+        >
           <ul>
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fab-fa-twitter">
+                className="fab-fa-twitter"
+              >
                 <i className="fab fa-twitter" />
               </a>
             </li>{" "}
@@ -1326,7 +1415,8 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
       </div>
       <section
         className="to-top-container to-top-right"
-        aria-labelledby="awb-to-top-label">
+        aria-labelledby="awb-to-top-label"
+      >
         <button type="button" id="toTop" className="fusion-top-top-link">
           <span id="awb-to-top-label" className="screen-reader-text">
             Go to Top

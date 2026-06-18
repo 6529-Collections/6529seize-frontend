@@ -85,7 +85,8 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
       console.error("Failed to post eula consent", error);
       setToast({
         type: "error",
-        message: "Something went wrong...",
+        title: "Couldn't save this consent.",
+        description: "Please try again.",
       });
     }
   };

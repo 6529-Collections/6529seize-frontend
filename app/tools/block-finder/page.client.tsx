@@ -81,8 +81,7 @@ export default function BlockFinderClient() {
     setPredictedBlocks(null);
     if (timeWindow !== BlockPickerTimeWindow.NONE && !blockNumberIncludes) {
       setToast({
-        message:
-          "You must provide some block number inclusions when using a time window!",
+        message: "Add at least one block number when using a time window.",
         type: "error",
       });
       return;
@@ -93,7 +92,7 @@ export default function BlockFinderClient() {
       !/^\d+(,\s*\d+)*$/.test(blockNumberIncludes.trim())
     ) {
       setToast({
-        message: "Block numbers must be numeric and comma-separated!",
+        message: "Enter block numbers separated by commas.",
         type: "error",
       });
       return;
@@ -174,11 +173,9 @@ export default function BlockFinderClient() {
 
   return (
     <div className="tw-bg-iron-900">
-      <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-        <h1 className="tw-text-white pb-4">
-          Block Finder
-        </h1>
-        <div className="tw-w-full tw-mt-3 tw-mb-5 tw-flex tw-gap-x-4 tw-gap-y-5">
+      <div className="tailwind-scope tw-relative tw-mx-auto tw-min-h-screen tw-overflow-y-auto tw-px-4 tw-pb-12 tw-pt-8 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        <h1 className="pb-4 tw-text-white">Block Finder</h1>
+        <div className="tw-mb-5 tw-mt-3 tw-flex tw-w-full tw-gap-x-4 tw-gap-y-5">
           <div className="tw-w-1/2">
             <BlockPickerDateSelect
               date={date}
@@ -206,7 +203,8 @@ export default function BlockFinderClient() {
                 onClicked={onSubmit}
                 disabled={!date || !time}
                 loading={loading}
-                padding="tw-px-4 tw-py-3">
+                padding="tw-px-4 tw-py-3"
+              >
                 Submit
               </PrimaryButton>
             </div>

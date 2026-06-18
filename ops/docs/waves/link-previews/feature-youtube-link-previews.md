@@ -4,7 +4,9 @@ Parent: [Wave Link Previews Index](README.md)
 
 ## Overview
 
-Supported YouTube links render as dedicated video cards instead of plain links.
+Supported YouTube links render as dedicated video cards backed by the shared
+`/api/open-graph` preview pipeline instead of one-off client-side metadata
+fetching.
 
 This page covers:
 
@@ -43,17 +45,21 @@ Links that do not match these rules stay regular links.
 ## User Journey
 
 1. Open a surface with a supported YouTube URL.
-2. The renderer validates the URL and starts metadata fetch with canonical
-   `https://www.youtube.com/watch?v={id}`.
-3. If `list` and `index` are present, those query values are preserved in the
-   metadata fetch URL.
-4. A loading card appears with a stable `16:9` media frame and metadata
-   skeleton rows.
-5. On success, the card shows thumbnail, title, and channel name.
-6. Select play to swap the thumbnail for an inline embed player.
-7. In wave/DM chat layouts, side actions (open/copy) are shown. Author-only
+2. The renderer validates the URL and routes it through `LinkPreviewCard`.
+3. `/api/open-graph` detects the URL, fetches YouTube oEmbed metadata
+   server-side, and returns a typed `youtube.video` preview response.
+4. If `list` and `index` are present, those query values are preserved in the
+   metadata fetch URL. If a supported `start` or `t` value is present, it is
+   preserved for the watch and embed URLs.
+5. A loading card appears in the same stable frame system as other shared link
+   previews.
+6. On success, the card shows a black `16:9` thumbnail frame, title, channel
+   name, and a small YouTube source accent.
+7. Select play to swap the thumbnail for an inline `youtube-nocookie.com`
+   embed player.
+8. In wave/DM chat layouts, side actions (open/copy) are shown. Author-only
    preview toggle actions are shown when allowed.
-8. In home-style layouts, side actions are hidden.
+9. In home-style layouts, side actions are hidden.
 
 ## Common Scenarios
 
@@ -71,22 +77,24 @@ Links that do not match these rules stay regular links.
 - Unsupported YouTube host/path shapes stay regular links.
 - Invalid or missing video IDs stay regular links.
 - Unsupported YouTube links do not fall back to generic OpenGraph cards.
-- If returned embed HTML fails safety checks, the card falls back to the same
-  error state as failed loads.
+- If the YouTube oEmbed response is unavailable or invalid, shared link preview
+  loading falls back to the original link.
 
 ## Failure and Recovery
 
-- If the preview request fails, fallback card text is
-  `Failed to load YouTube preview`.
+- If the preview request fails, the shared link preview fallback renders the
+  original link.
 - If metadata fetch returns no usable payload (for example non-OK oEmbed
-  response), fallback card text is `YouTube preview unavailable`.
-- Fallback cards keep `Open on YouTube` linking to the original URL.
+  response), `/api/open-graph` returns an error for that URL and the client uses
+  the original link fallback.
 - There is no in-card retry action; reload or reopen the surface to retry.
 
 ## Limitations / Notes
 
 - Inline playback starts only after explicit user action.
-- Preview availability and card completeness depend on YouTube oEmbed responses.
+- Preview availability and card completeness depend on YouTube oEmbed
+  responses.
+- Shared preview batching and client caching apply to YouTube cards.
 - This page covers wave/DM markdown cards plus leaderboard and boosted home
   variants, not standalone media routes.
 

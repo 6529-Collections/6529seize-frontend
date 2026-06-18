@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { ApiWaveCurationRequest } from "@/generated/models/ApiWaveCurationRequest";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   getWaveCurationsQueryKey,
@@ -164,7 +165,9 @@ export function useWaveCurationReorderMutation({
 
       setToast({
         type: "error",
-        message: getErrorMessage(error),
+        title: "Couldn't update the curation order.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, getErrorMessage(error)),
       });
     },
     onSettled: async () => {

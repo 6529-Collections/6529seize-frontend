@@ -1,4 +1,5 @@
 import {
+  getMemeFocusLabel,
   getMemeTabTitle,
   getSharedAppServerSideProps,
   MEME_FOCUS,
@@ -17,6 +18,24 @@ describe("getMemeTabTitle", () => {
 
   it("returns original title when no extras", () => {
     expect(getMemeTabTitle("The Memes")).toBe("The Memes");
+  });
+
+  it("uses message-backed focus labels", () => {
+    expect(getMemeFocusLabel(MEME_FOCUS.COLLECTORS, "en-GB")).toBe(
+      "Collectors"
+    );
+    expect(
+      getMemeTabTitle("The Memes", "3", undefined, MEME_FOCUS.YOUR_TRANSACTIONS)
+    ).toBe("The Memes #3 | Your Transactions");
+  });
+
+  it("documents en-US fallback for non-English detail labels", () => {
+    expect(getMemeFocusLabel(MEME_FOCUS.COLLECTORS, "fr-FR")).toBe(
+      "Collectors"
+    );
+    expect(
+      getMemeTabTitle("The Memes", "3", undefined, MEME_FOCUS.HISTORY, "fr-FR")
+    ).toBe("The Memes #3 | History");
   });
 });
 

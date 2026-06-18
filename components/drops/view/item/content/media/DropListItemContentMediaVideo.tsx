@@ -4,10 +4,9 @@ import { useInView } from "@/hooks/useInView";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
-import { PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import React, { useEffect } from "react";
-import { InlineMediaActions } from "./MediaActionToolbar";
+import React, { useEffect, useRef } from "react";
+import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import { useMediaActions } from "./useMediaActions";
 
 interface Props {
@@ -15,6 +14,8 @@ interface Props {
   readonly mimeType?: string | undefined;
   readonly disableAutoPlay?: boolean | undefined;
   readonly fillContainer?: boolean | undefined;
+  readonly align?: "left" | "center" | undefined;
+  readonly showFullscreen?: boolean | undefined;
 }
 
 function DropListItemContentMediaVideo({
@@ -22,8 +23,11 @@ function DropListItemContentMediaVideo({
   mimeType,
   disableAutoPlay = false,
   fillContainer = false,
+  align = "left",
+  showFullscreen = true,
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const wasFullscreenRef = useRef(false);
   const { isApp } = useDeviceInfo();
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
@@ -48,7 +52,6 @@ function DropListItemContentMediaVideo({
     fallbackSrc: src,
     autoPlay: inView && !isApp && !disableAutoPlay,
   });
-  const showNativeControls = !isApp;
 
   // 3) Play/pause & mute based on scroll visibility
   const shouldAutoPlay = inView && !isApp && !disableAutoPlay;
@@ -56,6 +59,11 @@ function DropListItemContentMediaVideo({
   useEffect(() => {
     const videoEl = videoRef.current;
     if (!videoEl || isLoading) return;
+    const fullscreenElement = document.fullscreenElement;
+    if (fullscreenElement?.contains(videoEl) ?? false) {
+      wasFullscreenRef.current = true;
+      return;
+    }
 
     if (shouldAutoPlay) {
       // ensure muted autoplay works
@@ -82,11 +90,20 @@ function DropListItemContentMediaVideo({
 
     const pauseWhenFullscreenCloses = () => {
       const videoEl = videoRef.current;
-      if (!videoEl || document.fullscreenElement === videoEl) {
+      if (!videoEl) {
         return;
       }
 
-      videoEl.pause();
+      const fullscreenElement = document.fullscreenElement;
+      if (fullscreenElement?.contains(videoEl) ?? false) {
+        wasFullscreenRef.current = true;
+        return;
+      }
+
+      if (wasFullscreenRef.current) {
+        wasFullscreenRef.current = false;
+        videoEl.pause();
+      }
     };
 
     document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);
@@ -98,63 +115,20 @@ function DropListItemContentMediaVideo({
     };
   }, [isApp, videoRef]);
 
-  const enterFullscreenAndPlay = () => {
-    const videoEl = videoRef.current;
-    if (!videoEl) {
-      return;
-    }
-
-    videoEl.play().catch(() => undefined);
-    videoEl.requestFullscreen().catch(() => undefined);
-  };
-
   return (
     <div
       ref={wrapperRef}
       className={clsx(
-        "tw-group tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-bg-black",
-        fillContainer
-          ? "tw-h-full tw-max-h-full"
-          : "tw-max-h-64 tw-min-h-[200px]"
+        "tw-flex tw-w-full tw-items-start tw-justify-start",
+        fillContainer && "tw-h-full tw-max-h-full"
       )}
     >
-      <video
-        ref={videoRef}
-        onClick={() => {
-          if (!isApp) {
-            return;
-          }
-          enterFullscreenAndPlay();
-        }}
-        playsInline
-        controls={showNativeControls}
-        controlsList="nodownload noplaybackrate"
-        autoPlay={false}
-        muted
-        loop
-        className={clsx(
-          "tw-w-full tw-rounded-xl tw-object-contain",
-          fillContainer ? "tw-h-full tw-max-h-full" : "tw-h-auto tw-max-h-64"
-        )}
-      >
-        Your browser does not support the video tag.
-      </video>
-      {isApp && (
-        <button
-          type="button"
-          aria-label="Play video"
-          title="Play video"
-          onClick={(event) => {
-            event.stopPropagation();
-            enterFullscreenAndPlay();
-          }}
-          className="tw-absolute tw-left-1/2 tw-top-1/2 tw-z-20 tw-flex tw-size-16 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/75 tw-text-white tw-shadow-lg tw-shadow-black/30 tw-backdrop-blur-sm"
-        >
-          <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
-        </button>
-      )}
-      <InlineMediaActions
-        variant="video"
+      <SeizeVideoPlayer
+        videoRef={videoRef}
+        template="ambient-media"
+        layout={fillContainer ? "fill" : "natural"}
+        align={align}
+        showFullscreen={showFullscreen}
         onDownload={downloadMedia}
         onOpen={openMedia}
         openLabel={openLabel}

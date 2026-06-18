@@ -8,6 +8,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiMarkDropUnreadResponse } from "@/generated/models/ApiMarkDropUnreadResponse";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
@@ -82,15 +83,17 @@ export default function WaveDropActionsMarkUnread({
       }
 
       setToast({
-        message: "Marked as unread",
+        message: "Marked as unread.",
         type: "success",
       });
 
       onMarkUnread?.();
     } catch (error) {
       setToast({
-        message: typeof error === "string" ? error : "Failed to mark as unread",
         type: "error",
+        title: "Couldn't mark this drop as unread.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, "Could not mark as unread."),
       });
     } finally {
       setLoading(false);

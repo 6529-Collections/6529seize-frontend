@@ -13,6 +13,8 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
   redeemed The Memes subscriptions.
 - `/tools/app-wallets*`: create, import, and manage app-local wallets when
   runtime app-wallet support is available (supported native app environments).
+- `/tools/6529bot/admin`: private operator dashboard for central
+  `6529reviewbot` spend, budgets, alerts, and worker health.
 
 ## Read Order
 
@@ -23,6 +25,7 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 3. Read `Memes Subscriptions Report` for aggregate subscription reporting.
 4. Read `App Wallets Management` for native app-wallet setup, recovery, and
    unsupported-state behavior.
+5. Read `6529bot Admin` for the private bot operator route and auth boundary.
 
 ## Route Coverage
 
@@ -32,6 +35,7 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 - `/tools/app-wallets`
 - `/tools/app-wallets/import-wallet`
 - `/tools/app-wallets/{appWalletAddress}`
+- `/tools/6529bot/admin`
 
 ## Navigation and Visibility
 
@@ -48,6 +52,9 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
   - `Tools -> App Wallets` (only when app-wallet support is enabled)
 - When app-wallet support is unavailable, direct `/tools/app-wallets*` routes
   still load but show an unsupported message panel instead of wallet controls.
+- `6529bot Admin` is direct-route only. It is not listed in sidebar menus and
+  fails closed unless deployment config, 6529 wallet auth, and the server-side
+  operator allowlist all pass.
 - On iOS outside the US, `Subscriptions Report` is hidden in web sidebar and
   search.
 - On native app, the Tools drawer still lists `Memes Subscriptions`.
@@ -59,6 +66,7 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 2. [Block Finder](feature-block-finder.md)
 3. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
 4. [App Wallets Management](feature-app-wallets.md)
+5. [6529bot Admin](feature-6529bot-admin.md)
 
 ## Flows
 
@@ -80,3 +88,4 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 - [App Sidebar Menu](../navigation/feature-app-sidebar-menu.md)
 - [Profile Subscriptions Tab](../profiles/tabs/feature-subscriptions-tab.md)
 - [Meme Subscriptions Open Data](../open-data/feature-meme-subscriptions.md)
+- [6529bot Usage](../open-data/feature-6529bot-usage.md)

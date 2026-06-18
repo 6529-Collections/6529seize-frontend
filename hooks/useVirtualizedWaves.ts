@@ -104,44 +104,77 @@ export function useVirtualizedWaves<T>({
     );
   }, [listContainerRef, scrollContainerRef]);
 
+  const scheduleFrame = useCallback((callback: () => void) => {
+    if (typeof globalThis.requestAnimationFrame === "function") {
+      const id = globalThis.requestAnimationFrame(callback);
+      return () => globalThis.cancelAnimationFrame(id);
+    }
+
+    const id = globalThis.setTimeout(callback, 16);
+    return () => globalThis.clearTimeout(id);
+  }, []);
+
   // Restore scroll position on mount
   useLayoutEffect(() => {
     if (!isActive) {
       return;
     }
-    const el = scrollContainerRef.current;
-    if (!el) return;
 
-    restoreScrollPosition(el, getPosition(key));
-    setScrollOffset(el.scrollTop);
-    updateLayout();
-    const onScroll = () => {
+    let isDisposed = false;
+    let cancelScheduledFrame: (() => void) | null = null;
+    let cleanupScrollBinding: (() => void) | null = null;
+
+    const bindScrollContainer = () => {
+      if (isDisposed || cleanupScrollBinding !== null) {
+        return;
+      }
+
+      const el = scrollContainerRef.current;
+      if (!el) {
+        cancelScheduledFrame = scheduleFrame(bindScrollContainer);
+        return;
+      }
+
+      restoreScrollPosition(el, getPosition(key));
       setScrollOffset(el.scrollTop);
-      setPosition(key, el.scrollTop);
       updateLayout();
+      const onScroll = () => {
+        setScrollOffset(el.scrollTop);
+        setPosition(key, el.scrollTop);
+        updateLayout();
+      };
+      el.addEventListener("scroll", onScroll);
+
+      const canObserveResize = typeof globalThis.ResizeObserver === "function";
+      const resizeObserver = canObserveResize
+        ? new globalThis.ResizeObserver(updateLayout)
+        : null;
+
+      resizeObserver?.observe(el);
+      if (listContainerRef.current !== null) {
+        resizeObserver?.observe(listContainerRef.current);
+      }
+
+      cleanupScrollBinding = () => {
+        setPosition(key, el.scrollTop);
+        el.removeEventListener("scroll", onScroll);
+        resizeObserver?.disconnect();
+      };
     };
-    el.addEventListener("scroll", onScroll);
 
-    const canObserveResize = typeof globalThis.ResizeObserver === "function";
-    const resizeObserver = canObserveResize
-      ? new globalThis.ResizeObserver(updateLayout)
-      : null;
-
-    resizeObserver?.observe(el);
-    if (listContainerRef.current !== null) {
-      resizeObserver?.observe(listContainerRef.current);
-    }
+    bindScrollContainer();
 
     return () => {
-      setPosition(key, el.scrollTop);
-      el.removeEventListener("scroll", onScroll);
-      resizeObserver?.disconnect();
+      isDisposed = true;
+      cancelScheduledFrame?.();
+      cleanupScrollBinding?.();
     };
   }, [
     getPosition,
     isActive,
     key,
     listContainerRef,
+    scheduleFrame,
     scrollContainerRef,
     setPosition,
     updateLayout,

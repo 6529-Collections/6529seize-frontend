@@ -23,6 +23,7 @@ interface WavePodiumItemProps {
   readonly position: "first" | "second" | "third";
   readonly customAnimationIndex?: number | undefined;
   readonly showVoteDetails?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 interface PodiumAvatarProps {
@@ -188,11 +189,10 @@ const getPodiumIdentityDisplay = (drop: ExtendedDrop) => {
     pfp: identityProfile?.pfp ?? null,
     profileUser:
       identityProfile?.handle ?? identityProfile?.primary_address ?? null,
-    comparableIdentity:
-      identityProfile ?? {
-        handle: fallbackValue,
-        primary_address: fallbackValue,
-      },
+    comparableIdentity: identityProfile ?? {
+      handle: fallbackValue,
+      primary_address: fallbackValue,
+    },
   };
 };
 
@@ -238,6 +238,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   position,
   customAnimationIndex,
   showVoteDetails = true,
+  outcomesVisible = true,
 }) => {
   const styles = positionStyles[position];
   const hoverTextColorClass = getHoverTextColorClass(position);
@@ -492,7 +493,10 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   )}
 
                   <div onClick={(e) => e.stopPropagation()}>
-                    <WavePodiumItemContentOutcomes winner={winner} />
+                    <WavePodiumItemContentOutcomes
+                      winner={winner}
+                      outcomesVisible={outcomesVisible}
+                    />
                   </div>
                 </div>
               </div>

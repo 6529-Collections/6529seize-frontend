@@ -26,6 +26,7 @@ export class ApiWavePoll {
     'voted': Array<number>;
     'multichoice': boolean;
     'anonymous': boolean;
+    'only_droppers_can_respond': boolean;
     'closing_time': number;
     'is_open': boolean;
 
@@ -79,6 +80,12 @@ export class ApiWavePoll {
         {
             "name": "anonymous",
             "baseName": "anonymous",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "only_droppers_can_respond",
+            "baseName": "only_droppers_can_respond",
             "type": "boolean",
             "format": ""
         },

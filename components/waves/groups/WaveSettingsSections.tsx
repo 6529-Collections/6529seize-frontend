@@ -8,6 +8,7 @@ import WaveApproveTabLabels from "@/components/waves/specs/WaveApproveTabLabels"
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveGroup from "@/components/waves/specs/groups/group/WaveGroup";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
+import WaveOutcomesVisibility from "@/components/waves/specs/WaveOutcomesVisibility";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
 import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
 
@@ -38,11 +39,20 @@ export default function WaveSettingsSections({
   wave,
 }: WaveSettingsSectionsProps) {
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
+  const isDisplaySettingsWave =
+    wave.wave.type === ApiWaveType.Rank ||
+    wave.wave.type === ApiWaveType.Approve;
   const showChatSettings = wave.chat.enabled;
 
   return (
     <div className="tw-pb-4">
       <WaveActiveCurationSection wave={wave} />
+
+      {isDisplaySettingsWave && (
+        <SettingsSection title="Display">
+          <WaveOutcomesVisibility wave={wave} />
+        </SettingsSection>
+      )}
 
       {isApproveWave && (
         <>

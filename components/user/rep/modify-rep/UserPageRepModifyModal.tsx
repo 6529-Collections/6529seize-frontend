@@ -7,6 +7,7 @@ import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjus
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -88,7 +89,8 @@ export default function UserPageRepModifyModal({
   const adjustedValueNum = getStringAsNumberOrZero(adjustedRatingStr);
   const isValidValue =
     !!activeProfileProxy ||
-    (adjustedValueNum >= minMaxValues.min && adjustedValueNum <= minMaxValues.max);
+    (adjustedValueNum >= minMaxValues.min &&
+      adjustedValueNum <= minMaxValues.max);
 
   const [newRating, setNewRating] = useState<number>(
     getStringAsNumberOrZero(adjustedRatingStr)
@@ -121,9 +123,8 @@ export default function UserPageRepModifyModal({
     return false;
   };
 
-  const [isSaveDisabled, setIsSaveDisabled] = useState<boolean>(
-    getIsSaveDisabled()
-  );
+  const [isSaveDisabled, setIsSaveDisabled] =
+    useState<boolean>(getIsSaveDisabled());
 
   useEffect(() => {
     setIsSaveDisabled(getIsSaveDisabled());
@@ -160,8 +161,10 @@ export default function UserPageRepModifyModal({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update this Rep rating.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -178,7 +181,7 @@ export default function UserPageRepModifyModal({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in.",
+        message: "Log in to continue.",
         type: "error",
       });
       setMutating(false);
@@ -204,16 +207,16 @@ export default function UserPageRepModifyModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default">
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default"
+    >
       <div className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
+      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-end tw-justify-center tw-overflow-y-auto tw-p-2 tw-text-center sm:tw-items-center lg:tw-p-0">
         <div
           ref={modalRef}
-          className="sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6">
+          className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-md"
+        >
           <UserPageRepModifyModalHeader
-            handleOrWallet={
-              profile.query ?? profile.handle ?? profile.display
-            }
+            handleOrWallet={profile.query ?? profile.handle ?? profile.display}
             onClose={onClose}
           />
           {repState && (
@@ -226,9 +229,13 @@ export default function UserPageRepModifyModal({
           <form onSubmit={onSubmit} className="tw-mt-4">
             <div>
               <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
-                Your total Rep for <span className="tw-text-iron-300 tw-font-semibold">{category}</span>:
+                Your total Rep for{" "}
+                <span className="tw-font-semibold tw-text-iron-300">
+                  {category}
+                </span>
+                :
               </label>
-              <div className="tw-relative tw-flex tw-mt-1.5">
+              <div className="tw-relative tw-mt-1.5 tw-flex">
                 <UserPageRateInput
                   value={adjustedRatingStr}
                   onChange={setAdjustedRatingStr}
@@ -247,15 +254,16 @@ export default function UserPageRepModifyModal({
             </div>
 
             <div className="tw-mt-8">
-              <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
+              <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
                 <button
                   type="submit"
                   disabled={isSaveDisabled}
                   className={`${
                     !isSaveDisabled
-                      ? "tw-cursor-pointer hover:tw-bg-primary-600 hover:tw-border-primary-600"
+                      ? "tw-cursor-pointer hover:tw-border-primary-600 hover:tw-bg-primary-600"
                       : "tw-cursor-not-allowed tw-opacity-50"
-                  } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-border-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid  tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}>
+                  } tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out sm:tw-w-auto`}
+                >
                   {mutating ? (
                     <div className="tw-w-8">
                       <CircleLoader />
@@ -267,7 +275,8 @@ export default function UserPageRepModifyModal({
                 <button
                   onClick={onClose}
                   type="button"
-                  className="tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
+                  className="tw-mt-3 tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 sm:tw-mt-0 sm:tw-w-auto"
+                >
                   Cancel
                 </button>
               </div>

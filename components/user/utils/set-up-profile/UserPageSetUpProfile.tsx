@@ -13,6 +13,7 @@ import UserSettingsUsername from "@/components/user/settings/UserSettingsUsernam
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
@@ -107,8 +108,10 @@ export default function UserPageSetUpProfile({
     },
     onError: (error: unknown) => {
       setToast({
-        message: error as string,
         type: "error",
+        title: "Couldn't set up this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -121,7 +124,7 @@ export default function UserPageSetUpProfile({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in to save settings",
+        message: "Log in to save settings.",
         type: "error",
       });
       return;

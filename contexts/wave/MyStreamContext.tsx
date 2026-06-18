@@ -125,6 +125,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
     supportsPinning: true,
     otherListWaveIds: dmWaveIds,
+    preserveBackendWaveOrder: true,
   });
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
     supportsPinning: false,

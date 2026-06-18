@@ -61,11 +61,13 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     reserveMediaHeight,
     useNaturalHeightMedia,
     useCompactLink,
+    alignStart,
   }: {
     readonly groupedImage: boolean;
     readonly reserveMediaHeight: boolean;
     readonly useNaturalHeightMedia: boolean;
     readonly useCompactLink: boolean;
+    readonly alignStart: boolean;
   }) => {
     if (useCompactLink) {
       return "tw-w-full";
@@ -84,7 +86,10 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     }
 
     if (useNaturalHeightMedia) {
-      return "tw-flex tw-w-full tw-min-w-[min(200px,100%)] tw-max-h-64 tw-items-center tw-justify-center";
+      return clsx(
+        "tw-flex tw-w-full tw-min-w-[min(200px,100%)] tw-items-start",
+        alignStart ? "tw-justify-start" : "tw-justify-center"
+      );
     }
 
     return clsx(
@@ -103,10 +108,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       fullWidthMedia && media.mime_type.includes("image");
     const useImageReservedHeight =
       !fullWidthMedia && media.mime_type.includes("image");
-    const useVideoReservedHeight =
-      !fullWidthMedia && media.mime_type.includes("video");
-    const useNaturalHeightVideo =
-      fullWidthMedia && media.mime_type.includes("video");
+    const useVideoReservedHeight = false;
+    const useNaturalHeightVideo = media.mime_type.includes("video");
     const galleryItemId = media.mime_type.includes("image")
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
@@ -116,6 +119,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       reserveMediaHeight: useImageReservedHeight || useVideoReservedHeight,
       useNaturalHeightMedia: useNaturalHeightImage || useNaturalHeightVideo,
       useCompactLink,
+      alignStart: useNaturalHeightVideo,
     });
     let mediaContent;
 

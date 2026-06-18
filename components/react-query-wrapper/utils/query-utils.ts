@@ -1,5 +1,11 @@
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWaveSubscriptionTargetAction } from "@/generated/models/ApiWaveSubscriptionTargetAction";
+
+export const WAVE_SCORE_DISCOVERY_PARAMS = {
+  overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
+  scoreSort: ApiWaveScoreSort.Balanced,
+} as const;
 
 export const WAVE_FOLLOWING_WAVES_PARAMS = {
   limit: 20,

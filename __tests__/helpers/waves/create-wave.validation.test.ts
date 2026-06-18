@@ -53,6 +53,7 @@ describe("create-wave.validation", () => {
     outcomes: [{ id: 1 }],
     approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
     display: {
+      outcomesVisible: true,
       approve: {
         approvalsTabLabel: "",
         approvedTabLabel: "",
@@ -81,6 +82,7 @@ describe("create-wave.validation", () => {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
       display: {
+        ...baseConfig.display,
         approve: {
           approvalsTabLabel: "Candidates",
           approvedTabLabel: "Selected",
@@ -109,6 +111,7 @@ describe("create-wave.validation", () => {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
       display: {
+        ...baseConfig.display,
         approve: {
           approvalsTabLabel: "A".repeat(25),
           approvedTabLabel: "",
@@ -131,6 +134,7 @@ describe("create-wave.validation", () => {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
       display: {
+        ...baseConfig.display,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "Proposals",
@@ -155,6 +159,7 @@ describe("create-wave.validation", () => {
         ...baseConfig,
         overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
         display: {
+          ...baseConfig.display,
           approve: {
             approvalsTabLabel: label,
             approvedTabLabel: "Selected",

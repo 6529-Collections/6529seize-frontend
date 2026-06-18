@@ -29,6 +29,7 @@ interface BrainMobileViewContentProps {
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
   readonly isApproveWave?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
   readonly hasPolls?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onOpenQuickVote: () => void;
@@ -66,6 +67,7 @@ export default function BrainMobileViewContent({
   isMemesWave,
   isRankWave,
   isApproveWave = false,
+  outcomesVisible = true,
   hasPolls = false,
   onDropClick,
   onOpenQuickVote,
@@ -73,7 +75,8 @@ export default function BrainMobileViewContent({
   wave,
 }: BrainMobileViewContentProps) {
   const isCompetitionWave = isRankWave || isApproveWave;
-  const supportsOutcomeView = isCompetitionWave && !isCurationWave;
+  const supportsOutcomeView =
+    isCompetitionWave && !isCurationWave && outcomesVisible;
   const rankWave = isCompetitionWave ? (wave ?? null) : null;
   const outcomeWave = supportsOutcomeView ? (wave ?? null) : null;
   const curationWave = isCurationWave ? (wave ?? null) : null;

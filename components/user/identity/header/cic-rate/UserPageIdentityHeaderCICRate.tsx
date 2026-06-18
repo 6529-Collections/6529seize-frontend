@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import { useContext, useEffect, useState } from "react";
 import type { ApiProfileRaterCicState } from "@/entities/IProfile";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -97,8 +98,10 @@ export default function UserPageIdentityHeaderCICRate({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update this NIC rating.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -198,7 +201,7 @@ export default function UserPageIdentityHeaderCICRate({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in.",
+        message: "Log in to continue.",
         type: "error",
       });
       return;
@@ -327,7 +330,7 @@ export default function UserPageIdentityHeaderCICRate({
                   isSaveDisabled
                     ? "tw-cursor-not-allowed tw-opacity-40"
                     : "hover:tw-border-emerald-500 hover:tw-bg-emerald-500 active:tw-scale-[0.98]"
-                } tw-w-full md:tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-600 tw-bg-emerald-600 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out`}
+                } tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-emerald-600 tw-bg-emerald-600 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out md:tw-flex-1`}
               >
                 {fullButtonContent}
               </button>
@@ -335,7 +338,7 @@ export default function UserPageIdentityHeaderCICRate({
                 <button
                   onClick={onCancel}
                   type="button"
-                  className="tw-w-full md:tw-flex-1 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
+                  className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 md:tw-flex-1"
                 >
                   Cancel
                 </button>

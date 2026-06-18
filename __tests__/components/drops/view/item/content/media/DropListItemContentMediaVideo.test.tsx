@@ -4,12 +4,13 @@ import "@testing-library/jest-dom";
 import DropListItemContentMediaVideo from "@/components/drops/view/item/content/media/DropListItemContentMediaVideo";
 
 const downloadMediaUrlMock = jest.fn();
+let mockIsApp = false;
 
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false }),
 }));
-jest.mock("@/hooks/useDeviceInfo", () => () => ({ isApp: false }));
+jest.mock("@/hooks/useDeviceInfo", () => () => ({ isApp: mockIsApp }));
 jest.mock("@/hooks/useInView", () => ({ useInView: jest.fn() }));
 jest.mock("@/hooks/useOptimizedVideo", () => ({
   useOptimizedVideo: jest.fn(),
@@ -29,7 +30,12 @@ describe("DropListItemContentMediaVideo", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+    mockIsApp = false;
     downloadMediaUrlMock.mockClear();
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      value: null,
+    });
   });
 
   it("renders video when in view", () => {
@@ -55,6 +61,23 @@ describe("DropListItemContentMediaVideo", () => {
     const vid = document.querySelector("video") as HTMLVideoElement;
     expect(vid).toBeTruthy();
     expect(vid.autoplay).toBe(false); // Component uses useEffect for controlled playback
+  });
+
+  it("centers the natural video player when requested", () => {
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    render(<DropListItemContentMediaVideo src="foo.mp4" align="center" />);
+
+    expect(screen.getByRole("group", { name: "Video player" })).toHaveClass(
+      "tw-mx-auto"
+    );
   });
 
   it("renders video even when not in view (but paused)", () => {
@@ -89,6 +112,64 @@ describe("DropListItemContentMediaVideo", () => {
 
     render(<DropListItemContentMediaVideo src="foo.mp4" disableAutoPlay />);
     expect(playSpy).not.toHaveBeenCalled();
+  });
+
+  it("does not pause while its video is in wrapper fullscreen", () => {
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, false]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const pauseSpy = jest.fn();
+    Object.defineProperty(HTMLVideoElement.prototype, "pause", {
+      configurable: true,
+      value: pauseSpy,
+    });
+
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      value: document.body,
+    });
+
+    render(<DropListItemContentMediaVideo src="foo.mp4" />);
+
+    expect(pauseSpy).not.toHaveBeenCalled();
+  });
+
+  it("pauses an app video after its wrapper fullscreen exits", () => {
+    mockIsApp = true;
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, false]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const pauseSpy = jest.fn();
+    Object.defineProperty(HTMLVideoElement.prototype, "pause", {
+      configurable: true,
+      value: pauseSpy,
+    });
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      value: document.body,
+    });
+
+    render(<DropListItemContentMediaVideo src="foo.mp4" />);
+
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      value: null,
+    });
+    document.dispatchEvent(new Event("fullscreenchange"));
+
+    expect(pauseSpy).toHaveBeenCalledTimes(1);
   });
 
   it("always shows the inline video media actions", () => {

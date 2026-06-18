@@ -213,7 +213,7 @@ const createEditHandlers = (
       });
 
       mockSetToast({
-        message: "Drop updated successfully",
+        message: "Drop updated.",
         type: "success",
       });
       mockInvalidateDrops();
@@ -222,7 +222,7 @@ const createEditHandlers = (
       // Explicitly handle test error scenario - log error for debugging
       console.error("Test error scenario triggered:", error);
       mockSetToast({
-        message: "Failed to update drop. Please try again.",
+        message: "Couldn't update this drop. Please try again.",
         type: "error",
       });
     }
@@ -394,7 +394,7 @@ describe("Edit Drop Integration Flow", () => {
 
       // Step 5: Verify success toast
       expect(mockSetToast).toHaveBeenCalledWith({
-        message: "Drop updated successfully",
+        message: "Drop updated.",
         type: "success",
       });
 
@@ -482,7 +482,7 @@ describe("Edit Drop Integration Flow", () => {
       // Verify error toast is shown
       await waitFor(() => {
         expect(mockSetToast).toHaveBeenCalledWith({
-          message: "Failed to update drop. Please try again.",
+          message: "Couldn't update this drop. Please try again.",
           type: "error",
         });
       });
@@ -504,7 +504,7 @@ describe("Edit Drop Integration Flow", () => {
             body: { content, mentioned_users: mentions },
           });
           mockSetToast({
-            message: "Drop updated successfully",
+            message: "Drop updated.",
             type: "success",
           });
           mockInvalidateDrops();

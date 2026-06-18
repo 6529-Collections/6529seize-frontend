@@ -1,7 +1,4 @@
 "use client";
-
-/* eslint-disable max-lines -- This composer already exceeds the diff lint limit. */
-
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import type {
   CreateDropConfig,
@@ -20,6 +17,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -69,6 +67,7 @@ import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
+import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useWebSocket } from "@/services/websocket";
@@ -92,6 +91,10 @@ import {
   hasCurrentDropPartContent,
   shouldUseInitialDropConfig,
 } from "./utils/createDropContentSubmission";
+import {
+  hasPendingInlineImageUploadDrop,
+  hasPendingInlineImageUploadMarkdown,
+} from "@/helpers/waves/inline-image-upload.helpers";
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
@@ -735,15 +738,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const getMarkdown = useMemo(
     () =>
       editorState
-        ? exportDropMarkdown(editorState, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-            HASHTAG_TRANSFORMER,
-            WAVE_MENTION_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ])
+        ? normalizeTypedEmojiShortcuts(
+            exportDropMarkdown(editorState, [
+              ...SAFE_MARKDOWN_TRANSFORMERS,
+              MENTION_TRANSFORMER,
+              ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
+              HASHTAG_TRANSFORMER,
+              WAVE_MENTION_TRANSFORMER,
+              IMAGE_TRANSFORMER,
+              EMOJI_TRANSFORMER,
+            ])
+          )
         : null,
     [canMentionAll, editorState]
   );
@@ -802,6 +807,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return true;
   };
 
+  const hasPendingInlineImageUpload = useMemo(
+    () =>
+      hasPendingInlineImageUploadMarkdown(getMarkdown) ||
+      (drop ? hasPendingInlineImageUploadDrop(drop) : false),
+    [drop, getMarkdown]
+  );
+
   const getCanSubmit = () => {
     const dropParts = drop?.parts ?? [];
 
@@ -813,6 +825,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         hasMetadata,
         hasPoll: hasValidPoll,
       }) &&
+      !hasPendingInlineImageUpload &&
       !hasMetadataValidationErrors &&
       !hasPollValidationError &&
       !!(dropParts.length ? getCanSubmitStorm() : true)
@@ -827,7 +840,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       getMarkdown?.length ?? 0
     ) ?? 0) >= 24000;
 
-  const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
+  const getCanAddPart = () =>
+    getHaveMarkdownOrFile() &&
+    !hasPendingInlineImageUpload &&
+    !getIsDropLimit();
   const isSlowModeSubmitBlocked = isChatBlockedBySlowMode && !isDropMode;
   const isChatLinksRestrictionActive = isChatLinkRestrictionApplicable({
     dropType: ApiDropType.Chat,
@@ -1435,8 +1451,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       refreshState();
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't submit this drop.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setSubmitting(false);
@@ -1456,6 +1474,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const onDrop = async (): Promise<void> => {
     if (submitting) {
+      return;
+    }
+
+    if (hasPendingInlineImageUpload) {
       return;
     }
 
@@ -1508,6 +1530,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const onGifDrop = async (gif: string): Promise<void> => {
     if (submitting) {
+      return;
+    }
+    if (hasPendingInlineImageUpload) {
       return;
     }
     if (identityValidationMessage) {
@@ -1588,8 +1613,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       });
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't add this file.",
+        description: "Check the file and try again.",
+        details: getToastErrorDetails(error),
       });
       return;
     }

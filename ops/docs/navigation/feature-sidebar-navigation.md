@@ -70,7 +70,7 @@ On web layouts, route switching is sidebar-first.
   delegation pages, `/meme-accounting`, `/meme-gas`,
   optional `/tools/subscriptions-report`, optional `/tools/app-wallets`,
   `/tools/api`, `/emma`, `/tools/block-finder`,
-  `/open-data`, `/open-data/network-metrics`,
+  `/open-data`, `/open-data/6529bot`, `/open-data/network-metrics`,
   optional `/open-data/meme-subscriptions`, `/open-data/rememes`,
   `/open-data/team`, `/open-data/royalties`.
 - Use collapsed-rail flyouts for grouped destinations:

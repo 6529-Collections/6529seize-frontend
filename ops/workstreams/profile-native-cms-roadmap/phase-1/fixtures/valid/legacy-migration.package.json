@@ -1,0 +1,189 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-legacy-migration-v1",
+  "profile": {
+    "handle": "6529museum",
+    "profile_id": "profile-6529museum"
+  },
+  "site": {
+    "title": "6529 Museum Migration Fixture",
+    "description": "A fixture for migrating a hardcoded content family into a profile CMS site.",
+    "base_path": "/6529museum/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "system",
+      "accent": "#444444"
+    },
+    "navigation_id": "nav-main",
+    "metadata_defaults": [
+      {
+        "scope": {
+          "path_prefix": "/6529museum/exhibitions/"
+        },
+        "values": {
+          "search": "include",
+          "robots": "index",
+          "locale": "en"
+        }
+      }
+    ],
+    "required_renderer_capabilities": ["static_blocks", "aliases"]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/6529museum/index.html",
+        "kind": "page",
+        "page_id": "page-home"
+      },
+      {
+        "path": "/6529museum/exhibitions/the-memes/index.html",
+        "kind": "page",
+        "page_id": "page-exhibition"
+      },
+      {
+        "path": "/6529museum/legacy/museum/the-memes/index.html",
+        "kind": "alias",
+        "target": "/6529museum/exhibitions/the-memes/index.html"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-home",
+        "type": "page",
+        "path": "/6529museum/index.html",
+        "metadata": {
+          "title": "6529 Museum",
+          "description": "Migrated museum homepage fixture.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529museum/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "Museum",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-home-title",
+            "block_type": "heading",
+            "level": 1,
+            "text": "6529 Museum"
+          }
+        ]
+      },
+      {
+        "id": "page-exhibition",
+        "type": "page",
+        "path": "/6529museum/exhibitions/the-memes/index.html",
+        "metadata": {
+          "title": "The Memes Exhibition",
+          "description": "Migrated exhibition page fixture.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529museum/exhibitions/the-memes/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes",
+          "search": "include",
+          "robots": "index"
+        },
+        "source": {
+          "source_packet_id": "source-migration"
+        },
+        "blocks": [
+          {
+            "id": "block-exhibition-title",
+            "block_type": "heading",
+            "level": 1,
+            "text": "The Memes Exhibition"
+          },
+          {
+            "id": "block-migration-note",
+            "block_type": "callout",
+            "tone": "note",
+            "content": "This fixture models a route family migrated from hardcoded pages into profile CMS."
+          }
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-og",
+        "kind": "social_image",
+        "uri": "ipfs://bafyfixturemigration/og.png",
+        "content_hash": "sha256:3939393939393939393939393939393939393939393939393939393939393939",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 630,
+        "file_size_bytes": 47000,
+        "roles": ["social"],
+        "alt_text": "Social preview for migrated museum fixture"
+      }
+    ],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Museum",
+            "page_id": "page-home"
+          },
+          {
+            "label": "The Memes",
+            "page_id": "page-exhibition"
+          }
+        ]
+      }
+    ],
+    "source_packets": [
+      {
+        "id": "source-migration",
+        "source_type": "import",
+        "captured_at": "2026-06-17T00:00:00Z",
+        "content_hash": "sha256:4040404040404040404040404040404040404040404040404040404040404040",
+        "legacy_routes": ["/museum/the-memes"]
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-cms-static",
+      "renderer_version": "0.0.0-fixture",
+      "route_count": 3,
+      "asset_count": 1,
+      "warnings": [
+        "in-profile legacy alias route included for migration coverage"
+      ]
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:4141414141414141414141414141414141414141414141414141414141414141",
+    "package_hash": "sha256:4242424242424242424242424242424242424242424242424242424242424242",
+    "note": "Fixture placeholder hash; replace with generated vector before Phase 2."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:6529museum",
+      "signature": "fixture-signature-migration",
+      "signed_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://bafyfixturemigration",
+      "content_hash": "sha256:4242424242424242424242424242424242424242424242424242424242424242",
+      "provider_content_id": "bafyfixturemigration",
+      "pinned": true,
+      "canonical": true,
+      "recorded_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-fixture",
+    "builder_version": "0.0.0",
+    "created_at": "2026-06-17T00:00:00Z",
+    "notes": "Valid institutional migration fixture."
+  }
+}

@@ -2,6 +2,8 @@
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
+import { normalizeLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { type JSX } from "react";
 
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
@@ -17,6 +19,11 @@ const refreshWithoutToastOverride = () => {
   globalThis.location.reload();
 };
 
+const getBrowserLocale = () =>
+  normalizeLocale(
+    globalThis.navigator?.languages?.[0] ?? globalThis.navigator?.language
+  );
+
 const NewVersionToast = (): JSX.Element | null => {
   const isVersionStale = useIsVersionStale();
   const { isApp } = useDeviceInfo();
@@ -24,6 +31,9 @@ const NewVersionToast = (): JSX.Element | null => {
   if (!isVersionStale) {
     return null;
   }
+
+  const locale = getBrowserLocale();
+  const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
 
   return (
     <div
@@ -33,17 +43,17 @@ const NewVersionToast = (): JSX.Element | null => {
     >
       <button
         type="button"
-        aria-label="Refresh page"
-        title="Refresh page"
+        aria-label={refreshActionLabel}
+        title={refreshActionLabel}
         onClick={refreshWithoutToastOverride}
         className="toast-shell tw-group tw-pointer-events-auto tw-relative tw-mx-auto tw-flex tw-w-full tw-animate-fadeIn tw-cursor-pointer tw-items-center tw-justify-between tw-gap-1 tw-overflow-hidden tw-rounded-[18px] tw-border-none tw-bg-[#15191b] tw-px-[18px] tw-py-2 tw-text-iron-50 tw-shadow-[0_0_0_1px_rgba(126,158,134,0.34),_0_2px_12px_rgba(0,0,0,0.36),_0_18px_40px_rgba(0,0,0,0.60),_0_0_34px_rgba(49,205,105,0.15),_inset_0_1px_0_rgba(255,255,255,0.07),_inset_0_-1px_0_rgba(49,205,105,0.08)] tw-backdrop-blur-xl tw-transition-[box-shadow,transform] tw-duration-200 tw-ease-out before:tw-pointer-events-none before:tw-absolute before:tw-inset-0 before:tw-origin-[82%_50%] before:tw-scale-95 before:tw-bg-[radial-gradient(circle_at_82%_50%,rgba(42,185,82,0.34),rgba(18,44,29,0.20)_32%,transparent_64%)] before:tw-opacity-0 before:tw-transition-[opacity,transform] before:tw-duration-200 before:tw-ease-out before:tw-content-[''] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#95ffad] active:tw-scale-[0.985] desktop-hover:hover:tw-shadow-[0_0_0_1px_rgba(66,168,84,0.50),_0_2px_12px_rgba(0,0,0,0.34),_0_18px_40px_rgba(0,0,0,0.56),_0_0_16px_rgba(49,205,105,0.12),_inset_0_1px_0_rgba(153,255,176,0.12),_inset_0_0_20px_rgba(35,126,61,0.12)] desktop-hover:hover:before:tw-scale-100 desktop-hover:hover:before:tw-opacity-100 sm:tw-ml-auto sm:tw-mr-0 sm:tw-w-[372px]"
       >
         <div className="tw-relative tw-z-10 tw-min-w-0 tw-pr-1">
           <div className="tw-whitespace-nowrap tw-text-[15px] tw-font-bold tw-leading-tight tw-text-[#f5f7f6] sm:tw-text-base">
-            A new version is available
+            {t(locale, "newVersionToast.title")}
           </div>
           <div className="tw-mt-0.5 tw-flex tw-items-center tw-gap-1 tw-text-[13px] tw-font-semibold tw-leading-none tw-text-[#b9c0c4] sm:tw-text-sm">
-            <span>Yes, again!</span>
+            <span>{t(locale, "newVersionToast.eyebrow")}</span>
             <img
               src="/emojis/sgt_wink.webp"
               alt=""

@@ -22,6 +22,8 @@ restores it whenever that wave is opened again and the tab is still available.
 - Open a wave from waves lists, profile wave links, or a shared wave URL.
 - Open a direct message thread with a selected wave.
 - Select a tab from the wave tab strip.
+- Eligible wave admins can use the tab-row `+` menu to create a curation or,
+  on root non-direct-message waves, create a subwave.
 
 ## User Journey
 
@@ -36,8 +38,8 @@ restores it whenever that wave is opened again and the tab is still available.
      it is still available.
 4. Select a tab to switch sections.
 5. The main content panel updates in place while staying on the same route.
-6. When open polls still need the signed-in user's answer, the `Polls` tab shows
-   an unread-style count badge.
+6. When open polls still need the signed-in user's answer and the user can
+   respond, the `Polls` tab shows an unread-style count badge.
 7. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and
    an inline media format badge when that drop includes media metadata.
    For non-image media, that thumbnail comes from a `preview_image` metadata value
@@ -59,6 +61,9 @@ restores it whenever that wave is opened again and the tab is still available.
   `preview_image` metadata is valid.
 - Move between waves and return later; the previously selected tab is restored for the
   wave if it remains available.
+- Polls can allow every reader to respond or limit responses to people who can
+  chat. Readers who cannot respond still see poll results, but vote controls are
+  hidden.
 
 ## Edge Cases
 

@@ -9,7 +9,7 @@ import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import {
@@ -21,6 +21,14 @@ import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
 import styles from "./Delegation.module.scss";
+
+function getTransactionErrorToastMessage(
+  error: { message?: string } | null | undefined,
+  fallback: string
+) {
+  const message = error?.message?.split("Request Arguments")[0]?.trim();
+  return message || fallback;
+}
 
 function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>
@@ -113,13 +121,22 @@ export function DelegationFormOriginalDelegatorFormGroup(
 }
 
 export function DelegationAddressDisabledInput(
-  props: Readonly<{ address: string; ens: string | null | undefined }>
+  props: Readonly<{
+    address?: string | undefined;
+    ens: string | null | undefined;
+  }>
 ) {
+  const displayValue = props.address
+    ? props.ens
+      ? `${props.ens} - ${props.address}`
+      : props.address
+    : "Connect wallet to continue";
+
   return (
     <Form.Control
       className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
       type="text"
-      value={props.ens ? `${props.ens} - ${props.address}` : `${props.address}`}
+      value={displayValue}
       disabled
     />
   );
@@ -251,7 +268,7 @@ export function DelegationSubmitGroups(
     gasError?: string | undefined;
     validate: () => string[];
     onHide: () => void;
-    onSetToast: (toast: { title: string; message: string }) => void;
+    onSetToast: (toast: { title: string; message: ReactNode }) => void;
     submitBtnLabel?: string | undefined;
   }>
 ) {
@@ -272,7 +289,7 @@ export function DelegationSubmitGroups(
   });
   const [errors, setErrors] = useState<string[]>([]);
   const emitToast = useEffectEvent(
-    (toast: { title: string; message: string }) => {
+    (toast: { title: string; message: ReactNode }) => {
       onSetToast(toast);
     }
   );
@@ -291,42 +308,69 @@ export function DelegationSubmitGroups(
     }
   }
 
-  function getTransactionAnchor(hash: any) {
-    return `<a href=${getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
-    target="_blank"
-    rel="noopener noreferrer"
-    className=${styles["etherscanLink"]}>
-      view
-    </a>`;
+  function getTransactionAnchor(hash: `0x${string}`) {
+    return (
+      <a
+        href={getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles["etherscanLink"]}
+      >
+        view
+      </a>
+    );
   }
 
   useEffect(() => {
     if (writeDelegation.error) {
       emitToast({
         title,
-        message: writeDelegation.error.message.split("Request Arguments")[0]!,
+        message: getTransactionErrorToastMessage(
+          writeDelegation.error,
+          "Failed to start transaction."
+        ),
       });
     }
     if (writeDelegation.data) {
       if (waitWriteDelegation.isLoading) {
         emitToast({
           title,
-          message: `Transaction submitted...
-                    ${getTransactionAnchor(writeDelegation.data)}
-                    <br />Waiting for confirmation...`,
+          message: (
+            <>
+              Transaction submitted...{" "}
+              {getTransactionAnchor(writeDelegation.data)}
+              <br />
+              Waiting for confirmation...
+            </>
+          ),
         });
-      } else {
+      } else if (waitWriteDelegation.isSuccess) {
         emitToast({
           title,
-          message: `Transaction Successful!
-                    ${getTransactionAnchor(writeDelegation.data)}`,
+          message: (
+            <>
+              Transaction Successful!{" "}
+              {getTransactionAnchor(writeDelegation.data)}
+            </>
+          ),
+        });
+      } else if (waitWriteDelegation.isError) {
+        emitToast({
+          title: `${title} Failed`,
+          message: getTransactionErrorToastMessage(
+            waitWriteDelegation.error,
+            "Transaction failed while waiting for confirmation."
+          ),
         });
       }
     }
   }, [
     writeDelegation.error,
     writeDelegation.data,
+    waitWriteDelegation.error,
+    waitWriteDelegation.isError,
     waitWriteDelegation.isLoading,
+    waitWriteDelegation.isSuccess,
     title,
   ]);
 
@@ -348,6 +392,7 @@ export function DelegationSubmitGroups(
         >
           {showCancel && (
             <button
+              type="button"
               className={styles["newDelegationCancelBtn"]}
               onClick={() => onHide()}
             >
@@ -355,6 +400,8 @@ export function DelegationSubmitGroups(
             </button>
           )}
           <button
+            type="button"
+            disabled={isLoading()}
             className={`${styles["newDelegationSubmitBtn"]} ${
               isLoading() ? `${styles["newDelegationSubmitBtnDisabled"]}` : ``
             }`}
@@ -367,7 +414,7 @@ export function DelegationSubmitGroups(
             {isLoading() && (
               <div className="d-inline">
                 <output className={`spinner-border ${styles["loader"]}`}>
-                  <span className="sr-only"></span>
+                  <span className="sr-only">Transaction pending</span>
                 </output>
               </div>
             )}
@@ -378,6 +425,8 @@ export function DelegationSubmitGroups(
         <Form.Group
           as={Row}
           className={`pt-2 pb-2 ${styles["newDelegationError"]}`}
+          role="alert"
+          aria-live="assertive"
         >
           <Form.Label column sm={4} className="d-flex align-items-center">
             Errors
@@ -464,13 +513,15 @@ export function DelegationCloseButton(
 
   return (
     <>
-      <FontAwesomeIcon
+      <button
+        type="button"
         aria-label={`Cancel ${props.title}`}
         className={styles["closeNewDelegationForm"]}
-        icon={faTimesCircle}
         onClick={() => props.onHide()}
         data-tooltip-id={tooltipId}
-      ></FontAwesomeIcon>
+      >
+        <FontAwesomeIcon icon={faTimesCircle} aria-hidden />
+      </button>
       <Tooltip
         id={tooltipId}
         place="top"

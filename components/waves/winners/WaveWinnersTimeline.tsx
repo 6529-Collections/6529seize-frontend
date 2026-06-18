@@ -14,6 +14,7 @@ interface WaveWinnersTimelineProps {
   readonly wave: ApiWave;
   readonly isLoading: boolean;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
@@ -22,6 +23,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   wave,
   isLoading,
   contentPresentation,
+  outcomesVisible = true,
 }) => {
   if (isLoading) {
     return <WaveWinnersTimelineLoading />;
@@ -85,6 +87,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
                       wave={wave}
                       isLoading={false}
                       contentPresentation={contentPresentation}
+                      outcomesVisible={outcomesVisible}
                     />
                   </div>
                 </div>

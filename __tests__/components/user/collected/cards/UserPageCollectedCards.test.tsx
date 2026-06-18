@@ -6,8 +6,18 @@ import {
   CollectionSort,
 } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
-import { render, screen } from "@testing-library/react";
+import { t as translate } from "@/i18n/messages";
+import { render, screen, within } from "@testing-library/react";
 import React from "react";
+
+jest.mock("@/i18n/messages", () => {
+  const actual =
+    jest.requireActual<typeof import("@/i18n/messages")>("@/i18n/messages");
+  return {
+    ...actual,
+    t: jest.fn(actual.t),
+  };
+});
 
 jest.mock("@/components/user/collected/cards/UserPageCollectedCard", () => {
   const MockedCard = (props: any) => (
@@ -37,7 +47,9 @@ jest.mock(
   "@/components/user/collected/cards/UserPageCollectedCardsNoCards",
   () => {
     const MockedNoCards = (props: any) => (
-      <div data-testid="no-cards">{String(props.filters.collection)}</div>
+      <div data-testid="no-cards" data-locale={props.locale}>
+        {String(props.filters.collection)}
+      </div>
     );
 
     MockedNoCards.displayName = "UserPageCollectedCardsNoCards";
@@ -84,7 +96,16 @@ const renderWithProviders = (component: React.ReactNode) => {
   return render(<TransferProvider>{component}</TransferProvider>);
 };
 
+const translateMock = translate as jest.MockedFunction<typeof translate>;
+
 describe("UserPageCollectedCards", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    for (const key of Object.keys(paginationProps)) {
+      delete paginationProps[key];
+    }
+  });
+
   it("renders cards and pagination when cards exist", () => {
     const setPage = jest.fn();
     renderWithProviders(
@@ -95,9 +116,13 @@ describe("UserPageCollectedCards", () => {
         showDataRow={true}
         filters={{ ...baseFilters, collection: null }}
         setPage={setPage}
+        dataTransfer={[]}
+        locale="fr-FR"
       />
     );
 
+    const cardsList = screen.getByRole("list", { name: "Collected cards" });
+    expect(within(cardsList).getAllByRole("listitem")).toHaveLength(2);
     expect(screen.getAllByTestId("card")).toHaveLength(2);
     expect(screen.getAllByTestId("card")[0]).toHaveAttribute(
       "data-show-data-row",
@@ -106,6 +131,10 @@ describe("UserPageCollectedCards", () => {
     expect(screen.getByTestId("pagination")).toHaveTextContent("Page 2 of 3");
     expect(paginationProps.setCurrentPage).toBe(setPage);
     expect(paginationProps.haveNextPage).toBe(true);
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.cards.listLabel"
+    );
   });
 
   it("omits pagination when only one page", () => {
@@ -117,6 +146,7 @@ describe("UserPageCollectedCards", () => {
         showDataRow={false}
         filters={{ ...baseFilters, collection: null }}
         setPage={() => {}}
+        dataTransfer={[]}
       />
     );
 
@@ -132,10 +162,17 @@ describe("UserPageCollectedCards", () => {
         showDataRow={false}
         filters={{ ...baseFilters, collection: CollectedCollectionType.MEMES }}
         setPage={() => {}}
+        dataTransfer={[]}
+        locale="de-DE"
       />
     );
 
     expect(screen.getByTestId("no-cards")).toHaveTextContent("MEMES");
+    expect(screen.getByTestId("no-cards")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(screen.queryByRole("list", { name: "Collected cards" })).toBeNull();
     expect(screen.queryByTestId("card")).toBeNull();
   });
 });

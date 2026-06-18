@@ -66,6 +66,10 @@ The default app port is `3001`.
 - Avoid editing generated files directly unless regenerating them from source.
 - Update user-facing documentation under `ops/docs/` when user-visible behavior
   changes.
+- For new or touched frontend UI, follow the accessibility and localization
+  standards in [ops/standards](ops/standards/README.md). Do not add new
+  accessibility or i18n debt when a touched surface can reasonably meet the
+  standard.
 
 Useful commands:
 

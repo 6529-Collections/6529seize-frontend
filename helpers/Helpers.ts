@@ -10,6 +10,12 @@ import {
 } from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
 import {
+  canonicalizeGatewayHostname,
+  normalizeDecentralizedMediaUrl,
+  parseDecentralizedMediaRef,
+  toExternalFallbackUrls,
+} from "@/lib/media/decentralized-media";
+import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
@@ -323,20 +329,35 @@ export function parseIpfsUrl(url: string) {
   if (!url) {
     return url;
   }
-  if (url.startsWith("ipfs")) {
-    return `https://ipfs.io/ipfs/${url.split("://")[1]}`;
-  }
-  return url;
+  return (
+    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
+    url
+  );
 }
 
 export function parseIpfsUrlToGateway(url: string) {
   if (!url) {
     return url;
   }
-  if (url.startsWith("ipfs")) {
-    return `https://cf-ipfs.com/ipfs/${url.split("://")[1]}`;
+  const parsed = parseDecentralizedMediaRef(url);
+  if (!parsed) {
+    return url;
   }
-  return url;
+  const fallbacks = toExternalFallbackUrls(parsed);
+  return (
+    fallbacks.find((fallback) => {
+      try {
+        return (
+          canonicalizeGatewayHostname(new URL(fallback).hostname) ===
+          "cf-ipfs.com"
+        );
+      } catch {
+        return false;
+      }
+    }) ??
+    fallbacks[0] ??
+    parseIpfsUrl(url)
+  );
 }
 
 export function isEmptyObject(obj: any) {

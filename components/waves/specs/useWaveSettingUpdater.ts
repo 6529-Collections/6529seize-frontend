@@ -8,6 +8,7 @@ import {
   canEditWave,
   convertWaveToUpdateWave,
 } from "@/helpers/waves/waves.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useContext, useState } from "react";
 
@@ -34,7 +35,8 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
         if (!success) {
           setToast({
             type: "error",
-            message: "Failed to authenticate",
+            message:
+              "Couldn't authenticate. Reconnect your wallet and try again.",
           });
           return;
         }
@@ -48,8 +50,10 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
         closeEditor();
       } catch (error) {
         setToast({
-          message: error instanceof Error ? error.message : String(error),
           type: "error",
+          title: "Couldn't save these wave settings.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error),
         });
       } finally {
         setMutating(false);

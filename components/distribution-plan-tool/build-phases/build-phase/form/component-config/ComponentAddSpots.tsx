@@ -27,7 +27,7 @@ export default function ComponentAddSpots({
   const onAddSpots = () => {
     if (typeof maxMints !== "number") {
       setToasts({
-        messages: ["Please insert a max mint count."],
+        messages: ["Enter a max mint count."],
         type: "error",
       });
       return;
@@ -56,7 +56,7 @@ export default function ComponentAddSpots({
           Count
         </label>
         <div className="tw-mt-1.5">
-          <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-iron-700/40 hover:tw-ring-iron-700 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+          <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 hover:tw-ring-iron-700">
             <input
               type="number"
               value={maxMints}
@@ -65,7 +65,7 @@ export default function ComponentAddSpots({
                   ? setMaxMints(Number(event.target.value))
                   : setMaxMints("")
               }
-              className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-iron-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+              className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-white placeholder:tw-text-iron-500 focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
               placeholder="Max mint count per wallet"
             />
           </div>
@@ -77,7 +77,8 @@ export default function ComponentAddSpots({
         showNextBtn={!isDisabled}
         onSkip={() => undefined}
         onNext={onAddSpots}
-        isDisabled={isDisabled}>
+        isDisabled={isDisabled}
+      >
         <ComponentConfigMeta
           tags={[]}
           walletsCount={uniqueWalletsCount}

@@ -91,6 +91,7 @@ const embeddedPollRow = {
     voted: [1],
     multichoice: false,
     anonymous: false,
+    only_droppers_can_respond: false,
     closing_time: 2000,
     is_open: true,
   },
@@ -101,6 +102,7 @@ const embeddedPollRow = {
   voted: [2],
   multichoice: false,
   anonymous: true,
+  only_droppers_can_respond: true,
   closing_time: 2000,
   is_open: true,
 } as any;
@@ -155,6 +157,7 @@ describe("useWavePollDrops", () => {
     expect(page.drops[0].poll).toMatchObject({
       id: "poll-1",
       voted: [2],
+      only_droppers_can_respond: true,
     });
   });
 });

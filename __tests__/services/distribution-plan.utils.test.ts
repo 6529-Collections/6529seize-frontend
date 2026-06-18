@@ -1,24 +1,24 @@
 import { makeErrorToast } from "@/services/distribution-plan.utils";
-import { toast } from "react-toastify";
 
-jest.mock("react-toastify", () => ({
-  toast: jest.fn(),
-  Slide: jest.fn(),
+const mockShowAppToast = jest.fn();
+
+jest.mock("@/components/utils/toast/AppToast", () => ({
+  showAppToast: (toast: unknown) => mockShowAppToast(toast),
 }));
 
 describe("makeErrorToast", () => {
   beforeEach(() => {
-    (toast as unknown as jest.Mock).mockClear();
+    mockShowAppToast.mockClear();
   });
 
-  it("shows error toasts for 8 seconds", () => {
+  it("routes errors through the shared toast helper", () => {
     makeErrorToast("Something went wrong");
 
-    expect(toast).toHaveBeenCalledWith(
-      "Something went wrong",
+    expect(mockShowAppToast).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "error",
-        autoClose: 8000,
+        title: "Couldn't complete this action.",
+        description: "Please try again.",
       })
     );
   });

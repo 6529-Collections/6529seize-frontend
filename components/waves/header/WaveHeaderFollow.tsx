@@ -14,6 +14,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 export enum WaveFollowBtnSize {
   SMALL = "SMALL",
@@ -80,8 +81,10 @@ export default function WaveHeaderFollow({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't join this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -109,8 +112,10 @@ export default function WaveHeaderFollow({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't leave this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

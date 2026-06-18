@@ -3,6 +3,13 @@ import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { SingleWaveDropVoteStats } from "@/components/waves/drop/SingleWaveDropVoteStats";
 
 describe("SingleWaveDropVoteStats", () => {
+  const expectTextContent = (text: RegExp) => {
+    expect(
+      screen.getAllByText((_, element) => text.test(element?.textContent ?? ""))
+        .length
+    ).toBeGreaterThan(0);
+  };
+
   it("displays current and max rating with default wave scope", () => {
     render(
       <SingleWaveDropVoteStats
@@ -12,9 +19,9 @@ describe("SingleWaveDropVoteStats", () => {
       />
     );
     expect(screen.getByText("Your votes:")).toBeInTheDocument();
-    expect(screen.getByText(/1,234\s*Rep/i)).toBeInTheDocument();
+    expectTextContent(/1,234\s*Rep/i);
     expect(screen.getByText("Max for wave:")).toBeInTheDocument();
-    expect(screen.getByText(/5,678\s*Rep/i)).toBeInTheDocument();
+    expectTextContent(/5,678\s*Rep/i);
   });
 
   it("displays max per drop for drop-scoped voting", () => {
@@ -28,6 +35,6 @@ describe("SingleWaveDropVoteStats", () => {
     );
 
     expect(screen.getByText("Max per drop:")).toBeInTheDocument();
-    expect(screen.getByText(/100\s*TDH/i)).toBeInTheDocument();
+    expectTextContent(/100\s*TDH/i);
   });
 });

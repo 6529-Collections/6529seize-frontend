@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import React from "react";
 import WaveHeader from "@/components/waves/header/WaveHeader";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -108,7 +108,9 @@ describe("WaveHeader", () => {
   });
 
   it("shows pin action for root waves", () => {
-    wrapper({ ...baseWave, subscribed_actions: ["drop_created"] });
+    wrapper({ ...baseWave, subscribed_actions: ["drop_created"] }, undefined, {
+      connectedProfile: { handle: "alice" },
+    });
 
     expect(screen.getByTestId("wave-header-pin")).toBeInTheDocument();
   });
@@ -176,10 +178,13 @@ describe("WaveHeader", () => {
       "data-show-owner",
       "true"
     );
+    expect(
+      screen.getByTestId("wave-header-options").parentElement?.className
+    ).toContain("tw-mt-[22px]");
     expect(screen.queryByTestId("wave-header-pin")).toBeNull();
   });
 
-  it("places owner options next to the pin action", () => {
+  it("places pin in the main action row and owner options beside the title", () => {
     wrapper({ ...baseWave, subscribed_actions: ["drop_created"] }, undefined, {
       connectedProfile: { handle: "a" },
     });
@@ -189,7 +194,6 @@ describe("WaveHeader", () => {
     const options = screen.getByTestId("wave-header-options");
     const pin = screen.getByTestId("wave-header-pin");
     const topActionRow = follow.parentElement?.parentElement;
-    const pinActionGroup = pin.parentElement;
 
     expect(topActionRow).toHaveClass(
       "tw-mt-8",
@@ -199,11 +203,85 @@ describe("WaveHeader", () => {
       "tw-justify-end"
     );
     expect(notifications.parentElement?.parentElement).toBe(topActionRow);
-    expect(options.parentElement).toBe(pinActionGroup);
-    expect(pinActionGroup).toHaveClass("tw-gap-1.5");
-    expect(pinActionGroup).not.toBe(topActionRow);
+    expect(pin.parentElement?.parentElement).toBe(topActionRow);
+    expect(options.parentElement).not.toBe(topActionRow);
+  });
+
+  it("shows wave trust stats in the about header for logged-out users", () => {
+    wrapper({
+      ...baseWave,
+      wave_score: {
+        visibility_score: 94.9,
+        quality_score: 93.4,
+        hotness_score: 97.69,
+      },
+      wave_rep: { total_rep: 494061, authenticated_user_contribution: null },
+    });
+
+    const stats = screen.getByLabelText("Wave trust stats");
+    expect(within(stats).getByText("Score")).toBeInTheDocument();
+    expect(within(stats).getByText("95")).toBeInTheDocument();
+    expect(within(stats).getByText("Quality")).toBeInTheDocument();
+    expect(within(stats).getByText("93")).toBeInTheDocument();
+    expect(within(stats).getByText("Hot")).toBeInTheDocument();
+    expect(within(stats).getByText("98")).toBeInTheDocument();
+    expect(within(stats).getByText("Wave REP")).toBeInTheDocument();
+    expect(within(stats).getByText("494.1K")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Wave REP/i })).toBeNull();
+  });
+
+  it("does not show wave trust stats for DMs", () => {
+    wrapper({
+      ...baseWave,
+      chat: { scope: { group: { is_direct_message: true } } },
+      wave_score: {
+        visibility_score: 94.9,
+        quality_score: 93.4,
+        hotness_score: 97.69,
+      },
+      wave_rep: { total_rep: 494061, authenticated_user_contribution: null },
+    });
+
+    expect(screen.queryByLabelText("Wave trust stats")).toBeNull();
+  });
+
+  it("shows a visible Add REP action for eligible non-author waves", () => {
+    wrapper(
+      {
+        ...baseWave,
+        wave_rep: { total_rep: 1250, authenticated_user_contribution: null },
+      },
+      undefined,
+      { connectedProfile: { handle: "alice" } }
+    );
+
     expect(
-      options.compareDocumentPosition(pin) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+      screen.getByRole("button", { name: /Add Wave REP to this wave/i })
+    ).toBeInTheDocument();
+    const addButton = screen.getByRole("button", {
+      name: /Add Wave REP to this wave/i,
+    });
+    expect(within(addButton).getByText("Add REP")).toBeInTheDocument();
+    expect(within(addButton).queryByText("1.3K")).toBeNull();
+    expect(screen.getByText("1.3K")).toBeInTheDocument();
+  });
+
+  it("shows an edit REP action when the user already contributed", () => {
+    wrapper(
+      {
+        ...baseWave,
+        wave_rep: {
+          total_rep: 1250,
+          authenticated_user_contribution: 25,
+        },
+      },
+      undefined,
+      { connectedProfile: { handle: "alice" } }
+    );
+
+    expect(
+      screen.getByRole("button", { name: /Edit your Wave REP/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Edit REP")).toBeInTheDocument();
   });
 });

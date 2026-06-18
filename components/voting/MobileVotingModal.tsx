@@ -1,8 +1,14 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
-import { SingleWaveDropVoteSubmissionMode } from "../waves/drop/SingleWaveDropVote.types";
+import {
+  type SingleWaveDropVoteMode,
+  SingleWaveDropVoteSubmissionMode,
+} from "../waves/drop/SingleWaveDropVote.types";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+import { VoteModeControl } from "./VoteModeControl";
 
 interface MobileVotingModalProps {
   readonly drop: ExtendedDrop;
@@ -15,11 +21,15 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const [voteInputMode, setVoteInputMode] =
+    useState<SingleWaveDropVoteMode>("slider");
+
   const handleClose = (e?: React.MouseEvent | React.KeyboardEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
+    setVoteInputMode("slider");
     onClose();
   };
 
@@ -28,11 +38,16 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
       isOpen={isOpen}
       onClose={handleClose}
       title="Vote for this artwork"
+      headerActions={
+        <VoteModeControl value={voteInputMode} onChange={setVoteInputMode} />
+      }
     >
-      <div className="tw-pt-2 tw-pb-2 tw-px-4">
+      <div className="tw-px-4 tw-pb-2 tw-pt-2">
         <SingleWaveDropVote
           drop={drop}
-          onVoteRequestStarted={onClose}
+          onVoteRequestStarted={handleClose}
+          voteMode={voteInputMode}
+          onVoteModeChange={setVoteInputMode}
           submissionMode={
             SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
           }

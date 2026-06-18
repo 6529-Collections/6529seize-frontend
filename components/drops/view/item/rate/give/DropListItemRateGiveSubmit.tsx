@@ -6,6 +6,7 @@ import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { commonApiPost } from "@/services/api/common-api";
@@ -74,8 +75,10 @@ export default function DropListItemRateGiveSubmit({
       optimisticRollbackRef.current?.();
       optimisticRollbackRef.current = null;
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't submit your rating.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

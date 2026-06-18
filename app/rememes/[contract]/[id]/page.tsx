@@ -4,22 +4,37 @@ import {
   getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
 import RememePage from "@/components/rememes/RememePage";
+import {
+  getRememeDetailApiQuery,
+  getRememesRouteLocale,
+  type RememesSearchParams,
+} from "@/components/rememes/rememesRouteParams";
 import { publicEnv } from "@/config/env";
 import { formatAddress } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import styles from "@/styles/Home.module.scss";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Rememe } from "@/entities/INFT";
 import type { Metadata } from "next";
 
-const getNonEmptyText = (value: string | undefined): string | undefined => {
+type RememeDetailSearchParams = Pick<RememesSearchParams, "locale">;
+
+type RememeRouteProps = {
+  readonly params: Promise<{ contract: string; id: string }>;
+  readonly searchParams?: Promise<RememeDetailSearchParams>;
+};
+
+const getNonEmptyText = (
+  value: string | null | undefined
+): string | undefined => {
   const normalized = value?.trim() ?? "";
   return normalized.length > 0 ? normalized : undefined;
 };
 
 const getRememeCollectionName = (rememe?: Rememe): string =>
-  getNonEmptyText(rememe?.contract_opensea_data.collectionName) ?? "ReMemes";
+  getNonEmptyText(rememe?.contract_opensea_data?.collectionName) ?? "ReMemes";
 
 const getRememeName = (rememe: Rememe): string | undefined => {
   const metadata = rememe.metadata as { name?: unknown };
@@ -72,41 +87,47 @@ const getRememeImage = (rememe?: Rememe): string | undefined => {
     getNonEmptyText(rememe.s3_image_original) ??
     getNonEmptyText(rememe.image) ??
     mediaImage ??
-    getNonEmptyText(rememe.contract_opensea_data.imageUrl)
+    getNonEmptyText(rememe.contract_opensea_data?.imageUrl)
   );
 };
 
+async function getRouteLocale(searchParams: RememeRouteProps["searchParams"]) {
+  return getRememesRouteLocale(searchParams ? await searchParams : {});
+}
+
 export default async function ReMeme({
   params,
-}: {
-  readonly params: Promise<{ contract: string; id: string }>;
-}) {
+  searchParams,
+}: RememeRouteProps) {
   const { contract, id } = await params;
+  const locale = await getRouteLocale(searchParams);
 
   return (
     <main className={styles["main"]}>
-      <RememePage contract={contract} id={id} />
+      <RememePage contract={contract} id={id} locale={locale} />
     </main>
   );
 }
 
 export async function generateMetadata({
   params,
-}: {
-  readonly params: Promise<{ contract: string; id: string }>;
-}): Promise<Metadata> {
+  searchParams,
+}: RememeRouteProps): Promise<Metadata> {
   const { contract, id } = await params;
+  const locale = await getRouteLocale(searchParams);
+  const rememesTitle = t(locale, "rememes.title");
   let name = `${formatAddress(contract)} #${id}`;
   let rememe: Rememe | undefined;
 
   try {
     const headers = await getAppCommonHeaders();
+    const query = getRememeDetailApiQuery({ contract, id });
     const response = await fetchUrl<DBResponse<Rememe>>(
-      `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`,
+      `${publicEnv.API_ENDPOINT}/api/rememes?${query}`,
       { headers }
     );
 
-    const firstRememe = response.data[0];
+    const firstRememe = response?.data?.[0];
     if (firstRememe !== undefined) {
       rememe = firstRememe;
       const rememeName = getRememeName(rememe);
@@ -125,15 +146,15 @@ export async function generateMetadata({
 
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title: name,
-      description: "ReMemes",
+      title: t(locale, "rememes.detail.documentTitle", { name }),
+      description: rememesTitle,
       ogImage: getNftSocialCardImagePath({
         badge: "ReMemes",
         collection: collectionName,
         contract,
         id,
         image: getRememeImage(rememe),
-        subtitle: `${collectionName} #${id} | ReMemes`,
+        subtitle: `${collectionName} #${id} | ${rememesTitle}`,
         title: name,
       }),
       ogImageAlt: `${name} ReMeme social card`,

@@ -2,6 +2,17 @@ jest.mock("node:dns/promises", () => ({
   lookup: jest.fn(),
 }));
 
+const mockUndiciFetch = jest.fn();
+
+jest.mock("undici", () => ({
+  Agent: jest.fn(() => ({
+    close: jest.fn(),
+    destroy: jest.fn(),
+    dispatch: jest.fn(),
+  })),
+  fetch: (...args: unknown[]) => mockUndiciFetch(...args),
+}));
+
 import {
   buildGoogleWorkspaceResponse,
   buildResponse,
@@ -15,11 +26,7 @@ const { lookup } = require("node:dns/promises") as {
 const originalFetch = global.fetch;
 const mockFetch = jest.fn();
 
-const createMockFetchResponse = (
-  status: number,
-  body: string,
-  url: string
-) => {
+const createMockFetchResponse = (status: number, body: string, url: string) => {
   const headerMap = new Map<string, string>();
   headerMap.set("content-type", "text/html");
   return {
@@ -36,7 +43,12 @@ const createMockFetchResponse = (
 beforeEach(() => {
   lookup.mockReset();
   mockFetch.mockReset();
+  mockUndiciFetch.mockReset();
   global.fetch = mockFetch as unknown as typeof fetch;
+});
+
+afterEach(() => {
+  expect(mockUndiciFetch).not.toHaveBeenCalled();
 });
 
 afterAll(() => {
@@ -55,6 +67,8 @@ describe("open-graph route helpers", () => {
           <meta property="og:title" content="OG Title" />
           <meta property="og:description" content="OG Description" />
           <meta property="og:image" content="/og-image.jpg" />
+          <meta name="twitter:image" content="/twitter-image.jpg" />
+          <meta name="twitter:image:alt" content="Twitter-only alt" />
           <meta property="og:url" content="https://example.com/page" />
           <meta property="og:site_name" content="Example Site" />
           <meta property="og:type" content="article" />
@@ -72,9 +86,33 @@ describe("open-graph route helpers", () => {
     expect(result.url).toBe("https://example.com/page");
     expect(result.mediaType).toBe("article");
     expect(result.image?.url).toBe("https://example.com/og-image.jpg");
-    expect(result.images?.[0]?.secureUrl).toBe("https://example.com/og-image.jpg");
+    expect(result.image?.alt).toBeNull();
+    expect(result.images?.[0]?.secureUrl).toBe(
+      "https://example.com/og-image.jpg"
+    );
+    expect(result.images?.[1]?.secureUrl).toBe(
+      "https://example.com/twitter-image.jpg"
+    );
     expect(result.favicon).toBe("https://example.com/favicon.ico");
     expect(result.contentType).toBe("text/html");
+  });
+
+  it("applies Twitter image alt only when the Twitter image is primary", () => {
+    const html = `
+      <html>
+        <head>
+          <title>Twitter Image</title>
+          <meta name="twitter:image" content="/twitter-image.jpg" />
+          <meta name="twitter:image:alt" content="Twitter image alt" />
+        </head>
+        <body></body>
+      </html>
+    `;
+
+    const result = buildResponse(baseUrl, html, "text/html");
+
+    expect(result.image?.url).toBe("https://example.com/twitter-image.jpg");
+    expect(result.image?.alt).toBe("Twitter image alt");
   });
 
   it("falls back to document title and canonical link", () => {
@@ -84,6 +122,7 @@ describe("open-graph route helpers", () => {
           <title>Plain Title</title>
           <meta name="description" content="Plain Description" />
           <link rel="canonical" href="/canonical" />
+          <link rel="apple-touch-icon" href="/apple.png" />
           <link rel="shortcut icon" href="https://cdn.example.com/icon.png" />
         </head>
         <body></body>
@@ -98,9 +137,79 @@ describe("open-graph route helpers", () => {
     expect(result.favicon).toBe("https://cdn.example.com/icon.png");
   });
 
+  it("ignores oversized JSON-LD blocks", () => {
+    const oversizedJsonLd = JSON.stringify({
+      "@type": "Article",
+      headline: "Oversized JSON-LD Title",
+      description: "x".repeat(140 * 1024),
+    });
+    const html = `
+      <html>
+        <head>
+          <title>Fallback Title</title>
+          <script type="application/ld+json">${oversizedJsonLd}</script>
+        </head>
+        <body></body>
+      </html>
+    `;
+
+    const result = buildResponse(baseUrl, html, "text/html");
+
+    expect(result.title).toBe("Fallback Title");
+  });
+
+  it("bounds deeply nested JSON-LD traversal", () => {
+    const deepJsonLd = JSON.stringify(
+      Array.from({ length: 20 }).reduce<unknown>((value) => [value], {
+        "@type": "Article",
+        headline: "Too Deep",
+      })
+    );
+    const html = `
+      <html>
+        <head>
+          <title>Safe Fallback</title>
+          <script type="application/ld+json">${deepJsonLd}</script>
+        </head>
+        <body></body>
+      </html>
+    `;
+
+    const result = buildResponse(baseUrl, html, "text/html");
+
+    expect(result.title).toBe("Safe Fallback");
+  });
+
+  it("bounds deeply nested JSON-LD image arrays", () => {
+    const deepImage = Array.from({ length: 20 }).reduce<unknown>(
+      (value) => [value],
+      "/deep-image.jpg"
+    );
+    const html = `
+      <html>
+        <head>
+          <title>Deep Image Fallback</title>
+          <script type="application/ld+json">${JSON.stringify({
+            "@type": "Article",
+            headline: "Deep Image Fallback",
+            image: deepImage,
+          })}</script>
+        </head>
+        <body></body>
+      </html>
+    `;
+
+    const result = buildResponse(baseUrl, html, "text/html");
+
+    expect(result.title).toBe("Deep Image Fallback");
+    expect(result.image).toBeNull();
+  });
+
   it("builds a Google Docs preview with public availability", async () => {
-    const initialHtml = "<html><head><title>Doc Title</title></head><body></body></html>";
-    const previewHtml = "<html><head><title>Preview Title</title></head><body></body></html>";
+    const initialHtml =
+      "<html><head><title>Doc Title</title></head><body></body></html>";
+    const previewHtml =
+      "<html><head><title>Preview Title</title></head><body></body></html>";
 
     mockFetch.mockResolvedValueOnce(
       Promise.resolve(
@@ -216,9 +325,9 @@ describe("open-graph route helpers", () => {
   });
 
   it("rejects hex-encoded IPv4 hosts", async () => {
-    await expect(
-      assertPublicUrl(new URL("http://0x7f000001"))
-    ).rejects.toThrow("URL host is not allowed.");
+    await expect(assertPublicUrl(new URL("http://0x7f000001"))).rejects.toThrow(
+      "URL host is not allowed."
+    );
   });
 
   it("allows domains that resolve to public addresses", async () => {
@@ -228,5 +337,4 @@ describe("open-graph route helpers", () => {
       assertPublicUrl(new URL("http://example.com"))
     ).resolves.toBeUndefined();
   });
-
 });

@@ -1,3 +1,8 @@
+jest.mock("undici", () => ({
+  Agent: jest.fn().mockImplementation(() => ({})),
+  fetch: jest.fn(),
+}));
+
 jest.mock("@/lib/security/urlGuard", () => {
   const actual = jest.requireActual("@/lib/security/urlGuard");
   return {
@@ -56,6 +61,10 @@ const PNG_1X1 = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
   "base64"
 );
+const GIF_2_FRAME = Buffer.from(
+  "R0lGODlhAgACAPAAAP8AAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQAAAAAACwAAAAAAgACAAACAoRRACH5BAAKAAAALAAAAAACAAIAgAAA/wAAAAIChFEAOw==",
+  "base64"
+);
 
 const createRequest = (sourceUrl: string): NextRequest =>
   ({
@@ -68,9 +77,11 @@ const createRequest = (sourceUrl: string): NextRequest =>
 
 const createReadableBody = (buffer: Buffer) => {
   let hasRead = false;
+  const cancel = jest.fn();
   return {
+    cancel,
     getReader: () => ({
-      cancel: jest.fn(),
+      cancel,
       read: jest.fn(async () => {
         if (hasRead) {
           return { done: true, value: undefined };
@@ -87,18 +98,25 @@ const createHeaders = (values: Record<string, string>) => ({
   get: (name: string) => values[name.toLowerCase()] ?? null,
 });
 
-const mockImageResponse = (contentLength: number): void => {
-  mockFetchPublicUrl.mockResolvedValue({
-    body: createReadableBody(PNG_1X1),
+const mockImageResponse = (
+  contentLength: number,
+  contentType = "image/png",
+  body = PNG_1X1,
+  status = 200
+): jest.Mock => {
+  const responseBody = createReadableBody(body);
+  mockFetchPublicUrl.mockResolvedValueOnce({
+    body: responseBody,
     headers: {
       get: createHeaders({
         "content-length": `${contentLength}`,
-        "content-type": "image/png",
+        "content-type": contentType,
       }).get,
     },
-    ok: true,
-    status: 200,
+    ok: status >= 200 && status < 300,
+    status,
   });
+  return responseBody.cancel;
 };
 
 describe("/api/og-metadata/image", () => {
@@ -128,6 +146,66 @@ describe("/api/og-metadata/image", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Failed to normalize image",
     });
+  });
+
+  it("uses a bounded range request for oversized GIF previews", async () => {
+    mockImageResponse(108 * 1024 * 1024, "image/gif");
+    mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME, 206);
+
+    const response = await GET(
+      createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/png");
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+    expect(mockFetchPublicUrl.mock.calls[1]?.[1]).toMatchObject({
+      headers: expect.objectContaining({
+        range: "bytes=0-8388607",
+      }),
+    });
+  });
+
+  it("rejects oversized GIF range responses when the upstream ignores Range", async () => {
+    mockImageResponse(108 * 1024 * 1024, "image/gif");
+    const cancelRangeBody = mockImageResponse(
+      GIF_2_FRAME.byteLength,
+      "image/gif",
+      GIF_2_FRAME,
+      200
+    );
+
+    const response = await GET(
+      createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
+    );
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({
+      error: "Failed to normalize image",
+    });
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+    expect(cancelRangeBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancels oversized GIF range responses before rejecting their content length", async () => {
+    mockImageResponse(108 * 1024 * 1024, "image/gif");
+    const cancelRangeBody = mockImageResponse(
+      9 * 1024 * 1024,
+      "image/gif",
+      GIF_2_FRAME,
+      206
+    );
+
+    const response = await GET(
+      createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
+    );
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({
+      error: "Failed to normalize image",
+    });
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+    expect(cancelRangeBody).toHaveBeenCalledTimes(1);
   });
 
   it("keeps invalid media urls as JSON errors", async () => {

@@ -1,8 +1,24 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import type { Metadata } from "next";
 export default function BlogDisneyDeekayTheirSecretToAnimationPage() {
   return (
     <div>
+      <JsonLdScript
+        data={buildArticlePageJsonLd({
+          path: "/blog/disney-deekay-their-secret-to-animation",
+          headline: "Disney and DeeKay: Their Secret to Animation",
+          description:
+            "Some animators possess the talent to move us, rattle us, charm, inspire, delight and amaze in ways that make their art form endure. From Disney to DeeKay, these are the animators who are gifted with the secret recipe for animation that both reflects and affects our humanity.",
+          image:
+            "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/deekay.jpeg",
+          author: "Sabrina Khan",
+          datePublished: "2023-02-23T18:30:32+00:00",
+          dateModified: "2023-03-16T19:43:46+00:00",
+          section: "Blog",
+        })}
+      />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta
@@ -323,16 +339,19 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
           <div id="home" style={{ position: "relative", top: "-1px" }} />
           <div
             id="sliders-container"
-            className="fusion-slider-visibility"></div>
+            className="fusion-slider-visibility"
+          ></div>
           <main
             id="main"
-            className="clearfix "
-            style={{ minHeight: "100vh", padding: 30 }}>
+            className="clearfix"
+            style={{ minHeight: "100vh", padding: 30 }}
+          >
             <div className="fusion-row">
               <section id="content" style={{ width: "100%" }}>
                 <article
                   id="post-2423"
-                  className="post post-2423 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                  className="post post-2423 type-post status-publish format-standard has-post-thumbnail hentry category-blog"
+                >
                   <span className="entry-title" style={{ display: "none" }}>
                     Disney and DeeKay: Their Secret to Animation
                   </span>
@@ -345,14 +364,16 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column"
                           style={{
@@ -364,18 +385,21 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-1 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-1 hover-type-none">
                                 <a
                                   className="fusion-no-lightbox"
                                   href="/"
                                   target="_blank"
                                   aria-label="6529-header-logo-beta"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -400,14 +424,16 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column"
                           style={{
@@ -417,11 +443,13 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
                               className="fusion-text fusion-text-1"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   Disney and DeeKay: Their Secret to Animation
@@ -430,14 +458,16 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-2"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   by{" "}
                                   <a
                                     href="https://twitter.com/sabrinaxdoll"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Sabrina Khan
                                   </a>
                                 </b>
@@ -445,7 +475,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-3"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   “I just want to make people smile with my
@@ -488,14 +519,16 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-4"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>Animation's Early Days </b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-5"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   The power of animation to move and charm the
@@ -525,15 +558,17 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-2 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-2 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/the-desert.gif"
                                   className="fusion-lightbox"
                                   data-rel="iLightbox[0c82fbb283642ccedc1]"
                                   data-title="the desert"
-                                  title="the desert">
+                                  title="the desert"
+                                >
                                   <img
                                     loading="lazy"
                                     fetchPriority="high"
@@ -549,21 +584,24 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-6"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 Phenakistoscope Animation
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-7"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>Disney and His Mouse Rule the House </b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-8"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   But it was not the type of animation that had
@@ -589,7 +627,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   motion to create personality and dimensional
                                   character. In this way, he established himself
                                   as one of the best animators on earth and
-                                  changed the way animation could affect people.{" "}
+                                  changed the way animation could affect
+                                  people.{" "}
                                 </span>
                               </p>
                               <p>
@@ -608,13 +647,15 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                               </p>
                             </div>
                             <div
-                              className="fusion-image-element "
-                              style={{ textAlign: "center" }}>
-                              <span className=" fusion-imageframe imageframe-none imageframe-3 hover-type-none">
+                              className="fusion-image-element"
+                              style={{ textAlign: "center" }}
+                            >
+                              <span className="fusion-imageframe imageframe-none imageframe-3 hover-type-none">
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/steamboat-mickey.gif"
                                   className="fusion-lightbox"
-                                  data-rel="iLightbox[4ddc2fbef23560e65d5]">
+                                  data-rel="iLightbox[4ddc2fbef23560e65d5]"
+                                >
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -629,14 +670,16 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-9"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 <i>Mickey Mouse in Steamboat Willie</i>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-10"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   This is why Mickey survived and why those
@@ -655,14 +698,16 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-11"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>DeeKay's Autobiographical Animations</b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-12"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   This is precisely the recipe utilized by
@@ -670,7 +715,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   “I♡NY”, a piece that is both a love letter to
                                   a city he adores as well as an
                                   autobiographical depiction of his personal
-                                  experience while living and drawing there.{" "}
+                                  experience while living and drawing
+                                  there.{" "}
                                 </span>
                               </p>
                               <p>
@@ -688,7 +734,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-video fusion-selfhosted-video"
-                              style={{ alignSelf: "center", maxWidth: 400 }}>
+                              style={{ alignSelf: "center", maxWidth: 400 }}
+                            >
                               <div className="video-wrapper">
                                 <video
                                   playsInline={true}
@@ -698,7 +745,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   muted={true}
                                   loop={true}
                                   preload="auto"
-                                  controls={true}>
+                                  controls={true}
+                                >
                                   <source
                                     src="https://videos.files.wordpress.com/ImmA5S3p/iloveny.mp4"
                                     type="video/mp4"
@@ -710,19 +758,22 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-13"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 <a
                                   href="https://superrare.com/artwork-v2/i%E2%99%A1ny-31243"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   I♡NY
                                 </a>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-14"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   There is a cinematic quality to the piece set
@@ -756,7 +807,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-15"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   In an exclusive interview, DeeKay reveals that
@@ -796,14 +848,16 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-16"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>DeeKay's Art Affects All Ages </b>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-17"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   DeeKay says, “I
@@ -837,7 +891,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             <blockquote
                               className="twitter-tweet tw-align-center"
                               data-dnt="true"
-                              data-theme="light">
+                              data-theme="light"
+                            >
                               <p lang="en" dir="ltr">
                                 gm.
                                 <br />
@@ -854,7 +909,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </blockquote>{" "}
                             <div
                               className="fusion-text fusion-text-18"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Animation has the power to affect us across
@@ -910,7 +966,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   reach and move us, and DeeKay's animations,
                                   though bright and vibrant with lighthearted
                                   moments, also contains elements of darkness
-                                  that make it all the more rich and relatable.{" "}
+                                  that make it all the more rich and
+                                  relatable.{" "}
                                 </span>
                               </p>
                               <p>
@@ -928,7 +985,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-19"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <b>
                                   Animation Not For Kids But For The Kids In Us
@@ -938,7 +996,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-20"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Similarly, DeeKay's works each capture a sense
@@ -947,7 +1006,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   <a
                                     href="https://superrare.com/artwork-v2/destiny-29095"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Destiny
                                   </a>
                                   ”, experiencing the wonder of living and aging
@@ -956,7 +1016,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   <a
                                     href="https://deekaykwon.com/#/designer-client-1/"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Designer &amp; Client{""}
                                   </a>
                                   ”, spreading infectious joy in “Happy Virus”,
@@ -965,7 +1026,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   <a
                                     href="https://superrare.com/artwork-v2/yin-yang-38023"
                                     target="_blank"
-                                    rel="noopener noreferrer">
+                                    rel="noopener noreferrer"
+                                  >
                                     Yin Yang
                                   </a>
                                   {""}
@@ -976,7 +1038,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-video fusion-selfhosted-video"
-                              style={{ alignSelf: "center", maxWidth: 400 }}>
+                              style={{ alignSelf: "center", maxWidth: 400 }}
+                            >
                               <div className="video-wrapper">
                                 <video
                                   playsInline={true}
@@ -986,7 +1049,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   muted={true}
                                   loop={true}
                                   preload="auto"
-                                  controls={true}>
+                                  controls={true}
+                                >
                                   <source
                                     src="https://videos.files.wordpress.com/7Ye95PFU/happyvirus.mp4"
                                     type="video/mp4"
@@ -998,19 +1062,22 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-21"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 <a
                                   href="https://superrare.com/artwork-v2/happy-virus-24069"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   Happy Virus
                                 </a>
                               </p>
                             </div>
                             <div
                               className="fusion-video fusion-selfhosted-video"
-                              style={{ alignSelf: "center", maxWidth: 400 }}>
+                              style={{ alignSelf: "center", maxWidth: 400 }}
+                            >
                               <div className="video-wrapper">
                                 <video
                                   playsInline={true}
@@ -1020,7 +1087,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   muted={true}
                                   loop={true}
                                   preload="auto"
-                                  controls={true}>
+                                  controls={true}
+                                >
                                   <source
                                     src="https://videos.files.wordpress.com/RM0P4DsO/lifeanddeathdeekay.mp4"
                                     type="video/mp4"
@@ -1032,19 +1100,22 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                             </div>
                             <div
                               className="fusion-text fusion-text-22"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p style={{ textAlign: "center" }}>
                                 <a
                                   href="https://superrare.com/artwork-v2/life-and-death-33745"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   Life and Death
                                 </a>
                               </p>
                             </div>
                             <div
                               className="fusion-text fusion-text-23"
-                              style={{ color: "#000000" }}>
+                              style={{ color: "#000000" }}
+                            >
                               <p>
                                 <span style={{ fontWeight: 400 }}>
                                   Just as Disney began animation doing gag reels
@@ -1098,7 +1169,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                       <a
                         href="/author/ladysabrina/"
                         title="Posts by Sabrina Khan"
-                        rel="author">
+                        rel="author"
+                      >
                         Sabrina Khan
                       </a>
                     </span>
@@ -1121,20 +1193,23 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
         type="button"
         className="fusion-one-page-text-link fusion-page-load-link"
         tabIndex={-1}
-        aria-hidden="true">
+        aria-hidden="true"
+      >
         Page load link
       </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
-          className="design-sharp alignment-right with-animation">
+          className="design-sharp alignment-right with-animation"
+        >
           <ul>
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fab-fa-twitter">
+                className="fab-fa-twitter"
+              >
                 <i className="fab fa-twitter" />
               </a>
             </li>{" "}
@@ -1143,7 +1218,8 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
       </div>
       <section
         className="to-top-container to-top-right"
-        aria-labelledby="awb-to-top-label">
+        aria-labelledby="awb-to-top-label"
+      >
         <button type="button" id="toTop" className="fusion-top-top-link">
           <span id="awb-to-top-label" className="screen-reader-text">
             Go to Top

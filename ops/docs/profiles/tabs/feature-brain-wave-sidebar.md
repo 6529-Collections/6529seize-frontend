@@ -28,8 +28,8 @@ created, or into the waves where that profile is most active.
 2. If created-wave or most-active wave data is available, the companion surface
    appears beside or above the feed.
 3. Desktop shows:
-   - `Created Waves`: the first created wave plus a `Show N more` toggle when
-     more created waves exist
+   - `Created Waves`: up to three created waves plus a `Show N more` toggle
+     when more created waves exist
    - `Most Active In`: up to three waves
 4. Small screens show `Created` and `Active In` pill rows above the feed.
 5. If more created waves exist on small screens, select the overflow chip to
@@ -74,8 +74,8 @@ created, or into the waves where that profile is most active.
 
 ## Limitations / Notes
 
-- Desktop inline created-waves view shows only one item until expanded, even
-  when more authored waves exist.
+- Desktop inline created-waves view shows up to three items until expanded,
+  even when more authored waves exist.
 - The mobile strip surfaces only the first created wave inline, plus up to
   three `Most Active In` items.
 - The full modal lists created waves only; it does not provide a full-screen

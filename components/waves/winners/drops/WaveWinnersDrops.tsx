@@ -16,6 +16,7 @@ interface WaveWinnersDropsProps {
   readonly isApprovalWave?: boolean | undefined;
   readonly emptyMessage?: string | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
@@ -26,6 +27,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
   isApprovalWave = false,
   emptyMessage,
   contentPresentation = "default",
+  outcomesVisible = true,
 }) => {
   const renderableWinners = getRenderableWaveDecisionWinners(winners);
   const invalidWinnerCount = winners.length - renderableWinners.length;
@@ -85,6 +87,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
           onDropClick={onDropClick}
           isApprovalWave={isApprovalWave}
           contentPresentation={contentPresentation}
+          outcomesVisible={outcomesVisible}
         />
       ))}
     </div>

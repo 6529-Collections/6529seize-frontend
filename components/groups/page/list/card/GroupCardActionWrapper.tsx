@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import GroupCardActionFooter from "./utils/GroupCardActionFooter";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+import type { GroupCardRateMatter } from "./GroupCard";
 
 export default function GroupCardActionWrapper({
   loading,
@@ -20,13 +21,13 @@ export default function GroupCardActionWrapper({
   readonly addingRates: boolean;
   readonly membersCount: number | null;
   readonly doneMembersCount: number | null;
-  readonly matter: ApiRateMatter;
+  readonly matter: GroupCardRateMatter;
   readonly onSave: () => void;
   readonly onCancel: () => void;
 
   readonly children: React.ReactNode;
 }) {
-  const MATTER_LABEL: Record<ApiRateMatter, string> = {
+  const MATTER_LABEL: Record<GroupCardRateMatter, string> = {
     [ApiRateMatter.Rep]: "Rep",
     [ApiRateMatter.Cic]: "NIC",
   };

@@ -1,9 +1,23 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import type { Metadata } from "next";
 
 export default function PodcastsPage() {
   return (
     <div>
+      <JsonLdScript
+        data={buildArticlePageJsonLd({
+          path: "/education/podcasts",
+          headline: "Podcasts",
+          description:
+            "6529 podcasts and audio resources for learning about NFTs and decentralization.",
+          image:
+            "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-header-logo.png",
+          dateModified: "2022-06-15T11:51:53+00:00",
+          section: "Education",
+        })}
+      />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta
@@ -284,10 +298,12 @@ This is without question the Real Vision"
           <div id="home" style={{ position: "relative", top: "-1px" }} />
           <div
             id="sliders-container"
-            className="fusion-slider-visibility"></div>
+            className="fusion-slider-visibility"
+          ></div>
           <section
             className="avada-page-titlebar-wrapper"
-            aria-label="Page Title Bar">
+            aria-label="Page Title Bar"
+          >
             <div className="fusion-page-title-bar fusion-page-title-bar-none fusion-page-title-bar-center">
               <div className="fusion-page-title-row">
                 <div className="fusion-page-title-wrapper">
@@ -302,12 +318,14 @@ This is without question the Real Vision"
           <main
             id="main"
             className="clearfix width-100"
-            style={{ minHeight: "100vh", padding: 30 }}>
+            style={{ minHeight: "100vh", padding: 30 }}
+          >
             <div className="fusion-row" style={{ maxWidth: "100%" }}>
               <section id="content" className="full-width">
                 <div
                   id="post-218"
-                  className="post-218 page type-page status-publish hentry">
+                  className="post-218 page type-page status-publish hentry"
+                >
                   <span className="entry-title rich-snippet-hidden">
                     PODCASTS
                   </span>
@@ -316,7 +334,8 @@ This is without question the Real Vision"
                       <a
                         href="/author/6529er6529-io/"
                         title="Posts by 6529er"
-                        rel="author">
+                        rel="author"
+                      >
                         6529er
                       </a>
                     </span>
@@ -333,14 +352,16 @@ This is without question the Real Vision"
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-stretch fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_3 1_3 fusion-flex-column fusion-column-inner-bg-wrapper"
                           style={{
@@ -349,19 +370,22 @@ This is without question the Real Vision"
                             paddingRight: "5.76%",
                             marginBottom: 0,
                             paddingLeft: "5.76%",
-                          }}>
+                          }}
+                        >
                           <span className="fusion-column-inner-bg hover-type-none">
                             <a
                               className="fusion-column-anchor"
                               href="https://www.coindesk.com/tv/special-coverage/pseudonymous-philosopher-livestream/"
                               rel="noopener noreferrer"
-                              target="_blank">
+                              target="_blank"
+                            >
                               <span className="fusion-column-inner-bg-image" />
                             </a>
                           </span>
                           <div
                             className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column fusion-empty-column-bg-image fusion-column-has-bg-image"
-                            data-bg-url="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/06/Punk-6529-Consensus-800x451.jpg">
+                            data-bg-url="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/06/Punk-6529-Consensus-800x451.jpg"
+                          >
                             <img
                               loading="lazy"
                               decoding="async"
@@ -380,16 +404,19 @@ This is without question the Real Vision"
                             paddingRight: "2.88%",
                             marginBottom: 20,
                             paddingLeft: "2.88%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
                               <h1
                                 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
-                                style={{ margin: 0, lineHeight: "0.9" }}>
+                                style={{ margin: 0, lineHeight: "0.9" }}
+                              >
                                 <a
                                   href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   THE PSEUDONYMOUS PHILOSOPHER: PUNK 6529'S
                                   VISION FOR OUR DECENTRALIZED FUTURE
                                 </a>
@@ -413,7 +440,8 @@ This is without question the Real Vision"
                                 <a
                                   href="https://www.coindesk.com/tv/special-coverage/pseudonymous-philosopher-livestream/"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   Coindesk
                                 </a>
                               </p>
@@ -430,7 +458,8 @@ This is without question the Real Vision"
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
                               className="fusion-separator fusion-full-width-sep"
@@ -439,7 +468,8 @@ This is without question the Real Vision"
                                 marginLeft: "auto",
                                 marginRight: "auto",
                                 width: "100%",
-                              }}>
+                              }}
+                            >
                               <div
                                 className="fusion-separator-border sep-single sep-solid"
                                 style={{
@@ -460,14 +490,16 @@ This is without question the Real Vision"
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-stretch fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-3 fusion_builder_column_1_3 1_3 fusion-flex-column fusion-column-inner-bg-wrapper"
                           style={{
@@ -476,19 +508,22 @@ This is without question the Real Vision"
                             paddingRight: "5.76%",
                             marginBottom: 0,
                             paddingLeft: "5.76%",
-                          }}>
+                          }}
+                        >
                           <span className="fusion-column-inner-bg hover-type-none">
                             <a
                               className="fusion-column-anchor"
                               href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5"
                               rel="noopener noreferrer"
-                              target="_blank">
+                              target="_blank"
+                            >
                               <span className="fusion-column-inner-bg-image" />
                             </a>
                           </span>
                           <div
                             className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column fusion-empty-column-bg-image fusion-column-has-bg-image"
-                            data-bg-url="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Raoul-Pal-6529-600x337.jpg">
+                            data-bg-url="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Raoul-Pal-6529-600x337.jpg"
+                          >
                             <img
                               loading="lazy"
                               decoding="async"
@@ -507,16 +542,19 @@ This is without question the Real Vision"
                             paddingRight: "2.88%",
                             marginBottom: 20,
                             paddingLeft: "2.88%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-one">
                               <h1
                                 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
-                                style={{ margin: 0, lineHeight: "0.9" }}>
+                                style={{ margin: 0, lineHeight: "0.9" }}
+                              >
                                 <a
                                   href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   THE WORLD ACCORDING TO PUNK 6529
                                 </a>
                               </h1>
@@ -547,7 +585,8 @@ This is without question the Real Vision"
                                 <a
                                   href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5?utm_campaign=Standard&utm_medium=email&_hsmi=209440565&_hsenc=p2ANqtz--g9VR4uR4r_gYXUHzs_nQ_HtjcBwauwvn9JpB0mcMcjnP7pTKcphSHpClkDikSztXMi6N7_1n11iVTODrpvFNuVz26qg&utm_source=202248_alert_weekly_members_crypto_1_Standard"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   RealVision.com
                                 </a>
                               </p>
@@ -564,7 +603,8 @@ This is without question the Real Vision"
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
                               className="fusion-separator fusion-full-width-sep"
@@ -573,7 +613,8 @@ This is without question the Real Vision"
                                 marginLeft: "auto",
                                 marginRight: "auto",
                                 width: "100%",
-                              }}>
+                              }}
+                            >
                               <div
                                 className="fusion-separator-border sep-single sep-solid"
                                 style={{
@@ -594,14 +635,16 @@ This is without question the Real Vision"
                         borderBottomRightRadius: 0,
                         borderBottomLeftRadius: 0,
                         flexWrap: "wrap",
-                      }}>
+                      }}
+                    >
                       <div
                         className="fusion-builder-row fusion-row fusion-flex-align-items-stretch fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
-                        }}>
+                        }}
+                      >
                         <div
                           className="fusion-layout-column fusion_builder_column fusion-builder-column-6 fusion_builder_column_1_3 1_3 fusion-flex-column"
                           style={{
@@ -611,13 +654,15 @@ This is without question the Real Vision"
                             paddingRight: "5.76%",
                             marginBottom: 0,
                             paddingLeft: "5.76%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div className="fusion-video fusion-youtube">
                               <div className="video-shortcode">
                                 <div
                                   className="fluid-width-video-wrapper"
-                                  style={{ paddingTop: "60%" }}>
+                                  style={{ paddingTop: "60%" }}
+                                >
                                   <iframe
                                     title="YouTube video player 1"
                                     src="https://www.youtube.com/embed/i2jfWIMiWO0?wmode=transparent&autoplay=0&rel=0"
@@ -640,16 +685,19 @@ This is without question the Real Vision"
                             paddingRight: "2.88%",
                             marginBottom: 20,
                             paddingLeft: "2.88%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div className="fusion-title title fusion-title-3 fusion-sep-none fusion-title-text fusion-title-size-one">
                               <h1
                                 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
-                                style={{ margin: 0, lineHeight: "0.9" }}>
+                                style={{ margin: 0, lineHeight: "0.9" }}
+                              >
                                 <a
                                   href="https://unchainedpodcast.com/punk6529-on-the-significance-of-bored-ape-yacht-club-and-cryptopunks/"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   PUNK6529 ON THE SIGNIFICANCE OF BORED APE
                                   YACHT CLUB AND CRYPTOPUNKS
                                 </a>
@@ -668,14 +716,16 @@ This is without question the Real Vision"
                             </div>
                             <div
                               className="fusion-audio fusion-audio-1"
-                              style={{ backgroundColor: "#1d242d" }}>
+                              style={{ backgroundColor: "#1d242d" }}
+                            >
                               {/*[if lt IE 9]><![endif]*/}
                               <audio
                                 className="wp-audio-shortcode"
                                 id="audio-218-1"
                                 preload="none"
                                 style={{ width: "100%" }}
-                                controls={true}>
+                                controls={true}
+                              >
                                 <source
                                   type="audio/mpeg"
                                   src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Unchained_-_Ep.331_-_Punk6529_on_the_Significance_of_Bored_Ape_Yacht_Club_and_CryptoPunks.mp3?_=1"
@@ -691,7 +741,8 @@ This is without question the Real Vision"
                                 <a
                                   href="https://unchainedpodcast.com/punk6529-on-the-significance-of-bored-ape-yacht-club-and-cryptopunks/"
                                   target="_blank"
-                                  rel="noopener noreferrer">
+                                  rel="noopener noreferrer"
+                                >
                                   UnchainedPodcast.com
                                 </a>{" "}
                                 |{" "}
@@ -712,7 +763,8 @@ This is without question the Real Vision"
                             paddingRight: "1.92%",
                             marginBottom: 20,
                             paddingLeft: "1.92%",
-                          }}>
+                          }}
+                        >
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div
                               className="fusion-separator fusion-full-width-sep"
@@ -721,7 +773,8 @@ This is without question the Real Vision"
                                 marginLeft: "auto",
                                 marginRight: "auto",
                                 width: "100%",
-                              }}>
+                              }}
+                            >
                               <div
                                 className="fusion-separator-border sep-single sep-solid"
                                 style={{
@@ -750,20 +803,23 @@ This is without question the Real Vision"
         className="fusion-one-page-text-link fusion-page-load-link"
         tabIndex={-1}
         href="#"
-        aria-hidden="true">
+        aria-hidden="true"
+      >
         Page load link
       </a>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
-          className="design-sharp alignment-right with-animation">
+          className="design-sharp alignment-right with-animation"
+        >
           <ul>
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fab-fa-twitter">
+                className="fab-fa-twitter"
+              >
                 <i className="fab fa-twitter" />
               </a>
             </li>{" "}
@@ -772,7 +828,8 @@ This is without question the Real Vision"
       </div>
       <section
         className="to-top-container to-top-right"
-        aria-labelledby="awb-to-top-label">
+        aria-labelledby="awb-to-top-label"
+      >
         <a href="#" id="toTop" className="fusion-top-top-link">
           <span id="awb-to-top-label" className="screen-reader-text">
             Go to Top

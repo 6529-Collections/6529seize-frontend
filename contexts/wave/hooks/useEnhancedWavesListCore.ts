@@ -1,6 +1,9 @@
 "use client";
 
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ApiWaveRepSummary } from "@/generated/models/ApiWaveRepSummary";
+import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
+import type { SidebarDiscoverySection } from "@/hooks/useWavesList";
 import type { SidebarWave, SidebarWaveContributor } from "@/types/waves.types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
@@ -17,6 +20,7 @@ export interface MinimalWave {
   picture: string | null;
   contributors: readonly SidebarWaveContributor[];
   isPinned: boolean;
+  isFollowing: boolean;
   isOfficial: boolean;
   isMuted: boolean;
   parentWaveId: string | null;
@@ -24,11 +28,15 @@ export interface MinimalWave {
   unreadDropsCount: number;
   latestReadTimestamp: number;
   firstUnreadDropSerialNo: number | null;
+  waveRep: ApiWaveRepSummary | null;
+  waveScore: ApiWaveScore | null;
+  sidebarSection: SidebarDiscoverySection | null;
 }
 
 type EnhancedSidebarWave = SidebarWave & {
   readonly isPinned?: boolean;
   readonly isOfficial?: boolean;
+  readonly sidebarSection?: SidebarDiscoverySection;
 };
 
 interface WavesDataSource {
@@ -49,6 +57,7 @@ interface UseEnhancedWavesListCoreOptions {
   supportsPinning: boolean;
   otherListWaveIds?: ReadonlySet<string> | undefined;
   unknownWaveRefetchCooldownMs?: number | undefined;
+  preserveBackendWaveOrder?: boolean | undefined;
 }
 
 const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
@@ -174,6 +183,7 @@ function useEnhancedWavesListCore(
         isPinned: options.supportsPinning
           ? (wave.isPinned ?? wave.pinned ?? false)
           : false,
+        isFollowing: wave.subscribed ?? false,
         isOfficial: wave.isOfficial ?? false,
         isMuted: wave.muted,
         parentWaveId: wave.parentWaveId,
@@ -181,6 +191,9 @@ function useEnhancedWavesListCore(
         unreadDropsCount,
         latestReadTimestamp: wave.latestReadTimestamp,
         firstUnreadDropSerialNo,
+        waveRep: wave.waveRep,
+        waveScore: wave.waveScore,
+        sidebarSection: wave.sidebarSection ?? null,
       };
     },
     [
@@ -202,12 +215,15 @@ function useEnhancedWavesListCore(
         if (a.isMuted !== b.isMuted) {
           return a.isMuted ? 1 : -1;
         }
+        if (options.preserveBackendWaveOrder) {
+          return 0;
+        }
         return (
           (b.newDropsCount.latestDropTimestamp ?? 0) -
           (a.newDropsCount.latestDropTimestamp ?? 0)
         );
       }),
-    [minimal]
+    [minimal, options.preserveBackendWaveOrder]
   );
 
   return useMemo(

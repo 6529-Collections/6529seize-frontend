@@ -2,6 +2,8 @@ import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { BaseNFT } from "@/entities/INFT";
 import { areEqualAddresses, idStringToDisplay } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import {
   getAppMetadata,
@@ -21,27 +23,65 @@ export enum MEME_FOCUS {
   TIMELINE = "timeline",
 }
 
+const MEME_FOCUS_VALUES: readonly string[] = Object.values(MEME_FOCUS);
+
+function assertUnhandled(value: never, label: string): never {
+  throw new Error(`Unhandled ${label}: ${String(value)}`);
+}
+
+export function isMemeFocus(focus: string): focus is MEME_FOCUS {
+  return MEME_FOCUS_VALUES.includes(focus);
+}
+
+export function getMemeFocusLabel(
+  focus: MEME_FOCUS,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string {
+  switch (focus) {
+    case MEME_FOCUS.LIVE:
+      return t(locale, "theMemes.detail.tabs.overview");
+    case MEME_FOCUS.YOUR_CARDS:
+      return t(locale, "theMemes.detail.tabs.yourCards");
+    case MEME_FOCUS.THE_ART:
+      return t(locale, "theMemes.detail.tabs.theArt");
+    case MEME_FOCUS.REFERENCES:
+      return t(locale, "theMemes.detail.tabs.references");
+    case MEME_FOCUS.COLLECTORS:
+      return t(locale, "theMemes.detail.tabs.collectors");
+    case MEME_FOCUS.HISTORY:
+      return t(locale, "theMemes.detail.tabs.history");
+    case MEME_FOCUS.YOUR_TRANSACTIONS:
+      return t(locale, "theMemes.detail.tabs.yourTransactions");
+    case MEME_FOCUS.ACTIVITY:
+      return t(locale, "theMemes.detail.tabs.activity");
+    case MEME_FOCUS.TIMELINE:
+      return t(locale, "theMemes.detail.tabs.timeline");
+    default:
+      return assertUnhandled(focus, "MEME_FOCUS");
+  }
+}
+
 export const MEME_TABS: MemeTab[] = [
-  { focus: MEME_FOCUS.LIVE, title: "Overview" },
-  { focus: MEME_FOCUS.YOUR_CARDS, title: "Your Cards" },
-  { focus: MEME_FOCUS.THE_ART, title: "The Art" },
-  { focus: MEME_FOCUS.REFERENCES, title: "References" },
-  { focus: MEME_FOCUS.COLLECTORS, title: "Collectors" },
-  { focus: MEME_FOCUS.HISTORY, title: "History" },
-  { focus: MEME_FOCUS.ACTIVITY, title: "Activity" },
-  { focus: MEME_FOCUS.TIMELINE, title: "Timeline" },
+  { focus: MEME_FOCUS.LIVE },
+  { focus: MEME_FOCUS.YOUR_CARDS },
+  { focus: MEME_FOCUS.THE_ART },
+  { focus: MEME_FOCUS.REFERENCES },
+  { focus: MEME_FOCUS.COLLECTORS },
+  { focus: MEME_FOCUS.HISTORY },
+  { focus: MEME_FOCUS.ACTIVITY },
+  { focus: MEME_FOCUS.TIMELINE },
 ];
 
 interface MemeTab {
   focus: MEME_FOCUS;
-  title: string;
 }
 
 async function getMetadataProps(
   contract: string,
   id: string,
   focus: string,
-  isDistribution: boolean = false
+  isDistribution: boolean = false,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
   let urlPath = "nfts";
   const idDisplay = idStringToDisplay(id);
@@ -71,12 +111,11 @@ async function getMetadataProps(
   }
 
   if (focus && focus !== MEME_FOCUS.LIVE) {
-    const tab = MEME_TABS.find((t) => t.focus === focus);
-    if (tab) {
-      name = `${name} | ${tab.title}`;
+    if (isMemeFocus(focus)) {
+      name = `${name} | ${getMemeFocusLabel(focus, locale)}`;
     }
   } else if (isDistribution) {
-    name = `${name} | Distribution`;
+    name = `${name} | ${t(locale, "distribution.title")}`;
   }
 
   return {
@@ -100,13 +139,15 @@ export async function getSharedAppServerSideProps(
   contract: string,
   id: string,
   focus: string,
-  isDistribution: boolean = false
+  isDistribution: boolean = false,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
   const { title, description, ogImage, ogImageAlt } = await getMetadataProps(
     contract,
     id,
     focus,
-    isDistribution
+    isDistribution,
+    locale
   );
 
   return getAppMetadata(
@@ -123,7 +164,8 @@ export function getMemeTabTitle(
   title: string,
   id?: string,
   nft?: BaseNFT,
-  focus?: MEME_FOCUS
+  focus?: MEME_FOCUS,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
   let t = title;
   if (id) {
@@ -133,10 +175,7 @@ export function getMemeTabTitle(
     t = `${nft.name} | ${t}`;
   }
   if (focus && focus !== MEME_FOCUS.LIVE) {
-    const tab = MEME_TABS.find((t) => t.focus === focus);
-    if (tab) {
-      t = `${t} | ${tab.title}`;
-    }
+    t = `${t} | ${getMemeFocusLabel(focus, locale)}`;
   }
   return t;
 }

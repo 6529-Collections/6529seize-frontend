@@ -1,7 +1,9 @@
 import type { Distribution } from "@/entities/IDistribution";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
+import { getDistributionsMessage } from "./distributions.messages";
 import UserPageStatsActivityDistributionsTable from "./UserPageStatsActivityDistributionsTable";
 
 export default function UserPageStatsActivityDistributionsTableWrapper({
@@ -12,6 +14,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
   page,
   totalPages,
   setPage,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly data: Distribution[];
   readonly profile: ApiIdentity;
@@ -20,23 +23,25 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
   readonly page: number;
   readonly totalPages: number;
   readonly setPage: (page: number) => void;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   if (isFirstLoading) {
     return (
-      <div className="tw-mt-2 sm:tw-mt-4 tw-w-full tw-h-96">
+      <div className="tw-mt-2 tw-h-96 tw-w-full sm:tw-mt-4">
         <CommonCardSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-x-auto">
+    <div className="tw-mt-2 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 lg:tw-mt-4">
       {data.length ? (
         <div className="tw-flow-root">
           <UserPageStatsActivityDistributionsTable
             items={data}
             profile={profile}
             loading={loading}
+            locale={locale}
           />
           {totalPages > 1 && (
             <CommonTablePagination
@@ -50,9 +55,13 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
           )}
         </div>
       ) : (
-        <div className="tw-p-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
-          No distributions found
-        </div>
+        <output className="tw-p-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6">
+          {getDistributionsMessage(
+            "user.collected.stats.distributions.empty",
+            undefined,
+            locale
+          )}
+        </output>
       )}
     </div>
   );

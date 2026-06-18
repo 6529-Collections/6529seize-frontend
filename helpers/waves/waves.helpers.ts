@@ -22,6 +22,17 @@ export const getCreateWaveStepStatus = ({
   return CreateWaveStepStatus.PENDING;
 };
 
+export const getParentWaveName = (
+  parentWave: ApiWave["parent_wave"]
+): string | undefined => {
+  if (!parentWave) {
+    return undefined;
+  }
+
+  const trimmedName = parentWave.name.trim();
+  return trimmedName.length > 0 ? trimmedName : parentWave.id;
+};
+
 const getPeriodUpdate = <T>(
   period: T | null | undefined
 ): Partial<{ readonly period: T }> => {

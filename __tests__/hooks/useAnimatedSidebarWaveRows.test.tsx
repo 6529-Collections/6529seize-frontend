@@ -48,6 +48,44 @@ const parentOnlyRows: SidebarWaveTreeRow[] = [
 ];
 
 describe("useAnimatedSidebarWaveRows", () => {
+  it("returns rows during the first non-empty render", () => {
+    const renderSnapshots: {
+      readonly keys: string[];
+      readonly states: string[];
+    }[] = [];
+    const { rerender, result } = renderHook(
+      ({ rows }: { readonly rows: SidebarWaveTreeRow[] }) => {
+        const animatedRows = useAnimatedSidebarWaveRows(rows);
+        renderSnapshots.push({
+          keys: animatedRows.map((row) => row.key),
+          states: animatedRows.map((row) => row.animationState),
+        });
+        return animatedRows;
+      },
+      {
+        initialProps: {
+          rows: [],
+        },
+      }
+    );
+
+    renderSnapshots.length = 0;
+    rerender({ rows: expandedRows });
+
+    expect(renderSnapshots[0]).toEqual({
+      keys: ["parent", "parent:child"],
+      states: ["entered", "entered"],
+    });
+    expect(result.current.map((row) => row.key)).toEqual([
+      "parent",
+      "parent:child",
+    ]);
+    expect(result.current.map((row) => row.animationState)).toEqual([
+      "entered",
+      "entered",
+    ]);
+  });
+
   it("keeps exiting child rows by default until the transition timer finishes", () => {
     jest.useFakeTimers();
 

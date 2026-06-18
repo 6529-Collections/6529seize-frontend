@@ -19,12 +19,26 @@ jest.mock("react-use", () => ({
   useInterval: jest.fn(),
 }));
 import type { TypeOptions } from "react-toastify";
-import { toast } from "react-toastify";
 
-jest.mock("react-toastify", () => ({
-  toast: jest.fn(),
-  Slide: jest.fn(),
-  ToastContainer: () => null,
+const mockShowAppToast = jest.fn();
+const mockShowAppToasts = jest.fn(
+  ({
+    messages,
+    type,
+  }: {
+    readonly messages: readonly string[];
+    readonly type: TypeOptions;
+  }) => {
+    messages.forEach((message) => mockShowAppToast({ message, type }));
+  }
+);
+
+jest.mock("@/components/utils/toast/AppToast", () => ({
+  showAppToast: (toast: unknown) => mockShowAppToast(toast),
+  showAppToasts: (input: {
+    readonly messages: readonly string[];
+    readonly type: TypeOptions;
+  }) => mockShowAppToasts(input),
 }));
 
 const plan = { id: "1", name: "Plan", description: "desc", createdAt: 0 };
@@ -111,6 +125,16 @@ function ContextReader() {
           })
         }
       />
+      <button
+        data-testid="structured-toast"
+        onClick={() =>
+          context.setToast({
+            type: "success" as TypeOptions,
+            title: "Saved.",
+            description: "Your changes are ready.",
+          })
+        }
+      />
     </>
   );
 }
@@ -133,7 +157,8 @@ describe("DistributionPlanToolContext", () => {
       success: true,
       data: plan,
     });
-    (toast as unknown as jest.Mock).mockClear();
+    mockShowAppToast.mockClear();
+    mockShowAppToasts.mockClear();
   });
 
   it("renders children and default step", () => {
@@ -179,25 +204,33 @@ describe("DistributionPlanToolContext", () => {
   it("displays toasts for messages", () => {
     setup();
     screen.getByTestId("toast").click();
-    expect(toast).toHaveBeenCalledTimes(2);
-    expect(toast).toHaveBeenCalledWith(
-      "a",
-      expect.objectContaining({
-        type: "info",
-        autoClose: 3000,
-      })
-    );
+    expect(mockShowAppToasts).toHaveBeenCalledWith({
+      messages: ["a", "b"],
+      type: "info",
+    });
+    expect(mockShowAppToast).toHaveBeenCalledTimes(2);
+    expect(mockShowAppToast).toHaveBeenCalledWith({
+      message: "a",
+      type: "info",
+    });
   });
 
-  it("keeps error toasts visible longer", () => {
+  it("displays error toasts for messages", () => {
     setup();
     screen.getByTestId("error-toast").click();
-    expect(toast).toHaveBeenCalledWith(
-      "error",
-      expect.objectContaining({
-        type: "error",
-        autoClose: 8000,
-      })
-    );
+    expect(mockShowAppToasts).toHaveBeenCalledWith({
+      messages: ["error"],
+      type: "error",
+    });
+  });
+
+  it("supports structured toasts", () => {
+    setup();
+    screen.getByTestId("structured-toast").click();
+    expect(mockShowAppToast).toHaveBeenCalledWith({
+      type: "success",
+      title: "Saved.",
+      description: "Your changes are ready.",
+    });
   });
 });

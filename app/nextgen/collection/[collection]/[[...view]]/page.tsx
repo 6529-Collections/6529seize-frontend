@@ -1,6 +1,8 @@
 import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildNextgenCollectionPageJsonLd } from "@/lib/structured-data/nextgen";
 import styles from "@/styles/Home.module.scss";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
@@ -45,8 +47,17 @@ export default async function NextGenCollectionPage({
     notFound();
   }
   const resolvedView = getCollectionView(view?.[0] ?? "");
+  const path = `/nextgen/collection/${collection}${
+    view?.[0] ? `/${view[0]}` : ""
+  }`;
   return (
     <main className={styles["main"]}>
+      <JsonLdScript
+        data={buildNextgenCollectionPageJsonLd({
+          collection: resolvedCollection,
+          path,
+        })}
+      />
       <NextGenCollectionComponent
         collection={resolvedCollection}
         initialView={resolvedView}

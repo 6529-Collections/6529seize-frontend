@@ -23,7 +23,10 @@ import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
-import { useApproveWaveCustomTabLabels } from "@/hooks/waves/useWaveMetadata";
+import {
+  useApproveWaveCustomTabLabels,
+  useWaveOutcomeVisibility,
+} from "@/hooks/waves/useWaveMetadata";
 import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
 import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
@@ -39,7 +42,7 @@ import {
   type SetActiveContentTab,
 } from "../ContentTabContext";
 import MyStreamActionTooltip from "./MyStreamActionTooltip";
-import MyStreamWaveCreateCurationAction from "./tabs/MyStreamWaveCreateCurationAction";
+import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 
 interface MyStreamWaveDesktopTabsProps {
@@ -48,7 +51,7 @@ interface MyStreamWaveDesktopTabsProps {
   readonly setActiveTab: SetActiveContentTab;
   readonly activeCurationId: string | null;
   readonly onSelectCuration: (curationId: string | null) => void;
-  readonly showCreateCurationAction?: boolean | undefined;
+  readonly showCreateActionsMenu?: boolean | undefined;
 }
 
 interface TabOption {
@@ -322,7 +325,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   setActiveTab,
   activeCurationId,
   onSelectCuration,
-  showCreateCurationAction = true,
+  showCreateActionsMenu = true,
 }) => {
   const searchParams = useSearchParams();
   const { availableTabs, updateAvailableTabs } = useContentTab();
@@ -337,6 +340,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const approveLabels = useApproveWaveCustomTabLabels(wave);
+  const outcomesVisible = useWaveOutcomeVisibility(wave);
   const isCompetitionWave = isRankWave || isApproveWave;
   const {
     voting: { isUpcoming, isCompleted },
@@ -445,6 +449,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       hasAuthenticatedProfile,
       isCurationWave,
       isApproveWave,
+      showOutcomeTab: outcomesVisible,
       votingState,
       hasFirstDecisionPassed: firstDecisionDone,
       transientPreferredTab: hasSerialTarget ? MyStreamWaveTab.CHAT : null,
@@ -455,6 +460,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isChatWave,
     hasPolls,
     isApproveWave,
+    outcomesVisible,
     hasAuthenticatedProfile,
     isCurationWave,
     votingState,
@@ -479,6 +485,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           if (tab === MyStreamWaveTab.FAQ) {
             return isMemesWave;
           }
+          if (tab === MyStreamWaveTab.OUTCOME) {
+            return outcomesVisible;
+          }
           return true;
         })
         .map((tab) => ({
@@ -496,6 +505,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isCompetitionWave,
       isMemesWave,
       isCurationWave,
+      outcomesVisible,
       unansweredPolls,
     ]
   );
@@ -638,23 +648,23 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         ref={desktopTabsScrollerRef}
         className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
       >
-        <div className="tw-flex tw-w-auto tw-gap-x-1" role="tablist">
-          {standardOptions.map((option) => (
-            <DesktopTabOption
-              key={option.key}
-              option={option}
-              activeKey={activeKey}
-              onSelect={(key) => {
-                onSelectCuration(null);
-                setActiveTab(key as MyStreamWaveTab);
-              }}
-            />
-          ))}
-          <DndContext
-            sensors={sortableSensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleCurationDragEnd}
-          >
+        <DndContext
+          sensors={sortableSensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleCurationDragEnd}
+        >
+          <div className="tw-flex tw-w-auto tw-gap-x-1" role="tablist">
+            {standardOptions.map((option) => (
+              <DesktopTabOption
+                key={option.key}
+                option={option}
+                activeKey={activeKey}
+                onSelect={(key) => {
+                  onSelectCuration(null);
+                  setActiveTab(key as MyStreamWaveTab);
+                }}
+              />
+            ))}
             <SortableContext
               items={curationTabKeys}
               strategy={horizontalListSortingStrategy}
@@ -682,12 +692,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                 </React.Fragment>
               ))}
             </SortableContext>
-          </DndContext>
-        </div>
+          </div>
+        </DndContext>
       </div>
-      {showCreateCurationAction && (
+      {showCreateActionsMenu && (
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 sm:tw-ml-auto">
-          <MyStreamWaveCreateCurationAction
+          <MyStreamWaveCreateActionsMenu
             wave={wave}
             onCreated={onSelectCuration}
           />
