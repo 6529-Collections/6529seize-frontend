@@ -13,6 +13,7 @@
 
 import { ApiGlobalRepCategoryWaveRef } from '../models/ApiGlobalRepCategoryWaveRef';
 import { ApiProfileMin } from '../models/ApiProfileMin';
+import { HttpFile } from '../http/http';
 
 export class ApiGlobalRepCategoryWaveContributor {
     'wave': ApiGlobalRepCategoryWaveRef;
