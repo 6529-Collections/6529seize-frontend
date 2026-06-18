@@ -6,22 +6,45 @@ import {
 import RememePage from "@/components/rememes/RememePage";
 import { publicEnv } from "@/config/env";
 import { formatAddress } from "@/helpers/Helpers";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { fetchUrl } from "@/services/6529api";
 import styles from "@/styles/Home.module.scss";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Rememe } from "@/entities/INFT";
 import type { Metadata } from "next";
 
-const getRememeCollectionName = (rememe?: Rememe): string =>
-  rememe?.contract_opensea_data?.collectionName?.trim() || "ReMemes";
+const getNonEmptyText = (value: string | undefined): string | undefined => {
+  const normalized = value?.trim() ?? "";
+  return normalized.length > 0 ? normalized : undefined;
+};
 
-const getRememeImage = (rememe?: Rememe): string | undefined =>
-  rememe?.s3_image_scaled ||
-  rememe?.s3_image_original ||
-  rememe?.image ||
-  rememe?.media?.find((media) => media.gateway)?.gateway ||
-  rememe?.contract_opensea_data?.imageUrl ||
-  undefined;
+const getRememeCollectionName = (rememe?: Rememe): string =>
+  getNonEmptyText(rememe?.contract_opensea_data.collectionName) ?? "ReMemes";
+
+const getRememeName = (rememe: Rememe): string | undefined => {
+  const metadata = rememe.metadata as { name?: unknown };
+  return typeof metadata.name === "string"
+    ? getNonEmptyText(metadata.name)
+    : undefined;
+};
+
+const getRememeImage = (rememe?: Rememe): string | undefined => {
+  if (!rememe) {
+    return undefined;
+  }
+
+  const mediaGateway = rememe.media.find(
+    (media) => media.gateway.trim().length > 0
+  )?.gateway;
+
+  return (
+    getNonEmptyText(rememe.s3_image_scaled) ??
+    getNonEmptyText(rememe.s3_image_original) ??
+    getNonEmptyText(rememe.image) ??
+    getNonEmptyText(mediaGateway) ??
+    getNonEmptyText(rememe.contract_opensea_data.imageUrl)
+  );
+};
 
 export default async function ReMeme({
   params,
@@ -47,14 +70,18 @@ export async function generateMetadata({
   let rememe: Rememe | undefined;
 
   try {
+    const headers = await getAppCommonHeaders();
     const response = await fetchUrl<DBResponse<Rememe>>(
-      `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
+      `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`,
+      { headers }
     );
 
-    if (response?.data?.length > 0) {
-      rememe = response.data[0];
-      if (rememe?.metadata?.name) {
-        name = rememe.metadata.name;
+    const firstRememe = response.data[0];
+    if (firstRememe !== undefined) {
+      rememe = firstRememe;
+      const rememeName = getRememeName(rememe);
+      if (rememeName !== undefined) {
+        name = rememeName;
       }
     }
   } catch (error) {

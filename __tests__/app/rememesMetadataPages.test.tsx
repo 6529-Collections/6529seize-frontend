@@ -1,10 +1,15 @@
 import { generateMetadata as generateRememeDetailMetadata } from "@/app/rememes/[contract]/[id]/page";
 import { generateMetadata as generateRememesAddMetadata } from "@/app/rememes/add/page";
 import { generateMetadata as generateRememesMetadata } from "@/app/rememes/page";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { fetchUrl } from "@/services/6529api";
 import type { Metadata } from "next";
 
 jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
+
+jest.mock("@/helpers/server.app.helpers", () => ({
+  getAppCommonHeaders: jest.fn().mockResolvedValue({ "x-test": "1" }),
+}));
 
 jest.mock("@/components/rememes/Rememes", () => ({
   __esModule: true,
@@ -92,8 +97,10 @@ describe("ReMemes metadata", () => {
       params: Promise.resolve({ contract: "0xabc", id: "7" }),
     });
 
+    expect(getAppCommonHeaders).toHaveBeenCalled();
     expect(fetchUrl).toHaveBeenCalledWith(
-      expect.stringContaining("/api/rememes?contract=0xabc&id=7")
+      expect.stringContaining("/api/rememes?contract=0xabc&id=7"),
+      { headers: { "x-test": "1" } }
     );
 
     const image = getSocialImage(metadata);
@@ -123,8 +130,10 @@ describe("ReMemes metadata", () => {
       params: Promise.resolve({ contract: "0xabc", id: "8" }),
     });
 
+    expect(getAppCommonHeaders).toHaveBeenCalled();
     expect(fetchUrl).toHaveBeenCalledWith(
-      expect.stringContaining("/api/rememes?contract=0xabc&id=8")
+      expect.stringContaining("/api/rememes?contract=0xabc&id=8"),
+      { headers: { "x-test": "1" } }
     );
 
     const image = getSocialImage(metadata);
