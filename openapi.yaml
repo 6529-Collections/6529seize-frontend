@@ -2236,6 +2236,67 @@ paths:
                 $ref: "#/components/schemas/ApiDropAndWave"
         "404":
           description: Drop not found
+  /v2/drops/{id}/replies:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 replies to a drop.
+      description: Returns the reply thread for a drop using V2 drop and wave shapes.
+      operationId: getDropRepliesV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetDropRepliesV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: serial_no_limit
+          in: query
+          required: false
+          description: Serial number anchor for paginating replies.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: search_strategy
+          in: query
+          required: false
+          description: >-
+            Use in combination with serial_no_limit. If this is not set then
+            FIND_OLDER is used.
+          schema:
+            $ref: "#/components/schemas/ApiDropSearchStrategy"
+        - name: drop_type
+          in: query
+          description: Filter by drop type
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiDropType"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveDropsFeedV2"
+        "400":
+          description: Invalid reply feed query params
+        "404":
+          description: Drop not found
   /v2/drops/{id}/metadata:
     get:
       tags:
@@ -4835,6 +4896,153 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiGlobalRepCategoryGiversPage"
+  /rep/categories/{category}/wave-overview:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get Wave REP category overview across visible waves
+      operationId: getGlobalRepCategoryWaveOverview
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/rep-categories/global-rep-category.handlers"
+          name: handleGetGlobalRepCategoryWaveOverview
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[\p{L}\p{N}?!,.\x27() ]{1,100}$
+          description: URL-encoded REP category name.
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiGlobalRepCategoryWaveOverview"
+  /rep/categories/{category}/waves:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get visible waves using a REP category
+      operationId: getGlobalRepCategoryWaves
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/rep-categories/global-rep-category.handlers"
+          name: handleGetGlobalRepCategoryWaves
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[\p{L}\p{N}?!,.\x27() ]{1,100}$
+          description: URL-encoded REP category name.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - rep
+              - last_modified
+              - wave
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiGlobalRepCategoryWavesPage"
+  /rep/categories/{category}/wave-contributors:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get visible Wave REP contributors for a category
+      operationId: getGlobalRepCategoryWaveContributors
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/rep-categories/global-rep-category.handlers"
+          name: handleGetGlobalRepCategoryWaveContributors
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[\p{L}\p{N}?!,.\x27() ]{1,100}$
+          description: URL-encoded REP category name.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - rep
+              - last_modified
+              - wave
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiGlobalRepCategoryWaveContributorsPage"
   /profiles:
     post:
       tags:
@@ -7161,7 +7369,10 @@ paths:
         - Waves
       summary: Get drops related to wave or parent drop
       deprecated: true
-      description: Deprecated. Use GET /v2/waves/{id}/drops instead.
+      description: >-
+        Deprecated. Use GET /v2/waves/{id}/drops for the wave timeline feed, GET
+        /v2/drops/{id}/replies for reply threads, and GET
+        /v2/waves/{id}/curations/{curation_id}/drops for curation drops.
       operationId: getDropsOfWave
       parameters:
         - name: id
@@ -8097,7 +8308,12 @@ paths:
     get:
       tags:
         - WavesV2
-      summary: Get V2 drops related to wave
+      summary: Get V2 timeline drops for a wave
+      description: >-
+        Returns the timeline feed for a wave. This endpoint does not accept
+        reply-thread or curation filters. Use GET /v2/drops/{id}/replies for
+        reply threads and GET /v2/waves/{id}/curations/{curation_id}/drops for
+        curation drops.
       operationId: getWaveDropsV2
       x-6529-router:
         enabled: true
@@ -8119,7 +8335,7 @@ paths:
             format: int64
             minimum: 1
             maximum: 200
-            default: 20
+            default: 50
         - name: serial_no_limit
           in: query
           required: false
@@ -8127,6 +8343,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
         - name: search_strategy
           in: query
           required: false
@@ -8148,6 +8365,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeedV2"
+        "400":
+          description: Invalid wave timeline feed query params
   /v2/waves/{id}/polls:
     get:
       tags:
@@ -12071,6 +12290,139 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiGlobalRepCategoryRecipient"
+    ApiGlobalRepCategorySuggestedCategory:
+      type: object
+      required:
+        - category
+        - total_rep
+        - profile_rep
+        - wave_rep
+        - rating_count
+        - last_modified
+      properties:
+        category:
+          type: string
+        total_rep:
+          type: number
+          format: int64
+        profile_rep:
+          type: number
+          format: int64
+        wave_rep:
+          type: number
+          format: int64
+        rating_count:
+          type: number
+          format: int64
+        last_modified:
+          type: string
+    ApiGlobalRepCategoryWave:
+      type: object
+      required:
+        - wave
+        - total_rep
+        - contributor_count
+        - last_modified
+        - top_contributors
+      properties:
+        wave:
+          $ref: "#/components/schemas/ApiGlobalRepCategoryWaveRef"
+        total_rep:
+          type: number
+          format: int64
+        contributor_count:
+          type: number
+          format: int64
+        last_modified:
+          type: string
+        top_contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryWaveContributor"
+    ApiGlobalRepCategoryWaveContributor:
+      type: object
+      required:
+        - wave
+        - profile
+        - contribution
+        - last_modified
+      properties:
+        wave:
+          $ref: "#/components/schemas/ApiGlobalRepCategoryWaveRef"
+        profile:
+          $ref: "#/components/schemas/ApiProfileMin"
+        contribution:
+          type: number
+          format: int64
+        last_modified:
+          type: string
+    ApiGlobalRepCategoryWaveContributorsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryWaveContributor"
+    ApiGlobalRepCategoryWaveOverview:
+      type: object
+      required:
+        - category
+        - total_rep
+        - wave_count
+        - contributor_count
+        - top_waves
+        - top_contributors
+      properties:
+        category:
+          type: string
+        total_rep:
+          type: number
+          format: int64
+        wave_count:
+          type: number
+          format: int64
+        contributor_count:
+          type: number
+          format: int64
+        top_waves:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryWave"
+        top_contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryWaveContributor"
+    ApiGlobalRepCategoryWaveRef:
+      type: object
+      required:
+        - id
+        - name
+        - is_direct_message
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        pfp:
+          type: string
+          nullable: true
+        is_direct_message:
+          type: boolean
+    ApiGlobalRepCategoryWavesPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryWave"
     ApiGroup:
       type: object
       required:

@@ -13,7 +13,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchGlobalRepCategoryOverview,
   fetchGlobalRepCategoryPage,
@@ -57,8 +57,8 @@ const SORTS: ReadonlyArray<{
   readonly id: GlobalRepCategorySort;
   readonly label: string;
 }> = [
-  { id: "rep_desc", label: "REP high" },
-  { id: "rep_asc", label: "REP low" },
+  { id: "rep_desc", label: "REP impact high" },
+  { id: "rep_asc", label: "REP impact low" },
   { id: "recent", label: "Recent" },
 ];
 
@@ -157,6 +157,45 @@ function MiniList({
   );
 }
 
+function LoadMoreSentinel({
+  canLoadMore,
+  isLoading,
+  onLoadMore,
+}: {
+  readonly canLoadMore: boolean;
+  readonly isLoading: boolean;
+  readonly onLoadMore: () => void;
+}) {
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !canLoadMore || isLoading) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: "240px 0px" }
+    );
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [canLoadMore, isLoading, onLoadMore]);
+
+  if (!canLoadMore) {
+    return null;
+  }
+
+  return (
+    <div ref={sentinelRef} aria-hidden="true" className="tw-h-1 tw-w-full" />
+  );
+}
+
 function RepTotalMiniRow({
   profile,
   totalRep,
@@ -239,7 +278,7 @@ function OverviewContent({ category }: { readonly category: string }) {
       </div>
 
       <div className="tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
-        <MiniList title="Top recipients">
+        <MiniList title="Recipients preview">
           {overview.top_recipients.length > 0 ? (
             overview.top_recipients.map((item) => (
               <RepTotalMiniRow
@@ -255,7 +294,7 @@ function OverviewContent({ category }: { readonly category: string }) {
           )}
         </MiniList>
 
-        <MiniList title="Top givers">
+        <MiniList title="Givers preview">
           {overview.top_givers.length > 0 ? (
             overview.top_givers.map((item) => (
               <RepTotalMiniRow
@@ -447,6 +486,11 @@ function PaginatedTable({
       ) ?? [],
     [pageQuery.data?.pages]
   );
+  const loadNextPage = () => {
+    if (pageQuery.hasNextPage && !pageQuery.isFetchingNextPage) {
+      pageQuery.fetchNextPage().catch(() => undefined);
+    }
+  };
 
   if (pageQuery.isPending) {
     return (
@@ -545,16 +589,21 @@ function PaginatedTable({
       )}
 
       {pageQuery.hasNextPage && (
-        <button
-          type="button"
-          disabled={pageQuery.isFetchingNextPage}
-          onClick={() => {
-            pageQuery.fetchNextPage().catch(() => undefined);
-          }}
-          className="tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
-        >
-          {pageQuery.isFetchingNextPage ? "Loading..." : "Load more"}
-        </button>
+        <>
+          <LoadMoreSentinel
+            canLoadMore={pageQuery.hasNextPage}
+            isLoading={pageQuery.isFetchingNextPage}
+            onLoadMore={loadNextPage}
+          />
+          <button
+            type="button"
+            disabled={pageQuery.isFetchingNextPage}
+            onClick={loadNextPage}
+            className="tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
+          >
+            {pageQuery.isFetchingNextPage ? "Loading..." : "Load more"}
+          </button>
+        </>
       )}
     </div>
   );
@@ -564,10 +613,12 @@ export default function GlobalRepCategoryDetail({
   category,
   mode = "page",
   showFullPageLink = false,
+  showSearchLink = false,
 }: {
   readonly category: string;
   readonly mode?: "page" | "dialog";
   readonly showFullPageLink?: boolean;
+  readonly showSearchLink?: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<GlobalRepCategoryTab>("overview");
   const [sort, setSort] = useState<GlobalRepCategorySort>("rep_desc");
@@ -583,7 +634,7 @@ export default function GlobalRepCategoryDetail({
         <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
           <div className="tw-min-w-0">
             <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-primary-300">
-              Global REP Category
+              REP Category
             </p>
             <h1
               className={`tw-mb-0 tw-break-words tw-font-semibold tw-text-white ${
@@ -593,14 +644,24 @@ export default function GlobalRepCategoryDetail({
               {category}
             </h1>
           </div>
-          {showFullPageLink && (
-            <Link
-              href={getRepCategoryPath(category)}
-              className="tw-text-primary-200 hover:tw-text-primary-100 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15"
-            >
-              Open full page
-            </Link>
-          )}
+          <div className="tw-flex tw-flex-wrap tw-gap-2">
+            {showSearchLink && (
+              <Link
+                href="/rep/categories"
+                className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] hover:tw-text-white"
+              >
+                Back to category search
+              </Link>
+            )}
+            {showFullPageLink && (
+              <Link
+                href={getRepCategoryPath(category)}
+                className="tw-text-primary-200 hover:tw-text-primary-100 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15"
+              >
+                Open full page
+              </Link>
+            )}
+          </div>
         </div>
 
         <div

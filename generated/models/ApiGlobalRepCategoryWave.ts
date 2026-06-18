@@ -11,14 +11,16 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiGlobalRepCategoryWaveContributor } from '../models/ApiGlobalRepCategoryWaveContributor';
+import { ApiGlobalRepCategoryWaveRef } from '../models/ApiGlobalRepCategoryWaveRef';
 import { HttpFile } from '../http/http';
 
-export class ApiGlobalRepCategoryGiver {
-    'profile': ApiProfileMin;
+export class ApiGlobalRepCategoryWave {
+    'wave': ApiGlobalRepCategoryWaveRef;
     'total_rep': number;
-    'recipient_count': number;
+    'contributor_count': number;
     'last_modified': string;
+    'top_contributors': Array<ApiGlobalRepCategoryWaveContributor>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,9 +28,9 @@ export class ApiGlobalRepCategoryGiver {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "profile",
-            "baseName": "profile",
-            "type": "ApiProfileMin",
+            "name": "wave",
+            "baseName": "wave",
+            "type": "ApiGlobalRepCategoryWaveRef",
             "format": ""
         },
         {
@@ -38,8 +40,8 @@ export class ApiGlobalRepCategoryGiver {
             "format": "int64"
         },
         {
-            "name": "recipient_count",
-            "baseName": "recipient_count",
+            "name": "contributor_count",
+            "baseName": "contributor_count",
             "type": "number",
             "format": "int64"
         },
@@ -48,10 +50,16 @@ export class ApiGlobalRepCategoryGiver {
             "baseName": "last_modified",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "top_contributors",
+            "baseName": "top_contributors",
+            "type": "Array<ApiGlobalRepCategoryWaveContributor>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiGlobalRepCategoryGiver.attributeTypeMap;
+        return ApiGlobalRepCategoryWave.attributeTypeMap;
     }
 
     public constructor() {

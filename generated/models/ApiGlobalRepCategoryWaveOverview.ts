@@ -11,14 +11,17 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiGlobalRepCategoryWave } from '../models/ApiGlobalRepCategoryWave';
+import { ApiGlobalRepCategoryWaveContributor } from '../models/ApiGlobalRepCategoryWaveContributor';
 import { HttpFile } from '../http/http';
 
-export class ApiGlobalRepCategoryGiver {
-    'profile': ApiProfileMin;
+export class ApiGlobalRepCategoryWaveOverview {
+    'category': string;
     'total_rep': number;
-    'recipient_count': number;
-    'last_modified': string;
+    'wave_count': number;
+    'contributor_count': number;
+    'top_waves': Array<ApiGlobalRepCategoryWave>;
+    'top_contributors': Array<ApiGlobalRepCategoryWaveContributor>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,9 +29,9 @@ export class ApiGlobalRepCategoryGiver {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "profile",
-            "baseName": "profile",
-            "type": "ApiProfileMin",
+            "name": "category",
+            "baseName": "category",
+            "type": "string",
             "format": ""
         },
         {
@@ -38,20 +41,32 @@ export class ApiGlobalRepCategoryGiver {
             "format": "int64"
         },
         {
-            "name": "recipient_count",
-            "baseName": "recipient_count",
+            "name": "wave_count",
+            "baseName": "wave_count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "last_modified",
-            "baseName": "last_modified",
-            "type": "string",
+            "name": "contributor_count",
+            "baseName": "contributor_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "top_waves",
+            "baseName": "top_waves",
+            "type": "Array<ApiGlobalRepCategoryWave>",
+            "format": ""
+        },
+        {
+            "name": "top_contributors",
+            "baseName": "top_contributors",
+            "type": "Array<ApiGlobalRepCategoryWaveContributor>",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiGlobalRepCategoryGiver.attributeTypeMap;
+        return ApiGlobalRepCategoryWaveOverview.attributeTypeMap;
     }
 
     public constructor() {

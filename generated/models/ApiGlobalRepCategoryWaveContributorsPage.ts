@@ -11,14 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiGlobalRepCategoryWaveContributor } from '../models/ApiGlobalRepCategoryWaveContributor';
 import { HttpFile } from '../http/http';
 
-export class ApiGlobalRepCategoryGiver {
-    'profile': ApiProfileMin;
-    'total_rep': number;
-    'recipient_count': number;
-    'last_modified': string;
+export class ApiGlobalRepCategoryWaveContributorsPage {
+    'data': Array<ApiGlobalRepCategoryWaveContributor>;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +25,26 @@ export class ApiGlobalRepCategoryGiver {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "profile",
-            "baseName": "profile",
-            "type": "ApiProfileMin",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiGlobalRepCategoryWaveContributor>",
             "format": ""
         },
         {
-            "name": "total_rep",
-            "baseName": "total_rep",
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "recipient_count",
-            "baseName": "recipient_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "last_modified",
-            "baseName": "last_modified",
-            "type": "string",
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiGlobalRepCategoryGiver.attributeTypeMap;
+        return ApiGlobalRepCategoryWaveContributorsPage.attributeTypeMap;
     }
 
     public constructor() {

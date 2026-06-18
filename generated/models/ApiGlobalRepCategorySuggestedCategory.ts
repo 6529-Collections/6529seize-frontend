@@ -11,13 +11,14 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
-export class ApiGlobalRepCategoryGiver {
-    'profile': ApiProfileMin;
+export class ApiGlobalRepCategorySuggestedCategory {
+    'category': string;
     'total_rep': number;
-    'recipient_count': number;
+    'profile_rep': number;
+    'wave_rep': number;
+    'rating_count': number;
     'last_modified': string;
 
     static readonly discriminator: string | undefined = undefined;
@@ -26,9 +27,9 @@ export class ApiGlobalRepCategoryGiver {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "profile",
-            "baseName": "profile",
-            "type": "ApiProfileMin",
+            "name": "category",
+            "baseName": "category",
+            "type": "string",
             "format": ""
         },
         {
@@ -38,8 +39,20 @@ export class ApiGlobalRepCategoryGiver {
             "format": "int64"
         },
         {
-            "name": "recipient_count",
-            "baseName": "recipient_count",
+            "name": "profile_rep",
+            "baseName": "profile_rep",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "wave_rep",
+            "baseName": "wave_rep",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "rating_count",
+            "baseName": "rating_count",
             "type": "number",
             "format": "int64"
         },
@@ -51,7 +64,7 @@ export class ApiGlobalRepCategoryGiver {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiGlobalRepCategoryGiver.attributeTypeMap;
+        return ApiGlobalRepCategorySuggestedCategory.attributeTypeMap;
     }
 
     public constructor() {

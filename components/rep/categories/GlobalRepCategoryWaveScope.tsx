@@ -3,88 +3,48 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveRepCategory } from "@/generated/models/ApiWaveRepCategory";
-import type { ApiWaveRepContributor } from "@/generated/models/ApiWaveRepContributor";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ApiGlobalRepCategoryWave } from "@/generated/models/ApiGlobalRepCategoryWave";
+import type { ApiGlobalRepCategoryWaveContributor } from "@/generated/models/ApiGlobalRepCategoryWaveContributor";
+import type { ApiGlobalRepCategoryWaveRef } from "@/generated/models/ApiGlobalRepCategoryWaveRef";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { fetchWaveById, searchWavesByName } from "@/services/api/waves-v2-api";
-import type { SidebarWave } from "@/types/waves.types";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  fetchWaveRepCategoryContributors,
-  fetchWaveRepCategorySummary,
-  getWaveRepCategoryContributorsQueryKey,
-  getWaveRepCategoryQueryKey,
+  fetchGlobalRepCategoryWaveContributorsPage,
+  fetchGlobalRepCategoryWaveOverview,
+  fetchGlobalRepCategoryWavesPage,
+  getGlobalRepCategoryWaveContributorsPageQueryKey,
+  getGlobalRepCategoryWaveOverviewQueryKey,
+  getGlobalRepCategoryWavesPageQueryKey,
 } from "./globalRepCategory.api";
 import {
   GLOBAL_REP_CATEGORY_PAGE_SIZE,
+  formatRepCategoryDate,
   getProfileDisplay,
   getProfileHref,
+  type GlobalRepCategorySort,
 } from "./globalRepCategory.helpers";
-import { parseWaveIdFromRepCategoryInput } from "./waveSearch.helpers";
 
-type SearchStatus = "idle" | "loading" | "error" | "results";
+type WaveRepTab = "waves" | "contributors";
 
-type SelectedWave = {
-  readonly id: string;
-  readonly name: string;
-  readonly isDirectMessage: boolean;
-};
+const WAVE_REP_TABS: ReadonlyArray<{
+  readonly id: WaveRepTab;
+  readonly label: string;
+}> = [
+  { id: "waves", label: "Waves" },
+  { id: "contributors", label: "Contributors" },
+];
 
-type ContributorRow = {
-  readonly item: ApiWaveRepContributor;
-  readonly rank: number;
-};
-
-function getSelectedWaveFromApiWave(wave: ApiWave): SelectedWave {
-  return {
-    id: wave.id,
-    name: wave.name,
-    isDirectMessage:
-      wave.wave.type === ApiWaveType.Chat &&
-      Boolean(wave.chat?.scope?.group?.is_direct_message),
-  };
-}
-
-function getSelectedWaveFromSidebarWave(wave: SidebarWave): SelectedWave {
-  return {
-    id: wave.id,
-    name: wave.name,
-    isDirectMessage: wave.isDirectMessage,
-  };
-}
-
-function WaveResultButton({
-  wave,
-  onSelect,
-}: {
-  readonly wave: SidebarWave;
-  readonly onSelect: (wave: SidebarWave) => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(wave)}
-      className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2.5 tw-text-left tw-transition-colors hover:tw-border-primary-400/40 hover:tw-bg-primary-500/10"
-    >
-      <span className="tw-min-w-0">
-        <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-white">
-          {wave.name}
-        </span>
-        <span className="tw-block tw-truncate tw-text-xs tw-text-iron-500">
-          {wave.id}
-        </span>
-      </span>
-      <span className="tw-flex-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
-        Select
-      </span>
-    </button>
-  );
-}
+const WAVE_REP_SORTS: ReadonlyArray<{
+  readonly id: GlobalRepCategorySort;
+  readonly label: string;
+}> = [
+  { id: "rep_desc", label: "REP impact high" },
+  { id: "rep_asc", label: "REP impact low" },
+  { id: "recent", label: "Recent" },
+];
 
 function WaveMetric({
   label,
@@ -105,147 +65,251 @@ function WaveMetric({
   );
 }
 
-function LoadingOutput({
-  label,
-  size,
-  className,
+function StateBlock({
+  title,
+  message,
+  onRetry,
 }: {
-  readonly label: string;
-  readonly size: CircleLoaderSize;
-  readonly className: string;
+  readonly title: string;
+  readonly message: string;
+  readonly onRetry?: (() => void) | undefined;
 }) {
   return (
-    <output aria-label={label} className={className}>
-      <CircleLoader size={size} />
-    </output>
+    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-p-5">
+      <p className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-100">
+        {title}
+      </p>
+      <p className="tw-mb-0 tw-text-sm tw-text-iron-400">{message}</p>
+      {onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07]"
+        >
+          Retry
+        </button>
+      )}
+    </div>
   );
 }
 
-function WaveSearchResults({
-  matches,
-  onSelect,
+function LoadMoreSentinel({
+  canLoadMore,
+  isLoading,
+  onLoadMore,
 }: {
-  readonly matches: SidebarWave[];
-  readonly onSelect: (wave: SidebarWave) => void;
+  readonly canLoadMore: boolean;
+  readonly isLoading: boolean;
+  readonly onLoadMore: () => void;
 }) {
-  if (matches.length === 0) {
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !canLoadMore || isLoading) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: "240px 0px" }
+    );
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [canLoadMore, isLoading, onLoadMore]);
+
+  if (!canLoadMore) {
     return null;
   }
 
   return (
-    <div className="tw-mt-4">
-      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-        Search results
-      </p>
-      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
-        {matches.map((wave) => (
-          <li key={wave.id}>
-            <WaveResultButton wave={wave} onSelect={onSelect} />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <div ref={sentinelRef} aria-hidden="true" className="tw-h-1 tw-w-full" />
   );
 }
 
-function WaveSelectionPrompt() {
+function WaveLink({ wave }: { readonly wave: ApiGlobalRepCategoryWaveRef }) {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-p-5">
-      <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-        Select a wave to inspect this category inside Wave REP.
-      </p>
-    </div>
+    <Link
+      href={getWaveRoute({
+        waveId: wave.id,
+        isDirectMessage: wave.is_direct_message,
+        isApp: false,
+      })}
+      className="tw-text-primary-200 hover:tw-text-primary-100 tw-break-words tw-font-semibold tw-no-underline"
+    >
+      {wave.name}
+    </Link>
   );
 }
 
-function SelectedWaveHeader({ wave }: { readonly wave: SelectedWave }) {
-  return (
-    <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-      <div className="tw-min-w-0">
-        <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-          Selected wave
-        </p>
-        <p className="tw-mb-0 tw-break-words tw-text-lg tw-font-semibold tw-text-white">
-          {wave.name}
-        </p>
-      </div>
-      <Link
-        href={getWaveRoute({
-          waveId: wave.id,
-          isDirectMessage: wave.isDirectMessage,
-          isApp: false,
-        })}
-        className="tw-text-primary-200 hover:tw-text-primary-100 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15"
-      >
-        Open wave
-      </Link>
-    </div>
-  );
-}
-
-function WaveCategorySummary({
-  category,
-  isPending,
-  isError,
-  data,
+function ContributorLink({
+  contributor,
 }: {
-  readonly category: string;
-  readonly isPending: boolean;
-  readonly isError: boolean;
-  readonly data: ApiWaveRepCategory | null | undefined;
+  readonly contributor: ApiGlobalRepCategoryWaveContributor;
 }) {
-  if (isPending) {
-    return (
-      <LoadingOutput
-        label="Loading wave REP category"
-        size={CircleLoaderSize.XXLARGE}
-        className="tw-flex tw-justify-center tw-py-8"
-      />
-    );
-  }
-
-  if (isError) {
-    return (
-      <p className="tw-mb-0 tw-text-sm tw-text-error">
-        Could not load Wave REP category totals.
-      </p>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-p-5">
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-          This wave has no non-zero Wave REP for {category}.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3">
-      <WaveMetric label="Wave category REP" value={data.total_rep} />
-      <WaveMetric label="Contributors" value={data.contributor_count} />
-      <WaveMetric
-        label="Your contribution"
-        value={data.authenticated_user_contribution ?? 0}
-      />
-    </div>
+    <Link
+      href={getProfileHref(contributor.profile)}
+      className="hover:tw-text-primary-200 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline"
+    >
+      {getProfileDisplay(contributor.profile)}
+    </Link>
   );
 }
 
-function WaveContributorsTable({
+function TopContributors({
+  contributors,
+}: {
+  readonly contributors: ApiGlobalRepCategoryWaveContributor[];
+}) {
+  if (contributors.length === 0) {
+    return <span className="tw-text-sm tw-text-iron-500">None yet</span>;
+  }
+
+  return (
+    <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+      {contributors.map((contributor) => (
+        <li
+          key={`${contributor.wave.id}-${contributor.profile.id}-${contributor.contribution}`}
+          className="tw-rounded-full tw-bg-white/[0.04] tw-px-2.5 tw-py-1 tw-text-xs tw-text-iron-200"
+        >
+          <ContributorLink contributor={contributor} />{" "}
+          <span className="tw-text-iron-400">
+            {formatNumberWithCommas(contributor.contribution)}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function WaveRow({
+  item,
+  rank,
+}: {
+  readonly item: ApiGlobalRepCategoryWave;
+  readonly rank: number;
+}) {
+  return (
+    <tr className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/5 last:tw-border-b-0">
+      <td className="tw-px-4 tw-py-3 tw-text-sm tw-text-iron-500">{rank}</td>
+      <td className="tw-px-4 tw-py-3">
+        <WaveLink wave={item.wave} />
+      </td>
+      <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-semibold tw-text-iron-100">
+        {formatNumberWithCommas(item.total_rep)}
+      </td>
+      <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-text-iron-300">
+        {formatNumberWithCommas(item.contributor_count)}
+      </td>
+      <td className="tw-px-4 tw-py-3">
+        <TopContributors contributors={item.top_contributors} />
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+        {formatRepCategoryDate(item.last_modified)}
+      </td>
+    </tr>
+  );
+}
+
+function ContributorRow({
+  item,
+  rank,
+}: {
+  readonly item: ApiGlobalRepCategoryWaveContributor;
+  readonly rank: number;
+}) {
+  return (
+    <tr className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/5 last:tw-border-b-0">
+      <td className="tw-px-4 tw-py-3 tw-text-sm tw-text-iron-500">{rank}</td>
+      <td className="tw-px-4 tw-py-3">
+        <ContributorLink contributor={item} />
+      </td>
+      <td className="tw-px-4 tw-py-3">
+        <WaveLink wave={item.wave} />
+      </td>
+      <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-semibold tw-text-iron-100">
+        {formatNumberWithCommas(item.contribution)}
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+        {formatRepCategoryDate(item.last_modified)}
+      </td>
+    </tr>
+  );
+}
+
+function WavesTable({
   category,
   rows,
 }: {
   readonly category: string;
-  readonly rows: ContributorRow[];
+  readonly rows: Array<{
+    readonly item: ApiGlobalRepCategoryWave;
+    readonly rank: number;
+  }>;
 }) {
   return (
     <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08]">
-      <table className="tw-w-full tw-min-w-[34rem] tw-border-collapse tw-bg-white/[0.02] tw-text-left">
+      <table className="tw-w-full tw-min-w-[54rem] tw-border-collapse tw-bg-white/[0.02] tw-text-left">
         <caption className="tw-sr-only">
-          Wave REP contributors for {category}
+          Waves using REP category {category}
+        </caption>
+        <thead className="tw-bg-white/[0.04] tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          <tr>
+            <th scope="col" className="tw-w-16 tw-px-4 tw-py-3">
+              Rank
+            </th>
+            <th scope="col" className="tw-px-4 tw-py-3">
+              Wave
+            </th>
+            <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
+              REP
+            </th>
+            <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
+              Contributors
+            </th>
+            <th scope="col" className="tw-px-4 tw-py-3">
+              Leading contributors
+            </th>
+            <th scope="col" className="tw-px-4 tw-py-3">
+              Last modified
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <WaveRow
+              key={`${row.rank}-${row.item.wave.id}`}
+              item={row.item}
+              rank={row.rank}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ContributorsTable({
+  category,
+  rows,
+}: {
+  readonly category: string;
+  readonly rows: Array<{
+    readonly item: ApiGlobalRepCategoryWaveContributor;
+    readonly rank: number;
+  }>;
+}) {
+  return (
+    <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08]">
+      <table className="tw-w-full tw-min-w-[44rem] tw-border-collapse tw-bg-white/[0.02] tw-text-left">
+        <caption className="tw-sr-only">
+          Wave REP contributors for category {category}
         </caption>
         <thead className="tw-bg-white/[0.04] tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
           <tr>
@@ -255,32 +319,24 @@ function WaveContributorsTable({
             <th scope="col" className="tw-px-4 tw-py-3">
               Contributor
             </th>
+            <th scope="col" className="tw-px-4 tw-py-3">
+              Wave
+            </th>
             <th scope="col" className="tw-px-4 tw-py-3 tw-text-right">
               REP
+            </th>
+            <th scope="col" className="tw-px-4 tw-py-3">
+              Last modified
             </th>
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ item, rank }) => (
-            <tr
-              key={`${rank}-${item.profile.id}`}
-              className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/5 last:tw-border-b-0"
-            >
-              <td className="tw-px-4 tw-py-3 tw-text-sm tw-text-iron-500">
-                {rank}
-              </td>
-              <td className="tw-px-4 tw-py-3">
-                <Link
-                  href={getProfileHref(item.profile)}
-                  className="hover:tw-text-primary-200 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline"
-                >
-                  {getProfileDisplay(item.profile)}
-                </Link>
-              </td>
-              <td className="tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-semibold tw-text-iron-100">
-                {formatNumberWithCommas(item.contribution)}
-              </td>
-            </tr>
+          {rows.map((row) => (
+            <ContributorRow
+              key={`${row.rank}-${row.item.wave.id}-${row.item.profile.id}`}
+              item={row.item}
+              rank={row.rank}
+            />
           ))}
         </tbody>
       </table>
@@ -288,98 +344,34 @@ function WaveContributorsTable({
   );
 }
 
-function WaveContributorsSection({
-  category,
-  isPending,
-  isError,
-  rows,
+function SortControls({
+  sort,
+  onSortChange,
 }: {
-  readonly category: string;
-  readonly isPending: boolean;
-  readonly isError: boolean;
-  readonly rows: ContributorRow[];
-}) {
-  if (isPending) {
-    return (
-      <LoadingOutput
-        label="Loading wave REP contributors"
-        size={CircleLoaderSize.LARGE}
-        className="tw-flex tw-justify-center tw-py-6"
-      />
-    );
-  }
-
-  if (isError) {
-    return (
-      <p className="tw-mb-0 tw-text-sm tw-text-error">
-        Could not load Wave REP contributors.
-      </p>
-    );
-  }
-
-  if (rows.length === 0) {
-    return (
-      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-        No Wave REP contributors found for this category.
-      </p>
-    );
-  }
-
-  return <WaveContributorsTable category={category} rows={rows} />;
-}
-
-function WaveRepDetails({
-  category,
-  selectedWave,
-  categoryStatus,
-  contributorsStatus,
-  contributorRows,
-  hasNextPage,
-  isFetchingNextPage,
-  onLoadMore,
-}: {
-  readonly category: string;
-  readonly selectedWave: SelectedWave;
-  readonly categoryStatus: {
-    readonly isPending: boolean;
-    readonly isError: boolean;
-    readonly data: ApiWaveRepCategory | null | undefined;
-  };
-  readonly contributorsStatus: {
-    readonly isPending: boolean;
-    readonly isError: boolean;
-  };
-  readonly contributorRows: ContributorRow[];
-  readonly hasNextPage: boolean;
-  readonly isFetchingNextPage: boolean;
-  readonly onLoadMore: () => void;
+  readonly sort: GlobalRepCategorySort;
+  readonly onSortChange: (sort: GlobalRepCategorySort) => void;
 }) {
   return (
-    <section className="tw-flex tw-flex-col tw-gap-4">
-      <SelectedWaveHeader wave={selectedWave} />
-      <WaveCategorySummary
-        category={category}
-        isPending={categoryStatus.isPending}
-        isError={categoryStatus.isError}
-        data={categoryStatus.data}
-      />
-      <WaveContributorsSection
-        category={category}
-        isPending={contributorsStatus.isPending}
-        isError={contributorsStatus.isError}
-        rows={contributorRows}
-      />
-      {hasNextPage && (
+    <div
+      className="tw-inline-flex tw-flex-wrap tw-gap-2"
+      aria-label="Sort Wave REP rows"
+    >
+      {WAVE_REP_SORTS.map((option) => (
         <button
+          key={option.id}
           type="button"
-          disabled={isFetchingNextPage}
-          onClick={onLoadMore}
-          className="tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
+          aria-pressed={sort === option.id}
+          onClick={() => onSortChange(option.id)}
+          className={`tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition-colors ${
+            sort === option.id
+              ? "tw-text-primary-200 tw-border-primary-400/50 tw-bg-primary-500/15"
+              : "tw-border-white/10 tw-bg-white/[0.03] tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-200"
+          }`}
         >
-          {isFetchingNextPage ? "Loading..." : "Load more"}
+          {option.label}
         </button>
-      )}
-    </section>
+      ))}
+    </div>
   );
 }
 
@@ -388,50 +380,53 @@ export default function GlobalRepCategoryWaveScope({
 }: {
   readonly category: string;
 }) {
-  const [input, setInput] = useState("");
-  const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [matches, setMatches] = useState<SidebarWave[]>([]);
-  const [selectedWave, setSelectedWave] = useState<SelectedWave | null>(null);
-  const selectedWaveId = selectedWave?.id ?? null;
+  const [activeTab, setActiveTab] = useState<WaveRepTab>("waves");
+  const [sort, setSort] = useState<GlobalRepCategorySort>("rep_desc");
 
-  const waveCategoryQuery = useQuery({
-    queryKey: getWaveRepCategoryQueryKey({
-      waveId: selectedWaveId ?? "no-wave-selected",
-      category,
-    }),
-    queryFn: async () => {
-      if (!selectedWaveId) {
-        throw new Error("Select a wave before loading category REP.");
-      }
-      return await fetchWaveRepCategorySummary({
-        waveId: selectedWaveId,
-        category,
-      });
-    },
-    enabled: selectedWaveId !== null,
+  const overviewQuery = useQuery({
+    queryKey: getGlobalRepCategoryWaveOverviewQueryKey(category),
+    queryFn: async () => await fetchGlobalRepCategoryWaveOverview(category),
   });
 
-  const contributorsQuery = useInfiniteQuery({
-    queryKey: getWaveRepCategoryContributorsQueryKey({
-      waveId: selectedWaveId ?? "no-wave-selected",
-      category,
-    }),
-    queryFn: async ({ pageParam }: { pageParam: number }) => {
-      if (!selectedWaveId) {
-        throw new Error("Select a wave before loading category contributors.");
-      }
-      return await fetchWaveRepCategoryContributors({
-        waveId: selectedWaveId,
+  const wavesQuery = useInfiniteQuery({
+    queryKey: getGlobalRepCategoryWavesPageQueryKey({ category, sort }),
+    queryFn: async ({ pageParam }: { pageParam: number }) =>
+      await fetchGlobalRepCategoryWavesPage({
         category,
+        sort,
         page: pageParam,
-      });
-    },
-    enabled: selectedWaveId !== null,
+      }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.next ? lastPage.page + 1 : undefined,
   });
+
+  const contributorsQuery = useInfiniteQuery({
+    queryKey: getGlobalRepCategoryWaveContributorsPageQueryKey({
+      category,
+      sort,
+    }),
+    queryFn: async ({ pageParam }: { pageParam: number }) =>
+      await fetchGlobalRepCategoryWaveContributorsPage({
+        category,
+        sort,
+        page: pageParam,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.next ? lastPage.page + 1 : undefined,
+  });
+
+  const waveRows = useMemo(
+    () =>
+      wavesQuery.data?.pages.flatMap((page) =>
+        page.data.map((item, index) => ({
+          item,
+          rank: (page.page - 1) * GLOBAL_REP_CATEGORY_PAGE_SIZE + index + 1,
+        }))
+      ) ?? [],
+    [wavesQuery.data?.pages]
+  );
 
   const contributorRows = useMemo(
     () =>
@@ -444,130 +439,171 @@ export default function GlobalRepCategoryWaveScope({
     [contributorsQuery.data?.pages]
   );
 
-  const selectWave = (wave: SelectedWave) => {
-    setSelectedWave(wave);
-    setMatches([]);
-    setSearchStatus("idle");
-    setSearchError(null);
-    setInput(wave.name);
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmedInput = input.trim();
-    if (trimmedInput.length < 2) {
-      setSearchStatus("error");
-      setSearchError("Enter a wave name, id, or URL.");
-      setMatches([]);
-      return;
-    }
-
-    setSearchStatus("loading");
-    setSearchError(null);
-    setMatches([]);
-
-    const waveId = parseWaveIdFromRepCategoryInput(trimmedInput);
-    if (waveId) {
-      try {
-        const wave = await fetchWaveById({ waveId });
-        selectWave(getSelectedWaveFromApiWave(wave));
-      } catch (error) {
-        setSearchStatus("error");
-        setSearchError(
-          error instanceof Error ? error.message : "Could not load that wave."
-        );
-      }
-      return;
-    }
-
-    try {
-      const searchMatches = await searchWavesByName({
-        name: trimmedInput,
-        pageSize: 5,
-      });
-      setMatches(searchMatches);
-      setSearchStatus("results");
-      if (searchMatches.length === 0) {
-        setSearchError("No matching waves found.");
-      }
-    } catch (error) {
-      setSearchStatus("error");
-      setSearchError(
-        error instanceof Error ? error.message : "Could not search waves."
-      );
+  const activeQuery = activeTab === "waves" ? wavesQuery : contributorsQuery;
+  const loadMoreActiveRows = () => {
+    if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
+      activeQuery.fetchNextPage().catch(() => undefined);
     }
   };
 
-  const waveContent = selectedWave ? (
-    <WaveRepDetails
-      category={category}
-      selectedWave={selectedWave}
-      categoryStatus={{
-        isPending: waveCategoryQuery.isPending,
-        isError: waveCategoryQuery.isError,
-        data: waveCategoryQuery.data,
-      }}
-      contributorsStatus={{
-        isPending: contributorsQuery.isPending,
-        isError: contributorsQuery.isError,
-      }}
-      contributorRows={contributorRows}
-      hasNextPage={contributorsQuery.hasNextPage}
-      isFetchingNextPage={contributorsQuery.isFetchingNextPage}
-      onLoadMore={() => {
-        contributorsQuery.fetchNextPage().catch(() => undefined);
-      }}
-    />
-  ) : (
-    <WaveSelectionPrompt />
-  );
+  if (overviewQuery.isPending) {
+    return (
+      <output
+        aria-label="Loading Wave REP category overview"
+        className="tw-flex tw-justify-center tw-py-12"
+      >
+        <CircleLoader size={CircleLoaderSize.XXLARGE} />
+      </output>
+    );
+  }
+
+  if (overviewQuery.isError) {
+    return (
+      <StateBlock
+        title="Could not load Wave REP"
+        message={
+          overviewQuery.error instanceof Error
+            ? overviewQuery.error.message
+            : "Wave REP for this category failed to load."
+        }
+        onRetry={() => {
+          overviewQuery.refetch().catch(() => undefined);
+        }}
+      />
+    );
+  }
+
+  const overview = overviewQuery.data;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-5">
-      <section className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-p-4">
-        <form
-          onSubmit={(event) => {
-            handleSubmit(event).catch(() => undefined);
-          }}
-          className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row"
-        >
-          <label className="tw-sr-only" htmlFor="wave-rep-wave-search">
-            Search wave for REP analytics
-          </label>
-          <input
-            id="wave-rep-wave-search"
-            type="search"
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            className="tw-form-input tw-block tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm"
-            placeholder="Search wave by name, URL, or id"
-          />
-          <button
-            type="submit"
-            disabled={searchStatus === "loading"}
-            className="tw-text-primary-100 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-transition-colors hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15 disabled:tw-cursor-wait disabled:tw-opacity-70"
-          >
-            {searchStatus === "loading" ? "Searching..." : "Search"}
-          </button>
-        </form>
+      <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3">
+        <WaveMetric label="Wave REP" value={overview.total_rep} />
+        <WaveMetric label="Waves" value={overview.wave_count} />
+        <WaveMetric label="Contributors" value={overview.contributor_count} />
+      </div>
 
-        {searchStatus === "results" && (
-          <WaveSearchResults
-            matches={matches}
-            onSelect={(nextWave) =>
-              selectWave(getSelectedWaveFromSidebarWave(nextWave))
-            }
-          />
-        )}
+      {overview.wave_count === 0 ? (
+        <StateBlock
+          title="No Wave REP found"
+          message="This category has not been used for Wave REP yet."
+        />
+      ) : (
+        <>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
+            <section>
+              <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+                Waves preview
+              </h3>
+              <div className="tw-flex tw-flex-col tw-gap-2">
+                {overview.top_waves.map((wave) => (
+                  <div
+                    key={wave.wave.id}
+                    className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5"
+                  >
+                    <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+                      <WaveLink wave={wave.wave} />
+                      <span className="tw-flex-shrink-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+                        {formatNumberWithCommas(wave.total_rep)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section>
+              <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+                Contributors preview
+              </h3>
+              <div className="tw-flex tw-flex-col tw-gap-2">
+                {overview.top_contributors.map((contributor) => (
+                  <div
+                    key={`${contributor.wave.id}-${contributor.profile.id}`}
+                    className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5"
+                  >
+                    <div className="tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:tw-items-center">
+                      <ContributorLink contributor={contributor} />
+                      <WaveLink wave={contributor.wave} />
+                      <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                        {formatNumberWithCommas(contributor.contribution)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
 
-        {searchError && (
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-error">
-            {searchError}
-          </p>
-        )}
-      </section>
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2">
+            <div
+              role="tablist"
+              aria-label="Wave REP category sections"
+              className="tw-flex tw-gap-2"
+            >
+              {WAVE_REP_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
+                    activeTab === tab.id
+                      ? "tw-border-white/20 tw-bg-white/10 tw-text-white"
+                      : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <SortControls sort={sort} onSortChange={setSort} />
+          </div>
 
-      {waveContent}
+          {activeQuery.isPending ? (
+            <output
+              aria-label={`Loading Wave REP ${activeTab}`}
+              className="tw-flex tw-justify-center tw-py-8"
+            >
+              <CircleLoader size={CircleLoaderSize.LARGE} />
+            </output>
+          ) : activeQuery.isError ? (
+            <StateBlock
+              title="Could not load Wave REP rows"
+              message={
+                activeQuery.error instanceof Error
+                  ? activeQuery.error.message
+                  : "Wave REP rows failed to load."
+              }
+              onRetry={() => {
+                activeQuery.refetch().catch(() => undefined);
+              }}
+            />
+          ) : activeTab === "waves" ? (
+            <WavesTable category={category} rows={waveRows} />
+          ) : (
+            <ContributorsTable category={category} rows={contributorRows} />
+          )}
+
+          {activeQuery.hasNextPage && (
+            <>
+              <LoadMoreSentinel
+                canLoadMore={activeQuery.hasNextPage}
+                isLoading={activeQuery.isFetchingNextPage}
+                onLoadMore={loadMoreActiveRows}
+              />
+              <button
+                type="button"
+                disabled={activeQuery.isFetchingNextPage}
+                onClick={loadMoreActiveRows}
+                className="tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
+              >
+                {activeQuery.isFetchingNextPage ? "Loading..." : "Load more"}
+              </button>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

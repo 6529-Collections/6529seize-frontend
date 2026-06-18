@@ -11,13 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiGlobalRepCategoryWaveRef } from '../models/ApiGlobalRepCategoryWaveRef';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
-export class ApiGlobalRepCategoryGiver {
+export class ApiGlobalRepCategoryWaveContributor {
+    'wave': ApiGlobalRepCategoryWaveRef;
     'profile': ApiProfileMin;
-    'total_rep': number;
-    'recipient_count': number;
+    'contribution': number;
     'last_modified': string;
 
     static readonly discriminator: string | undefined = undefined;
@@ -26,20 +27,20 @@ export class ApiGlobalRepCategoryGiver {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
+            "name": "wave",
+            "baseName": "wave",
+            "type": "ApiGlobalRepCategoryWaveRef",
+            "format": ""
+        },
+        {
             "name": "profile",
             "baseName": "profile",
             "type": "ApiProfileMin",
             "format": ""
         },
         {
-            "name": "total_rep",
-            "baseName": "total_rep",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "recipient_count",
-            "baseName": "recipient_count",
+            "name": "contribution",
+            "baseName": "contribution",
             "type": "number",
             "format": "int64"
         },
@@ -51,7 +52,7 @@ export class ApiGlobalRepCategoryGiver {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiGlobalRepCategoryGiver.attributeTypeMap;
+        return ApiGlobalRepCategoryWaveContributor.attributeTypeMap;
     }
 
     public constructor() {
