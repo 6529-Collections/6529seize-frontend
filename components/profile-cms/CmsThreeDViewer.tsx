@@ -72,7 +72,9 @@ export default function CmsThreeDViewer({
   const hasAutoStartedRef = useRef(false);
   const pointerGestureRef = useRef({ moved: false, x: 0, y: 0 });
   const runtimeRef = useRef<CmsThreeDRuntime | null>(null);
+  const viewerFrameRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMobileFallback, setIsMobileFallback] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -181,6 +183,42 @@ export default function CmsThreeDViewer({
 
   useEffect(() => disposeRuntime, [disposeRuntime]);
 
+  useEffect(() => {
+    const syncFullscreenState = () => {
+      setIsFullscreen(
+        !!viewerFrameRef.current &&
+          globalThis.document.fullscreenElement === viewerFrameRef.current
+      );
+    };
+
+    syncFullscreenState();
+    globalThis.document.addEventListener(
+      "fullscreenchange",
+      syncFullscreenState
+    );
+
+    return () => {
+      globalThis.document.removeEventListener(
+        "fullscreenchange",
+        syncFullscreenState
+      );
+    };
+  }, []);
+
+  const handleFullscreenToggle = useCallback(() => {
+    const frame = viewerFrameRef.current;
+    if (!frame) {
+      return;
+    }
+
+    if (globalThis.document.fullscreenElement === frame) {
+      globalThis.document.exitFullscreen?.().catch(() => undefined);
+      return;
+    }
+
+    frame.requestFullscreen?.().catch(() => undefined);
+  }, []);
+
   const onCanvasPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLCanvasElement>) => {
       event.currentTarget.focus({ preventScroll: true });
@@ -231,13 +269,18 @@ export default function CmsThreeDViewer({
   );
 
   const showOverlay = status !== "ready" || isMobileFallback;
+  const frameClassName = isFullscreen
+    ? "tw-fixed tw-inset-0 tw-z-[9999] tw-h-screen tw-min-h-screen tw-w-screen tw-border-0"
+    : "tw-aspect-[16/9] tw-min-h-[22rem] tw-w-full tw-border tw-border-solid tw-border-iron-800 md:tw-min-h-[32rem]";
 
   return (
     <section
       aria-label={config.title}
-      className="tw-relative tw-left-1/2 tw-h-[calc(100vh-56px)] tw-min-h-[720px] tw-w-screen -tw-translate-x-1/2 tw-overflow-hidden tw-bg-black"
+      className={`tw-relative tw-isolate tw-overflow-hidden tw-bg-black ${frameClassName}`}
       data-cms-3d-kind={config.kind}
+      data-cms-3d-fullscreen={isFullscreen}
       data-cms-3d-status={isMobileFallback ? "mobile-fallback" : status}
+      ref={viewerFrameRef}
     >
       <div className="tw-absolute tw-inset-0" ref={containerRef}>
         <canvas
@@ -267,6 +310,11 @@ export default function CmsThreeDViewer({
         />
       ) : null}
 
+      <CmsThreeDFullscreenControl
+        isFullscreen={isFullscreen}
+        locale={locale}
+        onToggle={handleFullscreenToggle}
+      />
       <CmsThreeDLinkTray config={config} locale={locale} />
     </section>
   );
@@ -388,6 +436,31 @@ function CmsThreeDStartControl({
       type="button"
     >
       {getCmsThreeDStartLabel({ config, locale, progress, status })}
+    </button>
+  );
+}
+
+function CmsThreeDFullscreenControl({
+  isFullscreen,
+  locale,
+  onToggle,
+}: {
+  readonly isFullscreen: boolean;
+  readonly locale: SupportedLocale;
+  readonly onToggle: () => void;
+}) {
+  return (
+    <button
+      className="tw-absolute tw-right-4 tw-top-4 tw-z-30 tw-inline-flex tw-min-h-10 tw-items-center tw-border tw-border-white/15 tw-bg-black/55 tw-px-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-white tw-backdrop-blur-md tw-transition hover:tw-border-white/35 hover:tw-text-primary-300"
+      onClick={onToggle}
+      type="button"
+    >
+      {t(
+        locale,
+        isFullscreen
+          ? "profileCms.interactive.exitFullscreen"
+          : "profileCms.interactive.fullscreen"
+      )}
     </button>
   );
 }
@@ -566,7 +639,7 @@ function CmsThreeDLinkTray({
   return (
     <nav
       aria-label={t(locale, "profileCms.interactive.roomWorksLabel")}
-      className="tw-absolute tw-bottom-5 tw-left-24 tw-right-5 tw-z-20 tw-flex tw-flex-wrap tw-gap-2"
+      className="tw-absolute tw-bottom-4 tw-left-4 tw-right-4 tw-z-20 tw-flex tw-flex-wrap tw-gap-2"
     >
       {config.placements.map((placement) => (
         <a

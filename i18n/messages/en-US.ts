@@ -668,6 +668,8 @@ export const EN_US_MESSAGES = {
     "Enter a simple exhibition room. Every artwork still links to its canonical 2D detail page.",
   "profileCms.interactive.openSourceMedia": "Open source media",
   "profileCms.interactive.enterRoom": "Enter room",
+  "profileCms.interactive.fullscreen": "Full screen",
+  "profileCms.interactive.exitFullscreen": "Exit full screen",
   "profileCms.interactive.loadObject": "Load 3D object",
   "profileCms.interactive.loading": "Loading {progress}%",
   "profileCms.interactive.loadError":
