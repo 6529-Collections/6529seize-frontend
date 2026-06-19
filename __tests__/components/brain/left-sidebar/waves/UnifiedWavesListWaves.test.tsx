@@ -234,9 +234,9 @@ it("adds the active loaded all-wave to the highly rated preview source", () => {
 
   expect(
     getHighlyRatedPreviewWaves({
+      activeWaveLookupWaves: [activeWave],
       activeParentWaveId: null,
       activeWaveId: activeWave.id,
-      allWaves: [activeWave],
       highlyRatedWaves,
     }).map((wave) => wave.id)
   ).toEqual([
@@ -252,6 +252,26 @@ it("adds the active loaded all-wave to the highly rated preview source", () => {
     "h10",
     "r11",
   ]);
+});
+
+it("prefers the active wave over its parent in the preview recovery pool", () => {
+  const highlyRatedWaves = Array.from({ length: 10 }, (_, index) =>
+    createMockMinimalWave({
+      id: `h${index + 1}`,
+      sidebarSection: "highly-rated",
+    })
+  );
+  const parentWave = createMockMinimalWave({ id: "parent" });
+  const activeWave = createMockMinimalWave({ id: "child" });
+
+  expect(
+    getHighlyRatedPreviewWaves({
+      activeWaveLookupWaves: [parentWave, activeWave],
+      activeParentWaveId: parentWave.id,
+      activeWaveId: activeWave.id,
+      highlyRatedWaves,
+    }).at(-1)?.id
+  ).toBe(activeWave.id);
 });
 
 it("renders fitting highly rated waves as an unboxed preview strip without an expand control", () => {

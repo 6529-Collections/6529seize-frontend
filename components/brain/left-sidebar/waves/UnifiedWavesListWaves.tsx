@@ -243,12 +243,12 @@ const UnifiedWavesListWaves = forwardRef<
     const highlyRatedPreviewWaves = useMemo(
       () =>
         getHighlyRatedPreviewWaves({
+          activeWaveLookupWaves: topLevelWaves,
           activeParentWaveId,
           activeWaveId,
-          allWaves,
           highlyRatedWaves,
         }),
-      [activeParentWaveId, activeWaveId, allWaves, highlyRatedWaves]
+      [activeParentWaveId, activeWaveId, highlyRatedWaves, topLevelWaves]
     );
     const highlyRatedPreviewItems = useMemo(
       () =>

@@ -33,28 +33,29 @@ type SetActiveWaveForPreview = (
 ) => void;
 
 export function getHighlyRatedPreviewWaves({
+  activeWaveLookupWaves,
   activeParentWaveId,
   activeWaveId,
-  allWaves,
   highlyRatedWaves,
 }: {
+  readonly activeWaveLookupWaves: readonly MinimalWave[];
   readonly activeParentWaveId: string | null | undefined;
   readonly activeWaveId: string | null | undefined;
-  readonly allWaves: readonly MinimalWave[];
   readonly highlyRatedWaves: readonly MinimalWave[];
 }): MinimalWave[] {
-  const activeIds = [activeWaveId, activeParentWaveId].filter(
-    (waveId): waveId is string => typeof waveId === "string"
-  );
-
-  if (activeIds.length === 0) {
-    return [...highlyRatedWaves];
-  }
-
   const highlyRatedWaveIds = new Set(highlyRatedWaves.map((wave) => wave.id));
-  const activeWave = allWaves.find((wave) => activeIds.includes(wave.id));
+  const findRecoverableWave = (waveId: string | null | undefined) => {
+    if (typeof waveId !== "string" || highlyRatedWaveIds.has(waveId)) {
+      return undefined;
+    }
 
-  if (activeWave === undefined || highlyRatedWaveIds.has(activeWave.id)) {
+    return activeWaveLookupWaves.find((wave) => wave.id === waveId);
+  };
+  const activeWave =
+    findRecoverableWave(activeWaveId) ??
+    findRecoverableWave(activeParentWaveId);
+
+  if (activeWave === undefined) {
     return [...highlyRatedWaves];
   }
 

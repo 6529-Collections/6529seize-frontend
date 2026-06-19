@@ -435,12 +435,12 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const highlyRatedPreviewWaves = useMemo(
     () =>
       getHighlyRatedPreviewWaves({
+        activeWaveLookupWaves: topLevelWaves,
         activeParentWaveId,
         activeWaveId,
-        allWaves,
         highlyRatedWaves,
       }),
-    [activeParentWaveId, activeWaveId, allWaves, highlyRatedWaves]
+    [activeParentWaveId, activeWaveId, highlyRatedWaves, topLevelWaves]
   );
   const highlyRatedPreviewItems = useMemo(
     () =>
