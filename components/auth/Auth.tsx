@@ -876,16 +876,9 @@ export default function Auth({
     readonly role: string | null;
   }): Promise<{ success: boolean }> => {
     try {
-      const isSingleWebSessionV2 = getSessionClientType() === "web";
-      if (
-        !canStoreAnotherWalletAccount(signerAddress, {
-          allowAdditionalAccounts: !isSingleWebSessionV2,
-        })
-      ) {
+      if (!canStoreAnotherWalletAccount(signerAddress)) {
         setToast({
-          message: isSingleWebSessionV2
-            ? "Disconnect the current profile before connecting another profile"
-            : "You've reached the connected profile limit.",
+          message: "You've reached the connected profile limit.",
           type: "error",
         });
         return { success: false };

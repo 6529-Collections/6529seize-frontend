@@ -272,6 +272,9 @@ export const validateJwt = async ({
       activeProfileProxy,
     });
   } catch (error: unknown) {
+    if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
+      return VALID_JWT_RESULT;
+    }
     if (hasValidLocalJwt) {
       return SESSION_UPGRADE_REQUIRED_RESULT;
     }
