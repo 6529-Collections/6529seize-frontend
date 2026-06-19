@@ -1385,6 +1385,63 @@ describe("Auth component", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("keeps session upgrade dismiss reminders scoped to each connected account", async () => {
+      const firstAddress = "0x1111111111111111111111111111111111111111";
+      const secondAddress = "0x2222222222222222222222222222222222222222";
+      walletAddress = firstAddress;
+      enableAuthMigrationDeadline();
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      const { unmount } = render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+
+      const user = userEvent.setup();
+      await user.click(screen.getByText("Remind me later"));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Upgrade Authentication")
+        ).not.toBeInTheDocument();
+      });
+
+      unmount();
+      walletAddress = secondAddress;
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+    });
+
     it("caps displayed temporary access time by the configured migration deadline", async () => {
       const now = Date.UTC(2026, 5, 17, 12, 0, 0);
       jest.spyOn(Date, "now").mockReturnValue(now);
