@@ -68,12 +68,13 @@ const WavesFilterToggle = (): React.JSX.Element | null => {
 
   // Render the button group toggle with error boundary for rendering issues
   try {
+    const filterLabel = t(DEFAULT_LOCALE, "waves.sidebar.filterAriaLabel");
+
     return (
-      <div
-        aria-label={t(DEFAULT_LOCALE, "waves.sidebar.filterAriaLabel")}
+      <fieldset
         className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-8 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden tw-bg-iron-950"
-        role="group"
       >
+        <legend className="tw-sr-only">{filterLabel}</legend>
         <button
           type="button"
           aria-pressed={!following}
@@ -90,7 +91,7 @@ const WavesFilterToggle = (): React.JSX.Element | null => {
         >
           {t(DEFAULT_LOCALE, "waves.sidebar.filterJoined")}
         </button>
-      </div>
+      </fieldset>
     );
   } catch (error) {
     console.warn("[WavesFilterToggle] Rendering error occurred", {

@@ -1078,3 +1078,12 @@
   and editorial report data (`dateLabel`, `publishedAt`, repo focus summaries,
   and markdown report bodies), which intentionally stays `en-US` until the
   About Tech shelf gets a full localization pass.
+- Recorded brain left-sidebar waves filter fallback debt while addressing PR
+  #2778 bot feedback: `WavesFilterToggle`, `UnifiedWavesList`, and
+  `WebUnifiedWavesList` now use source-locale message keys for the All/Joined
+  labels, filter group name, and joined empty state, but the sidebar has no
+  viewer-locale source yet and therefore falls back to `en-US`. Non-English
+  viewers may see English sidebar filter copy until locale is threaded through
+  the brain sidebar shell; owner is the frontend a11y/i18n workstream, and the
+  remediation path is to pass the resolved app locale into the brain sidebar
+  components before translating this surface.
