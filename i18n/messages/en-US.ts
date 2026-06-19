@@ -341,7 +341,6 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Highly Rated",
   pinned: "Pinned",
-  following: "Following",
   allWaves: "All Waves",
   all: "All",
   filterAriaLabel: "Wave list filter",
@@ -351,7 +350,6 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Highly rated waves",
   pinnedAriaLabel: "Pinned waves",
-  followingAriaLabel: "Following waves",
   followingListAriaLabel: "Following waves list",
   allRecentActivityAriaLabel: "All recent waves list",
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",

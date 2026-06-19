@@ -740,9 +740,7 @@ test("sorts regular all waves by latest activity", () => {
     waves:
       overviewType === ApiWavesOverviewType.RecentlyDroppedTo && !following
         ? [firstRegularWave, secondRegularWave]
-        : overviewType === ApiWavesOverviewType.RecentlyDroppedTo
-          ? []
-          : [],
+        : [],
     isFetching: false,
     isFetchingNextPage: false,
     hasNextPage: false,

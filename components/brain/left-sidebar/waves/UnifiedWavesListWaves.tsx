@@ -206,10 +206,7 @@ const UnifiedWavesListWaves = forwardRef<
 
     const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
       items: virtualizedRows,
-      key:
-        animatedAllRows.length > 0
-          ? "unified-waves-all"
-          : "unified-waves-following",
+      key: isJoinedFilterActive ? "unified-waves-joined" : "unified-waves-all",
       scrollContainerRef,
       listContainerRef,
       rowHeight: getSidebarRowHeight,
