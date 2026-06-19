@@ -1,3 +1,5 @@
+/* eslint max-lines: "off" */
+
 import {
   DISTRIBUTION_MESSAGES,
   LINK_PREVIEW_MESSAGES,
@@ -173,8 +175,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.rep": "REP",
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
-  "suggested.description":
-    "Categories with the most profile REP activity.",
+  "suggested.description": "Categories with the most profile REP activity.",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -339,14 +340,23 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Highly Rated",
+  "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
+  "highlyRatedPreviewOpenAriaLabel.one": "Open {waveName}, {count} new message",
+  "highlyRatedPreviewOpenAriaLabel.other":
+    "Open {waveName}, {count} new messages",
+  highlyRatedPreviewScore: "Score {score}",
   pinned: "Pinned",
-  following: "Following",
+  allWaves: "All Waves",
   all: "All",
+  filterAriaLabel: "Wave list filter",
+  filterAll: "All",
+  filterJoined: "Joined",
+  joinedEmptyMessage: "No joined waves to display",
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Highly rated waves",
   pinnedAriaLabel: "Pinned waves",
-  followingAriaLabel: "Following waves",
   followingListAriaLabel: "Following waves list",
+  allRecentActivityAriaLabel: "All recent waves list",
   allQualityRankedAriaLabel: "All quality-ranked waves list",
   directMessagesAriaLabel: "Direct message conversations",
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",
@@ -358,6 +368,15 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
   "postsCount.one": "{count} Post",
   "postsCount.other": "{count} Posts",
+} as const);
+
+const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
+  coverAlt: "{waveName} cover",
+  "dropsCount.one": "{timeAgo} · {count} drop",
+  "dropsCount.other": "{timeAgo} · {count} drops",
+  noDropsYet: "No drops yet",
+  viewAriaLabel: "View wave {waveName}",
+  viewWithScoreAriaLabel: "View wave {waveName}. {scoreSummary}",
 } as const);
 
 const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
@@ -969,10 +988,15 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
+  "drop.media.processing": "Processing image",
+  "drop.media.unavailable": "Image unavailable",
+  "drop.media.processingFailed": "Image processing failed.",
+  "drop.media.processingTimedOut": "Image processing timed out.",
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
   ...WAVE_REP_ACTION_MESSAGES,

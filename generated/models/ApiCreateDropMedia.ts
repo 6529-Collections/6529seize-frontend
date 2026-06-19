@@ -11,14 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
-export class ApiGlobalRepCategoryGiver {
-    'profile': ApiProfileMin;
-    'total_rep': number;
-    'recipient_count': number;
-    'last_modified': string;
+export class ApiCreateDropMedia {
+    'url': string;
+    'mime_type': string;
+    'media_upload_id'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +24,26 @@ export class ApiGlobalRepCategoryGiver {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "profile",
-            "baseName": "profile",
-            "type": "ApiProfileMin",
+            "name": "url",
+            "baseName": "url",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "total_rep",
-            "baseName": "total_rep",
-            "type": "number",
-            "format": "int64"
+            "name": "mime_type",
+            "baseName": "mime_type",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "recipient_count",
-            "baseName": "recipient_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "last_modified",
-            "baseName": "last_modified",
+            "name": "media_upload_id",
+            "baseName": "media_upload_id",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiGlobalRepCategoryGiver.attributeTypeMap;
+        return ApiCreateDropMedia.attributeTypeMap;
     }
 
     public constructor() {
