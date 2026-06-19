@@ -114,16 +114,18 @@ describe("ExploreWaveCard", () => {
       />
     );
 
-    expect(screen.getByText("Score")).toBeInTheDocument();
-    expect(screen.getByText("Hot")).toBeInTheDocument();
-    expect(screen.getByText("REP")).toBeInTheDocument();
+    expect(screen.queryByText("Score")).not.toBeInTheDocument();
+    expect(screen.queryByText("Hot")).not.toBeInTheDocument();
+    expect(screen.queryByText("REP")).not.toBeInTheDocument();
     expect(screen.getByText("96")).toBeInTheDocument();
     expect(screen.getByText("98")).toBeInTheDocument();
     expect(screen.getByText("+1.3K")).toBeInTheDocument();
 
-    const metricsRow = screen.getByText("96").parentElement?.parentElement;
+    const metricsRow = screen
+      .getByText("96")
+      .closest(".explore-wave-card-metrics");
+    expect(metricsRow).toBeInTheDocument();
     expect(metricsRow).toHaveClass("tw-flex-nowrap");
-    expect(metricsRow).toHaveClass("discover-wave-card-trust-signals");
 
     const scoreBadge = screen.getByText("96").closest("[aria-label]");
     expect(scoreBadge).toHaveAttribute(

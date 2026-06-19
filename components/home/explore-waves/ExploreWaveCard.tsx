@@ -9,13 +9,15 @@ import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { SidebarWave } from "@/types/waves.types";
-import {
-  getWaveTrustSummaryLabel,
-  WaveTrustSignals,
-} from "@/components/waves/WaveTrustSignals";
-import { formatInteger } from "@/i18n/format";
+import { getWaveTrustSummaryLabel } from "@/components/waves/WaveTrustSignals";
+import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import {
+  FireIcon,
+  ScaleIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -24,6 +26,12 @@ interface ExploreWaveCardProps {
 }
 
 const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
+const METRIC_CHIP_CLASSES =
+  "tw-inline-flex tw-items-center tw-cursor-help tw-gap-1 tw-whitespace-nowrap tw-rounded-md tw-px-1.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none";
+const METRIC_ICON_CLASSES = "tw-size-3.5 tw-flex-shrink-0";
+const METRIC_VALUE_CLASSES = "tw-text-[11px] tw-font-semibold tw-tabular-nums";
+const METRIC_SEPARATOR_CLASSES =
+  "tw-text-[11px] tw-leading-none tw-text-iron-500/70";
 
 const getDropsCountMessageKey = (
   count: number
@@ -37,6 +45,85 @@ const getDropsCountMessageKey = (
   return pluralCategory === "one"
     ? "waves.explore.card.dropsCount.one"
     : "waves.explore.card.dropsCount.other";
+};
+
+const formatCompactNumber = (value: number): string =>
+  formatNumber(EXPLORE_WAVE_CARD_LOCALE, value, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
+
+const formatScore = (value: number | null | undefined): string | null => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return formatInteger(EXPLORE_WAVE_CARD_LOCALE, Math.round(value));
+};
+
+const formatRep = (value: number | null | undefined): string | null => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return null;
+  }
+
+  if (value > 0) {
+    return `+${formatCompactNumber(value)}`;
+  }
+
+  return formatCompactNumber(value);
+};
+
+const formatRepAccessibleValue = (
+  value: number | null | undefined
+): string | null => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return null;
+  }
+
+  const formatted = formatInteger(EXPLORE_WAVE_CARD_LOCALE, Math.abs(value));
+  if (value > 0) {
+    return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repPositive", {
+      value: formatted,
+    });
+  }
+  if (value < 0) {
+    return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repNegative", {
+      value: formatted,
+    });
+  }
+  return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repNeutral", {
+    value: formatted,
+  });
+};
+
+const getVisibilityToneClasses = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
+  }
+
+  if (value >= 85) {
+    return "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300";
+  }
+
+  if (value >= 65) {
+    return "tw-text-sky-400 desktop-hover:hover:tw-text-sky-300";
+  }
+
+  if (value < 35) {
+    return "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300";
+  }
+
+  return "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
+};
+
+const getRepToneClasses = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || value === 0) {
+    return "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
+  }
+
+  return value > 0
+    ? "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300"
+    : "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300";
 };
 
 export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
@@ -118,12 +205,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         <span className="tw-m-0 tw-line-clamp-1 tw-break-words tw-text-sm tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80 sm:tw-text-base">
           {wave.name}
         </span>
-        <WaveTrustSignals
-          waveRep={wave.waveRep}
-          waveScore={wave.waveScore}
-          variant="header-inline"
-          className="discover-wave-card-trust-signals tw-mt-3 tw-flex-nowrap tw-overflow-hidden"
-        />
+        <ExploreWaveCompactMetrics wave={wave} />
 
         {descriptionPreview && (
           <MessagePreviewContent previewContent={descriptionPreview} />
@@ -146,6 +228,113 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         )}
       </div>
     </Link>
+  );
+}
+
+function ExploreWaveCompactMetrics({ wave }: { readonly wave: SidebarWave }) {
+  const visibilityScore = formatScore(wave.waveScore?.visibility_score);
+  const hotnessScore = formatScore(wave.waveScore?.hotness_score);
+  const repScore =
+    wave.waveRep === null
+      ? formatScore(wave.waveScore?.rep_sort_score)
+      : formatRep(wave.waveRep.total_rep);
+  const repAccessibleValue = formatRepAccessibleValue(wave.waveRep?.total_rep);
+  let repAriaLabel: string | null = null;
+  if (repScore !== null) {
+    repAriaLabel =
+      repAccessibleValue !== null
+        ? t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repAriaRaw", {
+            value: repAccessibleValue,
+          })
+        : t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repAriaScore", {
+            repScore,
+          });
+  }
+
+  const metrics = [
+    visibilityScore === null
+      ? null
+      : {
+          ariaLabel: t(
+            EXPLORE_WAVE_CARD_LOCALE,
+            "waves.score.details.visibilityAria",
+            { visibilityScore }
+          ),
+          icon: (
+            <ShieldCheckIcon
+              className={METRIC_ICON_CLASSES}
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
+          ),
+          toneClasses: getVisibilityToneClasses(
+            wave.waveScore?.visibility_score
+          ),
+          value: visibilityScore,
+        },
+    hotnessScore === null
+      ? null
+      : {
+          ariaLabel: t(
+            EXPLORE_WAVE_CARD_LOCALE,
+            "waves.score.details.hotnessAria",
+            {
+              hotnessScore,
+            }
+          ),
+          icon: (
+            <FireIcon
+              className={METRIC_ICON_CLASSES}
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
+          ),
+          toneClasses:
+            "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
+          value: hotnessScore,
+        },
+    repScore === null
+      ? null
+      : {
+          ariaLabel: repAriaLabel ?? "",
+          icon: (
+            <ScaleIcon
+              className={METRIC_ICON_CLASSES}
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
+          ),
+          toneClasses: getRepToneClasses(wave.waveRep?.total_rep),
+          value: repScore,
+        },
+  ].filter((metric) => metric !== null);
+
+  if (metrics.length === 0) {
+    return null;
+  }
+
+  return (
+    <span className="explore-wave-card-metrics tw-mt-3 tw-flex tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-hidden">
+      {metrics.map((metric, index) => (
+        <span
+          key={`${metric.ariaLabel}-${metric.value}`}
+          className="tw-contents"
+        >
+          {index > 0 && (
+            <span className={METRIC_SEPARATOR_CLASSES} aria-hidden="true">
+              &bull;
+            </span>
+          )}
+          <span
+            className={`${METRIC_CHIP_CLASSES} ${metric.toneClasses}`}
+            aria-label={metric.ariaLabel}
+          >
+            {metric.icon}
+            <span className={METRIC_VALUE_CLASSES}>{metric.value}</span>
+          </span>
+        </span>
+      ))}
+    </span>
   );
 }
 
