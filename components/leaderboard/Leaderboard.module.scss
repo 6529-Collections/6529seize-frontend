@@ -5,6 +5,7 @@
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
   overflow-x: auto;
+  max-width: 100%;
 }
 
 .scrollContainer::-webkit-scrollbar {
@@ -102,7 +103,7 @@
   gap: 0;
   margin-bottom: 1rem;
   min-height: 112px;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
 }
 
@@ -228,6 +229,168 @@
   margin: 0;
   min-inline-size: 0;
   padding: 0;
+}
+
+.scrollCue {
+  display: none;
+}
+
+@media only screen and (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
+  .networkHeader {
+    gap: 1rem;
+  }
+
+  .networkToolbar {
+    min-height: 0;
+  }
+
+  .scrollContainer {
+    overflow-x: visible;
+  }
+
+  .networkToolbarTop {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 0;
+    padding: 0.875rem 1rem;
+  }
+
+  .networkToolbarSearchRow {
+    justify-content: stretch;
+    padding: 0.75rem 1rem;
+  }
+
+  .networkViewTabs {
+    font-size: 1rem;
+    line-height: 1.1;
+    width: 100%;
+  }
+
+  .networkFilters {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .networkFilters .contentDropdown,
+  .networkFilters .contentDropdown button {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .networkFilters .contentDropdown button {
+    justify-content: flex-start;
+    min-height: 32px;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .focusToggle {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .focusToggle > span {
+    display: none;
+  }
+
+  .focusToggle .focus {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 9999px;
+    min-height: 40px;
+    padding: 0.55rem 0.5rem;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .focusToggle .focus:not(.disabled) {
+    background-color: variables.$font-color;
+    color: variables.$very-dark-grey;
+  }
+
+  .focusToggle .focus.disabled {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .leaderboardTableShell {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.5rem;
+  }
+
+  .leaderboardTableFrameWithCue {
+    padding-top: 2rem;
+  }
+
+  .scrollCue {
+    align-items: center;
+    background-color: variables.$almost-very-dark-grey;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    color: variables.$font-color;
+    display: inline-flex;
+    height: 1.55rem;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    top: 0.1rem;
+    width: 2rem;
+    z-index: 1;
+
+    svg {
+      height: 1rem;
+      width: 1rem;
+    }
+  }
+
+  .scrollCueLeft {
+    left: 0;
+  }
+
+  .scrollCueRight {
+    right: 0;
+  }
+
+  .cardsCollectedTable {
+    min-width: 64rem;
+    table-layout: auto;
+    width: max-content;
+  }
+
+  .interactionsTable {
+    min-width: 78rem;
+    table-layout: auto;
+    width: max-content;
+  }
+
+  .cardsCollectedTable th:first-child,
+  .cardsCollectedTable td:first-child,
+  .interactionsTable th:first-child,
+  .interactionsTable td:first-child {
+    min-width: 4rem;
+    width: auto;
+  }
+
+  .cardsCollectedTable th:nth-child(2),
+  .cardsCollectedTable td:nth-child(2),
+  .interactionsTable th:nth-child(2),
+  .interactionsTable td:nth-child(2) {
+    max-width: none;
+    min-width: 16rem;
+    width: auto;
+  }
+
+  .cardsCollectedTable th:not(:first-child):not(:nth-child(2)),
+  .cardsCollectedTable td:not(:first-child):not(:nth-child(2)),
+  .interactionsTable th:not(:first-child):not(:nth-child(2)),
+  .interactionsTable td:not(:first-child):not(:nth-child(2)) {
+    min-width: 7rem;
+  }
 }
 
 .tdhViewSegmentActive {
@@ -392,9 +555,13 @@
   }
 }
 
+.leaderboardTableFrame,
 .leaderboardTableShell {
-  overflow-x: auto;
   width: 100%;
+}
+
+.leaderboardTableFrame {
+  position: relative;
 }
 
 .leaderboardEmpty {
