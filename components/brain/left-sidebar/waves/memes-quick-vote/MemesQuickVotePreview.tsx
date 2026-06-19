@@ -12,6 +12,7 @@ import {
   formatMemesQuickVoteLeftThisRoundText,
   formatMemesQuickVoteUnratedText,
 } from "@/hooks/memesQuickVote.helpers";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import type { ReactNode, TouchEventHandler } from "react";
 import { useMemo } from "react";
@@ -189,25 +190,33 @@ function MemesQuickVoteMediaStage({
           />
         ))}
 
-      {isInteractive && (
-        <>
-          <div
+      {isInteractive && isMobile && (
+        <div className="tw-pointer-events-none tw-absolute tw-inset-x-3 tw-bottom-3 tw-z-10 tw-flex tw-items-center tw-justify-between tw-gap-3 md:tw-hidden">
+          <span
             className={clsx(
-              "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity md:tw-hidden",
-              swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
+              "tw-inline-flex tw-h-8 tw-max-w-[46%] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-text-xs tw-font-bold tw-shadow-[0_10px_24px_rgba(0,0,0,0.28)] tw-backdrop-blur-md tw-transition-all",
+              swipeOffset < 0
+                ? "tw-border-rose-300/45 tw-bg-rose-500/20 tw-text-rose-100"
+                : "tw-border-white/10 tw-bg-black/45 tw-text-iron-200"
             )}
           >
-            Skip
-          </div>
-          <div
+            <ChevronLeftIcon className="tw-size-3.5 tw-shrink-0" />
+            <span className="tw-truncate">Skip</span>
+          </span>
+          <span
             className={clsx(
-              "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity md:tw-hidden",
-              swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
+              "tw-inline-flex tw-h-8 tw-max-w-[54%] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-text-xs tw-font-bold tw-shadow-[0_10px_24px_rgba(0,0,0,0.28)] tw-backdrop-blur-md tw-transition-all",
+              swipeOffset > 0
+                ? "tw-text-primary-100 tw-border-primary-300/45 tw-bg-primary-500/20"
+                : "tw-border-white/10 tw-bg-black/45 tw-text-iron-200"
             )}
           >
-            {swipeHint ? `Vote ${swipeHint}` : "Vote"}
-          </div>
-        </>
+            <span className="tw-truncate">
+              {swipeHint ? `Vote ${swipeHint}` : "Vote"}
+            </span>
+            <ChevronRightIcon className="tw-size-3.5 tw-shrink-0" />
+          </span>
+        </div>
       )}
     </div>
   );
