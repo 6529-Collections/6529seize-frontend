@@ -5,7 +5,6 @@
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
   overflow-x: auto;
-  max-width: 100%;
 }
 
 .scrollContainer::-webkit-scrollbar {
@@ -231,84 +230,6 @@
   padding: 0;
 }
 
-@media only screen and (max-width: 760px) {
-  .networkHeader {
-    gap: 1rem;
-  }
-
-  .networkToolbar {
-    min-height: 0;
-  }
-
-  .networkToolbarTop {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 0.75rem;
-    min-height: 0;
-    padding: 0.875rem 1rem;
-  }
-
-  .networkToolbarSearchRow {
-    justify-content: stretch;
-    padding: 0.75rem 1rem;
-  }
-
-  .networkViewTabs {
-    font-size: 1rem;
-    line-height: 1.1;
-    width: 100%;
-  }
-
-  .networkFilters {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .networkFilters .contentDropdown,
-  .networkFilters .contentDropdown button {
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .networkFilters .contentDropdown button {
-    justify-content: flex-start;
-    min-height: 32px;
-    text-align: left;
-    white-space: normal;
-  }
-
-  .focusToggle {
-    display: grid;
-    gap: 0.5rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
-  }
-
-  .focusToggle > span {
-    display: none;
-  }
-
-  .focusToggle .focus {
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 9999px;
-    min-height: 40px;
-    padding: 0.55rem 0.5rem;
-    text-align: center;
-    white-space: normal;
-  }
-
-  .focusToggle .focus:not(.disabled) {
-    background-color: variables.$font-color;
-    color: variables.$very-dark-grey;
-  }
-
-  .focusToggle .focus.disabled {
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-}
-
 .tdhViewSegmentActive {
   background-color: variables.$font-color;
   color: variables.$very-dark-grey;
@@ -472,14 +393,8 @@
 }
 
 .leaderboardTableShell {
-  -webkit-overflow-scrolling: touch;
   overflow-x: auto;
-  overscroll-behavior-x: contain;
   width: 100%;
-}
-
-.leaderboardTableShell > table {
-  min-width: max-content;
 }
 
 .leaderboardEmpty {
