@@ -9,7 +9,7 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
 
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 10 as const;
@@ -73,7 +73,7 @@ export function buildHighlyRatedWavePreviewItems({
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
       setActiveWave(nextWaveId, {
         isDirectMessage,
-        divider: nextWaveId !== null ? wave.firstUnreadDropSerialNo : null,
+        divider: nextWaveId === null ? null : wave.firstUnreadDropSerialNo,
       });
     },
     onMouseEnter: hasTouchScreen ? undefined : () => handleHover(wave.id),
@@ -188,7 +188,7 @@ function HighlyRatedWavePreviewLink({
     unreadCount > 0
       ? t(
           SIDEBAR_LOCALE,
-          `waves.sidebar.highlyRatedPreviewOpenAriaLabel.${countKey}` as MessageKey,
+          `waves.sidebar.highlyRatedPreviewOpenAriaLabel.${countKey}`,
           {
             waveName: wave.name,
             count: formatInteger(SIDEBAR_LOCALE, unreadCount),
