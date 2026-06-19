@@ -11,16 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
-import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference';
-import { ApiQuotedDrop } from '../models/ApiQuotedDrop';
 import { HttpFile } from '../http/http';
 
-export class ApiCreateDropPart {
-    'content'?: string | null;
-    'quoted_drop'?: ApiQuotedDrop | null;
-    'media': Array<ApiCreateDropMedia>;
-    'attachments'?: Array<ApiDropAttachmentReference>;
+export class ApiCreateDropMedia {
+    'url': string;
+    'mime_type': string;
+    'media_upload_id'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -28,32 +24,26 @@ export class ApiCreateDropPart {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "content",
-            "baseName": "content",
+            "name": "url",
+            "baseName": "url",
             "type": "string",
             "format": ""
         },
         {
-            "name": "quoted_drop",
-            "baseName": "quoted_drop",
-            "type": "ApiQuotedDrop",
+            "name": "mime_type",
+            "baseName": "mime_type",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "media",
-            "baseName": "media",
-            "type": "Array<ApiCreateDropMedia>",
-            "format": ""
-        },
-        {
-            "name": "attachments",
-            "baseName": "attachments",
-            "type": "Array<ApiDropAttachmentReference>",
+            "name": "media_upload_id",
+            "baseName": "media_upload_id",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiCreateDropPart.attributeTypeMap;
+        return ApiCreateDropMedia.attributeTypeMap;
     }
 
     public constructor() {

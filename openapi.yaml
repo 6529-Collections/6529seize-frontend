@@ -11521,12 +11521,25 @@ components:
         media:
           type: array
           items:
-            $ref: "#/components/schemas/ApiDropMedia"
+            $ref: "#/components/schemas/ApiCreateDropMedia"
         attachments:
           type: array
           default: []
           items:
             $ref: "#/components/schemas/ApiDropAttachmentReference"
+    ApiCreateDropMedia:
+      type: object
+      required:
+        - url
+        - mime_type
+      properties:
+        url:
+          type: string
+        mime_type:
+          type: string
+        media_upload_id:
+          type: string
+          nullable: true
     ApiCreateDropPollRequest:
       type: object
       required:

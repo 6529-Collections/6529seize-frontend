@@ -10,7 +10,6 @@ import type {
 } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
-import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -98,6 +97,7 @@ import {
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
+import { toApiCreateDropPart } from "./utils/createDropRequestPart";
 import { buildDropSubmissionMetadata } from "./utils/buildDropSubmissionMetadata";
 import { getIdentitySubmissionMetadataErrors } from "./utils/identitySubmissionMetadataValidation";
 import {
@@ -517,16 +517,9 @@ const generateParts = async (
   }
 };
 
-const stripUploadedAttachments = (
+const toApiCreateDropParts = (
   parts: CreateDropRequestPart[]
-): ApiCreateDropPart[] =>
-  parts.map(({ uploaded_attachments, attachments, ...part }) => {
-    const requestPart: ApiCreateDropPart = { ...part };
-    if (attachments?.length) {
-      requestPart.attachments = attachments;
-    }
-    return requestPart;
-  });
+): ApiCreateDropRequest["parts"] => parts.map(toApiCreateDropPart);
 
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
@@ -1360,7 +1353,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         setSubmitting(false);
         return;
       }
-      const parts = stripUploadedAttachments(generatedParts);
+      const parts = toApiCreateDropParts(generatedParts);
 
       const requestBody: ApiCreateDropRequest = {
         ...dropRequest,
@@ -1387,7 +1380,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       }
 
       const optimisticDrop = getOptimisticDrop(
-        updatedDropRequest,
+        {
+          ...updatedDropRequest,
+          parts: updatedDropRequest.parts.map((part, index) => ({
+            ...part,
+            media: generatedParts[index]?.media ?? part.media,
+          })),
+        },
         connectedProfile,
         wave,
         activeDrop,

@@ -63,6 +63,7 @@ export * from '../models/ApiConsolidatedTdhMetricsSort';
 export * from '../models/ApiConsolidatedTdhView';
 export * from '../models/ApiCreateAttachmentMultipartUploadRequest';
 export * from '../models/ApiCreateAttachmentMultipartUploadResponse';
+export * from '../models/ApiCreateDropMedia';
 export * from '../models/ApiCreateDropPart';
 export * from '../models/ApiCreateDropPollRequest';
 export * from '../models/ApiCreateDropRequest';
@@ -545,6 +546,7 @@ import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetri
 import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
+import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
 import { ApiCreateDropRequest                } from '../models/ApiCreateDropRequest';
@@ -1115,6 +1117,7 @@ let typeMap: {[index: string]: any} = {
     "ApiConsolidatedTdhMetricsPage": ApiConsolidatedTdhMetricsPage,
     "ApiCreateAttachmentMultipartUploadRequest": ApiCreateAttachmentMultipartUploadRequest,
     "ApiCreateAttachmentMultipartUploadResponse": ApiCreateAttachmentMultipartUploadResponse,
+    "ApiCreateDropMedia": ApiCreateDropMedia,
     "ApiCreateDropPart": ApiCreateDropPart,
     "ApiCreateDropPollRequest": ApiCreateDropPollRequest,
     "ApiCreateDropRequest": ApiCreateDropRequest,
