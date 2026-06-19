@@ -122,8 +122,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
           waveRep={wave.waveRep}
           waveScore={wave.waveScore}
           variant="header-inline"
-          mode="summary"
-          className="tw-mt-3"
+          className="discover-wave-card-trust-signals tw-mt-3 tw-flex-nowrap tw-overflow-hidden"
         />
 
         {descriptionPreview && (

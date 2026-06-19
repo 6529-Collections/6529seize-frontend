@@ -97,7 +97,7 @@ describe("ExploreWaveCard", () => {
     expect(screen.getByText("No drops yet")).toBeInTheDocument();
   });
 
-  it("shows only the primary score metric while keeping secondary details accessible", () => {
+  it("shows compact score, hotness, and REP values in one icon row", () => {
     render(
       <ExploreWaveCard
         wave={createWave({
@@ -115,27 +115,36 @@ describe("ExploreWaveCard", () => {
     );
 
     expect(screen.getByText("Score")).toBeInTheDocument();
+    expect(screen.getByText("Hot")).toBeInTheDocument();
+    expect(screen.getByText("REP")).toBeInTheDocument();
     expect(screen.getByText("96")).toBeInTheDocument();
-    expect(screen.queryByText("Hot")).not.toBeInTheDocument();
-    expect(screen.queryByText("REP")).not.toBeInTheDocument();
+    expect(screen.getByText("98")).toBeInTheDocument();
+    expect(screen.getByText("+1.3K")).toBeInTheDocument();
 
-    const scoreBadge = screen.getByText("Score").closest("[aria-label]");
+    const metricsRow = screen.getByText("96").parentElement?.parentElement;
+    expect(metricsRow).toHaveClass("tw-flex-nowrap");
+    expect(metricsRow).toHaveClass("discover-wave-card-trust-signals");
+
+    const scoreBadge = screen.getByText("96").closest("[aria-label]");
     expect(scoreBadge).toHaveAttribute(
       "aria-label",
-      expect.stringContaining("Hotness 98")
+      "Visibility score 96 out of 100"
     );
-    expect(scoreBadge?.getAttribute("aria-label")).toMatch(
-      /REP: \+1,250 raw, 76 score$/
+
+    expect(screen.getByText("98").closest("[aria-label]")).toHaveAttribute(
+      "aria-label",
+      "Hotness score 98 out of 100"
+    );
+    expect(screen.getByText("+1.3K").closest("[aria-label]")).toHaveAttribute(
+      "aria-label",
+      "Wave REP positive 1,250"
     );
 
     expect(
       screen.getByRole("link", {
         name: /View wave Wave One\. Wave score 96\./,
       })
-    ).toHaveAttribute(
-      "aria-label",
-      expect.stringContaining("Hotness 98")
-    );
+    ).toHaveAttribute("aria-label", expect.stringContaining("Hotness 98"));
   });
 });
 
