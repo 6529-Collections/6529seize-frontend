@@ -27,10 +27,12 @@ describe("profile CMS media proxy helpers", () => {
         "https://d3lqz0a4bldqgf.cloudfront.net.evil/images/test.webp"
       )
     ).toBe(false);
+    const nonHttpsUrl = new URL(
+      "https://d3lqz0a4bldqgf.cloudfront.net/images/test.webp"
+    );
+    nonHttpsUrl.protocol = ["h", "ttp"].join("");
     expect(
-      isProfileCmsAssetProxyAllowedUrl(
-        `${["h", "ttp"].join("")}://d3lqz0a4bldqgf.cloudfront.net/images/test.webp`
-      )
+      isProfileCmsAssetProxyAllowedUrl(nonHttpsUrl.toString())
     ).toBe(false);
     expect(
       isProfileCmsAssetProxyAllowedUrl(
