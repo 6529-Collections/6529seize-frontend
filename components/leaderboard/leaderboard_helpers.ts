@@ -4,20 +4,17 @@ import { publicEnv } from "@/config/env";
 import { useCallback, useEffect, useState } from "react";
 import type { CICType } from "@/entities/IProfile";
 import type { SortDirection } from "@/entities/ISort";
+import type { ApiConsolidatedTdhMetrics } from "@/generated/models/ApiConsolidatedTdhMetrics";
+import { ApiConsolidatedTdhMetricsSort } from "@/generated/models/ApiConsolidatedTdhMetricsSort";
+import type { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { cicToType } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Collector, Content } from "./Leaderboard";
 
 export const LEADERBOARD_PAGE_SIZE = 50;
 
-export enum LeaderboardCardsCollectedSort {
-  level = "level",
-  balance = "balance",
-  unique_memes = "unique_memes",
-  memes_cards_sets = "memes_cards_sets",
-  boosted_tdh = "boosted_tdh",
-  day_change = "day_change",
-}
+export const LeaderboardCardsCollectedSort = ApiConsolidatedTdhMetricsSort;
+export type LeaderboardCardsCollectedSort = ApiConsolidatedTdhMetricsSort;
 
 export enum LeaderboardInteractionsSort {
   "primary_purchases_count" = "primary_purchases_count",
@@ -32,24 +29,9 @@ export enum LeaderboardInteractionsSort {
   "burns" = "burns",
 }
 
-export interface LeaderboardMetrics {
-  handle: string;
-  consolidation_key: string;
-  consolidation_display: string;
-  pfp_url: string;
-  balance: number;
-  unique_memes: number;
-  unique_memes_total: number;
-  memes_cards_sets: number;
-  rep_score: number;
-  cic_score: number;
-  primary_wallet: string;
-  total_tdh: number;
-  boosted_tdh: number;
-  day_change: number;
-  level: number;
+export type LeaderboardMetrics = ApiConsolidatedTdhMetrics & {
   cic_type?: CICType | undefined;
-}
+};
 
 type LeaderboardItem = LeaderboardMetrics | LeaderboardInteractions;
 
@@ -120,30 +102,48 @@ async function fetchLeaderboardData<T>(
     content: Content;
     collector: Collector;
     selectedSeason: number;
+    tdhView?: ApiConsolidatedTdhView | undefined;
+    useGeneratedFilterValues?: boolean | undefined;
   }
 ): Promise<{
   count: number;
   data: T[];
   url: string;
 }> {
-  let walletFilter = "";
+  const params = new URLSearchParams({
+    page_size: pageSize.toString(),
+    page: page.toString(),
+    sort: sort.sort,
+    sort_direction: sort.sort_direction,
+  });
+
   if (query.searchWallets && query.searchWallets.length > 0) {
-    walletFilter = `&search=${query.searchWallets.join(",")}`;
+    params.set("search", query.searchWallets.join(","));
   }
-  let mysort = sort.sort;
-  let contentFilter = "";
   if (query.content !== Content.ALL) {
-    contentFilter = `&content=${query.content.toLowerCase()}`;
+    params.set(
+      "content",
+      query.useGeneratedFilterValues
+        ? query.content
+        : query.content.toLowerCase()
+    );
   }
-  let collectorFilter = "";
   if (query.collector !== Collector.ALL) {
-    collectorFilter = `&collector=${query.collector.toLowerCase()}`;
+    params.set(
+      "collector",
+      query.useGeneratedFilterValues
+        ? query.collector
+        : query.collector.toLowerCase()
+    );
   }
-  let seasonFilter = "";
   if (query.selectedSeason > 0) {
-    seasonFilter = `&season=${query.selectedSeason}`;
+    params.set("season", query.selectedSeason.toString());
   }
-  const url = `${endpoint}?page_size=${pageSize}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
+  if (query.tdhView) {
+    params.set("tdh_view", query.tdhView);
+  }
+
+  const url = `${endpoint}?${params.toString()}`;
   const response = await commonApiFetch<{
     count: number;
     page: number;
@@ -174,6 +174,8 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
     content: Content;
     collector: Collector;
     selectedSeason: number;
+    tdhView?: ApiConsolidatedTdhView | undefined;
+    useGeneratedFilterValues?: boolean | undefined;
   },
   setIsLoading: (isLoading: boolean) => void
 ) {
@@ -183,18 +185,22 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
 
   const fetchResults = useCallback(async () => {
     setIsLoading(true);
-    const data = await fetchLeaderboardData<T>(
-      endpoint,
-      LEADERBOARD_PAGE_SIZE,
-      page,
-      sort,
-      query
-    );
-    setTotalResults(data.count);
-    setLeaderboard(data.data);
-    setIsLoading(false);
-    setMyFetchUrl(`${publicEnv.API_ENDPOINT}/api/${data.url}`);
+    try {
+      const data = await fetchLeaderboardData<T>(
+        endpoint,
+        LEADERBOARD_PAGE_SIZE,
+        page,
+        sort,
+        query
+      );
+      setTotalResults(data.count);
+      setLeaderboard(data.data);
+      setMyFetchUrl(`${publicEnv.API_ENDPOINT}/api/${data.url}`);
+    } finally {
+      setIsLoading(false);
+    }
   }, [
+    endpoint,
     page,
     sort.sort,
     sort.sort_direction,
@@ -202,6 +208,9 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
     query.content,
     query.collector,
     query.selectedSeason,
+    query.tdhView,
+    query.useGeneratedFilterValues,
+    setIsLoading,
   ]);
 
   useEffect(() => {

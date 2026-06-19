@@ -1,4 +1,5 @@
 import ClientCommunityNerdPage from "@/app/network/nerd/[[...focus]]/page.client";
+import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { LeaderboardFocus } from "@/types/enums";
 import { act, render } from "@testing-library/react";
 import React from "react";
@@ -17,11 +18,21 @@ jest.mock("@/components/leaderboard/Leaderboard", () => ({
   },
 }));
 
+jest.mock("@/components/network/NetworkPageLayout", () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="network-page-layout">{children}</div>
+  ),
+}));
+
 // 🧪 Mock next/navigation
 const replaceMock = jest.fn();
+const usePathnameMock = jest.fn();
+const useSearchParamsMock = jest.fn();
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
-  usePathname: () => "/network/nerd",
+  usePathname: () => usePathnameMock(),
+  useSearchParams: () => useSearchParamsMock(),
 }));
 
 // 🧪 Mock TitleContext
@@ -43,6 +54,9 @@ describe("ClientCommunityNerdPage", () => {
   beforeEach(() => {
     capturedProps = undefined;
     jest.clearAllMocks();
+    globalThis.history.pushState({}, "", "/network/nerd/cards-collected");
+    usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
   });
 
   const renderPage = (focus: LeaderboardFocus) => {
@@ -57,6 +71,15 @@ describe("ClientCommunityNerdPage", () => {
   it("updates path when focus changes", () => {
     renderPage(LeaderboardFocus.TDH);
     act(() => capturedProps.setFocus(LeaderboardFocus.INTERACTIONS));
-    expect(replaceMock).toHaveBeenCalledWith("/network/nerd/interactions");
+    expect(replaceMock).not.toHaveBeenCalled();
+    expect(globalThis.location.pathname).toBe("/network/nerd/interactions");
+  });
+
+  it("reads tdh view from search params", () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("tdh_view=unboosted")
+    );
+    renderPage(LeaderboardFocus.TDH);
+    expect(capturedProps.tdhView).toBe(ApiConsolidatedTdhView.Unboosted);
   });
 });

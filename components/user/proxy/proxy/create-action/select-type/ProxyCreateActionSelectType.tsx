@@ -51,6 +51,11 @@ export default function ProxyCreateActionSelectType({
           (action) =>
             action.action_type === ApiProfileProxyActionType.RateWaveDrop
         );
+      case ApiProfileProxyActionType.PublishCms:
+        return !currentActions.some(
+          (action) =>
+            action.action_type === ApiProfileProxyActionType.PublishCms
+        );
       default:
         assertUnreachable(actionType);
         return false;

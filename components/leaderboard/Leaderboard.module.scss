@@ -11,15 +11,232 @@
   display: none;
 }
 
+.networkPage {
+  padding-top: 0;
+}
+
+.networkHeader {
+  align-items: center;
+  display: flex;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
+}
+
+.networkTitleBlock {
+  min-width: 0;
+}
+
+.networkTitle {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
+.networkStats {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(150px, auto));
+  margin-left: auto;
+}
+
+.networkStat {
+  background-color: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 74px;
+  min-width: 160px;
+  padding: 0.85rem 1rem;
+}
+
+.networkStatLabel {
+  color: variables.$lightest-grey;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.networkStatValue {
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+@media only screen and (max-width: 1100px) {
+  .networkHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .networkStats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .networkStat {
+    min-width: 0;
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  .networkStats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.networkToolbar {
+  background-color: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 1rem;
+  min-height: 112px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.networkToolbarTop {
+  align-items: center;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  min-height: 56px;
+  min-width: 0;
+  padding: 0 1rem;
+}
+
+.networkToolbarSearchRow {
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+  display: flex;
+  justify-content: flex-end;
+  min-height: 56px;
+  min-width: 0;
+  padding: 0 1rem;
+}
+
+.networkViewTabs {
+  color: variables.$lightest-grey;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.networkSearch {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  min-width: 0;
+  width: 100%;
+}
+
+.networkLoadingSlot {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  width: 32px;
+}
+
+.networkFilters {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.networkFilters .contentDropdown {
+  line-height: 1;
+  text-align: left;
+}
+
+.networkFilters .contentDropdown button {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.35rem;
+  line-height: 1.1;
+}
+
+.dropdownCaret {
+  border-left: 0.28em solid transparent;
+  border-right: 0.28em solid transparent;
+  border-top: 0.28em solid currentcolor;
+  display: inline-block;
+  flex-shrink: 0;
+  height: 0;
+  margin-top: 0.08em;
+  width: 0;
+}
+
+.leaderboardSurface {
+  padding-top: 0.5rem;
+}
+
 .headerMenuFocus {
   background-color: transparent;
-  width: 100%;
-  height: 48px;
-  height: 48px;
-  line-height: 48px;
+  min-height: 48px;
+  line-height: 1;
   font-size: larger;
   font-weight: bold;
   color: variables.$lightest-grey;
+}
+
+.tdhViewSegmentedControl {
+  align-items: center;
+  background-color: variables.$almost-very-dark-grey;
+  border: 1px solid variables.$dark-grey;
+  border-radius: 9999px;
+  display: inline-flex;
+  line-height: 1;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 2px;
+}
+
+.tdhViewSegment {
+  background: transparent;
+  border: 0;
+  border-radius: 9999px;
+  color: variables.$lightest-grey;
+  font-size: 0.8em;
+  font-weight: bold;
+  line-height: 1;
+  padding: 6px 10px;
+
+  &:hover {
+    color: white;
+  }
+}
+
+.focusToggle {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+.tdhViewSegmentActive {
+  background-color: variables.$font-color;
+  color: variables.$very-dark-grey;
+
+  &:hover {
+    color: variables.$very-dark-grey;
+  }
 }
 
 .pageHeader {
@@ -27,15 +244,6 @@
   h1 {
     margin-bottom: 0px !important;
   }
-}
-
-.rank {
-  width: 5%;
-  text-align: center;
-}
-
-.hodlerContainer {
-  width: 40%;
 }
 
 .hodler {
@@ -83,11 +291,6 @@
 .tdhSubNote {
   font-size: smaller;
   font-weight: lighter;
-}
-
-.tdhSub {
-  width: calc(55% / 6);
-  text-align: center;
 }
 
 .viewAllLink {
@@ -189,48 +392,21 @@
   }
 }
 
-.gap {
-  height: 5px;
+.leaderboardTableShell {
+  overflow-x: auto;
+  width: 100%;
 }
 
-.leaderboardTable {
-  tr td {
-    white-space: nowrap;
-    align-items: center;
-    vertical-align: middle;
-    span {
-      float: left;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      a {
-        line-height: 40px;
-      }
-    }
-  }
-
-  th {
-    white-space: nowrap;
-    line-height: 28px;
-  }
-
-  th span {
-    white-space: nowrap;
-  }
-
-  td {
-    line-height: 40px;
-  }
-
-  thead tr {
-    background-color: transparent !important;
-  }
-
-  tbody tr:nth-child(odd) {
-    background-color: variables.$almost-very-dark-grey;
-  }
+.leaderboardEmpty {
+  color: variables.$font-color;
+  padding: 1rem 0;
 }
 
 .collectorLevel {
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 1;
+
   span {
     float: none !important;
     margin-top: 0 !important;
@@ -268,21 +444,13 @@
   }
 }
 
-.leaderboardTable > :not(caption) > * > *,
 .nftLeaderboardTable > :not(caption) > * > * {
   padding: 0.5rem;
 }
 
-.leaderboardTable tbody > tr > *,
 .nftLeaderboardTable tbody > tr > * {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-}
-
-.borderBottom {
-  border-bottom: 0.5px solid variables.$font-color !important;
-  padding: 0rem !important;
-  position: relative;
 }
 
 .focusSwitchLabel {
@@ -352,13 +520,16 @@
     line-height: 30px;
   }
   button {
+    align-items: center;
+    display: inline-flex;
     font-size: larger !important;
     font-weight: bolder !important;
+    gap: 0.35rem;
     padding: 0;
     background-color: transparent !important;
     border-color: transparent !important;
     &::after {
-      margin-top: 0.8rem;
+      display: none;
     }
   }
   div {
@@ -367,8 +538,12 @@
 }
 
 .focus {
+  background: transparent;
+  border: 0;
   color: variables.$font-color;
   cursor: pointer;
+  font: inherit;
+  padding: 0;
 }
 
 .disabled {
@@ -376,16 +551,6 @@
   text-decoration: none;
   &:hover {
     color: white;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  .contentDropdown {
-    button {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
   }
 }
 
@@ -441,8 +606,9 @@
 
 .statsContainer {
   background-color: variables.$very-dark-grey;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 15px 20px;
-  width: fit-content;
+  min-width: 360px;
   color: white;
   box-shadow:
     0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
