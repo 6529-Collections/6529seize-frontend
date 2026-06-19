@@ -157,6 +157,34 @@ it("renders announcement, highly rated, pinned, following, and all sections with
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
 });
 
+it("feeds direct messages to virtualization as one flat list", () => {
+  render(
+    <WebUnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({ id: "newest", isFollowing: false }),
+        createMockMinimalWave({ id: "joined-older", isFollowing: true }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+      hideHeaders
+      hideToggle
+      hidePin
+      basePath="/messages"
+      isDirectMessage
+    />
+  );
+
+  const virtualizedItems = mockUseVirtualizedWaves.mock.calls.at(-1)?.[0].items;
+  expect(
+    screen.getByLabelText("Direct message conversations")
+  ).toBeInTheDocument();
+  expect(virtualizedItems.map((row: any) => row.wave.id)).toEqual([
+    "newest",
+    "joined-older",
+  ]);
+});
+
 it("does not give special placement to official waves", () => {
   render(
     <WebUnifiedWavesListWaves

@@ -77,6 +77,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         hidePin={true}
         basePath="/messages"
         isCollapsed={isCollapsed}
+        isDirectMessage={true}
         sentinelRef={sentinelRef}
       />
     );
