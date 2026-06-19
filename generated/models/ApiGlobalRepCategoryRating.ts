@@ -11,17 +11,14 @@
  * Do not edit the class manually.
  */
 
-/**
-* Opaque package signature envelope for this vertical slice. The server stores it and verifies hash consistency with package_json; wallet signature verification is a future publish-adapter responsibility.
-*/
-export class ApiCmsSignatureEnvelope {
-    'signature_type': string;
-    'signing_wallet': string;
-    /**
-    * Client-supplied signing timestamp stored as envelope metadata.
-    */
-    'signed_at': string;
-    'signature': string;
+import { ApiProfileMin } from '../models/ApiProfileMin';
+
+export class ApiGlobalRepCategoryRating {
+    'giver': ApiProfileMin;
+    'recipient': ApiProfileMin;
+    'rep': number;
+    'last_modified': string;
+    'category': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,32 +26,38 @@ export class ApiCmsSignatureEnvelope {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "signature_type",
-            "baseName": "signature_type",
+            "name": "giver",
+            "baseName": "giver",
+            "type": "ApiProfileMin",
+            "format": ""
+        },
+        {
+            "name": "recipient",
+            "baseName": "recipient",
+            "type": "ApiProfileMin",
+            "format": ""
+        },
+        {
+            "name": "rep",
+            "baseName": "rep",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "last_modified",
+            "baseName": "last_modified",
             "type": "string",
             "format": ""
         },
         {
-            "name": "signing_wallet",
-            "baseName": "signing_wallet",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "signed_at",
-            "baseName": "signed_at",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "signature",
-            "baseName": "signature",
+            "name": "category",
+            "baseName": "category",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiCmsSignatureEnvelope.attributeTypeMap;
+        return ApiGlobalRepCategoryRating.attributeTypeMap;
     }
 
     public constructor() {
