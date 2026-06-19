@@ -15,7 +15,13 @@ This note records the frontend contract for root waves and subwaves. The goal is
 - Joining a subwave joins only that subwave.
 - Leaving a root wave must not leave joined subwaves.
 - Leaving a subwave must not leave the root wave.
-- A followed subwave should remain reachable through its parent container. If a followed subwave cannot be reached from the current root-wave source, the backend or a future frontend fallback should provide the parent container explicitly.
+- A followed subwave should remain reachable through its parent container. If a
+  followed subwave cannot be reached from the current root-wave source, the
+  backend or a future frontend fallback should provide the parent container
+  explicitly.
+- Showing a parent row as the container for a followed subwave must not imply
+  the parent itself is joined. The parent row should keep the parent join state,
+  mute state, pin state, picture, REP, and score returned for the parent.
 
 ## Pinning
 
@@ -35,6 +41,31 @@ This note records the frontend contract for root waves and subwaves. The goal is
 - Drop actions are drop-scoped and therefore belong to the wave or subwave that owns the drop.
 - A reaction, vote, or boost on a subwave drop should update that drop and refresh relevant wave caches, but it should not create a synthetic parent reaction or vote.
 - New drop activity in a subwave can make the collapsed parent show hidden subwave activity.
+- A subwave post must not be copied into the parent wave stream. If users open
+  the parent wave, they should see parent-owned drops; if they open the subwave,
+  they should see subwave-owned drops.
+- "Bubble up" means sidebar/discovery/navigation metadata only: for example,
+  the parent container can be shown, marked with hidden subwave activity, or
+  sorted by an aggregate latest-child-activity value when the API provides one.
+  It does not mean duplicating the post, votes, boosts, reactions, unread count,
+  or REP onto the parent wave.
+
+## Post Activity Bubbling
+
+Subwave posts should affect surfaces according to the viewer's relationship to
+the parent and child:
+
+| Viewer state | Parent row | Subwave row | Post/feed behavior |
+| --- | --- | --- | --- |
+| Follows parent only | Parent stays visible from parent follow. | Child appears only when the parent is expanded or otherwise loaded. | Subwave posts do not enter the parent feed or create parent-scoped actions. |
+| Follows subwave only | Parent can appear as a container so the followed subwave is reachable. | Child should show the subwave's own unread/activity state once loaded. | Subwave posts belong to the subwave feed; parent state remains parent-specific. |
+| Follows both | Parent can sort by parent or aggregate activity, depending on backend data. | Child shows its own unread/activity state. | Parent and child feeds remain separate. |
+| Follows neither | Parent/subwave discovery is score/quality-driven. | Child appears only through parent expansion/discovery. | No followed-wave unread or notification state is implied. |
+
+If the backend wants followed-subwave activity to move a parent container upward
+in the activity-first sections, it should return an explicit aggregate activity
+field or include the parent container in the followed/activity source. The
+frontend should not infer parent activity by locally copying child drop state.
 
 ## Unread And Activity
 
@@ -42,6 +73,24 @@ This note records the frontend contract for root waves and subwaves. The goal is
 - Collapsed parent rows may show a hidden-subwave unread indicator when loaded child rows have unread drops.
 - Subwaves are sorted by latest activity within an expanded parent.
 - Pinned and following root sections are activity-first; discovery sections are quality-first.
+- If a parent row is present only because a followed subwave needs a container,
+  its section placement should be treated as container placement, not as proof
+  that the parent is followed.
+
+## Pictures, Avatars, And PFP Fallbacks
+
+- Root waves and subwaves use the picture, contributor collage, and fallback
+  rules returned for that exact wave id.
+- A subwave with its own picture should show that picture in rows, headers, and
+  detail surfaces.
+- A subwave without a picture should use its own contributor/fallback data. It
+  should not silently inherit the parent picture/PFP unless the API later
+  returns an explicit inherited or composed picture contract.
+- Parent rows should not adopt a child subwave picture because a child has new
+  activity. The parent picture remains the parent picture.
+- If we later want stronger visual family cues, add a first-class design such
+  as parent-picture-with-subwave-badge or an explicit parent picture field on
+  subwave responses.
 
 ## Sidebar Expansion
 
