@@ -31,6 +31,7 @@ import {
   fitArtworkToFrame,
   getCmsRoomPreset,
 } from "@/lib/profile-cms/runtime/threeD";
+import { getProfileCmsAssetProxyUrl } from "@/lib/profile-cms/runtime/mediaProxy";
 
 type ThreeModule = typeof import("three");
 
@@ -378,7 +379,7 @@ function CmsThreeDPoster({
       fill
       loading="lazy"
       sizes="100vw"
-      src={poster.url}
+      src={getProfileCmsAssetProxyUrl(poster.url)}
       unoptimized
     />
   ) : null;
@@ -1872,9 +1873,10 @@ async function addArtworkPlacement({
   innerFrame.rotation.set(rotationX, rotationY, rotationZ);
   scene.add(innerFrame);
 
-  const texture = await loadTexture(THREE, placement.asset.url).catch(
-    () => null
-  );
+  const texture = await loadTexture(
+    THREE,
+    getProfileCmsAssetProxyUrl(placement.asset.url)
+  ).catch(() => null);
   if (texture) {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = 8;
