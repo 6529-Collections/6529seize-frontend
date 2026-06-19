@@ -128,7 +128,11 @@ function pathMatchesRoute(rawPath, routePattern) {
 
   for (const routeSegment of routePattern) {
     if (routeSegment.kind === "optionalCatchAll") {
-      return !usesPlaceholder;
+      const remainingSegments = pathSegments.slice(pathIndex);
+      if (usesPlaceholder) {
+        return remainingSegments.length === 0;
+      }
+      return true;
     }
     if (routeSegment.kind === "catchAll") {
       return !usesPlaceholder && pathIndex < pathSegments.length;
