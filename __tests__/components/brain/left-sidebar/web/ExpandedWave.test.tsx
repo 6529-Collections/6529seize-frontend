@@ -130,21 +130,47 @@ describe("ExpandedWave", () => {
     expect(getWaveRow()).toHaveClass("tw-px-5");
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
     expect(getWaveRow()).not.toHaveClass("tw-pl-2");
-    const rowLink = screen.getByRole("link", { name: "Chat Wave" });
-    expect(rowLink).toHaveClass("tw-absolute");
-    expect(rowLink).toHaveClass("tw-inset-0");
-    expect(rowLink).toHaveClass("tw-z-10");
+    const titleLink = screen.getByRole("link", { name: "Chat Wave" });
+    expect(titleLink.nextElementSibling).toBe(expandButton);
+    expect(expandButton.parentElement).toContainElement(titleLink);
+    expect(titleLink).toHaveClass("tw-z-20");
     expect(getWaveRow()).toHaveClass("tw-cursor-pointer");
+    const rowOverlayLink = getWaveRow().querySelector(
+      'a[aria-hidden="true"]'
+    );
+    expect(rowOverlayLink).not.toBeNull();
+    expect(rowOverlayLink).toHaveAttribute("tabindex", "-1");
+    expect(rowOverlayLink).toHaveClass("tw-absolute");
+    expect(rowOverlayLink).toHaveClass("tw-inset-0");
+    expect(rowOverlayLink).toHaveClass("tw-z-10");
     const avatar = screen.getByTestId("sidebar-wave-avatar");
     expect(avatar).toHaveAttribute("aria-hidden", "true");
     expect(avatar.closest("a")).toBeNull();
     expect(screen.getAllByRole("link")).toHaveLength(1);
-    expect(rowLink).toHaveClass("focus-visible:tw-outline");
+    expect(titleLink).toHaveClass("focus-visible:tw-outline");
 
     await user.click(expandButton);
 
     expect(onToggleExpand).toHaveBeenCalledWith("1");
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("anchors the expanded tooltip to the visible title link", () => {
+    renderExpandedWave({
+      showExpandedTooltip: true,
+      tooltipContent: "Chat Wave",
+      tooltipId: "wave-expanded-1",
+    });
+
+    const titleLink = screen.getByRole("link", { name: "Chat Wave" });
+    const rowOverlayLink = getWaveRow().querySelector(
+      'a[aria-hidden="true"]'
+    );
+
+    expect(titleLink).toHaveAttribute("data-tooltip-id", "wave-expanded-1");
+    expect(titleLink).toHaveAttribute("data-tooltip-content", "Chat Wave");
+    expect(rowOverlayLink).not.toHaveAttribute("data-tooltip-id");
+    expect(rowOverlayLink).not.toHaveAttribute("data-tooltip-content");
   });
 
   it("does not render a nested expand button for child rows", () => {

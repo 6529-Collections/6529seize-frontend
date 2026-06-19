@@ -261,8 +261,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         href={href}
         prefetch={false}
         onClick={handleWaveClick}
-        aria-label={rowLinkAriaLabel}
-        className="tw-absolute tw-inset-0 tw-z-10 tw-rounded-lg tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
+        aria-hidden="true"
+        tabIndex={-1}
+        className="tw-absolute tw-inset-0 tw-z-10 tw-rounded-lg tw-no-underline"
       >
         <span className="tw-sr-only">{rowLinkAriaLabel}</span>
       </Link>
@@ -340,9 +341,20 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               shouldShowPinButton ? "tw-pr-7" : ""
             }`}
           >
-            <span className="tw-block tw-min-w-0 tw-flex-shrink tw-truncate tw-text-sm tw-font-medium">
-              {formattedWaveName}
-            </span>
+            <Link
+              href={href}
+              prefetch={false}
+              onClick={handleWaveClick}
+              className={`tw-relative tw-z-20 tw-min-w-0 tw-flex-shrink tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+                isActive
+                  ? "tw-text-white desktop-hover:group-hover:tw-text-white"
+                  : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+              }`}
+            >
+              <span className="tw-block tw-truncate tw-text-sm tw-font-medium">
+                {formattedWaveName}
+              </span>
+            </Link>
             <SidebarWaveExpandControl
               formattedWaveName={formattedWaveName}
               isExpanded={isExpanded}

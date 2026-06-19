@@ -160,9 +160,9 @@ export const ExpandedWave = ({
         href={href}
         prefetch={false}
         onClick={onClick}
-        aria-label={rowLinkAriaLabel}
-        className="tw-absolute tw-inset-0 tw-z-10 tw-rounded-lg tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
-        {...tooltipAttributes}
+        aria-hidden="true"
+        tabIndex={-1}
+        className="tw-absolute tw-inset-0 tw-z-10 tw-rounded-lg tw-no-underline"
       >
         <span className="tw-sr-only">{rowLinkAriaLabel}</span>
       </Link>
@@ -206,12 +206,21 @@ export const ExpandedWave = ({
               shouldShowPinButton ? "tw-pr-7" : ""
             }`}
           >
-            <div
-              ref={nameRef}
-              className="tw-min-w-0 tw-flex-shrink tw-truncate tw-text-sm"
+            <Link
+              href={href}
+              prefetch={false}
+              onClick={onClick}
+              className={`tw-relative tw-z-20 tw-min-w-0 tw-flex-shrink tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+                isActive
+                  ? "tw-text-white desktop-hover:group-hover:tw-text-white"
+                  : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+              }`}
+              {...tooltipAttributes}
             >
-              {formattedWaveName}
-            </div>
+              <div ref={nameRef} className="tw-truncate tw-text-sm">
+                {formattedWaveName}
+              </div>
+            </Link>
             <SidebarWaveExpandControl
               formattedWaveName={formattedWaveName}
               isExpanded={isExpanded}
