@@ -54,11 +54,4 @@ export const DE_DE_MESSAGES = {
   "theMemes.volume.7Days": "7 Tage",
   "theMemes.volume.30Days": "30 Tage",
   "theMemes.volume.allTime": "Gesamt",
-  "waves.sidebar.announcementWavesAriaLabel": "Ankuendigungs-Waves",
-  "waves.sidebar.expandControlExpandAriaLabel":
-    "Subwaves von {waveName} erweitern",
-  "waves.sidebar.expandControlCollapseAriaLabel":
-    "Subwaves von {waveName} einklappen",
-  "waves.sidebar.expandControlLoadingAriaLabel":
-    "Subwaves von {waveName} werden geladen",
 } satisfies Partial<Record<MessageKey, string>>;

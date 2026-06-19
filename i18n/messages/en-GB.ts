@@ -18,11 +18,4 @@ export const EN_GB_MESSAGES = {
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
-  "waves.sidebar.announcementWavesAriaLabel": "Announcement waves",
-  "waves.sidebar.expandControlExpandAriaLabel":
-    "Expand {waveName} subwaves",
-  "waves.sidebar.expandControlCollapseAriaLabel":
-    "Collapse {waveName} subwaves",
-  "waves.sidebar.expandControlLoadingAriaLabel":
-    "Loading {waveName} subwaves",
 } satisfies Partial<Record<MessageKey, string>>;
