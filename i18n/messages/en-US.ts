@@ -173,8 +173,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.rep": "REP",
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
-  "suggested.description":
-    "Categories with the most profile REP activity.",
+  "suggested.description": "Categories with the most profile REP activity.",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -339,6 +338,11 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Highly Rated",
+  "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
+  "highlyRatedPreviewOpenAriaLabel.one": "Open {waveName}, {count} new message",
+  "highlyRatedPreviewOpenAriaLabel.other":
+    "Open {waveName}, {count} new messages",
+  highlyRatedPreviewScore: "Score {score}",
   pinned: "Pinned",
   following: "Following",
   all: "All",
