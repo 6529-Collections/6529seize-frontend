@@ -74,8 +74,6 @@ const nextConfigFactory = (phase: string): NextConfig => {
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
-        WEB_SESSION_CREDENTIAL_API_ORIGINS:
-          publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS,
         ALLOWLIST_API_ENDPOINT: publicEnv.ALLOWLIST_API_ENDPOINT,
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
         VERSION,
