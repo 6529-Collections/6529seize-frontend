@@ -293,6 +293,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     waves,
     activeWaveId: activeWave.id,
     activeParentWaveId: activeWave.parentWaveId,
+    loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
     onParentExpand: streamWaves.loadSubwavesForParent,
     showExpandedSubwaves: !isCollapsed,
   });
@@ -403,6 +404,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       depth={row.depth}
       canExpand={row.canExpand && !isCollapsed}
       isExpanded={row.isExpanded}
+      isLoadingSubwaves={row.isLoadingSubwaves}
       hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
       isLastSubwave={row.isLastSubwave}
       onToggleExpand={toggleParent}
@@ -436,7 +438,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         <div>
           {hasAnnouncementRows && (
             <SidebarWaveRowsSection
-              ariaLabel="Announcement waves"
+              ariaLabel={t(
+                SIDEBAR_LOCALE,
+                "waves.sidebar.announcementWavesAriaLabel"
+              )}
               className={sectionClassName}
               getRowHeight={getSidebarRowHeight}
               isRowVisible={(row) =>
