@@ -15,6 +15,7 @@ import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
 import {
   buildHighlyRatedWavePreviewItems,
+  getHighlyRatedPreviewWaves,
   HighlyRatedWavesToggle,
 } from "../waves/HighlyRatedWavesToggle";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
@@ -431,6 +432,16 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     },
     [activeWaveId, basePath]
   );
+  const highlyRatedPreviewWaves = useMemo(
+    () =>
+      getHighlyRatedPreviewWaves({
+        activeParentWaveId,
+        activeWaveId,
+        allWaves,
+        highlyRatedWaves,
+      }),
+    [activeParentWaveId, activeWaveId, allWaves, highlyRatedWaves]
+  );
   const highlyRatedPreviewItems = useMemo(
     () =>
       buildHighlyRatedWavePreviewItems({
@@ -441,7 +452,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         hasTouchScreen: isTouchDevice,
         isDirectMessage: basePath === "/messages",
         setActiveWave,
-        waves: highlyRatedWaves,
+        waves: highlyRatedPreviewWaves,
       }),
     [
       activeParentWaveId,
@@ -449,7 +460,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       basePath,
       getHighlyRatedPreviewHref,
       handleHighlyRatedPreviewHover,
-      highlyRatedWaves,
+      highlyRatedPreviewWaves,
       isTouchDevice,
       setActiveWave,
     ]

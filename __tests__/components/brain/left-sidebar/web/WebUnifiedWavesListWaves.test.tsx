@@ -48,7 +48,7 @@ jest.mock(
 jest.mock(
   "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar",
   () => ({
-    WaveAvatar: (props: any) => (
+    WaveAvatar: (props: { readonly wave: { readonly id: string } }) => (
       <div data-testid={`preview-avatar-${props.wave.id}`} />
     ),
   })
@@ -210,6 +210,46 @@ it("caps highly rated previews at ten without rendering an overflow control", ()
   ).toBeNull();
   expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(screen.queryByTestId("wave-h11")).toBeNull();
+});
+
+it("keeps an active loaded all-wave visible in the capped preview strip", () => {
+  const activeWave = createMockMinimalWave({
+    id: "r11",
+    name: "Active Ranked Eleven",
+  });
+  const waves = [
+    ...Array.from({ length: 10 }, (_, index) =>
+      createMockMinimalWave({
+        id: `h${index + 1}`,
+        name: `Highly Rated ${index + 1}`,
+        sidebarSection: "highly-rated",
+      })
+    ),
+    activeWave,
+  ];
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: activeWave.id, parentWaveId: null, set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+
+  render(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+
+  expect(screen.getByTestId("preview-avatar-r11")).toBeInTheDocument();
+  expect(screen.queryByTestId("preview-avatar-h10")).toBeNull();
+  expect(
+    screen.getByRole("link", { name: "Open Active Ranked Eleven" })
+  ).toBeInTheDocument();
 });
 
 it("keeps the active highly rated wave visible in the preview strip", () => {

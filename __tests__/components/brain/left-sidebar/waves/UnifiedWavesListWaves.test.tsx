@@ -10,6 +10,7 @@ import type { UnifiedWavesListWavesHandle } from "@/components/brain/left-sideba
 import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import {
   getFittingPreviewCount,
+  getHighlyRatedPreviewWaves,
   getVisibleHighlyRatedPreviewItems,
   type HighlyRatedWavePreviewItem,
 } from "@/components/brain/left-sidebar/waves/HighlyRatedWavesToggle";
@@ -219,6 +220,40 @@ it("preserves promoted active highly rated preview ordering when fewer avatars f
   ).toEqual(["h1", "h2", "h3", "h12"]);
 });
 
+it("adds the active loaded all-wave to the highly rated preview source", () => {
+  const highlyRatedWaves = Array.from({ length: 10 }, (_, index) =>
+    createMockMinimalWave({
+      id: `h${index + 1}`,
+      sidebarSection: "highly-rated",
+    })
+  );
+  const activeWave = createMockMinimalWave({
+    id: "r11",
+    name: "Active Ranked Eleven",
+  });
+
+  expect(
+    getHighlyRatedPreviewWaves({
+      activeParentWaveId: null,
+      activeWaveId: activeWave.id,
+      allWaves: [activeWave],
+      highlyRatedWaves,
+    }).map((wave) => wave.id)
+  ).toEqual([
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "h7",
+    "h8",
+    "h9",
+    "h10",
+    "r11",
+  ]);
+});
+
 it("renders fitting highly rated waves as an unboxed preview strip without an expand control", () => {
   const ref = React.createRef<UnifiedWavesListWavesHandle>();
   render(
@@ -287,6 +322,45 @@ it("caps highly rated previews at ten without rendering an overflow control", ()
   ).toBeNull();
   expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(screen.queryByTestId("wave-h11")).toBeNull();
+});
+
+it("keeps an active loaded all-wave visible in the capped preview strip", () => {
+  const activeWave = createMockMinimalWave({
+    id: "r11",
+    name: "Active Ranked Eleven",
+  });
+  const waves = [
+    ...Array.from({ length: 10 }, (_, index) =>
+      createMockMinimalWave({
+        id: `h${index + 1}`,
+        name: `Highly Rated ${index + 1}`,
+        sidebarSection: "highly-rated",
+      })
+    ),
+    activeWave,
+  ];
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: activeWave.id, parentWaveId: null, set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+
+  render(
+    <UnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByTestId("preview-avatar-r11")).toBeInTheDocument();
+  expect(screen.queryByTestId("preview-avatar-h10")).toBeNull();
+  expect(
+    screen.getByRole("link", { name: "Open Active Ranked Eleven" })
+  ).toBeInTheDocument();
 });
 
 it("keeps the active highly rated wave visible in the preview strip", () => {

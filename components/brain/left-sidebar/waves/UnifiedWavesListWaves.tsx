@@ -12,6 +12,7 @@ import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
 import {
   buildHighlyRatedWavePreviewItems,
+  getHighlyRatedPreviewWaves,
   HighlyRatedWavesToggle,
 } from "./HighlyRatedWavesToggle";
 import SectionHeader from "./SectionHeader";
@@ -239,6 +240,16 @@ const UnifiedWavesListWaves = forwardRef<
       },
       [activeWaveId, isApp, isDirectMessage]
     );
+    const highlyRatedPreviewWaves = useMemo(
+      () =>
+        getHighlyRatedPreviewWaves({
+          activeParentWaveId,
+          activeWaveId,
+          allWaves,
+          highlyRatedWaves,
+        }),
+      [activeParentWaveId, activeWaveId, allWaves, highlyRatedWaves]
+    );
     const highlyRatedPreviewItems = useMemo(
       () =>
         buildHighlyRatedWavePreviewItems({
@@ -249,7 +260,7 @@ const UnifiedWavesListWaves = forwardRef<
           hasTouchScreen,
           isDirectMessage,
           setActiveWave,
-          waves: highlyRatedWaves,
+          waves: highlyRatedPreviewWaves,
         }),
       [
         activeWaveId,
@@ -257,7 +268,7 @@ const UnifiedWavesListWaves = forwardRef<
         getHighlyRatedPreviewHref,
         handleHighlyRatedPreviewHover,
         hasTouchScreen,
-        highlyRatedWaves,
+        highlyRatedPreviewWaves,
         isDirectMessage,
         setActiveWave,
       ]

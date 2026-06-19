@@ -32,6 +32,35 @@ type SetActiveWaveForPreview = (
   }
 ) => void;
 
+export function getHighlyRatedPreviewWaves({
+  activeParentWaveId,
+  activeWaveId,
+  allWaves,
+  highlyRatedWaves,
+}: {
+  readonly activeParentWaveId: string | null | undefined;
+  readonly activeWaveId: string | null | undefined;
+  readonly allWaves: readonly MinimalWave[];
+  readonly highlyRatedWaves: readonly MinimalWave[];
+}): MinimalWave[] {
+  const activeIds = [activeWaveId, activeParentWaveId].filter(
+    (waveId): waveId is string => typeof waveId === "string"
+  );
+
+  if (activeIds.length === 0) {
+    return [...highlyRatedWaves];
+  }
+
+  const highlyRatedWaveIds = new Set(highlyRatedWaves.map((wave) => wave.id));
+  const activeWave = allWaves.find((wave) => activeIds.includes(wave.id));
+
+  if (activeWave === undefined || highlyRatedWaveIds.has(activeWave.id)) {
+    return [...highlyRatedWaves];
+  }
+
+  return [...highlyRatedWaves, activeWave];
+}
+
 const isModifiedAnchorClick = (event: MouseEvent<HTMLAnchorElement>) =>
   event.metaKey ||
   event.ctrlKey ||
