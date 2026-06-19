@@ -159,7 +159,7 @@ export const ExpandedWave = ({
         href={href}
         prefetch={false}
         onClick={onClick}
-        className="tw-absolute tw-inset-0 tw-z-0 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+        className="tw-absolute tw-inset-0 tw-z-[1] tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
         {...tooltipAttributes}
       >
         <span className="tw-sr-only">{formattedWaveName}</span>
@@ -203,7 +203,6 @@ export const ExpandedWave = ({
             className={`-tw-mt-1 tw-mb-1 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 ${
               shouldShowPinButton ? "tw-pr-7" : ""
             }`}
-            {...tooltipAttributes}
           >
             <span
               className={`tw-min-w-0 tw-flex-shrink ${

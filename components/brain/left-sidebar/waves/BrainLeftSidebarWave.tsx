@@ -260,7 +260,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         href={href}
         prefetch={false}
         onClick={handleWaveClick}
-        className="tw-absolute tw-inset-0 tw-z-0 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+        className="tw-absolute tw-inset-0 tw-z-[1] tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
       >
         <span className="tw-sr-only">{formattedWaveName}</span>
       </Link>

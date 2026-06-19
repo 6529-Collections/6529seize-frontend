@@ -44,7 +44,19 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>
+  () => (props: any) => (
+    <button
+      type="button"
+      className={props.className}
+      data-testid="pin"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+    >
+      {String(props.isPinned)}
+    </button>
+  )
 );
 
 const mockedPrefetch = usePrefetchWaveData as jest.Mock;
@@ -263,6 +275,7 @@ describe("BrainLeftSidebarWave", () => {
     const rowLink = screen.getByRole("link", { name: "Chat Wave" });
     expect(rowLink).toHaveClass("tw-absolute");
     expect(rowLink).toHaveClass("tw-inset-0");
+    expect(rowLink).toHaveClass("tw-z-[1]");
     expect(rowLink).toHaveClass("focus-visible:tw-ring-2");
     expect(expandButton.closest("a")).toBeNull();
     expect(expandButton.parentElement).toHaveClass("tw-z-10");
@@ -274,6 +287,16 @@ describe("BrainLeftSidebarWave", () => {
     await user.click(expandButton);
 
     expect(onToggleExpand).toHaveBeenCalledWith("1");
+    expect(setActiveWave).not.toHaveBeenCalled();
+  });
+
+  it("does not navigate when the pin control is clicked", async () => {
+    const user = userEvent.setup();
+
+    render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} showPin />);
+
+    await user.click(screen.getByTestId("pin"));
+
     expect(setActiveWave).not.toHaveBeenCalled();
   });
 

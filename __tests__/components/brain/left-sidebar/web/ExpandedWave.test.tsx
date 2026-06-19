@@ -36,7 +36,19 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>
+  () => (props: any) => (
+    <button
+      type="button"
+      className={props.className}
+      data-testid="pin"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+    >
+      {String(props.isPinned)}
+    </button>
+  )
 );
 
 const baseWave = createMockMinimalWave({
@@ -100,6 +112,15 @@ describe("ExpandedWave", () => {
     expect(row).not.toHaveClass("tw-pl-2");
   });
 
+  it("opens the wave from the stretched row link", async () => {
+    const user = userEvent.setup();
+    const { onClick } = renderExpandedWave();
+
+    await user.click(screen.getByRole("link", { name: "Chat Wave" }));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
   it("renders one row link and keeps the subwave expand button separate", async () => {
     const user = userEvent.setup();
     const { onClick, onToggleExpand } = renderExpandedWave({
@@ -133,6 +154,7 @@ describe("ExpandedWave", () => {
     const rowLink = screen.getByRole("link", { name: "Chat Wave" });
     expect(rowLink).toHaveClass("tw-absolute");
     expect(rowLink).toHaveClass("tw-inset-0");
+    expect(rowLink).toHaveClass("tw-z-[1]");
     expect(rowLink).toHaveClass("focus-visible:tw-ring-2");
     expect(expandButton.closest("a")).toBeNull();
     expect(expandButton.parentElement).toHaveClass("tw-z-10");
@@ -144,6 +166,17 @@ describe("ExpandedWave", () => {
     await user.click(expandButton);
 
     expect(onToggleExpand).toHaveBeenCalledWith("1");
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("does not navigate when the pin control is clicked", async () => {
+    const user = userEvent.setup();
+    const { onClick } = renderExpandedWave({
+      showPin: true,
+    });
+
+    await user.click(screen.getByTestId("pin"));
+
     expect(onClick).not.toHaveBeenCalled();
   });
 
