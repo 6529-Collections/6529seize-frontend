@@ -5,6 +5,11 @@ import { ExpandedWave } from "@/components/brain/left-sidebar/web/WebBrainLeftSi
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 
+type MockWavePinProps = {
+  readonly className?: string;
+  readonly isPinned?: boolean;
+};
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
@@ -36,7 +41,7 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => (
+  () => (props: MockWavePinProps) => (
     <button
       type="button"
       className={props.className}
@@ -215,8 +220,8 @@ describe("ExpandedWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(getWaveRow()).toHaveClass("tw-pl-[84px]");
-    expect(getWaveRow()).toHaveClass("md:tw-pl-[72px]");
+    expect(getWaveRow()).toHaveClass("tw-pl-[82px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-[70px]");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );

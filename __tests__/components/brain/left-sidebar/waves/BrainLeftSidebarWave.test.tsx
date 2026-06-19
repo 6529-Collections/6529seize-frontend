@@ -6,6 +6,11 @@ import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 
+type MockWavePinProps = {
+  readonly className?: string;
+  readonly isPinned?: boolean;
+};
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
@@ -44,7 +49,7 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => (
+  () => (props: MockWavePinProps) => (
     <button
       type="button"
       className={props.className}
@@ -437,8 +442,8 @@ describe("BrainLeftSidebarWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(getWaveRow()).toHaveClass("tw-pl-[84px]");
-    expect(getWaveRow()).toHaveClass("md:tw-pl-20");
+    expect(getWaveRow()).toHaveClass("tw-pl-[82px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-[78px]");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );

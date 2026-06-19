@@ -94,7 +94,7 @@ export const ExpandedWave = ({
   const shouldShowTrustSignalsRow =
     hasSummaryScore || presentLatestDropTimestamp !== null;
   const titleTooltipAnchorLeftClasses = isChildRow
-    ? "tw-left-[120px] md:tw-left-[108px]"
+    ? "tw-left-[118px] md:tw-left-[106px]"
     : "tw-left-16";
   const titleTooltipAnchorRightClasses = shouldShowPinButton
     ? "tw-right-12"

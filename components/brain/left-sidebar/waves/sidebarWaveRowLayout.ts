@@ -16,7 +16,7 @@ const DEFAULT_LINK_GAP_CLASSES = "tw-space-x-3";
 const rowLayoutByVariant = {
   app: {
     child: {
-      rowPaddingClasses: "tw-pl-[84px] tw-pr-5 md:tw-pl-20",
+      rowPaddingClasses: "tw-pl-[82px] tw-pr-5 md:tw-pl-[78px]",
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
     },
@@ -28,7 +28,7 @@ const rowLayoutByVariant = {
   },
   web: {
     child: {
-      rowPaddingClasses: "tw-pl-[84px] tw-pr-5 md:tw-pl-[72px]",
+      rowPaddingClasses: "tw-pl-[82px] tw-pr-5 md:tw-pl-[70px]",
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
     },
