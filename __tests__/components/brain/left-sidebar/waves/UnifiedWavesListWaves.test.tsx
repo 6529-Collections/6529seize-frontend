@@ -408,6 +408,34 @@ it("keeps the active highly rated wave visible in the preview strip", () => {
   expect(screen.queryByTestId("wave-h1")).toBeNull();
 });
 
+it("renders direct messages as one flat latest-first list", () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({ id: "newest", isFollowing: false }),
+        createMockMinimalWave({ id: "joined-older", isFollowing: true }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      hideHeaders
+      hideToggle
+      hidePin
+      isDirectMessage
+    />
+  );
+
+  expect(
+    screen.getByLabelText("Direct message conversations")
+  ).toBeInTheDocument();
+  expect(screen.queryByLabelText("Following waves")).not.toBeInTheDocument();
+  expect(
+    screen.queryByLabelText("All quality-ranked waves list")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
+  ).toEqual(["wave-newest", "wave-joined-older"]);
+});
+
 it("does not give special placement to official waves", () => {
   render(
     <UnifiedWavesListWaves

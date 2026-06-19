@@ -352,6 +352,7 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   followingAriaLabel: "Following waves",
   followingListAriaLabel: "Following waves list",
   allQualityRankedAriaLabel: "All quality-ranked waves list",
+  directMessagesAriaLabel: "Direct message conversations",
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",
   expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
   expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
@@ -361,6 +362,15 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
   "postsCount.one": "{count} Post",
   "postsCount.other": "{count} Posts",
+} as const);
+
+const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
+  coverAlt: "{waveName} cover",
+  "dropsCount.one": "{timeAgo} · {count} drop",
+  "dropsCount.other": "{timeAgo} · {count} drops",
+  noDropsYet: "No drops yet",
+  viewAriaLabel: "View wave {waveName}",
+  viewWithScoreAriaLabel: "View wave {waveName}. {scoreSummary}",
 } as const);
 
 const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
@@ -976,6 +986,7 @@ export const EN_US_MESSAGES = {
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
   ...WAVE_REP_ACTION_MESSAGES,
