@@ -56,7 +56,16 @@ class MockNextResponse {
   }
 
   async text(): Promise<string> {
-    return typeof this.body === "string" ? this.body : "";
+    if (typeof this.body === "string") {
+      return this.body;
+    }
+    if (this.body instanceof Uint8Array) {
+      return new TextDecoder().decode(this.body);
+    }
+    if (this.body instanceof ArrayBuffer) {
+      return new TextDecoder().decode(this.body);
+    }
+    return "";
   }
 }
 
@@ -154,6 +163,7 @@ describe("profile CMS asset route", () => {
     expect(response.headers.get("cache-control")).toBe(
       "public, max-age=86400, s-maxage=86400"
     );
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
     expect(await response.text()).toBe("image-bytes");
     expect(mockFetchPublicUrl).toHaveBeenCalledWith(
       new URL(ALLOWED_IMAGE_URL),
@@ -187,6 +197,7 @@ describe("profile CMS asset route", () => {
     expect(response.headers.get("cache-control")).toBe(
       "public, max-age=300, s-maxage=300"
     );
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
     await expect(response.json()).resolves.toEqual(["6529white"]);
   });
 
@@ -225,6 +236,46 @@ describe("profile CMS asset route", () => {
       "Unsupported CMS asset content type"
     );
   });
+
+  it("rejects an oversized upstream body without a content-length header", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createUpstreamResponse("x".repeat(16 * 1024 * 1024 + 1), {
+        headers: {
+          "content-type": "image/webp",
+        },
+        status: 200,
+      })
+    );
+
+    await expectJsonError(
+      `https://6529.io/api/profile-cms/assets?url=${encodeURIComponent(
+        ALLOWED_IMAGE_URL
+      )}`,
+      413,
+      "CMS asset response is too large"
+    );
+  });
+
+  it("rejects a redirected final URL outside the allowlist", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createUpstreamResponse("image-bytes", {
+        headers: {
+          "content-length": "11",
+          "content-type": "image/webp",
+        },
+        status: 200,
+        url: "https://example.com/image.webp",
+      })
+    );
+
+    await expectJsonError(
+      `https://6529.io/api/profile-cms/assets?url=${encodeURIComponent(
+        ALLOWED_IMAGE_URL
+      )}`,
+      400,
+      "Unsupported CMS asset URL"
+    );
+  });
 });
 
 function createRequest(target: string): NextRequest {
@@ -240,6 +291,7 @@ function createUpstreamResponse(
   options: {
     readonly headers: Record<string, string>;
     readonly status: number;
+    readonly url?: string;
   }
 ): {
   readonly body: string;
@@ -253,7 +305,7 @@ function createUpstreamResponse(
     headers: new MockHeaders(options.headers),
     ok: options.status >= 200 && options.status < 300,
     status: options.status,
-    url: "",
+    url: options.url ?? "",
   };
 }
 

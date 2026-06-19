@@ -76,6 +76,87 @@ function isOversizedResponse(headers: Headers): boolean {
   return !Number.isFinite(bytes) || bytes < 0 || bytes > MAX_ASSET_BYTES;
 }
 
+function getKnownBodyByteLength(body: BodyInit): number | null {
+  if (typeof body === "string") {
+    return new TextEncoder().encode(body).byteLength;
+  }
+
+  if (body instanceof Blob) {
+    return body.size;
+  }
+
+  if (body instanceof ArrayBuffer) {
+    return body.byteLength;
+  }
+
+  if (ArrayBuffer.isView(body)) {
+    return body.byteLength;
+  }
+
+  return null;
+}
+
+function combineChunks(
+  chunks: readonly Uint8Array[],
+  totalBytes: number
+): ArrayBuffer {
+  const body = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return body.buffer as ArrayBuffer;
+}
+
+async function readStreamWithLimit(
+  body: ReadableStream<Uint8Array>
+): Promise<BodyInit | NextResponse> {
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        return combineChunks(chunks, totalBytes);
+      }
+
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_ASSET_BYTES) {
+        await reader.cancel("CMS asset response is too large");
+        return jsonError("CMS asset response is too large", 413);
+      }
+
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+async function readBodyWithLimit(
+  body: BodyInit
+): Promise<BodyInit | NextResponse> {
+  const knownBytes = getKnownBodyByteLength(body);
+  if (knownBytes !== null) {
+    if (knownBytes > MAX_ASSET_BYTES) {
+      return jsonError("CMS asset response is too large", 413);
+    }
+    return body;
+  }
+
+  if (
+    typeof ReadableStream !== "undefined" &&
+    body instanceof ReadableStream
+  ) {
+    return readStreamWithLimit(body);
+  }
+
+  return body;
+}
+
 function mapGuardErrorToResponse(error: UrlGuardError): NextResponse {
   switch (error.kind) {
     case "timeout":
@@ -123,8 +204,14 @@ async function proxyAsset(url: URL): Promise<NextResponse> {
     const headers = new Headers();
     headers.set("content-type", contentType);
     headers.set("Cache-Control", getCacheControl(contentType));
+    headers.set("X-Content-Type-Options", "nosniff");
 
-    return new NextResponse(response.body, {
+    const body = await readBodyWithLimit(response.body);
+    if (body instanceof NextResponse) {
+      return body;
+    }
+
+    return new NextResponse(body, {
       headers,
       status: 200,
     });

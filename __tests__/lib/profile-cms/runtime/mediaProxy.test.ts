@@ -11,6 +11,11 @@ describe("profile CMS media proxy helpers", () => {
     expect(isProfileCmsAssetProxyAllowedUrl(allowedUrl)).toBe(true);
     expect(
       isProfileCmsAssetProxyAllowedUrl(
+        "https://d3lqz0a4bldqgf.cloudfront.net:443/images/test.webp"
+      )
+    ).toBe(true);
+    expect(
+      isProfileCmsAssetProxyAllowedUrl(
         "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json?t=1"
       )
     ).toBe(true);
@@ -25,6 +30,11 @@ describe("profile CMS media proxy helpers", () => {
     expect(
       isProfileCmsAssetProxyAllowedUrl(
         "http://d3lqz0a4bldqgf.cloudfront.net/images/test.webp"
+      )
+    ).toBe(false);
+    expect(
+      isProfileCmsAssetProxyAllowedUrl(
+        "https://d3lqz0a4bldqgf.cloudfront.net:444/images/test.webp"
       )
     ).toBe(false);
     expect(

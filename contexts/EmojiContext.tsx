@@ -14,7 +14,7 @@ import { getProfileCmsAssetProxyUrl } from "@/lib/profile-cms/runtime/mediaProxy
 
 const EMOJI_CDN_BASE = "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji";
 const S3_EMOJI_URL = getProfileCmsAssetProxyUrl(
-  `${EMOJI_CDN_BASE}/emoji-list.json?t=${Date.now()}`
+  `${EMOJI_CDN_BASE}/emoji-list.json`
 );
 
 interface BaseEmoji {
