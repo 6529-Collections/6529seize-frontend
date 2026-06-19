@@ -68,10 +68,7 @@ const updateLatestDropTimestamp = ({
   const current = newDropsCounts[waveId];
   const next: MinimalWaveNewDropsCount = {
     count: unreadCount ?? current?.count ?? 0,
-    latestDropTimestamp: Math.max(
-      createdAt,
-      current?.latestDropTimestamp ?? 0
-    ),
+    latestDropTimestamp: Math.max(createdAt, current?.latestDropTimestamp ?? 0),
     firstUnreadSerialNo:
       firstUnreadSerialNo !== undefined
         ? firstUnreadSerialNo

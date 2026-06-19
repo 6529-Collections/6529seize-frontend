@@ -3,9 +3,17 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import UnifiedWavesList from "@/components/brain/left-sidebar/waves/UnifiedWavesList";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
 jest.mock("@/hooks/useDeviceInfo");
+jest.mock("@/hooks/useShowFollowingWaves");
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(() => ({
+    connectedProfile: { handle: "alice" },
+    activeProfileProxy: null,
+  })),
+}));
 const mockOpenWave = jest.fn();
 jest.mock("@/hooks/useCreateModalState", () => ({
   __esModule: true,
@@ -23,8 +31,8 @@ jest.mock(
   "@/components/brain/left-sidebar/waves/UnifiedWavesListEmpty",
   () => ({
     __esModule: true,
-    default: ({ sortedWaves }: any) => (
-      <div data-testid="empty">{sortedWaves.length}</div>
+    default: ({ emptyMessage, sortedWaves }: any) => (
+      <div data-testid="empty">{emptyMessage ?? sortedWaves.length}</div>
     ),
   })
 );
@@ -59,10 +67,12 @@ type DeviceInfo = {
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
 >;
+const mockUseShowFollowingWaves = useShowFollowingWaves as jest.Mock;
 
 beforeEach(() => {
   sentinel = null;
   mockOpenWave.mockClear();
+  mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   useDeviceInfoMock.mockReturnValue({
     isApp: false,
     isMobileDevice: false,
@@ -91,6 +101,26 @@ describe("UnifiedWavesList", () => {
     await userEvent.click(screen.getByRole("button", { name: "Create Wave" }));
     expect(mockOpenWave).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("loader")).toHaveTextContent("false");
+  });
+
+  it("shows joined empty copy when the joined filter is active", () => {
+    mockUseShowFollowingWaves.mockReturnValue([true, jest.fn()]);
+
+    render(
+      <UnifiedWavesList
+        waves={[]}
+        fetchNextPage={jest.fn()}
+        hasNextPage={false}
+        isFetching={false}
+        isFetchingNextPage={false}
+        onHover={jest.fn()}
+        scrollContainerRef={React.createRef()}
+      />
+    );
+
+    expect(screen.getByTestId("empty")).toHaveTextContent(
+      "No joined waves to display"
+    );
   });
 
   it("triggers fetchNextPage when sentinel intersects", () => {

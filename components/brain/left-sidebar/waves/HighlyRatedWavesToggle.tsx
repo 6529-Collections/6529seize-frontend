@@ -167,7 +167,9 @@ const getMaxPreviewItems = (
 
   if (
     activePreviewItem === undefined ||
-    cappedPreviewItems.some((item) => item.wave.id === activePreviewItem.wave.id)
+    cappedPreviewItems.some(
+      (item) => item.wave.id === activePreviewItem.wave.id
+    )
   ) {
     return cappedPreviewItems;
   }
