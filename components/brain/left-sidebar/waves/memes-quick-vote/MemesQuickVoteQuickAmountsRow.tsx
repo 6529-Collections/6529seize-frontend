@@ -30,7 +30,7 @@ export default function MemesQuickVoteQuickAmountsRow({
   quickAmounts,
 }: MemesQuickVoteQuickAmountsRowProps) {
   return (
-    <div className="tw-flex tw-h-11 tw-w-full tw-items-stretch tw-gap-1.5 tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:tw-h-12 sm:tw-gap-2 md:tw-h-12 [&::-webkit-scrollbar]:tw-hidden">
+    <div className="tw-flex tw-h-12 tw-w-full tw-items-stretch tw-gap-1.5 tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:tw-gap-2 [&::-webkit-scrollbar]:tw-hidden">
       {quickAmounts.map((amount) => (
         <MemesQuickVoteAmountButton
           key={amount}
