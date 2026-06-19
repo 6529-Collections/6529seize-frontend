@@ -64,7 +64,7 @@ describe("ChatItemHrefButtons", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Hide link previews" }));
-    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onToggle).toHaveBeenCalledWith(true);
   });
 
   it("opens the overlay menu and keeps copy action available", () => {
