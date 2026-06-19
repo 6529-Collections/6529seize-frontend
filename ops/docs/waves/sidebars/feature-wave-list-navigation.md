@@ -4,8 +4,10 @@
 
 Wave and DM rows in the left list control which thread is open.
 
-- Click an inactive row to open that thread.
-- Click the active row to clear selection and return to section home.
+- Click the body of an inactive row to open that thread.
+- Click the body of the active row to clear selection and return to section
+  home.
+- Row pin and subwave expand/collapse buttons remain separate controls.
 - Browser back/forward keeps the active row and URL in sync.
 
 ## Location in the Site
@@ -18,15 +20,16 @@ Wave and DM rows in the left list control which thread is open.
 ## Entry Points
 
 - Open the `Waves` or `Messages` shell with the left list visible.
-- Select an inactive wave or DM row from the list.
+- Select an inactive wave or DM row from the list by clicking the row body.
 - Use browser back/forward after navigating between rows.
 
 ## User Journey
 
 1. Open a waves or messages shell with the row list visible.
-2. Select an inactive row to open that thread.
+2. Select an inactive row body to open that thread.
 3. The app updates the active highlight and URL together.
-4. Select the active row again to clear selection and return to section home.
+4. Select the active row body again to clear selection and return to section
+   home.
 5. Use browser back/forward to revisit row selections while keeping the list
    and URL in sync.
 
@@ -47,6 +50,8 @@ Wave and DM rows in the left list control which thread is open.
 
 - Direct-message navigation uses `/messages/{waveId}`; legacy query links are redirected.
 - If first unread is known, row navigation can add `divider={serialNo}`.
+- Row pin/unpin and subwave expand/collapse buttons do not trigger row
+  navigation.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
