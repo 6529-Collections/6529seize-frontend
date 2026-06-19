@@ -30,10 +30,7 @@ import {
   setActiveWalletAccount,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
-import {
-  getSessionClientType,
-  logoutSessionV2,
-} from "@/services/auth/session-v2.utils";
+import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { WalletInitializationError } from "@/src/errors/wallet";
@@ -1021,14 +1018,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [activeAddress, refreshStoredConnectedAccounts, setConnected]
   );
 
-  const isSingleWebSessionV2 = getSessionClientType() === "web";
-
   const canAddConnectedAccount = useMemo(() => {
-    if (isSingleWebSessionV2 && storedConnectedAccounts.length > 0) {
-      return false;
-    }
     return storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
-  }, [isSingleWebSessionV2, storedConnectedAccounts]);
+  }, [storedConnectedAccounts]);
 
   const activeConnectorType = wagmiAccount.connector?.type;
   const isActiveAppWalletConnector =
@@ -1044,12 +1036,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
-    if (
-      !canAddConnectedAccount ||
-      !canStoreAnotherWalletAccount(null, {
-        allowAdditionalAccounts: !isSingleWebSessionV2,
-      })
-    ) {
+    if (!canAddConnectedAccount || !canStoreAnotherWalletAccount()) {
       return;
     }
 
@@ -1162,7 +1149,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     canAddConnectedAccount,
     disconnect,
     isActiveAppWalletConnector,
-    isSingleWebSessionV2,
     isAddingConnectedAccount,
     seizeConnect,
     state.open,

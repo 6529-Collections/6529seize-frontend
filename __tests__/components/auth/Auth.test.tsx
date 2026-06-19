@@ -500,7 +500,7 @@ describe("Auth component", () => {
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
 
-    it("blocks adding a second web account when session v2 uses a single cookie", async () => {
+    it("allows adding a second web account when below the connected profile limit", async () => {
       const existingAddress = "0x1111111111111111111111111111111111111111";
       const nextAddress = "0x2222222222222222222222222222222222222222";
       walletAddress = nextAddress;
@@ -513,10 +513,17 @@ describe("Auth component", () => {
         },
       ];
       const authUtils = require("@/services/auth/auth.utils");
-      authUtils.canStoreAnotherWalletAccount.mockReturnValue(false);
+      authUtils.canStoreAnotherWalletAccount.mockReturnValue(true);
       const sessionV2 = require("@/services/auth/session-v2.utils");
       sessionV2.getSessionClientType.mockReturnValue("web");
-      const toast = require("react-toastify").toast;
+      const sessionResponse = {
+        client_type: "web",
+        address: nextAddress,
+        role: null,
+        access_token: "session-access-token-2",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      };
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
       const user = userEvent.setup();
 
       render(
@@ -532,23 +539,23 @@ describe("Auth component", () => {
       await user.click(screen.getByTestId("req"));
 
       expect(authUtils.canStoreAnotherWalletAccount).toHaveBeenCalledWith(
-        nextAddress,
-        { allowAdditionalAccounts: false }
+        nextAddress
       );
-      expect(mockCommonApiFetch).not.toHaveBeenCalled();
-      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
-      expect(toast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          props: expect.objectContaining({
-            toast: expect.objectContaining({
-              message:
-                "Disconnect the current profile before connecting another profile",
-              type: "error",
-            }),
-          }),
-        }),
-        expect.objectContaining({ type: "error" })
+      expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+        signerAddress: nextAddress,
+      });
+      await waitFor(() =>
+        expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
+          serverSignature: "server-signature",
+          clientSignature: "0xsignature",
+          signerAddress: nextAddress,
+          role: null,
+        })
       );
+      expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
+        sessionResponse
+      );
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
   });
 

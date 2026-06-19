@@ -313,11 +313,11 @@ describe("SeizeConnectProvider add-account flow", () => {
     expect(mockOpen).toHaveBeenCalledTimes(1);
   });
 
-  it("does not start add-account flow for web session v2 with an existing account", () => {
+  it("starts add-account flow for web session v2 with an existing account", async () => {
     const authUtils = require("@/services/auth/auth.utils");
     const sessionV2 = require("@/services/auth/session-v2.utils");
     sessionV2.getSessionClientType.mockReturnValue("web");
-    authUtils.canStoreAnotherWalletAccount.mockReturnValue(false);
+    authUtils.canStoreAnotherWalletAccount.mockReturnValue(true);
 
     render(
       <SeizeConnectProvider>
@@ -329,9 +329,20 @@ describe("SeizeConnectProvider add-account flow", () => {
       fireEvent.click(screen.getByRole("button", { name: "Add account" }));
     });
 
-    expect(authUtils.canStoreAnotherWalletAccount).not.toHaveBeenCalled();
-    expect(mockDisconnect).not.toHaveBeenCalled();
+    expect(authUtils.canStoreAnotherWalletAccount).toHaveBeenCalledWith();
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
     expect(mockOpen).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+    expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
   });
 
   it("continues single logout cleanup when session revocation fails", async () => {

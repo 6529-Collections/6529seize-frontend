@@ -112,6 +112,25 @@ describe("jwt-validation.utils", () => {
     });
   });
 
+  it("accepts a current session-v2 JWT when web cookie refresh belongs to another connected account", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
+    mockedRefreshSessionV2.mockResolvedValue({
+      client_type: "web",
+      address: "0x456",
+      role: null,
+      access_token: "other-account-access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    });
+    mockedAreEqualAddresses.mockReturnValue(false);
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: true,
+      wasCancelled: false,
+    });
+    expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
+  });
+
   it("requires session-v2 upgrade when refresh transport fails but current JWT is valid", async () => {
     mockedJwtDecode.mockReturnValue(validPayload);
     mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));
