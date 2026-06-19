@@ -120,7 +120,9 @@ export default function LeaderboardCardsCollectedComponent(
   return (
     <>
       <div className={styles["leaderboardTableShell"]}>
-        <table className={TABLE_CLASS_NAME}>
+        <table
+          className={clsx(TABLE_CLASS_NAME, styles["cardsCollectedTable"])}
+        >
           <thead>
             <tr>
               <th
