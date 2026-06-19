@@ -10,6 +10,11 @@ import React, {
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
+import {
+  buildHighlyRatedWavePreviewItems,
+  getHighlyRatedPreviewWaves,
+  HighlyRatedWavesToggle,
+} from "./HighlyRatedWavesToggle";
 import SectionHeader from "./SectionHeader";
 import WavesFilterToggle from "./WavesFilterToggle";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
@@ -19,6 +24,9 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   useSidebarWaveTree,
   type SidebarWaveTreeRow,
@@ -70,6 +78,14 @@ function SidebarCategoryHeader({
       {rightContent !== undefined && rightContent !== null && (
         <div className="tw-flex tw-items-center">{rightContent}</div>
       )}
+    </div>
+  );
+}
+
+function SidebarCategoryLabel({ label }: { readonly label: string }) {
+  return (
+    <div className="tw-px-4 tw-pb-1 tw-pt-2 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+      {label}
     </div>
   );
 }
@@ -151,6 +167,13 @@ const UnifiedWavesListWaves = forwardRef<
     const { activeWave, waves: streamWaves } = useMyStream();
     const isJoinedFilterActive =
       following && !!connectedProfile?.handle && !activeProfileProxy;
+    const {
+      id: activeWaveId,
+      parentWaveId: activeParentWaveId,
+      set: setActiveWave,
+    } = activeWave;
+    const { isApp, hasTouchScreen } = useDeviceInfo();
+    const prefetchWaveData = usePrefetchWaveData();
     const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
       waves,
       activeWaveId: activeWave.id,
@@ -219,6 +242,71 @@ const UnifiedWavesListWaves = forwardRef<
     if (isDirectMessage) {
       virtualizedKey = "direct-message-conversations";
     }
+    const shouldUseHighlyRatedToggle = !hideHeaders;
+    const shouldShowHighlyRatedRows =
+      highlyRatedRows.length > 0 && !shouldUseHighlyRatedToggle;
+    const handleHighlyRatedPreviewHover = useCallback(
+      (waveId: string) => {
+        if (waveId === activeWaveId) {
+          return;
+        }
+
+        onHover(waveId);
+        prefetchWaveData(waveId);
+      },
+      [activeWaveId, onHover, prefetchWaveData]
+    );
+    const getHighlyRatedPreviewHref = useCallback(
+      (wave: MinimalWave) => {
+        if (activeWaveId === wave.id) {
+          return getWaveHomeRoute({ isDirectMessage, isApp });
+        }
+
+        return getWaveRoute({
+          waveId: wave.id,
+          extraParams:
+            typeof wave.firstUnreadDropSerialNo === "number"
+              ? { divider: String(wave.firstUnreadDropSerialNo) }
+              : undefined,
+          isDirectMessage,
+          isApp,
+        });
+      },
+      [activeWaveId, isApp, isDirectMessage]
+    );
+    const highlyRatedPreviewWaves = useMemo(
+      () =>
+        getHighlyRatedPreviewWaves({
+          activeWaveLookupWaves: topLevelWaves,
+          activeParentWaveId,
+          activeWaveId,
+          highlyRatedWaves,
+        }),
+      [activeParentWaveId, activeWaveId, highlyRatedWaves, topLevelWaves]
+    );
+    const highlyRatedPreviewItems = useMemo(
+      () =>
+        buildHighlyRatedWavePreviewItems({
+          activeParentWaveId,
+          activeWaveId,
+          getHref: getHighlyRatedPreviewHref,
+          handleHover: handleHighlyRatedPreviewHover,
+          hasTouchScreen,
+          isDirectMessage,
+          setActiveWave,
+          waves: highlyRatedPreviewWaves,
+        }),
+      [
+        activeWaveId,
+        activeParentWaveId,
+        getHighlyRatedPreviewHref,
+        handleHighlyRatedPreviewHover,
+        hasTouchScreen,
+        highlyRatedPreviewWaves,
+        isDirectMessage,
+        setActiveWave,
+      ]
+    );
     const getSidebarRowHeight = useCallback(
       (row: SidebarWaveTreeRow) =>
         row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
@@ -297,28 +385,36 @@ const UnifiedWavesListWaves = forwardRef<
 
         {highlyRatedRows.length > 0 && (
           <>
-            {!hideHeaders && (
-              <SidebarCategoryHeader
-                label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+            {shouldUseHighlyRatedToggle && (
+              <>
+                <SidebarCategoryLabel
+                  label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                />
+                <HighlyRatedWavesToggle
+                  paddingClassName="tw-px-4"
+                  previewItems={highlyRatedPreviewItems}
+                />
+              </>
+            )}
+            {shouldShowHighlyRatedRows && (
+              <SidebarWaveRowsSection
+                ariaLabel={t(
+                  SIDEBAR_LOCALE,
+                  "waves.sidebar.highlyRatedAriaLabel"
+                )}
+                className="tw-flex tw-flex-col"
+                getRowHeight={getSidebarRowHeight}
+                isRowVisible={(row) =>
+                  isVisibleStaticRow({
+                    detailedLabel: "Highly rated",
+                    row,
+                    sectionName: "highly rated",
+                  })
+                }
+                renderRow={(row) => renderWaveRow(row, false)}
+                rows={animatedHighlyRatedRows}
               />
             )}
-            <SidebarWaveRowsSection
-              ariaLabel={t(
-                SIDEBAR_LOCALE,
-                "waves.sidebar.highlyRatedAriaLabel"
-              )}
-              className="tw-flex tw-flex-col"
-              getRowHeight={getSidebarRowHeight}
-              isRowVisible={(row) =>
-                isVisibleStaticRow({
-                  detailedLabel: "Highly rated",
-                  row,
-                  sectionName: "highly rated",
-                })
-              }
-              renderRow={(row) => renderWaveRow(row, false)}
-              rows={animatedHighlyRatedRows}
-            />
           </>
         )}
 

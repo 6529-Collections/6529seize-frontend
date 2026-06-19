@@ -481,6 +481,7 @@ test("keeps top sections while the joined bottom list shows followed waves", () 
     "highly-rated-one",
     "highly-rated-two",
     "highly-rated-three",
+    "highly-rated-four",
     "3",
     "followed-new",
     "followed-old",
@@ -494,7 +495,12 @@ test("keeps top sections while the joined bottom list shows followed waves", () 
           wave.sidebarSection === "highly-rated"
       )
       .map((wave: any) => wave.id)
-  ).toEqual(["highly-rated-one", "highly-rated-two", "highly-rated-three"]);
+  ).toEqual([
+    "highly-rated-one",
+    "highly-rated-two",
+    "highly-rated-three",
+    "highly-rated-four",
+  ]);
   expect(
     result.current.waves
       .filter(

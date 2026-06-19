@@ -340,6 +340,11 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Highly Rated",
+  "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
+  "highlyRatedPreviewOpenAriaLabel.one": "Open {waveName}, {count} new message",
+  "highlyRatedPreviewOpenAriaLabel.other":
+    "Open {waveName}, {count} new messages",
+  highlyRatedPreviewScore: "Score {score}",
   pinned: "Pinned",
   allWaves: "All Waves",
   all: "All",

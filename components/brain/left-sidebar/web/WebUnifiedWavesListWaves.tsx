@@ -4,6 +4,7 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -13,6 +14,11 @@ import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
+import {
+  buildHighlyRatedWavePreviewItems,
+  getHighlyRatedPreviewWaves,
+  HighlyRatedWavesToggle,
+} from "../waves/HighlyRatedWavesToggle";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
@@ -25,6 +31,7 @@ import {
   type SidebarWaveTreeRow,
 } from "@/hooks/useSidebarWaveTree";
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import {
   groupSidebarWavesForView,
   isValidSidebarWave,
@@ -89,6 +96,66 @@ function SidebarCategoryHeader({
       )}
     </div>
   );
+}
+
+function SidebarCategoryLabel({ label }: { readonly label: string }) {
+  return (
+    <div className="tw-px-5 tw-pb-1 tw-pt-2 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+      {label}
+    </div>
+  );
+}
+
+function getVirtualizedAriaLabel({
+  isDirectMessage,
+  isJoinedFilterActive,
+}: {
+  readonly isDirectMessage: boolean;
+  readonly isJoinedFilterActive: boolean;
+}) {
+  if (isDirectMessage) {
+    return t(SIDEBAR_LOCALE, "waves.sidebar.directMessagesAriaLabel");
+  }
+
+  if (isJoinedFilterActive) {
+    return t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
+  }
+
+  return t(SIDEBAR_LOCALE, "waves.sidebar.allRecentActivityAriaLabel");
+}
+
+function getVirtualizedKey({
+  isDirectMessage,
+  isJoinedFilterActive,
+}: {
+  readonly isDirectMessage: boolean;
+  readonly isJoinedFilterActive: boolean;
+}) {
+  if (isDirectMessage) {
+    return "web-direct-message-conversations";
+  }
+
+  if (isJoinedFilterActive) {
+    return "web-unified-waves-joined";
+  }
+
+  return "web-unified-waves-all";
+}
+
+function getBottomListLabel(isJoinedFilterActive: boolean) {
+  return isJoinedFilterActive
+    ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
+    : t(SIDEBAR_LOCALE, "waves.sidebar.all");
+}
+
+function getSectionClassName(isCollapsed: boolean) {
+  return isCollapsed
+    ? "tw-flex tw-flex-col tw-items-center tw-gap-y-2"
+    : "tw-flex tw-flex-col";
+}
+
+function getBaseRowHeight(isCollapsed: boolean) {
+  return isCollapsed ? WAVE_ROW_HEIGHT_COLLAPSED : WAVE_ROW_HEIGHT_DEFAULT;
 }
 
 interface WebUnifiedWavesListWavesProps {
@@ -302,8 +369,14 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { openWave, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
+  const prefetchWaveData = usePrefetchWaveData();
   const seizeSettings = useSeizeSettingsOptional();
   const { activeWave, waves: streamWaves } = useMyStream();
+  const {
+    id: activeWaveId,
+    parentWaveId: activeParentWaveId,
+    set: setActiveWave,
+  } = activeWave;
   const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
     waves,
     activeWaveId: activeWave.id,
@@ -369,45 +442,89 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasHighlyRatedRows = animatedHighlyRatedRows.length > 0;
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const virtualizedRows = animatedAllRows;
-  let virtualizedAriaLabel = t(
-    SIDEBAR_LOCALE,
-    "waves.sidebar.allRecentActivityAriaLabel"
-  );
-  if (isJoinedFilterActive) {
-    virtualizedAriaLabel = t(
-      SIDEBAR_LOCALE,
-      "waves.sidebar.followingListAriaLabel"
-    );
-  }
-  if (isDirectMessage) {
-    virtualizedAriaLabel = t(
-      SIDEBAR_LOCALE,
-      "waves.sidebar.directMessagesAriaLabel"
-    );
-  }
-  const bottomListLabel = isJoinedFilterActive
-    ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
-    : t(SIDEBAR_LOCALE, "waves.sidebar.all");
+  const virtualizedAriaLabel = getVirtualizedAriaLabel({
+    isDirectMessage,
+    isJoinedFilterActive,
+  });
+  const bottomListLabel = getBottomListLabel(isJoinedFilterActive);
+  const shouldUseHighlyRatedToggle = !hideHeaders && !isCollapsed;
+  const shouldShowHighlyRatedRows =
+    hasHighlyRatedRows && !shouldUseHighlyRatedToggle;
   const headerPaddingClassName = "tw-px-4";
   const shouldShowBottomHeader = !hideHeaders && !isCollapsed;
-  let virtualizedKey = "web-unified-waves-all";
-  if (isJoinedFilterActive) {
-    virtualizedKey = "web-unified-waves-joined";
-  }
-  if (isDirectMessage) {
-    virtualizedKey = "web-direct-message-conversations";
-  }
-  const sectionClassName = isCollapsed
-    ? "tw-flex tw-flex-col tw-items-center tw-gap-y-2"
-    : "tw-flex tw-flex-col";
-
-  const rowHeight = isCollapsed
-    ? WAVE_ROW_HEIGHT_COLLAPSED
-    : WAVE_ROW_HEIGHT_DEFAULT;
+  const virtualizedKey = getVirtualizedKey({
+    isDirectMessage,
+    isJoinedFilterActive,
+  });
+  const sectionClassName = getSectionClassName(isCollapsed);
+  const rowHeight = getBaseRowHeight(isCollapsed);
+  const isMessageBasePath = basePath === "/messages";
   const getSidebarRowHeight = useCallback(
     (row: SidebarWaveTreeRow) =>
       row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight,
     [rowHeight]
+  );
+  const handleHighlyRatedPreviewHover = useCallback(
+    (waveId: string) => {
+      if (waveId === activeWaveId) {
+        return;
+      }
+
+      onHover(waveId);
+      prefetchWaveData(waveId);
+    },
+    [activeWaveId, onHover, prefetchWaveData]
+  );
+  const getHighlyRatedPreviewHref = useCallback(
+    (wave: MinimalWave) => {
+      if (activeWaveId === wave.id) {
+        return basePath;
+      }
+
+      return getWaveRoute({
+        waveId: wave.id,
+        extraParams:
+          typeof wave.firstUnreadDropSerialNo === "number"
+            ? { divider: String(wave.firstUnreadDropSerialNo) }
+            : undefined,
+        isDirectMessage: isMessageBasePath,
+        isApp: false,
+      });
+    },
+    [activeWaveId, basePath, isMessageBasePath]
+  );
+  const highlyRatedPreviewWaves = useMemo(
+    () =>
+      getHighlyRatedPreviewWaves({
+        activeWaveLookupWaves: topLevelWaves,
+        activeParentWaveId,
+        activeWaveId,
+        highlyRatedWaves,
+      }),
+    [activeParentWaveId, activeWaveId, highlyRatedWaves, topLevelWaves]
+  );
+  const highlyRatedPreviewItems = useMemo(
+    () =>
+      buildHighlyRatedWavePreviewItems({
+        activeParentWaveId,
+        activeWaveId,
+        getHref: getHighlyRatedPreviewHref,
+        handleHover: handleHighlyRatedPreviewHover,
+        hasTouchScreen: isTouchDevice,
+        isDirectMessage: isMessageBasePath,
+        setActiveWave,
+        waves: highlyRatedPreviewWaves,
+      }),
+    [
+      activeParentWaveId,
+      activeWaveId,
+      getHighlyRatedPreviewHref,
+      handleHighlyRatedPreviewHover,
+      highlyRatedPreviewWaves,
+      isMessageBasePath,
+      isTouchDevice,
+      setActiveWave,
+    ]
   );
 
   const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
@@ -485,25 +602,40 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
           {hasHighlyRatedRows && (
             <>
-              {!hideHeaders && !isCollapsed && (
-                <SidebarCategoryHeader
-                  label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+              {shouldUseHighlyRatedToggle ? (
+                <>
+                  <SidebarCategoryLabel
+                    label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                  />
+                  <HighlyRatedWavesToggle
+                    paddingClassName="tw-px-5"
+                    previewItems={highlyRatedPreviewItems}
+                  />
+                </>
+              ) : (
+                !hideHeaders &&
+                !isCollapsed && (
+                  <SidebarCategoryLabel
+                    label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                  />
+                )
+              )}
+              {shouldShowHighlyRatedRows && (
+                <SidebarWaveRowsSection
+                  ariaLabel={t(
+                    SIDEBAR_LOCALE,
+                    "waves.sidebar.highlyRatedAriaLabel"
+                  )}
+                  className={sectionClassName}
+                  getRowHeight={getSidebarRowHeight}
+                  isRowVisible={(row) =>
+                    isVisibleSectionRow({ row, sectionName: "highly rated" })
+                  }
+                  renderRow={(row) => renderWaveRow(row, false)}
+                  rows={animatedHighlyRatedRows}
+                  transitionClassName="tw-w-full"
                 />
               )}
-              <SidebarWaveRowsSection
-                ariaLabel={t(
-                  SIDEBAR_LOCALE,
-                  "waves.sidebar.highlyRatedAriaLabel"
-                )}
-                className={sectionClassName}
-                getRowHeight={getSidebarRowHeight}
-                isRowVisible={(row) =>
-                  isVisibleSectionRow({ row, sectionName: "highly rated" })
-                }
-                renderRow={(row) => renderWaveRow(row, false)}
-                rows={animatedHighlyRatedRows}
-                transitionClassName="tw-w-full"
-              />
             </>
           )}
           {hasHighlyRatedRows &&

@@ -41,7 +41,7 @@ type SidebarWaveWithDiscoverySection = SidebarWave & {
 const SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED: SidebarDiscoverySection =
   "highly-rated";
 const SIDEBAR_DISCOVERY_SECTION_ALL: SidebarDiscoverySection = "all";
-const HIGHLY_RATED_WAVE_LIMIT = 3;
+const HIGHLY_RATED_WAVE_LIMIT = 10;
 const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 
 // V2 overview, pinned, and announcement wave sources are root-wave
