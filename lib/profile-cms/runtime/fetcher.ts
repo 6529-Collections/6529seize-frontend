@@ -357,7 +357,9 @@ function isNotFoundError(error: unknown): boolean {
   }
 
   const message = getErrorMessage(error);
-  return /not found|cannot get|404/i.test(message);
+  return /not found|cannot get|404|no primary published cms package/i.test(
+    message
+  );
 }
 
 function getErrorStatus(error: unknown): number | undefined {

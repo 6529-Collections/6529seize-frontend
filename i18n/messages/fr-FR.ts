@@ -16,6 +16,8 @@ export const FR_FR_MESSAGES = {
   "media.video.unmute": "Activer le son de la video",
   "media.video.unsupported":
     "Votre navigateur ne prend pas en charge la balise video.",
+  "profileCms.interactive.fullscreen": "Plein ecran",
+  "profileCms.interactive.exitFullscreen": "Quitter le plein ecran",
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",

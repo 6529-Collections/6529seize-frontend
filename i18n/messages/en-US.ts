@@ -342,11 +342,15 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   pinned: "Pinned",
   following: "Following",
   all: "All",
+  announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Highly rated waves",
   pinnedAriaLabel: "Pinned waves",
   followingAriaLabel: "Following waves",
   followingListAriaLabel: "Following waves list",
   allQualityRankedAriaLabel: "All quality-ranked waves list",
+  expandControlExpandAriaLabel: "Expand {waveName} subwaves",
+  expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
+  expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
 } as const);
 
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
@@ -726,6 +730,8 @@ export const EN_US_MESSAGES = {
     "Enter a simple exhibition room. Every artwork still links to its canonical 2D detail page.",
   "profileCms.interactive.openSourceMedia": "Open source media",
   "profileCms.interactive.enterRoom": "Enter room",
+  "profileCms.interactive.fullscreen": "Full screen",
+  "profileCms.interactive.exitFullscreen": "Exit full screen",
   "profileCms.interactive.loadObject": "Load 3D object",
   "profileCms.interactive.loading": "Loading {progress}%",
   "profileCms.interactive.loadError":
