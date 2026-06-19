@@ -1,5 +1,4 @@
 import { Capacitor } from "@capacitor/core";
-import { publicEnv } from "@/config/env";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { setAuthJwt } from "./auth.utils";
@@ -79,58 +78,8 @@ function isUnauthorizedApiError(error: unknown): boolean {
   return statusError.status === 401 || statusError.response?.status === 401;
 }
 
-function canUseWebCookieSession(): boolean {
-  if (globalThis.window === undefined) {
-    return true;
-  }
-
-  return isWebSessionCredentialApiOriginAllowed(
-    new URL(publicEnv.API_ENDPOINT).origin,
-    globalThis.window.location.origin
-  );
-}
-
-function isWebSessionCredentialApiOriginAllowed(
-  apiOrigin: string,
-  windowOrigin: string
-): boolean {
-  if (apiOrigin === windowOrigin) {
-    return true;
-  }
-
-  return getConfiguredWebSessionCredentialApiOrigins().includes(apiOrigin);
-}
-
-function getConfiguredWebSessionCredentialApiOrigins(): string[] {
-  return (publicEnv.WEB_SESSION_CREDENTIAL_API_ORIGINS ?? "")
-    .split(",")
-    .map(normalizeWebSessionCredentialOrigin)
-    .filter((origin): origin is string => origin !== null);
-}
-
-function normalizeWebSessionCredentialOrigin(
-  value: string | null | undefined
-): string | null {
-  if (!value) {
-    return null;
-  }
-  try {
-    const parsed = new URL(value.trim());
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-      return null;
-    }
-    return parsed.origin;
-  } catch {
-    return null;
-  }
-}
-
-function getSessionCredentialsMode(): RequestCredentials | undefined {
-  if (getSessionClientType() !== "web") {
-    return "include";
-  }
-
-  return canUseWebCookieSession() ? "include" : undefined;
+function getSessionCredentialsMode(): RequestCredentials {
+  return "include";
 }
 
 async function rollbackUnpersistedSession(
@@ -236,10 +185,6 @@ export async function refreshSessionV2({
       }
       throw error;
     }
-  }
-
-  if (!canUseWebCookieSession()) {
-    return null;
   }
 
   try {
@@ -361,10 +306,6 @@ export async function logoutSessionV2({
     } finally {
       await removeNativeRefreshToken(address);
     }
-    return;
-  }
-
-  if (!canUseWebCookieSession()) {
     return;
   }
 

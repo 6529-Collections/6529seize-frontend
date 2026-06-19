@@ -332,6 +332,7 @@ export * from '../models/ApiSubwavesSort';
 export * from '../models/ApiTargetAndSubscriptionActions';
 export * from '../models/ApiTdhEdition';
 export * from '../models/ApiTdhEditionsPage';
+export * from '../models/ApiToggleHideLinkPreviewRequest';
 export * from '../models/ApiTokenTdh';
 export * from '../models/ApiTokenTdhRank';
 export * from '../models/ApiTransaction';
@@ -829,6 +830,7 @@ import { ApiSubwavesSort } from '../models/ApiSubwavesSort';
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
 import { ApiTdhEdition } from '../models/ApiTdhEdition';
 import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
+import { ApiToggleHideLinkPreviewRequest } from '../models/ApiToggleHideLinkPreviewRequest';
 import { ApiTokenTdh } from '../models/ApiTokenTdh';
 import { ApiTokenTdhRank } from '../models/ApiTokenTdhRank';
 import { ApiTransaction } from '../models/ApiTransaction';
@@ -1407,6 +1409,7 @@ let typeMap: {[index: string]: any} = {
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
     "ApiTdhEdition": ApiTdhEdition,
     "ApiTdhEditionsPage": ApiTdhEditionsPage,
+    "ApiToggleHideLinkPreviewRequest": ApiToggleHideLinkPreviewRequest,
     "ApiTokenTdh": ApiTokenTdh,
     "ApiTokenTdhRank": ApiTokenTdhRank,
     "ApiTransaction": ApiTransaction,
