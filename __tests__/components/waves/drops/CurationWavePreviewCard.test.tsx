@@ -363,6 +363,49 @@ describe("CurationWavePreviewCard", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("uses contained scrolling for created waves in the touch sheet variant", () => {
+    useWavesMock.mockReturnValue({
+      waves: [createCreatedWave()],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      error: null,
+    });
+
+    render(
+      <CurationWavePreviewCard
+        waveId="wave-1"
+        profileIdentity="alice"
+        variant="sheet"
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Show all waves" }));
+
+    const createdWavesPanel = screen.getByRole("region", {
+      name: "Created waves",
+    });
+    const scrollContainer = createdWavesPanel.querySelector(
+      ".tw-overflow-y-auto"
+    );
+
+    expect(scrollContainer).not.toBeNull();
+    expect(createdWavesPanel).toHaveClass(
+      "tw-flex",
+      "tw-min-h-0",
+      "tw-flex-[1_1_14rem]",
+      "tw-flex-col"
+    );
+    expect(scrollContainer as Element).toHaveClass(
+      "tw-min-h-0",
+      "tw-flex-1",
+      "tw-overflow-y-auto",
+      "tw-max-h-none"
+    );
+  });
+
   it("omits the all-waves disclosure without a profile identity", () => {
     render(<CurationWavePreviewCard waveId="wave-1" />);
 
