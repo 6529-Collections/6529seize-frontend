@@ -4,7 +4,6 @@ export interface SidebarWaveGroups {
   readonly announcementWaves: MinimalWave[];
   readonly highlyRatedWaves: MinimalWave[];
   readonly pinnedWaves: MinimalWave[];
-  readonly followingWaves: MinimalWave[];
   readonly allWaves: MinimalWave[];
 }
 
@@ -64,7 +63,6 @@ export const groupSidebarWaves = ({
   const announcementWaves: MinimalWave[] = [];
   const highlyRatedWaves: MinimalWave[] = [];
   const pinnedWaves: MinimalWave[] = [];
-  const followingWaves: MinimalWave[] = [];
   const allWaves: MinimalWave[] = [];
 
   for (const wave of waves) {
@@ -83,7 +81,6 @@ export const groupSidebarWaves = ({
     announcementWaves,
     highlyRatedWaves,
     pinnedWaves,
-    followingWaves,
     allWaves,
   };
 };

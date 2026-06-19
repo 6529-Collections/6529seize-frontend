@@ -109,7 +109,7 @@ interface UnifiedWavesListWavesProps {
   readonly hideToggle?: boolean | undefined;
   /** Whether to hide the pin functionality for waves */
   readonly hidePin?: boolean | undefined;
-  /** Whether to hide section headers (All Waves, Pinned) */
+  /** Whether to hide section headers */
   readonly hideHeaders?: boolean | undefined;
   /** Reference to the scroll container for virtualization */
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -240,9 +240,11 @@ const UnifiedWavesListWaves = forwardRef<
 
     return (
       <div className="tw-flex tw-flex-col">
-        {/* Always show "All Waves" header when not hidden */}
         {!hideHeaders && (
-          <SectionHeader label="All Waves" paddingClassName="tw-px-4" />
+          <SectionHeader
+            label={t(SIDEBAR_LOCALE, "waves.sidebar.allWaves")}
+            paddingClassName="tw-px-4"
+          />
         )}
 
         {announcementRows.length > 0 && (

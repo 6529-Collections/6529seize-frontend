@@ -1,3 +1,5 @@
+/* eslint max-lines: "off" */
+
 import {
   DISTRIBUTION_MESSAGES,
   LINK_PREVIEW_MESSAGES,
@@ -173,8 +175,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.rep": "REP",
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
-  "suggested.description":
-    "Categories with the most profile REP activity.",
+  "suggested.description": "Categories with the most profile REP activity.",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -341,6 +342,7 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Highly Rated",
   pinned: "Pinned",
   following: "Following",
+  allWaves: "All Waves",
   all: "All",
   filterAriaLabel: "Wave list filter",
   filterAll: "All",

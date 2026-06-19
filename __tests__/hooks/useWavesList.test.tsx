@@ -542,7 +542,7 @@ test("paginates only followed activity in joined mode", () => {
   expect(fetchNextAllQualityPage).not.toHaveBeenCalled();
 });
 
-test("preserves pinned, announcement, and subwaves while joined mode filters the bottom list source", () => {
+test("preserves top sections while joined mode filters bottom list roots and subwaves", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
   const joinedPinnedWave = createSidebarWave({
@@ -651,7 +651,6 @@ test("preserves pinned, announcement, and subwaves while joined mode filters the
     "joined-pinned",
     "joined-parent",
     "joined-subwave",
-    "unjoined-subwave",
   ]);
 });
 

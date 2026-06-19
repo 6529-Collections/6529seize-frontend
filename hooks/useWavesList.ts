@@ -38,6 +38,9 @@ type SidebarWaveWithDiscoverySection = SidebarWave & {
   readonly sidebarSection?: SidebarDiscoverySection;
 };
 
+const SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED: SidebarDiscoverySection =
+  "highly-rated";
+const SIDEBAR_DISCOVERY_SECTION_ALL: SidebarDiscoverySection = "all";
 const HIGHLY_RATED_WAVE_LIMIT = 3;
 const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 
@@ -162,7 +165,7 @@ const useWavesList = () => {
       ...highlyRatedWaves.slice(0, HIGHLY_RATED_WAVE_LIMIT).map(
         (wave): SidebarWaveWithDiscoverySection => ({
           ...wave,
-          sidebarSection: "highly-rated",
+          sidebarSection: SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
         })
       ),
       ...followedActivityWaves,
@@ -171,7 +174,7 @@ const useWavesList = () => {
         : allQualityWaves.map(
             (wave): SidebarWaveWithDiscoverySection => ({
               ...wave,
-              sidebarSection: "all",
+              sidebarSection: SIDEBAR_DISCOVERY_SECTION_ALL,
             })
           )),
     ];
@@ -348,13 +351,13 @@ const useWavesList = () => {
       (wave) =>
         !wave.isPinned &&
         !wave.subscribed &&
-        wave.sidebarSection === "highly-rated"
+        wave.sidebarSection === SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED
     );
     const backendOrderedScoreWaves = nonAnnouncementWaves.filter(
       (wave) =>
         !wave.isPinned &&
         !wave.subscribed &&
-        wave.sidebarSection !== "highly-rated"
+        wave.sidebarSection !== SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED
     );
     const sortedNonAnnouncementWaves = [
       ...highlyRatedDiscoveryWaves,
@@ -459,10 +462,34 @@ const useWavesList = () => {
     shouldFetchAnnouncementWave,
   ]);
 
-  // Derived data should come directly from memoized inputs
+  const topSectionWaveIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    combinedWaves.forEach((wave) => {
+      if (
+        isAnnouncementsWave(wave.id) ||
+        wave.isPinned ||
+        wave.sidebarSection === SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED
+      ) {
+        ids.add(wave.id);
+      }
+    });
+
+    return ids;
+  }, [combinedWaves, isAnnouncementsWave]);
+
+  // Derived data should come directly from memoized inputs.
   const allWaves = useMemo(
-    () => [...combinedWaves, ...subwaves],
-    [combinedWaves, subwaves]
+    () => [
+      ...combinedWaves,
+      ...subwaves.filter(
+        (wave) =>
+          !isJoinedMode ||
+          wave.subscribed ||
+          topSectionWaveIds.has(wave.parentWaveId ?? "")
+      ),
+    ],
+    [combinedWaves, isJoinedMode, subwaves, topSectionWaveIds]
   );
 
   // New drops counting logic has been removed and will be managed by context
