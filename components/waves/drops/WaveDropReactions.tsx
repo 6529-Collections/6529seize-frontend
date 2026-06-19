@@ -480,6 +480,8 @@ function WaveDropReaction({
               src={customSrc}
               alt={emojiId}
               fill
+              sizes="16px"
+              unoptimized
               className="tw-object-contain"
             />
           </div>
@@ -490,6 +492,8 @@ function WaveDropReaction({
               src={customSrc}
               alt={emojiId}
               fill
+              sizes="32px"
+              unoptimized
               className="tw-rounded-sm tw-object-contain"
             />
           </div>

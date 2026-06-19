@@ -25,12 +25,18 @@ export interface MinimalWave {
   isMuted: boolean;
   parentWaveId: string | null;
   hasSubwaves: boolean;
+  followedSubwavesCount: number;
+  latestFollowedSubwaveDropTimestamp: number | null;
+  unreadFollowedSubwaveDrops: number;
   unreadDropsCount: number;
   latestReadTimestamp: number;
   firstUnreadDropSerialNo: number | null;
+  firstUnreadFollowedSubwaveDropSerialNo: number | null;
   waveRep: ApiWaveRepSummary | null;
   waveScore: ApiWaveScore | null;
   sidebarSection: SidebarDiscoverySection | null;
+  sidebarActivityTimestamp: number | null;
+  isFollowedSubwaveContainer: boolean;
 }
 
 type EnhancedSidebarWave = SidebarWave & {
@@ -59,10 +65,12 @@ interface UseEnhancedWavesListCoreOptions {
   otherListWaveIds?: ReadonlySet<string> | undefined;
   unknownWaveRefetchCooldownMs?: number | undefined;
   preserveBackendWaveOrder?: boolean | undefined;
+  sortMutedLast?: boolean | undefined;
 }
 
 const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
   supportsPinning: true,
+  sortMutedLast: true,
 };
 
 function useEnhancedWavesListCore(
@@ -136,12 +144,17 @@ function useEnhancedWavesListCore(
     (wave: EnhancedSidebarWave): MinimalWave => {
       const wsData = newDropsCounts[wave.id];
       const hasNewWsDrops = (wsData?.count ?? 0) > 0;
+      const directLatestDropTimestamp = getNewestTimestamp(
+        wsData?.latestDropTimestamp,
+        wave.latestDropTimestamp ?? null
+      );
+      const sidebarActivityTimestamp = getNewestTimestamp(
+        directLatestDropTimestamp,
+        wave.latestFollowedSubwaveDropTimestamp ?? null
+      );
       const newDrops = {
         count: wsData?.count ?? 0,
-        latestDropTimestamp: getNewestTimestamp(
-          wsData?.latestDropTimestamp,
-          wave.latestDropTimestamp ?? null
-        ),
+        latestDropTimestamp: sidebarActivityTimestamp,
         firstUnreadSerialNo: wsData?.firstUnreadSerialNo ?? null,
       };
       const isCleared = clearedUnreadWaveIds.has(wave.id) && !hasNewWsDrops;
@@ -189,12 +202,25 @@ function useEnhancedWavesListCore(
         isMuted: wave.muted,
         parentWaveId: wave.parentWaveId,
         hasSubwaves: wave.hasSubwaves,
+        followedSubwavesCount: wave.followedSubwavesCount,
+        latestFollowedSubwaveDropTimestamp:
+          wave.latestFollowedSubwaveDropTimestamp,
+        unreadFollowedSubwaveDrops: wave.unreadFollowedSubwaveDrops,
         unreadDropsCount,
         latestReadTimestamp: wave.latestReadTimestamp,
         firstUnreadDropSerialNo,
+        firstUnreadFollowedSubwaveDropSerialNo:
+          wave.firstUnreadFollowedSubwaveDropSerialNo,
         waveRep: wave.waveRep,
         waveScore: wave.waveScore,
         sidebarSection: wave.sidebarSection ?? null,
+        sidebarActivityTimestamp,
+        // Directly-followed waves remain normal following rows; this flag is
+        // reserved for parent rows surfaced only because a child subwave is followed.
+        isFollowedSubwaveContainer:
+          wave.parentWaveId === null &&
+          !(wave.subscribed ?? false) &&
+          wave.followedSubwavesCount > 0,
       };
     },
     [
@@ -213,18 +239,17 @@ function useEnhancedWavesListCore(
   const sorted = useMemo(
     () =>
       [...minimal].sort((a, b) => {
-        if (a.isMuted !== b.isMuted) {
+        if (options.sortMutedLast !== false && a.isMuted !== b.isMuted) {
           return a.isMuted ? 1 : -1;
         }
         if (options.preserveBackendWaveOrder) {
           return 0;
         }
         return (
-          (b.newDropsCount.latestDropTimestamp ?? 0) -
-          (a.newDropsCount.latestDropTimestamp ?? 0)
+          (b.sidebarActivityTimestamp ?? 0) - (a.sidebarActivityTimestamp ?? 0)
         );
       }),
-    [minimal, options.preserveBackendWaveOrder]
+    [minimal, options.preserveBackendWaveOrder, options.sortMutedLast]
   );
 
   return useMemo(

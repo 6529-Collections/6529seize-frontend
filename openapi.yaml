@@ -18695,6 +18695,18 @@ components:
         first_unread_drop_serial_no:
           type: integer
           format: int64
+        followed_subwaves_count:
+          type: integer
+          format: int64
+        latest_followed_subwave_activity_timestamp:
+          type: integer
+          format: int64
+        hidden_followed_subwave_unread_drops:
+          type: integer
+          format: int64
+        first_hidden_followed_subwave_unread_drop_serial_no:
+          type: integer
+          format: int64
         muted:
           type: boolean
     ApiWaveOverviewContributor:
