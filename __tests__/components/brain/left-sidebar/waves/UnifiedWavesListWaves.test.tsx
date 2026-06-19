@@ -8,6 +8,11 @@ import {
 } from "@testing-library/react";
 import type { UnifiedWavesListWavesHandle } from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
+import {
+  getFittingPreviewCount,
+  getVisibleHighlyRatedPreviewItems,
+  type HighlyRatedWavePreviewItem,
+} from "@/components/brain/left-sidebar/waves/HighlyRatedWavesToggle";
 import { SIDEBAR_SUBWAVE_ROW_TRANSITION_MS } from "@/hooks/useAnimatedSidebarWaveRows";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useAuth } from "@/components/auth/Auth";
@@ -107,6 +112,19 @@ const baseWaves = [
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
 
+const createPreviewItem = ({
+  id,
+  isActive = false,
+}: {
+  readonly id: string;
+  readonly isActive?: boolean;
+}): HighlyRatedWavePreviewItem => ({
+  wave: createMockMinimalWave({ id, sidebarSection: "highly-rated" }),
+  href: `/waves/${id}`,
+  isActive,
+  onClick: jest.fn(),
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
   globalThis.localStorage.clear();
@@ -153,6 +171,36 @@ it("renders structure even when no waves", () => {
     "tw-px-4"
   );
   expect(screen.getByTestId("switch")).toBeInTheDocument();
+});
+
+it("calculates how many highly rated preview avatars fit", () => {
+  expect(getFittingPreviewCount({ itemCount: 0, width: 220 })).toBe(0);
+  expect(getFittingPreviewCount({ itemCount: 10, width: 0 })).toBe(10);
+  expect(getFittingPreviewCount({ itemCount: 10, width: 32 })).toBe(1);
+  expect(getFittingPreviewCount({ itemCount: 10, width: 70 })).toBe(2);
+  expect(getFittingPreviewCount({ itemCount: 12, width: 1000 })).toBe(10);
+});
+
+it("keeps the active highly rated preview visible within the capped strip", () => {
+  const previewItems = Array.from({ length: 11 }, (_, index) =>
+    createPreviewItem({
+      id: `h${index + 1}`,
+      isActive: index === 10,
+    })
+  );
+
+  expect(
+    getVisibleHighlyRatedPreviewItems({
+      previewItems,
+      visiblePreviewCount: 10,
+    }).map((item) => item.wave.id)
+  ).toEqual(["h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "h9", "h11"]);
+  expect(
+    getVisibleHighlyRatedPreviewItems({
+      previewItems,
+      visiblePreviewCount: 4,
+    }).map((item) => item.wave.id)
+  ).toEqual(["h1", "h2", "h3", "h11"]);
 });
 
 it("renders fitting highly rated waves as an unboxed preview strip without an expand control", () => {

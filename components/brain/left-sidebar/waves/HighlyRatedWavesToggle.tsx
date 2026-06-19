@@ -94,7 +94,7 @@ const getWaveScoreLabel = (wave: MinimalWave): string | null => {
   return formatInteger(SIDEBAR_LOCALE, Math.round(score));
 };
 
-const getFittingPreviewCount = ({
+export const getFittingPreviewCount = ({
   itemCount,
   width,
 }: {
@@ -115,6 +115,57 @@ const getFittingPreviewCount = ({
   );
 
   return Math.max(1, Math.min(maxVisibleCount, fittingCount));
+};
+
+const getMaxPreviewItems = (
+  previewItems: readonly HighlyRatedWavePreviewItem[]
+) => {
+  const cappedPreviewItems = previewItems.slice(
+    0,
+    HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT
+  );
+  const activePreviewItem = previewItems.find((item) => item.isActive);
+
+  if (
+    activePreviewItem === undefined ||
+    cappedPreviewItems.some((item) => item.wave.id === activePreviewItem.wave.id)
+  ) {
+    return cappedPreviewItems;
+  }
+
+  return [...cappedPreviewItems.slice(0, -1), activePreviewItem];
+};
+
+export const getVisibleHighlyRatedPreviewItems = ({
+  previewItems,
+  visiblePreviewCount,
+}: {
+  readonly previewItems: readonly HighlyRatedWavePreviewItem[];
+  readonly visiblePreviewCount: number;
+}) => {
+  const maxPreviewItems = getMaxPreviewItems(previewItems);
+  const cappedVisibleCount = Math.min(
+    maxPreviewItems.length,
+    Math.max(0, visiblePreviewCount)
+  );
+  const activePreviewIndex = maxPreviewItems.findIndex((item) => item.isActive);
+
+  if (
+    activePreviewIndex < cappedVisibleCount ||
+    cappedVisibleCount >= maxPreviewItems.length
+  ) {
+    return maxPreviewItems.slice(0, cappedVisibleCount);
+  }
+
+  const activePreviewItem = maxPreviewItems[activePreviewIndex];
+  if (activePreviewItem === undefined) {
+    return maxPreviewItems.slice(0, cappedVisibleCount);
+  }
+
+  return [
+    ...maxPreviewItems.slice(0, Math.max(0, cappedVisibleCount - 1)),
+    activePreviewItem,
+  ];
 };
 
 function HighlyRatedWavePreviewLink({
@@ -234,31 +285,14 @@ export function HighlyRatedWavesToggle({
     };
   }, [updateVisiblePreviewCount]);
 
-  const maxPreviewItems = useMemo(
-    () => previewItems.slice(0, HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT),
-    [previewItems]
+  const visiblePreviewItems = useMemo(
+    () =>
+      getVisibleHighlyRatedPreviewItems({
+        previewItems,
+        visiblePreviewCount,
+      }),
+    [previewItems, visiblePreviewCount]
   );
-  const visiblePreviewItems = useMemo(() => {
-    const activePreviewIndex = maxPreviewItems.findIndex(
-      (item) => item.isActive
-    );
-    if (
-      activePreviewIndex < visiblePreviewCount ||
-      visiblePreviewCount >= maxPreviewItems.length
-    ) {
-      return maxPreviewItems.slice(0, visiblePreviewCount);
-    }
-
-    const activePreviewItem = maxPreviewItems[activePreviewIndex];
-    if (activePreviewItem === undefined) {
-      return maxPreviewItems.slice(0, visiblePreviewCount);
-    }
-
-    return [
-      ...maxPreviewItems.slice(0, Math.max(0, visiblePreviewCount - 1)),
-      activePreviewItem,
-    ];
-  }, [maxPreviewItems, visiblePreviewCount]);
 
   return (
     <div className={`${paddingClassName} tw-pb-1`}>
