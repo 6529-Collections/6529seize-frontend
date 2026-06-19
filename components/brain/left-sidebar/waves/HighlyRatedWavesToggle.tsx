@@ -251,6 +251,8 @@ export function HighlyRatedWavesToggle({
   const [visiblePreviewCount, setVisiblePreviewCount] = useState<number>(
     HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT
   );
+  const activePreviewItemId =
+    previewItems.find((item) => item.isActive)?.wave.id ?? null;
 
   const updateVisiblePreviewCount = useCallback(() => {
     const width = previewStripRef.current?.clientWidth ?? 0;
@@ -283,7 +285,7 @@ export function HighlyRatedWavesToggle({
       globalThis.cancelAnimationFrame(animationFrameId);
       globalThis.removeEventListener("resize", updateVisiblePreviewCount);
     };
-  }, [updateVisiblePreviewCount]);
+  }, [activePreviewItemId, updateVisiblePreviewCount]);
 
   const visiblePreviewItems = useMemo(
     () =>

@@ -203,6 +203,22 @@ it("keeps the active highly rated preview visible within the capped strip", () =
   ).toEqual(["h1", "h2", "h3", "h11"]);
 });
 
+it("preserves promoted active highly rated preview ordering when fewer avatars fit", () => {
+  const previewItems = Array.from({ length: 12 }, (_, index) =>
+    createPreviewItem({
+      id: `h${index + 1}`,
+      isActive: index === 11,
+    })
+  );
+
+  expect(
+    getVisibleHighlyRatedPreviewItems({
+      previewItems,
+      visiblePreviewCount: 4,
+    }).map((item) => item.wave.id)
+  ).toEqual(["h1", "h2", "h3", "h12"]);
+});
+
 it("renders fitting highly rated waves as an unboxed preview strip without an expand control", () => {
   const ref = React.createRef<UnifiedWavesListWavesHandle>();
   render(
