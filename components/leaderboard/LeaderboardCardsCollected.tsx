@@ -17,6 +17,7 @@ import {
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import LeaderboardFooter from "./LeaderboardDownload";
 import LeaderboardSort from "./LeaderboardSort";
+import LeaderboardTableScrollShell from "./LeaderboardTableScrollShell";
 
 const PAGE_SIZE = 50;
 const TABLE_CLASS_NAME = "tw-mb-0 tw-w-full tw-border-collapse tw-text-white";
@@ -119,7 +120,7 @@ export default function LeaderboardCardsCollectedComponent(
 
   return (
     <>
-      <div className={styles["leaderboardTableShell"]}>
+      <LeaderboardTableScrollShell>
         <table
           className={clsx(TABLE_CLASS_NAME, styles["cardsCollectedTable"])}
         >
@@ -331,7 +332,7 @@ export default function LeaderboardCardsCollectedComponent(
             })}
           </tbody>
         </table>
-      </div>
+      </LeaderboardTableScrollShell>
       <LeaderboardFooter
         url={myFetchUrl}
         totalResults={totalResults}
