@@ -85,6 +85,18 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </QueryClientProvider>
 );
 
+const wrapperWithoutConnectedIdentity: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => (
+  <QueryClientProvider client={queryClient}>
+    <AuthContext.Provider
+      value={{ connectedProfile: null, activeProfileProxy: null } as any}
+    >
+      {children}
+    </AuthContext.Provider>
+  </QueryClientProvider>
+);
+
 const createSidebarWave = ({
   id,
   latestDropTimestamp,
@@ -301,6 +313,77 @@ test("polls followed activity when the sidebar is in joined mode", () => {
     enabled: true,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   });
+});
+
+test("falls back to all waves when joined preference is persisted without a connected identity", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+
+  const highlyRatedWave = createSidebarWave({
+    id: "highly-rated",
+    latestDropTimestamp: 50,
+  });
+  const allQualityWave = createSidebarWave({
+    id: "all-quality",
+    latestDropTimestamp: 100,
+  });
+
+  useWavesV2Mock.mockImplementation(({ enabled, overviewType, pageSize }) => {
+    let waves = [allQualityWave];
+    if (enabled === false) {
+      waves = [];
+    } else if (
+      overviewType === ApiWavesOverviewType.ScoredRecentlyDroppedTo &&
+      pageSize === 10
+    ) {
+      waves = [highlyRatedWave];
+    }
+
+    return {
+      waves,
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+    };
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), {
+    wrapper: wrapperWithoutConnectedIdentity,
+  });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "highly-rated",
+    "all-quality",
+  ]);
+  expect(useWavesV2Mock.mock.calls.map(([args]) => args)).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
+        pageSize: 10,
+        enabled: true,
+      }),
+      expect.objectContaining({
+        overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
+        pageSize: 20,
+        enabled: true,
+      }),
+      expect.objectContaining({
+        overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+        enabled: false,
+      }),
+    ])
+  );
 });
 
 test("shows only followed waves in joined mode", () => {
