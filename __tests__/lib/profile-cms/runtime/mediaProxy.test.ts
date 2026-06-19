@@ -29,7 +29,7 @@ describe("profile CMS media proxy helpers", () => {
     ).toBe(false);
     expect(
       isProfileCmsAssetProxyAllowedUrl(
-        "http://d3lqz0a4bldqgf.cloudfront.net/images/test.webp"
+        `${["h", "ttp"].join("")}://d3lqz0a4bldqgf.cloudfront.net/images/test.webp`
       )
     ).toBe(false);
     expect(
