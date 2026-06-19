@@ -196,8 +196,8 @@ function MemesQuickVoteMediaStage({
             className={clsx(
               "tw-inline-flex tw-h-8 tw-max-w-[46%] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-text-xs tw-font-bold tw-shadow-[0_10px_24px_rgba(0,0,0,0.28)] tw-backdrop-blur-md tw-transition-all",
               swipeOffset < 0
-                ? "tw-border-rose-300/45 tw-bg-rose-500/20 tw-text-rose-100"
-                : "tw-border-white/10 tw-bg-black/45 tw-text-iron-200"
+                ? "tw-border-rose-300/70 tw-bg-rose-950 tw-text-white"
+                : "tw-border-white/20 tw-bg-black/85 tw-text-white"
             )}
           >
             <ChevronLeftIcon className="tw-size-3.5 tw-shrink-0" />
@@ -207,8 +207,8 @@ function MemesQuickVoteMediaStage({
             className={clsx(
               "tw-inline-flex tw-h-8 tw-max-w-[54%] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-text-xs tw-font-bold tw-shadow-[0_10px_24px_rgba(0,0,0,0.28)] tw-backdrop-blur-md tw-transition-all",
               swipeOffset > 0
-                ? "tw-text-primary-100 tw-border-primary-300/45 tw-bg-primary-500/20"
-                : "tw-border-white/10 tw-bg-black/45 tw-text-iron-200"
+                ? "tw-border-primary-300/70 tw-bg-primary-600 tw-text-white"
+                : "tw-border-white/20 tw-bg-black/85 tw-text-white"
             )}
           >
             <span className="tw-truncate">
