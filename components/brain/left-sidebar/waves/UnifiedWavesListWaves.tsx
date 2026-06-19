@@ -25,7 +25,7 @@ import {
 } from "@/hooks/useSidebarWaveTree";
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 import {
-  groupSidebarWaves,
+  groupSidebarWavesForView,
   isValidSidebarWave,
   validateSidebarWaveDetailed,
 } from "./sidebarWaveListUtils";
@@ -162,14 +162,15 @@ const UnifiedWavesListWaves = forwardRef<
     const { announcementWaves, highlyRatedWaves, pinnedWaves, allWaves } =
       useMemo(
         () =>
-          groupSidebarWaves({
+          groupSidebarWavesForView({
             isAnnouncementsWave:
               seizeSettings === null
                 ? undefined
                 : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
+            isDirectMessage,
             waves: topLevelWaves,
           }),
-        [topLevelWaves, seizeSettings]
+        [topLevelWaves, seizeSettings, isDirectMessage]
       );
 
     const announcementRows = useMemo(
@@ -191,13 +192,33 @@ const UnifiedWavesListWaves = forwardRef<
     const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
     const animatedAllRows = useAnimatedSidebarWaveRows(allRows);
     const virtualizedRows = animatedAllRows;
-    const virtualizedAriaLabel = isJoinedFilterActive
-      ? t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel")
-      : t(SIDEBAR_LOCALE, "waves.sidebar.allRecentActivityAriaLabel");
+    let virtualizedAriaLabel = t(
+      SIDEBAR_LOCALE,
+      "waves.sidebar.allRecentActivityAriaLabel"
+    );
+    if (isJoinedFilterActive) {
+      virtualizedAriaLabel = t(
+        SIDEBAR_LOCALE,
+        "waves.sidebar.followingListAriaLabel"
+      );
+    }
+    if (isDirectMessage) {
+      virtualizedAriaLabel = t(
+        SIDEBAR_LOCALE,
+        "waves.sidebar.directMessagesAriaLabel"
+      );
+    }
     const bottomListLabel = isJoinedFilterActive
       ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
       : t(SIDEBAR_LOCALE, "waves.sidebar.all");
     const shouldShowBottomHeader = !hideHeaders;
+    let virtualizedKey = "unified-waves-all";
+    if (isJoinedFilterActive) {
+      virtualizedKey = "unified-waves-joined";
+    }
+    if (isDirectMessage) {
+      virtualizedKey = "direct-message-conversations";
+    }
     const getSidebarRowHeight = useCallback(
       (row: SidebarWaveTreeRow) =>
         row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
@@ -206,7 +227,7 @@ const UnifiedWavesListWaves = forwardRef<
 
     const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
       items: virtualizedRows,
-      key: isJoinedFilterActive ? "unified-waves-joined" : "unified-waves-all",
+      key: virtualizedKey,
       scrollContainerRef,
       listContainerRef,
       rowHeight: getSidebarRowHeight,

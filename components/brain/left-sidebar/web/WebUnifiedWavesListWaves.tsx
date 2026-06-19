@@ -26,7 +26,7 @@ import {
 } from "@/hooks/useSidebarWaveTree";
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 import {
-  groupSidebarWaves,
+  groupSidebarWavesForView,
   isValidSidebarWave,
 } from "../waves/sidebarWaveListUtils";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -101,6 +101,7 @@ interface WebUnifiedWavesListWavesProps {
   readonly basePath?: string | undefined;
   readonly isCollapsed?: boolean | undefined;
   readonly showProfileFeedShortcut?: boolean | undefined;
+  readonly isDirectMessage?: boolean | undefined;
   readonly sentinelRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -293,6 +294,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   basePath = "/waves",
   isCollapsed = false,
   showProfileFeedShortcut = true,
+  isDirectMessage = false,
   sentinelRef,
 }) => {
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -319,14 +321,15 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const { announcementWaves, highlyRatedWaves, pinnedWaves, allWaves } =
     useMemo(
       () =>
-        groupSidebarWaves({
+        groupSidebarWavesForView({
           isAnnouncementsWave:
             seizeSettings === null
               ? undefined
               : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
+          isDirectMessage,
           waves: topLevelWaves,
         }),
-      [topLevelWaves, seizeSettings]
+      [topLevelWaves, seizeSettings, isDirectMessage]
     );
 
   const announcementRows = useMemo(
@@ -366,14 +369,34 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasHighlyRatedRows = animatedHighlyRatedRows.length > 0;
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const virtualizedRows = animatedAllRows;
-  const virtualizedAriaLabel = isJoinedFilterActive
-    ? t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel")
-    : t(SIDEBAR_LOCALE, "waves.sidebar.allRecentActivityAriaLabel");
+  let virtualizedAriaLabel = t(
+    SIDEBAR_LOCALE,
+    "waves.sidebar.allRecentActivityAriaLabel"
+  );
+  if (isJoinedFilterActive) {
+    virtualizedAriaLabel = t(
+      SIDEBAR_LOCALE,
+      "waves.sidebar.followingListAriaLabel"
+    );
+  }
+  if (isDirectMessage) {
+    virtualizedAriaLabel = t(
+      SIDEBAR_LOCALE,
+      "waves.sidebar.directMessagesAriaLabel"
+    );
+  }
   const bottomListLabel = isJoinedFilterActive
     ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
     : t(SIDEBAR_LOCALE, "waves.sidebar.all");
   const headerPaddingClassName = "tw-px-4";
   const shouldShowBottomHeader = !hideHeaders && !isCollapsed;
+  let virtualizedKey = "web-unified-waves-all";
+  if (isJoinedFilterActive) {
+    virtualizedKey = "web-unified-waves-joined";
+  }
+  if (isDirectMessage) {
+    virtualizedKey = "web-direct-message-conversations";
+  }
   const sectionClassName = isCollapsed
     ? "tw-flex tw-flex-col tw-items-center tw-gap-y-2"
     : "tw-flex tw-flex-col";
@@ -389,9 +412,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
   const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
     items: virtualizedRows,
-    key: isJoinedFilterActive
-      ? "web-unified-waves-joined"
-      : "web-unified-waves-all",
+    key: virtualizedKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
     rowHeight: getSidebarRowHeight,

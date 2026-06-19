@@ -100,6 +100,9 @@ const wrapperWithoutConnectedIdentity: React.FC<{
 const createSidebarWave = ({
   id,
   latestDropTimestamp,
+  latestFollowedSubwaveDropTimestamp = null,
+  followedSubwavesCount = 0,
+  unreadFollowedSubwaveDrops = 0,
   isDirectMessage = false,
   type = ApiWaveType.Rank,
   pinned = false,
@@ -107,6 +110,9 @@ const createSidebarWave = ({
 }: {
   readonly id: string;
   readonly latestDropTimestamp: number;
+  readonly latestFollowedSubwaveDropTimestamp?: number | null;
+  readonly followedSubwavesCount?: number;
+  readonly unreadFollowedSubwaveDrops?: number;
   readonly isDirectMessage?: boolean;
   readonly type?: ApiWaveType;
   readonly pinned?: boolean;
@@ -129,8 +135,12 @@ const createSidebarWave = ({
   totalDropsCount: 0,
   isPrivate: false,
   latestDropTimestamp,
+  latestFollowedSubwaveDropTimestamp,
   firstUnreadDropSerialNo: null,
+  firstUnreadFollowedSubwaveDropSerialNo: null,
   unreadDropsCount: 0,
+  followedSubwavesCount,
+  unreadFollowedSubwaveDrops,
   latestReadTimestamp: 0,
   pinned,
   muted: false,
@@ -665,6 +675,131 @@ test("preserves top sections while joined mode filters bottom list roots and sub
     "joined-pinned",
     "joined-parent",
     "joined-subwave",
+  ]);
+});
+
+test("orders followed-subwave parent containers by aggregate activity", () => {
+  const directlyFollowedWave = createSidebarWave({
+    id: "direct-follow",
+    latestDropTimestamp: 500,
+    subscribed: true,
+  });
+  const subwaveOnlyParent = createSidebarWave({
+    id: "subwave-parent",
+    latestDropTimestamp: 10,
+    latestFollowedSubwaveDropTimestamp: 900,
+    followedSubwavesCount: 1,
+    unreadFollowedSubwaveDrops: 2,
+    subscribed: false,
+  });
+  const oldSubwaveOnlyParent = createSidebarWave({
+    id: "old-subwave-parent",
+    latestDropTimestamp: 20,
+    latestFollowedSubwaveDropTimestamp: 100,
+    followedSubwavesCount: 1,
+    subscribed: false,
+  });
+  const qualitySuggestion = createSidebarWave({
+    id: "quality-suggestion",
+    latestDropTimestamp: 999,
+  });
+
+  useWavesV2Mock.mockImplementation(({ overviewType, pageSize }) => ({
+    waves:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? [directlyFollowedWave, subwaveOnlyParent, oldSubwaveOnlyParent]
+        : pageSize === 10
+          ? [qualitySuggestion]
+          : [subwaveOnlyParent, qualitySuggestion],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  }));
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "quality-suggestion",
+    "subwave-parent",
+    "direct-follow",
+    "old-subwave-parent",
+  ]);
+  expect(
+    result.current.waves.find((wave: any) => wave.id === "subwave-parent")
+  ).toMatchObject({
+    subscribed: false,
+    followedSubwavesCount: 1,
+    unreadFollowedSubwaveDrops: 2,
+    latestFollowedSubwaveDropTimestamp: 900,
+    sidebarSection: "all",
+  });
+});
+
+test("backfills highly rated rows after filtering known subwave containers", () => {
+  const knownSubwaveParent = createSidebarWave({
+    id: "known-subwave-parent",
+    latestDropTimestamp: 100,
+    followedSubwavesCount: 1,
+  });
+  const highlyRatedOne = createSidebarWave({
+    id: "highly-rated-one",
+    latestDropTimestamp: 90,
+  });
+  const highlyRatedTwo = createSidebarWave({
+    id: "highly-rated-two",
+    latestDropTimestamp: 80,
+  });
+  const highlyRatedThree = createSidebarWave({
+    id: "highly-rated-three",
+    latestDropTimestamp: 70,
+  });
+
+  useWavesV2Mock.mockImplementation(({ overviewType }) => ({
+    waves:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? [knownSubwaveParent]
+        : [
+            knownSubwaveParent,
+            highlyRatedOne,
+            highlyRatedTwo,
+            highlyRatedThree,
+          ],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  }));
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "highly-rated-one",
+    "highly-rated-two",
+    "highly-rated-three",
+    "known-subwave-parent",
   ]);
 });
 

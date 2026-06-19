@@ -50,6 +50,35 @@ const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 const isExpectedRootSidebarWave = (wave: SidebarWave) =>
   wave.parentWaveId === null;
 
+const getLatestKnownActivityTimestamp = (
+  wave: Pick<
+    SidebarWave,
+    "latestDropTimestamp" | "latestFollowedSubwaveDropTimestamp"
+  >
+) =>
+  Math.max(
+    wave.latestDropTimestamp ?? 0,
+    wave.latestFollowedSubwaveDropTimestamp ?? 0
+  );
+
+const getFirstUnreadSerialNo = (
+  left: number | null,
+  right: number | null
+): number | null => {
+  if (left === null) {
+    return right;
+  }
+
+  if (right === null) {
+    return left;
+  }
+
+  return Math.min(left, right);
+};
+
+const isKnownWaveForCurrentViewer = (wave: SidebarWave) =>
+  wave.subscribed || wave.followedSubwavesCount > 0;
+
 /**
  * Hook for managing and fetching waves list including pinned waves
  * @returns Wave list data and loading states
@@ -161,12 +190,15 @@ const useWavesList = () => {
     return [
       // Keep the highly-rated slice before the broader activity list:
       // duplicate wave ids retain their first sidebarSection during merge.
-      ...highlyRatedWaves.slice(0, HIGHLY_RATED_WAVE_LIMIT).map(
-        (wave): SidebarWaveWithDiscoverySection => ({
-          ...wave,
-          sidebarSection: SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
-        })
-      ),
+      ...highlyRatedWaves
+        .filter((wave) => !isKnownWaveForCurrentViewer(wave))
+        .slice(0, HIGHLY_RATED_WAVE_LIMIT)
+        .map(
+          (wave): SidebarWaveWithDiscoverySection => ({
+            ...wave,
+            sidebarSection: SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
+          })
+        ),
       ...(isJoinedMode
         ? followedActivityWaves
         : allActivityWaves.map(
@@ -326,11 +358,40 @@ const useWavesList = () => {
       const sidebarSection: SidebarDiscoverySection | undefined = (
         wave as SidebarWaveWithDiscoverySection
       ).sidebarSection;
+
+      const nextLatestFollowedSubwaveDropTimestamp = Math.max(
+        existingWave?.latestFollowedSubwaveDropTimestamp ?? 0,
+        wave.latestFollowedSubwaveDropTimestamp ?? 0
+      );
+      const preservedSidebarSection =
+        existingWave?.sidebarSection ?? sidebarSection ?? "all";
+      const isPinned = pinnedWavesSet.has(wave.id);
+
+      // The current source has the freshest wave payload; the fields below
+      // intentionally preserve cross-source sidebar state that can appear only
+      // on an earlier duplicate row for the same wave id.
       allWavesMap.set(wave.id, {
+        ...(existingWave ?? wave),
         ...wave,
         subscribed: existingWave?.subscribed === true || wave.subscribed,
-        isPinned: pinnedWavesSet.has(wave.id),
-        sidebarSection: existingWave?.sidebarSection ?? sidebarSection ?? "all",
+        followedSubwavesCount: Math.max(
+          existingWave?.followedSubwavesCount ?? 0,
+          wave.followedSubwavesCount
+        ),
+        latestFollowedSubwaveDropTimestamp:
+          nextLatestFollowedSubwaveDropTimestamp > 0
+            ? nextLatestFollowedSubwaveDropTimestamp
+            : null,
+        unreadFollowedSubwaveDrops: Math.max(
+          existingWave?.unreadFollowedSubwaveDrops ?? 0,
+          wave.unreadFollowedSubwaveDrops
+        ),
+        firstUnreadFollowedSubwaveDropSerialNo: getFirstUnreadSerialNo(
+          existingWave?.firstUnreadFollowedSubwaveDropSerialNo ?? null,
+          wave.firstUnreadFollowedSubwaveDropSerialNo
+        ),
+        isPinned,
+        sidebarSection: preservedSidebarSection,
       });
     });
 
@@ -338,7 +399,9 @@ const useWavesList = () => {
     const sortedPinnedWaves = nonAnnouncementWaves
       .filter((wave) => wave.isPinned)
       .sort(
-        (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
+        (a, b) =>
+          getLatestKnownActivityTimestamp(b) -
+          getLatestKnownActivityTimestamp(a)
       );
     // Product rule: All is one recent-activity stream. Joined uses the same
     // activity order, filtered by the followed-only query.
@@ -349,13 +412,15 @@ const useWavesList = () => {
           wave.sidebarSection !== SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED
       )
       .sort(
-        (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
+        (a, b) =>
+          getLatestKnownActivityTimestamp(b) -
+          getLatestKnownActivityTimestamp(a)
       );
     const highlyRatedDiscoveryWaves = nonAnnouncementWaves.filter(
       (wave) =>
         !wave.isPinned &&
-        !wave.subscribed &&
-        wave.sidebarSection === SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED
+        !isKnownWaveForCurrentViewer(wave) &&
+        wave.sidebarSection === "highly-rated"
     );
     const sortedNonAnnouncementWaves = [
       ...highlyRatedDiscoveryWaves,

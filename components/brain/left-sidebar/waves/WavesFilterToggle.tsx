@@ -71,9 +71,7 @@ const WavesFilterToggle = (): React.JSX.Element | null => {
     const filterLabel = t(DEFAULT_LOCALE, "waves.sidebar.filterAriaLabel");
 
     return (
-      <fieldset
-        className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-8 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden tw-bg-iron-950"
-      >
+      <fieldset className="tw-flex tw-h-8 tw-items-center tw-overflow-hidden tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-1 tw-text-xs">
         <legend className="tw-sr-only">{filterLabel}</legend>
         <button
           type="button"
