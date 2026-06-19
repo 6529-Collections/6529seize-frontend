@@ -84,8 +84,9 @@ const useWavesList = () => {
     }
 
     const normalizedAddress = address.toLowerCase();
-    if (activeProfileProxy?.id !== undefined) {
-      return `${normalizedAddress}:proxy:${activeProfileProxy.id}`;
+    const proxyId = activeProfileProxy?.id;
+    if (proxyId !== undefined) {
+      return `${normalizedAddress}:proxy:${proxyId}`;
     }
 
     return `${normalizedAddress}:primary`;
@@ -154,7 +155,7 @@ const useWavesList = () => {
       ? SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS
       : false,
     refetchIntervalInBackground: false,
-    enabled: isConnectedIdentity,
+    enabled: isJoinedMode,
   });
   const mainWaves = useMemo<SidebarWaveWithDiscoverySection[]>(() => {
     return [
@@ -339,6 +340,8 @@ const useWavesList = () => {
       .sort(
         (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
       );
+    // Product rule: All is one recent-activity stream. Joined uses the same
+    // activity order, filtered by the followed-only query.
     const activityOrderedRegularWaves = nonAnnouncementWaves
       .filter(
         (wave) =>
@@ -438,9 +441,12 @@ const useWavesList = () => {
 
   // Function to refetch all waves (main, pinned, announcements, subwaves)
   const refetchAllWaves = useCallback(() => {
-    allActivityWavesRefetch();
+    if (isJoinedMode) {
+      followedActivityWavesRefetch();
+    } else {
+      allActivityWavesRefetch();
+    }
     highlyRatedWavesRefetch();
-    followedActivityWavesRefetch();
     void refetchPinnedWaves();
     refetchSubwaves();
     if (shouldFetchAnnouncementWave) {
@@ -450,6 +456,7 @@ const useWavesList = () => {
     allActivityWavesRefetch,
     highlyRatedWavesRefetch,
     followedActivityWavesRefetch,
+    isJoinedMode,
     refetchPinnedWaves,
     refetchSubwaves,
     announcementRefetch,

@@ -260,7 +260,7 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
         pageSize: 20,
         following: true,
         directMessage: false,
-        enabled: true,
+        enabled: false,
         refetchInterval: false,
         refetchIntervalInBackground: false,
       }),
@@ -1101,7 +1101,7 @@ test("refetches discovery, activity, pinned, and subwave sources", () => {
 
   expect(highlyRatedRefetch).toHaveBeenCalled();
   expect(allActivityRefetch).toHaveBeenCalled();
-  expect(followedActivityRefetch).toHaveBeenCalled();
+  expect(followedActivityRefetch).not.toHaveBeenCalled();
   expect(pinnedRefetch).toHaveBeenCalled();
   expect(subwavesRefetch).toHaveBeenCalled();
 });
