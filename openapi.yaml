@@ -10895,6 +10895,65 @@ components:
         total_cards_held:
           type: integer
           format: int64
+    ApiProfileCmsValidationIssue:
+      type: object
+      required:
+        - severity
+        - code
+        - message
+        - path
+      properties:
+        severity:
+          type: string
+          enum:
+            - error
+            - warning
+            - note
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        page_id:
+          type: string
+        block_id:
+          type: string
+        suggested_fix:
+          type: string
+    ApiProfileCmsValidationResult:
+      type: object
+      required:
+        - schema
+        - valid
+        - checked_at
+        - issues
+      properties:
+        schema:
+          type: string
+          enum:
+            - 6529.cms.validation_result.v1
+        valid:
+          type: boolean
+        checked_at:
+          type: string
+        validator:
+          type: string
+        validator_version:
+          type: string
+        target:
+          type: object
+          properties:
+            package_hash:
+              type: string
+            draft_id:
+              type: string
+            package_id:
+              type: string
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileCmsValidationIssue"
     ApiCommunityMemberMinimal:
       type: object
       required:
@@ -15885,65 +15944,6 @@ components:
         published_at:
           type: integer
           format: int64
-    ApiProfileCmsValidationIssue:
-      type: object
-      required:
-        - severity
-        - code
-        - message
-        - path
-      properties:
-        severity:
-          type: string
-          enum:
-            - error
-            - warning
-            - note
-        code:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        page_id:
-          type: string
-        block_id:
-          type: string
-        suggested_fix:
-          type: string
-    ApiProfileCmsValidationResult:
-      type: object
-      required:
-        - schema
-        - valid
-        - checked_at
-        - issues
-      properties:
-        schema:
-          type: string
-          enum:
-            - 6529.cms.validation_result.v1
-        valid:
-          type: boolean
-        checked_at:
-          type: string
-        validator:
-          type: string
-        validator_version:
-          type: string
-        target:
-          type: object
-          properties:
-            package_hash:
-              type: string
-            draft_id:
-              type: string
-            package_id:
-              type: string
-        issues:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiProfileCmsValidationIssue"
     ApiProfileCmsWalletGalleryAsset:
       type: object
       required:
