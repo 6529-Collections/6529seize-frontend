@@ -24,6 +24,9 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
   default: () => false,
 }));
+jest.mock("@/hooks/usePrefetchWaveData", () => ({
+  usePrefetchWaveData: () => jest.fn(),
+}));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: { handle: "alice" } }),
 }));
@@ -41,6 +44,14 @@ jest.mock(
 jest.mock(
   "@/components/brain/left-sidebar/waves/WavesFilterToggle",
   () => () => <div data-testid="waves-filter-toggle" />
+);
+jest.mock(
+  "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar",
+  () => ({
+    WaveAvatar: (props: { readonly wave: { readonly id: string } }) => (
+      <div data-testid={`preview-avatar-${props.wave.id}`} />
+    ),
+  })
 );
 jest.mock("react-tooltip", () => ({
   Tooltip: () => null,
@@ -66,7 +77,11 @@ const sentinel = document.createElement("div");
 
 const baseWaves = [
   createMockMinimalWave({ id: "a1" }),
-  createMockMinimalWave({ id: "h1", sidebarSection: "highly-rated" }),
+  createMockMinimalWave({
+    id: "h1",
+    name: "Highly Rated One",
+    sidebarSection: "highly-rated",
+  }),
   createMockMinimalWave({ id: "p1", isPinned: true }),
   createMockMinimalWave({ id: "f1", isFollowing: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
@@ -121,7 +136,7 @@ jest.mock(
   )
 );
 
-it("renders announcement, highly rated, pinned, following, and all sections without double rendering", () => {
+it("renders fitting highly rated waves as an unboxed preview strip without an expand control", () => {
   const sentinelRef = React.createRef<HTMLDivElement>();
 
   render(
@@ -140,21 +155,127 @@ it("renders announcement, highly rated, pinned, following, and all sections with
   );
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+  expect(screen.getByText("Highly Rated")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", {
+      name: "Expand Highly Rated, 1 wave",
+    })
+  ).toBeNull();
+  expect(
+    screen.getByRole("link", { name: "Open Highly Rated One" })
+  ).toBeInTheDocument();
+  expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Following waves")).toBeInTheDocument();
   expect(
     screen.getByLabelText("All quality-ranked waves list")
   ).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
-  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
+  expect(screen.queryByTestId("wave-h1")).toBeNull();
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
   expect(
     screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
-  ).toEqual(["wave-a1", "wave-h1", "wave-p1", "wave-f1", "wave-r1"]);
+  ).toEqual(["wave-a1", "wave-p1", "wave-f1", "wave-r1"]);
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
+});
+
+it("caps highly rated previews at ten without rendering an overflow control", () => {
+  const waves = Array.from({ length: 11 }, (_, index) =>
+    createMockMinimalWave({
+      id: `h${index + 1}`,
+      name: `Highly Rated ${index + 1}`,
+      sidebarSection: "highly-rated",
+    })
+  );
+
+  render(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+
+  expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
+  expect(screen.getByTestId("preview-avatar-h10")).toBeInTheDocument();
+  expect(screen.queryByTestId("preview-avatar-h11")).toBeNull();
+  expect(
+    screen.queryByRole("button", {
+      name: /more Highly Rated/,
+    })
+  ).toBeNull();
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByTestId("wave-h11")).toBeNull();
+});
+
+it("keeps an active loaded all-wave visible in the capped preview strip", () => {
+  const activeWave = createMockMinimalWave({
+    id: "r11",
+    name: "Active Ranked Eleven",
+  });
+  const waves = [
+    ...Array.from({ length: 10 }, (_, index) =>
+      createMockMinimalWave({
+        id: `h${index + 1}`,
+        name: `Highly Rated ${index + 1}`,
+        sidebarSection: "highly-rated",
+      })
+    ),
+    activeWave,
+  ];
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: activeWave.id, parentWaveId: null, set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+
+  render(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+
+  expect(screen.getByTestId("preview-avatar-r11")).toBeInTheDocument();
+  expect(screen.queryByTestId("preview-avatar-h10")).toBeNull();
+  expect(
+    screen.getByRole("link", { name: "Open Active Ranked Eleven" })
+  ).toBeInTheDocument();
+});
+
+it("keeps the active highly rated wave visible in the preview strip", () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "h1", set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+
+  render(
+    <WebUnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+
+  expect(
+    screen.getByRole("link", { name: "Open Highly Rated One" })
+  ).toBeInTheDocument();
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByTestId("wave-h1")).toBeNull();
 });
 
 it("feeds direct messages to virtualization as one flat list", () => {
@@ -427,6 +548,7 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
         onHover={jest.fn()}
         scrollContainerRef={scrollRef}
         sentinelRef={sentinelRef}
+        hideHeaders
       />
     );
 
@@ -441,6 +563,7 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
         onHover={jest.fn()}
         scrollContainerRef={scrollRef}
         sentinelRef={sentinelRef}
+        hideHeaders
       />
     );
 

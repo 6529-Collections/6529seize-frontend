@@ -173,8 +173,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.rep": "REP",
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
-  "suggested.description":
-    "Categories with the most profile REP activity.",
+  "suggested.description": "Categories with the most profile REP activity.",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -339,6 +338,11 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Highly Rated",
+  "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
+  "highlyRatedPreviewOpenAriaLabel.one": "Open {waveName}, {count} new message",
+  "highlyRatedPreviewOpenAriaLabel.other":
+    "Open {waveName}, {count} new messages",
+  highlyRatedPreviewScore: "Score {score}",
   pinned: "Pinned",
   following: "Following",
   all: "All",
@@ -358,6 +362,15 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
   "postsCount.one": "{count} Post",
   "postsCount.other": "{count} Posts",
+} as const);
+
+const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
+  coverAlt: "{waveName} cover",
+  "dropsCount.one": "{timeAgo} · {count} drop",
+  "dropsCount.other": "{timeAgo} · {count} drops",
+  noDropsYet: "No drops yet",
+  viewAriaLabel: "View wave {waveName}",
+  viewWithScoreAriaLabel: "View wave {waveName}. {scoreSummary}",
 } as const);
 
 const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
@@ -973,6 +986,7 @@ export const EN_US_MESSAGES = {
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
   ...WAVE_REP_ACTION_MESSAGES,
