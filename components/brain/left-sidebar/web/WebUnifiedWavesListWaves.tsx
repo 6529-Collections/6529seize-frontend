@@ -4,17 +4,18 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { useCallback, useId, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
 import {
+  buildHighlyRatedWavePreviewItems,
   HighlyRatedWavesToggle,
-  useHighlyRatedWavesExpandedPreference,
 } from "../waves/HighlyRatedWavesToggle";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import SectionHeader from "../waves/SectionHeader";
@@ -28,6 +29,7 @@ import {
   type SidebarWaveTreeRow,
 } from "@/hooks/useSidebarWaveTree";
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import {
   groupSidebarWaves,
   isValidSidebarWave,
@@ -288,14 +290,17 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   sentinelRef,
 }) => {
   const listContainerRef = useRef<HTMLDivElement>(null);
-  const highlyRatedSectionId = useId();
   const { connectedProfile } = useAuth();
   const { openWave, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
+  const prefetchWaveData = usePrefetchWaveData();
   const seizeSettings = useSeizeSettingsOptional();
   const { activeWave, waves: streamWaves } = useMyStream();
-  const [isHighlyRatedExpanded, setIsHighlyRatedExpanded] =
-    useHighlyRatedWavesExpandedPreference();
+  const {
+    id: activeWaveId,
+    parentWaveId: activeParentWaveId,
+    set: setActiveWave,
+  } = activeWave;
   const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
     waves,
     activeWaveId: activeWave.id,
@@ -372,21 +377,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const hasFollowingRows = animatedFollowingRows.length > 0;
   const hasAllRows = animatedAllRows.length > 0;
-  const hasActiveHighlyRatedRow = highlyRatedRows.some((row) => {
-    const activeParentWaveId = activeWave.parentWaveId;
-
-    return (
-      row.wave.id === activeWave.id ||
-      (typeof activeParentWaveId === "string" &&
-        row.wave.id === activeParentWaveId)
-    );
-  });
-  const isHighlyRatedSectionExpanded =
-    isHighlyRatedExpanded || hasActiveHighlyRatedRow;
   const shouldUseHighlyRatedToggle = !hideHeaders && !isCollapsed;
   const shouldShowHighlyRatedRows =
-    hasHighlyRatedRows &&
-    (!shouldUseHighlyRatedToggle || isHighlyRatedSectionExpanded);
+    hasHighlyRatedRows && !shouldUseHighlyRatedToggle;
   const virtualizedRows = hasAllRows ? animatedAllRows : animatedFollowingRows;
   const staticFollowingRows = hasAllRows ? animatedFollowingRows : [];
   const hasVirtualizedFollowingRows = !hasAllRows && hasFollowingRows;
@@ -407,9 +400,59 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight,
     [rowHeight]
   );
-  const handleHighlyRatedToggle = useCallback(() => {
-    setIsHighlyRatedExpanded(!isHighlyRatedExpanded);
-  }, [isHighlyRatedExpanded, setIsHighlyRatedExpanded]);
+  const handleHighlyRatedPreviewHover = useCallback(
+    (waveId: string) => {
+      if (waveId === activeWaveId) {
+        return;
+      }
+
+      onHover(waveId);
+      prefetchWaveData(waveId);
+    },
+    [activeWaveId, onHover, prefetchWaveData]
+  );
+  const getHighlyRatedPreviewHref = useCallback(
+    (wave: MinimalWave) => {
+      const isDirectMessage = basePath === "/messages";
+
+      if (activeWaveId === wave.id) {
+        return basePath;
+      }
+
+      return getWaveRoute({
+        waveId: wave.id,
+        extraParams:
+          typeof wave.firstUnreadDropSerialNo === "number"
+            ? { divider: String(wave.firstUnreadDropSerialNo) }
+            : undefined,
+        isDirectMessage,
+        isApp: false,
+      });
+    },
+    [activeWaveId, basePath]
+  );
+  const highlyRatedPreviewItems = useMemo(
+    () =>
+      buildHighlyRatedWavePreviewItems({
+        activeParentWaveId,
+        activeWaveId,
+        getHref: getHighlyRatedPreviewHref,
+        handleHover: handleHighlyRatedPreviewHover,
+        hasTouchScreen: isTouchDevice,
+        isDirectMessage: basePath === "/messages",
+        setActiveWave,
+        waves: highlyRatedWaves,
+      }),
+    [
+      activeParentWaveId,
+      activeWaveId,
+      getHighlyRatedPreviewHref,
+      handleHighlyRatedPreviewHover,
+      highlyRatedWaves,
+      isTouchDevice,
+      setActiveWave,
+    ]
+  );
 
   const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
     items: virtualizedRows,
@@ -495,13 +538,15 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           {hasHighlyRatedRows && (
             <>
               {shouldUseHighlyRatedToggle ? (
-                <HighlyRatedWavesToggle
-                  controlsId={highlyRatedSectionId}
-                  count={highlyRatedWaves.length}
-                  isExpanded={isHighlyRatedSectionExpanded}
-                  onToggle={handleHighlyRatedToggle}
-                  paddingClassName="tw-px-5"
-                />
+                <>
+                  <SidebarCategoryLabel
+                    label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                  />
+                  <HighlyRatedWavesToggle
+                    paddingClassName="tw-px-5"
+                    previewItems={highlyRatedPreviewItems}
+                  />
+                </>
               ) : (
                 !hideHeaders &&
                 !isCollapsed && (
@@ -512,7 +557,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               )}
               {shouldShowHighlyRatedRows && (
                 <SidebarWaveRowsSection
-                  id={highlyRatedSectionId}
                   ariaLabel={t(
                     SIDEBAR_LOCALE,
                     "waves.sidebar.highlyRatedAriaLabel"

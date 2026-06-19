@@ -24,6 +24,9 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
   default: () => false,
 }));
+jest.mock("@/hooks/usePrefetchWaveData", () => ({
+  usePrefetchWaveData: () => jest.fn(),
+}));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: { handle: "alice" } }),
 }));
@@ -41,6 +44,14 @@ jest.mock(
 jest.mock(
   "@/components/brain/left-sidebar/waves/WavesFilterToggle",
   () => () => <div data-testid="waves-filter-toggle" />
+);
+jest.mock(
+  "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar",
+  () => ({
+    WaveAvatar: (props: any) => (
+      <div data-testid={`preview-avatar-${props.wave.id}`} />
+    ),
+  })
 );
 jest.mock("react-tooltip", () => ({
   Tooltip: () => null,
@@ -66,7 +77,11 @@ const sentinel = document.createElement("div");
 
 const baseWaves = [
   createMockMinimalWave({ id: "a1" }),
-  createMockMinimalWave({ id: "h1", sidebarSection: "highly-rated" }),
+  createMockMinimalWave({
+    id: "h1",
+    name: "Highly Rated One",
+    sidebarSection: "highly-rated",
+  }),
   createMockMinimalWave({ id: "p1", isPinned: true }),
   createMockMinimalWave({ id: "f1", isFollowing: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
@@ -121,7 +136,7 @@ jest.mock(
   )
 );
 
-it("renders highly rated waves collapsed by default and expands them from the section control", () => {
+it("renders fitting highly rated waves as an unboxed preview strip without an expand control", () => {
   const sentinelRef = React.createRef<HTMLDivElement>();
 
   render(
@@ -140,11 +155,16 @@ it("renders highly rated waves collapsed by default and expands them from the se
   );
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  const highlyRatedToggle = screen.getByRole("button", {
-    name: "Expand Highly Rated, 1 wave",
-  });
-  expect(highlyRatedToggle).toHaveTextContent("Highly Rated 1 wave");
-  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "false");
+  expect(screen.getByText("Highly Rated")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", {
+      name: "Expand Highly Rated, 1 wave",
+    })
+  ).toBeNull();
+  expect(
+    screen.getByRole("link", { name: "Open Highly Rated One" })
+  ).toBeInTheDocument();
+  expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
   expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Following waves")).toBeInTheDocument();
@@ -159,57 +179,17 @@ it("renders highly rated waves collapsed by default and expands them from the se
   expect(
     screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
   ).toEqual(["wave-a1", "wave-p1", "wave-f1", "wave-r1"]);
-
-  fireEvent.click(highlyRatedToggle);
-
-  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "true");
-  expect(
-    screen.getByRole("button", {
-      name: "Collapse Highly Rated, 1 wave",
-    })
-  ).toBeInTheDocument();
-  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
-  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
-  expect(
-    screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
-  ).toEqual(["wave-a1", "wave-h1", "wave-p1", "wave-f1", "wave-r1"]);
-
-  fireEvent.click(highlyRatedToggle);
-
-  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "false");
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
 });
 
-it("shows the collapsed highly rated count and remembers expansion preference", () => {
-  const waves = [
-    createMockMinimalWave({ id: "h1", sidebarSection: "highly-rated" }),
-    createMockMinimalWave({ id: "h2", sidebarSection: "highly-rated" }),
-    createMockMinimalWave({ id: "h3", sidebarSection: "highly-rated" }),
-  ];
-  const sentinelRef = React.createRef<HTMLDivElement>();
-  const { unmount } = render(
-    <WebUnifiedWavesListWaves
-      waves={waves}
-      onHover={jest.fn()}
-      scrollContainerRef={scrollRef}
-      sentinelRef={sentinelRef}
-    />
+it("caps highly rated previews at ten without rendering an overflow control", () => {
+  const waves = Array.from({ length: 11 }, (_, index) =>
+    createMockMinimalWave({
+      id: `h${index + 1}`,
+      name: `Highly Rated ${index + 1}`,
+      sidebarSection: "highly-rated",
+    })
   );
-
-  const highlyRatedToggle = screen.getByRole("button", {
-    name: "Expand Highly Rated, 3 waves",
-  });
-  expect(highlyRatedToggle).toHaveTextContent("Highly Rated 3 waves");
-  expect(screen.queryByTestId("wave-h1")).toBeNull();
-
-  fireEvent.click(highlyRatedToggle);
-
-  expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
-  expect(screen.getByTestId("wave-h2")).toBeInTheDocument();
-  expect(screen.getByTestId("wave-h3")).toBeInTheDocument();
-
-  unmount();
 
   render(
     <WebUnifiedWavesListWaves
@@ -220,15 +200,19 @@ it("shows the collapsed highly rated count and remembers expansion preference", 
     />
   );
 
+  expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
+  expect(screen.getByTestId("preview-avatar-h10")).toBeInTheDocument();
+  expect(screen.queryByTestId("preview-avatar-h11")).toBeNull();
   expect(
-    screen.getByRole("button", {
-      name: "Collapse Highly Rated, 3 waves",
+    screen.queryByRole("button", {
+      name: /more Highly Rated/,
     })
-  ).toHaveAttribute("aria-expanded", "true");
-  expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
+  ).toBeNull();
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByTestId("wave-h11")).toBeNull();
 });
 
-it("keeps the active highly rated wave visible when the section preference is collapsed", () => {
+it("keeps the active highly rated wave visible in the preview strip", () => {
   mockUseMyStream.mockReturnValue({
     activeWave: { id: "h1", set: jest.fn() },
     waves: {
@@ -248,12 +232,10 @@ it("keeps the active highly rated wave visible when the section preference is co
   );
 
   expect(
-    screen.getByRole("button", {
-      name: "Collapse Highly Rated, 1 wave",
-    })
-  ).toHaveAttribute("aria-expanded", "true");
-  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
-  expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
+    screen.getByRole("link", { name: "Open Highly Rated One" })
+  ).toBeInTheDocument();
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByTestId("wave-h1")).toBeNull();
 });
 
 it("does not give special placement to official waves", () => {
@@ -498,14 +480,10 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
         onHover={jest.fn()}
         scrollContainerRef={scrollRef}
         sentinelRef={sentinelRef}
+        hideHeaders
       />
     );
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Expand Highly Rated, 1 wave",
-      })
-    );
     fireEvent.click(screen.getByTestId("toggle-highly-rated-parent"));
     expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
     expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
@@ -517,6 +495,7 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
         onHover={jest.fn()}
         scrollContainerRef={scrollRef}
         sentinelRef={sentinelRef}
+        hideHeaders
       />
     );
 

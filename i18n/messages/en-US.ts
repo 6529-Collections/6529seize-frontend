@@ -173,8 +173,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.rep": "REP",
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
-  "suggested.description":
-    "Categories with the most profile REP activity.",
+  "suggested.description": "Categories with the most profile REP activity.",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -339,12 +338,11 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Highly Rated",
-  "highlyRatedToggleLabel.one": "Highly Rated {count} wave",
-  "highlyRatedToggleLabel.other": "Highly Rated {count} waves",
-  "highlyRatedExpandAriaLabel.one": "Expand Highly Rated, {count} wave",
-  "highlyRatedExpandAriaLabel.other": "Expand Highly Rated, {count} waves",
-  "highlyRatedCollapseAriaLabel.one": "Collapse Highly Rated, {count} wave",
-  "highlyRatedCollapseAriaLabel.other": "Collapse Highly Rated, {count} waves",
+  "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
+  "highlyRatedPreviewOpenAriaLabel.one": "Open {waveName}, {count} new message",
+  "highlyRatedPreviewOpenAriaLabel.other":
+    "Open {waveName}, {count} new messages",
+  highlyRatedPreviewScore: "Score {score}",
   pinned: "Pinned",
   following: "Following",
   all: "All",
