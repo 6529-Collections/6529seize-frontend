@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
-import { useAuth } from "../../../auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
+import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 // Pure helper function for authentication state logic (testable)
-const checkConnectedIdentity = (connectedHandle: string | null | undefined, activeProfileProxy: unknown): boolean => {
+const checkConnectedIdentity = (
+  connectedHandle: string | null | undefined,
+  activeProfileProxy: unknown
+): boolean => {
   return !!connectedHandle && !activeProfileProxy;
 };
 
@@ -14,7 +19,7 @@ const checkConnectedIdentity = (connectedHandle: string | null | undefined, acti
  * Shows "All" and "Joined" options in a segmented control style.
  * Only renders when the user is authenticated with a connected identity (not using a proxy).
  * Uses localStorage to persist the toggle state across sessions.
- * 
+ *
  * @returns JSX element containing the button group toggle, or null if user is not authenticated or on error
  */
 const WavesFilterToggle = (): React.JSX.Element | null => {
@@ -34,11 +39,14 @@ const WavesFilterToggle = (): React.JSX.Element | null => {
 
   // Safe extraction with fallbacks - return early if hooks failed
   if (!followingHookResult) {
-    console.warn('[WavesFilterToggle] useShowFollowingWaves hook failed - component will not render', {
-      component: 'WavesFilterToggle',
-      error: 'hook_failure',
-      hook: 'useShowFollowingWaves'
-    });
+    console.warn(
+      "[WavesFilterToggle] useShowFollowingWaves hook failed - component will not render",
+      {
+        component: "WavesFilterToggle",
+        error: "hook_failure",
+        hook: "useShowFollowingWaves",
+      }
+    );
     return null;
   }
 
@@ -61,28 +69,36 @@ const WavesFilterToggle = (): React.JSX.Element | null => {
   // Render the button group toggle with error boundary for rendering issues
   try {
     return (
-      <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-8 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden tw-bg-iron-950">
+      <div
+        aria-label={t(DEFAULT_LOCALE, "waves.sidebar.filterAriaLabel")}
+        className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-8 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden tw-bg-iron-950"
+        role="group"
+      >
         <button
+          type="button"
+          aria-pressed={!following}
           className={getButtonClassName(!following)}
           onClick={() => setFollowing(false)}
         >
-          All
+          {t(DEFAULT_LOCALE, "waves.sidebar.filterAll")}
         </button>
         <button
+          type="button"
+          aria-pressed={following}
           className={getButtonClassName(following)}
           onClick={() => setFollowing(true)}
         >
-          Joined
+          {t(DEFAULT_LOCALE, "waves.sidebar.filterJoined")}
         </button>
       </div>
     );
   } catch (error) {
-    console.warn('[WavesFilterToggle] Rendering error occurred', {
-      component: 'WavesFilterToggle',
-      error: 'rendering_failure',
+    console.warn("[WavesFilterToggle] Rendering error occurred", {
+      component: "WavesFilterToggle",
+      error: "rendering_failure",
       errorMessage: error instanceof Error ? error.message : String(error),
       following,
-      connectedHandle: !!connectedHandle
+      connectedHandle: !!connectedHandle,
     });
     return null;
   }

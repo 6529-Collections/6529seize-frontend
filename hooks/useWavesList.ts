@@ -45,6 +45,8 @@ const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 const isExpectedRootSidebarWave = (wave: SidebarWave) =>
   wave.parentWaveId === null;
 
+const isJoinedWave = (wave: SidebarWave) => wave.subscribed;
+
 /**
  * Hook for managing and fetching waves list including pinned waves
  * @returns Wave list data and loading states
@@ -107,7 +109,7 @@ const useWavesList = () => {
       ? false
       : SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
-    enabled: true,
+    enabled: !following,
   });
   // Fetch quality-ranked waves for the broad discovery section and pagination.
   const {
@@ -131,7 +133,7 @@ const useWavesList = () => {
       ? false
       : SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
-    enabled: true,
+    enabled: !following,
   });
   // Fetch followed waves by latest post activity for the known-wave sidebar.
   const {
@@ -155,63 +157,54 @@ const useWavesList = () => {
     enabled: isConnectedIdentity,
   });
   const mainWaves = useMemo<SidebarWaveWithDiscoverySection[]>(
-    () => [
-      ...followedActivityWaves,
-      // Keep the highly-rated slice before the broader all-quality list:
-      // duplicate wave ids retain their first sidebarSection during merge.
-      ...highlyRatedWaves.slice(0, HIGHLY_RATED_WAVE_LIMIT).map(
-        (wave): SidebarWaveWithDiscoverySection => ({
-          ...wave,
-          sidebarSection: "highly-rated",
-        })
-      ),
-      ...allQualityWaves.map(
-        (wave): SidebarWaveWithDiscoverySection => ({
-          ...wave,
-          sidebarSection: "all",
-        })
-      ),
-    ],
-    [followedActivityWaves, highlyRatedWaves, allQualityWaves]
+    () => {
+      if (following) {
+        return followedActivityWaves;
+      }
+
+      return [
+        ...followedActivityWaves,
+        // Keep the highly-rated slice before the broader all-quality list:
+        // duplicate wave ids retain their first sidebarSection during merge.
+        ...highlyRatedWaves.slice(0, HIGHLY_RATED_WAVE_LIMIT).map(
+          (wave): SidebarWaveWithDiscoverySection => ({
+            ...wave,
+            sidebarSection: "highly-rated",
+          })
+        ),
+        ...allQualityWaves.map(
+          (wave): SidebarWaveWithDiscoverySection => ({
+            ...wave,
+            sidebarSection: "all",
+          })
+        ),
+      ];
+    },
+    [following, followedActivityWaves, highlyRatedWaves, allQualityWaves]
   );
   const isMainWavesFetching =
-    isAllQualityWavesFetching ||
-    isHighlyRatedWavesFetching ||
+    (!following && (isAllQualityWavesFetching || isHighlyRatedWavesFetching)) ||
     isFollowedActivityWavesFetching;
   const isMainWavesFetchingNextPage =
-    isAllQualityWavesFetchingNextPage ||
-    (following && isFollowedActivityWavesFetchingNextPage);
+    following
+      ? isFollowedActivityWavesFetchingNextPage
+      : isAllQualityWavesFetchingNextPage;
   const hasMainWavesNextPage =
-    hasAllQualityWavesNextPage ||
-    (following && hasFollowedActivityWavesNextPage);
+    following ? hasFollowedActivityWavesNextPage : hasAllQualityWavesNextPage;
   const fetchNextMainWavesPage = useCallback(() => {
-    if (!following) {
-      return fetchNextAllQualityWavesPage();
-    }
-
-    const nextPageRequests = [];
-    if (hasFollowedActivityWavesNextPage) {
-      nextPageRequests.push(fetchNextFollowedActivityWavesPage());
-    }
-    if (hasAllQualityWavesNextPage) {
-      nextPageRequests.push(fetchNextAllQualityWavesPage());
-    }
-
-    return Promise.all(nextPageRequests);
+    return following
+      ? fetchNextFollowedActivityWavesPage()
+      : fetchNextAllQualityWavesPage();
   }, [
     following,
     fetchNextAllQualityWavesPage,
     fetchNextFollowedActivityWavesPage,
-    hasAllQualityWavesNextPage,
-    hasFollowedActivityWavesNextPage,
   ]);
   const mainWavesStatus =
-    following && followedActivityWavesStatus === "error"
-      ? followedActivityWavesStatus
-      : allQualityWavesStatus;
+    following ? followedActivityWavesStatus : allQualityWavesStatus;
   const mainWavesRefetch = useCallback(() => {
     if (following) {
-      void followedActivityWavesRefetch();
+      return followedActivityWavesRefetch();
     }
 
     return allQualityWavesRefetch();
@@ -219,9 +212,12 @@ const useWavesList = () => {
   const trackedAnnouncementWave = useMemo(
     () =>
       mainWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
-      serverPinnedWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
+      serverPinnedWaves.find(
+        (wave) =>
+          isAnnouncementsWave(wave.id) && (!following || isJoinedWave(wave))
+      ) ??
       null,
-    [mainWaves, serverPinnedWaves, isAnnouncementsWave]
+    [following, mainWaves, serverPinnedWaves, isAnnouncementsWave]
   );
   const shouldFetchAnnouncementWave = Boolean(
     announcementsWaveId && !trackedAnnouncementWave
@@ -288,9 +284,10 @@ const useWavesList = () => {
       (wave) =>
         !mainWaveIds.has(wave.id) &&
         isExpectedRootSidebarWave(wave) &&
-        !isAnnouncementsWave(wave.id)
+        !isAnnouncementsWave(wave.id) &&
+        (!following || isJoinedWave(wave))
     );
-  }, [serverPinnedWaves, mainWaveIds, isAnnouncementsWave]);
+  }, [following, serverPinnedWaves, mainWaveIds, isAnnouncementsWave]);
 
   // Collect ALL pinned waves (both from mainWaves and server-provided)
   const allPinnedWaves = useMemo(() => {
@@ -323,7 +320,8 @@ const useWavesList = () => {
       if (
         wave.isDirectMessage ||
         !isExpectedRootSidebarWave(wave) ||
-        isAnnouncementsWave(wave.id)
+        isAnnouncementsWave(wave.id) ||
+        (following && !isJoinedWave(wave))
       ) {
         return;
       }
@@ -370,7 +368,7 @@ const useWavesList = () => {
       ...backendOrderedScoreWaves,
     ];
 
-    if (announcementWave) {
+    if (announcementWave && (!following || isJoinedWave(announcementWave))) {
       allWavesArray.push({
         ...announcementWave,
         isPinned: pinnedWavesSet.has(announcementWave.id),
@@ -385,6 +383,7 @@ const useWavesList = () => {
     separatelyFetchedPinnedWaves,
     pinnedIds,
     announcementWave,
+    following,
     isAnnouncementsWave,
   ]);
 
@@ -468,8 +467,11 @@ const useWavesList = () => {
 
   // Derived data should come directly from memoized inputs
   const allWaves = useMemo(
-    () => [...combinedWaves, ...subwaves],
-    [combinedWaves, subwaves]
+    () => [
+      ...combinedWaves,
+      ...(following ? subwaves.filter(isJoinedWave) : subwaves),
+    ],
+    [combinedWaves, following, subwaves]
   );
 
   // New drops counting logic has been removed and will be managed by context
