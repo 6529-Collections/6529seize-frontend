@@ -106,7 +106,7 @@ function combineChunks(
     body.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return body.buffer as ArrayBuffer;
+  return body.buffer;
 }
 
 async function readStreamWithLimit(

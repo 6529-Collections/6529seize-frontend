@@ -22,9 +22,8 @@ export function isProfileCmsAssetProxyAllowedUrl(value: string): boolean {
   }
 
   const hostname = parsed.hostname.toLowerCase();
-  if (
-    !PROFILE_CMS_ASSET_PROXY_ALLOWED_HOSTS.some((host) => hostname === host)
-  ) {
+  const allowedHosts: readonly string[] = PROFILE_CMS_ASSET_PROXY_ALLOWED_HOSTS;
+  if (!allowedHosts.includes(hostname)) {
     return false;
   }
 

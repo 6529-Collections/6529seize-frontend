@@ -69,13 +69,17 @@ class MockNextResponse {
   }
 }
 
+function MockNextRequest() {
+  return undefined;
+}
+
 Object.defineProperty(globalThis, "Headers", {
   configurable: true,
   value: MockHeaders,
 });
 
 jest.mock("next/server", () => ({
-  NextRequest: class {},
+  NextRequest: MockNextRequest,
   NextResponse: MockNextResponse,
 }));
 
