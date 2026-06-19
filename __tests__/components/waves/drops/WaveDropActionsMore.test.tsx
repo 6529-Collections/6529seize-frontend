@@ -139,7 +139,7 @@ describe("WaveDropActionsMore", () => {
       screen.getByRole("button", { name: "Restore link previews" })
     );
 
-    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onToggle).toHaveBeenCalledWith(false);
   });
 
   it("does not show a desktop download action for media", async () => {

@@ -1875,8 +1875,9 @@ paths:
         - Drops
       summary: Toggle hide link preview for a drop
       description: >-
-        Toggles (flips) hide_link_preview for a drop. Only the author can call
-        this endpoint.
+        Toggles (flips) hide_link_preview for a drop when no body is provided,
+        or sets it to the provided value. Only the author can call this
+        endpoint.
       operationId: toggleHideLinkPreview
       parameters:
         - name: dropId
@@ -1884,6 +1885,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiToggleHideLinkPreviewRequest"
       responses:
         "200":
           description: successful operation
@@ -16395,6 +16402,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTdhEdition"
+    ApiToggleHideLinkPreviewRequest:
+      type: object
+      properties:
+        hide_link_preview:
+          type: boolean
+          description: >-
+            Desired final hidden-preview state. Omit to keep legacy toggle
+            behavior.
     ApiTokenTdh:
       type: object
       properties:
