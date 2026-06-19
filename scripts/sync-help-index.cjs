@@ -5,6 +5,8 @@ const repoRoot = path.resolve(__dirname, "..");
 const appDir = path.join(repoRoot, "app");
 const sourcePath = path.join(repoRoot, "ops", "help", "help-index.json");
 const outputPath = path.join(repoRoot, "public", "help-index.json");
+// Keep V1 broad enough that the help bot does not regress into a few canned answers.
+const MIN_HELP_RECORDS = 25;
 const REQUIRED_RECORD_IDS = [
   "network.tdh",
   "network.xtdh",
@@ -72,13 +74,13 @@ function routePatternFromPage(pagePath) {
     .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
     .map((segment) => {
       if (segment.startsWith("[[...") && segment.endsWith("]]")) {
-        return { kind: "optionalCatchAll" };
+        return { kind: "optionalCatchAll", value: segment.slice(5, -2) };
       }
       if (segment.startsWith("[...") && segment.endsWith("]")) {
-        return { kind: "catchAll" };
+        return { kind: "catchAll", value: segment.slice(4, -1) };
       }
       if (segment.startsWith("[") && segment.endsWith("]")) {
-        return { kind: "dynamic" };
+        return { kind: "dynamic", value: segment.slice(1, -1) };
       }
       return { kind: "static", value: segment };
     });
@@ -105,6 +107,18 @@ function isPlaceholderSegment(segment) {
   return segment.startsWith("{") && segment.endsWith("}");
 }
 
+function placeholderName(segment) {
+  return isPlaceholderSegment(segment) ? segment.slice(1, -1) : null;
+}
+
+function pathSegmentMatchesDynamic(pathSegment, routeSegment, usesPlaceholder) {
+  const name = placeholderName(pathSegment);
+  if (name) {
+    return name === routeSegment.value;
+  }
+  return !usesPlaceholder;
+}
+
 function pathMatchesRoute(rawPath, routePattern) {
   const cleanedPath = stripPathDecorators(rawPath);
   const pathSegments =
@@ -123,6 +137,12 @@ function pathMatchesRoute(rawPath, routePattern) {
     if (!pathSegment) {
       return false;
     }
+    if (
+      routeSegment.kind === "dynamic" &&
+      !pathSegmentMatchesDynamic(pathSegment, routeSegment, usesPlaceholder)
+    ) {
+      return false;
+    }
     if (routeSegment.kind === "static" && routeSegment.value !== pathSegment) {
       return false;
     }
@@ -130,6 +150,21 @@ function pathMatchesRoute(rawPath, routePattern) {
   }
 
   return pathIndex === pathSegments.length;
+}
+
+function assertRouteMatchingInvariants(routePatterns) {
+  const examples = [
+    { path: "/{user}/subscriptions", matches: true },
+    { path: "/{user}/subscriptionz", matches: false },
+  ];
+  for (const example of examples) {
+    const matches = routePatterns.some((routePattern) =>
+      pathMatchesRoute(example.path, routePattern)
+    );
+    if (matches !== example.matches) {
+      fail(`Route matcher invariant failed for ${example.path}`);
+    }
+  }
 }
 
 function validateInternalPath(value, field, recordId, routePatterns) {
@@ -200,11 +235,12 @@ function validateIndex(index) {
   requireString(index.generated_at, "generated_at", "index");
   requireString(index.commit_sha, "commit_sha", "index");
   requireString(index.base_url, "base_url", "index");
-  if (!Array.isArray(index.records) || index.records.length < 25) {
-    fail("records must contain at least 25 records");
+  if (!Array.isArray(index.records) || index.records.length < MIN_HELP_RECORDS) {
+    fail(`records must contain at least ${MIN_HELP_RECORDS} records`);
   }
   const ids = new Set();
   const routePatterns = createRoutePatterns();
+  assertRouteMatchingInvariants(routePatterns);
   index.records.forEach((record) => validateRecord(record, ids, routePatterns));
   for (const requiredId of REQUIRED_RECORD_IDS) {
     if (!ids.has(requiredId)) {
