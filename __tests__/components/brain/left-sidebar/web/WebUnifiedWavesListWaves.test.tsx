@@ -177,6 +177,25 @@ it("does not give special placement to official waves", () => {
   expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
 });
 
+it("labels following waves when they are the virtualized section", () => {
+  render(
+    <WebUnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({ id: "p1", isPinned: true }),
+        createMockMinimalWave({ id: "f1", isFollowing: true }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+
+  expect(screen.getByText("Pinned")).toBeInTheDocument();
+  expect(screen.getByText("Following")).toBeInTheDocument();
+  expect(screen.getByLabelText("Following waves list")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
+});
+
 it("passes pin controls through for pinned announcement waves", () => {
   render(
     <WebUnifiedWavesListWaves
