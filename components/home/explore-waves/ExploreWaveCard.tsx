@@ -9,7 +9,6 @@ import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { SidebarWave } from "@/types/waves.types";
-import { getWaveTrustSummaryLabel } from "@/components/waves/WaveTrustSignals";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -20,9 +19,17 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 interface ExploreWaveCardProps {
   readonly wave: SidebarWave;
+}
+
+interface ExploreWaveMetric {
+  readonly ariaLabel: string;
+  readonly icon: ReactNode;
+  readonly toneClasses: string;
+  readonly value: string;
 }
 
 const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
@@ -126,6 +133,95 @@ const getRepToneClasses = (value: number | null | undefined): string => {
     : "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300";
 };
 
+const getRepAriaLabel = (wave: SidebarWave, repScore: string): string => {
+  const repAccessibleValue = formatRepAccessibleValue(wave.waveRep?.total_rep);
+
+  if (repAccessibleValue !== null) {
+    return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repAriaRaw", {
+      value: repAccessibleValue,
+    });
+  }
+
+  return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repAriaScore", {
+    repScore,
+  });
+};
+
+const getExploreWaveMetrics = (wave: SidebarWave): ExploreWaveMetric[] => {
+  const visibilityScore = formatScore(wave.waveScore?.visibility_score);
+  const hotnessScore = formatScore(wave.waveScore?.hotness_score);
+  const repScore =
+    wave.waveRep === null
+      ? formatScore(wave.waveScore?.rep_sort_score)
+      : formatRep(wave.waveRep.total_rep);
+  const metrics: ExploreWaveMetric[] = [];
+
+  if (visibilityScore !== null) {
+    metrics.push({
+      ariaLabel: t(
+        EXPLORE_WAVE_CARD_LOCALE,
+        "waves.score.details.visibilityAria",
+        { visibilityScore }
+      ),
+      icon: (
+        <ShieldCheckIcon
+          className={METRIC_ICON_CLASSES}
+          strokeWidth={1.5}
+          aria-hidden="true"
+        />
+      ),
+      toneClasses: getVisibilityToneClasses(wave.waveScore?.visibility_score),
+      value: visibilityScore,
+    });
+  }
+
+  if (hotnessScore !== null) {
+    metrics.push({
+      ariaLabel: t(
+        EXPLORE_WAVE_CARD_LOCALE,
+        "waves.score.details.hotnessAria",
+        { hotnessScore }
+      ),
+      icon: (
+        <FireIcon
+          className={METRIC_ICON_CLASSES}
+          strokeWidth={1.5}
+          aria-hidden="true"
+        />
+      ),
+      toneClasses: "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
+      value: hotnessScore,
+    });
+  }
+
+  if (repScore !== null) {
+    metrics.push({
+      ariaLabel: getRepAriaLabel(wave, repScore),
+      icon: (
+        <ScaleIcon
+          className={METRIC_ICON_CLASSES}
+          strokeWidth={1.5}
+          aria-hidden="true"
+        />
+      ),
+      toneClasses: getRepToneClasses(wave.waveRep?.total_rep),
+      value: repScore,
+    });
+  }
+
+  return metrics;
+};
+
+const getMetricsSummaryLabel = (
+  metrics: readonly ExploreWaveMetric[]
+): string | null => {
+  if (metrics.length === 0) {
+    return null;
+  }
+
+  return metrics.map((metric) => metric.ariaLabel).join(". ");
+};
+
 export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const waveHref = getWaveRoute({
     waveId: wave.id,
@@ -158,10 +254,8 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         }
       )
     : null;
-  const scoreSummaryLabel = getWaveTrustSummaryLabel({
-    waveRep: wave.waveRep,
-    waveScore: wave.waveScore,
-  });
+  const metrics = getExploreWaveMetrics(wave);
+  const scoreSummaryLabel = getMetricsSummaryLabel(metrics);
   const cardAriaLabel =
     scoreSummaryLabel === null
       ? t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.viewAriaLabel", {
@@ -205,7 +299,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         <span className="tw-m-0 tw-line-clamp-1 tw-break-words tw-text-sm tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80 sm:tw-text-base">
           {wave.name}
         </span>
-        <ExploreWaveCompactMetrics wave={wave} />
+        <ExploreWaveCompactMetrics metrics={metrics} />
 
         {descriptionPreview && (
           <MessagePreviewContent previewContent={descriptionPreview} />
@@ -231,84 +325,11 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   );
 }
 
-function ExploreWaveCompactMetrics({ wave }: { readonly wave: SidebarWave }) {
-  const visibilityScore = formatScore(wave.waveScore?.visibility_score);
-  const hotnessScore = formatScore(wave.waveScore?.hotness_score);
-  const repScore =
-    wave.waveRep === null
-      ? formatScore(wave.waveScore?.rep_sort_score)
-      : formatRep(wave.waveRep.total_rep);
-  const repAccessibleValue = formatRepAccessibleValue(wave.waveRep?.total_rep);
-  let repAriaLabel: string | null = null;
-  if (repScore !== null) {
-    repAriaLabel =
-      repAccessibleValue !== null
-        ? t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repAriaRaw", {
-            value: repAccessibleValue,
-          })
-        : t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repAriaScore", {
-            repScore,
-          });
-  }
-
-  const metrics = [
-    visibilityScore === null
-      ? null
-      : {
-          ariaLabel: t(
-            EXPLORE_WAVE_CARD_LOCALE,
-            "waves.score.details.visibilityAria",
-            { visibilityScore }
-          ),
-          icon: (
-            <ShieldCheckIcon
-              className={METRIC_ICON_CLASSES}
-              strokeWidth={1.5}
-              aria-hidden="true"
-            />
-          ),
-          toneClasses: getVisibilityToneClasses(
-            wave.waveScore?.visibility_score
-          ),
-          value: visibilityScore,
-        },
-    hotnessScore === null
-      ? null
-      : {
-          ariaLabel: t(
-            EXPLORE_WAVE_CARD_LOCALE,
-            "waves.score.details.hotnessAria",
-            {
-              hotnessScore,
-            }
-          ),
-          icon: (
-            <FireIcon
-              className={METRIC_ICON_CLASSES}
-              strokeWidth={1.5}
-              aria-hidden="true"
-            />
-          ),
-          toneClasses:
-            "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
-          value: hotnessScore,
-        },
-    repScore === null
-      ? null
-      : {
-          ariaLabel: repAriaLabel ?? "",
-          icon: (
-            <ScaleIcon
-              className={METRIC_ICON_CLASSES}
-              strokeWidth={1.5}
-              aria-hidden="true"
-            />
-          ),
-          toneClasses: getRepToneClasses(wave.waveRep?.total_rep),
-          value: repScore,
-        },
-  ].filter((metric) => metric !== null);
-
+function ExploreWaveCompactMetrics({
+  metrics,
+}: {
+  readonly metrics: readonly ExploreWaveMetric[];
+}) {
   if (metrics.length === 0) {
     return null;
   }

@@ -144,9 +144,44 @@ describe("ExploreWaveCard", () => {
 
     expect(
       screen.getByRole("link", {
-        name: /View wave Wave One\. Wave score 96\./,
+        name: /View wave Wave One\. Visibility score 96 out of 100\./,
       })
-    ).toHaveAttribute("aria-label", expect.stringContaining("Hotness 98"));
+    ).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("Wave REP positive 1,250")
+    );
+  });
+
+  it("shows REP score fallback when raw wave REP is missing", () => {
+    render(
+      <ExploreWaveCard
+        wave={createWave({
+          waveRep: null,
+          waveScore: {
+            visibility_score: 72,
+            quality_score: null,
+            hotness_score: null,
+            rep_sort_score: 76,
+          } as SidebarWave["waveScore"],
+        })}
+      />
+    );
+
+    expect(screen.getByText("72")).toBeInTheDocument();
+    expect(screen.getByText("76")).toBeInTheDocument();
+    expect(screen.queryByText("REP")).not.toBeInTheDocument();
+    expect(screen.getByText("76").closest("[aria-label]")).toHaveAttribute(
+      "aria-label",
+      "Wave REP score 76 out of 100"
+    );
+    expect(
+      screen.getByRole("link", {
+        name: /View wave Wave One\. Visibility score 72 out of 100\./,
+      })
+    ).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("Wave REP score 76 out of 100")
+    );
   });
 });
 
