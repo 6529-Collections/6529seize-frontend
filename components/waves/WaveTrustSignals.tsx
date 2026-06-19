@@ -445,6 +445,28 @@ const buildSummaryDetails = ({
   ];
 };
 
+export const getWaveTrustSummaryLabel = ({
+  waveRep,
+  waveScore,
+}: {
+  readonly waveRep?: ApiWaveRepSummary | null | undefined;
+  readonly waveScore?: ApiWaveScore | null | undefined;
+}): string | null => {
+  const visibilityScore = formatScore(waveScore?.visibility_score);
+
+  if (visibilityScore === null) {
+    return null;
+  }
+
+  return buildSummaryDetails({
+    visibilityScore,
+    qualityScore: formatScore(waveScore?.quality_score),
+    hotnessScore: formatScore(waveScore?.hotness_score),
+    repSortScore: formatScore(waveScore?.rep_sort_score),
+    waveRep,
+  }).join(". ");
+};
+
 const buildHotnessDetails = ({
   hotnessScore,
   qualityScore,
