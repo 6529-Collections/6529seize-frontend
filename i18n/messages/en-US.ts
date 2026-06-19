@@ -361,6 +361,8 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
 
 const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
   coverAlt: "{waveName} cover",
+  "dropsCount.one": "{timeAgo} · {count} drop",
+  "dropsCount.other": "{timeAgo} · {count} drops",
   noDropsYet: "No drops yet",
   viewAriaLabel: "View wave {waveName}",
   viewWithScoreAriaLabel: "View wave {waveName}. {scoreSummary}",

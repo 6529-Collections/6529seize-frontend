@@ -1078,3 +1078,12 @@
   and editorial report data (`dateLabel`, `publishedAt`, repo focus summaries,
   and markdown report bodies), which intentionally stays `en-US` until the
   About Tech shelf gets a full localization pass.
+- Recorded Discover/explore wave-card fallback debt while addressing PR #2782
+  bot feedback: `ExploreWaveCard` card copy, drops count text, image alt text,
+  link accessible names, and `WaveTrustSignals` score-summary accessible text
+  now use source-locale messages and locale-aware integer formatting, but the
+  surface still resolves through `DEFAULT_LOCALE`/`WAVE_TRUST_LOCALE` until the
+  active locale can be threaded through the Discover/home explore grids and
+  shared wave score chip. User impact: non-English users continue to see
+  English labels on this card surface. Follow-up owner: frontend i18n
+  migration workstream.

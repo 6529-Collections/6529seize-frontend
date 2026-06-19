@@ -13,6 +13,7 @@ import {
   getWaveTrustSummaryLabel,
   WaveTrustSignals,
 } from "@/components/waves/WaveTrustSignals";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image from "next/image";
@@ -23,6 +24,20 @@ interface ExploreWaveCardProps {
 }
 
 const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
+
+const getDropsCountMessageKey = (
+  count: number
+):
+  | "waves.explore.card.dropsCount.one"
+  | "waves.explore.card.dropsCount.other" => {
+  const pluralCategory = new Intl.PluralRules(EXPLORE_WAVE_CARD_LOCALE).select(
+    count
+  );
+
+  return pluralCategory === "one"
+    ? "waves.explore.card.dropsCount.one"
+    : "waves.explore.card.dropsCount.other";
+};
 
 export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const waveHref = getWaveRoute({
@@ -42,6 +57,20 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const lastMessageTime = wave.latestDropTimestamp;
   const hasDrops = lastMessageTime !== null;
   const descriptionPreview = getWavePreviewContent(wave);
+  const formattedDropsCount = formatInteger(
+    EXPLORE_WAVE_CARD_LOCALE,
+    wave.totalDropsCount
+  );
+  const dropsCountLabel = hasDrops
+    ? t(
+        EXPLORE_WAVE_CARD_LOCALE,
+        getDropsCountMessageKey(wave.totalDropsCount),
+        {
+          count: formattedDropsCount,
+          timeAgo: getTimeAgoShort(lastMessageTime),
+        }
+      )
+    : null;
   const scoreSummaryLabel = getWaveTrustSummaryLabel({
     waveRep: wave.waveRep,
     waveScore: wave.waveScore,
@@ -107,11 +136,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
               <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/60" />
               <span className="tw-relative tw-inline-flex tw-h-2 tw-w-2 tw-rounded-full tw-bg-success" />
             </span>
-            <span className="tw-text-iron-300">
-              {getTimeAgoShort(lastMessageTime)} ·{" "}
-              {wave.totalDropsCount.toLocaleString()}
-            </span>{" "}
-            drops
+            <span className="tw-text-iron-300">{dropsCountLabel}</span>
           </div>
         )}
 
