@@ -228,6 +228,34 @@ it("shows the collapsed highly rated count and remembers expansion preference", 
   expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
 });
 
+it("keeps the active highly rated wave visible when the section preference is collapsed", () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "h1", set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+
+  render(
+    <WebUnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+
+  expect(
+    screen.getByRole("button", {
+      name: "Collapse Highly Rated, 1 wave",
+    })
+  ).toHaveAttribute("aria-expanded", "true");
+  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
+});
+
 it("does not give special placement to official waves", () => {
   render(
     <WebUnifiedWavesListWaves

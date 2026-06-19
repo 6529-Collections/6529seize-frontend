@@ -372,10 +372,21 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const hasFollowingRows = animatedFollowingRows.length > 0;
   const hasAllRows = animatedAllRows.length > 0;
+  const hasActiveHighlyRatedRow = highlyRatedRows.some((row) => {
+    const activeParentWaveId = activeWave.parentWaveId;
+
+    return (
+      row.wave.id === activeWave.id ||
+      (typeof activeParentWaveId === "string" &&
+        row.wave.id === activeParentWaveId)
+    );
+  });
+  const isHighlyRatedSectionExpanded =
+    isHighlyRatedExpanded || hasActiveHighlyRatedRow;
   const shouldUseHighlyRatedToggle = !hideHeaders && !isCollapsed;
   const shouldShowHighlyRatedRows =
     hasHighlyRatedRows &&
-    (!shouldUseHighlyRatedToggle || isHighlyRatedExpanded);
+    (!shouldUseHighlyRatedToggle || isHighlyRatedSectionExpanded);
   const virtualizedRows = hasAllRows ? animatedAllRows : animatedFollowingRows;
   const staticFollowingRows = hasAllRows ? animatedFollowingRows : [];
   const hasVirtualizedFollowingRows = !hasAllRows && hasFollowingRows;
@@ -487,7 +498,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                 <HighlyRatedWavesToggle
                   controlsId={highlyRatedSectionId}
                   count={highlyRatedWaves.length}
-                  isExpanded={isHighlyRatedExpanded}
+                  isExpanded={isHighlyRatedSectionExpanded}
                   onToggle={handleHighlyRatedToggle}
                   paddingClassName="tw-px-5"
                 />

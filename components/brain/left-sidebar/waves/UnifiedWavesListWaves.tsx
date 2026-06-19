@@ -197,10 +197,21 @@ const UnifiedWavesListWaves = forwardRef<
       animatedAllRows.length > 0 ? animatedFollowingRows : [];
     const hasVirtualizedFollowingRows =
       animatedAllRows.length === 0 && animatedFollowingRows.length > 0;
+    const hasActiveHighlyRatedRow = highlyRatedRows.some((row) => {
+      const activeParentWaveId = activeWave.parentWaveId;
+
+      return (
+        row.wave.id === activeWave.id ||
+        (typeof activeParentWaveId === "string" &&
+          row.wave.id === activeParentWaveId)
+      );
+    });
+    const isHighlyRatedSectionExpanded =
+      isHighlyRatedExpanded || hasActiveHighlyRatedRow;
     const shouldUseHighlyRatedToggle = !hideHeaders;
     const shouldShowHighlyRatedRows =
       highlyRatedRows.length > 0 &&
-      (!shouldUseHighlyRatedToggle || isHighlyRatedExpanded);
+      (!shouldUseHighlyRatedToggle || isHighlyRatedSectionExpanded);
     const virtualizedAriaLabel =
       animatedAllRows.length > 0
         ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
@@ -296,7 +307,7 @@ const UnifiedWavesListWaves = forwardRef<
               <HighlyRatedWavesToggle
                 controlsId={highlyRatedSectionId}
                 count={highlyRatedWaves.length}
-                isExpanded={isHighlyRatedExpanded}
+                isExpanded={isHighlyRatedSectionExpanded}
                 onToggle={handleHighlyRatedToggle}
                 paddingClassName="tw-px-4"
               />

@@ -191,6 +191,33 @@ it("renders highly rated waves collapsed by default and expands them from the se
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
 });
 
+it("keeps the active highly rated wave visible when the section preference is collapsed", () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "h1", set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+
+  render(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(
+    screen.getByRole("button", {
+      name: "Collapse Highly Rated, 1 wave",
+    })
+  ).toHaveAttribute("aria-expanded", "true");
+  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
+});
+
 it("does not give special placement to official waves", () => {
   render(
     <UnifiedWavesListWaves
