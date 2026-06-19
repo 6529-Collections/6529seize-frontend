@@ -154,14 +154,14 @@ describe("multipartUploadCore MIME helpers", () => {
       .mockResolvedValueOnce({ upload_url: "https://s3.example/upload" })
       .mockResolvedValueOnce({
         media_url: "https://cdn.example/drops/img.jpg",
-        media_upload_id: "media-upload-1",
+        media_upload_id: "media upload/1",
         media_status: ApiDropMediaStatus.Processing,
       });
     commonApiFetchMock
       .mockRejectedValueOnce(new Error("temporary status failure"))
       .mockResolvedValueOnce({
         media_url: "https://cdn.example/drops/img.jpg",
-        media_upload_id: "media-upload-1",
+        media_upload_id: "media upload/1",
         media_status: ApiDropMediaStatus.Ready,
       });
     axiosPutMock.mockResolvedValue({ headers: { etag: '"part-etag"' } });
@@ -178,5 +178,8 @@ describe("multipartUploadCore MIME helpers", () => {
 
     expect(response.media_status).toBe(ApiDropMediaStatus.Ready);
     expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+    expect(commonApiFetchMock).toHaveBeenNthCalledWith(1, {
+      endpoint: "drop-media/uploads/media%20upload%2F1",
+    });
   });
 });

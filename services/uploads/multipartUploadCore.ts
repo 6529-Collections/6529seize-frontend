@@ -237,7 +237,9 @@ async function waitForMediaReady(
     let status: ApiCompleteMultipartUploadResponse;
     try {
       status = await commonApiFetch<ApiCompleteMultipartUploadResponse>({
-        endpoint: `drop-media/uploads/${completionData.media_upload_id}`,
+        endpoint: `drop-media/uploads/${encodeURIComponent(
+          completionData.media_upload_id
+        )}`,
         ...(signal ? { signal } : {}),
       });
     } catch (error) {
