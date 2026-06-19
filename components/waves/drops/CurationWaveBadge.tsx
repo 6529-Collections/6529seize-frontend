@@ -147,6 +147,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
           onClose={() => setIsMobilePreviewOpen(false)}
           noPadding
           showScrollbar
+          tall
           zIndexClassName="tw-z-[1200]"
         >
           {previewCard}
