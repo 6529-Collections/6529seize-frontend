@@ -118,7 +118,7 @@ const buildSidebarWaveRows = ({
   showExpandedSubwaves,
   subwavesByParentId,
 }: {
-  readonly getHasUnreadSubwaves: (waveId: string) => boolean;
+  readonly getHasUnreadSubwaves: (wave: MinimalWave) => boolean;
   readonly getIsExpanded: (waveId: string) => boolean;
   readonly loadingParentWaveIds: ReadonlySet<string>;
   readonly parentWaves: readonly MinimalWave[];
@@ -129,8 +129,13 @@ const buildSidebarWaveRows = ({
 
   for (const wave of parentWaves) {
     const subwaves = subwavesByParentId.get(wave.id) ?? [];
+    // Muted parents can still be expanded for inspection; unread indicators
+    // stay suppressed by getHasUnreadSubwaves.
     const canExpand =
-      wave.parentWaveId === null && (wave.hasSubwaves || subwaves.length > 0);
+      wave.parentWaveId === null &&
+      (wave.hasSubwaves ||
+        wave.followedSubwavesCount > 0 ||
+        subwaves.length > 0);
     const isExpanded =
       showExpandedSubwaves &&
       canExpand &&
@@ -142,7 +147,7 @@ const buildSidebarWaveRows = ({
       subwaves.length === 0 &&
       loadingParentWaveIds.has(wave.id) &&
       getIsExpanded(wave.id);
-    const hasUnreadSubwaves = canExpand && getHasUnreadSubwaves(wave.id);
+    const hasUnreadSubwaves = canExpand && getHasUnreadSubwaves(wave);
 
     rows.push({
       key: wave.id,
@@ -279,8 +284,10 @@ export function useSidebarWaveTree({
   );
 
   const getHasUnreadSubwaves = useCallback(
-    (waveId: string) =>
-      (subwavesByParentId.get(waveId) ?? []).some(hasUnreadDrops),
+    (wave: MinimalWave) =>
+      !wave.isMuted &&
+      (wave.unreadFollowedSubwaveDrops > 0 ||
+        (subwavesByParentId.get(wave.id) ?? []).some(hasUnreadDrops)),
     [subwavesByParentId]
   );
 

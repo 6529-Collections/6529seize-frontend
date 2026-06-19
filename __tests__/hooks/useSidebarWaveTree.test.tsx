@@ -357,6 +357,70 @@ describe("useSidebarWaveTree", () => {
     });
   });
 
+  it("makes followed-subwave parent containers expandable before child rows load", () => {
+    const parentContainer = createMockMinimalWave({
+      id: "parent-container",
+      followedSubwavesCount: 1,
+      unreadFollowedSubwaveDrops: 2,
+    });
+    const onParentExpand = jest.fn();
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: [parentContainer],
+        activeWaveId: null,
+        onParentExpand,
+      })
+    );
+
+    let rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      canExpand: true,
+      hasUnreadSubwaves: true,
+      isExpanded: false,
+    });
+
+    act(() => {
+      result.current.toggleParent("parent-container");
+    });
+
+    rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(onParentExpand).toHaveBeenCalledWith("parent-container");
+    expect(rows[0]).toMatchObject({
+      canExpand: true,
+      isExpanded: false,
+    });
+  });
+
+  it("does not show followed child unread on a muted parent container", () => {
+    const mutedParentContainer = createMockMinimalWave({
+      id: "muted-parent-container",
+      followedSubwavesCount: 1,
+      unreadFollowedSubwaveDrops: 2,
+      isMuted: true,
+    });
+    const unreadChild = createMockMinimalWave({
+      id: "unread-child",
+      parentWaveId: "muted-parent-container",
+      unreadDropsCount: 1,
+    });
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: [mutedParentContainer, unreadChild],
+        activeWaveId: null,
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows[0]).toMatchObject({
+      canExpand: true,
+      hasUnreadSubwaves: false,
+    });
+  });
+
   it("marks an expanded parent as loading before child rows are available", () => {
     const onParentExpand = jest.fn();
     const { result, rerender } = renderHook(
