@@ -8,12 +8,17 @@ import yaml from "js-yaml";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Tooltip } from "react-tooltip";
+import { useAuth } from "@/components/auth/Auth";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useElectron } from "@/hooks/useElectron";
-import { getWalletAddress } from "@/services/auth/auth.utils";
+import {
+  getWalletAddress,
+  hasActiveSessionV2Auth,
+} from "@/services/auth/auth.utils";
 import { createConnectionShare } from "@/services/auth/session-v2.utils";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
@@ -33,6 +38,12 @@ type IsStaleGeneration = () => boolean | undefined;
 type SearchParamsLike = {
   toString(): string;
 };
+type ConnectionShareStatus =
+  | "unauthenticated"
+  | "legacy-auth"
+  | "loading"
+  | "ready"
+  | "error";
 
 function isAbortError(error: unknown, signal?: AbortSignal): boolean {
   return (
@@ -42,6 +53,16 @@ function isAbortError(error: unknown, signal?: AbortSignal): boolean {
       "name" in error &&
       error.name === "AbortError")
   );
+}
+
+function isSessionUpgradeRequiredError(error: unknown): boolean {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "";
+  return message.toLowerCase().includes("session-v2");
 }
 
 function buildRouterPath(
@@ -92,10 +113,6 @@ function buildConnectionShareUrls({
     address: share.address,
   });
 
-  if (share.role) {
-    shareParams.set("role", share.role);
-  }
-
   return {
     appUrl: `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?${shareParams.toString()}`,
     coreUrl: `${coreScheme}://${DeepLinkScope.NAVIGATE}${share.deep_link_path}`,
@@ -131,6 +148,41 @@ function generateQrCodeSource({
       console.error(errorMessage, error);
       clearSource();
     });
+}
+
+async function fetchCoreAppsVersions(): Promise<OSInfo[]> {
+  const fetchYml = async (url: string): Promise<LatestYml> => {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${url}`);
+    }
+
+    const text = await response.text();
+    return yaml.load(text) as LatestYml;
+  };
+
+  const enabledConfigs = CORE_OS_CONFIGS.filter((config) => config.enabled);
+  const results = await Promise.allSettled(
+    enabledConfigs.map((config) => fetchYml(config.url))
+  );
+
+  return results.flatMap((result, index) => {
+    const osConfig = enabledConfigs[index];
+    if (!osConfig) {
+      return [];
+    }
+
+    if (result.status === "fulfilled") {
+      return [{ ...osConfig, version: result.value.version }];
+    }
+
+    console.error(
+      `Failed to fetch or process ${osConfig.displayName}:`,
+      result.reason
+    );
+    return [];
+  });
 }
 
 interface OSInfo {
@@ -330,6 +382,7 @@ export function HeaderQRModal({
   const [isVisible, setIsVisible] = useState(show);
 
   const { hasValidWalletAuth } = useSeizeConnectContext();
+  const { requestSessionUpgrade } = useAuth();
 
   const [activeTab, setActiveTab] = useState<Mode>(
     hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE
@@ -343,8 +396,10 @@ export function HeaderQRModal({
   const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
   const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
     useState<string>("");
-  const [canShareConnection, setCanShareConnection] =
-    useState<boolean>(hasValidWalletAuth);
+  const [connectionShareStatus, setConnectionShareStatus] =
+    useState<ConnectionShareStatus>(
+      hasValidWalletAuth ? "legacy-auth" : "unauthenticated"
+    );
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
@@ -458,8 +513,14 @@ export function HeaderQRModal({
     let shareConnectionAppUrl = "";
     let shareConnectionCoreUrl = "";
 
-    if (walletAddress && hasValidWalletAuth) {
+    const canCreateConnectionShare =
+      !!walletAddress &&
+      hasValidWalletAuth &&
+      hasActiveSessionV2Auth({ address: walletAddress });
+
+    if (canCreateConnectionShare) {
       try {
+        setConnectionShareStatus("loading");
         const addressKey = walletAddress.toLowerCase();
         const cachedShare = getCachedConnectionShare(
           cachedConnectionShareRef.current,
@@ -489,7 +550,7 @@ export function HeaderQRModal({
         shareConnectionAppUrl = shareUrls.appUrl;
         shareConnectionCoreUrl = shareUrls.coreUrl;
 
-        setCanShareConnection(true);
+        setConnectionShareStatus("ready");
         setShareConnectionAppUrl(shareConnectionAppUrl);
         setShareConnectionCoreUrl(shareConnectionCoreUrl);
       } catch (error: unknown) {
@@ -497,14 +558,22 @@ export function HeaderQRModal({
           return;
         }
         console.error("Failed to create connection share", error);
-        setCanShareConnection(false);
+        setConnectionShareStatus(
+          isSessionUpgradeRequiredError(error) ? "legacy-auth" : "error"
+        );
         setShareConnectionAppUrl("");
         setShareConnectionCoreUrl("");
         setShareConnectionSrc("");
-        setActiveTab(Mode.NAVIGATE);
       }
+    } else if (walletAddress && hasValidWalletAuth) {
+      setConnectionShareStatus("legacy-auth");
+      setShareConnectionAppUrl("");
+      setShareConnectionCoreUrl("");
+      setShareConnectionSrc("");
     } else {
-      setCanShareConnection(false);
+      setConnectionShareStatus("unauthenticated");
+      setShareConnectionAppUrl("");
+      setShareConnectionCoreUrl("");
       setShareConnectionSrc("");
     }
 
@@ -544,7 +613,9 @@ export function HeaderQRModal({
       cachedConnectionShareRef.current = null;
       connectionShareAbortRef.current?.abort();
       connectionShareAbortRef.current = null;
-      setCanShareConnection(false);
+      setConnectionShareStatus(
+        hasValidWalletAuth ? "legacy-auth" : "unauthenticated"
+      );
       setShareConnectionAppUrl("");
       setShareConnectionCoreUrl("");
       setShareConnectionSrc("");
@@ -709,6 +780,13 @@ export function HeaderQRModal({
   };
 
   const getShareContent = () => {
+    if (connectionShareStatus !== "ready") {
+      return {
+        content: renderConnectionShareNotice(connectionShareStatus),
+        url: "",
+      };
+    }
+
     if (activeSubTab === SubMode.CORE) {
       return {
         content: renderCoreLink(shareConnectionCoreUrl),
@@ -727,6 +805,71 @@ export function HeaderQRModal({
     }
 
     return { content: <span>Invalid submode for SHARE</span>, url: "" };
+  };
+
+  const renderConnectionShareNotice = (status: ConnectionShareStatus) => {
+    const isLegacyAuth = status === "legacy-auth";
+    const title = (() => {
+      if (isLegacyAuth) {
+        return "Update Authentication";
+      }
+      if (status === "loading") {
+        return "Preparing Connection";
+      }
+      if (status === "error") {
+        return "Connection Sharing Unavailable";
+      }
+      return "Sign In Required";
+    })();
+    const message = (() => {
+      if (isLegacyAuth) {
+        return "You can't share a connection from your current authentication. Update to the new secure session first.";
+      }
+      if (status === "loading") {
+        return "Creating a one-time connection code.";
+      }
+      if (status === "error") {
+        return "We couldn't create a connection share. Close this dialog and try again.";
+      }
+      return "Connect and authenticate your wallet before sharing a connection.";
+    })();
+
+    return (
+      <div
+        className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-8 tw-text-center"
+        style={squareStyle}
+      >
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          <div className="tw-text-lg tw-font-semibold tw-text-iron-50">
+            {title}
+          </div>
+          <div className="tw-text-sm tw-leading-6 tw-text-iron-300">
+            {message}
+          </div>
+        </div>
+        {isLegacyAuth && (
+          <div className="tw-flex tw-w-full tw-gap-3">
+            <button
+              type="button"
+              className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-white"
+              onClick={() => {
+                onClose();
+                void requestSessionUpgrade?.();
+              }}
+            >
+              Update
+            </button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const getAppsContent = () => {
@@ -861,7 +1004,6 @@ export function HeaderQRModal({
             Share
           </h2>
           <ModalMenu
-            isShareConnection={canShareConnection}
             activeTab={activeTab}
             activeSubTab={activeSubTab}
             onTabChange={(tab, subTab) => {
@@ -877,18 +1019,16 @@ export function HeaderQRModal({
 }
 
 function ModalMenu({
-  isShareConnection,
   activeTab,
   activeSubTab,
   onTabChange,
 }: {
-  readonly isShareConnection?: boolean | undefined;
   readonly activeTab: Mode;
   readonly activeSubTab: SubMode;
   readonly onTabChange: (tab: Mode, subTab: SubMode) => void;
 }) {
   const isElectron = useElectron() ?? false;
-  const topTabCount = isShareConnection ? 3 : 2;
+  const topTabCount = 3;
   const subTabCount = getSubTabCount(activeTab, isElectron);
   const subTabLabel = getSubTabLabel(activeTab);
   const getMenuButtonClass = (active: boolean) => {
@@ -914,16 +1054,14 @@ function ModalMenu({
             gridTemplateColumns: `repeat(${topTabCount}, minmax(0, 1fr))`,
           }}
         >
-          {isShareConnection && (
-            <button
-              type="button"
-              disabled={activeTab === Mode.SHARE}
-              className={getMenuButtonClass(activeTab === Mode.SHARE)}
-              onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
-            >
-              Connection
-            </button>
-          )}
+          <button
+            type="button"
+            disabled={activeTab === Mode.SHARE}
+            className={getMenuButtonClass(activeTab === Mode.SHARE)}
+            onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
+          >
+            Connection
+          </button>
           <button
             type="button"
             disabled={activeTab === Mode.NAVIGATE}
@@ -988,49 +1126,11 @@ function ModalMenu({
 }
 
 function CoreAppsDownload() {
-  const [versions, setVersions] = useState<OSInfo[]>([]);
-
-  useEffect(() => {
-    const fetchYml = async (url: string): Promise<LatestYml> => {
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}`);
-      }
-
-      const text = await response.text();
-      return yaml.load(text) as LatestYml;
-    };
-
-    const loadVersions = async () => {
-      const versions: OSInfo[] = [];
-      const enabledConfigs = CORE_OS_CONFIGS.filter((config) => config.enabled);
-      const results = await Promise.allSettled(
-        enabledConfigs.map((config) => fetchYml(config.url))
-      );
-
-      results.forEach((result, index) => {
-        const osConfig = enabledConfigs[index];
-        if (!osConfig) {
-          return;
-        }
-
-        if (result.status === "fulfilled") {
-          versions.push({ ...osConfig, version: result.value.version });
-          return;
-        }
-
-        console.error(
-          `Failed to fetch or process ${osConfig.displayName}:`,
-          result.reason
-        );
-      });
-
-      setVersions(versions);
-    };
-
-    loadVersions();
-  }, []);
+  const { data: versions = [] } = useQuery({
+    queryKey: ["core-apps-versions"],
+    queryFn: fetchCoreAppsVersions,
+    staleTime: 5 * 60 * 1000,
+  });
 
   return (
     <div style={squareStyle}>

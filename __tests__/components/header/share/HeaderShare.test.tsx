@@ -12,6 +12,11 @@ jest.mock("@/hooks/isMobileDevice");
 jest.mock("@/hooks/useElectron", () => ({
   useElectron: jest.fn(() => false),
 }));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(() => ({
+    requestSessionUpgrade: jest.fn(),
+  })),
+}));
 
 // Mock SeizeConnectContext
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -109,6 +114,7 @@ const mockAuthUtils = {
   getRefreshToken: jest.fn<string | null, []>(() => null),
   getWalletAddress: jest.fn<string | null, []>(() => null),
   getWalletRole: jest.fn<string | null, []>(() => null),
+  hasActiveSessionV2Auth: jest.fn<boolean, [{ address: string }]>(() => false),
   removeAuthJwt: jest.fn(),
 };
 
@@ -118,6 +124,8 @@ require("@/services/auth/auth.utils").getWalletAddress =
   mockAuthUtils.getWalletAddress;
 require("@/services/auth/auth.utils").getWalletRole =
   mockAuthUtils.getWalletRole;
+require("@/services/auth/auth.utils").hasActiveSessionV2Auth =
+  mockAuthUtils.hasActiveSessionV2Auth;
 require("@/services/auth/auth.utils").removeAuthJwt =
   mockAuthUtils.removeAuthJwt;
 
@@ -154,6 +162,12 @@ describe("HeaderShare", () => {
     mockAuthUtils.getRefreshToken.mockReturnValue(null);
     mockAuthUtils.getWalletAddress.mockReturnValue(null);
     mockAuthUtils.getWalletRole.mockReturnValue(null);
+    mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
+
+    const auth = require("@/components/auth/Auth");
+    auth.useAuth.mockReturnValue({
+      requestSessionUpgrade: jest.fn(),
+    });
 
     mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
       isAuthenticated: false,
@@ -309,10 +323,12 @@ describe("HeaderShare", () => {
 
       await screen.findByTestId("header-share-modal");
 
-      // Should NOT show Connection button when not authenticated
-      expect(screen.queryByText("Connection")).not.toBeInTheDocument();
+      expect(screen.getByText("Connection")).toBeInTheDocument();
       expect(screen.getByText("Current URL")).toBeInTheDocument();
       expect(screen.getByText("6529 Apps")).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText("Connection"));
+      expect(screen.getByText("Sign In Required")).toBeInTheDocument();
     });
   });
 
@@ -369,6 +385,7 @@ describe("HeaderShare", () => {
         "0x1234567890123456789012345678901234567890"
       );
       mockAuthUtils.getWalletRole.mockReturnValue(null);
+      mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(true);
       mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
         isAuthenticated: true,
         hasValidWalletAuth: true,
@@ -400,6 +417,36 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByLabelText("Close share modal"));
 
       expect(signals[0]?.aborted).toBe(true);
+    });
+
+    it("shows an upgrade action instead of creating a connection share for legacy auth", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      auth.useAuth.mockReturnValue({
+        requestSessionUpgrade,
+      });
+      mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByText("Update Authentication")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "You can't share a connection from your current authentication. Update to the new secure session first."
+        )
+      ).toBeInTheDocument();
+      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole("button", { name: "Update" }));
+
+      expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
     });
 
     it("generates connection QR codes from one-time connection share codes", async () => {
@@ -519,10 +566,11 @@ describe("HeaderShare", () => {
         expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
       );
       expect(screen.queryByTitle(/first-share-code/)).not.toBeInTheDocument();
-      expect(screen.queryByText("Connection")).not.toBeInTheDocument();
+      expect(screen.getByText("Connection")).toBeInTheDocument();
+      expect(screen.getByText("Preparing Connection")).toBeInTheDocument();
     });
 
-    it("encodes connection-share deep-link query values", async () => {
+    it("encodes connection-share deep-link query values without exposing role", async () => {
       const qrcode = require("qrcode");
       const sessionV2 = require("@/services/auth/session-v2.utils");
       sessionV2.createConnectionShare.mockResolvedValue({
@@ -551,12 +599,12 @@ describe("HeaderShare", () => {
         qrcode.toDataURL.mock.calls.some(
           (call: unknown[]) =>
             typeof call[0] === "string" &&
-            call[0].includes("role=role%2Badmin%26test")
+            call[0].includes("role=")
         )
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it("disables the Connection tab when connection-share creation fails", async () => {
+    it("shows an unavailable state when connection-share creation fails", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       jest.spyOn(console, "error").mockImplementation(() => undefined);
       sessionV2.createConnectionShare.mockRejectedValue(
@@ -570,10 +618,10 @@ describe("HeaderShare", () => {
       await waitFor(() =>
         expect(sessionV2.createConnectionShare).toHaveBeenCalled()
       );
-      await waitFor(() =>
-        expect(screen.queryByText("Connection")).not.toBeInTheDocument()
-      );
-      expect(screen.getByText("Current URL")).toBeInTheDocument();
+      expect(screen.getByText("Connection")).toBeInTheDocument();
+      expect(
+        screen.getByText("Connection Sharing Unavailable")
+      ).toBeInTheDocument();
     });
   });
 

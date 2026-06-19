@@ -119,7 +119,9 @@ describe("AcceptConnectionSharing page", () => {
   it("includes provided address in the page", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("connection_share_code=abc12345&address=0x123")
+      new URLSearchParams(
+        "connection_share_code=abc12345&address=0x123&role=client-role"
+      )
     );
     render(
       <TestProvider>
@@ -181,7 +183,7 @@ describe("AcceptConnectionSharing page", () => {
     (redeemConnectionShare as jest.Mock).mockResolvedValue({
       client_type: "native",
       address: "0x123",
-      role: null,
+      role: "server-role",
       access_token: "access-token",
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
       native_refresh_token: "native-refresh-token",
@@ -204,6 +206,7 @@ describe("AcceptConnectionSharing page", () => {
       expect.objectContaining({
         client_type: "native",
         address: "0x123",
+        role: "server-role",
         native_refresh_token: "native-refresh-token",
       })
     );

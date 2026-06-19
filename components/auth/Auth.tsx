@@ -104,6 +104,7 @@ type AuthContextType = {
   readonly activeProfileProxy: ApiProfileProxy | null;
   readonly showWaves: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
+  readonly requestSessionUpgrade?: () => Promise<{ success: boolean }>;
   readonly setToast: (toast: AppToastInput) => void;
   readonly setActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
@@ -474,6 +475,7 @@ export const AuthContext = createContext<AuthContextType>({
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),
+  requestSessionUpgrade: async () => ({ success: false }),
   setToast: () => {},
   setActiveProfileProxy: async () => {},
 });
@@ -1219,6 +1221,52 @@ export default function Auth({
     }
   };
 
+  const requestSessionUpgrade = async (): Promise<{ success: boolean }> => {
+    const connectedAddress = ensureConnectedWalletAddress();
+    if (!connectedAddress) {
+      return { success: false };
+    }
+
+    if (!enableWalletAuthentication) {
+      return { success: true };
+    }
+
+    setAuthLoadingState("signing");
+    setSignModalReason("session-upgrade");
+
+    try {
+      const promptStatus = showSessionUpgradePrompt(connectedAddress, {
+        forceShow: true,
+      });
+      if (promptStatus.timeLeftMs <= 0) {
+        await expireSessionUpgradeAuth(connectedAddress);
+        return { success: false };
+      }
+
+      if (!canSignActiveWallet) {
+        return { success: false };
+      }
+
+      const role = activeProfileProxy
+        ? validateRoleForAuthentication(activeProfileProxy)
+        : null;
+      const { success } = await requestSignIn({
+        signerAddress: connectedAddress,
+        role,
+      });
+
+      if (!success) {
+        return { success: await handleAuthorizedWalletSignInFailure(true) };
+      }
+
+      invalidateAll();
+      clearSessionUpgradeReminder(connectedAddress);
+      return { success: finishAuthorizedWalletAuthentication() };
+    } finally {
+      setAuthLoadingState("idle");
+    }
+  };
+
   const onActiveProfileProxy = async (
     profileProxy: ApiProfileProxy | null
   ): Promise<void> => {
@@ -1442,6 +1490,7 @@ export default function Auth({
           profile: connectedProfile ?? null,
           isProxy: !!activeProfileProxy,
         }),
+        requestSessionUpgrade,
         setActiveProfileProxy: onActiveProfileProxy,
       }}
     >
