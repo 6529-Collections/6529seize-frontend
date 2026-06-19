@@ -1289,6 +1289,7 @@
         "reports"
       ],
       "source_refs": [
+        "app/tools/subscriptions-report/page.tsx",
         "components/subscriptions-report/SubscriptionsReport.tsx",
         "ops/docs/api-tool/feature-memes-subscriptions-report.md"
       ]
@@ -1665,6 +1666,9 @@
         "6529bot"
       ],
       "source_refs": [
+        "app/open-data/6529bot/page.tsx",
+        "app/tools/api/page.tsx",
+        "app/tools/6529bot/admin/page.tsx",
         "ops/docs/api-tool/feature-6529bot-admin.md",
         "ops/docs/open-data/feature-6529bot-usage.md"
       ]

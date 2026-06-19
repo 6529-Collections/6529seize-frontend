@@ -546,7 +546,7 @@
       "canonical_path": "/tools/subscriptions-report",
       "related_paths": ["/about/subscriptions"],
       "tags": ["subscriptions", "reports"],
-      "source_refs": ["components/subscriptions-report/SubscriptionsReport.tsx", "ops/docs/api-tool/feature-memes-subscriptions-report.md"]
+      "source_refs": ["app/tools/subscriptions-report/page.tsx", "components/subscriptions-report/SubscriptionsReport.tsx", "ops/docs/api-tool/feature-memes-subscriptions-report.md"]
     },
     {
       "id": "open-data.overview",
@@ -706,7 +706,7 @@
       "canonical_path": "/open-data/6529bot",
       "related_paths": ["/tools/api", "/tools/6529bot/admin"],
       "tags": ["api-tool", "6529bot"],
-      "source_refs": ["ops/docs/api-tool/feature-6529bot-admin.md", "ops/docs/open-data/feature-6529bot-usage.md"]
+      "source_refs": ["app/open-data/6529bot/page.tsx", "app/tools/api/page.tsx", "app/tools/6529bot/admin/page.tsx", "ops/docs/api-tool/feature-6529bot-admin.md", "ops/docs/open-data/feature-6529bot-usage.md"]
     }
   ]
 }

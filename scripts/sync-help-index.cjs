@@ -14,6 +14,13 @@ const REQUIRED_RECORD_IDS = [
   "profiles.subscriptions-tab",
   "subscriptions.report",
 ];
+const ALLOWED_RECORD_KINDS = new Set([
+  "business_rule",
+  "glossary",
+  "route",
+  "ui_affordance",
+  "workflow",
+]);
 
 function fail(message) {
   console.error(message);
@@ -137,8 +144,12 @@ function validateSourceRefs(record) {
     if (sourceRef.startsWith("https://")) {
       continue;
     }
-    if (!fs.existsSync(path.join(repoRoot, sourceRef))) {
+    const sourcePath = path.join(repoRoot, sourceRef);
+    if (!fs.existsSync(sourcePath)) {
       fail(`${record.id}: source_refs entry does not exist: ${sourceRef}`);
+    }
+    if (!fs.statSync(sourcePath).isFile()) {
+      fail(`${record.id}: source_refs entry must be a file: ${sourceRef}`);
     }
   }
 }
@@ -151,6 +162,9 @@ function validateRecord(record, ids, routePatterns) {
   ids.add(record.id);
 
   requireString(record.kind, "kind", record.id);
+  if (!ALLOWED_RECORD_KINDS.has(record.kind)) {
+    fail(`${record.id}: kind is not allowed: ${record.kind}`);
+  }
   requireString(record.title, "title", record.id);
   requireString(record.canonical_path, "canonical_path", record.id);
   validateInternalPath(
