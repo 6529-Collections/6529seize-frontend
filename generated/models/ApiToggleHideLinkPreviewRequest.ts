@@ -11,12 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ApiGlobalRepCategoryGiver } from '../models/ApiGlobalRepCategoryGiver';
+import { HttpFile } from '../http/http';
 
-export class ApiGlobalRepCategoryGiversPage {
-    'data': Array<ApiGlobalRepCategoryGiver>;
-    'page': number;
-    'next': boolean;
+export class ApiToggleHideLinkPreviewRequest {
+    /**
+    * Desired final hidden-preview state. Omit to keep legacy toggle behavior.
+    */
+    'hide_link_preview'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +25,14 @@ export class ApiGlobalRepCategoryGiversPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiGlobalRepCategoryGiver>",
-            "format": ""
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
+            "name": "hide_link_preview",
+            "baseName": "hide_link_preview",
             "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiGlobalRepCategoryGiversPage.attributeTypeMap;
+        return ApiToggleHideLinkPreviewRequest.attributeTypeMap;
     }
 
     public constructor() {
