@@ -11,17 +11,14 @@
  * Do not edit the class manually.
  */
 
-/**
-* Opaque package signature envelope for this vertical slice. The server stores it and verifies hash consistency with package_json; wallet signature verification is a future publish-adapter responsibility.
-*/
-export class ApiCmsSignatureEnvelope {
-    'signature_type': string;
-    'signing_wallet': string;
-    /**
-    * Client-supplied signing timestamp stored as envelope metadata.
-    */
-    'signed_at': string;
-    'signature': string;
+import { ApiGlobalRepCategoryWaveRef } from '../models/ApiGlobalRepCategoryWaveRef';
+import { ApiProfileMin } from '../models/ApiProfileMin';
+
+export class ApiGlobalRepCategoryWaveContributor {
+    'wave': ApiGlobalRepCategoryWaveRef;
+    'profile': ApiProfileMin;
+    'contribution': number;
+    'last_modified': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,32 +26,32 @@ export class ApiCmsSignatureEnvelope {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "signature_type",
-            "baseName": "signature_type",
-            "type": "string",
+            "name": "wave",
+            "baseName": "wave",
+            "type": "ApiGlobalRepCategoryWaveRef",
             "format": ""
         },
         {
-            "name": "signing_wallet",
-            "baseName": "signing_wallet",
-            "type": "string",
+            "name": "profile",
+            "baseName": "profile",
+            "type": "ApiProfileMin",
             "format": ""
         },
         {
-            "name": "signed_at",
-            "baseName": "signed_at",
-            "type": "string",
-            "format": ""
+            "name": "contribution",
+            "baseName": "contribution",
+            "type": "number",
+            "format": "int64"
         },
         {
-            "name": "signature",
-            "baseName": "signature",
+            "name": "last_modified",
+            "baseName": "last_modified",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiCmsSignatureEnvelope.attributeTypeMap;
+        return ApiGlobalRepCategoryWaveContributor.attributeTypeMap;
     }
 
     public constructor() {

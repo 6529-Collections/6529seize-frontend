@@ -11,17 +11,12 @@
  * Do not edit the class manually.
  */
 
-/**
-* Opaque package signature envelope for this vertical slice. The server stores it and verifies hash consistency with package_json; wallet signature verification is a future publish-adapter responsibility.
-*/
-export class ApiCmsSignatureEnvelope {
-    'signature_type': string;
-    'signing_wallet': string;
-    /**
-    * Client-supplied signing timestamp stored as envelope metadata.
-    */
-    'signed_at': string;
-    'signature': string;
+
+export class ApiGlobalRepCategoryWaveRef {
+    'id': string;
+    'name': string;
+    'pfp'?: string | null;
+    'is_direct_message': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,32 +24,32 @@ export class ApiCmsSignatureEnvelope {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "signature_type",
-            "baseName": "signature_type",
+            "name": "id",
+            "baseName": "id",
             "type": "string",
             "format": ""
         },
         {
-            "name": "signing_wallet",
-            "baseName": "signing_wallet",
+            "name": "name",
+            "baseName": "name",
             "type": "string",
             "format": ""
         },
         {
-            "name": "signed_at",
-            "baseName": "signed_at",
+            "name": "pfp",
+            "baseName": "pfp",
             "type": "string",
             "format": ""
         },
         {
-            "name": "signature",
-            "baseName": "signature",
-            "type": "string",
+            "name": "is_direct_message",
+            "baseName": "is_direct_message",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiCmsSignatureEnvelope.attributeTypeMap;
+        return ApiGlobalRepCategoryWaveRef.attributeTypeMap;
     }
 
     public constructor() {

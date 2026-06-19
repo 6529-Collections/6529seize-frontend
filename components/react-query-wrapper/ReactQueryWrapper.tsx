@@ -126,6 +126,13 @@ export enum QueryKey {
   MARKETPLACE_PREVIEW = "MARKETPLACE_PREVIEW",
   REP_OVERVIEW = "REP_OVERVIEW",
   REP_CATEGORIES = "REP_CATEGORIES",
+  GLOBAL_REP_CATEGORY_SEARCH = "GLOBAL_REP_CATEGORY_SEARCH",
+  GLOBAL_REP_CATEGORY_SUGGESTED = "GLOBAL_REP_CATEGORY_SUGGESTED",
+  GLOBAL_REP_CATEGORY_OVERVIEW = "GLOBAL_REP_CATEGORY_OVERVIEW",
+  GLOBAL_REP_CATEGORY_PAGE = "GLOBAL_REP_CATEGORY_PAGE",
+  GLOBAL_REP_CATEGORY_WAVE_OVERVIEW = "GLOBAL_REP_CATEGORY_WAVE_OVERVIEW",
+  GLOBAL_REP_CATEGORY_WAVES_PAGE = "GLOBAL_REP_CATEGORY_WAVES_PAGE",
+  GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE = "GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE",
   CIC_OVERVIEW = "CIC_OVERVIEW",
 }
 
@@ -510,6 +517,20 @@ const createReactQueryContextValue = (
     });
   };
 
+  const invalidateRepCategoryAnalytics = () => {
+    [
+      QueryKey.GLOBAL_REP_CATEGORY_SEARCH,
+      QueryKey.GLOBAL_REP_CATEGORY_SUGGESTED,
+      QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW,
+      QueryKey.GLOBAL_REP_CATEGORY_PAGE,
+      QueryKey.GLOBAL_REP_CATEGORY_WAVE_OVERVIEW,
+      QueryKey.GLOBAL_REP_CATEGORY_WAVES_PAGE,
+      QueryKey.GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE,
+    ].forEach((queryKey) => {
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
+    });
+  };
+
   const invalidateProfileRaters = ({
     profile,
     matter,
@@ -650,6 +671,7 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_CATEGORIES],
     });
+    invalidateRepCategoryAnalytics();
     invalidateProfileRaters({
       profile: targetProfile,
       matter: RateMatter.REP,
@@ -902,6 +924,7 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_CATEGORIES],
     });
+    invalidateRepCategoryAnalytics();
     queryClient.invalidateQueries({
       queryKey: [QueryKey.CIC_OVERVIEW],
     });
