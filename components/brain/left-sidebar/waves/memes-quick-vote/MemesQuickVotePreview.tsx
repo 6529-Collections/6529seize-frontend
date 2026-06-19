@@ -12,6 +12,7 @@ import {
   formatMemesQuickVoteLeftThisRoundText,
   formatMemesQuickVoteUnratedText,
 } from "@/hooks/memesQuickVote.helpers";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import type { ReactNode, TouchEventHandler } from "react";
 import { useMemo } from "react";
@@ -144,14 +145,12 @@ function MemesQuickVoteMediaStage({
   isInteractive,
   isMobile,
   mediaContent,
-  swipeHint,
   swipeOffset,
   touchSurfaceProps,
 }: {
   readonly isInteractive: boolean;
   readonly isMobile: boolean;
   readonly mediaContent: ReactNode;
-  readonly swipeHint: string | null;
   readonly swipeOffset: number;
   readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
 }) {
@@ -189,25 +188,38 @@ function MemesQuickVoteMediaStage({
           />
         ))}
 
-      {isInteractive && (
-        <>
+      {isInteractive && isMobile && (
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-inset-y-0 tw-z-10 tw-flex tw-items-center tw-justify-between md:tw-hidden"
+        >
           <div
             className={clsx(
-              "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity md:tw-hidden",
-              swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
+              "tw-flex tw-h-24 tw-w-10 tw-items-center tw-justify-start tw-bg-gradient-to-r tw-from-black/45 tw-to-transparent tw-pl-2 tw-transition-opacity",
+              swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-65"
             )}
           >
-            Skip
+            <ChevronLeftIcon
+              className={clsx(
+                "tw-size-6 tw-shrink-0 tw-drop-shadow",
+                swipeOffset < 0 ? "tw-text-white" : "tw-text-white/75"
+              )}
+            />
           </div>
           <div
             className={clsx(
-              "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity md:tw-hidden",
-              swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
+              "tw-flex tw-h-24 tw-w-10 tw-items-center tw-justify-end tw-bg-gradient-to-l tw-from-black/45 tw-to-transparent tw-pr-2 tw-transition-opacity",
+              swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-65"
             )}
           >
-            {swipeHint ? `Vote ${swipeHint}` : "Vote"}
+            <ChevronRightIcon
+              className={clsx(
+                "tw-size-6 tw-shrink-0 tw-drop-shadow",
+                swipeOffset > 0 ? "tw-text-white" : "tw-text-white/75"
+              )}
+            />
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -331,7 +343,6 @@ function MemesQuickVotePreviewContent({
           isInteractive={isInteractive}
           isMobile={isMobile}
           mediaContent={mediaContent}
-          swipeHint={swipeHint}
           swipeOffset={swipeOffset}
           touchSurfaceProps={mobileTouchSurfaceProps}
         />
