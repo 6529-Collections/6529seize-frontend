@@ -110,6 +110,14 @@ export default function Leaderboard(
     selectedNetworkTdhChange !== undefined
       ? (selectedNetworkTdhChange / selectedNetworkTdh) * 100
       : undefined;
+  const isSelectedNetworkTdhChangeLoading =
+    selectedNetworkTdh === undefined || selectedNetworkTdhChange === undefined;
+  const selectedGlobalTdhRateChangeLabel =
+    selectedNetworkTdh === 0
+      ? "n/a"
+      : selectedGlobalTdhRateChange === undefined
+        ? undefined
+        : `${selectedGlobalTdhRateChange.toFixed(2)}%`;
 
   useEffect(() => {
     if (
@@ -349,14 +357,13 @@ export default function Leaderboard(
           <div className={styles["networkStat"]}>
             <span className={styles["networkStatLabel"]}>Daily Change</span>
             <span className={styles["networkStatValue"]}>
-              {selectedNetworkTdhChange === undefined ||
-              selectedGlobalTdhRateChange === undefined ? (
+              {isSelectedNetworkTdhChangeLoading ? (
                 <DotLoader />
               ) : (
                 <>
                   {numberWithCommas(selectedNetworkTdhChange)}{" "}
                   <span className="font-smaller">
-                    ({selectedGlobalTdhRateChange.toFixed(2)}%)
+                    ({selectedGlobalTdhRateChangeLabel})
                   </span>
                 </>
               )}

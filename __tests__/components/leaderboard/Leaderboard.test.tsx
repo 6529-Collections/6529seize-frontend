@@ -37,6 +37,7 @@ jest.mock("@/components/dotLoader/DotLoader", () => ({
 }));
 
 beforeEach(() => {
+  jest.clearAllMocks();
   fetchUrl.mockResolvedValue({ data: [{ block_number: 1, timestamp: 0 }] });
   commonApiFetch.mockResolvedValue([]);
   usePathnameMock.mockReturnValue("/");
@@ -82,4 +83,56 @@ test("renders seasons and switches focus", async () => {
   // Now seasons dropdown should be enabled and we can find S1
   await user.click(screen.getByText("SZN: All"));
   expect(await screen.findByText("S1")).toBeInTheDocument();
+});
+
+test("shows zero daily change without a loader when selected network TDH is zero", async () => {
+  usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
+  fetchUrl.mockImplementation((url: string) => {
+    if (url.includes("tdh_global_history")) {
+      return Promise.resolve({
+        data: [
+          {
+            block: 1,
+            date: new Date(0),
+            created_tdh: 0,
+            destroyed_tdh: 0,
+            net_tdh: 0,
+            created_boosted_tdh: 0,
+            destroyed_boosted_tdh: 0,
+            net_boosted_tdh: 0,
+            created_tdh__raw: 0,
+            destroyed_tdh__raw: 0,
+            net_tdh__raw: 0,
+            memes_balance: 0,
+            gradients_balance: 0,
+            total_boosted_tdh: 0,
+            total_tdh: 0,
+            total_tdh__raw: 0,
+            gradients_boosted_tdh: 0,
+            gradients_tdh: 0,
+            gradients_tdh__raw: 0,
+            memes_boosted_tdh: 0,
+            memes_tdh: 0,
+            memes_tdh__raw: 0,
+            total_consolidated_wallets: 0,
+            total_wallets: 0,
+          },
+        ],
+      });
+    }
+
+    return Promise.resolve({ data: [{ block_number: 1, timestamp: 0 }] });
+  });
+
+  render(
+    <Leaderboard
+      focus={LeaderboardFocus.TDH}
+      setFocus={jest.fn()}
+      tdhView={ApiConsolidatedTdhView.Boosted}
+      setTdhView={jest.fn()}
+    />
+  );
+
+  expect(await screen.findByText("(n/a)")).toBeInTheDocument();
+  await waitFor(() => expect(screen.queryByTestId("loader")).toBeNull());
 });

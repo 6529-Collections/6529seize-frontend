@@ -186,6 +186,11 @@ The production workflow now:
    `.ebextensions/`, and `.platform/`.
 5. Uploads `target/_next/static` and `package.zip` to S3 under the build
    version path.
+6. Ensures the Elastic Beanstalk application version for the commit SHA exists.
+   If a previous failed attempt already created the version with the expected
+   S3 source bundle, the workflow reuses it and continues the deploy. If the
+   label points at a different source bundle, the workflow fails instead of
+   automatically replacing a potentially live production version label.
 
 At deploy time, [`runtime-bundle.config`](../../../.ebextensions/runtime-bundle.config)
 restores the real `package.json`, verifies the standalone runtime bundle, and
