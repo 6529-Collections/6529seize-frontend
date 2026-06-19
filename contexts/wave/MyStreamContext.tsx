@@ -131,6 +131,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
     supportsPinning: false,
     otherListWaveIds: mainWaveIds,
+    sortMutedLast: false,
   });
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();

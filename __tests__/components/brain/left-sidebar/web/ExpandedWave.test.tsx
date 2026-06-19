@@ -5,6 +5,11 @@ import { ExpandedWave } from "@/components/brain/left-sidebar/web/WebBrainLeftSi
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 
+type MockWavePinProps = {
+  readonly className?: string;
+  readonly isPinned?: boolean;
+};
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
@@ -36,7 +41,19 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>
+  () => (props: MockWavePinProps) => (
+    <button
+      type="button"
+      className={props.className}
+      data-testid="pin"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+    >
+      {String(props.isPinned)}
+    </button>
+  )
 );
 
 const baseWave = createMockMinimalWave({
@@ -100,7 +117,16 @@ describe("ExpandedWave", () => {
     expect(row).not.toHaveClass("tw-pl-2");
   });
 
-  it("renders the subwave expand button beside the wave name without opening the wave", async () => {
+  it("opens the wave from the stretched row link", async () => {
+    const user = userEvent.setup();
+    const { onClick } = renderExpandedWave();
+
+    await user.click(screen.getByRole("link", { name: "Chat Wave" }));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders one row link and keeps the subwave expand button separate", async () => {
     const user = userEvent.setup();
     const { onClick, onToggleExpand } = renderExpandedWave({
       canExpand: true,
@@ -130,23 +156,51 @@ describe("ExpandedWave", () => {
     expect(getWaveRow()).toHaveClass("tw-px-5");
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
     expect(getWaveRow()).not.toHaveClass("tw-pl-2");
-    const titleLink = screen.getByRole("link", { name: "Chat Wave" });
-    expect(titleLink.nextElementSibling).toBe(expandButton);
-    expect(expandButton.parentElement).toContainElement(titleLink);
+    const rowLink = screen.getByRole("link", { name: "Chat Wave" });
+    expect(rowLink).toHaveClass("tw-static");
+    expect(rowLink).toHaveClass("before:tw-absolute");
+    expect(rowLink).toHaveClass("before:tw-inset-0");
+    expect(rowLink).toHaveClass("before:tw-z-[5]");
+    expect(rowLink).toHaveClass("before:tw-content-['']");
+    expect(rowLink).toHaveClass("focus-visible:before:tw-ring-2");
+    expect(expandButton.closest("a")).toBeNull();
+    expect(expandButton.parentElement).toHaveClass("tw-z-10");
     const avatar = screen.getByTestId("sidebar-wave-avatar");
     expect(avatar).toHaveAttribute("aria-hidden", "true");
     expect(avatar.closest("a")).toBeNull();
     expect(screen.getAllByRole("link")).toHaveLength(1);
-    expect(
-      screen.getByRole("link", { name: "Chat Wave" }).closest(".tw-pr-7")
-    ).not.toBeNull();
-    expect(screen.getByRole("link", { name: "Chat Wave" })).toHaveClass(
-      "focus-visible:tw-outline"
-    );
 
     await user.click(expandButton);
 
     expect(onToggleExpand).toHaveBeenCalledWith("1");
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("anchors the expanded title tooltip to the visible row link", () => {
+    renderExpandedWave({
+      showExpandedTooltip: true,
+      showPin: true,
+    });
+
+    const rowLink = screen.getByRole("link", { name: "Chat Wave" });
+    const tooltipAnchor = screen.getByText("Chat Wave");
+
+    expect(rowLink).not.toHaveAttribute("data-tooltip-id");
+    expect(tooltipAnchor.closest("a")).toBe(rowLink);
+    expect(tooltipAnchor).toHaveAttribute("data-tooltip-id", "wave-expanded-1");
+    expect(tooltipAnchor).toHaveAttribute("data-tooltip-content", "Chat Wave");
+    expect(tooltipAnchor).toHaveClass("tw-relative");
+    expect(tooltipAnchor).toHaveClass("tw-z-[6]");
+  });
+
+  it("does not navigate when the pin control is clicked", async () => {
+    const user = userEvent.setup();
+    const { onClick } = renderExpandedWave({
+      showPin: true,
+    });
+
+    await user.click(screen.getByTestId("pin"));
+
     expect(onClick).not.toHaveBeenCalled();
   });
 
@@ -161,8 +215,8 @@ describe("ExpandedWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(getWaveRow()).toHaveClass("tw-pl-[84px]");
-    expect(getWaveRow()).toHaveClass("md:tw-pl-[72px]");
+    expect(getWaveRow()).toHaveClass("tw-pl-[82px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-[70px]");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );
