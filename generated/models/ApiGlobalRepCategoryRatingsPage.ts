@@ -12,7 +12,6 @@
  */
 
 import { ApiGlobalRepCategoryRating } from '../models/ApiGlobalRepCategoryRating';
-import { HttpFile } from '../http/http';
 
 export class ApiGlobalRepCategoryRatingsPage {
     'data': Array<ApiGlobalRepCategoryRating>;

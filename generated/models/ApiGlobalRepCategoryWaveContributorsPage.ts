@@ -12,7 +12,6 @@
  */
 
 import { ApiGlobalRepCategoryWaveContributor } from '../models/ApiGlobalRepCategoryWaveContributor';
-import { HttpFile } from '../http/http';
 
 export class ApiGlobalRepCategoryWaveContributorsPage {
     'data': Array<ApiGlobalRepCategoryWaveContributor>;
