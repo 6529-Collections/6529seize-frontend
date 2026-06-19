@@ -82,6 +82,47 @@ describe("useNewDropCounter", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
+  it("updates muted wave timestamps without unread counts", () => {
+    const refetch = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ muted }) =>
+        useNewDropCounter(null, [...waves, { id: "muted-wave", muted }], refetch),
+      { wrapper, initialProps: { muted: false } }
+    );
+
+    act(() => {
+      wsCallback({
+        wave: { id: "muted-wave" },
+        author: { handle: "other" },
+        created_at: 60,
+        serial_no: 5,
+      });
+    });
+    expect(result.current.newDropsCounts["muted-wave"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 60,
+      firstUnreadSerialNo: 5,
+    });
+
+    rerender({ muted: true });
+
+    act(() => {
+      wsCallback({
+        wave: { id: "muted-wave" },
+        author: { handle: "other" },
+        created_at: 70,
+        serial_no: 6,
+      });
+    });
+
+    expect(result.current.newDropsCounts["muted-wave"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 70,
+      firstUnreadSerialNo: null,
+    });
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
   it("ignores messages from connected profile and resets on active change", () => {
     const { result, rerender } = renderHook(
       ({ activeId }) => useNewDropCounter(activeId, waves, jest.fn()),
