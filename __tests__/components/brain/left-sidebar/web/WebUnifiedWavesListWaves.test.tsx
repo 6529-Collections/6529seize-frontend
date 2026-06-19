@@ -150,9 +150,7 @@ it("renders announcement, highly rated, pinned, and one filterable bottom list w
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
-  expect(
-    screen.getByLabelText("All quality-ranked waves list")
-  ).toBeInTheDocument();
+  expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.queryByLabelText("Following waves")).toBeNull();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
@@ -201,9 +199,7 @@ it("renders followed waves in the same bottom list instead of a separate section
   expect(screen.getByText("Pinned")).toBeInTheDocument();
   expect(screen.getByText("All")).toBeInTheDocument();
   expect(screen.queryByText("Following")).toBeNull();
-  expect(
-    screen.getByLabelText("All quality-ranked waves list")
-  ).toBeInTheDocument();
+  expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
 });
 

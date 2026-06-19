@@ -193,7 +193,7 @@ const UnifiedWavesListWaves = forwardRef<
     const virtualizedRows = animatedAllRows;
     const virtualizedAriaLabel = isJoinedFilterActive
       ? t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel")
-      : t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel");
+      : t(SIDEBAR_LOCALE, "waves.sidebar.allRecentActivityAriaLabel");
     const bottomListLabel = isJoinedFilterActive
       ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
       : t(SIDEBAR_LOCALE, "waves.sidebar.all");

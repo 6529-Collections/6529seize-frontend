@@ -353,7 +353,7 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   pinnedAriaLabel: "Pinned waves",
   followingAriaLabel: "Following waves",
   followingListAriaLabel: "Following waves list",
-  allQualityRankedAriaLabel: "All quality-ranked waves list",
+  allRecentActivityAriaLabel: "All recent waves list",
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",
   expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
   expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
