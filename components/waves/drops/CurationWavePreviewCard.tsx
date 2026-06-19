@@ -124,16 +124,36 @@ const getPreviewLayoutClassNames = ({
 
   if (variant === "hovercard") {
     return {
-      layoutClassName: "tw-flex tw-flex-col min-[760px]:tw-flex-row",
+      layoutClassName:
+        "tw-flex tw-min-h-0 tw-flex-1 tw-flex-col min-[760px]:tw-flex-row",
       columnClassName:
-        "tw-min-w-0 tw-w-full min-[760px]:tw-w-[360px] min-[760px]:tw-flex-shrink-0",
+        "tw-flex tw-min-h-0 tw-min-w-0 tw-w-full tw-flex-[0_1_auto] tw-flex-col min-[760px]:tw-w-[360px] min-[760px]:tw-flex-none",
     };
   }
 
   return {
-    layoutClassName: "tw-flex tw-flex-col",
-    columnClassName: "tw-min-w-0 tw-w-full",
+    layoutClassName: "tw-flex tw-min-h-0 tw-flex-1 tw-flex-col",
+    columnClassName:
+      "tw-flex tw-min-h-0 tw-min-w-0 tw-w-full tw-flex-[0_1_auto] tw-flex-col",
   };
+};
+
+const getPreviewBodyFrameClassName = ({
+  isExpanded,
+  variant,
+}: {
+  readonly isExpanded: boolean;
+  readonly variant: CurationWavePreviewCardVariant;
+}): string => {
+  if (!isExpanded) {
+    return "";
+  }
+
+  if (variant === "hovercard") {
+    return "tw-min-h-0 tw-flex-[0_1_auto] tw-overflow-y-auto min-[760px]:tw-overflow-visible";
+  }
+
+  return "tw-min-h-0 tw-flex-[0_1_auto] tw-overflow-y-auto";
 };
 
 const WavePreviewHeader: React.FC<{
@@ -211,11 +231,11 @@ const PreviewActions: React.FC<{
   onToggleCreatedWaves,
   variant,
 }) => (
-  <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-5 tw-py-3">
+  <div className="tw-flex tw-flex-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-3">
     <Link
       href={waveHref}
       prefetch={false}
-      className="tw-group/open-wave tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-primary-300"
+      className="tw-group/open-wave tw-inline-flex tw-min-h-10 tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-primary-300"
     >
       Open profile wave
       <ArrowRightIcon
@@ -229,7 +249,7 @@ const PreviewActions: React.FC<{
         onClick={onToggleCreatedWaves}
         aria-expanded={isCreatedWavesExpanded}
         aria-controls={createdWavesPanelId}
-        className="tw-group/show-waves tw-inline-flex tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-50"
+        className="tw-group/show-waves tw-inline-flex tw-min-h-10 tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-50"
       >
         {isCreatedWavesExpanded && (
           <CreatedWavesToggleIcon
@@ -343,6 +363,10 @@ export const CurationWavePreviewCard: React.FC<
     isExpanded: isCreatedWavesExpanded,
     variant,
   });
+  const previewBodyFrameClassName = getPreviewBodyFrameClassName({
+    isExpanded: isCreatedWavesExpanded,
+    variant,
+  });
   const bannerBackground = getBannerBackground({
     banner1: resolvedWave?.author.banner1_color,
     banner2: resolvedWave?.author.banner2_color,
@@ -352,49 +376,48 @@ export const CurationWavePreviewCard: React.FC<
     setAreCreatedWavesOpen((current) => !current);
 
   return (
-    <CurationPreviewShell
-      variant={variant}
-      expanded={variant === "hovercard" && isCreatedWavesExpanded}
-    >
+    <CurationPreviewShell variant={variant} expanded={isCreatedWavesExpanded}>
       <div className={previewLayoutClassName}>
         <div className={previewColumnClassName}>
-          {hasBannerCover && (
-            <div
-              className={
-                variant === "sheet"
-                  ? "tw-relative tw-h-[68px] tw-w-full tw-overflow-hidden"
-                  : "tw-relative tw-h-14 tw-w-full tw-overflow-hidden"
-              }
-              aria-hidden="true"
-            >
+          <div className={previewBodyFrameClassName}>
+            {hasBannerCover && (
               <div
-                className="tw-absolute tw-inset-0 tw-opacity-85"
-                style={{ background: bannerBackground }}
-              />
-              <div className="tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.18),transparent_34%),linear-gradient(to_top,#131316_0%,rgba(19,19,22,0.42)_48%,rgba(19,19,22,0.08)_100%)]" />
-            </div>
-          )}
-          <CurationPreviewBody
-            hasBannerCover={hasBannerCover}
-            variant={variant}
-          >
-            <WavePreviewHeader
-              hasBannerCover={hasBannerCover}
-              picture={wavePicture}
-              waveName={waveName}
-              author={author}
-            />
-            {description && (
-              <p className="tw-mb-0 tw-mt-3 tw-line-clamp-2 tw-pr-1 tw-text-xs tw-font-medium tw-leading-[1.45] tw-text-zinc-300">
-                {description}
-              </p>
+                className={
+                  variant === "sheet"
+                    ? "tw-relative tw-h-[68px] tw-w-full tw-overflow-hidden"
+                    : "tw-relative tw-h-14 tw-w-full tw-overflow-hidden"
+                }
+                aria-hidden="true"
+              >
+                <div
+                  className="tw-absolute tw-inset-0 tw-opacity-85"
+                  style={{ background: bannerBackground }}
+                />
+                <div className="tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.18),transparent_34%),linear-gradient(to_top,#131316_0%,rgba(19,19,22,0.42)_48%,rgba(19,19,22,0.08)_100%)]" />
+              </div>
             )}
+            <CurationPreviewBody
+              hasBannerCover={hasBannerCover}
+              variant={variant}
+            >
+              <WavePreviewHeader
+                hasBannerCover={hasBannerCover}
+                picture={wavePicture}
+                waveName={waveName}
+                author={author}
+              />
+              {description && (
+                <p className="tw-mb-0 tw-mt-3 tw-line-clamp-2 tw-pr-1 tw-text-xs tw-font-medium tw-leading-[1.45] tw-text-zinc-300">
+                  {description}
+                </p>
+              )}
 
-            <PreviewContent
-              isPending={isPreviewPending}
-              previewItems={previewItems}
-            />
-          </CurationPreviewBody>
+              <PreviewContent
+                isPending={isPreviewPending}
+                previewItems={previewItems}
+              />
+            </CurationPreviewBody>
+          </div>
 
           <PreviewActions
             waveHref={waveHref}
@@ -434,13 +457,13 @@ const CreatedWavesPanel: React.FC<{
     <section
       id={id}
       aria-label="Created waves"
-      className={`tw-min-w-0 ${
+      className={`tw-flex tw-min-h-0 tw-min-w-0 tw-flex-[1_1_14rem] tw-flex-col ${
         isSheet
           ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-4"
-          : "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-p-4 min-[760px]:tw-w-[360px] min-[760px]:tw-flex-shrink-0 min-[760px]:tw-border-l min-[760px]:tw-border-t-0"
+          : "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-p-4 min-[760px]:tw-w-[360px] min-[760px]:tw-flex-none min-[760px]:tw-flex-shrink-0 min-[760px]:tw-border-l min-[760px]:tw-border-t-0"
       }`}
     >
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+      <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-3 min-[420px]:tw-flex-row">
         <div className="tw-min-w-0">
           <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
             Created waves
@@ -449,15 +472,17 @@ const CreatedWavesPanel: React.FC<{
         <Link
           href={profileBrainHref}
           prefetch={false}
-          className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-primary-300"
+          className="tw-inline-flex tw-min-h-8 tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-primary-300"
         >
           Show all brain activity
           <ArrowRightIcon className="tw-h-3 tw-w-3" aria-hidden="true" />
         </Link>
       </div>
       <div
-        className={`tw-mt-3 tw-overflow-y-auto tw-pr-1 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500 ${
-          isSheet ? "tw-max-h-[360px]" : "tw-max-h-[320px]"
+        className={`tw-mt-3 tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pr-1 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500 ${
+          isSheet
+            ? "tw-max-h-none"
+            : "min-[760px]:tw-max-h-[320px] min-[760px]:tw-flex-none"
         }`}
       >
         <WaveCreatorPreviewList state={wavesState} variant="compact" />
