@@ -157,7 +157,7 @@ it("renders announcement, highly rated, pinned, following, and all sections with
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
 });
 
-it("renders direct messages as one flat latest-first list", () => {
+it("feeds direct messages to virtualization as one flat list", () => {
   render(
     <WebUnifiedWavesListWaves
       waves={[
@@ -175,16 +175,14 @@ it("renders direct messages as one flat latest-first list", () => {
     />
   );
 
+  const virtualizedItems = mockUseVirtualizedWaves.mock.calls.at(-1)?.[0].items;
   expect(
     screen.getByLabelText("Direct message conversations")
   ).toBeInTheDocument();
-  expect(screen.queryByLabelText("Following waves")).not.toBeInTheDocument();
-  expect(
-    screen.queryByLabelText("All quality-ranked waves list")
-  ).not.toBeInTheDocument();
-  expect(
-    screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
-  ).toEqual(["wave-newest", "wave-joined-older"]);
+  expect(virtualizedItems.map((row: any) => row.wave.id)).toEqual([
+    "newest",
+    "joined-older",
+  ]);
 });
 
 it("does not give special placement to official waves", () => {

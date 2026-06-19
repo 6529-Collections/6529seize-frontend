@@ -25,6 +25,7 @@ import {
 } from "@/hooks/useSidebarWaveTree";
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 import {
+  groupDirectMessageSidebarWaves,
   groupSidebarWaves,
   isValidSidebarWave,
 } from "../waves/sidebarWaveListUtils";
@@ -312,13 +313,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   } = useMemo(
     () => {
       if (isDirectMessage) {
-        return {
-          announcementWaves: [],
-          highlyRatedWaves: [],
-          pinnedWaves: [],
-          followingWaves: [],
-          allWaves: topLevelWaves,
-        };
+        return groupDirectMessageSidebarWaves(topLevelWaves);
       }
 
       return groupSidebarWaves({

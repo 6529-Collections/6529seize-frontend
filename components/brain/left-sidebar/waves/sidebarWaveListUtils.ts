@@ -89,3 +89,13 @@ export const groupSidebarWaves = ({
     allWaves,
   };
 };
+
+export const groupDirectMessageSidebarWaves = (
+  waves: readonly MinimalWave[]
+): SidebarWaveGroups => ({
+  announcementWaves: [],
+  highlyRatedWaves: [],
+  pinnedWaves: [],
+  followingWaves: [],
+  allWaves: [...waves],
+});

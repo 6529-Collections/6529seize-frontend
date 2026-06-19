@@ -23,6 +23,7 @@ import {
 } from "@/hooks/useSidebarWaveTree";
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 import {
+  groupDirectMessageSidebarWaves,
   groupSidebarWaves,
   isValidSidebarWave,
   validateSidebarWaveDetailed,
@@ -151,13 +152,7 @@ const UnifiedWavesListWaves = forwardRef<
     } = useMemo(
       () => {
         if (isDirectMessage) {
-          return {
-            announcementWaves: [],
-            highlyRatedWaves: [],
-            pinnedWaves: [],
-            followingWaves: [],
-            allWaves: topLevelWaves,
-          };
+          return groupDirectMessageSidebarWaves(topLevelWaves);
         }
 
         return groupSidebarWaves({
