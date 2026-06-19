@@ -72,6 +72,29 @@ navigation because the frontend owns:
 The backend should own runtime copies, embeddings, job orchestration, LLM calls,
 message reactions, and bot replies.
 
+## Agent Maintenance Contract
+
+Future agents must update the help bot knowledge materials when frontend changes
+affect what users can ask `@6529help` about. This applies to:
+
+- new or renamed routes
+- new product terms or changed user-facing definitions
+- workflow changes, especially multi-step creation or eligibility flows
+- prominent controls and UI entry points, such as create buttons, tabs, menus,
+  empty states, and settings panels
+- canonical links, route redirects, or page moves
+- docs under `ops/docs` that explain user-facing behavior
+
+For the current V1, the live bot answers from backend seed records. If a
+frontend change needs to be answerable before the full help-index/RAG path is
+implemented, update the paired backend seed corpus in
+`src/help-bot/help-bot.knowledge.ts` or explicitly record the follow-up.
+
+For the future help index, keep curated records, route records, doc chunks, and
+`data-help-*` metadata aligned with the UI in the same PR as the feature change.
+Do not rely on the LLM to discover new routes or controls from source code at
+answer time.
+
 ## Proposed Help Sources
 
 ### 1. Curated Glossary Records

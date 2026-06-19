@@ -190,6 +190,14 @@ is available, use it; otherwise read the relevant files in
 
 - User-facing docs live under `ops/docs/`. Update them when visible behavior,
   routes, loading/empty/error states, or user workflows change.
+- When adding or changing user-facing routes, terminology, workflows, prominent
+  controls, empty states, or navigation that users may ask `@6529help` about,
+  update the 6529 Help Bot knowledge materials in the same PR. The current
+  frontend spec is
+  `ops/docs/specs/2026-06-19-6529-help-bot-knowledge-index.md`; future generated
+  help-index source records or `data-help-*` metadata must stay aligned with the
+  changed UI. While V1 uses backend seed records, open or update the paired
+  backend PR when the changed concept should be answerable before full RAG.
 - Treat `ops/docs/` as curated product docs, not a complete source of truth.
   Compare docs against `app/**/page.tsx`, `app/**/route.ts`, components, API
   helpers, tests, and configs before making behavior claims.
