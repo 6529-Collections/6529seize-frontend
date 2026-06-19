@@ -175,7 +175,7 @@
         "Profile pages organize identity, collected NFTs, waves, groups, subscriptions, proxy, Brain, and xTDH surfaces through tabs.",
         "Editable profile surfaces require the owner or an authorized proxy."
       ],
-      "canonical_path": "/network",
+      "canonical_path": "/{user}",
       "related_paths": [
         "/{user}/identity",
         "/{user}/groups",
@@ -216,7 +216,7 @@
         "The active tab can be opened directly through a route such as /{user}/identity or /{user}/groups.",
         "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
       ],
-      "canonical_path": "/network",
+      "canonical_path": "/{user}/identity",
       "related_paths": [
         "/{user}/identity",
         "/{user}/collected",
@@ -256,7 +256,7 @@
         "The tab shows balance, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Owners can update settings and top up; read-only viewers can inspect visible subscription information."
       ],
-      "canonical_path": "/about/subscriptions",
+      "canonical_path": "/{user}/subscriptions",
       "related_paths": [
         "/{user}/subscriptions"
       ],
@@ -292,7 +292,7 @@
         "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
         "Proxy and delegation are related concepts but live in separate product areas."
       ],
-      "canonical_path": "/network",
+      "canonical_path": "/{user}/proxy",
       "related_paths": [
         "/{user}/proxy",
         "/delegation/delegation-center"
@@ -328,7 +328,7 @@
         "Brain views include activity and wave sidebar surfaces where available.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
-      "canonical_path": "/network",
+      "canonical_path": "/{user}/brain",
       "related_paths": [
         "/{user}/brain"
       ],

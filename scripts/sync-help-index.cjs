@@ -101,18 +101,23 @@ function stripPathDecorators(value) {
   return trimTrailingSlashes(withoutQuery) || "/";
 }
 
+function isPlaceholderSegment(segment) {
+  return segment.startsWith("{") && segment.endsWith("}");
+}
+
 function pathMatchesRoute(rawPath, routePattern) {
   const cleanedPath = stripPathDecorators(rawPath);
   const pathSegments =
     cleanedPath === "/" ? [] : cleanedPath.slice(1).split("/");
+  const usesPlaceholder = pathSegments.some(isPlaceholderSegment);
   let pathIndex = 0;
 
   for (const routeSegment of routePattern) {
     if (routeSegment.kind === "optionalCatchAll") {
-      return true;
+      return !usesPlaceholder;
     }
     if (routeSegment.kind === "catchAll") {
-      return pathIndex < pathSegments.length;
+      return !usesPlaceholder && pathIndex < pathSegments.length;
     }
     const pathSegment = pathSegments[pathIndex];
     if (!pathSegment) {
