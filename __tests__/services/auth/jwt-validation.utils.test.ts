@@ -110,9 +110,10 @@ describe("jwt-validation.utils", () => {
       isValid: true,
       wasCancelled: false,
     });
+    expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
   });
 
-  it("accepts a current session-v2 JWT when web cookie refresh belongs to another connected account", async () => {
+  it("accepts a current session-v2 JWT without refreshing another connected account cookie", async () => {
     mockedJwtDecode.mockReturnValue(validPayload);
     mockedHasActiveSessionV2Auth.mockReturnValue(true);
     mockedRefreshSessionV2.mockResolvedValue({
@@ -128,6 +129,7 @@ describe("jwt-validation.utils", () => {
       isValid: true,
       wasCancelled: false,
     });
+    expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
     expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
   });
 

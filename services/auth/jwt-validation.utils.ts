@@ -263,6 +263,10 @@ export const validateJwt = async ({
 
   const hasValidLocalJwt = doJWTValidation({ jwt, wallet, role });
 
+  if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
+    return VALID_JWT_RESULT;
+  }
+
   let refreshedResult: ValidateJwtResult;
   try {
     refreshedResult = await handleTokenRefresh({
