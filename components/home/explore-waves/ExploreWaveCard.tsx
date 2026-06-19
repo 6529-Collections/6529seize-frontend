@@ -9,13 +9,20 @@ import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { SidebarWave } from "@/types/waves.types";
-import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
+import {
+  getWaveTrustSummaryLabel,
+  WaveTrustSignals,
+} from "@/components/waves/WaveTrustSignals";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
 
 interface ExploreWaveCardProps {
   readonly wave: SidebarWave;
 }
+
+const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
 
 export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const waveHref = getWaveRoute({
@@ -35,13 +42,30 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const lastMessageTime = wave.latestDropTimestamp;
   const hasDrops = lastMessageTime !== null;
   const descriptionPreview = getWavePreviewContent(wave);
+  const scoreSummaryLabel = getWaveTrustSummaryLabel({
+    waveRep: wave.waveRep,
+    waveScore: wave.waveScore,
+  });
+  const cardAriaLabel =
+    scoreSummaryLabel === null
+      ? t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.viewAriaLabel", {
+          waveName: wave.name,
+        })
+      : t(
+          EXPLORE_WAVE_CARD_LOCALE,
+          "waves.explore.card.viewWithScoreAriaLabel",
+          {
+            waveName: wave.name,
+            scoreSummary: scoreSummaryLabel,
+          }
+        );
 
   return (
     <Link
       href={waveHref}
       prefetch={false}
       className="tw-group tw-relative tw-block tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500/30"
-      aria-label={`View wave ${wave.name}`}
+      aria-label={cardAriaLabel}
     >
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-white/10" />
       <div
@@ -51,7 +75,9 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         {wave.picture && (
           <Image
             src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
-            alt={`${wave.name} cover`}
+            alt={t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.coverAlt", {
+              waveName: wave.name,
+            })}
             fill
             sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
             className="tw-object-cover tw-transition-transform tw-duration-700 tw-will-change-transform desktop-hover:group-hover:tw-scale-105"
@@ -67,6 +93,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
           waveRep={wave.waveRep}
           waveScore={wave.waveScore}
           variant="header-inline"
+          mode="summary"
           className="tw-mt-3"
         />
 
@@ -90,7 +117,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
 
         {!hasDrops && (
           <div className="tw-mt-3 tw-text-[11px] tw-text-iron-500 sm:tw-text-xs">
-            No drops yet
+            {t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.noDropsYet")}
           </div>
         )}
       </div>

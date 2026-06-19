@@ -96,6 +96,47 @@ describe("ExploreWaveCard", () => {
 
     expect(screen.getByText("No drops yet")).toBeInTheDocument();
   });
+
+  it("shows only the primary score metric while keeping secondary details accessible", () => {
+    render(
+      <ExploreWaveCard
+        wave={createWave({
+          waveRep: {
+            total_rep: 1_250,
+          } as SidebarWave["waveRep"],
+          waveScore: {
+            visibility_score: 96,
+            quality_score: 90,
+            hotness_score: 98,
+            rep_sort_score: 76,
+          } as SidebarWave["waveScore"],
+        })}
+      />
+    );
+
+    expect(screen.getByText("Score")).toBeInTheDocument();
+    expect(screen.getByText("96")).toBeInTheDocument();
+    expect(screen.queryByText("Hot")).not.toBeInTheDocument();
+    expect(screen.queryByText("REP")).not.toBeInTheDocument();
+
+    const scoreBadge = screen.getByText("Score").closest("[aria-label]");
+    expect(scoreBadge).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("Hotness 98")
+    );
+    expect(scoreBadge?.getAttribute("aria-label")).toMatch(
+      /REP: \+1,250 raw, 76 score$/
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: /View wave Wave One\. Wave score 96\./,
+      })
+    ).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("Hotness 98")
+    );
+  });
 });
 
 function createWave(overrides: Partial<SidebarWave> = {}): SidebarWave {
@@ -104,6 +145,7 @@ function createWave(overrides: Partial<SidebarWave> = {}): SidebarWave {
     name: "Wave One",
     type: ApiWaveType.Chat,
     createdAt: 0,
+    creator: null,
     picture: null,
     contributors: [],
     isDirectMessage: false,
@@ -123,6 +165,8 @@ function createWave(overrides: Partial<SidebarWave> = {}): SidebarWave {
     pinned: false,
     muted: false,
     subscribed: false,
+    waveRep: null,
+    waveScore: null,
     ...overrides,
   };
 }
