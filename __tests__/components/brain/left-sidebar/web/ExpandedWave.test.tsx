@@ -157,14 +157,14 @@ describe("ExpandedWave", () => {
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
     expect(getWaveRow()).not.toHaveClass("tw-pl-2");
     const rowLink = screen.getByRole("link", { name: "Chat Wave" });
-    expect(rowLink).toHaveClass("tw-absolute");
-    expect(rowLink).toHaveClass("tw-inset-0");
-    expect(rowLink).toHaveClass("tw-z-[5]");
-    expect(rowLink).toHaveClass("focus-visible:tw-ring-2");
-    expect(rowLink.nextElementSibling).toHaveClass("tw-pointer-events-none");
+    expect(rowLink).toHaveClass("tw-static");
+    expect(rowLink).toHaveClass("before:tw-absolute");
+    expect(rowLink).toHaveClass("before:tw-inset-0");
+    expect(rowLink).toHaveClass("before:tw-z-[5]");
+    expect(rowLink).toHaveClass("before:tw-content-['']");
+    expect(rowLink).toHaveClass("focus-visible:before:tw-ring-2");
     expect(expandButton.closest("a")).toBeNull();
     expect(expandButton.parentElement).toHaveClass("tw-z-10");
-    expect(expandButton.parentElement).toHaveClass("tw-pointer-events-auto");
     const avatar = screen.getByTestId("sidebar-wave-avatar");
     expect(avatar).toHaveAttribute("aria-hidden", "true");
     expect(avatar.closest("a")).toBeNull();
@@ -176,26 +176,21 @@ describe("ExpandedWave", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it("anchors the expanded title tooltip inside the row link", () => {
+  it("anchors the expanded title tooltip to the visible row link", () => {
     renderExpandedWave({
       showExpandedTooltip: true,
       showPin: true,
     });
 
     const rowLink = screen.getByRole("link", { name: "Chat Wave" });
-    const tooltipAnchor = rowLink.querySelector(
-      '[data-tooltip-id="wave-expanded-1"]'
-    );
+    const tooltipAnchor = screen.getByText("Chat Wave");
 
     expect(rowLink).not.toHaveAttribute("data-tooltip-id");
-    expect(tooltipAnchor).not.toBeNull();
-    expect(tooltipAnchor).toHaveAttribute("aria-hidden", "true");
+    expect(tooltipAnchor.closest("a")).toBe(rowLink);
+    expect(tooltipAnchor).toHaveAttribute("data-tooltip-id", "wave-expanded-1");
     expect(tooltipAnchor).toHaveAttribute("data-tooltip-content", "Chat Wave");
-    expect(tooltipAnchor).toHaveClass("tw-absolute");
-    expect(tooltipAnchor).toHaveClass("tw-top-2");
-    expect(tooltipAnchor).toHaveClass("tw-h-5");
-    expect(tooltipAnchor).toHaveClass("tw-left-16");
-    expect(tooltipAnchor).toHaveClass("tw-right-12");
+    expect(tooltipAnchor).toHaveClass("tw-relative");
+    expect(tooltipAnchor).toHaveClass("tw-z-[6]");
   });
 
   it("does not navigate when the pin control is clicked", async () => {

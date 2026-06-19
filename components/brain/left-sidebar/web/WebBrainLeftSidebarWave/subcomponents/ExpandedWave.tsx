@@ -9,8 +9,6 @@ import {
   hasWaveTrustSummaryScore,
   WaveTrustSignals,
 } from "@/components/waves/WaveTrustSignals";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { Tooltip } from "react-tooltip";
 import { WaveAvatar } from "./WaveAvatar";
 import type { WaveTooltipPlacement } from "./WaveTooltip";
 import { WaveTooltip } from "./WaveTooltip";
@@ -89,16 +87,9 @@ export const ExpandedWave = ({
   const isChildRow = depth === 1;
   const shouldShowExpandControl = canExpand && depth === 0;
   const shouldShowPinButton = showPin && depth === 0;
-  const trustSignalsTooltipId = `sidebar-expanded-wave-trust-signals-${waveId}`;
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowTrustSignalsRow =
     hasSummaryScore || presentLatestDropTimestamp !== null;
-  const titleTooltipAnchorLeftClasses = isChildRow
-    ? "tw-left-[118px] md:tw-left-[106px]"
-    : "tw-left-16";
-  const titleTooltipAnchorRightClasses = shouldShowPinButton
-    ? "tw-right-12"
-    : "tw-right-5";
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
@@ -161,21 +152,6 @@ export const ExpandedWave = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
-      <Link
-        href={href}
-        prefetch={false}
-        onClick={onClick}
-        className="tw-absolute tw-inset-0 tw-z-[5] tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
-      >
-        <span className="tw-sr-only">{formattedWaveName}</span>
-        {showExpandedTooltip && (
-          <span
-            aria-hidden="true"
-            className={`tw-absolute tw-top-2 tw-h-5 ${titleTooltipAnchorLeftClasses} ${titleTooltipAnchorRightClasses}`}
-            {...tooltipAttributes}
-          />
-        )}
-      </Link>
       {isChildRow && (
         <span
           aria-hidden="true"
@@ -185,7 +161,7 @@ export const ExpandedWave = ({
         />
       )}
       <div
-        className={`tw-pointer-events-none tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
@@ -216,19 +192,26 @@ export const ExpandedWave = ({
               shouldShowPinButton ? "tw-pr-7" : ""
             }`}
           >
-            <span
-              className={`tw-min-w-0 tw-flex-shrink ${
+            <Link
+              href={href}
+              prefetch={false}
+              onClick={onClick}
+              className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${
                 isActive
                   ? "tw-text-white desktop-hover:group-hover:tw-text-white"
                   : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
               }`}
             >
-              <div ref={nameRef} className="tw-truncate tw-text-sm">
+              <div
+                ref={nameRef}
+                className="tw-relative tw-z-[6] tw-truncate tw-text-sm"
+                {...tooltipAttributes}
+              >
                 {formattedWaveName}
               </div>
-            </span>
+            </Link>
             {shouldShowExpandControl && (
-              <span className="tw-pointer-events-auto tw-relative tw-z-10 tw-inline-flex">
+              <span className="tw-relative tw-z-10 tw-inline-flex">
                 <SidebarWaveExpandControl
                   formattedWaveName={formattedWaveName}
                   isExpanded={isExpanded}
@@ -257,7 +240,6 @@ export const ExpandedWave = ({
                   variant="sidebar-inline"
                   mode="summary"
                   className="tw-ml-auto tw-shrink-0"
-                  tooltipId={trustSignalsTooltipId}
                 />
               )}
             </div>
@@ -276,16 +258,6 @@ export const ExpandedWave = ({
         <WaveTooltip id={tooltipId} place={tooltipPlacement}>
           {tooltipContent}
         </WaveTooltip>
-      )}
-      {hasSummaryScore && (
-        <Tooltip
-          id={trustSignalsTooltipId}
-          place="top"
-          offset={8}
-          opacity={1}
-          positionStrategy="fixed"
-          style={TOOLTIP_STYLES}
-        />
       )}
     </div>
   );
