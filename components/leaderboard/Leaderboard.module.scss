@@ -307,6 +307,34 @@
   .focusToggle .focus.disabled {
     border-color: rgba(255, 255, 255, 0.08);
   }
+
+  .leaderboardTableShell {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .leaderboardTableShell > table {
+    min-width: max-content;
+  }
+
+  .leaderboardTableShell::after {
+    background-color: variables.$almost-very-dark-grey;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    bottom: 0;
+    color: variables.$font-color;
+    content: ">>";
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1;
+    padding: 0.2rem 0.45rem;
+    pointer-events: none;
+    position: absolute;
+    right: 0.25rem;
+  }
 }
 
 .tdhViewSegmentActive {
@@ -472,14 +500,7 @@
 }
 
 .leaderboardTableShell {
-  -webkit-overflow-scrolling: touch;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
   width: 100%;
-}
-
-.leaderboardTableShell > table {
-  min-width: max-content;
 }
 
 .leaderboardEmpty {
