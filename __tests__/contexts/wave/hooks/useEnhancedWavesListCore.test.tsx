@@ -136,4 +136,39 @@ describe("useEnhancedWavesListCore", () => {
       "muted",
     ]);
   });
+
+  it("can keep muted waves in latest-message order", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [
+        createSidebarWave({
+          id: "older-unmuted",
+          latestDropTimestamp: 100,
+        }),
+        createSidebarWave({
+          id: "newer-muted",
+          latestDropTimestamp: 300,
+          muted: true,
+        }),
+        createSidebarWave({
+          id: "middle-unmuted",
+          latestDropTimestamp: 200,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: false,
+        sortMutedLast: false,
+      })
+    );
+
+    expect(result.current.waves.map((wave) => wave.id)).toEqual([
+      "newer-muted",
+      "middle-unmuted",
+      "older-unmuted",
+    ]);
+  });
 });

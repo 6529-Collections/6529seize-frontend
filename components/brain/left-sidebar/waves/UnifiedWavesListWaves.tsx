@@ -149,15 +149,26 @@ const UnifiedWavesListWaves = forwardRef<
       followingWaves,
       allWaves,
     } = useMemo(
-      () =>
-        groupSidebarWaves({
+      () => {
+        if (isDirectMessage) {
+          return {
+            announcementWaves: [],
+            highlyRatedWaves: [],
+            pinnedWaves: [],
+            followingWaves: [],
+            allWaves: topLevelWaves,
+          };
+        }
+
+        return groupSidebarWaves({
           isAnnouncementsWave:
             seizeSettings === null
               ? undefined
               : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
           waves: topLevelWaves,
-        }),
-      [topLevelWaves, seizeSettings]
+        });
+      },
+      [topLevelWaves, seizeSettings, isDirectMessage]
     );
 
     const announcementRows = useMemo(
@@ -190,7 +201,9 @@ const UnifiedWavesListWaves = forwardRef<
     const hasVirtualizedFollowingRows =
       animatedAllRows.length === 0 && animatedFollowingRows.length > 0;
     const virtualizedAriaLabel =
-      animatedAllRows.length > 0
+      isDirectMessage
+        ? t(SIDEBAR_LOCALE, "waves.sidebar.directMessagesAriaLabel")
+        : animatedAllRows.length > 0
         ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
         : t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
     const getSidebarRowHeight = useCallback(
@@ -202,7 +215,9 @@ const UnifiedWavesListWaves = forwardRef<
     const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
       items: virtualizedRows,
       key:
-        animatedAllRows.length > 0
+        isDirectMessage
+          ? "direct-message-conversations"
+          : animatedAllRows.length > 0
           ? "unified-waves-all"
           : "unified-waves-following",
       scrollContainerRef,

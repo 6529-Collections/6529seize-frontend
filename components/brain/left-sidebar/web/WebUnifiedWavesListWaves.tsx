@@ -89,6 +89,7 @@ interface WebUnifiedWavesListWavesProps {
   readonly basePath?: string | undefined;
   readonly isCollapsed?: boolean | undefined;
   readonly showProfileFeedShortcut?: boolean | undefined;
+  readonly isDirectMessage?: boolean | undefined;
   readonly sentinelRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -281,6 +282,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   basePath = "/waves",
   isCollapsed = false,
   showProfileFeedShortcut = true,
+  isDirectMessage = false,
   sentinelRef,
 }) => {
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -308,15 +310,26 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     followingWaves,
     allWaves,
   } = useMemo(
-    () =>
-      groupSidebarWaves({
+    () => {
+      if (isDirectMessage) {
+        return {
+          announcementWaves: [],
+          highlyRatedWaves: [],
+          pinnedWaves: [],
+          followingWaves: [],
+          allWaves: topLevelWaves,
+        };
+      }
+
+      return groupSidebarWaves({
         isAnnouncementsWave:
           seizeSettings === null
             ? undefined
             : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
         waves: topLevelWaves,
-      }),
-    [topLevelWaves, seizeSettings]
+      });
+    },
+    [topLevelWaves, seizeSettings, isDirectMessage]
   );
 
   const announcementRows = useMemo(
@@ -369,7 +382,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const staticFollowingRows = hasAllRows ? animatedFollowingRows : [];
   const hasVirtualizedFollowingRows = !hasAllRows && hasFollowingRows;
   const virtualizedAriaLabel = hasAllRows
-    ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
+    ? isDirectMessage
+      ? t(SIDEBAR_LOCALE, "waves.sidebar.directMessagesAriaLabel")
+      : t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
     : t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
   const headerPaddingClassName = "tw-px-4";
   const filterPaddingClassName = "tw-px-4";
@@ -388,7 +403,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
   const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
     items: virtualizedRows,
-    key: hasAllRows ? "web-unified-waves-all" : "web-unified-waves-following",
+    key: isDirectMessage
+      ? "web-direct-message-conversations"
+      : hasAllRows
+        ? "web-unified-waves-all"
+        : "web-unified-waves-following",
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
     rowHeight: getSidebarRowHeight,

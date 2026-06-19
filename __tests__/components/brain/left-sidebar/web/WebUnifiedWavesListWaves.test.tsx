@@ -157,6 +157,36 @@ it("renders announcement, highly rated, pinned, following, and all sections with
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
 });
 
+it("renders direct messages as one flat latest-first list", () => {
+  render(
+    <WebUnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({ id: "newest", isFollowing: false }),
+        createMockMinimalWave({ id: "joined-older", isFollowing: true }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+      hideHeaders
+      hideToggle
+      hidePin
+      basePath="/messages"
+      isDirectMessage
+    />
+  );
+
+  expect(
+    screen.getByLabelText("Direct message conversations")
+  ).toBeInTheDocument();
+  expect(screen.queryByLabelText("Following waves")).not.toBeInTheDocument();
+  expect(
+    screen.queryByLabelText("All quality-ranked waves list")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
+  ).toEqual(["wave-newest", "wave-joined-older"]);
+});
+
 it("does not give special placement to official waves", () => {
   render(
     <WebUnifiedWavesListWaves
