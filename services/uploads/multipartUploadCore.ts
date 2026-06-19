@@ -2,7 +2,7 @@ import axios, { CanceledError, isCancel } from "axios";
 import pLimit from "p-limit";
 import pRetry, { AbortError } from "p-retry";
 import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
-import { commonApiPost } from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   getContentType,
   toApiMediaUploadMimeType,
@@ -13,6 +13,7 @@ import type { ApiUploadPartOfMultipartUploadRequest } from "@/generated/models/A
 import type { ApiUploadPartOfMultipartUploadResponse } from "@/generated/models/ApiUploadPartOfMultipartUploadResponse";
 import type { ApiCompleteMultipartUploadRequest } from "@/generated/models/ApiCompleteMultipartUploadRequest";
 import type { ApiCompleteMultipartUploadResponse } from "@/generated/models/ApiCompleteMultipartUploadResponse";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiCreateAttachmentMultipartUploadRequest } from "@/generated/models/ApiCreateAttachmentMultipartUploadRequest";
 import type { ApiCreateAttachmentMultipartUploadResponse } from "@/generated/models/ApiCreateAttachmentMultipartUploadResponse";
@@ -23,6 +24,8 @@ const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
 const RETRIES = 3;
 const MIN_TIMEOUT = 1000;
+const MEDIA_READY_POLL_DELAY_MS = 1500;
+const MEDIA_READY_POLL_ATTEMPTS = 80;
 
 interface MultipartUploadEndpoints {
   start: string;
@@ -34,6 +37,8 @@ interface MultipartUploadCoreParams {
   file: File;
   endpoints: MultipartUploadEndpoints;
   onProgress?: ((bytesUploaded: number) => void) | undefined;
+  onCompleting?: (() => void) | undefined;
+  waitForReady?: boolean | undefined;
   signal?: AbortSignal | undefined;
 }
 
@@ -164,12 +169,71 @@ async function uploadMultipartParts({
   return await Promise.all(partPromises);
 }
 
+const sleep = (delayMs: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new AbortError("Upload aborted"));
+      return;
+    }
+
+    const timeout = globalThis.setTimeout(resolve, delayMs);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        globalThis.clearTimeout(timeout);
+        reject(new AbortError("Upload aborted"));
+      },
+      { once: true }
+    );
+  });
+
+async function waitForMediaReady(
+  completionData: ApiCompleteMultipartUploadResponse,
+  signal?: AbortSignal
+): Promise<ApiCompleteMultipartUploadResponse> {
+  if (!completionData.media_upload_id) {
+    return completionData;
+  }
+
+  if (completionData.media_status === ApiDropMediaStatus.Failed) {
+    throw new Error(completionData.media_error ?? "Image processing failed.");
+  }
+
+  if (
+    completionData.media_status === undefined ||
+    completionData.media_status === ApiDropMediaStatus.Ready
+  ) {
+    return completionData;
+  }
+
+  for (let attempt = 0; attempt < MEDIA_READY_POLL_ATTEMPTS; attempt++) {
+    await sleep(MEDIA_READY_POLL_DELAY_MS, signal);
+
+    const status = await commonApiFetch<ApiCompleteMultipartUploadResponse>({
+      endpoint: `drop-media/uploads/${completionData.media_upload_id}`,
+      ...(signal ? { signal } : {}),
+    });
+
+    if (status.media_status === ApiDropMediaStatus.Ready) {
+      return status;
+    }
+
+    if (status.media_status === ApiDropMediaStatus.Failed) {
+      throw new Error(status.media_error ?? "Image processing failed.");
+    }
+  }
+
+  throw new Error("Image processing timed out.");
+}
+
 export async function multipartUploadCore({
   file,
   endpoints,
   onProgress,
+  onCompleting,
+  waitForReady = false,
   signal,
-}: MultipartUploadCoreParams): Promise<string> {
+}: MultipartUploadCoreParams): Promise<ApiCompleteMultipartUploadResponse> {
   const contentType = getApiMediaUploadMimeType(file);
 
   const startData = await commonApiPost<
@@ -199,6 +263,8 @@ export async function multipartUploadCore({
     signal,
   });
 
+  onCompleting?.();
+
   const completionData = await commonApiPost<
     ApiCompleteMultipartUploadRequest,
     ApiCompleteMultipartUploadResponse
@@ -220,7 +286,9 @@ export async function multipartUploadCore({
     throw new Error("No final media_url returned from completion endpoint");
   }
 
-  return media_url;
+  return waitForReady
+    ? await waitForMediaReady(completionData, signal)
+    : completionData;
 }
 
 export async function multipartAttachmentUploadCore({

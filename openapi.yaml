@@ -2085,6 +2085,30 @@ paths:
                 $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
         "400":
           description: Invalid request
+  /drop-media/uploads/{media_upload_id}:
+    get:
+      tags:
+        - Drops
+      summary: Get drop or wave media upload status
+      description: Returns the final media URL and async sanitizer status.
+      operationId: getDropMediaUploadStatus
+      parameters:
+        - name: media_upload_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
+        "403":
+          description: Forbidden
+        "404":
+          description: Media upload not found
   /wave-media/multipart-upload:
     post:
       tags:
@@ -7758,8 +7782,9 @@ paths:
         - name: only_waves_followed_by_authenticated_user
           in: query
           description: >-
-            If true then result only includes waves what authenticated user
-            follows
+            If true then result only includes waves the authenticated user
+            follows, plus root parent containers for subwaves the authenticated
+            user follows where the parent is visible.
           required: false
           schema:
             type: boolean
@@ -7839,7 +7864,8 @@ paths:
           in: query
           description: >-
             If true then result excludes waves the authenticated user already
-            follows
+            follows, plus root parent containers for subwaves the authenticated
+            user follows where the parent is visible.
           required: false
           schema:
             type: boolean
@@ -8833,7 +8859,8 @@ paths:
           in: query
           description: >-
             OVERVIEW view only. If true then result only includes waves that the
-            authenticated user follows.
+            authenticated user follows, plus root parent containers for subwaves
+            the authenticated user follows where the parent is visible.
           required: false
           schema:
             type: boolean
@@ -8898,7 +8925,9 @@ paths:
           description: >-
             HOT view and OVERVIEW view with
             overview_type=SCORED_RECENTLY_DROPPED_TO only. If true then result
-            excludes waves the authenticated user already follows.
+            excludes waves the authenticated user already follows, plus root
+            parent containers for subwaves the authenticated user follows where
+            the parent is visible.
           required: false
           schema:
             type: boolean
@@ -10902,65 +10931,6 @@ components:
         total_cards_held:
           type: integer
           format: int64
-    ApiProfileCmsValidationIssue:
-      type: object
-      required:
-        - severity
-        - code
-        - message
-        - path
-      properties:
-        severity:
-          type: string
-          enum:
-            - error
-            - warning
-            - note
-        code:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        page_id:
-          type: string
-        block_id:
-          type: string
-        suggested_fix:
-          type: string
-    ApiProfileCmsValidationResult:
-      type: object
-      required:
-        - schema
-        - valid
-        - checked_at
-        - issues
-      properties:
-        schema:
-          type: string
-          enum:
-            - 6529.cms.validation_result.v1
-        valid:
-          type: boolean
-        checked_at:
-          type: string
-        validator:
-          type: string
-        validator_version:
-          type: string
-        target:
-          type: object
-          properties:
-            package_hash:
-              type: string
-            draft_id:
-              type: string
-            package_id:
-              type: string
-        issues:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiProfileCmsValidationIssue"
     ApiCommunityMemberMinimal:
       type: object
       required:
@@ -11277,6 +11247,14 @@ components:
       properties:
         media_url:
           type: string
+        media_upload_id:
+          type: string
+          nullable: true
+        media_status:
+          $ref: "#/components/schemas/ApiDropMediaStatus"
+        media_error:
+          type: string
+          nullable: true
     ApiConsolidatedTdh:
       type: object
       properties:
@@ -12598,6 +12576,21 @@ components:
         mime_type:
           type: string
           maxLength: 100
+        media_upload_id:
+          type: string
+          nullable: true
+        media_status:
+          $ref: "#/components/schemas/ApiDropMediaStatus"
+        media_error:
+          type: string
+          nullable: true
+    ApiDropMediaStatus:
+      type: string
+      enum:
+        - uploading
+        - processing
+        - ready
+        - failed
     ApiDropMentionedUser:
       type: object
       required:
@@ -15951,6 +15944,65 @@ components:
         published_at:
           type: integer
           format: int64
+    ApiProfileCmsValidationIssue:
+      type: object
+      required:
+        - severity
+        - code
+        - message
+        - path
+      properties:
+        severity:
+          type: string
+          enum:
+            - error
+            - warning
+            - note
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        page_id:
+          type: string
+        block_id:
+          type: string
+        suggested_fix:
+          type: string
+    ApiProfileCmsValidationResult:
+      type: object
+      required:
+        - schema
+        - valid
+        - checked_at
+        - issues
+      properties:
+        schema:
+          type: string
+          enum:
+            - 6529.cms.validation_result.v1
+        valid:
+          type: boolean
+        checked_at:
+          type: string
+        validator:
+          type: string
+        validator_version:
+          type: string
+        target:
+          type: object
+          properties:
+            package_hash:
+              type: string
+            draft_id:
+              type: string
+            package_id:
+              type: string
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileCmsValidationIssue"
     ApiProfileCmsWalletGalleryAsset:
       type: object
       required:
@@ -16887,6 +16939,11 @@ components:
           type: string
         key:
           type: string
+        media_upload_id:
+          type: string
+          nullable: true
+        media_status:
+          $ref: "#/components/schemas/ApiDropMediaStatus"
     ApiSubmissionDropContext:
       type: object
       required:

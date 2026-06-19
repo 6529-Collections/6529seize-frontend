@@ -16,10 +16,7 @@ export const getCreateWaveDropRequest = async (
       const requestPart: ApiCreateDropPart = {
         content: part.content,
         quoted_drop: part.quoted_drop,
-        media: part.media.map((media) => ({
-          url: media.url,
-          mime_type: media.mime_type,
-        })),
+        media: part.media,
       };
 
       const attachments = part.attachments;

@@ -22,6 +22,7 @@ interface UploadingFile {
   file: File;
   isUploading: boolean;
   progress: number;
+  phase?: "uploading" | "processing";
 }
 
 interface FilePreviewProps {
@@ -114,6 +115,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         );
         const isUploading = !!uploadingFile;
         const progress = uploadingFile?.progress ?? 0;
+        const isProcessingImage =
+          uploadingFile?.phase === "processing" &&
+          file.file.type.startsWith("image/");
         const fileKey = `${file.file.name}-${file.file.size}-${file.file.lastModified}-${index}`;
         return (
           <div key={fileKey} className="tw-group tw-relative">
@@ -128,8 +132,10 @@ const FilePreview: React.FC<FilePreviewProps> = ({
                   <ProgressOverlay progress={progress} />
                   <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center">
                     <CircleLoader size={CircleLoaderSize.XXLARGE} />
-                    <span className="tw-mt-1 tw-text-base tw-font-medium tw-text-white">
-                      {Math.round(progress)}%
+                    <span className="tw-mt-1 tw-px-2 tw-text-center tw-text-sm tw-font-medium tw-leading-tight tw-text-white">
+                      {isProcessingImage
+                        ? "Processing image"
+                        : `${Math.round(progress)}%`}
                     </span>
                   </div>
                 </>

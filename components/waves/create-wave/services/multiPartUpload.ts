@@ -16,6 +16,8 @@ interface MultiPartUploadParams {
   file: File;
   path: "drop" | "wave";
   onProgress?: ((progressPercent: number) => void) | undefined;
+  onProcessing?: (() => void) | undefined;
+  waitForReady?: boolean | undefined;
   signal?: AbortSignal | undefined;
 }
 
@@ -51,6 +53,8 @@ export async function multiPartUpload({
   file,
   path,
   onProgress,
+  onProcessing,
+  waitForReady = true,
   signal,
 }: MultiPartUploadParams): Promise<ApiDropMedia> {
   if (file.size > MAX_FILE_SIZE) {
@@ -61,7 +65,7 @@ export async function multiPartUpload({
 
   assertNonEmptyFile(file, onProgress);
 
-  const mediaUrl = await multipartUploadCore({
+  const completion = await multipartUploadCore({
     file,
     endpoints: {
       start: `${path}-media/multipart-upload`,
@@ -69,12 +73,23 @@ export async function multiPartUpload({
       complete: `${path}-media/multipart-upload/completion`,
     },
     onProgress: createProgressHandler(file, onProgress),
+    onCompleting: onProcessing,
+    waitForReady,
     signal,
   });
 
   return {
-    url: mediaUrl,
+    url: completion.media_url,
     mime_type: contentType,
+    ...(completion.media_upload_id !== undefined
+      ? { media_upload_id: completion.media_upload_id }
+      : {}),
+    ...(completion.media_status !== undefined
+      ? { media_status: completion.media_status }
+      : {}),
+    ...(completion.media_error !== undefined
+      ? { media_error: completion.media_error }
+      : {}),
   };
 }
 

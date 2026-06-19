@@ -414,6 +414,7 @@ export interface UploadingFile {
   file: File;
   isUploading: boolean;
   progress: number;
+  phase: "uploading" | "processing";
 }
 
 const generateMediaForPart = async (
@@ -422,14 +423,21 @@ const generateMediaForPart = async (
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
-    { file: media, isUploading: true, progress: 0 },
+    { file: media, isUploading: true, progress: 0, phase: "uploading" },
   ]);
   return await multiPartUpload({
     file: media,
     path: "drop",
+    waitForReady: false,
     onProgress: (progress) =>
       setUploadingFiles((prev) =>
         prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
+      ),
+    onProcessing: () =>
+      setUploadingFiles((prev) =>
+        prev.map((uf) =>
+          uf.file === media ? { ...uf, progress: 100, phase: "processing" } : uf
+        )
       ),
   }).finally(() => {
     setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
@@ -442,7 +450,7 @@ const generateAttachmentForPart = async (
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
-    { file: attachment, isUploading: true, progress: 0 },
+    { file: attachment, isUploading: true, progress: 0, phase: "uploading" },
   ]);
   return await multiPartAttachmentUpload({
     file: attachment,
