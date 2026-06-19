@@ -51,7 +51,7 @@ jest.mock(
 jest.mock(
   "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar",
   () => ({
-    WaveAvatar: (props: any) => (
+    WaveAvatar: (props: { readonly wave: { readonly id: string } }) => (
       <div data-testid={`preview-avatar-${props.wave.id}`} />
     ),
   })

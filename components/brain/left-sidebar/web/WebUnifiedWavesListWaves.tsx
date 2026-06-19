@@ -446,6 +446,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     [
       activeParentWaveId,
       activeWaveId,
+      basePath,
       getHighlyRatedPreviewHref,
       handleHighlyRatedPreviewHover,
       highlyRatedWaves,
