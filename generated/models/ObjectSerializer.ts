@@ -161,6 +161,20 @@ export * from '../models/ApiDropsLeaderboardPageV2';
 export * from '../models/ApiDropsPage';
 export * from '../models/ApiFeedItem';
 export * from '../models/ApiFeedItemType';
+export * from '../models/ApiGlobalRepCategoryGiver';
+export * from '../models/ApiGlobalRepCategoryGiversPage';
+export * from '../models/ApiGlobalRepCategoryOverview';
+export * from '../models/ApiGlobalRepCategoryRating';
+export * from '../models/ApiGlobalRepCategoryRatingsPage';
+export * from '../models/ApiGlobalRepCategoryRecipient';
+export * from '../models/ApiGlobalRepCategoryRecipientsPage';
+export * from '../models/ApiGlobalRepCategorySuggestedCategory';
+export * from '../models/ApiGlobalRepCategoryWave';
+export * from '../models/ApiGlobalRepCategoryWaveContributor';
+export * from '../models/ApiGlobalRepCategoryWaveContributorsPage';
+export * from '../models/ApiGlobalRepCategoryWaveOverview';
+export * from '../models/ApiGlobalRepCategoryWaveRef';
+export * from '../models/ApiGlobalRepCategoryWavesPage';
 export * from '../models/ApiGroup';
 export * from '../models/ApiGroupCicFilter';
 export * from '../models/ApiGroupDescription';
@@ -644,6 +658,20 @@ import { ApiDropsLeaderboardPageV2 } from '../models/ApiDropsLeaderboardPageV2';
 import { ApiDropsPage } from '../models/ApiDropsPage';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
 import { ApiFeedItemType } from '../models/ApiFeedItemType';
+import { ApiGlobalRepCategoryGiver } from '../models/ApiGlobalRepCategoryGiver';
+import { ApiGlobalRepCategoryGiversPage } from '../models/ApiGlobalRepCategoryGiversPage';
+import { ApiGlobalRepCategoryOverview } from '../models/ApiGlobalRepCategoryOverview';
+import { ApiGlobalRepCategoryRating } from '../models/ApiGlobalRepCategoryRating';
+import { ApiGlobalRepCategoryRatingsPage } from '../models/ApiGlobalRepCategoryRatingsPage';
+import { ApiGlobalRepCategoryRecipient } from '../models/ApiGlobalRepCategoryRecipient';
+import { ApiGlobalRepCategoryRecipientsPage } from '../models/ApiGlobalRepCategoryRecipientsPage';
+import { ApiGlobalRepCategorySuggestedCategory } from '../models/ApiGlobalRepCategorySuggestedCategory';
+import { ApiGlobalRepCategoryWave } from '../models/ApiGlobalRepCategoryWave';
+import { ApiGlobalRepCategoryWaveContributor } from '../models/ApiGlobalRepCategoryWaveContributor';
+import { ApiGlobalRepCategoryWaveContributorsPage } from '../models/ApiGlobalRepCategoryWaveContributorsPage';
+import { ApiGlobalRepCategoryWaveOverview } from '../models/ApiGlobalRepCategoryWaveOverview';
+import { ApiGlobalRepCategoryWaveRef } from '../models/ApiGlobalRepCategoryWaveRef';
+import { ApiGlobalRepCategoryWavesPage } from '../models/ApiGlobalRepCategoryWavesPage';
 import { ApiGroup } from '../models/ApiGroup';
 import { ApiGroupCicFilter     } from '../models/ApiGroupCicFilter';
 import { ApiGroupDescription } from '../models/ApiGroupDescription';
@@ -1223,6 +1251,20 @@ let typeMap: {[index: string]: any} = {
     "ApiDropsLeaderboardPageV2": ApiDropsLeaderboardPageV2,
     "ApiDropsPage": ApiDropsPage,
     "ApiFeedItem": ApiFeedItem,
+    "ApiGlobalRepCategoryGiver": ApiGlobalRepCategoryGiver,
+    "ApiGlobalRepCategoryGiversPage": ApiGlobalRepCategoryGiversPage,
+    "ApiGlobalRepCategoryOverview": ApiGlobalRepCategoryOverview,
+    "ApiGlobalRepCategoryRating": ApiGlobalRepCategoryRating,
+    "ApiGlobalRepCategoryRatingsPage": ApiGlobalRepCategoryRatingsPage,
+    "ApiGlobalRepCategoryRecipient": ApiGlobalRepCategoryRecipient,
+    "ApiGlobalRepCategoryRecipientsPage": ApiGlobalRepCategoryRecipientsPage,
+    "ApiGlobalRepCategorySuggestedCategory": ApiGlobalRepCategorySuggestedCategory,
+    "ApiGlobalRepCategoryWave": ApiGlobalRepCategoryWave,
+    "ApiGlobalRepCategoryWaveContributor": ApiGlobalRepCategoryWaveContributor,
+    "ApiGlobalRepCategoryWaveContributorsPage": ApiGlobalRepCategoryWaveContributorsPage,
+    "ApiGlobalRepCategoryWaveOverview": ApiGlobalRepCategoryWaveOverview,
+    "ApiGlobalRepCategoryWaveRef": ApiGlobalRepCategoryWaveRef,
+    "ApiGlobalRepCategoryWavesPage": ApiGlobalRepCategoryWavesPage,
     "ApiGroup": ApiGroup,
     "ApiGroupCicFilter": ApiGroupCicFilter,
     "ApiGroupDescription": ApiGroupDescription,

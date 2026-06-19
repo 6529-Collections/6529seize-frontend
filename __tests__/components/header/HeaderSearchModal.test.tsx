@@ -327,6 +327,37 @@ describe("HeaderSearchModal", () => {
     ).toBe(true);
   });
 
+  it("shows one Network Nerd page result for cards and interactions aliases", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "interactions leaderboard" } });
+
+    const renderedItems = (await screen.findAllByTestId("item")).map(
+      (element) => element.textContent ?? ""
+    );
+    const networkNerdItems = renderedItems.filter((content) =>
+      content.includes('"/network/nerd"')
+    );
+
+    expect(networkNerdItems).toHaveLength(1);
+    expect(networkNerdItems[0]).toContain('"title":"Network Nerd"');
+    expect(networkNerdItems[0]).not.toContain(
+      '"title":"Network Nerd Cards Collected"'
+    );
+    expect(networkNerdItems[0]).not.toContain(
+      '"title":"Network Nerd Interactions"'
+    );
+  });
+
   it("matches close pluralized page titles for page searches", async () => {
     setup({
       selectedCategory: "PAGES",

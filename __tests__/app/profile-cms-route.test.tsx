@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 
-import ProfileCmsPage from "@/app/[user]/[...cmsPath]/page";
+import ProfileCmsPage, {
+  generateMetadata,
+} from "@/app/[user]/[...cmsPath]/page";
+import exhibitionRoomPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/exhibition-room.package.json";
 import minimalPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/minimal-profile-homepage.package.json";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
@@ -41,6 +44,7 @@ const getAppCommonHeadersMock = getAppCommonHeaders as jest.Mock;
 const getUserProfileMock = getUserProfile as jest.Mock;
 const getProfileCmsPrimarySiteMock = getProfileCmsPrimarySite as jest.Mock;
 const cmsPackage = minimalPackage as unknown as CmsPackageV1;
+const roomCmsPackage = exhibitionRoomPackage as unknown as CmsPackageV1;
 
 describe("profile CMS App Router catch-all", () => {
   beforeEach(() => {
@@ -95,14 +99,60 @@ describe("profile CMS App Router catch-all", () => {
     });
   });
 
-  it("returns a safe not-found when no primary CMS site exists", async () => {
+  it("renders a published room package through the CMS catch-all route", async () => {
+    getProfileCmsPrimarySiteMock.mockResolvedValueOnce({
+      cmsPackage: roomCmsPackage,
+      source: "fixture",
+    });
+
+    const page = await ProfileCmsPage({
+      params: Promise.resolve({
+        user: "punk6529",
+        cmsPath: ["index.html"],
+      }),
+    });
+
+    render(page);
+
+    expect(screen.getByTestId("cms-renderer")).toHaveTextContent(
+      "3D Room Fixture"
+    );
+  });
+
+  it("returns a safe empty state when no primary CMS site exists", async () => {
     getProfileCmsPrimarySiteMock.mockResolvedValueOnce(null);
 
+    const page = await ProfileCmsPage({
+      params: Promise.resolve({
+        user: "punk6529",
+        cmsPath: ["index.html"],
+      }),
+    });
+
+    render(page);
+
+    expect(screen.getByText("Website page not found")).toBeInTheDocument();
+  });
+
+  it("does not throw from metadata when no primary CMS site exists", async () => {
+    getProfileCmsPrimarySiteMock.mockResolvedValueOnce(null);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({
+        user: "punk6529",
+        cmsPath: ["index.html"],
+      }),
+    });
+
+    expect(metadata.title).toBeDefined();
+  });
+
+  it("keeps non-CMS profile paths as not-found", async () => {
     await expect(
       ProfileCmsPage({
         params: Promise.resolve({
           user: "punk6529",
-          cmsPath: ["index.html"],
+          cmsPath: ["collected"],
         }),
       })
     ).rejects.toThrow("NEXT_NOT_FOUND");

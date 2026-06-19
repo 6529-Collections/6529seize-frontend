@@ -3,7 +3,11 @@ import { ProfileCmsEmptyState } from "@/components/profile-cms/CmsSiteStates";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { getUserProfile } from "@/helpers/server.helpers";
-import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
+import {
+  DEFAULT_LOCALE,
+  normalizeLocale,
+  type SupportedLocale,
+} from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
 import {
@@ -43,7 +47,7 @@ export default async function ProfileCmsPage({
   }
 
   if (!context.site) {
-    return notFound();
+    return <ProfileCmsEmptyState locale={locale} />;
   }
 
   const routeResolution = resolveCmsRoute(
@@ -92,7 +96,10 @@ export async function generateMetadata({
   }
 
   if (!context?.site) {
-    return notFound();
+    return getAppMetadata({
+      title: t(DEFAULT_LOCALE, "profileCms.state.empty.title"),
+      description: t(DEFAULT_LOCALE, "profileCms.state.empty.description"),
+    });
   }
 
   const routeResolution = resolveCmsRoute(
@@ -173,7 +180,11 @@ async function getProfileCmsRouteContext(
     headers,
   });
   if (!site) {
-    return null;
+    return {
+      cmsPath: requestCmsPath,
+      redirectTo: null,
+      site: null,
+    };
   }
 
   if (site.cmsPackage.profile.handle.toLowerCase() !== canonicalHandle) {

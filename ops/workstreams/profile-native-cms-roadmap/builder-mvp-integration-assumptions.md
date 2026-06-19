@@ -21,8 +21,11 @@ canonicalization semantics.
 
 ## Builder Package Behavior
 
-- The builder emits a V1 `CmsPackageV1` candidate with one homepage route:
+- The builder emits a V1 `CmsPackageV1` candidate with a homepage route:
   `/{handle}/index.html`.
+- If the author adds a 3D room block, the candidate also emits one faithful 2D
+  detail route per room work at `/{handle}/rooms/work-{n}/index.html`, plus a
+  matching `exhibition_room` payload entry and display asset.
 - The candidate uses the existing `withComputedCmsHashes` helper and validates
   with `validateCmsPackageV1(..., { allowFixtureSignatures: true,
   allowFixtureStorage: true, enforceHashes: true })`.
@@ -33,6 +36,14 @@ canonicalization semantics.
 - The live preview uses `CmsSiteRenderer`; there is no separate fake preview
   renderer.
 - JSON export/import exists for debugging, portability, and backend handoff.
+- The 3D room primitive is deliberately simple: room preset, one artwork asset,
+  deferred viewer policy, poster/fallback asset, and a canonical 2D detail
+  route. It does not imply wallet gallery generation or automated NFT indexing.
+- For that primitive, `/{handle}/rooms/work-{n}/index.html` is the canonical
+  CMS detail route for the authored room work. It is not claiming to be the
+  chain-indexed `/nfts/...` route; a later NFT-aware builder must collect
+  chain/contract/token data and point room placements at the existing NFT detail
+  convention when that data is available.
 
 ## Expected Backend Write API
 
@@ -162,10 +173,29 @@ storage flow and exact BE publish body are wired.
   profile authority and real decentralized storage receipts.
 - Backend publish must reject schema/hash drift and unsafe URI violations.
 - Storage upload and content-addressed receipt creation are out of scope here.
-- Production wallet gallery generation, NFT indexing, 3D rooms, and AI-agent
-  MCP flows remain owned by their backend/specialist lanes. The current FE
-  gallery shell uses a fixture-backed preview fallback only while waiting for
-  the deterministic backend generator.
+- Production wallet gallery generation, NFT indexing, full 3D world editing,
+  multi-room navigation, and AI-agent MCP flows remain owned by their
+  backend/specialist lanes. The current FE gallery shell uses a fixture-backed
+  preview fallback only while waiting for the deterministic backend generator,
+  and the 3D lane is limited to bounded viewer primitives rather than a full
+  world editor.
+
+## AI-Agent Affordance Follow-Up
+
+The Phase 8 builder follow-up adds draft-only BYO-agent affordances without
+changing the backend write model:
+
+- Package, source packet, and schema bundle downloads are client-side exports.
+- Source packets separate facts, author copy, derived metadata, validation
+  diagnostics, and prompt-injection-safe handling rules.
+- Agent patch import accepts `6529.cms.agent_patch.v1` JSON, checks the current
+  draft id/version/hash target, previews the diff, recomputes package hashes,
+  and runs local V1 validation.
+- Patch import never saves, server-validates, signs, stores, or publishes.
+  Users must explicitly apply the patch to the local draft, then separately use
+  owner-gated backend actions.
+- The MCP read-tool contract is documented as a future read-only interface until
+  backend draft storage and authenticated read endpoints exist.
 
 ## Localization Follow-Up
 
@@ -181,6 +211,10 @@ storage flow and exact BE publish body are wired.
   block, callout, metadata, and fixture alt text in the Preview tab. Starter and
   preview package text is treated as editable authored content, not translated
   runtime chrome.
+- Agent tab fallback debt: `ProfileCmsAgentPanel` source packet labels,
+  workspace copy, and rejection states are now message-backed in `en-US`, but
+  non-source locale dictionaries intentionally fall back to `en-US`. User
+  impact remains limited to the hidden flagged builder route.
 - Owner/follow-up: frontend CMS builder lane should add partial-locale builder
   keys before the route exits hidden feature-flag status.
 - Remediation: translate `profileCms.builder.*` chrome keys and decide whether

@@ -1,6 +1,6 @@
 # Active Context
 
-Last updated: 2026-06-17.
+Last updated: 2026-06-18.
 
 ## Current State
 
@@ -47,6 +47,14 @@ Available now:
   `/{handle}/cms/builder` route, guided homepage editor, real renderer preview,
   local V1 validation checklist, JSON import/export, and save/validate/publish
   adapter stubs.
+- The Phase 7 frontend 3D lane adds a bounded Three.js client island for
+  GLB/glTF object viewing and simple exhibition room rendering, plus a
+  builder-facing 3D room primitive.
+- Phase 5-8 QA/integration is now tracked on
+  `codex/cms-phase5-8-qa-integration` with a living checklist at
+  `phase-5-8-qa-checklist.md`, fixture renderer coverage for wallet gallery,
+  collection, NFT detail, mixed media, and 3D room fallback packages, and an
+  opt-in Playwright smoke harness prepared for worker branch integration.
 
 Important limits:
 
@@ -63,9 +71,15 @@ Important limits:
 - The executable validator is currently a Zod mirror plus semantic pass. The
   JSON Schema files remain the protocol reference; a later shared-package pass
   should decide whether to add direct AJV execution.
-- Live NFT indexing, full collection pages, full NFT pages, and 3D rooms are
-  not implemented yet.
+- Live NFT indexing, full collection pages, and full NFT pages are not
+  implemented yet.
+- Full 3D world editing, multi-room navigation, AR/VR, and automatic NFT room
+  generation remain future scope. The current 3D lane is a deterministic MVP:
+  poster/static preview, deferred room/object loading, faithful 2D art
+  surfaces, canonical detail links, and mobile fallback.
 - There is no general WYSIWYG/block editor yet.
+- The Phase 5-8 smoke harness is opt-in because it needs deployed/staged routes
+  and fixture data for the full generated gallery and 3D surfaces.
 
 ## Product Decisions Already Made
 
@@ -84,19 +98,19 @@ Important limits:
 
 ## Next Implementation Slice
 
-The active critical-path slice is the FE Builder + Publish UI MVP stacked on
-PR #2720:
+The active critical-path slice is the FE 3D Rooms And Object Viewer lane stacked
+on the FE Builder + Publish UI MVP:
 
 1. Keep the builder route hidden behind `PROFILE_CMS_BUILDER_ENABLED` or
    `NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED`.
 2. Use the existing V1 protocol helpers without changing hash or
    canonicalization semantics.
-3. Let users create a simple homepage package, preview it with
-   `CmsSiteRenderer`, validate it locally, and export/import JSON.
-4. Wire save, server-validate, and publish CTAs through a narrow adapter that
-   stays unavailable unless backend endpoints are explicitly enabled.
-5. Do not start wallet gallery generation, NFT indexing, storage upload, 3D
-   rooms, or AI-agent MCP work in this lane.
+3. Render only bounded 3D surfaces: GLB/glTF object viewer and simple room
+   frames/artwork placements.
+4. Keep 2D NFT/detail pages canonical for inspection and make every 3D artwork
+   click/tap path point there.
+5. Validate desktop/mobile behavior with browser screenshots and WebGL canvas
+   nonblank checks before PR closeout.
 
 ## Decisions To Make Before Coding More
 

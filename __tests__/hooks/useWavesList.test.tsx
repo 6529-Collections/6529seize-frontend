@@ -269,13 +269,30 @@ test("polls followed activity when the sidebar is in joined mode", () => {
 
   const waveQueryArgs = useWavesV2Mock.mock.calls.map(([args]) => args);
   expect(
-    waveQueryArgs
-      .filter(
-        (args) =>
-          args.overviewType === ApiWavesOverviewType.ScoredRecentlyDroppedTo
-      )
-      .every((args) => args.enabled === false)
-  ).toBe(true);
+    waveQueryArgs.filter(
+      (args) =>
+        args.overviewType === ApiWavesOverviewType.ScoredRecentlyDroppedTo
+    )
+  ).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        pageSize: 10,
+        enabled: true,
+        excludeFollowed: true,
+        pinned: ApiWavesPinFilter.NotPinned,
+        scoreSort: ApiWaveScoreSort.Quality,
+        refetchInterval: false,
+      }),
+      expect.objectContaining({
+        pageSize: 20,
+        enabled: true,
+        excludeFollowed: true,
+        pinned: ApiWavesPinFilter.NotPinned,
+        scoreSort: ApiWaveScoreSort.Quality,
+        refetchInterval: false,
+      }),
+    ])
+  );
   expect(
     waveQueryArgs.find(
       (args) => args.overviewType === ApiWavesOverviewType.RecentlyDroppedTo
@@ -284,6 +301,172 @@ test("polls followed activity when the sidebar is in joined mode", () => {
     enabled: true,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   });
+});
+
+test("keeps highly rated and all quality sections in joined mode", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+
+  const followedOld = createSidebarWave({
+    id: "followed-old",
+    latestDropTimestamp: 10,
+    subscribed: true,
+  });
+  const followedNew = createSidebarWave({
+    id: "followed-new",
+    latestDropTimestamp: 500,
+    subscribed: true,
+  });
+  const highlyRatedOne = createSidebarWave({
+    id: "highly-rated-one",
+    latestDropTimestamp: 50,
+  });
+  const highlyRatedTwo = createSidebarWave({
+    id: "highly-rated-two",
+    latestDropTimestamp: 60,
+  });
+  const highlyRatedThree = createSidebarWave({
+    id: "highly-rated-three",
+    latestDropTimestamp: 70,
+  });
+  const highlyRatedFour = createSidebarWave({
+    id: "highly-rated-four",
+    latestDropTimestamp: 80,
+  });
+  const allQualityWave = createSidebarWave({
+    id: "all-quality",
+    latestDropTimestamp: 999,
+  });
+  const fetchNextAllQualityPage = jest.fn();
+  const fetchNextFollowedActivityPage = jest.fn();
+
+  useWavesV2Mock.mockImplementation(({ overviewType, pageSize }) => ({
+    waves:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? [followedOld, followedNew]
+        : pageSize === 10
+          ? [
+              highlyRatedOne,
+              highlyRatedTwo,
+              highlyRatedThree,
+              highlyRatedFour,
+            ]
+          : [
+              highlyRatedOne,
+              highlyRatedTwo,
+              highlyRatedThree,
+              highlyRatedFour,
+              allQualityWave,
+            ],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: true,
+    fetchNextPage:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? fetchNextFollowedActivityPage
+        : pageSize === 20
+          ? fetchNextAllQualityPage
+          : jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  }));
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: ["3"],
+    pinnedWaves: [pinnedExtra],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "highly-rated-one",
+    "highly-rated-two",
+    "highly-rated-three",
+    "3",
+    "followed-new",
+    "followed-old",
+    "highly-rated-four",
+    "all-quality",
+  ]);
+  expect(
+    result.current.waves
+      .filter(
+        (wave: any) =>
+          !wave.isPinned &&
+          !wave.subscribed &&
+          wave.sidebarSection === "highly-rated"
+      )
+      .map((wave: any) => wave.id)
+  ).toEqual(["highly-rated-one", "highly-rated-two", "highly-rated-three"]);
+  expect(
+    result.current.waves
+      .filter(
+        (wave: any) =>
+          !wave.isPinned && !wave.subscribed && wave.sidebarSection === "all"
+      )
+      .map((wave: any) => wave.id)
+  ).toEqual(["highly-rated-four", "all-quality"]);
+
+  result.current.fetchNextPage();
+
+  expect(fetchNextAllQualityPage).toHaveBeenCalled();
+  expect(fetchNextFollowedActivityPage).toHaveBeenCalled();
+});
+
+test("paginates followed activity when joined discovery rows are empty", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+
+  const followedWave = createSidebarWave({
+    id: "followed",
+    latestDropTimestamp: 500,
+    subscribed: true,
+  });
+  const fetchNextAllQualityPage = jest.fn();
+  const fetchNextFollowedActivityPage = jest.fn();
+
+  useWavesV2Mock.mockImplementation(({ overviewType, pageSize }) => ({
+    waves:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? [followedWave]
+        : [],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo ||
+      pageSize === 20,
+    fetchNextPage:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? fetchNextFollowedActivityPage
+        : pageSize === 20
+          ? fetchNextAllQualityPage
+          : jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  }));
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "followed",
+  ]);
+  expect(result.current.hasNextPage).toBe(true);
+
+  result.current.fetchNextPage();
+
+  expect(fetchNextFollowedActivityPage).toHaveBeenCalled();
+  expect(fetchNextAllQualityPage).toHaveBeenCalled();
 });
 
 test("puts highly rated discovery before followed activity", () => {
@@ -459,6 +642,54 @@ test("starts without subwave queries, then appends subwaves for loaded parents",
     "parent",
     "child",
   ]);
+});
+
+test("exposes loading parent ids while requested subwaves are fetching", () => {
+  const parentWave = {
+    ...createSidebarWave({ id: "parent", latestDropTimestamp: 500 }),
+    hasSubwaves: true,
+  };
+
+  useWavesV2Mock.mockReturnValue({
+    waves: [parentWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+  useWaveSubwavesMapMock.mockImplementation(
+    ({ parentWaveIds }: { readonly parentWaveIds: readonly string[] }) => ({
+      subwaves: [],
+      subwavesByParentId: new Map(
+        parentWaveIds.includes("parent")
+          ? [["parent", { subwaves: [], isFetching: true }]]
+          : []
+      ),
+      isFetching: parentWaveIds.includes("parent"),
+      refetch: jest.fn(),
+    })
+  );
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.loadingSubwaveParentIds).toEqual([]);
+
+  act(() => {
+    result.current.loadSubwavesForParent("parent");
+  });
+
+  expect(result.current.loadingSubwaveParentIds).toEqual(["parent"]);
 });
 
 test("keeps public fetching state scoped to root wave sources", () => {

@@ -309,7 +309,7 @@ export default function ChatItemHrefButtons({
       return;
     }
 
-    previewToggle.onToggle();
+    previewToggle.onToggle(!previewToggle.isHidden);
     closeMenu({ restoreFocusToTrigger: event.detail === 0 });
   };
 

@@ -293,6 +293,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     waves,
     activeWaveId: activeWave.id,
     activeParentWaveId: activeWave.parentWaveId,
+    loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
     onParentExpand: streamWaves.loadSubwavesForParent,
     showExpandedSubwaves: !isCollapsed,
   });
@@ -366,6 +367,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasAllRows = animatedAllRows.length > 0;
   const virtualizedRows = hasAllRows ? animatedAllRows : animatedFollowingRows;
   const staticFollowingRows = hasAllRows ? animatedFollowingRows : [];
+  const hasVirtualizedFollowingRows = !hasAllRows && hasFollowingRows;
   const virtualizedAriaLabel = hasAllRows
     ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
     : t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
@@ -403,6 +405,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       depth={row.depth}
       canExpand={row.canExpand && !isCollapsed}
       isExpanded={row.isExpanded}
+      isLoadingSubwaves={row.isLoadingSubwaves}
       hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
       isLastSubwave={row.isLastSubwave}
       onToggleExpand={toggleParent}
@@ -436,7 +439,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         <div>
           {hasAnnouncementRows && (
             <SidebarWaveRowsSection
-              ariaLabel="Announcement waves"
+              ariaLabel={t(
+                SIDEBAR_LOCALE,
+                "waves.sidebar.announcementWavesAriaLabel"
+              )}
               className={sectionClassName}
               getRowHeight={getSidebarRowHeight}
               isRowVisible={(row) =>
@@ -547,6 +553,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           {!hideHeaders && !isCollapsed && hasAllRows && (
             <SidebarCategoryLabel
               label={t(SIDEBAR_LOCALE, "waves.sidebar.all")}
+            />
+          )}
+          {!hideHeaders && !isCollapsed && hasVirtualizedFollowingRows && (
+            <SidebarCategoryLabel
+              label={t(SIDEBAR_LOCALE, "waves.sidebar.following")}
             />
           )}
           {virtualizedRows.length > 0 ? (

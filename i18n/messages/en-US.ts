@@ -284,11 +284,15 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   pinned: "Pinned",
   following: "Following",
   all: "All",
+  announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Highly rated waves",
   pinnedAriaLabel: "Pinned waves",
   followingAriaLabel: "Following waves",
   followingListAriaLabel: "Following waves list",
   allQualityRankedAriaLabel: "All quality-ranked waves list",
+  expandControlExpandAriaLabel: "Expand {waveName} subwaves",
+  expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
+  expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
 } as const);
 
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
@@ -662,11 +666,25 @@ export const EN_US_MESSAGES = {
   "profileCms.interactive.embed.iframeTitle": "Embedded profile website media",
   "profileCms.interactive.object.title": "3D object preview",
   "profileCms.interactive.object.description":
-    "This V1 renderer shows the declared fallback until the object viewer island is enabled.",
+    "Load the GLB or glTF viewer when you are ready to inspect the model.",
   "profileCms.interactive.room.title": "Room preview",
   "profileCms.interactive.room.description":
-    "This V1 renderer keeps room navigation static until the room viewer island is enabled.",
+    "Enter a simple exhibition room. Every artwork still links to its canonical 2D detail page.",
   "profileCms.interactive.openSourceMedia": "Open source media",
+  "profileCms.interactive.enterRoom": "Enter room",
+  "profileCms.interactive.fullscreen": "Full screen",
+  "profileCms.interactive.exitFullscreen": "Exit full screen",
+  "profileCms.interactive.loadObject": "Load 3D object",
+  "profileCms.interactive.loading": "Loading {progress}%",
+  "profileCms.interactive.loadError":
+    "The 3D preview could not be loaded. Use the 2D links below.",
+  "profileCms.interactive.mobileFallback":
+    "This mobile view uses the static poster and 2D links for a lighter, more reliable experience.",
+  "profileCms.interactive.openFallback": "Open 2D fallback",
+  "profileCms.interactive.roomWorksLabel": "Room artworks",
+  "profileCms.interactive.canvasLabel": "Interactive 3D preview",
+  "profileCms.interactive.budgetWarning":
+    "This 3D asset is above the declared performance budget, so loading may be slow.",
   "profileCms.builder.pageTitle": "Profile CMS builder",
   "profileCms.builder.pageDescription":
     "Build and preview a profile-native CMS site package.",
@@ -674,6 +692,7 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.tab.editor": "Editor",
   "profileCms.builder.tab.preview": "Preview",
   "profileCms.builder.tab.json": "JSON",
+  "profileCms.builder.tab.agent": "Agent",
   "profileCms.builder.cta.saveDraft": "Save draft",
   "profileCms.builder.cta.serverValidate": "Server validate",
   "profileCms.builder.cta.publish": "Publish",
@@ -681,6 +700,7 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.templates.homepage": "Basic homepage",
   "profileCms.builder.templates.walletGallery": "Wallet gallery",
   "profileCms.builder.templates.gallery": "Gallery",
+  "profileCms.builder.templates.room": "3D room",
   "profileCms.builder.templates.status.comingSoon": "Coming soon",
   "profileCms.builder.gallery.settings": "Gallery settings",
   "profileCms.builder.gallery.wallets.title": "Wallet sources",
@@ -743,6 +763,7 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.block.image": "Image",
   "profileCms.builder.block.callout": "Callout",
   "profileCms.builder.block.quote": "Quote",
+  "profileCms.builder.block.roomViewer": "3D room",
   "profileCms.builder.block.remove": "Remove",
   "profileCms.builder.block.headingText": "Heading text",
   "profileCms.builder.block.body": "Body",
@@ -755,10 +776,94 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.block.calloutTitle": "Callout title",
   "profileCms.builder.block.quoteText": "Quote text",
   "profileCms.builder.block.citation": "Citation",
+  "profileCms.builder.block.roomStyle": "Room style",
+  "profileCms.builder.block.roomStyle.wall": "Simple wall",
+  "profileCms.builder.block.roomStyle.salon": "Salon",
+  "profileCms.builder.block.roomStyle.whiteCube": "White cube",
+  "profileCms.builder.block.roomStyle.darkRoom": "Dark room",
+  "profileCms.builder.block.roomTitle": "Room work title",
+  "profileCms.builder.block.roomImageUri": "Room artwork URI",
   "profileCms.builder.json.title": "Package JSON",
   "profileCms.builder.json.label": "Package candidate",
   "profileCms.builder.json.import": "Import JSON",
   "profileCms.builder.json.importFailed": "Package JSON could not be imported.",
+  "profileCms.builder.json.downloadPackage": "Download package JSON",
+  "profileCms.builder.json.downloadSourcePacket": "Download source packet",
+  "profileCms.builder.json.downloadSchemaBundle": "Download schemas",
+  "profileCms.builder.agent.source.title": "Source packet",
+  "profileCms.builder.agent.source.description":
+    "Export draft context for local tools and review the packet boundaries.",
+  "profileCms.builder.agent.packet.facts": "Facts",
+  "profileCms.builder.agent.packet.authorCopy": "Author copy",
+  "profileCms.builder.agent.packet.derivedMetadata": "Derived metadata",
+  "profileCms.builder.agent.packet.validation": "Validation diagnostics",
+  "profileCms.builder.agent.packet.safety": "Source rules",
+  "profileCms.builder.agent.packet.label.profile": "Profile",
+  "profileCms.builder.agent.packet.label.package": "Package",
+  "profileCms.builder.agent.packet.label.draft": "Draft",
+  "profileCms.builder.agent.packet.label.route": "Route",
+  "profileCms.builder.agent.packet.label.site": "Site",
+  "profileCms.builder.agent.packet.label.page": "Page",
+  "profileCms.builder.agent.packet.label.navigation": "Navigation",
+  "profileCms.builder.agent.packet.label.blocks": "Blocks",
+  "profileCms.builder.agent.packet.label.canonical": "Canonical",
+  "profileCms.builder.agent.packet.label.packageHash": "Package hash",
+  "profileCms.builder.agent.packet.label.payloadHash": "Payload hash",
+  "profileCms.builder.agent.packet.label.assets": "Assets",
+  "profileCms.builder.agent.packet.label.status": "Status",
+  "profileCms.builder.agent.packet.label.issues": "Issues",
+  "profileCms.builder.agent.packet.label.baseVersion": "Base version",
+  "profileCms.builder.agent.packet.label.writable": "Writable",
+  "profileCms.builder.agent.packet.value.yes": "Yes",
+  "profileCms.builder.agent.packet.value.no": "No",
+  "profileCms.builder.agent.patch.title": "Patch review",
+  "profileCms.builder.agent.patch.description":
+    "Paste or upload an agent patch, review the diff, then apply it to this draft.",
+  "profileCms.builder.agent.patch.upload": "Upload patch",
+  "profileCms.builder.agent.patch.fileTooLarge":
+    "Patch file is too large. Paste a smaller JSON patch.",
+  "profileCms.builder.agent.patch.review": "Review patch",
+  "profileCms.builder.agent.patch.apply": "Apply to draft",
+  "profileCms.builder.agent.patch.label": "Agent patch JSON",
+  "profileCms.builder.agent.patch.accepted":
+    "Patch validates against the current draft.",
+  "profileCms.builder.agent.patch.rejected":
+    "Patch was rejected before it could change the draft.",
+  "profileCms.builder.agent.patch.applied": "Patch applied to this draft.",
+  "profileCms.builder.agent.patch.diff": "Proposed diff",
+  "profileCms.builder.agent.error.codeLabel": "Code: {code}",
+  "profileCms.builder.agent.error.jsonInvalid":
+    "Patch JSON could not be parsed.",
+  "profileCms.builder.agent.error.schemaInvalid":
+    "Patch JSON does not match the agent patch schema.",
+  "profileCms.builder.agent.error.targetDraftMismatch":
+    "Patch target draft id does not match the current draft.",
+  "profileCms.builder.agent.error.baseVersionMismatch":
+    "Patch target base version is stale for the current draft.",
+  "profileCms.builder.agent.error.baseHashMissing":
+    "Patch target package hash is required.",
+  "profileCms.builder.agent.error.baseHashMismatch":
+    "Patch target package hash does not match the current draft.",
+  "profileCms.builder.agent.error.operationUnsupported":
+    "Builder review does not support {op}.",
+  "profileCms.builder.agent.error.pageMissing":
+    "Builder draft does not contain an editable homepage.",
+  "profileCms.builder.agent.error.valueInvalid":
+    "Patch value is not valid for this operation.",
+  "profileCms.builder.agent.error.pathUnsupported":
+    "Builder review cannot apply path {path}.",
+  "profileCms.builder.agent.error.metadataFieldUnsupported":
+    "Metadata field {field} is not editable by agent patches.",
+  "profileCms.builder.agent.error.blockFieldUnsupported":
+    "Block field {field} is not editable by agent patches.",
+  "profileCms.builder.agent.error.blockDuplicateId":
+    "Block id {id} already exists in this draft.",
+  "profileCms.builder.agent.error.blockStructuralMix":
+    "Structural block operations cannot be combined with other block mutations in one patch.",
+  "profileCms.builder.agent.error.navigationMissing":
+    "Builder draft does not contain an editable navigation item.",
+  "profileCms.builder.agent.error.validationRejected":
+    "Local package validation rejected this change ({code}).",
   "profileCms.builder.validation.title": "Validation",
   "profileCms.builder.validation.valid": "Package candidate is valid.",
   "profileCms.builder.validation.invalid": "Package candidate needs changes.",
