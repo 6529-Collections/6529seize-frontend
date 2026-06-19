@@ -244,7 +244,10 @@ const UnifiedWavesListWaves = forwardRef<
 
         {announcementRows.length > 0 && (
           <SidebarWaveRowsSection
-            ariaLabel="Announcement waves"
+            ariaLabel={t(
+              SIDEBAR_LOCALE,
+              "waves.sidebar.announcementWavesAriaLabel"
+            )}
             className="tw-flex tw-flex-col"
             getRowHeight={getSidebarRowHeight}
             isRowVisible={(row) =>

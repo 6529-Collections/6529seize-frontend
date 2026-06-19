@@ -438,7 +438,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         <div>
           {hasAnnouncementRows && (
             <SidebarWaveRowsSection
-              ariaLabel="Announcement waves"
+              ariaLabel={t(
+                SIDEBAR_LOCALE,
+                "waves.sidebar.announcementWavesAriaLabel"
+              )}
               className={sectionClassName}
               getRowHeight={getSidebarRowHeight}
               isRowVisible={(row) =>

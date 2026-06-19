@@ -3,6 +3,10 @@ import {
   ArrowPathIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+
+const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
 interface SidebarWaveExpandControlProps {
   readonly formattedWaveName: string;
@@ -30,16 +34,19 @@ export function SidebarWaveExpandControl({
   const buttonStateClasses = isExpanded || isLoading
     ? "tw-bg-iron-700/60 tw-text-iron-200 tw-opacity-100"
     : "tw-bg-transparent tw-text-iron-500 tw-opacity-80";
-  const labelAction = isLoading
-    ? "Loading"
+  const ariaLabelKey: MessageKey = isLoading
+    ? "waves.sidebar.expandControlLoadingAriaLabel"
     : isExpanded
-      ? "Collapse"
-      : "Expand";
+      ? "waves.sidebar.expandControlCollapseAriaLabel"
+      : "waves.sidebar.expandControlExpandAriaLabel";
+  const ariaLabel = t(SIDEBAR_LOCALE, ariaLabelKey, {
+    waveName: formattedWaveName,
+  });
 
   return (
     <button
       type="button"
-      aria-label={`${labelAction} ${formattedWaveName} subwaves`}
+      aria-label={ariaLabel}
       aria-expanded={isExpanded}
       aria-busy={isLoading || undefined}
       onClick={onClick}
