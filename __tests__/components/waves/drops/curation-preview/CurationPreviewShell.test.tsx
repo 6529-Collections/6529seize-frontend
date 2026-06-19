@@ -24,7 +24,6 @@ describe("CurationPreviewShell", () => {
 
     expect(screen.getByText("Preview content").parentElement).toHaveClass(
       "tw-h-[calc(100svh-4rem)]",
-      "tw-max-h-[calc(100vh-4rem)]",
       "tw-overflow-hidden"
     );
   });

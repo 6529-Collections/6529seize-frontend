@@ -497,7 +497,7 @@ const PreviewContent: React.FC<{
 }> = ({ isPending, previewItems }) => {
   if (previewItems.length > 0) {
     return (
-      <div className="tw-mt-4 tw-columns-1 tw-gap-2 sm:tw-columns-2">
+      <div className="tw-mt-4 tw-columns-1 tw-gap-2 min-[760px]:tw-columns-2">
         {previewItems.map((item) => (
           <PreviewTile key={item.key} item={item} />
         ))}

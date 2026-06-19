@@ -8,7 +8,7 @@ export const CurationPreviewShell: React.FC<{
 }> = ({ variant, expanded = false, children }) => {
   if (variant === "sheet") {
     const expandedHeightClassName = expanded
-      ? "tw-h-[calc(100svh-4rem)] tw-max-h-[calc(100vh-4rem)]"
+      ? "tw-h-[calc(100svh-4rem)]"
       : "tw-max-h-[calc(100svh-4rem)]";
 
     return (
