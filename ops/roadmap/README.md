@@ -9,7 +9,7 @@ instead of leaving conflicting guidance in place.
 
 ## Agent Release Railway Roadmap
 
-Last reviewed: 2026-06-11 against `origin/main` at `334b02c57`.
+Last reviewed: 2026-06-18 against `origin/main` at `97bb30914`.
 
 The repository is moving from one-human-per-PR review toward a higher-throughput
 agent development model. The operating goal is to stop treating "PR opened" as
@@ -64,11 +64,13 @@ branch model is:
 - High risk PRs can receive staging validation, but require explicit human
   approval before merging to the integration trunk unless the policy is later
   relaxed.
-- Production deploys selected release branches, not "whatever `main` currently
-  contains."
+- Current frontend production deploys from `origin/main` only. Production must
+  use the same `origin/main` SHA or ordered release set that passed staging. If
+  `origin/main` advances after staging validation, rerun staging or pause merges
+  before promotion.
 
 This keeps new work based on a common codebase while preserving production
-safety through release branch selection.
+safety through explicit staging evidence and human production approval.
 
 ### P1: Build A Staging Train
 
@@ -81,7 +83,9 @@ Triggers:
 - PR merged to `main`.
 - Manual dispatch.
 - Applying a staging queue label.
-- A scheduled bus, initially every 15 minutes.
+- A scheduled bus that follows the cadence in
+  `ops/docs/developer/deployment-bus-process.md` so the process doc stays the
+  source of truth when the team tunes the batching window.
 
 Behavior:
 
@@ -134,21 +138,20 @@ Initial label mapping:
 Agents should also perform exploratory browser checks for visible behavior, but
 the scripted E2E packs are the durable release signal.
 
-### P1: Promote To Production Through Release Branches
+### P1: Promote To Production From A Staging-Passed Main SHA
 
 Production releases should be selected batches of validated work.
 
 Flow:
 
 - Resolve the latest production SHA from the last successful production deploy.
-- Create a branch such as `release/YYYY-MM-DD-N` from that SHA.
-- Cherry-pick selected validated PR merge commits in a deterministic order.
 - Generate a release manifest.
-- Deploy the release branch to a quiet pre-production environment or a staged
-  final-smoke window.
+- Verify the candidate is the current `origin/main` SHA and has passed staging
+  as the same ordered release set.
+- If new commits land on `origin/main` after staging passed, rerun staging for
+  the new release set or pause merges before final validation.
 - Require human approval of the manifest before production deploy.
-- Deploy production through the existing production workflow against the release
-  branch.
+- Deploy production through the existing production workflow against `main`.
 
 The release manifest should include:
 
@@ -167,7 +170,7 @@ Longer term, add a second environment:
 - `preprod-release`: quiet, exact production candidate.
 
 Until that exists, schedule release freezes where staging temporarily validates
-the exact release branch.
+the exact `origin/main` production candidate.
 
 ### P1: Create A Release Dashboard And Ledger
 
@@ -208,7 +211,7 @@ The most important health metrics are:
 3. Add GitHub Deployment-based staging ledger.
 4. Add the staging train workflow with serial and scheduled deploy modes.
 5. Add per-PR staging result comments.
-6. Add release branch creation and manifest generation.
+6. Add release manifest generation and production candidate preflight.
 7. Add pre-production or final-smoke release validation.
 8. Add a `ghtrain`-style dashboard or CLI once the data model is stable.
 

@@ -111,9 +111,13 @@ export const publicEnvSchema = z.object({
     .url("STANDALONE_MAIN_SITE_BASE must be a valid URL")
     .optional(),
   FEATURE_AB_CARD: z.string().optional(),
+  NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
+  NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),
   NEXT_PUBLIC_DEBUG_NAV: z.string().optional(),
   NEXT_PUBLIC_FEATURE_AB_CARD: z.string().optional(),
+  PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
+  PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_VITE_FEATURE_AB_CARD: z.string().optional(),
   VITE_FEATURE_AB_CARD: z.string().optional(),
 

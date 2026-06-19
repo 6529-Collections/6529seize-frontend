@@ -429,10 +429,22 @@ const useWavesList = () => {
     [queryClient, rootWaveIds, viewerIdentityKey]
   );
 
-  const { subwaves, refetch: refetchSubwaves } = useWaveSubwavesMap({
+  const {
+    subwaves,
+    subwavesByParentId,
+    refetch: refetchSubwaves,
+  } = useWaveSubwavesMap({
     parentWaveIds: loadedSubwaveParentIds,
     viewerIdentityKey,
   });
+  const loadingSubwaveParentIds = useMemo(
+    () =>
+      loadedSubwaveParentIds.filter(
+        (parentWaveId) =>
+          subwavesByParentId.get(parentWaveId)?.isFetching === true
+      ),
+    [loadedSubwaveParentIds, subwavesByParentId]
+  );
 
   // Function to refetch all waves (main, pinned, announcements, subwaves)
   const refetchAllWaves = useCallback(() => {
@@ -507,6 +519,7 @@ const useWavesList = () => {
       refetchAllWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
+      loadingSubwaveParentIds,
     }),
     [
       allWaves,
@@ -531,6 +544,7 @@ const useWavesList = () => {
       refetchAllWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
+      loadingSubwaveParentIds,
     ]
   );
 };

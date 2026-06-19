@@ -7,7 +7,7 @@ export type LinkPreviewToggleControl = {
   readonly isHidden: boolean;
   readonly isLoading: boolean;
   readonly label: string;
-  readonly onToggle: () => void;
+  readonly onToggle: (hideLinkPreview?: boolean) => void;
 };
 
 export type LinkPreviewInlineShowControl = {

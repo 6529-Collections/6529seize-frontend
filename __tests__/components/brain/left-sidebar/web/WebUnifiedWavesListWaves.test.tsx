@@ -81,6 +81,7 @@ beforeEach(() => {
     waves: {
       loadSubwavesForParent,
       prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
     },
   });
   mockUseSeizeSettingsOptional.mockReturnValue({
@@ -106,6 +107,7 @@ jest.mock(
       data-depth={String(props.depth)}
       data-can-expand={String(props.canExpand)}
       data-expanded={String(props.isExpanded)}
+      data-loading-subwaves={String(props.isLoadingSubwaves)}
       data-unread-subwaves={String(props.hasUnreadSubwaves)}
     >
       {props.canExpand && (
@@ -437,6 +439,7 @@ it("auto-expands the parent for the active subwave", () => {
     waves: {
       loadSubwavesForParent,
       prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
     },
   });
 
@@ -472,6 +475,7 @@ it("loads a direct active subwave parent before showing it expanded", async () =
     waves: {
       loadSubwavesForParent,
       prefetchSubwavesForParent,
+      loadingSubwaveParentIds: ["parent"],
     },
   });
 
@@ -492,6 +496,10 @@ it("loads a direct active subwave parent before showing it expanded", async () =
   expect(screen.getByTestId("wave-parent")).toHaveAttribute(
     "data-expanded",
     "false"
+  );
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-loading-subwaves",
+    "true"
   );
   expect(screen.queryByTestId("wave-child")).toBeNull();
 

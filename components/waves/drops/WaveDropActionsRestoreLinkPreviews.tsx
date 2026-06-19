@@ -26,7 +26,7 @@ export default function WaveDropActionsRestoreLinkPreviews({
       return;
     }
 
-    previewToggle.onToggle();
+    previewToggle.onToggle(false);
     onRestored?.();
   };
 

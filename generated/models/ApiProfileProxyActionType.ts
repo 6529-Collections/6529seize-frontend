@@ -19,5 +19,6 @@ export enum ApiProfileProxyActionType {
     CreateWave = 'CREATE_WAVE',
     ReadWave = 'READ_WAVE',
     CreateDropToWave = 'CREATE_DROP_TO_WAVE',
-    RateWaveDrop = 'RATE_WAVE_DROP'
+    RateWaveDrop = 'RATE_WAVE_DROP',
+    PublishCms = 'PUBLISH_CMS'
 }

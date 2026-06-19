@@ -15,6 +15,8 @@ export const EN_GB_MESSAGES = {
   "media.video.seek": "Seek video",
   "media.video.unmute": "Unmute video",
   "media.video.unsupported": "Your browser does not support the video tag.",
+  "profileCms.interactive.fullscreen": "Full screen",
+  "profileCms.interactive.exitFullscreen": "Exit full screen",
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
