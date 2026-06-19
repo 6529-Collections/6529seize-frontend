@@ -290,7 +290,7 @@
     display: none;
   }
 
-  .focus {
+  .focusToggle .focus {
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 9999px;
     min-height: 40px;
@@ -299,12 +299,12 @@
     white-space: normal;
   }
 
-  .focus:not(.disabled) {
+  .focusToggle .focus:not(.disabled) {
     background-color: variables.$font-color;
     color: variables.$very-dark-grey;
   }
 
-  .focus.disabled {
+  .focusToggle .focus.disabled {
     border-color: rgba(255, 255, 255, 0.08);
   }
 }
