@@ -11,6 +11,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import GlobalRepCategoryDialog from "@/components/rep/categories/GlobalRepCategoryDialog";
 import { RateMatter } from "@/types/enums";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -64,6 +65,15 @@ type RepContributorsDialogState =
       readonly contributorCount: number;
     };
 
+type RepDialogState =
+  | ({
+      readonly type: "contributors";
+    } & RepContributorsDialogState)
+  | {
+      readonly type: "globalCategory";
+      readonly category: string;
+    };
+
 function useRepCategories({
   user,
   queryDirection,
@@ -111,8 +121,7 @@ export default function UserPageRep({
 
   const [repDirection, setRepDirection] = useState<RepDirection>("received");
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
-  const [contributorsDialog, setContributorsDialog] =
-    useState<RepContributorsDialogState | null>(null);
+  const [repDialog, setRepDialog] = useState<RepDialogState | null>(null);
   const [visibleCounts, setVisibleCounts] = useState(getDefaultVisibleCounts);
   const visibleCountsRef = useRef(visibleCounts);
   const isFetchingNextPageRef = useRef(getDefaultFetchStates());
@@ -273,7 +282,8 @@ export default function UserPageRep({
       return;
     }
 
-    setContributorsDialog({
+    setRepDialog({
+      type: "contributors",
       scope: "overview",
       direction: repDirection,
       contributorCount: activeOverview.contributor_count,
@@ -285,7 +295,8 @@ export default function UserPageRep({
       return;
     }
 
-    setContributorsDialog({
+    setRepDialog({
+      type: "contributors",
       scope: "category",
       direction: repDirection,
       category: category.category,
@@ -310,6 +321,9 @@ export default function UserPageRep({
           hasNextPage={activeHasNextPage}
           isFetchingNextPage={activeIsFetchingNextPage}
           onOpenOverviewContributors={handleOpenOverviewContributors}
+          onOpenGlobalCategory={(category) =>
+            setRepDialog({ type: "globalCategory", category })
+          }
           onOpenCategoryContributors={handleOpenCategoryContributors}
         />
       </div>
@@ -326,6 +340,9 @@ export default function UserPageRep({
               profile={profile}
               repDirection={repDirection}
               onOpenOverviewContributors={handleOpenOverviewContributors}
+              onOpenGlobalCategory={(category) =>
+                setRepDialog({ type: "globalCategory", category })
+              }
               onOpenCategoryContributors={handleOpenCategoryContributors}
               onRepDirectionChange={setRepDirection}
               loading={activeLoading}
@@ -365,16 +382,32 @@ export default function UserPageRep({
 
       <RepContributorsDialog
         identity={user}
-        isOpen={contributorsDialog !== null}
-        scope={contributorsDialog?.scope ?? "overview"}
-        direction={contributorsDialog?.direction ?? repDirection}
+        isOpen={repDialog?.type === "contributors"}
+        scope={
+          repDialog?.type === "contributors" ? repDialog.scope : "overview"
+        }
+        direction={
+          repDialog?.type === "contributors"
+            ? repDialog.direction
+            : repDirection
+        }
         category={
-          contributorsDialog?.scope === "category"
-            ? contributorsDialog.category
+          repDialog?.type === "contributors" && repDialog.scope === "category"
+            ? repDialog.category
             : null
         }
-        contributorCount={contributorsDialog?.contributorCount ?? 0}
-        onClose={() => setContributorsDialog(null)}
+        contributorCount={
+          repDialog?.type === "contributors" ? repDialog.contributorCount : 0
+        }
+        onClose={() => setRepDialog(null)}
+      />
+
+      <GlobalRepCategoryDialog
+        category={
+          repDialog?.type === "globalCategory" ? repDialog.category : null
+        }
+        isOpen={repDialog?.type === "globalCategory"}
+        onClose={() => setRepDialog(null)}
       />
 
       <MobileWrapperDialog
