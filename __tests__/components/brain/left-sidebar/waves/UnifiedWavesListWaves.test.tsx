@@ -16,11 +16,10 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
-jest.mock("@/components/utils/switch/CommonSwitch", () => (props: any) => (
-  <div data-testid="switch">
-    {props.label}-{String(props.isOn)}
-  </div>
-));
+jest.mock(
+  "@/components/brain/left-sidebar/waves/WavesFilterToggle",
+  () => () => <div data-testid="waves-filter-toggle" />
+);
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWave",
   () => (props: any) => (
@@ -133,10 +132,10 @@ it("renders structure even when no waves", () => {
     "data-padding",
     "tw-px-4"
   );
-  expect(screen.getByTestId("switch")).toBeInTheDocument();
+  expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
 });
 
-it("renders announcement, highly rated, pinned, following, and all waves with headers and switch", () => {
+it("renders announcement, highly rated, pinned, and one filterable bottom list", () => {
   const ref = React.createRef<UnifiedWavesListWavesHandle>();
   render(
     <UnifiedWavesListWaves
@@ -147,14 +146,14 @@ it("renders announcement, highly rated, pinned, following, and all waves with he
     />
   );
   expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
-  expect(screen.getByTestId("switch")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
-  expect(screen.getByLabelText("Following waves")).toBeInTheDocument();
   expect(
     screen.getByLabelText("All quality-ranked waves list")
   ).toBeInTheDocument();
+  expect(screen.queryByLabelText("Following waves")).toBeNull();
+  expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
@@ -186,7 +185,7 @@ it("does not give special placement to official waves", () => {
   expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
 });
 
-it("labels following waves when they are the virtualized section", () => {
+it("renders followed waves in the same bottom list instead of a separate section", () => {
   render(
     <UnifiedWavesListWaves
       waves={[
@@ -199,8 +198,11 @@ it("labels following waves when they are the virtualized section", () => {
   );
 
   expect(screen.getByText("Pinned")).toBeInTheDocument();
-  expect(screen.getByText("Following")).toBeInTheDocument();
-  expect(screen.getByLabelText("Following waves list")).toBeInTheDocument();
+  expect(screen.getByText("All")).toBeInTheDocument();
+  expect(screen.queryByText("Following")).toBeNull();
+  expect(
+    screen.getByLabelText("All quality-ranked waves list")
+  ).toBeInTheDocument();
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
 });
 
@@ -238,7 +240,7 @@ it("respects hide options and does not render toggle when not connected", () => 
   );
   expect(screen.queryByTestId("header-Pinned")).toBeNull();
   expect(screen.queryByTestId("header-All Waves")).toBeNull();
-  expect(screen.queryByTestId("switch")).toBeNull();
+  expect(screen.queryByTestId("waves-filter-toggle")).toBeNull();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
   expect(screen.queryByTestId("wave-p1")).toBeNull();

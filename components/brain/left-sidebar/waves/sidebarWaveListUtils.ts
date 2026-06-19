@@ -72,8 +72,6 @@ export const groupSidebarWaves = ({
       announcementWaves.push(wave);
     } else if (wave.isPinned) {
       pinnedWaves.push(wave);
-    } else if (wave.isFollowing) {
-      followingWaves.push(wave);
     } else if (wave.sidebarSection === "highly-rated") {
       highlyRatedWaves.push(wave);
     } else {

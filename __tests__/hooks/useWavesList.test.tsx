@@ -274,28 +274,25 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
   ).not.toHaveProperty("scoreSort");
 });
 
-test("polls followed activity when the sidebar is in joined mode", () => {
+test("keeps highly rated visible and polls followed activity when the bottom list is in joined mode", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
   renderHook(() => useWavesList(), { wrapper });
 
   const waveQueryArgs = useWavesV2Mock.mock.calls.map(([args]) => args);
-  expect(
-    waveQueryArgs.filter(
-      (args) =>
-        args.overviewType === ApiWavesOverviewType.ScoredRecentlyDroppedTo
-    )
-  ).toEqual(
+  expect(waveQueryArgs).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
+        overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
         pageSize: 10,
-        enabled: false,
+        enabled: true,
         excludeFollowed: true,
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
-        refetchInterval: false,
+        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
       }),
       expect.objectContaining({
+        overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
         pageSize: 20,
         enabled: false,
         excludeFollowed: true,
@@ -386,7 +383,7 @@ test("falls back to all waves when joined preference is persisted without a conn
   );
 });
 
-test("shows only followed waves in joined mode", () => {
+test("keeps top sections while the joined bottom list shows followed waves", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
   const followedOld = createSidebarWave({
@@ -427,12 +424,7 @@ test("shows only followed waves in joined mode", () => {
       overviewType === ApiWavesOverviewType.RecentlyDroppedTo
         ? [followedOld, followedNew]
         : pageSize === 10
-          ? [
-              highlyRatedOne,
-              highlyRatedTwo,
-              highlyRatedThree,
-              highlyRatedFour,
-            ]
+          ? [highlyRatedOne, highlyRatedTwo, highlyRatedThree, highlyRatedFour]
           : [
               highlyRatedOne,
               highlyRatedTwo,
@@ -465,6 +457,10 @@ test("shows only followed waves in joined mode", () => {
   const { result } = renderHook(() => useWavesList(), { wrapper });
 
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "highly-rated-one",
+    "highly-rated-two",
+    "highly-rated-three",
+    "3",
     "followed-new",
     "followed-old",
   ]);
@@ -477,7 +473,7 @@ test("shows only followed waves in joined mode", () => {
           wave.sidebarSection === "highly-rated"
       )
       .map((wave: any) => wave.id)
-  ).toEqual([]);
+  ).toEqual(["highly-rated-one", "highly-rated-two", "highly-rated-three"]);
   expect(
     result.current.waves
       .filter(
@@ -546,7 +542,7 @@ test("paginates only followed activity in joined mode", () => {
   expect(fetchNextAllQualityPage).not.toHaveBeenCalled();
 });
 
-test("excludes unjoined pinned, announcement, and subwaves in joined mode", () => {
+test("preserves pinned, announcement, and subwaves while joined mode filters the bottom list source", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
   const joinedPinnedWave = createSidebarWave({
@@ -639,6 +635,8 @@ test("excludes unjoined pinned, announcement, and subwaves in joined mode", () =
   const { result } = renderHook(() => useWavesList(), { wrapper });
 
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "4",
+    "unjoined-pinned",
     "joined-pinned",
     "joined-parent",
   ]);
@@ -648,9 +646,12 @@ test("excludes unjoined pinned, announcement, and subwaves in joined mode", () =
   });
 
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "4",
+    "unjoined-pinned",
     "joined-pinned",
     "joined-parent",
     "joined-subwave",
+    "unjoined-subwave",
   ]);
 });
 
