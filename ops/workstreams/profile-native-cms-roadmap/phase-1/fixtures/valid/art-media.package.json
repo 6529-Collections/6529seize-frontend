@@ -16,7 +16,11 @@
       "accent": "#f6c744"
     },
     "navigation_id": "nav-main",
-    "required_renderer_capabilities": ["media_posters", "sandboxed_embed", "object_viewer"]
+    "required_renderer_capabilities": [
+      "media_posters",
+      "sandboxed_embed",
+      "object_viewer"
+    ]
   },
   "payload": {
     "schema": "6529.cms.payload.v1",
@@ -47,6 +51,12 @@
             "id": "block-video",
             "block_type": "video",
             "asset_id": "asset-video",
+            "poster_asset_id": "asset-poster"
+          },
+          {
+            "id": "block-audio",
+            "block_type": "audio",
+            "asset_id": "asset-audio",
             "poster_asset_id": "asset-poster"
           },
           {
@@ -118,7 +128,8 @@
         "mime_type": "audio/mpeg",
         "duration_seconds": 33,
         "file_size_bytes": 1200000,
-        "roles": ["original"]
+        "roles": ["original"],
+        "alt_text": "Audio artwork transcript placeholder for mixed media fixture"
       },
       {
         "id": "asset-html",

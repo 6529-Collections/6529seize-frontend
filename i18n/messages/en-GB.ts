@@ -45,6 +45,8 @@ export const EN_GB_MESSAGES = {
   "linkPreview.github.fact.mime": "MIME",
   "linkPreview.github.fact.type": "Type",
   "linkPreview.github.fileKind": "{kind} file",
+  "profileCms.interactive.fullscreen": "Full screen",
+  "profileCms.interactive.exitFullscreen": "Exit full screen",
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",

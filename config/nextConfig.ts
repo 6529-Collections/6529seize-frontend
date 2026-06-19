@@ -11,7 +11,11 @@ import { fileURLToPath } from "node:url";
 const HTML_LIMITED_METADATA_BOTS =
   /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
 const SASS_LOAD_PATHS = [
-  path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "node_modules"),
+  path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "node_modules"
+  ),
 ];
 
 export function sharedConfig(
@@ -70,7 +74,7 @@ export function sharedConfig(
           headers: createSecurityHeaders(
             publicEnv["API_ENDPOINT"],
             publicEnv["IPFS_GATEWAY_ENDPOINT"],
-              publicEnv["MEDIA_RESOLVER_ENDPOINT"],
+            publicEnv["MEDIA_RESOLVER_ENDPOINT"],
             {
               allowInsecureLocalhostConnectSrc:
                 publicEnv.NODE_ENV === "development" ||

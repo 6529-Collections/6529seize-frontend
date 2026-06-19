@@ -69,7 +69,8 @@ export default function SelectSnapshot({
         onSkip={() => undefined}
         onNext={onAddSnapshot}
         isDisabled={false}
-        isLoading={isLoading}>
+        isLoading={isLoading}
+      >
         <ComponentConfigMeta
           tags={[]}
           walletsCount={selectedSnapshot?.walletsCount ?? null}

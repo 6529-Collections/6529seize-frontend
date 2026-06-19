@@ -113,9 +113,13 @@ function NetworkCard({
   const imageAlt = translate(locale, "user.collected.networkCards.imageAlt", {
     name: tokenName,
   });
-  const tokenLabel = translate(locale, "user.collected.networkCards.tokenLabel", {
-    tokenId: card.token,
-  });
+  const tokenLabel = translate(
+    locale,
+    "user.collected.networkCards.tokenLabel",
+    {
+      tokenId: card.token,
+    }
+  );
   const xtdhLabel = translate(locale, "user.collected.networkCards.xtdh");
   const xtdhRateLabel = translate(
     locale,
@@ -167,17 +171,13 @@ function NetworkCard({
 
         <div className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
           <span className="tw-flex tw-items-baseline tw-gap-1.5 tw-text-[13px] tw-font-semibold">
-            <span className="tw-order-2 tw-text-white/30">
-              {xtdhLabel}
-            </span>
+            <span className="tw-order-2 tw-text-white/30">{xtdhLabel}</span>
             <span className="tw-order-1 tw-text-white/80">
               {formatStatFloor(card.xtdh, 1)}
             </span>
           </span>
           <span className="tw-flex tw-items-baseline tw-justify-end tw-gap-1.5 tw-text-[13px] tw-font-semibold">
-            <span className="tw-order-2 tw-text-white/30">
-              {xtdhRateLabel}
-            </span>
+            <span className="tw-order-2 tw-text-white/30">{xtdhRateLabel}</span>
             <span className="tw-order-1 tw-text-white/80">
               {formatStatFloor(card.xtdh_rate, 1)}
             </span>

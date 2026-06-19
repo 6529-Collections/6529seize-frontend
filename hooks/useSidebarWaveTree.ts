@@ -1,6 +1,7 @@
 "use client";
 
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { compareSubwavesByLatestActivity } from "@/helpers/waves/subwave-activity.helpers";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type SidebarWaveDepth = 0 | 1;
@@ -24,6 +25,7 @@ export interface SidebarWaveTreeRow {
   readonly depth: SidebarWaveDepth;
   readonly parentWaveId: string | null;
   readonly isExpanded: boolean;
+  readonly isLoadingSubwaves: boolean;
   readonly canExpand: boolean;
   readonly hasUnreadSubwaves: boolean;
   readonly isFirstSubwave: boolean;
@@ -91,7 +93,7 @@ const buildSubwavesByParentId = (waves: readonly MinimalWave[]) => {
   }
 
   for (const subwaves of map.values()) {
-    subwaves.sort((a, b) => a.createdAt - b.createdAt);
+    subwaves.sort(compareSubwavesByLatestActivity);
   }
 
   return map;
@@ -111,12 +113,14 @@ const getActiveParentWaveIdFromWaves = (
 const buildSidebarWaveRows = ({
   getHasUnreadSubwaves,
   getIsExpanded,
+  loadingParentWaveIds,
   parentWaves,
   showExpandedSubwaves,
   subwavesByParentId,
 }: {
   readonly getHasUnreadSubwaves: (waveId: string) => boolean;
   readonly getIsExpanded: (waveId: string) => boolean;
+  readonly loadingParentWaveIds: ReadonlySet<string>;
   readonly parentWaves: readonly MinimalWave[];
   readonly showExpandedSubwaves: boolean;
   readonly subwavesByParentId: ReadonlyMap<string, readonly MinimalWave[]>;
@@ -128,7 +132,16 @@ const buildSidebarWaveRows = ({
     const canExpand =
       wave.parentWaveId === null && (wave.hasSubwaves || subwaves.length > 0);
     const isExpanded =
-      showExpandedSubwaves && canExpand && getIsExpanded(wave.id);
+      showExpandedSubwaves &&
+      canExpand &&
+      subwaves.length > 0 &&
+      getIsExpanded(wave.id);
+    const isLoadingSubwaves =
+      showExpandedSubwaves &&
+      canExpand &&
+      subwaves.length === 0 &&
+      loadingParentWaveIds.has(wave.id) &&
+      getIsExpanded(wave.id);
     const hasUnreadSubwaves = canExpand && getHasUnreadSubwaves(wave.id);
 
     rows.push({
@@ -137,6 +150,7 @@ const buildSidebarWaveRows = ({
       depth: 0,
       parentWaveId: null,
       isExpanded,
+      isLoadingSubwaves,
       canExpand,
       hasUnreadSubwaves,
       isFirstSubwave: false,
@@ -154,6 +168,7 @@ const buildSidebarWaveRows = ({
         depth: 1,
         parentWaveId: wave.id,
         isExpanded: false,
+        isLoadingSubwaves: false,
         canExpand: false,
         hasUnreadSubwaves: false,
         isFirstSubwave: index === 0,
@@ -169,6 +184,7 @@ interface UseSidebarWaveTreeOptions {
   readonly waves: readonly MinimalWave[];
   readonly activeWaveId: string | null;
   readonly activeParentWaveId?: string | null | undefined;
+  readonly loadingSubwaveParentIds?: readonly string[] | undefined;
   readonly onParentExpand?: ((parentWaveId: string) => void) | undefined;
   readonly showExpandedSubwaves?: boolean | undefined;
 }
@@ -177,6 +193,7 @@ export function useSidebarWaveTree({
   waves,
   activeWaveId,
   activeParentWaveId,
+  loadingSubwaveParentIds = [],
   onParentExpand,
   showExpandedSubwaves = true,
 }: UseSidebarWaveTreeOptions) {
@@ -211,6 +228,10 @@ export function useSidebarWaveTree({
   const subwavesByParentId = useMemo(
     () => buildSubwavesByParentId(waves),
     [waves]
+  );
+  const loadingParentWaveIds = useMemo(
+    () => new Set(loadingSubwaveParentIds),
+    [loadingSubwaveParentIds]
   );
 
   const activeParentWaveIdFromWaves = useMemo(
@@ -263,9 +284,17 @@ export function useSidebarWaveTree({
     [subwavesByParentId]
   );
 
+  const getIsVisiblyExpanded = useCallback(
+    (waveId: string) =>
+      showExpandedSubwaves &&
+      (subwavesByParentId.get(waveId)?.length ?? 0) > 0 &&
+      getIsExpanded(waveId),
+    [getIsExpanded, showExpandedSubwaves, subwavesByParentId]
+  );
+
   const toggleParent = useCallback(
     (waveId: string) => {
-      const isExpanded = getIsExpanded(waveId);
+      const isExpanded = getIsVisiblyExpanded(waveId);
       if (!isExpanded) {
         requestParentExpand(waveId, { force: true });
       }
@@ -294,7 +323,7 @@ export function useSidebarWaveTree({
         return nextState;
       });
     },
-    [getIsExpanded, requestParentExpand]
+    [getIsVisiblyExpanded, requestParentExpand]
   );
 
   const getRows = useCallback(
@@ -302,6 +331,7 @@ export function useSidebarWaveTree({
       buildSidebarWaveRows({
         getHasUnreadSubwaves,
         getIsExpanded,
+        loadingParentWaveIds,
         parentWaves,
         showExpandedSubwaves,
         subwavesByParentId,
@@ -309,6 +339,7 @@ export function useSidebarWaveTree({
     [
       getHasUnreadSubwaves,
       getIsExpanded,
+      loadingParentWaveIds,
       showExpandedSubwaves,
       subwavesByParentId,
     ]

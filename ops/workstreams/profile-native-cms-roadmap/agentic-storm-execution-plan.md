@@ -974,4 +974,3 @@ The roadmap is now broad enough that implementation can move very fast, but only
 if package schemas, fixtures, route rules, hash rules, and publish invariants are
 stable first. Once those are locked, many agents can work in parallel without
 accidental architecture drift.
-

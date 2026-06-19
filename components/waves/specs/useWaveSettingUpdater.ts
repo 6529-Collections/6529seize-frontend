@@ -35,7 +35,8 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
         if (!success) {
           setToast({
             type: "error",
-            message: "Couldn't authenticate. Reconnect your wallet and try again.",
+            message:
+              "Couldn't authenticate. Reconnect your wallet and try again.",
           });
           return;
         }

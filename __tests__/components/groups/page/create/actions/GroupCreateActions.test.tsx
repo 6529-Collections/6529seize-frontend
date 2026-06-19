@@ -1,17 +1,23 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { ApiGroupTdhInclusionStrategy } from '@/generated/models/ApiGroupTdhInclusionStrategy';
-import userEvent from '@testing-library/user-event';
-import GroupCreateActions from '@/components/groups/page/create/actions/GroupCreateActions';
-import { AuthContext } from '@/components/auth/Auth';
-import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
+import userEvent from "@testing-library/user-event";
+import GroupCreateActions from "@/components/groups/page/create/actions/GroupCreateActions";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
-jest.mock('@/components/groups/page/create/actions/GroupCreateTest', () => () => <div data-testid="test" />);
-jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
+jest.mock(
+  "@/components/groups/page/create/actions/GroupCreateTest",
+  () => () => <div data-testid="test" />
+);
+jest.mock(
+  "@/components/distribution-plan-tool/common/CircleLoader",
+  () => () => <div data-testid="loader" />
+);
 
 const mockSubmit = jest.fn();
 const mockValidate = jest.fn();
-jest.mock('@/hooks/groups/useGroupMutations', () => ({
+jest.mock("@/hooks/groups/useGroupMutations", () => ({
   useGroupMutations: () => ({
     validate: mockValidate,
     submit: mockSubmit,
@@ -24,10 +30,20 @@ jest.mock('@/hooks/groups/useGroupMutations', () => ({
 }));
 
 const defaultGroup = {
-  name: '',
+  name: "",
   group: {
-    tdh: { min: null, max: null, inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh },
-    rep: { min: null, max: null, user_identity: null, category: null, direction: null },
+    tdh: {
+      min: null,
+      max: null,
+      inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
+    },
+    rep: {
+      min: null,
+      max: null,
+      user_identity: null,
+      category: null,
+      direction: null,
+    },
     cic: { min: null, max: null, user_identity: null, direction: null },
     level: { min: null, max: null },
     owns_nfts: [],
@@ -36,11 +52,13 @@ const defaultGroup = {
   },
 };
 
-function renderActions(props?: Partial<React.ComponentProps<typeof GroupCreateActions>>) {
+function renderActions(
+  props?: Partial<React.ComponentProps<typeof GroupCreateActions>>
+) {
   const auth = {
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
-    connectedProfile: { handle: 'alice' },
+    connectedProfile: { handle: "alice" },
   } as any;
   const queryCtx = { onGroupCreate: jest.fn() } as any;
   const onCompleted = jest.fn();
@@ -65,62 +83,78 @@ beforeEach(() => {
   mockValidate.mockReset();
 });
 
-it('disables create button when no filters selected', () => {
+it("disables create button when no filters selected", () => {
   mockValidate.mockReturnValue({ valid: false, issues: [] });
   renderActions();
-  expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
 });
 
-it('shows save button when editing an existing group', () => {
+it("shows save button when editing an existing group", () => {
   mockValidate.mockReturnValue({ valid: false, issues: [] });
-  renderActions({ originalGroup: { id: 'old' } as any });
-  expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
-  expect(screen.queryByRole('button', { name: 'Create' })).not.toBeInTheDocument();
+  renderActions({ originalGroup: { id: "old" } as any });
+  expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  expect(
+    screen.queryByRole("button", { name: "Create" })
+  ).not.toBeInTheDocument();
 });
 
-it('creates group and marks visible on create', async () => {
+it("creates group and marks visible on create", async () => {
   const groupConfig = {
     ...defaultGroup,
-    name: 'New Group',
-    group: { ...defaultGroup.group, identity_addresses: ['0x1'] },
+    name: "New Group",
+    group: { ...defaultGroup.group, identity_addresses: ["0x1"] },
   };
   mockValidate.mockReturnValue({ valid: true, issues: [] });
-  mockSubmit.mockResolvedValueOnce({ ok: true, group: { id: '123' }, published: true });
+  mockSubmit.mockResolvedValueOnce({
+    ok: true,
+    group: { id: "123" },
+    published: true,
+  });
 
   const { auth, onCompleted } = renderActions({ groupConfig });
 
-  await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+  await userEvent.click(screen.getByRole("button", { name: "Create" }));
 
   await waitFor(() => expect(mockSubmit).toHaveBeenCalledTimes(1));
   expect(mockSubmit).toHaveBeenCalledWith({
     payload: groupConfig,
     previousGroup: null,
-    currentHandle: 'alice',
+    currentHandle: "alice",
   });
-  expect(auth.setToast).toHaveBeenCalledWith({ message: 'Group created.', type: 'success' });
+  expect(auth.setToast).toHaveBeenCalledWith({
+    message: "Group created.",
+    type: "success",
+  });
   expect(onCompleted).toHaveBeenCalled();
 });
 
-it('saves group changes in edit mode', async () => {
+it("saves group changes in edit mode", async () => {
   const groupConfig = {
     ...defaultGroup,
-    name: 'Edited Group',
-    group: { ...defaultGroup.group, identity_addresses: ['0x1'] },
+    name: "Edited Group",
+    group: { ...defaultGroup.group, identity_addresses: ["0x1"] },
   };
-  const originalGroup = { id: 'old', created_by: { handle: 'Alice' } } as any;
+  const originalGroup = { id: "old", created_by: { handle: "Alice" } } as any;
   mockValidate.mockReturnValue({ valid: true, issues: [] });
-  mockSubmit.mockResolvedValueOnce({ ok: true, group: { id: '123' }, published: true });
+  mockSubmit.mockResolvedValueOnce({
+    ok: true,
+    group: { id: "123" },
+    published: true,
+  });
 
   const { auth, onCompleted } = renderActions({ groupConfig, originalGroup });
 
-  await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
   await waitFor(() => expect(mockSubmit).toHaveBeenCalledTimes(1));
   expect(mockSubmit).toHaveBeenCalledWith({
     payload: groupConfig,
     previousGroup: originalGroup,
-    currentHandle: 'alice',
+    currentHandle: "alice",
   });
-  expect(auth.setToast).toHaveBeenCalledWith({ message: 'Group saved.', type: 'success' });
+  expect(auth.setToast).toHaveBeenCalledWith({
+    message: "Group saved.",
+    type: "success",
+  });
   expect(onCompleted).toHaveBeenCalled();
 });

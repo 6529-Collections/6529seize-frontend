@@ -147,6 +147,18 @@ export default function WaveRepRatingModal({
         queryKey: [QueryKey.WAVE_REP_CREDIT],
       });
       queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE_REP_OVERVIEW],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE_REP_CATEGORIES],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE_REP_LOGS],
+      });
+      queryClient.invalidateQueries({
         queryKey: [QueryKey.WAVE],
       });
       queryClient.invalidateQueries({
@@ -347,10 +359,7 @@ export default function WaveRepRatingModal({
                 role="status"
                 className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-amber-200"
               >
-                {t(
-                  WAVE_REP_MODAL_LOCALE,
-                  "waves.rep.modal.noAvailableCredit"
-                )}
+                {t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.noAvailableCredit")}
               </p>
             )}
           </div>

@@ -36,6 +36,11 @@
         "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
         "kind": "page",
         "page_id": "page-nft-1"
+      },
+      {
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2/index.html",
+        "kind": "page",
+        "page_id": "page-nft-2"
       }
     ],
     "pages": [
@@ -74,7 +79,8 @@
               "block_number": 22000000,
               "captured_at": "2026-06-17T00:00:00Z"
             },
-            "featured_page_ids": ["page-collection", "page-nft-1"]
+            "display_mode": "editorial",
+            "featured_page_ids": ["page-collection", "page-nft-1", "page-nft-2"]
           }
         ]
       },
@@ -120,7 +126,31 @@
           {
             "id": "block-nft-ref",
             "block_type": "nft_reference",
-            "nft_media_profile_id": "nft-memes-1"
+            "nft_media_profile_id": "nft-memes-1",
+            "collection_title": "The Memes by 6529"
+          }
+        ]
+      },
+      {
+        "id": "page-nft-2",
+        "type": "nft_detail",
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2/index.html",
+        "metadata": {
+          "title": "The Memes #2",
+          "description": "Second generated NFT detail page for multi-work gallery inspection.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes #2",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-nft-ref",
+            "block_type": "nft_reference",
+            "nft_media_profile_id": "nft-memes-2",
+            "collection_title": "The Memes by 6529"
           }
         ]
       }
@@ -149,6 +179,18 @@
         "file_size_bytes": 900000,
         "roles": ["original", "detail", "fullscreen"],
         "alt_text": "The Memes by 6529 card number 1"
+      },
+      {
+        "id": "asset-memes-2-grid",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturegallery/memes-2-grid.webp",
+        "content_hash": "sha256:3939393939393939393939393939393939393939393939393939393939393939",
+        "mime_type": "image/webp",
+        "width": 900,
+        "height": 1200,
+        "file_size_bytes": 160000,
+        "roles": ["grid", "thumbnail"],
+        "alt_text": "Grid derivative for The Memes by 6529 card number 2"
       }
     ],
     "nft_media_profiles": [
@@ -171,6 +213,29 @@
         "poster_asset_id": "asset-memes-1-original",
         "snapshot": {
           "owner": "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+          "block_number": 22000000,
+          "captured_at": "2026-06-17T00:00:00Z"
+        }
+      },
+      {
+        "id": "nft-memes-2",
+        "chain_id": 1,
+        "contract": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+        "token_id": "2",
+        "metadata_uri": "ipfs://bafyfixturegallery/metadata/2.json",
+        "metadata_hash": "sha256:4040404040404040404040404040404040404040404040404040404040404040",
+        "original_asset_ids": ["asset-memes-2-grid"],
+        "display_variants": [
+          {
+            "asset_id": "asset-memes-2-grid",
+            "role": "grid",
+            "crop_mode": "cover",
+            "source_asset_id": "asset-memes-2-grid"
+          }
+        ],
+        "poster_asset_id": "asset-memes-2-grid",
+        "snapshot": {
+          "owner": "0xfDF8bcf56aF0584026f9DB963381db72C5cc8e3b",
           "block_number": 22000000,
           "captured_at": "2026-06-17T00:00:00Z"
         }
@@ -206,8 +271,8 @@
     "build_manifest": {
       "renderer": "6529-cms-static",
       "renderer_version": "0.0.0-fixture",
-      "route_count": 3,
-      "asset_count": 2,
+      "route_count": 4,
+      "asset_count": 3,
       "warnings": []
     }
   },
@@ -244,4 +309,3 @@
     "notes": "Valid generated wallet gallery fixture."
   }
 }
-

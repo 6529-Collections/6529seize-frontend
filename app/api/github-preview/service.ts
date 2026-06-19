@@ -1148,7 +1148,8 @@ function decodeGithubContentBuffer(
   if (
     content.encoding !== "base64" ||
     !content.content ||
-    (typeof content.size === "number" && content.size > CONTENT_EXCERPT_MAX_BYTES)
+    (typeof content.size === "number" &&
+      content.size > CONTENT_EXCERPT_MAX_BYTES)
   ) {
     return null;
   }

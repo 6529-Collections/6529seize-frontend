@@ -15,6 +15,8 @@ import { ApiCreateNewProfileProxyAllocateCicAction } from '../models/ApiCreateNe
 import { ApiCreateNewProfileProxyAllocateRepAction } from '../models/ApiCreateNewProfileProxyAllocateRepAction';
 import { ApiCreateNewProfileProxyCreateWaveAction } from '../models/ApiCreateNewProfileProxyCreateWaveAction';
 import { ApiCreateNewProfileProxyCreateWaveParticipationDropAction } from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropAction';
+import { ApiCreateNewProfileProxyPublishCmsAction } from '../models/ApiCreateNewProfileProxyPublishCmsAction';
+import { ApiCreateNewProfileProxyRateWaveDropAction } from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
 import { ApiCreateNewProfileProxyReadWaveAction } from '../models/ApiCreateNewProfileProxyReadWaveAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
 import { HttpFile } from '../http/http';

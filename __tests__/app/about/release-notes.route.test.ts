@@ -32,7 +32,7 @@ describe("/about/release-notes redirect route", () => {
 
   it("permanently redirects GET requests to the Releases wave", () => {
     const request = createRequest(
-      "https://6529.io/about/release-notes?utm_source=sitemap"
+      "https://0.0.0.0:3001/about/release-notes?utm_source=sitemap"
     );
 
     const response = GET(request);

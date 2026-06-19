@@ -30,6 +30,7 @@ jest.mock(
       data-depth={String(props.depth)}
       data-can-expand={String(props.canExpand)}
       data-expanded={String(props.isExpanded)}
+      data-loading-subwaves={String(props.isLoadingSubwaves)}
       data-unread-subwaves={String(props.hasUnreadSubwaves)}
     >
       {props.canExpand && (
@@ -101,6 +102,7 @@ beforeEach(() => {
     waves: {
       loadSubwavesForParent,
       prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
     },
   });
   mockUseSeizeSettingsOptional.mockReturnValue({
@@ -325,6 +327,7 @@ it("auto-expands the parent for the active subwave", () => {
     waves: {
       loadSubwavesForParent,
       prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
     },
   });
 
@@ -353,12 +356,13 @@ it("auto-expands the parent for the active subwave", () => {
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 });
 
-it("loads and expands a direct active subwave parent before the child row is available", async () => {
+it("loads a direct active subwave parent before showing it expanded", async () => {
   mockUseMyStream.mockReturnValue({
     activeWave: { id: "child", parentWaveId: "parent", set: jest.fn() },
     waves: {
       loadSubwavesForParent,
       prefetchSubwavesForParent,
+      loadingSubwaveParentIds: ["parent"],
     },
   });
 
@@ -377,6 +381,10 @@ it("loads and expands a direct active subwave parent before the child row is ava
 
   expect(screen.getByTestId("wave-parent")).toHaveAttribute(
     "data-expanded",
+    "false"
+  );
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-loading-subwaves",
     "true"
   );
   expect(screen.queryByTestId("wave-child")).toBeNull();

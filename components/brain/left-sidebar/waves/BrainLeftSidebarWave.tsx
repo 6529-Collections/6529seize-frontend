@@ -36,6 +36,7 @@ interface BrainLeftSidebarWaveProps {
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
   readonly isExpanded?: boolean | undefined;
+  readonly isLoadingSubwaves?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly isLastSubwave?: boolean | undefined;
   readonly onToggleExpand?: ((waveId: string) => void) | undefined;
@@ -97,6 +98,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   depth = 0,
   canExpand = false,
   isExpanded = false,
+  isLoadingSubwaves = false,
   hasUnreadSubwaves = false,
   isLastSubwave = false,
   onToggleExpand,
@@ -345,6 +347,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             <SidebarWaveExpandControl
               formattedWaveName={formattedWaveName}
               isExpanded={isExpanded}
+              isLoading={isLoadingSubwaves}
               onBlur={cancelSubwavePrefetch}
               onClick={handleToggleExpand}
               onFocus={scheduleSubwavePrefetch}

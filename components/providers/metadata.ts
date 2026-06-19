@@ -22,12 +22,42 @@ type LargeSocialCardMetadata = Omit<
   readonly ogImage: string;
 };
 
+type SocialCardQueryValue = string | number | null | undefined;
+
 const getBaseEndpointUrl = (baseEndpoint: string): URL => {
   try {
     return new URL(baseEndpoint);
   } catch {
     return new URL(publicEnv.BASE_ENDPOINT);
   }
+};
+
+const appendSocialCardQueryText = (
+  params: URLSearchParams,
+  key: string,
+  value: SocialCardQueryValue
+) => {
+  if (value === null || value === undefined) {
+    return;
+  }
+
+  const normalized = String(value).trim();
+  if (normalized) {
+    params.set(key, normalized);
+  }
+};
+
+const getSocialCardImagePath = (
+  path: string,
+  query: Record<string, SocialCardQueryValue>
+): string => {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) =>
+    appendSocialCardQueryText(params, key, value)
+  );
+
+  const queryString = params.toString();
+  return queryString ? `${path}?${queryString}` : path;
 };
 
 export function getAbsoluteOgImageUrl(
@@ -43,10 +73,68 @@ export function getDefaultOgImageUrl(
   return getAbsoluteOgImageUrl(DEFAULT_OG_IMAGE_PATH, baseEndpoint);
 }
 
-export function getLargeSocialCardMetadata(
-  metadata: LargeSocialCardMetadata,
+export function getCollectionSocialCardImagePath(
+  collection: string,
+  options: {
+    readonly badge?: SocialCardQueryValue;
+    readonly image?: SocialCardQueryValue;
+    readonly subtitle?: SocialCardQueryValue;
+    readonly title?: SocialCardQueryValue;
+  } = {}
+): string {
+  return getSocialCardImagePath(
+    `/api/og-metadata/collections/${encodeURIComponent(collection)}`,
+    options
+  );
+}
+
+export function getNftSocialCardImagePath({
+  artist,
+  badge,
+  collection,
+  contract,
+  displayId,
+  id,
+  image,
+  subtitle,
+  title,
+}: {
+  readonly artist?: SocialCardQueryValue;
+  readonly badge?: SocialCardQueryValue;
+  readonly collection?: SocialCardQueryValue;
+  readonly contract: string;
+  readonly displayId?: SocialCardQueryValue;
+  readonly id: string | number;
+  readonly image?: SocialCardQueryValue;
+  readonly subtitle?: SocialCardQueryValue;
+  readonly title?: SocialCardQueryValue;
+}): string {
+  return getSocialCardImagePath(
+    `/api/og-metadata/nfts/${encodeURIComponent(contract)}/${encodeURIComponent(
+      String(id)
+    )}`,
+    {
+      artist,
+      badge,
+      collection,
+      displayId,
+      image,
+      subtitle,
+      title,
+    }
+  );
+}
+
+export function getLargeSocialCardMetadata<
+  SocialCardMetadata extends LargeSocialCardMetadata,
+>(
+  metadata: SocialCardMetadata,
   baseEndpoint = publicEnv.BASE_ENDPOINT
-): Partial<PageSSRMetadata> {
+): Omit<SocialCardMetadata, "ogImage"> &
+  Pick<
+    PageSSRMetadata,
+    "ogImage" | "ogImageHeight" | "ogImageWidth" | "twitterCard"
+  > {
   return {
     ...metadata,
     ogImage: getAbsoluteOgImageUrl(metadata.ogImage, baseEndpoint),
@@ -67,7 +155,12 @@ const getOpenGraphImages = ({
   readonly ogImageWidth?: number | undefined;
   readonly ogImageAlt?: string | undefined;
 }): string[] | OgImageDescriptor[] => {
-  if (!ogImageHeight || !ogImageWidth) {
+  if (
+    ogImageHeight === undefined ||
+    ogImageWidth === undefined ||
+    ogImageHeight <= 0 ||
+    ogImageWidth <= 0
+  ) {
     return [ogImage];
   }
 
@@ -77,7 +170,7 @@ const getOpenGraphImages = ({
     height: ogImageHeight,
   };
 
-  if (ogImageAlt) {
+  if (ogImageAlt !== undefined && ogImageAlt.trim().length > 0) {
     return [{ ...image, alt: ogImageAlt }];
   }
 

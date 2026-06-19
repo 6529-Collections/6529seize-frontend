@@ -110,9 +110,7 @@ export function resolveSeizeVideoTemplate({
 }
 
 function getPrefersReducedMotionSnapshot(): boolean {
-  return (
-    globalThis.window?.matchMedia?.(REDUCED_MOTION_QUERY).matches ?? false
-  );
+  return globalThis.window?.matchMedia?.(REDUCED_MOTION_QUERY).matches ?? false;
 }
 
 function subscribePrefersReducedMotion(onStoreChange: () => void) {
