@@ -145,14 +145,12 @@ function MemesQuickVoteMediaStage({
   isInteractive,
   isMobile,
   mediaContent,
-  swipeHint,
   swipeOffset,
   touchSurfaceProps,
 }: {
   readonly isInteractive: boolean;
   readonly isMobile: boolean;
   readonly mediaContent: ReactNode;
-  readonly swipeHint: string | null;
   readonly swipeOffset: number;
   readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
 }) {
@@ -191,31 +189,36 @@ function MemesQuickVoteMediaStage({
         ))}
 
       {isInteractive && isMobile && (
-        <div className="tw-pointer-events-none tw-absolute tw-inset-x-3 tw-bottom-3 tw-z-10 tw-flex tw-items-center tw-justify-between tw-gap-3 md:tw-hidden">
-          <span
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-inset-y-0 tw-z-10 tw-flex tw-items-center tw-justify-between md:tw-hidden"
+        >
+          <div
             className={clsx(
-              "tw-inline-flex tw-h-8 tw-max-w-[46%] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-text-xs tw-font-bold tw-shadow-[0_10px_24px_rgba(0,0,0,0.28)] tw-backdrop-blur-md tw-transition-all",
-              swipeOffset < 0
-                ? "tw-border-rose-300/70 tw-bg-rose-950 tw-text-white"
-                : "tw-border-white/20 tw-bg-black/85 tw-text-white"
+              "tw-flex tw-h-24 tw-w-10 tw-items-center tw-justify-start tw-bg-gradient-to-r tw-from-black/45 tw-to-transparent tw-pl-2 tw-transition-opacity",
+              swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-65"
             )}
           >
-            <ChevronLeftIcon className="tw-size-3.5 tw-shrink-0" />
-            <span className="tw-truncate">Skip</span>
-          </span>
-          <span
+            <ChevronLeftIcon
+              className={clsx(
+                "tw-size-6 tw-shrink-0 tw-drop-shadow",
+                swipeOffset < 0 ? "tw-text-white" : "tw-text-white/75"
+              )}
+            />
+          </div>
+          <div
             className={clsx(
-              "tw-inline-flex tw-h-8 tw-max-w-[54%] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-text-xs tw-font-bold tw-shadow-[0_10px_24px_rgba(0,0,0,0.28)] tw-backdrop-blur-md tw-transition-all",
-              swipeOffset > 0
-                ? "tw-border-primary-300/70 tw-bg-primary-600 tw-text-white"
-                : "tw-border-white/20 tw-bg-black/85 tw-text-white"
+              "tw-flex tw-h-24 tw-w-10 tw-items-center tw-justify-end tw-bg-gradient-to-l tw-from-black/45 tw-to-transparent tw-pr-2 tw-transition-opacity",
+              swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-65"
             )}
           >
-            <span className="tw-truncate">
-              {swipeHint ? `Vote ${swipeHint}` : "Vote"}
-            </span>
-            <ChevronRightIcon className="tw-size-3.5 tw-shrink-0" />
-          </span>
+            <ChevronRightIcon
+              className={clsx(
+                "tw-size-6 tw-shrink-0 tw-drop-shadow",
+                swipeOffset > 0 ? "tw-text-white" : "tw-text-white/75"
+              )}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -340,7 +343,6 @@ function MemesQuickVotePreviewContent({
           isInteractive={isInteractive}
           isMobile={isMobile}
           mediaContent={mediaContent}
-          swipeHint={swipeHint}
           swipeOffset={swipeOffset}
           touchSurfaceProps={mobileTouchSurfaceProps}
         />
