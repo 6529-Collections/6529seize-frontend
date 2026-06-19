@@ -47,10 +47,14 @@ Available now:
   `/{handle}/cms/builder` route, guided homepage editor, real renderer preview,
   local V1 validation checklist, JSON import/export, and save/validate/publish
   adapter stubs.
-- The Phase 7 frontend 3D lane is in progress on
-  `codex/cms-3d-rooms-mvp`, stacked on the builder MVP. It adds a bounded
-  Three.js client island for GLB/glTF object viewing and simple exhibition room
-  rendering, plus a builder-facing 3D room primitive.
+- The Phase 7 frontend 3D lane adds a bounded Three.js client island for
+  GLB/glTF object viewing and simple exhibition room rendering, plus a
+  builder-facing 3D room primitive.
+- Phase 5-8 QA/integration is now tracked on
+  `codex/cms-phase5-8-qa-integration` with a living checklist at
+  `phase-5-8-qa-checklist.md`, fixture renderer coverage for wallet gallery,
+  collection, NFT detail, mixed media, and 3D room fallback packages, and an
+  opt-in Playwright smoke harness prepared for worker branch integration.
 
 Important limits:
 
@@ -74,6 +78,8 @@ Important limits:
   poster/static preview, deferred room/object loading, faithful 2D art
   surfaces, canonical detail links, and mobile fallback.
 - There is no general WYSIWYG/block editor yet.
+- The Phase 5-8 smoke harness is opt-in because it needs deployed/staged routes
+  and fixture data for the full generated gallery and 3D surfaces.
 
 ## Product Decisions Already Made
 

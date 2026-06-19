@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import CmsThreeDViewer from "@/components/profile-cms/CmsThreeDViewer";
 import type { CmsThreeDViewerConfig } from "@/components/profile-cms/CmsThreeDTypes";
@@ -43,9 +43,22 @@ const roomConfig: CmsThreeDViewerConfig = {
 
 describe("CmsThreeDViewer", () => {
   const originalMatchMedia = globalThis.matchMedia;
+  const originalRequestFullscreen = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    "requestFullscreen"
+  );
 
   afterEach(() => {
     globalThis.matchMedia = originalMatchMedia;
+    if (originalRequestFullscreen) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "requestFullscreen",
+        originalRequestFullscreen
+      );
+    } else {
+      Reflect.deleteProperty(HTMLElement.prototype, "requestFullscreen");
+    }
   });
 
   it("renders a deferred room canvas with canonical artwork links", () => {
@@ -58,6 +71,37 @@ describe("CmsThreeDViewer", () => {
     expect(
       screen.getByRole("link", { name: "Square artwork" })
     ).toHaveAttribute("href", "/punk6529/nfts/ethereum/contract/1/index.html");
+  });
+
+  it("keeps the 3D viewer embedded until fullscreen is requested", () => {
+    mockMatchMedia(false);
+
+    render(<CmsThreeDViewer config={roomConfig} />);
+
+    const viewer = screen.getByLabelText("Simple room");
+    expect(viewer).toHaveAttribute("data-cms-3d-fullscreen", "false");
+    expect(viewer).toHaveClass("tw-w-full");
+    expect(viewer).not.toHaveClass("tw-w-screen");
+    expect(
+      screen.getByRole("button", { name: "Full screen" })
+    ).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("requests fullscreen on the viewer frame", () => {
+    mockMatchMedia(false);
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
+      configurable: true,
+      value: requestFullscreen,
+    });
+
+    render(<CmsThreeDViewer config={roomConfig} />);
+
+    const viewer = screen.getByLabelText("Simple room");
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+
+    expect(requestFullscreen).toHaveBeenCalledTimes(1);
+    expect(requestFullscreen.mock.contexts[0]).toBe(viewer);
   });
 
   it("uses poster and 2D links on mobile", async () => {

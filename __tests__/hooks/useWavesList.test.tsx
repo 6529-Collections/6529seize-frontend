@@ -461,6 +461,54 @@ test("starts without subwave queries, then appends subwaves for loaded parents",
   ]);
 });
 
+test("exposes loading parent ids while requested subwaves are fetching", () => {
+  const parentWave = {
+    ...createSidebarWave({ id: "parent", latestDropTimestamp: 500 }),
+    hasSubwaves: true,
+  };
+
+  useWavesV2Mock.mockReturnValue({
+    waves: [parentWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+  useWaveSubwavesMapMock.mockImplementation(
+    ({ parentWaveIds }: { readonly parentWaveIds: readonly string[] }) => ({
+      subwaves: [],
+      subwavesByParentId: new Map(
+        parentWaveIds.includes("parent")
+          ? [["parent", { subwaves: [], isFetching: true }]]
+          : []
+      ),
+      isFetching: parentWaveIds.includes("parent"),
+      refetch: jest.fn(),
+    })
+  );
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.loadingSubwaveParentIds).toEqual([]);
+
+  act(() => {
+    result.current.loadSubwavesForParent("parent");
+  });
+
+  expect(result.current.loadingSubwaveParentIds).toEqual(["parent"]);
+});
+
 test("keeps public fetching state scoped to root wave sources", () => {
   useWaveSubwavesMapMock.mockReturnValue({
     subwaves: [],
