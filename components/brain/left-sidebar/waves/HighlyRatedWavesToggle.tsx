@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import useLocalPreference from "@/hooks/useLocalPreference";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
@@ -38,8 +39,11 @@ export function HighlyRatedWavesToggle({
     `waves.sidebar.highlyRatedToggleLabel.${countKey}` as MessageKey;
   const ariaLabelKey =
     `waves.sidebar.highlyRated${isExpanded ? "Collapse" : "Expand"}AriaLabel.${countKey}` as MessageKey;
-  const label = t(SIDEBAR_LOCALE, labelKey, { count });
-  const ariaLabel = t(SIDEBAR_LOCALE, ariaLabelKey, { count });
+  const formattedCount = formatInteger(SIDEBAR_LOCALE, count);
+  const label = t(SIDEBAR_LOCALE, labelKey, { count: formattedCount });
+  const ariaLabel = t(SIDEBAR_LOCALE, ariaLabelKey, {
+    count: formattedCount,
+  });
   const handleClick = useCallback(() => {
     onToggle();
   }, [onToggle]);
