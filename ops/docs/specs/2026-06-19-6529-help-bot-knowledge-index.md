@@ -20,10 +20,11 @@ frontend repository, GitHub, or a live rendered page while a user waits for an
 answer. The frontend should provide a structured, versioned help corpus that can
 be synchronized by the backend and used for retrieval-augmented generation.
 
-The agreed bot handle is `@6529help`. The first runtime release ships from the
-backend with bounded seed records and no full RAG. This document describes the
-frontend-owned help index needed for the next corpus phase, when the helper
-chatbot expands beyond the V1 seed set.
+The agreed bot handle is `@6529help`. The first runtime release ships without
+full RAG, but it now uses a frontend-owned curated help index rather than
+backend-owned frontend product records. The source lives at
+`ops/help/help-index.json`, the build publishes `public/help-index.json`, and
+the backend consumes the deployed `/help-index.json` with a short cache.
 
 ## Goals
 
@@ -69,8 +70,8 @@ navigation because the frontend owns:
 - page-level product documentation under `ops/docs`
 - affordances such as buttons, menus, tabs, and empty-state calls to action
 
-The backend should own runtime copies, embeddings, job orchestration, LLM calls,
-message reactions, and bot replies.
+The backend should own caching, retrieval, embeddings when added, job
+orchestration, LLM calls, message reactions, and bot replies.
 
 ## Agent Maintenance Contract
 
@@ -85,15 +86,11 @@ affect what users can ask `@6529help` about. This applies to:
 - canonical links, route redirects, or page moves
 - docs under `ops/docs` that explain user-facing behavior
 
-For the current V1, the live bot answers from backend seed records. If a
-frontend change needs to be answerable before the full help-index/RAG path is
-implemented, update the paired backend seed corpus in
-`src/help-bot/help-bot.knowledge.ts` or explicitly record the follow-up.
-
-For the future help index, keep curated records, route records, doc chunks, and
-`data-help-*` metadata aligned with the UI in the same PR as the feature change.
-Do not rely on the LLM to discover new routes or controls from source code at
-answer time.
+For the current V1, keep `ops/help/help-index.json` aligned with the UI in the
+same PR as the frontend feature change, then run `6529 run help-index:sync` so
+the generated `public/help-index.json` stays in sync. Do not rely on the
+backend, LLM, GitHub lookup, or source-code inspection to discover new frontend
+routes or controls at answer time.
 
 ## Proposed Help Sources
 
@@ -162,8 +159,8 @@ Example:
 ```
 
 The exact schema can evolve, but the important product rule is that the LLM
-should not discover the `+` button live. The UI location should be authored or
-generated ahead of time.
+should not discover the `+` button live. The UI location is authored ahead of
+time in `ops/help/help-index.json`.
 
 ### 3. Generated Route Records
 
@@ -178,7 +175,7 @@ Generated route records should be low confidence unless paired with curated docs
 or route metadata. They are useful for retrieval, but curated records should
 select canonical links for important questions.
 
-### 4. Product Doc Chunks
+### 4. Future Product Doc Chunks
 
 Chunk existing docs under `ops/docs` by heading and paragraph group. Preserve:
 
@@ -240,9 +237,9 @@ Rules:
 - `data-help-id` values should be stable.
 - CI should fail when a curated `data-help-id` is duplicated.
 
-## Generated Artifact
+## Current Artifact
 
-The frontend should publish one generated help artifact:
+The frontend publishes one generated help artifact:
 
 ```text
 help-index.json
@@ -269,21 +266,22 @@ Recommended high-level shape:
 }
 ```
 
-The backend may consume the artifact from a deployed public URL, S3 object, or
-repository release artifact. The answer path should consume only the backend's
-cached copy.
+The backend consumes the artifact from the deployed public site by default at
+`https://6529.io/help-index.json`, with `HELP_BOT_INDEX_URL` available as an
+override. The answer path consumes only the backend's cached copy.
 
 ## Validation Requirements
 
-The frontend build or CI should validate:
+The frontend `help-index:sync` step validates:
 
-- every `canonical_path` starts with `/`
-- every `canonical_path` resolves to a known route or an explicitly external
-  destination
-- every related internal path resolves or is marked as intentionally dynamic
+- every `canonical_path` starts with `/` or `https://`
+- every internal `canonical_path` resolves to a known App Router page, including
+  dynamic routes such as `/{user}/subscriptions`
+- every related internal path resolves to a known App Router page
 - record IDs are unique
 - aliases are normalized and non-empty
 - required records for critical terms/actions exist
+- source references exist in the frontend repository
 - generated JSON matches schema
 
 Initial critical records:
@@ -292,9 +290,9 @@ Initial critical records:
 - `network.xtdh`
 - `waves.create.entrypoint.sidebar`
 - `waves.create.flow`
-- `waves.direct-message.create`
-- `profiles.subscriptions`
-- `tools.subscriptions-report`
+- `waves.direct-messages`
+- `profiles.subscriptions-tab`
+- `subscriptions.report`
 
 ## Retrieval Expectations
 
@@ -321,25 +319,30 @@ compose a short answer.
 
 ## Rollout Plan
 
-### Phase 1: Curated Seed Corpus
+### Phase 1: Curated Frontend Corpus - Done In PR
 
 - Add curated records for top glossary terms and common actions.
 - Include wave creation and TDH as first test cases.
 - Publish a static help index artifact from the frontend.
 
-### Phase 2: Docs Chunking
+### Phase 2: Backend Consumption - Done In Paired Backend PR
+
+- Fetch the deployed frontend artifact from `/help-index.json`.
+- Cache the parsed index in the backend answer path.
+- Use deterministic retrieval plus optional LLM wording.
+
+### Phase 3: Docs Chunking
 
 - Chunk `ops/docs` and include route references.
-- Add schema validation and route validation.
-- Add backend sync from the published artifact.
+- Add richer provenance and chunk-level route references.
 
-### Phase 3: Component Help Metadata
+### Phase 4: Component Help Metadata
 
 - Add `data-help-*` metadata for high-value controls.
 - Generate UI affordance records from annotated controls.
 - Keep curated records as the higher-confidence source.
 
-### Phase 4: Coverage and Evals
+### Phase 5: Coverage and Evals
 
 - Add eval questions for glossary, workflow, UI location, and broad docs
   requests.
@@ -347,11 +350,7 @@ compose a short answer.
 
 ## Open Questions
 
-- Should the frontend publish `help-index.json` through the deployed site,
-  through S3, or as a repository artifact consumed by backend deployment?
-- Should curated records live under `ops/help`, `content/help`, or another
-  frontend-owned directory?
-- Which user-facing name should ship first: `6529 Help Bot`, `6529 Help`, or
-  another handle?
-- Which controls should receive `data-help-*` metadata in the first pass?
 - Should private or role-gated routes be indexed with public fallback wording?
+- Which controls should receive `data-help-*` metadata in the next pass?
+- How should unanswered production questions feed back into corpus updates and
+  eval coverage?

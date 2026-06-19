@@ -1,0 +1,712 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-19T00:00:00.000Z",
+  "commit_sha": "frontend-owned-curated-v1",
+  "base_url": "https://6529.io",
+  "records": [
+    {
+      "id": "home.overview",
+      "kind": "route",
+      "title": "6529.io home",
+      "aliases": ["home", "homepage", "landing page", "6529 home"],
+      "keywords": ["home", "latest", "mint", "coming", "discover", "mission"],
+      "facts": [
+        "The home page is the main 6529.io entry point.",
+        "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "Use it when users ask where to start or where the current mint is surfaced."
+      ],
+      "canonical_path": "/",
+      "related_paths": ["/the-memes", "/waves"],
+      "tags": ["home", "navigation"],
+      "source_refs": ["ops/docs/home/README.md"]
+    },
+    {
+      "id": "navigation.sidebar",
+      "kind": "ui_affordance",
+      "title": "Sidebar navigation",
+      "aliases": ["sidebar", "left nav", "app menu", "main menu", "navigation"],
+      "keywords": ["sidebar", "menu", "navigation", "left", "collapse", "expand"],
+      "facts": [
+        "The app sidebar is the main navigation surface for sections such as Waves, Network, Groups, Delegation, and other app areas.",
+        "The sidebar can be collapsed or expanded depending on viewport and layout state.",
+        "On mobile, primary navigation is also available through mobile app navigation surfaces."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/network", "/delegation/delegation-center"],
+      "tags": ["navigation", "ui"],
+      "source_refs": ["ops/docs/navigation/feature-sidebar-navigation.md", "ops/docs/navigation/feature-app-sidebar-menu.md"]
+    },
+    {
+      "id": "navigation.search",
+      "kind": "ui_affordance",
+      "title": "Header search",
+      "aliases": ["search", "find a user", "find a profile", "search modal", "header search"],
+      "keywords": ["search", "header", "modal", "profile", "route", "find"],
+      "facts": [
+        "Header search opens a modal for finding app targets such as profiles and navigable entities.",
+        "Use the search control in the app header when users ask how to find people or pages.",
+        "Search and direct route navigation are separate from Waves feed filtering."
+      ],
+      "canonical_path": "/",
+      "related_paths": ["/network"],
+      "tags": ["navigation", "search"],
+      "source_refs": ["ops/docs/navigation/feature-header-search-modal.md"]
+    },
+    {
+      "id": "wallet.connect.profile",
+      "kind": "workflow",
+      "title": "Wallet and profile connection",
+      "aliases": ["connect wallet", "connect profile", "wallet login", "sign in", "profile switch"],
+      "keywords": ["wallet", "connect", "profile", "login", "auth", "account", "switch"],
+      "facts": [
+        "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
+        "Profile switching and account controls live in the wallet/account area of the app header.",
+        "Some write actions, settings, and subscriptions require a connected profile."
+      ],
+      "canonical_path": "/",
+      "related_paths": ["/access"],
+      "tags": ["auth", "wallet", "profiles"],
+      "source_refs": ["ops/docs/navigation/feature-wallet-account-controls.md"]
+    },
+    {
+      "id": "profiles.overview",
+      "kind": "route",
+      "title": "Profiles",
+      "aliases": ["profile", "user profile", "6529 profile", "profile page"],
+      "keywords": ["profile", "user", "handle", "identity", "tabs", "followers"],
+      "facts": [
+        "A profile page is available at /{user}, where {user} is a handle or wallet-like route target.",
+        "Profile pages organize identity, collected NFTs, waves, groups, subscriptions, proxy, Brain, and xTDH surfaces through tabs.",
+        "Editable profile surfaces require the owner or an authorized proxy."
+      ],
+      "canonical_path": "/network",
+      "related_paths": ["/{user}/identity", "/{user}/groups", "/{user}/waves"],
+      "tags": ["profiles"],
+      "source_refs": ["ops/docs/profiles/navigation/README.md", "ops/docs/profiles/navigation/feature-tabs.md"]
+    },
+    {
+      "id": "profiles.tabs",
+      "kind": "ui_affordance",
+      "title": "Profile tabs",
+      "aliases": ["profile tabs", "profile navigation", "profile sections", "where is profile identity"],
+      "keywords": ["profile", "tabs", "identity", "collected", "groups", "waves", "proxy", "subscriptions", "brain", "xtdh"],
+      "facts": [
+        "Profile tabs split profile content into sections such as Identity, Collected, Groups, Waves, Subscriptions, Proxy, Brain, and xTDH.",
+        "The active tab can be opened directly through a route such as /{user}/identity or /{user}/groups.",
+        "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
+      ],
+      "canonical_path": "/network",
+      "related_paths": ["/{user}/identity", "/{user}/collected", "/{user}/groups"],
+      "tags": ["profiles", "navigation"],
+      "source_refs": ["ops/docs/profiles/navigation/feature-tabs.md"]
+    },
+    {
+      "id": "profiles.subscriptions-tab",
+      "kind": "route",
+      "title": "Profile Subscriptions tab",
+      "aliases": ["profile subscriptions", "my subscriptions", "subscriptions tab", "where are my subscriptions"],
+      "keywords": ["profile", "subscriptions", "tab", "balance", "mode", "top", "up", "history", "upcoming"],
+      "facts": [
+        "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
+        "The tab shows balance, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
+        "Owners can update settings and top up; read-only viewers can inspect visible subscription information."
+      ],
+      "canonical_path": "/about/subscriptions",
+      "related_paths": ["/{user}/subscriptions"],
+      "tags": ["profiles", "subscriptions"],
+      "source_refs": ["ops/docs/profiles/tabs/feature-subscriptions-tab.md", "components/subscriptions-report/SubscriptionsReport.tsx"]
+    },
+    {
+      "id": "profiles.proxy-tab",
+      "kind": "route",
+      "title": "Profile Proxy tab",
+      "aliases": ["proxy tab", "profile proxy", "proxy actions", "profile delegation"],
+      "keywords": ["profile", "proxy", "actions", "permissions", "authorized", "wallet"],
+      "facts": [
+        "The Profile Proxy tab exposes profile proxy relationships and actions.",
+        "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
+        "Proxy and delegation are related concepts but live in separate product areas."
+      ],
+      "canonical_path": "/network",
+      "related_paths": ["/{user}/proxy", "/delegation/delegation-center"],
+      "tags": ["profiles", "proxy"],
+      "source_refs": ["ops/docs/profiles/tabs/feature-proxy-tab.md"]
+    },
+    {
+      "id": "profiles.brain-tab",
+      "kind": "route",
+      "title": "Profile Brain tab",
+      "aliases": ["brain tab", "profile brain", "brain activity", "activity heatmap"],
+      "keywords": ["profile", "brain", "activity", "heatmap", "waves", "sidebar"],
+      "facts": [
+        "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
+        "Brain views include activity and wave sidebar surfaces where available.",
+        "Use /{user}/brain for profile-specific Brain context."
+      ],
+      "canonical_path": "/network",
+      "related_paths": ["/{user}/brain"],
+      "tags": ["profiles", "brain"],
+      "source_refs": ["ops/docs/profiles/tabs/feature-brain-tab.md", "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md"]
+    },
+    {
+      "id": "network.tdh",
+      "kind": "glossary",
+      "title": "TDH",
+      "aliases": ["tdh", "total days held", "total day held"],
+      "keywords": ["tdh", "total", "days", "held", "boost", "boosted", "unboosted", "metric"],
+      "facts": [
+        "TDH stands for Total Days Held.",
+        "TDH is a time-weighted NFT holding metric that starts from days held and applies edition-size weighting plus active boosters.",
+        "TDH updates on a daily cadence and is used across Network surfaces."
+      ],
+      "canonical_path": "/network/tdh",
+      "related_paths": ["/network/definitions", "/network/tdh/historic-boosts"],
+      "tags": ["network", "tdh", "glossary"],
+      "source_refs": ["ops/docs/network/feature-tdh-boost-rules.md", "ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions",
+      "kind": "glossary",
+      "title": "Network definitions",
+      "aliases": ["definitions", "network definitions", "tdh definitions", "network glossary"],
+      "keywords": ["definitions", "cards", "collected", "unique", "memes", "sets", "tdh", "purchases", "sales", "transfers"],
+      "facts": [
+        "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "Use the definitions page when users ask what a Network metric means.",
+        "For a single TDH explanation, point users to the TDH page."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/levels"],
+      "tags": ["network", "glossary"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.levels",
+      "kind": "glossary",
+      "title": "Network Levels",
+      "aliases": ["levels", "level", "network levels", "6529 level"],
+      "keywords": ["levels", "level", "tdh", "rep", "network", "thresholds"],
+      "facts": [
+        "Network Levels are an integrated signal based on TDH and REP.",
+        "The levels page explains the current thresholds and how the displayed level is derived.",
+        "Levels are shown across profile and Network surfaces where relevant."
+      ],
+      "canonical_path": "/network/levels",
+      "related_paths": ["/network/tdh", "/rep/categories"],
+      "tags": ["network", "levels"],
+      "source_refs": ["ops/docs/network/feature-network-levels.md"]
+    },
+    {
+      "id": "network.xtdh",
+      "kind": "glossary",
+      "title": "xTDH",
+      "aliases": ["xtdh", "x tdh", "extended tdh", "grants"],
+      "keywords": ["xtdh", "grants", "received", "granted", "network", "profile"],
+      "facts": [
+        "xTDH is an extended TDH-related surface with granted and received views on profiles.",
+        "Profile xTDH information is available under /{user}/xtdh when visible.",
+        "Network xTDH overview and formulas live under the Network area."
+      ],
+      "canonical_path": "/network/xtdh",
+      "related_paths": ["/{user}/xtdh", "/network"],
+      "tags": ["network", "xtdh"],
+      "source_refs": ["ops/docs/network/feature-xtdh-network-overview.md", "ops/docs/network/feature-xtdh-formulas.md", "ops/docs/profiles/tabs/feature-xtdh-tab.md"]
+    },
+    {
+      "id": "network.health",
+      "kind": "route",
+      "title": "Network health dashboard",
+      "aliases": ["network health", "health dashboard", "tdh health", "network status"],
+      "keywords": ["network", "health", "dashboard", "tdh", "status"],
+      "facts": [
+        "The Network health dashboard surfaces health and status information for Network data.",
+        "Use it when users ask where to inspect Network status or TDH health information.",
+        "A dedicated Network TDH health route exists under /network/health/network-tdh."
+      ],
+      "canonical_path": "/network/health",
+      "related_paths": ["/network/health/network-tdh"],
+      "tags": ["network", "health"],
+      "source_refs": ["ops/docs/network/feature-health-dashboard.md"]
+    },
+    {
+      "id": "network.activity",
+      "kind": "route",
+      "title": "Network activity feed",
+      "aliases": ["network activity", "activity feed", "nft activity", "transfers"],
+      "keywords": ["network", "activity", "feed", "transfers", "sales", "purchases"],
+      "facts": [
+        "Network activity shows network-level activity such as NFT-related events and metric movement.",
+        "Use /network/activity when users ask where to browse live or recent Network activity.",
+        "Profile-specific activity belongs on profile tabs rather than the global Network feed."
+      ],
+      "canonical_path": "/network/activity",
+      "related_paths": ["/feed", "/network"],
+      "tags": ["network", "activity"],
+      "source_refs": ["ops/docs/network/feature-network-activity-feed.md"]
+    },
+    {
+      "id": "rep.cic",
+      "kind": "glossary",
+      "title": "REP and CIC",
+      "aliases": ["rep", "cic", "reputation", "community interaction count", "rep categories"],
+      "keywords": ["rep", "cic", "reputation", "ratings", "categories", "community", "interaction"],
+      "facts": [
+        "REP is peer-given reputation in categories and waves.",
+        "CIC is the community interaction count signal shown on profiles and Network surfaces.",
+        "REP category analytics and category-level views live under /rep/categories."
+      ],
+      "canonical_path": "/rep/categories",
+      "related_paths": ["/network/levels"],
+      "tags": ["rep", "cic", "network"],
+      "source_refs": ["ops/docs/network/feature-network-levels.md"]
+    },
+    {
+      "id": "waves.overview",
+      "kind": "route",
+      "title": "Waves",
+      "aliases": ["waves", "wave", "wave feed", "wave thread", "chat wave"],
+      "keywords": ["waves", "wave", "feed", "drops", "chat", "rank", "approve", "vote", "react"],
+      "facts": [
+        "Waves are the main social threads for conversations, drops, reactions, voting, and wave-specific activity.",
+        "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
+        "The Waves panel includes wave lists, pinned waves, highly rated waves, and create controls."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves/create", "/messages"],
+      "tags": ["waves"],
+      "source_refs": ["ops/docs/waves/README.md", "ops/docs/waves/sidebars/feature-wave-list-navigation.md"]
+    },
+    {
+      "id": "waves.create.entrypoint.sidebar",
+      "kind": "ui_affordance",
+      "title": "Create a wave from the Waves panel",
+      "aliases": ["create wave", "make a wave", "new wave", "start a wave", "plus icon", "+ icon"],
+      "keywords": ["create", "new", "make", "start", "wave", "waves", "plus", "+", "button", "sidebar"],
+      "facts": [
+        "To create a wave, click the + button at the top-right of the Waves panel.",
+        "The same flow is available directly at /waves/create.",
+        "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
+      ],
+      "canonical_path": "/waves/create",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "create", "ui"],
+      "source_refs": ["ops/docs/waves/create/feature-modal-entry-points.md"]
+    },
+    {
+      "id": "waves.create.flow",
+      "kind": "workflow",
+      "title": "Wave creation flow",
+      "aliases": ["wave creation flow", "create wave features", "wave setup", "wave settings"],
+      "keywords": ["wave", "create", "flow", "overview", "groups", "dates", "drops", "voting", "outcomes", "description"],
+      "facts": [
+        "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
+        "Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "The docs for wave creation live under ops/docs/waves/create and the app route is /waves/create."
+      ],
+      "canonical_path": "/waves/create",
+      "related_paths": ["/waves/create"],
+      "tags": ["waves", "create", "workflow"],
+      "source_refs": ["ops/docs/waves/create/README.md", "ops/docs/waves/create/feature-overview-step.md", "ops/docs/waves/create/feature-groups-step.md"]
+    },
+    {
+      "id": "waves.create.chat",
+      "kind": "workflow",
+      "title": "Chat waves",
+      "aliases": ["chat wave", "chat waves", "conversation wave"],
+      "keywords": ["chat", "wave", "conversation", "overview", "groups", "description"],
+      "facts": [
+        "Chat waves are conversation-focused waves.",
+        "Chat wave creation uses Overview, Groups, and Description steps.",
+        "Use Chat when the wave does not need ranking or approval mechanics."
+      ],
+      "canonical_path": "/waves/create",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "chat"],
+      "source_refs": ["ops/docs/waves/create/feature-overview-step.md", "ops/docs/waves/chat/README.md"]
+    },
+    {
+      "id": "waves.create.rank",
+      "kind": "workflow",
+      "title": "Rank waves",
+      "aliases": ["rank wave", "rank waves", "ranking wave", "voting wave"],
+      "keywords": ["rank", "wave", "voting", "leaderboard", "winners", "outcomes", "drops"],
+      "facts": [
+        "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
+        "Rank wave setup includes Dates, Drops, Voting, Outcomes, Groups, and Description.",
+        "Leaderboards, winners, and voting state are part of rank-wave participation."
+      ],
+      "canonical_path": "/waves/create",
+      "related_paths": ["/waves", "/waves/create"],
+      "tags": ["waves", "rank", "voting"],
+      "source_refs": ["ops/docs/waves/create/feature-voting-step.md", "ops/docs/waves/leaderboard/README.md"]
+    },
+    {
+      "id": "waves.create.approve",
+      "kind": "workflow",
+      "title": "Approve waves",
+      "aliases": ["approve wave", "approve waves", "approval wave"],
+      "keywords": ["approve", "approval", "wave", "voting", "outcomes", "drops"],
+      "facts": [
+        "Approve waves use approval-oriented voting rather than a plain chat flow.",
+        "Approve wave setup includes Dates, Drops, Voting, Outcomes, Groups, and Description.",
+        "Use Approve when the wave is intended to accept or reject submissions."
+      ],
+      "canonical_path": "/waves/create",
+      "related_paths": ["/waves", "/waves/create"],
+      "tags": ["waves", "approve", "voting"],
+      "source_refs": ["ops/docs/waves/create/feature-voting-step.md", "ops/docs/waves/create/feature-outcomes-step.md"]
+    },
+    {
+      "id": "waves.direct-messages",
+      "kind": "route",
+      "title": "Direct message waves",
+      "aliases": ["direct message", "dm", "messages", "private wave", "create dm"],
+      "keywords": ["direct", "message", "messages", "dm", "private", "wave"],
+      "facts": [
+        "Direct-message waves live under /messages and individual message threads use /messages/{waveId}.",
+        "A direct-message creation flow is available at /messages/create.",
+        "Direct messages use wave mechanics but are surfaced separately from standard public wave routes."
+      ],
+      "canonical_path": "/messages",
+      "related_paths": ["/messages/create"],
+      "tags": ["waves", "messages"],
+      "source_refs": ["ops/docs/waves/create/feature-direct-message-creation.md"]
+    },
+    {
+      "id": "waves.composer",
+      "kind": "ui_affordance",
+      "title": "Wave composer",
+      "aliases": ["composer", "post a drop", "write a drop", "drop composer", "reply in wave"],
+      "keywords": ["composer", "drop", "post", "reply", "markdown", "mentions", "attachments", "images"],
+      "facts": [
+        "The wave composer is where users post drops and replies inside a wave.",
+        "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
+        "Composer availability depends on the wave, groups, permissions, and current state."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "composer", "drops"],
+      "source_refs": ["ops/docs/waves/composer/README.md", "ops/docs/waves/chat/feature-chat-composer-availability.md"]
+    },
+    {
+      "id": "waves.reactions-voting",
+      "kind": "workflow",
+      "title": "Wave reactions and voting",
+      "aliases": ["react to drop", "rate a drop", "vote on a drop", "boost drop", "drop voting"],
+      "keywords": ["reaction", "reactions", "rating", "vote", "voting", "boost", "drop", "slider"],
+      "facts": [
+        "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
+        "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
+        "Wave creator badges and drop state indicators explain context around submitted drops."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "drops", "voting"],
+      "source_refs": ["ops/docs/waves/drop-actions/feature-reactions-and-ratings.md", "ops/docs/waves/drop-actions/feature-vote-slider.md", "ops/docs/waves/drop-actions/feature-drop-boosting.md"]
+    },
+    {
+      "id": "waves.leaderboard",
+      "kind": "route",
+      "title": "Wave leaderboard",
+      "aliases": ["leaderboard", "wave leaderboard", "winners", "top voters", "my votes"],
+      "keywords": ["leaderboard", "winners", "votes", "voters", "sales", "sort", "group", "eligibility"],
+      "facts": [
+        "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, grouping, decision timelines, and drop eligibility states.",
+        "Leaderboard availability depends on the wave type and configuration.",
+        "Use the right sidebar or wave-specific navigation to inspect leaderboard surfaces when available."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "leaderboard"],
+      "source_refs": ["ops/docs/waves/leaderboard/README.md", "ops/docs/waves/sidebars/feature-right-sidebar-leaderboard.md"]
+    },
+    {
+      "id": "waves.memes-submission",
+      "kind": "workflow",
+      "title": "Memes wave submissions",
+      "aliases": ["submit meme", "memes submission", "submit to memes wave", "quick vote memes"],
+      "keywords": ["memes", "submission", "submit", "preview", "quick", "vote", "additional", "info"],
+      "facts": [
+        "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
+        "Submission availability depends on the active wave and its eligibility/settings.",
+        "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/the-memes"],
+      "tags": ["waves", "memes"],
+      "source_refs": ["ops/docs/waves/memes/README.md"]
+    },
+    {
+      "id": "groups.overview",
+      "kind": "route",
+      "title": "Groups",
+      "aliases": ["groups", "community groups", "group list", "network groups"],
+      "keywords": ["groups", "community", "members", "filters", "cards", "network"],
+      "facts": [
+        "Groups are reusable community/member sets used across app workflows such as waves.",
+        "The groups area provides list, filter, card, and create/edit surfaces.",
+        "Group routes include Network-scoped group discovery and profile group tabs."
+      ],
+      "canonical_path": "/network/groups",
+      "related_paths": ["/{user}/groups"],
+      "tags": ["groups"],
+      "source_refs": ["ops/docs/groups/README.md", "ops/docs/groups/flow-groups-list-create-and-network-scope.md"]
+    },
+    {
+      "id": "groups.create-edit",
+      "kind": "workflow",
+      "title": "Create and edit groups",
+      "aliases": ["create group", "edit group", "new group", "group membership"],
+      "keywords": ["create", "edit", "group", "membership", "filters", "network", "profile"],
+      "facts": [
+        "Group create/edit flows define group details and membership rules.",
+        "Group creation requires the relevant connected profile permissions.",
+        "Groups can be used later in workflows such as wave access or participation settings."
+      ],
+      "canonical_path": "/network/groups",
+      "related_paths": ["/network/groups"],
+      "tags": ["groups", "workflow"],
+      "source_refs": ["ops/docs/groups/feature-group-create-and-edit.md"]
+    },
+    {
+      "id": "delegation.overview",
+      "kind": "route",
+      "title": "Delegation center",
+      "aliases": ["delegation", "delegate", "delegations", "delegation center"],
+      "keywords": ["delegation", "delegate", "wallet", "vault", "airdrop", "mapping", "checker"],
+      "facts": [
+        "Delegation lets one wallet authorize another wallet for supported 6529 uses.",
+        "The delegation center provides wallet checking, action flows, collection management, and section navigation.",
+        "Delegation is useful for vault/hot-wallet patterns and airdrop-related workflows."
+      ],
+      "canonical_path": "/delegation/delegation-center",
+      "related_paths": ["/delegation/wallet-checker", "/delegation-mapping-tool", "/consolidation-mapping-tool"],
+      "tags": ["delegation", "wallet"],
+      "source_refs": ["ops/docs/delegation/README.md", "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md"]
+    },
+    {
+      "id": "delegation.mapping-tools",
+      "kind": "route",
+      "title": "Delegation and consolidation mapping tools",
+      "aliases": ["delegation mapping tool", "consolidation mapping tool", "wallet mapping", "check delegation"],
+      "keywords": ["delegation", "mapping", "consolidation", "wallet", "checker", "tool"],
+      "facts": [
+        "The delegation mapping tool helps inspect delegation relationships.",
+        "The consolidation mapping tool helps inspect wallet consolidation relationships used by 6529 features.",
+        "Use these tools when users ask how to check wallet relationships."
+      ],
+      "canonical_path": "/delegation-mapping-tool",
+      "related_paths": ["/consolidation-mapping-tool", "/delegation/wallet-checker"],
+      "tags": ["delegation", "tools"],
+      "source_refs": ["ops/docs/delegation/feature-wallet-checker.md"]
+    },
+    {
+      "id": "subscriptions.overview",
+      "kind": "workflow",
+      "title": "The Memes subscriptions",
+      "aliases": ["subscriptions", "meme subscriptions", "memes subscriptions", "subscription minting", "subscribe to memes"],
+      "keywords": ["subscription", "subscriptions", "meme", "memes", "mint", "minting", "airdrop", "balance", "top", "up"],
+      "facts": [
+        "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
+        "Subscriptions are not a mintpass and do not create extra allowlist access.",
+        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab."
+      ],
+      "canonical_path": "/about/subscriptions",
+      "related_paths": ["/{user}/subscriptions"],
+      "tags": ["subscriptions", "memes"],
+      "source_refs": ["ops/docs/open-data/feature-meme-subscriptions.md", "ops/docs/profiles/tabs/feature-subscriptions-tab.md"]
+    },
+    {
+      "id": "subscriptions.eligibility",
+      "kind": "business_rule",
+      "title": "Subscription eligibility",
+      "aliases": ["subscription eligibility", "subscriptions eligibility", "eligible subscriptions", "subscription allowlist", "phase eligibility"],
+      "keywords": ["subscription", "subscriptions", "eligibility", "eligible", "allowlist", "phase", "mintpass", "mint", "airdrop"],
+      "facts": [
+        "Subscriptions do not create extra eligibility.",
+        "A subscription can only mint within the phase and allowlist access the profile would otherwise have.",
+        "Top-ups must be received by 00:00 UTC the day before a Meme Card mint to be eligible for that mint."
+      ],
+      "canonical_path": "/about/subscriptions",
+      "related_paths": ["/{user}/subscriptions"],
+      "tags": ["subscriptions", "eligibility"],
+      "source_refs": ["ops/docs/open-data/feature-meme-subscriptions.md"]
+    },
+    {
+      "id": "subscriptions.report",
+      "kind": "route",
+      "title": "Subscriptions report",
+      "aliases": ["subscriptions report", "subscription report", "upcoming subscriptions", "redeemed subscriptions"],
+      "keywords": ["subscriptions", "report", "upcoming", "redeemed", "download", "csv", "season"],
+      "facts": [
+        "The Subscriptions Report shows upcoming and redeemed Meme Card subscription counts.",
+        "It includes download actions for redeemed subscription count reports.",
+        "It links users to their own Subscriptions tab when a connected profile is available."
+      ],
+      "canonical_path": "/tools/subscriptions-report",
+      "related_paths": ["/about/subscriptions"],
+      "tags": ["subscriptions", "reports"],
+      "source_refs": ["components/subscriptions-report/SubscriptionsReport.tsx", "ops/docs/api-tool/feature-memes-subscriptions-report.md"]
+    },
+    {
+      "id": "open-data.overview",
+      "kind": "route",
+      "title": "Open Data hub",
+      "aliases": ["open data", "downloads", "data hub", "export data"],
+      "keywords": ["open", "data", "downloads", "metrics", "team", "royalties", "rememes", "subscriptions"],
+      "facts": [
+        "The Open Data hub collects downloadable data routes and operational data resources.",
+        "Open Data includes network metrics downloads, team downloads, royalties uploads, Rememes uploads, and Meme subscription data.",
+        "Use /open-data when users ask where downloadable data lives."
+      ],
+      "canonical_path": "/open-data",
+      "related_paths": ["/network", "/about/subscriptions"],
+      "tags": ["open-data"],
+      "source_refs": ["ops/docs/open-data/README.md", "ops/docs/open-data/flow-open-data-hub-to-download-routes.md"]
+    },
+    {
+      "id": "open-data.network-metrics",
+      "kind": "route",
+      "title": "Network metrics downloads",
+      "aliases": ["network metrics downloads", "tdh download", "download network data", "metrics csv"],
+      "keywords": ["network", "metrics", "download", "tdh", "csv", "open", "data"],
+      "facts": [
+        "Network metrics downloads are documented under the Open Data area.",
+        "Use these routes when users ask where to download TDH or Network metric data.",
+        "The Network UI pages explain the metrics; Open Data is for downloadable data access."
+      ],
+      "canonical_path": "/open-data",
+      "related_paths": ["/network/definitions", "/network/tdh"],
+      "tags": ["open-data", "network"],
+      "source_refs": ["ops/docs/open-data/feature-network-metrics-downloads.md"]
+    },
+    {
+      "id": "the-memes.overview",
+      "kind": "route",
+      "title": "The Memes",
+      "aliases": ["the memes", "memes", "meme cards", "meme card"],
+      "keywords": ["memes", "meme", "cards", "card", "collection", "season", "szn", "mint", "distribution"],
+      "facts": [
+        "The Memes is the main Meme Card collection area.",
+        "Use The Memes routes to browse cards, card pages, distributions, and minting-related surfaces.",
+        "Individual Meme Card pages and distribution pages live under The Memes route family."
+      ],
+      "canonical_path": "/the-memes",
+      "related_paths": ["/meme-calendar", "/meme-lab"],
+      "tags": ["memes", "collections"],
+      "source_refs": ["ops/docs/media/README.md"]
+    },
+    {
+      "id": "the-memes.minting",
+      "kind": "workflow",
+      "title": "Meme Card minting",
+      "aliases": ["mint meme card", "meme mint", "now minting", "meme gas", "meme calendar"],
+      "keywords": ["meme", "mint", "minting", "calendar", "gas", "coming", "latest", "subscribe"],
+      "facts": [
+        "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
+        "Meme calendar and meme gas routes provide additional minting context.",
+        "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
+      ],
+      "canonical_path": "/the-memes",
+      "related_paths": ["/meme-calendar", "/meme-gas", "/about/subscriptions"],
+      "tags": ["memes", "minting"],
+      "source_refs": ["ops/docs/home/feature-home-latest-drop-and-coming-up.md"]
+    },
+    {
+      "id": "meme-lab.overview",
+      "kind": "route",
+      "title": "Meme Lab",
+      "aliases": ["meme lab", "memelab", "lab cards", "meme lab collection"],
+      "keywords": ["meme", "lab", "collection", "distribution", "card"],
+      "facts": [
+        "Meme Lab is a collection area separate from The Memes.",
+        "Meme Lab has collection, individual card, and distribution routes.",
+        "Use /meme-lab when users ask where Meme Lab cards live."
+      ],
+      "canonical_path": "/meme-lab",
+      "related_paths": ["/the-memes"],
+      "tags": ["collections", "meme-lab"],
+      "source_refs": ["ops/docs/media/README.md"]
+    },
+    {
+      "id": "nextgen.overview",
+      "kind": "route",
+      "title": "NextGen",
+      "aliases": ["nextgen", "next gen", "nextgen collection", "generative collection"],
+      "keywords": ["nextgen", "next", "gen", "collection", "token", "mint", "art", "traits"],
+      "facts": [
+        "NextGen is the generative collection area for collections, tokens, art, minting, and manager tools.",
+        "Collection pages live under /nextgen/collection/{collection}.",
+        "Token pages live under /nextgen/token/{token}."
+      ],
+      "canonical_path": "/nextgen",
+      "related_paths": ["/nextgen/manager"],
+      "tags": ["nextgen", "collections"],
+      "source_refs": ["ops/docs/media/README.md", "ops/docs/nextgen/README.md"]
+    },
+    {
+      "id": "nextgen.manager",
+      "kind": "route",
+      "title": "NextGen manager",
+      "aliases": ["nextgen manager", "nextgen admin", "manage nextgen", "nextgen tools"],
+      "keywords": ["nextgen", "manager", "admin", "collections", "tokens", "mint"],
+      "facts": [
+        "NextGen manager/admin tools live under /nextgen/manager.",
+        "Manager access depends on role and permissions.",
+        "Regular users usually browse NextGen through /nextgen, collection pages, or token pages."
+      ],
+      "canonical_path": "/nextgen/manager",
+      "related_paths": ["/nextgen"],
+      "tags": ["nextgen", "manager"],
+      "source_refs": ["app/nextgen/manager/page.tsx"]
+    },
+    {
+      "id": "drop-forge.overview",
+      "kind": "route",
+      "title": "Drop Forge",
+      "aliases": ["drop forge", "craft drop", "launch claim", "claims", "craft to launch"],
+      "keywords": ["drop", "forge", "craft", "launch", "claims", "mint", "airdrop", "subscriptions"],
+      "facts": [
+        "Drop Forge is the area for claim/drop workflows from craft to launch.",
+        "The hub links to Craft and Launch sections, with list and detail pages for each.",
+        "Launch claim pages can include mint stats and subscription airdrop sections when configured."
+      ],
+      "canonical_path": "/drop-forge",
+      "related_paths": ["/drop-forge/craft", "/drop-forge/launch"],
+      "tags": ["drop-forge", "claims"],
+      "source_refs": ["ops/docs/drop-forge/README.md", "ops/docs/drop-forge/flow-drop-forge-craft-to-launch.md"]
+    },
+    {
+      "id": "media.rememes",
+      "kind": "workflow",
+      "title": "Rememes submissions",
+      "aliases": ["rememes", "re-memes", "rememe submission", "submit rememe"],
+      "keywords": ["rememes", "re", "memes", "submission", "media", "tdh", "uploads"],
+      "facts": [
+        "Rememes submission docs cover add-submission behavior and runtime requirements.",
+        "Some Rememes submission paths depend on TDH threshold checks for non-deployer submissions.",
+        "Open Data also documents Rememes uploads."
+      ],
+      "canonical_path": "/rememes",
+      "related_paths": ["/open-data"],
+      "tags": ["media", "rememes"],
+      "source_refs": ["ops/docs/media/collections/feature-rememes-add-submission.md", "ops/docs/open-data/feature-rememes-uploads.md"]
+    },
+    {
+      "id": "api-tool.6529bot",
+      "kind": "route",
+      "title": "6529bot admin and usage",
+      "aliases": ["6529bot", "api tool", "bot admin", "6529bot usage"],
+      "keywords": ["6529bot", "api", "tool", "admin", "usage", "open", "data"],
+      "facts": [
+        "The API tool docs include 6529bot admin and usage documentation.",
+        "This is separate from the `@6529help` helper chatbot being implemented for Waves.",
+        "Use this record when users ask about existing 6529bot API-tool documentation rather than the helper bot."
+      ],
+      "canonical_path": "/open-data/6529bot",
+      "related_paths": ["/tools/api", "/tools/6529bot/admin"],
+      "tags": ["api-tool", "6529bot"],
+      "source_refs": ["ops/docs/api-tool/feature-6529bot-admin.md", "ops/docs/open-data/feature-6529bot-usage.md"]
+    }
+  ]
+}
