@@ -124,4 +124,59 @@ describe("multipartUploadCore MIME helpers", () => {
     expect(onCompleting).toHaveBeenCalledTimes(1);
     expect(commonApiFetchMock).not.toHaveBeenCalled();
   });
+
+  it("rejects failed image processing even when not waiting for ready", async () => {
+    commonApiPostMock
+      .mockResolvedValueOnce({ upload_id: "upload-1", key: "drops/img.jpg" })
+      .mockResolvedValueOnce({ upload_url: "https://s3.example/upload" })
+      .mockResolvedValueOnce({
+        media_url: "https://cdn.example/drops/img.jpg",
+        media_upload_id: "media-upload-1",
+        media_status: ApiDropMediaStatus.Failed,
+      });
+    axiosPutMock.mockResolvedValue({ headers: { etag: '"part-etag"' } });
+
+    await expect(
+      multipartUploadCore({
+        file: new File(["image"], "img.jpg", { type: "image/jpeg" }),
+        endpoints: {
+          start: "drop-media/multipart-upload",
+          part: "drop-media/multipart-upload/part",
+          complete: "drop-media/multipart-upload/completion",
+        },
+      })
+    ).rejects.toThrow("Image processing failed.");
+  });
+
+  it("continues polling after a transient media status fetch failure", async () => {
+    commonApiPostMock
+      .mockResolvedValueOnce({ upload_id: "upload-1", key: "drops/img.jpg" })
+      .mockResolvedValueOnce({ upload_url: "https://s3.example/upload" })
+      .mockResolvedValueOnce({
+        media_url: "https://cdn.example/drops/img.jpg",
+        media_upload_id: "media-upload-1",
+        media_status: ApiDropMediaStatus.Processing,
+      });
+    commonApiFetchMock
+      .mockRejectedValueOnce(new Error("temporary status failure"))
+      .mockResolvedValueOnce({
+        media_url: "https://cdn.example/drops/img.jpg",
+        media_upload_id: "media-upload-1",
+        media_status: ApiDropMediaStatus.Ready,
+      });
+    axiosPutMock.mockResolvedValue({ headers: { etag: '"part-etag"' } });
+
+    const response = await multipartUploadCore({
+      file: new File(["image"], "img.jpg", { type: "image/jpeg" }),
+      endpoints: {
+        start: "drop-media/multipart-upload",
+        part: "drop-media/multipart-upload/part",
+        complete: "drop-media/multipart-upload/completion",
+      },
+      waitForReady: true,
+    });
+
+    expect(response.media_status).toBe(ApiDropMediaStatus.Ready);
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+  });
 });

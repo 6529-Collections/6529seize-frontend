@@ -12,6 +12,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getFileExtension } from "./memes/file-upload/utils/formatHelpers";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
+import { t } from "@/i18n/messages";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 
 interface FileItem {
   file: File;
@@ -134,7 +136,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
                     <CircleLoader size={CircleLoaderSize.XXLARGE} />
                     <span className="tw-mt-1 tw-px-2 tw-text-center tw-text-sm tw-font-medium tw-leading-tight tw-text-white">
                       {isProcessingImage
-                        ? "Processing image"
+                        ? t(DEFAULT_LOCALE, "drop.media.processing")
                         : `${Math.round(progress)}%`}
                     </span>
                   </div>

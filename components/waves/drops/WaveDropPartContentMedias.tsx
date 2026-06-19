@@ -10,6 +10,8 @@ import WaveDropPartContentMediaImage from "./WaveDropPartContentMediaImage";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import { t } from "@/i18n/messages";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 
 function isRenderableMedia(mimeType: string, url: string): boolean {
   return (
@@ -48,7 +50,9 @@ const ImageProcessingPlaceholder: React.FC<{
     <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
       {!failed && <CircleLoader size={CircleLoaderSize.LARGE} />}
       <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-        {failed ? "Image unavailable" : "Processing image"}
+        {failed
+          ? t(DEFAULT_LOCALE, "drop.media.unavailable")
+          : t(DEFAULT_LOCALE, "drop.media.processing")}
       </span>
     </div>
   </div>

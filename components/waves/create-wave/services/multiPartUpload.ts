@@ -81,13 +81,14 @@ export async function multiPartUpload({
   return {
     url: completion.media_url,
     mime_type: contentType,
-    ...(completion.media_upload_id !== undefined
+    ...(completion.media_upload_id !== undefined &&
+    completion.media_upload_id !== null
       ? { media_upload_id: completion.media_upload_id }
       : {}),
     ...(completion.media_status !== undefined
       ? { media_status: completion.media_status }
       : {}),
-    ...(completion.media_error !== undefined
+    ...(completion.media_error !== undefined && completion.media_error !== null
       ? { media_error: completion.media_error }
       : {}),
   };

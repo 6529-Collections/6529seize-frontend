@@ -19,6 +19,8 @@ import type { ApiCreateAttachmentMultipartUploadRequest } from "@/generated/mode
 import type { ApiCreateAttachmentMultipartUploadResponse } from "@/generated/models/ApiCreateAttachmentMultipartUploadResponse";
 import type { ApiCompleteAttachmentMultipartUploadRequest } from "@/generated/models/ApiCompleteAttachmentMultipartUploadRequest";
 import { getApiAttachmentUploadMimeType } from "@/services/uploads/attachmentUploadMimeType";
+import { t } from "@/i18n/messages";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 
 const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
@@ -187,6 +189,30 @@ const sleep = (delayMs: number, signal?: AbortSignal): Promise<void> =>
     );
   });
 
+function isAbortError(error: unknown): boolean {
+  return (
+    (typeof isCancel === "function" && isCancel(error)) ||
+    (typeof CanceledError === "function" && error instanceof CanceledError) ||
+    (error instanceof DOMException && error.name === "AbortError")
+  );
+}
+
+function getImageProcessingFailedMessage(
+  response: ApiCompleteMultipartUploadResponse
+): string {
+  return (
+    response.media_error ?? t(DEFAULT_LOCALE, "drop.media.processingFailed")
+  );
+}
+
+function assertImageProcessingDidNotFail(
+  response: ApiCompleteMultipartUploadResponse
+): void {
+  if (response.media_status === ApiDropMediaStatus.Failed) {
+    throw new Error(getImageProcessingFailedMessage(response));
+  }
+}
+
 async function waitForMediaReady(
   completionData: ApiCompleteMultipartUploadResponse,
   signal?: AbortSignal
@@ -195,9 +221,7 @@ async function waitForMediaReady(
     return completionData;
   }
 
-  if (completionData.media_status === ApiDropMediaStatus.Failed) {
-    throw new Error(completionData.media_error ?? "Image processing failed.");
-  }
+  assertImageProcessingDidNotFail(completionData);
 
   if (
     completionData.media_status === undefined ||
@@ -206,24 +230,35 @@ async function waitForMediaReady(
     return completionData;
   }
 
+  let lastPollError: unknown;
   for (let attempt = 0; attempt < MEDIA_READY_POLL_ATTEMPTS; attempt++) {
     await sleep(MEDIA_READY_POLL_DELAY_MS, signal);
 
-    const status = await commonApiFetch<ApiCompleteMultipartUploadResponse>({
-      endpoint: `drop-media/uploads/${completionData.media_upload_id}`,
-      ...(signal ? { signal } : {}),
-    });
+    let status: ApiCompleteMultipartUploadResponse;
+    try {
+      status = await commonApiFetch<ApiCompleteMultipartUploadResponse>({
+        endpoint: `drop-media/uploads/${completionData.media_upload_id}`,
+        ...(signal ? { signal } : {}),
+      });
+    } catch (error) {
+      if (signal?.aborted || isAbortError(error)) {
+        throw error;
+      }
+      lastPollError = error;
+      continue;
+    }
 
     if (status.media_status === ApiDropMediaStatus.Ready) {
       return status;
     }
 
-    if (status.media_status === ApiDropMediaStatus.Failed) {
-      throw new Error(status.media_error ?? "Image processing failed.");
-    }
+    assertImageProcessingDidNotFail(status);
   }
 
-  throw new Error("Image processing timed out.");
+  if (lastPollError instanceof Error) {
+    throw lastPollError;
+  }
+  throw new Error(t(DEFAULT_LOCALE, "drop.media.processingTimedOut"));
 }
 
 export async function multipartUploadCore({
@@ -285,6 +320,8 @@ export async function multipartUploadCore({
   if (!media_url) {
     throw new Error("No final media_url returned from completion endpoint");
   }
+
+  assertImageProcessingDidNotFail(completionData);
 
   return waitForReady
     ? await waitForMediaReady(completionData, signal)
