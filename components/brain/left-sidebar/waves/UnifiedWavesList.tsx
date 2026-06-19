@@ -10,6 +10,10 @@ import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
 import type { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { useAuth } from "@/components/auth/Auth";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -32,6 +36,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 }) => {
   const { isApp } = useDeviceInfo();
   const { openWave } = useCreateModalState();
+  const [following] = useShowFollowingWaves();
+  const { connectedProfile, activeProfileProxy } = useAuth();
+  const isJoinedFilterActive =
+    following && !!connectedProfile?.handle && !activeProfileProxy;
   // Refs to the scroll container and sentinel
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
 
@@ -114,6 +122,11 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
             sortedWaves={waves}
             isFetching={isFetching}
             isFetchingNextPage={isFetchingNextPage}
+            emptyMessage={
+              isJoinedFilterActive
+                ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
+                : undefined
+            }
           />
         </div>
       </div>

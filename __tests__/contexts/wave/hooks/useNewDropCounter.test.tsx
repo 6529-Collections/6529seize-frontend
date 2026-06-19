@@ -104,7 +104,11 @@ describe("useNewDropCounter", () => {
     const refetch = jest.fn();
     const { result, rerender } = renderHook(
       ({ muted }) =>
-        useNewDropCounter(null, [...waves, { id: "muted-wave", muted }], refetch),
+        useNewDropCounter(
+          null,
+          [...waves, { id: "muted-wave", muted }],
+          refetch
+        ),
       { wrapper, initialProps: { muted: false } }
     );
 
