@@ -33,6 +33,12 @@ export function createMockMinimalWave(
     waveRep: null,
     waveScore: null,
     sidebarSection: null,
+    followedSubwavesCount: 0,
+    latestFollowedSubwaveDropTimestamp: null,
+    unreadFollowedSubwaveDrops: 0,
+    firstUnreadFollowedSubwaveDropSerialNo: null,
+    sidebarActivityTimestamp: null,
+    isFollowedSubwaveContainer: false,
     ...overrides,
   };
 }
