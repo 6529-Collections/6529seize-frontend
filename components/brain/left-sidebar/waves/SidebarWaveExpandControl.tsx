@@ -52,7 +52,7 @@ export function SidebarWaveExpandControl({
       onClick={onClick}
       onFocus={onFocus}
       onBlur={onBlur}
-      className={`tw-relative tw-inline-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-700/70 desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-opacity-100 ${buttonStateClasses}`}
+      className={`tw-relative tw-z-20 tw-inline-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-700/70 desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-opacity-100 ${buttonStateClasses}`}
     >
       {isLoading ? (
         <ArrowPathIcon

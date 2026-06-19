@@ -143,18 +143,29 @@ export const ExpandedWave = ({
     event.stopPropagation();
     onToggleExpand?.(waveId);
   };
+  const rowLinkAriaLabel = formattedWaveName;
 
   return (
     <div
       onMouseEnter={handleRowMouseEnter}
       onMouseLeave={cancelSubwavePrefetch}
       role="group"
-      className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-relative tw-flex tw-cursor-pointer tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
+      <Link
+        href={href}
+        prefetch={false}
+        onClick={onClick}
+        aria-label={rowLinkAriaLabel}
+        className="tw-absolute tw-inset-0 tw-z-10 tw-rounded-lg tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
+        {...tooltipAttributes}
+      >
+        <span className="tw-sr-only">{rowLinkAriaLabel}</span>
+      </Link>
       {isChildRow && (
         <span
           aria-hidden="true"
@@ -194,22 +205,13 @@ export const ExpandedWave = ({
             className={`-tw-mt-1 tw-mb-1 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 ${
               shouldShowPinButton ? "tw-pr-7" : ""
             }`}
-            {...tooltipAttributes}
           >
-            <Link
-              href={href}
-              prefetch={false}
-              onClick={onClick}
-              className={`tw-min-w-0 tw-flex-shrink tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
-                isActive
-                  ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-                  : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-              }`}
+            <div
+              ref={nameRef}
+              className="tw-min-w-0 tw-flex-shrink tw-truncate tw-text-sm"
             >
-              <div ref={nameRef} className="tw-truncate tw-text-sm">
-                {formattedWaveName}
-              </div>
-            </Link>
+              {formattedWaveName}
+            </div>
             <SidebarWaveExpandControl
               formattedWaveName={formattedWaveName}
               isExpanded={isExpanded}
@@ -248,7 +250,7 @@ export const ExpandedWave = ({
           waveId={waveId}
           isPinned={isPinned}
           compact
-          className="tw-absolute tw-right-3 tw-top-2 tw-z-10"
+          className="tw-absolute tw-right-3 tw-top-2 tw-z-20"
         />
       )}
       {showExpandedTooltip && (
