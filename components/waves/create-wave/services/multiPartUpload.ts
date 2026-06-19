@@ -12,6 +12,10 @@ import {
 
 const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
+function hasValue<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
 interface MultiPartUploadParams {
   file: File;
   path: "drop" | "wave";
@@ -81,14 +85,13 @@ export async function multiPartUpload({
   return {
     url: completion.media_url,
     mime_type: contentType,
-    ...(completion.media_upload_id !== undefined &&
-    completion.media_upload_id !== null
+    ...(hasValue(completion.media_upload_id)
       ? { media_upload_id: completion.media_upload_id }
       : {}),
     ...(completion.media_status !== undefined
       ? { media_status: completion.media_status }
       : {}),
-    ...(completion.media_error !== undefined && completion.media_error !== null
+    ...(hasValue(completion.media_error)
       ? { media_error: completion.media_error }
       : {}),
   };
