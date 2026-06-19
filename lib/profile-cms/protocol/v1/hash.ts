@@ -19,9 +19,7 @@ export function computeCmsPackageHash(cmsPackage: CmsPackageV1): string {
   return hashCanonicalJson(toPackageHashInput(cmsPackage));
 }
 
-export function withComputedCmsHashes(
-  cmsPackage: CmsPackageV1
-): CmsPackageV1 {
+export function withComputedCmsHashes(cmsPackage: CmsPackageV1): CmsPackageV1 {
   const payloadHash = computeCmsPayloadHash(cmsPackage.payload);
   const packageWithPayloadHash = {
     ...cmsPackage,

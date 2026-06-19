@@ -27,10 +27,7 @@ describe("MemeCalendarOverview upcoming mints card", () => {
     timeZone: "UTC",
   } satisfies Intl.DateTimeFormatOptions;
 
-  const formatDivisionDate = (
-    date: Date,
-    locale: string
-  ): string =>
+  const formatDivisionDate = (date: Date, locale: string): string =>
     new Intl.DateTimeFormat(locale, DIVISION_DATE_FORMAT).format(date);
 
   const getSznDivisionRange = (date: Date, locale: string): string => {

@@ -1,6 +1,6 @@
 # Active Context
 
-Last updated: 2026-06-17.
+Last updated: 2026-06-18.
 
 ## Current State
 
@@ -38,20 +38,48 @@ Available now:
   `art-nft-display-best-practices.md`.
 - A phase-based agentic storm execution plan now exists at
   `agentic-storm-execution-plan.md`.
+- Wave 1 frontend runtime bridge work is green in PR #2720 on
+  `codex/profile-cms-runtime-bridge`: App Router support for
+  `/{handle}/index.html`, a narrow primary-site API adapter, a V1 static
+  renderer, and profile Website link plumbing.
+- The next stacked FE lane is the CMS Builder + Publish UI MVP on
+  `codex/profile-cms-builder-mvp`: a hidden feature-flagged
+  `/{handle}/cms/builder` route, guided homepage editor, real renderer preview,
+  local V1 validation checklist, JSON import/export, and save/validate/publish
+  adapter stubs.
+- The Phase 7 frontend 3D lane adds a bounded Three.js client island for
+  GLB/glTF object viewing and simple exhibition room rendering, plus a
+  builder-facing 3D room primitive.
+- Phase 5-8 QA/integration is now tracked on
+  `codex/cms-phase5-8-qa-integration` with a living checklist at
+  `phase-5-8-qa-checklist.md`, fixture renderer coverage for wallet gallery,
+  collection, NFT detail, mixed media, and 3D room fallback packages, and an
+  opt-in Playwright smoke harness prepared for worker branch integration.
 
 Important limits:
 
-- No runtime CMS route, renderer, builder, publish endpoint, storage adapter, or
-  pointer implementation has been landed by this Phase 0/1 pass.
+- No production publish endpoint, storage upload adapter, or backend write model
+  is landed in frontend. The builder MVP documents its expected backend write
+  endpoints in `builder-mvp-integration-assumptions.md` and must not fake a
+  production publish.
+- The frontend runtime adapter assumes `GET /api/profile-cms/:handle/primary`
+  and documents that boundary in
+  `runtime-bridge-integration-assumptions.md`.
 - The broader schema is ahead of any authoring experience.
 - Real IPFS and Arweave upload adapters are still needed.
 - Real wallet signature verification is still needed.
 - The executable validator is currently a Zod mirror plus semantic pass. The
   JSON Schema files remain the protocol reference; a later shared-package pass
   should decide whether to add direct AJV execution.
-- Live NFT indexing, full collection pages, full NFT pages, and 3D rooms are
-  not implemented yet.
+- Live NFT indexing, full collection pages, and full NFT pages are not
+  implemented yet.
+- Full 3D world editing, multi-room navigation, AR/VR, and automatic NFT room
+  generation remain future scope. The current 3D lane is a deterministic MVP:
+  poster/static preview, deferred room/object loading, faithful 2D art
+  surfaces, canonical detail links, and mobile fallback.
 - There is no general WYSIWYG/block editor yet.
+- The Phase 5-8 smoke harness is opt-in because it needs deployed/staged routes
+  and fixture data for the full generated gallery and 3D surfaces.
 
 ## Product Decisions Already Made
 
@@ -70,18 +98,19 @@ Important limits:
 
 ## Next Implementation Slice
 
-The highest leverage next slice is Wave 1 from `phase-0/pr-wave-plan.md`:
+The active critical-path slice is the FE 3D Rooms And Object Viewer lane stacked
+on the FE Builder + Publish UI MVP:
 
-1. Decide whether this executable protocol stays in FE temporarily or moves to
-   a shared 6529mono package before BE adoption.
-2. Add backend tests that consume the same Phase 1 fixture corpus and validation
-   result shape.
-3. Start the `/{handle}/index.html` route and native static renderer behind a
-   feature flag.
-4. Add profile-page website button plumbing for profiles with a published CMS
-   pointer.
-5. Only then fan out publish/storage, builder, wallet-gallery generation, art
-   display, 3D rooms, and AI-agent affordances.
+1. Keep the builder route hidden behind `PROFILE_CMS_BUILDER_ENABLED` or
+   `NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED`.
+2. Use the existing V1 protocol helpers without changing hash or
+   canonicalization semantics.
+3. Render only bounded 3D surfaces: GLB/glTF object viewer and simple room
+   frames/artwork placements.
+4. Keep 2D NFT/detail pages canonical for inspection and make every 3D artwork
+   click/tap path point there.
+5. Validate desktop/mobile behavior with browser screenshots and WebGL canvas
+   nonblank checks before PR closeout.
 
 ## Decisions To Make Before Coding More
 

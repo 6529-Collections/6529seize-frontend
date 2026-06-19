@@ -246,12 +246,12 @@ describe("BrainLeftSidebarWave", () => {
     expect(expandButton).not.toHaveClass("tw-absolute");
     expect(expandButton).toHaveClass("tw-relative");
     expect(expandButton).toHaveClass("tw-inline-flex");
-    expect(expandButton).toHaveClass("tw-size-6");
+    expect(expandButton).toHaveClass("tw-size-5");
     expect(expandButton).toHaveClass("tw-rounded-full");
     expect(expandButton).toHaveClass("tw-border-0");
     expect(expandButton).toHaveClass("tw-bg-transparent");
     expect(expandButton).toHaveClass("desktop-hover:hover:tw-bg-iron-700/70");
-    expect(expandButton.querySelector("svg")).toHaveClass("tw-size-4");
+    expect(expandButton.querySelector("svg")).toHaveClass("tw-size-3.5");
     expect(expandButton.querySelector(".tw-bg-primary-400")).toBeNull();
     const unreadSubwavesDot = getWaveRow().querySelector(".tw-bg-primary-400");
     expect(unreadSubwavesDot).not.toBeNull();
@@ -330,6 +330,27 @@ describe("BrainLeftSidebarWave", () => {
     expect(expandButton).toHaveClass("tw-bg-iron-700/60");
     expect(expandButton).toHaveClass("tw-text-iron-200");
     expect(expandButton).toHaveClass("tw-opacity-100");
+  });
+
+  it("shows a busy expand control while subwaves are loading", () => {
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        canExpand
+        isLoadingSubwaves
+        onToggleExpand={jest.fn()}
+      />
+    );
+
+    const expandButton = screen.getByRole("button", {
+      name: "Loading Chat Wave subwaves",
+    });
+
+    expect(expandButton).toHaveAttribute("aria-expanded", "false");
+    expect(expandButton).toHaveAttribute("aria-busy", "true");
+    expect(expandButton).toHaveClass("tw-bg-iron-700/60");
+    expect(expandButton.querySelector("svg")).toHaveClass("tw-animate-spin");
   });
 
   it("places the timestamp below the title and pushes score to the far edge", () => {

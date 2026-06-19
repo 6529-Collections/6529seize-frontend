@@ -74,7 +74,10 @@ function readString(value: unknown, maxChars = TEXT_MAX_CHARS): string | null {
   return normalized.slice(0, maxChars);
 }
 
-function getMetaIdentifier($: LoadedHtml, element: unknown): string | undefined {
+function getMetaIdentifier(
+  $: LoadedHtml,
+  element: unknown
+): string | undefined {
   const tag = $(element);
   return normalizeWhitespace(
     tag.attr("property") ?? tag.attr("name") ?? tag.attr("itemprop")
@@ -108,7 +111,9 @@ function getTitleTag($: LoadedHtml): string | null {
   return readString($("title").first().text());
 }
 
-function parseMiniAppMetadata(value: string | undefined): MiniAppMetadata | null {
+function parseMiniAppMetadata(
+  value: string | undefined
+): MiniAppMetadata | null {
   if (!value || value.length > META_JSON_MAX_CHARS) {
     return null;
   }

@@ -213,7 +213,9 @@ describe("WaveRepRatingModal", () => {
     expect(
       await screen.findByText(/No available Wave REP credit/i)
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save Wave REP" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Save Wave REP" })
+    ).toBeDisabled();
   });
 
   it("shows one mutation error toast and clears the busy state", async () => {
@@ -255,6 +257,18 @@ describe("WaveRepRatingModal", () => {
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_REP_CREDIT],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_REP_OVERVIEW],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_REP_CATEGORIES],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_REP_LOGS],
     });
   });
 

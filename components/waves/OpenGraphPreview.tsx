@@ -1,9 +1,4 @@
-import {
-  Fragment,
-  useState,
-  type ReactElement,
-  type ReactNode,
-} from "react";
+import { Fragment, useState, type ReactElement, type ReactNode } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -492,8 +487,7 @@ function parseNamedMonthDate(value: string): number | undefined {
     /^([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/
   );
   if (monthFirstMatch) {
-    const monthIndex =
-      MONTH_INDEX_BY_NAME[monthFirstMatch[1]!.toLowerCase()];
+    const monthIndex = MONTH_INDEX_BY_NAME[monthFirstMatch[1]!.toLowerCase()];
     return typeof monthIndex === "number"
       ? parseUtcCalendarDate(
           Number(monthFirstMatch[3]),
@@ -1404,7 +1398,7 @@ function YoutubeVideoPreviewCard({
         ].join(" ")}
         data-testid="youtube-video-preview-card"
       >
-        <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 tw-bg-red-500/80" />
+        <span className="tw-bg-red-500/80 tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1" />
         <div
           className={[
             "tw-grid tw-h-full tw-w-full tw-min-w-0 tw-items-center tw-gap-3 tw-p-3 sm:tw-gap-4",
@@ -1456,7 +1450,7 @@ function YoutubeVideoPreviewCard({
                 <span className="tw-absolute tw-inset-0 tw-bg-black/20 tw-transition tw-duration-200 group-hover/youtube-play:tw-bg-black/10" />
                 <span
                   aria-hidden="true"
-                  className="tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-h-12 tw-w-12 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-bg-red-600 tw-shadow-lg tw-shadow-black/30 tw-transition tw-duration-200 group-hover/youtube-play:tw-scale-105"
+                  className="tw-bg-red-600 tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-h-12 tw-w-12 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-shadow-lg tw-shadow-black/30 tw-transition tw-duration-200 group-hover/youtube-play:tw-scale-105"
                 >
                   <span className="tw-ml-1 tw-block tw-h-0 tw-w-0 tw-border-y-[8px] tw-border-l-[13px] tw-border-y-transparent tw-border-l-white" />
                 </span>
@@ -1491,7 +1485,7 @@ function YoutubeVideoPreviewCard({
 
           <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden">
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-              <span className="tw-flex-shrink-0 tw-rounded-md tw-border tw-border-red-500/25 tw-bg-red-500/10 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-red-100">
+              <span className="tw-border-red-500/25 tw-bg-red-500/10 tw-text-red-100 tw-flex-shrink-0 tw-rounded-md tw-border tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4">
                 {providerLabel}
               </span>
               {author && (
@@ -1514,9 +1508,9 @@ function YoutubeVideoPreviewCard({
               target={linkTarget}
               rel={linkRel}
               onClick={(event) => event.stopPropagation()}
-              className="tw-inline-flex tw-w-fit tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition tw-duration-200 hover:tw-border-red-500/40 hover:tw-text-white"
+              className="hover:tw-border-red-500/40 tw-inline-flex tw-w-fit tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
             >
-              <span className="tw-h-1.5 tw-w-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-red-500" />
+              <span className="tw-bg-red-500 tw-h-1.5 tw-w-1.5 tw-flex-shrink-0 tw-rounded-full" />
               <span className="tw-truncate">{watchLabel}</span>
             </Link>
           </div>

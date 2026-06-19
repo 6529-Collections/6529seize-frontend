@@ -108,15 +108,10 @@ export function CollectedStatsSeasons({
       total: allSeasonCountValue,
     }
   );
-  const showLess = translate(
-    locale,
-    "user.collected.stats.seasons.showLess"
-  );
-  const showMore = translate(
-    locale,
-    "user.collected.stats.seasons.showMore",
-    { count: hiddenStartedSeasonCountValue }
-  );
+  const showLess = translate(locale, "user.collected.stats.seasons.showLess");
+  const showMore = translate(locale, "user.collected.stats.seasons.showMore", {
+    count: hiddenStartedSeasonCountValue,
+  });
   const showMoreAriaLabel = translate(
     locale,
     "user.collected.stats.seasons.showMoreAriaLabel",

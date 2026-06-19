@@ -48,21 +48,24 @@ describe("CMS Phase 1 fixtures", () => {
       code: "block.unknown_type",
       path: "/payload/pages/0/blocks/0/block_type",
     },
-  ])("returns expected issue for invalid fixture $file", ({ file, code, path: issuePath }) => {
-    const fixture = readFixture(path.join(INVALID_FIXTURE_DIR, file));
-    const result = validateCmsPackageV1(fixture);
+  ])(
+    "returns expected issue for invalid fixture $file",
+    ({ file, code, path: issuePath }) => {
+      const fixture = readFixture(path.join(INVALID_FIXTURE_DIR, file));
+      const result = validateCmsPackageV1(fixture);
 
-    expect(result.valid).toBe(false);
-    expect(result.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          severity: "error",
-          code,
-          path: issuePath,
-        }),
-      ])
-    );
-  });
+      expect(result.valid).toBe(false);
+      expect(result.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            severity: "error",
+            code,
+            path: issuePath,
+          }),
+        ])
+      );
+    }
+  );
 
   it("rejects fixture signatures and storage in production mode", () => {
     const fixture = readFixture(

@@ -91,7 +91,11 @@ type ResolvedTarget =
   | { readonly kind: "meme-lab"; readonly id: string }
   | { readonly kind: "6529-gradient"; readonly id: string }
   | { readonly kind: "nextgen-token"; readonly tokenId: string }
-  | { readonly kind: "rememes"; readonly contract: string; readonly id: string };
+  | {
+      readonly kind: "rememes";
+      readonly contract: string;
+      readonly id: string;
+    };
 
 type PreviewBuildInput = {
   readonly kind: SeizeCollectionPreviewKind;
@@ -218,10 +222,7 @@ function hasApiAuth(context?: ApiContext): boolean {
   return getApiAuth(context) !== undefined;
 }
 
-function shouldRetryApiStatus(
-  status: number,
-  context?: ApiContext
-): boolean {
+function shouldRetryApiStatus(status: number, context?: ApiContext): boolean {
   if (status >= 500 && status < 600) {
     return true;
   }
@@ -304,7 +305,11 @@ async function fetchFirstPageItem<T>(
   params?: Record<string, string | number | undefined>,
   context?: ApiContext
 ): Promise<T | null> {
-  const page = await fetchOptionalApiJson<ApiPage<T>>(endpoint, params, context);
+  const page = await fetchOptionalApiJson<ApiPage<T>>(
+    endpoint,
+    params,
+    context
+  );
   return page?.data?.[0] ?? null;
 }
 
@@ -512,7 +517,8 @@ function compactFacts(
   facts: readonly (SeizeCollectionPreviewFact | null | undefined)[]
 ): SeizeCollectionPreviewFact[] {
   return facts.filter(
-    (fact): fact is SeizeCollectionPreviewFact => fact !== null && fact !== undefined
+    (fact): fact is SeizeCollectionPreviewFact =>
+      fact !== null && fact !== undefined
   );
 }
 
@@ -530,7 +536,9 @@ function normalizeHttpsImageUrl(value: unknown): string | undefined {
   }
 }
 
-function selectHttpsImageUrl(...values: readonly unknown[]): string | undefined {
+function selectHttpsImageUrl(
+  ...values: readonly unknown[]
+): string | undefined {
   for (const value of values) {
     const url = normalizeHttpsImageUrl(value);
     if (url) {
@@ -543,7 +551,9 @@ function selectHttpsImageUrl(...values: readonly unknown[]): string | undefined 
 
 function createImageMedia(url: string | undefined): LinkPreviewMedia | null {
   const normalizedUrl = normalizeHttpsImageUrl(url);
-  return normalizedUrl ? { url: normalizedUrl, secureUrl: normalizedUrl } : null;
+  return normalizedUrl
+    ? { url: normalizedUrl, secureUrl: normalizedUrl }
+    : null;
 }
 
 function buildPreview(input: PreviewBuildInput): SeizeCollectionLinkPreview {
@@ -562,7 +572,8 @@ function buildPreview(input: PreviewBuildInput): SeizeCollectionLinkPreview {
     requestUrl: input.requestUrl.toString(),
     url: input.requestUrl.toString(),
     title: input.title,
-    description: descriptionParts.length > 0 ? descriptionParts.join(" | ") : null,
+    description:
+      descriptionParts.length > 0 ? descriptionParts.join(" | ") : null,
     siteName: "6529",
     mediaType: null,
     contentType: null,
@@ -584,7 +595,9 @@ function firstHandle(value: string | null | undefined): string | undefined {
     .find((handle) => handle.length > 0);
 }
 
-function profileHrefForHandle(value: string | null | undefined): string | undefined {
+function profileHrefForHandle(
+  value: string | null | undefined
+): string | undefined {
   const handle = firstHandle(value);
   return handle ? `/${handle}` : undefined;
 }
@@ -801,7 +814,11 @@ async function fetchTheMemesPreview(
     source.artist_seize_handle,
     readAttributeValue(attributes, "SEIZE Artist Profile")
   );
-  const title = firstNonEmptyString(claim?.name, source.name, `The Memes #${id}`)!;
+  const title = firstNonEmptyString(
+    claim?.name,
+    source.name,
+    `The Memes #${id}`
+  )!;
   const claimEditionSize = readPositiveNumber(claim?.edition_size);
   const mintStatEditionSize = readPositiveNumber(mintStat?.total_count);
   const guardedMintStatEditionSize = shouldUseMintStatEditionSize(
@@ -860,7 +877,10 @@ async function fetchTheMemesPreview(
         "TDH rate",
         tdhRate !== undefined ? formatDecimal(tdhRate) : undefined
       ),
-      createFact("Season", season !== undefined ? formatInteger(season) : undefined),
+      createFact(
+        "Season",
+        season !== undefined ? formatInteger(season) : undefined
+      ),
       createFact("Mint date", mintDate),
     ]),
     imageUrl: selectHttpsImageUrl(
@@ -900,7 +920,10 @@ async function fetchMemeLabPreview(
     readAttributeValue(attributes, "SEIZE Artist Profile")
   );
   const artistName = firstNonEmptyString(artistHandle, source.artist);
-  const editionSize = firstPositiveNumber(extended?.edition_size, source.supply);
+  const editionSize = firstPositiveNumber(
+    extended?.edition_size,
+    source.supply
+  );
   const mintDate = formatMintDate(source.mint_date);
 
   return buildPreview({
@@ -1073,8 +1096,9 @@ async function resolveNextGenToken(
   );
 
   return (
-    tokenCandidates.find((token) => token?.normalised_id === normalizedTokenId) ??
-    null
+    tokenCandidates.find(
+      (token) => token?.normalised_id === normalizedTokenId
+    ) ?? null
   );
 }
 
@@ -1205,7 +1229,9 @@ async function fetchReMemesPreview(
   const references = Array.isArray(rememe.meme_references)
     ? rememe.meme_references
     : [];
-  const replicasCount = Array.isArray(rememe.replicas) ? rememe.replicas.length : 0;
+  const replicasCount = Array.isArray(rememe.replicas)
+    ? rememe.replicas.length
+    : 0;
   const editionSize = readRememeEditionSize(rememe);
   const referenceLabels = references
     .map((reference) => `#${reference}`)
@@ -1265,7 +1291,12 @@ async function executeTarget(
     case "nextgen-token":
       return fetchNextGenPreview(target.tokenId, requestUrl, context);
     case "rememes":
-      return fetchReMemesPreview(target.contract, target.id, requestUrl, context);
+      return fetchReMemesPreview(
+        target.contract,
+        target.id,
+        requestUrl,
+        context
+      );
   }
 }
 

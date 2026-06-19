@@ -2,6 +2,10 @@ name: Web Deploy - PROD
 
 on: workflow_dispatch
 
+concurrency:
+  group: web-deploy-prod
+  cancel-in-progress: false
+
 env:
   AWS_BUCKET: "seize-web"
   COMMIT_SHA: "${{ github.sha }}"
@@ -20,8 +24,25 @@ env:
   ASSETS_FROM_S3: "true"
 
 jobs:
-  build-upload-deploy:
+  assert-main-ref:
+    name: Assert main ref
     runs-on: ubuntu-latest
+    permissions: {}
+
+    steps:
+      - name: Assert production deploy runs from main
+        run: |
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "::error::Production deploys must be run from the main branch. Selected ref: ${GITHUB_REF_NAME} (${GITHUB_SHA})."
+            exit 1
+          fi
+
+  build-upload-deploy:
+    needs: assert-main-ref
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment: production
 
     steps:
       - name: Checkout code
@@ -129,13 +150,47 @@ jobs:
       - name: Get commit message
         run: echo "COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
 
-      - name: Create new ElasticBeanstalk Application Version
+      - name: Ensure ElasticBeanstalk Application Version
         run: |
-          aws elasticbeanstalk create-application-version \
-          --application-name "${{ env.BEANSTALK_APP_NAME }}" \
-          --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
-          --version-label "${{ env.COMMIT_SHA }}" \
-          --description "${{ env.COMMIT_MESSAGE }}"
+          set -euo pipefail
+
+          SOURCE_BUNDLE_KEY="web_build/${COMMIT_SHA}/package.zip"
+
+          create_application_version() {
+            aws elasticbeanstalk create-application-version \
+              --application-name "${BEANSTALK_APP_NAME}" \
+              --source-bundle S3Bucket="${AWS_BUCKET}",S3Key="${SOURCE_BUNDLE_KEY}" \
+              --version-label "${COMMIT_SHA}" \
+              --description "${COMMIT_MESSAGE}"
+          }
+
+          APPLICATION_VERSION_JSON=$(aws elasticbeanstalk describe-application-versions \
+            --application-name "${BEANSTALK_APP_NAME}" \
+            --version-labels "${COMMIT_SHA}" \
+            --output json)
+          VERSION_COUNT=$(jq '.ApplicationVersions | length' <<< "$APPLICATION_VERSION_JSON")
+
+          case "$VERSION_COUNT" in
+            0)
+              echo "Creating Elastic Beanstalk application version ${COMMIT_SHA}."
+              create_application_version
+              ;;
+            1)
+              EXISTING_BUCKET=$(jq -r '.ApplicationVersions[0].SourceBundle.S3Bucket // ""' <<< "$APPLICATION_VERSION_JSON")
+              EXISTING_KEY=$(jq -r '.ApplicationVersions[0].SourceBundle.S3Key // ""' <<< "$APPLICATION_VERSION_JSON")
+
+              if [ "$EXISTING_BUCKET" = "$AWS_BUCKET" ] && [ "$EXISTING_KEY" = "$SOURCE_BUNDLE_KEY" ]; then
+                echo "Elastic Beanstalk application version ${COMMIT_SHA} already exists with the expected source bundle; reusing it."
+              else
+                echo "::error::Elastic Beanstalk application version ${COMMIT_SHA} already exists with unexpected source s3://${EXISTING_BUCKET}/${EXISTING_KEY}; expected s3://${AWS_BUCKET}/${SOURCE_BUNDLE_KEY}. Refusing to replace an unexpected production version label automatically."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::Expected at most one Elastic Beanstalk application version for ${COMMIT_SHA}, found ${VERSION_COUNT}."
+              exit 1
+              ;;
+          esac
 
       - name: Deploy new Version to ElasticBeanstalk with Runtime Environment Variables
         env:

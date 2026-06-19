@@ -221,7 +221,7 @@ describe("github-preview API route", () => {
       "import React from 'react';",
       "",
       "export function GithubLinkPreview() {",
-      "  return <a href=\"https://github.com\">GitHub</a>;",
+      '  return <a href="https://github.com">GitHub</a>;',
       "}",
       "const one = 1;",
       "const two = 2;",
@@ -259,7 +259,7 @@ describe("github-preview API route", () => {
       lineEnd: 8,
       excerpt: [
         "export function GithubLinkPreview() {",
-        "  return <a href=\"https://github.com\">GitHub</a>;",
+        '  return <a href="https://github.com">GitHub</a>;',
         "}",
         "const one = 1;",
         "const two = 2;",

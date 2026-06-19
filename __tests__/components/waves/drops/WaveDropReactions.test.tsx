@@ -1,6 +1,8 @@
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import { useAuth } from "@/components/auth/Auth";
+import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useEmoji } from "@/contexts/EmojiContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import * as commonApi from "@/services/api/common-api";
 import { __resetDropReactionMonitoringForTests } from "@/utils/monitoring/dropReactionMonitoring";
@@ -12,6 +14,9 @@ import {
   waitFor,
 } from "@testing-library/react";
 import React from "react";
+
+const mockQueryCacheFindAll = jest.fn(() => []);
+const mockSetQueryData = jest.fn();
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
@@ -49,6 +54,8 @@ jest.mock(
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
+    getQueryCache: jest.fn(() => ({ findAll: mockQueryCacheFindAll })),
+    setQueryData: mockSetQueryData,
     setQueriesData: jest.fn(),
   })),
 }));
@@ -150,6 +157,13 @@ const createMockDrop = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+type MockNotificationQuery = {
+  readonly queryKey: readonly unknown[];
+  state: {
+    data: unknown;
+  };
+};
+
 const createDeferred = <T,>() => {
   let resolve!: (value: T) => void;
   let reject!: (reason?: unknown) => void;
@@ -173,6 +187,9 @@ describe("WaveDropReactions", () => {
     // Reset call history without removing default implementations
     jest.clearAllMocks();
     __resetDropReactionMonitoringForTests();
+    mockQueryCacheFindAll.mockReset();
+    mockQueryCacheFindAll.mockReturnValue([]);
+    mockSetQueryData.mockReset();
     mockUseAuth.mockReturnValue({
       connectedProfile: { id: "profile-1", handle: "alice" },
       setToast: setToastMock,
@@ -353,6 +370,90 @@ describe("WaveDropReactions", () => {
       endpoint: "drops/test-drop/reaction",
       errorMode: "structured",
     });
+  });
+
+  it("updates cached notification drops when removing a chip reaction", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    const drop = createMockDrop({
+      context_profile_context: { reaction: ":gm:" },
+      reactions: [
+        {
+          reaction: ":gm:",
+          count: 1,
+          profiles: [{ handle: "alice", id: "profile-1" }],
+        },
+      ],
+    }) as ApiDrop;
+    const notificationQuery: MockNotificationQuery = {
+      queryKey: [AppQueryKey.IDENTITY_NOTIFICATIONS, { identity: "alice" }],
+      state: {
+        data: {
+          pages: [
+            {
+              notifications: [
+                {
+                  id: 1,
+                  related_drops: [drop],
+                },
+              ],
+            },
+          ],
+          pageParams: [null],
+        },
+      },
+    };
+    mockQueryCacheFindAll.mockImplementation(
+      ({
+        predicate,
+      }: {
+        readonly predicate: (query: MockNotificationQuery) => boolean;
+      }) => [notificationQuery].filter((query) => predicate(query))
+    );
+    (commonApi.commonApiDelete as jest.Mock).mockResolvedValueOnce({});
+
+    render(<WaveDropReactions drop={drop} />);
+
+    fireEvent.click(screen.getByRole("button"));
+
+    await waitFor(() => {
+      expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
+        endpoint: "drops/test-drop/reaction",
+        errorMode: "structured",
+      });
+    });
+    expect(mockSetQueryData).toHaveBeenCalledWith(
+      notificationQuery.queryKey,
+      expect.objectContaining({
+        pages: [
+          {
+            notifications: [
+              expect.objectContaining({
+                related_drops: [
+                  expect.objectContaining({
+                    id: "test-drop",
+                    context_profile_context: expect.objectContaining({
+                      reaction: null,
+                    }),
+                    reactions: [],
+                  }),
+                ],
+              }),
+            ],
+          },
+        ],
+      })
+    );
   });
 
   it("shows the structured API error message when a chip reaction fails", async () => {

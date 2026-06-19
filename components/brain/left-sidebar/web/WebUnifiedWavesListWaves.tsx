@@ -293,6 +293,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     waves,
     activeWaveId: activeWave.id,
     activeParentWaveId: activeWave.parentWaveId,
+    loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
     onParentExpand: streamWaves.loadSubwavesForParent,
     showExpandedSubwaves: !isCollapsed,
   });
@@ -364,9 +365,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const hasFollowingRows = animatedFollowingRows.length > 0;
   const hasAllRows = animatedAllRows.length > 0;
-  const virtualizedRows = hasAllRows
-    ? animatedAllRows
-    : animatedFollowingRows;
+  const virtualizedRows = hasAllRows ? animatedAllRows : animatedFollowingRows;
   const staticFollowingRows = hasAllRows ? animatedFollowingRows : [];
   const virtualizedAriaLabel = hasAllRows
     ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
@@ -388,9 +387,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
   const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
     items: virtualizedRows,
-    key: hasAllRows
-      ? "web-unified-waves-all"
-      : "web-unified-waves-following",
+    key: hasAllRows ? "web-unified-waves-all" : "web-unified-waves-following",
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
     rowHeight: getSidebarRowHeight,
@@ -407,6 +404,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       depth={row.depth}
       canExpand={row.canExpand && !isCollapsed}
       isExpanded={row.isExpanded}
+      isLoadingSubwaves={row.isLoadingSubwaves}
       hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
       isLastSubwave={row.isLastSubwave}
       onToggleExpand={toggleParent}
@@ -440,7 +438,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         <div>
           {hasAnnouncementRows && (
             <SidebarWaveRowsSection
-              ariaLabel="Announcement waves"
+              ariaLabel={t(
+                SIDEBAR_LOCALE,
+                "waves.sidebar.announcementWavesAriaLabel"
+              )}
               className={sectionClassName}
               getRowHeight={getSidebarRowHeight}
               isRowVisible={(row) =>

@@ -169,4 +169,3 @@ Responsibilities:
 - Publish/sign/storage changes require Backend Publish Agent and Storage Agent
   review.
 - No agent should edit unrelated dirty worktree files.
-

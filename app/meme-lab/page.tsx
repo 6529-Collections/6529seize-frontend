@@ -4,7 +4,11 @@ import {
   getSearchParamValue,
   type MemeLabListSearchParams,
 } from "@/components/memelab/memeLabRouteParams";
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { t } from "@/i18n/messages";
 import JsonLdScript from "@/lib/structured-data/json-ld";
@@ -13,12 +17,12 @@ import { CC0_LICENSE_URL } from "@/lib/structured-data/utils";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
-export default async function MemeLab({
-  searchParams,
-}: {
-  readonly searchParams: Promise<MemeLabListSearchParams>;
-}) {
-  const resolvedSearchParams = await searchParams;
+type MemeLabPageProps = {
+  readonly searchParams?: Promise<MemeLabListSearchParams>;
+};
+
+export default async function MemeLab({ searchParams }: MemeLabPageProps = {}) {
+  const resolvedSearchParams = (await searchParams) ?? {};
   const locale = getMemeLabRouteLocale(resolvedSearchParams);
 
   return (
@@ -46,15 +50,15 @@ export default async function MemeLab({
 
 export async function generateMetadata({
   searchParams,
-}: {
-  readonly searchParams: Promise<MemeLabListSearchParams>;
-}): Promise<Metadata> {
-  const locale = getMemeLabRouteLocale(await searchParams);
+}: MemeLabPageProps = {}): Promise<Metadata> {
+  const locale = getMemeLabRouteLocale((await searchParams) ?? {});
 
-  return getAppMetadata({
-    title: t(locale, "memeLab.title"),
-    ogImage: `${publicEnv.BASE_ENDPOINT}/meme-lab.jpg`,
-    description: t(locale, "memeLab.description.collections"),
-    twitterCard: "summary_large_image",
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: t(locale, "memeLab.title"),
+      ogImage: getCollectionSocialCardImagePath("meme-lab"),
+      ogImageAlt: "Meme Lab collection social card",
+      description: t(locale, "memeLab.description.collections"),
+    })
+  );
 }

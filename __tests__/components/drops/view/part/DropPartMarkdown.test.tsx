@@ -102,11 +102,7 @@ jest.mock(
             }
           }}
         >
-          <img
-            alt="Drop media"
-            src={src}
-            data-mount-id={currentMountId}
-          />
+          <img alt="Drop media" src={src} data-mount-id={currentMountId} />
         </button>
       );
     }
@@ -915,7 +911,8 @@ describe("DropPartMarkdown", () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    const originalImplementation = mockTwitterPreviewCard.getMockImplementation();
+    const originalImplementation =
+      mockTwitterPreviewCard.getMockImplementation();
     mockTwitterPreviewCard.mockImplementation(() => {
       throw new Error("boom");
     });

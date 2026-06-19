@@ -83,7 +83,7 @@ export default function UserPageSubscriptionsMode(
           <h5 className="tw-mb-0">
             Mode{" "}
             {props.details && props.details.last_update > 0 && (
-              <span className="tw-text-iron-400 tw-text-sm tw-font-semibold">
+              <span className="tw-text-sm tw-font-semibold tw-text-iron-400">
                 {new Date(props.details.last_update).toLocaleString("en-US", {
                   day: "numeric",
                   month: "short",
