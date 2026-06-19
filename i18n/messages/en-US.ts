@@ -339,6 +339,12 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Highly Rated",
+  "highlyRatedToggleLabel.one": "Highly Rated {count} wave",
+  "highlyRatedToggleLabel.other": "Highly Rated {count} waves",
+  "highlyRatedExpandAriaLabel.one": "Expand Highly Rated, {count} wave",
+  "highlyRatedExpandAriaLabel.other": "Expand Highly Rated, {count} waves",
+  "highlyRatedCollapseAriaLabel.one": "Collapse Highly Rated, {count} wave",
+  "highlyRatedCollapseAriaLabel.other": "Collapse Highly Rated, {count} waves",
   pinned: "Pinned",
   following: "Following",
   all: "All",

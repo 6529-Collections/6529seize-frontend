@@ -7,11 +7,15 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useId, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
+import {
+  HighlyRatedWavesToggle,
+  useHighlyRatedWavesExpandedPreference,
+} from "../waves/HighlyRatedWavesToggle";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
@@ -284,11 +288,14 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   sentinelRef,
 }) => {
   const listContainerRef = useRef<HTMLDivElement>(null);
+  const highlyRatedSectionId = useId();
   const { connectedProfile } = useAuth();
   const { openWave, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
   const seizeSettings = useSeizeSettingsOptional();
   const { activeWave, waves: streamWaves } = useMyStream();
+  const [isHighlyRatedExpanded, setIsHighlyRatedExpanded] =
+    useHighlyRatedWavesExpandedPreference();
   const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
     waves,
     activeWaveId: activeWave.id,
@@ -365,6 +372,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const hasFollowingRows = animatedFollowingRows.length > 0;
   const hasAllRows = animatedAllRows.length > 0;
+  const shouldUseHighlyRatedToggle = !hideHeaders && !isCollapsed;
+  const shouldShowHighlyRatedRows =
+    hasHighlyRatedRows &&
+    (!shouldUseHighlyRatedToggle || isHighlyRatedExpanded);
   const virtualizedRows = hasAllRows ? animatedAllRows : animatedFollowingRows;
   const staticFollowingRows = hasAllRows ? animatedFollowingRows : [];
   const hasVirtualizedFollowingRows = !hasAllRows && hasFollowingRows;
@@ -385,6 +396,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight,
     [rowHeight]
   );
+  const handleHighlyRatedToggle = useCallback(() => {
+    setIsHighlyRatedExpanded(!isHighlyRatedExpanded);
+  }, [isHighlyRatedExpanded, setIsHighlyRatedExpanded]);
 
   const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
     items: virtualizedRows,
@@ -469,25 +483,39 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
           {hasHighlyRatedRows && (
             <>
-              {!hideHeaders && !isCollapsed && (
-                <SidebarCategoryLabel
-                  label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+              {shouldUseHighlyRatedToggle ? (
+                <HighlyRatedWavesToggle
+                  controlsId={highlyRatedSectionId}
+                  count={highlyRatedWaves.length}
+                  isExpanded={isHighlyRatedExpanded}
+                  onToggle={handleHighlyRatedToggle}
+                  paddingClassName="tw-px-5"
+                />
+              ) : (
+                !hideHeaders &&
+                !isCollapsed && (
+                  <SidebarCategoryLabel
+                    label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                  />
+                )
+              )}
+              {shouldShowHighlyRatedRows && (
+                <SidebarWaveRowsSection
+                  id={highlyRatedSectionId}
+                  ariaLabel={t(
+                    SIDEBAR_LOCALE,
+                    "waves.sidebar.highlyRatedAriaLabel"
+                  )}
+                  className={sectionClassName}
+                  getRowHeight={getSidebarRowHeight}
+                  isRowVisible={(row) =>
+                    isVisibleSectionRow({ row, sectionName: "highly rated" })
+                  }
+                  renderRow={(row) => renderWaveRow(row, false)}
+                  rows={animatedHighlyRatedRows}
+                  transitionClassName="tw-w-full"
                 />
               )}
-              <SidebarWaveRowsSection
-                ariaLabel={t(
-                  SIDEBAR_LOCALE,
-                  "waves.sidebar.highlyRatedAriaLabel"
-                )}
-                className={sectionClassName}
-                getRowHeight={getSidebarRowHeight}
-                isRowVisible={(row) =>
-                  isVisibleSectionRow({ row, sectionName: "highly rated" })
-                }
-                renderRow={(row) => renderWaveRow(row, false)}
-                rows={animatedHighlyRatedRows}
-                transitionClassName="tw-w-full"
-              />
             </>
           )}
           {hasHighlyRatedRows &&

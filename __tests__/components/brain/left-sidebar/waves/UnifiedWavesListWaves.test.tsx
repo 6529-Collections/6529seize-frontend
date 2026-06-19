@@ -136,7 +136,7 @@ it("renders structure even when no waves", () => {
   expect(screen.getByTestId("switch")).toBeInTheDocument();
 });
 
-it("renders announcement, highly rated, pinned, following, and all waves with headers and switch", () => {
+it("renders highly rated waves collapsed by default and expands them from the section control", () => {
   const ref = React.createRef<UnifiedWavesListWavesHandle>();
   render(
     <UnifiedWavesListWaves
@@ -149,20 +149,44 @@ it("renders announcement, highly rated, pinned, following, and all waves with he
   expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
   expect(screen.getByTestId("switch")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+  const highlyRatedToggle = screen.getByRole("button", {
+    name: "Expand Highly Rated, 1 wave",
+  });
+  expect(highlyRatedToggle).toHaveTextContent("Highly Rated 1 wave");
+  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "false");
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Following waves")).toBeInTheDocument();
   expect(
     screen.getByLabelText("All quality-ranked waves list")
   ).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
-  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
+  expect(screen.queryByTestId("wave-h1")).toBeNull();
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
   expect(
     screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
+  ).toEqual(["wave-a1", "wave-p1", "wave-f1", "wave-r1"]);
+
+  fireEvent.click(highlyRatedToggle);
+
+  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "true");
+  expect(
+    screen.getByRole("button", {
+      name: "Collapse Highly Rated, 1 wave",
+    })
+  ).toBeInTheDocument();
+  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
+  expect(
+    screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
   ).toEqual(["wave-a1", "wave-h1", "wave-p1", "wave-f1", "wave-r1"]);
+
+  fireEvent.click(highlyRatedToggle);
+
+  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "false");
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(ref.current?.containerRef.current).toBe(container);
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
 });

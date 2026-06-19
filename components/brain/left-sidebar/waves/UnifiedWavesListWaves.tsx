@@ -5,11 +5,16 @@ import React, {
   useMemo,
   forwardRef,
   useImperativeHandle,
+  useId,
   useRef,
 } from "react";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
+import {
+  HighlyRatedWavesToggle,
+  useHighlyRatedWavesExpandedPreference,
+} from "./HighlyRatedWavesToggle";
 import SectionHeader from "./SectionHeader";
 import JoinedToggle from "./JoinedToggle";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
@@ -132,8 +137,11 @@ const UnifiedWavesListWaves = forwardRef<
     ref
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
+    const highlyRatedSectionId = useId();
     const seizeSettings = useSeizeSettingsOptional();
     const { activeWave, waves: streamWaves } = useMyStream();
+    const [isHighlyRatedExpanded, setIsHighlyRatedExpanded] =
+      useHighlyRatedWavesExpandedPreference();
     const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
       waves,
       activeWaveId: activeWave.id,
@@ -189,10 +197,17 @@ const UnifiedWavesListWaves = forwardRef<
       animatedAllRows.length > 0 ? animatedFollowingRows : [];
     const hasVirtualizedFollowingRows =
       animatedAllRows.length === 0 && animatedFollowingRows.length > 0;
+    const shouldUseHighlyRatedToggle = !hideHeaders;
+    const shouldShowHighlyRatedRows =
+      highlyRatedRows.length > 0 &&
+      (!shouldUseHighlyRatedToggle || isHighlyRatedExpanded);
     const virtualizedAriaLabel =
       animatedAllRows.length > 0
         ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
         : t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
+    const handleHighlyRatedToggle = useCallback(() => {
+      setIsHighlyRatedExpanded(!isHighlyRatedExpanded);
+    }, [isHighlyRatedExpanded, setIsHighlyRatedExpanded]);
     const getSidebarRowHeight = useCallback(
       (row: SidebarWaveTreeRow) =>
         row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
@@ -277,28 +292,35 @@ const UnifiedWavesListWaves = forwardRef<
 
         {highlyRatedRows.length > 0 && (
           <>
-            {!hideHeaders && (
-              <SidebarCategoryLabel
-                label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+            {shouldUseHighlyRatedToggle ? (
+              <HighlyRatedWavesToggle
+                controlsId={highlyRatedSectionId}
+                count={highlyRatedWaves.length}
+                isExpanded={isHighlyRatedExpanded}
+                onToggle={handleHighlyRatedToggle}
+                paddingClassName="tw-px-4"
+              />
+            ) : null}
+            {shouldShowHighlyRatedRows && (
+              <SidebarWaveRowsSection
+                id={highlyRatedSectionId}
+                ariaLabel={t(
+                  SIDEBAR_LOCALE,
+                  "waves.sidebar.highlyRatedAriaLabel"
+                )}
+                className="tw-flex tw-flex-col"
+                getRowHeight={getSidebarRowHeight}
+                isRowVisible={(row) =>
+                  isVisibleStaticRow({
+                    detailedLabel: "Highly rated",
+                    row,
+                    sectionName: "highly rated",
+                  })
+                }
+                renderRow={(row) => renderWaveRow(row, false)}
+                rows={animatedHighlyRatedRows}
               />
             )}
-            <SidebarWaveRowsSection
-              ariaLabel={t(
-                SIDEBAR_LOCALE,
-                "waves.sidebar.highlyRatedAriaLabel"
-              )}
-              className="tw-flex tw-flex-col"
-              getRowHeight={getSidebarRowHeight}
-              isRowVisible={(row) =>
-                isVisibleStaticRow({
-                  detailedLabel: "Highly rated",
-                  row,
-                  sectionName: "highly rated",
-                })
-              }
-              renderRow={(row) => renderWaveRow(row, false)}
-              rows={animatedHighlyRatedRows}
-            />
           </>
         )}
 

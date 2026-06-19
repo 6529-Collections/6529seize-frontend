@@ -121,7 +121,7 @@ jest.mock(
   )
 );
 
-it("renders announcement, highly rated, pinned, following, and all sections without double rendering", () => {
+it("renders highly rated waves collapsed by default and expands them from the section control", () => {
   const sentinelRef = React.createRef<HTMLDivElement>();
 
   render(
@@ -140,21 +140,92 @@ it("renders announcement, highly rated, pinned, following, and all sections with
   );
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+  const highlyRatedToggle = screen.getByRole("button", {
+    name: "Expand Highly Rated, 1 wave",
+  });
+  expect(highlyRatedToggle).toHaveTextContent("Highly Rated 1 wave");
+  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "false");
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Following waves")).toBeInTheDocument();
   expect(
     screen.getByLabelText("All quality-ranked waves list")
   ).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
-  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
+  expect(screen.queryByTestId("wave-h1")).toBeNull();
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
   expect(
     screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
+  ).toEqual(["wave-a1", "wave-p1", "wave-f1", "wave-r1"]);
+
+  fireEvent.click(highlyRatedToggle);
+
+  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "true");
+  expect(
+    screen.getByRole("button", {
+      name: "Collapse Highly Rated, 1 wave",
+    })
+  ).toBeInTheDocument();
+  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
+  expect(
+    screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
   ).toEqual(["wave-a1", "wave-h1", "wave-p1", "wave-f1", "wave-r1"]);
+
+  fireEvent.click(highlyRatedToggle);
+
+  expect(highlyRatedToggle).toHaveAttribute("aria-expanded", "false");
+  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
+});
+
+it("shows the collapsed highly rated count and remembers expansion preference", () => {
+  const waves = [
+    createMockMinimalWave({ id: "h1", sidebarSection: "highly-rated" }),
+    createMockMinimalWave({ id: "h2", sidebarSection: "highly-rated" }),
+    createMockMinimalWave({ id: "h3", sidebarSection: "highly-rated" }),
+  ];
+  const sentinelRef = React.createRef<HTMLDivElement>();
+  const { unmount } = render(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={sentinelRef}
+    />
+  );
+
+  const highlyRatedToggle = screen.getByRole("button", {
+    name: "Expand Highly Rated, 3 waves",
+  });
+  expect(highlyRatedToggle).toHaveTextContent("Highly Rated 3 waves");
+  expect(screen.queryByTestId("wave-h1")).toBeNull();
+
+  fireEvent.click(highlyRatedToggle);
+
+  expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-h2")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-h3")).toBeInTheDocument();
+
+  unmount();
+
+  render(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+
+  expect(
+    screen.getByRole("button", {
+      name: "Collapse Highly Rated, 3 waves",
+    })
+  ).toHaveAttribute("aria-expanded", "true");
+  expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
 });
 
 it("does not give special placement to official waves", () => {
@@ -402,6 +473,11 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
       />
     );
 
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Expand Highly Rated, 1 wave",
+      })
+    );
     fireEvent.click(screen.getByTestId("toggle-highly-rated-parent"));
     expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
     expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
