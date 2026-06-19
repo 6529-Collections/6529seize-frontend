@@ -214,6 +214,49 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.updateData).toHaveBeenCalled();
   });
 
+  it("marks active wave as read after visible reaction updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-active",
+            type: DropSize.FULL,
+            stableKey: "d4-active",
+            stableHash: "d4-active",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-active",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d4-active", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
   it("skips stale DROP_REACTION_UPDATE canonical drops", async () => {
     const store = {
       wave1: {
@@ -230,6 +273,7 @@ describe("useWaveRealtimeUpdater", () => {
       },
     };
     const props = baseProps(store);
+    props.activeWaveId = "wave1";
     fetchDropByIdBatched.mockResolvedValue({
       id: "d4-stale",
       author: {},
@@ -260,6 +304,56 @@ describe("useWaveRealtimeUpdater", () => {
     expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4-stale");
     expect(props.updateData).not.toHaveBeenCalled();
     expect(mockSetQueriesData).not.toHaveBeenCalled();
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
+  it("does not mark background wave as read after reaction updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-background",
+            type: DropSize.FULL,
+            stableKey: "d4-background",
+            stableHash: "d4-background",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave2";
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-background",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d4-background",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 
   it("does not process when wave is missing", async () => {

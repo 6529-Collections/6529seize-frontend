@@ -588,6 +588,9 @@ const useProcessIncomingDrop = ({
           type,
           options,
         });
+        if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+          markActiveWaveAsRead(waveId);
+        }
         return;
       }
 
