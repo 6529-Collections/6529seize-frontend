@@ -200,8 +200,12 @@ export interface SidebarWave {
   readonly totalDropsCount: number;
   readonly isPrivate: boolean;
   readonly latestDropTimestamp: number | null;
+  readonly latestFollowedSubwaveDropTimestamp: number | null;
   readonly firstUnreadDropSerialNo: number | null;
+  readonly firstUnreadFollowedSubwaveDropSerialNo: number | null;
   readonly unreadDropsCount: number;
+  readonly followedSubwavesCount: number;
+  readonly unreadFollowedSubwaveDrops: number;
   readonly latestReadTimestamp: number;
   readonly pinned: boolean;
   readonly muted: boolean;
