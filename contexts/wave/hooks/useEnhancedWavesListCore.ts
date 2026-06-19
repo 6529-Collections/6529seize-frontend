@@ -65,10 +65,12 @@ interface UseEnhancedWavesListCoreOptions {
   otherListWaveIds?: ReadonlySet<string> | undefined;
   unknownWaveRefetchCooldownMs?: number | undefined;
   preserveBackendWaveOrder?: boolean | undefined;
+  sortMutedLast?: boolean | undefined;
 }
 
 const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
   supportsPinning: true,
+  sortMutedLast: true,
 };
 
 function useEnhancedWavesListCore(
@@ -237,7 +239,7 @@ function useEnhancedWavesListCore(
   const sorted = useMemo(
     () =>
       [...minimal].sort((a, b) => {
-        if (a.isMuted !== b.isMuted) {
+        if (options.sortMutedLast !== false && a.isMuted !== b.isMuted) {
           return a.isMuted ? 1 : -1;
         }
         if (options.preserveBackendWaveOrder) {
@@ -247,7 +249,7 @@ function useEnhancedWavesListCore(
           (b.sidebarActivityTimestamp ?? 0) - (a.sidebarActivityTimestamp ?? 0)
         );
       }),
-    [minimal, options.preserveBackendWaveOrder]
+    [minimal, options.preserveBackendWaveOrder, options.sortMutedLast]
   );
 
   return useMemo(
