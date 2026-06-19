@@ -48,26 +48,23 @@ export default function LeaderboardTableScrollShell({
     );
   }, []);
 
-  const scrollTable = useCallback(
-    (direction: -1 | 1) => {
-      const scrollElement = scrollElementRef.current;
+  const scrollTable = useCallback((direction: -1 | 1) => {
+    const scrollElement = scrollElementRef.current;
 
-      if (!scrollElement) {
-        return;
-      }
+    if (!scrollElement) {
+      return;
+    }
 
-      scrollElement.scrollBy({
-        behavior: "smooth",
-        left:
-          direction *
-          Math.max(
-            scrollElement.clientWidth * SCROLL_STEP_RATIO,
-            MIN_SCROLL_STEP_PX
-          ),
-      });
-    },
-    []
-  );
+    scrollElement.scrollBy({
+      behavior: "smooth",
+      left:
+        direction *
+        Math.max(
+          scrollElement.clientWidth * SCROLL_STEP_RATIO,
+          MIN_SCROLL_STEP_PX
+        ),
+    });
+  }, []);
 
   useEffect(() => {
     const scrollElement = scrollElementRef.current;

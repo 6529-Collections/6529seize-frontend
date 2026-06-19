@@ -9,6 +9,7 @@ import {
 import WebUnifiedWavesListWaves from "@/components/brain/left-sidebar/web/WebUnifiedWavesListWaves";
 import { SIDEBAR_SUBWAVE_ROW_TRANSITION_MS } from "@/hooks/useAnimatedSidebarWaveRows";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
+import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
@@ -28,7 +29,10 @@ jest.mock("@/hooks/usePrefetchWaveData", () => ({
   usePrefetchWaveData: () => jest.fn(),
 }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ connectedProfile: { handle: "alice" } }),
+  useAuth: () => ({
+    connectedProfile: { handle: "alice" },
+    activeProfileProxy: null,
+  }),
 }));
 jest.mock(
   "@/components/brain/left-sidebar/waves/SectionHeader",
@@ -57,6 +61,7 @@ jest.mock("react-tooltip", () => ({
   Tooltip: () => null,
 }));
 jest.mock("@/hooks/useVirtualizedWaves");
+jest.mock("@/hooks/useShowFollowingWaves");
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettingsOptional: jest.fn(),
 }));
@@ -65,6 +70,7 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 }));
 
 const mockUseVirtualizedWaves = useVirtualizedWaves as jest.Mock;
+const mockUseShowFollowingWaves = useShowFollowingWaves as jest.Mock;
 const mockUseSeizeSettingsOptional = useSeizeSettingsOptional as jest.Mock;
 const mockUseMyStream = useMyStream as jest.Mock;
 const loadSubwavesForParent = jest.fn();
@@ -91,6 +97,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   globalThis.localStorage.clear();
   globalThis.sessionStorage.clear();
+  mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   mockUseMyStream.mockReturnValue({
     activeWave: { id: null, set: jest.fn() },
     waves: {
@@ -108,8 +115,9 @@ beforeEach(() => {
     virtualItems: [
       { index: 0, start: 0, size: 62 },
       { index: 1, start: 62, size: 40 },
+      { index: 2, start: 102, size: 1 },
     ],
-    totalHeight: 102,
+    totalHeight: 103,
   });
 });
 
@@ -136,7 +144,7 @@ jest.mock(
   )
 );
 
-it("renders fitting highly rated waves as an unboxed preview strip without an expand control", () => {
+it("renders announcement, highly rated preview, pinned, and one filterable bottom list without double rendering", () => {
   const sentinelRef = React.createRef<HTMLDivElement>();
 
   render(
@@ -167,10 +175,8 @@ it("renders fitting highly rated waves as an unboxed preview strip without an ex
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
   expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
-  expect(screen.getByLabelText("Following waves")).toBeInTheDocument();
-  expect(
-    screen.getByLabelText("All quality-ranked waves list")
-  ).toBeInTheDocument();
+  expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
+  expect(screen.queryByLabelText("Following waves")).toBeNull();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
   expect(screen.queryByTestId("wave-h1")).toBeNull();
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
@@ -326,7 +332,7 @@ it("does not give special placement to official waves", () => {
   expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
 });
 
-it("labels following waves when they are the virtualized section", () => {
+it("renders followed waves in the same bottom list instead of a separate section", () => {
   render(
     <WebUnifiedWavesListWaves
       waves={[
@@ -340,8 +346,9 @@ it("labels following waves when they are the virtualized section", () => {
   );
 
   expect(screen.getByText("Pinned")).toBeInTheDocument();
-  expect(screen.getByText("Following")).toBeInTheDocument();
-  expect(screen.getByLabelText("Following waves list")).toBeInTheDocument();
+  expect(screen.getByText("All")).toBeInTheDocument();
+  expect(screen.queryByText("Following")).toBeNull();
+  expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
 });
 

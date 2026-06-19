@@ -1,3 +1,5 @@
+/* eslint max-lines: "off" */
+
 import {
   DISTRIBUTION_MESSAGES,
   LINK_PREVIEW_MESSAGES,
@@ -344,13 +346,17 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
     "Open {waveName}, {count} new messages",
   highlyRatedPreviewScore: "Score {score}",
   pinned: "Pinned",
-  following: "Following",
+  allWaves: "All Waves",
   all: "All",
+  filterAriaLabel: "Wave list filter",
+  filterAll: "All",
+  filterJoined: "Joined",
+  joinedEmptyMessage: "No joined waves to display",
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Highly rated waves",
   pinnedAriaLabel: "Pinned waves",
-  followingAriaLabel: "Following waves",
   followingListAriaLabel: "Following waves list",
+  allRecentActivityAriaLabel: "All recent waves list",
   allQualityRankedAriaLabel: "All quality-ranked waves list",
   directMessagesAriaLabel: "Direct message conversations",
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",

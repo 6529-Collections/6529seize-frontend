@@ -16,12 +16,14 @@ import {
   HighlyRatedWavesToggle,
 } from "./HighlyRatedWavesToggle";
 import SectionHeader from "./SectionHeader";
-import JoinedToggle from "./JoinedToggle";
+import WavesFilterToggle from "./WavesFilterToggle";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useAuth } from "@/components/auth/Auth";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -60,6 +62,25 @@ const absolutePositionedStyle = {
 const emptyPlaceholderStyle = {
   minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT,
 } as const satisfies React.CSSProperties;
+
+function SidebarCategoryHeader({
+  label,
+  rightContent,
+}: {
+  readonly label: string;
+  readonly rightContent?: React.ReactNode | undefined;
+}) {
+  return (
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-px-4 tw-pb-1 tw-pt-2">
+      <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+        {label}
+      </div>
+      {rightContent !== undefined && rightContent !== null && (
+        <div className="tw-flex tw-items-center">{rightContent}</div>
+      )}
+    </div>
+  );
+}
 
 function SidebarCategoryLabel({ label }: { readonly label: string }) {
   return (
@@ -104,7 +125,7 @@ interface UnifiedWavesListWavesProps {
   readonly hideToggle?: boolean | undefined;
   /** Whether to hide the pin functionality for waves */
   readonly hidePin?: boolean | undefined;
-  /** Whether to hide section headers (All Waves, Pinned) */
+  /** Whether to hide section headers */
   readonly hideHeaders?: boolean | undefined;
   /** Reference to the scroll container for virtualization */
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -140,8 +161,12 @@ const UnifiedWavesListWaves = forwardRef<
     ref
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
+    const [following] = useShowFollowingWaves();
+    const { connectedProfile, activeProfileProxy } = useAuth();
     const seizeSettings = useSeizeSettingsOptional();
     const { activeWave, waves: streamWaves } = useMyStream();
+    const isJoinedFilterActive =
+      following && !!connectedProfile?.handle && !activeProfileProxy;
     const {
       id: activeWaveId,
       parentWaveId: activeParentWaveId,
@@ -157,24 +182,19 @@ const UnifiedWavesListWaves = forwardRef<
       onParentExpand: streamWaves.loadSubwavesForParent,
     });
 
-    const {
-      announcementWaves,
-      highlyRatedWaves,
-      pinnedWaves,
-      followingWaves,
-      allWaves,
-    } = useMemo(
-      () =>
-        groupSidebarWavesForView({
-          isAnnouncementsWave:
-            seizeSettings === null
-              ? undefined
-              : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
-          isDirectMessage,
-          waves: topLevelWaves,
-        }),
-      [topLevelWaves, seizeSettings, isDirectMessage]
-    );
+    const { announcementWaves, highlyRatedWaves, pinnedWaves, allWaves } =
+      useMemo(
+        () =>
+          groupSidebarWavesForView({
+            isAnnouncementsWave:
+              seizeSettings === null
+                ? undefined
+                : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
+            isDirectMessage,
+            waves: topLevelWaves,
+          }),
+        [topLevelWaves, seizeSettings, isDirectMessage]
+      );
 
     const announcementRows = useMemo(
       () => getRows(announcementWaves),
@@ -188,32 +208,43 @@ const UnifiedWavesListWaves = forwardRef<
       () => getRows(pinnedWaves),
       [pinnedWaves, getRows]
     );
-    const followingRows = useMemo(
-      () => getRows(followingWaves),
-      [followingWaves, getRows]
-    );
     const allRows = useMemo(() => getRows(allWaves), [allWaves, getRows]);
     const animatedAnnouncementRows =
       useAnimatedSidebarWaveRows(announcementRows);
     const animatedHighlyRatedRows = useAnimatedSidebarWaveRows(highlyRatedRows);
     const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
-    const animatedFollowingRows = useAnimatedSidebarWaveRows(followingRows);
     const animatedAllRows = useAnimatedSidebarWaveRows(allRows);
-    const virtualizedRows =
-      animatedAllRows.length > 0 ? animatedAllRows : animatedFollowingRows;
-    const staticFollowingRows =
-      animatedAllRows.length > 0 ? animatedFollowingRows : [];
-    const hasVirtualizedFollowingRows =
-      animatedAllRows.length === 0 && animatedFollowingRows.length > 0;
+    const virtualizedRows = animatedAllRows;
+    let virtualizedAriaLabel = t(
+      SIDEBAR_LOCALE,
+      "waves.sidebar.allRecentActivityAriaLabel"
+    );
+    if (isJoinedFilterActive) {
+      virtualizedAriaLabel = t(
+        SIDEBAR_LOCALE,
+        "waves.sidebar.followingListAriaLabel"
+      );
+    }
+    if (isDirectMessage) {
+      virtualizedAriaLabel = t(
+        SIDEBAR_LOCALE,
+        "waves.sidebar.directMessagesAriaLabel"
+      );
+    }
+    const bottomListLabel = isJoinedFilterActive
+      ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
+      : t(SIDEBAR_LOCALE, "waves.sidebar.all");
+    const shouldShowBottomHeader = !hideHeaders;
+    let virtualizedKey = "unified-waves-all";
+    if (isJoinedFilterActive) {
+      virtualizedKey = "unified-waves-joined";
+    }
+    if (isDirectMessage) {
+      virtualizedKey = "direct-message-conversations";
+    }
     const shouldUseHighlyRatedToggle = !hideHeaders;
     const shouldShowHighlyRatedRows =
       highlyRatedRows.length > 0 && !shouldUseHighlyRatedToggle;
-    const virtualizedAriaLabel =
-      isDirectMessage
-        ? t(SIDEBAR_LOCALE, "waves.sidebar.directMessagesAriaLabel")
-        : animatedAllRows.length > 0
-        ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
-        : t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
     const handleHighlyRatedPreviewHover = useCallback(
       (waveId: string) => {
         if (waveId === activeWaveId) {
@@ -284,12 +315,7 @@ const UnifiedWavesListWaves = forwardRef<
 
     const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
       items: virtualizedRows,
-      key:
-        isDirectMessage
-          ? "direct-message-conversations"
-          : animatedAllRows.length > 0
-          ? "unified-waves-all"
-          : "unified-waves-following",
+      key: virtualizedKey,
       scrollContainerRef,
       listContainerRef,
       rowHeight: getSidebarRowHeight,
@@ -320,12 +346,10 @@ const UnifiedWavesListWaves = forwardRef<
 
     return (
       <div className="tw-flex tw-flex-col">
-        {/* Always show "All Waves" header with toggle when not hidden */}
         {!hideHeaders && (
           <SectionHeader
-            label="All Waves"
+            label={t(SIDEBAR_LOCALE, "waves.sidebar.allWaves")}
             paddingClassName="tw-px-4"
-            rightContent={hideToggle ? undefined : <JoinedToggle />}
           />
         )}
 
@@ -355,8 +379,7 @@ const UnifiedWavesListWaves = forwardRef<
           announcementRows.length > 0 &&
           (highlyRatedRows.length > 0 ||
             pinnedRows.length > 0 ||
-            followingRows.length > 0 ||
-            allRows.length > 0) && (
+            shouldShowBottomHeader) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
@@ -397,16 +420,14 @@ const UnifiedWavesListWaves = forwardRef<
 
         {!hideHeaders &&
           highlyRatedRows.length > 0 &&
-          (pinnedRows.length > 0 ||
-            followingRows.length > 0 ||
-            allRows.length > 0) && (
+          (pinnedRows.length > 0 || shouldShowBottomHeader) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedRows.length > 0 && (
           <>
-            <SidebarCategoryLabel
+            <SidebarCategoryHeader
               label={t(SIDEBAR_LOCALE, "waves.sidebar.pinned")}
             />
             <SidebarWaveRowsSection
@@ -426,51 +447,14 @@ const UnifiedWavesListWaves = forwardRef<
           </>
         )}
 
-        {!hideHeaders &&
-          pinnedRows.length > 0 &&
-          (followingRows.length > 0 || allRows.length > 0) && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-          )}
-
-        {staticFollowingRows.length > 0 && (
-          <>
-            {!hideHeaders && (
-              <SidebarCategoryLabel
-                label={t(SIDEBAR_LOCALE, "waves.sidebar.following")}
-              />
-            )}
-            <SidebarWaveRowsSection
-              ariaLabel={t(SIDEBAR_LOCALE, "waves.sidebar.followingAriaLabel")}
-              className="tw-flex tw-flex-col"
-              getRowHeight={getSidebarRowHeight}
-              isRowVisible={(row) =>
-                isVisibleStaticRow({
-                  detailedLabel: "Following",
-                  row,
-                  sectionName: "following",
-                })
-              }
-              renderRow={(row) => renderWaveRow(row, !hidePin)}
-              rows={staticFollowingRows}
-            />
-          </>
+        {!hideHeaders && pinnedRows.length > 0 && shouldShowBottomHeader && (
+          <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
         )}
 
-        {!hideHeaders &&
-          staticFollowingRows.length > 0 &&
-          animatedAllRows.length > 0 && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-          )}
-
-        {!hideHeaders && animatedAllRows.length > 0 && (
-          <SidebarCategoryLabel
-            label={t(SIDEBAR_LOCALE, "waves.sidebar.all")}
-          />
-        )}
-
-        {!hideHeaders && hasVirtualizedFollowingRows && (
-          <SidebarCategoryLabel
-            label={t(SIDEBAR_LOCALE, "waves.sidebar.following")}
+        {shouldShowBottomHeader && (
+          <SidebarCategoryHeader
+            label={bottomListLabel}
+            rightContent={hideToggle ? undefined : <WavesFilterToggle />}
           />
         )}
 
