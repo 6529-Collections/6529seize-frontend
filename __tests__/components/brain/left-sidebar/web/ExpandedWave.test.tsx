@@ -36,8 +36,23 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>
+  () => (props: any) => (
+    <button
+      type="button"
+      data-testid="pin"
+      className={props.className}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        mockPinClick();
+      }}
+    >
+      {String(props.isPinned)}
+    </button>
+  )
 );
+
+const mockPinClick = jest.fn();
 
 const baseWave = createMockMinimalWave({
   id: "1",
@@ -85,6 +100,10 @@ const renderExpandedWave = (
 };
 
 describe("ExpandedWave", () => {
+  beforeEach(() => {
+    mockPinClick.mockClear();
+  });
+
   it("uses normal row padding when a wave has no subwaves", () => {
     renderExpandedWave({
       showPin: true,
@@ -173,6 +192,23 @@ describe("ExpandedWave", () => {
     expect(rowOverlayLink).not.toHaveAttribute("data-tooltip-content");
   });
 
+  it("keeps pin clicks independent from row navigation", async () => {
+    const user = userEvent.setup();
+    const { onClick } = renderExpandedWave({
+      isPinned: true,
+      showPin: true,
+    });
+
+    const pin = screen.getByTestId("pin");
+
+    expect(pin).toHaveClass("tw-z-20");
+
+    await user.click(pin);
+
+    expect(mockPinClick).toHaveBeenCalledTimes(1);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
   it("does not render a nested expand button for child rows", () => {
     renderExpandedWave({
       depth: 1,
@@ -230,8 +266,12 @@ describe("ExpandedWave", () => {
 
     expect(metadataRow?.children[0]).toBe(timestampWrapper);
     expect(metadataRow?.children[1]).toBe(score);
+    expect(metadataRow).toHaveClass("tw-pointer-events-none");
+    expect(metadataRow).toHaveClass("tw-relative");
+    expect(metadataRow).toHaveClass("tw-z-20");
     expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
     expect(score).toHaveClass("tw-ml-auto");
+    expect(score).toHaveClass("tw-pointer-events-auto");
   });
 
   it("overlaps non-final child rails to avoid visible line gaps", () => {

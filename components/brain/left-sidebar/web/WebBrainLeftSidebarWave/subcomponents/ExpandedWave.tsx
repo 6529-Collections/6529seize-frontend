@@ -232,7 +232,7 @@ export const ExpandedWave = ({
             />
           </div>
           {shouldShowTrustSignalsRow && (
-            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
+            <div className="tw-pointer-events-none tw-relative tw-z-20 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
               {presentLatestDropTimestamp !== null && (
                 <span className="tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
                   <BrainLeftSidebarWaveDropTime
@@ -246,7 +246,7 @@ export const ExpandedWave = ({
                   waveScore={wave.waveScore}
                   variant="sidebar-inline"
                   mode="summary"
-                  className="tw-ml-auto tw-shrink-0"
+                  className="tw-pointer-events-auto tw-ml-auto tw-shrink-0"
                   tooltipId={trustSignalsTooltipId}
                 />
               )}

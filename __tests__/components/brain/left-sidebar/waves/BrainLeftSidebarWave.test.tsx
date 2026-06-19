@@ -44,8 +44,23 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>
+  () => (props: any) => (
+    <button
+      type="button"
+      data-testid="pin"
+      className={props.className}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        mockPinClick();
+      }}
+    >
+      {String(props.isPinned)}
+    </button>
+  )
 );
+
+const mockPinClick = jest.fn();
 
 const mockedPrefetch = usePrefetchWaveData as jest.Mock;
 const mockedUseMyStream = useMyStream as jest.Mock;
@@ -86,6 +101,7 @@ describe("BrainLeftSidebarWave", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPinClick.mockClear();
     mockedPrefetch.mockReturnValue(prefetch);
     activeWaveId = null;
     mockedUseMyStream.mockImplementation(() => ({
@@ -209,6 +225,27 @@ describe("BrainLeftSidebarWave", () => {
     };
     render(<BrainLeftSidebarWave wave={wave} onHover={onHover} showPin />);
     expect(screen.getByTestId("pin")).toHaveTextContent("true");
+  });
+
+  it("keeps pin clicks independent from row navigation", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrainLeftSidebarWave
+        wave={{ ...baseWave, id: "pin-test", isPinned: true }}
+        onHover={onHover}
+        showPin
+      />
+    );
+
+    const pin = screen.getByTestId("pin");
+
+    expect(pin).toHaveClass("tw-z-20");
+
+    await user.click(pin);
+
+    expect(mockPinClick).toHaveBeenCalledTimes(1);
+    expect(setActiveWave).not.toHaveBeenCalled();
   });
 
   it("uses normal row padding when a wave has no subwaves", () => {
@@ -373,8 +410,12 @@ describe("BrainLeftSidebarWave", () => {
 
     expect(metadataRow?.children[0]).toBe(timestampWrapper);
     expect(metadataRow?.children[1]).toBe(score);
+    expect(metadataRow).toHaveClass("tw-pointer-events-none");
+    expect(metadataRow).toHaveClass("tw-relative");
+    expect(metadataRow).toHaveClass("tw-z-20");
     expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
     expect(score).toHaveClass("tw-ml-auto");
+    expect(score).toHaveClass("tw-pointer-events-auto");
   });
 
   it("cancels subwave prefetch when hover intent ends early", () => {
