@@ -155,6 +155,15 @@ export const ExpandedWave = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
+      <Link
+        href={href}
+        prefetch={false}
+        onClick={onClick}
+        className="tw-absolute tw-inset-0 tw-z-0 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+        {...tooltipAttributes}
+      >
+        <span className="tw-sr-only">{formattedWaveName}</span>
+      </Link>
       {isChildRow && (
         <span
           aria-hidden="true"
@@ -196,11 +205,8 @@ export const ExpandedWave = ({
             }`}
             {...tooltipAttributes}
           >
-            <Link
-              href={href}
-              prefetch={false}
-              onClick={onClick}
-              className={`tw-min-w-0 tw-flex-shrink tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+            <span
+              className={`tw-min-w-0 tw-flex-shrink ${
                 isActive
                   ? "tw-text-white desktop-hover:group-hover:tw-text-white"
                   : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
@@ -209,16 +215,20 @@ export const ExpandedWave = ({
               <div ref={nameRef} className="tw-truncate tw-text-sm">
                 {formattedWaveName}
               </div>
-            </Link>
-            <SidebarWaveExpandControl
-              formattedWaveName={formattedWaveName}
-              isExpanded={isExpanded}
-              isLoading={isLoadingSubwaves}
-              onBlur={cancelSubwavePrefetch}
-              onClick={handleToggleExpand}
-              onFocus={scheduleSubwavePrefetch}
-              shouldShowButton={shouldShowExpandControl}
-            />
+            </span>
+            {shouldShowExpandControl && (
+              <span className="tw-relative tw-z-10 tw-inline-flex">
+                <SidebarWaveExpandControl
+                  formattedWaveName={formattedWaveName}
+                  isExpanded={isExpanded}
+                  isLoading={isLoadingSubwaves}
+                  onBlur={cancelSubwavePrefetch}
+                  onClick={handleToggleExpand}
+                  onFocus={scheduleSubwavePrefetch}
+                  shouldShowButton={shouldShowExpandControl}
+                />
+              </span>
+            )}
           </div>
           {shouldShowTrustSignalsRow && (
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">

@@ -100,7 +100,7 @@ describe("ExpandedWave", () => {
     expect(row).not.toHaveClass("tw-pl-2");
   });
 
-  it("renders the subwave expand button beside the wave name without opening the wave", async () => {
+  it("renders one row link and keeps the subwave expand button separate", async () => {
     const user = userEvent.setup();
     const { onClick, onToggleExpand } = renderExpandedWave({
       canExpand: true,
@@ -130,19 +130,16 @@ describe("ExpandedWave", () => {
     expect(getWaveRow()).toHaveClass("tw-px-5");
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
     expect(getWaveRow()).not.toHaveClass("tw-pl-2");
-    const titleLink = screen.getByRole("link", { name: "Chat Wave" });
-    expect(titleLink.nextElementSibling).toBe(expandButton);
-    expect(expandButton.parentElement).toContainElement(titleLink);
+    const rowLink = screen.getByRole("link", { name: "Chat Wave" });
+    expect(rowLink).toHaveClass("tw-absolute");
+    expect(rowLink).toHaveClass("tw-inset-0");
+    expect(rowLink).toHaveClass("focus-visible:tw-ring-2");
+    expect(expandButton.closest("a")).toBeNull();
+    expect(expandButton.parentElement).toHaveClass("tw-z-10");
     const avatar = screen.getByTestId("sidebar-wave-avatar");
     expect(avatar).toHaveAttribute("aria-hidden", "true");
     expect(avatar.closest("a")).toBeNull();
     expect(screen.getAllByRole("link")).toHaveLength(1);
-    expect(
-      screen.getByRole("link", { name: "Chat Wave" }).closest(".tw-pr-7")
-    ).not.toBeNull();
-    expect(screen.getByRole("link", { name: "Chat Wave" })).toHaveClass(
-      "focus-visible:tw-outline"
-    );
 
     await user.click(expandButton);
 
