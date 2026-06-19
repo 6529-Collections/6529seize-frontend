@@ -332,6 +332,27 @@ describe("BrainLeftSidebarWave", () => {
     expect(expandButton).toHaveClass("tw-opacity-100");
   });
 
+  it("shows a busy expand control while subwaves are loading", () => {
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        canExpand
+        isLoadingSubwaves
+        onToggleExpand={jest.fn()}
+      />
+    );
+
+    const expandButton = screen.getByRole("button", {
+      name: "Loading Chat Wave subwaves",
+    });
+
+    expect(expandButton).toHaveAttribute("aria-expanded", "false");
+    expect(expandButton).toHaveAttribute("aria-busy", "true");
+    expect(expandButton).toHaveClass("tw-bg-iron-700/60");
+    expect(expandButton.querySelector("svg")).toHaveClass("tw-animate-spin");
+  });
+
   it("places the timestamp below the title and pushes score to the far edge", () => {
     render(
       <BrainLeftSidebarWave

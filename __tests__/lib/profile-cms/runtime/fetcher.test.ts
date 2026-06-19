@@ -150,6 +150,19 @@ describe("profile CMS primary-site fetcher", () => {
     });
   });
 
+  it("returns null for the backend no-primary-site message", async () => {
+    commonApiFetchMock.mockRejectedValueOnce(
+      "Profile punk6529 has no primary published CMS package"
+    );
+
+    await expect(
+      fetchProfileCmsPrimarySite({
+        handle: "punk6529",
+        headers: {},
+      })
+    ).resolves.toBeNull();
+  });
+
   it("uses the dev fixture only when explicitly enabled and the API is unavailable", async () => {
     process.env["PROFILE_CMS_RUNTIME_FIXTURE_PRIMARY"] = "true";
     commonApiFetchMock.mockRejectedValueOnce(new Error("ECONNREFUSED"));

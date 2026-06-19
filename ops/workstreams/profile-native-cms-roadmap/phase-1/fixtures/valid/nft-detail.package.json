@@ -27,6 +27,11 @@
         "page_id": "page-home"
       },
       {
+        "path": "/punk6529/collections/the-memes/index.html",
+        "kind": "page",
+        "page_id": "page-collection"
+      },
+      {
         "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
         "kind": "page",
         "page_id": "page-nft"
@@ -57,6 +62,30 @@
         ]
       },
       {
+        "id": "page-collection",
+        "type": "collection",
+        "path": "/punk6529/collections/the-memes/index.html",
+        "metadata": {
+          "title": "The Memes by 6529",
+          "description": "Collection context for the NFT detail fixture.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/collections/the-memes/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-collection-ref",
+            "block_type": "collection_reference",
+            "chain_id": 1,
+            "contract": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+            "title": "The Memes by 6529"
+          }
+        ]
+      },
+      {
         "id": "page-nft",
         "type": "nft_detail",
         "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
@@ -70,6 +99,9 @@
           "search": "include",
           "robots": "index"
         },
+        "source": {
+          "source_packet_id": "source-nft-1"
+        },
         "blocks": [
           {
             "id": "block-media",
@@ -80,7 +112,19 @@
           {
             "id": "block-nft-ref",
             "block_type": "nft_reference",
-            "nft_media_profile_id": "nft-profile"
+            "nft_media_profile_id": "nft-profile",
+            "collection_title": "The Memes by 6529",
+            "collection_page_id": "page-collection",
+            "traits": [
+              {
+                "trait_type": "Season",
+                "value": "1"
+              },
+              {
+                "trait_type": "Theme",
+                "value": "Open Metaverse"
+              }
+            ]
           }
         ]
       }
@@ -163,8 +207,28 @@
             "page_id": "page-home"
           },
           {
+            "label": "Collection",
+            "page_id": "page-collection"
+          },
+          {
             "label": "NFT",
             "page_id": "page-nft"
+          }
+        ]
+      }
+    ],
+    "source_packets": [
+      {
+        "id": "source-nft-1",
+        "source_type": "nft_metadata",
+        "captured_at": "2026-06-17T00:00:00Z",
+        "content_hash": "sha256:3838383838383838383838383838383838383838383838383838383838383838",
+        "metadata_uri": "ipfs://bafyfixturenft/metadata.json",
+        "owner": "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+        "attributes": [
+          {
+            "trait_type": "Edition",
+            "value": "Meme Card"
           }
         ]
       }
@@ -172,7 +236,7 @@
     "build_manifest": {
       "renderer": "6529-cms-static",
       "renderer_version": "0.0.0-fixture",
-      "route_count": 2,
+      "route_count": 3,
       "asset_count": 3,
       "warnings": []
     }
