@@ -1,4 +1,7 @@
 import { useDropLinkPreviewToggleControl } from "@/components/waves/drops/useDropLinkPreviewToggleControl";
+import type { useAuth as useAuthHook } from "@/components/auth/Auth";
+import type { useMyStreamOptional as useMyStreamOptionalHook } from "@/contexts/wave/MyStreamContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { act, renderHook } from "@testing-library/react";
@@ -14,33 +17,64 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 const { useAuth } = jest.requireMock("@/components/auth/Auth") as {
-  useAuth: jest.Mock;
+  useAuth: jest.MockedFunction<typeof useAuthHook>;
 };
 const { useMyStreamOptional } = jest.requireMock(
   "@/contexts/wave/MyStreamContext"
-) as { useMyStreamOptional: jest.Mock };
-const mockedCommonApiPost = commonApiPost as jest.Mock;
+) as {
+  useMyStreamOptional: jest.MockedFunction<typeof useMyStreamOptionalHook>;
+};
+const mockedCommonApiPost = commonApiPost as jest.MockedFunction<
+  typeof commonApiPost
+>;
 
-function createDrop(hideLinkPreview = false) {
-  return {
+type TestDrop = {
+  id: string;
+  wave: { id: string };
+  author: { handle: string };
+  parts: Array<{ content: string }>;
+  hide_link_preview: boolean;
+};
+
+type TestDropDraft = {
+  type: DropSize;
+  hide_link_preview: boolean;
+};
+
+type TestDropUpdate = (draft: TestDropDraft) => TestDropDraft;
+
+function createDrop(hideLinkPreview = false): ApiDrop {
+  const drop = {
     id: "drop-1",
     wave: { id: "wave-1" },
     author: { handle: "alice" },
     parts: [{ content: "https://6529.io" }],
     hide_link_preview: hideLinkPreview,
-  } as any;
+  } satisfies TestDrop;
+
+  return drop as ApiDrop;
 }
 
 function setupStream() {
-  const updates: Array<(draft: any) => any> = [];
+  const updates: TestDropUpdate[] = [];
   const rollback = jest.fn();
-  const applyOptimisticDropUpdate = jest.fn(({ update }) => {
-    updates.push(update);
-    return { rollback };
-  });
+  const applyOptimisticDropUpdate = jest.fn(
+    ({ update }: { update: TestDropUpdate }) => {
+      updates.push(update);
+      return { rollback };
+    }
+  );
   useMyStreamOptional.mockReturnValue({ applyOptimisticDropUpdate });
 
   return { applyOptimisticDropUpdate, rollback, updates };
+}
+
+function expectToggleControl(
+  control: ReturnType<typeof useDropLinkPreviewToggleControl>
+): asserts control is NonNullable<
+  ReturnType<typeof useDropLinkPreviewToggleControl>
+> {
+  expect(control).toBeDefined();
 }
 
 describe("useDropLinkPreviewToggleControl", () => {
@@ -58,12 +92,14 @@ describe("useDropLinkPreviewToggleControl", () => {
 
   it("posts desired state and reconciles optimistic state from response", async () => {
     const { updates } = setupStream();
+    mockedCommonApiPost.mockResolvedValueOnce({ hide_link_preview: false });
     const { result } = renderHook(() =>
       useDropLinkPreviewToggleControl(createDrop(false))
     );
 
+    expectToggleControl(result.current);
     await act(async () => {
-      await result.current?.onToggle(true);
+      await result.current.onToggle(true);
     });
 
     expect(mockedCommonApiPost).toHaveBeenCalledWith({
@@ -78,7 +114,7 @@ describe("useDropLinkPreviewToggleControl", () => {
 
     draft.hide_link_preview = false;
     updates[1](draft);
-    expect(draft.hide_link_preview).toBe(true);
+    expect(draft.hide_link_preview).toBe(false);
   });
 
   it("rolls back and shows a toast when the request fails", async () => {
@@ -88,8 +124,9 @@ describe("useDropLinkPreviewToggleControl", () => {
       useDropLinkPreviewToggleControl(createDrop(false))
     );
 
+    expectToggleControl(result.current);
     await act(async () => {
-      await result.current?.onToggle(true);
+      await result.current.onToggle(true);
     });
 
     expect(rollback).toHaveBeenCalledTimes(1);
@@ -117,24 +154,27 @@ describe("useDropLinkPreviewToggleControl", () => {
       useDropLinkPreviewToggleControl(createDrop(false))
     );
 
+    expectToggleControl(first.result.current);
     act(() => {
-      first.result.current?.onToggle(true);
+      void first.result.current.onToggle(true);
     });
 
     const second = renderHook(() =>
       useDropLinkPreviewToggleControl(createDrop(false))
     );
 
+    expectToggleControl(second.result.current);
     act(() => {
-      second.result.current?.onToggle(true);
+      void second.result.current.onToggle(true);
     });
 
     expect(mockedCommonApiPost).toHaveBeenCalledTimes(1);
 
     first.unmount();
 
+    expectToggleControl(second.result.current);
     await act(async () => {
-      await second.result.current?.onToggle(true);
+      await second.result.current.onToggle(true);
     });
 
     expect(mockedCommonApiPost).toHaveBeenCalledTimes(2);
