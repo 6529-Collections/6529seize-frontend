@@ -103,7 +103,7 @@
   gap: 0;
   margin-bottom: 1rem;
   min-height: 112px;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
 }
 
@@ -231,6 +231,10 @@
   padding: 0;
 }
 
+.scrollCue {
+  display: none;
+}
+
 @media only screen and (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
   .networkHeader {
     gap: 1rem;
@@ -317,7 +321,39 @@
     overflow-x: auto;
     overscroll-behavior-x: contain;
     padding-bottom: 0.5rem;
-    position: relative;
+  }
+
+  .leaderboardTableFrameWithCue {
+    padding-top: 2rem;
+  }
+
+  .scrollCue {
+    align-items: center;
+    background-color: variables.$almost-very-dark-grey;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    color: variables.$font-color;
+    display: inline-flex;
+    height: 1.55rem;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    top: 0.1rem;
+    width: 2rem;
+    z-index: 1;
+
+    svg {
+      height: 1rem;
+      width: 1rem;
+    }
+  }
+
+  .scrollCueLeft {
+    left: 0;
+  }
+
+  .scrollCueRight {
+    right: 0;
   }
 
   .cardsCollectedTable {
@@ -354,22 +390,6 @@
   .interactionsTable th:not(:first-child):not(:nth-child(2)),
   .interactionsTable td:not(:first-child):not(:nth-child(2)) {
     min-width: 7rem;
-  }
-
-  .leaderboardTableShell::after {
-    background-color: variables.$almost-very-dark-grey;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 9999px;
-    color: variables.$font-color;
-    content: ">>";
-    font-size: 0.75rem;
-    font-weight: 800;
-    line-height: 1;
-    padding: 0.2rem 0.45rem;
-    pointer-events: none;
-    position: absolute;
-    right: 0.25rem;
-    top: 0.25rem;
   }
 }
 
@@ -535,8 +555,13 @@
   }
 }
 
+.leaderboardTableFrame,
 .leaderboardTableShell {
   width: 100%;
+}
+
+.leaderboardTableFrame {
+  position: relative;
 }
 
 .leaderboardEmpty {
