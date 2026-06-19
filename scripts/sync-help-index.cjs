@@ -81,8 +81,17 @@ function createRoutePatterns() {
   return listFiles(appDir, "page.tsx").map(routePatternFromPage);
 }
 
+function trimTrailingSlashes(value) {
+  let end = value.length;
+  while (end > 1 && value[end - 1] === "/") {
+    end -= 1;
+  }
+  return value.slice(0, end);
+}
+
 function stripPathDecorators(value) {
-  return value.split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+  const withoutQuery = value.split("?")[0].split("#")[0];
+  return trimTrailingSlashes(withoutQuery) || "/";
 }
 
 function pathMatchesRoute(rawPath, routePattern) {
