@@ -7,13 +7,11 @@ import {
 } from "@/components/waves/WaveTrustSignals";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Tooltip } from "react-tooltip";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import {
   getWaveHomeRoute,
@@ -118,9 +116,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowTrustSignalsRow =
     hasSummaryScore || latestDropTimestamp !== null;
-  const trustSignalsTooltipId = hasTouchScreen
-    ? undefined
-    : `sidebar-wave-trust-signals-${wave.id}`;
 
   const formattedWaveName = useMemo(() => getFormattedWaveName(wave), [wave]);
 
@@ -334,25 +329,29 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               href={href}
               prefetch={false}
               onClick={handleWaveClick}
-              className={`tw-min-w-0 tw-flex-shrink tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+              className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${
                 isActive
                   ? "tw-text-white desktop-hover:group-hover:tw-text-white"
                   : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
               }`}
             >
-              <span className="tw-block tw-truncate tw-text-sm tw-font-medium">
+              <span className="tw-relative tw-z-[6] tw-block tw-truncate tw-text-sm tw-font-medium">
                 {formattedWaveName}
               </span>
             </Link>
-            <SidebarWaveExpandControl
-              formattedWaveName={formattedWaveName}
-              isExpanded={isExpanded}
-              isLoading={isLoadingSubwaves}
-              onBlur={cancelSubwavePrefetch}
-              onClick={handleToggleExpand}
-              onFocus={scheduleSubwavePrefetch}
-              shouldShowButton={shouldShowExpandControl}
-            />
+            {shouldShowExpandControl && (
+              <span className="tw-relative tw-z-10 tw-inline-flex">
+                <SidebarWaveExpandControl
+                  formattedWaveName={formattedWaveName}
+                  isExpanded={isExpanded}
+                  isLoading={isLoadingSubwaves}
+                  onBlur={cancelSubwavePrefetch}
+                  onClick={handleToggleExpand}
+                  onFocus={scheduleSubwavePrefetch}
+                  shouldShowButton={shouldShowExpandControl}
+                />
+              </span>
+            )}
           </div>
           {shouldShowTrustSignalsRow && (
             <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
@@ -368,7 +367,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                   variant="sidebar-inline"
                   mode="summary"
                   className="tw-ml-auto tw-shrink-0"
-                  tooltipId={trustSignalsTooltipId}
                 />
               )}
             </div>
@@ -381,16 +379,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           isPinned={!!wave.isPinned}
           compact
           className="tw-absolute tw-right-3 tw-top-3 tw-z-10"
-        />
-      )}
-      {trustSignalsTooltipId !== undefined && hasSummaryScore && (
-        <Tooltip
-          id={trustSignalsTooltipId}
-          place="top"
-          offset={8}
-          opacity={1}
-          positionStrategy="fixed"
-          style={TOOLTIP_STYLES}
         />
       )}
     </div>
