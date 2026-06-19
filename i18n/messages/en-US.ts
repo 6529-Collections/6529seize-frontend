@@ -360,6 +360,15 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   "postsCount.other": "{count} Posts",
 } as const);
 
+const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
+  coverAlt: "{waveName} cover",
+  "dropsCount.one": "{timeAgo} · {count} drop",
+  "dropsCount.other": "{timeAgo} · {count} drops",
+  noDropsYet: "No drops yet",
+  viewAriaLabel: "View wave {waveName}",
+  viewWithScoreAriaLabel: "View wave {waveName}. {scoreSummary}",
+} as const);
+
 const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
   title: "Score",
   quality: "Quality",
@@ -973,6 +982,7 @@ export const EN_US_MESSAGES = {
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
   ...WAVE_REP_ACTION_MESSAGES,
