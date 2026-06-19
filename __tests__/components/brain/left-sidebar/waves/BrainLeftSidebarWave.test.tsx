@@ -275,10 +275,12 @@ describe("BrainLeftSidebarWave", () => {
     const rowLink = screen.getByRole("link", { name: "Chat Wave" });
     expect(rowLink).toHaveClass("tw-absolute");
     expect(rowLink).toHaveClass("tw-inset-0");
-    expect(rowLink).toHaveClass("tw-z-[1]");
+    expect(rowLink).toHaveClass("tw-z-[5]");
     expect(rowLink).toHaveClass("focus-visible:tw-ring-2");
+    expect(rowLink.nextElementSibling).toHaveClass("tw-pointer-events-none");
     expect(expandButton.closest("a")).toBeNull();
     expect(expandButton.parentElement).toHaveClass("tw-z-10");
+    expect(expandButton.parentElement).toHaveClass("tw-pointer-events-auto");
     const avatar = screen.getByTestId("sidebar-wave-avatar");
     expect(avatar).toHaveAttribute("aria-hidden", "true");
     expect(avatar.closest("a")).toBeNull();

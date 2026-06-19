@@ -260,7 +260,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         href={href}
         prefetch={false}
         onClick={handleWaveClick}
-        className="tw-absolute tw-inset-0 tw-z-[1] tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+        className="tw-absolute tw-inset-0 tw-z-[5] tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
       >
         <span className="tw-sr-only">{formattedWaveName}</span>
       </Link>
@@ -273,7 +273,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         />
       )}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-pointer-events-none tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
@@ -350,7 +350,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               </span>
             </span>
             {shouldShowExpandControl && (
-              <span className="tw-relative tw-z-10 tw-inline-flex">
+              <span className="tw-pointer-events-auto tw-relative tw-z-10 tw-inline-flex">
                 <SidebarWaveExpandControl
                   formattedWaveName={formattedWaveName}
                   isExpanded={isExpanded}

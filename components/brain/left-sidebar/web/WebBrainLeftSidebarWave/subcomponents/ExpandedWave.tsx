@@ -93,6 +93,12 @@ export const ExpandedWave = ({
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowTrustSignalsRow =
     hasSummaryScore || presentLatestDropTimestamp !== null;
+  const titleTooltipAnchorLeftClasses = isChildRow
+    ? "tw-left-[120px] md:tw-left-[108px]"
+    : "tw-left-16";
+  const titleTooltipAnchorRightClasses = shouldShowPinButton
+    ? "tw-right-12"
+    : "tw-right-5";
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
@@ -159,10 +165,16 @@ export const ExpandedWave = ({
         href={href}
         prefetch={false}
         onClick={onClick}
-        className="tw-absolute tw-inset-0 tw-z-[1] tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
-        {...tooltipAttributes}
+        className="tw-absolute tw-inset-0 tw-z-[5] tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
       >
         <span className="tw-sr-only">{formattedWaveName}</span>
+        {showExpandedTooltip && (
+          <span
+            aria-hidden="true"
+            className={`tw-absolute tw-top-2 tw-h-5 ${titleTooltipAnchorLeftClasses} ${titleTooltipAnchorRightClasses}`}
+            {...tooltipAttributes}
+          />
+        )}
       </Link>
       {isChildRow && (
         <span
@@ -173,7 +185,7 @@ export const ExpandedWave = ({
         />
       )}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-pointer-events-none tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
@@ -216,7 +228,7 @@ export const ExpandedWave = ({
               </div>
             </span>
             {shouldShowExpandControl && (
-              <span className="tw-relative tw-z-10 tw-inline-flex">
+              <span className="tw-pointer-events-auto tw-relative tw-z-10 tw-inline-flex">
                 <SidebarWaveExpandControl
                   formattedWaveName={formattedWaveName}
                   isExpanded={isExpanded}
