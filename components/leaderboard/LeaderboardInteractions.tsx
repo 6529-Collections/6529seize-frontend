@@ -89,7 +89,7 @@ export default function LeaderboardInteractionsComponent(
   return (
     <>
       <div className={styles["leaderboardTableShell"]}>
-        <table className={TABLE_CLASS_NAME}>
+        <table className={clsx(TABLE_CLASS_NAME, styles["interactionsTable"])}>
           <thead>
             <tr>
               <th className={HEADER_CELL_CLASS_NAME} colSpan={2} />

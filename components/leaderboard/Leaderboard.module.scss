@@ -230,13 +230,17 @@
   padding: 0;
 }
 
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
   .networkHeader {
     gap: 1rem;
   }
 
   .networkToolbar {
     min-height: 0;
+  }
+
+  .scrollContainer {
+    overflow-x: visible;
   }
 
   .networkToolbarTop {
@@ -311,19 +315,50 @@
     -webkit-overflow-scrolling: touch;
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    padding-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
     position: relative;
   }
 
-  .leaderboardTableShell > table {
-    min-width: max-content;
+  .cardsCollectedTable {
+    min-width: 64rem;
+    table-layout: auto;
+    width: max-content;
+  }
+
+  .interactionsTable {
+    min-width: 78rem;
+    table-layout: auto;
+    width: max-content;
+  }
+
+  .cardsCollectedTable th:first-child,
+  .cardsCollectedTable td:first-child,
+  .interactionsTable th:first-child,
+  .interactionsTable td:first-child {
+    min-width: 4rem;
+    width: auto;
+  }
+
+  .cardsCollectedTable th:nth-child(2),
+  .cardsCollectedTable td:nth-child(2),
+  .interactionsTable th:nth-child(2),
+  .interactionsTable td:nth-child(2) {
+    max-width: none;
+    min-width: 16rem;
+    width: auto;
+  }
+
+  .cardsCollectedTable th:not(:first-child):not(:nth-child(2)),
+  .cardsCollectedTable td:not(:first-child):not(:nth-child(2)),
+  .interactionsTable th:not(:first-child):not(:nth-child(2)),
+  .interactionsTable td:not(:first-child):not(:nth-child(2)) {
+    min-width: 7rem;
   }
 
   .leaderboardTableShell::after {
     background-color: variables.$almost-very-dark-grey;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 9999px;
-    bottom: 0;
     color: variables.$font-color;
     content: ">>";
     font-size: 0.75rem;
@@ -333,6 +368,7 @@
     pointer-events: none;
     position: absolute;
     right: 0.25rem;
+    top: 0.25rem;
   }
 }
 
