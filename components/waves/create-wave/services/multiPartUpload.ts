@@ -82,19 +82,22 @@ export async function multiPartUpload({
     signal,
   });
 
-  return {
+  const media: ApiDropMedia = {
     url: completion.media_url,
     mime_type: contentType,
-    ...(hasValue(completion.media_upload_id)
-      ? { media_upload_id: completion.media_upload_id }
-      : {}),
-    ...(completion.media_status !== undefined
-      ? { media_status: completion.media_status }
-      : {}),
-    ...(hasValue(completion.media_error)
-      ? { media_error: completion.media_error }
-      : {}),
   };
+
+  if (hasValue(completion.media_upload_id)) {
+    media.media_upload_id = completion.media_upload_id;
+  }
+  if (hasValue(completion.media_status)) {
+    media.media_status = completion.media_status;
+  }
+  if (hasValue(completion.media_error)) {
+    media.media_error = completion.media_error;
+  }
+
+  return media;
 }
 
 export async function multiPartAttachmentUpload({
