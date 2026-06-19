@@ -84,7 +84,7 @@ describe("CmsThreeDViewer", () => {
     expect(viewer).not.toHaveClass("tw-w-screen");
     expect(
       screen.getByRole("button", { name: "Full screen" })
-    ).toBeVisible();
+    ).toHaveAttribute("aria-pressed", "false");
   });
 
   it("requests fullscreen on the viewer frame", () => {

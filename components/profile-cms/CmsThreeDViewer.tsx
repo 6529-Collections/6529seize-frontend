@@ -449,18 +449,22 @@ function CmsThreeDFullscreenControl({
   readonly locale: SupportedLocale;
   readonly onToggle: () => void;
 }) {
+  const label = t(
+    locale,
+    isFullscreen
+      ? "profileCms.interactive.exitFullscreen"
+      : "profileCms.interactive.fullscreen"
+  );
+
   return (
     <button
-      className="tw-absolute tw-right-4 tw-top-4 tw-z-30 tw-inline-flex tw-min-h-10 tw-items-center tw-border tw-border-white/15 tw-bg-black/55 tw-px-3 tw-text-xs tw-font-semibold tw-uppercase tw-text-white tw-backdrop-blur-md tw-transition hover:tw-border-white/35 hover:tw-text-primary-300"
+      aria-label={label}
+      aria-pressed={isFullscreen}
+      className="tw-absolute tw-right-4 tw-top-4 tw-z-30 tw-inline-flex tw-min-h-10 tw-max-w-[calc(100%-2rem)] tw-items-center tw-justify-center tw-border tw-border-white/15 tw-bg-black/55 tw-px-3 tw-text-center tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-white tw-backdrop-blur-md tw-transition hover:tw-border-white/35 hover:tw-text-primary-300"
       onClick={onToggle}
       type="button"
     >
-      {t(
-        locale,
-        isFullscreen
-          ? "profileCms.interactive.exitFullscreen"
-          : "profileCms.interactive.fullscreen"
-      )}
+      {label}
     </button>
   );
 }
