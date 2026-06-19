@@ -187,6 +187,8 @@ const UnifiedWavesListWaves = forwardRef<
       animatedAllRows.length > 0 ? animatedAllRows : animatedFollowingRows;
     const staticFollowingRows =
       animatedAllRows.length > 0 ? animatedFollowingRows : [];
+    const hasVirtualizedFollowingRows =
+      animatedAllRows.length === 0 && animatedFollowingRows.length > 0;
     const virtualizedAriaLabel =
       animatedAllRows.length > 0
         ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
@@ -370,6 +372,12 @@ const UnifiedWavesListWaves = forwardRef<
         {!hideHeaders && animatedAllRows.length > 0 && (
           <SidebarCategoryLabel
             label={t(SIDEBAR_LOCALE, "waves.sidebar.all")}
+          />
+        )}
+
+        {!hideHeaders && hasVirtualizedFollowingRows && (
+          <SidebarCategoryLabel
+            label={t(SIDEBAR_LOCALE, "waves.sidebar.following")}
           />
         )}
 
