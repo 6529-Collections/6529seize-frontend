@@ -20,6 +20,11 @@ frontend repository, GitHub, or a live rendered page while a user waits for an
 answer. The frontend should provide a structured, versioned help corpus that can
 be synchronized by the backend and used for retrieval-augmented generation.
 
+The agreed bot handle is `@6529help`. The first runtime release ships from the
+backend with bounded seed records and no full RAG. This document describes the
+frontend-owned help index needed for the next corpus phase, when the helper
+chatbot expands beyond the V1 seed set.
+
 ## Goals
 
 - Define frontend-owned source material for 6529 Help Bot answers.
