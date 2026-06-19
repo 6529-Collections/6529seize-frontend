@@ -67,6 +67,38 @@ in the activity-first sections, it should return an explicit aggregate activity
 field or include the parent container in the followed/activity source. The
 frontend should not infer parent activity by locally copying child drop state.
 
+## Backend/API Contract For Followed Subwaves
+
+The left sidebar can make a followed subwave move with its parent only when the
+API returns enough parent-container metadata to do so.
+
+- When a viewer follows a subwave, the followed/activity API should return the
+  parent root wave as a container row even if the viewer does not follow the
+  parent itself.
+- That parent container should include the parent wave's own state:
+  subscribed/joined, muted, pinned, picture, contributors, REP, score, direct
+  message flag, and root-wave identifiers must remain parent-scoped.
+- To let a subwave post move the parent container upward, the API should expose
+  an explicit aggregate activity signal for the parent container, such as
+  `latest_subwave_drop_timestamp`, `latest_child_activity_timestamp`, or a
+  documented equivalent.
+- That aggregate activity signal should be used only for container ordering and
+  hidden-activity hints. It must not overwrite the parent wave's own latest drop
+  timestamp unless the field name and contract explicitly say it is an
+  aggregate.
+- The API should expose enough child metadata for the followed subwave row to
+  render after expansion: subwave id, parent id, followed state, muted state,
+  unread counts, latest drop timestamp, picture/contributors, REP, and score.
+- If a followed subwave has unread drops while the parent is collapsed, the API
+  should either expose an aggregate hidden-subwave unread count/hint on the
+  parent container or return the followed child early enough for the frontend to
+  compute the hint after expansion.
+- The frontend should sort activity-first parent containers using the explicit
+  aggregate field when present. Without that field, it should preserve the
+  backend order and should not locally promote the parent based on child posts.
+- The frontend should never duplicate subwave drops into the parent feed to
+  simulate bubbling.
+
 ## Unread And Activity
 
 - Root waves and subwaves carry independent unread counts.
