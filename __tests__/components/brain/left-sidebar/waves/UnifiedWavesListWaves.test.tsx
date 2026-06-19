@@ -10,6 +10,7 @@ import type { UnifiedWavesListWavesHandle } from "@/components/brain/left-sideba
 import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import {
   getFittingPreviewCount,
+  getHighlyRatedPreviewTooltipAlignment,
   getHighlyRatedPreviewWaves,
   getVisibleHighlyRatedPreviewItems,
   type HighlyRatedWavePreviewItem,
@@ -180,6 +181,24 @@ it("calculates how many highly rated preview avatars fit", () => {
   expect(getFittingPreviewCount({ itemCount: 10, width: 32 })).toBe(1);
   expect(getFittingPreviewCount({ itemCount: 10, width: 70 })).toBe(2);
   expect(getFittingPreviewCount({ itemCount: 12, width: 1000 })).toBe(10);
+});
+
+it("aligns edge preview tooltips inward to avoid sidebar clipping", () => {
+  expect(
+    getHighlyRatedPreviewTooltipAlignment({ index: 0, itemCount: 7 })
+  ).toBe("start");
+  expect(
+    getHighlyRatedPreviewTooltipAlignment({ index: 1, itemCount: 7 })
+  ).toBe("start");
+  expect(
+    getHighlyRatedPreviewTooltipAlignment({ index: 3, itemCount: 7 })
+  ).toBe("center");
+  expect(
+    getHighlyRatedPreviewTooltipAlignment({ index: 5, itemCount: 7 })
+  ).toBe("end");
+  expect(
+    getHighlyRatedPreviewTooltipAlignment({ index: 3, itemCount: 4 })
+  ).toBe("center");
 });
 
 it("keeps the active highly rated preview visible within the capped strip", () => {

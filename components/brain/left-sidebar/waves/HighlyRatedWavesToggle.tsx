@@ -15,6 +15,15 @@ const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 10 as const;
 const PREVIEW_THUMBNAIL_WIDTH_PX = 32;
 const PREVIEW_GAP_PX = 6;
+type PreviewTooltipAlignment = "start" | "center" | "end";
+const PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES: Record<
+  PreviewTooltipAlignment,
+  string
+> = {
+  start: "tw-left-0 tw-translate-x-0",
+  center: "tw-left-1/2 -tw-translate-x-1/2",
+  end: "tw-right-0 tw-translate-x-0",
+};
 
 export interface HighlyRatedWavePreviewItem {
   readonly wave: MinimalWave;
@@ -198,10 +207,30 @@ export const getVisibleHighlyRatedPreviewItems = ({
   ];
 };
 
+export const getHighlyRatedPreviewTooltipAlignment = ({
+  index,
+  itemCount,
+}: {
+  readonly index: number;
+  readonly itemCount: number;
+}): PreviewTooltipAlignment => {
+  if (index <= 1) {
+    return "start";
+  }
+
+  if (itemCount >= 5 && index >= itemCount - 2) {
+    return "end";
+  }
+
+  return "center";
+};
+
 function HighlyRatedWavePreviewLink({
   item,
+  tooltipAlignment,
 }: {
   readonly item: HighlyRatedWavePreviewItem;
+  readonly tooltipAlignment: PreviewTooltipAlignment;
 }) {
   const { wave } = item;
   const unreadCount = getUnreadCount(wave);
@@ -247,7 +276,9 @@ function HighlyRatedWavePreviewLink({
         showNewDropsBadge={!item.isActive && unreadCount > 0}
         wave={wave}
       />
-      <span className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-10 tw-z-30 tw-hidden tw-w-48 -tw-translate-x-1/2 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-shadow-xl group-hover/preview:tw-block group-focus-visible/preview:tw-block">
+      <span
+        className={`tw-pointer-events-none tw-absolute tw-top-10 tw-z-30 tw-hidden tw-w-48 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-shadow-xl group-hover/preview:tw-block group-focus-visible/preview:tw-block ${PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES[tooltipAlignment]}`}
+      >
         <span className="tw-block tw-truncate tw-text-xs tw-font-semibold tw-text-iron-100">
           {wave.name}
         </span>
@@ -332,8 +363,15 @@ export function HighlyRatedWavesToggle({
         ref={previewStripRef}
         className="tw-flex tw-min-w-0 tw-items-center tw-justify-start tw-gap-x-1.5"
       >
-        {visiblePreviewItems.map((item) => (
-          <HighlyRatedWavePreviewLink key={item.wave.id} item={item} />
+        {visiblePreviewItems.map((item, index) => (
+          <HighlyRatedWavePreviewLink
+            key={item.wave.id}
+            item={item}
+            tooltipAlignment={getHighlyRatedPreviewTooltipAlignment({
+              index,
+              itemCount: visiblePreviewItems.length,
+            })}
+          />
         ))}
       </div>
     </div>
