@@ -24,6 +24,37 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </AuthContext.Provider>
 );
 
+const emitDropUpdate = ({
+  authorHandle = "other",
+  createdAt = 30,
+  reason,
+  serialNo,
+  waveId = "wave2",
+}: {
+  readonly authorHandle?: string;
+  readonly createdAt?: number;
+  readonly reason?: string;
+  readonly serialNo?: number;
+  readonly waveId?: string;
+} = {}) => {
+  const message: Record<string, unknown> = {
+    wave: { id: waveId },
+    author: { handle: authorHandle },
+    created_at: createdAt,
+  };
+
+  if (reason !== undefined) {
+    message.reason = reason;
+  }
+  if (serialNo !== undefined) {
+    message.serial_no = serialNo;
+  }
+
+  act(() => {
+    wsCallback(message);
+  });
+};
+
 describe("useNewDropCounter", () => {
   beforeEach(() => {
     (useWebSocketMessage as jest.Mock).mockImplementation(
@@ -44,13 +75,7 @@ describe("useNewDropCounter", () => {
       () => useNewDropCounter(null, waves, refetch),
       { wrapper }
     );
-    act(() => {
-      wsCallback({
-        wave: { id: "wave2" },
-        author: { handle: "other" },
-        created_at: 30,
-      });
-    });
+    emitDropUpdate();
     expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
     expect(result.current.newDropsCounts["wave2"]?.latestDropTimestamp).toBe(
       30
@@ -69,14 +94,7 @@ describe("useNewDropCounter", () => {
       { wrapper }
     );
 
-    act(() => {
-      wsCallback({
-        wave: { id: "wave2" },
-        author: { handle: "other" },
-        created_at: 30,
-        reason: WS_DROP_UPDATE_REASON_POLL_RESPONSE,
-      });
-    });
+    emitDropUpdate({ reason: WS_DROP_UPDATE_REASON_POLL_RESPONSE });
 
     expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(0);
     expect(refetch).not.toHaveBeenCalled();
@@ -90,14 +108,7 @@ describe("useNewDropCounter", () => {
       { wrapper, initialProps: { muted: false } }
     );
 
-    act(() => {
-      wsCallback({
-        wave: { id: "muted-wave" },
-        author: { handle: "other" },
-        created_at: 60,
-        serial_no: 5,
-      });
-    });
+    emitDropUpdate({ createdAt: 60, serialNo: 5, waveId: "muted-wave" });
     expect(result.current.newDropsCounts["muted-wave"]).toEqual({
       count: 1,
       latestDropTimestamp: 60,
@@ -106,14 +117,7 @@ describe("useNewDropCounter", () => {
 
     rerender({ muted: true });
 
-    act(() => {
-      wsCallback({
-        wave: { id: "muted-wave" },
-        author: { handle: "other" },
-        created_at: 70,
-        serial_no: 6,
-      });
-    });
+    emitDropUpdate({ createdAt: 70, serialNo: 6, waveId: "muted-wave" });
 
     expect(result.current.newDropsCounts["muted-wave"]).toEqual({
       count: 0,
@@ -129,13 +133,7 @@ describe("useNewDropCounter", () => {
       { wrapper, initialProps: { activeId: "wave1" } }
     );
     expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
-    act(() => {
-      wsCallback({
-        wave: { id: "wave1" },
-        author: { handle: "me" },
-        created_at: 50,
-      });
-    });
+    emitDropUpdate({ authorHandle: "me", createdAt: 50, waveId: "wave1" });
     expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
     rerender({ activeId: "wave2" });
     expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
@@ -151,13 +149,7 @@ describe("useNewDropCounter", () => {
       { wrapper }
     );
 
-    act(() => {
-      wsCallback({
-        wave: { id: "main-wave" },
-        author: { handle: "other" },
-        created_at: 30,
-      });
-    });
+    emitDropUpdate({ waveId: "main-wave" });
 
     expect(refetch).not.toHaveBeenCalled();
   });
@@ -176,33 +168,15 @@ describe("useNewDropCounter", () => {
       { wrapper }
     );
 
-    act(() => {
-      wsCallback({
-        wave: { id: "unknown-1" },
-        author: { handle: "other" },
-        created_at: 30,
-      });
-    });
+    emitDropUpdate({ waveId: "unknown-1" });
     expect(refetch).toHaveBeenCalledTimes(1);
 
     nowSpy.mockReturnValue(2000);
-    act(() => {
-      wsCallback({
-        wave: { id: "unknown-2" },
-        author: { handle: "other" },
-        created_at: 31,
-      });
-    });
+    emitDropUpdate({ createdAt: 31, waveId: "unknown-2" });
     expect(refetch).toHaveBeenCalledTimes(1);
 
     nowSpy.mockReturnValue(4501);
-    act(() => {
-      wsCallback({
-        wave: { id: "unknown-3" },
-        author: { handle: "other" },
-        created_at: 32,
-      });
-    });
+    emitDropUpdate({ createdAt: 32, waveId: "unknown-3" });
     expect(refetch).toHaveBeenCalledTimes(2);
   });
 });
