@@ -111,9 +111,11 @@ Common commands:
 6529 run build
 6529 run test
 6529 run test:e2e
+6529 run test:e2e:staging
 6529 run lint:changed
 6529 run typecheck:changed
 6529 run check:changed
+6529 run deployment-bus -- validate-manifest --file deployment-bus-manifest.json
 ```
 
 If pnpm reports ignored install/build scripts, run:

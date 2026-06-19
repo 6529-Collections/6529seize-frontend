@@ -23,17 +23,82 @@ jobs:
   deploy-staging:
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    permissions:
+      contents: read
+      deployments: write
 
     steps:
       - name: Checkout staging branch
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           ref: ${{ env.STAGING_BRANCH }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Resolve expected commit
         id: expected-commit
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve production candidate
+        id: production-candidate
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags origin main
+          main_sha="$(git rev-parse origin/main)"
+          if git merge-base --is-ancestor "$main_sha" "${{ steps.expected-commit.outputs.sha }}"; then
+            echo "sha=$main_sha" >> "$GITHUB_OUTPUT"
+            echo "eligible=true" >> "$GITHUB_OUTPUT"
+            echo "Staging candidate contains origin/main $main_sha."
+          else
+            echo "sha=" >> "$GITHUB_OUTPUT"
+            echo "eligible=false" >> "$GITHUB_OUTPUT"
+            echo "Staging candidate does not contain origin/main $main_sha; marking manifest as exploratory."
+          fi
+
+      - name: Create deployment bus manifest
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs create-manifest \
+            --environment staging \
+            --staging-branch "${STAGING_BRANCH}" \
+            --staging-deploy-sha "${{ steps.expected-commit.outputs.sha }}" \
+            --production-candidate-sha "${{ steps.production-candidate.outputs.sha }}" \
+            --production-eligible "${{ steps.production-candidate.outputs.eligible }}" \
+            --release-captain "github-actions/${{ github.actor }}" \
+            --status queued \
+            --phase queued \
+            --message "Staging deployment queued for ${{ steps.expected-commit.outputs.sha }}" \
+            --workflow-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --output deployment-bus-manifest.json
+
+      - name: Create GitHub deployment record
+        id: deployment-record
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          deployment_id="$(node ops/scripts/deployment-bus.cjs github-create-deployment \
+            --file deployment-bus-manifest.json \
+            --ref "${{ steps.expected-commit.outputs.sha }}" \
+            --environment staging \
+            --task deploy:staging \
+            --description "Staging deployment bus ${{ steps.expected-commit.outputs.sha }}")"
+          echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
+
+      - name: Mark staging deployment queued
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state queued \
+            --description "Staging deployment bus queued" \
+            --environment-url "https://staging.6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Validate staging configuration
         env:
@@ -110,8 +175,16 @@ jobs:
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state in_progress \
+            --description "Sending staging SSM deploy command" \
+            --environment-url "https://staging.6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
           repo_dir_q="$(printf '%q' "$REPO_DIR")"
           run_as_q="$(printf '%q' "$RUN_AS")"
@@ -265,6 +338,8 @@ jobs:
         env:
           COMMAND_ID: ${{ steps.send-command.outputs.command-id }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
+          DEPLOYMENT_ID: ${{ steps.deployment-record.outputs.deployment_id }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
@@ -301,6 +376,15 @@ jobs:
             fi
 
             echo "SSM status: $status"
+            if [ $((attempt % 40)) -eq 0 ]; then
+              node ops/scripts/deployment-bus.cjs github-create-status \
+                --deployment-id "$DEPLOYMENT_ID" \
+                --state in_progress \
+                --description "Staging SSM status after $((attempt * 15 / 60)) minutes: $status" \
+                --environment-url "https://staging.6529.io" \
+                --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true
+            fi
+
             case "$status" in
               Success)
                 terminal_status="$status"
@@ -321,3 +405,42 @@ jobs:
             echo "Staging deploy failed with SSM status: ${terminal_status:-unknown}" >&2
             exit 1
           fi
+
+      - name: Mark staging deployment terminal
+        if: always() && steps.deployment-record.outputs.deployment_id != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+
+          case "$JOB_STATUS" in
+            success)
+              state="success"
+              description="Staging deployment verified"
+              ;;
+            cancelled)
+              state="error"
+              description="Staging deployment cancelled before verification"
+              ;;
+            *)
+              state="failure"
+              description="Staging deployment failed before verification"
+              ;;
+          esac
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state "$state" \
+            --description "$description" \
+            --environment-url "https://staging.6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Upload deployment bus manifest
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: deployment-bus-staging-${{ steps.expected-commit.outputs.sha || github.run_id }}
+          path: deployment-bus-manifest.json
+          if-no-files-found: ignore
+          retention-days: 30
