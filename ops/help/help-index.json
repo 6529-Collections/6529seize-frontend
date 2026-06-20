@@ -164,6 +164,7 @@
       "id": "profiles.subscriptions-tab",
       "kind": "route",
       "title": "Profile Subscriptions tab",
+      "link_label": "Profile Subscriptions",
       "aliases": [
         "profile subscriptions",
         "my subscriptions",
@@ -891,6 +892,7 @@
       "id": "subscriptions.overview",
       "kind": "workflow",
       "title": "The Memes subscriptions",
+      "link_label": "Subscriptions",
       "aliases": [
         "subscriptions",
         "meme subscriptions",
@@ -927,6 +929,7 @@
       "id": "subscriptions.eligibility",
       "kind": "business_rule",
       "title": "Subscription eligibility",
+      "link_label": "Subscriptions",
       "aliases": [
         "subscription eligibility",
         "subscriptions eligibility",
@@ -959,6 +962,7 @@
       "id": "subscriptions.report",
       "kind": "route",
       "title": "Subscriptions report",
+      "link_label": "Subscriptions Report",
       "aliases": [
         "subscriptions report",
         "subscription report",
@@ -2956,6 +2960,7 @@
       "id": "open-data.meme-subscriptions",
       "kind": "route",
       "title": "Open Data Meme Subscriptions",
+      "link_label": "Meme Subscriptions Open Data",
       "aliases": [
         "meme subscriptions data",
         "subscriptions open data",
