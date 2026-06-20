@@ -103,7 +103,36 @@ describe("GithubPreviewStatusBadge", () => {
     expect(screen.getByTestId("github-preview-status-badge")).toHaveTextContent(
       "Merged"
     );
+    expect(screen.getByTestId("github-preview-repo-label")).toHaveTextContent(
+      "Frontend"
+    );
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("renders a known 6529 repository label for easier scanning", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-backend/issues/1661"
+        initialPreview={{
+          type: "github.issue",
+          owner: "6529-Collections",
+          repo: "6529seize-backend",
+          number: 1661,
+          title: "Backend issue",
+          state: "closed_completed",
+          assignees: [],
+          url: "https://github.com/6529-Collections/6529seize-backend/issues/1661",
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("github-preview-repo-label")).toHaveTextContent(
+      "Backend"
+    );
+    expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
+      "aria-label",
+      "6529-Collections/6529seize-backend: Completed · Unassigned"
+    );
   });
 
   it("renders issue completion state after the GitHub metadata request resolves", async () => {
@@ -128,7 +157,7 @@ describe("GithubPreviewStatusBadge", () => {
     await waitFor(() => {
       expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
         "aria-label",
-        "Completed · @alice"
+        "6529-Collections/6529seize-frontend: Completed · @alice"
       );
     });
     expect(
@@ -161,7 +190,7 @@ describe("GithubPreviewStatusBadge", () => {
 
     expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
       "aria-label",
-      "Open · Unassigned"
+      "6529-Collections/6529seize-frontend: Open · Unassigned"
     );
     expect(
       screen.getByTestId("github-preview-assignee-label")
@@ -194,7 +223,7 @@ describe("GithubPreviewStatusBadge", () => {
     ).toHaveTextContent("@alice, @bob");
     expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
       "aria-label",
-      "Open · @alice, @bob"
+      "6529-Collections/6529seize-frontend: Open · @alice, @bob"
     );
   });
 
@@ -431,7 +460,7 @@ describe("GithubPreviewStatusBadge", () => {
     });
     expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
       "aria-label",
-      "Status unavailable"
+      "6529-Collections/6529seize-frontend: Status unavailable"
     );
     expect(
       screen.getByTestId("github-preview-status-badge")
