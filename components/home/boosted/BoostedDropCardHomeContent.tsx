@@ -17,11 +17,15 @@ import {
 import BoostedDropLinkPreview from "./BoostedDropLinkPreview";
 import {
   extractFirstUrl,
+  extractStandaloneMarkdownImage,
   removePreviewUrlFromContent,
 } from "./extractStandaloneUrl";
 
 type BoostedDropPart = ApiDrop["parts"][number];
-type BoostedDropMediaItem = BoostedDropPart["media"][number];
+type BoostedDropMediaItem = Pick<
+  BoostedDropPart["media"][number],
+  "mime_type" | "url"
+>;
 type OverflowElements = {
   readonly container: HTMLDivElement;
   readonly preview: HTMLDivElement;
@@ -489,7 +493,17 @@ BoostedDropCardTextSection.displayName = "BoostedDropCardTextSection";
 
 const BoostedDropCardHomeContent = memo(
   ({ part, isChatVariant }: BoostedDropCardHomeContentProps) => {
-    const media = part?.media[0];
+    const standaloneMarkdownImage = extractStandaloneMarkdownImage(
+      part?.content
+    );
+    const media =
+      part?.media[0] ??
+      (standaloneMarkdownImage
+        ? {
+            mime_type: "image/webp",
+            url: standaloneMarkdownImage.url,
+          }
+        : undefined);
 
     if (!media) {
       return (
