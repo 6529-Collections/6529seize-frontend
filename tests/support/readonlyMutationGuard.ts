@@ -17,12 +17,13 @@ export type PlaywrightEnvironment =
 export type ReadonlyRequestInput = {
   baseURL?: string | undefined;
   method: string;
+  postData?: string | null | undefined;
   url: string;
   readonly: boolean;
 };
 
 export type ReadonlyRequestDecision = {
-  action: "allow" | "block";
+  action: "allow" | "abort" | "block";
   reason: string;
   ruleId?: string;
 };
@@ -43,13 +44,40 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const STAGING_HOSTNAME = "staging.6529.io";
 const PRODUCTION_HOSTNAMES = new Set(["6529.io", "www.6529.io"]);
 
-const ALLOWED_EXTERNAL_MUTATION_HOSTS = [
-  /(^|\.)google-analytics\.com$/i,
-  /(^|\.)analytics\.google\.com$/i,
+const IGNORED_EXTERNAL_MUTATION_HOSTS = [
   /(^|\.)mixpanel\.com$/i,
   /(^|\.)ingest\.sentry\.io$/i,
   /^dataplane\.rum\.[a-z0-9-]+\.amazonaws\.com$/i,
 ];
+const GOOGLE_COLLECT_HOSTS = new Set([
+  "analytics.google.com",
+  "www.google-analytics.com",
+  "www.google.com",
+]);
+const WALLETCONNECT_RPC_HOST = "rpc.walletconnect.org";
+const SAFE_WALLETCONNECT_RPC_METHODS = new Set([
+  "eth_accounts",
+  "eth_blockNumber",
+  "eth_call",
+  "eth_chainId",
+  "eth_estimateGas",
+  "eth_feeHistory",
+  "eth_gasPrice",
+  "eth_getBalance",
+  "eth_getBlockByHash",
+  "eth_getBlockByNumber",
+  "eth_getBlockTransactionCountByHash",
+  "eth_getBlockTransactionCountByNumber",
+  "eth_getCode",
+  "eth_getLogs",
+  "eth_getStorageAt",
+  "eth_getTransactionByHash",
+  "eth_getTransactionCount",
+  "eth_getTransactionReceipt",
+  "eth_maxPriorityFeePerGas",
+  "net_version",
+  "web3_clientVersion",
+]);
 
 function parseUrl(url: string) {
   try {
@@ -102,10 +130,81 @@ export function shouldUseReadonlyGuard(baseURL?: string) {
   return environment === "staging" || environment === "production";
 }
 
-function isAllowedExternalMutation(url: URL) {
-  return ALLOWED_EXTERNAL_MUTATION_HOSTS.some((pattern) =>
+function isIgnoredExternalMutation(url: URL) {
+  if (
+    url.hostname === "cca-lite.coinbase.com" &&
+    (url.pathname === "/amp" || url.pathname === "/metrics")
+  ) {
+    return true;
+  }
+
+  if (url.hostname === "pulse.walletconnect.org" && url.pathname === "/batch") {
+    return true;
+  }
+
+  if (GOOGLE_COLLECT_HOSTS.has(url.hostname) && url.pathname === "/g/collect") {
+    return true;
+  }
+
+  return IGNORED_EXTERNAL_MUTATION_HOSTS.some((pattern) =>
     pattern.test(url.hostname)
   );
+}
+
+function isWalletConnectRpc(url: URL) {
+  return url.hostname === WALLETCONNECT_RPC_HOST && url.pathname === "/v1/";
+}
+
+function parseJsonRpcPayload(postData?: string | null) {
+  if (!postData) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(postData) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function getJsonRpcCalls(payload: unknown) {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  return [payload];
+}
+
+function isSafeWalletConnectRpcPost(postData?: string | null) {
+  const payload = parseJsonRpcPayload(postData);
+  if (!payload) {
+    return false;
+  }
+
+  const calls = getJsonRpcCalls(payload);
+  if (calls.length === 0) {
+    return false;
+  }
+
+  return calls.every((call) => {
+    if (!call || typeof call !== "object" || Array.isArray(call)) {
+      return false;
+    }
+
+    const method = (call as { method?: unknown }).method;
+    return (
+      typeof method === "string" && SAFE_WALLETCONNECT_RPC_METHODS.has(method)
+    );
+  });
+}
+
+export function sanitizeReadonlyRequestUrl(url: string) {
+  const parsed = parseUrl(url);
+  if (!parsed || !["http:", "https:"].includes(parsed.protocol)) {
+    return url;
+  }
+
+  const redactedSuffix = parsed.search || parsed.hash ? "?[redacted]" : "";
+  return `${parsed.origin}${parsed.pathname}${redactedSuffix}`;
 }
 
 function wildcardPatternToRegExp(pattern: string) {
@@ -170,6 +269,7 @@ function registryMatch(method: string, url: URL, baseURL?: string) {
 export function decideReadonlyRequest({
   baseURL,
   method,
+  postData,
   readonly,
   url,
 }: ReadonlyRequestInput): ReadonlyRequestDecision {
@@ -192,8 +292,16 @@ export function decideReadonlyRequest({
     };
   }
 
-  if (isAllowedExternalMutation(parsed)) {
-    return { action: "allow", reason: "allowed-telemetry-endpoint" };
+  if (isWalletConnectRpc(parsed)) {
+    if (isSafeWalletConnectRpcPost(postData)) {
+      return { action: "allow", reason: "read-only-walletconnect-rpc" };
+    }
+
+    return { action: "block", reason: "unsafe-walletconnect-rpc" };
+  }
+
+  if (isIgnoredExternalMutation(parsed)) {
+    return { action: "abort", reason: "ignored-external-sdk-endpoint" };
   }
 
   return {
@@ -221,14 +329,20 @@ export async function installReadonlyMutationGuard(
     const decision = decideReadonlyRequest({
       baseURL,
       method: request.method(),
+      postData: request.postData(),
       readonly,
       url: request.url(),
     });
 
+    if (decision.action === "abort") {
+      await route.abort("blockedbyclient");
+      return;
+    }
+
     if (decision.action === "block") {
       const blockedRequest: BlockedReadonlyRequest = {
         method: request.method(),
-        url: request.url(),
+        url: sanitizeReadonlyRequestUrl(request.url()),
         reason: decision.reason,
       };
       if (decision.ruleId) {

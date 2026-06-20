@@ -1654,3 +1654,37 @@
   `seize` wrapper. A direct `seize exec knip --reporter json` also reports
   broad pre-existing repo dead-code noise plus future-facing helper exports, so
   PR1 does not claim a clean repo-wide knip baseline.
+
+## 2026-06-20T18:20Z PR 1 Staging Harness Follow-Up
+
+- PR #2797 merged to `main` as `5f09e6fe22f496ced5f9992cfbf93fec95f2fb69`.
+- Staging deploy succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27879071807
+  - staging merge SHA: `efd5bda48c065d23410e0fc8ef42b38fab50dd45`
+  - production candidate SHA:
+    `5f09e6fe22f496ced5f9992cfbf93fec95f2fb69`
+- First staging smoke found harness issues before production promotion:
+  - known page-load SDK POSTs from Coinbase, Google Analytics, and
+    WalletConnect telemetry should be aborted without failing the read-only
+    run;
+  - WalletConnect RPC POSTs need body-level JSON-RPC classification so known
+    read-only methods can continue while unsafe, unknown, missing, or invalid
+    RPC payloads still fail;
+  - staging access login needs to accept the success dialog before waiting for
+    navigation;
+  - deployed staging smoke should run serially.
+- Implemented follow-up branch `codex/testing-pr1-guard-fix` from current
+  `origin/main`.
+- Local/staging validation on the follow-up branch:
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run testing-strategy -- validate-mutation-registry --file ops/testing-strategy/mutation-endpoint-registry.json`
+  - `seize run lint:package-json`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run format:changed`
+  - `codex-diff-check`
+  - `seize run test:e2e:staging` with access code loaded from local Credential
+    Manager target `STAGING_AUTH`: 6 passed.
+- Production promotion remains held until this follow-up PR is reviewed,
+  merged, redeployed to staging, and validated.

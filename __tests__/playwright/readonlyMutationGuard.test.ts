@@ -1,6 +1,7 @@
 import {
   decideReadonlyRequest,
   inferPlaywrightEnvironment,
+  sanitizeReadonlyRequestUrl,
   shouldUseReadonlyGuard,
 } from "../../tests/support/readonlyMutationGuard";
 
@@ -25,7 +26,20 @@ describe("Playwright read-only mutation guard", () => {
     expect(shouldUseReadonlyGuard("http://localhost:3001")).toBe(false);
   });
 
-  it("blocks registered production API mutations", () => {
+  it("blocks registered staging and production API mutations", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://api.staging.6529.io/api/waves",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "staging-backend-api-mutations",
+    });
+
     expect(
       decideReadonlyRequest({
         baseURL: "https://6529.io",
@@ -65,19 +79,45 @@ describe("Playwright read-only mutation guard", () => {
     ).toMatchObject({ action: "allow" });
   });
 
-  it("allows explicitly recognized external telemetry but blocks other POSTs", () => {
+  it("aborts recognized external SDK POSTs without failing read-only mode", () => {
     expect(
       decideReadonlyRequest({
         baseURL: "https://6529.io",
         method: "POST",
         readonly: true,
-        url: "https://www.google-analytics.com/g/collect",
+        url: "https://cca-lite.coinbase.com/metrics",
       })
     ).toMatchObject({
-      action: "allow",
-      reason: "allowed-telemetry-endpoint",
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
     });
 
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://www.google.com/g/collect?v=2",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://pulse.walletconnect.org/batch?projectId=test",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+  });
+
+  it("blocks non-allowlisted external POSTs", () => {
     expect(
       decideReadonlyRequest({
         baseURL: "https://6529.io",
@@ -89,6 +129,93 @@ describe("Playwright read-only mutation guard", () => {
       action: "block",
       reason: "non-allowlisted-mutation",
     });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://www.google.com/unknown-write",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "non-allowlisted-mutation",
+    });
+  });
+
+  it("allows only read-only WalletConnect RPC POSTs", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        postData: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          method: "eth_chainId",
+        }),
+        readonly: true,
+        url: "https://rpc.walletconnect.org/v1/?chainId=eip155%3A1",
+      })
+    ).toMatchObject({
+      action: "allow",
+      reason: "read-only-walletconnect-rpc",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        postData: JSON.stringify([
+          { id: 1, jsonrpc: "2.0", method: "eth_chainId" },
+          { id: 2, jsonrpc: "2.0", method: "eth_call" },
+        ]),
+        readonly: true,
+        url: "https://rpc.walletconnect.org/v1/?chainId=eip155%3A1",
+      })
+    ).toMatchObject({
+      action: "allow",
+      reason: "read-only-walletconnect-rpc",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        postData: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          method: "eth_sendRawTransaction",
+        }),
+        readonly: true,
+        url: "https://rpc.walletconnect.org/v1/?chainId=eip155%3A1",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "unsafe-walletconnect-rpc",
+    });
+
+    for (const postData of [undefined, "not-json", JSON.stringify([])]) {
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://staging.6529.io",
+          method: "POST",
+          postData,
+          readonly: true,
+          url: "https://rpc.walletconnect.org/v1/?chainId=eip155%3A1",
+        })
+      ).toMatchObject({
+        action: "block",
+        reason: "unsafe-walletconnect-rpc",
+      });
+    }
+  });
+
+  it("redacts URL query strings in guard summaries", () => {
+    expect(
+      sanitizeReadonlyRequestUrl(
+        "https://rpc.walletconnect.org/v1/?chainId=eip155%3A1&projectId=secret"
+      )
+    ).toBe("https://rpc.walletconnect.org/v1/?[redacted]");
   });
 
   it("does not attribute third-party API paths to first-party registry rules", () => {
