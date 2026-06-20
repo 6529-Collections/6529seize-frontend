@@ -1,4 +1,5 @@
 import { test as base } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 import {
   assertNoPageErrors,
@@ -12,10 +13,34 @@ const STAGING_ACCESS_CODE =
   process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] ?? process.env["STAGING_AUTH"];
 const ACCESS_INPUT_SELECTOR =
   'input[aria-label="Team access code"], input[placeholder="Team Login"]';
+type PageGoto = (...args: Parameters<Page["goto"]>) => ReturnType<Page["goto"]>;
 
-async function unlockStagingAccess(page: import("@playwright/test").Page) {
-  await page.goto("/");
+async function installStagingAccessUnlock(page: Page) {
+  const originalGoto = page.goto.bind(page) as PageGoto;
+  const gotoWithAccessUnlock: PageGoto = async (...args) => {
+    const response = await originalGoto(...args);
+    if (!(await isAccessGateVisible(page))) {
+      return response;
+    }
+
+    if (!isStagingPage(page)) {
+      return response;
+    }
+
+    await submitStagingAccess(page, originalGoto);
+    return originalGoto(...args);
+  };
+
+  page.goto = gotoWithAccessUnlock as Page["goto"];
+  await gotoWithAccessUnlock("/", { waitUntil: "domcontentloaded" });
+}
+
+async function submitStagingAccess(page: Page, goto: PageGoto) {
   if (!(await isAccessGateVisible(page))) {
+    return;
+  }
+
+  if (!isStagingPage(page)) {
     return;
   }
 
@@ -43,7 +68,11 @@ async function unlockStagingAccess(page: import("@playwright/test").Page) {
     .catch(() => undefined);
 
   if (await isAccessGateVisible(page)) {
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+    if (!isStagingPage(page)) {
+      return;
+    }
+
+    await goto("/", { waitUntil: "domcontentloaded" });
   }
 
   if (await isAccessGateVisible(page)) {
@@ -63,7 +92,15 @@ function isAccessUrl(url: string) {
   }
 }
 
-async function isAccessGateVisible(page: import("@playwright/test").Page) {
+function isStagingPage(page: Page) {
+  try {
+    return new URL(page.url()).hostname === STAGING_HOSTNAME;
+  } catch {
+    return false;
+  }
+}
+
+async function isAccessGateVisible(page: Page) {
   if (isAccessUrl(page.url())) {
     return true;
   }
@@ -99,7 +136,7 @@ const test = base.extend({
     const diagnostics = attachPageDiagnostics(page);
 
     if (shouldUnlockStaging(baseURL)) {
-      await unlockStagingAccess(page);
+      await installStagingAccessUnlock(page);
     }
 
     await runTest(page);
