@@ -10,10 +10,12 @@ import { installReadonlyMutationGuard } from "./support/readonlyMutationGuard";
 const STAGING_HOSTNAME = "staging.6529.io";
 const STAGING_ACCESS_CODE =
   process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] ?? process.env["STAGING_AUTH"];
+const ACCESS_INPUT_SELECTOR =
+  'input[aria-label="Team access code"], input[placeholder="Team Login"]';
 
 async function unlockStagingAccess(page: import("@playwright/test").Page) {
   await page.goto("/");
-  if (!isAccessUrl(page.url())) {
+  if (!(await isAccessGateVisible(page))) {
     return;
   }
 
@@ -23,25 +25,28 @@ async function unlockStagingAccess(page: import("@playwright/test").Page) {
     );
   }
 
-  const accessInput = page
-    .locator(
-      'input[aria-label="Team access code"], input[placeholder="Team Login"]'
-    )
-    .first();
+  const accessInput = page.locator(ACCESS_INPUT_SELECTOR).first();
 
+  await accessInput.waitFor({ state: "visible", timeout: 5000 });
   await accessInput.fill(STAGING_ACCESS_CODE);
-  await Promise.all([
-    page
-      .waitForURL((url) => !isAccessPath(url), { timeout: 10000 })
-      .catch(() => undefined),
-    accessInput.press("Enter"),
-  ]);
+  const loginDialog = page
+    .waitForEvent("dialog", { timeout: 10000 })
+    .then(async (dialog) => {
+      await dialog.accept();
+    })
+    .catch(() => undefined);
 
-  if (isAccessUrl(page.url())) {
-    await page.goto("/");
+  await accessInput.press("Enter");
+  await loginDialog;
+  await page
+    .waitForURL((url) => !isAccessPath(url), { timeout: 10000 })
+    .catch(() => undefined);
+
+  if (await isAccessGateVisible(page)) {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
   }
 
-  if (isAccessUrl(page.url())) {
+  if (await isAccessGateVisible(page)) {
     throw new Error("Staging access gate did not unlock.");
   }
 }
@@ -56,6 +61,18 @@ function isAccessUrl(url: string) {
   } catch {
     return url.includes("/access");
   }
+}
+
+async function isAccessGateVisible(page: import("@playwright/test").Page) {
+  if (isAccessUrl(page.url())) {
+    return true;
+  }
+
+  return page
+    .locator(ACCESS_INPUT_SELECTOR)
+    .first()
+    .isVisible({ timeout: 500 })
+    .catch(() => false);
 }
 
 function shouldUnlockStaging(baseURL?: string) {
