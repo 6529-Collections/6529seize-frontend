@@ -112,12 +112,12 @@
         "followers"
       ],
       "facts": [
-        "A profile page is available at /{user}, where {user} is a handle or wallet-like route target.",
+        "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
         "Profile pages organize identity, collected NFTs, waves, groups, subscriptions, proxy, Brain, and xTDH surfaces through tabs.",
         "Editable profile surfaces require the owner or an authorized proxy."
       ],
-      "canonical_path": "/{user}",
-      "related_paths": ["/{user}/identity", "/{user}/groups", "/{user}/waves"],
+      "canonical_path": "/network",
+      "related_paths": ["/network"],
       "tags": ["profiles"],
       "source_refs": [
         "ops/docs/profiles/navigation/README.md",
@@ -749,12 +749,26 @@
         "submit meme",
         "memes submission",
         "submit to memes wave",
+        "submit to the memes main stage",
+        "the memes main stage",
+        "memes main stage",
+        "main stage submission",
+        "can't submit to memes main stage",
         "quick vote memes"
       ],
       "keywords": [
         "memes",
         "submission",
         "submit",
+        "main",
+        "stage",
+        "eligible",
+        "eligibility",
+        "limit",
+        "window",
+        "closed",
+        "started",
+        "proxy",
         "preview",
         "quick",
         "vote",
@@ -763,13 +777,20 @@
       ],
       "facts": [
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
-        "Submission availability depends on the active wave and its eligibility/settings.",
+        "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
+        "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
+        "If the submit control is hidden or disabled, use the shown restriction message to recover: log in, disable proxy mode, wait for the submission window, or free submission capacity.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/the-memes"],
       "tags": ["waves", "memes"],
-      "source_refs": ["ops/docs/waves/memes/README.md"]
+      "source_refs": [
+        "ops/docs/waves/memes/README.md",
+        "ops/docs/waves/memes/feature-memes-submission.md",
+        "ops/docs/waves/leaderboard/feature-drop-entry-and-eligibility.md",
+        "ops/docs/waves/troubleshooting-wave-navigation-and-posting.md"
+      ]
     },
     {
       "id": "groups.overview",
@@ -1068,12 +1089,16 @@
       "facts": [
         "The Memes is the main Meme Card collection area.",
         "Use The Memes routes to browse cards, card pages, distributions, and minting-related surfaces.",
-        "Individual Meme Card pages and distribution pages live under The Memes route family."
+        "Individual Meme Card pages and distribution pages live under The Memes route family.",
+        "The Memes collection routes are separate from Memes wave submission surfaces in Waves."
       ],
       "canonical_path": "/the-memes",
       "related_paths": ["/meme-calendar", "/meme-lab"],
       "tags": ["memes", "collections"],
-      "source_refs": ["ops/docs/media/README.md"]
+      "source_refs": [
+        "ops/docs/media/README.md",
+        "ops/docs/waves/memes/README.md"
+      ]
     },
     {
       "id": "the-memes.minting",
