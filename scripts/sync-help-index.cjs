@@ -23,6 +23,12 @@ const ALLOWED_RECORD_KINDS = new Set([
   "ui_affordance",
   "workflow",
 ]);
+const LEGACY_WORDPRESS_MARKERS = [
+  "legacy-wordpress/WordPressLegacyAssets",
+  "<WordPressLegacyAssets",
+  "wp-json/wp/v2/",
+  "wp-content/",
+];
 
 function fail(message) {
   console.error(message);
@@ -70,20 +76,23 @@ function listFiles(dir, fileName) {
 function routePatternFromPage(pagePath) {
   const relativeDir = path.dirname(path.relative(appDir, pagePath));
   const segments = relativeDir === "." ? [] : relativeDir.split(path.sep);
-  return segments
-    .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
-    .map((segment) => {
-      if (segment.startsWith("[[...") && segment.endsWith("]]")) {
-        return { kind: "optionalCatchAll", value: segment.slice(5, -2) };
-      }
-      if (segment.startsWith("[...") && segment.endsWith("]")) {
-        return { kind: "catchAll", value: segment.slice(4, -1) };
-      }
-      if (segment.startsWith("[") && segment.endsWith("]")) {
-        return { kind: "dynamic", value: segment.slice(1, -1) };
-      }
-      return { kind: "static", value: segment };
-    });
+  return {
+    pagePath,
+    segments: segments
+      .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
+      .map((segment) => {
+        if (segment.startsWith("[[...") && segment.endsWith("]]")) {
+          return { kind: "optionalCatchAll", value: segment.slice(5, -2) };
+        }
+        if (segment.startsWith("[...") && segment.endsWith("]")) {
+          return { kind: "catchAll", value: segment.slice(4, -1) };
+        }
+        if (segment.startsWith("[") && segment.endsWith("]")) {
+          return { kind: "dynamic", value: segment.slice(1, -1) };
+        }
+        return { kind: "static", value: segment };
+      }),
+  };
 }
 
 function createRoutePatterns() {
@@ -126,7 +135,7 @@ function pathMatchesRoute(rawPath, routePattern) {
   const usesPlaceholder = pathSegments.some(isPlaceholderSegment);
   let pathIndex = 0;
 
-  for (const routeSegment of routePattern) {
+  for (const routeSegment of routePattern.segments) {
     if (routeSegment.kind === "optionalCatchAll") {
       const remainingSegments = pathSegments.slice(pathIndex);
       if (usesPlaceholder) {
@@ -156,6 +165,15 @@ function pathMatchesRoute(rawPath, routePattern) {
   return pathIndex === pathSegments.length;
 }
 
+function isLegacyWordPressFile(filePath) {
+  const source = fs.readFileSync(filePath, "utf8");
+  return LEGACY_WORDPRESS_MARKERS.some((marker) => source.includes(marker));
+}
+
+function isLegacyWordPressRoute(routePattern) {
+  return isLegacyWordPressFile(routePattern.pagePath);
+}
+
 function assertRouteMatchingInvariants(routePatterns) {
   const examples = [
     { path: "/{user}/subscriptions", matches: true },
@@ -178,8 +196,16 @@ function validateInternalPath(value, field, recordId, routePatterns) {
   if (!value.startsWith("/")) {
     fail(`${recordId}: ${field} must be an internal path or https URL`);
   }
-  if (!routePatterns.some((routePattern) => pathMatchesRoute(value, routePattern))) {
+  const matchingRoutes = routePatterns.filter((routePattern) =>
+    pathMatchesRoute(value, routePattern)
+  );
+  if (!matchingRoutes.length) {
     fail(`${recordId}: ${field} does not resolve to a known app route: ${value}`);
+  }
+  if (matchingRoutes.some(isLegacyWordPressRoute)) {
+    fail(
+      `${recordId}: ${field} resolves to a legacy WordPress page and cannot be indexed: ${value}`
+    );
   }
 }
 
@@ -194,6 +220,11 @@ function validateSourceRefs(record) {
     }
     if (!fs.statSync(sourcePath).isFile()) {
       fail(`${record.id}: source_refs entry must be a file: ${sourceRef}`);
+    }
+    if (isLegacyWordPressFile(sourcePath)) {
+      fail(
+        `${record.id}: source_refs entry points to a legacy WordPress page and cannot be indexed: ${sourceRef}`
+      );
     }
   }
 }
@@ -259,5 +290,6 @@ function validateIndex(index) {
 const index = readJson(sourcePath);
 validateIndex(index);
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-fs.writeFileSync(outputPath, `${JSON.stringify(index, null, 2)}\n`);
+const source = fs.readFileSync(sourcePath, "utf8");
+fs.writeFileSync(outputPath, source.endsWith("\n") ? source : `${source}\n`);
 console.log(`Synced ${index.records.length} help records to public/help-index.json`);

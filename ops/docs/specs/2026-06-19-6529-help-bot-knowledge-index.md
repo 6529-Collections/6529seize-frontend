@@ -20,7 +20,7 @@ frontend repository, GitHub, or a live rendered page while a user waits for an
 answer. The frontend should provide a structured, versioned help corpus that can
 be synchronized by the backend and used for retrieval-augmented generation.
 
-The agreed bot handle is `@6529help`. The first runtime release ships without
+The agreed bot handle is `@help6529`. The first runtime release ships without
 full RAG, but it now uses a frontend-owned curated help index rather than
 backend-owned frontend product records. The source lives at
 `ops/help/help-index.json`, the build publishes `public/help-index.json`, and
@@ -76,7 +76,7 @@ orchestration, LLM calls, message reactions, and bot replies.
 ## Agent Maintenance Contract
 
 Future agents must update the help bot knowledge materials when frontend changes
-affect what users can ask `@6529help` about. This applies to:
+affect what users can ask `@help6529` about. This applies to:
 
 - new or renamed routes
 - new product terms or changed user-facing definitions
@@ -91,6 +91,12 @@ same PR as the frontend feature change, then run `6529 run help-index:sync` so
 the generated `public/help-index.json` stays in sync. Do not rely on the
 backend, LLM, GitHub lookup, or source-code inspection to discover new frontend
 routes or controls at answer time.
+
+Do not add migrated legacy WordPress pages to the help index. These pages are
+dated content snapshots and should not be used as bot knowledge or returned as
+canonical answer links. The sync step rejects records whose canonical or related
+paths resolve to WordPress-migrated route files, and rejects `source_refs` that
+point at those files.
 
 ## Proposed Help Sources
 

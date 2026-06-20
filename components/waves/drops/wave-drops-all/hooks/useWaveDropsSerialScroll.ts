@@ -102,6 +102,7 @@ export const useWaveDropsSerialScroll = ({
   const scrollOperationLockRef = useRef(false);
   const activeScrollTargetRef = useRef<number | null>(null);
   const scrollBaselineRef = useRef<ReadonlySet<number> | null>(null);
+  const previousInitialDropRef = useRef<number | null>(initialDrop);
 
   const latestWaveMessagesRef = useRef(waveMessages);
   const latestRenderedWaveMessagesRef = useRef(renderedWaveMessages);
@@ -112,6 +113,17 @@ export const useWaveDropsSerialScroll = ({
   const queueSerialTarget = useCallback((serialNo: number) => {
     setSerialTarget(serialNo);
   }, []);
+
+  useEffect(() => {
+    const previousInitialDrop = previousInitialDropRef.current;
+    previousInitialDropRef.current = initialDrop;
+
+    if (initialDrop === null || initialDrop === previousInitialDrop) {
+      return;
+    }
+
+    setSerialTarget(initialDrop);
+  }, [initialDrop]);
 
   const clearSerialTargetIfCurrent = useCallback((targetSerialNo: number) => {
     setSerialTarget((current) => (current === targetSerialNo ? null : current));

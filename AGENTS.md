@@ -191,7 +191,7 @@ is available, use it; otherwise read the relevant files in
 - User-facing docs live under `ops/docs/`. Update them when visible behavior,
   routes, loading/empty/error states, or user workflows change.
 - When adding or changing user-facing routes, terminology, workflows, prominent
-  controls, empty states, or navigation that users may ask `@6529help` about,
+  controls, empty states, or navigation that users may ask `@help6529` about,
   update the 6529 Help Bot corpus in the same PR. The frontend-owned source is
   `ops/help/help-index.json`, and `6529 run help-index:sync` validates it and
   publishes `public/help-index.json` for the backend runtime to consume from the
