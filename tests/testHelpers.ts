@@ -1,5 +1,12 @@
 import { test as base } from "@playwright/test";
 
+import {
+  assertNoPageErrors,
+  attachPageDiagnostics,
+  attachPageDiagnosticsArtifact,
+} from "./support/pageAssertions";
+import { installReadonlyMutationGuard } from "./support/readonlyMutationGuard";
+
 const STAGING_HOSTNAME = "staging.6529.io";
 const STAGING_ACCESS_CODE =
   process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] ?? process.env["STAGING_AUTH"];
@@ -64,14 +71,38 @@ function shouldUnlockStaging(baseURL?: string) {
 }
 
 const test = base.extend({
-  page: async ({ page, baseURL }, runTest) => {
+  context: async ({ context, baseURL }, runTest) => {
+    const guard = await installReadonlyMutationGuard(context, baseURL);
+
+    await runTest(context);
+
+    guard.assertNoBlockedRequests();
+  },
+  page: async ({ page, baseURL }, runTest, testInfo) => {
+    const diagnostics = attachPageDiagnostics(page);
+
     if (shouldUnlockStaging(baseURL)) {
       await unlockStagingAccess(page);
     }
 
     await runTest(page);
+
+    await attachPageDiagnosticsArtifact(testInfo, diagnostics);
+    assertNoPageErrors(diagnostics);
   },
 });
 
 export { expect } from "@playwright/test";
+export {
+  assertNoConsoleErrors,
+  assertNoPageErrors,
+  captureSafeScreenshot,
+  expectNoHorizontalOverflow,
+  waitForRouteReady,
+} from "./support/pageAssertions";
+export {
+  resolvePlaywrightTestSize,
+  tagTestTitle,
+  TEST_SIZE_TAGS,
+} from "./support/testSizes";
 export { test };

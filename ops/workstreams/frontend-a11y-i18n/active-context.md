@@ -230,23 +230,25 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Finish and deploy the staging Playwright smoke repair from
-   `codex/fix-staging-playwright-smoke`. Preserve the existing
-   `.github/6529bot.yml` lanes unchanged.
-2. Continue the broader PR 1 test-harness work after smoke is green:
-   local smoke, shared route-ready helpers, mutation guards, artifact redaction,
-   test sizing, and test typecheck coverage.
-3. Reconcile the existing PR stack from current `origin/main` before opening
+1. Publish and review PR 1 from `codex/testing-pr1-harness`, preserving the
+   existing `.github/6529bot.yml` lanes unchanged.
+2. Start PR 2 from current `origin/main` after PR 1 is merged or explicitly
+   stacked: add CI workflow/gating around the PR1 harness, test planning
+   automation, and secret/workflow safety checks.
+3. Start PR 3 from current `origin/main` after PR 2 is merged or explicitly
+   stacked: add first WCAG/i18n route-pack fixtures and advisory axe/i18n
+   assertions, keeping reviewbots as additive feedback.
+4. Reconcile the existing PR stack from current `origin/main` before opening
    broad new implementation PRs.
-4. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR
+5. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR
    impact/testing plan before opening the PR.
-5. For every implementation PR, assign a risk level, write hazard analysis,
+6. For every implementation PR, assign a risk level, write hazard analysis,
    create the validation manifest, and select durable artifact storage before
    opening the PR.
-6. For every implementation PR, run extensive local validation first; treat the
+7. For every implementation PR, run extensive local validation first; treat the
    live `wcag` and `i18n` reviewbot lanes as additional review, not a local-test
    substitute.
-7. Group only green, locally validated, reviewbot-happy PRs into deployment
+8. Group only green, locally validated, reviewbot-happy PRs into deployment
    trains.
-8. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
+9. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
    style files.
