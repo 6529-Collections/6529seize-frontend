@@ -153,6 +153,54 @@ describe("testing strategy risk floor", () => {
     ]);
   });
 
+  it("does not let config or routing infrastructure fall into Level 0", () => {
+    const result = classifyChangedFiles([
+      "config/securityHeaders.ts",
+      "config/env.schema.ts",
+      "middleware.ts",
+      "instrumentation.ts",
+    ]);
+
+    expect(result.computed_floor).toBe(4);
+    expect(result.reasons.map((reason) => reason.rule)).toEqual([
+      "deployment-or-release-control",
+      "deployment-or-release-control",
+      "deployment-or-release-control",
+      "deployment-or-release-control",
+    ]);
+  });
+
+  it("classifies unknown source files conservatively and catches hyphenated sensitive names", () => {
+    const result = classifyChangedFiles([
+      "src/errors/renderFailure.ts",
+      "src/errors/wallet-auth.ts",
+    ]);
+
+    expect(result.computed_floor).toBe(3);
+    expect(result.reasons).toEqual([
+      expect.objectContaining({
+        path: "src/errors/renderFailure.ts",
+        level: 2,
+        rule: "user-visible-runtime",
+      }),
+      expect.objectContaining({
+        path: "src/errors/wallet-auth.ts",
+        level: 3,
+        rule: "auth-wallet-upload-admin",
+      }),
+    ]);
+  });
+
+  it("defaults unmatched files to standard risk instead of docs risk", () => {
+    const result = classifyChangedFiles(["unknown-runtime-file.foo"]);
+
+    expect(result.computed_floor).toBe(2);
+    expect(result.reasons[0]).toMatchObject({
+      level: 2,
+      rule: "unclassified-runtime-or-config",
+    });
+  });
+
   it("routes secret and production authority paths to critical risk", () => {
     const result = classifyChangedFiles([
       ".env.production",
@@ -266,10 +314,40 @@ describe("testing strategy validation manifest", () => {
     expect(errors).toEqual(
       expect.arrayContaining([
         "artifacts[0].uri: must be a durable artifact pointer, not a local path or Git LFS object",
-        "artifacts[0].uri: must start with one of s3://, ipfs://, ipns://, https://artifacts.6529.io/, https://6529-artifacts",
+        "artifacts[0].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
         "artifacts[0]: must include at least one integrity field: sha256, cid, etag, or version_id",
         "artifacts[0].redaction_status: must be one of verified-redacted, not-sensitive, public-redacted",
       ]),
+    );
+  });
+
+  it("rejects artifact pointers outside 6529-controlled storage", () => {
+    const s3Errors = validateArtifactPointer(
+      artifactPointer({ uri: "s3://not-6529-owned/private-trace.zip" }),
+      0,
+    );
+    const httpsErrors = validateArtifactPointer(
+      artifactPointer({
+        uri: "https://6529-artifacts.evil.example/trace.zip",
+      }),
+      1,
+    );
+    const ipfsErrors = validateArtifactPointer(
+      artifactPointer({
+        uri: "ipfs://bafyexample",
+        redaction_status: "verified-redacted",
+      }),
+      2,
+    );
+
+    expect(s3Errors).toContain(
+      "artifacts[0].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
+    );
+    expect(httpsErrors).toContain(
+      "artifacts[1].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
+    );
+    expect(ipfsErrors).toContain(
+      "artifacts[2].redaction_status: must be public-redacted for IPFS/IPNS artifact pointers",
     );
   });
 
@@ -319,6 +397,32 @@ describe("testing strategy validation manifest", () => {
     expect(schema.properties.schema_version.const).toBe(
       VALIDATION_MANIFEST_SCHEMA_VERSION,
     );
+  });
+
+  it("keeps required reviewbot lanes in sync with the schema and repo config", () => {
+    const schema = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "ops/testing-strategy/validation-manifest.v1.schema.json",
+        ),
+        "utf8",
+      ),
+    );
+    const configText = fs.readFileSync(
+      path.join(process.cwd(), ".github/6529bot.yml"),
+      "utf8",
+    );
+    const initialLine = /initial:\s*\[([^\]]+)\]/.exec(configText)?.[1] ?? "";
+    const configLanes = initialLine.split(",").map((lane) => lane.trim());
+    const schemaLanes =
+      schema.properties.review.properties.reviewbot.properties.required_lanes.allOf.map(
+        (rule: { contains: { const: string } }) => rule.contains.const,
+      );
+
+    expect(configLanes).toEqual(REVIEWBOT_LANES);
+    expect(schemaLanes).toEqual(REVIEWBOT_LANES);
+    expect(EXISTING_REVIEWBOT_INITIAL_LANES).toEqual(REVIEWBOT_LANES);
   });
 });
 

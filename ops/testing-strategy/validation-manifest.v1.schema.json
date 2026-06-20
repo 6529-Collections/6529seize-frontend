@@ -149,9 +149,33 @@
               "items": {
                 "type": "string"
               },
-              "contains": {
-                "const": "general"
-              }
+              "allOf": [
+                {
+                  "contains": {
+                    "const": "general"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "wcag"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "i18n"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "security"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "responsiveness"
+                  }
+                }
+              ]
             }
           }
         }
@@ -181,7 +205,7 @@
         },
         "uri": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^(s3://6529-artifacts/|https://artifacts\\.6529\\.io/|ipfs://|ipns://)"
         },
         "sha256": {
           "type": "string",
@@ -223,6 +247,25 @@
         },
         {
           "required": ["version_id"]
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "uri": {
+                "pattern": "^(ipfs://|ipns://)"
+              }
+            },
+            "required": ["uri"]
+          },
+          "then": {
+            "properties": {
+              "redaction_status": {
+                "const": "public-redacted"
+              }
+            }
+          }
         }
       ]
     }

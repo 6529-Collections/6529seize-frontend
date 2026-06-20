@@ -17,13 +17,8 @@ const EXISTING_REVIEWBOT_INITIAL_LANES = Object.freeze([
   "security",
   "responsiveness",
 ]);
-const ARTIFACT_URI_PREFIXES = [
-  "s3://",
-  "ipfs://",
-  "ipns://",
-  "https://artifacts.6529.io/",
-  "https://6529-artifacts",
-];
+const S3_ARTIFACT_PREFIX = "s3://6529-artifacts/";
+const HTTPS_ARTIFACT_PREFIX = "https://artifacts.6529.io/";
 const ARTIFACT_REDACTION_STATUSES = new Set([
   "verified-redacted",
   "not-sensitive",
@@ -38,6 +33,28 @@ const HTTP_METHODS = new Set([
   "DELETE",
   "OPTIONS",
 ]);
+const ROUTE_FILE_STEMS = new Set([
+  "page",
+  "layout",
+  "template",
+  "loading",
+  "error",
+  "not-found",
+]);
+const ROUTE_FILE_EXTENSIONS = [
+  ".tsx",
+  ".ts",
+  ".jsx",
+  ".js",
+  ".mjs",
+  ".cjs",
+];
+const FALLBACK_RISK_RULE = {
+  level: 2,
+  name: "unclassified-runtime-or-config",
+  reason:
+    "Unclassified files default to standard risk so runtime/config changes cannot silently enter the docs fast lane.",
+};
 
 const RISK_RULES = [
   {
@@ -79,6 +96,9 @@ const RISK_RULES = [
       /^ops\/testing-strategy\//,
       /^package\.json$/,
       /^pnpm-lock\.yaml$/,
+      /^config\//,
+      /^middleware\.(tsx?|jsx?|mjs|cjs)$/,
+      /^instrumentation(?:-[^.]+)?\.(tsx?|jsx?|mjs|cjs)$/,
       /^next\.config\./,
       /^sentry\./,
       /^scripts\/(build|start|dev|run-secure|enforce|require-6529|quality|typecheck)/,
@@ -103,10 +123,15 @@ const RISK_RULES = [
     name: "auth-wallet-upload-admin",
     patterns: [
       /(^|\/)(auth|session|login|logout|oauth|cookie|jwt|token)(\/|\.|$)/,
+      /(^|[\/._-])(auth|session|login|logout|oauth|cookie|jwt|token)([\/._-]|$)/,
       /(^|\/)(wallet|wagmi|viem|ethers|ens)(\/|\.|$)/,
+      /(^|[\/._-])(wallet|wagmi|viem|ethers|ens)([\/._-]|$)/,
       /(^|\/)(profile|identity|tdh|delegation|owner|ownership)(\/|\.|$)/,
+      /(^|[\/._-])(profile|identity|tdh|delegation|owner|ownership)([\/._-]|$)/,
       /(^|\/)(upload|uploads|media|link-preview|open-graph|sanitize|safe-url)(\/|\.|$)/,
+      /(^|[\/._-])(upload|uploads|media|link-preview|open-graph|sanitize|safe-url)([\/._-]|$)/,
       /(^|\/)(waves?|drops?|posting|moderation|admin|vote|delete)(\/|\.|$)/,
+      /(^|[\/._-])(waves?|drops?|posting|moderation|admin|vote|delete)([\/._-]|$)/,
     ],
     reason: "Auth, wallet, upload, posting, moderation, and admin paths are guarded.",
   },
@@ -133,6 +158,7 @@ const RISK_RULES = [
       /^store\//,
       /^helpers\//,
       /^lib\//,
+      /^src\//,
       /^utils\//,
       /^styles\//,
       /^i18n\//,
@@ -207,7 +233,7 @@ function normalizePath(value) {
 
 function displayPath(value) {
   return String(value || "")
-    .replace(/\\/g, "/")
+    .replaceAll("\\", "/")
     .replace(/^\.\//, "")
     .replace(/^\/+/, "");
 }
@@ -218,35 +244,77 @@ function matchesAny(filePath, patterns) {
 
 function ruleForFile(filePath) {
   const normalized = normalizePath(filePath);
-  return (
-    RISK_RULES.find((rule) => matchesAny(normalized, rule.patterns)) ||
-    RISK_RULES[RISK_RULES.length - 1]
+  return RISK_RULES.find((rule) => matchesAny(normalized, rule.patterns)) || FALLBACK_RISK_RULE;
+}
+
+function routeFileStem(fileName) {
+  if (!fileName) {
+    return null;
+  }
+  for (const extension of ROUTE_FILE_EXTENSIONS) {
+    if (fileName.endsWith(extension)) {
+      return fileName.slice(0, -extension.length);
+    }
+  }
+  return null;
+}
+
+function normalizeRouteSegment(segment) {
+  if (segment.startsWith("(") && segment.endsWith(")")) {
+    return null;
+  }
+  if (segment.startsWith("[") && segment.endsWith("]")) {
+    return ":param";
+  }
+  return segment;
+}
+
+function routeFromSegments(segments) {
+  const routeParts = segments.map(normalizeRouteSegment).filter(Boolean);
+  return routeParts.length === 0 ? "/" : `/${routeParts.join("/")}`;
+}
+
+function appRouteImpact(file) {
+  if (!file.startsWith("app/")) {
+    return null;
+  }
+  const parts = file.slice("app/".length).split("/");
+  const stem = routeFileStem(parts.at(-1));
+  if (!ROUTE_FILE_STEMS.has(stem)) {
+    return null;
+  }
+  return routeFromSegments(parts.slice(0, -1));
+}
+
+function pagesRouteImpact(file) {
+  if (!file.startsWith("pages/")) {
+    return null;
+  }
+  const parts = file.slice("pages/".length).split("/");
+  if (parts[0] === "api") {
+    return null;
+  }
+  const stem = routeFileStem(parts.at(-1));
+  if (!stem) {
+    return null;
+  }
+  const routeParts = [...parts.slice(0, -1), stem].filter(
+    (part, index, source) => !(part === "index" && index === source.length - 1),
   );
+  return routeFromSegments(routeParts);
 }
 
 function inferRouteImpacts(files) {
   const routes = new Set();
 
   for (const file of files.map(normalizePath)) {
-    const appMatch = /^app\/(.+)\/(?:page|layout|template|loading|error|not-found)\.(tsx?|jsx?)$/.exec(
-      file,
-    );
-    if (appMatch) {
-      const route = `/${appMatch[1]
-        .replace(/\([^)]*\)\//g, "")
-        .replace(/\/?page$/, "")
-        .replace(/\/index$/, "")
-        .replace(/\[[^\]]+\]/g, ":param")}`;
-      routes.add(route === "/." ? "/" : route);
-    }
-
-    const pagesMatch = /^pages\/(.+)\.(tsx?|jsx?)$/.exec(file);
-    if (pagesMatch && !pagesMatch[1].startsWith("api/")) {
-      routes.add(`/${pagesMatch[1].replace(/\/index$/, "")}`);
+    const route = appRouteImpact(file) || pagesRouteImpact(file);
+    if (route) {
+      routes.add(route);
     }
   }
 
-  return [...routes].sort();
+  return [...routes].sort((left, right) => left.localeCompare(right));
 }
 
 function classifyChangedFiles(files) {
@@ -340,26 +408,7 @@ function validateArtifactPointer(artifact, index) {
   if (!artifact.uri || typeof artifact.uri !== "string") {
     pushError(errors, `${prefix}.uri`, "required");
   } else {
-    const uri = artifact.uri;
-    const lowerUri = uri.toLowerCase();
-    if (
-      lowerUri.startsWith("file://") ||
-      /^[a-z]:[\\/]/i.test(uri) ||
-      lowerUri.includes("git-lfs")
-    ) {
-      pushError(
-        errors,
-        `${prefix}.uri`,
-        "must be a durable artifact pointer, not a local path or Git LFS object",
-      );
-    }
-    if (!ARTIFACT_URI_PREFIXES.some((candidate) => lowerUri.startsWith(candidate))) {
-      pushError(
-        errors,
-        `${prefix}.uri`,
-        `must start with one of ${ARTIFACT_URI_PREFIXES.join(", ")}`,
-      );
-    }
+    validateArtifactUri(artifact, prefix, errors);
   }
 
   if (
@@ -394,6 +443,45 @@ function validateArtifactPointer(artifact, index) {
   return errors;
 }
 
+function validateArtifactUri(artifact, prefix, errors) {
+  const uri = artifact.uri;
+  const lowerUri = uri.toLowerCase();
+  if (
+    lowerUri.startsWith("file://") ||
+    /^[a-z]:[\\/]/i.test(uri) ||
+    lowerUri.includes("git-lfs")
+  ) {
+    pushError(
+      errors,
+      `${prefix}.uri`,
+      "must be a durable artifact pointer, not a local path or Git LFS object",
+    );
+  }
+
+  if (lowerUri.startsWith(S3_ARTIFACT_PREFIX)) {
+    return;
+  }
+  if (lowerUri.startsWith(HTTPS_ARTIFACT_PREFIX)) {
+    return;
+  }
+  if (lowerUri.startsWith("ipfs://") || lowerUri.startsWith("ipns://")) {
+    if (artifact.redaction_status !== "public-redacted") {
+      pushError(
+        errors,
+        `${prefix}.redaction_status`,
+        "must be public-redacted for IPFS/IPNS artifact pointers",
+      );
+    }
+    return;
+  }
+
+  pushError(
+    errors,
+    `${prefix}.uri`,
+    `must start with ${S3_ARTIFACT_PREFIX}, ${HTTPS_ARTIFACT_PREFIX}, ipfs://, or ipns://`,
+  );
+}
+
 function validateReviewbotLanes(review, errors) {
   const lanes = review?.reviewbot?.required_lanes;
   if (!lanes) {
@@ -415,27 +503,7 @@ function validateReviewbotLanes(review, errors) {
   }
 }
 
-function validateValidationManifest(manifest) {
-  const errors = [];
-  const warnings = [];
-
-  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
-    return {
-      ok: false,
-      errors: ["manifest: must be an object"],
-      warnings,
-    };
-  }
-
-  if (manifest.schema_version !== VALIDATION_MANIFEST_SCHEMA_VERSION) {
-    pushError(
-      errors,
-      "schema_version",
-      `must be ${VALIDATION_MANIFEST_SCHEMA_VERSION}`,
-    );
-  }
-
-  const risk = manifest.risk || {};
+function validateRiskSection(risk, errors) {
   for (const field of ["computed_floor", "declared", "final"]) {
     if (!isIntegerRisk(risk[field])) {
       pushError(errors, `risk.${field}`, "must be an integer from 0 through 5");
@@ -461,65 +529,99 @@ function validateValidationManifest(manifest) {
       pushError(errors, "risk.downgrade_approval.expires_at", "required");
     }
   }
+}
 
-  if (!Array.isArray(manifest.changed_files)) {
-    pushError(errors, "changed_files", "must be an array");
-  }
-
-  const hazards = manifest.hazards || [];
+function validateHazards(hazards, errors) {
   if (!Array.isArray(hazards)) {
     pushError(errors, "hazards", "must be an array");
-  } else {
-    hazards.forEach((hazard, index) => {
-      for (const field of [
-        "hazard",
-        "severity",
-        "likelihood",
-        "detection",
-        "required_test",
-        "rollback_or_fix_forward",
-      ]) {
-        if (!hazard?.[field]) {
-          pushError(errors, `hazards[${index}].${field}`, "required");
-        }
-      }
-    });
+    return;
   }
 
-  const commands = manifest.commands || [];
+  hazards.forEach((hazard, index) => {
+    for (const field of [
+      "hazard",
+      "severity",
+      "likelihood",
+      "detection",
+      "required_test",
+      "rollback_or_fix_forward",
+    ]) {
+      if (!hazard?.[field]) {
+        pushError(errors, `hazards[${index}].${field}`, "required");
+      }
+    }
+  });
+}
+
+function validateCommands(commands, errors) {
   if (!Array.isArray(commands)) {
     pushError(errors, "commands", "must be an array");
-  } else {
-    commands.forEach((command, index) => {
-      if (!command?.command) {
-        pushError(errors, `commands[${index}].command`, "required");
-      }
-      if (!COMMAND_STATUSES.has(command?.status)) {
-        pushError(
-          errors,
-          `commands[${index}].status`,
-          `must be one of ${[...COMMAND_STATUSES].join(", ")}`,
-        );
-      }
-    });
+    return;
   }
 
-  const artifacts = manifest.artifacts || [];
+  commands.forEach((command, index) => {
+    if (!command?.command) {
+      pushError(errors, `commands[${index}].command`, "required");
+    }
+    if (!COMMAND_STATUSES.has(command?.status)) {
+      pushError(
+        errors,
+        `commands[${index}].status`,
+        `must be one of ${[...COMMAND_STATUSES].join(", ")}`,
+      );
+    }
+  });
+}
+
+function validateArtifacts(artifacts, finalRisk, errors) {
   if (!Array.isArray(artifacts)) {
     pushError(errors, "artifacts", "must be an array");
-  } else {
-    artifacts.forEach((artifact, index) => {
-      errors.push(...validateArtifactPointer(artifact, index));
-    });
+    return;
   }
 
-  if (isIntegerRisk(risk.final) && risk.final >= 3 && artifacts.length === 0) {
+  artifacts.forEach((artifact, index) => {
+    errors.push(...validateArtifactPointer(artifact, index));
+  });
+
+  if (isIntegerRisk(finalRisk) && finalRisk >= 3 && artifacts.length === 0) {
     pushError(
       errors,
       "artifacts",
       "Level 3+ manifests require at least one validated durable artifact pointer",
     );
   }
+}
+
+function validateValidationManifest(manifest) {
+  const errors = [];
+  const warnings = [];
+
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
+    return {
+      ok: false,
+      errors: ["manifest: must be an object"],
+      warnings,
+    };
+  }
+
+  if (manifest.schema_version !== VALIDATION_MANIFEST_SCHEMA_VERSION) {
+    pushError(
+      errors,
+      "schema_version",
+      `must be ${VALIDATION_MANIFEST_SCHEMA_VERSION}`,
+    );
+  }
+
+  const risk = manifest.risk || {};
+  validateRiskSection(risk, errors);
+
+  if (!Array.isArray(manifest.changed_files)) {
+    pushError(errors, "changed_files", "must be an array");
+  }
+
+  validateHazards(manifest.hazards || [], errors);
+  validateCommands(manifest.commands || [], errors);
+  validateArtifacts(manifest.artifacts || [], risk.final, errors);
 
   validateReviewbotLanes(manifest.review, errors);
 
@@ -734,51 +836,61 @@ function usage() {
 `;
 }
 
+function commandComputeRiskFloor(args) {
+  const result = classifyChangedFiles(filesFromArgs(args));
+  if (args.json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  console.log(`Risk floor: ${result.risk_level}`);
+  for (const reason of result.reasons) {
+    console.log(`- ${reason.path}: level-${reason.level} (${reason.rule})`);
+  }
+  for (const modifier of result.modifiers) {
+    console.log(`- modifier ${modifier.name}: ${modifier.reason}`);
+  }
+}
+
+function commandValidateManifest(args) {
+  const result = validateValidationManifest(readJson(args.file));
+  printValidation(result, "Validation manifest is valid.");
+  if (!result.ok) {
+    process.exitCode = 1;
+  }
+}
+
+function commandSummarizeManifest(args) {
+  console.log(summarizeValidationManifest(readJson(args.file)));
+}
+
+function commandValidateMutationRegistry(args) {
+  const result = validateMutationRegistry(readJson(args.file));
+  printValidation(result, "Mutation endpoint registry is valid.");
+  if (!result.ok) {
+    process.exitCode = 1;
+  }
+}
+
+const COMMAND_HANDLERS = {
+  "compute-risk-floor": commandComputeRiskFloor,
+  "validate-manifest": commandValidateManifest,
+  "summarize-manifest": commandSummarizeManifest,
+  "validate-mutation-registry": commandValidateMutationRegistry,
+};
+
 async function main(argv = process.argv.slice(2)) {
   const [command, ...rest] = argv;
   const args = parseArgs(rest);
 
   try {
-    switch (command) {
-      case "compute-risk-floor": {
-        const result = classifyChangedFiles(filesFromArgs(args));
-        if (args.json) {
-          console.log(JSON.stringify(result, null, 2));
-        } else {
-          console.log(`Risk floor: ${result.risk_level}`);
-          for (const reason of result.reasons) {
-            console.log(`- ${reason.path}: level-${reason.level} (${reason.rule})`);
-          }
-          for (const modifier of result.modifiers) {
-            console.log(`- modifier ${modifier.name}: ${modifier.reason}`);
-          }
-        }
-        break;
-      }
-      case "validate-manifest": {
-        const result = validateValidationManifest(readJson(args.file));
-        printValidation(result, "Validation manifest is valid.");
-        if (!result.ok) {
-          process.exitCode = 1;
-        }
-        break;
-      }
-      case "summarize-manifest": {
-        console.log(summarizeValidationManifest(readJson(args.file)));
-        break;
-      }
-      case "validate-mutation-registry": {
-        const result = validateMutationRegistry(readJson(args.file));
-        printValidation(result, "Mutation endpoint registry is valid.");
-        if (!result.ok) {
-          process.exitCode = 1;
-        }
-        break;
-      }
-      default:
-        console.log(usage());
-        process.exitCode = command ? 1 : 0;
+    const handler = COMMAND_HANDLERS[command];
+    if (!handler) {
+      console.log(usage());
+      process.exitCode = command ? 1 : 0;
+      return;
     }
+    await handler(args);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
