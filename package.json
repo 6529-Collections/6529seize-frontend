@@ -57,6 +57,7 @@
     "react-doctor:diff": "node scripts/require-6529-command.cjs && node scripts/react-doctor-diff.cjs",
     "dependency:risk-gate": "node scripts/require-6529-command.cjs && node scripts/dependency-risk-gate.cjs",
     "deployment-bus": "node scripts/require-6529-command.cjs && node ops/scripts/deployment-bus.cjs",
+    "testing-strategy": "node scripts/require-6529-command.cjs && node ops/scripts/testing-strategy.cjs",
     "format": "node scripts/require-6529-command.cjs && prettier --write .",
     "format:check": "node scripts/require-6529-command.cjs && prettier --check .",
     "format:changed": "node scripts/require-6529-command.cjs && bash -lc '{ git diff --name-only -z --diff-filter=ACMR main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
