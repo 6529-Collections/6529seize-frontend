@@ -128,6 +128,20 @@ function pathSegmentMatchesDynamic(pathSegment, routeSegment, usesPlaceholder) {
   return !usesPlaceholder;
 }
 
+function pathSegmentMatchesRouteSegment(
+  pathSegment,
+  routeSegment,
+  usesPlaceholder
+) {
+  if (routeSegment.kind === "dynamic") {
+    return pathSegmentMatchesDynamic(pathSegment, routeSegment, usesPlaceholder);
+  }
+  if (routeSegment.kind === "static") {
+    return routeSegment.value === pathSegment;
+  }
+  return true;
+}
+
 function pathMatchesRoute(rawPath, routePattern) {
   const cleanedPath = stripPathDecorators(rawPath);
   const pathSegments =
@@ -151,12 +165,12 @@ function pathMatchesRoute(rawPath, routePattern) {
       return false;
     }
     if (
-      routeSegment.kind === "dynamic" &&
-      !pathSegmentMatchesDynamic(pathSegment, routeSegment, usesPlaceholder)
+      !pathSegmentMatchesRouteSegment(
+        pathSegment,
+        routeSegment,
+        usesPlaceholder
+      )
     ) {
-      return false;
-    }
-    if (routeSegment.kind === "static" && routeSegment.value !== pathSegment) {
       return false;
     }
     pathIndex += 1;

@@ -316,9 +316,7 @@ export default async function proxy(req: NextRequest) {
     }
 
     if (
-      STATIC_EXACT_PATHS.some((staticPath) =>
-        normalizedPathname === staticPath
-      ) ||
+      (STATIC_EXACT_PATHS as readonly string[]).includes(normalizedPathname) ||
       STATIC_PATH_PREFIXES.some((prefix) =>
         normalizedPathname.startsWith(prefix)
       ) ||
