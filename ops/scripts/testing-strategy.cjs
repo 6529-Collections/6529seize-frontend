@@ -3,12 +3,18 @@
 
 const { spawnSync } = require("node:child_process");
 const fs = require("node:fs");
+const path = require("node:path");
 
 const VALIDATION_MANIFEST_SCHEMA_VERSION =
   "frontend-testing.validation-manifest.v1";
 const MUTATION_REGISTRY_SCHEMA_VERSION =
   "frontend-testing.mutation-endpoint-registry.v1";
+const CI_PLAN_SCHEMA_VERSION = "frontend-testing.ci-plan.v1";
+const SECRET_SCAN_SCHEMA_VERSION = "frontend-testing.secret-scan.v1";
+const WORKFLOW_SECURITY_SCHEMA_VERSION =
+  "frontend-testing.workflow-security.v1";
 const MAX_RISK_LEVEL = 5;
+const TEXT_SCAN_MAX_BYTES = 1024 * 1024;
 const EXISTING_REVIEWBOT_INITIAL_LANES = Object.freeze([
   "general",
   "wcag",
@@ -197,6 +203,58 @@ const I18N_PAYLOAD_PATTERNS = [
   /(^|\/)(copy|labels|aria|forms|modals|navigation)(\/|\.|$)/,
 ];
 
+const PACKAGE_GOVERNANCE_FILES = new Set([
+  "package.json",
+  "pnpm-lock.yaml",
+  "pnpm-workspace.yaml",
+  ".npmrc",
+]);
+const SOURCE_CODE_EXTENSIONS = new Set([
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".mjs",
+  ".cjs",
+]);
+const STYLE_EXTENSIONS = new Set([".css", ".scss"]);
+const SECRET_SCAN_EXTENSIONS = new Set([
+  ...SOURCE_CODE_EXTENSIONS,
+  ...STYLE_EXTENSIONS,
+  ".json",
+  ".md",
+  ".mjs",
+  ".cjs",
+  ".yaml",
+  ".yml",
+  ".env",
+  ".txt",
+  ".sh",
+]);
+const TEXT_SECRET_PATTERNS = [
+  {
+    name: "named-secret-assignment",
+    pattern:
+      /\b(?:ANTHROPIC_API_KEY|OPENROUTER_API_KEY|STAGING_AUTH|STAGING_API_KEY|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|SENTRY_AUTH_TOKEN|ALCHEMY_API_KEY|SSR_CLIENT_SECRET)\b\s*[:=]\s*['"]?[A-Za-z0-9_./+=:@-]{8,}/i,
+  },
+  {
+    name: "authorization-bearer-token",
+    pattern: /\bAuthorization\s*:\s*Bearer\s+[A-Za-z0-9._~+/=-]{16,}/i,
+  },
+  {
+    name: "private-key-block",
+    pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
+  },
+  {
+    name: "github-token",
+    pattern: /\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}/,
+  },
+  {
+    name: "aws-access-key-id",
+    pattern: /\bAKIA[0-9A-Z]{16}\b/,
+  },
+];
+
 function parseArgs(argv) {
   const args = { _: [] };
 
@@ -376,6 +434,300 @@ function classifyChangedFiles(files) {
     reasons,
     modifiers,
     route_impacts: inferRouteImpacts(fileEntries.map((file) => file.normalized)),
+  };
+}
+
+function fileExtension(filePath) {
+  const basename = filePath.split("/").at(-1) || "";
+  const dotIndex = basename.lastIndexOf(".");
+  return dotIndex === -1 ? "" : basename.slice(dotIndex).toLowerCase();
+}
+
+function isSourceCodeFile(filePath) {
+  return SOURCE_CODE_EXTENSIONS.has(fileExtension(filePath));
+}
+
+function isStyleFile(filePath) {
+  return STYLE_EXTENSIONS.has(fileExtension(filePath));
+}
+
+function isLintableFile(filePath) {
+  return isSourceCodeFile(filePath);
+}
+
+function isPackageGovernanceFile(filePath) {
+  return PACKAGE_GOVERNANCE_FILES.has(normalizePath(filePath));
+}
+
+function isWorkflowFile(filePath) {
+  return /^\.github\/workflows\/[^/]+\.ya?ml$/i.test(normalizePath(filePath));
+}
+
+function isPlaywrightOrTestSupportFile(filePath) {
+  const normalized = normalizePath(filePath);
+  return (
+    normalized.startsWith("tests/") ||
+    normalized.startsWith("__tests__/") ||
+    normalized === "playwright.config.ts" ||
+    normalized === "tsconfig.playwright.json"
+  );
+}
+
+function isBuildSensitiveFile(filePath) {
+  const normalized = normalizePath(filePath);
+  return (
+    normalized === "package.json" ||
+    normalized === "pnpm-lock.yaml" ||
+    normalized === "next.config.js" ||
+    normalized === "next.config.mjs" ||
+    normalized === "next.config.ts" ||
+    normalized === "openapi.yaml" ||
+    normalized.startsWith(".github/workflows/") ||
+    normalized.startsWith("generated/") ||
+    normalized.startsWith("scripts/build") ||
+    normalized.startsWith("scripts/start") ||
+    normalized.startsWith("scripts/run-secure") ||
+    normalized.startsWith("ops/testing-strategy/") ||
+    normalized === "ops/scripts/testing-strategy.cjs" ||
+    normalized === "playwright.config.ts" ||
+    normalized.startsWith("app/") ||
+    normalized.startsWith("pages/")
+  );
+}
+
+function check(required, reason) {
+  return { required: Boolean(required), reason };
+}
+
+function createCiPlan(files, options = {}) {
+  const normalizedFiles = files.map(displayPath).filter(Boolean);
+  const risk = classifyChangedFiles(normalizedFiles);
+  const riskFloor = risk.computed_floor;
+  const hasSourceCode = normalizedFiles.some(isSourceCodeFile);
+  const hasStyle = normalizedFiles.some(isStyleFile);
+  const hasLintable = normalizedFiles.some(isLintableFile);
+  const hasPackageGovernance = normalizedFiles.some(isPackageGovernanceFile);
+  const hasWorkflow = normalizedFiles.some(isWorkflowFile);
+  const hasPlaywrightOrTests = normalizedFiles.some(isPlaywrightOrTestSupportFile);
+  const hasBuildSensitive = normalizedFiles.some(isBuildSensitiveFile);
+  const hasRuntimeEvidenceNeed =
+    riskFloor >= 2 || risk.route_impacts.length > 0 || hasStyle;
+  const needsInstall =
+    hasLintable ||
+    hasPackageGovernance ||
+    hasPlaywrightOrTests ||
+    hasRuntimeEvidenceNeed ||
+    hasBuildSensitive;
+
+  return {
+    schema_version: CI_PLAN_SCHEMA_VERSION,
+    generated_at: new Date().toISOString(),
+    changed_files: normalizedFiles,
+    risk,
+    untrusted_pr: Boolean(options.untrustedPr),
+    checks: {
+      risk_floor: check(true, "Every PR gets deterministic risk-floor evidence."),
+      secret_scan: check(true, "Changed files are scanned before dependency install."),
+      workflow_security_review: check(
+        hasWorkflow,
+        hasWorkflow
+          ? "Changed workflow files need pull_request secret and permission review."
+          : "No changed workflow files."
+      ),
+      dependency_governance: check(
+        hasPackageGovernance,
+        hasPackageGovernance
+          ? "Package manager or dependency policy files changed."
+          : "No package governance files changed."
+      ),
+      install: check(
+        needsInstall,
+        needsInstall
+          ? "Node dependency install is needed for changed code checks."
+          : "Docs or metadata only; no dependency install needed."
+      ),
+      lint_changed: check(
+        hasLintable,
+        hasLintable
+          ? "Changed source files need eslint coverage."
+          : "No lintable source files changed."
+      ),
+      typecheck_changed: check(
+        hasSourceCode,
+        hasSourceCode
+          ? "Changed TypeScript/JavaScript files need focused typecheck coverage."
+          : "No source files changed."
+      ),
+      test_typecheck: check(
+        needsInstall,
+        needsInstall
+          ? "Installed PR CI runs Playwright/helper typecheck as the test typecheck baseline."
+          : "No installed test typecheck needed for docs-only changes."
+      ),
+      jest_changed: check(
+        hasPlaywrightOrTests || riskFloor >= 2,
+        hasPlaywrightOrTests || riskFloor >= 2
+          ? "Changed tests or standard-risk runtime code need focused Jest coverage."
+          : "Fast-lane change without focused Jest requirement."
+      ),
+      build: check(
+        riskFloor >= 3 || hasBuildSensitive,
+        riskFloor >= 3 || hasBuildSensitive
+          ? "Guarded or build-sensitive changes need a production build."
+          : "Build is deferred for fast or ordinary non-build-sensitive changes."
+      ),
+      playwright_smoke: check(
+        hasRuntimeEvidenceNeed,
+        hasRuntimeEvidenceNeed
+          ? "Standard-risk UI, route, or style changes need a small browser smoke pack."
+          : "No route, runtime UI, or style smoke needed."
+      ),
+    },
+    security: {
+      secrets_allowed: false,
+      token_permissions: "contents:read",
+      fork_pr_policy:
+        "No repository secrets, deployment credentials, staging credentials, or artifact-store writes are used by this pull_request workflow.",
+    },
+  };
+}
+
+function shouldScanTextFile(filePath) {
+  const normalized = normalizePath(filePath);
+  const extension = fileExtension(normalized);
+  return (
+    SECRET_SCAN_EXTENSIONS.has(extension) ||
+    normalized.startsWith(".env") ||
+    normalized.endsWith(".env")
+  );
+}
+
+function changedFileExists(filePath, cwd = process.cwd()) {
+  try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI checks changed files only.
+    return fs.statSync(`${cwd}/${filePath}`).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function lineNumberForIndex(text, index) {
+  return text.slice(0, index).split(/\r\n|\r|\n/).length;
+}
+
+function scanTextForSecrets(text, filePath) {
+  const findings = [];
+  for (const { name, pattern } of TEXT_SECRET_PATTERNS) {
+    const match = pattern.exec(text);
+    if (match?.index !== undefined) {
+      findings.push({
+        file: displayPath(filePath),
+        line: lineNumberForIndex(text, match.index),
+        pattern: name,
+      });
+    }
+  }
+  return findings;
+}
+
+function scanFilesForSecrets(files, cwd = process.cwd()) {
+  const findings = [];
+  const skipped = [];
+
+  for (const file of files.map(displayPath).filter(Boolean)) {
+    if (!changedFileExists(file, cwd)) {
+      continue;
+    }
+    if (!shouldScanTextFile(file)) {
+      skipped.push({ file, reason: "not-text-extension" });
+      continue;
+    }
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI checks changed files only.
+    const stat = fs.statSync(`${cwd}/${file}`);
+    if (stat.size > TEXT_SCAN_MAX_BYTES) {
+      skipped.push({ file, reason: "too-large" });
+      continue;
+    }
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI checks changed files only.
+    const text = fs.readFileSync(`${cwd}/${file}`, "utf8");
+    findings.push(...scanTextForSecrets(text, file));
+  }
+
+  return {
+    schema_version: SECRET_SCAN_SCHEMA_VERSION,
+    ok: findings.length === 0,
+    findings,
+    skipped,
+  };
+}
+
+function workflowSecurityFindingsForText(text, filePath) {
+  const findings = [];
+  const hasPullRequestTrigger =
+    /^\s*pull_request\s*:/m.test(text) ||
+    /^\s*-\s*pull_request\s*$/m.test(text);
+
+  if (/^\s*pull_request_target\s*:/m.test(text)) {
+    findings.push({
+      file: displayPath(filePath),
+      pattern: "pull_request_target",
+      reason:
+        "pull_request_target can expose privileged tokens to untrusted code and needs a separate security design.",
+    });
+  }
+
+  if (hasPullRequestTrigger && /\bsecrets\.[A-Za-z0-9_]+\b/.test(text)) {
+    findings.push({
+      file: displayPath(filePath),
+      pattern: "pull_request-secrets",
+      reason:
+        "pull_request workflows must not reference repository secrets or deployment credentials.",
+    });
+  }
+
+  if (hasPullRequestTrigger && /^\s*permissions\s*:\s*write-all\s*$/m.test(text)) {
+    findings.push({
+      file: displayPath(filePath),
+      pattern: "pull_request-write-all",
+      reason: "pull_request workflows must use least-privilege permissions.",
+    });
+  }
+
+  if (
+    hasPullRequestTrigger &&
+    /^\s*(?:actions|contents|deployments|id-token|issues|packages|pull-requests)\s*:\s*write\s*$/m.test(
+      text
+    )
+  ) {
+    findings.push({
+      file: displayPath(filePath),
+      pattern: "pull_request-write-permission",
+      reason:
+        "ordinary app PR CI must stay read-only; write permissions need a separate trusted workflow.",
+    });
+  }
+
+  return findings;
+}
+
+function validateWorkflowSecurityFiles(files, cwd = process.cwd()) {
+  const workflowFiles = files.map(displayPath).filter(isWorkflowFile);
+  const findings = [];
+
+  for (const file of workflowFiles) {
+    if (!changedFileExists(file, cwd)) {
+      continue;
+    }
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI checks changed workflow files only.
+    const text = fs.readFileSync(`${cwd}/${file}`, "utf8");
+    findings.push(...workflowSecurityFindingsForText(text, file));
+  }
+
+  return {
+    schema_version: WORKFLOW_SECURITY_SCHEMA_VERSION,
+    ok: findings.length === 0,
+    checked_files: workflowFiles,
+    findings,
   };
 }
 
@@ -744,6 +1096,22 @@ function writeStdout(message = "") {
   process.stdout.write(`${message}\n`);
 }
 
+function writeJsonResult(value, args) {
+  const text = JSON.stringify(value, null, 2);
+  if (args.output) {
+    const outputDir = path.dirname(args.output);
+    if (outputDir && outputDir !== ".") {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes caller-supplied output paths.
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes caller-supplied output paths.
+    fs.writeFileSync(args.output, `${text}\n`);
+  }
+  if (args.json || !args.output) {
+    writeStdout(text);
+  }
+}
+
 function canRunCommand(command) {
   const result = spawnSync(command, ["--version"], {
     encoding: "utf8",
@@ -769,7 +1137,7 @@ function resolveGitCommand() {
 function changedFilesFromGit(baseRef, cwd = process.cwd()) {
   const diffResult = spawnSync(
     resolveGitCommand(),
-    ["diff", "--name-only", "--diff-filter=ACMR", "-z", `${baseRef}...HEAD`],
+    ["diff", "--name-only", "--diff-filter=ACMRD", "-z", `${baseRef}...HEAD`],
     {
       cwd,
       encoding: "buffer",
@@ -783,7 +1151,7 @@ function changedFilesFromGit(baseRef, cwd = process.cwd()) {
 
   const workspaceResult = spawnSync(
     resolveGitCommand(),
-    ["diff", "--name-only", "--diff-filter=ACMR", "-z", "HEAD"],
+    ["diff", "--name-only", "--diff-filter=ACMRD", "-z", "HEAD"],
     {
       cwd,
       encoding: "buffer",
@@ -842,6 +1210,9 @@ function usage() {
   return `Usage:
   node ops/scripts/testing-strategy.cjs compute-risk-floor --changed-from origin/main [--json]
   node ops/scripts/testing-strategy.cjs compute-risk-floor --files app/page.tsx,components/Foo.tsx [--json]
+  node ops/scripts/testing-strategy.cjs ci-plan --changed-from origin/main --output ci-plan.json
+  node ops/scripts/testing-strategy.cjs scan-changed-secrets --changed-from origin/main --output secret-scan.json
+  node ops/scripts/testing-strategy.cjs validate-workflow-security --changed-from origin/main --output workflow-security.json
   node ops/scripts/testing-strategy.cjs validate-manifest --file <file>
   node ops/scripts/testing-strategy.cjs summarize-manifest --file <file>
   node ops/scripts/testing-strategy.cjs validate-mutation-registry --file <file>
@@ -850,8 +1221,8 @@ function usage() {
 
 function commandComputeRiskFloor(args) {
   const result = classifyChangedFiles(filesFromArgs(args));
-  if (args.json) {
-    writeStdout(JSON.stringify(result, null, 2));
+  if (args.json || args.output) {
+    writeJsonResult(result, args);
     return;
   }
 
@@ -861,6 +1232,42 @@ function commandComputeRiskFloor(args) {
   }
   for (const modifier of result.modifiers) {
     writeStdout(`- modifier ${modifier.name}: ${modifier.reason}`);
+  }
+}
+
+function commandCiPlan(args) {
+  const result = createCiPlan(filesFromArgs(args), {
+    untrustedPr:
+      args["untrusted-pr"] === true ||
+      args["untrusted-pr"] === "true" ||
+      args["untrusted-pr"] === "1",
+  });
+  writeJsonResult(result, args);
+}
+
+function commandScanChangedSecrets(args) {
+  const result = scanFilesForSecrets(filesFromArgs(args));
+  writeJsonResult(result, args);
+  if (!result.ok) {
+    for (const finding of result.findings) {
+      console.error(
+        `error: ${finding.file}:${finding.line}: possible secret (${finding.pattern})`
+      );
+    }
+    process.exitCode = 1;
+  }
+}
+
+function commandValidateWorkflowSecurity(args) {
+  const result = validateWorkflowSecurityFiles(filesFromArgs(args));
+  writeJsonResult(result, args);
+  if (!result.ok) {
+    for (const finding of result.findings) {
+      console.error(
+        `error: ${finding.file}: ${finding.pattern}: ${finding.reason}`
+      );
+    }
+    process.exitCode = 1;
   }
 }
 
@@ -885,10 +1292,13 @@ function commandValidateMutationRegistry(args) {
 }
 
 const COMMAND_HANDLERS = {
+  "ci-plan": commandCiPlan,
   "compute-risk-floor": commandComputeRiskFloor,
+  "scan-changed-secrets": commandScanChangedSecrets,
   "validate-manifest": commandValidateManifest,
   "summarize-manifest": commandSummarizeManifest,
   "validate-mutation-registry": commandValidateMutationRegistry,
+  "validate-workflow-security": commandValidateWorkflowSecurity,
 };
 
 async function main(argv = process.argv.slice(2)) {
@@ -914,15 +1324,21 @@ if (require.main === module) {
 }
 
 module.exports = {
+  CI_PLAN_SCHEMA_VERSION,
   EXISTING_REVIEWBOT_INITIAL_LANES,
   MUTATION_REGISTRY_SCHEMA_VERSION,
+  SECRET_SCAN_SCHEMA_VERSION,
   VALIDATION_MANIFEST_SCHEMA_VERSION,
+  WORKFLOW_SECURITY_SCHEMA_VERSION,
   classifyChangedFiles,
+  createCiPlan,
   inferRouteImpacts,
   normalizePath,
   parseArgs,
+  scanFilesForSecrets,
   summarizeValidationManifest,
   validateArtifactPointer,
   validateMutationRegistry,
   validateValidationManifest,
+  validateWorkflowSecurityFiles,
 };

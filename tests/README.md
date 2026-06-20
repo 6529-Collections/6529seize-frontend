@@ -32,3 +32,16 @@ Remote read-only defaults:
   gate uses safe GET requests plus a browser cookie.
 - Traces are disabled for staging and production by default because they can
   retain credentials or private page state.
+
+App PR CI:
+
+- `.github/workflows/app-pr-ci.yml` computes a risk-aware CI plan before
+  installing dependencies.
+- Pull-request CI is read-only and secret-free. It must not receive staging
+  credentials, deployment credentials, external-model API keys, or durable
+  artifact-store write credentials.
+- The workflow runs `test:e2e:smoke` only when the CI plan sees route, runtime
+  UI, style, or higher-risk changes that need browser evidence.
+- Uploaded PR CI artifacts are short-term debugging evidence. Durable
+  deployment-train evidence still belongs on approved 6529-controlled artifact
+  storage, not Git LFS.

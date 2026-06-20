@@ -15,7 +15,9 @@ wrapper expects that location.
 - `deployment-bus.cjs`: deployment bus manifest, validation, heartbeat,
   production-preflight, and GitHub Deployment status helper.
 - `testing-strategy.cjs`: frontend testing strategy risk-floor classifier,
-  validation manifest checker, and mutation endpoint registry checker.
+  app PR CI planner, changed-file secret scanner, pull-request workflow
+  security checker, validation manifest checker, and mutation endpoint registry
+  checker.
 - `run-docs-area-remediator-loop.sh`: iterative docs remediation loop.
 - `process-docs-commit-queue.sh`: docs update queue helper for commit-based
   remediation workflows.

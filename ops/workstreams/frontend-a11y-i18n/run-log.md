@@ -1075,7 +1075,7 @@
   back to the follower's primary address for profile routes and accessible
   labels. Validation passed for the focused followers/i18n Jest suites,
   targeted ESLint, `typecheck:changed`, `react-doctor:diff`, `git diff
-  --check`, and desktop/mobile browser smoke on `/punk6529`.
+--check`, and desktop/mobile browser smoke on `/punk6529`.
 - Confirmed PR #2641 is bot-happy on the latest head: DCO passed, Snyk passed,
   SonarCloud passed, CodeRabbit passed with no review threads, and Claude
   remained configured for manual review only. Per workstream policy, do not
@@ -1126,7 +1126,7 @@
 - Validation after the PR #2643 bot-feedback fixes passed for the focused
   header/i18n Jest suites (6 suites, 19 tests), targeted ESLint for touched
   source files, `typecheck:changed`, `react-doctor:diff`, and `git diff
-  --check`. React Doctor still reports only the unrelated dirty
+--check`. React Doctor still reports only the unrelated dirty
   `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
 - Confirmed PR #2643 is bot-happy on the latest head: DCO passed, Snyk passed,
   SonarCloud passed with 0 new issues, CodeRabbit manual review passed, no
@@ -1206,6 +1206,7 @@
 - Added `audit-inventory.md` with candidate hotspots for static copy,
   interaction semantics, locale formatting, image alt review, and i18n helper
   adoption to guide the next safe stack.
+
 # 2026-06-19 Autonomous Production Rollout
 
 ## 2026-06-19T21:49Z Mission Start
@@ -1750,6 +1751,58 @@
   - `seize run format:changed`
   - `codex-diff-check`
   - `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run
-    test:e2e:smoke`: 6 passed.
+test:e2e:smoke`: 6 passed.
   - `seize run test:e2e:staging` with access code loaded from local Credential
     Manager target `STAGING_AUTH`: 6 passed.
+
+## 2026-06-20T20:10Z PR 1 Production Complete And PR 2 Started
+
+- PR #2800 merged to `main` as
+  `57d1d052f2990152a0ab1f49390e4e4bdc6c78c0`.
+- Staging deploy succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27882292675
+  - staging merge SHA: `8c2686e618f0a5e76c6921f50e8dec31094d88f1`
+  - production candidate SHA:
+    `57d1d052f2990152a0ab1f49390e4e4bdc6c78c0`
+- Fresh deployed staging smoke with access code loaded from local Credential
+  Manager target `STAGING_AUTH`: 6 passed.
+- Production deploy succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27882601643
+  - deployed production SHA:
+    `57d1d052f2990152a0ab1f49390e4e4bdc6c78c0`
+- Fresh production smoke:
+  - `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run
+test:e2e:smoke`: 6 passed.
+- Started PR 2 branch `codex/testing-pr2-ci-baseline` from current
+  `origin/main`.
+- PR 2 scope: add a secret-free read-only App PR CI workflow, CI plan command,
+  changed-file secret scan, pull-request workflow security review, and tests.
+  This intentionally keeps WCAG/axe, mobile/native surface matrix, durable
+  artifact storage, and GLM swarm implementation in later PRs.
+- PR 2 local validation so far:
+  - `seize install:frozen`
+  - `seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts`:
+    29 passed.
+  - `seize run testing-strategy -- ci-plan --changed-from origin/main --output
+    test-results/app-pr-ci/ci-plan.json`: computed Level 4 for this PR because
+    it touches workflow and testing/release controls.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+    origin/main --output test-results/app-pr-ci/secret-scan.json`: no findings.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from
+    origin/main --output test-results/app-pr-ci/workflow-security.json`: no
+    findings.
+  - `seize run testing-strategy -- validate-manifest --file
+    ops/testing-strategy/examples/minimal.validation-manifest.json`
+  - `seize run testing-strategy -- validate-mutation-registry --file
+    ops/testing-strategy/mutation-endpoint-registry.json`
+  - `seize run lint:diff`
+  - `seize run typecheck:ci`
+  - `seize run typecheck:playwright`
+  - workflow YAML parse via local `yaml` package.
+  - `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run
+    test:e2e:smoke`: 6 passed.
+  - `codex-diff-check`
+- Local Windows `seize run build` and localhost smoke remain blocked by the
+  pre-existing Windows Sass resolution issue in `styles/seize-bootstrap.scss`.
+  The failure happens before any PR 2 app-runtime behavior and is expected to be
+  covered by the new Ubuntu App PR CI workflow after PR publication.
