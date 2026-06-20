@@ -2,15 +2,17 @@ import NativeRouteOverlay from "@/components/native-navigation/NativeRouteOverla
 import BrainPage from "@/app/[user]/brain/page";
 import CollectedPage from "@/app/[user]/collected/page";
 import CurationsPage from "@/app/[user]/curations/page";
+import FollowersPage from "@/app/[user]/followers/page";
+import GroupsPage from "@/app/[user]/groups/page";
+import IdentityPage from "@/app/[user]/identity/page";
 import ProfileCmsPage from "@/app/[user]/[...cmsPath]/page";
 import ProxyPage from "@/app/[user]/proxy/page";
 import SubscriptionsPage from "@/app/[user]/subscriptions/page";
 import UserPage from "@/app/[user]/page";
+import UserWavesPage from "@/app/[user]/waves/page";
 import XtdhPage from "@/app/[user]/xtdh/page";
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import { getUserProfile } from "@/helpers/server.helpers";
 import type { ReactNode } from "react";
-import { notFound, permanentRedirect, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 type OverlaySearchParams = Record<string, string | string[] | undefined>;
 type UserRouteParams = { readonly user: string };
@@ -55,55 +57,6 @@ const USER_SUBROUTE_RENDERERS: Record<string, UserSubrouteRenderer> = {
   xtdh: (props) => <XtdhPage {...props} />,
 };
 
-const buildQueryString = (
-  params: OverlaySearchParams | URLSearchParams | undefined
-): string => {
-  const query = new URLSearchParams();
-
-  if (!params) {
-    return "";
-  }
-
-  if (params instanceof URLSearchParams) {
-    for (const [key, value] of params.entries()) {
-      query.append(key, value);
-    }
-    return query.toString();
-  }
-
-  for (const [key, value] of Object.entries(params)) {
-    if (value === undefined) {
-      continue;
-    }
-
-    const values = Array.isArray(value) ? value : [value];
-    values.forEach((entry) => query.append(key, entry));
-  }
-
-  return query.toString();
-};
-
-const redirectWithSearchParams = ({
-  destination,
-  permanent = false,
-  searchParams,
-}: {
-  readonly destination: string;
-  readonly permanent?: boolean | undefined;
-  readonly searchParams: OverlaySearchParams | undefined;
-}) => {
-  const queryString = buildQueryString(searchParams);
-  const resolvedDestination = queryString
-    ? `${destination}?${queryString}`
-    : destination;
-
-  if (permanent) {
-    permanentRedirect(resolvedDestination);
-  }
-
-  redirect(resolvedDestination);
-};
-
 const redirectLegacyProfileSubroute = async ({
   cmsPath,
   searchParams,
@@ -115,40 +68,29 @@ const redirectLegacyProfileSubroute = async ({
 }) => {
   const firstSegment = cmsPath[0]?.toLowerCase();
 
+  // These canonical profile subroutes are redirect-only modules. Calling them
+  // here delegates to the same redirect logic without rendering them as pages.
   if (firstSegment === "identity") {
-    redirectWithSearchParams({
-      destination: `/${encodeURIComponent(user)}`,
-      permanent: true,
-      searchParams: await searchParams,
-    });
+    await IdentityPage(getUserPageProps({ user, searchParams }));
+    return true;
   }
 
-  if (firstSegment === "groups" || firstSegment === "followers") {
-    redirect(`/${encodeURIComponent(user)}`);
+  if (firstSegment === "groups") {
+    await GroupsPage({ params: Promise.resolve({ user }) });
+    return true;
+  }
+
+  if (firstSegment === "followers") {
+    await FollowersPage({ params: Promise.resolve({ user }) });
+    return true;
   }
 
   if (firstSegment === "waves") {
-    const resolvedSearchParams = await searchParams;
-    let destination = `/${encodeURIComponent(user)}`;
-
-    try {
-      const profile = await getUserProfile({
-        user: user.toLowerCase(),
-        headers: await getAppCommonHeaders(),
-      });
-      const canonicalUser = profile.handle ?? profile.primary_wallet ?? user;
-      destination = profile.profile_wave_id
-        ? `/${encodeURIComponent(canonicalUser)}/curations`
-        : `/${encodeURIComponent(canonicalUser)}`;
-    } catch {
-      destination = `/${encodeURIComponent(user)}`;
-    }
-
-    redirectWithSearchParams({
-      destination,
-      searchParams: resolvedSearchParams,
-    });
+    await UserWavesPage(getUserPageProps({ user, searchParams }));
+    return true;
   }
+
+  return false;
 };
 
 const renderInOverlay = (children: ReactNode) => (
@@ -180,11 +122,15 @@ export async function renderNativeProfileCatchAllOverlay({
   const cmsPath = resolvedParams.cmsPath ?? [];
   const firstSegment = cmsPath[0]?.toLowerCase();
 
-  await redirectLegacyProfileSubroute({
+  const handledLegacyRedirect = await redirectLegacyProfileSubroute({
     cmsPath,
     searchParams,
     user,
   });
+
+  if (handledLegacyRedirect) {
+    return renderInOverlay(null);
+  }
 
   const subrouteRenderer = firstSegment
     ? USER_SUBROUTE_RENDERERS[firstSegment]

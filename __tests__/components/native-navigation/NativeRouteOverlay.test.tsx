@@ -91,6 +91,17 @@ describe("NativeRouteOverlay", () => {
   it("offers a keyboard-accessible close action", async () => {
     renderAppOverlay();
 
+    const overlay = await screen.findByTestId("native-route-overlay");
+    expect(document.activeElement).toBe(overlay);
+
+    fireEvent.keyDown(overlay, { key: "Escape" });
+
+    expect(back).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers a hidden close button", async () => {
+    renderAppOverlay();
+
     fireEvent.click(
       await screen.findByRole("button", { name: "Close profile overlay" })
     );

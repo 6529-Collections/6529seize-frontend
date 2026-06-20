@@ -61,6 +61,7 @@ export default function NativeRouteOverlay({
   const [hasMounted, setHasMounted] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const overlayRef = useRef<HTMLDialogElement | null>(null);
   const gestureRef = useRef<GestureState | null>(null);
 
   useEffect(() => {
@@ -79,6 +80,14 @@ export default function NativeRouteOverlay({
     return () => {
       globalThis.cancelAnimationFrame(frameId);
     };
+  }, [hasMounted, isApp]);
+
+  useEffect(() => {
+    if (!hasMounted || !isApp) {
+      return;
+    }
+
+    overlayRef.current?.focus({ preventScroll: true });
   }, [hasMounted, isApp]);
 
   const resetGesture = useCallback(() => {
@@ -258,6 +267,7 @@ export default function NativeRouteOverlay({
       onTouchMove={handleTouchMove}
       onTouchStart={handleTouchStart}
       open
+      ref={overlayRef}
       tabIndex={-1}
     >
       <button className="tw-sr-only" onClick={closeOverlay} type="button">
