@@ -1378,25 +1378,41 @@
       "id": "shared.route-errors",
       "kind": "workflow",
       "title": "Route errors and not-found screens",
-      "aliases": [
-        "404",
-        "not found",
-        "route error",
-        "page error",
-        "restricted page"
-      ],
-      "keywords": ["error", "not", "found", "route", "restricted", "404"],
+      "aliases": ["404", "not found", "route error", "page error"],
+      "keywords": ["error", "not", "found", "route", "404"],
       "facts": [
         "The app has shared route error and not-found screens.",
-        "Restricted access and missing routes are handled separately from ordinary loading states.",
-        "Use this when users ask what to do when a page shows not found, restricted, or an app error."
+        "Missing routes and app errors are handled separately from ordinary loading states.",
+        "Use this when users ask what to do when a page shows not found or an app error."
       ],
-      "canonical_path": "/restricted",
+      "canonical_path": "/error",
       "related_paths": ["/"],
       "tags": ["shared", "errors"],
+      "source_refs": ["ops/docs/shared/feature-route-error-and-not-found.md"]
+    },
+    {
+      "id": "shared.restricted-access",
+      "kind": "workflow",
+      "title": "Restricted access screens",
+      "aliases": [
+        "restricted page",
+        "restricted access",
+        "access denied",
+        "permission denied"
+      ],
+      "keywords": ["restricted", "access", "permission", "denied"],
+      "facts": [
+        "Restricted access is shown when a route exists but the current user or wallet cannot access it.",
+        "The restricted page is separate from missing-route and generic app-error screens.",
+        "Use this when users ask why a 6529 page says access is restricted."
+      ],
+      "canonical_path": "/restricted",
+      "related_paths": ["/access"],
+      "tags": ["shared", "errors", "access"],
       "source_refs": [
         "ops/docs/shared/feature-route-error-and-not-found.md",
-        "app/restricted/page.tsx"
+        "app/restricted/page.tsx",
+        "app/access/page.tsx"
       ]
     },
     {
