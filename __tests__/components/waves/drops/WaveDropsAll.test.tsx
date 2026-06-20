@@ -785,10 +785,11 @@ describe("WaveDropsAll", () => {
 
       act(() => {
         const currentWaveMessages = getWaveMessages();
-        setWaveMessages({
-          ...(currentWaveMessages ?? {}),
-          drops: [newDrop, initialDrop],
-        });
+        setWaveMessages(
+          currentWaveMessages
+            ? { ...currentWaveMessages, drops: [newDrop, initialDrop] }
+            : { drops: [newDrop, initialDrop] }
+        );
         renderResult.rerender(
           <WaveDropsAll {...props} initialDrop={newDrop.serial_no} />
         );
