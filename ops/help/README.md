@@ -1,7 +1,7 @@
 # 6529 Help Bot Corpus
 
 `ops/help/help-index.json` is the frontend-owned source of truth for the
-`@6529help` runtime knowledge corpus. The backend bot runtime consumes the
+`@help6529` runtime knowledge corpus. The backend bot runtime consumes the
 published copy at `/help-index.json`; it should not hardcode frontend product
 knowledge.
 
@@ -9,7 +9,7 @@ The published `/help-index.json` artifact must stay publicly readable, including
 on staging, so the backend help bot can fetch the environment-matching corpus.
 
 When user-facing frontend behavior changes, update this corpus in the same PR if
-users may reasonably ask `@6529help` about it. This includes routes, visible
+users may reasonably ask `@help6529` about it. This includes routes, visible
 controls, tabs, workflow steps, empty states, eligibility explanations, and
 canonical links.
 

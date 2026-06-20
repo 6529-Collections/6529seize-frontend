@@ -1249,7 +1249,7 @@
       "keywords": ["6529bot", "api", "tool", "admin", "usage", "open", "data"],
       "facts": [
         "The API tool docs include 6529bot admin and usage documentation.",
-        "This is separate from the `@6529help` helper chatbot being implemented for Waves.",
+        "This is separate from the `@help6529` helper chatbot being implemented for Waves.",
         "Use this record when users ask about existing 6529bot API-tool documentation rather than the helper bot."
       ],
       "canonical_path": "/open-data/6529bot",
@@ -1965,7 +1965,7 @@
       "facts": [
         "Wave mentions are typed in the composer and documented as a composer feature.",
         "Mention behavior depends on profile lookup and composer state.",
-        "The @6529help helper bot trigger also uses mention detection, but the bot runtime is implemented in the backend."
+        "The @help6529 helper bot trigger also uses mention detection, but the bot runtime is implemented in the backend."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
