@@ -2,16 +2,15 @@ import NativeRouteOverlay from "@/components/native-navigation/NativeRouteOverla
 import BrainPage from "@/app/[user]/brain/page";
 import CollectedPage from "@/app/[user]/collected/page";
 import CurationsPage from "@/app/[user]/curations/page";
-import FollowersPage from "@/app/[user]/followers/page";
-import GroupsPage from "@/app/[user]/groups/page";
-import IdentityPage from "@/app/[user]/identity/page";
 import ProfileCmsPage from "@/app/[user]/[...cmsPath]/page";
 import ProxyPage from "@/app/[user]/proxy/page";
 import SubscriptionsPage from "@/app/[user]/subscriptions/page";
 import UserPage from "@/app/[user]/page";
-import UserWavesPage from "@/app/[user]/waves/page";
 import XtdhPage from "@/app/[user]/xtdh/page";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { getUserProfile } from "@/helpers/server.helpers";
 import type { ReactNode } from "react";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 
 type OverlaySearchParams = Record<string, string | string[] | undefined>;
 type UserRouteParams = { readonly user: string };
@@ -34,9 +33,7 @@ type ProfileCatchAllPageProps = {
   readonly searchParams: Promise<OverlaySearchParams>;
 };
 
-type UserSubrouteRenderer = (
-  props: UserPageProps
-) => Promise<ReactNode | void> | ReactNode | void;
+type UserSubrouteRenderer = (props: UserPageProps) => ReactNode;
 
 const getUserPageProps = ({
   user,
@@ -50,16 +47,108 @@ const getUserPageProps = ({
 });
 
 const USER_SUBROUTE_RENDERERS: Record<string, UserSubrouteRenderer> = {
-  brain: (props) => BrainPage(props),
-  collected: (props) => CollectedPage(props),
-  curations: (props) => CurationsPage(props),
-  followers: (props) => FollowersPage({ params: props.params }),
-  groups: (props) => GroupsPage({ params: props.params }),
-  identity: (props) => IdentityPage(props),
-  proxy: (props) => ProxyPage(props),
-  subscriptions: (props) => SubscriptionsPage(props),
-  waves: (props) => UserWavesPage(props),
-  xtdh: (props) => XtdhPage(props),
+  brain: (props) => <BrainPage {...props} />,
+  collected: (props) => <CollectedPage {...props} />,
+  curations: (props) => <CurationsPage {...props} />,
+  proxy: (props) => <ProxyPage {...props} />,
+  subscriptions: (props) => <SubscriptionsPage {...props} />,
+  xtdh: (props) => <XtdhPage {...props} />,
+};
+
+const buildQueryString = (
+  params: OverlaySearchParams | URLSearchParams | undefined
+): string => {
+  const query = new URLSearchParams();
+
+  if (!params) {
+    return "";
+  }
+
+  if (params instanceof URLSearchParams) {
+    for (const [key, value] of params.entries()) {
+      query.append(key, value);
+    }
+    return query.toString();
+  }
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) {
+      continue;
+    }
+
+    const values = Array.isArray(value) ? value : [value];
+    values.forEach((entry) => query.append(key, entry));
+  }
+
+  return query.toString();
+};
+
+const redirectWithSearchParams = ({
+  destination,
+  permanent = false,
+  searchParams,
+}: {
+  readonly destination: string;
+  readonly permanent?: boolean | undefined;
+  readonly searchParams: OverlaySearchParams | undefined;
+}) => {
+  const queryString = buildQueryString(searchParams);
+  const resolvedDestination = queryString
+    ? `${destination}?${queryString}`
+    : destination;
+
+  if (permanent) {
+    permanentRedirect(resolvedDestination);
+  }
+
+  redirect(resolvedDestination);
+};
+
+const redirectLegacyProfileSubroute = async ({
+  cmsPath,
+  searchParams,
+  user,
+}: {
+  readonly cmsPath: readonly string[];
+  readonly searchParams: Promise<OverlaySearchParams>;
+  readonly user: string;
+}) => {
+  const firstSegment = cmsPath[0]?.toLowerCase();
+
+  if (firstSegment === "identity") {
+    redirectWithSearchParams({
+      destination: `/${encodeURIComponent(user)}`,
+      permanent: true,
+      searchParams: await searchParams,
+    });
+  }
+
+  if (firstSegment === "groups" || firstSegment === "followers") {
+    redirect(`/${encodeURIComponent(user)}`);
+  }
+
+  if (firstSegment === "waves") {
+    const resolvedSearchParams = await searchParams;
+    let destination = `/${encodeURIComponent(user)}`;
+
+    try {
+      const profile = await getUserProfile({
+        user: user.toLowerCase(),
+        headers: await getAppCommonHeaders(),
+      });
+      const canonicalUser = profile.handle ?? profile.primary_wallet ?? user;
+      destination = profile.profile_wave_id
+        ? `/${encodeURIComponent(canonicalUser)}/curations`
+        : `/${encodeURIComponent(canonicalUser)}`;
+    } catch {
+      destination = `/${encodeURIComponent(user)}`;
+    }
+
+    redirectWithSearchParams({
+      destination,
+      searchParams: resolvedSearchParams,
+    });
+  }
 };
 
 const renderInOverlay = (children: ReactNode) => (
@@ -71,10 +160,14 @@ export async function renderNativeProfileRootOverlay({
   searchParams,
 }: ProfileRootOverlayProps) {
   const resolvedParams = params ? await params : undefined;
-  const user = resolvedParams?.user ?? "";
+  const user = resolvedParams?.user;
+
+  if (!user) {
+    notFound();
+  }
 
   return renderInOverlay(
-    await UserPage(getUserPageProps({ user, searchParams }))
+    <UserPage {...getUserPageProps({ user, searchParams })} />
   );
 }
 
@@ -86,21 +179,27 @@ export async function renderNativeProfileCatchAllOverlay({
   const user = resolvedParams.user;
   const cmsPath = resolvedParams.cmsPath ?? [];
   const firstSegment = cmsPath[0]?.toLowerCase();
+
+  await redirectLegacyProfileSubroute({
+    cmsPath,
+    searchParams,
+    user,
+  });
+
   const subrouteRenderer = firstSegment
     ? USER_SUBROUTE_RENDERERS[firstSegment]
     : undefined;
 
   if (subrouteRenderer) {
-    const content = await subrouteRenderer(
-      getUserPageProps({ user, searchParams })
+    return renderInOverlay(
+      subrouteRenderer(getUserPageProps({ user, searchParams }))
     );
-    return renderInOverlay(content ?? null);
   }
 
   return renderInOverlay(
-    await ProfileCmsPage({
-      params: Promise.resolve({ user, cmsPath }),
-      searchParams,
-    })
+    <ProfileCmsPage
+      params={Promise.resolve({ user, cmsPath })}
+      searchParams={searchParams}
+    />
   );
 }

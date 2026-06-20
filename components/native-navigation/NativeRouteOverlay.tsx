@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
   type TouchEvent,
@@ -71,7 +72,13 @@ export default function NativeRouteOverlay({
       return;
     }
 
-    window.location.replace(getCanonicalCurrentPath());
+    const frameId = window.requestAnimationFrame(() => {
+      window.location.replace(getCanonicalCurrentPath());
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
   }, [hasMounted, isApp]);
 
   const resetGesture = useCallback(() => {
@@ -168,6 +175,22 @@ export default function NativeRouteOverlay({
     [getInwardDrag, resetGesture, router]
   );
 
+  const closeOverlay = useCallback(() => {
+    router.back();
+  }, [router]);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      event.preventDefault();
+      closeOverlay();
+    },
+    [closeOverlay]
+  );
+
   const handleClickCapture = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
       if (
@@ -226,12 +249,17 @@ export default function NativeRouteOverlay({
       data-native-route-overlay={pathname}
       data-testid="native-route-overlay"
       onClickCapture={handleClickCapture}
+      onKeyDown={handleKeyDown}
       onTouchCancel={resetGesture}
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
       onTouchStart={handleTouchStart}
       role="dialog"
+      tabIndex={-1}
     >
+      <button className="tw-sr-only" onClick={closeOverlay} type="button">
+        Close profile overlay
+      </button>
       <div
         className="tw-h-[100dvh] tw-overflow-y-auto tw-overscroll-contain tw-bg-black tw-text-iron-50"
         style={contentStyle}

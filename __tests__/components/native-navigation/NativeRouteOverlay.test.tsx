@@ -88,6 +88,16 @@ describe("NativeRouteOverlay", () => {
     expect(back).toHaveBeenCalledTimes(1);
   });
 
+  it("offers a keyboard-accessible close action", async () => {
+    renderAppOverlay();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Close profile overlay" })
+    );
+
+    expect(back).toHaveBeenCalledTimes(1);
+  });
+
   it("replaces same-origin overlay links to keep the overlay stack shallow", async () => {
     renderAppOverlay();
 
