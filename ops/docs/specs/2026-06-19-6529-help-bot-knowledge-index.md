@@ -92,6 +92,12 @@ the generated `public/help-index.json` stays in sync. Do not rely on the
 backend, LLM, GitHub lookup, or source-code inspection to discover new frontend
 routes or controls at answer time.
 
+Do not add migrated legacy WordPress pages to the help index. These pages are
+dated content snapshots and should not be used as bot knowledge or returned as
+canonical answer links. The sync step rejects records whose canonical or related
+paths resolve to WordPress-migrated route files, and rejects `source_refs` that
+point at those files.
+
 ## Proposed Help Sources
 
 ### 1. Curated Glossary Records

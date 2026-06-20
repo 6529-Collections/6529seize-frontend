@@ -25,6 +25,9 @@ Each record should be short, factual, and linkable:
 - `related_paths` should include only useful fallback or adjacent destinations.
 - `source_refs` should point to the frontend docs, components, or route files
   that justify the record.
+- Do not index migrated legacy WordPress pages. The sync script rejects records
+  whose canonical or related paths resolve to WordPress-migrated `page.tsx`
+  files, or whose `source_refs` point at those files.
 
 Run this after editing:
 
