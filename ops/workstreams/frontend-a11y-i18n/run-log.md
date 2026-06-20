@@ -1606,3 +1606,51 @@
   - `seize run test:e2e:staging` with the access code loaded from local
     Credential Manager target `STAGING_AUTH`: 6 passed.
   - `codex-diff-check`
+
+## 2026-06-20T17:55Z PR 1 Local Harness Expansion Implemented
+
+- Created a clean worktree on branch `codex/testing-pr1-harness` from current
+  `origin/main`.
+- Preserved `.github/6529bot.yml` unchanged; existing `general`, `wcag`,
+  `i18n`, `security`, and `responsiveness` reviewbot lanes remain the minimum
+  case for every PR.
+- Added Playwright harness helpers for:
+  - route readiness and horizontal-overflow assertions;
+  - page-error diagnostics with redacted text attachments;
+  - safe screenshot capture helper for future route packs;
+  - read-only mutation blocking for staging/production targets;
+  - explicit small/medium/large test-size tags.
+- Added `tsconfig.playwright.json` and package scripts:
+  - `typecheck:playwright`
+  - `test:e2e:smoke`
+- Updated `playwright.config.ts` so local runs respect `BASE_ENDPOINT`/`PORT`,
+  remote staging/prod targets disable trace retention, web-server timeout is
+  configurable, and browser artifacts land under `test-results/playwright`.
+- Expanded the mutation endpoint registry with first-party `/api/**` and
+  `https://api.6529.io/**` mutation protections.
+- Updated the seed smoke specs for home, about pages, and The Memes to use the
+  shared route-ready/no-overflow helpers and current `origin/main` assertions.
+- Added Jest coverage for artifact redaction and read-only mutation guard
+  decisions.
+- Added `tests/README.md` with local Playwright conventions, remote trace
+  safety, read-only mode, and test-size tag guidance.
+- Local validation:
+  - `seize run typecheck:playwright`
+  - `seize run test:no-coverage -- __tests__/playwright/artifactRedaction.test.ts __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run testing-strategy -- validate-mutation-registry --file ops/testing-strategy/mutation-endpoint-registry.json`
+  - `seize run format:changed`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run lint:package-json`
+  - `codex-diff-check`
+  - local browser smoke with `USE_TURBO=false`,
+    `PLAYWRIGHT_WEB_SERVER_TIMEOUT_MS=300000`,
+    `API_ENDPOINT=https://api.6529.io`, and
+    `WS_ENDPOINT=wss://ws.6529.io`:
+    `seize run test:e2e:smoke` passed 6/6.
+- Validation caveat: `seize run quality:changed` still fails inside its
+  internal Windows `bin/6529.cmd` wrapper/format path before reaching the full
+  quality flow. The equivalent component checks above were run with the local
+  `seize` wrapper. A direct `seize exec knip --reporter json` also reports
+  broad pre-existing repo dead-code noise plus future-facing helper exports, so
+  PR1 does not claim a clean repo-wide knip baseline.
