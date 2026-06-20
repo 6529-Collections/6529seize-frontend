@@ -1270,7 +1270,7 @@
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
       ],
-      "canonical_path": "/",
+      "canonical_path": "/waves",
       "related_paths": ["/waves", "/network"],
       "tags": ["navigation", "header"],
       "source_refs": ["ops/docs/navigation/feature-app-header-context.md"]
@@ -1291,7 +1291,7 @@
         "The mobile navigation surface is separate from the desktop sidebar.",
         "Mobile keyboard and viewport behavior can affect how navigation and composer controls fit on screen."
       ],
-      "canonical_path": "/open-mobile",
+      "canonical_path": "/waves",
       "related_paths": ["/waves", "/notifications"],
       "tags": ["navigation", "mobile"],
       "source_refs": [
@@ -1315,7 +1315,7 @@
         "It is intended for supported mobile surfaces and does not replace explicit page reload controls.",
         "Use it when users ask how to refresh content on mobile."
       ],
-      "canonical_path": "/open-mobile",
+      "canonical_path": "/waves",
       "related_paths": ["/waves", "/notifications"],
       "tags": ["navigation", "mobile", "refresh"],
       "source_refs": ["ops/docs/navigation/feature-mobile-pull-to-refresh.md"]
@@ -1350,7 +1350,7 @@
         "Wave-specific link sharing also exists in the wave header.",
         "Use the share modal when users ask how to copy a route or send someone a page."
       ],
-      "canonical_path": "/",
+      "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["navigation", "share"],
       "source_refs": [
@@ -1369,7 +1369,7 @@
         "It depends on route history and app shell context.",
         "Use it when users ask why a back control returns to a prior app surface."
       ],
-      "canonical_path": "/",
+      "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["navigation", "back"],
       "source_refs": ["ops/docs/navigation/feature-back-button.md"]
@@ -1423,7 +1423,7 @@
         "Many routes distinguish loading, empty, failed, and retryable states.",
         "Use route-specific records for exact recovery steps when available."
       ],
-      "canonical_path": "/",
+      "canonical_path": "/waves",
       "related_paths": ["/waves", "/open-data"],
       "tags": ["shared", "status"],
       "source_refs": ["ops/docs/shared/feature-loading-status-indicators.md"]
