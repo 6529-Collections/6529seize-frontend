@@ -1688,3 +1688,34 @@
     Manager target `STAGING_AUTH`: 6 passed.
 - Production promotion remains held until this follow-up PR is reviewed,
   merged, redeployed to staging, and validated.
+
+## 2026-06-20T18:45Z PR 1 Staging Access Retry Follow-Up
+
+- After PR #2798 merged and redeployed to staging, the first deployed smoke run
+  still found one access-gate flake: a later `page.goto(...)` could land back
+  on the access page after the initial fixture unlock.
+- Implemented follow-up branch `codex/testing-staging-access-goto-fix` from
+  current `origin/main`.
+- The staging page fixture now wraps `page.goto` only for staging targets; when
+  a navigation lands on the access gate, it submits the local staging access
+  code, accepts the success dialog, and retries the original navigation once.
+- Local/staging validation:
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run test:e2e:staging` with access code loaded from local Credential
+    Manager target `STAGING_AUTH`: 6 passed.
+- CodeRabbit review found a valid credential-safety edge: once the staging
+  helper wrapped `page.goto`, a deliberate navigation to a non-staging
+  `/access` URL could still trigger access-code submission. Hardened the helper
+  so it submits or retries only when the current page host is
+  `staging.6529.io`.
+- Follow-up validation after the CodeRabbit fix:
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run format:changed`
+  - `codex-diff-check`
+  - `seize run test:e2e:staging` with access code loaded from local Credential
+    Manager target `STAGING_AUTH`: 6 passed.
+- Production promotion remains held until this tiny follow-up PR is reviewed,
+  merged, redeployed to staging, and validated.
