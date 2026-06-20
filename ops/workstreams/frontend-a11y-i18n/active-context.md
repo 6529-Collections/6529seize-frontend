@@ -30,9 +30,11 @@ Read this section first after compaction or handoff.
       https://6529.io/waves/05b14183-e153-4e47-bc66-42a0f49102d4?drop=b3df3435-2bae-4a7f-b9c2-5d93feb7b524
     - Follow The Repo deployment note:
       https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4?drop=f8edf3f7-4255-4889-8a24-0a8a2e8cc469
-  - `seize run test:e2e:staging` is still blocked by the existing harness
-    problem `Cannot find module '../testHelpers'`; direct authenticated browser
-    smoke against staging passed instead.
+  - PR #2792 added the executable testing strategy foundation and was deployed
+    to production on 2026-06-20.
+  - Follow-up branch `codex/fix-staging-playwright-smoke` restores
+    `tests/testHelpers.ts` and makes `seize run test:e2e:staging` run real
+    browser smoke when `PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH` is set.
 - 2026-06-20 user direction: update the plan for the actual frontend WCAG/i18n
   mega run now that reviewbot is live. Reviewbot is an additional reviewer and
   regression detector only; it does not replace extensive local validation.
@@ -228,13 +230,12 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Publish and iterate the strategy foundation PR 0 from
-   `codex/testing-strategy-foundation`. Current PR 0 contents include
-   `ops/scripts/testing-strategy.cjs`, validation manifest schemas/examples,
-   mutation endpoint registry contract, package wrapper, and focused Jest
-   coverage. Preserve the existing `.github/6529bot.yml` lanes unchanged.
-2. Implement PR 1: repair `tests/testHelpers.ts`, local/staging Playwright
-   smoke, and `@small`/`@medium`/`@large` test sizing.
+1. Finish and deploy the staging Playwright smoke repair from
+   `codex/fix-staging-playwright-smoke`. Preserve the existing
+   `.github/6529bot.yml` lanes unchanged.
+2. Continue the broader PR 1 test-harness work after smoke is green:
+   local smoke, shared route-ready helpers, mutation guards, artifact redaction,
+   test sizing, and test typecheck coverage.
 3. Reconcile the existing PR stack from current `origin/main` before opening
    broad new implementation PRs.
 4. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR

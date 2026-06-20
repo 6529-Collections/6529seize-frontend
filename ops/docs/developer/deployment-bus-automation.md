@@ -155,6 +155,16 @@ The command sets:
 - `PLAYWRIGHT_BASE_URL=https://staging.6529.io`
 - `PLAYWRIGHT_SKIP_WEB_SERVER=1`
 
+When the staging access gate is enabled, provide the access code through
+`PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH`. Local Codex operators can
+load that value from the Windows Credential Manager target `STAGING_AUTH`, but
+must not print or persist it.
+
+The Playwright config disables traces when `PLAYWRIGHT_BASE_URL` is
+`https://staging.6529.io` so the access-code entry is not retained in retry
+artifacts. Do not re-enable traces for staging smoke runs unless the unlock flow
+has a separate redaction path.
+
 Keep deployed-environment tests production-safe: no public posts, purchases,
 wallet transfers, signer changes, destructive writes, or irreversible live
 actions.

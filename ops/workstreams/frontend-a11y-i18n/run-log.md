@@ -1569,3 +1569,40 @@
   - `seize run lint:changed`
   - `seize run typecheck:changed`
   - `codex-diff-check`
+
+## 2026-06-20T12:35Z PR 1 Staging Playwright Smoke Repair Started
+
+- Created clean branch `codex/fix-staging-playwright-smoke` from current
+  `origin/main`.
+- Added `tests/testHelpers.ts` so existing Playwright smoke specs can import
+  shared `test` and `expect` again.
+- The helper unlocks `staging.6529.io` only when the Playwright base URL is
+  staging and `PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH` is available.
+  It does not print or persist the access code.
+- Refreshed stale title/section assertions in the deployed staging smoke specs
+  for home, `/about/the-memes`, `/about/6529-gradient`, `/about/subscriptions`,
+  and `/the-memes`.
+- Local validation:
+  - `seize run test:e2e:staging` with the access code loaded from local
+    Credential Manager target `STAGING_AUTH`: 6 passed.
+
+## 2026-06-20T12:55Z PR 1 Review Feedback Integrated
+
+- Preserved `.github/6529bot.yml` unchanged; existing initial lanes remain
+  `general`, `wcag`, `i18n`, `security`, and `responsiveness`.
+- Fixed SonarCloud findings by renaming the Playwright fixture callback
+  parameter and re-exporting `expect` directly.
+- Addressed independent subagent security feedback by disabling Playwright
+  traces whenever `PLAYWRIGHT_BASE_URL` targets `staging.6529.io`, preventing
+  the staging access code from being retained in retry trace artifacts.
+- Removed the brittle home smoke assertion that expected a live `/the-memes/`
+  latest-drop link even when staging has no active mint card. The home smoke now
+  asserts stable landing content and active wave links.
+- Local validation after the feedback patch:
+  - `seize exec eslint playwright.config.ts tests/testHelpers.ts tests/home/home.spec.ts tests/pages/about.spec.ts tests/pages/the-memes.spec.ts --no-warn-ignored --max-warnings=0`
+  - `seize run typecheck:changed`
+  - `seize run lint:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json` returned Level 2 because `playwright.config.ts` is touched.
+  - `seize run test:e2e:staging` with the access code loaded from local
+    Credential Manager target `STAGING_AUTH`: 6 passed.
+  - `codex-diff-check`
