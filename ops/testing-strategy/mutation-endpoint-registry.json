@@ -2,6 +2,25 @@
   "schema_version": "frontend-testing.mutation-endpoint-registry.v1",
   "owner": "frontend-release-captain",
   "updated_at": "2026-06-20T00:00:00.000Z",
-  "description": "Versioned registry contract for endpoints that must be blocked by read-only staging and production Playwright mutation guards. PR1 should populate concrete endpoint patterns from the repaired E2E harness.",
-  "endpoints": []
+  "description": "Versioned registry contract for endpoints that must be blocked by read-only staging and production Playwright mutation guards.",
+  "endpoints": [
+    {
+      "id": "production-backend-api-mutations",
+      "pattern": "https://api.6529.io/**",
+      "methods": ["POST", "PUT", "PATCH", "DELETE"],
+      "surface": "backend-api",
+      "risk_level": 3,
+      "mutation": true,
+      "allowed_in_readonly_tests": false
+    },
+    {
+      "id": "first-party-api-mutations",
+      "pattern": "/api/**",
+      "methods": ["POST", "PUT", "PATCH", "DELETE"],
+      "surface": "next-route-handlers",
+      "risk_level": 3,
+      "mutation": true,
+      "allowed_in_readonly_tests": false
+    }
+  ]
 }
