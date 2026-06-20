@@ -62,13 +62,15 @@ type NativeProfileNavigationContextValue = {
 const NativeProfileNavigationContext =
   createContext<NativeProfileNavigationContextValue | null>(null);
 
+let nextProfileEntryId = 0;
+
 const makeProfileEntry = ({
   href,
   user,
 }: NativeProfileTarget): NativeProfileStackEntry => ({
   href,
   user,
-  id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
+  id: `${Date.now().toString(36)}-${(nextProfileEntryId += 1).toString(36)}`,
 });
 
 const getCurrentHistoryValue = (): NativeProfileHistoryValue | null => {
