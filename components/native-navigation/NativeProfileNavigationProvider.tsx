@@ -72,7 +72,7 @@ const makeProfileEntry = ({
 });
 
 const getCurrentHistoryValue = (): NativeProfileHistoryValue | null => {
-  if (typeof globalThis.window === "undefined") {
+  if (globalThis.window === undefined) {
     return null;
   }
 
@@ -124,7 +124,7 @@ export default function NativeProfileNavigationProvider({
 
   const openProfile = useCallback(
     (target: NativeProfileTarget) => {
-      if (!isApp || typeof globalThis.window === "undefined") {
+      if (!isApp || globalThis.window === undefined) {
         return;
       }
 
@@ -157,7 +157,7 @@ export default function NativeProfileNavigationProvider({
   );
 
   const closeTopProfile = useCallback(() => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined) {
       setHistoryValue(null);
       return;
     }
@@ -176,7 +176,7 @@ export default function NativeProfileNavigationProvider({
   }, []);
 
   useEffect(() => {
-    if (!isApp || typeof globalThis.window === "undefined") {
+    if (!isApp || globalThis.window === undefined) {
       return;
     }
 

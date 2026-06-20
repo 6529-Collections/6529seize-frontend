@@ -197,8 +197,7 @@ export const getNativeProfileTarget = ({
     return null;
   }
 
-  const segments = url.pathname.split("/").filter(Boolean);
-  const [rawUser] = segments;
+  const rawUser = url.pathname.split("/").find(Boolean);
   if (!rawUser) {
     return null;
   }
