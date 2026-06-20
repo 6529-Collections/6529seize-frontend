@@ -5,6 +5,14 @@ dotenv.config(); // Loads variables from .env
 dotenv.config({ path: ".env.test" }); // Overrides or adds variables from .env
 
 const baseURL = process.env["PLAYWRIGHT_BASE_URL"] || "http://localhost:3001";
+const stagingHostname = "staging.6529.io";
+const isStagingBaseURL = (() => {
+  try {
+    return new URL(baseURL).hostname === stagingHostname;
+  } catch {
+    return false;
+  }
+})();
 const skipWebServer =
   process.env["PLAYWRIGHT_SKIP_WEB_SERVER"] === "1" ||
   process.env["PLAYWRIGHT_SKIP_WEB_SERVER"] === "true";
@@ -21,7 +29,7 @@ const config = defineConfig({
   reporter: "html",
   use: {
     baseURL,
-    trace: "on-first-retry",
+    trace: isStagingBaseURL ? "off" : "on-first-retry",
   },
   projects: [
     {
