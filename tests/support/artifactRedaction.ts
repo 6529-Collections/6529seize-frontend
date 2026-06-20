@@ -117,9 +117,30 @@ function isCookieHeaderLine(line: string) {
   return line.indexOf("=", start + headerPrefix.length) >= 0;
 }
 
+function splitArtifactLines(text: string) {
+  const lines: string[] = [];
+  let start = 0;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char !== "\r" && char !== "\n") {
+      continue;
+    }
+
+    lines.push(text.slice(start, index));
+
+    if (char === "\r" && text[index + 1] === "\n") {
+      index += 1;
+    }
+    start = index + 1;
+  }
+
+  lines.push(text.slice(start));
+  return lines;
+}
+
 function redactCookieHeaders(text: string) {
-  return text
-    .split("\n")
+  return splitArtifactLines(text)
     .map((line) => {
       if (!isCookieHeaderLine(line)) {
         return line;
@@ -132,7 +153,7 @@ function redactCookieHeaders(text: string) {
 }
 
 function findCookieHeaderSecret(text: string) {
-  return text.split("\n").find((line) => isCookieHeaderLine(line));
+  return splitArtifactLines(text).find((line) => isCookieHeaderLine(line));
 }
 
 export function redactTextArtifact(text: string) {

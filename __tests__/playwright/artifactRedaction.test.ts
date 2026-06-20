@@ -41,6 +41,23 @@ describe("Playwright artifact redaction", () => {
     });
   });
 
+  it("redacts cookie headers across common line endings", () => {
+    const raw = [
+      "first",
+      "Cookie: session=fake-cookie-value",
+      "second\rCookie: second=fake-cookie-value",
+      "third\r\nCookie: third=fake-cookie-value",
+    ].join("\n");
+
+    const redacted = redactTextArtifact(raw);
+
+    expect(redacted).not.toContain("fake-cookie-value");
+    expect(verifyTextArtifactRedacted(redacted)).toEqual({
+      ok: true,
+      findings: [],
+    });
+  });
+
   it("sanitizes artifact names for Playwright attachments", () => {
     expect(sanitizeArtifactName(" route /about?secret=x ")).toBe(
       "route-about-secret-x"

@@ -98,7 +98,7 @@ export async function waitForRouteReady(
     timeout,
   });
   await page.locator("body").waitFor({ state: "attached", timeout });
-  await expect(page.locator(readySelector).first()).toBeAttached({ timeout });
+  await expect(page.locator(readySelector).first()).toBeVisible({ timeout });
 }
 
 export async function expectNoHorizontalOverflow(
