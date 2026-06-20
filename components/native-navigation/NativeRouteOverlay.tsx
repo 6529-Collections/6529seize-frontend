@@ -34,7 +34,7 @@ type TouchPoint = {
 };
 
 const getCanonicalCurrentPath = (): string =>
-  `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  `${globalThis.location.pathname}${globalThis.location.search}${globalThis.location.hash}`;
 
 const getSameOriginAnchorPath = (anchor: HTMLAnchorElement): string | null => {
   const href = anchor.getAttribute("href");
@@ -42,8 +42,8 @@ const getSameOriginAnchorPath = (anchor: HTMLAnchorElement): string | null => {
     return null;
   }
 
-  const url = new URL(href, window.location.href);
-  if (url.origin !== window.location.origin) {
+  const url = new URL(href, globalThis.location.href);
+  if (url.origin !== globalThis.location.origin) {
     return null;
   }
 
@@ -72,12 +72,12 @@ export default function NativeRouteOverlay({
       return;
     }
 
-    const frameId = window.requestAnimationFrame(() => {
-      window.location.replace(getCanonicalCurrentPath());
+    const frameId = globalThis.requestAnimationFrame(() => {
+      globalThis.location.replace(getCanonicalCurrentPath());
     });
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      globalThis.cancelAnimationFrame(frameId);
     };
   }, [hasMounted, isApp]);
 
@@ -87,30 +87,34 @@ export default function NativeRouteOverlay({
     setIsDragging(false);
   }, []);
 
-  const handleTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    const touch = event.touches[0];
-    if (!touch || event.touches.length !== 1) {
-      return;
-    }
+  const handleTouchStart = useCallback(
+    (event: TouchEvent<HTMLDialogElement>) => {
+      const touch = event.touches[0];
+      if (!touch || event.touches.length !== 1) {
+        return;
+      }
 
-    const viewportWidth = window.innerWidth || event.currentTarget.clientWidth;
-    const side =
-      touch.clientX <= EDGE_SWIPE_WIDTH_PX
-        ? "left"
-        : touch.clientX >= viewportWidth - EDGE_SWIPE_WIDTH_PX
-          ? "right"
-          : null;
+      const viewportWidth =
+        globalThis.innerWidth || event.currentTarget.clientWidth;
+      let side: SwipeSide | null = null;
+      if (touch.clientX <= EDGE_SWIPE_WIDTH_PX) {
+        side = "left";
+      } else if (touch.clientX >= viewportWidth - EDGE_SWIPE_WIDTH_PX) {
+        side = "right";
+      }
 
-    if (!side) {
-      return;
-    }
+      if (!side) {
+        return;
+      }
 
-    gestureRef.current = {
-      side,
-      startX: touch.clientX,
-      startY: touch.clientY,
-    };
-  }, []);
+      gestureRef.current = {
+        side,
+        startX: touch.clientX,
+        startY: touch.clientY,
+      };
+    },
+    []
+  );
 
   const getInwardDrag = useCallback((touch: TouchPoint | undefined) => {
     const gesture = gestureRef.current;
@@ -133,7 +137,7 @@ export default function NativeRouteOverlay({
   }, []);
 
   const handleTouchMove = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
+    (event: TouchEvent<HTMLDialogElement>) => {
       const drag = getInwardDrag(event.touches[0]);
       if (!drag) {
         return;
@@ -155,7 +159,7 @@ export default function NativeRouteOverlay({
   );
 
   const handleTouchEnd = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
+    (event: TouchEvent<HTMLDialogElement>) => {
       const drag = getInwardDrag(event.changedTouches[0]);
       if (!drag) {
         return;
@@ -180,7 +184,7 @@ export default function NativeRouteOverlay({
   }, [router]);
 
   const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
+    (event: KeyboardEvent<HTMLDialogElement>) => {
       if (event.key !== "Escape") {
         return;
       }
@@ -192,7 +196,7 @@ export default function NativeRouteOverlay({
   );
 
   const handleClickCapture = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
+    (event: MouseEvent<HTMLDialogElement>) => {
       if (
         event.defaultPrevented ||
         event.metaKey ||
@@ -242,10 +246,9 @@ export default function NativeRouteOverlay({
   }
 
   return (
-    <div
+    <dialog
       aria-label="Profile overlay"
-      aria-modal="true"
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[2147483000] tw-overflow-hidden tw-bg-black"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[2147483000] tw-m-0 tw-h-auto tw-max-h-none tw-w-auto tw-max-w-none tw-overflow-hidden tw-border-0 tw-bg-black tw-p-0"
       data-native-route-overlay={pathname}
       data-testid="native-route-overlay"
       onClickCapture={handleClickCapture}
@@ -254,7 +257,7 @@ export default function NativeRouteOverlay({
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
       onTouchStart={handleTouchStart}
-      role="dialog"
+      open
       tabIndex={-1}
     >
       <button className="tw-sr-only" onClick={closeOverlay} type="button">
@@ -266,6 +269,6 @@ export default function NativeRouteOverlay({
       >
         {children}
       </div>
-    </div>
+    </dialog>
   );
 }

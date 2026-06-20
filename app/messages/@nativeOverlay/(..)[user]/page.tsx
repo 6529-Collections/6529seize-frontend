@@ -1,3 +1,1 @@
-import { renderNativeProfileRootOverlay } from "@/app/_native-overlay/profileOverlay";
-
-export default renderNativeProfileRootOverlay;
+export { renderNativeProfileRootOverlay as default } from "@/app/_native-overlay/profileOverlay";

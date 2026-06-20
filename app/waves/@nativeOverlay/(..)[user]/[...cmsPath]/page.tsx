@@ -1,3 +1,1 @@
-import { renderNativeProfileCatchAllOverlay } from "@/app/_native-overlay/profileOverlay";
-
-export default renderNativeProfileCatchAllOverlay;
+export { renderNativeProfileCatchAllOverlay as default } from "@/app/_native-overlay/profileOverlay";
