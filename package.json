@@ -33,7 +33,7 @@
     "test-extract-failed-names": "node scripts/require-6529-command.cjs && node test-results/list-failed-tests.cjs",
     "test:e2e": "node scripts/require-6529-command.cjs && playwright test",
     "test:e2e:smoke": "node scripts/require-6529-command.cjs && playwright test tests/home/home.spec.ts tests/pages/about.spec.ts tests/pages/the-memes.spec.ts --grep @smoke --workers=1",
-    "test:e2e:staging": "node scripts/require-6529-command.cjs && cross-env PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 playwright test tests/home/home.spec.ts tests/pages/about.spec.ts tests/pages/the-memes.spec.ts",
+    "test:e2e:staging": "node scripts/require-6529-command.cjs && cross-env PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 playwright test tests/home/home.spec.ts tests/pages/about.spec.ts tests/pages/the-memes.spec.ts --workers=1",
     "test:e2e:ui": "node scripts/require-6529-command.cjs && playwright test --ui",
     "knip": "node scripts/require-6529-command.cjs && knip --fix --allow-remove-files",
     "lint:package-json": "node scripts/require-6529-command.cjs && node scripts/lint-package-json.cjs",
