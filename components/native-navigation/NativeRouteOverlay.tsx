@@ -8,8 +8,6 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type KeyboardEvent,
-  type MouseEvent,
   type ReactNode,
   type TouchEvent,
 } from "react";
@@ -192,20 +190,8 @@ export default function NativeRouteOverlay({
     router.back();
   }, [router]);
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDialogElement>) => {
-      if (event.key !== "Escape") {
-        return;
-      }
-
-      event.preventDefault();
-      closeOverlay();
-    },
-    [closeOverlay]
-  );
-
-  const handleClickCapture = useCallback(
-    (event: MouseEvent<HTMLDialogElement>) => {
+  const handleOverlayClick = useCallback(
+    (event: MouseEvent) => {
       if (
         event.defaultPrevented ||
         event.metaKey ||
@@ -217,9 +203,10 @@ export default function NativeRouteOverlay({
         return;
       }
 
+      const overlay = overlayRef.current;
       const target = event.target instanceof Element ? event.target : null;
       const anchor = target?.closest<HTMLAnchorElement>("a[href]");
-      if (!anchor || !event.currentTarget.contains(anchor)) {
+      if (!overlay || !anchor || !overlay.contains(anchor)) {
         return;
       }
 
@@ -241,6 +228,37 @@ export default function NativeRouteOverlay({
     [router]
   );
 
+  const handleOverlayKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      event.preventDefault();
+      closeOverlay();
+    },
+    [closeOverlay]
+  );
+
+  useEffect(() => {
+    if (!hasMounted || !isApp) {
+      return;
+    }
+
+    const overlay = overlayRef.current;
+    if (!overlay) {
+      return;
+    }
+
+    overlay.addEventListener("click", handleOverlayClick);
+    overlay.addEventListener("keydown", handleOverlayKeyDown);
+
+    return () => {
+      overlay.removeEventListener("click", handleOverlayClick);
+      overlay.removeEventListener("keydown", handleOverlayKeyDown);
+    };
+  }, [handleOverlayClick, handleOverlayKeyDown, hasMounted, isApp]);
+
   const contentStyle = useMemo<CSSProperties>(
     () => ({
       transform: dragX === 0 ? undefined : `translate3d(${dragX}px, 0, 0)`,
@@ -260,8 +278,6 @@ export default function NativeRouteOverlay({
       className="tailwind-scope tw-fixed tw-inset-0 tw-z-[2147483000] tw-m-0 tw-h-auto tw-max-h-none tw-w-auto tw-max-w-none tw-overflow-hidden tw-border-0 tw-bg-black tw-p-0"
       data-native-route-overlay={pathname}
       data-testid="native-route-overlay"
-      onClickCapture={handleClickCapture}
-      onKeyDown={handleKeyDown}
       onTouchCancel={resetGesture}
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
