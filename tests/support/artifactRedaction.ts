@@ -18,10 +18,6 @@ const SECRET_PATTERNS: Array<{ name: string; pattern: RegExp }> = [
     pattern: /\bAuthorization:\s*Bearer\s+[A-Za-z0-9._~+/=-]{12,}/gi,
   },
   {
-    name: "cookie-header",
-    pattern: /\bCookie:\s*[^;\n\r]+=[^;\n\r]{8,}/gi,
-  },
-  {
     name: "staging-access-code",
     pattern:
       /\b(?:PLAYWRIGHT_STAGING_ACCESS_CODE|STAGING_AUTH|STAGING_API_KEY)\s*[=:]\s*["']?[^"'\s,;]{4,}/gi,
@@ -49,19 +45,103 @@ const SECRET_PATTERNS: Array<{ name: string; pattern: RegExp }> = [
   },
 ];
 
+function isArtifactNameChar(char: string) {
+  const code = char.charCodeAt(0);
+  return (
+    (code >= 48 && code <= 57) ||
+    (code >= 65 && code <= 90) ||
+    (code >= 97 && code <= 122) ||
+    char === "_" ||
+    char === "." ||
+    char === "-"
+  );
+}
+
+function stripDashEdges(text: string) {
+  let start = 0;
+  let end = text.length;
+
+  while (start < end && text[start] === "-") {
+    start += 1;
+  }
+  while (end > start && text[end - 1] === "-") {
+    end -= 1;
+  }
+
+  return text.slice(start, end);
+}
+
 export function sanitizeArtifactName(name: string) {
-  return name
-    .trim()
-    .replace(/[^A-Za-z0-9_.-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
+  let sanitized = "";
+  let lastWasDash = false;
+
+  for (const char of name.trim()) {
+    if (isArtifactNameChar(char)) {
+      sanitized += char;
+      lastWasDash = char === "-";
+      continue;
+    }
+
+    if (!lastWasDash) {
+      sanitized += "-";
+      lastWasDash = true;
+    }
+  }
+
+  return stripDashEdges(sanitized).slice(0, 80);
+}
+
+function firstNonWhitespaceIndex(text: string) {
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char !== " " && char !== "\t" && char !== "\r") {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+function isCookieHeaderLine(line: string) {
+  const start = firstNonWhitespaceIndex(line);
+  if (start < 0) {
+    return false;
+  }
+
+  const headerPrefix = "cookie:";
+  const prefix = line.slice(start, start + headerPrefix.length).toLowerCase();
+  if (prefix !== headerPrefix) {
+    return false;
+  }
+
+  return line.indexOf("=", start + headerPrefix.length) >= 0;
+}
+
+function redactCookieHeaders(text: string) {
+  return text
+    .split("\n")
+    .map((line) => {
+      if (!isCookieHeaderLine(line)) {
+        return line;
+      }
+
+      const colonIndex = line.indexOf(":");
+      return `${line.slice(0, colonIndex + 1)} ${REDACTION}`;
+    })
+    .join("\n");
+}
+
+function findCookieHeaderSecret(text: string) {
+  return text.split("\n").find((line) => isCookieHeaderLine(line));
 }
 
 export function redactTextArtifact(text: string) {
-  return SECRET_PATTERNS.reduce(
+  const redactedPatterns = SECRET_PATTERNS.reduce(
     (next, { pattern }) => next.replace(pattern, REDACTION),
     text
   );
+
+  return redactCookieHeaders(redactedPatterns);
 }
 
 export function verifyTextArtifactRedacted(
@@ -78,6 +158,14 @@ export function verifyTextArtifactRedacted(
         sample: match[0].slice(0, 80),
       });
     }
+  }
+
+  const cookieHeader = findCookieHeaderSecret(text);
+  if (cookieHeader) {
+    findings.push({
+      pattern: "cookie-header",
+      sample: cookieHeader.slice(0, 80),
+    });
   }
 
   return {
