@@ -737,7 +737,19 @@ function printValidation(result, successMessage) {
     }
     return;
   }
-  console.log(successMessage);
+  writeStdout(successMessage);
+}
+
+function writeStdout(message = "") {
+  process.stdout.write(`${message}\n`);
+}
+
+function canRunCommand(command) {
+  const result = spawnSync(command, ["--version"], {
+    encoding: "utf8",
+    stdio: ["ignore", "ignore", "ignore"],
+  });
+  return result.status === 0;
 }
 
 function resolveGitCommand() {
@@ -751,7 +763,7 @@ function resolveGitCommand() {
     String.raw`C:\Program Files\Git\cmd\git.exe`,
     String.raw`C:\Program Files\Git\bin\git.exe`,
   ];
-  return candidates.find((candidate) => fs.existsSync(candidate)) || "git";
+  return candidates.find((candidate) => canRunCommand(candidate)) || "git";
 }
 
 function changedFilesFromGit(baseRef, cwd = process.cwd()) {
@@ -839,16 +851,16 @@ function usage() {
 function commandComputeRiskFloor(args) {
   const result = classifyChangedFiles(filesFromArgs(args));
   if (args.json) {
-    console.log(JSON.stringify(result, null, 2));
+    writeStdout(JSON.stringify(result, null, 2));
     return;
   }
 
-  console.log(`Risk floor: ${result.risk_level}`);
+  writeStdout(`Risk floor: ${result.risk_level}`);
   for (const reason of result.reasons) {
-    console.log(`- ${reason.path}: level-${reason.level} (${reason.rule})`);
+    writeStdout(`- ${reason.path}: level-${reason.level} (${reason.rule})`);
   }
   for (const modifier of result.modifiers) {
-    console.log(`- modifier ${modifier.name}: ${modifier.reason}`);
+    writeStdout(`- modifier ${modifier.name}: ${modifier.reason}`);
   }
 }
 
@@ -861,7 +873,7 @@ function commandValidateManifest(args) {
 }
 
 function commandSummarizeManifest(args) {
-  console.log(summarizeValidationManifest(readJson(args.file)));
+  writeStdout(summarizeValidationManifest(readJson(args.file)));
 }
 
 function commandValidateMutationRegistry(args) {
@@ -886,7 +898,7 @@ async function main(argv = process.argv.slice(2)) {
   try {
     const handler = COMMAND_HANDLERS[command];
     if (!handler) {
-      console.log(usage());
+      writeStdout(usage());
       process.exitCode = command ? 1 : 0;
       return;
     }
