@@ -1719,3 +1719,37 @@
     Manager target `STAGING_AUTH`: 6 passed.
 - Production promotion remains held until this tiny follow-up PR is reviewed,
   merged, redeployed to staging, and validated.
+
+## 2026-06-20T19:30Z PR 1 Production Smoke Guard Follow-Up
+
+- PR #2799 merged to `main` as `0d16551ca519ad595604f58dd7a9e0c629e5a27c`.
+- Staging deploy succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27880870400
+  - staging merge SHA: `b0fbdac2f082040da39f526bcb1a557beef8f29e`
+  - production candidate SHA:
+    `0d16551ca519ad595604f58dd7a9e0c629e5a27c`
+- Fresh deployed staging smoke with access code loaded from local Credential
+  Manager target `STAGING_AUTH`: 6 passed.
+- Production deploy succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27881187699
+  - deployed production SHA:
+    `0d16551ca519ad595604f58dd7a9e0c629e5a27c`
+- First production smoke found a read-only guard allowlist gap, not an app
+  deploy failure: the live app sends same-origin Sentry tunnel telemetry to
+  `POST /monitoring`, and the new guard blocked it as a non-allowlisted
+  mutation.
+- Implementing follow-up branch
+  `codex/testing-production-monitoring-guard` from current `origin/main` to
+  abort same-origin `/monitoring` telemetry while still blocking external
+  `/monitoring` lookalikes.
+- Follow-up branch validation:
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run format:changed`
+  - `codex-diff-check`
+  - `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run
+    test:e2e:smoke`: 6 passed.
+  - `seize run test:e2e:staging` with access code loaded from local Credential
+    Manager target `STAGING_AUTH`: 6 passed.
