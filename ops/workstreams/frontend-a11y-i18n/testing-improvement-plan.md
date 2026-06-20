@@ -146,6 +146,27 @@ Current gaps:
 14. Most test, reviewbot, and swarm output is feedback to Codex. It should drive
     another iteration, not take decision authority away from the agent.
 
+## Pre-PR Template Contract
+
+The executable pre-PR template lives in
+`ops/workstreams/frontend-a11y-i18n/mega-run-pr-playbook.md`. That playbook is
+the source of truth for page-cluster PR planning, and it must continue to collect
+these fields before a non-trivial WCAG/i18n migration PR opens:
+
+- Risk assessment: computed risk floor, declared risk level, final risk level,
+  downgrade approval when final risk is below the computed floor, and hazard
+  analysis in the format `hazard -> severity -> likelihood -> detection ->
+  required test -> rollback or fix-forward`.
+- Validation and artifacts: validation manifest path, durable artifact storage
+  plan, artifact redaction strategy for secrets/local paths/prompts/private data,
+  and expected reviewbot lanes.
+- PR description risk summary: risk level summary, hazard summary, validation
+  manifest status, and durable artifact pointers or planned artifact locations.
+
+This contract connects the playbook template to the validation manifest schema in
+`ops/testing-strategy/validation-manifest.v1.schema.json` and to the safety-case
+requirements in this strategy's "Safety Case And Validation Manifest" section.
+
 ## 6529.io Invariants
 
 High-risk PRs must map their evidence to the relevant invariants below. Add
