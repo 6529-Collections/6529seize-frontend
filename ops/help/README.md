@@ -19,6 +19,9 @@ Each record should be short, factual, and linkable:
 - `keywords` should include important retrieval terms.
 - `facts` should be concise statements the bot can safely reuse.
 - `canonical_path` should be the best 6529.io destination for the answer.
+- `link_label` should be the page/action label used when the bot links to
+  `canonical_path`; omit it only when the record `title` is already the best
+  link text.
 - `related_paths` should include only useful fallback or adjacent destinations.
 - `source_refs` should point to the frontend docs, components, or route files
   that justify the record.

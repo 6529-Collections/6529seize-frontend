@@ -210,6 +210,9 @@ function validateRecord(record, ids, routePatterns) {
     fail(`${record.id}: kind is not allowed: ${record.kind}`);
   }
   requireString(record.title, "title", record.id);
+  if (record.link_label !== undefined) {
+    requireString(record.link_label, "link_label", record.id);
+  }
   requireString(record.canonical_path, "canonical_path", record.id);
   validateInternalPath(
     record.canonical_path,
