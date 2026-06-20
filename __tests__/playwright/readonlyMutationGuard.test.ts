@@ -117,6 +117,44 @@ describe("Playwright read-only mutation guard", () => {
     });
   });
 
+  it("aborts same-origin telemetry POSTs without allowing external lookalikes", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://6529.io/monitoring?o=123&p=456",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-first-party-telemetry",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://staging.6529.io/monitoring/tunnel",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-first-party-telemetry",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://example.com/monitoring",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "non-allowlisted-mutation",
+    });
+  });
+
   it("blocks non-allowlisted external POSTs", () => {
     expect(
       decideReadonlyRequest({
