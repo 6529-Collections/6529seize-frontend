@@ -71,20 +71,24 @@ function shouldUnlockStaging(baseURL?: string) {
 }
 
 const test = base.extend({
-  page: async ({ context, page, baseURL }, runTest, testInfo) => {
+  context: async ({ context, baseURL }, runTest) => {
+    const guard = await installReadonlyMutationGuard(context, baseURL);
+
+    await runTest(context);
+
+    guard.assertNoBlockedRequests();
+  },
+  page: async ({ page, baseURL }, runTest, testInfo) => {
     const diagnostics = attachPageDiagnostics(page);
 
     if (shouldUnlockStaging(baseURL)) {
       await unlockStagingAccess(page);
     }
 
-    const guard = await installReadonlyMutationGuard(context, baseURL);
-
     await runTest(page);
 
     await attachPageDiagnosticsArtifact(testInfo, diagnostics);
     assertNoPageErrors(diagnostics);
-    guard.assertNoBlockedRequests();
   },
 });
 

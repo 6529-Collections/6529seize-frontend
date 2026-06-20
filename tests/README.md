@@ -21,7 +21,8 @@ Remote read-only defaults:
 - `PLAYWRIGHT_READONLY=1` is the default for staging and production.
 - Non-GET/HEAD/OPTIONS requests fail unless explicitly allowlisted by the
   read-only mutation guard.
-- For staging, the shared `page` fixture unlocks the access gate before
-  installing the read-only mutation guard.
+- For staging, the shared `context` fixture installs the read-only mutation
+  guard before the `page` fixture unlocks the access gate. The current access
+  gate uses safe GET requests plus a browser cookie.
 - Traces are disabled for staging and production by default because they can
   retain credentials or private page state.

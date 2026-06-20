@@ -54,7 +54,7 @@ describe("Playwright read-only mutation guard", () => {
     });
   });
 
-  it("allows safe methods and the staging access unlock path", () => {
+  it("allows safe methods", () => {
     expect(
       decideReadonlyRequest({
         baseURL: "https://6529.io",
@@ -63,18 +63,6 @@ describe("Playwright read-only mutation guard", () => {
         url: "https://api.6529.io/waves",
       })
     ).toMatchObject({ action: "allow" });
-
-    expect(
-      decideReadonlyRequest({
-        baseURL: "https://staging.6529.io",
-        method: "POST",
-        readonly: true,
-        url: "https://staging.6529.io/access",
-      })
-    ).toMatchObject({
-      action: "allow",
-      reason: "staging-access-unlock",
-    });
   });
 
   it("allows explicitly recognized external telemetry but blocks other POSTs", () => {
@@ -96,6 +84,20 @@ describe("Playwright read-only mutation guard", () => {
         method: "POST",
         readonly: true,
         url: "https://example.com/write",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "non-allowlisted-mutation",
+    });
+  });
+
+  it("does not attribute third-party API paths to first-party registry rules", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://cdn.example.com/api/track",
       })
     ).toMatchObject({
       action: "block",

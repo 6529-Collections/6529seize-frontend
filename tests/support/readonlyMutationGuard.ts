@@ -108,15 +108,6 @@ function isAllowedExternalMutation(url: URL) {
   );
 }
 
-function isStagingAccessUnlock(url: URL, baseURL?: string) {
-  const base = baseURL ? parseUrl(baseURL) : null;
-  return (
-    base?.hostname === STAGING_HOSTNAME &&
-    url.hostname === STAGING_HOSTNAME &&
-    (url.pathname === "/access" || url.pathname.startsWith("/access/"))
-  );
-}
-
 function wildcardPatternToRegExp(pattern: string) {
   let source = "";
   for (let index = 0; index < pattern.length; index += 1) {
@@ -137,23 +128,43 @@ function wildcardPatternToRegExp(pattern: string) {
   return new RegExp(`^${source}$`);
 }
 
-function endpointMatches(endpoint: MutationEndpoint, method: string, url: URL) {
+function getUrlCandidates(
+  endpoint: MutationEndpoint,
+  url: URL,
+  baseURL?: string
+) {
+  const candidates = [url.href, `${url.origin}${url.pathname}`];
+
+  if (endpoint.pattern.startsWith("/")) {
+    const base = baseURL ? parseUrl(baseURL) : null;
+    if (base?.origin === url.origin) {
+      candidates.push(url.pathname);
+    }
+  }
+
+  return candidates;
+}
+
+function endpointMatches(
+  endpoint: MutationEndpoint,
+  method: string,
+  url: URL,
+  baseURL?: string
+) {
   if (!endpoint.methods.includes(method)) {
     return false;
   }
 
-  const urlCandidates = [
-    url.href,
-    `${url.origin}${url.pathname}`,
-    url.pathname,
-  ];
+  const urlCandidates = getUrlCandidates(endpoint, url, baseURL);
   const matcher = wildcardPatternToRegExp(endpoint.pattern);
   return urlCandidates.some((candidate) => matcher.test(candidate));
 }
 
-function registryMatch(method: string, url: URL) {
+function registryMatch(method: string, url: URL, baseURL?: string) {
   const endpoints = mutationRegistry.endpoints as MutationEndpoint[];
-  return endpoints.find((endpoint) => endpointMatches(endpoint, method, url));
+  return endpoints.find((endpoint) =>
+    endpointMatches(endpoint, method, url, baseURL)
+  );
 }
 
 export function decideReadonlyRequest({
@@ -172,17 +183,13 @@ export function decideReadonlyRequest({
     return { action: "allow", reason: "non-http-url" };
   }
 
-  const endpoint = registryMatch(upperMethod, parsed);
+  const endpoint = registryMatch(upperMethod, parsed, baseURL);
   if (endpoint) {
     return {
       action: "block",
       reason: "registered-mutation-endpoint",
       ruleId: endpoint.id,
     };
-  }
-
-  if (isStagingAccessUnlock(parsed, baseURL)) {
-    return { action: "allow", reason: "staging-access-unlock" };
   }
 
   if (isAllowedExternalMutation(parsed)) {
