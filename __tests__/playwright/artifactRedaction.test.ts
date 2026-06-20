@@ -44,6 +44,7 @@ describe("Playwright artifact redaction", () => {
   it("redacts cookie headers across common line endings", () => {
     const raw = [
       "first",
+      "Cookie: short=1; session=fake-cookie-value",
       "Cookie: session=fake-cookie-value",
       "second\rCookie: second=fake-cookie-value",
       "third\r\nCookie: third=fake-cookie-value",
