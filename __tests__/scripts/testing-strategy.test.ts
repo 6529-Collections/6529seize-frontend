@@ -22,11 +22,16 @@ type ValidationResult = {
 
 type CiPlan = {
   schema_version: string;
+  generated_at: string;
   changed_files: string[];
   risk: RiskResult;
   untrusted_pr: boolean;
   checks: Record<string, { required: boolean; reason: string }>;
-  security: { secrets_allowed: boolean; token_permissions: string };
+  security: {
+    fork_pr_policy: string;
+    secrets_allowed: boolean;
+    token_permissions: string;
+  };
 };
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -54,7 +59,7 @@ const {
   classifyChangedFiles: (files: string[]) => RiskResult;
   createCiPlan: (
     files: string[],
-    options?: { untrustedPr?: boolean }
+    options?: { cwd?: string; untrustedPr?: boolean }
   ) => CiPlan;
   scanFilesForSecrets: (
     files: string[],
@@ -63,6 +68,7 @@ const {
     schema_version: string;
     ok: boolean;
     findings: Array<{ file: string; line: number; pattern: string }>;
+    skipped: Array<{ file: string; reason: string }>;
   };
   validateArtifactPointer: (artifact: unknown, index: number) => string[];
   validateMutationRegistry: (registry: unknown) => ValidationResult;
@@ -337,6 +343,29 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.build.reason).toContain("deleted runtime source");
   });
 
+  it("does not treat existing runtime fixture source as deleted", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "6529-testing-strategy-plan-")
+    );
+    try {
+      fs.mkdirSync(path.join(tempDir, "components", "example"), {
+        recursive: true,
+      });
+      fs.writeFileSync(
+        path.join(tempDir, "components", "example", "ExistingWidget.tsx"),
+        "export function ExistingWidget() { return null; }\n"
+      );
+
+      const plan = createCiPlan(["components/example/ExistingWidget.tsx"], {
+        cwd: tempDir,
+      });
+
+      expect(plan.checks.build.required).toBe(false);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("runs the reviewbot contract when bot config can drift", () => {
     const plan = createCiPlan([".github/6529bot.yml"]);
 
@@ -374,6 +403,32 @@ describe("testing strategy CI security checks", () => {
       },
     ]);
     expect(JSON.stringify(result)).not.toContain("sk-ant-fake-secret-value");
+  });
+
+  it("reports every occurrence of the same changed-file secret pattern", () => {
+    fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "components", "MultiToken.ts"),
+      [
+        `export const first = "${"STAGING"}_AUTH=first_fake_value";`,
+        `export const second = "${"STAGING"}_API_KEY=second_fake_value";`,
+      ].join("\n")
+    );
+
+    const result = scanFilesForSecrets(["components/MultiToken.ts"], tempDir);
+
+    expect(result.findings).toEqual([
+      {
+        file: "components/MultiToken.ts",
+        line: 1,
+        pattern: "named-secret-assignment",
+      },
+      {
+        file: "components/MultiToken.ts",
+        line: 2,
+        pattern: "named-secret-assignment",
+      },
+    ]);
   });
 
   it("scans common credential files that do not look like source", () => {

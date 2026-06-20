@@ -266,9 +266,26 @@ const TEXT_SECRET_PATTERNS = [
   },
   {
     name: "npm-auth-token",
-    pattern: /\/\/[^:\s]+\/?:_authToken\s*=\s*[A-Za-z0-9._~+/=-]{8,}/,
+    findLines: findNpmAuthTokenLines,
   },
 ];
+const WORKFLOW_WRITE_PERMISSION_SCOPES = new Set([
+  "actions",
+  "attestations",
+  "checks",
+  "contents",
+  "deployments",
+  "discussions",
+  "id-token",
+  "issues",
+  "models",
+  "packages",
+  "pages",
+  "pull-requests",
+  "repository-projects",
+  "security-events",
+  "statuses",
+]);
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -562,7 +579,7 @@ function createCiPlan(files, options = {}) {
     (file) =>
       isSourceCodeFile(file) &&
       !isTestOrTestSupportFile(file) &&
-      !changedFileExists(file)
+      !changedFileExists(file, options.cwd)
   );
   const hasRuntimeEvidenceNeed =
     riskFloor >= 2 || risk.route_impacts.length > 0 || hasStyle;
@@ -685,14 +702,55 @@ function lineNumberForIndex(text, index) {
   return text.slice(0, index).split(/\r\n|\r|\n/).length;
 }
 
+function lineNumbersForPattern(text, pattern) {
+  const flags = pattern.flags.includes("g")
+    ? pattern.flags
+    : `${pattern.flags}g`;
+  const matcher = new RegExp(pattern.source, flags);
+  const lineNumbers = [];
+  let match = matcher.exec(text);
+  while (match?.index !== undefined) {
+    lineNumbers.push(lineNumberForIndex(text, match.index));
+    if (match[0].length === 0) {
+      matcher.lastIndex += 1;
+    }
+    match = matcher.exec(text);
+  }
+  return lineNumbers;
+}
+
+function findNpmAuthTokenLines(text) {
+  const lineNumbers = [];
+  text.split(/\r\n|\r|\n/).forEach((line, index) => {
+    const trimmed = line.trimStart();
+    const markerIndex = trimmed.indexOf(":_authToken");
+    if (!trimmed.startsWith("//") || markerIndex < 3) {
+      return;
+    }
+    const afterMarker = trimmed
+      .slice(markerIndex + ":_authToken".length)
+      .trimStart();
+    if (!afterMarker.startsWith("=")) {
+      return;
+    }
+    const tokenValue = afterMarker.slice(1).trimStart();
+    if (tokenValue.length >= 8) {
+      lineNumbers.push(index + 1);
+    }
+  });
+  return lineNumbers;
+}
+
 function scanTextForSecrets(text, filePath) {
   const findings = [];
-  for (const { name, pattern } of TEXT_SECRET_PATTERNS) {
-    const match = pattern.exec(text);
-    if (match?.index !== undefined) {
+  for (const { name, pattern, findLines } of TEXT_SECRET_PATTERNS) {
+    const lineNumbers = findLines
+      ? findLines(text)
+      : lineNumbersForPattern(text, pattern);
+    for (const line of lineNumbers) {
       findings.push({
         file: displayPath(filePath),
-        line: lineNumberForIndex(text, match.index),
+        line,
         pattern: name,
       });
     }
@@ -733,17 +791,10 @@ function scanFilesForSecrets(files, cwd = process.cwd()) {
 
 function workflowSecurityFindingsForText(text, filePath) {
   const findings = [];
-  const hasPullRequestTrigger =
-    /^\s*pull_request\s*:/m.test(text) ||
-    /^\s*-\s*pull_request\s*$/m.test(text) ||
-    /^\s*on\s*:\s*pull_request\s*$/m.test(text) ||
-    /^\s*on\s*:\s*\[[^\]]*\bpull_request\b[^\]]*\]\s*$/m.test(text);
+  const workflowLines = text.split(/\r\n|\r|\n/).map((line) => line.trim());
+  const hasPullRequestTrigger = workflowHasTrigger(workflowLines, "pull_request");
 
-  if (
-    /^\s*pull_request_target\s*:/m.test(text) ||
-    /^\s*on\s*:\s*pull_request_target\s*$/m.test(text) ||
-    /^\s*on\s*:\s*\[[^\]]*\bpull_request_target\b[^\]]*\]\s*$/m.test(text)
-  ) {
+  if (workflowHasTrigger(workflowLines, "pull_request_target")) {
     findings.push({
       file: displayPath(filePath),
       pattern: "pull_request_target",
@@ -754,7 +805,7 @@ function workflowSecurityFindingsForText(text, filePath) {
 
   if (
     hasPullRequestTrigger &&
-    /\bsecrets\s*(?:\.\s*[A-Za-z0-9_]+|\[\s*['"][^'"]+['"]\s*\])/.test(text)
+    workflowReferencesSecrets(text)
   ) {
     findings.push({
       file: displayPath(filePath),
@@ -766,7 +817,9 @@ function workflowSecurityFindingsForText(text, filePath) {
 
   if (
     hasPullRequestTrigger &&
-    /^\s*permissions\s*:\s*write-all\s*$/m.test(text)
+    workflowLines.some(
+      (line) => line.toLowerCase() === "permissions: write-all"
+    )
   ) {
     findings.push({
       file: displayPath(filePath),
@@ -777,9 +830,7 @@ function workflowSecurityFindingsForText(text, filePath) {
 
   if (
     hasPullRequestTrigger &&
-    /^\s*(?:actions|attestations|checks|contents|deployments|discussions|id-token|issues|models|packages|pages|pull-requests|repository-projects|security-events|statuses)\s*:\s*write\s*$/m.test(
-      text
-    )
+    workflowLines.some(isWorkflowWritePermissionLine)
   ) {
     findings.push({
       file: displayPath(filePath),
@@ -790,6 +841,57 @@ function workflowSecurityFindingsForText(text, filePath) {
   }
 
   return findings;
+}
+
+function workflowHasTrigger(lines, trigger) {
+  return lines.some((line) => {
+    if (line === `${trigger}:` || line === `- ${trigger}`) {
+      return true;
+    }
+    if (!line.startsWith("on:")) {
+      return false;
+    }
+    const triggerValue = line.slice("on:".length).trim();
+    if (triggerValue === trigger) {
+      return true;
+    }
+    if (!triggerValue.startsWith("[") || !triggerValue.endsWith("]")) {
+      return false;
+    }
+    return triggerValue
+      .slice(1, -1)
+      .split(",")
+      .some((entry) => stripBoundaryQuotes(entry.trim()) === trigger);
+  });
+}
+
+function workflowReferencesSecrets(text) {
+  const compactText = text.replace(/[ \t]/g, "");
+  return compactText.includes("secrets.") || compactText.includes("secrets[");
+}
+
+function isWorkflowWritePermissionLine(line) {
+  const separatorIndex = line.indexOf(":");
+  if (separatorIndex === -1) {
+    return false;
+  }
+  const scope = line.slice(0, separatorIndex).trim().toLowerCase();
+  const permission = line.slice(separatorIndex + 1).trim().toLowerCase();
+  return (
+    WORKFLOW_WRITE_PERMISSION_SCOPES.has(scope) && permission === "write"
+  );
+}
+
+function stripBoundaryQuotes(value) {
+  if (value.length < 2) {
+    return value;
+  }
+  const first = value[0];
+  const last = value[value.length - 1];
+  if ((first === "'" || first === '"') && first === last) {
+    return value.slice(1, -1);
+  }
+  return value;
 }
 
 function validateWorkflowSecurityFiles(files, cwd = process.cwd()) {

@@ -1826,3 +1826,40 @@ test:e2e:smoke`: 6 passed.
     key file coverage.
 - Implementing follow-up commit to fix those findings and harden the workflow
   summary step when plan reports are missing.
+
+## 2026-06-20T21:45Z PR 2 Reviewbot And Sonar Follow-Up
+
+- 6529bot follow-up review on
+  `c3c466d65e1fa47255f0018e6e6766d565dee517` returned `Needs changes` for
+  test-side type contracts that drifted from the runtime CI plan and secret
+  scan return shapes.
+- CodeRabbit reported the same contract drift and a low-value scanner nit:
+  `scanTextForSecrets` only reported the first occurrence per pattern.
+- SonarCloud failed the quality gate with 10 security hotspots, all in
+  `ops/scripts/testing-strategy.cjs` regexes used by the new secret/workflow
+  scanners.
+- Follow-up implementation:
+  - tightened test-side `CiPlan` and secret-scan return types;
+  - threaded `cwd` through deleted-runtime-source detection and added fixture
+    coverage so the heuristic is testable outside `process.cwd()`;
+  - changed secret scanning to report every match per pattern;
+  - replaced the workflow-security regex checks Sonar flagged with bounded
+    line/string parsing while preserving compact trigger, secret-reference,
+    `write-all`, and write-scope coverage.
+- Local validation before commit:
+  - `seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts`:
+    35 passed.
+  - `node --check ops/scripts/testing-strategy.cjs`
+  - `seize run testing-strategy -- ci-plan --changed-from origin/main --output
+test-results/app-pr-ci/ci-plan.json`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+origin/main --output test-results/app-pr-ci/secret-scan.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from
+origin/main --output test-results/app-pr-ci/workflow-security.json`
+  - `seize run lint:diff`
+  - `seize run lint:changed`
+  - `seize run typecheck:ci`
+  - `seize run typecheck:changed` reported no changed files included in the
+    focused typecheck program; full CI typecheck covered the edited files.
+  - `seize run typecheck:playwright`
+  - `codex-diff-check`
