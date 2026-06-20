@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -19,23 +20,68 @@ type ValidationResult = {
   warnings: string[];
 };
 
+type CiPlan = {
+  schema_version: string;
+  generated_at: string;
+  changed_files: string[];
+  risk: RiskResult;
+  untrusted_pr: boolean;
+  checks: Record<string, { required: boolean; reason: string }>;
+  security: {
+    fork_pr_policy: string;
+    secrets_allowed: boolean;
+    token_permissions: string;
+  };
+};
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
+  CI_PLAN_SCHEMA_VERSION,
   EXISTING_REVIEWBOT_INITIAL_LANES,
   MUTATION_REGISTRY_SCHEMA_VERSION,
+  SECRET_SCAN_SCHEMA_VERSION,
   VALIDATION_MANIFEST_SCHEMA_VERSION,
+  WORKFLOW_SECURITY_SCHEMA_VERSION,
   classifyChangedFiles,
+  createCiPlan,
+  scanFilesForSecrets,
   validateArtifactPointer,
   validateMutationRegistry,
   validateValidationManifest,
+  validateWorkflowSecurityFiles,
 } = require("../../ops/scripts/testing-strategy.cjs") as {
+  CI_PLAN_SCHEMA_VERSION: string;
   EXISTING_REVIEWBOT_INITIAL_LANES: string[];
   MUTATION_REGISTRY_SCHEMA_VERSION: string;
+  SECRET_SCAN_SCHEMA_VERSION: string;
   VALIDATION_MANIFEST_SCHEMA_VERSION: string;
+  WORKFLOW_SECURITY_SCHEMA_VERSION: string;
   classifyChangedFiles: (files: string[]) => RiskResult;
+  createCiPlan: (
+    files: string[],
+    options?: { cwd?: string; untrustedPr?: boolean }
+  ) => CiPlan;
+  scanFilesForSecrets: (
+    files: string[],
+    cwd?: string
+  ) => {
+    schema_version: string;
+    ok: boolean;
+    findings: Array<{ file: string; line: number; pattern: string }>;
+    skipped: Array<{ file: string; reason: string }>;
+  };
   validateArtifactPointer: (artifact: unknown, index: number) => string[];
   validateMutationRegistry: (registry: unknown) => ValidationResult;
   validateValidationManifest: (manifest: unknown) => ValidationResult;
+  validateWorkflowSecurityFiles: (
+    files: string[],
+    cwd?: string
+  ) => {
+    schema_version: string;
+    ok: boolean;
+    checked_files: string[];
+    findings: Array<{ file: string; pattern: string; reason: string }>;
+  };
 };
 
 const REVIEWBOT_LANES = [
@@ -119,7 +165,7 @@ describe("testing strategy risk floor", () => {
   });
 
   it("classifies user-visible app code as standard risk", () => {
-    const result = classifyChangedFiles(["components/header/NavMenu.tsx"]);
+    const result = classifyChangedFiles(["components/header/AppHeader.tsx"]);
 
     expect(result.computed_floor).toBe(2);
     expect(result.reasons[0]).toMatchObject({
@@ -240,6 +286,267 @@ describe("testing strategy risk floor", () => {
       ])
     );
     expect(result.route_impacts).toContain("/waves/:param");
+  });
+});
+
+describe("testing strategy CI plan", () => {
+  it("keeps docs-only PRs in the no-install fast lane", () => {
+    const plan = createCiPlan([
+      "ops/workstreams/frontend-a11y-i18n/testing-improvement-plan.md",
+    ]);
+
+    expect(plan.schema_version).toBe(CI_PLAN_SCHEMA_VERSION);
+    expect(plan.risk.computed_floor).toBe(0);
+    expect(plan.checks.risk_floor.required).toBe(true);
+    expect(plan.checks.secret_scan.required).toBe(true);
+    expect(plan.checks.install.required).toBe(false);
+    expect(plan.checks.playwright_smoke.required).toBe(false);
+    expect(plan.security).toMatchObject({
+      secrets_allowed: false,
+      token_permissions: "contents:read",
+    });
+  });
+
+  it("routes ordinary UI changes through changed checks and smoke", () => {
+    const plan = createCiPlan(["components/header/AppHeader.tsx"], {
+      untrustedPr: true,
+    });
+
+    expect(plan.untrusted_pr).toBe(true);
+    expect(plan.risk.computed_floor).toBe(2);
+    expect(plan.checks.install.required).toBe(true);
+    expect(plan.checks.lint_changed.required).toBe(true);
+    expect(plan.checks.typecheck_changed.required).toBe(true);
+    expect(plan.checks.test_typecheck.required).toBe(true);
+    expect(plan.checks.jest_changed.required).toBe(true);
+    expect(plan.checks.playwright_smoke.required).toBe(true);
+    expect(plan.checks.build.required).toBe(false);
+  });
+
+  it("routes guarded or build-sensitive changes through build and workflow review", () => {
+    const plan = createCiPlan([
+      ".github/workflows/app-pr-ci.yml",
+      "package.json",
+    ]);
+
+    expect(plan.risk.computed_floor).toBe(4);
+    expect(plan.checks.workflow_security_review.required).toBe(true);
+    expect(plan.checks.dependency_governance.required).toBe(true);
+    expect(plan.checks.build.required).toBe(true);
+  });
+
+  it("requires build coverage for deleted runtime source", () => {
+    const plan = createCiPlan(["components/example/DeletedWidget.tsx"]);
+
+    expect(plan.risk.computed_floor).toBe(2);
+    expect(plan.checks.build.required).toBe(true);
+    expect(plan.checks.build.reason).toContain("deleted runtime source");
+  });
+
+  it("does not treat existing runtime fixture source as deleted", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "6529-testing-strategy-plan-")
+    );
+    try {
+      fs.mkdirSync(path.join(tempDir, "components", "example"), {
+        recursive: true,
+      });
+      fs.writeFileSync(
+        path.join(tempDir, "components", "example", "ExistingWidget.tsx"),
+        "export function ExistingWidget() { return null; }\n"
+      );
+
+      const plan = createCiPlan(["components/example/ExistingWidget.tsx"], {
+        cwd: tempDir,
+      });
+
+      expect(plan.checks.build.required).toBe(false);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("runs the reviewbot contract when bot config can drift", () => {
+    const plan = createCiPlan([".github/6529bot.yml"]);
+
+    expect(plan.checks.reviewbot_contract.required).toBe(true);
+  });
+});
+
+describe("testing strategy CI security checks", () => {
+  let tempDir = "";
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "6529-testing-strategy-"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it("reports changed-file secret patterns without returning secret values", () => {
+    fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "components", "Token.ts"),
+      `export const bad = "${"ANTHROPIC"}_API_KEY=sk-ant-fake-secret-value";\n`
+    );
+
+    const result = scanFilesForSecrets(["components/Token.ts"], tempDir);
+
+    expect(result.schema_version).toBe(SECRET_SCAN_SCHEMA_VERSION);
+    expect(result.ok).toBe(false);
+    expect(result.findings).toEqual([
+      {
+        file: "components/Token.ts",
+        line: 1,
+        pattern: "named-secret-assignment",
+      },
+    ]);
+    expect(JSON.stringify(result)).not.toContain("sk-ant-fake-secret-value");
+  });
+
+  it("reports every occurrence of the same changed-file secret pattern", () => {
+    fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "components", "MultiToken.ts"),
+      [
+        `export const first = "${"STAGING"}_AUTH=first_fake_value";`,
+        `export const second = "${"STAGING"}_API_KEY=second_fake_value";`,
+      ].join("\n")
+    );
+
+    const result = scanFilesForSecrets(["components/MultiToken.ts"], tempDir);
+
+    expect(result.findings).toEqual([
+      {
+        file: "components/MultiToken.ts",
+        line: 1,
+        pattern: "named-secret-assignment",
+      },
+      {
+        file: "components/MultiToken.ts",
+        line: 2,
+        pattern: "named-secret-assignment",
+      },
+    ]);
+  });
+
+  it("scans common credential files that do not look like source", () => {
+    fs.writeFileSync(
+      path.join(tempDir, ".npmrc"),
+      `//registry.npmjs.org/:_${"auth"}Token=npm_fake_secret_value\n`
+    );
+    fs.writeFileSync(
+      path.join(tempDir, "id_rsa"),
+      `-----BEGIN OPENSSH ${"PRIVATE"} KEY-----\nnot-real\n`
+    );
+
+    const result = scanFilesForSecrets([".npmrc", "id_rsa"], tempDir);
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining(["npm-auth-token", "private-key-block"])
+    );
+  });
+
+  it("accepts a read-only pull_request workflow", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "safe.yml"),
+      [
+        "name: Safe",
+        "on:",
+        "  pull_request:",
+        "permissions:",
+        "  contents: read",
+        "jobs:",
+        "  plan:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - run: echo ok",
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/safe.yml"],
+      tempDir
+    );
+
+    expect(result).toEqual({
+      schema_version: WORKFLOW_SECURITY_SCHEMA_VERSION,
+      ok: true,
+      checked_files: [".github/workflows/safe.yml"],
+      findings: [],
+    });
+  });
+
+  it("flags pull_request workflows that expose secrets or write permissions", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "unsafe.yml"),
+      [
+        "name: Unsafe",
+        "on:",
+        "  pull_request:",
+        "permissions:",
+        "  contents: write",
+        "jobs:",
+        "  bad:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        '      - run: echo "${{ secrets.STAGING_AUTH }}"',
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/unsafe.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining([
+        "pull_request-secrets",
+        "pull_request-write-permission",
+      ])
+    );
+  });
+
+  it("flags compact pull_request syntax with bracket secrets and broader write scopes", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "compact.yml"),
+      [
+        "name: Compact",
+        "on: [pull_request]",
+        "permissions:",
+        "  checks: write",
+        "jobs:",
+        "  bad:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - run: echo \"${{ secrets['STAGING_AUTH'] }}\"",
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/compact.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining([
+        "pull_request-secrets",
+        "pull_request-write-permission",
+      ])
+    );
   });
 });
 
