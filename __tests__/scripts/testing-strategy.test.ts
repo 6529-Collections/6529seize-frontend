@@ -224,7 +224,7 @@ describe("testing strategy risk floor", () => {
     expect(result.modifiers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "feature-flag-diff-risk" }),
-      ]),
+      ])
     );
   });
 
@@ -237,7 +237,7 @@ describe("testing strategy risk floor", () => {
     expect(result.modifiers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "i18n-layout-risk" }),
-      ]),
+      ])
     );
     expect(result.route_impacts).toContain("/waves/:param");
   });
@@ -249,10 +249,10 @@ describe("testing strategy validation manifest", () => {
       fs.readFileSync(
         path.join(
           process.cwd(),
-          "ops/testing-strategy/examples/minimal.validation-manifest.json",
+          "ops/testing-strategy/examples/minimal.validation-manifest.json"
         ),
-        "utf8",
-      ),
+        "utf8"
+      )
     );
 
     expect(validateValidationManifest(manifest)).toEqual({
@@ -280,7 +280,7 @@ describe("testing strategy validation manifest", () => {
         "risk.downgrade_approval.approver: required",
         "risk.downgrade_approval.reason: required",
         "risk.downgrade_approval.expires_at: required",
-      ]),
+      ])
     );
   });
 
@@ -300,7 +300,7 @@ describe("testing strategy validation manifest", () => {
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain(
-      "artifacts: Level 3+ manifests require at least one validated durable artifact pointer",
+      "artifacts: Level 3+ manifests require at least one validated durable artifact pointer"
     );
   });
 
@@ -311,7 +311,7 @@ describe("testing strategy validation manifest", () => {
         redaction_status: "raw",
         sha256: undefined,
       }),
-      0,
+      0
     );
 
     expect(errors).toEqual(
@@ -320,46 +320,46 @@ describe("testing strategy validation manifest", () => {
         "artifacts[0].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
         "artifacts[0]: must include at least one integrity field: sha256, cid, etag, or version_id",
         "artifacts[0].redaction_status: must be one of verified-redacted, not-sensitive, public-redacted",
-      ]),
+      ])
     );
   });
 
   it("rejects artifact pointers outside 6529-controlled storage", () => {
     const s3Errors = validateArtifactPointer(
       artifactPointer({ uri: "s3://not-6529-owned/private-trace.zip" }),
-      0,
+      0
     );
     const httpsErrors = validateArtifactPointer(
       artifactPointer({
         uri: "https://6529-artifacts.evil.example/trace.zip",
       }),
-      1,
+      1
     );
     const ipfsErrors = validateArtifactPointer(
       artifactPointer({
         uri: "ipfs://bafyexample",
         redaction_status: "verified-redacted",
       }),
-      2,
+      2
     );
     const uppercaseErrors = validateArtifactPointer(
       artifactPointer({
         uri: "S3://6529-ARTIFACTS/private-trace.zip",
       }),
-      3,
+      3
     );
 
     expect(s3Errors).toContain(
-      "artifacts[0].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
+      "artifacts[0].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://"
     );
     expect(httpsErrors).toContain(
-      "artifacts[1].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
+      "artifacts[1].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://"
     );
     expect(ipfsErrors).toContain(
-      "artifacts[2].redaction_status: must be public-redacted for IPFS/IPNS artifact pointers",
+      "artifacts[2].redaction_status: must be public-redacted for IPFS/IPNS artifact pointers"
     );
     expect(uppercaseErrors).toContain(
-      "artifacts[3].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
+      "artifacts[3].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://"
     );
   });
 
@@ -378,7 +378,7 @@ describe("testing strategy validation manifest", () => {
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain(
-      "review.reviewbot.required_lanes: must include existing reviewbot lane: responsiveness",
+      "review.reviewbot.required_lanes: must include existing reviewbot lane: responsiveness"
     );
   });
 
@@ -391,7 +391,7 @@ describe("testing strategy validation manifest", () => {
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain(
-      "review.reviewbot.required_lanes: required; every PR must preserve the existing reviewbot lanes",
+      "review.reviewbot.required_lanes: required; every PR must preserve the existing reviewbot lanes"
     );
   });
 
@@ -409,7 +409,7 @@ describe("testing strategy validation manifest", () => {
         "hazards: must be an array",
         "commands: must be an array",
         "artifacts: must be an array",
-      ]),
+      ])
     );
   });
 
@@ -418,14 +418,14 @@ describe("testing strategy validation manifest", () => {
       fs.readFileSync(
         path.join(
           process.cwd(),
-          "ops/testing-strategy/validation-manifest.v1.schema.json",
+          "ops/testing-strategy/validation-manifest.v1.schema.json"
         ),
-        "utf8",
-      ),
+        "utf8"
+      )
     );
 
     expect(schema.properties.schema_version.const).toBe(
-      VALIDATION_MANIFEST_SCHEMA_VERSION,
+      VALIDATION_MANIFEST_SCHEMA_VERSION
     );
   });
 
@@ -434,14 +434,14 @@ describe("testing strategy validation manifest", () => {
       fs.readFileSync(
         path.join(
           process.cwd(),
-          "ops/testing-strategy/validation-manifest.v1.schema.json",
+          "ops/testing-strategy/validation-manifest.v1.schema.json"
         ),
-        "utf8",
-      ),
+        "utf8"
+      )
     );
     const configText = fs.readFileSync(
       path.join(process.cwd(), ".github/6529bot.yml"),
-      "utf8",
+      "utf8"
     );
     const config = YAML.parse(configText) as {
       reviewKinds?: { initial?: string[] };
@@ -449,7 +449,7 @@ describe("testing strategy validation manifest", () => {
     const configLanes = config.reviewKinds?.initial ?? [];
     const schemaLanes =
       schema.properties.review.properties.reviewbot.properties.required_lanes.allOf.map(
-        (rule: { contains: { const: string } }) => rule.contains.const,
+        (rule: { contains: { const: string } }) => rule.contains.const
       );
 
     expect(configLanes).toEqual(REVIEWBOT_LANES);
@@ -464,10 +464,10 @@ describe("testing strategy mutation registry", () => {
       fs.readFileSync(
         path.join(
           process.cwd(),
-          "ops/testing-strategy/mutation-endpoint-registry.json",
+          "ops/testing-strategy/mutation-endpoint-registry.json"
         ),
-        "utf8",
-      ),
+        "utf8"
+      )
     );
 
     expect(validateMutationRegistry(registry)).toEqual({
@@ -512,7 +512,7 @@ describe("testing strategy mutation registry", () => {
         "endpoints[1].id: duplicate id: post-wave",
         "endpoints[1].methods: invalid HTTP method: TRACE",
         "endpoints[1].allowed_in_readonly_tests: must be false unless a separate allowlist explicitly handles the endpoint",
-      ]),
+      ])
     );
   });
 
@@ -521,14 +521,14 @@ describe("testing strategy mutation registry", () => {
       fs.readFileSync(
         path.join(
           process.cwd(),
-          "ops/testing-strategy/mutation-endpoint-registry.v1.schema.json",
+          "ops/testing-strategy/mutation-endpoint-registry.v1.schema.json"
         ),
-        "utf8",
-      ),
+        "utf8"
+      )
     );
 
     expect(schema.properties.schema_version.const).toBe(
-      MUTATION_REGISTRY_SCHEMA_VERSION,
+      MUTATION_REGISTRY_SCHEMA_VERSION
     );
   });
 });
