@@ -23,6 +23,10 @@ async function installStagingAccessUnlock(page: Page) {
       return response;
     }
 
+    if (!isStagingPage(page)) {
+      return response;
+    }
+
     await submitStagingAccess(page, originalGoto);
     return originalGoto(...args);
   };
@@ -33,6 +37,10 @@ async function installStagingAccessUnlock(page: Page) {
 
 async function submitStagingAccess(page: Page, goto: PageGoto) {
   if (!(await isAccessGateVisible(page))) {
+    return;
+  }
+
+  if (!isStagingPage(page)) {
     return;
   }
 
@@ -60,6 +68,10 @@ async function submitStagingAccess(page: Page, goto: PageGoto) {
     .catch(() => undefined);
 
   if (await isAccessGateVisible(page)) {
+    if (!isStagingPage(page)) {
+      return;
+    }
+
     await goto("/", { waitUntil: "domcontentloaded" });
   }
 
@@ -77,6 +89,14 @@ function isAccessUrl(url: string) {
     return isAccessPath(new URL(url));
   } catch {
     return url.includes("/access");
+  }
+}
+
+function isStagingPage(page: Page) {
+  try {
+    return new URL(page.url()).hostname === STAGING_HOSTNAME;
+  } catch {
+    return false;
   }
 }
 
