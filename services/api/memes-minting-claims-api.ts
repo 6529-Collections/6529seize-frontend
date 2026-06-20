@@ -241,12 +241,15 @@ export async function uploadClaimMedia(
 ): Promise<string> {
   // Claim/field linkage is persisted by the subsequent patchClaim call.
   // This upload endpoint is intentionally generic and only returns media_url.
-  return multipartUploadCore({
+  const completion = await multipartUploadCore({
     file,
     endpoints: {
       start: "drop-media/multipart-upload",
       part: "drop-media/multipart-upload/part",
       complete: "drop-media/multipart-upload/completion",
     },
+    waitForReady: true,
   });
+
+  return completion.media_url;
 }
