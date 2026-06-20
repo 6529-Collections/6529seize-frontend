@@ -481,6 +481,34 @@ describe("BoostedDropCardHome", () => {
     expect(screen.queryByText("!Seize")).not.toBeInTheDocument();
   });
 
+  it("derives standalone markdown image mime type from the URL", () => {
+    const imageUrl = "https://example.com/art.png";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: `![Art](${imageUrl})`,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(mockDropListItemContentMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        media_mime_type: "image/png",
+        media_url: imageUrl,
+      })
+    );
+    expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
+  });
+
   it("does not render supplemental chat content after the lead media", () => {
     renderWithAuth(
       <BoostedDropCardHome
