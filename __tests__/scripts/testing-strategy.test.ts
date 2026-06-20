@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const YAML = require("yaml") as { parse: (text: string) => unknown };
+
 type RiskResult = {
   computed_floor: number;
   risk_level: string;
@@ -339,6 +342,12 @@ describe("testing strategy validation manifest", () => {
       }),
       2,
     );
+    const uppercaseErrors = validateArtifactPointer(
+      artifactPointer({
+        uri: "S3://6529-ARTIFACTS/private-trace.zip",
+      }),
+      3,
+    );
 
     expect(s3Errors).toContain(
       "artifacts[0].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
@@ -348,6 +357,9 @@ describe("testing strategy validation manifest", () => {
     );
     expect(ipfsErrors).toContain(
       "artifacts[2].redaction_status: must be public-redacted for IPFS/IPNS artifact pointers",
+    );
+    expect(uppercaseErrors).toContain(
+      "artifacts[3].uri: must start with s3://6529-artifacts/, https://artifacts.6529.io/, ipfs://, or ipns://",
     );
   });
 
@@ -383,6 +395,24 @@ describe("testing strategy validation manifest", () => {
     );
   });
 
+  it("rejects missing required manifest array sections", () => {
+    const manifest = validManifest();
+    delete (manifest as Record<string, unknown>).hazards;
+    delete (manifest as Record<string, unknown>).commands;
+    delete (manifest as Record<string, unknown>).artifacts;
+
+    const result = validateValidationManifest(manifest);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        "hazards: must be an array",
+        "commands: must be an array",
+        "artifacts: must be an array",
+      ]),
+    );
+  });
+
   it("keeps the schema const in sync with the validator", () => {
     const schema = JSON.parse(
       fs.readFileSync(
@@ -413,8 +443,10 @@ describe("testing strategy validation manifest", () => {
       path.join(process.cwd(), ".github/6529bot.yml"),
       "utf8",
     );
-    const initialLine = /initial:\s*\[([^\]]+)\]/.exec(configText)?.[1] ?? "";
-    const configLanes = initialLine.split(",").map((lane) => lane.trim());
+    const config = YAML.parse(configText) as {
+      reviewKinds?: { initial?: string[] };
+    };
+    const configLanes = config.reviewKinds?.initial ?? [];
     const schemaLanes =
       schema.properties.review.properties.reviewbot.properties.required_lanes.allOf.map(
         (rule: { contains: { const: string } }) => rule.contains.const,

@@ -533,20 +533,25 @@ deployed through controlled trains.
 ### Mega Run Rules
 
 1. Start every implementation branch from current `origin/main` in a clean
-   worktree.
-2. Preserve unrelated dirty local changes in the long-lived workspace.
+   worktree (`testing-improvement-plan.md` section `Pull Request Workflow`).
+2. Preserve unrelated dirty local changes in the long-lived workspace
+   (`active-context.md` section `Constraints`).
 3. Re-review existing WCAG/i18n implementation PRs before merging; do not assume
    older green checks are still valid after main has moved.
 4. Complete the `mega-run-pr-playbook.md` pre-PR impact and testing plan for
-   each page or page cluster before opening the PR.
+   each page or page cluster before opening the PR (`mega-run-pr-playbook.md`
+   section `Required Order`).
 5. Require the automatic `general`, `wcag`, `i18n`, `security`, and
-   `responsiveness` bot lanes to complete on every PR.
+   `responsiveness` bot lanes to complete on every PR
+   (`testing-improvement-plan.md` section `Reviewbot And GLM Swarm`).
 6. Treat actionable i18n/WCAG bot comments as required fixes unless the finding
-   is a clear false positive or an exception is recorded.
+   is a clear false positive or an exception is recorded
+   (`testing-improvement-plan.md` section `Reviewbot And GLM Swarm`).
 7. Run extensive local validation before relying on reviewbot output:
    changed-file lint/typecheck/checks, targeted Jest, real browser smoke,
    keyboard/focus checks, mobile viewport checks, and locale formatting checks
-   appropriate to the touched surface.
+   appropriate to the touched surface (`testing-improvement-plan.md` section
+   `Execution Ladder`).
 8. Keep PRs reviewable by route family, primitive, or tightly related workflow;
    group only green PRs into deployment trains.
 9. Deploy every train to staging first, validate staging, then promote the same

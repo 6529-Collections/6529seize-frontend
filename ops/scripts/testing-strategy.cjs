@@ -55,6 +55,7 @@ const FALLBACK_RISK_RULE = {
     "Unclassified files default to standard risk so runtime/config changes cannot silently enter the docs fast lane.",
 };
 
+// Rules are intentionally ordered from highest to lowest risk. First match wins.
 const RISK_RULES = [
   {
     level: 5,
@@ -457,13 +458,13 @@ function validateArtifactUri(artifact, prefix, errors) {
     );
   }
 
-  if (lowerUri.startsWith(S3_ARTIFACT_PREFIX)) {
+  if (uri.startsWith(S3_ARTIFACT_PREFIX)) {
     return;
   }
-  if (lowerUri.startsWith(HTTPS_ARTIFACT_PREFIX)) {
+  if (uri.startsWith(HTTPS_ARTIFACT_PREFIX)) {
     return;
   }
-  if (lowerUri.startsWith("ipfs://") || lowerUri.startsWith("ipns://")) {
+  if (uri.startsWith("ipfs://") || uri.startsWith("ipns://")) {
     if (artifact.redaction_status !== "public-redacted") {
       pushError(
         errors,
@@ -618,9 +619,9 @@ function validateValidationManifest(manifest) {
     pushError(errors, "changed_files", "must be an array");
   }
 
-  validateHazards(manifest.hazards || [], errors);
-  validateCommands(manifest.commands || [], errors);
-  validateArtifacts(manifest.artifacts || [], risk.final, errors);
+  validateHazards(manifest.hazards, errors);
+  validateCommands(manifest.commands, errors);
+  validateArtifacts(manifest.artifacts, risk.final, errors);
 
   validateReviewbotLanes(manifest.review, errors);
 

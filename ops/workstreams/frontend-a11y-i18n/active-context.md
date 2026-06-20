@@ -88,10 +88,13 @@ for Level 4-5 work.
 
 Opus 4.8 second review on 2026-06-20 identified four foundation controls that
 must be executable before scaling page-cluster remediation: deterministic
-risk-floor classifier, staging/production request-interception mutation guard,
-artifact redaction pipeline with fake-secret regression test, and explicit
-Level 3+ blocking or temporary manual-validation exception until Playwright
-harness plus deployment evidence gates are green.
+risk-floor classifier (`testing-improvement-plan.md` section
+`PR 0: Executable Safety Controls And Manifest Schema`), staging/production
+request-interception mutation guard (`PR 1: Test Harness Repair And Test
+Sizing`), artifact redaction pipeline with fake-secret regression test (`PR 1:
+Test Harness Repair And Test Sizing`), and explicit Level 3+ blocking or
+temporary manual-validation exception until Playwright harness plus deployment
+evidence gates are green (`Safety Case And Validation Manifest`).
 
 GPT 5.5 Pro feedback on 2026-06-20 added an important calibration: keep the
 immediate strategy focused on testing, but treat Codex/reviewbot/swarms as

@@ -24,9 +24,10 @@ Keep a strong local environment for the whole mega run:
 - Bootstrap each frontend worktree with `seize-local-dev bootstrap`.
 - Use the shared local backend, MySQL, and Redis services unless the page
   cluster explicitly requires backend ownership.
-- Use the local wrapper for project commands in Windows Codex shells:
-  `seize run <script>`, `seize exec playwright test`, and `seize-local-dev
-  start-frontend`.
+- Use the repo command model. On this Windows Codex host, AGENTS.md documents
+  the local helpers: `seize run <script>`, `seize exec playwright test`, and
+  `seize-local-dev start-frontend`. In other repo environments, use the
+  equivalent repo `6529` wrapper command.
 - Prefer focused checks first, then broaden when the change touches shared
   primitives, routing, config, or build-sensitive code.
 - Use Playwright for real browser verification. Curl or status-only checks are
@@ -124,6 +125,24 @@ surfaces aligned with the frontend accessibility and localization standards.
 - Electron simulation or code-review fallback:
 - Screenshots/videos to capture:
 - Known local test limitations:
+
+## Risk Assessment
+
+- Computed risk floor:
+- Declared risk level:
+- Final risk level:
+- Downgrade approval, if any:
+- Hazard analysis:
+  - hazard -> severity -> likelihood -> detection -> required test -> rollback
+    or fix-forward:
+
+## Validation And Artifacts
+
+- Validation manifest path:
+- Durable artifact storage plan:
+- Artifact redaction strategy for secrets, local paths, prompts, and private
+  data:
+- Reviewbot lanes expected:
 ```
 
 ## PR Description Template
@@ -190,6 +209,15 @@ This PR is part of the frontend WCAG 2.2 AA and i18n migration mega run.
 - Secret/private-data exposure review:
 - Abuse/spoofing/phishing considerations:
 
+## Risk And Validation
+
+- Computed risk floor:
+- Declared/final risk level:
+- Hazard analysis summary:
+- Validation manifest:
+- Durable artifact pointers:
+- Artifact redaction status:
+
 ## Local Validation
 
 - [ ] `seize run lint:changed`
@@ -225,6 +253,24 @@ This PR is part of the frontend WCAG 2.2 AA and i18n migration mega run.
 
 For visible UI changes, use Playwright to verify the actual rendered app:
 
+### Evidence Labels
+
+Use these labels from `testing-improvement-plan.md` section `Surface Evidence`
+when documenting Playwright results:
+
+- `simulated`: browser-driven approximation, such as desktop Chromium, mobile
+  viewport, Capacitor flag simulation, or Electron user-agent simulation.
+- `shell-smoke`: app launched in an actual native or desktop shell with basic
+  route and interaction checks.
+- `real-device`: app checked on a real mobile device, emulator, simulator, or
+  desktop shell that exercises the target runtime.
+- `production-observed`: read-only validation against production for the exact
+  deployed version.
+
+For a page-cluster PR, desktop web and mobile viewport Playwright are normally
+`simulated`. Capacitor and Electron browser approximations are also
+`simulated` until PR 4 adds stronger native-adjacent integration.
+
 - desktop viewport for primary workflows;
 - 390px or equivalent mobile viewport for responsive behavior;
 - keyboard-only interaction for focusable controls;
@@ -235,6 +281,6 @@ For visible UI changes, use Playwright to verify the actual rendered app:
 - screenshots for layout, visual, focus, overflow, and responsive changes.
 
 When native Capacitor or Electron runtime cannot be exercised locally, document
-the unavailable native capability, simulate the closest web/runtime flag path
-where practical, and inspect the native-gated branch in code. Do not silently
-mark native behavior verified from ordinary desktop web smoke alone.
+the unavailable native capability with the evidence label used. Do not use
+`shell-smoke` or `real-device` when only `simulated` browser Playwright was run.
+Inspect the native-gated branch in code and record the residual risk.
