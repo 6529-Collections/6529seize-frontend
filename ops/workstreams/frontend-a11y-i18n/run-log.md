@@ -1784,25 +1784,45 @@ test:e2e:smoke`: 6 passed.
   - `seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts`:
     29 passed.
   - `seize run testing-strategy -- ci-plan --changed-from origin/main --output
-    test-results/app-pr-ci/ci-plan.json`: computed Level 4 for this PR because
+test-results/app-pr-ci/ci-plan.json`: computed Level 4 for this PR because
     it touches workflow and testing/release controls.
   - `seize run testing-strategy -- scan-changed-secrets --changed-from
-    origin/main --output test-results/app-pr-ci/secret-scan.json`: no findings.
+origin/main --output test-results/app-pr-ci/secret-scan.json`: no findings.
   - `seize run testing-strategy -- validate-workflow-security --changed-from
-    origin/main --output test-results/app-pr-ci/workflow-security.json`: no
+origin/main --output test-results/app-pr-ci/workflow-security.json`: no
     findings.
   - `seize run testing-strategy -- validate-manifest --file
-    ops/testing-strategy/examples/minimal.validation-manifest.json`
+ops/testing-strategy/examples/minimal.validation-manifest.json`
   - `seize run testing-strategy -- validate-mutation-registry --file
-    ops/testing-strategy/mutation-endpoint-registry.json`
+ops/testing-strategy/mutation-endpoint-registry.json`
   - `seize run lint:diff`
   - `seize run typecheck:ci`
   - `seize run typecheck:playwright`
   - workflow YAML parse via local `yaml` package.
   - `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run
-    test:e2e:smoke`: 6 passed.
+test:e2e:smoke`: 6 passed.
   - `codex-diff-check`
 - Local Windows `seize run build` and localhost smoke remain blocked by the
   pre-existing Windows Sass resolution issue in `styles/seize-bootstrap.scss`.
   The failure happens before any PR 2 app-runtime behavior and is expected to be
   covered by the new Ubuntu App PR CI workflow after PR publication.
+
+## 2026-06-20T21:25Z PR 2 First CI/Bot Feedback Loop
+
+- Opened PR #2801:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2801
+- Posted explicit existing reviewbot request:
+  `/6529bot review general wcag i18n security responsiveness`.
+- First App PR CI run failed in the plan job because Ubuntu `pnpm run` passed a
+  literal `--` separator through to `ops/scripts/testing-strategy.cjs`; the
+  local Windows wrapper did not expose that exact argv shape.
+- Independent verifier found useful pre-merge issues:
+  - deleted runtime source could avoid build coverage;
+  - `.github/6529bot.yml` drift would not explicitly run the reviewbot lane
+    contract test;
+  - workflow scanning needed compact `on: [pull_request]`, bracketed
+    `secrets[...]`, and broader write-permission coverage;
+  - secret scanning needed `.npmrc`, private-key extensions, and no-extension
+    key file coverage.
+- Implementing follow-up commit to fix those findings and harden the workflow
+  summary step when plan reports are missing.

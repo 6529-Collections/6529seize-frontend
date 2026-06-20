@@ -29,6 +29,7 @@ jobs:
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
+      reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
 
     steps:
       - name: Checkout code
@@ -96,9 +97,24 @@ jobs:
 
           node <<'NODE'
           const fs = require("node:fs");
-          const plan = JSON.parse(fs.readFileSync("test-results/app-pr-ci/ci-plan.json", "utf8"));
-          const secretScan = JSON.parse(fs.readFileSync("test-results/app-pr-ci/secret-scan.json", "utf8"));
-          const workflowSecurity = JSON.parse(fs.readFileSync("test-results/app-pr-ci/workflow-security.json", "utf8"));
+          const requiredFiles = [
+            "test-results/app-pr-ci/ci-plan.json",
+            "test-results/app-pr-ci/secret-scan.json",
+            "test-results/app-pr-ci/workflow-security.json",
+          ];
+          const missing = requiredFiles.filter((file) => !fs.existsSync(file));
+          if (missing.length > 0) {
+            fs.appendFileSync(
+              process.env.GITHUB_STEP_SUMMARY,
+              `## App PR CI Plan\n\nPlan reports were not created:\n${missing
+                .map((file) => `- ${file}`)
+                .join("\n")}\n`
+            );
+            process.exit(0);
+          }
+          const plan = JSON.parse(fs.readFileSync(requiredFiles[0], "utf8"));
+          const secretScan = JSON.parse(fs.readFileSync(requiredFiles[1], "utf8"));
+          const workflowSecurity = JSON.parse(fs.readFileSync(requiredFiles[2], "utf8"));
           const lines = [
             "## App PR CI Plan",
             "",
@@ -201,6 +217,10 @@ jobs:
         env:
           DEPENDENCY_RISK_BASE_REF: origin/${{ github.base_ref }}
         run: ./bin/6529 run dependency:risk-gate
+
+      - name: Verify reviewbot contract
+        if: needs.plan.outputs.reviewbot_contract_required == 'true'
+        run: ./bin/6529 run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts
 
       - name: Lint changed source
         if: needs.plan.outputs.lint_changed_required == 'true'

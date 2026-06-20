@@ -159,7 +159,7 @@ describe("testing strategy risk floor", () => {
   });
 
   it("classifies user-visible app code as standard risk", () => {
-    const result = classifyChangedFiles(["components/header/NavMenu.tsx"]);
+    const result = classifyChangedFiles(["components/header/AppHeader.tsx"]);
 
     expect(result.computed_floor).toBe(2);
     expect(result.reasons[0]).toMatchObject({
@@ -302,7 +302,7 @@ describe("testing strategy CI plan", () => {
   });
 
   it("routes ordinary UI changes through changed checks and smoke", () => {
-    const plan = createCiPlan(["components/header/NavMenu.tsx"], {
+    const plan = createCiPlan(["components/header/AppHeader.tsx"], {
       untrustedPr: true,
     });
 
@@ -327,6 +327,20 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.workflow_security_review.required).toBe(true);
     expect(plan.checks.dependency_governance.required).toBe(true);
     expect(plan.checks.build.required).toBe(true);
+  });
+
+  it("requires build coverage for deleted runtime source", () => {
+    const plan = createCiPlan(["components/example/DeletedWidget.tsx"]);
+
+    expect(plan.risk.computed_floor).toBe(2);
+    expect(plan.checks.build.required).toBe(true);
+    expect(plan.checks.build.reason).toContain("deleted runtime source");
+  });
+
+  it("runs the reviewbot contract when bot config can drift", () => {
+    const plan = createCiPlan([".github/6529bot.yml"]);
+
+    expect(plan.checks.reviewbot_contract.required).toBe(true);
   });
 });
 
@@ -360,6 +374,24 @@ describe("testing strategy CI security checks", () => {
       },
     ]);
     expect(JSON.stringify(result)).not.toContain("sk-ant-fake-secret-value");
+  });
+
+  it("scans common credential files that do not look like source", () => {
+    fs.writeFileSync(
+      path.join(tempDir, ".npmrc"),
+      `//registry.npmjs.org/:_${"auth"}Token=npm_fake_secret_value\n`
+    );
+    fs.writeFileSync(
+      path.join(tempDir, "id_rsa"),
+      `-----BEGIN OPENSSH ${"PRIVATE"} KEY-----\nnot-real\n`
+    );
+
+    const result = scanFilesForSecrets([".npmrc", "id_rsa"], tempDir);
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining(["npm-auth-token", "private-key-block"])
+    );
   });
 
   it("accepts a read-only pull_request workflow", () => {
@@ -417,6 +449,39 @@ describe("testing strategy CI security checks", () => {
 
     const result = validateWorkflowSecurityFiles(
       [".github/workflows/unsafe.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining([
+        "pull_request-secrets",
+        "pull_request-write-permission",
+      ])
+    );
+  });
+
+  it("flags compact pull_request syntax with bracket secrets and broader write scopes", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "compact.yml"),
+      [
+        "name: Compact",
+        "on: [pull_request]",
+        "permissions:",
+        "  checks: write",
+        "jobs:",
+        "  bad:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - run: echo \"${{ secrets['STAGING_AUTH'] }}\"",
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/compact.yml"],
       tempDir
     );
 

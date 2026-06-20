@@ -46,14 +46,7 @@ const ROUTE_FILE_STEMS = new Set([
   "error",
   "not-found",
 ]);
-const ROUTE_FILE_EXTENSIONS = [
-  ".tsx",
-  ".ts",
-  ".jsx",
-  ".js",
-  ".mjs",
-  ".cjs",
-];
+const ROUTE_FILE_EXTENSIONS = [".tsx", ".ts", ".jsx", ".js", ".mjs", ".cjs"];
 const FALLBACK_RISK_RULE = {
   level: 2,
   name: "unclassified-runtime-or-config",
@@ -71,7 +64,8 @@ const RISK_RULES = [
       /(^|\/)(credentials?|secrets?|secret-handling|private[-_]?key)(\/|\.|$)/,
       /(^|\/)(staging_auth|staging_api_key|wallet[-_]?seed)(\/|\.|$)/,
     ],
-    reason: "Credentials or secret-handling paths require release-captain review.",
+    reason:
+      "Credentials or secret-handling paths require release-captain review.",
   },
   {
     level: 5,
@@ -110,7 +104,8 @@ const RISK_RULES = [
       /^scripts\/(build|start|dev|run-secure|enforce|require-6529|quality|typecheck)/,
       /(^|\/)(deploy|deployment|release|rollback|fix-forward)(\/|\.|$)/,
     ],
-    reason: "Deployment, release, build, and operational controls affect promotion safety.",
+    reason:
+      "Deployment, release, build, and operational controls affect promotion safety.",
   },
   {
     level: 4,
@@ -122,7 +117,8 @@ const RISK_RULES = [
       /^electron\//,
       /(^|\/)(capacitor|electron|native-shell|webview2)(\/|\.|$)/,
     ],
-    reason: "Native or cross-surface runtime behavior needs broader validation.",
+    reason:
+      "Native or cross-surface runtime behavior needs broader validation.",
   },
   {
     level: 3,
@@ -139,7 +135,8 @@ const RISK_RULES = [
       /(^|\/)(waves?|drops?|posting|moderation|admin|vote|delete)(\/|\.|$)/,
       /(^|[\/._-])(waves?|drops?|posting|moderation|admin|vote|delete)([\/._-]|$)/,
     ],
-    reason: "Auth, wallet, upload, posting, moderation, and admin paths are guarded.",
+    reason:
+      "Auth, wallet, upload, posting, moderation, and admin paths are guarded.",
   },
   {
     level: 3,
@@ -151,7 +148,8 @@ const RISK_RULES = [
       /^api\//,
       /(^|\/)(api-client|route-protection|server-action|data-fetch|query-client)(\/|\.|$)/,
     ],
-    reason: "API models, route handlers, and shared data paths can affect trust boundaries.",
+    reason:
+      "API models, route handlers, and shared data paths can affect trust boundaries.",
   },
   {
     level: 2,
@@ -169,7 +167,8 @@ const RISK_RULES = [
       /^styles\//,
       /^i18n\//,
     ],
-    reason: "User-visible app behavior needs standard browser and component evidence.",
+    reason:
+      "User-visible app behavior needs standard browser and component evidence.",
   },
   {
     level: 1,
@@ -209,6 +208,12 @@ const PACKAGE_GOVERNANCE_FILES = new Set([
   "pnpm-workspace.yaml",
   ".npmrc",
 ]);
+const REVIEWBOT_CONTRACT_FILES = new Set([
+  ".github/6529bot.yml",
+  "ops/testing-strategy/validation-manifest.v1.schema.json",
+  "ops/scripts/testing-strategy.cjs",
+  "__tests__/scripts/testing-strategy.test.ts",
+]);
 const SOURCE_CODE_EXTENSIONS = new Set([
   ".js",
   ".jsx",
@@ -228,6 +233,12 @@ const SECRET_SCAN_EXTENSIONS = new Set([
   ".yaml",
   ".yml",
   ".env",
+  ".npmrc",
+  ".pem",
+  ".key",
+  ".p8",
+  ".toml",
+  ".tfvars",
   ".txt",
   ".sh",
 ]);
@@ -252,6 +263,10 @@ const TEXT_SECRET_PATTERNS = [
   {
     name: "aws-access-key-id",
     pattern: /\bAKIA[0-9A-Z]{16}\b/,
+  },
+  {
+    name: "npm-auth-token",
+    pattern: /\/\/[^:\s]+\/?:_authToken\s*=\s*[A-Za-z0-9._~+/=-]{8,}/,
   },
 ];
 
@@ -302,7 +317,10 @@ function matchesAny(filePath, patterns) {
 
 function ruleForFile(filePath) {
   const normalized = normalizePath(filePath);
-  return RISK_RULES.find((rule) => matchesAny(normalized, rule.patterns)) || FALLBACK_RISK_RULE;
+  return (
+    RISK_RULES.find((rule) => matchesAny(normalized, rule.patterns)) ||
+    FALLBACK_RISK_RULE
+  );
 }
 
 function routeFileStem(fileName) {
@@ -357,7 +375,7 @@ function pagesRouteImpact(file) {
     return null;
   }
   const routeParts = [...parts.slice(0, -1), stem].filter(
-    (part, index, source) => !(part === "index" && index === source.length - 1),
+    (part, index, source) => !(part === "index" && index === source.length - 1)
   );
   return routeFromSegments(routeParts);
 }
@@ -398,13 +416,15 @@ function classifyChangedFiles(files) {
   });
   let computedFloor = reasons.reduce(
     (highest, reason) => Math.max(highest, reason.level),
-    0,
+    0
   );
   const modifiers = [];
 
   if (
     computedFloor < 4 &&
-    fileEntries.some((file) => matchesAny(file.normalized, FEATURE_FLAG_PATTERNS))
+    fileEntries.some((file) =>
+      matchesAny(file.normalized, FEATURE_FLAG_PATTERNS)
+    )
   ) {
     computedFloor = Math.min(MAX_RISK_LEVEL, computedFloor + 1);
     modifiers.push({
@@ -416,7 +436,9 @@ function classifyChangedFiles(files) {
   }
 
   if (
-    fileEntries.some((file) => matchesAny(file.normalized, I18N_PAYLOAD_PATTERNS))
+    fileEntries.some((file) =>
+      matchesAny(file.normalized, I18N_PAYLOAD_PATTERNS)
+    )
   ) {
     modifiers.push({
       name: "i18n-layout-risk",
@@ -433,7 +455,9 @@ function classifyChangedFiles(files) {
     files: fileEntries.map((file) => file.display),
     reasons,
     modifiers,
-    route_impacts: inferRouteImpacts(fileEntries.map((file) => file.normalized)),
+    route_impacts: inferRouteImpacts(
+      fileEntries.map((file) => file.normalized)
+    ),
   };
 }
 
@@ -473,6 +497,20 @@ function isPlaywrightOrTestSupportFile(filePath) {
   );
 }
 
+function isTestOrTestSupportFile(filePath) {
+  const normalized = normalizePath(filePath);
+  return (
+    normalized.startsWith("tests/") ||
+    normalized.startsWith("__tests__/") ||
+    normalized.includes(".test.") ||
+    normalized.includes(".spec.")
+  );
+}
+
+function isReviewbotContractFile(filePath) {
+  return REVIEWBOT_CONTRACT_FILES.has(normalizePath(filePath));
+}
+
 function isBuildSensitiveFile(filePath) {
   const normalized = normalizePath(filePath);
   return (
@@ -500,7 +538,14 @@ function check(required, reason) {
 }
 
 function createCiPlan(files, options = {}) {
-  const normalizedFiles = files.map(displayPath).filter(Boolean);
+  const normalizedFiles = [
+    ...new Map(
+      files
+        .map(displayPath)
+        .filter(Boolean)
+        .map((file) => [normalizePath(file), file])
+    ).values(),
+  ];
   const risk = classifyChangedFiles(normalizedFiles);
   const riskFloor = risk.computed_floor;
   const hasSourceCode = normalizedFiles.some(isSourceCodeFile);
@@ -508,8 +553,17 @@ function createCiPlan(files, options = {}) {
   const hasLintable = normalizedFiles.some(isLintableFile);
   const hasPackageGovernance = normalizedFiles.some(isPackageGovernanceFile);
   const hasWorkflow = normalizedFiles.some(isWorkflowFile);
-  const hasPlaywrightOrTests = normalizedFiles.some(isPlaywrightOrTestSupportFile);
+  const hasPlaywrightOrTests = normalizedFiles.some(
+    isPlaywrightOrTestSupportFile
+  );
+  const hasReviewbotContract = normalizedFiles.some(isReviewbotContractFile);
   const hasBuildSensitive = normalizedFiles.some(isBuildSensitiveFile);
+  const hasDeletedRuntimeSource = normalizedFiles.some(
+    (file) =>
+      isSourceCodeFile(file) &&
+      !isTestOrTestSupportFile(file) &&
+      !changedFileExists(file)
+  );
   const hasRuntimeEvidenceNeed =
     riskFloor >= 2 || risk.route_impacts.length > 0 || hasStyle;
   const needsInstall =
@@ -526,8 +580,14 @@ function createCiPlan(files, options = {}) {
     risk,
     untrusted_pr: Boolean(options.untrustedPr),
     checks: {
-      risk_floor: check(true, "Every PR gets deterministic risk-floor evidence."),
-      secret_scan: check(true, "Changed files are scanned before dependency install."),
+      risk_floor: check(
+        true,
+        "Every PR gets deterministic risk-floor evidence."
+      ),
+      secret_scan: check(
+        true,
+        "Changed files are scanned before dependency install."
+      ),
       workflow_security_review: check(
         hasWorkflow,
         hasWorkflow
@@ -539,6 +599,12 @@ function createCiPlan(files, options = {}) {
         hasPackageGovernance
           ? "Package manager or dependency policy files changed."
           : "No package governance files changed."
+      ),
+      reviewbot_contract: check(
+        hasReviewbotContract,
+        hasReviewbotContract
+          ? "Reviewbot config, manifest schema, or strategy tooling changed and must preserve existing lanes."
+          : "No reviewbot contract files changed."
       ),
       install: check(
         needsInstall,
@@ -571,9 +637,9 @@ function createCiPlan(files, options = {}) {
           : "Fast-lane change without focused Jest requirement."
       ),
       build: check(
-        riskFloor >= 3 || hasBuildSensitive,
-        riskFloor >= 3 || hasBuildSensitive
-          ? "Guarded or build-sensitive changes need a production build."
+        riskFloor >= 3 || hasBuildSensitive || hasDeletedRuntimeSource,
+        riskFloor >= 3 || hasBuildSensitive || hasDeletedRuntimeSource
+          ? "Guarded, build-sensitive, or deleted runtime source changes need a production build."
           : "Build is deferred for fast or ordinary non-build-sensitive changes."
       ),
       playwright_smoke: check(
@@ -594,11 +660,15 @@ function createCiPlan(files, options = {}) {
 
 function shouldScanTextFile(filePath) {
   const normalized = normalizePath(filePath);
+  const basename = normalized.split("/").at(-1) || "";
   const extension = fileExtension(normalized);
   return (
     SECRET_SCAN_EXTENSIONS.has(extension) ||
     normalized.startsWith(".env") ||
-    normalized.endsWith(".env")
+    normalized.endsWith(".env") ||
+    /^(id_rsa|id_ed25519|id_ecdsa|credentials?|secrets?|private[-_]?key)$/i.test(
+      basename
+    )
   );
 }
 
@@ -665,9 +735,15 @@ function workflowSecurityFindingsForText(text, filePath) {
   const findings = [];
   const hasPullRequestTrigger =
     /^\s*pull_request\s*:/m.test(text) ||
-    /^\s*-\s*pull_request\s*$/m.test(text);
+    /^\s*-\s*pull_request\s*$/m.test(text) ||
+    /^\s*on\s*:\s*pull_request\s*$/m.test(text) ||
+    /^\s*on\s*:\s*\[[^\]]*\bpull_request\b[^\]]*\]\s*$/m.test(text);
 
-  if (/^\s*pull_request_target\s*:/m.test(text)) {
+  if (
+    /^\s*pull_request_target\s*:/m.test(text) ||
+    /^\s*on\s*:\s*pull_request_target\s*$/m.test(text) ||
+    /^\s*on\s*:\s*\[[^\]]*\bpull_request_target\b[^\]]*\]\s*$/m.test(text)
+  ) {
     findings.push({
       file: displayPath(filePath),
       pattern: "pull_request_target",
@@ -676,7 +752,10 @@ function workflowSecurityFindingsForText(text, filePath) {
     });
   }
 
-  if (hasPullRequestTrigger && /\bsecrets\.[A-Za-z0-9_]+\b/.test(text)) {
+  if (
+    hasPullRequestTrigger &&
+    /\bsecrets\s*(?:\.\s*[A-Za-z0-9_]+|\[\s*['"][^'"]+['"]\s*\])/.test(text)
+  ) {
     findings.push({
       file: displayPath(filePath),
       pattern: "pull_request-secrets",
@@ -685,7 +764,10 @@ function workflowSecurityFindingsForText(text, filePath) {
     });
   }
 
-  if (hasPullRequestTrigger && /^\s*permissions\s*:\s*write-all\s*$/m.test(text)) {
+  if (
+    hasPullRequestTrigger &&
+    /^\s*permissions\s*:\s*write-all\s*$/m.test(text)
+  ) {
     findings.push({
       file: displayPath(filePath),
       pattern: "pull_request-write-all",
@@ -695,7 +777,7 @@ function workflowSecurityFindingsForText(text, filePath) {
 
   if (
     hasPullRequestTrigger &&
-    /^\s*(?:actions|contents|deployments|id-token|issues|packages|pull-requests)\s*:\s*write\s*$/m.test(
+    /^\s*(?:actions|attestations|checks|contents|deployments|discussions|id-token|issues|models|packages|pages|pull-requests|repository-projects|security-events|statuses)\s*:\s*write\s*$/m.test(
       text
     )
   ) {
@@ -772,7 +854,7 @@ function validateArtifactPointer(artifact, index) {
     pushError(
       errors,
       prefix,
-      "must include at least one integrity field: sha256, cid, etag, or version_id",
+      "must include at least one integrity field: sha256, cid, etag, or version_id"
     );
   }
 
@@ -780,7 +862,7 @@ function validateArtifactPointer(artifact, index) {
     pushError(
       errors,
       `${prefix}.redaction_status`,
-      `must be one of ${[...ARTIFACT_REDACTION_STATUSES].join(", ")}`,
+      `must be one of ${[...ARTIFACT_REDACTION_STATUSES].join(", ")}`
     );
   }
 
@@ -806,7 +888,7 @@ function validateArtifactUri(artifact, prefix, errors) {
     pushError(
       errors,
       `${prefix}.uri`,
-      "must be a durable artifact pointer, not a local path or Git LFS object",
+      "must be a durable artifact pointer, not a local path or Git LFS object"
     );
   }
 
@@ -821,7 +903,7 @@ function validateArtifactUri(artifact, prefix, errors) {
       pushError(
         errors,
         `${prefix}.redaction_status`,
-        "must be public-redacted for IPFS/IPNS artifact pointers",
+        "must be public-redacted for IPFS/IPNS artifact pointers"
       );
     }
     return;
@@ -830,7 +912,7 @@ function validateArtifactUri(artifact, prefix, errors) {
   pushError(
     errors,
     `${prefix}.uri`,
-    `must start with ${S3_ARTIFACT_PREFIX}, ${HTTPS_ARTIFACT_PREFIX}, ipfs://, or ipns://`,
+    `must start with ${S3_ARTIFACT_PREFIX}, ${HTTPS_ARTIFACT_PREFIX}, ipfs://, or ipns://`
   );
 }
 
@@ -849,7 +931,7 @@ function validateReviewbotLanes(review, errors) {
       pushError(
         errors,
         "review.reviewbot.required_lanes",
-        `must include existing reviewbot lane: ${lane}`,
+        `must include existing reviewbot lane: ${lane}`
       );
     }
   }
@@ -919,7 +1001,7 @@ function validateCommands(commands, errors) {
       pushError(
         errors,
         `commands[${index}].status`,
-        `must be one of ${[...COMMAND_STATUSES].join(", ")}`,
+        `must be one of ${[...COMMAND_STATUSES].join(", ")}`
       );
     }
   });
@@ -939,7 +1021,7 @@ function validateArtifacts(artifacts, finalRisk, errors) {
     pushError(
       errors,
       "artifacts",
-      "Level 3+ manifests require at least one validated durable artifact pointer",
+      "Level 3+ manifests require at least one validated durable artifact pointer"
     );
   }
 }
@@ -960,7 +1042,7 @@ function validateValidationManifest(manifest) {
     pushError(
       errors,
       "schema_version",
-      `must be ${VALIDATION_MANIFEST_SCHEMA_VERSION}`,
+      `must be ${VALIDATION_MANIFEST_SCHEMA_VERSION}`
     );
   }
 
@@ -981,7 +1063,7 @@ function validateValidationManifest(manifest) {
     pushError(
       errors,
       "review.reviewbot.required_lanes",
-      "required; every PR must preserve the existing reviewbot lanes",
+      "required; every PR must preserve the existing reviewbot lanes"
     );
   }
 
@@ -1018,7 +1100,7 @@ function validateMutationRegistry(registry) {
     pushError(
       errors,
       "schema_version",
-      `must be ${MUTATION_REGISTRY_SCHEMA_VERSION}`,
+      `must be ${MUTATION_REGISTRY_SCHEMA_VERSION}`
     );
   }
   if (!registry.owner) {
@@ -1050,11 +1132,19 @@ function validateMutationRegistry(registry) {
       pushError(errors, `${prefix}.pattern`, "required");
     }
     if (!Array.isArray(endpoint.methods) || endpoint.methods.length === 0) {
-      pushError(errors, `${prefix}.methods`, "must include at least one method");
+      pushError(
+        errors,
+        `${prefix}.methods`,
+        "must include at least one method"
+      );
     } else {
       for (const method of endpoint.methods) {
         if (!HTTP_METHODS.has(method)) {
-          pushError(errors, `${prefix}.methods`, `invalid HTTP method: ${method}`);
+          pushError(
+            errors,
+            `${prefix}.methods`,
+            `invalid HTTP method: ${method}`
+          );
         }
       }
     }
@@ -1062,16 +1152,24 @@ function validateMutationRegistry(registry) {
       pushError(errors, `${prefix}.surface`, "required");
     }
     if (!isIntegerRisk(endpoint.risk_level)) {
-      pushError(errors, `${prefix}.risk_level`, "must be an integer from 0 through 5");
+      pushError(
+        errors,
+        `${prefix}.risk_level`,
+        "must be an integer from 0 through 5"
+      );
     }
     if (endpoint.mutation !== true) {
-      pushError(errors, `${prefix}.mutation`, "must be true for registry entries");
+      pushError(
+        errors,
+        `${prefix}.mutation`,
+        "must be true for registry entries"
+      );
     }
     if (endpoint.allowed_in_readonly_tests !== false) {
       pushError(
         errors,
         `${prefix}.allowed_in_readonly_tests`,
-        "must be false unless a separate allowlist explicitly handles the endpoint",
+        "must be false unless a separate allowlist explicitly handles the endpoint"
       );
     }
   });
@@ -1142,11 +1240,13 @@ function changedFilesFromGit(baseRef, cwd = process.cwd()) {
       cwd,
       encoding: "buffer",
       stdio: ["ignore", "pipe", "pipe"],
-    },
+    }
   );
 
   if (diffResult.status !== 0) {
-    throw new Error(diffResult.stderr.toString("utf8").trim() || "git diff failed");
+    throw new Error(
+      diffResult.stderr.toString("utf8").trim() || "git diff failed"
+    );
   }
 
   const workspaceResult = spawnSync(
@@ -1156,13 +1256,12 @@ function changedFilesFromGit(baseRef, cwd = process.cwd()) {
       cwd,
       encoding: "buffer",
       stdio: ["ignore", "pipe", "pipe"],
-    },
+    }
   );
 
   if (workspaceResult.status !== 0) {
     throw new Error(
-      workspaceResult.stderr.toString("utf8").trim() ||
-        "git diff HEAD failed",
+      workspaceResult.stderr.toString("utf8").trim() || "git diff HEAD failed"
     );
   }
 
@@ -1173,13 +1272,13 @@ function changedFilesFromGit(baseRef, cwd = process.cwd()) {
       cwd,
       encoding: "buffer",
       stdio: ["ignore", "pipe", "pipe"],
-    },
+    }
   );
 
   if (untrackedResult.status !== 0) {
     throw new Error(
       untrackedResult.stderr.toString("utf8").trim() ||
-        "git ls-files --others failed",
+        "git ls-files --others failed"
     );
   }
 
@@ -1302,6 +1401,9 @@ const COMMAND_HANDLERS = {
 };
 
 async function main(argv = process.argv.slice(2)) {
+  if (argv[0] === "--") {
+    argv = argv.slice(1);
+  }
   const [command, ...rest] = argv;
   const args = parseArgs(rest);
 
