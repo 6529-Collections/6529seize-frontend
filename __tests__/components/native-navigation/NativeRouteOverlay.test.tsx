@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import NativeRouteOverlay from "@/components/native-navigation/NativeRouteOverlay";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { StrictMode } from "react";
 
 const back = jest.fn();
 const replace = jest.fn();
@@ -74,6 +75,26 @@ describe("NativeRouteOverlay", () => {
     expect(back).toHaveBeenCalledTimes(1);
   });
 
+  it("prevents native scrolling once an edge swipe is claimed", async () => {
+    renderAppOverlay();
+
+    const overlay = await screen.findByTestId("native-route-overlay");
+    fireEvent.touchStart(overlay, {
+      touches: [{ clientX: 4, clientY: 20 }],
+    });
+
+    const moveEvent = new Event("touchmove", {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(moveEvent, "touches", {
+      value: [{ clientX: 96, clientY: 28 }],
+    });
+    overlay.dispatchEvent(moveEvent);
+
+    expect(moveEvent.defaultPrevented).toBe(true);
+  });
+
   it("closes on an inward right-edge swipe", async () => {
     renderAppOverlay();
 
@@ -89,6 +110,48 @@ describe("NativeRouteOverlay", () => {
     });
 
     expect(back).toHaveBeenCalledTimes(1);
+  });
+
+  it("cleans up the non-passive touchmove listener with matching options", async () => {
+    const addEventListenerSpy = jest.spyOn(
+      EventTarget.prototype,
+      "addEventListener"
+    );
+    const removeEventListenerSpy = jest.spyOn(
+      EventTarget.prototype,
+      "removeEventListener"
+    );
+    mockedUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: true,
+      isAppleMobile: true,
+      isMobileDevice: true,
+    });
+
+    const { unmount } = render(
+      <StrictMode>
+        <NativeRouteOverlay>
+          <a href="/bob">Bob</a>
+        </NativeRouteOverlay>
+      </StrictMode>
+    );
+
+    await screen.findByTestId("native-route-overlay");
+    unmount();
+
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "touchmove",
+      expect.any(Function),
+      { capture: false, passive: false }
+    );
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "touchmove",
+      expect.any(Function),
+      { capture: false, passive: false }
+    );
+
+    addEventListenerSpy.mockRestore();
+    removeEventListenerSpy.mockRestore();
   });
 
   it("offers a keyboard-accessible close action", async () => {

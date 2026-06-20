@@ -16,6 +16,9 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 const EDGE_SWIPE_WIDTH_PX = 36;
 const EDGE_SWIPE_CLOSE_DISTANCE_PX = 72;
 const EDGE_SWIPE_HORIZONTAL_RATIO = 1.35;
+const CAPTURE_LISTENER_OPTIONS = { capture: true } as const;
+const TOUCH_LISTENER_OPTIONS = { capture: false, passive: true } as const;
+const TOUCH_MOVE_LISTENER_OPTIONS = { capture: false, passive: false } as const;
 
 type SwipeSide = "left" | "right";
 
@@ -250,20 +253,60 @@ export default function NativeRouteOverlay({
       return;
     }
 
-    overlay.addEventListener("click", handleOverlayClick, true);
+    overlay.addEventListener(
+      "click",
+      handleOverlayClick,
+      CAPTURE_LISTENER_OPTIONS
+    );
     overlay.addEventListener("keydown", handleOverlayKeyDown);
-    overlay.addEventListener("touchcancel", handleTouchCancel);
-    overlay.addEventListener("touchend", handleTouchEnd);
-    overlay.addEventListener("touchmove", handleTouchMove, { passive: false });
-    overlay.addEventListener("touchstart", handleTouchStart);
+    overlay.addEventListener(
+      "touchcancel",
+      handleTouchCancel,
+      TOUCH_LISTENER_OPTIONS
+    );
+    overlay.addEventListener(
+      "touchend",
+      handleTouchEnd,
+      TOUCH_LISTENER_OPTIONS
+    );
+    overlay.addEventListener(
+      "touchmove",
+      handleTouchMove,
+      TOUCH_MOVE_LISTENER_OPTIONS
+    );
+    overlay.addEventListener(
+      "touchstart",
+      handleTouchStart,
+      TOUCH_LISTENER_OPTIONS
+    );
 
     return () => {
-      overlay.removeEventListener("click", handleOverlayClick, true);
+      overlay.removeEventListener(
+        "click",
+        handleOverlayClick,
+        CAPTURE_LISTENER_OPTIONS
+      );
       overlay.removeEventListener("keydown", handleOverlayKeyDown);
-      overlay.removeEventListener("touchcancel", handleTouchCancel);
-      overlay.removeEventListener("touchend", handleTouchEnd);
-      overlay.removeEventListener("touchmove", handleTouchMove);
-      overlay.removeEventListener("touchstart", handleTouchStart);
+      overlay.removeEventListener(
+        "touchcancel",
+        handleTouchCancel,
+        TOUCH_LISTENER_OPTIONS
+      );
+      overlay.removeEventListener(
+        "touchend",
+        handleTouchEnd,
+        TOUCH_LISTENER_OPTIONS
+      );
+      overlay.removeEventListener(
+        "touchmove",
+        handleTouchMove,
+        TOUCH_MOVE_LISTENER_OPTIONS
+      );
+      overlay.removeEventListener(
+        "touchstart",
+        handleTouchStart,
+        TOUCH_LISTENER_OPTIONS
+      );
     };
   }, [
     handleOverlayClick,
