@@ -1071,29 +1071,501 @@
   responses unrelated to the followers modal change.
 - Opened review-ready stacked PR #2641 against PR #2640. Per workstream policy,
   do not merge PR #2641.
-- Recorded `/about/tech` and `/about/tech/[reportSlug]` fallback debt while
-  addressing PR #2719 bot feedback: the report index/detail count chrome now
-  uses source-locale messages and `formatInteger`, and the not-found metadata
-  fallback is message-backed. Remaining debt is the broader tech-report chrome
-  and editorial report data (`dateLabel`, `publishedAt`, repo focus summaries,
-  and markdown report bodies), which intentionally stays `en-US` until the
-  About Tech shelf gets a full localization pass.
-- Recorded brain left-sidebar waves filter fallback debt while addressing PR
-  #2778 bot feedback: `WavesFilterToggle`, `UnifiedWavesList`, and
-  `WebUnifiedWavesList` now use source-locale message keys for the All/Joined
-  labels, filter group name, and joined empty state, but the sidebar has no
-  viewer-locale source yet and therefore falls back to `en-US`. Non-English
-  viewers may see English sidebar filter copy until locale is threaded through
-  the brain sidebar shell; owner is the frontend a11y/i18n workstream, and the
-  remediation path is to pass the resolved app locale into the brain sidebar
-  components before translating this surface.
-- Recorded Discover/explore wave-card fallback debt while addressing PR #2782
-  bot feedback: `ExploreWaveCard` card copy, drops count text, image alt text,
-  link accessible names, and the inlined compact score/hotness/REP metrics now
-  use source-locale messages and locale-aware integer/compact-number formatting.
-  The metric row derives its visible chips and link accessible-name suffix from
-  the same `ExploreWaveMetric` data. The surface still resolves through
-  `DEFAULT_LOCALE` until the active locale can be threaded through the
-  Discover/home explore grids. User impact: non-English users continue to see
-  English labels on this card surface. Follow-up owner: frontend i18n migration
-  workstream.
+- Fixed a PR #2641 typecheck issue for followers without handles by falling
+  back to the follower's primary address for profile routes and accessible
+  labels. Validation passed for the focused followers/i18n Jest suites,
+  targeted ESLint, `typecheck:changed`, `react-doctor:diff`, `git diff
+  --check`, and desktop/mobile browser smoke on `/punk6529`.
+- Confirmed PR #2641 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit passed with no review threads, and Claude
+  remained configured for manual review only. Per workstream policy, do not
+  merge PR #2641.
+- Started stacked branch `codex/user-header-stats-a11y-i18n` from PR #2641 for
+  the next low-risk user profile header follow-up.
+- Implemented message-backed source-locale labels and accessible names for the
+  profile header stats row. The TDH, xTDH, NIC, Rep, and follower controls now
+  expose explicit action labels that include the handle and current values, and
+  follower counts use the repo i18n integer formatting helper.
+- Validation passed for the stats-row follow-up so far: focused stats/i18n Jest
+  suites (3 suites, 8 tests), targeted ESLint for the touched source files,
+  `typecheck:changed`, `react-doctor:diff`, `git diff --check`, Next MCP
+  runtime diagnostics, and desktop/mobile browser smoke on `/punk6529`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Opened review-ready stacked PR #2642 against PR #2641. Per workstream policy,
+  do not merge PR #2642.
+- Confirmed PR #2642 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues and 0.0% duplication, CodeRabbit manual
+  review passed with no actionable comments and no review threads, and Claude
+  remained configured for manual review only. CodeRabbit's generic docstring
+  coverage warning was deferred because the touched helpers are self-explanatory
+  and repo style avoids low-value comments. Per workstream policy, do not merge
+  PR #2642.
+- Started stacked branch `codex/user-header-identity-a11y-i18n` from PR #2642
+  for the next low-risk profile header follow-up.
+- Implemented message-backed source-locale labels for the profile header name
+  edit action, profile picture alt/edit labels, banner edit label, and
+  profile-enabled date line. Removed disabled edit buttons from read-only name
+  and profile-picture wrappers so the public profile header uses plain
+  non-interactive containers when editing is unavailable. The profile-enabled
+  month/year now uses the repo i18n date formatting helper.
+- Validation passed for the header identity/media follow-up so far: focused
+  header/i18n Jest suites (6 suites, 18 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, `git diff --check`,
+  Next MCP runtime diagnostics, and desktop/mobile browser smoke on `/punk6529`.
+  React Doctor still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and a test-only `next/image` mock warning.
+- Opened review-ready stacked PR #2643 against PR #2642. Per workstream policy,
+  do not merge PR #2643.
+- Fixed PR #2643 bot feedback: SonarCloud reported accessibility findings in
+  test mocks, so the affected mocks now use semantic buttons and a
+  `next/image` mock with explicit alt text. CodeRabbit requested direct profile
+  header helper coverage and single-source profile label derivation for the
+  banner; added focused helper assertions and threaded the client-computed
+  `profileLabel` into `UserPageHeaderBanner`.
+- Validation after the PR #2643 bot-feedback fixes passed for the focused
+  header/i18n Jest suites (6 suites, 19 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, and `git diff
+  --check`. React Doctor still reports only the unrelated dirty
+  `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Confirmed PR #2643 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit manual review passed, no
+  review threads are open, and Claude remained configured for manual review
+  only. Per workstream policy, do not merge PR #2643.
+- Started stacked branch `codex/user-header-about-a11y-i18n` from PR #2643 for
+  the next low-risk profile header follow-up.
+- Implemented message-backed source-locale labels for the profile header About
+  placeholder, add/edit actions, and mobile expand/collapse control. Split the
+  existing statement edit affordance so long statements can keep their own
+  expand button without being nested inside a parent edit button. The public
+  read-only profile continues to render no hidden About edit controls.
+- Validation passed for the About statement follow-up so far: focused about/i18n
+  Jest suites (3 suites, 10 tests), targeted ESLint for touched source files,
+  `typecheck:changed`, `react-doctor:diff`, `git diff --check`, Next MCP runtime
+  diagnostics, and desktop/mobile browser smoke on `/punk6529`. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic; the local browser console still shows known shared
+  API/emoji resource errors.
+- Opened review-ready stacked PR #2644 against PR #2643. Per workstream policy,
+  do not merge PR #2644.
+- Confirmed PR #2644 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit manual review passed, no
+  review threads are open, and Claude remained configured for manual review
+  only. Per workstream policy, do not merge PR #2644.
+- Started stacked branch `codex/user-about-edit-a11y-i18n` from PR #2644 for the
+  next adjacent profile About follow-up.
+- Implemented message-backed source-locale labels for the profile About edit
+  form textarea, placeholder, character count, cancel/save controls, success
+  toast, moderation error copy, unknown-error title, and error-dismiss action.
+  The moderation error container now uses `role="alert"` so errors are announced.
+- Validation passed for the About edit-form follow-up so far: focused edit
+  form/error/i18n Jest suites (3 suites, 7 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, `git diff --check`,
+  Next MCP runtime diagnostics, and desktop browser smoke on `/punk6529`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic; the local browser console still shows known shared
+  API/emoji resource errors.
+- Opened review-ready stacked PR #2645 against PR #2644. Per workstream policy,
+  do not merge PR #2645.
+
+## 2026-06-13
+
+- Audited the open WCAG/i18n PR stack after user concern about the number of
+  related PRs. Confirmed PR #2604 and PRs #2607-#2645 are expected workstream
+  implementation PRs, are open, non-draft, mergeable, and green on the visible
+  GitHub check rollup. Recorded the stack snapshot in `stack-audit.md`.
+- Confirmed related-looking PR #2597 is older OG metadata work and PR #2632 is
+  separate 6529bot admin dashboard work; neither is part of this WCAG/i18n
+  migration stack.
+- Updated active context to pause new page PR creation until the current stack
+  is reviewed or a new scope is chosen.
+
+## 2026-06-14
+
+- Rechecked the bottom of the WCAG/i18n stack and used a clean temp worktree for
+  PR #2604.
+- Pushed signed hardening commit `23d119e` to PR #2604, making the The Memes
+  scroll listener passive.
+- Validation passed for PR #2604: changed-file lint, changed-file typecheck,
+  targeted The Memes card and i18n Jest suites, React Doctor PR-diff review,
+  `git diff --check`, and desktop/mobile browser smoke on
+  `/the-memes?locale=de-DE`.
+- Browser smoke used a local-only Bootstrap import fix that is already present
+  on current `main`; this verification-only tweak was not committed to #2604.
+- Confirmed stale CodeRabbit findings on #2604 are already handled in current
+  code: localized document title, case-insensitive locale normalization, and
+  exhaustive enum label guards.
+- Recorded the latest CodeRabbit caveat: the visible status context is green,
+  but the new incremental review was rate-limited, so treat new bot review as
+  unavailable until the limit resets.
+- Rechecked PR #2604 after CodeQL completed. The latest visible GitHub rollup
+  passed for head `23d119e`: CodeQL, DCO, SonarCloud, Snyk, and CodeRabbit
+  status context.
+- Posted a PR validation snapshot comment documenting the local checks, browser
+  smoke, green rollup, and CodeRabbit rate-limit caveat.
+- Added `audit-inventory.md` with candidate hotspots for static copy,
+  interaction semantics, locale formatting, image alt review, and i18n helper
+  adoption to guide the next safe stack.
+# 2026-06-19 Autonomous Production Rollout
+
+## 2026-06-19T21:49Z Mission Start
+
+- User requested autonomous overnight implementation and deployment of the
+  combined accessibility, i18n, and reviewbot plan, including production
+  rollout and fix-forward responsibility.
+- Loaded `ops/skills/6529-autonomous-manager/SKILL.md`.
+- Loaded deployment authority from `origin/main` because local dirty branch does
+  not currently contain `ops/skills/deploy-6529/SKILL.md`:
+  `git show origin/main:ops/skills/deploy-6529/SKILL.md`.
+- Loaded GitHub plugin skills for PR orientation, review comments, and CI
+  inspection.
+- Initialized Next.js DevTools MCP for the frontend repo worktree.
+- Created persistent Codex goal for this rollout.
+- Fetched remotes. `origin/main` is `9bc89b3b4b9f8f17e9ccb7a216aec1320a131b9f`.
+- Confirmed PR #2788 is merged:
+  - URL: https://github.com/6529-Collections/6529seize-frontend/pull/2788
+  - title: `Add combined accessibility, i18n, and reviewbot plan`
+  - head: `127ae232ce047781ec5b4e79831f9749808f14a3`
+  - merge commit: `9bc89b3b4b9f8f17e9ccb7a216aec1320a131b9f`
+  - checks: DCO, CodeQL, CodeRabbit, SonarCloud, Snyk green/neutral as expected
+  - 6529bot i18n/general/security reviews: no blocking findings.
+- Started read-only subagents:
+  - `Harvey` (`019ee1dd-6a7d-72e2-9475-b6139e90f108`): map
+    6529reviewbot-related PR/branch/deploy state.
+  - `Lovelace` (`019ee1dd-9304-75f1-bfc7-644bd0068833`): audit PR #2788 state,
+    checks, comments, risk, and validation needs.
+
+## Next
+
+1. Check active staging and production deployment lanes.
+2. Determine whether `9bc89b3b` is deployed to staging and production.
+3. If not, deploy `origin/main` through staging first, run staging validation,
+   then promote the same current `origin/main` SHA to production.
+4. Use reviewbot findings on subsequent implementation PRs once reviewbot is
+   confirmed live.
+
+## 2026-06-19T21:55Z Frontend Staging Start
+
+- Active staging lane check: no in-progress `deploy-staging.yml` run before
+  push.
+- Active production lane check: no in-progress `build-upload-deploy-prod.yml`
+  run before push.
+- Release set since last production deploy `52f3b1e5...`: exactly PR #2788,
+  docs-only, one new file.
+- Created a clean release worktree for the PR 2788 deployment lane.
+- Created signed staging merge commit:
+  `cbefed0ac379d7bd17bd51d4c9b0213d387cab5c`.
+- Pushed fast-forward to `origin/1a-staging`, triggering staging deploy:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27850097993
+- Production remains held until staging passes and current `origin/main` is
+  still `9bc89b3b4b9f8f17e9ccb7a216aec1320a131b9f`.
+
+## 2026-06-19T21:56Z Reviewbot Prerequisite Delegation
+
+- Frontend-side reviewbot enablement already merged before PR #2788:
+  - #2646 `Enable 6529bot reviewer config`
+  - #2710 `Enable responsiveness 6529bot review`
+  - #2716 `Enable automatic i18n 6529bot review`
+  - #2605/#2632/#2652 dashboard/admin/cost surfaces
+- PR #2788 itself received live `6529bot` i18n, general, and security reviews.
+- Central repo `6529-Collections/6529reviewbot` has open PR #397:
+  `Page usage events for admin summaries`.
+- Delegated central reviewbot merge/deploy lane to worker agent
+  `019ee1e1-6171-73a0-bd0c-458cebf23a36`. Worker owns only the reviewbot
+  repository; frontend production promotion remains held until reviewbot
+  prerequisite status is clear.
+
+## 2026-06-19T22:00Z User Clarification
+
+- User clarified the intended reviewbot prerequisite: decide and implement the
+  i18n and WCAG review bots in `6529reviewbot`, then make them automatically
+  run on `6529seize-frontend` PRs.
+- Redirected reviewbot worker away from unrelated PR #397 merge/deploy unless
+  directly needed for the new bot deliverable.
+- User also clarified frontend patches should match current merged GitHub
+  `main`. Future frontend edits will use a clean `origin/main` worktree rather
+  than the dirty local integration branch.
+
+## 2026-06-19T23:10Z Reviewbot And Frontend Config Live
+
+- Implemented and merged `6529reviewbot` PR #399:
+  https://github.com/6529-Collections/6529reviewbot/pull/399
+  - merge SHA: `db1fced6105af2a975965c5604a79d578fe5080b`
+  - strengthened `review:i18n` and `review:wcag` by adding deterministic,
+    frontend-scoped review leads for locale formatting, hardcoded accessible
+    copy, hardcoded JSX text, sentence concatenation, invalid locale ids,
+    clickable non-interactive elements, unlabeled form controls, icon-only
+    buttons, dialog focus, focus-outline removal, and autofocus.
+  - added trusted base-ref policy context from frontend standards/skills so PR
+    heads cannot alter their own review instructions.
+  - fixed the diff parser so legitimate added lines such as `++index;` are
+    retained while file headers are ignored.
+  - verification passed: `npm test`, `npm run check`, `codex-diff-check`,
+    CodeRabbit, 6529bot follow-up reviews, and an independent subagent review.
+- Implemented and merged frontend PR #2789:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2789
+  - merge SHA: `7c966099173d3610b34a40ff989cea41340a6637`
+  - `.github/6529bot.yml` now automatically runs initial review lanes:
+    `general, wcag, i18n, security, responsiveness`.
+  - `limits.maxJobsPerDelivery` increased to `5` to allow all initial lanes to
+    run in one delivery.
+  - reviewbot config validator passed.
+  - PR checks passed: CodeQL, CodeRabbit, DCO, SonarCloud, Snyk.
+  - manual `/6529bot review wcag i18n` on #2789 confirmed the deployed
+    reviewbot worker at `db1fced6105af2a975965c5604a79d578fe5080b` completed
+    clean WCAG and i18n reviews.
+
+## 2026-06-19T23:11Z Deployment Train Complete
+
+- Release train:
+  - PR #2788 combined accessibility/i18n/reviewbot plan, merge SHA
+    `9bc89b3b4b9f8f17e9ccb7a216aec1320a131b9f`.
+  - PR #2789 frontend automatic WCAG reviewbot config, merge SHA
+    `7c966099173d3610b34a40ff989cea41340a6637`.
+- Staging:
+  - created signed staging merge commit
+    `15504066aa5cee0c2bfaca69022fbdbf7da72590`.
+  - pushed to `origin/1a-staging`.
+  - staging deploy passed:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27851212528
+  - `seize run test:e2e:staging` remains blocked by the existing harness error
+    `Cannot find module '../testHelpers'` from staging Playwright specs.
+  - direct authenticated Playwright smoke passed on staging for `/`,
+    `/about/the-memes`, and `/the-memes`.
+- Production:
+  - confirmed no overlapping production deploy and that `origin/main` was still
+    `7c966099173d3610b34a40ff989cea41340a6637` before production mutation.
+  - production deploy passed:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27851738857
+  - workflow validation passed at production SHA
+    `7c966099173d3610b34a40ff989cea41340a6637`.
+  - independent Playwright smoke passed on `https://6529.io` for `/`,
+    `/about/the-memes`, and `/the-memes`; each route returned HTTP 200 and
+    rendered expected content.
+  - observed three non-fatal 403 resource loads for current CloudFront video
+    renditions for one drop (`m3u8`, 1080p mp4, 720p mp4). Core page content
+    and deploy validation were healthy.
+- Public notes:
+  - release note `4.41.1` posted to 6529 Releases:
+    https://6529.io/waves/05b14183-e153-4e47-bc66-42a0f49102d4?drop=b3df3435-2bae-4a7f-b9c2-5d93feb7b524
+  - deployment note posted to Follow The Repo:
+    https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4?drop=f8edf3f7-4255-4889-8a24-0a8a2e8cc469
+
+## 2026-06-20T00:00Z Mega Run Plan Refresh
+
+- Re-reviewed `combined-plan.md` after the reviewbot rollout.
+- Updated the plan to mark the reviewbot prerequisite complete:
+  - `6529reviewbot` PR #399 is live.
+  - frontend PR #2789 is live.
+  - frontend PRs automatically run `general`, `wcag`, `i18n`, `security`, and
+    `responsiveness` lanes.
+- Reframed the remaining work as the actual frontend WCAG/i18n mega run:
+  reconcile existing implementation PRs against current `origin/main`, run
+  extensive local validation, use reviewbot as an additional reviewer, and
+  deploy green PRs in controlled staging/production trains.
+- Made explicit that reviewbot is additive only; it does not replace local
+  lint/typecheck/tests/browser/keyboard/mobile/locale validation.
+- Updated `active-context.md` so future resumes no longer inherit the stale
+  "do not merge page implementation PRs" instruction. Page implementation PRs
+  may now merge only after rebase/revalidation, local testing, reviewbot
+  review, and train assignment.
+
+## 2026-06-20T00:10Z Page-Cluster Testing And PR Template
+
+- Added `mega-run-pr-playbook.md` as the required operating template for every
+  page or page-cluster PR in the mega run.
+- The playbook requires a pre-PR impact assessment for functionality, UX,
+  safety/security, web, Mobile/Capacitor, and Electron/Desktop Shell.
+- The playbook requires a local testing strategy before opening a PR, with
+  Playwright used for rendered web verification and explicit native-shell
+  fallback notes when Capacitor or Electron cannot be exercised locally.
+- Added a PR description template covering summary, cluster/workflows, WCAG,
+  i18n, functionality/UX impact, surface impact, safety/security review, local
+  validation, reviewbot/external checks, and deployment-train notes.
+- Linked the playbook from `combined-plan.md`, added it to the workstream
+  reload order, and updated `active-context.md` so future agents apply it.
+- Updated the templates so both the pre-PR plan and PR description explicitly
+  identify the work as part of the frontend WCAG 2.2 AA and i18n migration mega
+  run, with local validation first and reviewbot as an additional reviewer.
+
+## 2026-06-20T00:45Z Testing Improvement Sidequest Draft
+
+- Added `testing-improvement-plan.md` after external research and internal
+  repo review.
+- The plan frames testing as a sidequest prerequisite before scaling the
+  WCAG/i18n page-cluster mega run.
+- It records current gaps, including the broken staging Playwright helper,
+  missing broad app PR CI, narrow Playwright surface matrix, missing test
+  typecheck project, and lack of standard WCAG/i18n/security browser packs.
+- It defines testing layers: static gates, Jest/component tests, Playwright
+  browser harness, WCAG packs, i18n packs, security-sensitive read-only packs,
+  responsiveness/visual/performance packs, deployment gates, and agentic swarm
+  evidence rules.
+- It proposes the first implementation train:
+  1. test harness repair,
+  2. app PR CI baseline,
+  3. WCAG/i18n Playwright foundation,
+  4. surface matrix,
+  5. deployment evidence integration.
+- Linked the plan from `README.md` and `combined-plan.md`, and updated
+  `active-context.md` to treat the testing sidequest as the current gating
+  planning goal.
+
+## 2026-06-20T01:05Z Open-Model Swarm Reviewbot Added To Plan
+
+- Updated `testing-improvement-plan.md` to keep the existing Opus-backed
+  `6529reviewbot` review lanes unchanged.
+- Added a separate GLM/OpenRouter swarm reviewbot concept that runs in parallel
+  and posts one synthesized `6529bot GLM Swarm Review` comment.
+- Documented the proposed 20 internal GLM review threads, including diff risk,
+  missing test evidence, WCAG, i18n, mobile, Capacitor, Electron, auth, wallet,
+  upload, XSS, Next.js rendering, deployment, and contrarian review lanes.
+- Added implementation rules: one posted synthesized comment, concrete
+  file/evidence citations, advisory first rollout, no secrets, raw outputs kept
+  as artifacts/logs, cost caps, telemetry, and kill switch.
+- Added OpenRouter/Z.ai pricing references with a reminder to recheck pricing
+  and availability before implementation.
+
+## 2026-06-20T01:20Z Safety-Case Testing Layer Added
+
+- Updated `testing-improvement-plan.md` with the aerospace-style safety lens:
+  risk levels, requirements traceability, hazard analysis, independent
+  verification, stop-the-line rules, post-deploy watch, and quality metrics.
+- Added PR 0 to the first implementation train for the validation manifest,
+  risk/hazard templates, artifact pointer schema, redaction rules, and
+  train-assignment requirements.
+- Made durable evidence a first-class release artifact: Playwright reports,
+  traces, screenshots, reviewbot outputs, staging/prod evidence, and manifests
+  should live on 6529-controlled artifact infrastructure such as private S3,
+  pinned IPFS, or a future artifact service.
+- Explicitly ruled out Git LFS and committed large generated files as the
+  artifact store. GitHub Actions artifacts remain acceptable for short-term CI
+  debugging, but not as the durable record for the mega run.
+
+## 2026-06-20T01:35Z 6529.io Web-App Speed Model Added
+
+- Updated `testing-improvement-plan.md` to clarify that 6529.io should use the
+  parts of the blockchain-core safety lens that speed safe web-app development,
+  not Bitcoin-Core-style release gravity for ordinary frontend changes.
+- Added autonomy lanes:
+  - fast lane for Level 0-1 docs/tests/copy/style changes,
+  - standard lane for Level 2 page and workflow changes,
+  - guarded lane for Level 3 auth, wallet, upload, posting, admin, generated
+    API, shared data, and deploy-sensitive changes,
+  - release-captain lane for Level 4-5 production-risk, irreversible-data,
+    credentials, signing/funds, identity, and deploy-control changes.
+- Added 6529.io invariants for wallet/profile identity, signing prompts,
+  posting/destructive actions, auth/permissions, uploads/link previews,
+  WCAG/i18n, and exact deployment SHA tracking.
+- Added adversarial GLM swarm prompts focused on wrong wallet/profile state,
+  unsafe signing language, unauthorized actions, unsafe previews, hidden mobile
+  actions, missing accessible names, admin exposure, and overstated evidence.
+- Made private 6529-controlled object storage the practical default for durable
+  validation artifacts, with IPFS/IPNS reserved for public content-addressed
+  provenance when useful.
+
+## 2026-06-20T01:55Z Testing Strategy Coherence Refactor
+
+- Rewrote `testing-improvement-plan.md` from an accumulated plan into a coherent
+  `Frontend Testing And Release Strategy`.
+- Integrated the prior safety-case, 6529.io speed-lane, artifact, reviewbot,
+  and GLM swarm decisions into one flow:
+  purpose, design inputs, current state, principles, invariants, risk lanes,
+  safety case, test sizing, packs, architecture, surfaces, execution ladder,
+  PR workflow, CI/deploy gates, release reports, artifacts, agents, reviewbot,
+  PRR-lite, metrics, roadmap, page-cluster requirements, and success criteria.
+- Added Google-inspired structure:
+  - `@small` / `@medium` / `@large` test sizing,
+  - execution ladder from local inner loop through production and nightly,
+  - large-test ownership and flake policy,
+  - deployment train release reports,
+  - auto-hold criteria and future canary direction,
+  - PRR-lite only for Level 4-5 work.
+- Updated `active-context.md` so future agents start with PR 0 and PR 1
+  foundation work before scaling page-cluster remediation.
+
+## 2026-06-20T09:35Z Opus 4.8 Review Findings Integrated
+
+- Sent the strategy to Anthropic Claude Opus 4.8 for independent review using
+  the local `ANTHROPIC_API_KEY`. The first request failed because `temperature`
+  is deprecated for `claude-opus-4-8`; the retry without `temperature`
+  succeeded.
+- Integrated Opus's P0/P1 review into `testing-improvement-plan.md`:
+  - added deterministic CI risk-floor classifier and release-captain downgrade
+    approval;
+  - added temporary Level 3+ block until Playwright harness and deployment
+    evidence gates are green, with only release-captain manual-validation
+    exceptions;
+  - added staging/production request-interception mutation guard;
+  - added artifact `scrub -> verify -> upload` redaction pipeline with
+    fake-secret regression test;
+  - restricted auth/wallet/security/upload/production traces to private,
+    deletable 6529-controlled object storage, not IPFS/IPNS;
+  - added fork/untrusted PR secret restrictions and `pull_request_target`
+    warning;
+  - made production promotion SHA-pinned to the staging-validated candidate;
+  - made verifier independence mechanical;
+  - added axe profile/allowlist, native runtime detection consolidation,
+    high-risk flake caps, and GLM risk/cost controls.
+- Updated the first implementation train so PR 0 and PR 1 deliver executable
+  safety controls before page-cluster remediation scales.
+
+## 2026-06-20T10:05Z GPT 5.5 Pro Calibration Integrated
+
+- Reviewed user-provided GPT 5.5 Pro feedback.
+- Kept the immediate focus on fixing testing rather than expanding into a full
+  queue/orchestrator implementation.
+- Updated `testing-improvement-plan.md` to:
+  - add fast-lane execution mode for Level 0-1 PRs;
+  - clarify that swarms/reviewbots are high-recall hypothesis generators, while
+    only deterministic gates and hard invariant violations have blocking
+    authority;
+  - allow Codex plus review bots to cycle until no new useful findings or safe
+    patches appear;
+  - add risk modifiers for feature flags, large translations, and route-impact
+    heuristics;
+  - add CI-enforced artifact schema/pointer validation;
+  - add a versioned mutation endpoint registry for read-only guards;
+  - add CI runtime budgets, retry limits, and quarantine registry;
+  - move security baseline checks into the PR CI baseline.
+- Added `continuous-swarm-engine-notes.md` as a future architecture note for the
+  self-organizing queue, Codex worker wrapper, conflict resolver, invariant
+  gate, and auto-PR factory.
+- Linked the future note from `README.md` and `combined-plan.md`, while keeping
+  it explicitly outside the immediate testing sidequest unless promoted later.
+- Tightened the authority model after user clarification: tests, reviewbots,
+  and swarms are feedback loops for Codex by default. Hard promotion blocks are
+  rare and reserved for deterministic, reproducible disaster-class invariant
+  violations or missing required safety evidence, not ordinary model findings.
+
+## 2026-06-20T12:20Z PR 0 Executable Testing Controls Implemented
+
+- Created clean branch `codex/testing-strategy-foundation` from current
+  `origin/main` in a separate local worktree.
+- Added `ops/scripts/testing-strategy.cjs` with:
+  - deterministic changed-file risk-floor classification;
+  - feature-flag and i18n/layout modifiers;
+  - route-impact hints;
+  - validation manifest checks;
+  - durable artifact pointer checks;
+  - mutation endpoint registry validation;
+  - explicit preservation of existing reviewbot initial lanes.
+- Added `ops/testing-strategy/` schemas, checked-in minimal validation
+  manifest example, and mutation endpoint registry contract.
+- Added package wrapper `testing-strategy` and documented the ops script.
+- Added `__tests__/scripts/testing-strategy.test.ts` covering risk floors,
+  downgrade approval, Level 3+ artifact evidence, local-artifact rejection,
+  existing reviewbot lane preservation, schema constants, and registry
+  validation.
+- Confirmed `.github/6529bot.yml` is untouched; existing `general`, `wcag`,
+  `i18n`, `security`, and `responsiveness` lanes remain the minimum reviewbot
+  baseline.
+- Local validation:
+  - `seize install:frozen`
+  - `seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts`
+  - `seize run testing-strategy -- validate-manifest --file ops/testing-strategy/examples/minimal.validation-manifest.json`
+  - `seize run testing-strategy -- validate-mutation-registry --file ops/testing-strategy/mutation-endpoint-registry.json`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`

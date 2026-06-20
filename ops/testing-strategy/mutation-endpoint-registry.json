@@ -1,0 +1,7 @@
+{
+  "schema_version": "frontend-testing.mutation-endpoint-registry.v1",
+  "owner": "frontend-release-captain",
+  "updated_at": "2026-06-20T00:00:00.000Z",
+  "description": "Versioned registry contract for endpoints that must be blocked by read-only staging and production Playwright mutation guards. PR1 should populate concrete endpoint patterns from the repaired E2E harness.",
+  "endpoints": []
+}

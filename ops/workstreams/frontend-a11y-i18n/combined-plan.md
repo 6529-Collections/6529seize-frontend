@@ -7,6 +7,22 @@ new PR review-bot enforcement. It covers the main Next.js website, mobile web
 surfaces, standalone/exported surfaces, and future reviewbot rules that prevent
 new accessibility or localization regressions while the migration proceeds.
 
+## Current State As Of 2026-06-20
+
+- The reviewbot prerequisite is complete and live:
+  - `6529reviewbot` PR #399 is merged at
+    `db1fced6105af2a975965c5604a79d578fe5080b`.
+  - `6529seize-frontend` PR #2789 is merged at
+    `7c966099173d3610b34a40ff989cea41340a6637`.
+  - Frontend PRs now automatically run `general`, `wcag`, `i18n`, `security`,
+    and `responsiveness` review lanes.
+- PR #2788 delivered this combined plan and is live in production.
+- The remaining mission is the actual frontend WCAG/i18n mega run: rebase,
+  re-audit, merge, deploy, and validate frontend remediation PRs with the new
+  reviewbot as a second reviewer.
+- Future frontend implementation should use clean worktrees based on current
+  `origin/main`; do not base patches on older local dirty branches.
+
 ## Source Standards
 
 - Accessibility baseline: `ops/standards/frontend-accessibility-wcag-22-aa.md`.
@@ -63,14 +79,13 @@ new accessibility or localization regressions while the migration proceeds.
 
 ### Reviewbot Surfaces
 
-- The reviewbot implementation repository, once available in the workspace or
-  as a linked checkout.
+- The reviewbot implementation repository for maintenance and tuning only; the
+  first i18n/WCAG rollout is already live.
 - Frontend reviewbot dashboards and docs already tracked by
   `ops/workstreams/reviewbot-production-manager/` when reviewbot API or
   dashboard behavior changes.
-- New i18n and WCAG review-bot rule packs should be integrated with the
-  reviewbot's existing event, findings, commenting, and check-run model after
-  architecture review.
+- Future i18n and WCAG rule-pack changes should preserve the reviewbot's
+  existing event, diff, prompt, commenting, and check-run model.
 
 ## Workstream Artifacts
 
@@ -83,15 +98,29 @@ Maintain the following files in this workstream:
 - `pr-links.md`: related PRs, branches, and status.
 - `bot-decisions.md`: CI and review-bot findings with fix/defer decisions.
 - `combined-plan.md`: this combined migration and bot-enforcement plan.
+- `testing-improvement-plan.md`: testing sidequest plan required before
+  scaling page-cluster remediation PRs.
+- `mega-run-pr-playbook.md`: required pre-PR impact/testing plan and PR
+  description templates for each page cluster.
+- `continuous-swarm-engine-notes.md`: future self-organizing queue, Codex
+  worker wrapper, conflict resolver, and auto-PR architecture notes. This is
+  not part of the immediate testing sidequest unless explicitly promoted.
 
 Add these files when the next implementation phase needs them:
 
 - `exceptions.md`: accepted i18n and WCAG deferrals.
 - `qa-matrix.md`: route-by-route browser, keyboard, locale, mobile, and
   standalone verification matrix.
-- `bot-rules/i18n-rules.md`: i18n review-bot rule definitions.
-- `bot-rules/wcag-rules.md`: accessibility review-bot rule definitions.
-- `bot-rules/severity-model.md`: severity, confidence, and blocking criteria.
+- `mega-run-status.md`: PR train, validation, deployment, and residual-debt
+  ledger for the actual frontend remediation run.
+- `deployment-trains.md`: staging and production train composition, SHAs, and
+  smoke evidence.
+- `bot-rules/i18n-rules.md`: optional durable i18n rule documentation when
+  changing the already-live reviewbot implementation.
+- `bot-rules/wcag-rules.md`: optional durable accessibility rule documentation
+  when changing the already-live reviewbot implementation.
+- `bot-rules/severity-model.md`: optional severity, confidence, and blocking
+  criteria documentation for future bot hardening.
 
 ## Migration Status Model
 
@@ -120,6 +149,8 @@ Use these labels for each route/component/surface:
 5. Preserve unrelated user or agent changes. Do not widen scope to unrelated
    generated files, dependency changes, auth/security behavior, or deployment
    behavior without explicit need.
+6. Treat the live i18n/WCAG reviewbot as a required second reviewer for every
+   implementation PR in the mega run.
 
 ## Phase 1: Shared I18n Foundation
 
@@ -215,6 +246,15 @@ For each route or component slice:
 
 ## Phase 5: Automation And Quality Gates
 
+Current live guardrail:
+
+- `6529reviewbot` PR #399 added frontend-scoped i18n and WCAG changed-line
+  leads plus trusted base-ref policy context.
+- Frontend PR #2789 enabled automatic initial `wcag` and `i18n` review lanes
+  alongside `general`, `security`, and `responsiveness`.
+- The mega run should assume those bots are available on every frontend PR and
+  should fix or explicitly defer their findings before merge.
+
 Add or strengthen static checks for:
 
 - new hardcoded JSX text in migrated areas;
@@ -234,37 +274,29 @@ Prefer deterministic AST or ESLint-style findings before LLM review. Use LLMs
 for context, explanation, suggested remediation, and manual-check prompts rather
 than for ungrounded line comments.
 
-## Phase 6: Dedicated I18n And WCAG Review Bots
+## Phase 6: I18n And WCAG Reviewbot Guardrail
 
-### Bot Strategy
+Status: complete for the first rollout; maintain and tune during the mega run.
 
-Build two specialized review bots on the shared reviewbot infrastructure:
+The implemented strategy uses the shared `6529reviewbot` infrastructure with
+specialized `i18n` and `wcag` review kinds. They share event handling, diff
+acquisition, prompt construction, commenting, check-run behavior, budgeting, and
+deployment, while keeping separate frontend policy context and changed-line
+review leads.
 
-1. `6529-i18n-reviewbot`
-2. `6529-wcag-reviewbot`
+### Live Reviewbot Capabilities
 
-They may share event handling, diff parsing, findings storage, comments, and
-check-run publishing, but should have separate rule packs, prompts, severity
-rubrics, labels, and rollout gates.
-
-### Reviewbot Repo Prerequisite
-
-Before implementation, inspect the `6529reviewbot` repository in its actual
-checkout and document:
-
-- webhook or polling event model;
-- PR diff acquisition path;
-- findings schema;
-- check-run/status publishing;
-- inline comment support;
-- retry/idempotency behavior;
-- cost, rate-limit, and token-budget controls;
-- test harness and fixture conventions;
-- deployment and rollout process;
-- current frontend dashboard/API contract impacts.
-
-If the repo is not available locally, record that limitation and do not invent
-architecture-specific details.
+- The bot reads trusted frontend policy context from the PR base ref, not the
+  PR head.
+- It scans changed lines for high-signal i18n and WCAG leads and asks the model
+  to verify them rather than blindly commenting.
+- It covers likely hardcoded JSX text, hardcoded accessible names, direct locale
+  formatting, sentence concatenation, invalid locale ids, clickable
+  non-interactive elements, unlabeled form controls, icon-only controls, dialog
+  focus issues, focus-outline removal, and autofocus risks.
+- It skips test and fixture paths for these frontend policy hints.
+- It keeps public comments grounded in changed files and avoids treating legacy
+  untouched debt as a new PR blocker.
 
 ### Shared Bot Finding Schema
 
@@ -340,23 +372,25 @@ Non-goals:
 
 ### Bot Review Modes
 
-1. `advisory-summary`: post summary only; no inline comments; no blocking.
-2. `inline-advisory`: line comments for high-confidence findings; no blocking.
-3. `soft-blocking`: required check only for invalid bot config, bot runtime
-   errors, missing source keys, or clear new blockers.
-4. `migrated-path-blocking`: block high-confidence violations only in surfaces
-   marked migrated or in newly touched UI where standards apply.
+1. Current mode: advisory review with required check execution and human/agent
+   fix-forward discipline.
+2. During the mega run, treat every actionable i18n/WCAG finding as a merge
+   gate unless it is clearly a false positive or an accepted exception.
+3. Escalate to blocking mode only after false-positive rates are understood on
+   migrated paths.
 
 ### Bot Rollout Sequence
 
-1. Review `6529reviewbot` architecture and add no-op i18n/WCAG reviewers.
-2. Add deterministic i18n scanner and fixture tests.
-3. Add deterministic WCAG scanner and fixture tests.
-4. Add LLM explanation layer that only comments on diff-backed findings.
-5. Add frontend repo config and workstream exception/status integration.
-6. Enable advisory mode on frontend PRs.
-7. Tune false positives.
-8. Enable blocking only for migrated paths and high-confidence new regressions.
+1. Done: review `6529reviewbot` architecture.
+2. Done: add deterministic i18n changed-line leads and fixture tests.
+3. Done: add deterministic WCAG changed-line leads and fixture tests.
+4. Done: add LLM explanation layer that uses diff-backed findings as review
+   leads.
+5. Done: add frontend repo config and automatic advisory rollout.
+6. Active during mega run: tune false positives and missing leads from real PR
+   feedback.
+7. Future: enable blocking only for migrated paths and high-confidence new
+   regressions after the advisory data is strong enough.
 
 ### Bot Comment Style
 
@@ -382,6 +416,11 @@ Comments should be short, actionable, and grounded in the changed line:
 - Track costs, token usage, retries, and duplicate comments.
 
 ## Phase 7: Validation Matrix
+
+The reviewbot is an additional reviewer and regression detector. It does not
+replace local testing. Every implementation PR still needs focused local
+validation before merge, and every deployment train still needs staging and
+production verification.
 
 ### Docs-Only Or Workstream-Only PRs
 
@@ -470,12 +509,138 @@ behavior.
 
 ### Reviewbot PRs
 
-1. Reviewbot architecture discovery and no-op reviewers.
-2. I18n deterministic scanner.
-3. WCAG deterministic scanner.
-4. LLM explanation layer.
+Completed:
+
+1. Reviewbot architecture discovery.
+2. I18n deterministic changed-line leads.
+3. WCAG deterministic changed-line leads.
+4. LLM explanation layer with trusted base-ref frontend policy context.
 5. Frontend repo config and advisory rollout.
-6. Blocking rollout for migrated paths.
+
+Future only:
+
+1. False-positive tuning from real mega-run PRs.
+2. More deterministic coverage where the live bot misses repeated issue
+   patterns.
+3. Blocking rollout for migrated paths after advisory behavior is proven.
+
+## Phase 9: Mega Run Execution
+
+This is the active next phase. The goal is to move from planning and guardrails
+to actual frontend WCAG/i18n remediation, reviewed by the now-live bots and
+deployed through controlled trains.
+
+### Mega Run Rules
+
+1. Start every implementation branch from current `origin/main` in a clean
+   worktree.
+2. Preserve unrelated dirty local changes in the long-lived workspace.
+3. Re-review existing WCAG/i18n implementation PRs before merging; do not assume
+   older green checks are still valid after main has moved.
+4. Complete the `mega-run-pr-playbook.md` pre-PR impact and testing plan for
+   each page or page cluster before opening the PR.
+5. Require the automatic `general`, `wcag`, `i18n`, `security`, and
+   `responsiveness` bot lanes to complete on every PR.
+6. Treat actionable i18n/WCAG bot comments as required fixes unless the finding
+   is a clear false positive or an exception is recorded.
+7. Run extensive local validation before relying on reviewbot output:
+   changed-file lint/typecheck/checks, targeted Jest, real browser smoke,
+   keyboard/focus checks, mobile viewport checks, and locale formatting checks
+   appropriate to the touched surface.
+8. Keep PRs reviewable by route family, primitive, or tightly related workflow;
+   group only green PRs into deployment trains.
+9. Deploy every train to staging first, validate staging, then promote the same
+   release set from `origin/main` to production.
+10. Record validation, train membership, SHAs, bot decisions, and remaining debt
+   in this workstream.
+
+### Existing Stack Reconciliation
+
+The existing open WCAG/i18n stack should be reconciled before creating broad new
+surface PRs:
+
+1. Fetch and inventory all open PRs listed in `pr-links.md`,
+   `stack-audit.md`, and `active-context.md`.
+2. For each PR, decide whether to:
+   - rebase/update it directly;
+   - rebuild the same slice from current `origin/main`;
+   - split it because the diff grew too large;
+   - close/supersede it because main already contains the work or the approach
+     is stale.
+3. Re-run focused local checks after each update.
+4. Trigger or wait for the live reviewbot lanes.
+5. Fix all real bot findings before merge.
+
+Start with the bottom of the existing stack, then advance upward. If a lower PR
+is stale or too tangled, rebuild that slice from `origin/main` rather than
+dragging stale stacked history forward.
+
+### Suggested Deployment Trains
+
+Train composition must be confirmed from current diffs and check status before
+merge. Initial target grouping:
+
+1. Foundation and low-risk shared helpers.
+2. Public media read paths: The Memes, Meme Lab, Rememes, distribution,
+   activity, and related metadata/read-only surfaces.
+3. Profile read paths and profile shell: tabs, followers, header stats,
+   identity, About display, and About edit.
+4. App shell and navigation primitives.
+5. Waves/messages shell and composer.
+6. Forms, dialogs, popovers, menus, toasts, and status patterns.
+7. Complex workflows: delegation, Network/TDH dashboards, Drop Forge, NextGen,
+   EMMA, admin-like flows, and mint paths.
+8. Mobile-specific, zoom, reduced-motion, safe-area, and standalone/exported
+   passes.
+
+Do not ship a train because it is large. Ship a train only when each member PR
+is green, reviewbot-happy, locally validated, and coherent to roll back or
+fix-forward.
+
+### Per-PR Loop
+
+1. Identify the route/component slice and user impact.
+2. Read nearby code, tests, route docs, standards, and existing helper patterns.
+3. Complete the playbook impact assessment for functionality, UX, safety, web,
+   Mobile/Capacitor, and Electron/Desktop Shell.
+4. Design the local testing strategy before opening the PR.
+5. Implement i18n and WCAG fixes together for touched UI.
+6. Add or update focused tests.
+7. Run changed-file lint/typecheck/checks plus targeted Jest.
+8. Use real browser verification for visible UI, including keyboard and mobile
+   checks where relevant.
+9. Open or update the PR with the full playbook PR description template.
+10. Wait for all 6529bot lanes and external checks.
+11. Fix real findings; record false positives or exceptions.
+12. Merge only after the PR is green and train-ready.
+
+### Per-Train Loop
+
+1. Confirm no overlapping staging or production deploys.
+2. Merge selected green PRs to `main`.
+3. Create a staging train from the exact release set and deploy to
+   `1a-staging`.
+4. Validate staging with route-specific browser smoke, keyboard smoke, and
+   locale checks.
+5. Promote from `origin/main` only after staging passes and main has not moved
+   unexpectedly.
+6. Validate production with workflow checks and independent browser smoke.
+7. Post public release/deployment notes when user-facing behavior changes.
+8. Update workstream memory before continuing to the next train.
+
+### Mega Run Completion Criteria
+
+The mega run is complete when:
+
+- prioritized route families have either `complete` or `exception-recorded`
+  status;
+- the existing stale PR stack has been merged, superseded, or closed;
+- no known new WCAG/i18n regressions remain in touched UI;
+- the live reviewbot is tuned for repeated real findings discovered during the
+  run;
+- staging and production validation evidence exists for every deployment train;
+- public release notes describe user-facing changes without exposing internal
+  secrets or local paths.
 
 ## Stop Conditions
 
@@ -491,8 +656,8 @@ Pause autonomous implementation and request human/product review when:
   secret-handling behavior might change;
 - generated files, lockfiles, package metadata, docs, or environment behavior
   change unexpectedly;
-- reviewbot architecture is unavailable but implementation would require
-  architecture-specific assumptions.
+- the live reviewbot reports repeated false positives that would block safe
+  progress without tuning.
 
 ## Definition Of Done
 
@@ -514,5 +679,5 @@ A surface is done when:
 - standalone/exported behavior is verified where applicable;
 - automated checks pass or limitations are documented;
 - remaining debt has an exception with owner/follow-up/remediation path;
-- i18n and WCAG review bots, once available, are green or findings are fixed or
-  explicitly deferred with rationale.
+- i18n and WCAG reviewbot lanes are green, or findings are fixed or explicitly
+  deferred with rationale.
