@@ -101,10 +101,12 @@ Existing strengths:
 
 Current gaps:
 
-- The Playwright suite on `origin/main` is not a reliable gate because smoke
-  specs import `../testHelpers`, but `tests/testHelpers.ts` is absent.
-- `test:e2e:staging` depends on those smoke specs, so staging E2E cannot yet
-  be treated as a hard promotion signal.
+- The first follow-up testing PR restores the missing `tests/testHelpers.ts`
+  import path and makes `test:e2e:staging` run real deployed browser checks
+  when `PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH` is available.
+- The Playwright suite still needs broader hardening before it becomes a full
+  promotion signal: route-ready helpers, console/page-error policy, mutation
+  guards, artifact redaction, test sizing, and test typecheck coverage.
 - There is no broad ordinary-PR CI workflow for app changes.
 - Playwright currently runs only a desktop Chromium project.
 - Playwright artifacts are not yet standardized for trace, screenshot, console,
@@ -491,7 +493,9 @@ Purpose:
 
 Required shared fixtures:
 
-- `test` and `expect` exports from `tests/testHelpers.ts`.
+- `test` and `expect` exports from `tests/testHelpers.ts`. The minimal staging
+  smoke fixture unlocks `staging.6529.io` from `PLAYWRIGHT_STAGING_ACCESS_CODE`
+  or `STAGING_AUTH`; it must not log or persist the access code.
 - `gotoAndReady(path)` that waits for usable route state and asserts successful
   response where applicable.
 - Console error, page error, and failed request collection with narrow allowlist.
@@ -1145,8 +1149,8 @@ Exit criteria:
 
 Goals:
 
-- Restore or replace `tests/testHelpers.ts`.
-- Repair local and staging Playwright smoke.
+- Restore or replace `tests/testHelpers.ts` and repair deployed-staging smoke.
+- Repair local Playwright smoke after the staging smoke path is stable.
 - Add shared page error, console error, no-overflow, screenshot, and route-ready
   helpers.
 - Add read-only mutation guard with request interception for staging and

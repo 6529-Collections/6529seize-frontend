@@ -5,14 +5,25 @@ test.describe("Home Page", () => {
     await page.goto("/");
   });
 
-  test("should display the Latest Drop section", async ({ page }) => {
-    await expect(page).toHaveTitle("6529");
+  test("should display the home landing content", async ({ page }) => {
+    await expect(page).toHaveTitle("6529.io");
 
-    const heading = page.locator("h1", { hasText: "Latest Drop" });
-    await expect(heading).toBeVisible();
+    await expect(page.getByText("Latest Drop", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Building a decentralized network state",
+      })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "6529 is a network society",
+      })
+    ).toBeVisible();
 
-    const memeTitle = page.locator('h3 a[href^="/the-memes/"]');
-    await expect(memeTitle).toBeVisible();
+    const waveLink = page.getByRole("link", { name: /^View wave / }).first();
+    await expect(waveLink).toBeVisible();
   });
 
   test("should navigate to network health from the hero heart link", async ({
