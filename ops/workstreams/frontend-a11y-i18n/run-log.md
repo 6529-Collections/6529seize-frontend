@@ -1863,3 +1863,25 @@ origin/main --output test-results/app-pr-ci/workflow-security.json`
     focused typecheck program; full CI typecheck covered the edited files.
   - `seize run typecheck:playwright`
   - `codex-diff-check`
+
+## 2026-06-20T22:00Z PR 2 App PR CI Smoke Fix
+
+- App PR CI run
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27884331321
+  passed plan, install, reviewbot contract, lint, typecheck, Jest, and build,
+  then failed the small Playwright smoke pack.
+- Failure evidence:
+  - Next dev server logged blocked cross-origin requests for
+    `127.0.0.1` dev resources and advised `allowedDevOrigins`.
+  - Playwright navigations reached `http://127.0.0.1:3001/...` but timed out
+    waiting for `main`; console diagnostics showed 403s and HMR websocket
+    failures.
+- Read local Next docs:
+  `node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/allowedDevOrigins.md`.
+  The documented behavior is that dev-only endpoints are limited to the
+  hostname the dev server was initialized with, `localhost` by default, unless
+  additional origins are configured.
+- Follow-up fix: keep PR CI Playwright and the web server on
+  `http://localhost:3001` and set `PLAYWRIGHT_WEB_SERVER_COMMAND` to
+  `./bin/6529 run dev`, preserving the repo wrapper and avoiding a Next config
+  exception just for CI.
