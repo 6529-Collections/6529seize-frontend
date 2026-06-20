@@ -9,6 +9,7 @@ import {
 
 const mockToggleBoost = jest.fn();
 const mockBoostedDropLinkPreview = jest.fn();
+const mockDropListItemContentMedia = jest.fn();
 type ResizeObserverHarness = {
   restore: () => void;
   trigger: () => void;
@@ -43,7 +44,13 @@ jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="drop-media" />,
+    default: (props: {
+      readonly media_mime_type: string;
+      readonly media_url: string;
+    }) => {
+      mockDropListItemContentMedia(props);
+      return <div data-testid="drop-media" />;
+    },
   })
 );
 
@@ -195,6 +202,7 @@ const getBoostPill = (): HTMLElement => {
 describe("BoostedDropCardHome", () => {
   beforeEach(() => {
     mockBoostedDropLinkPreview.mockClear();
+    mockDropListItemContentMedia.mockClear();
     mockToggleBoost.mockReset();
   });
 
@@ -439,6 +447,66 @@ describe("BoostedDropCardHome", () => {
 
     expect(screen.getAllByTestId("drop-media")).toHaveLength(1);
     expect(screen.queryByTestId("content-display")).not.toBeInTheDocument();
+  });
+
+  it("renders standalone markdown images as boosted media instead of link previews", () => {
+    const imageUrl =
+      "https://img.transient.xyz/?n=-1&output=webp&url=https%3A%2F%2Fipfs.transientusercontent.xyz%2Fipfs%2FQmVsjJs2AfMZkdudRx1bUypA1pr5cDBcp8Y8qshdw74Civ%2Fnft.jpg&w=3072&we=";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: `![Seize](${imageUrl})`,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(screen.getByTestId("drop-media")).toBeInTheDocument();
+    expect(mockDropListItemContentMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        media_mime_type: "image/webp",
+        media_url: imageUrl,
+      })
+    );
+    expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("link-preview")).not.toBeInTheDocument();
+    expect(screen.queryByText("!Seize")).not.toBeInTheDocument();
+  });
+
+  it("derives standalone markdown image mime type from the URL", () => {
+    const imageUrl = "https://example.com/art.png";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: `![Art](${imageUrl})`,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(mockDropListItemContentMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        media_mime_type: "image/png",
+        media_url: imageUrl,
+      })
+    );
+    expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
   });
 
   it("does not render supplemental chat content after the lead media", () => {
