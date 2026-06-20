@@ -151,6 +151,18 @@ function isIgnoredExternalMutation(url: URL) {
   );
 }
 
+function isSameOrigin(url: URL, baseURL?: string) {
+  const base = baseURL ? parseUrl(baseURL) : null;
+  return base?.origin === url.origin;
+}
+
+function isFirstPartyTelemetryEndpoint(url: URL, baseURL?: string) {
+  return (
+    isSameOrigin(url, baseURL) &&
+    (url.pathname === "/monitoring" || url.pathname.startsWith("/monitoring/"))
+  );
+}
+
 function isWalletConnectRpc(url: URL) {
   return url.hostname === WALLETCONNECT_RPC_HOST && url.pathname === "/v1/";
 }
@@ -290,6 +302,10 @@ export function decideReadonlyRequest({
       reason: "registered-mutation-endpoint",
       ruleId: endpoint.id,
     };
+  }
+
+  if (isFirstPartyTelemetryEndpoint(parsed, baseURL)) {
+    return { action: "abort", reason: "ignored-first-party-telemetry" };
   }
 
   if (isWalletConnectRpc(parsed)) {
