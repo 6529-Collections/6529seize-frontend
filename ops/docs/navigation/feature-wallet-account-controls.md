@@ -109,8 +109,8 @@ expose different controls.
 
 - Connect from web sidebar, then open dropdown actions.
 - Connect from app footer and continue on the same route.
-- Use `Add` or `+` to connect a second or third profile without leaving the
-  current route.
+- Use `Add` or `+` to connect another profile, up to the five-profile limit,
+  without leaving the current route.
 - Use connected-account rows in the web dropdown to switch profiles without
   leaving the menu.
 - Use a quick second activate on the web user row to cycle to the next
