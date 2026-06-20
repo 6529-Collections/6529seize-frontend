@@ -19,6 +19,7 @@ import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext"
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
 import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
+import NativeProfileNavigationProvider from "../native-navigation/NativeProfileNavigationProvider";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
 import IpfsImageSetup from "./IpfsImageSetup";
@@ -46,7 +47,9 @@ export default function Providers({
       <HeaderProvider>
         <ScrollPositionProvider>
           <ViewProvider>
-            <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
+            <NativeProfileNavigationProvider>
+              <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
+            </NativeProfileNavigationProvider>
           </ViewProvider>
         </ScrollPositionProvider>
       </HeaderProvider>

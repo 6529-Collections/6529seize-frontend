@@ -21,6 +21,7 @@ import PullToRefresh from "../providers/PullToRefresh";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
+import { useNativeProfileNavigation } from "../native-navigation/NativeProfileNavigationProvider";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -83,24 +84,39 @@ function AppLayoutContent({ children }: Props) {
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
-  const isSingleDropOpen = searchParams.get("drop") !== null;
-  const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const nativeProfileNavigation = useNativeProfileNavigation();
+  const effectivePathname =
+    nativeProfileNavigation.backgroundLocation?.pathname ?? pathname;
+  const effectiveSearchParams = useMemo(
+    () =>
+      nativeProfileNavigation.backgroundLocation
+        ? new URLSearchParams(nativeProfileNavigation.backgroundLocation.search)
+        : searchParams,
+    [nativeProfileNavigation.backgroundLocation, searchParams]
+  );
+  const isSingleDropOpen = effectiveSearchParams.get("drop") !== null;
+  const waveParam = getActiveWaveIdFromUrl({
+    pathname: effectivePathname,
+    searchParams: effectiveSearchParams,
+  });
   const activeView = getActiveViewFromUrl({
     activeWaveId: waveParam,
-    searchParams,
+    searchParams: effectiveSearchParams,
   });
-  const viewParam = searchParams.get("view");
+  const viewParam = effectiveSearchParams.get("view");
   const hasWaveParam = Boolean(waveParam);
   const isViewingWavesOrMessages =
     viewParam === "waves" || viewParam === "messages";
-  const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
+  const isWavesRoute =
+    effectivePathname === "/waves" || effectivePathname.startsWith("/waves/");
   const isMessagesRoute =
-    pathname === "/messages" || pathname.startsWith("/messages/");
+    effectivePathname === "/messages" ||
+    effectivePathname.startsWith("/messages/");
   const isStreamRoute =
     isWavesRoute ||
     isMessagesRoute ||
-    pathname === "/notifications" ||
-    (pathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
+    effectivePathname === "/notifications" ||
+    (effectivePathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const { isVisible: isAndroidKeyboardVisible, isAndroid } =
