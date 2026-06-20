@@ -33,6 +33,9 @@ const renderAppOverlay = () => {
   return render(
     <NativeRouteOverlay>
       <a href="/bob/collected?address=0x1#items">Bob</a>
+      <a href="/bob/brain" onClick={(event) => event.stopPropagation()}>
+        Bob brain
+      </a>
       <a href="https://example.com">External</a>
     </NativeRouteOverlay>
   );
@@ -117,6 +120,14 @@ describe("NativeRouteOverlay", () => {
     expect(replace).toHaveBeenCalledWith("/bob/collected?address=0x1#items", {
       scroll: true,
     });
+  });
+
+  it("captures same-origin overlay links before child handlers stop propagation", async () => {
+    renderAppOverlay();
+
+    fireEvent.click(await screen.findByRole("link", { name: "Bob brain" }));
+
+    expect(replace).toHaveBeenCalledWith("/bob/brain", { scroll: true });
   });
 
   it("leaves external links alone", async () => {

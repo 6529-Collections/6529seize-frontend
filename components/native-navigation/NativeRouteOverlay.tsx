@@ -9,7 +9,6 @@ import {
   useState,
   type CSSProperties,
   type ReactNode,
-  type TouchEvent,
 } from "react";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -94,34 +93,31 @@ export default function NativeRouteOverlay({
     setIsDragging(false);
   }, []);
 
-  const handleTouchStart = useCallback(
-    (event: TouchEvent<HTMLDialogElement>) => {
-      const touch = event.touches[0];
-      if (!touch || event.touches.length !== 1) {
-        return;
-      }
+  const handleTouchStart = useCallback((event: TouchEvent) => {
+    const overlay = overlayRef.current;
+    const touch = event.touches[0];
+    if (!overlay || !touch || event.touches.length !== 1) {
+      return;
+    }
 
-      const viewportWidth =
-        globalThis.innerWidth || event.currentTarget.clientWidth;
-      let side: SwipeSide | null = null;
-      if (touch.clientX <= EDGE_SWIPE_WIDTH_PX) {
-        side = "left";
-      } else if (touch.clientX >= viewportWidth - EDGE_SWIPE_WIDTH_PX) {
-        side = "right";
-      }
+    const viewportWidth = globalThis.innerWidth || overlay.clientWidth;
+    let side: SwipeSide | null = null;
+    if (touch.clientX <= EDGE_SWIPE_WIDTH_PX) {
+      side = "left";
+    } else if (touch.clientX >= viewportWidth - EDGE_SWIPE_WIDTH_PX) {
+      side = "right";
+    }
 
-      if (!side) {
-        return;
-      }
+    if (!side) {
+      return;
+    }
 
-      gestureRef.current = {
-        side,
-        startX: touch.clientX,
-        startY: touch.clientY,
-      };
-    },
-    []
-  );
+    gestureRef.current = {
+      side,
+      startX: touch.clientX,
+      startY: touch.clientY,
+    };
+  }, []);
 
   const getInwardDrag = useCallback((touch: TouchPoint | undefined) => {
     const gesture = gestureRef.current;
@@ -144,7 +140,7 @@ export default function NativeRouteOverlay({
   }, []);
 
   const handleTouchMove = useCallback(
-    (event: TouchEvent<HTMLDialogElement>) => {
+    (event: TouchEvent) => {
       const drag = getInwardDrag(event.touches[0]);
       if (!drag) {
         return;
@@ -166,7 +162,7 @@ export default function NativeRouteOverlay({
   );
 
   const handleTouchEnd = useCallback(
-    (event: TouchEvent<HTMLDialogElement>) => {
+    (event: TouchEvent) => {
       const drag = getInwardDrag(event.changedTouches[0]);
       if (!drag) {
         return;
@@ -185,6 +181,10 @@ export default function NativeRouteOverlay({
     },
     [getInwardDrag, resetGesture, router]
   );
+
+  const handleTouchCancel = useCallback(() => {
+    resetGesture();
+  }, [resetGesture]);
 
   const closeOverlay = useCallback(() => {
     router.back();
@@ -250,14 +250,31 @@ export default function NativeRouteOverlay({
       return;
     }
 
-    overlay.addEventListener("click", handleOverlayClick);
+    overlay.addEventListener("click", handleOverlayClick, true);
     overlay.addEventListener("keydown", handleOverlayKeyDown);
+    overlay.addEventListener("touchcancel", handleTouchCancel);
+    overlay.addEventListener("touchend", handleTouchEnd);
+    overlay.addEventListener("touchmove", handleTouchMove, { passive: false });
+    overlay.addEventListener("touchstart", handleTouchStart);
 
     return () => {
-      overlay.removeEventListener("click", handleOverlayClick);
+      overlay.removeEventListener("click", handleOverlayClick, true);
       overlay.removeEventListener("keydown", handleOverlayKeyDown);
+      overlay.removeEventListener("touchcancel", handleTouchCancel);
+      overlay.removeEventListener("touchend", handleTouchEnd);
+      overlay.removeEventListener("touchmove", handleTouchMove);
+      overlay.removeEventListener("touchstart", handleTouchStart);
     };
-  }, [handleOverlayClick, handleOverlayKeyDown, hasMounted, isApp]);
+  }, [
+    handleOverlayClick,
+    handleOverlayKeyDown,
+    handleTouchCancel,
+    handleTouchEnd,
+    handleTouchMove,
+    handleTouchStart,
+    hasMounted,
+    isApp,
+  ]);
 
   const contentStyle = useMemo<CSSProperties>(
     () => ({
@@ -278,10 +295,6 @@ export default function NativeRouteOverlay({
       className="tailwind-scope tw-fixed tw-inset-0 tw-z-[2147483000] tw-m-0 tw-h-auto tw-max-h-none tw-w-auto tw-max-w-none tw-overflow-hidden tw-border-0 tw-bg-black tw-p-0"
       data-native-route-overlay={pathname}
       data-testid="native-route-overlay"
-      onTouchCancel={resetGesture}
-      onTouchEnd={handleTouchEnd}
-      onTouchMove={handleTouchMove}
-      onTouchStart={handleTouchStart}
       open
       ref={overlayRef}
       tabIndex={-1}
