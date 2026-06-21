@@ -10,9 +10,10 @@ Read this section first after compaction or handoff.
   - Active slice adds a credential-free-by-default authenticated read-only E2E
     pack for `/messages`, `/{profile}/subscriptions`, and `/{profile}/proxy`.
   - The pack uses the existing dev-auth runtime path only when the caller
-    provides `USE_DEV_AUTH=true`, `DEV_MODE_WALLET_ADDRESS`, and
-    `DEV_MODE_AUTH_JWT`, plus `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE`. It skips
-    loudly otherwise and never commits or extracts local secrets.
+    provides `PLAYWRIGHT_READONLY=1`, `USE_DEV_AUTH=true`,
+    `DEV_MODE_WALLET_ADDRESS`, and `DEV_MODE_AUTH_JWT`, plus
+    `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE`. It skips loudly otherwise and never
+    commits or extracts local secrets.
   - Authenticated `/notifications` is not part of the read-only pack because
     live dev-auth validation with the mutation guard showed it auto-posts
     `POST /api/notifications/read` on mount. Treat this as a separate

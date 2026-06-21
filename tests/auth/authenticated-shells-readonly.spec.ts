@@ -8,7 +8,7 @@ import {
 } from "../testHelpers";
 
 const DEV_AUTH_SKIP_MESSAGE =
-  "Authenticated shell E2E requires USE_DEV_AUTH=true, DEV_MODE_WALLET_ADDRESS, DEV_MODE_AUTH_JWT, and PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE.";
+  "Authenticated shell E2E requires PLAYWRIGHT_READONLY=1, USE_DEV_AUTH=true, DEV_MODE_WALLET_ADDRESS, DEV_MODE_AUTH_JWT, and PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE.";
 const PROFILE_HANDLE = process.env["PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE"] ?? "";
 const PROFILE_BASE_PATH = `/${PROFILE_HANDLE}`;
 const WALLET_GATE_HEADING =
@@ -21,6 +21,7 @@ function escapeRegExp(value: string) {
 
 function hasDevAuthConfig() {
   return (
+    process.env["PLAYWRIGHT_READONLY"] === "1" &&
     process.env["USE_DEV_AUTH"] === "true" &&
     Boolean(process.env["DEV_MODE_WALLET_ADDRESS"]) &&
     Boolean(process.env["DEV_MODE_AUTH_JWT"]) &&

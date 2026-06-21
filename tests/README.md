@@ -94,8 +94,8 @@ Surface matrix:
   both baseline web projects, with the mutation guard enabled even locally.
 - `test:e2e:authenticated-shells-readonly` runs authenticated, read-only
   route-shell coverage for direct messages and own-profile subscriptions/proxy
-  tabs on both baseline web projects. It skips unless `USE_DEV_AUTH=true`,
-  `DEV_MODE_WALLET_ADDRESS`, `DEV_MODE_AUTH_JWT`, and
+  tabs on both baseline web projects. It skips unless `PLAYWRIGHT_READONLY=1`,
+  `USE_DEV_AUTH=true`, `DEV_MODE_WALLET_ADDRESS`, `DEV_MODE_AUTH_JWT`, and
   `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE` are provided by the caller.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same

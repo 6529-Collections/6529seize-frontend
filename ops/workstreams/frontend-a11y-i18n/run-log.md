@@ -2768,3 +2768,13 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   authenticated-shell branch now covers `youtube-nocookie.com` and bare
   `youtube.com` stats/log endpoints in the guard unit test while preserving the
   default block for unknown external POSTs.
+- CodeRabbit review on PR #2816 correctly identified that the spec itself
+  should enforce `PLAYWRIGHT_READONLY=1`, not only the package script. The skip
+  gate, test docs, and active context now require explicit read-only mode before
+  authenticated credentials can run.
+- Follow-up validation after that fix:
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env.
+  - DPAPI-backed dev-auth run against a fresh local frontend port with
+    production API/WebSocket endpoints and `PLAYWRIGHT_READONLY=1`: 6 passed
+    across desktop and mobile Chromium.
