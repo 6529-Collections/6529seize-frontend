@@ -16,7 +16,7 @@ const WALLET_GATE_HEADING =
 const WALLET_GATE_COPY = "Connect your wallet to continue.";
 
 function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 function hasDevAuthConfig() {
