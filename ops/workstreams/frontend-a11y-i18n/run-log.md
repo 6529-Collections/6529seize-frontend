@@ -2706,8 +2706,12 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   staging run desktop and mobile Chromium; production is intentionally desktop
   Chromium only for a public read-only post-deploy smoke.
 - Added a narrow mutation-guard allowance for YouTube `/api/stats/` telemetry
-  emitted by embedded legacy content. Arbitrary YouTube mutations are still
-  blocked.
+  plus exact embedded-player telemetry endpoints for YouTube `/youtubei/v1/log_event`,
+  Google WAA `GenerateIT`, and GTM `/td`. Arbitrary YouTube, Google, and GTM
+  mutations are still blocked.
+- The route matrix uses canonical trailing-slash paths for legacy deep links
+  and normalizes the asserted browser path because Next strips the slash after
+  loading the page locally.
 - Added a global overflow guard for the legacy static-copy
   `#sticky-social-icons-container`; these pages include the container inline and
   it was adding 16px of horizontal scroll despite having no visible footprint.
@@ -2717,6 +2721,8 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run lint:changed`
   - `seize run typecheck:changed`
   - `seize run test:no-coverage --findRelatedTests tests/support/readonlyMutationGuard.ts --passWithNoTests`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run test:e2e:critical-shell`: 7 passed.
   - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/public-content-secret-scan.json`
   - `codex-diff-check`
 - Pre-merge production command was attempted and failed with the known

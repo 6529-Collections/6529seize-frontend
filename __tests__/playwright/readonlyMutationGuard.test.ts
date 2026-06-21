@@ -161,6 +161,42 @@ describe("Playwright read-only mutation guard", () => {
         baseURL: "https://staging.6529.io",
         method: "POST",
         readonly: true,
+        url: "https://www.youtube.com/api/stats/watchtime?ns=yt",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://www.youtube.com/youtubei/v1/log_event?key=redacted",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/GenerateIT",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
         url: "https://pulse.walletconnect.org/batch?projectId=test",
       })
     ).toMatchObject({

@@ -152,7 +152,15 @@ function isIgnoredExternalMutation(url: URL) {
 
   if (
     (url.hostname === "www.youtube.com" || url.hostname === "youtube.com") &&
-    url.pathname.startsWith("/api/stats/")
+    (url.pathname.startsWith("/api/stats/") ||
+      url.pathname === "/youtubei/v1/log_event")
+  ) {
+    return true;
+  }
+
+  if (
+    url.hostname === "jnn-pa.googleapis.com" &&
+    url.pathname === "/$rpc/google.internal.waa.v1.Waa/GenerateIT"
   ) {
     return true;
   }

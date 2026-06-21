@@ -25,12 +25,12 @@ const CONTENT_ROUTES: RouteExpectation[] = [
     ],
   },
   {
-    path: "/education/tweetstorms",
+    path: "/education/tweetstorms/",
     text: "TWEETSTORMS",
     links: [/^https:\/\/twitter\.com\/punk6529/],
   },
   {
-    path: "/education/podcasts",
+    path: "/education/podcasts/",
     text: "PODCASTS",
     links: [/^https:\/\/www\.realvision\.com\//],
     images: true,
@@ -42,18 +42,18 @@ const CONTENT_ROUTES: RouteExpectation[] = [
     images: true,
   },
   {
-    path: "/museum/genesis",
+    path: "/museum/genesis/",
     text: "GENESIS",
     links: ["/museum/genesis/autoglyphs/", "/museum/genesis/fidenza"],
     images: true,
   },
   {
-    path: "/museum/genesis/fidenza",
+    path: "/museum/genesis/fidenza/",
     text: "FIDENZA",
     images: true,
   },
   {
-    path: "/museum/6529-public-domain",
+    path: "/museum/6529-public-domain/",
     text: "6529 PUBLIC DOMAIN",
     links: [/^https:\/\/oncyber\.io\//],
     images: true,
@@ -64,7 +64,7 @@ const CONTENT_ROUTES: RouteExpectation[] = [
     links: ["/om/partnership-request/"],
   },
   {
-    path: "/news/introducing-om",
+    path: "/news/introducing-om/",
     text: "INTRODUCING OM",
     links: [/^https:\/\/oncyber\.io\//],
   },
@@ -74,18 +74,18 @@ const CONTENT_ROUTES: RouteExpectation[] = [
     links: ["/capital/company-portfolio/", "/capital/fund/"],
   },
   {
-    path: "/capital/fund",
+    path: "/capital/fund/",
     text: "6529 NFT FUND",
     links: ["mailto:jeff@6529.io"],
   },
   {
-    path: "/blog/from-fibonacci-to-fidenza",
+    path: "/blog/from-fibonacci-to-fidenza/",
     text: "FROM FIBONACCI TO FIDENZA",
     links: ["/author/ladysabrina/"],
     images: true,
   },
   {
-    path: "/author/ladysabrina",
+    path: "/author/ladysabrina/",
     text: /ladysabrina/i,
     links: ["/blog/from-fibonacci-to-fidenza/"],
   },
@@ -162,7 +162,9 @@ test.describe("Public legacy content read-only coverage @surface @medium @large 
     test(`renders ${route.path} content without mutation`, async ({ page }) => {
       await gotoContentRoute(page, route.path);
 
-      await expect(page).toHaveURL((url) => url.pathname === route.path);
+      await expect(page).toHaveURL(
+        (url) => normalizeHref(url.pathname) === normalizeHref(route.path)
+      );
       await expect(pageBody(page)).toContainText(route.text);
       for (const href of route.links ?? []) {
         await expectHrefPresent(page, href);
