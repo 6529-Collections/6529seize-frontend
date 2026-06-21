@@ -80,16 +80,22 @@ describe("Playwright axe assertions", () => {
   });
 
   it("summarizes violations with rule and target evidence", () => {
-    expect(
-      summarizeAxeViolations([
-        {
-          help: "Buttons must have discernible text",
-          helpUrl: "https://dequeuniversity.com/rules/axe/4.11/button-name",
-          id: "button-name",
-          impact: "critical",
-          nodes: [{ target: ["button.icon-only"] }],
-        },
-      ])
-    ).toContain("button-name (critical): Buttons must have discernible text");
+    const summary = summarizeAxeViolations([
+      {
+        help: "Buttons must have discernible text",
+        helpUrl: "https://dequeuniversity.com/rules/axe/4.11/button-name",
+        id: "button-name",
+        impact: "critical",
+        nodes: [{ target: ["button.icon-only"] }],
+      },
+    ]);
+
+    expect(summary).toContain(
+      "button-name (critical): Buttons must have discernible text"
+    );
+    expect(summary).toContain(
+      "https://dequeuniversity.com/rules/axe/4.11/button-name"
+    );
+    expect(summary).toContain("- button.icon-only");
   });
 });

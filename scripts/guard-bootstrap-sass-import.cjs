@@ -138,6 +138,50 @@ function hasUnexpectedBootstrapStatement(source) {
   );
 }
 
+function readBalancedArrayInitializer(source, constName) {
+  const declaration = `const ${constName}`;
+  const declarationIndex = source.indexOf(declaration);
+  if (declarationIndex === -1) {
+    return null;
+  }
+
+  const arrayStartIndex = source.indexOf("[", declarationIndex);
+  if (arrayStartIndex === -1) {
+    return null;
+  }
+
+  let depth = 0;
+  for (let index = arrayStartIndex; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === "[") {
+      depth += 1;
+    } else if (char === "]") {
+      depth -= 1;
+      if (depth === 0) {
+        return source.slice(arrayStartIndex, index + 1);
+      }
+    }
+  }
+
+  return null;
+}
+
+function hasBootstrapLoadPathBeforeNodeModules(source) {
+  const initializer = readBalancedArrayInitializer(source, "SASS_LOAD_PATHS");
+  if (!initializer) {
+    return false;
+  }
+
+  const bootstrapIndex = initializer.indexOf('"bootstrap", "scss"');
+  const nodeModulesIndex = initializer.indexOf("  NODE_MODULES_PATH");
+
+  return (
+    bootstrapIndex !== -1 &&
+    nodeModulesIndex !== -1 &&
+    bootstrapIndex < nodeModulesIndex
+  );
+}
+
 const bootstrapScss = stripComments(readRequiredFile(bootstrapScssPath));
 const nextConfig = stripComments(readRequiredFile(nextConfigPath));
 const failures = [];
@@ -154,12 +198,7 @@ if (hasUnexpectedBootstrapStatement(bootstrapScss)) {
   );
 }
 
-if (
-  !nextConfig.includes("const SASS_LOAD_PATHS") ||
-  !nextConfig.includes("const BOOTSTRAP_PROGRESS_PARTIAL") ||
-  !nextConfig.includes('"bootstrap", "scss"') ||
-  !nextConfig.includes('"node_modules"')
-) {
+if (!hasBootstrapLoadPathBeforeNodeModules(nextConfig)) {
   failures.push(
     `${nextConfigPath} must keep SASS_LOAD_PATHS pointed at Bootstrap SCSS before node_modules.`
   );
