@@ -2731,3 +2731,35 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   E2E pack passes after the overflow fix, so rerun
   `seize run test:e2e:production:public-content-readonly` only after this
   change is deployed.
+## 2026-06-21T22:35Z Authenticated Shell E2E Pack Started
+
+- Started clean worktree branch `codex/e2e-authenticated-shells-readonly` from
+  current `origin/main` after leaving the root checkout untouched.
+- Added the next read-only authenticated surface pack:
+  - `tests/auth/authenticated-shells-readonly.spec.ts` covers `/messages`,
+    `/{profile}/subscriptions`, and `/{profile}/proxy` across desktop and
+    mobile Chromium when dev auth is explicitly provided.
+  - The pack skips without `USE_DEV_AUTH=true`, `DEV_MODE_WALLET_ADDRESS`,
+    `DEV_MODE_AUTH_JWT`, and `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE`; committed
+    tests never contain or extract secrets.
+  - Assertions prove route shells render beyond the wallet gate and expose
+    their expected read-only affordances without clicking submit/create/assign
+    controls.
+- Added `test:e2e:authenticated-shells-readonly` and documented ownership in
+  `tests/README.md`.
+- Mirrored the narrow read-only telemetry guard hardening needed by route packs
+  that load GTM, YouTube, or Google WAA SDK endpoints; unknown POSTs and
+  registered first-party mutations remain blocked.
+- Real dev-auth validation against the production API with the read-only guard
+  found `/notifications` performs `POST /api/notifications/read` on
+  authenticated mount. That route is deliberately excluded from this read-only
+  pack until a mutation-safe notifications strategy exists.
+- Validation evidence:
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env, proving the committed pack is credential-free by default.
+  - DPAPI-backed dev-auth run against a fresh local frontend port with
+    production API/WebSocket endpoints and `PLAYWRIGHT_READONLY=1`: 6 passed
+    across desktop and mobile Chromium. The token was used only as an in-process
+    environment value and was not printed or persisted.
+  - A prior attempted `/notifications` inclusion failed safely because the
+    read-only guard blocked `POST https://api.6529.io/api/notifications/read`.

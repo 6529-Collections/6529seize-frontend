@@ -4,46 +4,32 @@
 
 Read this section first after compaction or handoff.
 
-- Latest testing-roadmap state, 2026-06-21T18:18Z:
-  - PR #2809 Waves/Profile read-only E2E is merged and deployed to production.
-    - merge SHA / production version:
-      `f82890f24a4ef7643f143dca5791ad0c50e010f3`
-    - staging run:
-      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27911257533
-    - production run:
-      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27911610405
+- Latest testing-roadmap state, 2026-06-21T22:35Z:
+  - Current clean worktree branch:
+    `codex/e2e-authenticated-shells-readonly`, based on current `origin/main`.
+  - Active slice adds a credential-free-by-default authenticated read-only E2E
+    pack for `/messages`, `/{profile}/subscriptions`, and `/{profile}/proxy`.
+  - The pack uses the existing dev-auth runtime path only when the caller
+    provides `USE_DEV_AUTH=true`, `DEV_MODE_WALLET_ADDRESS`, and
+    `DEV_MODE_AUTH_JWT`, plus `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE`. It skips
+    loudly otherwise and never commits or extracts local secrets.
+  - Authenticated `/notifications` is not part of the read-only pack because
+    live dev-auth validation with the mutation guard showed it auto-posts
+    `POST /api/notifications/read` on mount. Treat this as a separate
+    mutation-safety follow-up, not as an allowlist candidate.
+  - The intended validation bar before PR publication is focused Jest coverage
+    for the read-only guard, Playwright typecheck, changed lint/typecheck,
+    skipped-pack proof without dev auth, critical-shell regression, changed
+    secret scan, workflow security scan, and `codex-diff-check`. If secure
+    dev-auth env is present, also run the pack against both baseline web
+    projects.
+  - Already-merged read-only E2E packs before this branch include Waves/Profile,
+    media/mint/detail, delegation, Network/Open Data, collections, and public
+    Groups/Tools. Preserve their scripts, ownership docs, and run-log evidence
+    when rebasing this branch.
   - GLM reviewbot is live on `6529reviewbot` and must remain additive. Do not
     remove, downgrade, or make optional the existing Opus/general/WCAG/i18n/
     security/responsiveness reviewbot lanes.
-  - Current clean worktree branch: `codex/e2e-media-mint-detail`, based on
-    production `origin/main`
-    `f82890f24a4ef7643f143dca5791ad0c50e010f3`.
-  - Active E2E PR adds a read-only media/mint/detail pack:
-    `tests/media/media-mint-detail-readonly.spec.ts`, plus local, staging, and
-    production package scripts and `tests/README.md` ownership notes.
-  - Covered journeys: The Memes card detail, The Memes activity focus with
-    locale-preserving SZN links, The Memes mint page, Meme Lab activity focus,
-    and production-only ReMemes detail tabs/links.
-  - Local/staging intentionally skip the exact ReMemes detail fixture because
-    the stable record is only present on production right now. Do not weaken
-    production ReMemes assertions unless the fixture changes or a better stable
-    fixture is selected.
-  - Validation passed for the active media branch:
-    `seize run test:e2e:media-readonly` (8 passed, 2 expected skips after
-    clearing stale `.next` cache),
-    `seize run test:e2e:staging:media-readonly` (8 passed, 2 expected skips),
-    `seize run test:e2e:production:media-readonly` (5 passed),
-    `seize run typecheck:playwright`, `seize run lint:changed`,
-    `seize run typecheck:changed`, related Jest no-tests reproduction,
-    changed-secret scan, and `codex-diff-check`.
-  - A stale ignored `.next` dev cache can make local dynamic media routes serve
-    the 404 shell. Safe workaround before local Playwright validation is to
-    path-check and delete only this worktree's `.next`; this is not a test
-    assertion issue.
-  - Next high-value E2E PRs after media/mint/detail should cover delegation,
-    NextGen/groups/tools, broad network/open-data/static routes,
-    API-backed/authenticated read-only flows, upload/posting/admin guards, and
-    real native/Electron smoke as separate scoped trains.
 - Latest testing-roadmap state, 2026-06-21T16:45Z:
   - PR #2806, PR #2805, and PR #2808 are merged and deployed to production.
     - PR #2806 merge SHA:

@@ -263,6 +263,25 @@ describe("Playwright read-only mutation guard", () => {
       action: "abort",
       reason: "ignored-external-sdk-endpoint",
     });
+
+    for (const url of [
+      "https://www.googletagmanager.com/td?id=G-123",
+      "https://www.youtube.com/api/stats/watchtime",
+      "https://youtube.com/youtubei/v1/log_event?prettyPrint=false",
+      "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/GenerateIT",
+    ]) {
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://6529.io",
+          method: "POST",
+          readonly: true,
+          url,
+        })
+      ).toMatchObject({
+        action: "abort",
+        reason: "ignored-external-sdk-endpoint",
+      });
+    }
   });
 
   it("aborts same-origin telemetry POSTs without allowing external lookalikes", () => {
