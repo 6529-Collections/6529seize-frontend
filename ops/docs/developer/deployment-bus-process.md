@@ -6,10 +6,12 @@ slices: durable manifests and GitHub Deployment records first, then queue
 materialization, labels, PR comments, dashboard helpers, and stricter
 production preflight gates.
 
-Implementation note: the first automation slice is documented in
-`ops/docs/developer/deployment-bus-automation.md`. It adds manifest validation,
-GitHub Deployment ledger records, workflow artifacts, deployed-staging smoke
-support, and long-running deployment heartbeats without automating queue
+Implementation note: the automation slices are documented in
+`ops/docs/developer/deployment-bus-automation.md`. They add manifest
+validation, GitHub Deployment ledger records, workflow artifacts, standard
+deployed-environment validation pack names, release report artifacts,
+deployed-staging smoke support, auto-hold evaluation for missing release
+evidence, and long-running deployment heartbeats without automating queue
 movement or production promotion.
 
 ## Why This Exists
@@ -81,6 +83,14 @@ Known current gaps after the first automation slice:
 - The durable manifest artifact is authoritative for this slice; GitHub
   Deployment records are the status/history pointer, not the full manifest
   datastore.
+- Release reports evaluate whether required packs and durable artifact pointers
+  are recorded, but the workflows still do not automatically run those
+  post-deploy Playwright packs. The release captain or validation agents must
+  run them and record results with `record-validation-check` until a later
+  automation slice wires pack execution into the lane.
+- The current standard pack plan covers desktop Chromium only. Mobile browser,
+  Firefox, WebKit, Capacitor simulation, and Electron simulation are explicit
+  future surface-matrix work.
 - Backend coordination is still a cross-repo handoff, not a shared automated
   release train.
 
