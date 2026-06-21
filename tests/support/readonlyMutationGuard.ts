@@ -150,6 +150,13 @@ function isIgnoredExternalMutation(url: URL) {
     return true;
   }
 
+  if (
+    (url.hostname === "www.youtube.com" || url.hostname === "youtube.com") &&
+    url.pathname.startsWith("/api/stats/")
+  ) {
+    return true;
+  }
+
   return IGNORED_EXTERNAL_MUTATION_HOSTS.some((pattern) =>
     pattern.test(url.hostname)
   );
