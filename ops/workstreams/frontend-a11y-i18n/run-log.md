@@ -2240,6 +2240,8 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   redirect reliably. The required pack now only claims the stable high-value
   route, search, navigation, network, delegation, and surface-setup flows it
   proves.
+- Accepted CodeRabbit's low-risk wording nit for the staging E2E script docs in
+  `tests/README.md`.
 - Follow-up validation passed:
   - `seize run format:changed`
   - `node --check ops/scripts/deployment-bus.cjs`

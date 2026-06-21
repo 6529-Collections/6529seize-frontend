@@ -75,7 +75,8 @@ Surface matrix:
 - `test:e2e:surface-matrix` runs the core public route/navigation pack on both
   baseline web projects.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
-- `test:e2e:staging` runs the broader surface matrix against staging.
+- `test:e2e:staging` runs the broader surface matrix against the same
+  environment.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
