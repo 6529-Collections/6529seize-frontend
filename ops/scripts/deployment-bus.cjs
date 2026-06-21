@@ -646,6 +646,23 @@ function validateManifest(manifest) {
 
 function validateValidationPlan(manifest, errors, warnings) {
   const validation = manifest.validation || {};
+  const requiredPacks = validateRequiredPacks(validation, errors, warnings);
+  if (!requiredPacks) {
+    return;
+  }
+
+  validatePackPlan(validation, errors);
+  validateDurableArtifactsConfig(validation.durable_artifacts, errors);
+
+  const checksOk = validateValidationChecks(validation, errors, warnings);
+  if (!checksOk) {
+    return;
+  }
+
+  addReadinessFindings(manifest, errors, warnings);
+}
+
+function validateRequiredPacks(validation, errors, warnings) {
   const requiredPacks = validation.required_packs;
   if (!Array.isArray(requiredPacks) || requiredPacks.length === 0) {
     pushError(
@@ -653,7 +670,7 @@ function validateValidationPlan(manifest, errors, warnings) {
       "validation.required_packs",
       "must include at least one pack"
     );
-    return;
+    return null;
   }
 
   for (const packId of requiredPacks) {
@@ -664,14 +681,19 @@ function validateValidationPlan(manifest, errors, warnings) {
     }
   }
 
+  return requiredPacks;
+}
+
+function validatePackPlan(validation, errors) {
   if (
     validation.pack_plan !== undefined &&
     !Array.isArray(validation.pack_plan)
   ) {
     pushError(errors, "validation.pack_plan", "must be an array when present");
   }
+}
 
-  const durableArtifacts = validation.durable_artifacts;
+function validateDurableArtifactsConfig(durableArtifacts, errors) {
   if (durableArtifacts !== undefined) {
     if (typeof durableArtifacts.required !== "boolean") {
       pushError(
@@ -695,55 +717,83 @@ function validateValidationPlan(manifest, errors, warnings) {
       );
     }
   }
+}
 
+function validationAcceptedArtifactPrefixes(validation) {
+  const acceptedPrefixes = validation.durable_artifacts?.accepted_prefixes;
+  return Array.isArray(acceptedPrefixes)
+    ? acceptedPrefixes
+    : APPROVED_DURABLE_ARTIFACT_PREFIXES;
+}
+
+function validateValidationChecks(validation, errors, warnings) {
   const checks = validation.checks;
   if (!Array.isArray(checks)) {
     pushError(errors, "validation.checks", "must be an array");
+    return false;
+  }
+
+  const acceptedPrefixes = validationAcceptedArtifactPrefixes(validation);
+  checks.forEach((check, checkIndex) => {
+    validateCheckArtifacts(
+      check,
+      checkIndex,
+      acceptedPrefixes,
+      errors,
+      warnings
+    );
+  });
+
+  return true;
+}
+
+function validateCheckArtifacts(
+  check,
+  checkIndex,
+  acceptedPrefixes,
+  errors,
+  warnings
+) {
+  const checkStatus = normalizeCheckStatus(check.status);
+  checkArtifacts(check).forEach((artifact, artifactIndex) => {
+    const path = `validation.checks[${checkIndex}].artifacts[${artifactIndex}]`;
+    const rejectionReason = artifactRejectionReason(
+      artifactUri(artifact),
+      acceptedPrefixes
+    );
+
+    if (rejectionReason) {
+      pushError(errors, `${path}.uri`, rejectionReason);
+      return;
+    }
+
+    addArtifactMetadataWarnings(path, artifact, checkStatus, warnings);
+  });
+}
+
+function addArtifactMetadataWarnings(path, artifact, checkStatus, warnings) {
+  if (typeof artifact === "string" || checkStatus !== "passed") {
     return;
   }
 
-  const acceptedPrefixes = Array.isArray(durableArtifacts?.accepted_prefixes)
-    ? durableArtifacts.accepted_prefixes
-    : APPROVED_DURABLE_ARTIFACT_PREFIXES;
-  checks.forEach((check, checkIndex) => {
-    checkArtifacts(check).forEach((artifact, artifactIndex) => {
-      const uri = artifactUri(artifact);
-      const rejectionReason = artifactRejectionReason(uri, acceptedPrefixes);
-      const path = `validation.checks[${checkIndex}].artifacts[${artifactIndex}]`;
-      if (rejectionReason) {
-        pushError(errors, `${path}.uri`, rejectionReason);
-        return;
-      }
-      if (
-        typeof artifact !== "string" &&
-        normalizeCheckStatus(check.status) === "passed" &&
-        artifact.redaction_status !== "verified-redacted"
-      ) {
-        warnings.push(
-          `${path}.redaction_status: passed checks need verified-redacted durable evidence before release readiness`
-        );
-      }
-      if (
-        typeof artifact !== "string" &&
-        normalizeCheckStatus(check.status) === "passed" &&
-        !artifactHasIntegrityMetadata(artifact)
-      ) {
-        warnings.push(
-          `${path}: passed checks need sha256, etag, or cid metadata before release readiness`
-        );
-      }
-      if (
-        typeof artifact !== "string" &&
-        normalizeCheckStatus(check.status) === "passed" &&
-        !artifactHasRetentionMetadata(artifact)
-      ) {
-        warnings.push(
-          `${path}: passed checks need retention metadata before release readiness`
-        );
-      }
-    });
-  });
+  if (artifact.redaction_status !== "verified-redacted") {
+    warnings.push(
+      `${path}.redaction_status: passed checks need verified-redacted durable evidence before release readiness`
+    );
+  }
+  if (!artifactHasIntegrityMetadata(artifact)) {
+    warnings.push(
+      `${path}: passed checks need sha256, etag, or cid metadata before release readiness`
+    );
+  }
+  if (!artifactHasRetentionMetadata(artifact)) {
+    warnings.push(
+      `${path}: passed checks need retention metadata before release readiness`
+    );
+  }
+}
 
+function addReadinessFindings(manifest, errors, warnings) {
   if (!RELEASE_READINESS_STATUSES.has(manifest.status)) {
     return;
   }
@@ -1238,41 +1288,16 @@ async function githubRequest(
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const response = await fetch(
-        `${context.apiUrl}/repos/${context.owner}/${context.repo}${route}`,
-        {
-          method,
-          headers: {
-            Accept: "application/vnd.github+json",
-            Authorization: `Bearer ${context.token}`,
-            "Content-Type": "application/json",
-            "X-GitHub-Api-Version": "2022-11-28",
-          },
-          body: body ? JSON.stringify(body) : undefined,
-          signal: controller.signal,
-        }
+      return await githubRequestAttempt(
+        method,
+        route,
+        body,
+        context,
+        controller.signal
       );
-      const text = await response.text();
-      const data = text ? JSON.parse(text) : null;
-      if (response.ok) {
-        return data;
-      }
-
-      const message = data?.message || response.statusText;
-      lastError = new Error(
-        `GitHub API ${method} ${route} failed: ${response.status} ${message}`
-      );
-      const retryable = response.status === 429 || response.status >= 500;
-      if (!retryable || attempt === attempts) {
-        lastError.nonRetryable = !retryable;
-        throw lastError;
-      }
     } catch (error) {
       lastError = error;
-      if (error?.nonRetryable) {
-        throw lastError;
-      }
-      if (attempt === attempts) {
+      if (shouldStopGithubRetry(error, attempt, attempts)) {
         throw lastError;
       }
     } finally {
@@ -1283,6 +1308,60 @@ async function githubRequest(
   }
 
   throw lastError;
+}
+
+function githubRequestUrl(context, route) {
+  return `${context.apiUrl}/repos/${context.owner}/${context.repo}${route}`;
+}
+
+function githubRequestInit(method, body, context, signal) {
+  return {
+    method,
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${context.token}`,
+      "Content-Type": "application/json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal,
+  };
+}
+
+function githubApiError(method, route, response, data) {
+  const message = data?.message || response.statusText;
+  const error = new Error(
+    `GitHub API ${method} ${route} failed: ${response.status} ${message}`
+  );
+  error.nonRetryable = !isRetryableGithubStatus(response.status);
+  return error;
+}
+
+function isRetryableGithubStatus(status) {
+  return status === 429 || status >= 500;
+}
+
+async function parseGithubResponse(response) {
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function githubRequestAttempt(method, route, body, context, signal) {
+  const response = await fetch(
+    githubRequestUrl(context, route),
+    githubRequestInit(method, body, context, signal)
+  );
+  const data = await parseGithubResponse(response);
+
+  if (response.ok) {
+    return data;
+  }
+
+  throw githubApiError(method, route, response, data);
+}
+
+function shouldStopGithubRetry(error, attempt, attempts) {
+  return Boolean(error?.nonRetryable || attempt === attempts);
 }
 
 function normalizeDeploymentId(value) {
@@ -1506,15 +1585,15 @@ async function main(argv = process.argv.slice(2), env = process.env) {
           now: args.now,
         });
         const result = validateManifest(manifest);
-        if (!args.output) {
-          writeStdout(report);
-        } else {
+        if (args.output) {
           const target = path.resolve(args.output);
           // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes release reports to supplied workflow paths.
           fs.mkdirSync(path.dirname(target), { recursive: true });
           // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes release reports to supplied workflow paths.
           fs.writeFileSync(target, `${report}\n`);
           writeStdout(`Wrote ${args.output}`);
+        } else {
+          writeStdout(report);
         }
         printValidation(result);
         if (!result.ok) {

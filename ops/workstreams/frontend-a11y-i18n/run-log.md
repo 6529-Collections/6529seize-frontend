@@ -1981,6 +1981,13 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - `seize exec eslint ops/scripts/deployment-bus.cjs __tests__/scripts/deployment-bus.test.ts --no-warn-ignored --max-warnings=0`
   - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
     23 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr5-secret-scan.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/pr5-workflow-security.json`:
+    clean.
+  - `codex-diff-check`
   - `seize run testing-strategy -- ci-plan --changed-from origin/main --output test-results/app-pr-ci/pr5-ci-plan.json`:
     Level 5 because production deploy authority is touched.
   - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr5-secret-scan.json`:
@@ -2000,3 +2007,19 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
     production Next build, TypeScript, static generation, and sitemap
     generation. Nonfatal build warnings observed: known dynamic OG metadata
     image route warning and Node `punycode` deprecation warning.
+
+## 2026-06-21T09:10Z PR 5 Sonar Follow-Up
+
+- Addressed SonarCloud maintainability feedback on PR #2804 before continuing
+  the next testing-roadmap train:
+  - split `validateValidationPlan()` into smaller required-pack, pack-plan,
+    durable-artifact, check-artifact, and readiness helper functions;
+  - split `githubRequest()` URL/header/parse/retry helpers out of the retry
+    loop;
+  - flipped the `release-report` output branch to the positive `args.output`
+    path.
+- Focused validation after the refactor:
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize exec eslint ops/scripts/deployment-bus.cjs __tests__/scripts/deployment-bus.test.ts --no-warn-ignored --max-warnings=0`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    23 passed.
