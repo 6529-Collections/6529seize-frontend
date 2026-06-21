@@ -180,57 +180,56 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toBeVisible();
   });
 
-  test("renders ReMemes detail tabs without mutation", async ({
-    baseURL,
-    page,
-  }) => {
+  test.describe("production ReMemes detail fixture", () => {
     test.skip(
-      !isProductionBaseURL(baseURL),
+      ({ baseURL }) => !isProductionBaseURL(baseURL),
       "this ReMeme detail fixture is only stable against production data"
     );
 
-    await gotoReady(
-      page,
-      "/rememes/0xfb7dc9be63e53e24b217c02c16f3952ac3546e5f/7"
-    );
+    test("renders ReMemes detail tabs without mutation", async ({ page }) => {
+      await gotoReady(
+        page,
+        "/rememes/0xfb7dc9be63e53e24b217c02c16f3952ac3546e5f/7"
+      );
 
-    await expect(
-      page.getByRole("link", { name: "Back to ReMemes" })
-    ).toHaveAttribute("href", "/rememes");
-    await expect(page).toHaveTitle("SeizeGenart | ReMemes | 6529.io");
-    await expect(
-      page.getByRole("heading", { level: 1, name: "ReMemes - SeizeGenart" })
-    ).toBeVisible();
-    await expectNavigation(page, "ReMemes page sections");
-    await expect(
-      page.getByRole("button", { name: "Overview" })
-    ).toHaveAttribute("aria-pressed", "true");
-    await expect(
-      page.getByRole("region", { name: "ReMeme details" })
-    ).toBeVisible();
-    await expect(
-      page.locator("main img[alt='SeizeGenart']").first()
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "View Genart Memes on Etherscan" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Open @kkostya on X" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Open OpenSea" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Open Rarible" })
-    ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Back to ReMemes" })
+      ).toHaveAttribute("href", "/rememes");
+      await expect(page).toHaveTitle("SeizeGenart | ReMemes | 6529.io");
+      await expect(
+        page.getByRole("heading", { level: 1, name: "ReMemes - SeizeGenart" })
+      ).toBeVisible();
+      await expectNavigation(page, "ReMemes page sections");
+      await expect(
+        page.getByRole("button", { name: "Overview" })
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(
+        page.getByRole("region", { name: "ReMeme details" })
+      ).toBeVisible();
+      await expect(
+        page.locator("main img[alt='SeizeGenart']").first()
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "View Genart Memes on Etherscan" })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Open @kkostya on X" })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Open OpenSea" })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Open Rarible" })
+      ).toBeVisible();
 
-    await page.getByRole("button", { name: "Metadata" }).click();
-    await expect(
-      page.getByRole("button", { name: "Metadata" })
-    ).toHaveAttribute("aria-pressed", "true");
-    await page.getByRole("button", { name: "References" }).click();
-    await expect(
-      page.getByRole("button", { name: "References" })
-    ).toHaveAttribute("aria-pressed", "true");
+      await page.getByRole("button", { name: "Metadata" }).click();
+      await expect(
+        page.getByRole("button", { name: "Metadata" })
+      ).toHaveAttribute("aria-pressed", "true");
+      await page.getByRole("button", { name: "References" }).click();
+      await expect(
+        page.getByRole("button", { name: "References" })
+      ).toHaveAttribute("aria-pressed", "true");
+    });
   });
 });
