@@ -2,7 +2,7 @@ version: 1
 enabled: true
 
 reviewKinds:
-  allowed: [general, followup, wcag, i18n, security, responsiveness]
+  allowed: [general, followup, wcag, i18n, security, glm-swarm, responsiveness]
   initial: [general, wcag, i18n, security, responsiveness]
   followup: [followup]
 
