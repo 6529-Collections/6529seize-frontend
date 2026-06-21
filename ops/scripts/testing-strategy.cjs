@@ -583,6 +583,8 @@ function createCiPlan(files, options = {}) {
   );
   const hasRuntimeEvidenceNeed =
     riskFloor >= 2 || risk.route_impacts.length > 0 || hasStyle;
+  const hasCriticalShellEvidenceNeed =
+    riskFloor >= 3 || hasBuildSensitive || hasDeletedRuntimeSource;
   const needsInstall =
     hasLintable ||
     hasPackageGovernance ||
@@ -664,6 +666,12 @@ function createCiPlan(files, options = {}) {
         hasRuntimeEvidenceNeed
           ? "Standard-risk UI, route, or style changes need a small browser smoke pack."
           : "No route, runtime UI, or style smoke needed."
+      ),
+      playwright_critical_shell: check(
+        hasCriticalShellEvidenceNeed,
+        hasCriticalShellEvidenceNeed
+          ? "Guarded, build-sensitive, or deleted runtime source changes need critical route-shell browser evidence."
+          : "No guarded or build-sensitive route-shell browser evidence needed."
       ),
     },
     security: {

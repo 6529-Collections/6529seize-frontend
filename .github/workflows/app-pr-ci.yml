@@ -28,6 +28,7 @@ jobs:
       jest_changed_required: ${{ steps.plan_outputs.outputs.jest_changed_required }}
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
+      playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
 
@@ -267,7 +268,7 @@ jobs:
         run: ./bin/6529 run build
 
       - name: Install Playwright browser
-        if: needs.plan.outputs.playwright_smoke_required == 'true'
+        if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true'
         run: ./bin/6529 exec playwright install --with-deps chromium
 
       - name: Run small Playwright smoke pack
@@ -275,6 +276,12 @@ jobs:
         env:
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
+
+      - name: Run critical route-shell Playwright pack
+        if: needs.plan.outputs.playwright_critical_shell_required == 'true'
+        env:
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:critical-shell
 
       - name: Upload app check artifacts
         if: always()

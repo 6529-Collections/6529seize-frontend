@@ -54,6 +54,28 @@ Read this section first after compaction or handoff.
     global artifact readiness, invalid manifests producing ready reports, weak
     artifact URI/redaction metadata handling, and generated EOF noise. All four
     were fixed locally and covered by tests.
+- Latest testing-roadmap state, 2026-06-21T11:18Z:
+  - PR4 surface matrix is open separately as PR #2805 on
+    `codex/testing-e2e-surface-matrix`; leave it stable while it waits for
+    required review approval.
+  - Current clean worktree branch is now
+    `codex/testing-critical-e2e-guards`, based directly on current
+    `origin/main`.
+  - This slice adds an independent critical read-only route-shell Playwright
+    pack for high-value auth, operator, tool, and waves shells:
+    `/emma`, `/drop-forge`, `/tools/app-wallets`, `/tools/6529bot/admin`,
+    `/notifications`, `/messages`, `/waves`, `/open-data`, and
+    `/tools/block-finder`.
+  - App PR CI now plans `playwright_critical_shell` for guarded,
+    build-sensitive, or deleted runtime source changes and runs
+    `test:e2e:critical-shell` without weakening the existing smoke pack.
+  - GLM reviewbot is live in `.github/6529bot.yml`; frontend contract tests now
+    assert it is additive while preserving the five mandatory existing lanes:
+    `general`, `wcag`, `i18n`, `security`, and `responsiveness`.
+  - Local validation passed for the slice: strategy Jest contract tests,
+    Playwright typecheck, changed lint/typecheck, production build,
+    smoke E2E, critical-shell E2E, CI plan, secret scan, workflow security
+    scan, and `codex-diff-check`.
 - 2026-06-20 user direction: update the plan for the actual frontend WCAG/i18n
   mega run now that reviewbot is live. Reviewbot is an additional reviewer and
   regression detector only; it does not replace extensive local validation.
@@ -146,7 +168,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/testing-roadmap-next`
+`codex/testing-critical-e2e-guards`
 
 ## Constraints
 
@@ -249,14 +271,14 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Publish and review PR 1 from `codex/testing-pr1-harness`, preserving the
-   existing `.github/6529bot.yml` lanes unchanged.
-2. Start PR 2 from current `origin/main` after PR 1 is merged or explicitly
-   stacked: add CI workflow/gating around the PR1 harness, test planning
-   automation, and secret/workflow safety checks.
-3. Start PR 3 from current `origin/main` after PR 2 is merged or explicitly
-   stacked: add first WCAG/i18n route-pack fixtures and advisory axe/i18n
-   assertions, keeping reviewbots as additive feedback.
+1. Publish PR from `codex/testing-critical-e2e-guards`, request all existing
+   6529bot lanes plus `glm-swarm`, and iterate CI/reviewbot feedback without
+   removing any existing bot.
+2. Keep PR #2805 stable while it waits for required approval; do not churn it
+   unless a reviewer or CI finding requires a fix.
+3. After the critical-shell PR and PR #2805 land, continue PR7 canary/watch
+   docs/reporting and then expand authenticated/profile/API-backed browser
+   packs in separate focused PRs.
 4. Reconcile the existing PR stack from current `origin/main` before opening
    broad new implementation PRs.
 5. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR
