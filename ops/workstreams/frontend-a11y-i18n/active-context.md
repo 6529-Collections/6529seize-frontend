@@ -4,31 +4,50 @@
 
 Read this section first after compaction or handoff.
 
-- Latest testing-roadmap state, 2026-06-21T15:05Z:
-  - PR #2806 and PR #2805 are merged and deployed to production.
+- Latest testing-roadmap state, 2026-06-21T16:45Z:
+  - PR #2806, PR #2805, and PR #2808 are merged and deployed to production.
     - PR #2806 merge SHA:
       `745130a19785fdc844410a2798ba63a6db8256e8`
     - PR #2805 merge SHA and production version:
       `cd8635e004191fc0509f253bc8d9a66c8ff51805`
-    - staging deploy run:
-      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27906005657
-    - production deploy run:
-      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27906579357
-  - Production validation passed for API version, smoke surface matrix, full
-    surface matrix, and WCAG/i18n surface matrix. Public release note `4.41.7`
-    and Follow The Repo deployment note are posted.
+    - PR #2808 merge SHA and production version:
+      `1bdddd30c16c53e08601bf2bbfb67a267f517738`
+    - latest staging deploy run:
+      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27909464160
+    - latest production deploy run:
+      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27909937482
+  - PR #2808 added executable production post-deploy watch and canary-readiness
+    reporting to the deployment bus. Production deployment and read-only
+    validation passed for core smoke, surface matrix, WCAG/i18n, and the new
+    Waves/Profile social pack. The release report remains on hold until durable
+    artifact pointers are wired to approved infrastructure and the final
+    post-deploy watch checkpoint is recorded.
   - Durable artifact storage remains an operational follow-up. The deployment
     bus accepts approved S3/artifact-service/IPFS pointers, but the expected
     `s3://6529-artifacts/` storage path was not present during validation.
-  - Current branch: `codex/testing-roadmap-e2e-next`, based on production
-    `origin/main` `cd8635e004191fc0509f253bc8d9a66c8ff51805`.
-  - Active PR7a implementation adds executable post-deploy watch and
-    canary-readiness contracts to the deployment bus, workflow release reports,
-    and docs. It does not add real traffic-split canary infra.
-  - Subagent audit consensus: next high-value E2E PR after PR7a should cover
-    richer read-only Waves and public profile identity workflows across desktop
-    and mobile, then media/delegation, NextGen/groups/tools, and broad
-    network/open-data/static route matrices.
+    Do not weaken durable-artifact holds or treat GitHub Actions artifacts as
+    durable retained evidence.
+  - Current implementation branch: `codex/e2e-waves-profile`, based on
+    production `origin/main` `1bdddd30c16c53e08601bf2bbfb67a267f517738`.
+  - Active E2E PR adds a read-only Waves/Profile pack across desktop and mobile
+    Chromium plus staging/production scripts and a staging-access cookie seed
+    helper. It covers `/waves`, legacy `/waves?wave=...&serialNo=...`, the
+    `punk6529` public profile shell, and profile tabs:
+    `/punk6529/curations`, `/punk6529/collected`, `/punk6529/xtdh`.
+  - Validation for the active E2E branch passed:
+    `seize run test:e2e:social-readonly` (12 passed),
+    `seize run test:e2e:staging:social-readonly` (12 passed),
+    `seize run test:e2e:production:social-readonly` (6 passed),
+    `seize run typecheck:playwright`, `seize run typecheck:changed`,
+    `seize run lint:changed`, related Jest no-tests reproduction,
+    workflow-security scan, changed-secret scan, and `codex-diff-check`.
+  - GLM reviewbot is live on `6529reviewbot` and should remain additive. Do
+    not remove or downgrade existing Opus/general/WCAG/i18n/security/
+    responsiveness reviewbot lanes for any PR.
+  - Next high-value E2E PRs after Waves/Profile should cover media/mint/detail,
+    delegation, NextGen/groups/tools, and broad network/open-data/static route
+    matrices. Keep each pack read-only unless a dedicated authenticated-sandbox
+    mutation plan exists.
 - Latest rollout state, 2026-06-19T23:10Z:
   - `6529reviewbot` PR #399 is merged and live on reviewbot `main`:
     https://github.com/6529-Collections/6529reviewbot/pull/399
@@ -316,25 +335,28 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Commit the PR #2805 rebase evidence update and force-push
-   `codex/testing-e2e-surface-matrix` to refresh GitHub from the local rebased
-   branch.
-2. Iterate CodeRabbit, Sonar, CI, and 6529reviewbot feedback on PR #2805 until
-   Codex judges the loop is no longer adding material value.
-3. Merge PR #2805 after checks and review signals are green or consciously
-   dispositioned, then deploy the testing-hardening train through staging and
-   production with `ops/skills/deploy-6529/SKILL.md`.
-4. After the PR #2805/#2806 train lands in production, continue PR7
-   canary/watch docs/reporting and then expand authenticated/profile/API-backed
-   browser packs in separate focused PRs.
-5. Reconcile the existing page-cluster PR stack from current `origin/main`
+1. Commit, push, and open the `codex/e2e-waves-profile` PR with the validation
+   evidence listed above.
+2. Iterate CodeRabbit, Sonar, CI, Opus reviewbot, and GLM reviewbot feedback on
+   the Waves/Profile E2E PR until Codex judges the loop is no longer adding
+   material value.
+3. Merge the Waves/Profile E2E PR after checks and review signals are green or
+   consciously dispositioned, then deploy it through staging and production with
+   `ops/skills/deploy-6529/SKILL.md`.
+4. Record the PR #2808 production post-deploy watch checkpoint only after the
+   real 30-minute observation window and deployed-environment validation pass.
+   Leave the release report on hold if approved durable artifact storage is not
+   wired.
+5. Start the next E2E packs in focused PRs: media/mint/detail, delegation,
+   NextGen/groups/tools, then broad network/open-data/static route matrices.
+6. Reconcile the existing page-cluster PR stack from current `origin/main`
    before opening broad new implementation PRs.
-6. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR
+7. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR
    impact/testing plan, assign a risk level, write hazard analysis, create the
    validation manifest, and select durable artifact storage before opening the
    PR.
-7. Run extensive local validation first; treat the live `wcag`, `i18n`,
+8. Run extensive local validation first; treat the live `wcag`, `i18n`,
    `security`, `responsiveness`, and `glm-swarm` reviewbot lanes as additional
    review, not a local-test substitute.
-8. Preserve unrelated dirty EmojiContext, RememeImage test, and bootstrap style
+9. Preserve unrelated dirty EmojiContext, RememeImage test, and bootstrap style
    files in other worktrees.

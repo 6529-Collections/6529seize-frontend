@@ -2354,3 +2354,65 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - production `released` readiness hold until post-deploy watch passes;
   - `record-post-deploy-watch` CLI command;
   - `record-validation-check --retention-policy` support.
+
+## 2026-06-21T16:45Z PR7a Deployed And Waves/Profile E2E Pack Ready
+
+- PR #2808 deployment-bus post-deploy watch evidence merged and deployed:
+  - merge SHA / production version:
+    `1bdddd30c16c53e08601bf2bbfb67a267f517738`
+  - PR: https://github.com/6529-Collections/6529seize-frontend/pull/2808
+  - staging run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27909464160
+  - production run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27909937482
+- Production validation passed after deploy:
+  - production smoke: 12 passed.
+  - production surface matrix: 24 passed / 6 expected project-scope skips.
+  - production WCAG/i18n surface matrix: 6 passed.
+  - production Waves/Profile social read-only pack: 6 passed.
+- The PR #2808 production manifest correctly remains on hold until the
+  release-captain post-deploy watch checkpoint and approved durable artifact
+  pointers are available. The approved `s3://6529-artifacts/` bucket name was
+  not present to the current AWS identity; do not fake artifact URIs or weaken
+  durable-artifact holds.
+- Started branch `codex/e2e-waves-profile` from deployed `origin/main`
+  `1bdddd30c16c53e08601bf2bbfb67a267f517738`.
+- Implemented the first richer app E2E pack:
+  - `tests/social/waves-profile-readonly.spec.ts` covers `/waves`, legacy
+    `/waves?wave=...&serialNo=...`, the public `punk6529` profile shell, and
+    `/punk6529/curations`, `/punk6529/collected`, `/punk6529/xtdh`.
+  - `package.json` adds local, staging, and production social read-only
+    scripts.
+  - `tests/testHelpers.ts` seeds the staging access cookie from local
+    credential-backed env values before page navigation, keeping the UI unlock
+    path as fallback and never logging the secret value.
+  - `tests/README.md` records the new pack ownership and deployment commands.
+- Validation passed for the active E2E branch:
+  - `seize run test:e2e:social-readonly`: 12 passed.
+  - `seize run test:e2e:staging:social-readonly`: 12 passed.
+  - `seize run test:e2e:production:social-readonly`: 6 passed.
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`
+  - `seize run lint:changed`
+  - `codex-diff-check`
+- PR #2809 App PR CI initially failed because the related-Jest workflow step
+  passed an extra argument separator before `--findRelatedTests`, causing Jest
+  to treat `--passWithNoTests` as a literal pattern for Playwright-only changes.
+  Fixed `.github/workflows/app-pr-ci.yml` to pass Jest flags directly through
+  the repo wrapper. Follow-up validation passed:
+  - `seize run test:no-coverage --findRelatedTests tests/social/waves-profile-readonly.spec.ts tests/testHelpers.ts --passWithNoTests`
+  - `seize run testing-strategy -- validate-workflow-security --output test-results/app-pr-ci/pr2809-workflow-security.json`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr2809-secret-scan.json`
+- CodeRabbit and independent verifier feedback produced two low-risk hardening
+  fixes:
+  - Scope the social-read-only scripts to
+    `tests/social/waves-profile-readonly.spec.ts` so future non-read-only
+    social specs cannot be swept into staging/production read-only scripts.
+  - Assert public profile handle visibility directly instead of depending on
+    disabled edit-control accessible names.
+  - Follow-up validation passed: `seize run test:e2e:social-readonly`,
+    `seize run lint:changed`, `seize run typecheck:changed`, and
+    `codex-diff-check`.
+- Next PRs should keep expanding read-only coverage by user journey, not by
+  shallow route count: media/mint/detail first, then delegation,
+  NextGen/groups/tools, then broad network/open-data/static route matrices.
