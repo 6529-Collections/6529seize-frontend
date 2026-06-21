@@ -14,6 +14,9 @@ safe bus needs before queue automation can make decisions:
 - GitHub Deployment records for staging and production deploy workflows
 - Deployment status heartbeats while SSM or Elastic Beanstalk waits are running
 - manifest artifacts retained from deploy workflow runs
+- release report artifacts retained beside the manifest
+- standard deployed-environment validation pack names and commands
+- auto-hold evaluation for missing or failed required evidence
 - production workflow check that fails if `origin/main` advances during the
   build before Elastic Beanstalk is updated
 - deployed-staging Playwright mode through `PLAYWRIGHT_BASE_URL` and
@@ -41,6 +44,15 @@ Validate and summarize:
 ```bash
 6529 run deployment-bus -- validate-manifest --file deployment-bus-manifest.json
 6529 run deployment-bus -- summarize-manifest --file deployment-bus-manifest.json
+6529 run deployment-bus -- record-validation-check \
+  --file deployment-bus-manifest.json \
+  --pack playwright:core-smoke \
+  --status passed \
+  --artifact-uri s3://6529-artifacts/frontend/<release-id>/core-smoke.json \
+  --redaction-status verified-redacted \
+  --artifact-sha256 <sha256> \
+  --retention-days 90
+6529 run deployment-bus -- release-report --file deployment-bus-manifest.json --output deployment-release-report.md
 ```
 
 The manifest separates:
@@ -59,6 +71,74 @@ Manifest creation is intentionally a hard deploy gate. If the workflow cannot
 create and validate the manifest, it stops before SSM, S3, or Elastic Beanstalk
 mutation. The deployment lane should not move when its release ledger cannot be
 written.
+
+## Standard Validation Packs
+
+The deployment manifest now records the standard frontend deployed-environment
+packs in `validation.required_packs` and expands them in
+`validation.pack_plan`.
+
+| Pack                    | Staging command                                                                                         | Production command                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `playwright:core-smoke` | `seize run test:e2e:staging`                                                                            | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke`     |
+| `playwright:wcag-i18n`  | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n` | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n` |
+
+The current pack plan intentionally records `web:desktop-chromium` as the
+covered surface. Mobile Chromium, Firefox, WebKit, Capacitor simulation, and
+Electron simulation remain PR4 work and must not be claimed as covered until
+those projects exist and pass.
+
+## Release Reports And Auto-Hold
+
+Deploy workflows now update `deployment-bus-manifest.json` to a terminal deploy
+status before artifact upload and write `deployment-release-report.md` beside
+it. The report includes:
+
+- exact staging and production candidate SHAs;
+- release captain and environment URL;
+- required validation packs and their commands;
+- recorded validation checks and artifact pointers;
+- auto-hold findings;
+- included PRs and artifact policy.
+
+The report status is `hold` when required validation evidence has not been
+recorded yet. A hold does not mean the deploy failed. It means production
+promotion or public release notes still need the missing deployed-environment
+evidence or a recorded release-captain exception.
+
+`record-validation-check` appends a timestamped result to
+`validation.checks`. Use it after a required pack finishes so the next release
+report can distinguish unresolved findings from a fixed rerun. The latest
+recorded result for each required pack is authoritative for pack readiness; a
+failed run can be cleared by a later passing rerun with retained evidence.
+
+For release readiness, each required pack's latest passing check needs its own
+approved durable artifact pointer. An unrelated check's artifact does not prove
+the required pack. The pointer must include:
+
+- an approved durable URI without query strings, fragments, signed URL tokens,
+  local filesystem paths, or Git LFS pointers;
+- `redaction_status=verified-redacted`;
+- integrity metadata: `sha256`, `etag`, or `cid`;
+- retention metadata: `retention_days`, `retention_until`, or
+  `retention_policy`.
+
+Current auto-hold criteria:
+
+- any required validation pack records `failed`, `blocked`, or `timed_out`;
+- a deploy-verified or terminal manifest lacks a passed check for each required
+  validation pack;
+- a production-eligible manifest's latest passing required-pack check lacks an
+  approved durable artifact pointer with verified redaction, integrity metadata,
+  and retention metadata;
+- the production candidate SHA no longer matches the staging-validated release
+  set.
+
+Durable evidence must point at approved 6529-controlled artifact storage such
+as `s3://6529-artifacts/`, `https://artifacts.6529.io/`, or `ipfs://` for
+intentionally public redacted provenance. Git LFS and committed generated files
+are not durable release evidence stores. Do not record temporary signed URLs,
+query-string credentials, fragments, local paths, or unredacted artifacts.
 
 ## GitHub Deployment Ledger
 
