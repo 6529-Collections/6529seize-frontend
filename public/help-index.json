@@ -980,6 +980,55 @@
       "source_refs": ["ops/docs/open-data/feature-meme-subscriptions.md"]
     },
     {
+      "id": "subscriptions.top-up-troubleshooting",
+      "kind": "workflow",
+      "title": "Subscription top-up troubleshooting",
+      "link_label": "Subscriptions",
+      "aliases": [
+        "sent eth to subscription address",
+        "sent eth to subscriptions address",
+        "subscription top up missing",
+        "subscription top-up missing",
+        "subscription balance not showing",
+        "top up balance not showing",
+        "top-up balance not showing",
+        "deposit not showing in subscriptions",
+        "subscription payment pending",
+        "where is my subscription top up"
+      ],
+      "keywords": [
+        "subscription",
+        "subscriptions",
+        "top",
+        "up",
+        "top-up",
+        "eth",
+        "address",
+        "balance",
+        "pending",
+        "transaction",
+        "tx",
+        "history",
+        "refresh",
+        "deposit"
+      ],
+      "facts": [
+        "Subscription top-ups send ETH to the configured subscriptions address on the configured chain.",
+        "The Profile Subscriptions tab shows Current Balance, a refresh balance control, pending or successful top-up transaction links, and Top Up History.",
+        "If the wallet transaction is still pending, wait for confirmation; if it is confirmed and the balance or Top Up History still does not update after refreshing, share the transaction hash with the tech team."
+      ],
+      "canonical_path": "/about/subscriptions",
+      "related_paths": ["/{user}/subscriptions"],
+      "tags": ["subscriptions", "troubleshooting"],
+      "source_refs": [
+        "ops/docs/profiles/tabs/feature-subscriptions-tab.md",
+        "components/about/AboutSubscriptions.tsx",
+        "components/user/subscriptions/UserPageSubscriptionsTopUp.tsx",
+        "components/user/subscriptions/UserPageSubscriptionsBalance.tsx",
+        "components/user/subscriptions/UserPageSubscriptionsHistory.tsx"
+      ]
+    },
+    {
       "id": "subscriptions.report",
       "kind": "route",
       "title": "Subscriptions report",
@@ -1556,7 +1605,13 @@
         "realtime",
         "websocket",
         "stale feed",
-        "live connection"
+        "live connection",
+        "reply notification but no chat message",
+        "got notification but reply not in chat",
+        "new reply not showing",
+        "new message hidden",
+        "chat did not update",
+        "bot reply not showing"
       ],
       "keywords": [
         "realtime",
@@ -1564,10 +1619,19 @@
         "updates",
         "authenticated",
         "connection",
-        "websocket"
+        "websocket",
+        "reply",
+        "notification",
+        "message",
+        "chat",
+        "mobile",
+        "thread"
       ],
       "facts": [
-        "Authenticated live updates power realtime app behavior where supported.",
+        "Authenticated live updates power realtime app behavior where supported, including wave drop updates.",
+        "Wave chat should receive new drops through authenticated DROP_UPDATE websocket events when the connection is healthy.",
+        "On Apple mobile while the reader is not pinned to the bottom, newest drops can be held behind the new-messages control until the user reveals them.",
+        "Thread reply views listen for drop updates and refetch replies, so a thread can lag briefly even when the notification arrives.",
         "Connectivity problems can make feeds or counts appear stale until reconnect or refresh.",
         "The realtime troubleshooting docs cover connection recovery and expected limitations."
       ],
@@ -1576,7 +1640,10 @@
       "tags": ["realtime", "connectivity"],
       "source_refs": [
         "ops/docs/realtime/feature-authenticated-live-updates.md",
-        "ops/docs/realtime/troubleshooting-realtime-connectivity.md"
+        "ops/docs/realtime/troubleshooting-realtime-connectivity.md",
+        "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
+        "hooks/useDropMessages.ts",
+        "components/waves/drops/wave-drops-all/hooks/useDeferredNewestDrops.ts"
       ]
     },
     {
