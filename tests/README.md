@@ -74,9 +74,15 @@ Surface matrix:
   baseline web projects.
 - `test:e2e:surface-matrix` runs the core public route/navigation pack on both
   baseline web projects.
+- `test:e2e:social-readonly` runs the public Waves/Profile read-only pack on
+  both baseline web projects.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
+- `test:e2e:staging:social-readonly` runs the Waves/Profile read-only pack
+  against staging with the remote mutation guard and staging access unlock.
+- `test:e2e:production:social-readonly` runs the same pack against production
+  desktop web only as a public, read-only smoke.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -92,6 +98,9 @@ Large-pack ownership:
 - `test:e2e:surface-matrix` is owned by the PR owner for user-facing route,
   navigation, shell, WCAG, i18n, deployment, or routing changes. Keep it
   read-only and stable enough for staging and production validation.
+- `test:e2e:social-readonly` is owned by PR or train owners changing Waves,
+  public profile routing, profile tabs, social feed shells, route canonicalizing,
+  or read-only mutation guard behavior.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.
