@@ -85,6 +85,9 @@ Surface matrix:
 - `test:e2e:network-open-data-readonly` runs the public Network, Health, Open
   Data, API docs, restricted-route, and fail-closed route-handler pack on both
   baseline web projects.
+- `test:e2e:collections-readonly` runs the public NextGen, The Memes, Meme
+  Lab, 6529 Gradient, and ReMemes browse/read-only pack on both baseline web
+  projects.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -107,6 +110,10 @@ Surface matrix:
 - `test:e2e:production:network-open-data-readonly` runs the Network/Open Data
   read-only pack against production desktop web only as a public, read-only
   smoke.
+- `test:e2e:staging:collections-readonly` runs the collections read-only pack
+  against staging with the remote mutation guard and staging access unlock.
+- `test:e2e:production:collections-readonly` runs the collections read-only
+  pack against production desktop web only as a public, read-only smoke.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -136,6 +143,9 @@ Large-pack ownership:
 - `test:e2e:network-open-data-readonly` is owned by PR or train owners changing
   Network, Health metrics, Open Data downloads, public API docs, restricted
   access shells, or the covered fail-closed route handlers.
+- `test:e2e:collections-readonly` is owned by PR or train owners changing
+  NextGen public collection/token routes, The Memes, Meme Lab, 6529 Gradient,
+  ReMemes, collection sorting/filter shells, or collection browse cards.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.

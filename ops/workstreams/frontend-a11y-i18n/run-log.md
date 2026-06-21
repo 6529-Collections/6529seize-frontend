@@ -2580,3 +2580,33 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/network-open-data-secret-scan-rebased.json`
   - `codex-diff-check`
   - `seize run test:e2e:network-open-data-readonly`: 14 passed.
+
+## 2026-06-21T19:35Z Collections Read-Only E2E Pack Started
+
+- Started `codex/e2e-nextgen-collections-readonly` from current deployed
+  `origin/main` (`f82890f24a4ef7643f143dca5791ad0c50e010f3`).
+- Added `tests/collections/nextgen-collections-readonly.spec.ts` for:
+  - NextGen landing, about page, collection-list, Pebbles detail tabs, Pebbles
+    art browse, and minted-token detail/rarity routes.
+  - The Memes, Meme Lab, 6529 Gradient, and ReMemes public browse shells.
+  - Desktop and mobile route readiness, horizontal overflow, public card/empty
+    settling, and read-only mutation guard coverage through shared helpers.
+- Added local, staging, and production `collections-readonly` scripts and README
+  ownership notes.
+- Fixed a 6529 Gradient runtime markup regression found by the pack: gradient
+  cards no longer render an owner profile link nested inside the outer NFT card
+  link.
+- Unsafe actions explicitly avoided: wallet connect/signing, minting, transfers,
+  admin/manager routes, Rememe add/upload, LFG-style actions, NextGen display
+  center render/download actions, external clicks, exact live-data counts, and
+  order-sensitive assertions.
+- Validation passed:
+  - `seize run test:e2e:collections-readonly`: 20 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: no changed TS files in the app typecheck
+    project.
+  - `seize run typecheck:playwright`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+     origin/main --output
+     test-results/app-pr-ci/collections-readonly-secret-scan.json`: clean.
+   - `codex-diff-check`
