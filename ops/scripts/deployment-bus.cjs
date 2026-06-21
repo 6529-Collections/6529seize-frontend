@@ -725,16 +725,16 @@ function validateDurableArtifactsConfig(durableArtifacts, manifest, errors) {
         "must be boolean"
       );
     }
-    if (!Array.isArray(durableArtifacts.accepted_prefixes)) {
+    if (Array.isArray(durableArtifacts.accepted_prefixes)) {
+      validateAcceptedArtifactPrefixes(
+        durableArtifacts.accepted_prefixes,
+        errors
+      );
+    } else {
       pushError(
         errors,
         "validation.durable_artifacts.accepted_prefixes",
         "must be an array"
-      );
-    } else {
-      validateAcceptedArtifactPrefixes(
-        durableArtifacts.accepted_prefixes,
-        errors
       );
     }
     if (durableArtifacts.git_lfs_allowed !== false) {
@@ -749,7 +749,7 @@ function validateDurableArtifactsConfig(durableArtifacts, manifest, errors) {
 
 function validateAcceptedArtifactPrefixes(acceptedPrefixes, errors) {
   acceptedPrefixes.forEach((prefix, index) => {
-    if (!APPROVED_DURABLE_ARTIFACT_PREFIXES.includes(prefix)) {
+    if (!isApprovedDurableArtifactPrefix(prefix)) {
       pushError(
         errors,
         `validation.durable_artifacts.accepted_prefixes[${index}]`,
@@ -759,18 +759,27 @@ function validateAcceptedArtifactPrefixes(acceptedPrefixes, errors) {
   });
 }
 
-function validationAcceptedArtifactPrefixes(validation) {
-  const acceptedPrefixes = validation.durable_artifacts?.accepted_prefixes;
-  if (!Array.isArray(acceptedPrefixes)) {
-    return APPROVED_DURABLE_ARTIFACT_PREFIXES;
-  }
-
-  const approvedPrefixes = acceptedPrefixes.filter((prefix) =>
+function isApprovedDurableArtifactPrefix(prefix) {
+  return (
+    typeof prefix === "string" &&
     APPROVED_DURABLE_ARTIFACT_PREFIXES.includes(prefix)
   );
-  return approvedPrefixes.length > 0
-    ? approvedPrefixes
-    : APPROVED_DURABLE_ARTIFACT_PREFIXES;
+}
+
+function validationAcceptedArtifactPrefixes(validation) {
+  const acceptedPrefixes = validation.durable_artifacts?.accepted_prefixes;
+  let approvedPrefixes = [...APPROVED_DURABLE_ARTIFACT_PREFIXES];
+
+  if (Array.isArray(acceptedPrefixes)) {
+    const manifestPrefixes = acceptedPrefixes.filter(
+      isApprovedDurableArtifactPrefix
+    );
+    if (manifestPrefixes.length > 0) {
+      approvedPrefixes = manifestPrefixes;
+    }
+  }
+
+  return approvedPrefixes;
 }
 
 function validateValidationChecks(validation, errors, warnings) {

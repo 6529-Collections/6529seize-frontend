@@ -1989,6 +1989,25 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
     clean.
   - `codex-diff-check`
 
+## 2026-06-21T09:55Z PR 5 Sonar Polish
+
+- Addressed the remaining SonarCloud code-smell report after the CodeRabbit
+  follow-up:
+  - changed durable artifact prefix validation to use a positive array branch;
+  - made approved-prefix selection single-return and type-explicit.
+- Validation:
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize exec eslint ops/scripts/deployment-bus.cjs __tests__/scripts/deployment-bus.test.ts --no-warn-ignored --max-warnings=0`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    27 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr5-secret-scan.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/pr5-workflow-security.json`:
+    clean.
+  - `codex-diff-check`
+
 ## 2026-06-21T09:35Z PR 5 CodeRabbit Follow-Up
 
 - Addressed the first CodeRabbit review on PR #2804:
