@@ -42,6 +42,10 @@ App PR CI:
   artifact-store write credentials.
 - The workflow runs `test:e2e:smoke` only when the CI plan sees route, runtime
   UI, style, or higher-risk changes that need browser evidence.
+- The workflow runs `test:e2e:critical-shell` when the CI plan sees guarded,
+  build-sensitive, or deleted runtime source changes. This pack is read-only and
+  covers high-value route shells and auth/operator gates without signing,
+  posting, admin mutations, or wallet writes.
 - Uploaded PR CI artifacts are short-term debugging evidence. Durable
   deployment-train evidence still belongs on approved 6529-controlled artifact
   storage, not Git LFS.

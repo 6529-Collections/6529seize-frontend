@@ -2067,3 +2067,67 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - `seize exec eslint ops/scripts/deployment-bus.cjs __tests__/scripts/deployment-bus.test.ts --no-warn-ignored --max-warnings=0`
   - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
     23 passed.
+
+## 2026-06-21T11:18Z Critical Shell E2E Guards
+
+- Started independent branch `codex/testing-critical-e2e-guards` from current
+  `origin/main` after leaving PR #2805 stable for required review approval.
+- Added `test:e2e:critical-shell`, a read-only Playwright pack covering:
+  - wallet/auth/operator gates: `/emma`, `/drop-forge`, `/tools/app-wallets`,
+    `/tools/6529bot/admin`, `/notifications`, and `/messages`;
+  - high-value public/tool shells: `/waves`, `/open-data`, and
+    `/tools/block-finder`.
+- Wired `playwright_critical_shell` into `ops/scripts/testing-strategy.cjs` and
+  App PR CI for guarded, build-sensitive, or deleted runtime source changes.
+- Updated the reviewbot contract test for the now-live `glm-swarm` lane:
+  GLM must remain additive and the five existing initial lanes remain the
+  mandatory floor.
+- Local validation:
+  - `node --check ops/scripts/testing-strategy.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts`:
+    35 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize-local-dev bootstrap`: assigned frontend port `3162`.
+  - `seize run testing-strategy -- ci-plan --changed-from origin/main --output test-results/app-pr-ci/critical-shell-ci-plan.json`:
+    Level 4 with `playwright_critical_shell` required.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/critical-shell-secret-scan.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/critical-shell-workflow-security.json`:
+    clean.
+  - `$env:PORT_SEARCH_LIMIT='10'; $env:BASE_ENDPOINT='http://localhost:3162'; $env:PLAYWRIGHT_BASE_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run test:e2e:critical-shell`:
+    7 passed.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed full prebuild,
+    lint, production Next build, static generation, and sitemap generation.
+    Observed known non-fatal dynamic OG metadata and `punycode` warnings.
+  - `$env:PORT_SEARCH_LIMIT='10'; $env:BASE_ENDPOINT='http://localhost:3162'; $env:PLAYWRIGHT_BASE_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run test:e2e:smoke`:
+    6 passed.
+  - Restored three generated API model files rewritten by the build because
+    this PR does not intentionally change generated API models.
+  - `codex-diff-check`
+
+## 2026-06-21T12:35Z Critical Shell Review Follow-Up
+
+- Independent verifier found that the `/waves` case disabled all console-error
+  assertions, which would hide real route-shell console failures.
+- Replaced the route-wide bypass with scoped console allowances:
+  - the critical-shell pack tolerates the known local emoji-list fetch console
+    error from the shared local backend returning 404 for the proxied emoji
+    list;
+  - only the `/waves` assertion tolerates the known generic Chromium 500
+    resource message from local feed API health, while still failing on other
+    console errors.
+- Added Jest coverage proving explicit console allowances do not mask a second
+  actionable console error.
+- Local validation after the follow-up:
+  - `seize run test:no-coverage -- __tests__/playwright/pageAssertions.test.ts`:
+    3 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - cleared ignored `.next` and Playwright `test-results` after one stale local
+    dev compile served `/tools/6529bot/admin` as the 404 shell;
+  - `$env:PORT='3162'; $env:PORT_SEARCH_LIMIT='10'; $env:BASE_ENDPOINT='http://localhost:3162'; $env:PLAYWRIGHT_BASE_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run test:e2e:critical-shell`:
+    7 passed.
