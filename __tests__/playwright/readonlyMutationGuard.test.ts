@@ -146,6 +146,18 @@ describe("Playwright read-only mutation guard", () => {
 
     expect(
       decideReadonlyRequest({
+        baseURL: "http://localhost:3001",
+        method: "POST",
+        readonly: true,
+        url: "https://www.googletagmanager.com/td?cid=redacted",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
         baseURL: "https://staging.6529.io",
         method: "POST",
         readonly: true,

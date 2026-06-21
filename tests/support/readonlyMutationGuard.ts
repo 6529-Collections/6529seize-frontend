@@ -146,6 +146,10 @@ function isIgnoredExternalMutation(url: URL) {
     return true;
   }
 
+  if (url.hostname === "www.googletagmanager.com" && url.pathname === "/td") {
+    return true;
+  }
+
   return IGNORED_EXTERNAL_MUTATION_HOSTS.some((pattern) =>
     pattern.test(url.hostname)
   );
