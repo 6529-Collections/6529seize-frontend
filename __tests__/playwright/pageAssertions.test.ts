@@ -3,14 +3,14 @@ import {
   type PageDiagnostics,
 } from "../../tests/support/consoleDiagnostics";
 
-describe("Playwright page assertions", () => {
-  function diagnostics(consoleErrors: string[]): PageDiagnostics {
-    return {
-      consoleErrors,
-      pageErrors: [],
-    };
-  }
+function diagnostics(consoleErrors: string[]): PageDiagnostics {
+  return {
+    consoleErrors,
+    pageErrors: [],
+  };
+}
 
+describe("Playwright page assertions", () => {
   it("ignores browser-client blocked resource diagnostics", () => {
     expect(() =>
       assertNoConsoleErrors(

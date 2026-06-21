@@ -6,7 +6,7 @@ export type PageDiagnostics = {
 const BENIGN_CONSOLE_ERROR_PATTERNS = [
   /Failed to load resource: the server responded with a status of (403|404)/i,
   /net::ERR_ABORTED/i,
-  /^Failed to load resource: net::ERR_BLOCKED_BY_CLIENT(?:\.[A-Za-z]+)?$/i,
+  /^Failed to load resource: net::ERR_BLOCKED_BY_CLIENT(?:\.[a-z]+)?$/i,
 ];
 
 function isBenignConsoleError(message: string) {
