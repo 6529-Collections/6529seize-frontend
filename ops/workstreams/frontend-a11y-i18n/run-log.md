@@ -2607,6 +2607,18 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
     project.
   - `seize run typecheck:playwright`
   - `seize run testing-strategy -- scan-changed-secrets --changed-from
-     origin/main --output
-     test-results/app-pr-ci/collections-readonly-secret-scan.json`: clean.
-   - `codex-diff-check`
+    origin/main --output
+    test-results/app-pr-ci/collections-readonly-secret-scan.json`: clean.
+  - `codex-diff-check`
+
+## 2026-06-21T20:02Z Collections Verifier Follow-Up
+
+- Independent verifier found one low-severity coverage gap: the shared
+  route-ready helper checked horizontal overflow before async card/filter
+  content finished settling.
+- Tightened `expectCardsOrEmpty()` so every async card/empty-state assertion is
+  followed by a final no-horizontal-overflow assertion.
+- Follow-up validation passed:
+  - `seize run test:e2e:collections-readonly`: 20 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:playwright`

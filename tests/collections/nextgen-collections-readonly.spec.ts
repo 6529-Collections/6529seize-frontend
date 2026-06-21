@@ -103,6 +103,7 @@ async function expectCardsOrEmpty(
       { message, timeout: SETTLE_TIMEOUT_MS }
     )
     .toMatch(/^(cards|empty)$/);
+  await expectNoHorizontalOverflow(page);
 }
 
 function mainButton(page: Page, name: string) {
