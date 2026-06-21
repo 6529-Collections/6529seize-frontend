@@ -1,6 +1,6 @@
 "use client";
 
-import type { RefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
 import React, {
   useCallback,
   useEffect,
@@ -32,6 +32,8 @@ interface HoverCardProps {
   readonly offset?: number | undefined;
   readonly hoverTransitionDelay?: number | undefined;
   readonly openOnClick?: boolean | undefined;
+  readonly triggerDisplay?: CSSProperties["display"] | undefined;
+  readonly contentStyle?: CSSProperties | undefined;
 }
 export default function HoverCard({
   children,
@@ -44,6 +46,8 @@ export default function HoverCard({
   offset = 8,
   hoverTransitionDelay = 150,
   openOnClick = false,
+  triggerDisplay = "contents",
+  contentStyle,
 }: HoverCardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState<TooltipCoordinates>({ x: 0, y: 0 });
@@ -430,7 +434,7 @@ export default function HoverCard({
       <span
         ref={triggerBoundaryRef}
         role="presentation"
-        style={{ display: "contents" }}
+        style={{ display: triggerDisplay }}
         onMouseEnter={handleTriggerMouseEnter}
         onMouseLeave={handleTriggerMouseLeave}
         onFocus={handleTriggerFocus}
@@ -469,6 +473,7 @@ export default function HoverCard({
                   styles["tooltipContent"],
                   "tw-overflow-hidden tw-rounded-xl"
                 )}
+                style={contentStyle}
               >
                 {content}
               </div>
