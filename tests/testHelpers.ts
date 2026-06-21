@@ -155,6 +155,26 @@ export {
   waitForRouteReady,
 } from "./support/pageAssertions";
 export {
+  expectAxeClean,
+  getUnexpectedAxeViolations,
+  summarizeAxeViolations,
+  validateAxeAllowances,
+  WCAG_22_AA_TAGS,
+  type AxeViolationAllowance,
+} from "./support/a11yAssertions";
+export {
+  expectKeyboardFocusVisibleWithinTabs,
+  getFocusedElementSummary,
+  pressTab,
+  type FocusSummary,
+} from "./support/keyboardFocus";
+export {
+  getLocaleStressPaths,
+  LONG_TEXT_STRESS_LOCALE,
+  ROUTE_LOCALE_PARAM,
+  withLocale,
+} from "./support/i18nFixtures";
+export {
   resolvePlaywrightTestSize,
   tagTestTitle,
   TEST_SIZE_TAGS,
