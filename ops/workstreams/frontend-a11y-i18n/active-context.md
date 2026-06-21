@@ -4,6 +4,46 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-21T18:18Z:
+  - PR #2809 Waves/Profile read-only E2E is merged and deployed to production.
+    - merge SHA / production version:
+      `f82890f24a4ef7643f143dca5791ad0c50e010f3`
+    - staging run:
+      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27911257533
+    - production run:
+      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27911610405
+  - GLM reviewbot is live on `6529reviewbot` and must remain additive. Do not
+    remove, downgrade, or make optional the existing Opus/general/WCAG/i18n/
+    security/responsiveness reviewbot lanes.
+  - Current clean worktree branch: `codex/e2e-media-mint-detail`, based on
+    production `origin/main`
+    `f82890f24a4ef7643f143dca5791ad0c50e010f3`.
+  - Active E2E PR adds a read-only media/mint/detail pack:
+    `tests/media/media-mint-detail-readonly.spec.ts`, plus local, staging, and
+    production package scripts and `tests/README.md` ownership notes.
+  - Covered journeys: The Memes card detail, The Memes activity focus with
+    locale-preserving SZN links, The Memes mint page, Meme Lab activity focus,
+    and production-only ReMemes detail tabs/links.
+  - Local/staging intentionally skip the exact ReMemes detail fixture because
+    the stable record is only present on production right now. Do not weaken
+    production ReMemes assertions unless the fixture changes or a better stable
+    fixture is selected.
+  - Validation passed for the active media branch:
+    `seize run test:e2e:media-readonly` (8 passed, 2 expected skips after
+    clearing stale `.next` cache),
+    `seize run test:e2e:staging:media-readonly` (8 passed, 2 expected skips),
+    `seize run test:e2e:production:media-readonly` (5 passed),
+    `seize run typecheck:playwright`, `seize run lint:changed`,
+    `seize run typecheck:changed`, related Jest no-tests reproduction,
+    changed-secret scan, and `codex-diff-check`.
+  - A stale ignored `.next` dev cache can make local dynamic media routes serve
+    the 404 shell. Safe workaround before local Playwright validation is to
+    path-check and delete only this worktree's `.next`; this is not a test
+    assertion issue.
+  - Next high-value E2E PRs after media/mint/detail should cover delegation,
+    NextGen/groups/tools, broad network/open-data/static routes,
+    API-backed/authenticated read-only flows, upload/posting/admin guards, and
+    real native/Electron smoke as separate scoped trains.
 - Latest testing-roadmap state, 2026-06-21T16:45Z:
   - PR #2806, PR #2805, and PR #2808 are merged and deployed to production.
     - PR #2806 merge SHA:
@@ -27,8 +67,9 @@ Read this section first after compaction or handoff.
     `s3://6529-artifacts/` storage path was not present during validation.
     Do not weaken durable-artifact holds or treat GitHub Actions artifacts as
     durable retained evidence.
-  - Current implementation branch: `codex/e2e-waves-profile`, based on
-    production `origin/main` `1bdddd30c16c53e08601bf2bbfb67a267f517738`.
+  - Current implementation branch at that time: `codex/e2e-waves-profile`,
+    based on production `origin/main`
+    `1bdddd30c16c53e08601bf2bbfb67a267f517738`.
   - Active E2E PR adds a read-only Waves/Profile pack across desktop and mobile
     Chromium plus staging/production scripts and a staging-access cookie seed
     helper. It covers `/waves`, legacy `/waves?wave=...&serialNo=...`, the
@@ -232,7 +273,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/testing-e2e-surface-matrix`
+`codex/e2e-media-mint-detail`
 
 ## Constraints
 
@@ -335,19 +376,21 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Commit, push, and open the `codex/e2e-waves-profile` PR with the validation
-   evidence listed above.
-2. Iterate CodeRabbit, Sonar, CI, Opus reviewbot, and GLM reviewbot feedback on
-   the Waves/Profile E2E PR until Codex judges the loop is no longer adding
-   material value.
-3. Merge the Waves/Profile E2E PR after checks and review signals are green or
-   consciously dispositioned, then deploy it through staging and production with
-   `ops/skills/deploy-6529/SKILL.md`.
-4. Record the PR #2808 production post-deploy watch checkpoint only after the
-   real 30-minute observation window and deployed-environment validation pass.
-   Leave the release report on hold if approved durable artifact storage is not
-   wired.
-5. Start the next E2E packs in focused PRs: media/mint/detail, delegation,
+1. Commit, push, and open the `codex/e2e-media-mint-detail` PR with the
+   validation evidence listed above.
+2. Iterate CodeRabbit, Sonar, CI, Opus reviewbot, GLM reviewbot, and any
+   available specialized bots until Codex judges the loop is no longer adding
+   material value. Keep all reviewbot lanes additive; do not remove existing
+   bots.
+3. Merge the media/mint/detail E2E PR after checks and review signals are green
+   or consciously dispositioned, then deploy it through staging and production
+   using the deployment-bus process from the latest merged deployment-bus
+   runbook materials.
+4. Record the PR #2809 production post-deploy watch checkpoint if the real
+   30-minute observation window has elapsed and deployed-environment validation
+   still passes. Leave release reports on hold if approved durable artifact
+   storage is not wired.
+5. Start the next E2E packs in focused PRs: delegation first, then
    NextGen/groups/tools, then broad network/open-data/static route matrices.
 6. Reconcile the existing page-cluster PR stack from current `origin/main`
    before opening broad new implementation PRs.

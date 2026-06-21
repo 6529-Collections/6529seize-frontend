@@ -76,13 +76,21 @@ Surface matrix:
   baseline web projects.
 - `test:e2e:social-readonly` runs the public Waves/Profile read-only pack on
   both baseline web projects.
+- `test:e2e:media-readonly` runs the public media, mint, and detail read-only
+  pack on both baseline web projects. Exact ReMemes detail assertions are limited
+  to the production pack until local and staging have a stable matching fixture.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
 - `test:e2e:staging:social-readonly` runs the Waves/Profile read-only pack
   against staging with the remote mutation guard and staging access unlock.
+- `test:e2e:staging:media-readonly` runs the media/mint/detail read-only pack
+  against staging with the remote mutation guard and staging access unlock.
+  Production-only ReMemes fixture assertions are skipped on staging.
 - `test:e2e:production:social-readonly` runs the same pack against production
   desktop web only as a public, read-only smoke.
+- `test:e2e:production:media-readonly` runs the media/mint/detail pack against
+  production desktop web only as a public, read-only smoke.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -101,6 +109,11 @@ Large-pack ownership:
 - `test:e2e:social-readonly` is owned by PR or train owners changing Waves,
   public profile routing, profile tabs, social feed shells, route canonicalizing,
   or read-only mutation guard behavior.
+- `test:e2e:media-readonly` is owned by PR or train owners changing The Memes
+  detail pages, mint routing, Meme Lab detail pages, ReMemes detail pages,
+  media controls, detail tabs, collection image rendering, or read-only mutation
+  guard behavior on public media surfaces. ReMemes regressions need production
+  pack evidence until the same fixture is stable in local and staging.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.
