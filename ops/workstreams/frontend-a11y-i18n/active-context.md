@@ -39,7 +39,8 @@ Read this section first after compaction or handoff.
     `seize run test:e2e:staging:social-readonly` (12 passed),
     `seize run test:e2e:production:social-readonly` (6 passed),
     `seize run typecheck:playwright`, `seize run typecheck:changed`,
-    `seize run lint:changed`, and `codex-diff-check`.
+    `seize run lint:changed`, related Jest no-tests reproduction,
+    workflow-security scan, changed-secret scan, and `codex-diff-check`.
   - GLM reviewbot is live on `6529reviewbot` and should remain additive. Do
     not remove or downgrade existing Opus/general/WCAG/i18n/security/
     responsiveness reviewbot lanes for any PR.

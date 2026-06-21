@@ -2395,6 +2395,14 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run typecheck:changed`
   - `seize run lint:changed`
   - `codex-diff-check`
+- PR #2809 App PR CI initially failed because the related-Jest workflow step
+  passed an extra argument separator before `--findRelatedTests`, causing Jest
+  to treat `--passWithNoTests` as a literal pattern for Playwright-only changes.
+  Fixed `.github/workflows/app-pr-ci.yml` to pass Jest flags directly through
+  the repo wrapper. Follow-up validation passed:
+  - `seize run test:no-coverage --findRelatedTests tests/social/waves-profile-readonly.spec.ts tests/testHelpers.ts --passWithNoTests`
+  - `seize run testing-strategy -- validate-workflow-security --output test-results/app-pr-ci/pr2809-workflow-security.json`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr2809-secret-scan.json`
 - Next PRs should keep expanding read-only coverage by user journey, not by
   shallow route count: media/mint/detail first, then delegation,
   NextGen/groups/tools, then broad network/open-data/static route matrices.
