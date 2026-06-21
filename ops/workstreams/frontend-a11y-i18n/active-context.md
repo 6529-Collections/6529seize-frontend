@@ -72,28 +72,30 @@ Read this section first after compaction or handoff.
     global artifact readiness, invalid manifests producing ready reports, weak
     artifact URI/redaction metadata handling, and generated EOF noise. All four
     were fixed locally and covered by tests.
-- Latest testing-roadmap state, 2026-06-21T11:18Z:
-  - PR4 surface matrix is open separately as PR #2805 on
-    `codex/testing-e2e-surface-matrix`; leave it stable while it waits for
-    required review approval.
-  - Current clean worktree branch is now
-    `codex/testing-critical-e2e-guards`, based directly on current
-    `origin/main`.
-  - This slice adds an independent critical read-only route-shell Playwright
-    pack for high-value auth, operator, tool, and waves shells:
-    `/emma`, `/drop-forge`, `/tools/app-wallets`, `/tools/6529bot/admin`,
-    `/notifications`, `/messages`, `/waves`, `/open-data`, and
-    `/tools/block-finder`.
-  - App PR CI now plans `playwright_critical_shell` for guarded,
-    build-sensitive, or deleted runtime source changes and runs
-    `test:e2e:critical-shell` without weakening the existing smoke pack.
-  - GLM reviewbot is live in `.github/6529bot.yml`; frontend contract tests now
+- Latest testing-roadmap state, 2026-06-21T13:12Z:
+  - PR #2806 critical route-shell guards merged into `origin/main` as
+    `745130a19785fdc844410a2798ba63a6db8256e8`.
+  - Current clean worktree branch is `codex/testing-e2e-surface-matrix`, rebased
+    onto that post-#2806 `origin/main`.
+  - PR #2805 still needs a force-push from local HEAD because GitHub currently
+    has stale head `9c9c82b771cfe01b34c7e468ca251dab7a359b4a` and reports it
+    conflicting. Local rebased HEAD includes the surface-matrix stack plus the
+    merged critical-shell pack.
+  - Rebased PR #2805 preserves the merged `test:e2e:critical-shell` script and
+    scopes it to `--project=web-desktop-chromium`, so the added Playwright
+    project matrix does not unexpectedly multiply the critical-shell job.
+  - Rebased local validation passed: changed format/lint/typecheck,
+    Playwright typecheck, deployment-bus Jest tests, critical-shell,
+    surface-matrix, WCAG/i18n surface, browser-diversity, native-sim,
+    workflow-security scan, changed-secret scan, production build after clearing
+    stale ignored `.next` cache, and `codex-diff-check`.
+  - GLM reviewbot is live in `.github/6529bot.yml`; frontend contract tests
     assert it is additive while preserving the five mandatory existing lanes:
     `general`, `wcag`, `i18n`, `security`, and `responsiveness`.
-  - Local validation passed for the slice: strategy Jest contract tests,
-    Playwright typecheck, changed lint/typecheck, production build,
-    smoke E2E, critical-shell E2E, CI plan, secret scan, workflow security
-    scan, and `codex-diff-check`.
+  - Next incomplete roadmap slices after PR #2805 deploy are PR7
+    canary/watch/reporting, API-backed read-only E2E, authenticated read-only
+    E2E, profile/page-cluster E2E, real native/Electron smoke, native runtime
+    centralization, and upload/posting/admin guard packs.
 - 2026-06-20 user direction: update the plan for the actual frontend WCAG/i18n
   mega run now that reviewbot is live. Reviewbot is an additional reviewer and
   regression detector only; it does not replace extensive local validation.
@@ -289,12 +291,11 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Finish rebasing PR #2805 (`codex/testing-e2e-surface-matrix`) onto the
-   post-#2806 `origin/main`, preserving both the surface-matrix scripts and the
-   merged `test:e2e:critical-shell` pack.
-2. Re-run focused local validation for the rebased surface-matrix branch, push
-   the updated PR, and iterate CodeRabbit, Sonar, CI, and 6529reviewbot
-   feedback until Codex judges the loop is no longer adding material value.
+1. Commit the PR #2805 rebase evidence update and force-push
+   `codex/testing-e2e-surface-matrix` to refresh GitHub from the local rebased
+   branch.
+2. Iterate CodeRabbit, Sonar, CI, and 6529reviewbot feedback on PR #2805 until
+   Codex judges the loop is no longer adding material value.
 3. Merge PR #2805 after checks and review signals are green or consciously
    dispositioned, then deploy the testing-hardening train through staging and
    production with `ops/skills/deploy-6529/SKILL.md`.

@@ -2260,3 +2260,47 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - `seize run test:e2e:native-sim`: 16 passed, 11 skipped.
 - Native simulation still logs the expected iOS `Keyboard` plugin shim warning,
   but the lane passes and remains documented as simulation evidence only.
+
+## 2026-06-21T13:12Z PR 4 Rebase On Critical-Shell Main
+
+- Rebased PR #2805 branch `codex/testing-e2e-surface-matrix` onto
+  `origin/main` after PR #2806 merged as
+  `745130a19785fdc844410a2798ba63a6db8256e8`.
+- Preserved both PR4 surface-matrix scripts and the merged critical-shell
+  script. `test:e2e:critical-shell` is explicitly scoped to
+  `--project=web-desktop-chromium` so the new Playwright project matrix does
+  not fan the critical-shell lane out unexpectedly.
+- Independent verifier `Galileo` found no local rebased-diff blocker; it
+  confirmed the GitHub PR branch was stale and caught the local generated EOF
+  drift left by a build attempt.
+- Independent roadmap auditor `Fermat` confirmed the next incomplete roadmap
+  work after PR4 is PR7 canary/watch/reporting, API-backed read-only E2E,
+  authenticated read-only E2E, profile/page-cluster E2E, real native/Electron
+  smoke, native runtime centralization, and upload/posting/admin guard packs.
+- Rebased local validation passed:
+  - `seize run format:changed`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    29 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run test:e2e:surface-matrix`: 24 passed, 6 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `seize run test:e2e:browser-diversity`: 18 passed, 6 skipped.
+  - `seize run test:e2e:native-sim`: 16 passed, 11 skipped.
+  - `seize run testing-strategy -- validate-workflow-security --output
+    test-results/app-pr-ci/pr4-workflow-security-rebased.json`: clean.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+    origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
+    clean.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed after clearing stale
+    ignored `.next` dev type cache. The first build attempt failed on a corrupt
+    `.next/dev/types/routes.d.ts`, and the clean-cache rerun passed. Known
+    non-fatal output remains the Node `punycode` deprecation and existing
+    dynamic OG image metadata route warning.
+  - `codex-diff-check`
+- Build regeneration again added EOF blank-line noise to three generated model
+  files; those generated files were restored and the worktree is clean before
+  the PR branch push.
