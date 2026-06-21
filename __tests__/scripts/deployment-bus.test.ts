@@ -46,7 +46,7 @@ function releaseReadyValidationChecks() {
         {
           uri: "https://artifacts.6529.io/frontend/release/wcag-i18n.json",
           redaction_status: "verified-redacted",
-          etag: "release-wcag-i18n-etag",
+          etag: "9b2cf535f27731c974343645a3985328",
           retention_days: 90,
         },
       ],
@@ -116,6 +116,22 @@ describe("deployment bus manifest", () => {
           "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n",
       }),
     ]);
+  });
+
+  it("forces durable evidence for production-like manifests", () => {
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      durableArtifactsRequired: "false",
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(manifest.validation.durable_artifacts.required).toBe(true);
+
+    manifest.validation.durable_artifacts.required = false;
+    expect(validateManifest(manifest).errors).toContain(
+      "validation.durable_artifacts.required: must be true for production or production-eligible manifests"
+    );
   });
 
   it("marks staging without a production candidate as exploratory", () => {
@@ -324,6 +340,84 @@ describe("deployment bus manifest", () => {
       holds: [],
       warnings: [],
     });
+  });
+
+  it("rejects unapproved durable artifact prefixes before artifact matching", () => {
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      status: "released",
+      validationChecks: JSON.stringify([
+        {
+          pack: "playwright:core-smoke",
+          status: "passed",
+          artifacts: [
+            {
+              uri: "https://untrusted.example/artifacts/core-smoke.json",
+              redaction_status: "verified-redacted",
+              sha256: ARTIFACT_SHA256,
+              retention_days: 90,
+            },
+          ],
+        },
+        releaseReadyValidationChecks()[1],
+      ]),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+    manifest.validation.durable_artifacts.accepted_prefixes = [
+      "https://untrusted.example/artifacts/",
+    ];
+
+    const errors = validateManifest(manifest).errors;
+    expect(errors).toContain(
+      "validation.durable_artifacts.accepted_prefixes[0]: must be one of the approved durable artifact prefixes"
+    );
+    expect(errors).toContain(
+      "validation.checks[0].artifacts[0].uri: artifact URI does not use an approved durable artifact prefix"
+    );
+  });
+
+  it("requires well-formed artifact metadata for release readiness", () => {
+    const checks = releaseReadyValidationChecks();
+    checks[0].artifacts[0].sha256 = "not-a-sha";
+    checks[0].artifacts[0].retention_days = -1;
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      status: "released",
+      validationChecks: JSON.stringify(checks),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(validateManifest(manifest).errors).toContain(
+      "release_readiness.durable-artifact-pointer-missing: playwright:core-smoke has no approved durable artifact pointer with verified redaction, integrity metadata, and retention metadata"
+    );
+  });
+
+  it("uses recorded_at ordering for latest validation checks", () => {
+    const checks = releaseReadyValidationChecks();
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      status: "released",
+      validationChecks: JSON.stringify([
+        {
+          pack: "playwright:core-smoke",
+          status: "failed",
+          recorded_at: "2026-06-18T12:30:00.000Z",
+        },
+        {
+          ...checks[0],
+          recorded_at: "2026-06-18T12:15:00.000Z",
+        },
+        checks[1],
+      ]),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(validateManifest(manifest).errors).toContain(
+      "release_readiness.required-pack-failed: playwright:core-smoke recorded failed"
+    );
   });
 
   it("requires release-grade durable artifacts on the latest passing check for each pack", () => {

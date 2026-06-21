@@ -252,7 +252,14 @@
             "required": { "type": "boolean" },
             "accepted_prefixes": {
               "type": "array",
-              "items": { "type": "string" }
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "s3://6529-artifacts/",
+                  "https://artifacts.6529.io/",
+                  "ipfs://"
+                ]
+              }
             },
             "git_lfs_allowed": { "const": false },
             "notes": { "type": "string" }

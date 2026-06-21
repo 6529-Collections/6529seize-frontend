@@ -1988,6 +1988,31 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/pr5-workflow-security.json`:
     clean.
   - `codex-diff-check`
+
+## 2026-06-21T09:35Z PR 5 CodeRabbit Follow-Up
+
+- Addressed the first CodeRabbit review on PR #2804:
+  - schema and runtime validation now restrict durable artifact prefixes to the
+    approved catalog before artifact matching;
+  - production and production-eligible manifests cannot opt out of durable
+    evidence, even with `--durable-artifacts-required false`;
+  - release-ready artifact evidence now validates SHA-256, ETag, CID, retention
+    days, retention-until date, or known retention policy shape instead of
+    truthiness;
+  - latest validation check selection now uses `recorded_at` /
+    `completed_at` / `at` timestamps, with array order only as a tie-breaker.
+- Added regression tests for all four review findings. Focused validation:
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize exec eslint ops/scripts/deployment-bus.cjs __tests__/scripts/deployment-bus.test.ts --no-warn-ignored --max-warnings=0`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    27 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr5-secret-scan.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/pr5-workflow-security.json`:
+    clean.
+  - `codex-diff-check`
   - `seize run testing-strategy -- ci-plan --changed-from origin/main --output test-results/app-pr-ci/pr5-ci-plan.json`:
     Level 5 because production deploy authority is touched.
   - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr5-secret-scan.json`:

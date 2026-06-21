@@ -6,6 +6,9 @@ const path = require("node:path");
 
 const SCHEMA_VERSION = "deployment-bus.v1";
 const SHA_RE = /^[0-9a-f]{40}$/i;
+const SHA256_RE = /^[0-9a-f]{64}$/i;
+const ETAG_RE = /^"?[0-9a-f]{32}(?:-\d+)?"?$/i;
+const CID_RE = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{20,})$/;
 const VALID_ENVIRONMENTS = new Set(["staging", "production"]);
 const VALIDATION_PACKS = Object.freeze({
   "playwright:core-smoke": Object.freeze({
@@ -51,6 +54,12 @@ const APPROVED_DURABLE_ARTIFACT_PREFIXES = Object.freeze([
   "s3://6529-artifacts/",
   "https://artifacts.6529.io/",
   "ipfs://",
+]);
+const VALID_RETENTION_POLICIES = new Set([
+  "standard-30-days",
+  "standard-90-days",
+  "standard-1-year",
+  "permanent",
 ]);
 const RELEASE_READINESS_STATUSES = new Set([
   "deploy_verified",
@@ -364,10 +373,9 @@ function buildManifest(options, env = process.env) {
       exploratory_checks: parseJsonOption(options.exploratoryChecks, []),
       checks: parseJsonOption(options.validationChecks, []),
       durable_artifacts: {
-        required: parseBoolean(
-          options.durableArtifactsRequired,
-          productionLikeEvidenceRequired
-        ),
+        required: productionLikeEvidenceRequired
+          ? true
+          : parseBoolean(options.durableArtifactsRequired, false),
         accepted_prefixes: [...APPROVED_DURABLE_ARTIFACT_PREFIXES],
         git_lfs_allowed: false,
         notes:
@@ -652,7 +660,11 @@ function validateValidationPlan(manifest, errors, warnings) {
   }
 
   validatePackPlan(validation, errors);
-  validateDurableArtifactsConfig(validation.durable_artifacts, errors);
+  validateDurableArtifactsConfig(
+    validation.durable_artifacts,
+    manifest,
+    errors
+  );
 
   const checksOk = validateValidationChecks(validation, errors, warnings);
   if (!checksOk) {
@@ -693,7 +705,18 @@ function validatePackPlan(validation, errors) {
   }
 }
 
-function validateDurableArtifactsConfig(durableArtifacts, errors) {
+function validateDurableArtifactsConfig(durableArtifacts, manifest, errors) {
+  const durableEvidenceRequired =
+    manifest.environment === "production" ||
+    manifest.production_eligible === true;
+  if (durableEvidenceRequired && durableArtifacts?.required !== true) {
+    pushError(
+      errors,
+      "validation.durable_artifacts.required",
+      "must be true for production or production-eligible manifests"
+    );
+  }
+
   if (durableArtifacts !== undefined) {
     if (typeof durableArtifacts.required !== "boolean") {
       pushError(
@@ -708,6 +731,11 @@ function validateDurableArtifactsConfig(durableArtifacts, errors) {
         "validation.durable_artifacts.accepted_prefixes",
         "must be an array"
       );
+    } else {
+      validateAcceptedArtifactPrefixes(
+        durableArtifacts.accepted_prefixes,
+        errors
+      );
     }
     if (durableArtifacts.git_lfs_allowed !== false) {
       pushError(
@@ -719,10 +747,29 @@ function validateDurableArtifactsConfig(durableArtifacts, errors) {
   }
 }
 
+function validateAcceptedArtifactPrefixes(acceptedPrefixes, errors) {
+  acceptedPrefixes.forEach((prefix, index) => {
+    if (!APPROVED_DURABLE_ARTIFACT_PREFIXES.includes(prefix)) {
+      pushError(
+        errors,
+        `validation.durable_artifacts.accepted_prefixes[${index}]`,
+        "must be one of the approved durable artifact prefixes"
+      );
+    }
+  });
+}
+
 function validationAcceptedArtifactPrefixes(validation) {
   const acceptedPrefixes = validation.durable_artifacts?.accepted_prefixes;
-  return Array.isArray(acceptedPrefixes)
-    ? acceptedPrefixes
+  if (!Array.isArray(acceptedPrefixes)) {
+    return APPROVED_DURABLE_ARTIFACT_PREFIXES;
+  }
+
+  const approvedPrefixes = acceptedPrefixes.filter((prefix) =>
+    APPROVED_DURABLE_ARTIFACT_PREFIXES.includes(prefix)
+  );
+  return approvedPrefixes.length > 0
+    ? approvedPrefixes
     : APPROVED_DURABLE_ARTIFACT_PREFIXES;
 }
 
@@ -880,14 +927,50 @@ function artifactRejectionReason(uri, acceptedPrefixes) {
 }
 
 function artifactHasIntegrityMetadata(artifact) {
-  return Boolean(artifact?.sha256 || artifact?.etag || artifact?.cid);
+  return Boolean(
+    isValidSha256(artifact?.sha256) ||
+    isValidEtag(artifact?.etag) ||
+    isValidCid(artifact?.cid)
+  );
 }
 
 function artifactHasRetentionMetadata(artifact) {
   return Boolean(
-    artifact?.retention_days ||
-    artifact?.retention_until ||
-    artifact?.retention_policy
+    isPositiveIntegerValue(artifact?.retention_days) ||
+    isValidDateValue(artifact?.retention_until) ||
+    isValidRetentionPolicy(artifact?.retention_policy)
+  );
+}
+
+function isValidSha256(value) {
+  return typeof value === "string" && SHA256_RE.test(value.trim());
+}
+
+function isValidEtag(value) {
+  return typeof value === "string" && ETAG_RE.test(value.trim());
+}
+
+function isValidCid(value) {
+  return typeof value === "string" && CID_RE.test(value.trim());
+}
+
+function isPositiveIntegerValue(value) {
+  if (Number.isInteger(value)) {
+    return value > 0;
+  }
+  return typeof value === "string" && /^[1-9]\d*$/.test(value.trim());
+}
+
+function isValidDateValue(value) {
+  if (typeof value !== "string" || value.trim() === "") {
+    return false;
+  }
+  return !Number.isNaN(Date.parse(value));
+}
+
+function isValidRetentionPolicy(value) {
+  return (
+    typeof value === "string" && VALID_RETENTION_POLICIES.has(value.trim())
   );
 }
 
@@ -905,18 +988,60 @@ function artifactIsReleaseReady(artifact, acceptedPrefixes) {
 }
 
 function approvedDurableArtifactsForCheck(manifest, check) {
-  const acceptedPrefixes =
-    manifest.validation?.durable_artifacts?.accepted_prefixes ||
-    APPROVED_DURABLE_ARTIFACT_PREFIXES;
+  const acceptedPrefixes = validationAcceptedArtifactPrefixes(
+    manifest.validation || {}
+  );
 
   return checkArtifacts(check).filter((artifact) =>
     artifactIsReleaseReady(artifact, acceptedPrefixes)
   );
 }
 
+function checkTimestampMs(check) {
+  const value = check?.recorded_at || check?.completed_at || check?.at;
+  const ms = Date.parse(value || "");
+  return Number.isNaN(ms) ? null : ms;
+}
+
+function isNewerValidationCheck(
+  candidate,
+  candidateIndex,
+  latest,
+  latestIndex
+) {
+  const candidateMs = checkTimestampMs(candidate);
+  const latestMs = checkTimestampMs(latest);
+
+  if (candidateMs !== null && latestMs !== null) {
+    return (
+      candidateMs > latestMs ||
+      (candidateMs === latestMs && candidateIndex > latestIndex)
+    );
+  }
+  if (candidateMs !== null) {
+    return true;
+  }
+  if (latestMs !== null) {
+    return false;
+  }
+  return candidateIndex > latestIndex;
+}
+
 function latestCheckForPack(checks, packId) {
-  const packChecks = checks.filter((check) => checkPackId(check) === packId);
-  return packChecks[packChecks.length - 1] || null;
+  let latest = null;
+  let latestIndex = -1;
+
+  checks.forEach((check, index) => {
+    if (checkPackId(check) !== packId) {
+      return;
+    }
+    if (!latest || isNewerValidationCheck(check, index, latest, latestIndex)) {
+      latest = check;
+      latestIndex = index;
+    }
+  });
+
+  return latest;
 }
 
 function evaluateReleaseReadiness(manifest) {
