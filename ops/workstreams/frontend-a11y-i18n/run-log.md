@@ -2106,3 +2106,28 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - Restored three generated API model files rewritten by the build because
     this PR does not intentionally change generated API models.
   - `codex-diff-check`
+
+## 2026-06-21T12:35Z Critical Shell Review Follow-Up
+
+- Independent verifier found that the `/waves` case disabled all console-error
+  assertions, which would hide real route-shell console failures.
+- Replaced the route-wide bypass with scoped console allowances:
+  - the critical-shell pack tolerates the known local emoji-list fetch console
+    error from the shared local backend returning 404 for the proxied emoji
+    list;
+  - only the `/waves` assertion tolerates the known generic Chromium 500
+    resource message from local feed API health, while still failing on other
+    console errors.
+- Added Jest coverage proving explicit console allowances do not mask a second
+  actionable console error.
+- Local validation after the follow-up:
+  - `seize run test:no-coverage -- __tests__/playwright/pageAssertions.test.ts`:
+    3 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - cleared ignored `.next` and Playwright `test-results` after one stale local
+    dev compile served `/tools/6529bot/admin` as the 404 shell;
+  - `$env:PORT='3162'; $env:PORT_SEARCH_LIMIT='10'; $env:BASE_ENDPOINT='http://localhost:3162'; $env:PLAYWRIGHT_BASE_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run test:e2e:critical-shell`:
+    7 passed.

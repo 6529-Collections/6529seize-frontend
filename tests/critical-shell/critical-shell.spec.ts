@@ -13,6 +13,10 @@ type ConsoleDiagnostics = {
   pageErrors: string[];
 };
 
+const CRITICAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
+  /^Error fetching emoji list: Error: Failed to load emoji list(?:\n|$)/,
+];
+
 function attachConsoleDiagnostics(page: Page): ConsoleDiagnostics {
   const diagnostics: ConsoleDiagnostics = {
     consoleErrors: [],
@@ -31,14 +35,15 @@ function attachConsoleDiagnostics(page: Page): ConsoleDiagnostics {
 async function expectRouteShellHealthy(
   page: Page,
   diagnostics: ConsoleDiagnostics,
-  options: { assertConsoleErrors?: boolean } = {}
+  options: { allowedConsoleErrorPatterns?: RegExp[] } = {}
 ) {
-  const assertConsoleErrors = options.assertConsoleErrors ?? true;
-
   await expectNoHorizontalOverflow(page);
-  if (assertConsoleErrors) {
-    assertNoConsoleErrors(diagnostics);
-  }
+  assertNoConsoleErrors(diagnostics, {
+    allowedConsoleErrorPatterns: [
+      ...CRITICAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS,
+      ...(options.allowedConsoleErrorPatterns ?? []),
+    ],
+  });
 }
 
 test.describe("Critical read-only route shells @critical-shell @medium @large", () => {
@@ -155,9 +160,12 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     await expect(
       page.getByRole("link", { name: "Profile Waves Feed" })
     ).toHaveAttribute("href", "/waves");
-    // Feed API health gets its own coverage; this pack guards the shell mount.
     await expectRouteShellHealthy(page, diagnostics, {
-      assertConsoleErrors: false,
+      // Local feed API health gets separate coverage; keep this allowance
+      // route-scoped because Chromium reports the resource 500 without a URL.
+      allowedConsoleErrorPatterns: [
+        /^Failed to load resource: the server responded with a status of 500 \(Internal Server Error\)$/,
+      ],
     });
   });
 

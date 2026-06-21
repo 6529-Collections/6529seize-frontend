@@ -3,6 +3,10 @@ export type PageDiagnostics = {
   pageErrors: string[];
 };
 
+type ConsoleErrorOptions = {
+  allowedConsoleErrorPatterns?: RegExp[];
+};
+
 const BENIGN_CONSOLE_ERROR_PATTERNS = [
   /Failed to load resource: the server responded with a status of (403|404)/i,
   /net::ERR_ABORTED/i,
@@ -13,9 +17,22 @@ function isBenignConsoleError(message: string) {
   return BENIGN_CONSOLE_ERROR_PATTERNS.some((pattern) => pattern.test(message));
 }
 
-export function getActionableConsoleErrors(diagnostics: PageDiagnostics) {
+function isAllowedConsoleError(
+  message: string,
+  options: ConsoleErrorOptions
+) {
+  return (options.allowedConsoleErrorPatterns ?? []).some((pattern) =>
+    pattern.test(message)
+  );
+}
+
+export function getActionableConsoleErrors(
+  diagnostics: PageDiagnostics,
+  options: ConsoleErrorOptions = {}
+) {
   return diagnostics.consoleErrors.filter(
-    (message) => !isBenignConsoleError(message)
+    (message) =>
+      !isBenignConsoleError(message) && !isAllowedConsoleError(message, options)
   );
 }
 
@@ -29,8 +46,11 @@ export function assertNoPageErrors(diagnostics: PageDiagnostics) {
   );
 }
 
-export function assertNoConsoleErrors(diagnostics: PageDiagnostics) {
-  const actionable = getActionableConsoleErrors(diagnostics);
+export function assertNoConsoleErrors(
+  diagnostics: PageDiagnostics,
+  options: ConsoleErrorOptions = {}
+) {
+  const actionable = getActionableConsoleErrors(diagnostics, options);
 
   if (actionable.length === 0) {
     return;

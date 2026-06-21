@@ -26,4 +26,20 @@ describe("Playwright page assertions", () => {
       assertNoConsoleErrors(diagnostics(["Uncaught TypeError: boom"]))
     ).toThrow("Unexpected browser console error");
   });
+
+  it("keeps explicit allowances scoped to matching messages", () => {
+    expect(() =>
+      assertNoConsoleErrors(
+        diagnostics([
+          "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "Uncaught TypeError: boom",
+        ]),
+        {
+          allowedConsoleErrorPatterns: [
+            /^Failed to load resource: the server responded with a status of 500 \(Internal Server Error\)$/,
+          ],
+        }
+      )
+    ).toThrow("Uncaught TypeError: boom");
+  });
 });
