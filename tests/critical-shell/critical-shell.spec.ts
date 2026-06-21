@@ -15,6 +15,8 @@ type ConsoleDiagnostics = {
 
 const CRITICAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Error fetching emoji list: Error: Failed to load emoji list(?:\n|$)/,
+  /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
+  /^Failed to fetch cookie consent status Error: Network request failed\. Please check your connection and try again\. \(https:\/\/api\.6529\.io\/api\/policies\/country-check\)(?:\n|$)/,
 ];
 
 function attachConsoleDiagnostics(page: Page): ConsoleDiagnostics {

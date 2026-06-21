@@ -158,7 +158,7 @@ these fields before a non-trivial WCAG/i18n migration PR opens:
 - Risk assessment: computed risk floor, declared risk level, final risk level,
   downgrade approval when final risk is below the computed floor, and hazard
   analysis in the format `hazard -> severity -> likelihood -> detection ->
-  required test -> rollback or fix-forward`.
+required test -> rollback or fix-forward`.
 - Validation and artifacts: validation manifest path, durable artifact storage
   plan, artifact redaction strategy for secrets/local paths/prompts/private data,
   and expected reviewbot lanes.
@@ -235,14 +235,14 @@ Deployment:
 Every PR and deployment train needs a risk level. The risk level selects the
 minimum gates; owners can always run more.
 
-| Lane | Risk | Examples | Minimum gates |
-| --- | --- | --- | --- |
-| Fast | Level 0 | Docs, comments, test-only changes, non-runtime metadata | Whitespace/doc checks, changed lint when applicable, reviewer confirms no runtime path changed |
-| Fast | Level 1 | Isolated copy, labels, styles, non-shared presentational UI | Changed lint/typecheck, focused component tests where present, `@a11y` or `@i18n` if visible, mobile overflow if layout changed |
-| Standard | Level 2 | User-facing UI behavior, forms, navigation, menus, dialogs, route rendering, shared components | Level 1 gates, focused Jest, changed-route Playwright, keyboard/focus, mobile, locale, reviewbot findings addressed |
-| Guarded | Level 3 | Auth, session, wallet-adjacent UI, uploads, link previews, posting, moderation/admin, generated API, route protection, deploy config, shared data fetching | Level 2 gates, build, security pack, read-only destructive-action guard, staging validation for exact SHA, independent verifier |
-| Release-captain | Level 4 | Cross-surface changes, broad shared infrastructure, production routing, cache behavior, native-shell behavior, release-train changes | Level 3 gates, release captain, broader surface matrix, deployment manifest, rollback/fix-forward note, post-deploy watch |
-| Release-captain | Level 5 | Security-critical changes, funds or signing flows, irreversible data writes, credentials, infra/deploy control | Level 4 gates, explicit threat model, independent security review, least-privilege/secret review, release-captain approval, production monitoring checkpoints before public notes |
+| Lane            | Risk    | Examples                                                                                                                                                   | Minimum gates                                                                                                                                                                     |
+| --------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fast            | Level 0 | Docs, comments, test-only changes, non-runtime metadata                                                                                                    | Whitespace/doc checks, changed lint when applicable, reviewer confirms no runtime path changed                                                                                    |
+| Fast            | Level 1 | Isolated copy, labels, styles, non-shared presentational UI                                                                                                | Changed lint/typecheck, focused component tests where present, `@a11y` or `@i18n` if visible, mobile overflow if layout changed                                                   |
+| Standard        | Level 2 | User-facing UI behavior, forms, navigation, menus, dialogs, route rendering, shared components                                                             | Level 1 gates, focused Jest, changed-route Playwright, keyboard/focus, mobile, locale, reviewbot findings addressed                                                               |
+| Guarded         | Level 3 | Auth, session, wallet-adjacent UI, uploads, link previews, posting, moderation/admin, generated API, route protection, deploy config, shared data fetching | Level 2 gates, build, security pack, read-only destructive-action guard, staging validation for exact SHA, independent verifier                                                   |
+| Release-captain | Level 4 | Cross-surface changes, broad shared infrastructure, production routing, cache behavior, native-shell behavior, release-train changes                       | Level 3 gates, release captain, broader surface matrix, deployment manifest, rollback/fix-forward note, post-deploy watch                                                         |
+| Release-captain | Level 5 | Security-critical changes, funds or signing flows, irreversible data writes, credentials, infra/deploy control                                             | Level 4 gates, explicit threat model, independent security review, least-privilege/secret review, release-captain approval, production monitoring checkpoints before public notes |
 
 Risk can only move down with a written reason. If agents disagree, use the
 higher risk level until a human or release captain resolves it.
@@ -275,14 +275,14 @@ release captain records a downgrade reason in the validation manifest.
 
 Initial risk-floor table:
 
-| Change pattern | Minimum risk |
-| --- | --- |
-| Docs-only under `ops/`, Markdown docs, comments, non-runtime metadata | Level 0 |
-| Isolated non-shared style/copy/component changes outside auth/wallet/upload/admin/deploy paths | Level 1 |
-| `app/**`, `components/**`, `hooks/**`, `contexts/**`, `store/**`, `helpers/**`, `lib/**`, `utils/**` touching user-visible route/workflow behavior | Level 2 |
-| Any auth/session, wallet, signing, profile identity, TDH/delegation, upload, media/link-preview, posting, moderation, admin, route protection, generated API model, shared data-fetching, or Next.js rendering-mode path | Level 3 |
-| Deployment workflows, deployment bus, environment schema, build/release config, cache/routing infrastructure, native-shell behavior, broad shared primitives used across many route families | Level 4 |
-| Credentials, secret handling, signing/funds, irreversible data writes, deploy-control authority, artifact-store access controls, or security-critical auth/wallet/admin changes | Level 5 |
+| Change pattern                                                                                                                                                                                                           | Minimum risk |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| Docs-only under `ops/`, Markdown docs, comments, non-runtime metadata                                                                                                                                                    | Level 0      |
+| Isolated non-shared style/copy/component changes outside auth/wallet/upload/admin/deploy paths                                                                                                                           | Level 1      |
+| `app/**`, `components/**`, `hooks/**`, `contexts/**`, `store/**`, `helpers/**`, `lib/**`, `utils/**` touching user-visible route/workflow behavior                                                                       | Level 2      |
+| Any auth/session, wallet, signing, profile identity, TDH/delegation, upload, media/link-preview, posting, moderation, admin, route protection, generated API model, shared data-fetching, or Next.js rendering-mode path | Level 3      |
+| Deployment workflows, deployment bus, environment schema, build/release config, cache/routing infrastructure, native-shell behavior, broad shared primitives used across many route families                             | Level 4      |
+| Credentials, secret handling, signing/funds, irreversible data writes, deploy-control authority, artifact-store access controls, or security-critical auth/wallet/admin changes                                          | Level 5      |
 
 The first implementation must encode the Level 3+ floor with explicit path
 globs. Start conservative; false positives are cheaper than silently treating a
@@ -377,11 +377,11 @@ Temporary foundation constraint:
 
 Use Google-style test sizing to keep the suite fast and deterministic.
 
-| Size | Definition | 6529 examples | Runs |
-| --- | --- | --- | --- |
-| `@small` | Single process, deterministic, no network, no real browser, no external service | Pure helpers, formatters, reducers, URL guards, small components with fakes | Local, PR CI, changed-file gates |
-| `@medium` | Single machine, localhost allowed, local browser or local services allowed | Playwright against local frontend, local API smoke, component integration with browser, local upload validation | Local, PR CI when selected, train validation |
-| `@large` | Deployed or real external service, staging/prod, real native shell, production-like environment | Staging Playwright, production read-only smoke, real Capacitor/Electron shell smoke, train-level security smoke | Staging, production, release trains, scheduled runs |
+| Size      | Definition                                                                                      | 6529 examples                                                                                                   | Runs                                                |
+| --------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `@small`  | Single process, deterministic, no network, no real browser, no external service                 | Pure helpers, formatters, reducers, URL guards, small components with fakes                                     | Local, PR CI, changed-file gates                    |
+| `@medium` | Single machine, localhost allowed, local browser or local services allowed                      | Playwright against local frontend, local API smoke, component integration with browser, local upload validation | Local, PR CI when selected, train validation        |
+| `@large`  | Deployed or real external service, staging/prod, real native shell, production-like environment | Staging Playwright, production read-only smoke, real Capacitor/Electron shell smoke, train-level security smoke | Staging, production, release trains, scheduled runs |
 
 Rules:
 
@@ -641,16 +641,16 @@ Pack types:
 
 ## Surface Evidence
 
-| Surface | Coverage goal | Testing mode |
-| --- | --- | --- |
-| Main desktop web | Full migration confidence | Jest, Playwright desktop, axe, keyboard, staging/prod smoke |
-| Mobile web | Layout and touch confidence | Playwright mobile projects, viewport screenshots, touch/zoom checks |
-| Capacitor iOS | Native-adjacent confidence | Simulated Playwright first, real shell smoke later |
-| Capacitor Android | Native-adjacent confidence | Simulated Playwright first, real shell smoke later |
-| Electron/Desktop Shell | Shell-adjacent confidence | Electron user-agent simulation first, real shell smoke later |
-| Standalone/exported surfaces | Independent confidence | Surface-specific build/export and browser smoke |
-| Staging | Deployment candidate confidence | Deployed Playwright smoke plus release-specific packs |
-| Production | Live safety confidence | Read-only smoke, changed-route checks, console/network checks |
+| Surface                      | Coverage goal                   | Testing mode                                                        |
+| ---------------------------- | ------------------------------- | ------------------------------------------------------------------- |
+| Main desktop web             | Full migration confidence       | Jest, Playwright desktop, axe, keyboard, staging/prod smoke         |
+| Mobile web                   | Layout and touch confidence     | Playwright mobile projects, viewport screenshots, touch/zoom checks |
+| Capacitor iOS                | Native-adjacent confidence      | Simulated Playwright first, real shell smoke later                  |
+| Capacitor Android            | Native-adjacent confidence      | Simulated Playwright first, real shell smoke later                  |
+| Electron/Desktop Shell       | Shell-adjacent confidence       | Electron user-agent simulation first, real shell smoke later        |
+| Standalone/exported surfaces | Independent confidence          | Surface-specific build/export and browser smoke                     |
+| Staging                      | Deployment candidate confidence | Deployed Playwright smoke plus release-specific packs               |
+| Production                   | Live safety confidence          | Read-only smoke, changed-route checks, console/network checks       |
 
 Evidence labels:
 
@@ -668,16 +668,16 @@ when only browser simulation was run.
 
 ## Execution Ladder
 
-| Stage | Goal | Required signal |
-| --- | --- | --- |
-| Local inner loop | Fast agent/developer feedback | `@small` tests, changed lint/typecheck, focused component tests |
-| Local pre-PR | Prove touched workflow locally | Risk level, hazard analysis, selected packs, focused Playwright for visible UI |
-| PR CI | Repo-owned baseline before review/deploy | frozen install, lint, typecheck, test typecheck, focused/full Jest by risk, build when needed, small Playwright smoke |
-| Review | Independent reasoning | 6529reviewbot lanes, GLM swarm when available, human/agent review, findings mapped into manifest |
-| Post-merge/train | Validate train composition | exact PR set, exact SHA, release report, selected medium/large packs |
-| Staging | Validate production candidate | read-only staging Playwright, changed routes, owner validation, durable artifacts |
-| Production | Validate live release | exact deployed SHA, read-only smoke, error/route/API watch, public notes only after green |
-| Nightly/scheduled | Catch drift cheaply | broader browsers, Firefox/WebKit, full Jest, flake detection, dependency/security checks |
+| Stage             | Goal                                     | Required signal                                                                                                       |
+| ----------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Local inner loop  | Fast agent/developer feedback            | `@small` tests, changed lint/typecheck, focused component tests                                                       |
+| Local pre-PR      | Prove touched workflow locally           | Risk level, hazard analysis, selected packs, focused Playwright for visible UI                                        |
+| PR CI             | Repo-owned baseline before review/deploy | frozen install, lint, typecheck, test typecheck, focused/full Jest by risk, build when needed, small Playwright smoke |
+| Review            | Independent reasoning                    | 6529reviewbot lanes, GLM swarm when available, human/agent review, findings mapped into manifest                      |
+| Post-merge/train  | Validate train composition               | exact PR set, exact SHA, release report, selected medium/large packs                                                  |
+| Staging           | Validate production candidate            | read-only staging Playwright, changed routes, owner validation, durable artifacts                                     |
+| Production        | Validate live release                    | exact deployed SHA, read-only smoke, error/route/API watch, public notes only after green                             |
+| Nightly/scheduled | Catch drift cheaply                      | broader browsers, Firefox/WebKit, full Jest, flake detection, dependency/security checks                              |
 
 ## Pull Request Workflow
 
@@ -1304,8 +1304,22 @@ Goals:
 
 Exit criteria:
 
-- Current production watch is explicit.
+- Current production post-deploy watch is explicit.
 - Future canary work has clear prerequisites.
+
+Executable PR7a slice:
+
+- Add `post_deploy_watch` to deployment-bus manifests and release reports.
+- Add `canary_readiness` to record current rollout capability:
+  `auto-hold-only`, `feature-flag-only`, `traffic-split`, or
+  `not-applicable`.
+- Record staging and production workflow watch checkpoints without treating
+  GitHub Actions run URLs as durable artifact evidence.
+- Require a passed post-deploy watch before a production manifest in `released`
+  state is considered release-ready.
+- Keep traffic-split canary rollout as future infrastructure work until the
+  router, health thresholds, rollback automation, and durable artifact storage
+  are available.
 
 ## Page-Cluster PR Requirements After The Sidequest
 

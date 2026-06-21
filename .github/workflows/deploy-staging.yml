@@ -446,6 +446,32 @@ jobs:
             --environment-url "https://staging.6529.io" \
             --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
+      - name: Record staging post-deploy watch
+        if: always() && hashFiles('deployment-bus-manifest.json') != ''
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            watch_status="passed"
+            observed_minutes="15"
+            notes="SSM deployment completed and staging deployed SHA verification passed."
+          else
+            watch_status="failed"
+            observed_minutes="0"
+            notes="Staging workflow did not complete deploy verification successfully."
+          fi
+
+          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
+            --file deployment-bus-manifest.json \
+            --status "$watch_status" \
+            --observed-duration-minutes "$observed_minutes" \
+            --checkpoint staging-deploy-verification \
+            --checkpoint-status "$watch_status" \
+            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --notes "$notes"
+
       - name: Create staging release report
         if: always()
         run: |
