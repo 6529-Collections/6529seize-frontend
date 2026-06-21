@@ -1790,7 +1790,7 @@ function recordPostDeployWatch(manifest, options) {
     completed_at: completedAt,
     checkpoints: updateWatchCheckpoints(existingWatch.checkpoints || [], {
       id: options.checkpoint || options.checkpointId,
-      status: options.checkpointStatus || status,
+      status: options.checkpointStatus || defaultWatchCheckpointStatus(status),
       evidence: parseCsv(options.evidence || options.evidenceUri),
       notes: options.notes,
       recorded_at: now,
@@ -1816,6 +1816,10 @@ function recordPostDeployWatch(manifest, options) {
       },
     ],
   };
+}
+
+function defaultWatchCheckpointStatus(status) {
+  return status === "not_started" ? "not_run" : status;
 }
 
 function updateWatchCheckpoints(checkpoints, update) {

@@ -519,6 +519,27 @@ describe("deployment bus manifest", () => {
     expect(report).toContain("current capability: auto-hold-only");
   });
 
+  it("defaults not-started checkpoint records to not-run", () => {
+    const manifest = buildManifest({
+      environment: "staging",
+      stagingDeploySha: STAGING_SHA,
+      productionCandidateSha: MAIN_SHA,
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    const watched = recordPostDeployWatch(manifest, {
+      status: "not_started",
+      checkpoint: "manual-watch",
+      now: "2026-06-18T12:05:00.000Z",
+    });
+
+    expect(watched.post_deploy_watch.checkpoints[0]).toMatchObject({
+      id: "manual-watch",
+      status: "not_run",
+    });
+    expect(validateManifest(watched).errors).toEqual([]);
+  });
+
   it("rejects impossible traffic-split canary declarations", () => {
     const manifest = buildManifest({
       environment: "production",

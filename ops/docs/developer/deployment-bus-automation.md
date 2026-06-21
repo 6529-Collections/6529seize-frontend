@@ -192,6 +192,28 @@ does not by itself complete the release-captain post-deploy watch; production
 validation agents should record the final `passed` watch after the deployed
 environment checks finish.
 
+Production watch completion is intentionally a two-step handoff:
+
+1. The production workflow records the automated `eb-version-health` checkpoint
+   and leaves `post_deploy_watch.status` as `in_progress`.
+2. The release captain or validation agent runs the production-safe smoke,
+   surface-matrix, WCAG/i18n, API version, and changed-surface checks.
+3. After those checks pass, the validator records the terminal watch status:
+
+```bash
+6529 run deployment-bus -- record-post-deploy-watch \
+  --file deployment-bus-manifest.json \
+  --status passed \
+  --observed-duration-minutes 30 \
+  --checkpoint release-captain-validation \
+  --checkpoint-status passed \
+  --evidence https://github.com/6529-Collections/6529seize-frontend/actions/runs/<run-id> \
+  --notes "Production smoke, surface matrix, WCAG/i18n, and API version checks passed"
+```
+
+If production validation fails, record `failed` or `blocked` instead and keep
+the release on hold until rollback or fix-forward validation passes.
+
 `canary_readiness` records current rollout capability. Today the frontend bus
 supports auto-hold and explicit staged watch. Generic deployment traffic
 splitting is not currently supported, and feature flags are app-specific rather
