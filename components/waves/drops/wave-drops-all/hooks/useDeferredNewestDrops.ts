@@ -104,8 +104,7 @@ const getDeferredNewestDropsVisibleLatestSerial = ({
     maxSerialNoOrNull(
       session.revealedLatestSerial,
       session.capturedLatestSerial
-    ) ??
-    latestSerialNo
+    ) ?? latestSerialNo
   );
 };
 
