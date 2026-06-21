@@ -2463,3 +2463,21 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   then broad network/open-data/static route matrices, followed by API-backed or
   authenticated read-only flows, upload/posting/admin guards, and real
   native/Electron smoke.
+
+## 2026-06-21T20:58Z Media Sonar Follow-Up
+
+- Investigated PR #2810's passed Sonar gate that still reported one new
+  maintainability issue.
+- Fixed the remaining minor regex smell in
+  `tests/media/media-mint-detail-readonly.spec.ts` by using `\d` instead of
+  `[0-9]` in the mint-page title assertion.
+- Local validation for the follow-up passed:
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: no changed app TypeScript files in the
+    typecheck project.
+  - After stopping a stale local Next dev process on the worktree's assigned
+    port and clearing ignored `.next`, explicit assigned-port rerun:
+    `seize run test:e2e:media-readonly`: 8 passed, 2 expected production-only
+    skips.
+  - `codex-diff-check`

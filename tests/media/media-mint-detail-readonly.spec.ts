@@ -112,7 +112,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   test("renders The Memes mint page read-only", async ({ page }) => {
     await gotoReady(page, "/the-memes/mint");
 
-    await expect(page).toHaveTitle(/^Mint #[0-9]+ \| [^|]+ \| The Memes$/);
+    await expect(page).toHaveTitle(/^Mint #\d+ \| [^|]+ \| The Memes$/);
     await expect(page.getByText("Retrieving Mint information")).toBeHidden({
       timeout: 15000,
     });
