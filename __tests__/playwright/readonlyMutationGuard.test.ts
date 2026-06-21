@@ -267,7 +267,10 @@ describe("Playwright read-only mutation guard", () => {
     for (const url of [
       "https://www.googletagmanager.com/td?id=G-123",
       "https://www.youtube.com/api/stats/watchtime",
+      "https://youtube.com/api/stats/watchtime",
       "https://youtube.com/youtubei/v1/log_event?prettyPrint=false",
+      "https://www.youtube-nocookie.com/api/stats/watchtime",
+      "https://youtube-nocookie.com/youtubei/v1/log_event?prettyPrint=false",
       "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/GenerateIT",
     ]) {
       expect(

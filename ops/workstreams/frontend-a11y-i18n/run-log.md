@@ -2763,3 +2763,8 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
     environment value and was not printed or persisted.
   - A prior attempted `/notifications` inclusion failed safely because the
     read-only guard blocked `POST https://api.6529.io/api/notifications/read`.
+- Follow-up review feedback on the adjacent public content E2E PR identified
+  YouTube no-cookie telemetry as another expected SDK POST family. The
+  authenticated-shell branch now covers `youtube-nocookie.com` and bare
+  `youtube.com` stats/log endpoints in the guard unit test while preserving the
+  default block for unknown external POSTs.
