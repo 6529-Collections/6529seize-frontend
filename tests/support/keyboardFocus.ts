@@ -86,7 +86,7 @@ async function hasVisibleFocus(page: Page, timeout: number) {
           return false;
         }
 
-        const style = window.getComputedStyle(activeElement);
+        const style = globalThis.getComputedStyle(activeElement);
         const outlineWidth = Number.parseFloat(style.outlineWidth || "0");
         const hasOutline =
           style.outlineStyle !== "none" &&

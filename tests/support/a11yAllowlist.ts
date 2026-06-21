@@ -35,47 +35,74 @@ export function validateAxeAllowances(
   allowances: readonly AxeViolationAllowance[],
   now = new Date()
 ) {
+  const nowTime = now.getTime();
+  return allowances.flatMap((allowance) =>
+    getAxeAllowanceErrors(allowance, nowTime)
+  );
+}
+
+function getAxeAllowanceErrors(
+  allowance: AxeViolationAllowance,
+  nowTime: number
+) {
   const errors: string[] = [];
 
-  for (const allowance of allowances) {
-    if (!allowance.route.startsWith("/")) {
-      errors.push(`${allowance.ruleId}: route must start with /`);
-    }
+  if (!allowance.route.startsWith("/")) {
+    errors.push(`${allowance.ruleId}: route must start with /`);
+  }
 
-    const selector = allowance.selector.trim();
-    if (!selector) {
-      errors.push(`${allowance.ruleId}: selector is required`);
-    } else if (BROAD_SELECTORS.has(selector)) {
-      errors.push(`${allowance.ruleId}: selector is too broad`);
-    }
+  const selectorError = getSelectorValidationError(allowance);
+  if (selectorError) {
+    errors.push(selectorError);
+  }
 
-    if (!allowance.reason.trim()) {
-      errors.push(`${allowance.ruleId}: reason is required`);
-    }
+  if (!allowance.reason.trim()) {
+    errors.push(`${allowance.ruleId}: reason is required`);
+  }
 
-    if (!allowance.owner.trim()) {
-      errors.push(`${allowance.ruleId}: owner is required`);
-    }
+  if (!allowance.owner.trim()) {
+    errors.push(`${allowance.ruleId}: owner is required`);
+  }
 
-    if (!ISO_DATE_PATTERN.test(allowance.expires)) {
-      errors.push(`${allowance.ruleId}: expires must use YYYY-MM-DD`);
-      continue;
-    }
-
-    const expiresAt = getStrictIsoDateEndTime(allowance.expires);
-    if (expiresAt === null) {
-      errors.push(`${allowance.ruleId}: expires is not a valid date`);
-      continue;
-    }
-
-    if (expiresAt < now.getTime()) {
-      errors.push(
-        `${allowance.ruleId}: allowance expired on ${allowance.expires}`
-      );
-    }
+  const expirationError = getExpirationValidationError(allowance, nowTime);
+  if (expirationError) {
+    errors.push(expirationError);
   }
 
   return errors;
+}
+
+function getSelectorValidationError(allowance: AxeViolationAllowance) {
+  const selector = allowance.selector.trim();
+  if (!selector) {
+    return `${allowance.ruleId}: selector is required`;
+  }
+
+  if (BROAD_SELECTORS.has(selector)) {
+    return `${allowance.ruleId}: selector is too broad`;
+  }
+
+  return null;
+}
+
+function getExpirationValidationError(
+  allowance: AxeViolationAllowance,
+  nowTime: number
+) {
+  if (!ISO_DATE_PATTERN.test(allowance.expires)) {
+    return `${allowance.ruleId}: expires must use YYYY-MM-DD`;
+  }
+
+  const expiresAt = getStrictIsoDateEndTime(allowance.expires);
+  if (expiresAt === null) {
+    return `${allowance.ruleId}: expires is not a valid date`;
+  }
+
+  if (expiresAt < nowTime) {
+    return `${allowance.ruleId}: allowance expired on ${allowance.expires}`;
+  }
+
+  return null;
 }
 
 function getStrictIsoDateEndTime(date: string) {
@@ -155,6 +182,6 @@ function isNodeAllowed(
     (allowance) =>
       allowance.ruleId === ruleId &&
       allowance.route === route &&
-      node.target.some((target) => target === allowance.selector)
+      node.target.includes(allowance.selector)
   );
 }

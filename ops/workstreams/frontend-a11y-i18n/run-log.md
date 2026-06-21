@@ -1939,3 +1939,6 @@ origin/main --output test-results/app-pr-ci/workflow-security.json`
   - `codex-diff-check`
 - Existing 6529bot review lanes remain untouched; this PR is a local testing
   enhancement that complements bot review rather than replacing it.
+- Addressed the latest Sonar maintainability findings before merge by splitting
+  axe allowlist validation into smaller helpers, replacing a target lookup with
+  `.includes()`, and using `globalThis.getComputedStyle` in the focus helper.
