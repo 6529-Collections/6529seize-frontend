@@ -88,9 +88,11 @@ Known current gaps after the first automation slice:
   post-deploy Playwright packs. The release captain or validation agents must
   run them and record results with `record-validation-check` until a later
   automation slice wires pack execution into the lane.
-- The current standard pack plan covers desktop Chromium only. Mobile browser,
-  Firefox, WebKit, Capacitor simulation, and Electron simulation are explicit
-  future surface-matrix work.
+- The current standard pack plan requires desktop Chromium and mobile Chromium
+  evidence for `playwright:core-smoke`, `playwright:surface-matrix`, and
+  `playwright:wcag-i18n`. Firefox, WebKit, Capacitor simulation, and Electron
+  simulation remain optional train/nightly or targeted validation lanes and
+  must not be described as real native or real Electron shell coverage.
 - Backend coordination is still a cross-repo handoff, not a shared automated
   release train.
 

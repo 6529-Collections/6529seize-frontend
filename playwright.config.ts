@@ -35,6 +35,9 @@ const webServerPort = (() => {
     return "3001";
   }
 })();
+const webServerCommand =
+  process.env["PLAYWRIGHT_WEB_SERVER_COMMAND"] ||
+  "node scripts/require-6529-command.cjs && node scripts/dev-with-fallback.cjs";
 
 const config = defineConfig({
   testDir: "./tests",
@@ -52,25 +55,43 @@ const config = defineConfig({
   },
   projects: [
     {
-      name: "chromium",
+      name: "web-desktop-chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-    // Add other browsers like Firefox, WebKit if needed
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: "web-mobile-chromium",
+      use: { ...devices["Pixel 7"] },
+    },
+    {
+      name: "web-desktop-firefox",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "web-desktop-webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
+      name: "capacitor-ios-sim",
+      use: { ...devices["iPhone 14"] },
+    },
+    {
+      name: "capacitor-android-sim",
+      use: { ...devices["Pixel 7"] },
+    },
+    {
+      name: "electron-shell-sim",
+      use: {
+        ...devices["Desktop Chrome"],
+        userAgent:
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) 6529.io/1.0.0 Chrome/124.0.0.0 Electron/31.0.0 Safari/537.36",
+      },
+    },
   ],
   ...(skipWebServer
     ? {}
     : {
         webServer: {
-          command:
-            process.env["PLAYWRIGHT_WEB_SERVER_COMMAND"] || "pnpm run dev",
+          command: webServerCommand,
           env: {
             PORT: webServerPort,
           },

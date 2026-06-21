@@ -91,6 +91,7 @@ const REVIEWBOT_LANES = [
   "security",
   "responsiveness",
 ];
+const GLM_SWARM_LANE = "glm-swarm";
 
 function validManifest(overrides: Record<string, unknown> = {}) {
   return {
@@ -301,6 +302,7 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.secret_scan.required).toBe(true);
     expect(plan.checks.install.required).toBe(false);
     expect(plan.checks.playwright_smoke.required).toBe(false);
+    expect(plan.checks.playwright_critical_shell.required).toBe(false);
     expect(plan.security).toMatchObject({
       secrets_allowed: false,
       token_permissions: "contents:read",
@@ -320,6 +322,7 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.test_typecheck.required).toBe(true);
     expect(plan.checks.jest_changed.required).toBe(true);
     expect(plan.checks.playwright_smoke.required).toBe(true);
+    expect(plan.checks.playwright_critical_shell.required).toBe(false);
     expect(plan.checks.build.required).toBe(false);
   });
 
@@ -333,6 +336,7 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.workflow_security_review.required).toBe(true);
     expect(plan.checks.dependency_governance.required).toBe(true);
     expect(plan.checks.build.required).toBe(true);
+    expect(plan.checks.playwright_critical_shell.required).toBe(true);
   });
 
   it("requires build coverage for deleted runtime source", () => {
@@ -340,6 +344,7 @@ describe("testing strategy CI plan", () => {
 
     expect(plan.risk.computed_floor).toBe(2);
     expect(plan.checks.build.required).toBe(true);
+    expect(plan.checks.playwright_critical_shell.required).toBe(true);
     expect(plan.checks.build.reason).toContain("deleted runtime source");
   });
 
@@ -751,15 +756,25 @@ describe("testing strategy validation manifest", () => {
       "utf8"
     );
     const config = YAML.parse(configText) as {
-      reviewKinds?: { initial?: string[] };
+      limits?: { maxJobsPerDelivery?: number };
+      reviewKinds?: { allowed?: string[]; initial?: string[] };
     };
+    const allowedLanes = config.reviewKinds?.allowed ?? [];
     const configLanes = config.reviewKinds?.initial ?? [];
     const schemaLanes =
       schema.properties.review.properties.reviewbot.properties.required_lanes.allOf.map(
         (rule: { contains: { const: string } }) => rule.contains.const
       );
 
-    expect(configLanes).toEqual(REVIEWBOT_LANES);
+    expect(configLanes).toEqual(expect.arrayContaining(REVIEWBOT_LANES));
+    expect(new Set(configLanes).size).toBe(configLanes.length);
+    expect(allowedLanes).toEqual(
+      expect.arrayContaining([...REVIEWBOT_LANES, GLM_SWARM_LANE])
+    );
+    expect(configLanes).toContain(GLM_SWARM_LANE);
+    expect(config.limits?.maxJobsPerDelivery ?? 0).toBeGreaterThanOrEqual(
+      configLanes.length
+    );
     expect(schemaLanes).toEqual(REVIEWBOT_LANES);
     expect(EXISTING_REVIEWBOT_INITIAL_LANES).toEqual(REVIEWBOT_LANES);
   });

@@ -140,7 +140,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     isAppleMobile,
     waveMessages,
     shouldPinToBottom,
-    revealThroughSerialNo: initialDrop,
   });
 
   const renderedWaveMessagesWithFullWave = useMemo(() => {

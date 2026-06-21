@@ -102,19 +102,11 @@ distribution routes.
   - `/the-memes/{id}` requires an integer for fallback mode.
   - `/the-memes/{id}/distribution` requires a positive integer.
 - If timing looks wrong, switch `Local`/`UTC` to compare output.
-- `/api/meme-calendar/next` returns the next scheduled Meme Card mint.
-- `/api/meme-calendar/current` returns the live mint when an overall mint window
-  is open, or `current: null` plus the next mint when nothing is live.
 - `/api/meme-calendar/{id}` responses:
   - `200` for valid ids, with:
-    - `mint_number`
     - `mint_date` as `YYYY-MM-DD` (UTC day string, for example
       `2025-03-18`)
-    - `mint_start` and `mint_end` as UTC ISO timestamps for the overall mint
-      window
-    - `status` as `past`, `live`, or `upcoming`
     - `season`, `year`, `epoch`, `period`, `era`, `eon`
-    - `calendar_path` and `mint_path`
   - `400` for invalid ids (non-numeric, `0`, decimals, negatives, or above
     JavaScript `MAX_SAFE_INTEGER`):
     - `{"error":"Invalid id. Use a positive integer in /api/meme-calendar/<id>."}`
