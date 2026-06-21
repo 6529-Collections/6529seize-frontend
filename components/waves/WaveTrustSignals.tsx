@@ -1,5 +1,6 @@
 import type { ApiWaveRepSummary } from "@/generated/models/ApiWaveRepSummary";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
+import HoverCard from "@/components/utils/tooltip/HoverCard";
 import {
   FireIcon,
   ScaleIcon,
@@ -21,6 +22,12 @@ interface WaveTrustSignalsProps {
   readonly mode?: WaveTrustSignalsMode | undefined;
   readonly className?: string | undefined;
   readonly tooltipId?: string | undefined;
+}
+
+interface WaveScoreTooltipMetric {
+  readonly label: string;
+  readonly value: string;
+  readonly detail: string;
 }
 
 const compactNumberFormatter = new Intl.NumberFormat(undefined, {
@@ -186,7 +193,7 @@ const getChipClasses = (
 
   if (isInlineSidebarVariant(variant)) {
     variantClasses =
-      "tw-cursor-[inherit] tw-gap-[3px] tw-whitespace-nowrap tw-text-[11px] tw-font-semibold tw-leading-none";
+      "tw-cursor-help tw-gap-[3px] tw-whitespace-nowrap tw-text-[11px] tw-font-semibold tw-leading-none";
     sizeClasses = "";
   } else if (isInlineHeaderVariant(variant)) {
     variantClasses =
@@ -342,6 +349,109 @@ const buildSummaryDetails = ({
   return details;
 };
 
+const buildSummaryMetrics = ({
+  visibilityScore,
+  qualityScore,
+  hotnessScore,
+  repSortScore,
+  waveRep,
+}: {
+  readonly visibilityScore: string;
+  readonly qualityScore: string | null;
+  readonly hotnessScore: string | null;
+  readonly repSortScore: string | null;
+  readonly waveRep: ApiWaveRepSummary | null | undefined;
+}): WaveScoreTooltipMetric[] => {
+  const metrics: WaveScoreTooltipMetric[] = [
+    {
+      label: "Score",
+      value: `${visibilityScore}/100`,
+      detail: "Final visibility ranking",
+    },
+  ];
+
+  if (qualityScore !== null) {
+    metrics.push({
+      label: "Quality",
+      value: `${qualityScore}/100`,
+      detail: "Durable trust and participation",
+    });
+  }
+
+  if (hotnessScore !== null) {
+    metrics.push({
+      label: "Hotness",
+      value: `${hotnessScore}/100`,
+      detail: "Recent trusted activity",
+    });
+  }
+
+  const rawRep = formatSignedFullNumber(waveRep?.total_rep);
+  if (rawRep !== null && repSortScore !== null) {
+    metrics.push({
+      label: "REP",
+      value: rawRep,
+      detail: `${repSortScore}/100 score contribution`,
+    });
+  } else if (rawRep !== null) {
+    metrics.push({
+      label: "REP",
+      value: rawRep,
+      detail: "Raw wave reputation",
+    });
+  } else if (repSortScore !== null) {
+    metrics.push({
+      label: "REP",
+      value: `${repSortScore}/100`,
+      detail: "Reputation score contribution",
+    });
+  }
+
+  return metrics;
+};
+
+const WaveScoreInfoCard = ({
+  metrics,
+}: {
+  readonly metrics: readonly WaveScoreTooltipMetric[];
+}) => (
+  <div className="tw-w-[15rem] tw-max-w-[calc(100vw-2rem)]">
+    <div className="tw-flex tw-items-center tw-gap-2">
+      <div className="tw-flex tw-size-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-sky-400/10 tw-text-sky-200 tw-ring-1 tw-ring-inset tw-ring-sky-300/20">
+        <ShieldCheckIcon className="tw-size-3.5" aria-hidden="true" />
+      </div>
+      <div className="tw-min-w-0">
+        <div className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-white">
+          Wave score
+        </div>
+        <div className="tw-mt-0.5 tw-text-[10px] tw-font-medium tw-leading-3 tw-text-iron-400">
+          Signals used to rank trusted active waves.
+        </div>
+      </div>
+    </div>
+    <div className="tw-mt-2.5 tw-space-y-1.5">
+      {metrics.map((metric) => (
+        <div
+          key={metric.label}
+          className="tw-flex tw-items-start tw-justify-between tw-gap-3"
+        >
+          <div className="tw-min-w-0">
+            <div className="tw-text-[11px] tw-font-semibold tw-leading-[14px] tw-text-iron-100">
+              {metric.label}
+            </div>
+            <div className="tw-mt-0.5 tw-text-[10px] tw-font-medium tw-leading-3 tw-text-iron-500">
+              {metric.detail}
+            </div>
+          </div>
+          <div className="tw-flex-shrink-0 tw-rounded tw-bg-white/[0.04] tw-px-1.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/[0.07]">
+            {metric.value}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const renderContainer = ({
   children,
   className,
@@ -418,31 +528,70 @@ export function WaveTrustSignals({
       repSortScore,
       waveRep,
     });
+    const summaryMetrics = buildSummaryMetrics({
+      visibilityScore,
+      qualityScore,
+      hotnessScore,
+      repSortScore,
+      waveRep,
+    });
     const summaryLabel = summaryDetails.join(". ");
     const summaryTitle = summaryDetails.join("\n");
     const summaryTooltip = summaryDetails.join(" | ");
+    const summaryChipClasses = getChipClasses(
+      variant,
+      mode,
+      getVisibilityToneClasses(variant)
+    );
+    const summaryChipChildren = (
+      <>
+        <ShieldCheckIcon
+          className={getIconClasses(variant)}
+          strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
+          aria-hidden="true"
+        />
+        <span className={getChipLabelClasses(variant)}>Score</span>
+        <span className={getValueClasses(variant)}>{visibilityScore}</span>
+      </>
+    );
+
+    if (isInlineSidebarVariant(variant)) {
+      return renderContainer({
+        variant,
+        className: containerClasses,
+        children: (
+          <HoverCard
+            ariaLabel="Wave score details"
+            content={<WaveScoreInfoCard metrics={summaryMetrics} />}
+            delayShow={250}
+            offset={10}
+            openOnClick
+            placement="auto"
+          >
+            <button
+              type="button"
+              className={`${summaryChipClasses} tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300`}
+              aria-label={`Show wave score details. ${summaryLabel}`}
+              title={summaryTitle}
+            >
+              {summaryChipChildren}
+            </button>
+          </HoverCard>
+        ),
+      });
+    }
 
     return renderContainer({
       variant,
       className: containerClasses,
       children: (
         <span
-          className={getChipClasses(
-            variant,
-            mode,
-            getVisibilityToneClasses(variant)
-          )}
+          className={summaryChipClasses}
           aria-label={summaryLabel}
           title={summaryTitle}
           {...getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)}
         >
-          <ShieldCheckIcon
-            className={getIconClasses(variant)}
-            strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
-            aria-hidden="true"
-          />
-          <span className={getChipLabelClasses(variant)}>Score</span>
-          <span className={getValueClasses(variant)}>{visibilityScore}</span>
+          {summaryChipChildren}
         </span>
       ),
     });

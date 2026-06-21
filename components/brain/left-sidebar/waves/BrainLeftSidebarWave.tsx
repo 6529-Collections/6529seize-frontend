@@ -7,13 +7,11 @@ import {
 } from "@/components/waves/WaveTrustSignals";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Tooltip } from "react-tooltip";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import {
   getWaveHomeRoute,
@@ -114,11 +112,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     wave.newDropsCount.latestDropTimestamp
   );
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
-  const shouldShowTrustSignalsRow =
-    hasSummaryScore || latestDropTimestamp !== null;
-  const trustSignalsTooltipId = hasTouchScreen
-    ? undefined
-    : `sidebar-wave-trust-signals-${wave.id}`;
+  const shouldShowDropTime = latestDropTimestamp !== null;
 
   const formattedWaveName = useMemo(() => getFormattedWaveName(wave), [wave]);
 
@@ -215,6 +209,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     },
     [onToggleExpand, wave.id]
   );
+  const linkHoverProps = !hasTouchScreen ? { onMouseEnter: onWaveHover } : {};
+  const linkToneClasses = `tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+    isActive
+      ? "tw-text-white desktop-hover:group-hover:tw-text-white"
+      : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+  }`;
 
   const getAvatarRingClasses = () => {
     if (isActive) return activeRingClasses;
@@ -268,113 +268,106 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           }`}
         />
       )}
-      <Link
-        href={href}
-        prefetch={false}
-        {...(!hasTouchScreen && { onMouseEnter: onWaveHover })}
-        onClick={handleWaveClick}
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-        }`}
-      >
-        <div className="tw-relative">
-          <div
-            className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
-              isActive
-                ? "tw-opacity-100"
-                : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
-            }`}
-          >
-            <WavePicture
-              name={wave.name}
-              picture={wave.picture}
-              contributors={wave.contributors}
-            />
-            {isDropWave && (
-              <div className={dropBadgeClasses}>
-                <svg
-                  className={DROP_ICON_CLASSES}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 576 512"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M400 0L176 0c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8L24 64C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9L192 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-26.1 0C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24L446.4 64c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112l84.4 0c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6l84.4 0c-5.1 66.3-31.1 111.2-63 142.3z"
+      <div className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1`}>
+        <Link
+          href={href}
+          prefetch={false}
+          {...linkHoverProps}
+          onClick={handleWaveClick}
+          aria-hidden="true"
+          tabIndex={-1}
+          className={`tw-flex tw-flex-shrink-0 ${linkToneClasses}`}
+        >
+          <div className="tw-relative">
+            <div
+              className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
+                isActive
+                  ? "tw-opacity-100"
+                  : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
+              }`}
+            >
+              <WavePicture
+                name={wave.name}
+                picture={wave.picture}
+                contributors={wave.contributors}
+              />
+              {isDropWave && (
+                <div className={dropBadgeClasses}>
+                  <svg
+                    className={DROP_ICON_CLASSES}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 576 512"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M400 0L176 0c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8L24 64C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9L192 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-26.1 0C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24L446.4 64c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112l84.4 0c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6l84.4 0c-5.1 66.3-31.1 111.2-63 142.3z"
+                    />
+                  </svg>
+                </div>
+              )}
+              {!isActive && haveNewDrops && !wave.isMuted && (
+                <div className={UNREAD_BADGE_CLASSES}>
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </div>
+              )}
+              {wave.isMuted && (
+                <div className={MUTED_BADGE_CLASSES}>
+                  <FontAwesomeIcon
+                    icon={faBellSlash}
+                    className={MUTED_ICON_CLASSES}
                   />
-                </svg>
-              </div>
-            )}
-            {!isActive && haveNewDrops && !wave.isMuted && (
-              <div className={UNREAD_BADGE_CLASSES}>
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </div>
-            )}
-            {wave.isMuted && (
-              <div className={MUTED_BADGE_CLASSES}>
-                <FontAwesomeIcon
-                  icon={faBellSlash}
-                  className={MUTED_ICON_CLASSES}
-                />
-              </div>
+                </div>
+              )}
+            </div>
+            {hasUnreadSubwaves && (
+              <span
+                aria-hidden="true"
+                className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
+              />
             )}
           </div>
-          {hasUnreadSubwaves && (
-            <span
-              aria-hidden="true"
-              className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
-            />
-          )}
-        </div>
+        </Link>
         <div className="tw-min-w-0 tw-flex-1">
-          <div
-            className={`tw-truncate tw-text-sm tw-font-medium ${
-              shouldShowPinButton ? "tw-pr-7" : ""
-            }`}
-          >
-            {formattedWaveName}
-          </div>
-          {shouldShowTrustSignalsRow && (
-            <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
-              {hasSummaryScore && (
-                <WaveTrustSignals
-                  waveRep={wave.waveRep}
-                  waveScore={wave.waveScore}
-                  variant="sidebar-inline"
-                  mode="summary"
-                  className="tw-shrink-0"
-                  tooltipId={trustSignalsTooltipId}
+          <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1.5">
+              <Link
+                href={href}
+                prefetch={false}
+                {...linkHoverProps}
+                onClick={handleWaveClick}
+                className={`tw-min-w-0 tw-shrink ${linkToneClasses}`}
+              >
+                <div className="tw-truncate tw-text-sm tw-font-medium">
+                  {formattedWaveName}
+                </div>
+              </Link>
+              {shouldShowPinButton && (
+                <BrainLeftSidebarWavePin
+                  waveId={wave.id}
+                  isPinned={!!wave.isPinned}
+                  compact
+                  className="-tw-mt-1 tw-shrink-0"
                 />
               )}
-              {latestDropTimestamp !== null && (
-                <span className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
-                  <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
-                </span>
-              )}
+            </div>
+            {hasSummaryScore && (
+              <WaveTrustSignals
+                waveRep={wave.waveRep}
+                waveScore={wave.waveScore}
+                variant="sidebar-inline"
+                mode="summary"
+                className="tw-ml-auto tw-mt-[1px] tw-shrink-0"
+              />
+            )}
+          </div>
+          {shouldShowDropTime && (
+            <div className="tw-mt-0.5 tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
+              <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
             </div>
           )}
         </div>
-      </Link>
-      {shouldShowPinButton && (
-        <BrainLeftSidebarWavePin
-          waveId={wave.id}
-          isPinned={!!wave.isPinned}
-          compact
-          className="tw-absolute tw-right-3 tw-top-3 tw-z-10"
-        />
-      )}
-      {trustSignalsTooltipId !== undefined && hasSummaryScore && (
-        <Tooltip
-          id={trustSignalsTooltipId}
-          place="top"
-          offset={8}
-          opacity={1}
-          positionStrategy="fixed"
-          style={TOOLTIP_STYLES}
-        />
-      )}
+      </div>
     </div>
   );
 };

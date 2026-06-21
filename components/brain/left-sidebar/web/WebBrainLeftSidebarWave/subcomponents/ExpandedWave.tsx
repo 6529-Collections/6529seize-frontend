@@ -9,8 +9,6 @@ import {
   hasWaveTrustSummaryScore,
   WaveTrustSignals,
 } from "@/components/waves/WaveTrustSignals";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { Tooltip } from "react-tooltip";
 import { WaveAvatar } from "./WaveAvatar";
 import type { WaveTooltipPlacement } from "./WaveTooltip";
 import { WaveTooltip } from "./WaveTooltip";
@@ -88,10 +86,8 @@ export const ExpandedWave = ({
   const shouldShowExpandControl = canExpand && depth === 0;
   const shouldReserveExpandControlSpace = shouldShowExpandControl;
   const shouldShowPinButton = showPin && depth === 0;
-  const trustSignalsTooltipId = `sidebar-expanded-wave-trust-signals-${waveId}`;
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
-  const shouldShowTrustSignalsRow =
-    hasSummaryScore || presentLatestDropTimestamp !== null;
+  const shouldShowDropTime = presentLatestDropTimestamp !== null;
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
@@ -138,6 +134,15 @@ export const ExpandedWave = ({
     event.stopPropagation();
     onToggleExpand?.(waveId);
   };
+  const linkInteractionProps = {
+    ...(onMouseEnter ? { onMouseEnter } : {}),
+    onClick,
+  };
+  const linkToneClasses = `tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+    isActive
+      ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
+      : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+  }`;
 
   return (
     <div
@@ -167,87 +172,78 @@ export const ExpandedWave = ({
           }`}
         />
       )}
-      <Link
-        href={href}
-        prefetch={false}
-        {...(onMouseEnter ? { onMouseEnter } : {})}
-        onClick={onClick}
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-        }`}
-      >
-        <div className="tw-relative">
-          <WaveAvatar
-            isActive={isActive}
-            isDropWave={isDropWave}
-            showNewDropsBadge={!isActive && haveNewDrops}
-            wave={wave}
-            size={isChildRow ? "sm" : "default"}
-          />
-          {hasUnreadSubwaves && (
-            <span
-              aria-hidden="true"
-              className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
+      <div className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1`}>
+        <Link
+          href={href}
+          prefetch={false}
+          {...linkInteractionProps}
+          aria-hidden="true"
+          tabIndex={-1}
+          className={`tw-flex tw-flex-shrink-0 ${linkToneClasses}`}
+        >
+          <div className="tw-relative">
+            <WaveAvatar
+              isActive={isActive}
+              isDropWave={isDropWave}
+              showNewDropsBadge={!isActive && haveNewDrops}
+              wave={wave}
+              size={isChildRow ? "sm" : "default"}
             />
-          )}
-        </div>
-        <div className="tw-min-w-0 tw-flex-1">
-          <div
-            ref={nameRef}
-            className={`-tw-mt-1 tw-mb-1 tw-truncate tw-text-sm ${
-              shouldShowPinButton ? "tw-pr-7" : ""
-            }`}
-            {...tooltipAttributes}
-          >
-            {formattedWaveName}
+            {hasUnreadSubwaves && (
+              <span
+                aria-hidden="true"
+                className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
+              />
+            )}
           </div>
-          {shouldShowTrustSignalsRow && (
-            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
-              {hasSummaryScore && (
-                <WaveTrustSignals
-                  waveRep={wave.waveRep}
-                  waveScore={wave.waveScore}
-                  variant="sidebar-inline"
-                  mode="summary"
-                  className="tw-shrink-0"
-                  tooltipId={trustSignalsTooltipId}
+        </Link>
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1.5">
+              <Link
+                href={href}
+                prefetch={false}
+                {...linkInteractionProps}
+                className={`tw-min-w-0 tw-shrink ${linkToneClasses}`}
+              >
+                <div
+                  ref={nameRef}
+                  className="-tw-mt-1 tw-mb-1 tw-truncate tw-text-sm"
+                  {...tooltipAttributes}
+                >
+                  {formattedWaveName}
+                </div>
+              </Link>
+              {shouldShowPinButton && (
+                <BrainLeftSidebarWavePin
+                  waveId={waveId}
+                  isPinned={isPinned}
+                  compact
+                  className="-tw-mt-1 tw-shrink-0"
                 />
               )}
-              {presentLatestDropTimestamp !== null && (
-                <span className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
-                  <BrainLeftSidebarWaveDropTime
-                    time={presentLatestDropTimestamp}
-                  />
-                </span>
-              )}
+            </div>
+            {hasSummaryScore && (
+              <WaveTrustSignals
+                waveRep={wave.waveRep}
+                waveScore={wave.waveScore}
+                variant="sidebar-inline"
+                mode="summary"
+                className="tw-ml-auto tw-mt-[1px] tw-shrink-0"
+              />
+            )}
+          </div>
+          {shouldShowDropTime && (
+            <div className="tw-mt-0.5 tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
+              <BrainLeftSidebarWaveDropTime time={presentLatestDropTimestamp} />
             </div>
           )}
         </div>
-      </Link>
-      {shouldShowPinButton && (
-        <BrainLeftSidebarWavePin
-          waveId={waveId}
-          isPinned={isPinned}
-          compact
-          className="tw-absolute tw-right-3 tw-top-2 tw-z-10"
-        />
-      )}
+      </div>
       {showExpandedTooltip && (
         <WaveTooltip id={tooltipId} place={tooltipPlacement}>
           {tooltipContent}
         </WaveTooltip>
-      )}
-      {hasSummaryScore && (
-        <Tooltip
-          id={trustSignalsTooltipId}
-          place="top"
-          offset={8}
-          opacity={1}
-          positionStrategy="fixed"
-          style={TOOLTIP_STYLES}
-        />
       )}
     </div>
   );

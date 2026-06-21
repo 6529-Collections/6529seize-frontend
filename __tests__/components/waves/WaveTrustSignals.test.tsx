@@ -56,6 +56,32 @@ describe("WaveTrustSignals", () => {
     expect(screen.queryByText("REP")).not.toBeInTheDocument();
   });
 
+  it("renders sidebar summary score as an accessible details trigger", () => {
+    render(
+      <WaveTrustSignals
+        waveRep={waveRep}
+        waveScore={waveScore}
+        variant="sidebar-inline"
+        mode="summary"
+      />
+    );
+
+    const trigger = screen.getByRole("button", {
+      name: /Show wave score details/,
+    });
+
+    expect(trigger).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("Combined score: 83")
+    );
+    expect(trigger).toHaveAttribute(
+      "title",
+      expect.stringContaining("Quality: 78")
+    );
+    expect(screen.getByText("Score")).toBeInTheDocument();
+    expect(screen.getByText("83")).toBeInTheDocument();
+  });
+
   it("renders nothing in summary mode without a combined score", () => {
     const { container } = render(
       <WaveTrustSignals
