@@ -4,6 +4,31 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-21T15:05Z:
+  - PR #2806 and PR #2805 are merged and deployed to production.
+    - PR #2806 merge SHA:
+      `745130a19785fdc844410a2798ba63a6db8256e8`
+    - PR #2805 merge SHA and production version:
+      `cd8635e004191fc0509f253bc8d9a66c8ff51805`
+    - staging deploy run:
+      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27906005657
+    - production deploy run:
+      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27906579357
+  - Production validation passed for API version, smoke surface matrix, full
+    surface matrix, and WCAG/i18n surface matrix. Public release note `4.41.7`
+    and Follow The Repo deployment note are posted.
+  - Durable artifact storage remains an operational follow-up. The deployment
+    bus accepts approved S3/artifact-service/IPFS pointers, but the expected
+    `s3://6529-artifacts/` storage path was not present during validation.
+  - Current branch: `codex/testing-roadmap-e2e-next`, based on production
+    `origin/main` `cd8635e004191fc0509f253bc8d9a66c8ff51805`.
+  - Active PR7a implementation adds executable post-deploy watch and
+    canary-readiness contracts to the deployment bus, workflow release reports,
+    and docs. It does not add real traffic-split canary infra.
+  - Subagent audit consensus: next high-value E2E PR after PR7a should cover
+    richer read-only Waves and public profile identity workflows across desktop
+    and mobile, then media/delegation, NextGen/groups/tools, and broad
+    network/open-data/static route matrices.
 - Latest rollout state, 2026-06-19T23:10Z:
   - `6529reviewbot` PR #399 is merged and live on reviewbot `main`:
     https://github.com/6529-Collections/6529reviewbot/pull/399

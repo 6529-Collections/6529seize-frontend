@@ -163,6 +163,26 @@ function isFirstPartyTelemetryEndpoint(url: URL, baseURL?: string) {
   );
 }
 
+function isFirstPartyReadonlyRouteHandler(
+  method: string,
+  url: URL,
+  baseURL?: string
+) {
+  return (
+    method === "POST" &&
+    isSameOrigin(url, baseURL) &&
+    url.pathname === "/api/open-graph"
+  );
+}
+
+function isNextDevInspectorEndpoint(url: URL, baseURL?: string) {
+  return (
+    isSameOrigin(url, baseURL) &&
+    (url.pathname === "/__nextjs_original-stack-frame" ||
+      url.pathname === "/__nextjs_original-stack-frames")
+  );
+}
+
 function isWalletConnectRpc(url: URL) {
   return url.hostname === WALLETCONNECT_RPC_HOST && url.pathname === "/v1/";
 }
@@ -293,6 +313,14 @@ export function decideReadonlyRequest({
   const parsed = parseUrl(url);
   if (!parsed || !["http:", "https:"].includes(parsed.protocol)) {
     return { action: "allow", reason: "non-http-url" };
+  }
+
+  if (isFirstPartyReadonlyRouteHandler(upperMethod, parsed, baseURL)) {
+    return { action: "allow", reason: "first-party-readonly-route-handler" };
+  }
+
+  if (isNextDevInspectorEndpoint(parsed, baseURL)) {
+    return { action: "abort", reason: "ignored-next-dev-inspector" };
   }
 
   const endpoint = registryMatch(upperMethod, parsed, baseURL);

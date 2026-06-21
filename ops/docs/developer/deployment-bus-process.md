@@ -11,8 +11,9 @@ Implementation note: the automation slices are documented in
 validation, GitHub Deployment ledger records, workflow artifacts, standard
 deployed-environment validation pack names, release report artifacts,
 deployed-staging smoke support, auto-hold evaluation for missing release
-evidence, and long-running deployment heartbeats without automating queue
-movement or production promotion.
+evidence, post-deploy watch checkpoints, canary-readiness declarations, and
+long-running deployment heartbeats without automating queue movement or
+production promotion.
 
 ## Why This Exists
 
@@ -83,11 +84,22 @@ Known current gaps after the first automation slice:
 - The durable manifest artifact is authoritative for this slice; GitHub
   Deployment records are the status/history pointer, not the full manifest
   datastore.
+- Current rollout capability:
+  - auto-hold: supported by release-readiness evaluation;
+  - staged watch: supported through workflow checkpoints, Deployment statuses,
+    release-report fields, and release-captain validation updates;
+  - feature flags: app-specific only, not a generic release-lane capability;
+  - traffic-split canary rollout: not currently supported by the deployment bus;
+  - durable artifact storage: schema and validator are ready, but the approved
+    private storage/IAM/upload path still needs infrastructure wiring.
 - Release reports evaluate whether required packs and durable artifact pointers
   are recorded, but the workflows still do not automatically run those
   post-deploy Playwright packs. The release captain or validation agents must
   run them and record results with `record-validation-check` until a later
   automation slice wires pack execution into the lane.
+- The workflows record post-deploy deploy-verification checkpoints. These are
+  useful watch evidence, but GitHub Actions run URLs and temporary artifacts do
+  not satisfy durable artifact pointer requirements.
 - The current standard pack plan requires desktop Chromium and mobile Chromium
   evidence for `playwright:core-smoke`, `playwright:surface-matrix`, and
   `playwright:wcag-i18n`. Firefox, WebKit, Capacitor simulation, and Electron
@@ -186,6 +198,13 @@ validation:
   core_smoke_owner:
   required_packs:
   exploratory_checks:
+post_deploy_watch:
+  required:
+  status:
+  checkpoints:
+canary_readiness:
+  current_capability:
+  traffic_splitting_supported:
 status: queued | deploying | validating | passed | failed | held | superseded
 ```
 
@@ -252,6 +271,8 @@ Production validation:
 
 - verify the production deploy run and deployed SHA/version label
 - run production-safe smoke checks for changed behavior
+- record post-deploy watch checkpoints and final watch status in the deployment
+  bus manifest before release notes
 - avoid public posts, purchases, transfers, signer changes, destructive data
   work, or other irreversible actions unless the user explicitly requested
   that live action

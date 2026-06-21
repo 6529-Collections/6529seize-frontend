@@ -68,6 +68,46 @@ describe("Playwright read-only mutation guard", () => {
     });
   });
 
+  it("allows the same-origin open-graph metadata lookup in read-only mode", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://6529.io/api/open-graph",
+      })
+    ).toMatchObject({
+      action: "allow",
+      reason: "first-party-readonly-route-handler",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://example.com/api/open-graph",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "non-allowlisted-mutation",
+    });
+  });
+
+  it("aborts Next.js dev inspector stack-frame lookups without recording an app mutation", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "http://localhost:3001",
+        method: "POST",
+        readonly: true,
+        url: "http://localhost:3001/__nextjs_original-stack-frames",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-next-dev-inspector",
+    });
+  });
+
   it("allows safe methods", () => {
     expect(
       decideReadonlyRequest({
