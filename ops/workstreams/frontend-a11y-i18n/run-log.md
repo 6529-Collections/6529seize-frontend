@@ -2186,10 +2186,10 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - `seize run test:e2e:browser-diversity`: 18 passed, 8 skipped.
   - `seize run test:e2e:native-sim`: 17 passed, 13 skipped.
   - `seize run testing-strategy -- scan-changed-secrets --changed-from
-    origin/main --output test-results/app-pr-ci/pr4-secret-scan.json`: clean.
+origin/main --output test-results/app-pr-ci/pr4-secret-scan.json`: clean.
   - `seize run testing-strategy -- validate-workflow-security --changed-from
-    origin/main --output
-    test-results/app-pr-ci/pr4-workflow-security.json`: clean.
+origin/main --output
+test-results/app-pr-ci/pr4-workflow-security.json`: clean.
   - `codex-diff-check`
 - Browser diversity validation required installing local Playwright Firefox and
   WebKit browsers before the final pass.
@@ -2217,8 +2217,8 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - workflow YAML parse for app PR CI, staging deploy, and production deploy
     workflows passed.
   - `seize run testing-strategy -- validate-workflow-security --changed-from
-    origin/main --output
-    test-results/app-pr-ci/pr4-workflow-security.json`: clean.
+origin/main --output
+test-results/app-pr-ci/pr4-workflow-security.json`: clean.
   - `seize run test:e2e:surface-matrix`: 25 passed, 7 skipped.
   - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
   - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed after deleting a
@@ -2291,9 +2291,9 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - `seize run test:e2e:browser-diversity`: 18 passed, 6 skipped.
   - `seize run test:e2e:native-sim`: 16 passed, 11 skipped.
   - `seize run testing-strategy -- validate-workflow-security --output
-    test-results/app-pr-ci/pr4-workflow-security-rebased.json`: clean.
+test-results/app-pr-ci/pr4-workflow-security-rebased.json`: clean.
   - `seize run testing-strategy -- scan-changed-secrets --changed-from
-    origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
+origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
     clean.
   - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed after clearing stale
     ignored `.next` dev type cache. The first build attempt failed on a corrupt
@@ -2304,3 +2304,53 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
 - Build regeneration again added EOF blank-line noise to three generated model
   files; those generated files were restored and the worktree is clean before
   the PR branch push.
+
+## 2026-06-21T15:05Z Surface Matrix Train Deployed And PR7a Started
+
+- PR #2806 critical route-shell guards merged and deployed:
+  - merge SHA: `745130a19785fdc844410a2798ba63a6db8256e8`
+  - PR: https://github.com/6529-Collections/6529seize-frontend/pull/2806
+- PR #2805 surface matrix and deployment evidence hardening merged and
+  deployed:
+  - merge SHA / production version:
+    `cd8635e004191fc0509f253bc8d9a66c8ff51805`
+  - PR: https://github.com/6529-Collections/6529seize-frontend/pull/2805
+- Staging deployment:
+  - run: https://github.com/6529-Collections/6529seize-frontend/actions/runs/27906005657
+  - staging SHA: `ab1077c2d8949d421cf755872efc0868fe04057b`
+  - production candidate SHA:
+    `cd8635e004191fc0509f253bc8d9a66c8ff51805`
+  - validation: staging smoke 12 passed, staging surface matrix 24 passed / 6
+    skipped, staging WCAG/i18n surface matrix 6 passed.
+- Production deployment:
+  - run: https://github.com/6529-Collections/6529seize-frontend/actions/runs/27906579357
+  - production deployed SHA/version:
+    `cd8635e004191fc0509f253bc8d9a66c8ff51805`
+  - validation: `/api/version` matched deployed SHA, smoke surface matrix 12
+    passed, full surface matrix 24 passed / 6 skipped, WCAG/i18n surface
+    matrix 6 passed.
+- Public closeout notes:
+  - release note `4.41.7` drop:
+    `72478e18-4a9a-4841-a0c1-e47c1626ec59`
+  - Follow The Repo deployment note drop:
+    `b551b85c-93c8-41b6-b8c7-a2e515310736`
+- Residual operational gap:
+  - durable artifact pointers are schema/validator enforced, but the expected
+    approved storage path `s3://6529-artifacts/` was not present. Treat artifact
+    storage wiring as an infra follow-up; do not weaken durable-artifact holds
+    or treat GitHub Actions artifacts as durable retained evidence.
+- Started branch `codex/testing-roadmap-e2e-next` from deployed `origin/main`
+  for the next roadmap run.
+- Subagent audit consensus:
+  - PR7a should add executable post-deploy watch/canary-readiness reporting
+    without requiring new infra secrets;
+  - the first richer app E2E PR after PR7a should cover Waves and public profile
+    identity workflows before media/delegation, NextGen/groups/tools, and broad
+    network/open-data/static route matrices.
+- PR7a implementation in progress:
+  - `post_deploy_watch` manifest and release-report section;
+  - `canary_readiness` current-capability contract;
+  - staging and production workflow watch checkpoints;
+  - production `released` readiness hold until post-deploy watch passes;
+  - `record-post-deploy-watch` CLI command;
+  - `record-validation-check --retention-policy` support.

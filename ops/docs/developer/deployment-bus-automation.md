@@ -1,6 +1,6 @@
 # Deployment Bus Automation
 
-Status: first automation slice. The deployment bus process remains defined in
+Status: deployment-bus automation slices. The deployment bus process remains defined in
 `ops/docs/developer/deployment-bus-process.md`; this page documents the durable
 automation primitives added around the current staging and production workflows.
 
@@ -17,6 +17,8 @@ safe bus needs before queue automation can make decisions:
 - release report artifacts retained beside the manifest
 - standard deployed-environment validation pack names and commands
 - auto-hold evaluation for missing or failed required evidence
+- post-deploy watch evidence in the release report
+- explicit canary-readiness fields that say what rollout capability exists
 - production workflow check that fails if `origin/main` advances during the
   build before Elastic Beanstalk is updated
 - deployed-staging Playwright mode through `PLAYWRIGHT_BASE_URL` and
@@ -52,7 +54,15 @@ Validate and summarize:
   --artifact-uri s3://6529-artifacts/frontend/<release-id>/core-smoke.json \
   --redaction-status verified-redacted \
   --artifact-sha256 <sha256> \
-  --retention-days 90
+  --retention-policy standard-90-days
+6529 run deployment-bus -- record-post-deploy-watch \
+  --file deployment-bus-manifest.json \
+  --status passed \
+  --observed-duration-minutes 30 \
+  --checkpoint version-match \
+  --checkpoint-status passed \
+  --evidence https://github.com/6529-Collections/6529seize-frontend/actions/runs/<run-id> \
+  --notes "API version, route smoke, and static asset checks passed"
 6529 run deployment-bus -- release-report --file deployment-bus-manifest.json --output deployment-release-report.md
 ```
 
@@ -82,11 +92,11 @@ packs in `validation.required_packs` and expands them in
 `playwright:core-smoke` is the fast route smoke pack. `playwright:surface-matrix`
 is the broader route/navigation workflow pack.
 
-| Pack                        | Staging command                                                                                                                | Production command                                                                                             |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `playwright:core-smoke`     | `seize run test:e2e:staging:smoke`                                                                                             | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix`     |
-| `playwright:surface-matrix` | `seize run test:e2e:staging`                                                                                                   | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix`           |
-| `playwright:wcag-i18n`      | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix`         | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` |
+| Pack                        | Staging command                                                                                                        | Production command                                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `playwright:core-smoke`     | `seize run test:e2e:staging:smoke`                                                                                     | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix`     |
+| `playwright:surface-matrix` | `seize run test:e2e:staging`                                                                                           | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix`           |
+| `playwright:wcag-i18n`      | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` |
 
 The standard pack plan records `web:desktop-chromium` and
 `web:mobile-chromium` as the covered deployed web surfaces. Firefox, WebKit,
@@ -110,6 +120,8 @@ it. The report includes:
 - release captain and environment URL;
 - required validation packs and their commands;
 - recorded validation checks and artifact pointers;
+- post-deploy watch status, duration, checkpoints, and evidence links;
+- current canary capability and future traffic-split prerequisites;
 - auto-hold findings;
 - included PRs and artifact policy.
 
@@ -143,6 +155,8 @@ Current auto-hold criteria:
 - a production-eligible manifest's latest passing required-pack check lacks an
   approved durable artifact pointer with verified redaction, integrity metadata,
   and retention metadata;
+- a production release manifest has not recorded a passed post-deploy watch, or
+  the watch duration/checkpoints do not satisfy the manifest;
 - the production candidate SHA no longer matches the staging-validated release
   set.
 
@@ -151,6 +165,39 @@ as `s3://6529-artifacts/`, `https://artifacts.6529.io/`, or `ipfs://` for
 intentionally public redacted provenance. Git LFS and committed generated files
 are not durable release evidence stores. Do not record temporary signed URLs,
 query-string credentials, fragments, local paths, or unredacted artifacts.
+
+GitHub Actions workflow artifacts and run URLs are useful temporary evidence,
+but they are not durable artifact pointers. They can appear in post-deploy watch
+checkpoints and release reports; they do not satisfy the durable-artifact hold
+for retained Playwright traces, screenshots, or validation outputs.
+
+## Post-Deploy Watch And Canary Readiness
+
+Every manifest has `post_deploy_watch` and `canary_readiness` fields.
+
+`post_deploy_watch` records:
+
+- whether a watch is required;
+- current status: `not_started`, `in_progress`, `passed`, `failed`,
+  `blocked`, or `skipped`;
+- minimum and observed watch duration;
+- timestamped checkpoints with evidence links;
+- notes for the release captain or validation agents.
+
+The staging workflow records a staging deploy-verification checkpoint after SSM
+and deployed-SHA verification. The production workflow records an
+`eb-version-health` checkpoint after Elastic Beanstalk health/readiness and
+version-label validation. Production workflow evidence starts the watch but
+does not by itself complete the release-captain post-deploy watch; production
+validation agents should record the final `passed` watch after the deployed
+environment checks finish.
+
+`canary_readiness` records current rollout capability. Today the frontend bus
+supports auto-hold and explicit staged watch. Generic deployment traffic
+splitting is not currently supported, and feature flags are app-specific rather
+than a release-lane capability. The manifest records candidate/control metrics
+and prerequisites so a future traffic-split canary implementation has a clear
+contract instead of being inferred from prose.
 
 ## GitHub Deployment Ledger
 
