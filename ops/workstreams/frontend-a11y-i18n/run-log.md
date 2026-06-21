@@ -2242,6 +2242,9 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   proves.
 - Accepted CodeRabbit's low-risk wording nit for the staging E2E script docs in
   `tests/README.md`.
+- After Sonar reported remaining duplication at 3.5%, refactored
+  `ops/scripts/deployment-bus.cjs` again to use shared Playwright pack builders
+  and a non-duplicated CLI argument parser shape.
 - Follow-up validation passed:
   - `seize run format:changed`
   - `node --check ops/scripts/deployment-bus.cjs`

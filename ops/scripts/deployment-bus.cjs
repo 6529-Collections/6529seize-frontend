@@ -10,57 +10,39 @@ const SHA256_RE = /^[0-9a-f]{64}$/i;
 const ETAG_RE = /^"?[0-9a-f]{32}(?:-\d+)?"?$/i;
 const CID_RE = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{20,})$/;
 const VALID_ENVIRONMENTS = new Set(["staging", "production"]);
+const DEPLOYED_ENVIRONMENTS = Object.freeze(["staging", "production"]);
+const REQUIRED_WEB_SURFACES = Object.freeze([
+  "web:desktop-chromium",
+  "web:mobile-chromium",
+]);
+const PLAYWRIGHT_ARTIFACT_PATTERNS = Object.freeze([
+  "test-results/playwright/**",
+  "playwright-report/**",
+]);
 const VALIDATION_PACKS = Object.freeze({
-  "playwright:core-smoke": Object.freeze({
+  "playwright:core-smoke": createPlaywrightPack({
     id: "playwright:core-smoke",
-    size: "large",
     description: "Read-only core route smoke pack for deployed web health.",
-    environments: Object.freeze(["staging", "production"]),
-    surfaces: Object.freeze(["web:desktop-chromium", "web:mobile-chromium"]),
-    commands: Object.freeze({
-      staging: "seize run test:e2e:staging:smoke",
-      production:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix",
-    }),
-    artifacts: Object.freeze([
-      "test-results/playwright/**",
-      "playwright-report/**",
-    ]),
+    stagingCommand: "seize run test:e2e:staging:smoke",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix",
   }),
-  "playwright:surface-matrix": Object.freeze({
+  "playwright:surface-matrix": createPlaywrightPack({
     id: "playwright:surface-matrix",
-    size: "large",
     description:
       "Read-only route, navigation, search, network, and delegation surface matrix.",
-    environments: Object.freeze(["staging", "production"]),
-    surfaces: Object.freeze(["web:desktop-chromium", "web:mobile-chromium"]),
-    commands: Object.freeze({
-      staging: "seize run test:e2e:staging",
-      production:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix",
-    }),
-    artifacts: Object.freeze([
-      "test-results/playwright/**",
-      "playwright-report/**",
-    ]),
+    stagingCommand: "seize run test:e2e:staging",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix",
   }),
-  "playwright:wcag-i18n": Object.freeze({
+  "playwright:wcag-i18n": createPlaywrightPack({
     id: "playwright:wcag-i18n",
-    size: "large",
     description:
       "Read-only WCAG/i18n route evidence pack for deployed public routes.",
-    environments: Object.freeze(["staging", "production"]),
-    surfaces: Object.freeze(["web:desktop-chromium", "web:mobile-chromium"]),
-    commands: Object.freeze({
-      staging:
-        "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
-      production:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
-    }),
-    artifacts: Object.freeze([
-      "test-results/playwright/**",
-      "playwright-report/**",
-    ]),
+    stagingCommand:
+      "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
   }),
 });
 const DEFAULT_REQUIRED_PACKS = Object.freeze([
@@ -126,13 +108,35 @@ const GITHUB_DEPLOYMENT_STATES = new Set([
   "success",
 ]);
 
+function createPlaywrightPack({
+  id,
+  description,
+  stagingCommand,
+  productionCommand,
+}) {
+  return Object.freeze({
+    id,
+    size: "large",
+    description,
+    environments: DEPLOYED_ENVIRONMENTS,
+    surfaces: REQUIRED_WEB_SURFACES,
+    commands: Object.freeze({
+      staging: stagingCommand,
+      production: productionCommand,
+    }),
+    artifacts: PLAYWRIGHT_ARTIFACT_PATTERNS,
+  });
+}
+
 function parseArgs(argv) {
   const args = { _: [] };
+  let index = 0;
 
-  for (let i = 0; i < argv.length; i += 1) {
-    const token = argv[i];
+  while (index < argv.length) {
+    const token = argv[index];
     if (!token.startsWith("--")) {
       args._.push(token);
+      index += 1;
       continue;
     }
 
@@ -140,17 +144,19 @@ function parseArgs(argv) {
     const eqIndex = rawKey.indexOf("=");
     if (eqIndex !== -1) {
       args[rawKey.slice(0, eqIndex)] = rawKey.slice(eqIndex + 1);
+      index += 1;
       continue;
     }
 
-    const next = argv[i + 1];
-    if (!next || next.startsWith("--")) {
+    const nextToken = argv[index + 1];
+    if (!nextToken || nextToken.startsWith("--")) {
       args[rawKey] = true;
+      index += 1;
       continue;
     }
 
-    args[rawKey] = next;
-    i += 1;
+    args[rawKey] = nextToken;
+    index += 2;
   }
 
   return args;
