@@ -35,6 +35,25 @@ Read this section first after compaction or handoff.
   - Follow-up branch `codex/fix-staging-playwright-smoke` restores
     `tests/testHelpers.ts` and makes `seize run test:e2e:staging` run real
     browser smoke when `PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH` is set.
+- Latest testing-roadmap state, 2026-06-21T07:25Z:
+  - Current clean worktree branch: `codex/testing-roadmap-next`, based on
+    current `origin/main`.
+  - PR5 deployment evidence/reporting foundation is implemented locally:
+    deployed-environment pack plans, release reports, auto-hold readiness
+    evaluation, `record-validation-check`, workflow release-report artifacts,
+    and stricter durable artifact rules.
+  - Required deployed packs are currently `playwright:core-smoke` and
+    `playwright:wcag-i18n`. Both are still `web:desktop-chromium`; PR4 must add
+    broader mobile, Firefox, WebKit, Capacitor, and Electron/Desktop Shell
+    surface coverage before claiming those surfaces.
+  - Durable release evidence now requires one approved artifact pointer on each
+    required pack's latest passing check, with verified redaction, integrity
+    metadata (`sha256`, `etag`, or `cid`), retention metadata, and no query
+    strings/fragments/signed URLs/local paths/Git LFS pointers.
+  - Independent verifier `Linnaeus` found four P1s before PR publication:
+    global artifact readiness, invalid manifests producing ready reports, weak
+    artifact URI/redaction metadata handling, and generated EOF noise. All four
+    were fixed locally and covered by tests.
 - 2026-06-20 user direction: update the plan for the actual frontend WCAG/i18n
   mega run now that reviewbot is live. Reviewbot is an additional reviewer and
   regression detector only; it does not replace extensive local validation.
@@ -127,7 +146,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/user-about-edit-a11y-i18n`
+`codex/testing-roadmap-next`
 
 ## Constraints
 
@@ -252,3 +271,7 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
    trains.
 9. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
    style files.
+10. After PR5 is merged/deployed, start PR4 surface-matrix work from current
+    `origin/main`: expand E2E project coverage for mobile-sized Chromium,
+    Firefox/WebKit where practical, and the documented Capacitor/Electron
+    simulation lanes without weakening existing reviewbot lanes.

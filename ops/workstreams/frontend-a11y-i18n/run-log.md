@@ -1917,12 +1917,12 @@ origin/main --output test-results/app-pr-ci/workflow-security.json`
   - `seize run typecheck:ci`
   - `seize run typecheck:playwright`
   - `seize run test:no-coverage -- __tests__/playwright/a11yAssertions.test.ts
-    __tests__/playwright/i18nFixtures.test.ts`: 2 suites, 5 tests passed.
+__tests__/playwright/i18nFixtures.test.ts`: 2 suites, 5 tests passed.
   - `seize run testing-strategy -- ci-plan --changed-from main --output
-    test-results/app-pr-ci/pr3-ci-plan.json`: Level 4 because of Next config,
+test-results/app-pr-ci/pr3-ci-plan.json`: Level 4 because of Next config,
     package, and lockfile changes.
   - `seize run testing-strategy -- scan-changed-secrets --changed-from main
-    --output test-results/app-pr-ci/pr3-secret-scan.json`: clean.
+--output test-results/app-pr-ci/pr3-secret-scan.json`: clean.
   - `seize run dependency:risk-gate`: high risk / auto-merge blocked because
     the PR adds a new direct dev dependency; package metadata was independently
     checked and the risk is documented for review.
@@ -1931,9 +1931,9 @@ origin/main --output test-results/app-pr-ci/workflow-security.json`
     Without the local worker cap, Windows hit repeat `EBUSY` copy races after
     successful compile, typecheck, and static generation; CI runs on Ubuntu.
   - `$env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run
-    test:e2e:wcag-i18n`: 3 passed.
+test:e2e:wcag-i18n`: 3 passed.
   - `$env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run
-    test:e2e:smoke`: first run after production build hit stale local dev cache
+test:e2e:smoke`: first run after production build hit stale local dev cache
     404s; after isolating the production `.next` output and starting a fresh dev
     cache, 6 passed.
   - `codex-diff-check`
@@ -1942,3 +1942,61 @@ origin/main --output test-results/app-pr-ci/workflow-security.json`
 - Addressed the latest Sonar maintainability findings before merge by splitting
   axe allowlist validation into smaller helpers, replacing a target lookup with
   `.includes()`, and using `globalThis.getComputedStyle` in the focus helper.
+
+## 2026-06-21T07:25Z PR 5 Deployment Evidence Foundation
+
+- Continued the next autonomous testing-roadmap run from clean branch
+  `codex/testing-roadmap-next` based on current `origin/main`.
+- Reused `6529-autonomous-manager` mode and delegated an independent read-only
+  verifier pass to subagent `Linnaeus`.
+- Implemented the PR5 deployment evidence/reporting foundation:
+  - staging and production deploy workflows now include standard required packs
+    in the deployment-bus manifest and upload `deployment-release-report.md`
+    beside `deployment-bus-manifest.json`;
+  - terminal workflow status now heartbeats the manifest to `deploy_verified`,
+    `failed`, or `cancelled` before GitHub Deployment status publication;
+  - `ops/scripts/deployment-bus.cjs` now expands standard deployed-environment
+    pack plans, evaluates release readiness, generates Markdown release
+    reports, and appends validation results with `record-validation-check`;
+  - readiness uses the latest result for each required pack, so a failed run is
+    cleared by a later passing rerun with retained evidence;
+  - release readiness now requires each required pack's latest passing check to
+    include an approved durable artifact pointer with verified redaction,
+    integrity metadata (`sha256`, `etag`, or `cid`), retention metadata, and no
+    query strings/fragments/signed URLs/local paths/Git LFS pointers;
+  - invalid manifests produce `hold` release reports and make
+    `release-report` exit nonzero after writing the report.
+- Updated docs:
+  - `ops/docs/developer/deployment-bus-automation.md`
+  - `ops/docs/developer/deployment-bus-process.md`
+- Verifier feedback fixed before PR publication:
+  - global durable artifact readiness changed to per-required-pack readiness;
+  - invalid manifest reports can no longer say ready;
+  - artifact URI/redaction/integrity/retention rules were tightened;
+  - generated OpenAPI EOF-only changes from build were removed from the PR.
+- Local validation:
+  - `seize install:frozen` passed after clearing a partial `node_modules`
+    install left by Windows native-package unlink errors.
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize exec eslint ops/scripts/deployment-bus.cjs __tests__/scripts/deployment-bus.test.ts --no-warn-ignored --max-warnings=0`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    23 passed.
+  - `seize run testing-strategy -- ci-plan --changed-from origin/main --output test-results/app-pr-ci/pr5-ci-plan.json`:
+    Level 5 because production deploy authority is touched.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr5-secret-scan.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/pr5-workflow-security.json`:
+    clean.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - workflow YAML parse for staging and production workflows.
+  - `codex-diff-check`
+  - workflow-shaped CLI smoke:
+    `create-manifest -> heartbeat-manifest -> record-validation-check x2 -> release-report`;
+    report contained `Report status: ready`.
+  - `seize-local-dev bootstrap` assigned frontend port `3162` for this
+    worktree.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build` passed prebuild, lint,
+    production Next build, TypeScript, static generation, and sitemap
+    generation. Nonfatal build warnings observed: known dynamic OG metadata
+    image route warning and Node `punycode` deprecation warning.
