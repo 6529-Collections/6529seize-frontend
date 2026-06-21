@@ -2622,3 +2622,27 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run test:e2e:collections-readonly`: 20 passed.
   - `seize run lint:changed`
   - `seize run typecheck:playwright`
+
+## 2026-06-21T20:40Z Collections PR CI Follow-Up
+
+- App PR CI failed the related-Jest step on PR #2813 because direct unit tests
+  invoked the Meme Lab collection page without `searchParams`; the route had
+  correctly moved to Next.js promise search params but assumed the prop was
+  always supplied.
+- Made `app/meme-lab/collection/[collection]/page.tsx` and its metadata path
+  tolerate omitted `searchParams`, defaulting to the same empty-query behavior
+  used by real requests.
+- Updated `__tests__/moreStaticPages.test.tsx` to assert the full current
+  `MemeLabCollection` prop contract, including default locale and null sort
+  state.
+- Follow-up validation passed:
+  - `seize run test:no-coverage -- __tests__/moreStaticPages.test.tsx`: 6
+    passed.
+  - `seize run test:no-coverage --findRelatedTests
+    components/6529Gradient/6529Gradient.tsx
+    tests/collections/nextgen-collections-readonly.spec.ts
+    --passWithNoTests`: 13 passed across 3 suites.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: 1 changed TypeScript file passed.
+  - `seize run typecheck:playwright`
+  - `codex-diff-check`
