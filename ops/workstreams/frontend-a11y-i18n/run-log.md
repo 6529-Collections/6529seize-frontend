@@ -1885,3 +1885,60 @@ origin/main --output test-results/app-pr-ci/workflow-security.json`
   `http://localhost:3001` and set `PLAYWRIGHT_WEB_SERVER_COMMAND` to
   `./bin/6529 run dev`, preserving the repo wrapper and avoiding a Next config
   exception just for CI.
+
+## 2026-06-20T23:15Z PR 3 WCAG/i18n Browser Evidence Harness
+
+- Started PR 3 from merged `origin/main` after PR #2802:
+  `codex/testing-pr3-wcag-i18n-playwright`.
+- Added `@axe-core/playwright` as a dev dependency for first-party browser
+  accessibility scans.
+- Implementing shared Playwright helpers for:
+  - WCAG 2.2 A/AA axe assertions scoped to `main` by default;
+  - exact, owned, expiring axe debt allowlists;
+  - visible keyboard focus smoke checks;
+  - locale stress URL generation.
+- First route evidence target is `/the-memes?locale=fr-FR&sort=age&sort_dir=asc`
+  because it already has smoke coverage, meaningful localized labels, locale
+  preserving card links, and a stable public route surface.
+- Local browser validation initially exposed a Bootstrap Sass partial resolution
+  collision where Bootstrap's internal `progress` import resolved to the JS
+  `progress` package under pnpm. The PR keeps Bootstrap on the package-form
+  `@use "bootstrap/scss/bootstrap"` import, keeps Bootstrap's SCSS directory
+  before generic `node_modules` in Next Sass load paths, adds a narrow
+  Turbopack alias for Bootstrap's `_progress.scss` partial, silences
+  Bootstrap's known dependency deprecation warnings, and extends the guard to
+  keep that setup intact.
+- Final local validation before PR publication:
+  - `seize install:frozen`
+  - `seize run format:uncommitted`
+  - `seize run guard:bootstrap-sass`
+  - `seize run lint:diff`
+  - `seize run lint:changed`
+  - `seize run typecheck:ci`
+  - `seize run typecheck:playwright`
+  - `seize run test:no-coverage -- __tests__/playwright/a11yAssertions.test.ts
+    __tests__/playwright/i18nFixtures.test.ts`: 2 suites, 5 tests passed.
+  - `seize run testing-strategy -- ci-plan --changed-from main --output
+    test-results/app-pr-ci/pr3-ci-plan.json`: Level 4 because of Next config,
+    package, and lockfile changes.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from main
+    --output test-results/app-pr-ci/pr3-secret-scan.json`: clean.
+  - `seize run dependency:risk-gate`: high risk / auto-merge blocked because
+    the PR adds a new direct dev dependency; package metadata was independently
+    checked and the risk is documented for review.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed full prebuild,
+    lint, production Next build, standalone output, and postbuild sitemap.
+    Without the local worker cap, Windows hit repeat `EBUSY` copy races after
+    successful compile, typecheck, and static generation; CI runs on Ubuntu.
+  - `$env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run
+    test:e2e:wcag-i18n`: 3 passed.
+  - `$env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run
+    test:e2e:smoke`: first run after production build hit stale local dev cache
+    404s; after isolating the production `.next` output and starting a fresh dev
+    cache, 6 passed.
+  - `codex-diff-check`
+- Existing 6529bot review lanes remain untouched; this PR is a local testing
+  enhancement that complements bot review rather than replacing it.
+- Addressed the latest Sonar maintainability findings before merge by splitting
+  axe allowlist validation into smaller helpers, replacing a target lookup with
+  `.includes()`, and using `globalThis.getComputedStyle` in the focus helper.
