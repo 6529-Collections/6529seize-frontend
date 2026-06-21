@@ -2517,6 +2517,8 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run typecheck:playwright`
   - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/delegation-readonly-secret-scan.json`
   - `codex-diff-check`
+- Opened PR #2811:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2811
 
 ## 2026-06-21T20:15Z PR #2810 Gate Status
 

@@ -129,7 +129,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
 
     await expect(page.getByRole("link", { name: "Etherscan" })).toHaveAttribute(
       "href",
-      /etherscan\.io\/address\//
+      /^https:\/\/(?:sepolia\.)?etherscan\.io\/address\/0x[a-fA-F0-9]{40}$/
     );
     await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
       "href",

@@ -415,8 +415,8 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
   review threads. GitHub branch protection still reports `REVIEW_REQUIRED`;
   an attempted approval from the PR author account was correctly rejected as
   self-approval, so the PR is waiting on independent review before merge/deploy.
-- Active branch `codex/e2e-delegation-readonly` adds the next read-only pack
-  plus a Wallet Checker query-load fix discovered by that pack.
+- PR #2811 (`codex/e2e-delegation-readonly`) adds the next read-only pack plus
+  a Wallet Checker query-load fix discovered by that pack.
 - Deployment train policy remains: merge only after Codex, reviewbots, and CI
   stop adding material value; deploy staging first, validate exact merged SHA,
   then production from current `origin/main` with release evidence.
@@ -425,7 +425,7 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 1. Get independent approval on PR #2810, then merge and deploy through staging
    and production with media-readonly validation.
-2. Commit, push, and open the delegation read-only PR; iterate reviewbots/CI.
+2. Iterate PR #2811 reviewbots/CI and fix valid findings.
 3. Use subagent route-cluster findings to implement the next PRs:
    NextGen/groups/tools, network/open-data/API/auth-adjacent read-only, then
    broader static route coverage.
