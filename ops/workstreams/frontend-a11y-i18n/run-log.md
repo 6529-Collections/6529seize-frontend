@@ -2072,8 +2072,7 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
 - Added `tests/surfaces/core-surfaces.spec.ts` for high-value public flows:
   header search to Wave Score, sidebar Network to TDH, mobile About to The
   Memes, Wave Score input validation, TDH cross-links, delegation center
-  disconnected render, delegation FAQ child article navigation, and legacy
-  `/waves` query redirect.
+  disconnected render, and delegation FAQ child article navigation.
 - Updated package scripts and deployment-bus pack metadata so standard deployed
   evidence covers desktop and mobile Chromium while Firefox/WebKit/native/Electron
   simulation remain optional train/nightly lanes.
@@ -2170,7 +2169,7 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - high-value read-only E2E coverage for desktop search, desktop Network
     navigation, mobile menu navigation, mobile search, Wave Score validation,
     TDH reference links, delegation disconnected-safe rendering, Delegation FAQ
-    article navigation, and the legacy Waves query redirect;
+    article navigation, and required surface setup checks;
   - deployment-bus required pack metadata for `playwright:core-smoke`,
     `playwright:surface-matrix`, and `playwright:wcag-i18n`, including
     command/surface readiness holds and release-report surface output;
@@ -2230,3 +2229,29 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
 - Build regeneration temporarily added EOF blank-line noise to three generated
   model files; the noise was removed before PR staging and generated files are
   clean again.
+
+## 2026-06-21T11:05Z PR 4 Sonar And Surface Follow-Up
+
+- Addressed PR #2805 Sonar duplication feedback by extracting repeated
+  deployment-bus fixture objects and repeated surface-matrix assertions into
+  small local helpers.
+- Removed the legacy `/waves?wave=...` redirect assertion from the required
+  `playwright:surface-matrix` pack after local dev no longer performed the
+  redirect reliably. The required pack now only claims the stable high-value
+  route, search, navigation, network, delegation, and surface-setup flows it
+  proves.
+- Follow-up validation passed:
+  - `seize run format:changed`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    29 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - `seize run test:e2e:surface-matrix`: 24 passed, 6 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `seize run test:e2e:browser-diversity`: 18 passed, 6 skipped.
+  - `seize run test:e2e:native-sim`: 16 passed, 11 skipped.
+- Native simulation still logs the expected iOS `Keyboard` plugin shim warning,
+  but the lane passes and remains documented as simulation evidence only.

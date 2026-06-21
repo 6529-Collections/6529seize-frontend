@@ -550,8 +550,7 @@ Current implementation note:
   `playwright:wcag-i18n`.
 - `tests/surfaces/core-surfaces.spec.ts` covers public route/navigation flows
   for header search, sidebar navigation, mobile menu navigation, Wave Score,
-  TDH, delegation center, delegation FAQ, and legacy `/waves` redirect
-  behavior.
+  TDH, delegation center, and delegation FAQ.
 - Capacitor and Electron projects are explicitly named as simulations and are
   available through `test:e2e:native-sim`; they must not be used as real native
   or real Electron evidence.

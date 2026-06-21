@@ -20,54 +20,56 @@ const STAGING_SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const MAIN_SHA = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 const ARTIFACT_SHA256 =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+const REQUIRED_WEB_SURFACES = ["web:desktop-chromium", "web:mobile-chromium"];
+
+function releaseArtifact(uri, metadata) {
+  return {
+    uri,
+    redaction_status: "verified-redacted",
+    retention_days: 90,
+    ...metadata,
+  };
+}
+
+function releasePackCheck({ pack, command, artifact }) {
+  return {
+    pack,
+    status: "passed",
+    command,
+    surfaces: [...REQUIRED_WEB_SURFACES],
+    artifacts: [artifact],
+  };
+}
 
 function releaseReadyValidationChecks() {
   return [
-    {
+    releasePackCheck({
       pack: "playwright:core-smoke",
-      status: "passed",
       command:
         "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix",
-      surfaces: ["web:desktop-chromium", "web:mobile-chromium"],
-      artifacts: [
-        {
-          uri: "s3://6529-artifacts/frontend/release/core-smoke.json",
-          redaction_status: "verified-redacted",
-          sha256: ARTIFACT_SHA256,
-          retention_days: 90,
-        },
-      ],
-    },
-    {
+      artifact: releaseArtifact(
+        "s3://6529-artifacts/frontend/release/core-smoke.json",
+        { sha256: ARTIFACT_SHA256 }
+      ),
+    }),
+    releasePackCheck({
       pack: "playwright:surface-matrix",
-      status: "passed",
       command:
         "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix",
-      surfaces: ["web:desktop-chromium", "web:mobile-chromium"],
-      artifacts: [
-        {
-          uri: "s3://6529-artifacts/frontend/release/surface-matrix.json",
-          redaction_status: "verified-redacted",
-          sha256: ARTIFACT_SHA256,
-          retention_days: 90,
-        },
-      ],
-    },
-    {
+      artifact: releaseArtifact(
+        "s3://6529-artifacts/frontend/release/surface-matrix.json",
+        { sha256: ARTIFACT_SHA256 }
+      ),
+    }),
+    releasePackCheck({
       pack: "playwright:wcag-i18n",
-      status: "passed",
       command:
         "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
-      surfaces: ["web:desktop-chromium", "web:mobile-chromium"],
-      artifacts: [
-        {
-          uri: "https://artifacts.6529.io/frontend/release/wcag-i18n.json",
-          redaction_status: "verified-redacted",
-          etag: "9b2cf535f27731c974343645a3985328",
-          retention_days: 90,
-        },
-      ],
-    },
+      artifact: releaseArtifact(
+        "https://artifacts.6529.io/frontend/release/wcag-i18n.json",
+        { etag: "9b2cf535f27731c974343645a3985328" }
+      ),
+    }),
   ];
 }
 

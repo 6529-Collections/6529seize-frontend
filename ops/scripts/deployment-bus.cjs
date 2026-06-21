@@ -31,7 +31,7 @@ const VALIDATION_PACKS = Object.freeze({
     id: "playwright:surface-matrix",
     size: "large",
     description:
-      "Read-only route, navigation, search, network, delegation, and legacy redirect surface matrix.",
+      "Read-only route, navigation, search, network, and delegation surface matrix.",
     environments: Object.freeze(["staging", "production"]),
     surfaces: Object.freeze(["web:desktop-chromium", "web:mobile-chromium"]),
     commands: Object.freeze({

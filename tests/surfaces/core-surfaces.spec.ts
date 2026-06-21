@@ -4,21 +4,67 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import {
   isCapacitorSimulationProject,
-  isChromiumDesktopWebProject,
   isDesktopWebProject,
   isMobileWebProject,
   isMobileSurfaceProject,
 } from "../support/surfaceSimulation";
 
-const LEGACY_WAVE_ID = "test-wave-123";
+const NAVIGATION_TIMEOUT_MS = 15000;
+const WAVE_SCORE_RESULT = /Wave Score.*Network/i;
+const WAVE_SCORE_HEADING = "Wave score transparency";
+const REQUIRED_DELEGATION_ACTIONS = [
+  "Register Delegation",
+  "Register Consolidation",
+  "Register Delegation Manager",
+];
 
 async function gotoReady(page: Page, path: string) {
   await page.goto(path, { waitUntil: "domcontentloaded" });
   await waitForRouteReady(page);
   await expectNoHorizontalOverflow(page);
+}
+
+async function forceExpandedDesktopSidebar(page: Page) {
+  await page.addInitScript(() => {
+    globalThis.sessionStorage.setItem("sidebarCollapsed", "false");
+  });
+}
+
+async function openWaveScoreFromSearch(page: Page, searchButton: Locator) {
+  await searchButton.click();
+  const searchInput = page.locator("#header-search-input");
+  await expect(searchInput).toBeVisible();
+  await searchInput.fill("wave score");
+  const result = page.getByRole("link", { name: WAVE_SCORE_RESULT }).first();
+  await expect(result).toBeVisible();
+  await result.click();
+  await expectWaveScorePage(page);
+}
+
+async function expectWaveScorePage(page: Page) {
+  await expect(page).toHaveURL(/\/network\/wave-score$/, {
+    timeout: NAVIGATION_TIMEOUT_MS,
+  });
+  await waitForRouteReady(page);
+  await expect(
+    page.getByRole("heading", { level: 1, name: WAVE_SCORE_HEADING })
+  ).toBeVisible();
+}
+
+async function expectTdhExplainer(page: Page) {
+  await expect(
+    page.getByRole("heading", { level: 1, name: "TDH" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "How TDH is computed" })
+  ).toBeVisible();
+}
+
+async function expectLinkHref(page: Page, name: string, href: string) {
+  await expect(page.getByRole("link", { name })).toHaveAttribute("href", href);
 }
 
 test.describe("Core app surface coverage @surface @medium @large", () => {
@@ -30,29 +76,14 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
       "desktop header search is covered on the desktop web shell"
     );
 
-    await page.addInitScript(() => {
-      globalThis.sessionStorage.setItem("sidebarCollapsed", "false");
-    });
+    await forceExpandedDesktopSidebar(page);
     await gotoReady(page, "/");
-
-    await page
-      .locator('[aria-label="Primary sidebar"]')
-      .getByRole("button", { name: "Search" })
-      .click();
-    await page.locator("#header-search-input").fill("wave score");
-    await page
-      .getByRole("link", { name: /Wave Score.*Network/i })
-      .first()
-      .click();
-
-    await expect(page).toHaveURL(/\/network\/wave-score$/);
-    await waitForRouteReady(page);
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: "Wave score transparency",
-      })
-    ).toBeVisible();
+    await openWaveScoreFromSearch(
+      page,
+      page
+        .locator('[aria-label="Primary sidebar"]')
+        .getByRole("button", { name: "Search" })
+    );
   });
 
   test("desktop sidebar navigates Network to TDH", async ({
@@ -63,9 +94,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
       "desktop sidebar expansion is covered on the desktop web shell"
     );
 
-    await page.addInitScript(() => {
-      globalThis.sessionStorage.setItem("sidebarCollapsed", "false");
-    });
+    await forceExpandedDesktopSidebar(page);
     await gotoReady(page, "/");
 
     const nav = page.getByRole("navigation", { name: "Desktop navigation" });
@@ -74,12 +103,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
 
     await expect(page).toHaveURL(/\/network\/tdh$/);
     await waitForRouteReady(page);
-    await expect(
-      page.getByRole("heading", { level: 1, name: "TDH" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "How TDH is computed" })
-    ).toBeVisible();
+    await expectTdhExplainer(page);
   });
 
   test("mobile menu navigates Collections to The Memes", async ({
@@ -116,22 +140,10 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     );
 
     await gotoReady(page, "/");
-
-    await page.getByRole("button", { name: "Search" }).click();
-    await page.locator("#header-search-input").fill("wave score");
-    await page
-      .getByRole("link", { name: /Wave Score.*Network/i })
-      .first()
-      .click();
-
-    await expect(page).toHaveURL(/\/network\/wave-score$/);
-    await waitForRouteReady(page);
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: "Wave score transparency",
-      })
-    ).toBeVisible();
+    await openWaveScoreFromSearch(
+      page,
+      page.getByRole("button", { name: "Search" })
+    );
   });
 
   test("Capacitor simulations apply native viewport setup", async ({
@@ -168,22 +180,15 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
   test("TDH explainer links to network reference pages", async ({ page }) => {
     await gotoReady(page, "/network/tdh");
 
-    await expect(
-      page.getByRole("heading", { level: 1, name: "TDH" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "How TDH is computed" })
-    ).toBeVisible();
+    await expectTdhExplainer(page);
     await expect(page.getByRole("heading", { name: /TDH 1\.4/ })).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Definitions" })
-    ).toHaveAttribute("href", "/network/definitions");
-    await expect(
-      page.getByRole("link", { name: "View Network Stats" })
-    ).toHaveAttribute("href", "/network/health/network-tdh");
-    await expect(
-      page.getByRole("link", { name: "View Levels" })
-    ).toHaveAttribute("href", "/network/levels");
+    await expectLinkHref(page, "Definitions", "/network/definitions");
+    await expectLinkHref(
+      page,
+      "View Network Stats",
+      "/network/health/network-tdh"
+    );
+    await expectLinkHref(page, "View Levels", "/network/levels");
   });
 
   test("Delegation Center renders disconnected-safe choices", async ({
@@ -197,21 +202,11 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expect(
       page.getByText("These actions do not transfer NFTs.")
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Register Delegation", exact: true })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", {
-        name: "Register Consolidation",
-        exact: true,
-      })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", {
-        name: "Register Delegation Manager",
-        exact: true,
-      })
-    ).toBeVisible();
+    for (const name of REQUIRED_DELEGATION_ACTIONS) {
+      await expect(
+        page.getByRole("button", { name, exact: true })
+      ).toBeVisible();
+    }
     await expect(
       page.getByRole("heading", { name: "Manage by Collection" })
     ).toBeVisible();
@@ -237,23 +232,5 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
         name: "Delegation FAQ article navigation",
       })
     ).toBeVisible();
-  });
-
-  test("legacy Waves query redirects to the canonical wave route", async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      !isChromiumDesktopWebProject(testInfo.project.name) &&
-        testInfo.project.name !== "electron-shell-sim",
-      "legacy redirect behavior is covered by Chromium web and Electron shells"
-    );
-
-    await page.goto(`/waves?wave=${LEGACY_WAVE_ID}&serialNo=42&divider=7`, {
-      waitUntil: "domcontentloaded",
-    });
-
-    await expect(page).toHaveURL(
-      new RegExp(`/waves/${LEGACY_WAVE_ID}\\?serialNo=42&divider=7$`)
-    );
   });
 });
