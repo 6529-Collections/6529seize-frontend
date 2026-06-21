@@ -2416,3 +2416,68 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
 - Next PRs should keep expanding read-only coverage by user journey, not by
   shallow route count: media/mint/detail first, then delegation,
   NextGen/groups/tools, then broad network/open-data/static route matrices.
+
+## 2026-06-21T18:18Z Media/Mint/Detail E2E Pack Ready
+
+- PR #2809 Waves/Profile read-only E2E was merged and deployed:
+  - merge SHA / production version:
+    `f82890f24a4ef7643f143dca5791ad0c50e010f3`
+  - staging run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27911257533
+  - production run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27911610405
+- Started branch `codex/e2e-media-mint-detail` from production `origin/main`
+  `f82890f24a4ef7643f143dca5791ad0c50e010f3`.
+- Implemented the next richer read-only app pack:
+  - `tests/media/media-mint-detail-readonly.spec.ts` covers The Memes card
+    detail, The Memes activity focus with locale-preserving links, The Memes
+    mint page, Meme Lab activity focus, and production-only ReMemes detail
+    tabs/links.
+  - `package.json` adds local, staging, and production media-readonly scripts.
+  - `tests/README.md` records pack ownership and the production-only ReMemes
+    fixture limitation.
+- Independent verifier feedback before PR publication:
+  - confirmed the work was not yet committed, so the future PR would currently
+    contain none of the media-pack changes;
+  - flagged Meme Lab activity row assertions as potentially local-data
+    sensitive, so row-count checks now run only off local base URLs;
+  - flagged README overclaiming for local ReMemes coverage, so docs now state
+    exact ReMemes detail assertions are production-only until local/staging
+    have a stable matching fixture.
+- Staging validation initially found the ReMemes production fixture falls back
+  to the collection route on staging (`Rememes | Collections`). The spec now
+  skips that exact fixture on local and staging but keeps it enforced in the
+  production pack.
+- Local validation passed after clearing a stale ignored `.next` dev cache that
+  served dynamic media routes as the 404 shell:
+  - `seize run test:e2e:media-readonly`: 8 passed, 2 expected skips.
+  - `seize run test:e2e:staging:media-readonly`: 8 passed, 2 expected skips.
+  - `seize run test:e2e:production:media-readonly`: 5 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage --findRelatedTests tests/media/media-mint-detail-readonly.spec.ts --passWithNoTests`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/media-readonly-secret-scan.json`: clean.
+  - `codex-diff-check`
+- Next focused E2E slices remain: delegation first, then NextGen/groups/tools,
+  then broad network/open-data/static route matrices, followed by API-backed or
+  authenticated read-only flows, upload/posting/admin guards, and real
+  native/Electron smoke.
+
+## 2026-06-21T20:58Z Media Sonar Follow-Up
+
+- Investigated PR #2810's passed Sonar gate that still reported one new
+  maintainability issue.
+- Fixed the remaining minor regex smell in
+  `tests/media/media-mint-detail-readonly.spec.ts` by using `\d` instead of
+  `[0-9]` in the mint-page title assertion.
+- Local validation for the follow-up passed:
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: no changed app TypeScript files in the
+    typecheck project.
+  - After stopping a stale local Next dev process on the worktree's assigned
+    port and clearing ignored `.next`, explicit assigned-port rerun:
+    `seize run test:e2e:media-readonly`: 8 passed, 2 expected production-only
+    skips.
+  - `codex-diff-check`
