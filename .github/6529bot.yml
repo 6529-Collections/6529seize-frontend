@@ -3,7 +3,7 @@ enabled: true
 
 reviewKinds:
   allowed: [general, followup, wcag, i18n, security, glm-swarm, responsiveness]
-  initial: [general, wcag, i18n, security, responsiveness]
+  initial: [general, wcag, i18n, security, responsiveness, glm-swarm]
   followup: [followup]
 
 commands:
@@ -14,7 +14,7 @@ lanes:
     model: claude-opus-4-8
 
 limits:
-  maxJobsPerDelivery: 5
+  maxJobsPerDelivery: 6
 
 admission:
   publicRepoMode: trusted
