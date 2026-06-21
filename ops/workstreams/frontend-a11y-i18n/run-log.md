@@ -2052,6 +2052,31 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
     generation. Nonfatal build warnings observed: known dynamic OG metadata
     image route warning and Node `punycode` deprecation warning.
 
+## 2026-06-21T10:25Z PR 4 Surface Matrix Start
+
+- Restarted the next autonomous testing-roadmap train from a clean
+  `codex/testing-e2e-surface-matrix` worktree based on merged PR #2804 /
+  current `origin/main`.
+- Confirmed another local checkout is on an unrelated dirty branch and left it
+  untouched.
+- Added named Playwright projects for:
+  - `web-desktop-chromium`
+  - `web-mobile-chromium`
+  - `web-desktop-firefox`
+  - `web-desktop-webkit`
+  - `capacitor-ios-sim`
+  - `capacitor-android-sim`
+  - `electron-shell-sim`
+- Added shared Playwright surface simulation setup for Capacitor custom
+  platforms, Electron user-agent simulation, and surface labels.
+- Added `tests/surfaces/core-surfaces.spec.ts` for high-value public flows:
+  header search to Wave Score, sidebar Network to TDH, mobile About to The
+  Memes, Wave Score input validation, TDH cross-links, delegation center
+  disconnected render, and delegation FAQ child article navigation.
+- Updated package scripts and deployment-bus pack metadata so standard deployed
+  evidence covers desktop and mobile Chromium while Firefox/WebKit/native/Electron
+  simulation remain optional train/nightly lanes.
+
 ## 2026-06-21T09:10Z PR 5 Sonar Follow-Up
 
 - Addressed SonarCloud maintainability feedback on PR #2804 before continuing
@@ -2131,3 +2156,151 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
     dev compile served `/tools/6529bot/admin` as the 404 shell;
   - `$env:PORT='3162'; $env:PORT_SEARCH_LIMIT='10'; $env:BASE_ENDPOINT='http://localhost:3162'; $env:PLAYWRIGHT_BASE_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run test:e2e:critical-shell`:
     7 passed.
+
+## 2026-06-21T09:42Z PR 4 Surface Matrix Validation Complete
+
+- Completed the local PR4 surface-matrix branch
+  `codex/testing-e2e-surface-matrix` from current `origin/main`.
+- Final implementation scope:
+  - named Playwright projects for desktop Chromium, mobile Chromium, Firefox,
+    WebKit, Capacitor iOS/Android simulation, and Electron shell simulation;
+  - shared surface simulation setup for Capacitor custom platform labels, iOS
+    EULA consent seeding, Electron/mobile surface labels, and project helpers;
+  - high-value read-only E2E coverage for desktop search, desktop Network
+    navigation, mobile menu navigation, mobile search, Wave Score validation,
+    TDH reference links, delegation disconnected-safe rendering, Delegation FAQ
+    article navigation, and required surface setup checks;
+  - deployment-bus required pack metadata for `playwright:core-smoke`,
+    `playwright:surface-matrix`, and `playwright:wcag-i18n`, including
+    command/surface readiness holds and release-report surface output;
+  - package scripts and docs for smoke, surface-matrix, browser-diversity,
+    WCAG/i18n surface, staging, and native/Electron simulation lanes.
+- Local validation passed:
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run typecheck:playwright`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    29 passed.
+  - `seize run test:e2e:surface-matrix`: 25 passed, 7 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `seize run test:e2e:browser-diversity`: 18 passed, 8 skipped.
+  - `seize run test:e2e:native-sim`: 17 passed, 13 skipped.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+    origin/main --output test-results/app-pr-ci/pr4-secret-scan.json`: clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from
+    origin/main --output
+    test-results/app-pr-ci/pr4-workflow-security.json`: clean.
+  - `codex-diff-check`
+- Browser diversity validation required installing local Playwright Firefox and
+  WebKit browsers before the final pass.
+- Residual caveat for PR description: Capacitor and Electron lanes are explicit
+  browser simulations for shell-sensitive layout and route checks. They are not
+  a substitute for real packaged native/Electron app smoke once that runner
+  exists.
+
+## 2026-06-21T10:09Z PR 4 Verifier Follow-Up
+
+- Reused independent verifier lane `Feynman` for a read-only final diff review.
+- Fixed all material verifier findings before PR publication:
+  - staging and production deployment workflows now include
+    `playwright:surface-matrix` in the explicit `--required-packs` manifest
+    creation list;
+  - Playwright's default local web-server command now uses the repo-owned
+    `require-6529-command` plus `dev-with-fallback` path instead of the local
+    Codex `seize` helper;
+  - `deployment-bus-process.md` now matches the desktop/mobile Chromium
+    required-pack state and keeps Firefox/WebKit/Capacitor/Electron simulation
+    as optional train/nightly or targeted validation.
+- Updated the profile native CMS checklist command from the old Playwright
+  `chromium` project name to `web-desktop-chromium`.
+- Post-fix validation:
+  - workflow YAML parse for app PR CI, staging deploy, and production deploy
+    workflows passed.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from
+    origin/main --output
+    test-results/app-pr-ci/pr4-workflow-security.json`: clean.
+  - `seize run test:e2e:surface-matrix`: 25 passed, 7 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed after deleting a
+    stale ignored `.next` cache that had a corrupt dev `routes.d.ts`; known
+    warnings were Node `punycode` deprecation and the existing dynamic OG image
+    metadata route warning.
+  - `codex-diff-check`
+- Build regeneration temporarily added EOF blank-line noise to three generated
+  model files; the noise was removed before PR staging and generated files are
+  clean again.
+
+## 2026-06-21T11:05Z PR 4 Sonar And Surface Follow-Up
+
+- Addressed PR #2805 Sonar duplication feedback by extracting repeated
+  deployment-bus fixture objects and repeated surface-matrix assertions into
+  small local helpers.
+- Removed the legacy `/waves?wave=...` redirect assertion from the required
+  `playwright:surface-matrix` pack after local dev no longer performed the
+  redirect reliably. The required pack now only claims the stable high-value
+  route, search, navigation, network, delegation, and surface-setup flows it
+  proves.
+- Accepted CodeRabbit's low-risk wording nit for the staging E2E script docs in
+  `tests/README.md`.
+- After Sonar reported remaining duplication at 3.5%, refactored
+  `ops/scripts/deployment-bus.cjs` again to use shared Playwright pack builders
+  and a non-duplicated CLI argument parser shape.
+- Follow-up validation passed:
+  - `seize run format:changed`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    29 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - `seize run test:e2e:surface-matrix`: 24 passed, 6 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `seize run test:e2e:browser-diversity`: 18 passed, 6 skipped.
+  - `seize run test:e2e:native-sim`: 16 passed, 11 skipped.
+- Native simulation still logs the expected iOS `Keyboard` plugin shim warning,
+  but the lane passes and remains documented as simulation evidence only.
+
+## 2026-06-21T13:12Z PR 4 Rebase On Critical-Shell Main
+
+- Rebased PR #2805 branch `codex/testing-e2e-surface-matrix` onto
+  `origin/main` after PR #2806 merged as
+  `745130a19785fdc844410a2798ba63a6db8256e8`.
+- Preserved both PR4 surface-matrix scripts and the merged critical-shell
+  script. `test:e2e:critical-shell` is explicitly scoped to
+  `--project=web-desktop-chromium` so the new Playwright project matrix does
+  not fan the critical-shell lane out unexpectedly.
+- Independent verifier `Galileo` found no local rebased-diff blocker; it
+  confirmed the GitHub PR branch was stale and caught the local generated EOF
+  drift left by a build attempt.
+- Independent roadmap auditor `Fermat` confirmed the next incomplete roadmap
+  work after PR4 is PR7 canary/watch/reporting, API-backed read-only E2E,
+  authenticated read-only E2E, profile/page-cluster E2E, real native/Electron
+  smoke, native runtime centralization, and upload/posting/admin guard packs.
+- Rebased local validation passed:
+  - `seize run format:changed`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    29 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run test:e2e:surface-matrix`: 24 passed, 6 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `seize run test:e2e:browser-diversity`: 18 passed, 6 skipped.
+  - `seize run test:e2e:native-sim`: 16 passed, 11 skipped.
+  - `seize run testing-strategy -- validate-workflow-security --output
+    test-results/app-pr-ci/pr4-workflow-security-rebased.json`: clean.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+    origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
+    clean.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed after clearing stale
+    ignored `.next` dev type cache. The first build attempt failed on a corrupt
+    `.next/dev/types/routes.d.ts`, and the clean-cache rerun passed. Known
+    non-fatal output remains the Node `punycode` deprecation and existing
+    dynamic OG image metadata route warning.
+  - `codex-diff-check`
+- Build regeneration again added EOF blank-line noise to three generated model
+  files; those generated files were restored and the worktree is clean before
+  the PR branch push.

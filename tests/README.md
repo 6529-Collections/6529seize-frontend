@@ -60,3 +60,44 @@ WCAG and i18n route evidence:
   and future expiry. Expired or broad entries fail before the scan runs.
 - Locale stress tests should wait for route-specific hydrated content before
   checking axe, keyboard focus, overflow, or locale-preserving links.
+
+Surface matrix:
+
+- `web-desktop-chromium` is the baseline desktop web project.
+- `web-mobile-chromium` is the baseline mobile web project.
+- `test:e2e` keeps the historical default behavior and runs the full test set
+  on `web-desktop-chromium` only.
+- `test:e2e:all-projects` intentionally fans out across every configured
+  project and should be reserved for train/nightly or targeted compatibility
+  runs.
+- `test:e2e:smoke:surface-matrix` runs the deployed smoke pack on both
+  baseline web projects.
+- `test:e2e:surface-matrix` runs the core public route/navigation pack on both
+  baseline web projects.
+- `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
+- `test:e2e:staging` runs the broader surface matrix against the same
+  environment.
+- `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
+  projects for train, nightly, or targeted compatibility checks.
+- `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
+  browser simulations only. They may catch responsive/runtime branching issues,
+  but they are not evidence that the real native or desktop shells were tested.
+- The iOS Capacitor simulation seeds the app's existing EULA consent cookie so
+  route-level smoke tests exercise the page shell instead of the legal modal.
+
+Large-pack ownership:
+
+- `test:e2e`, `test:e2e:smoke`, and targeted single-route specs are ordinary
+  PR-owner checks.
+- `test:e2e:surface-matrix` is owned by the PR owner for user-facing route,
+  navigation, shell, WCAG, i18n, deployment, or routing changes. Keep it
+  read-only and stable enough for staging and production validation.
+- `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
+  owner should run it when changing browser-sensitive rendering, media,
+  focus/keyboard behavior, or CSS layout primitives.
+- `test:e2e:native-sim` is a native-adjacent smoke pack. A PR owner should run
+  it when changing native runtime detection, deep links, wallet/native shell
+  branching, or viewport assumptions.
+- Large-pack failures belong to the PR or train owner until they are diagnosed
+  as unrelated infrastructure. Do not quarantine, skip, or downgrade a failing
+  large pack without recording the reason in the PR or release report.

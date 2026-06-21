@@ -10,44 +10,44 @@ const SHA256_RE = /^[0-9a-f]{64}$/i;
 const ETAG_RE = /^"?[0-9a-f]{32}(?:-\d+)?"?$/i;
 const CID_RE = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{20,})$/;
 const VALID_ENVIRONMENTS = new Set(["staging", "production"]);
+const DEPLOYED_ENVIRONMENTS = Object.freeze(["staging", "production"]);
+const REQUIRED_WEB_SURFACES = Object.freeze([
+  "web:desktop-chromium",
+  "web:mobile-chromium",
+]);
+const PLAYWRIGHT_ARTIFACT_PATTERNS = Object.freeze([
+  "test-results/playwright/**",
+  "playwright-report/**",
+]);
 const VALIDATION_PACKS = Object.freeze({
-  "playwright:core-smoke": Object.freeze({
+  "playwright:core-smoke": createPlaywrightPack({
     id: "playwright:core-smoke",
-    size: "large",
     description: "Read-only core route smoke pack for deployed web health.",
-    environments: Object.freeze(["staging", "production"]),
-    surfaces: Object.freeze(["web:desktop-chromium"]),
-    commands: Object.freeze({
-      staging: "seize run test:e2e:staging",
-      production:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke",
-    }),
-    artifacts: Object.freeze([
-      "test-results/playwright/**",
-      "playwright-report/**",
-    ]),
+    stagingCommand: "seize run test:e2e:staging:smoke",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix",
   }),
-  "playwright:wcag-i18n": Object.freeze({
+  "playwright:surface-matrix": createPlaywrightPack({
+    id: "playwright:surface-matrix",
+    description:
+      "Read-only route, navigation, search, network, and delegation surface matrix.",
+    stagingCommand: "seize run test:e2e:staging",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix",
+  }),
+  "playwright:wcag-i18n": createPlaywrightPack({
     id: "playwright:wcag-i18n",
-    size: "large",
     description:
       "Read-only WCAG/i18n route evidence pack for deployed public routes.",
-    environments: Object.freeze(["staging", "production"]),
-    surfaces: Object.freeze(["web:desktop-chromium"]),
-    commands: Object.freeze({
-      staging:
-        "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n",
-      production:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n",
-    }),
-    artifacts: Object.freeze([
-      "test-results/playwright/**",
-      "playwright-report/**",
-    ]),
+    stagingCommand:
+      "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
   }),
 });
 const DEFAULT_REQUIRED_PACKS = Object.freeze([
   "playwright:core-smoke",
+  "playwright:surface-matrix",
   "playwright:wcag-i18n",
 ]);
 const APPROVED_DURABLE_ARTIFACT_PREFIXES = Object.freeze([
@@ -108,13 +108,35 @@ const GITHUB_DEPLOYMENT_STATES = new Set([
   "success",
 ]);
 
+function createPlaywrightPack({
+  id,
+  description,
+  stagingCommand,
+  productionCommand,
+}) {
+  return Object.freeze({
+    id,
+    size: "large",
+    description,
+    environments: DEPLOYED_ENVIRONMENTS,
+    surfaces: REQUIRED_WEB_SURFACES,
+    commands: Object.freeze({
+      staging: stagingCommand,
+      production: productionCommand,
+    }),
+    artifacts: PLAYWRIGHT_ARTIFACT_PATTERNS,
+  });
+}
+
 function parseArgs(argv) {
   const args = { _: [] };
+  let index = 0;
 
-  for (let i = 0; i < argv.length; i += 1) {
-    const token = argv[i];
+  while (index < argv.length) {
+    const token = argv[index];
     if (!token.startsWith("--")) {
       args._.push(token);
+      index += 1;
       continue;
     }
 
@@ -122,17 +144,19 @@ function parseArgs(argv) {
     const eqIndex = rawKey.indexOf("=");
     if (eqIndex !== -1) {
       args[rawKey.slice(0, eqIndex)] = rawKey.slice(eqIndex + 1);
+      index += 1;
       continue;
     }
 
-    const next = argv[i + 1];
-    if (!next || next.startsWith("--")) {
+    const nextToken = argv[index + 1];
+    if (!nextToken || nextToken.startsWith("--")) {
       args[rawKey] = true;
+      index += 1;
       continue;
     }
 
-    args[rawKey] = next;
-    i += 1;
+    args[rawKey] = nextToken;
+    index += 2;
   }
 
   return args;
@@ -402,6 +426,20 @@ function buildManifest(options, env = process.env) {
             "A production-eligible terminal manifest lacks approved durable artifact pointers.",
           recovery:
             "Upload redacted evidence to approved storage and record the URI, hash/CID/ETag, retention, and redaction status.",
+        },
+        {
+          id: "required-pack-command-mismatch",
+          hold_when:
+            "A standard required validation pack's latest passing check does not record the expected pack-plan command.",
+          recovery:
+            "Rerun the standard command or record a release-captain exception outside the standard pack.",
+        },
+        {
+          id: "required-pack-surface-evidence-missing",
+          hold_when:
+            "A standard required validation pack's latest passing check does not list all required pack-plan surfaces.",
+          recovery:
+            "Rerun the full pack or record all covered surfaces before promotion.",
         },
         {
           id: "candidate-sha-mismatch",
@@ -1053,6 +1091,27 @@ function latestCheckForPack(checks, packId) {
   return latest;
 }
 
+function expectedCommandForStandardPack(manifest, packId) {
+  const pack = VALIDATION_PACKS[packId];
+  if (!pack) {
+    return null;
+  }
+  return pack.commands[manifest.environment] || null;
+}
+
+function missingStandardPackSurfaces(packId, check) {
+  const expectedSurfaces = VALIDATION_PACKS[packId]?.surfaces;
+  if (!expectedSurfaces || expectedSurfaces.length === 0) {
+    return [];
+  }
+
+  const recordedSurfaces = Array.isArray(check?.surfaces)
+    ? new Set(check.surfaces)
+    : new Set();
+
+  return [...expectedSurfaces].filter((surface) => !recordedSurfaces.has(surface));
+}
+
 function evaluateReleaseReadiness(manifest) {
   const holds = [];
   const warnings = [];
@@ -1077,6 +1136,24 @@ function evaluateReleaseReadiness(manifest) {
         id: "required-pack-missing-terminal-evidence",
         pack: packId,
         message: `${packId} has no passed validation check recorded`,
+      });
+    } else if (
+      expectedCommandForStandardPack(manifest, packId) &&
+      latestCheck?.command !== expectedCommandForStandardPack(manifest, packId)
+    ) {
+      holds.push({
+        id: "required-pack-command-mismatch",
+        pack: packId,
+        message: `${packId} latest passing check did not record the expected command`,
+      });
+    } else if (missingStandardPackSurfaces(packId, latestCheck).length > 0) {
+      holds.push({
+        id: "required-pack-surface-evidence-missing",
+        pack: packId,
+        message: `${packId} latest passing check is missing required surfaces: ${missingStandardPackSurfaces(
+          packId,
+          latestCheck
+        ).join(", ")}`,
       });
     } else if (
       validation.durable_artifacts?.required === true &&
@@ -1126,6 +1203,11 @@ function recordValidationCheck(manifest, options) {
     pack,
     status,
     command: options.command || packPlan.command,
+    surfaces: parseCsv(
+      options.surfaces ||
+        options.surface ||
+        (Array.isArray(packPlan.surfaces) ? packPlan.surfaces.join(",") : "")
+    ),
     owner:
       options.owner ||
       validation.core_smoke_owner ||
@@ -1226,6 +1308,10 @@ function formatRecordedChecks(manifest) {
       const command = check.command
         ? `\n  - command: \`${check.command}\``
         : "";
+      const surfaces =
+        Array.isArray(check.surfaces) && check.surfaces.length > 0
+          ? `\n  - surfaces: ${check.surfaces.join(", ")}`
+          : "";
       const artifacts = checkArtifacts(check)
         .map((artifact) => {
           const uri = formatArtifactUriForReport(artifactUri(artifact));
@@ -1255,7 +1341,7 @@ function formatRecordedChecks(manifest) {
       const artifactList = artifacts.map((uri) => `    - ${uri}`).join("\n");
       const artifactLines =
         artifacts.length > 0 ? `\n  - artifacts:\n${artifactList}` : "";
-      return `- ${pack}: ${status}${command}${artifactLines}`;
+      return `- ${pack}: ${status}${command}${surfaces}${artifactLines}`;
     })
     .join("\n");
 }
@@ -1603,7 +1689,7 @@ function usage() {
   node ops/scripts/deployment-bus.cjs create-manifest --environment staging --staging-deploy-sha <sha> --output <file>
   node ops/scripts/deployment-bus.cjs validate-manifest --file <file>
   node ops/scripts/deployment-bus.cjs summarize-manifest --file <file>
-  node ops/scripts/deployment-bus.cjs record-validation-check --file <file> --pack playwright:core-smoke --status passed --artifact-uri s3://6529-artifacts/... --redaction-status verified-redacted --artifact-sha256 <hex> --retention-days 90
+  node ops/scripts/deployment-bus.cjs record-validation-check --file <file> --pack playwright:core-smoke --status passed --surfaces web:desktop-chromium,web:mobile-chromium --artifact-uri s3://6529-artifacts/... --redaction-status verified-redacted --artifact-sha256 <hex> --retention-days 90
   node ops/scripts/deployment-bus.cjs release-report --file <file> --output <markdown-file>
   node ops/scripts/deployment-bus.cjs heartbeat-manifest --file <file> --message <text> [--status deploying] [--phase build]
   node ops/scripts/deployment-bus.cjs production-preflight --file <file> --current-main-sha <sha> [--remote origin] [--branch main]
@@ -1690,6 +1776,7 @@ async function main(argv = process.argv.slice(2), env = process.env) {
           pack: args.pack,
           status: args.status,
           command: args.command,
+          surfaces: args.surfaces || args.surface,
           owner: args.owner,
           artifactUri: args["artifact-uri"] || args["artifact-uris"],
           redactionStatus: args["redaction-status"],
