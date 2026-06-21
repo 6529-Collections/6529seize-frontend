@@ -2724,13 +2724,38 @@
         "meme calendar",
         "mint calendar",
         "upcoming mints",
-        "mint schedule"
+        "mint schedule",
+        "next drop",
+        "next mint",
+        "current mint",
+        "when is the next drop",
+        "drop time",
+        "meme card mint window",
+        "when does meme card mint",
+        "when did meme card mint",
+        "minting window"
       ],
-      "keywords": ["memes", "calendar", "mint", "schedule", "upcoming"],
+      "keywords": [
+        "memes",
+        "calendar",
+        "mint",
+        "schedule",
+        "upcoming",
+        "next",
+        "current",
+        "past",
+        "drop",
+        "window"
+      ],
       "facts": [
         "The meme calendar route lives at /meme-calendar.",
         "It is the canonical place for minting-calendar context.",
-        "The home page can also surface current or upcoming mint information."
+        "The home page can also surface current or upcoming mint information.",
+        "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
+        "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",
+        "Calendar API responses include the mint number, UTC mint date, UTC start and end timestamps, live/past/upcoming status, SZN, Year, Epoch, Period, Era, Eon, /meme-calendar, and /the-memes/{id} paths.",
+        "The bot can use the calendar API for exact next/current/past drop timing and overall mint-window answers.",
+        "Mint windows are schedule information only; wallet eligibility, allowlists, and actual mint success are still enforced by the mint flow."
       ],
       "canonical_path": "/meme-calendar",
       "related_paths": ["/the-memes", "/the-memes/mint"],
