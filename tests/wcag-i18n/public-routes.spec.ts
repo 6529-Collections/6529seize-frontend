@@ -8,6 +8,7 @@ import {
   waitForRouteReady,
   withLocale,
 } from "../testHelpers";
+import { isMobileSurfaceProject } from "../support/surfaceSimulation";
 
 const THE_MEMES_ROUTE = "/the-memes";
 const THE_MEMES_STRESS_ROUTE = `${withLocale(
@@ -20,11 +21,11 @@ const THE_MEMES_EMPTY_STATE_PATTERN = /Aucun meme/i;
 test.describe("WCAG and i18n public route evidence @wcag @i18n @medium @large", () => {
   test("The Memes route has no WCAG 2.2 A/AA axe violations @wcag @medium @large", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.goto(THE_MEMES_STRESS_ROUTE, { waitUntil: "domcontentloaded" });
     await waitForTheMemesRouteReady(page);
 
-    await expect(page.locator("h1", { hasText: "The Memes" })).toBeVisible();
+    await expectVisibleTheMemesTitle(page, testInfo.project.name);
     await expectAxeClean(page, { route: THE_MEMES_STRESS_ROUTE });
   });
 
@@ -92,4 +93,15 @@ async function waitForTheMemesRouteReady(page: Page) {
       }
     )
     .toMatch(/^(cards|empty)$/);
+}
+
+async function expectVisibleTheMemesTitle(page: Page, projectName: string) {
+  if (isMobileSurfaceProject(projectName)) {
+    await expect(
+      page.getByRole("button", { name: "Collection: The Memes" })
+    ).toBeVisible();
+    return;
+  }
+
+  await expect(page.locator("h1", { hasText: "The Memes" })).toBeVisible();
 }

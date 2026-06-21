@@ -7,6 +7,7 @@ import {
   attachPageDiagnosticsArtifact,
 } from "./support/pageAssertions";
 import { installReadonlyMutationGuard } from "./support/readonlyMutationGuard";
+import { installSurfaceSimulation } from "./support/surfaceSimulation";
 
 const STAGING_HOSTNAME = "staging.6529.io";
 const STAGING_ACCESS_CODE =
@@ -125,7 +126,8 @@ function shouldUnlockStaging(baseURL?: string) {
 }
 
 const test = base.extend({
-  context: async ({ context, baseURL }, runTest) => {
+  context: async ({ context, baseURL }, runTest, testInfo) => {
+    await installSurfaceSimulation(context, testInfo.project.name, baseURL);
     const guard = await installReadonlyMutationGuard(context, baseURL);
 
     await runTest(context);

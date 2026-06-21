@@ -27,7 +27,8 @@ function releaseReadyValidationChecks() {
       pack: "playwright:core-smoke",
       status: "passed",
       command:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke",
+        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix",
+      surfaces: ["web:desktop-chromium", "web:mobile-chromium"],
       artifacts: [
         {
           uri: "s3://6529-artifacts/frontend/release/core-smoke.json",
@@ -38,10 +39,26 @@ function releaseReadyValidationChecks() {
       ],
     },
     {
+      pack: "playwright:surface-matrix",
+      status: "passed",
+      command:
+        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix",
+      surfaces: ["web:desktop-chromium", "web:mobile-chromium"],
+      artifacts: [
+        {
+          uri: "s3://6529-artifacts/frontend/release/surface-matrix.json",
+          redaction_status: "verified-redacted",
+          sha256: ARTIFACT_SHA256,
+          retention_days: 90,
+        },
+      ],
+    },
+    {
       pack: "playwright:wcag-i18n",
       status: "passed",
       command:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n",
+        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
+      surfaces: ["web:desktop-chromium", "web:mobile-chromium"],
       artifacts: [
         {
           uri: "https://artifacts.6529.io/frontend/release/wcag-i18n.json",
@@ -82,12 +99,16 @@ describe("deployment bus manifest", () => {
     expect(manifest.validation.pack_plan).toEqual([
       expect.objectContaining({
         id: "playwright:core-smoke",
+        command: "seize run test:e2e:staging:smoke",
+      }),
+      expect.objectContaining({
+        id: "playwright:surface-matrix",
         command: "seize run test:e2e:staging",
       }),
       expect.objectContaining({
         id: "playwright:wcag-i18n",
         command:
-          "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n",
+          "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
       }),
     ]);
     expect(manifest.validation.durable_artifacts).toMatchObject({
@@ -108,12 +129,17 @@ describe("deployment bus manifest", () => {
       expect.objectContaining({
         id: "playwright:core-smoke",
         command:
-          "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke",
+          "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix",
+      }),
+      expect.objectContaining({
+        id: "playwright:surface-matrix",
+        command:
+          "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix",
       }),
       expect.objectContaining({
         id: "playwright:wcag-i18n",
         command:
-          "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n",
+          "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
       }),
     ]);
   });
@@ -394,6 +420,38 @@ describe("deployment bus manifest", () => {
     );
   });
 
+  it("holds release readiness when a standard pack records the wrong command", () => {
+    const checks = releaseReadyValidationChecks();
+    checks[0].command = "seize run test:e2e";
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      status: "released",
+      validationChecks: JSON.stringify(checks),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(validateManifest(manifest).errors).toContain(
+      "release_readiness.required-pack-command-mismatch: playwright:core-smoke latest passing check did not record the expected command"
+    );
+  });
+
+  it("holds release readiness when a standard pack is missing required surfaces", () => {
+    const checks = releaseReadyValidationChecks();
+    checks[1].surfaces = ["web:desktop-chromium"];
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      status: "released",
+      validationChecks: JSON.stringify(checks),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(validateManifest(manifest).errors).toContain(
+      "release_readiness.required-pack-surface-evidence-missing: playwright:surface-matrix latest passing check is missing required surfaces: web:mobile-chromium"
+    );
+  });
+
   it("uses recorded_at ordering for latest validation checks", () => {
     const checks = releaseReadyValidationChecks();
     const manifest = buildManifest({
@@ -421,28 +479,15 @@ describe("deployment bus manifest", () => {
   });
 
   it("requires release-grade durable artifacts on the latest passing check for each pack", () => {
+    const checks = releaseReadyValidationChecks();
+    checks[2].artifacts = [];
+
     const manifest = buildManifest({
       environment: "production",
       productionCandidateSha: MAIN_SHA,
       status: "released",
       validationChecks: JSON.stringify([
-        {
-          pack: "playwright:core-smoke",
-          status: "passed",
-          artifacts: [
-            {
-              uri: "s3://6529-artifacts/frontend/release/core-smoke.json",
-              redaction_status: "verified-redacted",
-              sha256: ARTIFACT_SHA256,
-              retention_days: 90,
-            },
-          ],
-        },
-        {
-          pack: "playwright:wcag-i18n",
-          status: "passed",
-          artifacts: [],
-        },
+        ...checks,
         {
           pack: "ad-hoc:notes",
           status: "passed",

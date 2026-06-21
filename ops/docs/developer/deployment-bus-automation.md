@@ -48,6 +48,7 @@ Validate and summarize:
   --file deployment-bus-manifest.json \
   --pack playwright:core-smoke \
   --status passed \
+  --surfaces web:desktop-chromium,web:mobile-chromium \
   --artifact-uri s3://6529-artifacts/frontend/<release-id>/core-smoke.json \
   --redaction-status verified-redacted \
   --artifact-sha256 <sha256> \
@@ -78,15 +79,26 @@ The deployment manifest now records the standard frontend deployed-environment
 packs in `validation.required_packs` and expands them in
 `validation.pack_plan`.
 
-| Pack                    | Staging command                                                                                         | Production command                                                                              |
-| ----------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `playwright:core-smoke` | `seize run test:e2e:staging`                                                                            | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke`     |
-| `playwright:wcag-i18n`  | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n` | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n` |
+`playwright:core-smoke` is the fast route smoke pack. `playwright:surface-matrix`
+is the broader route/navigation workflow pack.
 
-The current pack plan intentionally records `web:desktop-chromium` as the
-covered surface. Mobile Chromium, Firefox, WebKit, Capacitor simulation, and
-Electron simulation remain PR4 work and must not be claimed as covered until
-those projects exist and pass.
+| Pack                        | Staging command                                                                                                                | Production command                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `playwright:core-smoke`     | `seize run test:e2e:staging:smoke`                                                                                             | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix`     |
+| `playwright:surface-matrix` | `seize run test:e2e:staging`                                                                                                   | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix`           |
+| `playwright:wcag-i18n`      | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix`         | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` |
+
+The standard pack plan records `web:desktop-chromium` and
+`web:mobile-chromium` as the covered deployed web surfaces. Firefox, WebKit,
+Capacitor simulation, and Electron simulation remain optional train/nightly or
+targeted validation lanes until they are stable enough to make them required
+deployment evidence. Browser simulation must not be described as real native or
+real Electron shell coverage.
+
+For standard required packs, release readiness requires the latest passing
+check to record the pack-plan command and every required pack-plan surface.
+Equivalent but differently spelled commands should be recorded as custom or
+release-captain exception evidence, not as a passed standard pack.
 
 ## Release Reports And Auto-Hold
 
@@ -236,9 +248,8 @@ The command sets:
 - `PLAYWRIGHT_SKIP_WEB_SERVER=1`
 
 When the staging access gate is enabled, provide the access code through
-`PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH`. Local Codex operators can
-load that value from the Windows Credential Manager target `STAGING_AUTH`, but
-must not print or persist it.
+`PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH`. Operators must not print or
+persist it.
 
 The Playwright config disables traces when `PLAYWRIGHT_BASE_URL` is
 `https://staging.6529.io` so the access-code entry is not retained in retry

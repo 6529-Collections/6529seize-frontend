@@ -35,17 +35,35 @@ Read this section first after compaction or handoff.
   - Follow-up branch `codex/fix-staging-playwright-smoke` restores
     `tests/testHelpers.ts` and makes `seize run test:e2e:staging` run real
     browser smoke when `PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH` is set.
-- Latest testing-roadmap state, 2026-06-21T07:25Z:
-  - Current clean worktree branch: `codex/testing-roadmap-next`, based on
-    current `origin/main`.
+- Latest testing-roadmap state, 2026-06-21T09:42Z:
+  - Current clean worktree branch: `codex/testing-e2e-surface-matrix`, based
+    on current `origin/main`.
   - PR5 deployment evidence/reporting foundation is implemented locally:
     deployed-environment pack plans, release reports, auto-hold readiness
     evaluation, `record-validation-check`, workflow release-report artifacts,
     and stricter durable artifact rules.
-  - Required deployed packs are currently `playwright:core-smoke` and
-    `playwright:wcag-i18n`. Both are still `web:desktop-chromium`; PR4 must add
-    broader mobile, Firefox, WebKit, Capacitor, and Electron/Desktop Shell
-    surface coverage before claiming those surfaces.
+  - PR4 branch `codex/testing-e2e-surface-matrix` adds desktop and mobile
+    Chromium Playwright projects, browser-diversity projects, Capacitor/Electron
+    simulation projects, and a read-only `playwright:surface-matrix` deployment
+    pack.
+  - Required deployed packs are now `playwright:core-smoke`,
+    `playwright:surface-matrix`, and `playwright:wcag-i18n`. Required deployed
+    web surfaces are `web:desktop-chromium` and `web:mobile-chromium`.
+    Firefox, WebKit, Capacitor simulation, and Electron simulation remain
+    optional train/nightly or targeted validation lanes and must not be claimed
+    as real native/Electron-shell coverage.
+  - PR4 local validation is complete before PR publication:
+    `lint:changed`, `typecheck:changed`, `typecheck:playwright`,
+    deployment-bus Jest tests, `test:e2e:surface-matrix`,
+    `test:e2e:wcag-i18n:surface-matrix`, `test:e2e:browser-diversity`,
+    `test:e2e:native-sim`, workflow YAML parse, readonly secret scan,
+    workflow-security scan, `seize run build`, and `codex-diff-check` all
+    passed.
+  - Independent verifier feedback found the staging/prod workflow
+    `--required-packs` list omitted `playwright:surface-matrix`, the Playwright
+    web-server default used the local Codex `seize` helper, and the
+    deployment-bus process doc still described desktop-only evidence. All three
+    findings are fixed in PR4 before PR publication.
   - Durable release evidence now requires one approved artifact pointer on each
     required pack's latest passing check, with verified redaction, integrity
     metadata (`sha256`, `etag`, or `cid`), retention metadata, and no query
@@ -168,7 +186,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/testing-critical-e2e-guards`
+`codex/testing-e2e-surface-matrix`
 
 ## Constraints
 
@@ -271,29 +289,26 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Publish PR from `codex/testing-critical-e2e-guards`, request all existing
-   6529bot lanes plus `glm-swarm`, and iterate CI/reviewbot feedback without
-   removing any existing bot.
-2. Keep PR #2805 stable while it waits for required approval; do not churn it
-   unless a reviewer or CI finding requires a fix.
-3. After the critical-shell PR and PR #2805 land, continue PR7 canary/watch
-   docs/reporting and then expand authenticated/profile/API-backed browser
-   packs in separate focused PRs.
-4. Reconcile the existing PR stack from current `origin/main` before opening
-   broad new implementation PRs.
-5. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR
-   impact/testing plan before opening the PR.
-6. For every implementation PR, assign a risk level, write hazard analysis,
-   create the validation manifest, and select durable artifact storage before
-   opening the PR.
-7. For every implementation PR, run extensive local validation first; treat the
-   live `wcag` and `i18n` reviewbot lanes as additional review, not a local-test
-   substitute.
-8. Group only green, locally validated, reviewbot-happy PRs into deployment
-   trains.
-9. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
-   style files.
-10. After PR5 is merged/deployed, start PR4 surface-matrix work from current
-    `origin/main`: expand E2E project coverage for mobile-sized Chromium,
-    Firefox/WebKit where practical, and the documented Capacitor/Electron
-    simulation lanes without weakening existing reviewbot lanes.
+1. Finish rebasing PR #2805 (`codex/testing-e2e-surface-matrix`) onto the
+   post-#2806 `origin/main`, preserving both the surface-matrix scripts and the
+   merged `test:e2e:critical-shell` pack.
+2. Re-run focused local validation for the rebased surface-matrix branch, push
+   the updated PR, and iterate CodeRabbit, Sonar, CI, and 6529reviewbot
+   feedback until Codex judges the loop is no longer adding material value.
+3. Merge PR #2805 after checks and review signals are green or consciously
+   dispositioned, then deploy the testing-hardening train through staging and
+   production with `ops/skills/deploy-6529/SKILL.md`.
+4. After the PR #2805/#2806 train lands in production, continue PR7
+   canary/watch docs/reporting and then expand authenticated/profile/API-backed
+   browser packs in separate focused PRs.
+5. Reconcile the existing page-cluster PR stack from current `origin/main`
+   before opening broad new implementation PRs.
+6. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR
+   impact/testing plan, assign a risk level, write hazard analysis, create the
+   validation manifest, and select durable artifact storage before opening the
+   PR.
+7. Run extensive local validation first; treat the live `wcag`, `i18n`,
+   `security`, `responsiveness`, and `glm-swarm` reviewbot lanes as additional
+   review, not a local-test substitute.
+8. Preserve unrelated dirty EmojiContext, RememeImage test, and bootstrap style
+   files in other worktrees.

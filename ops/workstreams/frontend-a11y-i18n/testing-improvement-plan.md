@@ -526,12 +526,11 @@ PR-gating Playwright baseline:
 
 Train or nightly projects until stable:
 
-- `web-tablet-chromium`.
 - `web-desktop-firefox` for train or nightly.
 - `web-desktop-webkit` for train or nightly.
-- `capacitor-ios-simulated`.
-- `capacitor-android-simulated`.
-- `electron-simulated`.
+- `capacitor-ios-sim`.
+- `capacitor-android-sim`.
+- `electron-shell-sim`.
 
 Config targets:
 
@@ -543,6 +542,19 @@ Config targets:
 - Centralize native runtime detection before relying on `@capacitor-sim` or
   `@electron-sim`; simulation projects should target one shared detection API
   rather than scattered direct Capacitor imports or user-agent checks.
+
+Current implementation note:
+
+- The standard Playwright deployment packs cover desktop and mobile Chromium
+  for `playwright:core-smoke`, `playwright:surface-matrix`, and
+  `playwright:wcag-i18n`.
+- `tests/surfaces/core-surfaces.spec.ts` covers public route/navigation flows
+  for header search, sidebar navigation, mobile menu navigation, Wave Score,
+  TDH, delegation center, delegation FAQ, and legacy `/waves` redirect
+  behavior.
+- Capacitor and Electron projects are explicitly named as simulations and are
+  available through `test:e2e:native-sim`; they must not be used as real native
+  or real Electron evidence.
 
 ### Accessibility Packs
 
@@ -1212,22 +1224,29 @@ Exit criteria:
 
 Goals:
 
-- Add Playwright projects for desktop and mobile.
-- Centralize native runtime detection before relying on simulation projects.
-- Add Electron simulation against the centralized detection API.
-- Add Capacitor iOS/Android simulation against the centralized detection API.
-- Document simulation limits.
-- Add owner/purpose/runtime/flake policy for large Playwright packs.
-- Keep Firefox, WebKit, tablet, Capacitor simulation, and Electron simulation
-  train/nightly-only until desktop and mobile Chromium are stable.
-- Identify what is needed for future real native shell smoke.
+- Add Playwright projects for desktop and mobile. Done for Chromium.
+- Add Electron simulation against the shared Playwright surface shim. Done as
+  `electron-shell-sim`.
+- Add Capacitor iOS/Android simulation against the shared Playwright surface
+  shim. Done as `capacitor-ios-sim` and `capacitor-android-sim`.
+- Document simulation limits. Done in `tests/README.md` and deployment-bus
+  docs.
+- Add owner/purpose/runtime/flake policy for large Playwright packs. Done in
+  `tests/README.md`; PR and train owners must diagnose large-pack failures
+  before skips, quarantines, or downgrades are accepted.
+- Keep Firefox, WebKit, Capacitor simulation, and Electron simulation
+  train/nightly-only until desktop and mobile Chromium are stable. Done in
+  package scripts and docs.
+- Identify what is needed for future real native shell smoke. Still open.
 
 Exit criteria:
 
 - Page-cluster PRs can declare exact covered surfaces.
 - Simulated native evidence is never mislabeled as real native evidence.
 - Large tests have owners and repair expectations.
-- Native-adjacent simulation is based on one shared runtime-detection path.
+- Native-adjacent simulation limits and the remaining runtime-detection
+  centralization prerequisite are recorded before simulated evidence is treated
+  as a native-adjacent signal.
 
 ### PR 5: Deployment Evidence And Release Reports
 

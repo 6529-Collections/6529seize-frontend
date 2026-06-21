@@ -60,7 +60,7 @@ jobs:
             --environment production \
             --production-candidate-sha "${COMMIT_SHA}" \
             --production-eligible true \
-            --required-packs "playwright:core-smoke,playwright:wcag-i18n" \
+            --required-packs "playwright:core-smoke,playwright:surface-matrix,playwright:wcag-i18n" \
             --release-captain "github-actions/${{ github.actor }}" \
             --status queued \
             --phase queued \
