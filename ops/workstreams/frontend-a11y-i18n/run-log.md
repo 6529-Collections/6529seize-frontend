@@ -2403,6 +2403,16 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run test:no-coverage --findRelatedTests tests/social/waves-profile-readonly.spec.ts tests/testHelpers.ts --passWithNoTests`
   - `seize run testing-strategy -- validate-workflow-security --output test-results/app-pr-ci/pr2809-workflow-security.json`
   - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr2809-secret-scan.json`
+- CodeRabbit and independent verifier feedback produced two low-risk hardening
+  fixes:
+  - Scope the social-read-only scripts to
+    `tests/social/waves-profile-readonly.spec.ts` so future non-read-only
+    social specs cannot be swept into staging/production read-only scripts.
+  - Assert public profile handle visibility directly instead of depending on
+    disabled edit-control accessible names.
+  - Follow-up validation passed: `seize run test:e2e:social-readonly`,
+    `seize run lint:changed`, `seize run typecheck:changed`, and
+    `codex-diff-check`.
 - Next PRs should keep expanding read-only coverage by user journey, not by
   shallow route count: media/mint/detail first, then delegation,
   NextGen/groups/tools, then broad network/open-data/static route matrices.

@@ -42,11 +42,8 @@ async function expectProfileShell(
 
   await expect(profileSections).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Profile picture" })
+    page.locator("main").getByText(PROFILE_HANDLE, { exact: true }).first()
   ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Edit profile name" })
-  ).toContainText(PROFILE_HANDLE);
   await expect(
     profileSections.getByRole("link", { name: activeTab })
   ).toHaveAttribute("aria-current", "page");
