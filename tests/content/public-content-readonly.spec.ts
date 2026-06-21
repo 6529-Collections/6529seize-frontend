@@ -144,8 +144,8 @@ async function expectTargetBlankLinksAreSafe(page: Page) {
           rel: anchor.getAttribute("rel") || "",
         }))
         .filter((anchor) => {
-          const tokens = anchor.rel.toLowerCase().split(/\s+/);
-          return !tokens.includes("noopener") && !tokens.includes("noreferrer");
+          const tokens = new Set(anchor.rel.toLowerCase().split(/\s+/));
+          return !tokens.has("noopener") && !tokens.has("noreferrer");
         })
     );
 
