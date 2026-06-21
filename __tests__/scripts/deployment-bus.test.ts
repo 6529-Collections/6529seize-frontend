@@ -84,7 +84,7 @@ function releaseReadyPostDeployWatch(overrides = {}) {
     completed_at: "2026-06-18T13:30:00.000Z",
     checkpoints: [
       {
-        id: "version-match",
+        id: "release-captain-validation",
         status: "passed",
         recorded_at: "2026-06-18T13:30:00.000Z",
         evidence: [
@@ -199,6 +199,27 @@ describe("deployment bus manifest", () => {
     manifest.validation.durable_artifacts.required = false;
     expect(validateManifest(manifest).errors).toContain(
       "validation.durable_artifacts.required: must be true for production or production-eligible manifests"
+    );
+  });
+
+  it("forces post-deploy watch requirements for production manifests", () => {
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      postDeployWatchRequired: "false",
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(manifest.post_deploy_watch.required).toBe(true);
+
+    manifest.post_deploy_watch.required = false;
+    expect(validateManifest(manifest).errors).toContain(
+      "post_deploy_watch.required: must be true for production manifests"
+    );
+    expect(evaluateReleaseReadiness(manifest).holds).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "post-deploy-watch-required" }),
+      ])
     );
   });
 
@@ -460,6 +481,41 @@ describe("deployment bus manifest", () => {
     );
   });
 
+  it("holds production readiness until release-captain validation evidence is recorded", () => {
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      status: "released",
+      validationChecks: JSON.stringify(releaseReadyValidationChecks()),
+      postDeployWatchStatus: "passed",
+      postDeployWatchObservedDurationMinutes: "30",
+      postDeployWatchStartedAt: "2026-06-18T13:00:00.000Z",
+      postDeployWatchCompletedAt: "2026-06-18T13:30:00.000Z",
+      postDeployWatchCheckpoints: JSON.stringify([
+        {
+          id: "version-match",
+          status: "passed",
+          recorded_at: "2026-06-18T13:30:00.000Z",
+          evidence: [
+            "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
+          ],
+        },
+      ]),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(validateManifest(manifest).errors).toContain(
+      "release_readiness.post-deploy-watch-validation-checkpoint-missing: post-deploy watch requires a passed release-captain-validation checkpoint with evidence"
+    );
+    expect(evaluateReleaseReadiness(manifest).holds).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "post-deploy-watch-validation-checkpoint-missing",
+        }),
+      ])
+    );
+  });
+
   it("records post-deploy watch evidence without satisfying durable artifact holds", () => {
     const checksWithoutArtifacts = releaseReadyValidationChecks().map(
       (check) => ({
@@ -478,7 +534,7 @@ describe("deployment bus manifest", () => {
     const watched = recordPostDeployWatch(manifest, {
       status: "passed",
       observedDurationMinutes: "30",
-      checkpoint: "version-match",
+      checkpoint: "release-captain-validation",
       evidence:
         "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
       notes: "EB health green and deployed version matched.",
@@ -494,7 +550,7 @@ describe("deployment bus manifest", () => {
       observed_duration_minutes: 30,
     });
     expect(watched.post_deploy_watch.checkpoints[0]).toMatchObject({
-      id: "version-match",
+      id: "release-captain-validation",
       status: "passed",
       evidence: [
         "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
@@ -511,7 +567,7 @@ describe("deployment bus manifest", () => {
       ])
     );
     expect(report).toContain("## Post-Deploy Watch");
-    expect(report).toContain("version-match: passed");
+    expect(report).toContain("release-captain-validation: passed");
     expect(report).toContain(
       "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123"
     );
@@ -728,6 +784,41 @@ describe("deployment bus manifest", () => {
       "validation.checks[0].artifacts[0].uri: artifact URI must not include query strings or fragments"
     );
     expect(report).toContain("Report status: hold");
+    expect(report).toContain("[query-or-fragment redacted]");
+    expect(report).not.toContain("X-Amz-Signature");
+  });
+
+  it("rejects tokenized post-deploy watch evidence and redacts it in reports", () => {
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      status: "released",
+      validationChecks: JSON.stringify(releaseReadyValidationChecks()),
+      postDeployWatchStatus: "passed",
+      postDeployWatchObservedDurationMinutes: "30",
+      postDeployWatchStartedAt: "2026-06-18T13:00:00.000Z",
+      postDeployWatchCompletedAt: "2026-06-18T13:30:00.000Z",
+      postDeployWatchCheckpoints: JSON.stringify([
+        {
+          id: "release-captain-validation",
+          status: "passed",
+          recorded_at: "2026-06-18T13:30:00.000Z",
+          evidence: [
+            "https://artifacts.6529.io/frontend/release/watch.json?X-Amz-Signature=secret#frag",
+          ],
+        },
+      ]),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    const result = validateManifest(manifest);
+    const report = createReleaseReport(manifest, {
+      now: "2026-06-18T14:00:00.000Z",
+    });
+
+    expect(result.errors).toContain(
+      "post_deploy_watch.checkpoints[0].evidence[0]: evidence URI must not include query strings or fragments"
+    );
     expect(report).toContain("[query-or-fragment redacted]");
     expect(report).not.toContain("X-Amz-Signature");
   });

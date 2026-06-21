@@ -359,10 +359,10 @@ function buildManifest(options, env = process.env) {
   const packPlan = buildPackPlanList(requiredPacks, environment);
   const productionLikeEvidenceRequired =
     environment === "production" || productionEligible;
-  const postDeployWatchRequired = parseBoolean(
-    options.postDeployWatchRequired,
+  const postDeployWatchRequired =
     environment === "production"
-  );
+      ? true
+      : parseBoolean(options.postDeployWatchRequired, false);
   const longRunning =
     complexity === "complex" || expectedDurationMinutes > 120
       ? {
@@ -473,6 +473,13 @@ function buildManifest(options, env = process.env) {
             "Production candidate SHA differs from current origin/main or from the staging-validated release set.",
           recovery:
             "Rerun staging for the current candidate or remove superseded work from the train.",
+        },
+        {
+          id: "post-deploy-watch-validation-checkpoint-missing",
+          hold_when:
+            "A production release manifest lacks a passed release-captain-validation checkpoint with evidence.",
+          recovery:
+            "Run production-safe validation, then record the release-captain-validation checkpoint with canonical evidence before release notes.",
         },
       ],
     },
@@ -775,6 +782,16 @@ function validatePostDeployWatch(manifest, errors) {
   if (typeof postDeployWatch.required !== "boolean") {
     pushError(errors, "post_deploy_watch.required", "must be boolean");
   }
+  if (
+    manifest.environment === "production" &&
+    postDeployWatch.required !== true
+  ) {
+    pushError(
+      errors,
+      "post_deploy_watch.required",
+      "must be true for production manifests"
+    );
+  }
   if (!VALID_POST_DEPLOY_WATCH_STATUSES.has(postDeployWatch.status)) {
     pushError(
       errors,
@@ -850,6 +867,24 @@ function validateWatchCheckpoints(checkpoints, errors) {
       !Array.isArray(checkpoint.evidence)
     ) {
       pushError(errors, `${pathName}.evidence`, "must be an array");
+    } else if (Array.isArray(checkpoint?.evidence)) {
+      checkpoint.evidence.forEach((uri, evidenceIndex) => {
+        if (typeof uri !== "string") {
+          pushError(
+            errors,
+            `${pathName}.evidence[${evidenceIndex}]`,
+            "must be a string"
+          );
+          return;
+        }
+        if (uri.includes("?") || uri.includes("#")) {
+          pushError(
+            errors,
+            `${pathName}.evidence[${evidenceIndex}]`,
+            "evidence URI must not include query strings or fragments"
+          );
+        }
+      });
     }
   });
 }
@@ -1398,6 +1433,10 @@ function evaluatePostDeployWatchReadiness(manifest, holds) {
 
   const postDeployWatch = manifest.post_deploy_watch;
   if (!postDeployWatch || postDeployWatch.required !== true) {
+    holds.push({
+      id: "post-deploy-watch-required",
+      message: "production release requires a post-deploy watch contract",
+    });
     return;
   }
 
@@ -1436,6 +1475,27 @@ function evaluatePostDeployWatchReadiness(manifest, holds) {
       message: `${failedCheckpoint.id} recorded ${failedCheckpoint.status}`,
     });
   }
+
+  const releaseCaptainCheckpoint = postDeployWatch.checkpoints?.find(
+    (checkpoint) => checkpoint.id === "release-captain-validation"
+  );
+  if (
+    releaseCaptainCheckpoint?.status !== "passed" ||
+    !hasCheckpointEvidence(releaseCaptainCheckpoint)
+  ) {
+    holds.push({
+      id: "post-deploy-watch-validation-checkpoint-missing",
+      message:
+        "post-deploy watch requires a passed release-captain-validation checkpoint with evidence",
+    });
+  }
+}
+
+function hasCheckpointEvidence(checkpoint) {
+  return (
+    Array.isArray(checkpoint?.evidence) &&
+    checkpoint.evidence.some((uri) => typeof uri === "string" && uri.trim())
+  );
 }
 
 function recordValidationCheck(manifest, options) {
@@ -1701,7 +1761,9 @@ function formatPostDeployWatch(manifest) {
             const evidence =
               Array.isArray(checkpoint.evidence) &&
               checkpoint.evidence.length > 0
-                ? `; evidence: ${checkpoint.evidence.join(", ")}`
+                ? `; evidence: ${checkpoint.evidence
+                    .map(formatArtifactUriForReport)
+                    .join(", ")}`
                 : "";
             const notes = checkpoint.notes
               ? `; notes: ${checkpoint.notes}`

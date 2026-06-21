@@ -211,6 +211,10 @@ Production watch completion is intentionally a two-step handoff:
   --notes "Production smoke, surface matrix, WCAG/i18n, and API version checks passed"
 ```
 
+Use canonical evidence URLs without query strings or fragments; signed URLs and
+tokenized dashboard links do not belong in deployment-bus manifests or release
+reports.
+
 If production validation fails, record `failed` or `blocked` instead and keep
 the release on hold until rollback or fix-forward validation passes.
 
