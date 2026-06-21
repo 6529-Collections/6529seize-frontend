@@ -45,7 +45,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   test("renders The Memes card detail shell", async ({ page }) => {
     await gotoReady(page, "/the-memes/1");
 
-    await expect(page).toHaveTitle(/6529Seizing.*The Memes/i);
+    await expect(page).toHaveTitle("6529Seizing | The Memes #1");
     await expect(
       page.getByRole("heading", { level: 1, name: "Card 1 - 6529Seizing" })
     ).toBeVisible();
@@ -112,7 +112,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   test("renders The Memes mint page read-only", async ({ page }) => {
     await gotoReady(page, "/the-memes/mint");
 
-    await expect(page).toHaveTitle(/Mint #\d+.*The Memes/i);
+    await expect(page).toHaveTitle(/^Mint #[0-9]+ \| [^|]+ \| The Memes$/);
     await expect(page.getByText("Retrieving Mint information")).toBeHidden({
       timeout: 15000,
     });
@@ -143,7 +143,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   }) => {
     await gotoReady(page, "/meme-lab/1?focus=activity&locale=de-DE");
 
-    await expect(page).toHaveTitle(/Spread the Memes.*Meme Lab/i);
+    await expect(page).toHaveTitle(
+      "Spread the Memes | Meme Lab #1 | Card Activity"
+    );
     await expect(
       page.getByRole("heading", {
         level: 1,
@@ -195,7 +197,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("link", { name: "Back to ReMemes" })
     ).toHaveAttribute("href", "/rememes");
-    await expect(page).toHaveTitle(/SeizeGenart.*ReMemes/i);
+    await expect(page).toHaveTitle("SeizeGenart | ReMemes | 6529.io");
     await expect(
       page.getByRole("heading", { level: 1, name: "ReMemes - SeizeGenart" })
     ).toBeVisible();
