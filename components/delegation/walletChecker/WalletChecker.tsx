@@ -62,13 +62,14 @@ export default function WalletCheckerComponent(
   }>
 ) {
   const { address_query, setAddressQuery } = props;
+  const initialAddressQuery = address_query ?? "";
 
   const [fetchedAddress, setFetchedAddress] = useState<string>("");
-  const [walletInputValue, setWalletInputValue] = useState(address_query ?? "");
-  const [walletAddress, setWalletAddress] = useState("");
+  const [walletInputValue, setWalletInputValue] = useState(initialAddressQuery);
+  const [walletAddress, setWalletAddress] = useState(initialAddressQuery);
   const [ensLoading, setEnsLoading] = useState(false);
 
-  const [checking, setChecking] = useState(!!address_query);
+  const [checking, setChecking] = useState(!!initialAddressQuery);
   const [addressError, setAddressError] = useState(false);
 
   const [delegations, setDelegations] = useState<Delegation[]>([]);
@@ -342,6 +343,22 @@ export default function WalletCheckerComponent(
     delegationsStatus === "error" ||
     consolidationsStatus === "error" ||
     consolidatedWalletsStatus === "error";
+
+  useEffect(() => {
+    const nextAddressQuery = address_query ?? "";
+
+    setWalletInputValue(nextAddressQuery);
+    setWalletAddress(nextAddressQuery);
+    setFetchedAddress("");
+    setAddressError(false);
+    setDelegations([]);
+    setDelegationsLoaded(false);
+    setSubDelegations([]);
+    setConsolidations([]);
+    setConsolidationsLoaded(false);
+    setConsolidatedWallets([]);
+    setChecking(!!nextAddressQuery);
+  }, [address_query]);
 
   useEffect(() => {
     if (!consolidationsLoaded || !fetchedAddress) {

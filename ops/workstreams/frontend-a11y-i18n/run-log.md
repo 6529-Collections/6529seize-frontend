@@ -2481,3 +2481,52 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
     `seize run test:e2e:media-readonly`: 8 passed, 2 expected production-only
     skips.
   - `codex-diff-check`
+
+## 2026-06-21T19:30Z Delegation Read-Only E2E Pack Started
+
+- Started `codex/e2e-delegation-readonly` from current `origin/main`
+  (`f82890f24a4ef7643f143dca5791ad0c50e010f3`) after PR #2809 production
+  deploy.
+- Added `tests/delegation/delegation-readonly.spec.ts` for:
+  - Delegation Center disconnected-safe actions, collection choices, and
+    Etherscan/GitHub references.
+  - Top-level delegation articles and a FAQ child article.
+  - Wallet Checker invalid input and a synthetic public empty-state address.
+  - Disconnected write-route guards for register delegation, register
+    consolidation, register delegation manager, and assign primary address.
+  - Collection-scope disconnected gates for Any Collection, The Memes,
+    Meme Lab, and 6529 Gradient.
+- Added local, staging, and production `delegation-readonly` scripts and README
+  ownership notes.
+- Unsafe actions explicitly avoided: wallet connect clicks, on-chain form
+  submit paths, lock/unlock, edit/revoke, posting, uploads, purchases,
+  transfers, and external link navigation.
+- First local E2E run exposed a real Wallet Checker query-load bug:
+  direct-loading `/delegation/wallet-checker?address=...` populated the input
+  but left the internal wallet address state empty, causing an invalid-address
+  alert instead of the public read-only empty-state check.
+- Fixed `components/delegation/walletChecker/WalletChecker.tsx` to initialize
+  and sync the wallet address state from `address_query`.
+- Added a unit regression in `__tests__/components/walletChecker.test.tsx`.
+- Validation passed:
+  - `seize run test:e2e:delegation-readonly`: 30 passed.
+  - `seize run test:no-coverage -- __tests__/components/walletChecker.test.tsx`:
+    5 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run typecheck:playwright`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/delegation-readonly-secret-scan.json`
+  - `codex-diff-check`
+- Opened PR #2811:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2811
+
+## 2026-06-21T20:15Z PR #2810 Gate Status
+
+- PR #2810 media/mint/detail is bot/CI green:
+  - CodeQL actions/javascript-typescript/python passed.
+  - CodeRabbit passed; no unresolved review threads.
+  - 6529bot follow-up on latest head reported no new findings.
+  - DCO, Snyk, and SonarCloud passed.
+- GitHub still reports `REVIEW_REQUIRED`; the authenticated PR author account
+  cannot approve its own PR. Treat this as an independent-review gate, not as a
+  test failure or bot finding.

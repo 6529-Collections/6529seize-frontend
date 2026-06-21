@@ -403,3 +403,31 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
    review, not a local-test substitute.
 9. Preserve unrelated dirty EmojiContext, RememeImage test, and bootstrap style
    files in other worktrees.
+
+## 2026-06-21 Current Autonomous Run
+
+- User asked to continue autonomous manager mode and finish the not-completed
+  and partially-completed testing roadmap items, with important E2E coverage
+  across app areas.
+- GLM reviewbot is live in `6529reviewbot`; keep it additive. Do not remove,
+  downgrade, or replace existing reviewbots.
+- PR #2810 media/mint/detail E2E is open, bot/CI green, and has no unresolved
+  review threads. GitHub branch protection still reports `REVIEW_REQUIRED`;
+  an attempted approval from the PR author account was correctly rejected as
+  self-approval, so the PR is waiting on independent review before merge/deploy.
+- PR #2811 (`codex/e2e-delegation-readonly`) adds the next read-only pack plus
+  a Wallet Checker query-load fix discovered by that pack.
+- Deployment train policy remains: merge only after Codex, reviewbots, and CI
+  stop adding material value; deploy staging first, validate exact merged SHA,
+  then production from current `origin/main` with release evidence.
+
+## Current Next Actions
+
+1. Get independent approval on PR #2810, then merge and deploy through staging
+   and production with media-readonly validation.
+2. Iterate PR #2811 reviewbots/CI and fix valid findings.
+3. Use subagent route-cluster findings to implement the next PRs:
+   NextGen/groups/tools, network/open-data/API/auth-adjacent read-only, then
+   broader static route coverage.
+4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
+   artifact pointers or weaken release holds.
