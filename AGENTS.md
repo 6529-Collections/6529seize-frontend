@@ -116,8 +116,8 @@ All project commands must go through the repo-local `6529` wrapper.
   `ops/standards/frontend-i18n-localization.md`.
 - New and touched user-facing UI should follow
   `ops/standards/frontend-design-ui-ux.md` for repo-specific visual
-  consistency, responsive layout, interaction states, media behavior, and
-  browser evidence.
+  consistency, Tailwind-first styling migration, responsive layout, interaction
+  states, media behavior, and browser evidence.
 - Use `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
 - Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
 - Use `ops/skills/i18n-localization/SKILL.md` for progressive localization

@@ -15,8 +15,9 @@ New frontend work must avoid adding accessibility, localization, or UI/UX debt.
   user-facing copy, accessible names, dates, numbers, sorting, and locale
   fallbacks.
 - Follow [Design and UI/UX](frontend-design-ui-ux.md) for repo-specific visual
-  consistency, responsive layout, interaction states, media treatment, loading,
-  empty, error, and visual evidence expectations.
+  consistency, Tailwind-first styling migration, responsive layout, interaction
+  states, media treatment, loading, empty, error, and visual evidence
+  expectations.
 - If a touched page is not fully migrated yet, make the touched UI meet these
   standards and record any remaining page-level debt.
 - Document exceptions with owner, reason, user impact, and a follow-up path.

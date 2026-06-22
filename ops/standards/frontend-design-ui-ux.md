@@ -11,13 +11,19 @@ The goal is consistency and usability, not a new visual direction. Agents should
 derive decisions from the current codebase and rendered product before adding
 new UI patterns.
 
+The frontend is in a progressive styling migration. Tailwind CSS with the repo
+`tw-` prefix is the preferred direction for new and touched UI. Bootstrap,
+React Bootstrap, global Sass, and Sass modules still exist and may be correct
+for legacy or not-yet-migrated surfaces, but their presence is not permission to
+copy old colors, spacing, or component chrome into new work.
+
 ## Applies To
 
 - App routes, layouts, shells, cards, lists, tables, forms, dialogs, menus,
   popovers, toolbars, toasts, loading states, empty states, errors, media
   surfaces, and navigation.
 - Visual styling, spacing, typography, responsive behavior, interaction states,
-  motion, image/media treatment, and page density.
+  motion, image/media treatment, page density, and styling-system choices.
 - Agent-authored PR notes that claim UI readiness or visual validation.
 
 Backend-only changes, generated models, docs-only changes, and internal scripts
@@ -39,25 +45,47 @@ do not need this standard unless they change visible frontend behavior.
 - Match the local surface. A feed row, media grid, admin/tool form, modal, and
   collection card may have different density, but each new piece should look
   native to its neighboring route.
+- Do not treat legacy styling as the future design system. Older Bootstrap,
+  WordPress/Fusion, global Sass, and pre-migration module styles can be useful
+  evidence for layout constraints or product behavior, but modern Tailwind
+  surfaces are the stronger visual reference for new or migrated UI.
 
 ## Source Of Truth
 
 Before designing or reviewing touched UI, inspect the closest relevant source:
 
-- `styles/variables.scss` for core fonts, colors, and shared dimensions.
-- `styles/globals.scss`, `styles/animations.scss`, and `tailwind.config.ts` for
-  global layout, prefixed Tailwind tokens, motion, and `iron-*` colors.
+- `tailwind.config.ts` for the `tw-` prefix, `iron-*` palette, primary/error/
+  success colors, breakpoints, container queries, hover/touch variants, and
+  motion tokens.
+- `styles/globals.scss` for global layout classes, `tailwind-scope`, app-level
+  resets, and places where legacy global rules intentionally avoid Tailwind
+  scoped UI.
+- `styles/variables.scss` and `styles/seize-bootstrap.scss` for legacy Sass and
+  Bootstrap compatibility. Treat these as compatibility sources unless the
+  touched surface is still intentionally Bootstrap-based.
 - Nearby `*.module.scss`, route components, and shared components for local
-  spacing, borders, typography, state styling, and responsive behavior.
+  spacing, borders, typography, state styling, and responsive behavior. First
+  classify the surface as modern Tailwind, legacy Bootstrap/Sass, or mixed.
 - Existing user-facing docs under `ops/docs/` only as behavior references; verify
   UI details against code and browser evidence.
 
 Do not add hardcoded hex values, font families, one-off spacing scales, new icon
 sets, or styling libraries when an existing token or pattern covers the need.
+Avoid new React Bootstrap usage, Bootstrap utility classes, or Sass-only styling
+for new/migrated UI unless the PR is deliberately maintaining a legacy surface
+and the exception is documented.
 
 ## New PR Requirements
 
-- Reuse existing layout and component patterns before creating a new pattern.
+- Reuse existing layout and component patterns before creating a new pattern,
+  but prefer migrated Tailwind patterns over older Bootstrap/Sass patterns when
+  both are available.
+- Use Tailwind utilities and shared Tailwind-based components for new or
+  substantially touched UI. Use Sass modules only when they are already local to
+  the surface or when Tailwind cannot express the behavior cleanly.
+- Keep legacy changes narrow. If a Bootstrap/Sass page is only being fixed,
+  preserve behavior and avoid a broad redesign; migrate the touched UI toward
+  Tailwind when practical and record remaining styling debt when not.
 - Keep text readable and contained at mobile and desktop widths. Long labels,
   translated text, badges, counters, wallet/profile names, and timestamps must
   wrap, truncate, or resize intentionally without overlapping adjacent content.
@@ -92,6 +120,8 @@ For visible UI changes, also collect browser evidence that covers:
 
 - Source evidence: the nearby components, style modules, tokens, and docs used
   as the pattern.
+- Migration evidence: whether the touched surface is modern Tailwind, legacy
+  Bootstrap/Sass, or mixed, and why the chosen styling approach is appropriate.
 - Browser evidence: desktop and mobile render checks for the touched route or a
   representative route shell.
 - State evidence: loading, empty, error, disabled, selected, and interaction
@@ -116,7 +146,11 @@ therefore check both DOM geometry and rendered pixels.
 For each touched page or component:
 
 - Which existing route, component, or style source did it match?
-- Which tokens, fonts, colors, spacing, and surface patterns were reused?
+- Is the touched surface modern Tailwind, legacy Bootstrap/Sass, or mixed?
+- Which `tw-` utilities, Tailwind tokens, fonts, colors, spacing, and surface
+  patterns were reused?
+- Did the PR avoid adding new Bootstrap, React Bootstrap, global Sass, or
+  Sass-only design debt unless it is intentionally maintaining legacy UI?
 - Which desktop and mobile widths were checked?
 - Which loading, empty, error, and disabled states were checked or unaffected?
 - How were focus, hover, touch, and keyboard affordances preserved?
