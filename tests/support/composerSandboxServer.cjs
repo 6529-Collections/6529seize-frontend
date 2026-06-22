@@ -289,12 +289,13 @@ const localDrop = {
 
 function corsHeaders() {
   return {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": frontendBaseUrl,
     "Access-Control-Allow-Headers":
       "authorization, content-type, x-6529-auth, x-api-key",
     "Access-Control-Allow-Methods":
       "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Max-Age": "600",
+    Vary: "Origin",
   };
 }
 
@@ -564,7 +565,9 @@ function handleWebSocketUpgrade(req, socket) {
   }
 
   const accept = crypto
-    .createHash("sha1")
+    // WebSocket handshakes require SHA-1; this local-only test server does not
+    // use the digest for security decisions or secret storage.
+    .createHash("sha1") // NOSONAR
     .update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`)
     .digest("base64");
 
