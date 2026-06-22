@@ -1,11 +1,14 @@
 import {
-  getMintTimelineStatus,
+  getCanonicalNextMintNumber,
+  getMintNumberForMintDate,
+  getMintTimelineDetails,
   toISO,
-  type MintTimelineDetails,
-  type MintTimelineStatus,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 
-export interface MemeCalendarMintResponse {
+type MintTimelineDetails = ReturnType<typeof getMintTimelineDetails>;
+type MintTimelineStatus = "past" | "live" | "upcoming";
+
+interface MemeCalendarMintResponse {
   readonly mint_number: number;
   readonly mint_date: string;
   readonly mint_start: string;
@@ -19,6 +22,45 @@ export interface MemeCalendarMintResponse {
   readonly eon: number;
   readonly calendar_path: string;
   readonly mint_path: string;
+}
+
+export function getMintTimelineStatus(
+  timeline: MintTimelineDetails,
+  now: Date = new Date()
+): MintTimelineStatus {
+  if (now < timeline.instantUtc) {
+    return "upcoming";
+  }
+  if (now < timeline.mintEndUtc) {
+    return "live";
+  }
+  return "past";
+}
+
+export function getNextMintTimelineDetails(
+  now: Date = new Date()
+): MintTimelineDetails {
+  return getMintTimelineDetails(getCanonicalNextMintNumber(now));
+}
+
+export function getCurrentMintTimelineDetails(
+  now: Date = new Date()
+): MintTimelineDetails | null {
+  const nextTimeline = getNextMintTimelineDetails(now);
+  const currentOrPreviousTimeline = getMintTimelineDetails(
+    getMintNumberForMintDate(now)
+  );
+  const candidates = [nextTimeline, currentOrPreviousTimeline];
+  const previousMintNumber = currentOrPreviousTimeline.mintNumber - 1;
+  if (previousMintNumber > 0) {
+    candidates.push(getMintTimelineDetails(previousMintNumber));
+  }
+
+  return (
+    candidates.find(
+      (timeline) => getMintTimelineStatus(timeline, now) === "live"
+    ) ?? null
+  );
 }
 
 export function buildMemeCalendarMintResponse(
