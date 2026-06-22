@@ -525,6 +525,7 @@ export default function Auth({
   const [sessionUpgradeTimeLeftMs, setSessionUpgradeTimeLeftMs] = useState(0);
   const [sessionUpgradeCanDismiss, setSessionUpgradeCanDismiss] =
     useState(true);
+  const signModalReasonRef = useRef<SignModalReason>(signModalReason);
 
   const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity(
     {
@@ -643,6 +644,10 @@ export default function Auth({
   }, [address]);
 
   useEffect(() => {
+    signModalReasonRef.current = signModalReason;
+  }, [signModalReason]);
+
+  useEffect(() => {
     if (!address || !connectedProfile?.id) {
       return;
     }
@@ -684,10 +689,12 @@ export default function Auth({
       return;
     }
 
-    // Clear any stale sign modal state when returning to an authorized account.
-    // If JWT validation still needs a signature, validateAuthImmediate will
-    // re-open it via onShowSignModal(true).
-    setShowSignModal(false);
+    // Clear stale non-upgrade sign modal state when returning to an authorized
+    // account. Keep an active session-upgrade prompt visible while validation
+    // reruns, otherwise the prompt blinks during auth state rehydration.
+    if (signModalReasonRef.current !== "session-upgrade") {
+      setShowSignModal(false);
+    }
 
     const activeStoredAddress = getWalletAddress();
     if (
@@ -1409,12 +1416,14 @@ export default function Auth({
 
   // Computed modal visibility to prevent flickering during rapid state changes
   const shouldShowSignModal = useMemo(() => {
+    const shouldHideDuringValidation =
+      authLoadingState === "validating" && signModalReason !== "session-upgrade";
     return (
       showSignModal &&
-      authLoadingState !== "validating" &&
+      !shouldHideDuringValidation &&
       connectionState === "connected"
     );
-  }, [showSignModal, authLoadingState, connectionState]);
+  }, [showSignModal, authLoadingState, connectionState, signModalReason]);
 
   const isSignRequestInProgress =
     isSigningPending || authLoadingState === "signing";
@@ -1468,9 +1477,19 @@ export default function Auth({
   const signModalConfirmText = isDisconnectedWebSessionUpgradePrompt
     ? "Connect"
     : "Sign";
+  const reconnectActiveWalletForSessionUpgrade = async (): Promise<void> => {
+    try {
+      await seizeDisconnect();
+    } catch (error) {
+      logErrorSecurely("session_upgrade_disconnect_before_connect", error);
+      return;
+    }
+
+    seizeConnect();
+  };
   const onConfirmSignRequest = () => {
     if (isDisconnectedWebSessionUpgradePrompt) {
-      seizeConnect();
+      void reconnectActiveWalletForSessionUpgrade();
       return;
     }
     void requestAuth();
