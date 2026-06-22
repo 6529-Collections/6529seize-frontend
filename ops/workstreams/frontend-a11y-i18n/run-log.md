@@ -3323,3 +3323,51 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and mobile
     Chromium.
   - risk floor and changed-secret scan.
+
+## 2026-06-22T15:20Z Create-Wave Sandbox E2E Slice Started
+
+- PR #2844 merged and shipped to production. Production now serves
+  `d26393b40d2fec0e9a2bf557f911324b27bc7686`, and post-deploy
+  `seize run test:e2e:production:readonly` passed 65/65.
+- Started branch `codex/e2e-wave-create-sandbox` from current `origin/main`
+  for the next positive authenticated local-sandbox E2E slice.
+- Extended the local mock API plan for `/waves/create` so the create-wave
+  wizard can exercise the real Chat-wave path with synthetic dev-auth:
+  Overview name, default public groups, description editor, automatic
+  "Only playwright" admin group creation, group publish, wave creation, and
+  navigation to a deterministic created wave detail page.
+- The mutation auditor for this slice should allow only exact queryless
+  sandbox POSTs to `/api/groups`, `/api/groups/{sandbox-admin-id}/visible`,
+  and `/api/waves` with the expected bodies. Unknown mock API writes,
+  same-origin app API writes, dangerous composer/upload paths, oversized bodies,
+  and unknown unsafe external browser writes remain failures.
+- Local validation completed before independent review:
+  - `seize install:frozen`
+  - `node --check tests/support/composerSandboxServer.cjs`
+  - focused ESLint on changed sandbox support/spec files
+  - Prettier check for changed docs/spec/support/package files
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`
+  - `seize run lint:changed`
+  - focused create-wave sandbox rerun: 1 passed
+  - `seize run test:e2e:auth-sandbox`: 5 passed
+  - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and mobile
+    Chromium
+  - risk floor computed Level 4 because `package.json` updates a
+    release-validation control
+  - changed-secret scan and workflow-security scan passed
+  - `codex-diff-check`
+- Independent verifier `Hubble` found one high pre-publication issue: the
+  create-wave mutation validators enforced expected values but did not reject
+  arbitrary extra nested fields. Fixed by adding recursive exact-key checks for
+  the admin group body, description drop/part body, voting, participation, chat,
+  wave config, and top-level create-wave body. Runtime period values remain
+  dynamic but key-exact and must be finite positive numbers with `max >= min`.
+- Post-fix validation passed:
+  - focused create-wave sandbox rerun: 1 passed
+  - `seize run test:e2e:auth-sandbox`: 5 passed
+  - focused ESLint, Prettier check, Playwright typecheck, changed typecheck,
+    `lint:changed`, risk floor, changed-secret scan, workflow-security scan,
+    and `codex-diff-check`
+- Hubble re-reviewed the updated diff and found no remaining publication
+  blockers.

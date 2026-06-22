@@ -118,9 +118,10 @@ Surface matrix:
   pack.
 - `test:e2e:auth-sandbox` runs the local authenticated sandbox on desktop
   Chromium. It includes the composer checks plus positive `/notifications`
-  and `/messages/create` flows with deterministic mock API data. It allows
-  only explicit local sandbox mutations such as notification mark-read and
-  synthetic direct-message creation with exact sandbox IDs, queryless paths, and
+  `/messages/create`, and `/waves/create` Chat-wave flows with deterministic
+  mock API data. It allows only explicit local sandbox mutations such as
+  notification mark-read, synthetic direct-message creation, and synthetic
+  create-wave group/wave creation with exact sandbox IDs, queryless paths, and
   request bodies. Unknown mock API writes fail the sandbox request audit, and
   unexpected same-origin Next.js API writes or unknown unsafe external browser
   writes are blocked by a browser route guard. Known wallet and analytics SDK
@@ -238,10 +239,10 @@ Large-pack ownership:
   or a user-equivalent product behavior that does not mark notifications read.
 - `test:e2e:auth-sandbox` is owned by PR or train owners changing local
   dev-auth behavior, notifications UI/filtering, direct-message creation,
-  composer shell behavior, or the sandbox mutation auditor. It is the positive
-  stateful counterpart to the remote read-only packs and must stay loopback
-  only; the mock API and spawned Next dev server are intentionally bound to
-  loopback hosts.
+  create-wave wizard behavior, composer shell behavior, or the sandbox mutation
+  auditor. It is the positive stateful counterpart to the remote read-only packs
+  and must stay loopback only; the mock API and spawned Next dev server are
+  intentionally bound to loopback hosts.
 - `test:e2e:profile-deep-links-readonly` is owned by PR or train owners
   changing public profile routing, query-preserving profile links, legacy
   waves/groups/followers redirects, profile tab canonicalization, query
