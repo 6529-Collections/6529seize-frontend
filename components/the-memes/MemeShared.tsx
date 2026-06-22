@@ -102,7 +102,7 @@ async function getMetadataProps(
       `${publicEnv.API_ENDPOINT}/api/${urlPath}?${query}`
     );
     const nft = Array.isArray(response.data) ? response.data[0] : undefined;
-    if (nft) {
+    if (nft && typeof nft.name === "string" && nft.name.trim().length > 0) {
       description = `${name} | ${description}`;
       name = nft.name;
       artist = nft.artist ?? null;
