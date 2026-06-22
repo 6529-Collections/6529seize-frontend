@@ -70,7 +70,7 @@ const setViewportWidth = (width: number) => {
 
 /** Mocks hover media queries used by drop action interaction mode. */
 const setHoverSupport = (hasHover: boolean) => {
-  globalThis.window.matchMedia = jest.fn((query: string) => ({
+  globalThis.matchMedia = jest.fn((query: string) => ({
     matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
     media: query,
     onchange: null,
@@ -79,7 +79,7 @@ const setHoverSupport = (hasHover: boolean) => {
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
-  })) as typeof window.matchMedia;
+  })) as typeof globalThis.matchMedia;
 };
 
 describe("DefaultWinnerDrop", () => {

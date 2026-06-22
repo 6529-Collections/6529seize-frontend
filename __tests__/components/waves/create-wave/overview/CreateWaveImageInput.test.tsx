@@ -4,12 +4,12 @@ import CreateWaveImageInput from '@/components/waves/create-wave/overview/Create
 import { createMockAuthContext } from '@/__tests__/utils/testContexts';
 
 // Mock URL.createObjectURL
-Object.defineProperty(global.URL, 'createObjectURL', {
+Object.defineProperty(globalThis.URL, 'createObjectURL', {
   writable: true,
   value: jest.fn(() => 'mocked-object-url'),
 });
 
-Object.defineProperty(global.URL, 'revokeObjectURL', {
+Object.defineProperty(globalThis.URL, 'revokeObjectURL', {
   writable: true,
   value: jest.fn(),
 });
