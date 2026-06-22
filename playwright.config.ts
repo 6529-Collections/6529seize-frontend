@@ -38,6 +38,9 @@ const webServerPort = (() => {
 const webServerCommand =
   process.env["PLAYWRIGHT_WEB_SERVER_COMMAND"] ||
   "node scripts/require-6529-command.cjs && node scripts/dev-with-fallback.cjs";
+const forceWebServer =
+  process.env["PLAYWRIGHT_FORCE_WEB_SERVER"] === "1" ||
+  process.env["PLAYWRIGHT_FORCE_WEB_SERVER"] === "true";
 
 const config = defineConfig({
   testDir: "./tests",
@@ -96,7 +99,7 @@ const config = defineConfig({
             PORT: webServerPort,
           },
           url: webServerUrl,
-          reuseExistingServer: !process.env["CI"],
+          reuseExistingServer: !process.env["CI"] && !forceWebServer,
           timeout: webServerTimeout,
         },
       }),

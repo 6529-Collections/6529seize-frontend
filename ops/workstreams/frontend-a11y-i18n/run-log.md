@@ -2970,3 +2970,67 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   it. Fixed the fixture helper to allow only `GET` and `HEAD`, and to fail
   loudly on any other matching method. Also removed stale active-context next
   pack guidance that referenced already-merged E2E areas.
+
+## 2026-06-22T05:45Z Composer Sandbox E2E Pack Validated
+
+- PR #2819 merged into `origin/main` as
+  `174b2d054 Add search and wave read-only E2E coverage (#2819)`.
+- Started branch `codex/e2e-composer-sandbox` from current `origin/main` for
+  the next unfinished high-value E2E pack: local-only authenticated
+  composer/upload/link-preview sandbox coverage.
+- Added `tests/support/composerSandboxServer.cjs`, a local mock API plus Next
+  dev runner that:
+  - builds the env schema before starting Next, because direct Next startup
+    bypasses the repo `predev` script.
+  - points runtime API, allowlist API, WebSocket, and base endpoint values at
+    local-only origins.
+  - generates synthetic dev-auth data at runtime without committing a
+    token-shaped literal or reading local secrets.
+  - records browser requests through `/__composer-sandbox/requests`.
+  - classifies `/api/drops`, `/api/drop-media`, and `/api/attachments`
+    mutations as dangerous composer/upload mutations.
+  - keeps known notification wave-read side effects separate from dangerous
+    composer mutations, while failing the spec on either dangerous composer
+    mutations or any unhandled local mutation.
+- Added `tests/social/waves-composer-sandbox.spec.ts`, a local-only Playwright
+  pack gated by `PLAYWRIGHT_COMPOSER_SANDBOX=1` and `PLAYWRIGHT_ENV=local`.
+  It covers desktop and mobile Chromium file attachment preview/removal,
+  link-preview rendering, composer post-button enablement, and mock mutation
+  diagnostics.
+- Added `PLAYWRIGHT_FORCE_WEB_SERVER` support in `playwright.config.ts` so this
+  sandbox pack always starts its intended local Next/mock server instead of
+  accidentally reusing a stale local dev server.
+- Added a spec-level loopback assertion so inherited Playwright URL env cannot
+  send this local sandbox pack to staging or production.
+- Added `test:e2e:composer-sandbox` to `package.json` and documented ownership
+  and local-only safety in `tests/README.md`.
+- Validation completed before PR publication:
+  - `seize-local-dev bootstrap`
+  - `seize install:frozen`
+  - `seize run format:uncommitted`
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `seize exec prettier --write tests/support/composerSandboxServer.cjs`
+  - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and mobile
+    Chromium.
+  - `seize run typecheck:playwright`
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/support/composerSandboxServer.cjs tests/social/waves-composer-sandbox.spec.ts playwright.config.ts`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    computed Level 4 because `package.json` scripts are release-validation
+    controls.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/composer-sandbox-secret-scan-final.json`:
+    passed, 0 findings.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/composer-sandbox-workflow-security-final.json`:
+    passed, 0 findings.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+  - `codex-diff-check`
+- Local `seize run quality:changed` still fails at its aggregate format step in
+  this Windows worktree, while the direct equivalent checks
+  (`format:changed`, `lint:changed`, and `typecheck:changed`) pass. Treat this
+  as a local wrapper aggregation caveat rather than a code failure unless CI
+  reproduces it.
+- This pack is intentionally not a staging or production smoke. It exercises
+  authenticated composer-adjacent behavior only against the local mock API and
+  must remain separate from deployed-environment read-only packs unless a
+  disposable backend sandbox and explicit mutation plan are added.

@@ -109,6 +109,13 @@ Surface matrix:
 - `test:e2e:search-waves-readonly` runs global header search keyboard and
   navigation coverage plus wave-local message search coverage on both baseline
   web projects, with the mutation guard enabled even locally.
+- `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
+  sandbox on both baseline web projects. It starts a mock API/WebSocket server,
+  renders a real wave detail route, verifies attachment queue/remove behavior
+  and deterministic link previews, and fails if composer submit/upload
+  endpoints are touched. It must run against a loopback base URL, but it is not
+  a full network-isolation harness and is not a staging or production smoke
+  pack.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -221,6 +228,13 @@ Large-pack ownership:
   header search, site search result catalog entries, wave-local message search,
   public wave detail routing, search modal keyboard/focus behavior, or
   read-only mutation guard behavior on search and wave surfaces.
+- `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
+  composer input, attachment preview/removal, link preview rendering, dev-auth
+  composer eligibility, or local sandbox/mock API coverage. The pack may use
+  local synthetic auth and a mock API, but it must never submit a drop or upload
+  files to staging or production. Treat it as coverage for composer/drop/upload
+  API safety, not as a guarantee that every external read-only media or metadata
+  endpoint is isolated.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.
