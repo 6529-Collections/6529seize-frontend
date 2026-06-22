@@ -12,6 +12,12 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const reactDomInsertBeforeMessage =
+    "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+  const reactDomFrame = {
+    filename:
+      "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+  };
 
   type BeforeSendResult = {
     tags?: Record<string, unknown> | undefined;
@@ -65,6 +71,33 @@ describe("instrumentation-client", () => {
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it("drops exact React DOM insertBefore NotFoundError events on waves routes with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "react-dom-insert-before-event",
+      transaction: "/waves",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomInsertBeforeMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/waves",
+        url: "/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
   });
 
   it("drops sampled-out first-party browser transport network errors", () => {
