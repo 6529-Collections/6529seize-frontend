@@ -164,6 +164,9 @@ Surface matrix:
 - `test:e2e:production:search-waves-readonly` runs the search and wave-detail
   read-only pack against production desktop web only as a public, read-only
   smoke.
+- `test:e2e:production:readonly` runs the full production-safe read-only pack
+  family in one Playwright invocation so release validation fails fast and
+  returns one aggregate status.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are

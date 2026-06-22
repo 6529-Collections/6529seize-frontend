@@ -454,19 +454,27 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 - PR #2819 merged the global search and wave-local message search E2E slice
   into `origin/main` as `174b2d054 Add search and wave read-only E2E coverage
 (#2819)`.
-- Current branch `codex/e2e-composer-sandbox` adds local-only authenticated
-  composer/upload/link-preview sandbox coverage. It uses a per-run mock API and
-  generated synthetic dev-auth token, asserts the file-preview/remove and link
-  preview paths, and fails if the browser posts to dangerous composer/upload
-  mutation endpoints.
+- PR #2820 (`codex/e2e-composer-sandbox`) merged into `origin/main` as
+  `fa048794f72898c9604a7063e25192eaf2731c1c` and shipped to production in
+  production workflow run #27934426448 after staging workflow run #27933627091
+  and staging E2E passed.
+- Production post-deploy read-only validation exposed testing debt, not a live
+  app regression: `test:e2e:production:collections-readonly` expected the exact
+  Gradient page title `6529 Gradient`, while production returns
+  `6529 Gradient | Collections`.
+- Current branch `codex/fix-production-collections-readonly` fixes that title
+  assertion and adds aggregate `test:e2e:production:readonly` so release
+  validation can run all production-safe read-only packs in one failing
+  Playwright invocation.
 - Deployment train policy remains: merge only after Codex, reviewbots, and CI
   stop adding material value; deploy staging first, validate exact merged SHA,
   then production from current `origin/main` with release evidence.
 
 ## Current Next Actions
 
-1. Finish CI/reviewbot iteration and merge readiness for PR #2820
-   (`codex/e2e-composer-sandbox`).
+1. Publish the production read-only aggregate follow-up PR from
+   `codex/fix-production-collections-readonly`, iterate CI/reviewbots, merge,
+   and deploy because it updates release-validation controls.
 2. Keep `/notifications` out of staging/production read-only smoke until a
    disposable sandbox account/backend or product-safe non-mutating test path
    exists.
