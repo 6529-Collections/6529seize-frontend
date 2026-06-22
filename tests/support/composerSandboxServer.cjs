@@ -32,6 +32,12 @@ const SANDBOX_NOTIFICATION_WAVE_ID = "00000000-0000-4000-8000-000000000533";
 const SANDBOX_NOTIFICATION_DROP_ID = "00000000-0000-4000-8000-000000000534";
 const SANDBOX_NOTIFICATION_REACTION_DROP_ID =
   "00000000-0000-4000-8000-000000000535";
+const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
+const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
+const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
+const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
+const SANDBOX_CREATED_WAVE_DESCRIPTION =
+  "Local-only create-wave description for Playwright.";
 const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
@@ -85,6 +91,7 @@ const localProfile = {
   classification: "BOT",
   sub_classification: null,
   primary_address: SANDBOX_WALLET,
+  primary_wallet: SANDBOX_WALLET,
   wallets: [
     {
       wallet: SANDBOX_WALLET,
@@ -101,6 +108,39 @@ const localProfile = {
   artist_of_prevote_cards: [],
   profile_wave_id: null,
   is_wave_creator: false,
+};
+
+const sandboxAdminGroup = {
+  id: SANDBOX_ADMIN_GROUP_ID,
+  name: `Only ${SANDBOX_HANDLE}`,
+  created_at: CREATED_AT,
+  created_by: localIdentityOverview,
+  visible: true,
+  is_private: false,
+  group: {
+    tdh: {
+      min: null,
+      max: null,
+      inclusion_strategy: "TDH",
+    },
+    rep: {
+      min: null,
+      max: null,
+      direction: "RECEIVED",
+      user_identity: null,
+      category: null,
+    },
+    cic: {
+      min: null,
+      max: null,
+      direction: "RECEIVED",
+      user_identity: null,
+    },
+    level: { min: null, max: null },
+    owns_nfts: [],
+    identity_addresses: [SANDBOX_WALLET],
+    excluded_identity_addresses: null,
+  },
 };
 
 function identityOverview({
@@ -327,6 +367,58 @@ const localDrop = {
   nft_links: [],
 };
 
+const createdWaveMin = {
+  ...localWaveMin,
+  id: SANDBOX_CREATED_WAVE_ID,
+  name: SANDBOX_CREATED_WAVE_NAME,
+  description_drop_id: SANDBOX_CREATED_WAVE_DROP_ID,
+  admin_group_id: SANDBOX_ADMIN_GROUP_ID,
+};
+
+const createdWaveOverview = {
+  ...localWaveOverview,
+  id: SANDBOX_CREATED_WAVE_ID,
+  name: SANDBOX_CREATED_WAVE_NAME,
+  description_drop: {
+    id: SANDBOX_CREATED_WAVE_DROP_ID,
+    content: SANDBOX_CREATED_WAVE_DESCRIPTION,
+  },
+};
+
+const createdWaveDescriptionDrop = {
+  ...localWave.description_drop,
+  id: SANDBOX_CREATED_WAVE_DROP_ID,
+  wave: createdWaveMin,
+  content: SANDBOX_CREATED_WAVE_DESCRIPTION,
+  parts: [
+    {
+      id: 1,
+      content: SANDBOX_CREATED_WAVE_DESCRIPTION,
+      media: [],
+      quoted_drop: null,
+    },
+  ],
+};
+
+const createdWave = {
+  ...localWave,
+  id: SANDBOX_CREATED_WAVE_ID,
+  name: SANDBOX_CREATED_WAVE_NAME,
+  description_drop: createdWaveDescriptionDrop,
+  wave: {
+    ...localWave.wave,
+    admin_group: { group: sandboxAdminGroup },
+    authenticated_user_eligible_for_admin: true,
+  },
+};
+
+const createdWaveDrop = {
+  ...localDrop,
+  id: SANDBOX_CREATED_WAVE_DROP_ID,
+  content: SANDBOX_CREATED_WAVE_DESCRIPTION,
+  parts_count: 1,
+};
+
 const dmWaveOverview = {
   ...localWaveOverview,
   id: SANDBOX_DM_WAVE_ID,
@@ -455,6 +547,7 @@ const sandboxNotificationWaveIds = new Set([
   SANDBOX_WAVE_ID,
   SANDBOX_DM_WAVE_ID,
   SANDBOX_NOTIFICATION_WAVE_ID,
+  SANDBOX_CREATED_WAVE_ID,
 ]);
 
 function notificationResponse(searchParams) {
@@ -579,6 +672,247 @@ function isExpectedDirectMessageBody(body) {
   );
 }
 
+function hasOnlyKeys(value, expectedKeys) {
+  if (!isPlainObject(value)) {
+    return false;
+  }
+
+  const keys = Object.keys(value).sort();
+  const expected = [...expectedKeys].sort();
+  return (
+    keys.length === expected.length &&
+    keys.every((key, index) => key === expected[index])
+  );
+}
+
+function isExpectedCreateAdminGroupBody(body) {
+  if (
+    !hasOnlyKeys(body, ["name", "group"]) ||
+    body.name !== `Only ${SANDBOX_HANDLE}` ||
+    !hasOnlyKeys(body.group, [
+      "cic",
+      "excluded_identity_addresses",
+      "identity_addresses",
+      "level",
+      "owns_nfts",
+      "rep",
+      "tdh",
+    ])
+  ) {
+    return false;
+  }
+
+  const group = body.group;
+  return (
+    hasOnlyKeys(group.tdh, ["inclusion_strategy", "max", "min"]) &&
+    hasOnlyKeys(group.rep, [
+      "category",
+      "direction",
+      "max",
+      "min",
+      "user_identity",
+    ]) &&
+    hasOnlyKeys(group.cic, ["direction", "max", "min", "user_identity"]) &&
+    hasOnlyKeys(group.level, ["max", "min"]) &&
+    Array.isArray(group.owns_nfts) &&
+    group.owns_nfts.length === 0 &&
+    Array.isArray(group.identity_addresses) &&
+    group.identity_addresses.length === 1 &&
+    isSameAddress(group.identity_addresses[0], SANDBOX_WALLET) &&
+    group.excluded_identity_addresses === null &&
+    group.tdh?.min === null &&
+    group.tdh?.max === null &&
+    group.tdh?.inclusion_strategy === "TDH" &&
+    group.rep?.min === null &&
+    group.rep?.max === null &&
+    group.rep?.direction === "RECEIVED" &&
+    group.rep?.user_identity === null &&
+    group.rep?.category === null &&
+    group.cic?.min === null &&
+    group.cic?.max === null &&
+    group.cic?.direction === "RECEIVED" &&
+    group.cic?.user_identity === null &&
+    group.level?.min === null &&
+    group.level?.max === null
+  );
+}
+
+function isExpectedPublishAdminGroupBody(body) {
+  return (
+    hasOnlyKeys(body, ["visible", "old_version_id"]) &&
+    body.visible === true &&
+    body.old_version_id === null
+  );
+}
+
+function hasNullGroupScope(value) {
+  return (
+    hasOnlyKeys(value, ["scope"]) &&
+    hasOnlyKeys(value.scope, ["group_id"]) &&
+    value.scope.group_id === null
+  );
+}
+
+function isExpectedRuntimePeriod(period) {
+  return (
+    hasOnlyKeys(period, ["max", "min"]) &&
+    typeof period.min === "number" &&
+    Number.isFinite(period.min) &&
+    period.min > 0 &&
+    typeof period.max === "number" &&
+    Number.isFinite(period.max) &&
+    period.max >= period.min
+  );
+}
+
+function isExpectedDescriptionDrop(drop) {
+  if (
+    !hasOnlyKeys(drop, [
+      "mentioned_users",
+      "metadata",
+      "parts",
+      "referenced_nfts",
+      "signature",
+      "title",
+    ]) ||
+    !Array.isArray(drop.parts)
+  ) {
+    return false;
+  }
+
+  return (
+    drop.parts.length === 1 &&
+    hasOnlyKeys(drop.parts[0], ["content", "media", "quoted_drop"]) &&
+    drop.parts[0]?.content === SANDBOX_CREATED_WAVE_DESCRIPTION &&
+    Array.isArray(drop.parts[0]?.media) &&
+    drop.parts[0].media.length === 0 &&
+    drop.parts[0]?.quoted_drop === null &&
+    Array.isArray(drop.referenced_nfts) &&
+    drop.referenced_nfts.length === 0 &&
+    Array.isArray(drop.mentioned_users) &&
+    drop.mentioned_users.length === 0 &&
+    Array.isArray(drop.metadata) &&
+    drop.metadata.length === 0 &&
+    drop.title === null &&
+    drop.signature === null
+  );
+}
+
+function isExpectedCreateWaveVotingConfig(voting) {
+  return (
+    hasOnlyKeys(voting, [
+      "credit_category",
+      "credit_scope",
+      "credit_type",
+      "creditor_id",
+      "forbid_negative_votes",
+      "period",
+      "scope",
+      "signature_required",
+    ]) &&
+    hasOnlyKeys(voting.scope, ["group_id"]) &&
+    voting.scope.group_id === null &&
+    voting.credit_type === "TDH_PLUS_XTDH" &&
+    voting.credit_scope === "WAVE" &&
+    voting.credit_category === null &&
+    voting.creditor_id === null &&
+    voting.signature_required === false &&
+    isExpectedRuntimePeriod(voting.period) &&
+    voting.forbid_negative_votes === false
+  );
+}
+
+function isExpectedCreateWaveParticipationConfig(participation) {
+  return (
+    hasOnlyKeys(participation, [
+      "no_of_applications_allowed_per_participant",
+      "period",
+      "required_media",
+      "required_metadata",
+      "scope",
+      "signature_required",
+      "terms",
+    ]) &&
+    hasOnlyKeys(participation.scope, ["group_id"]) &&
+    participation.scope.group_id === null &&
+    participation.no_of_applications_allowed_per_participant === null &&
+    Array.isArray(participation.required_media) &&
+    participation.required_media.length === 0 &&
+    Array.isArray(participation.required_metadata) &&
+    participation.required_metadata.length === 0 &&
+    participation.signature_required === false &&
+    isExpectedRuntimePeriod(participation.period) &&
+    participation.terms === null
+  );
+}
+
+function isExpectedCreateWaveChatConfig(chat) {
+  return (
+    hasOnlyKeys(chat, ["enabled", "links_disabled", "scope"]) &&
+    hasOnlyKeys(chat.scope, ["group_id"]) &&
+    chat.scope.group_id === null &&
+    chat.enabled === true &&
+    chat.links_disabled === false
+  );
+}
+
+function isExpectedCreateWaveConfig(wave) {
+  return (
+    hasOnlyKeys(wave, [
+      "admin_drop_deletion_enabled",
+      "admin_group",
+      "decisions_strategy",
+      "max_votes_per_identity_to_drop",
+      "max_winners",
+      "time_lock_ms",
+      "type",
+      "winning_threshold",
+      "winning_threshold_min_duration_ms",
+    ]) &&
+    hasOnlyKeys(wave.admin_group, ["group_id"]) &&
+    wave.admin_group.group_id === SANDBOX_ADMIN_GROUP_ID &&
+    wave.type === "CHAT" &&
+    wave.admin_drop_deletion_enabled === true &&
+    wave.winning_threshold === null &&
+    wave.winning_threshold_min_duration_ms === null &&
+    wave.max_winners === null &&
+    wave.max_votes_per_identity_to_drop === null &&
+    wave.time_lock_ms === null &&
+    wave.decisions_strategy === null
+  );
+}
+
+function isExpectedCreateWaveBody(body) {
+  if (
+    !hasOnlyKeys(body, [
+      "chat",
+      "description_drop",
+      "outcomes",
+      "participation",
+      "picture",
+      "visibility",
+      "voting",
+      "wave",
+      "name",
+    ])
+  ) {
+    return false;
+  }
+
+  return (
+    body.name === SANDBOX_CREATED_WAVE_NAME &&
+    body.picture === null &&
+    isExpectedDescriptionDrop(body.description_drop) &&
+    hasNullGroupScope(body.visibility) &&
+    isExpectedCreateWaveParticipationConfig(body.participation) &&
+    isExpectedCreateWaveVotingConfig(body.voting) &&
+    isExpectedCreateWaveChatConfig(body.chat) &&
+    isExpectedCreateWaveConfig(body.wave) &&
+    Array.isArray(body.outcomes) &&
+    body.outcomes.length === 0
+  );
+}
+
 function notificationIdFromPath(pathname) {
   return pathname.match(/^\/api\/notifications\/(\d+)\/read$/)?.[1] ?? null;
 }
@@ -604,6 +938,18 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 
   if (pathname === "/api/notifications/read") {
     return isEmptyRequestBody(body);
+  }
+
+  if (pathname === "/api/groups") {
+    return isExpectedCreateAdminGroupBody(body);
+  }
+
+  if (pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible`) {
+    return isExpectedPublishAdminGroupBody(body);
+  }
+
+  if (pathname === "/api/waves") {
+    return isExpectedCreateWaveBody(body);
   }
 
   const notificationId = notificationIdFromPath(pathname);
@@ -645,15 +991,61 @@ function classifyRequest(method, pathname, searchParams, body) {
 }
 
 function loggedRequestBody(pathname, body) {
-  if (pathname !== "/api/waves/direct-message/new" || !isPlainObject(body)) {
+  if (!isPlainObject(body)) {
     return undefined;
   }
 
-  return {
-    identity_addresses: Array.isArray(body.identity_addresses)
-      ? body.identity_addresses
-      : [],
-  };
+  if (pathname === "/api/waves/direct-message/new") {
+    return {
+      identity_addresses: Array.isArray(body.identity_addresses)
+        ? body.identity_addresses
+        : [],
+    };
+  }
+
+  if (pathname === "/api/groups") {
+    return {
+      name: typeof body.name === "string" ? body.name : null,
+      identity_addresses: Array.isArray(body.group?.identity_addresses)
+        ? body.group.identity_addresses
+        : [],
+    };
+  }
+
+  if (pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible`) {
+    return {
+      visible: body.visible,
+      old_version_id: body.old_version_id,
+    };
+  }
+
+  if (pathname === "/api/waves") {
+    const firstPart = Array.isArray(body.description_drop?.parts)
+      ? body.description_drop.parts[0]
+      : null;
+    return {
+      name: typeof body.name === "string" ? body.name : null,
+      admin_group_id: body.wave?.admin_group?.group_id ?? null,
+      description: isPlainObject(firstPart) ? firstPart.content : null,
+      keys: Object.keys(body).sort(),
+      description_drop_keys: isPlainObject(body.description_drop)
+        ? Object.keys(body.description_drop).sort()
+        : [],
+      description_part_keys: isPlainObject(firstPart)
+        ? Object.keys(firstPart).sort()
+        : [],
+      participation_keys: isPlainObject(body.participation)
+        ? Object.keys(body.participation).sort()
+        : [],
+      voting_keys: isPlainObject(body.voting)
+        ? Object.keys(body.voting).sort()
+        : [],
+      chat_keys: isPlainObject(body.chat) ? Object.keys(body.chat).sort() : [],
+      wave_keys: isPlainObject(body.wave) ? Object.keys(body.wave).sort() : [],
+    };
+  }
+
+  return undefined;
 }
 
 function recordRequest(method, url, body) {
@@ -699,6 +1091,11 @@ function handleMockApi(method, pathname, url, body, res) {
     return true;
   }
 
+  if (pathname === "/api/groups" && isSafeReadMethod(method)) {
+    writeJson(res, 200, []);
+    return true;
+  }
+
   if (pathname === "/api/v2/waves" && isSafeReadMethod(method)) {
     writeJson(res, 200, { data: [localWaveOverview], page: 1, next: false });
     return true;
@@ -722,6 +1119,25 @@ function handleMockApi(method, pathname, url, body, res) {
     isSafeReadMethod(method)
   ) {
     writeJson(res, 200, { wave: dmWaveOverview, drops: [] });
+    return true;
+  }
+
+  if (
+    pathname === `/api/waves/${SANDBOX_CREATED_WAVE_ID}` &&
+    isSafeReadMethod(method)
+  ) {
+    writeJson(res, 200, createdWave);
+    return true;
+  }
+
+  if (
+    pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/drops` &&
+    isSafeReadMethod(method)
+  ) {
+    writeJson(res, 200, {
+      wave: createdWaveOverview,
+      drops: [createdWaveDrop],
+    });
     return true;
   }
 
@@ -830,6 +1246,33 @@ function handleMockApi(method, pathname, url, body, res) {
 
   if (pathname === "/api/feed" && isSafeReadMethod(method)) {
     writeJson(res, 200, []);
+    return true;
+  }
+
+  if (
+    method === "POST" &&
+    pathname === "/api/groups" &&
+    isKnownSandboxMutation(method, pathname, url.searchParams, body)
+  ) {
+    writeJson(res, 200, { ...sandboxAdminGroup, visible: false });
+    return true;
+  }
+
+  if (
+    method === "POST" &&
+    pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible` &&
+    isKnownSandboxMutation(method, pathname, url.searchParams, body)
+  ) {
+    writeJson(res, 200, sandboxAdminGroup);
+    return true;
+  }
+
+  if (
+    method === "POST" &&
+    pathname === "/api/waves" &&
+    isKnownSandboxMutation(method, pathname, url.searchParams, body)
+  ) {
+    writeJson(res, 200, createdWave);
     return true;
   }
 
