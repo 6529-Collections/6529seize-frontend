@@ -32,7 +32,7 @@ async function expectProfileShell(
   ).toHaveAttribute("aria-current", "page");
 }
 
-test.describe("Profile deep-link read-only coverage @surface @medium @readonly", () => {
+test.describe("Profile deep-link read-only coverage @surface @medium @large @readonly", () => {
   test("keeps public profile query links readable without mutation", async ({
     page,
   }) => {
