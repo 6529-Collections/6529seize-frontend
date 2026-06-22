@@ -68,6 +68,60 @@ describe("Playwright read-only mutation guard", () => {
     });
   });
 
+  it("blocks notification mark-read mutations with a named registry rule", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "http://localhost:3001",
+        method: "POST",
+        readonly: true,
+        url: "http://localhost:3000/api/notifications/read",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "notification-read-all",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "http://localhost:3101",
+        method: "POST",
+        readonly: true,
+        url: "http://127.0.0.1:3000/api/notifications/read",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "notification-read-all-loopback",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://api.staging.6529.io/api/notifications/read",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "staging-notification-read-all",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://api.6529.io/api/notifications/read",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "production-notification-read-all",
+    });
+  });
+
   it("allows the same-origin open-graph metadata lookup in read-only mode", () => {
     expect(
       decideReadonlyRequest({
