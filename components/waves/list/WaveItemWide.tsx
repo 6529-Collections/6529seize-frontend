@@ -14,7 +14,6 @@ import { getRandomColorWithSeed, numberWithCommas } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import WaveItemFollow from "./WaveItemFollow";
-import type { SidebarWave } from "@/types/waves.types";
 
 const LEVEL_CLASSES: ReadonlyArray<{
   readonly minLevel: number;
@@ -130,22 +129,17 @@ function resolveLevelClasses(level?: number | null) {
 
 export default function WaveItemWide({
   wave,
-  wavePreview,
   userPlaceholder,
   titlePlaceholder,
 }: {
   readonly wave?: ApiWave | undefined;
-  readonly wavePreview?: SidebarWave | undefined;
   readonly userPlaceholder?: string | undefined;
   readonly titlePlaceholder?: string | undefined;
 }) {
   const router = useRouter();
-  const author = wave?.author ?? wavePreview?.creator ?? null;
+  const author = wave?.author;
   const authorHref = author?.handle ? `/${author.handle}` : undefined;
   const authorLevel = author?.level ?? 0;
-  const waveId = wave?.id ?? wavePreview?.id;
-  const waveName = wave?.name ?? wavePreview?.name;
-  const wavePicture = wave?.picture ?? wavePreview?.picture ?? null;
 
   const banner1 =
     author?.banner1_color ??
@@ -156,17 +150,16 @@ export default function WaveItemWide({
     getRandomColorWithSeed(author?.handle ?? userPlaceholder ?? "");
 
   const isDirectMessage = wave?.chat.scope.group?.is_direct_message ?? false;
-  const previewIsDirectMessage = wavePreview?.isDirectMessage ?? false;
 
-  const waveHref = waveId
+  const waveHref = wave
     ? getWaveRoute({
-        waveId,
-        isDirectMessage: wave ? isDirectMessage : previewIsDirectMessage,
+        waveId: wave.id,
+        isDirectMessage,
         isApp: false,
       })
     : undefined;
 
-  const labelValue = waveName ?? waveId;
+  const labelValue = wave?.name ?? wave?.id;
   const cardLabel = getCardLabel(waveHref, labelValue);
   const isInteractive = Boolean(waveHref);
 
@@ -290,10 +283,8 @@ export default function WaveItemWide({
     [router, waveHref]
   );
 
-  const dropsCount =
-    wave?.metrics.drops_count ?? wavePreview?.totalDropsCount ?? 0;
-  const subscribersCount = wave?.metrics.subscribers_count;
-  const hasWaveData = Boolean(wave ?? wavePreview);
+  const dropsCount = wave?.metrics.drops_count ?? 0;
+  const subscribersCount = wave?.metrics.subscribers_count ?? 0;
 
   return (
     <CardContainer
@@ -309,13 +300,13 @@ export default function WaveItemWide({
             className="tw-absolute tw-inset-0"
             style={{
               background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
-              opacity: wavePicture ? 0.35 : 1,
+              opacity: wave?.picture ? 0.35 : 1,
             }}
           />
-          {wavePicture && (
+          {wave?.picture && (
             <Image
-              src={getScaledImageUri(wavePicture, ImageScale.AUTOx450)}
-              alt={`Wave ${waveName ?? waveId}`}
+              src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
+              alt={`Wave ${wave.name}`}
               fill
               sizes="(max-width: 639px) 96px, (max-width: 1023px) 112px, 128px"
               className="tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-[1.02]"
@@ -326,7 +317,7 @@ export default function WaveItemWide({
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
           <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
             <span className="tw-line-clamp-2 tw-text-sm tw-font-bold tw-leading-tight tw-text-white sm:tw-text-base">
-              {waveName ?? titlePlaceholder}
+              {wave?.name ?? titlePlaceholder}
             </span>
             {wave && (
               <div
@@ -340,7 +331,7 @@ export default function WaveItemWide({
 
           {authorSection}
 
-          {hasWaveData && (
+          {wave && (
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-[11px] tw-text-iron-400">
               <span className="tw-inline-flex tw-items-center tw-gap-1">
                 <ChatBubbleLeftRightIcon
@@ -354,18 +345,16 @@ export default function WaveItemWide({
                   {dropsCount === 1 ? "Drop" : "Drops"}
                 </span>
               </span>
-              {subscribersCount !== undefined && (
-                <span className="tw-inline-flex tw-items-center tw-gap-1">
-                  <UserGroupIcon
-                    aria-hidden="true"
-                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
-                  />
-                  <span className="tw-font-medium">
-                    {numberWithCommas(subscribersCount)}
-                  </span>
-                  <span className="tw-text-iron-500">Joined</span>
+              <span className="tw-inline-flex tw-items-center tw-gap-1">
+                <UserGroupIcon
+                  aria-hidden="true"
+                  className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
+                />
+                <span className="tw-font-medium">
+                  {numberWithCommas(subscribersCount)}
                 </span>
-              )}
+                <span className="tw-text-iron-500">Joined</span>
+              </span>
             </div>
           )}
         </div>
