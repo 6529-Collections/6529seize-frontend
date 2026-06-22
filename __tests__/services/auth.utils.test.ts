@@ -54,6 +54,26 @@ describe("auth.utils", () => {
     return storage;
   };
 
+  const maxConnectedProfileFixtures = [
+    ["0x001", "jwt-1", "refresh-1", "role-1"],
+    ["0x002", "jwt-2", "refresh-2", "role-2"],
+    ["0x003", "jwt-3", "refresh-3", "role-3"],
+    ["0x004", "jwt-4", "refresh-4", "role-4"],
+    ["0x005", "jwt-5", "refresh-5", "role-5"],
+  ] as const;
+
+  const storeMaxConnectedProfiles = (): string[] => {
+    for (const [
+      address,
+      jwt,
+      refreshToken,
+      role,
+    ] of maxConnectedProfileFixtures) {
+      setAuthJwt(address, jwt, refreshToken, role);
+    }
+    return maxConnectedProfileFixtures.map(([address]) => address);
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     const { publicEnv } = require("@/config/env");
@@ -364,20 +384,18 @@ describe("auth.utils", () => {
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
 
-    setAuthJwt("0x001", "jwt-1", "refresh-1", "role-1");
-    setAuthJwt("0x002", "jwt-2", "refresh-2", "role-2");
-    setAuthJwt("0x003", "jwt-3", "refresh-3", "role-3");
+    storeMaxConnectedProfiles();
 
     expect(canStoreAnotherWalletAccount()).toBe(false);
-    expect(canStoreAnotherWalletAccount("0x004")).toBe(false);
-    expect(canStoreAnotherWalletAccount("0x003")).toBe(true);
+    expect(canStoreAnotherWalletAccount("0x006")).toBe(false);
+    expect(canStoreAnotherWalletAccount("0x005")).toBe(true);
     expect(
-      canStoreAnotherWalletAccount("0x004", {
+      canStoreAnotherWalletAccount("0x006", {
         allowAdditionalAccounts: false,
       })
     ).toBe(false);
     expect(
-      canStoreAnotherWalletAccount("0x003", {
+      canStoreAnotherWalletAccount("0x005", {
         allowAdditionalAccounts: false,
       })
     ).toBe(true);
@@ -413,15 +431,13 @@ describe("auth.utils", () => {
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
 
-    setAuthJwt("0x001", "jwt-1", "refresh-1", "role-1");
-    setAuthJwt("0x002", "jwt-2", "refresh-2", "role-2");
-    setAuthJwt("0x003", "jwt-3", "refresh-3", "role-3");
+    const storedAddresses = storeMaxConnectedProfiles();
 
-    const didStore = setAuthJwt("0x004", "jwt-4", "refresh-4", "role-4");
+    const didStore = setAuthJwt("0x006", "jwt-6", "refresh-6", "role-6");
     expect(didStore).toBe(false);
     expect(
       getConnectedWalletAccounts().map((account) => account.address)
-    ).toEqual(["0x001", "0x002", "0x003"]);
+    ).toEqual(storedAddresses);
   });
 
   it("syncs and updates stored profile metadata for connected wallet accounts", () => {
