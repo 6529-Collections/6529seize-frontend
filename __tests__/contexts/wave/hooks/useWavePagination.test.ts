@@ -213,7 +213,7 @@ describe('useWavePagination', () => {
     expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(1);
   });
 
-  it('skips around-serial requests covered by the last hydrated range', async () => {
+  it('skips around-serial requests covered by a currently hydrated drop', async () => {
     const initial: Record<string, WaveState> = {
       wave1: {
         id: 'wave1',
@@ -242,10 +242,48 @@ describe('useWavePagination', () => {
     });
 
     act(() => {
-      result.current.fetchAroundSerialNo('wave1', 105);
       result.current.fetchAroundSerialNo('wave1', 100);
     });
 
     expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches a covered serial when the current store only has a light drop', async () => {
+    const initial: Record<string, WaveState> = {
+      wave1: {
+        id: 'wave1',
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: true,
+        drops: [],
+        latestFetchedSerialNo: null,
+      },
+    };
+
+    fetchAroundSerialNoWaveMessages.mockResolvedValue([
+      { id: 'd', serial_no: 100 },
+    ]);
+
+    const { result, store } = setup(initial);
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    store.wave1!.drops = [{ id: 'd', serial_no: 100, type: DropSize.LIGHT }];
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(2);
   });
 });

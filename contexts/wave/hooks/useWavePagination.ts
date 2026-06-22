@@ -67,8 +67,17 @@ export function useWavePagination({
     []
   );
 
+  const hasHydratedDropForSerialNo = useCallback(
+    (waveId: string, serialNo: number): boolean =>
+      getData(waveId)?.drops.some(
+        (drop) =>
+          drop.serial_no === serialNo && drop.type !== DropSize.LIGHT
+      ) ?? false,
+    [getData]
+  );
+
   const determineSerialToFetch = useCallback(
-    (state: AroundSerialNoState): number | null => {
+    (waveId: string, state: AroundSerialNoState): number | null => {
       const pendingSerialNo = state.pendingSerialNo;
 
       if (pendingSerialNo === null) {
@@ -76,7 +85,9 @@ export function useWavePagination({
       }
 
       if (isSerialCoveredByLastAroundFetch(state, pendingSerialNo)) {
-        return null;
+        return hasHydratedDropForSerialNo(waveId, pendingSerialNo)
+          ? null
+          : pendingSerialNo;
       }
 
       const lastSuccessfullyFetchedSerialNo =
@@ -117,7 +128,7 @@ export function useWavePagination({
         return lastFetchedMinSerialNo - (WAVE_DROPS_PARAMS.limit - 1);
       }
     },
-    [isSerialCoveredByLastAroundFetch]
+    [hasHydratedDropForSerialNo, isSerialCoveredByLastAroundFetch]
   );
 
   /**
@@ -358,7 +369,7 @@ export function useWavePagination({
       }
 
       // Guard 2: No pending request
-      const serialToFetch = determineSerialToFetch(state);
+      const serialToFetch = determineSerialToFetch(waveId, state);
       if (serialToFetch === null) {
         state.pendingSerialNo = null;
         return;
@@ -459,7 +470,8 @@ export function useWavePagination({
         !state ||
         state.activeSerialNo === serialNo ||
         state.pendingSerialNo === serialNo ||
-        isSerialCoveredByLastAroundFetch(state, serialNo)
+        (isSerialCoveredByLastAroundFetch(state, serialNo) &&
+          hasHydratedDropForSerialNo(waveId, serialNo))
       ) {
         return;
       }
@@ -472,7 +484,11 @@ export function useWavePagination({
       // Trigger the processing queue
       _processAroundSerialNoQueue(waveId).catch(() => undefined);
     },
-    [_processAroundSerialNoQueue, isSerialCoveredByLastAroundFetch]
+    [
+      _processAroundSerialNoQueue,
+      hasHydratedDropForSerialNo,
+      isSerialCoveredByLastAroundFetch,
+    ]
   );
 
   return {
