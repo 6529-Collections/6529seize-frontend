@@ -3467,3 +3467,99 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`
 - Next action: commit/push this GLM follow-up and rerun PR checks plus bots on
   the final head.
+
+## 2026-06-22T19:35Z PR #2847 Merged And Deployed
+
+- PR #2847 merged into `origin/main` as
+  `0c55e0c628541fb2ac695d87f871568848e7c057`.
+- Final PR readiness before merge:
+  - required PR CI passed: CodeQL, DCO, Installed app checks, Plan risk and
+    security checks, SonarCloud, Snyk, and CodeRabbit status.
+  - 6529bot final-head Opus lanes were clean: general Good to merge, WCAG no
+    findings, i18n no findings, security no findings.
+  - 6529bot responsiveness passed on final-head rerun across web desktop, web
+    mobile, native simulation, and Electron simulation.
+  - GLM swarm found useful feedback on the previous head; all valid items were
+    fixed in the final head. Two final-head GLM reruns failed in the reviewbot
+    worker with the same empty-output error before producing review text, so
+    this was treated as bot-infra noise instead of an unresolved frontend
+    finding.
+- Staged the release by merging current `origin/main` into `1a-staging` as
+  `0fdc39ecddebc8f6730da82ff9838284924e9492`.
+- Staging deploy run #27976114194 succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27976114194
+  - workflow HTTP version verification matched the staging deploy SHA.
+  - local staging `/api/version` matched
+    `0fdc39ecddebc8f6730da82ff9838284924e9492`.
+  - `seize run test:e2e:staging`: 24 passed / 6 skipped.
+  - manual broad staging read-only aggregate: 127 passed / 2 skipped / 1
+    transient mobile NextGen staging API network miss; the exact failed case
+    passed on focused rerun.
+- Production deploy run #27977449591 succeeded from exact `origin/main` SHA:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27977449591
+  - workflow HTTP version verification matched the production SHA.
+  - local production `/api/version` matched
+    `0c55e0c628541fb2ac695d87f871568848e7c057`.
+  - `seize run test:e2e:production:readonly`: 65/65 passed.
+- Release notes posted:
+  - 6529 Releases drop #1123251:
+    https://6529.io/waves/05b14183-e153-4e47-bc66-42a0f49102d4?drop=62b11757-72d5-4cbe-83b2-95a550710648
+  - Follow The Repo drop #1123253:
+    https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4?drop=d18e6cc7-eb53-473c-a94c-d1edcb4be808
+- Next slice candidates remain wallet/native/Electron shell coverage, real
+  native runtime detection, and upload/posting/admin guarded packs.
+
+## 2026-06-22T20:05Z Native And Electron Simulated Shell Slice
+
+- Started branch `codex/e2e-native-shell-readonly` from current `origin/main`
+  `0c55e0c628541fb2ac695d87f871568848e7c057`.
+- Scope is test-only:
+  - expose a minimal `globalThis.Capacitor` shim in the Playwright Capacitor
+    simulations, while preserving the existing `CapacitorCustomPlatform`
+    signal.
+  - add read-only E2E coverage for Capacitor runtime signals, iOS/Android Open
+    Data subscription visibility, Capacitor app-wallet empty-state behavior,
+    Electron app-wallet unsupported behavior, and Electron share-modal desktop
+    handoff suppression.
+  - document the focused `test:e2e:native-shell-readonly` pack and broaden
+    `test:e2e:native-sim` to include all surface specs.
+- Boundary: these are browser simulations only. They should catch shell
+  branching drift, but they must not be presented as real packaged iOS,
+  Android, or Electron runtime evidence.
+- Explorer `Ampere` independently confirmed the high-value scope and
+  recommended adding the direct `globalThis.Capacitor` signal plus app-wallet
+  and Electron share-modal assertions.
+- First focused run showed the Capacitor browser simulation uses the secure
+  storage plugin's web fallback and renders an empty supported wallet state,
+  not native unsupported copy. The test and docs now assert that actual
+  simulation contract and leave real native secure storage as a separate
+  non-browser evidence requirement.
+- Targeted unit validation initially exposed two existing test-harness breaks:
+  `HeaderShare.test.tsx` redefined JSDOM's non-configurable
+  `window.location`, and `wagmiAppWalletConnector.test.ts` used viem mock
+  factories that tripped Jest hoisting. Both are fixed in this slice so the
+  relevant share/wallet unit coverage is usable again.
+- Local validation completed:
+  - `seize-local-dev bootstrap`
+  - `seize install:frozen`
+  - `seize run build:env-schema`
+  - targeted Prettier on changed files
+  - `seize run typecheck:playwright`
+  - `seize run test:e2e:native-shell-readonly`: 8 passed / 10 skipped
+  - `seize run test:e2e:native-sim`: first run found a transient iOS
+    simulation mobile-search miss; the exact failed case passed on focused
+    rerun, and the full rerun passed 24 passed / 21 skipped.
+  - `seize run test:e2e:surface-matrix`: 24 passed / 18 skipped.
+  - `seize run test:no-coverage -- __tests__/hooks/useCapacitor.test.ts __tests__/components/header/share/HeaderShare.test.tsx __tests__/utils/appkit-initialization.utils.test.ts __tests__/wagmiConfig/wagmiAppWalletConnector.test.ts`:
+    60 tests passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    Level 4, driven by `package.json` validation-command changes.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/native-shell-secret-scan.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/native-shell-workflow-security.json`:
+    clean.
+  - `codex-diff-check`
+- Next action: final diff review, commit/push/open PR, then iterate all
+  reviewbot lanes including GLM.
