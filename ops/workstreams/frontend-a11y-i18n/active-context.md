@@ -49,6 +49,16 @@ Read this section first after compaction or handoff.
       `Open ...` link, because live production can show external X links first.
     - post-fix focused Waves/Profile production check passed, and full
       `seize run test:e2e:production:readonly` passed 65/65 again.
+  - GLM swarm review on PR #2847 was useful and fixed:
+    - added unit coverage for `gotoDocumentWithTransientRetry` success,
+      non-transient pass-through, transient retry, persistent transient throw,
+      and transient-then-null behavior.
+    - made Google CSP report positive coverage a named test case.
+    - tightened Waves/Profile wave-id extraction to poll for actual UUID detail
+      paths inside the wave-list region, instead of any `/waves/` prefix.
+    - post-fix unit coverage passed 20 tests across route readiness and the
+      read-only guard, and full `seize run test:e2e:production:readonly`
+      passed 65/65 again.
   - Independent verifier `Heisenberg` found the ReMemes visible-title assertion
     was over-specific and recommended replacing exact text with the
     breakpoint-aware `Collection: ReMemes` button candidate. Fixed before PR

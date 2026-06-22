@@ -373,6 +373,20 @@ describe("Playwright read-only mutation guard", () => {
     }
   });
 
+  it("aborts exact Google CSP script-inclusion reports", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://csp.withgoogle.com/csp/script-inclusions/1a74b362328347702024274e29d77eb5",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+  });
+
   it("aborts same-origin telemetry POSTs without allowing external lookalikes", () => {
     expect(
       decideReadonlyRequest({

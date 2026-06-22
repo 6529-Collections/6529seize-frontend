@@ -3441,3 +3441,29 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`
 - Next action: commit/push the follow-up, rerun PR checks and reviewbot lanes on
   the new head, then merge/deploy if no material feedback remains.
+
+## 2026-06-22T18:18Z PR #2847 GLM Swarm Follow-Up
+
+- GLM swarm reviewed head `efe131b4dd44` and found useful additional test
+  harness hardening ideas.
+- Fixed valid GLM feedback:
+  - added `__tests__/playwright/routeReadiness.test.ts` covering
+    `gotoDocumentWithTransientRetry` success, non-transient pass-through,
+    transient retry, persistent transient throw, and transient-then-null
+    behavior.
+  - made exact Google CSP script-inclusion report positive coverage an explicit
+    named unit test.
+  - tightened the Waves/Profile legacy-link selector to poll for UUID-shaped
+    `/waves/{id}` detail paths inside the wave-list region, avoiding future
+    `/waves/create` or `/waves/feed` false positives.
+- Post-fix validation passed:
+  - `seize run test:no-coverage -- __tests__/playwright/routeReadiness.test.ts __tests__/playwright/readonlyMutationGuard.test.ts`:
+    20 tests passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - focused production Waves/Profile legacy-link test: 1 passed
+  - full `seize run test:e2e:production:readonly`: 65/65 passed
+  - `codex-diff-check`
+- Next action: commit/push this GLM follow-up and rerun PR checks plus bots on
+  the final head.
