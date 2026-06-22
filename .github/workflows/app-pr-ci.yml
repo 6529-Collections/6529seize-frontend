@@ -259,7 +259,7 @@ jobs:
             exit 0
           fi
 
-          ./bin/6529 run test:no-coverage --findRelatedTests "${existing_files[@]}" --passWithNoTests --runInBand --forceExit
+          ./bin/6529 run test:no-coverage --findRelatedTests "${existing_files[@]}" --passWithNoTests
 
       - name: Build app
         if: needs.plan.outputs.build_required == 'true'
