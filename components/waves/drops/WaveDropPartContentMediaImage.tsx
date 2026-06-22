@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const AUTO_RETRY_DELAY_MS = 1500;
 const MAX_AUTO_RETRY_ATTEMPTS = 40;
+const MAX_FAILED_LOAD_ATTEMPTS = MAX_AUTO_RETRY_ATTEMPTS + 1;
 const IMAGE_RETRY_QUERY_PARAM = "drop_media_retry";
 
 function withRetryCacheBust(src: string, retryTick: number): string {
@@ -264,7 +265,7 @@ function WaveDropPartContentMediaImageContent({
     }
   }, []);
 
-  if (failedAttempts > MAX_AUTO_RETRY_ATTEMPTS) {
+  if (failedAttempts >= MAX_FAILED_LOAD_ATTEMPTS) {
     return <ImageLoadErrorState onRetry={manualRetry} />;
   }
 

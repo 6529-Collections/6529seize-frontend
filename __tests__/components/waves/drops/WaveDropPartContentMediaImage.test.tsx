@@ -55,6 +55,18 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
+const failCurrentImageThroughFallback = async () => {
+  fireEvent.error(screen.getByAltText("Drop media"));
+
+  await waitFor(() => {
+    expect(screen.getByAltText("Drop media").getAttribute("src")).not.toContain(
+      "scale=auto"
+    );
+  });
+
+  fireEvent.error(screen.getByAltText("Drop media"));
+};
+
 describe("WaveDropPartContentMediaImage", () => {
   it("fills a reserved-height media container without natural aspect sizing", () => {
     const { container } = render(
@@ -119,15 +131,7 @@ describe("WaveDropPartContentMediaImage", () => {
       "https://example.com/path/image.png?scale=auto"
     );
 
-    fireEvent.error(image);
-    await waitFor(() => {
-      expect(image).toHaveAttribute(
-        "src",
-        "https://example.com/path/image.png"
-      );
-    });
-
-    fireEvent.error(image);
+    await failCurrentImageThroughFallback();
 
     expect(screen.getByText("Processing image")).toBeInTheDocument();
     expect(screen.queryByText("Couldn’t load image.")).not.toBeInTheDocument();
@@ -140,6 +144,45 @@ describe("WaveDropPartContentMediaImage", () => {
       expect(screen.getByAltText("Drop media")).toHaveAttribute(
         "src",
         "https://example.com/path/image.png?scale=auto&drop_media_retry=1"
+      );
+    });
+  });
+
+  it("shows manual retry after auto-retries are exhausted", async () => {
+    jest.useFakeTimers();
+
+    render(
+      <WaveDropPartContentMediaImage src="https://example.com/path/image.png" />
+    );
+
+    for (let retryAttempt = 1; retryAttempt <= 40; retryAttempt++) {
+      await failCurrentImageThroughFallback();
+
+      expect(screen.getByText("Processing image")).toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(1500);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByAltText("Drop media")).toHaveAttribute(
+          "src",
+          `https://example.com/path/image.png?scale=auto&drop_media_retry=${retryAttempt}`
+        );
+      });
+    }
+
+    await failCurrentImageThroughFallback();
+
+    expect(screen.getByText("Couldn’t load image.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    await waitFor(() => {
+      expect(screen.getByAltText("Drop media")).toHaveAttribute(
+        "src",
+        "https://example.com/path/image.png?scale=auto&drop_media_retry=41"
       );
     });
   });
