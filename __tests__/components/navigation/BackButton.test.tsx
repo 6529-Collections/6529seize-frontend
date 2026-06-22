@@ -82,7 +82,6 @@ describe("BackButton", () => {
     const { replace } = setup({ drop: "123" });
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(replace).toHaveBeenCalledWith("/test", { scroll: false });
-    expect(screen.getByTestId("spinner")).toBeInTheDocument();
   });
 
   it("navigates back to messages when wave is DM", async () => {

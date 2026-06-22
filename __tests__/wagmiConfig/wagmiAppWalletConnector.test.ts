@@ -18,27 +18,30 @@ import {
 // Mock dependencies
 jest.mock("@/components/app-wallets/app-wallet-helpers");
 jest.mock("@/helpers/Helpers");
+jest.mock("viem/accounts", () => ({
+  privateKeyToAccount: jest
+    .fn()
+    .mockReturnValue({ address: "0x1234567890123456789012345678901234567890" }),
+}));
+
+jest.mock("viem", () => ({
+  createWalletClient: jest.fn(),
+  fallback: jest.fn(),
+  http: jest.fn(),
+}));
+
 // Mock all viem functions
 const mockWalletClient = {
   account: { address: "0x1234567890123456789012345678901234567890" },
 };
 
-const mockCreateWalletClient = jest.fn().mockReturnValue(mockWalletClient);
-const mockPrivateKeyToAccount = jest
-  .fn()
-  .mockReturnValue({ address: "0x1234567890123456789012345678901234567890" });
-const mockFallback = jest.fn();
-const mockHttp = jest.fn();
-
-jest.mock("viem/accounts", () => ({
-  privateKeyToAccount: mockPrivateKeyToAccount,
-}));
-
-jest.mock("viem", () => ({
+const { privateKeyToAccount: mockPrivateKeyToAccount } =
+  jest.requireMock("viem/accounts");
+const {
   createWalletClient: mockCreateWalletClient,
   fallback: mockFallback,
   http: mockHttp,
-}));
+} = jest.requireMock("viem");
 
 const mockDecryptData = decryptData as jest.MockedFunction<typeof decryptData>;
 const mockAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
@@ -94,16 +97,17 @@ describe("wagmiAppWalletConnector", () => {
   describe("Capacitor environment tests", () => {
     beforeEach(() => {
       // Mock Capacitor environment
-      (global as any).window = {
-        Capacitor: {
+      Object.defineProperty(window, "Capacitor", {
+        configurable: true,
+        value: {
           isNativePlatform: jest.fn().mockReturnValue(true),
         },
-      };
+      });
     });
 
     afterEach(() => {
       // Clean up global mock
-      delete (global as any).window;
+      delete (window as any).Capacitor;
     });
 
     it("throws InvalidPasswordError when address mismatch in Capacitor", async () => {

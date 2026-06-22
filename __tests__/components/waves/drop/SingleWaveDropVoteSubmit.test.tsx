@@ -434,7 +434,9 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: "Vote failed",
+        title: "Couldn't submit your vote.",
+        description: "Please try again.",
+        details: "Vote failed.",
         type: "error",
       });
     });
@@ -532,7 +534,9 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: "Vote failed",
+        title: "Couldn't submit your vote.",
+        description: "Please try again.",
+        details: "Vote failed.",
         type: "error",
       });
     });

@@ -20,6 +20,10 @@ const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
 
 const FILE_SIZE_LIMIT = 10485760;
 
+const getFirstFile = (
+  files: FileList | readonly File[] | null | undefined
+): File | null => files?.item?.(0) ?? files?.[0] ?? null;
+
 export default function CreateWaveImageInput({
   imageToShow,
   setFile,
@@ -50,7 +54,7 @@ export default function CreateWaveImageInput({
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    const file = e.dataTransfer.files.item(0);
+    const file = getFirstFile(e.dataTransfer.files);
     if (file !== null) {
       onFileChange(file);
     }
@@ -168,12 +172,9 @@ export default function CreateWaveImageInput({
             className="tw-hidden"
             accept={ACCEPTED_FORMATS_DISPLAY}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const files = e.target.files;
-              if (files !== null) {
-                const file = files.item(0);
-                if (file !== null) {
-                  onFileChange(file);
-                }
+              const file = getFirstFile(e.target.files);
+              if (file !== null) {
+                onFileChange(file);
               }
             }}
           />

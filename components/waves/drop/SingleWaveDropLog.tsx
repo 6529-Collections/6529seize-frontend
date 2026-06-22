@@ -24,7 +24,7 @@ interface VoteSummaryProps {
 }
 
 interface TimeStampProps {
-  readonly createdAt: Date | string;
+  readonly createdAt: Date | string | number;
   readonly iconClassName: string;
   readonly textClassName: string;
 }
@@ -79,6 +79,8 @@ const TimeStamp = ({
       {getTimeAgoShort(
         typeof createdAt === "string"
           ? new Date(createdAt).getTime()
+          : typeof createdAt === "number"
+            ? createdAt
           : createdAt.getTime()
       )}
     </span>

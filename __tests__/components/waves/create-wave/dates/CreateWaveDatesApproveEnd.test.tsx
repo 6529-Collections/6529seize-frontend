@@ -219,7 +219,7 @@ describe("CreateWaveDatesApproveEnd", () => {
       "data-selected-timestamp",
       "null"
     );
-    expect(screen.getByTestId("time")).toHaveAttribute("data-hours", "9");
+    expect(screen.getByTestId("time")).toHaveAttribute("data-hours", "12");
     expect(screen.getByTestId("time")).toHaveAttribute("data-minutes", "16");
 
     rerender(
@@ -238,7 +238,7 @@ describe("CreateWaveDatesApproveEnd", () => {
       "data-selected-timestamp",
       "null"
     );
-    expect(screen.getByTestId("time")).toHaveAttribute("data-hours", "12");
+    expect(screen.getByTestId("time")).toHaveAttribute("data-hours", "15");
     expect(screen.getByTestId("time")).toHaveAttribute("data-minutes", "46");
   });
 

@@ -21,15 +21,16 @@ import type { JsonLdObject } from "./types";
 export function buildNextgenLandingPageJsonLd({
   featuredCollection,
 }: {
-  readonly featuredCollection: NextGenCollection;
+  readonly featuredCollection: NextGenCollection | null | undefined;
 }): JsonLdObject {
   const path = "/nextgen";
   const nextgenId = nodeId(path, "collection");
-  const featuredPath = `/nextgen/collection/${formatNameForUrl(
-    featuredCollection.name
-  )}`;
+  const featuredCollectionName = cleanText(featuredCollection?.name);
+  const featuredPath = featuredCollectionName
+    ? `/nextgen/collection/${formatNameForUrl(featuredCollectionName)}`
+    : undefined;
 
-  return graphJsonLd([
+  const nodes: JsonLdObject[] = [
     organizationNode(),
     websiteNode(),
     compactJsonLdObject({
@@ -41,33 +42,45 @@ export function buildNextgenLandingPageJsonLd({
       url: canonicalUrl(path),
       license: CC0_LICENSE_URL,
       creator: { "@id": nodeId("/", "organization") },
-      hasPart: { "@id": nodeId(featuredPath, "collection") },
+      hasPart: featuredPath
+        ? { "@id": nodeId(featuredPath, "collection") }
+        : undefined,
     }),
-    compactJsonLdObject({
-      "@type": "Collection",
-      "@id": nodeId(featuredPath, "collection"),
-      name: featuredCollection.name,
-      description: cleanText(featuredCollection.description),
-      url: canonicalUrl(featuredPath),
-      image:
-        toAbsoluteHttpUrl(featuredCollection.banner) ??
-        toAbsoluteHttpUrl(featuredCollection.image),
-      license: CC0_LICENSE_URL,
-      creator: buildNextgenCreator(featuredCollection),
-    }),
+  ];
+
+  if (featuredCollectionName && featuredPath) {
+    nodes.push(
+      compactJsonLdObject({
+          "@type": "Collection",
+          "@id": nodeId(featuredPath, "collection"),
+          name: featuredCollectionName,
+          description: cleanText(featuredCollection?.description),
+          url: canonicalUrl(featuredPath),
+          image:
+            toAbsoluteHttpUrl(featuredCollection?.banner) ??
+            toAbsoluteHttpUrl(featuredCollection?.image),
+          license: CC0_LICENSE_URL,
+          creator: buildNextgenCreator(featuredCollection),
+        })
+    );
+  }
+
+  nodes.push(
     webPageNode({
       path,
       name: "NextGen",
       description: "Explore 6529 NextGen generative art collections.",
       mainEntityId: nextgenId,
-      image: featuredCollection.banner || featuredCollection.image,
+      image: featuredCollection?.banner || featuredCollection?.image,
       type: ["CollectionPage", "WebPage"],
     }),
     buildBreadcrumbList([
       { name: "Home", path: "/" },
       { name: "NextGen", path },
     ]),
-  ]);
+  );
+
+  return graphJsonLd(nodes);
 }
 
 export function buildNextgenCollectionPageJsonLd({

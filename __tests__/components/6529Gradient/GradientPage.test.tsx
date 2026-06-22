@@ -55,6 +55,7 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
 jest.mock("@/components/nft-transfer/TransferSingle", () => ({
   __esModule: true,
   default: () => <div data-testid="transfer-action" />,
+  TransferSingleActions: () => <div data-testid="transfer-action" />,
 }));
 jest.mock("@/hooks/useCapacitor", () => () => ({ isIos: false }));
 
@@ -207,7 +208,7 @@ describe("GradientPage", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Gradient 1 - Gradient #1" })
+      screen.getByRole("heading", { name: "Gradient #1" })
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "6529 Gradient" })).toHaveAttribute(
       "href",
@@ -236,7 +237,9 @@ describe("GradientPage", () => {
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getByText("Card Details")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Card Details" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Mint Date")).toBeInTheDocument();
     expect(screen.getByText("Artist")).toBeInTheDocument();
     expect(screen.getByTestId("artist")).toBeInTheDocument();
@@ -254,7 +257,7 @@ describe("GradientPage", () => {
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getAllByText("TDH")).toHaveLength(2); // heading and metric label
+    expect(screen.getByText("TDH")).toBeInTheDocument();
     expect(screen.getByText("100")).toBeInTheDocument(); // boosted_tdh
     expect(screen.getByText("Unweighted TDH")).toBeInTheDocument();
     expect(screen.getByText("50")).toBeInTheDocument(); // tdh__raw

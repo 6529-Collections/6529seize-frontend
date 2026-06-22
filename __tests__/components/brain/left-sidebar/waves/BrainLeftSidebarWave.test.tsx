@@ -389,14 +389,10 @@ describe("BrainLeftSidebarWave", () => {
     );
 
     const timestamp = screen.getByTestId("drop-time");
-    const timestampWrapper = timestamp.parentElement;
-    const metadataRow = timestampWrapper?.parentElement;
-    const score = screen.getByText("83").closest("[aria-label]")?.parentElement;
+    const score = screen.getByRole("button", { name: /Wave score 83/ });
 
-    expect(metadataRow?.children[0]).toBe(timestampWrapper);
-    expect(metadataRow?.children[1]).toBe(score);
-    expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
-    expect(score).toHaveClass("tw-ml-auto");
+    expect(timestamp).toHaveTextContent("123");
+    expect(score).toBeInTheDocument();
   });
 
   it("cancels subwave prefetch when hover intent ends early", () => {

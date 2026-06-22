@@ -104,7 +104,7 @@ describe('CreateWaveImageInput', () => {
     expect(mockSetFile).not.toHaveBeenCalled();
     expect(mockSetToast).toHaveBeenCalledWith({
       type: 'error',
-      message: 'Invalid file type',
+      message: 'This file type is not supported.',
     });
   });
 
@@ -119,7 +119,7 @@ describe('CreateWaveImageInput', () => {
     expect(mockSetFile).not.toHaveBeenCalled();
     expect(mockSetToast).toHaveBeenCalledWith({
       type: 'error',
-      message: 'File size must be less than 10MB',
+      message: 'Use a file smaller than 10 MB.',
     });
   });
 
@@ -145,15 +145,15 @@ describe('CreateWaveImageInput', () => {
     const dropArea = document.querySelector('label') as HTMLElement;
     
     // Initial state - should not have dragging styles
-    expect(dropArea).toHaveClass('tw-bg-iron-900', 'tw-border-iron-700');
+    expect(dropArea).toHaveClass('tw-bg-iron-900/60', 'tw-border-white/10');
     
     // Drag enter
     fireEvent.dragEnter(dropArea);
-    expect(dropArea).toHaveClass('tw-border-iron-600', 'tw-bg-iron-800');
+    expect(dropArea).toHaveClass('tw-border-white/20', 'tw-bg-iron-900');
     
     // Drag leave
     fireEvent.dragLeave(dropArea);
-    expect(dropArea).toHaveClass('tw-bg-iron-900', 'tw-border-iron-700');
+    expect(dropArea).toHaveClass('tw-bg-iron-900/60', 'tw-border-white/10');
   });
 
   it('prevents default on drag events', () => {
