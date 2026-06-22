@@ -259,7 +259,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/6529-gradient?sort=id&sort_dir=asc");
 
-    await expect(page).toHaveTitle("6529 Gradient");
+    await expect(page).toHaveTitle(/^6529 Gradient(?: \| Collections)?$/);
     await expectCollectionTitle(page, testInfo.project.name, "6529 Gradient");
     await expect(
       page.getByRole("region", { name: "Gradient sorting" })

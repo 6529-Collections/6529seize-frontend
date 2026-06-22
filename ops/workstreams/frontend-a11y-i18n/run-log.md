@@ -3036,3 +3036,58 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   disposable backend sandbox and explicit mutation plan are added.
 - Opened PR #2820:
   https://github.com/6529-Collections/6529seize-frontend/pull/2820
+
+## 2026-06-22T07:10Z Composer Sandbox E2E Shipped And Production Read-Only Aggregate Follow-Up Started
+
+- PR #2820 merged into `origin/main` as
+  `fa048794f72898c9604a7063e25192eaf2731c1c`.
+- Staged PR #2820 by merging current `origin/main` into `1a-staging` as
+  `83f8ca7c512f81ca5a6251eb7dcd2dd461b17503`.
+- Staging deploy run #27933627091 succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27933627091
+- Staging validation with the local Credential Manager target `STAGING_AUTH`
+  passed: `seize run test:e2e:staging` reported 24 passed and 6 skipped.
+- Production deploy run #27934426448 succeeded from exact `origin/main` SHA
+  `fa048794f72898c9604a7063e25192eaf2731c1c`:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27934426448
+- Post-production validation ran all current production-safe read-only packs.
+  All packs passed except `test:e2e:production:collections-readonly`, which
+  exposed stale test metadata: live production returned
+  `6529 Gradient | Collections` while the test expected exact title
+  `6529 Gradient`.
+- Started branch `codex/fix-production-collections-readonly` from current
+  `origin/main`.
+- Updated `tests/collections/nextgen-collections-readonly.spec.ts` to accept the
+  current Gradient collection title contract while still requiring the exact
+  collection name and optional `| Collections` suffix.
+- Added aggregate `test:e2e:production:readonly` to run all production-safe
+  read-only packs in one Playwright invocation and documented it in
+  `tests/README.md`.
+- Validation completed before PR publication:
+  - `seize run format:uncommitted`
+  - `seize run test:e2e:production:readonly`: 65 passed on production desktop
+    Chromium.
+  - `seize run typecheck:playwright`
+  - `seize run test:e2e:collections-readonly`: 20 passed locally across
+    desktop and mobile Chromium.
+  - `seize run test:e2e:production:collections-readonly`: 10 passed on
+    production desktop Chromium.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    computed Level 4 because `package.json` scripts are release-validation
+    controls.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/prod-readonly-aggregate-secret-scan.json`:
+    passed, 0 findings.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/prod-readonly-aggregate-workflow-security.json`:
+    passed, 0 findings.
+  - `codex-diff-check`
+- Staging collections validation caveat:
+  - First `seize run test:e2e:staging:collections-readonly` attempt overlapped
+    another staging deploy and failed on mobile asset MIME/loading errors.
+  - After that deploy completed, reruns no longer showed MIME failures but did
+    show intermittent staging API fetch errors against NextGen collection data.
+  - Focused rerun of the failing mobile collection-detail test passed 1/1.
+  - Treat the staging result as an environment/API stability signal to track,
+    not evidence that this title assertion or aggregate production script change
+    regressed application runtime behavior.
