@@ -84,7 +84,7 @@ function SidebarCategoryHeader({
 
 function SidebarCategoryLabel({ label }: { readonly label: string }) {
   return (
-    <div className="tw-px-4 tw-pb-1 tw-pt-2 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+    <div className="tw-px-4 tw-pb-0.5 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
       {label}
     </div>
   );
@@ -380,7 +380,7 @@ const UnifiedWavesListWaves = forwardRef<
           (highlyRatedRows.length > 0 ||
             pinnedRows.length > 0 ||
             shouldShowBottomHeader) && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
         {highlyRatedRows.length > 0 && (
