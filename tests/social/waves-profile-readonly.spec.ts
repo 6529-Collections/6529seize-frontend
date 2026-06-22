@@ -1,13 +1,13 @@
 import type { Page } from "@playwright/test";
 
+import { expect, test } from "../testHelpers";
 import {
-  expect,
-  expectNoHorizontalOverflow,
-  test,
-  waitForRouteReady,
-} from "../testHelpers";
+  expectProfileShell,
+  expectProfileTabLinks,
+  gotoReady,
+  PROFILE_HANDLE,
+} from "./profileReadonlyHelpers";
 
-const PROFILE_HANDLE = "punk6529";
 const PROFILE_TAB_PATHS = [
   {
     path: `/${PROFILE_HANDLE}/curations`,
@@ -25,38 +25,6 @@ const PROFILE_TAB_PATHS = [
     activeTab: /xTDH/,
   },
 ];
-
-async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
-  await waitForRouteReady(page);
-  await expectNoHorizontalOverflow(page);
-}
-
-async function expectProfileShell(
-  page: Page,
-  activeTab: string | RegExp = "Identity"
-) {
-  const profileSections = page.getByRole("navigation", {
-    name: "Profile sections",
-  });
-
-  await expect(profileSections).toBeVisible();
-  await expect(
-    page.locator("main").getByText(PROFILE_HANDLE, { exact: true }).first()
-  ).toBeVisible();
-  await expect(
-    profileSections.getByRole("link", { name: activeTab })
-  ).toHaveAttribute("aria-current", "page");
-  await expect(
-    profileSections.getByRole("link", { name: "Curation" })
-  ).toHaveAttribute("href", `/${PROFILE_HANDLE}/curations`);
-  await expect(
-    profileSections.getByRole("link", { name: "Collected" })
-  ).toHaveAttribute("href", `/${PROFILE_HANDLE}/collected`);
-  await expect(
-    profileSections.getByRole("link", { name: /xTDH/ })
-  ).toHaveAttribute("href", `/${PROFILE_HANDLE}/xtdh`);
-}
 
 async function getFirstWaveId(page: Page) {
   await gotoReady(page, "/waves");
@@ -114,11 +82,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("handles legacy wave query links without mutation", async ({ page }) => {
     const waveId = await getFirstWaveId(page);
 
-    await page.goto(`/waves?wave=${waveId}&serialNo=1`, {
-      waitUntil: "domcontentloaded",
-    });
-    await waitForRouteReady(page);
-    await expectNoHorizontalOverflow(page);
+    await gotoReady(page, `/waves?wave=${waveId}&serialNo=1`);
 
     const url = new URL(page.url());
     if (url.pathname === "/waves") {
@@ -142,6 +106,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
     await expect(page).toHaveTitle(new RegExp(PROFILE_HANDLE, "i"));
     await expectProfileShell(page);
+    await expectProfileTabLinks(page);
   });
 
   for (const tab of PROFILE_TAB_PATHS) {
@@ -151,6 +116,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await expect(page).toHaveURL((url) => url.pathname === tab.path);
       await expect(page).toHaveTitle(tab.title);
       await expectProfileShell(page, tab.activeTab);
+      await expectProfileTabLinks(page);
     });
   }
 });

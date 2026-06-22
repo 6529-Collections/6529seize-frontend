@@ -2840,3 +2840,14 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/profile-deep-links-workflow-security.json`
   - `codex-diff-check`
   - `seize run test:e2e:social-readonly`: 12 passed.
+- Follow-up validation after SonarCloud flagged duplicate new code:
+  - Extracted shared public-profile E2E assertions into
+    `tests/social/profileReadonlyHelpers.ts` for both the existing social pack
+    and the new profile deep-link pack.
+  - `seize run test:e2e:profile-deep-links-readonly`: 8 passed.
+  - `seize run test:e2e:social-readonly`: 12 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/profile-deep-links-secret-scan-sonar-fix.json`
+  - `codex-diff-check`

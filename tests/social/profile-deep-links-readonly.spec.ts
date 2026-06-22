@@ -1,36 +1,9 @@
-import type { Page } from "@playwright/test";
-
+import { expect, test } from "../testHelpers";
 import {
-  expect,
-  expectNoHorizontalOverflow,
-  test,
-  waitForRouteReady,
-} from "../testHelpers";
-
-const PROFILE_HANDLE = "punk6529";
-
-async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
-  await waitForRouteReady(page);
-  await expectNoHorizontalOverflow(page);
-}
-
-async function expectProfileShell(
-  page: Page,
-  activeTab: string | RegExp = "Identity"
-) {
-  const profileSections = page.getByRole("navigation", {
-    name: "Profile sections",
-  });
-
-  await expect(profileSections).toBeVisible();
-  await expect(
-    page.locator("main").getByText(PROFILE_HANDLE, { exact: true }).first()
-  ).toBeVisible();
-  await expect(
-    profileSections.getByRole("link", { name: activeTab })
-  ).toHaveAttribute("aria-current", "page");
-}
+  expectProfileShell,
+  gotoReady,
+  PROFILE_HANDLE,
+} from "./profileReadonlyHelpers";
 
 test.describe("Profile deep-link read-only coverage @surface @medium @large @readonly", () => {
   test("keeps public profile query links readable without mutation", async ({
