@@ -251,7 +251,11 @@ test("wave follow change toggles and invalidates", () => {
 
 it("invalidateAll calls queryClient.invalidateQueries with no args", () => {
   const { client, ctx } = createTestSetup();
+  jest.spyOn(client, "removeQueries");
   act(() => ctx.invalidateAll());
+  expect(client.removeQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.WAVE],
+  });
   expect(client.invalidateQueries).toHaveBeenCalledWith();
 });
 

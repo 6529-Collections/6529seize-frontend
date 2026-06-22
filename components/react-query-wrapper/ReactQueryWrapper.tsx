@@ -1059,6 +1059,9 @@ const createReactQueryContextValue = (
   };
 
   const invalidateAll = () => {
+    queryClient.removeQueries({
+      queryKey: [QueryKey.WAVE],
+    });
     queryClient.invalidateQueries();
   };
 
