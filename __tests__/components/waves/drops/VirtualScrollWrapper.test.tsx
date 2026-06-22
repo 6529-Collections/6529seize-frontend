@@ -73,7 +73,7 @@ test("renders placeholder when out of view", () => {
   const placeholder = div.firstChild as HTMLElement;
   expect(placeholder.getAttribute("style")).toContain("height: 123px");
   expect(placeholder.tagName).toBe("DIV");
-  expect(placeholder.children.length).toBe(0);
+  expect(placeholder.children).toHaveLength(0);
 });
 
 test("fetches light drop when entering view", () => {

@@ -589,10 +589,11 @@ const useProcessIncomingDrop = ({
           type,
           options,
         });
-        if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-          if (isWaveDropNearViewport(waveId, drop.id)) {
-            markActiveWaveAsRead(waveId);
-          }
+        if (
+          type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
+          isWaveDropNearViewport(waveId, drop.id)
+        ) {
+          markActiveWaveAsRead(waveId);
         }
         return;
       }
