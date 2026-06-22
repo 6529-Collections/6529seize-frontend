@@ -88,7 +88,11 @@ it("calls onDropClick when clicked", () => {
       onDropClick={onDropClick}
     />
   );
-  fireEvent.click(container.querySelector(".tw-cursor-pointer")!);
+  const clickableElement = container.querySelector(".tw-cursor-pointer");
+  if (!clickableElement) {
+    throw new Error("Expected podium item to render a clickable drop element");
+  }
+  fireEvent.click(clickableElement);
   expect(onDropClick).toHaveBeenCalledWith(drop);
 });
 

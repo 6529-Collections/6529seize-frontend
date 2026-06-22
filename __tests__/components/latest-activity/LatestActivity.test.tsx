@@ -100,7 +100,7 @@ describe("LatestActivity", () => {
       writable: true,
     });
 
-    window.history.pushState({}, "", "/");
+    globalThis.history.pushState({}, "", "/");
   });
 
   it("fetches with filters and updates on selection", async () => {
@@ -119,7 +119,7 @@ describe("LatestActivity", () => {
   });
 
   it("hides View All link on nft-activity page", async () => {
-    window.history.pushState({}, "", "/nft-activity");
+    globalThis.history.pushState({}, "", "/nft-activity");
     render(<LatestActivity page={1} pageSize={10} showMore />);
     // Wait for fetch
     await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
@@ -248,7 +248,7 @@ describe("LatestActivity", () => {
     });
 
     it("shows dot loader when fetching on nft-activity page", async () => {
-      window.history.pushState({}, "", "/nft-activity");
+      globalThis.history.pushState({}, "", "/nft-activity");
 
       // Set up a delayed response
       let resolvePromise: (value: any) => void;

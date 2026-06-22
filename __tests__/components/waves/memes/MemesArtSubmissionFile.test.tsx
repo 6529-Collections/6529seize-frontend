@@ -69,10 +69,10 @@ beforeAll(() => {
   });
 
   // Mock URL.createObjectURL and revokeObjectURL
-  global.URL.createObjectURL = jest.fn(() => "mock-blob-url");
-  global.URL.revokeObjectURL = jest.fn();
+  globalThis.URL.createObjectURL = jest.fn(() => "mock-blob-url");
+  globalThis.URL.revokeObjectURL = jest.fn();
 
-  window.IntersectionObserver = jest.fn((callback) => {
+  globalThis.IntersectionObserver = jest.fn((callback) => {
     const observer = {
       observe: jest.fn(),
       unobserve: jest.fn(),
