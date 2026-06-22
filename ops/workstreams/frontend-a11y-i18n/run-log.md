@@ -3034,3 +3034,5 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   authenticated composer-adjacent behavior only against the local mock API and
   must remain separate from deployed-environment read-only packs unless a
   disposable backend sandbox and explicit mutation plan are added.
+- Opened PR #2820:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2820

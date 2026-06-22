@@ -9,6 +9,8 @@ Read this section first after compaction or handoff.
     `174b2d054 Add search and wave read-only E2E coverage (#2819)`.
   - Current branch: `codex/e2e-composer-sandbox`, based on that current
     `origin/main`.
+  - PR #2820 is open:
+    https://github.com/6529-Collections/6529seize-frontend/pull/2820
   - Active slice adds local-only authenticated composer/upload/link-preview
     sandbox coverage. It starts a per-run mock API, runs Next against that mock
     runtime, uses generated synthetic dev-auth data only, and verifies file
@@ -25,6 +27,8 @@ Read this section first after compaction or handoff.
     workflow-security scan, and `codex-diff-check`. `quality:changed` still
     fails locally at its aggregate format step in this Windows worktree, while
     the equivalent direct subchecks pass.
+  - Next action is to iterate CI and all reviewbot lanes on PR #2820. Keep
+    GLM additive alongside existing reviewbots.
   - GLM reviewbot is live on `6529reviewbot` and remains additive. Do not
     remove, downgrade, or make optional the existing Opus/general/WCAG/i18n/
     security/responsiveness reviewbot lanes.
@@ -461,8 +465,8 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Finish validation, PR publication, bot iteration, and merge for
-   `codex/e2e-composer-sandbox`.
+1. Finish CI/reviewbot iteration and merge readiness for PR #2820
+   (`codex/e2e-composer-sandbox`).
 2. Keep `/notifications` out of staging/production read-only smoke until a
    disposable sandbox account/backend or product-safe non-mutating test path
    exists.
