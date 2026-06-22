@@ -801,15 +801,6 @@ function hasAcceptedChatDropSubmit() {
   );
 }
 
-function isLatestAllowedChatDropSubmit() {
-  const latestRequest = requests[requests.length - 1];
-  return (
-    latestRequest?.method === "POST" &&
-    latestRequest.path === "/api/drops" &&
-    latestRequest.kind === "allowed-sandbox-mutation"
-  );
-}
-
 function hasOnlyKeys(value, expectedKeys) {
   if (!isPlainObject(value)) {
     return false;
@@ -1171,8 +1162,7 @@ function loggedRequestBody(pathname, body) {
       part_keys: isPlainObject(firstPart) ? sortedKeys(firstPart) : [],
       media_count: Array.isArray(firstPart?.media) ? firstPart.media.length : 0,
       has_attachments:
-        isPlainObject(firstPart) &&
-        Object.prototype.hasOwnProperty.call(firstPart, "attachments"),
+        isPlainObject(firstPart) && Object.hasOwn(firstPart, "attachments"),
       referenced_nfts_count: Array.isArray(body.referenced_nfts)
         ? body.referenced_nfts.length
         : 0,
@@ -1223,18 +1213,20 @@ function loggedRequestBody(pathname, body) {
 function recordRequest(method, url, body) {
   const pathname = normalizedPath(url);
   if (pathname.startsWith("/__composer-sandbox")) {
-    return;
+    return undefined;
   }
   if (method === "OPTIONS") {
-    return;
+    return undefined;
   }
   const loggedBody = loggedRequestBody(pathname, body);
+  const kind = classifyRequest(method, pathname, url.searchParams, body);
   requests.push({
     method,
     path: pathname,
-    kind: classifyRequest(method, pathname, url.searchParams, body),
+    kind,
     ...(loggedBody === undefined ? {} : { body: loggedBody }),
   });
+  return kind;
 }
 
 function requestLog() {
@@ -1254,7 +1246,7 @@ function handleDiagnostics(method, pathname, res) {
   return false;
 }
 
-function handleMockApi(method, pathname, url, body, res) {
+function handleMockApi(method, pathname, url, body, res, requestKind) {
   if (pathname === "/api/community-members" && isSafeReadMethod(method)) {
     const query = url.searchParams.get("param") ?? "";
     const members =
@@ -1424,7 +1416,7 @@ function handleMockApi(method, pathname, url, body, res) {
   if (
     method === "POST" &&
     pathname === "/api/drops" &&
-    isLatestAllowedChatDropSubmit()
+    requestKind === "allowed-sandbox-mutation"
   ) {
     writeJson(res, 200, submittedChatDrop);
     return true;
@@ -1552,9 +1544,9 @@ async function handleRequest(req, res) {
     });
     return;
   }
-  recordRequest(method, url, requestBody);
+  const requestKind = recordRequest(method, url, requestBody);
 
-  if (handleMockApi(method, pathname, url, requestBody, res)) {
+  if (handleMockApi(method, pathname, url, requestBody, res, requestKind)) {
     return;
   }
 

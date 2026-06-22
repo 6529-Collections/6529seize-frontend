@@ -151,6 +151,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       }),
     });
 
+    // Optimistic drops use timestamp serials; serial 2 is the mock server drop.
     const submittedDrop = page.locator('[data-serial-no="2"]');
     await expect(submittedDrop).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -171,6 +172,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   test("rejects repeated exact-shape chat drop mutation bodies", async ({
     baseURL,
   }) => {
+    await resetSandboxRequests(baseURL);
+
     const exactBody = buildExactChatDropBody();
     const apiOrigin = getSandboxApiOrigin(baseURL);
 
@@ -210,6 +213,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   });
 
   test("rejects non-exact chat drop mutation bodies", async ({ baseURL }) => {
+    await resetSandboxRequests(baseURL);
+
     const response = await fetch(`${getSandboxApiOrigin(baseURL)}/api/drops`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
