@@ -98,10 +98,12 @@ Use the existing Tailwind visual language for new and substantially touched UI:
   Use semantic tokens such as `error` and `success` for user-facing status when
   available. Reserve bright or heavy borders for active, selected, warning, or
   error state.
-- Use `tw-rounded-lg` and `tw-rounded-xl` as the standard radius for cards,
-  dialogs, buttons, panels, and framed product surfaces. Use `tw-rounded-md`,
-  `tw-rounded`, or smaller radii for dense inputs, table controls, thumbnails,
-  and compact rows when the nearby pattern does.
+- Use `tw-rounded-xl` for cards, dialogs, and larger framed surfaces. Use
+  `tw-rounded-lg` for buttons, inputs, panels, rows, and standard controls. Use
+  `tw-rounded-md` only for compact elements where `tw-rounded-lg` would feel
+  oversized, such as small thumbnails, compact menu items, segmented controls,
+  status chips, small icon buttons, dense tool/table controls, and skeleton
+  detail blocks.
 - Use `tw-rounded-full` for avatars, pills, badges, dots, circular icon buttons,
   and progress indicators.
 - Follow established custom colors when a surface already uses them for real

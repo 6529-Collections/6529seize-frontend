@@ -19,12 +19,12 @@ Use this skill for user-facing design and UX work in this repository.
    tokens, and shared Tailwind-based components for new or migrated UI. Use
    existing Sass or Bootstrap patterns only when maintaining a legacy surface or
    when a narrow exception is justified.
-5. Check shape, color, and surface-token choices. Use existing product radius
-   patterns: `tw-rounded-lg` / `tw-rounded-xl` for framed surfaces,
-   `tw-rounded-md` / `tw-rounded` for dense controls, and `tw-rounded-full` for
-   circular or pill UI. When an element needs a visible edge, separator, focus
-   ring, or layered separation, match the established local boundary treatment,
-   including white-with-opacity edges on layered dark surfaces.
+5. Check shape, color, and surface-token choices. Use `tw-rounded-xl` for cards,
+   dialogs, and larger framed surfaces; `tw-rounded-lg` for buttons, inputs,
+   panels, rows, and standard controls; `tw-rounded-md` only for compact details
+   where `tw-rounded-lg` would feel oversized; and `tw-rounded-full` for circular
+   or pill UI. When an element needs a visible edge, separator, focus ring, or
+   layered separation, match the established local boundary treatment.
 6. Keep the change scoped to the touched surface. Reuse the existing visual
    language, icon set, spacing scale, palette, styling library, and
    Bootstrap/Sass boundaries.
@@ -50,9 +50,10 @@ Use this skill for user-facing design and UX work in this repository.
 - Dark-first surfaces, `iron-*` greys, boundary treatments when present,
   typography, and compact spacing match current Tailwind patterns before older
   Bootstrap/Sass patterns.
-- Cards, dialogs, controls, and framed surfaces use existing radius patterns
-  (`tw-rounded-lg` / `tw-rounded-xl` by default, `tw-rounded-full` for
-  circular/pill UI).
+- Cards, dialogs, controls, and framed surfaces use the product radius hierarchy:
+  `tw-rounded-xl` for larger framed surfaces, `tw-rounded-lg` for standard
+  controls and rows, `tw-rounded-md` only for compact details, and
+  `tw-rounded-full` for circular/pill UI.
 - Color choices use Tailwind tokens or established local custom colors tied to
   product meaning, media/art treatment, brand color, chart/domain state, or
   legacy compatibility.
