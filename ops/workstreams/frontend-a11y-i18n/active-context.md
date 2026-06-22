@@ -5,6 +5,44 @@
 Read this section first after compaction or handoff.
 
 - Latest testing-roadmap state, 2026-06-22T08:32Z:
+  - PR #2823 is merged and deployed. Production is serving
+    `02382bc81f1d945083b28bf78641ab2469e2212e`.
+  - Staging deploy run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27943628946
+    - staging SHA: `43d6f711a7f3856c62b5544736d001319f285bef`
+    - workflow HTTP version evidence matched the staging SHA.
+    - local staging validation passed:
+      `test:e2e:staging:smoke` 12 passed,
+      `test:e2e:staging` 24 passed / 6 skipped,
+      `test:e2e:wcag-i18n:surface-matrix` 6 passed.
+  - Production deploy run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27944602623
+    - workflow HTTP version evidence matched the production SHA.
+    - local production `/api/version` probe matched the production SHA.
+  - Current branch:
+    `codex/e2e-production-readonly-hardening`, based on current `origin/main`.
+  - Active follow-up fixes the production-readonly aggregate after live
+    validation found a real test-harness gap:
+    - current production mint card can render dynamic interactive art inside an
+      iframe, while the test only accepted direct `img[id^="image-"]` media.
+    - the read-only mutation guard blocked safe read-only Ethereum JSON-RPC
+      POSTs to known public RPC hosts used by the mint page.
+    - the app was not rolled back: production app runtime is healthy and this
+      branch changes test harness behavior only.
+  - Validation passed for this follow-up:
+    - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+    - focused ESLint on the changed E2E/guard files
+    - failing production mint test rerun: 1 passed
+    - full `seize run test:e2e:production:readonly`: 65 passed
+    - `seize run lint:changed`
+    - `seize run typecheck:changed`
+    - `codex-diff-check`
+    - clean risk floor: Level 3
+    - changed secret scan passed.
+  - Next action: commit, open PR, iterate all reviewbot lanes including the
+    now-live GLM reviewer, then merge/deploy if CI and bots add no further
+    value.
+- Previous testing-roadmap state, 2026-06-22T08:32Z:
   - PR #2822 is merged and deployed. Production is serving
     `7693d1138987175e0ccd6c54841d7547d99ce322`, and the full production-safe
     read-only aggregate passed again: `seize run test:e2e:production:readonly`
