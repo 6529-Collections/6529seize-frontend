@@ -110,7 +110,7 @@ Surface matrix:
   navigation coverage plus wave-local message search coverage on both baseline
   web projects, with the mutation guard enabled even locally.
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
-  sandbox on both baseline web projects. It starts a mock API/WebSocket server,
+  sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
   and deterministic link previews, and fails if composer submit/upload
   endpoints are touched. It must run against a loopback base URL, but it is not
