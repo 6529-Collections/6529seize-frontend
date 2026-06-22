@@ -500,6 +500,7 @@ describe("BrainMobileViewContent", () => {
         isCurationWave={false}
         isMemesWave={false}
         isRankWave={false}
+        hasPolls={true}
         onDropClick={onDropClick}
         onOpenQuickVote={jest.fn()}
         wave={wave}
