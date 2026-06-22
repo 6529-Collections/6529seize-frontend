@@ -18,6 +18,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
+  shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterInjectedWalletCollision,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
@@ -111,6 +112,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterInjectedWalletCollision(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
     return true;
   }
 

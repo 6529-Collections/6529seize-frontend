@@ -6,36 +6,26 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import {
+  dismissNextDevTools,
+  expectNoUnsafeSandboxMutations,
+  LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  useLocalSandboxMutationGuard,
+} from "../support/localSandbox";
 
-const NAVIGATION_TIMEOUT_MS = 30000;
 const SANDBOX_WAVE_ID = "00000000-0000-4000-8000-000000000529";
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const PREVIEW_TITLE = "Sandbox Preview Title";
 const PREVIEW_DESCRIPTION = "Deterministic local preview served by Playwright.";
 
-type SandboxRequest = {
-  readonly method: string;
-  readonly path: string;
-  readonly kind: string;
-};
-
-type SandboxRequestsResponse = {
-  readonly requests: SandboxRequest[];
-};
-
 test.describe.configure({ mode: "serial" });
 
 test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
-  test.skip(
-    process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] !== "1" ||
-      process.env["PLAYWRIGHT_ENV"] !== "local",
+  useLocalSandboxMutationGuard(
+    test,
+    "PLAYWRIGHT_COMPOSER_SANDBOX",
     "Composer sandbox requires the local mock API runner."
   );
-
-  test.beforeEach(async ({ baseURL }) => {
-    assertLocalSandboxBaseURL(baseURL);
-    await resetSandboxRequests(baseURL);
-  });
 
   test("queues and removes an attachment without upload or submit", async ({
     baseURL,
@@ -56,7 +46,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     });
 
     await expect(page.getByText("composer-sandbox.pdf")).toBeVisible({
-      timeout: NAVIGATION_TIMEOUT_MS,
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(
       page.getByRole("img", { name: "PDF file: composer-sandbox.pdf" })
@@ -80,10 +70,12 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     const previewLink = page
       .getByRole("link", { name: new RegExp(PREVIEW_TITLE) })
       .first();
-    await expect(previewLink).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await expect(previewLink).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
     await expect(previewLink).toHaveAttribute("href", PREVIEW_URL);
     await expect(page.getByText(PREVIEW_TITLE).first()).toBeVisible({
-      timeout: NAVIGATION_TIMEOUT_MS,
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(page.getByText(PREVIEW_DESCRIPTION).first()).toBeVisible();
 
@@ -112,10 +104,10 @@ async function gotoSandboxWave(page: Page) {
       level: 1,
       name: "Local Composer Sandbox Wave",
     })
-  ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+  ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await expect(
     page.getByRole("textbox", { name: "Write a chat message" }).last()
-  ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+  ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await dismissNextDevTools(page);
   await expectNoHorizontalOverflow(page);
 }
@@ -146,18 +138,8 @@ async function showDropActionsIfCollapsed(page: Page) {
   }
 
   await expect(page.getByRole("button", { name: "Upload a file" })).toBeVisible(
-    { timeout: NAVIGATION_TIMEOUT_MS }
+    { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
   );
-}
-
-async function dismissNextDevTools(page: Page) {
-  const closeButton = page.getByRole("button", {
-    name: "Close Next.js Dev Tools",
-  });
-
-  if (await closeButton.isVisible().catch(() => false)) {
-    await closeButton.click({ force: true });
-  }
 }
 
 async function installOpenGraphFixture(page: Page) {
@@ -204,70 +186,4 @@ function previewFor(url: string) {
     siteName: "Example Sandbox",
     mediaType: "article",
   };
-}
-
-function getSandboxApiOrigin(baseURL: string | undefined) {
-  if (!baseURL) {
-    throw new Error("Composer sandbox tests require a local baseURL.");
-  }
-
-  const url = new URL(baseURL);
-  assertLocalSandboxUrl(url);
-  const port = Number(url.port || "3001");
-  return `http://127.0.0.1:${port + 1000}`;
-}
-
-function assertLocalSandboxBaseURL(baseURL: string | undefined) {
-  if (!baseURL) {
-    throw new Error("Composer sandbox tests require a local baseURL.");
-  }
-
-  assertLocalSandboxUrl(new URL(baseURL));
-}
-
-function assertLocalSandboxUrl(url: URL) {
-  if (url.protocol !== "http:") {
-    throw new Error(
-      `Composer sandbox must run against a local http origin, got ${url.origin}.`
-    );
-  }
-
-  if (!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
-    throw new Error(
-      `Composer sandbox refused non-local baseURL ${url.origin}.`
-    );
-  }
-}
-
-async function fetchSandboxRequests(baseURL: string | undefined) {
-  const response = await fetch(
-    `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/requests`
-  );
-  expect(response.ok).toBe(true);
-  const body = (await response.json()) as SandboxRequestsResponse;
-  return body.requests;
-}
-
-async function resetSandboxRequests(baseURL: string | undefined) {
-  const response = await fetch(
-    `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/reset`,
-    { method: "POST" }
-  );
-  expect(response.ok).toBe(true);
-}
-
-async function expectNoUnsafeSandboxMutations(baseURL: string | undefined) {
-  const requests = await fetchSandboxRequests(baseURL);
-  const unsafeRequests = requests.filter(
-    (request) =>
-      request.kind === "dangerous-composer-mutation" ||
-      request.kind === "unhandled-mutation"
-  );
-
-  expect(
-    unsafeRequests,
-    `Expected no unsafe sandbox mutations. Requests: ${JSON.stringify(
-      requests
-    )}`
-  ).toEqual([]);
 }
