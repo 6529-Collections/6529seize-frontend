@@ -14,12 +14,14 @@ jest.mock("next/server", () => ({
 }));
 
 type GetHandler = typeof import("../../../app/api/github-preview/route").GET;
+type PostHandler = typeof import("../../../app/api/github-preview/route").POST;
 
 let GET: GetHandler;
+let POST: PostHandler;
 
 async function loadRoute(): Promise<void> {
   jest.resetModules();
-  ({ GET } = await import("../../../app/api/github-preview/route"));
+  ({ GET, POST } = await import("../../../app/api/github-preview/route"));
 }
 
 describe("github-preview API route", () => {
@@ -46,11 +48,105 @@ describe("github-preview API route", () => {
       ),
     }) as any;
 
+  const batchRequestFor = (urls: readonly unknown[]) =>
+    ({
+      json: async () => ({ urls }),
+    }) as unknown as Request;
+
   const jsonResponse = (body: unknown, init?: ResponseInit) =>
     new Response(JSON.stringify(body), {
       headers: { "content-type": "application/json" },
       ...init,
     });
+
+  it("maps batched GitHub preview requests", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: "https://github.com/o/r/issues/1",
+          title: "First issue",
+          state: "open",
+          state_reason: null,
+          assignees: [],
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: "https://github.com/o/r/issues/2",
+          title: "Second issue",
+          state: "closed",
+          state_reason: "completed",
+          assignees: [],
+        })
+      );
+
+    const response = await POST(
+      batchRequestFor([
+        "https://github.com/o/r/issues/1",
+        "https://github.com/o/r/issues/2",
+      ])
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      results: {
+        "https://github.com/o/r/issues/1": {
+          type: "github.issue",
+          title: "First issue",
+          state: "open",
+        },
+        "https://github.com/o/r/issues/2": {
+          type: "github.issue",
+          title: "Second issue",
+          state: "closed_completed",
+        },
+      },
+      errors: {},
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps invalid GitHub preview batch entries isolated", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        html_url: "https://github.com/o/r/issues/1",
+        title: "First issue",
+        state: "open",
+        state_reason: null,
+        assignees: [],
+      })
+    );
+
+    const response = await POST(
+      batchRequestFor([
+        "https://github.com/o/r/issues/1",
+        "https://github.com/o/r/settings",
+      ])
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      results: {
+        "https://github.com/o/r/issues/1": {
+          type: "github.issue",
+          title: "First issue",
+        },
+      },
+      errors: {
+        "https://github.com/o/r/settings":
+          "Only github.com repository URLs are supported.",
+      },
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects empty GitHub preview batches", async () => {
+    const response = await POST(batchRequestFor([]));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "At least one GitHub URL is required.",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 
   it("maps open GitHub issues", async () => {
     fetchMock.mockResolvedValueOnce(

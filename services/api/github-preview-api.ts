@@ -183,13 +183,32 @@ interface FetchGithubPreviewOptions {
   readonly bypassCache?: boolean | undefined;
 }
 
+interface GithubPreviewBatchResponse {
+  readonly results?: Record<string, GithubPreviewResponse | undefined>;
+  readonly errors?: Record<string, string | undefined>;
+}
+
+type PendingGithubPreviewRequest = {
+  readonly url: string;
+  readonly promise: Promise<GithubPreviewResponse>;
+  readonly resolve: (value: GithubPreviewResponse) => void;
+  readonly reject: (reason: Error) => void;
+};
+
 const GITHUB_PREVIEW_CACHE_TTL_MS = 2 * 60 * 1000;
 const GITHUB_PREVIEW_CACHE_MAX_ITEMS = 200;
+const GITHUB_PREVIEW_BATCH_MAX_URLS = 10;
+const GITHUB_PREVIEW_METADATA_ERROR_MESSAGE =
+  "Failed to fetch GitHub preview metadata.";
 
 const previewCache = new LruTtlCache<string, Promise<GithubPreviewResponse>>({
   max: GITHUB_PREVIEW_CACHE_MAX_ITEMS,
   ttlMs: GITHUB_PREVIEW_CACHE_TTL_MS,
 });
+
+const pendingPreviewBatch = new Map<string, PendingGithubPreviewRequest>();
+const refreshRequests = new Map<string, Promise<GithubPreviewResponse>>();
+let batchFlushScheduled = false;
 
 const normalizeUrl = (url: string): string => url.trim();
 
@@ -203,31 +222,134 @@ const readErrorMessage = async (response: Response): Promise<string> => {
     // ignore parse errors
   }
 
-  return "Failed to fetch GitHub preview metadata.";
+  return GITHUB_PREVIEW_METADATA_ERROR_MESSAGE;
 };
 
-export const fetchGithubPreview = async (
-  url: string,
-  options?: FetchGithubPreviewOptions
-): Promise<GithubPreviewResponse> => {
-  const normalized = normalizeUrl(url);
-  if (!normalized) {
-    throw new Error("A valid URL is required to fetch GitHub metadata.");
+const toError = (error: unknown): Error =>
+  error instanceof Error
+    ? error
+    : new Error(GITHUB_PREVIEW_METADATA_ERROR_MESSAGE);
+
+const clearGithubPreviewCacheOnError = (
+  promise: Promise<GithubPreviewResponse>,
+  cacheKey: string
+): Promise<GithubPreviewResponse> =>
+  promise.catch((error: unknown) => {
+    previewCache.delete(cacheKey);
+    throw error;
+  });
+
+const scheduleBatchFlush = (): void => {
+  if (batchFlushScheduled) {
+    return;
   }
 
-  const bypassCache = options?.bypassCache === true;
-  if (!bypassCache) {
-    const cached = previewCache.get(normalized);
-    if (cached) {
-      return cached;
+  batchFlushScheduled = true;
+  globalThis.queueMicrotask(flushGithubPreviewBatch);
+};
+
+const chunkRequests = (
+  requests: readonly PendingGithubPreviewRequest[]
+): PendingGithubPreviewRequest[][] => {
+  const chunks: PendingGithubPreviewRequest[][] = [];
+  for (
+    let index = 0;
+    index < requests.length;
+    index += GITHUB_PREVIEW_BATCH_MAX_URLS
+  ) {
+    chunks.push(requests.slice(index, index + GITHUB_PREVIEW_BATCH_MAX_URLS));
+  }
+
+  return chunks;
+};
+
+const sendGithubPreviewBatch = async (
+  requests: readonly PendingGithubPreviewRequest[]
+): Promise<void> => {
+  try {
+    const urls = requests.map((request) => request.url);
+    const response = await fetch("/api/github-preview", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ urls }),
+    });
+
+    if (!response.ok) {
+      throw new Error(await readErrorMessage(response));
     }
+
+    const body = (await response.json()) as GithubPreviewBatchResponse;
+    const results = body.results ?? {};
+    const errors = body.errors ?? {};
+
+    requests.forEach((request) => {
+      const result = results[request.url];
+      if (result) {
+        request.resolve(result);
+        return;
+      }
+
+      request.reject(
+        new Error(errors[request.url] ?? GITHUB_PREVIEW_METADATA_ERROR_MESSAGE)
+      );
+    });
+  } catch (error: unknown) {
+    const reason = toError(error);
+    requests.forEach((request) => request.reject(reason));
+  }
+};
+
+function flushGithubPreviewBatch(): void {
+  batchFlushScheduled = false;
+  const requests = Array.from(pendingPreviewBatch.values());
+  pendingPreviewBatch.clear();
+
+  chunkRequests(requests).forEach((chunk) => {
+    void sendGithubPreviewBatch(chunk);
+  });
+}
+
+const queueGithubPreviewRequest = (
+  normalizedUrl: string
+): Promise<GithubPreviewResponse> => {
+  const pendingRequest = pendingPreviewBatch.get(normalizedUrl);
+  if (pendingRequest) {
+    return pendingRequest.promise;
   }
 
-  const params = new URLSearchParams({ url: normalized });
-  if (bypassCache) {
-    params.set("refresh", "1");
-    params.set("ts", Date.now().toString());
+  let resolveRequest!: (value: GithubPreviewResponse) => void;
+  let rejectRequest!: (reason: Error) => void;
+  const rawPromise = new Promise<GithubPreviewResponse>((resolve, reject) => {
+    resolveRequest = resolve;
+    rejectRequest = reject;
+  });
+  const promise = clearGithubPreviewCacheOnError(rawPromise, normalizedUrl);
+
+  pendingPreviewBatch.set(normalizedUrl, {
+    url: normalizedUrl,
+    promise,
+    resolve: resolveRequest,
+    reject: rejectRequest,
+  });
+  scheduleBatchFlush();
+
+  return promise;
+};
+
+const fetchGithubPreviewRefresh = (
+  normalizedUrl: string
+): Promise<GithubPreviewResponse> => {
+  const pendingRefresh = refreshRequests.get(normalizedUrl);
+  if (pendingRefresh) {
+    return pendingRefresh;
   }
+
+  const params = new URLSearchParams({ url: normalizedUrl });
+  params.set("refresh", "1");
+  params.set("ts", Date.now().toString());
 
   const request = fetch(`/api/github-preview?${params.toString()}`, {
     headers: { Accept: "application/json" },
@@ -239,16 +361,43 @@ export const fetchGithubPreview = async (
 
       return (await response.json()) as GithubPreviewResponse;
     })
-    .catch((error) => {
-      if (!bypassCache) {
-        previewCache.delete(normalized);
-      }
-      throw error;
+    .then((preview) => {
+      previewCache.set(normalizedUrl, Promise.resolve(preview));
+      return preview;
+    })
+    .finally(() => {
+      refreshRequests.delete(normalizedUrl);
     });
 
-  if (!bypassCache) {
-    previewCache.set(normalized, request);
+  refreshRequests.set(normalizedUrl, request);
+
+  return request;
+};
+
+export const fetchGithubPreview = (
+  url: string,
+  options?: FetchGithubPreviewOptions
+): Promise<GithubPreviewResponse> => {
+  const normalized = normalizeUrl(url);
+  if (!normalized) {
+    return Promise.reject(
+      new Error("A valid URL is required to fetch GitHub metadata.")
+    );
   }
+
+  const bypassCache = options?.bypassCache === true;
+  if (bypassCache) {
+    return fetchGithubPreviewRefresh(normalized);
+  }
+
+  const cached = previewCache.get(normalized);
+  if (cached) {
+    return cached;
+  }
+
+  const request = queueGithubPreviewRequest(normalized);
+
+  previewCache.set(normalized, request);
 
   return request;
 };
