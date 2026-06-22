@@ -2,16 +2,6 @@ import { render, screen } from "@testing-library/react";
 import AdditionalInfoStep from "@/components/waves/memes/submission/steps/AdditionalInfoStep";
 import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 
-jest.mock("@/hooks/useEnsResolution", () => ({
-  useEnsResolution: ({ initialValue = "" } = {}) => ({
-    inputValue: initialValue,
-    address: initialValue,
-    handleInputChange: jest.fn(),
-    ensNameQuery: { isLoading: false, isError: false },
-    ensAddressQuery: { isLoading: false, isError: false },
-  }),
-}));
-
 describe("AdditionalInfoStep", () => {
   const baseTraits = {
     title: "Title",

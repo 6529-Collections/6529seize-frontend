@@ -5,12 +5,12 @@ import { useCallback, useRef, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { decryptData, getAppWalletPassphraseError } from "./app-wallet-helpers";
+import { decryptData } from "./app-wallet-helpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
 
-const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
+const SEED_MIN_PASS_LENGTH = 6;
 
 const showAppWalletError = (
   timeoutRef: RefObject<NodeJS.Timeout | null>,
@@ -65,9 +65,12 @@ export function CreateAppWalletModal(
   );
 
   const handleCreate = useCallback(async () => {
-    const passphraseError = getAppWalletPassphraseError(walletPass);
-    if (passphraseError) {
-      showAppWalletError(timeoutRef, setError, passphraseError);
+    if (walletPass.length < SEED_MIN_PASS_LENGTH) {
+      showAppWalletError(
+        timeoutRef,
+        setError,
+        `Password must be at least ${SEED_MIN_PASS_LENGTH} characters long`
+      );
       return;
     } else {
       setError("");
@@ -95,9 +98,12 @@ export function CreateAppWalletModal(
   const handleImport = useCallback(async () => {
     if (!importData) return;
 
-    const passphraseError = getAppWalletPassphraseError(walletPass);
-    if (passphraseError) {
-      showAppWalletError(timeoutRef, setError, passphraseError);
+    if (walletPass.length < SEED_MIN_PASS_LENGTH) {
+      showAppWalletError(
+        timeoutRef,
+        setError,
+        `Password must be at least ${SEED_MIN_PASS_LENGTH} characters long`
+      );
       return;
     } else {
       setError("");
@@ -235,54 +241,28 @@ export function UnlockAppWalletModal(
     address: string;
     address_hashed: string;
     onUnlock: (pass: string) => void;
-    onVerifiedUnlock?:
-      | ((address: string, pass: string) => Promise<unknown> | void)
-      | undefined;
     onHide: () => void;
-    sensitiveAction?: {
-      label: string;
-      warning: string;
-      confirmationText: string;
-    };
   }>
 ) {
   const [walletPass, setWalletPass] = useState("");
   const [passHidden, setPassHidden] = useState(true);
   const [unlocking, setUnlocking] = useState(false);
   const [error, setError] = useState("");
-  const [confirmation, setConfirmation] = useState("");
 
-  const {
-    show,
-    address,
-    address_hashed,
-    onUnlock,
-    onVerifiedUnlock,
-    onHide,
-    sensitiveAction,
-  } = props;
+  const { show, address, address_hashed, onUnlock, onHide } = props;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const sensitiveActionConfirmed =
-    !sensitiveAction || confirmation === sensitiveAction.confirmationText;
-
-  const canUnlock =
-    !unlocking &&
-    walletPass.length >= LEGACY_UNLOCK_MIN_PASS_LENGTH &&
-    sensitiveActionConfirmed;
-
   const handleHide = useCallback(() => {
     setWalletPass("");
-    setConfirmation("");
     setError("");
     setUnlocking(false);
     onHide();
   }, [onHide]);
 
   const handleKeyPress = (e: any) => {
-    if (e.key === "Enter" && canUnlock) {
+    if (e.key === "Enter" && walletPass) {
       handleUnlock();
     }
   };
@@ -295,10 +275,6 @@ export function UnlockAppWalletModal(
   }, []);
 
   const handleUnlock = useCallback(async () => {
-    if (sensitiveAction && confirmation !== sensitiveAction.confirmationText) {
-      return;
-    }
-
     setError("");
     setUnlocking(true);
 
@@ -310,11 +286,6 @@ export function UnlockAppWalletModal(
           walletPass
         );
         if (areEqualAddresses(address, decryptedAddress)) {
-          try {
-            await onVerifiedUnlock?.(address, walletPass);
-          } catch (error) {
-            console.error("App wallet unlock migration failed:", error);
-          }
           onUnlock(walletPass);
           handleHide();
         } else {
@@ -332,9 +303,6 @@ export function UnlockAppWalletModal(
     address_hashed,
     handleHide,
     onUnlock,
-    onVerifiedUnlock,
-    confirmation,
-    sensitiveAction,
     showUnlockError,
     walletPass,
   ]);
@@ -383,22 +351,6 @@ export function UnlockAppWalletModal(
           }}
           onKeyDown={handleKeyPress}
         />
-        {sensitiveAction && (
-          <div className="pt-3">
-            <p className="mb-2 text-warning">{sensitiveAction.warning}</p>
-            <label className="pb-1" htmlFor="sensitiveActionConfirmation">
-              Type {sensitiveAction.confirmationText} to confirm{" "}
-              {sensitiveAction.label}
-            </label>
-            <input
-              id="sensitiveActionConfirmation"
-              type="text"
-              value={confirmation}
-              className={styles["newWalletInput"]}
-              onChange={(e) => setConfirmation(e.target.value)}
-            />
-          </div>
-        )}
         <p className="mt-4 mb-1">
           {error ? (
             <span className="text-danger">{error}</span>
@@ -411,7 +363,13 @@ export function UnlockAppWalletModal(
         <Button variant="secondary" onClick={() => handleHide()}>
           Cancel
         </Button>
-        <Button variant="primary" disabled={!canUnlock} onClick={handleUnlock}>
+        <Button
+          variant="primary"
+          disabled={
+            unlocking || !walletPass || walletPass.length < SEED_MIN_PASS_LENGTH
+          }
+          onClick={handleUnlock}
+        >
           {unlocking ? "Unlocking..." : "Unlock"}
         </Button>
       </Modal.Footer>

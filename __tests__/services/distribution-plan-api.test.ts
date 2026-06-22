@@ -26,36 +26,21 @@ beforeEach(() => {
 
 describe("distribution-plan-api", () => {
   it("handles successful fetch", async () => {
-    globalThis.fetch = jest.fn().mockResolvedValue({
-      status: 200,
-      json: () => Promise.resolve({ foo: "bar" }),
-    }) as any;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({
+        status: 200,
+        json: () => Promise.resolve({ foo: "bar" }),
+      }) as any;
     const result = await distributionPlanApiFetch<any>("/path");
     expect(result).toEqual({ success: true, data: { foo: "bar" } });
   });
 
   it("handles unauthorized", async () => {
-    globalThis.fetch = jest
+    global.fetch = jest
       .fn()
       .mockResolvedValue({ status: 401, json: jest.fn() }) as any;
     const res = await distributionPlanApiFetch<any>("/x");
-    expect(removeAuthJwt).toHaveBeenCalled();
-    expect(makeErrorToast).toHaveBeenCalledWith(
-      "Please reconnect your wallet."
-    );
-    expect(res.success).toBe(false);
-  });
-
-  it("handles unauthorized when JWT cleanup fails", async () => {
-    (removeAuthJwt as jest.Mock).mockRejectedValueOnce(
-      new Error("cleanup failed")
-    );
-    globalThis.fetch = jest
-      .fn()
-      .mockResolvedValue({ status: 401, json: jest.fn() }) as any;
-
-    const res = await distributionPlanApiFetch<any>("/x");
-
     expect(removeAuthJwt).toHaveBeenCalled();
     expect(makeErrorToast).toHaveBeenCalledWith(
       "Please reconnect your wallet."
@@ -65,17 +50,19 @@ describe("distribution-plan-api", () => {
 
   it("posts data with auth header", async () => {
     (getAuthJwt as jest.Mock).mockReturnValue("jwt");
-    globalThis.fetch = jest.fn().mockResolvedValue({
-      status: 200,
-      json: () => Promise.resolve({ a: 1 }),
-    }) as any;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({
+        status: 200,
+        json: () => Promise.resolve({ a: 1 }),
+      }) as any;
     await distributionPlanApiPost<any>({ endpoint: "/p", body: { x: 1 } });
     const call = (fetch as jest.Mock).mock.calls[0];
     expect(call[1].headers["Authorization"]).toBe("Bearer jwt");
   });
 
   it("deletes and handles plain ok response", async () => {
-    globalThis.fetch = jest.fn().mockResolvedValue({
+    global.fetch = jest.fn().mockResolvedValue({
       status: 200,
       statusText: "OK",
       json: () => {

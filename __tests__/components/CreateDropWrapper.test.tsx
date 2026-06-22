@@ -60,7 +60,7 @@ const mockSeizeConnect = useSeizeConnectContext as jest.MockedFunction<
 >;
 
 beforeEach(() => {
-  (globalThis as any).ResizeObserver = class {
+  (global as any).ResizeObserver = class {
     observe() {}
     disconnect() {}
   };
@@ -76,7 +76,6 @@ beforeEach(() => {
     seizeConnectOpen: false,
     isConnected: true,
     isAuthenticated: true,
-    hasValidWalletAuth: true,
   } as any);
 });
 describe("CreateDropWrapper", () => {

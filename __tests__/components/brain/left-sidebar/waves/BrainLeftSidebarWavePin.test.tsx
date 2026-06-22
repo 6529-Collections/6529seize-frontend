@@ -125,9 +125,8 @@ describe("BrainLeftSidebarWavePin", () => {
       type: "error",
       message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
     });
-    expect(screen.getByTestId("tooltip-wave-pin-1")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /pin wave/i })).toHaveAttribute(
-      "data-tooltip-content",
+    const tooltip = screen.getByTestId("tooltip-wave-pin-1");
+    expect(tooltip).toHaveTextContent(
       `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`
     );
   });

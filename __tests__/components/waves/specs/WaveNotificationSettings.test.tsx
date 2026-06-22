@@ -71,10 +71,6 @@ const mockAuthContext = {
 const mockUseWaveNotificationSubscription =
   require("@/hooks/useWaveNotificationSubscription").useWaveNotificationSubscription;
 
-const expectActivePreferenceButton = (button: HTMLElement) => {
-  expect(button).toHaveClass("tw-bg-primary-400/10", "tw-text-primary-400");
-};
-
 describe("WaveNotificationSettings", () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -135,7 +131,10 @@ describe("WaveNotificationSettings", () => {
     const allMentionsButton = screen.getByLabelText(
       "Receive ALL mention notifications"
     );
-    expectActivePreferenceButton(allMentionsButton);
+    expect(allMentionsButton).toHaveClass(
+      "tw-bg-iron-800",
+      "tw-text-primary-400"
+    );
   });
 
   it("shows all drop button as active when all drop notifications enabled", () => {
@@ -147,7 +146,7 @@ describe("WaveNotificationSettings", () => {
     renderComponent();
 
     const allButton = screen.getByLabelText("Receive all drop notifications");
-    expectActivePreferenceButton(allButton);
+    expect(allButton).toHaveClass("tw-bg-iron-800", "tw-text-primary-400");
   });
 
   it("can show ALL mention and all drop buttons active together", () => {
@@ -161,11 +160,12 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
-    expectActivePreferenceButton(
+    expect(
       screen.getByLabelText("Receive ALL mention notifications")
-    );
-    expectActivePreferenceButton(
-      screen.getByLabelText("Receive all drop notifications")
+    ).toHaveClass("tw-bg-iron-800", "tw-text-primary-400");
+    expect(screen.getByLabelText("Receive all drop notifications")).toHaveClass(
+      "tw-bg-iron-800",
+      "tw-text-primary-400"
     );
   });
 
@@ -201,7 +201,7 @@ describe("WaveNotificationSettings", () => {
 
     const allButton = screen.getByLabelText("Receive all drop notifications");
     expect(allButton).toBeEnabled();
-    expectActivePreferenceButton(allButton);
+    expect(allButton).toHaveClass("tw-bg-iron-800", "tw-text-primary-400");
     expect(allButton).not.toHaveClass("tw-cursor-not-allowed");
     expect(allButton).not.toHaveAttribute("style");
     expect(allButton.parentElement?.tagName).toBe("DIV");
@@ -430,13 +430,10 @@ describe("WaveNotificationSettings", () => {
     await userEvent.click(allButton);
 
     await waitFor(() => {
-      expect(mockAuthContext.setToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          details: expect.stringMatching(/API Error/i),
-          title: expect.stringMatching(/notification settings/i),
-          type: "error",
-        })
-      );
+      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+        message: "API Error",
+        type: "error",
+      });
     });
   });
 
@@ -461,13 +458,10 @@ describe("WaveNotificationSettings", () => {
     await userEvent.click(allMentionsButton);
 
     await waitFor(() => {
-      expect(mockAuthContext.setToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          details: expect.stringMatching(/Unable to update subscription/i),
-          title: expect.stringMatching(/notification settings/i),
-          type: "error",
-        })
-      );
+      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+        message: "Unable to update subscription",
+        type: "error",
+      });
     });
   });
 
@@ -561,13 +555,10 @@ describe("WaveNotificationSettings", () => {
     await userEvent.click(mutedButton);
 
     await waitFor(() => {
-      expect(mockAuthContext.setToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          details: expect.stringMatching(/Unable to unmute wave/i),
-          title: expect.stringMatching(/unmute this wave/i),
-          type: "error",
-        })
-      );
+      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+        message: "Unable to unmute wave",
+        type: "error",
+      });
     });
   });
 });

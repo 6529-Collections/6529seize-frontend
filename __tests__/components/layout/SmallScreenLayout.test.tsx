@@ -6,10 +6,6 @@ const registerRef = jest.fn();
 let pathname = "/";
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({ useLayout: () => ({ registerRef }) }));
-jest.mock("@/components/layout/sidebar/WebSidebar", () => ({
-  __esModule: true,
-  default: () => <div data-testid="web-sidebar" />,
-}));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: null }),
 }));

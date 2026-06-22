@@ -159,18 +159,18 @@ describe("MarketplacePreview", () => {
     }
   );
 
-  it("renders supported marketplace previews immediately", () => {
+  it("renders placeholder when marketplace preview is out of viewport", () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
     mockUseInView.mockReturnValue([{ current: null }, false]);
 
     render(<MarketplacePreview href={href} />);
 
-    expect(mockMarketplaceManifoldListingPreview).toHaveBeenCalledWith({
+    expect(mockMarketplacePreviewPlaceholder).toHaveBeenCalledWith({
       href,
       compact: false,
     });
-    expect(screen.getByTestId("manifold-listing")).toBeInTheDocument();
-    expect(mockMarketplacePreviewPlaceholder).not.toHaveBeenCalled();
+    expect(screen.getByTestId("marketplace-placeholder")).toBeInTheDocument();
+    expect(mockMarketplaceManifoldListingPreview).not.toHaveBeenCalled();
   });
 
   it("renders marketplace unavailable card for unsupported URLs when visible", () => {
@@ -185,10 +185,13 @@ describe("MarketplacePreview", () => {
     expect(screen.getByTestId("marketplace-unavailable")).toBeInTheDocument();
   });
 
-  it("does not gate previews on viewport visibility", () => {
+  it("uses marketplace viewport preload options", () => {
     render(<MarketplacePreview href="https://transient.xyz/mint/edition-1" />);
 
-    expect(mockUseInView).not.toHaveBeenCalled();
+    expect(mockUseInView).toHaveBeenCalledWith({
+      rootMargin: "500px 0px",
+      threshold: 0,
+    });
   });
 
   it("stops click propagation to parent containers", () => {

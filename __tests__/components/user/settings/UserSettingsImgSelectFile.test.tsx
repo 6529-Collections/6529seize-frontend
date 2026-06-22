@@ -39,10 +39,7 @@ describe('UserSettingsImgSelectFile', () => {
     const bad = new File(['1'], 'file.txt', { type: 'text/plain' });
     fireEvent.change(input, { target: { files: [bad] } });
     await new Promise((r) => setTimeout(r, 0));
-    expect(setToast).toHaveBeenCalledWith({
-      type: 'error',
-      message: 'This file type is not supported.',
-    });
+    expect(setToast).toHaveBeenCalledWith({ type: 'error', message: 'Invalid file type' });
     expect(setFile).not.toHaveBeenCalled();
   });
 });

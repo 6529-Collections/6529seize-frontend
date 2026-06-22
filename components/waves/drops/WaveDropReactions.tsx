@@ -402,7 +402,6 @@ function WaveDropReaction({
   const prevTotalRef = useRef(total);
   const prevContextReactionRef = useRef(drop.context_profile_context?.reaction);
   const prevProfilesRef = useRef(reaction.profiles);
-  const prevReactionTotalRef = useRef(getReactionCount(reaction));
 
   // Sync selected when context reaction changes from server
   useEffect(() => {
@@ -423,15 +422,13 @@ function WaveDropReaction({
 
   useEffect(() => {
     const nextTotal = getReactionCount(reaction);
-    const profilesChanged = reaction.profiles !== prevProfilesRef.current;
-    const totalChanged = nextTotal !== prevReactionTotalRef.current;
-
-    if (!profilesChanged && !totalChanged) {
-      return;
+    if (reaction.profiles === prevProfilesRef.current) {
+      const timeoutId = setTimeout(() => {
+        setTotal((current) => (current === nextTotal ? current : nextTotal));
+      }, 0);
+      return () => clearTimeout(timeoutId);
     }
-
     prevProfilesRef.current = reaction.profiles;
-    prevReactionTotalRef.current = nextTotal;
 
     const timeoutId = setTimeout(() => {
       setTotal((current) => (current === nextTotal ? current : nextTotal));
