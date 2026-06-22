@@ -3175,3 +3175,57 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   and 0.0% new-code duplication.
 - As of this log entry, App PR CI, Dependency Governance, CodeQL, and latest
   6529bot/GLM follow-up signals were still pending or queued.
+
+## 2026-06-22T10:25Z PR #2823 Shipped And Production Read-Only Harness Follow-Up
+
+- PR #2823 merged into `origin/main` as
+  `02382bc81f1d945083b28bf78641ab2469e2212e`.
+- Staged the release by merging current `origin/main` into `1a-staging` as
+  `43d6f711a7f3856c62b5544736d001319f285bef`.
+- Staging deploy run #27943628946 succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27943628946
+  - workflow `deployment-version-evidence.json` matched
+    `43d6f711a7f3856c62b5544736d001319f285bef`.
+  - local staging `/api/version` probe matched the same SHA.
+  - local staging validation passed:
+    `test:e2e:staging:smoke` 12 passed,
+    `test:e2e:staging` 24 passed / 6 skipped,
+    `test:e2e:wcag-i18n:surface-matrix` 6 passed.
+- Production deploy run #27944602623 succeeded from exact `origin/main` SHA
+  `02382bc81f1d945083b28bf78641ab2469e2212e`:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27944602623
+  - workflow `deployment-version-evidence.json` matched the production SHA.
+  - local production `/api/version` probe matched the production SHA.
+- Initial post-production `seize run test:e2e:production:readonly` run found two
+  failures:
+  - delegation wallet-checker empty-state test stayed on loading for 20s, then
+    passed immediately on isolated rerun. Treat as transient production/API
+    timing unless repeated.
+  - The Memes mint page test failed repeatedly because live production card
+    #512 renders dynamic iframe art and the test only accepted direct image
+    media. The read-only guard also blocked safe Ethereum JSON-RPC read POSTs
+    to `eth.llamarpc.com`, `cloudflare-eth.com`, and
+    `ethereum-rpc.publicnode.com`.
+- Started branch `codex/e2e-production-readonly-hardening` from current
+  `origin/main`.
+- Follow-up test-harness changes:
+  - `tests/media/media-mint-detail-readonly.spec.ts` now accepts either direct
+    image media or visible iframe art on the mint page.
+  - `tests/support/readonlyMutationGuard.ts` allows only safe Ethereum JSON-RPC
+    read methods on the observed public RPC hosts, while still blocking unsafe
+    methods such as `eth_sendRawTransaction` and unknown RPC hosts.
+  - `__tests__/playwright/readonlyMutationGuard.test.ts` covers the new public
+    RPC allow/block behavior.
+- Validation completed before PR publication:
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`:
+    14 passed.
+  - focused ESLint on changed guard/E2E files.
+  - production mint-page focused rerun: 1 passed.
+  - `seize run test:e2e:production:readonly`: 65 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    Level 3.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/production-readonly-hardening-secret-scan-clean.json`:
+    passed.
