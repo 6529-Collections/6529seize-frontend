@@ -318,7 +318,21 @@ const createReactQueryContextValue = (
     );
   };
 
+  const setWaveIfMissing = (wave: ApiWave) => {
+    const queryKey = [QueryKey.WAVE, { wave_id: wave.id }];
+    const existingData = queryClient.getQueryData<ApiWave>(queryKey);
+    if (existingData) {
+      return;
+    }
+
+    queryClient.setQueryData<ApiWave>(queryKey, wave);
+  };
+
   const setWavesOverviewPage = (wavesOverview: ApiWave[]) => {
+    for (const wave of wavesOverview) {
+      setWaveIfMissing(wave);
+    }
+
     const queryKey = [
       QueryKey.WAVES_OVERVIEW,
       {

@@ -1,4 +1,4 @@
-import { useWaveById } from "@/hooks/useWaveById";
+import { useWavePreviewById } from "@/hooks/useWavePreviewById";
 import ChatItemHrefButtons from "../ChatItemHrefButtons";
 import WaveItemWide from "./WaveItemWide";
 
@@ -9,7 +9,7 @@ export default function WaveItemChat({
   readonly href: string;
   readonly waveId: string;
 }) {
-  const { wave } = useWaveById(waveId, { enabled: false });
+  const { wave } = useWavePreviewById(waveId);
 
   return (
     <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
