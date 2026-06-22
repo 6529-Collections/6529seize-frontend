@@ -18,7 +18,6 @@ interface UseDeferredNewestDropsProps {
   readonly isAppleMobile: boolean;
   readonly waveMessages: WaveMessagesResult;
   readonly shouldPinToBottom: boolean;
-  readonly revealThroughSerialNo?: number | null | undefined;
 }
 
 interface DeferredNewestDropsSession {
@@ -42,21 +41,6 @@ const createDeferredNewestDropsSession = (
   capturedLatestSerial: null,
   revealedLatestSerial: null,
 });
-
-const maxSerialNoOrNull = (
-  ...values: readonly (number | null | undefined)[]
-): number | null => {
-  let max: number | null = null;
-
-  for (const value of values) {
-    if (typeof value !== "number" || !Number.isFinite(value)) {
-      continue;
-    }
-    max = max === null ? value : Math.max(max, value);
-  }
-
-  return max;
-};
 
 const updateDeferredNewestDropsSession = ({
   session,
@@ -101,10 +85,9 @@ const getDeferredNewestDropsVisibleLatestSerial = ({
   }
 
   return (
-    maxSerialNoOrNull(
-      session.revealedLatestSerial,
-      session.capturedLatestSerial
-    ) ?? latestSerialNo
+    session.revealedLatestSerial ??
+    session.capturedLatestSerial ??
+    latestSerialNo
   );
 };
 
@@ -115,7 +98,6 @@ const getDeferredNewestDropsNextSession = ({
   shouldPinToBottom,
   latestSerialNo,
   previousInputs,
-  revealThroughSerialNo,
 }: {
   readonly session: DeferredNewestDropsSession;
   readonly waveId: string;
@@ -123,7 +105,6 @@ const getDeferredNewestDropsNextSession = ({
   readonly shouldPinToBottom: boolean;
   readonly latestSerialNo: number | null;
   readonly previousInputs: DeferredNewestDropsInputsSnapshot | null;
-  readonly revealThroughSerialNo?: number | null | undefined;
 }): DeferredNewestDropsSession => {
   let nextSession =
     session.waveId === waveId
@@ -164,10 +145,6 @@ const getDeferredNewestDropsNextSession = ({
     ...nextSession,
     wasPinned: false,
     capturedLatestSerial,
-    revealedLatestSerial: maxSerialNoOrNull(
-      nextSession.revealedLatestSerial,
-      revealThroughSerialNo
-    ),
   };
 
   return updateDeferredNewestDropsSession({ session, nextSession });
@@ -242,7 +219,6 @@ export function useDeferredNewestDrops({
   isAppleMobile,
   waveMessages,
   shouldPinToBottom,
-  revealThroughSerialNo = null,
 }: UseDeferredNewestDropsProps): DeferredNewestDropsState {
   const latestSerialNo = waveMessages?.drops[0]?.serial_no ?? null;
   const [session, setSession] = useState<DeferredNewestDropsSession>(() =>
@@ -273,7 +249,6 @@ export function useDeferredNewestDrops({
       shouldPinToBottom,
       latestSerialNo,
       previousInputs: previousInputsRef.current,
-      revealThroughSerialNo,
     });
 
     previousInputsRef.current = {
@@ -283,16 +258,10 @@ export function useDeferredNewestDrops({
     };
 
     if (session !== nextSession) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- This commits the derived session before the next paint so deferred-drop capture stays in sync with the current render inputs.
       setSession(nextSession);
     }
-  }, [
-    isAppleMobile,
-    latestSerialNo,
-    revealThroughSerialNo,
-    session,
-    shouldPinToBottom,
-    waveId,
-  ]);
+  }, [isAppleMobile, latestSerialNo, session, shouldPinToBottom, waveId]);
 
   const renderedWaveMessages = useMemo(
     () =>
