@@ -4,6 +4,45 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-22T08:32Z:
+  - PR #2822 is merged and deployed. Production is serving
+    `7693d1138987175e0ccd6c54841d7547d99ce322`, and the full production-safe
+    read-only aggregate passed again: `seize run test:e2e:production:readonly`
+    reported 65/65 passed.
+  - Current branch: `codex/deployment-evidence-verification`, based on current
+    `origin/main`.
+  - Active slice closes a deployment evidence gap:
+    - adds `ops/scripts/verify-deployment-version.cjs` and
+      `seize run verify:deployment-version` to GET `/api/version`, require
+      HTTP 200, `Cache-Control: no-store`, and exact expected SHA match, with
+      bounded retry and redacted `deployment-version-evidence.json` output.
+    - wires staging and production workflows to run the HTTP version check
+      before marking deploys verified and upload the evidence JSON beside the
+      deployment-bus manifest/report.
+    - records an `http-version-match` post-deploy-watch checkpoint when the
+      workflow probe passes.
+    - adds optional deployment-bus pack `playwright:production-readonly` for
+      the existing production aggregate. It is production-only,
+      desktop-Chromium only, and intentionally not in `DEFAULT_REQUIRED_PACKS`
+      until durable artifact upload/recording is automated.
+    - rejects known standard packs when required in an unsupported environment,
+      so `playwright:production-readonly` cannot silently become a null-command
+      staging requirement.
+  - Validation passed for this slice:
+    `node --check ops/scripts/verify-deployment-version.cjs`; focused ESLint on
+    deployment-bus/verifier files; `seize run test:no-coverage --
+__tests__/scripts/verify-deployment-version.test.ts
+__tests__/scripts/deployment-bus.test.ts
+__tests__/app/api/version/route.test.ts
+__tests__/hooks/useVersion.test.tsx` (51 tests); `lint:changed`;
+    `typecheck:changed`; risk-floor computed Level 5; changed secret scan;
+    workflow-security scan; live production version probe; live staging version
+    probe; `codex-diff-check`; and production aggregate E2E 65/65.
+  - Reviewer subagent `Kepler` is inspecting the final uncommitted diff. Wait
+    for it before committing/publishing.
+  - GLM reviewbot is live and remains additive. Do not remove, downgrade, or
+    replace existing Opus/general/WCAG/i18n/security/responsiveness reviewbot
+    lanes.
 - Latest testing-roadmap state, 2026-06-22T05:45Z:
   - PR #2819 is merged into `origin/main` as
     `174b2d054 Add search and wave read-only E2E coverage (#2819)`.
@@ -307,7 +346,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-composer-sandbox`
+`codex/deployment-evidence-verification`
 
 ## Constraints
 
@@ -472,14 +511,26 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Publish the production read-only aggregate follow-up PR from
-   `codex/fix-production-collections-readonly`, iterate CI/reviewbots, merge,
-   and deploy because it updates release-validation controls.
-2. Keep `/notifications` out of staging/production read-only smoke until a
+1. Continue PR #2823
+   (`codex/deployment-evidence-verification`) review/check iteration on head
+   `dba0a6c6cf05fae6f68a786554d6e5388b33aa99`.
+2. Wait for App PR CI, Dependency Governance, CodeQL, 6529bot follow-up, GLM
+   reviewbot if it posts on this repo, and any remaining installed-app checks to
+   reach terminal status. CodeRabbit is rate-limited on this PR; keep its
+   existing review signal, but do not treat rate limiting as a hard block unless
+   it later posts an actionable finding.
+3. Confirm the latest 6529bot follow-up has no new blocking findings. The prior
+   `874ccc35` finding was addressed by moving the shared parser into
+   `ops/scripts/cli-args.cjs` and adding a verifier CLI smoke test.
+4. Update the PR body validation notes if needed, then merge and deploy this
+   release-control PR through staging and production,
+   because it changes deployment workflows. Validate exact deployed SHAs and run
+   the production read-only aggregate after production.
+5. Keep `/notifications` out of staging/production read-only smoke until a
    disposable sandbox account/backend or product-safe non-mutating test path
    exists.
-3. Start the next high-value E2E pack after this PR: wallet/native/Electron
+6. Start the next high-value E2E pack after this PR: wallet/native/Electron
    shell coverage, deployment evidence/version verification, or the next
    guarded authenticated sandbox pack.
-4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
+7. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.
