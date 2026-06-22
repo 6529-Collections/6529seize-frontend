@@ -29,7 +29,11 @@ const PROFILE_TAB_PATHS = [
 async function getFirstWaveId(page: Page) {
   await gotoReady(page, "/waves");
 
-  const firstWaveLink = page.getByRole("link", { name: /^Open / }).first();
+  const waveList = page.getByRole("region", {
+    name: /All recent waves list|Regular waves list/,
+  });
+  await expect(waveList).toBeVisible({ timeout: 15000 });
+  const firstWaveLink = waveList.locator('a[href^="/waves/"]').first();
   await expect(firstWaveLink).toBeVisible({ timeout: 15000 });
   const href = await firstWaveLink.getAttribute("href");
   const pathname = href ? new URL(href, page.url()).pathname : "";

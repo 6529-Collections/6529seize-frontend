@@ -22,16 +22,24 @@ export async function gotoReady(page: Page, path: string) {
 export async function gotoDocumentWithTransientRetry(page: Page, path: string) {
   for (let attempt = 1; attempt <= 2; attempt++) {
     const response = await page.goto(path, { waitUntil: "domcontentloaded" });
-    const shouldRetry =
-      attempt === 1 &&
+    const transientStatus =
       response !== null &&
-      TRANSIENT_DOCUMENT_STATUS_CODES.has(response.status());
+      TRANSIENT_DOCUMENT_STATUS_CODES.has(response.status())
+        ? response.status()
+        : null;
 
-    if (!shouldRetry) {
+    if (transientStatus === null) {
       return response;
     }
 
-    await page.waitForTimeout(TRANSIENT_DOCUMENT_RETRY_DELAY_MS);
+    if (attempt === 1) {
+      await page.waitForTimeout(TRANSIENT_DOCUMENT_RETRY_DELAY_MS);
+      continue;
+    }
+
+    throw new Error(
+      `Document navigation to ${path} returned transient HTTP ${transientStatus} after retry.`
+    );
   }
 
   return null;

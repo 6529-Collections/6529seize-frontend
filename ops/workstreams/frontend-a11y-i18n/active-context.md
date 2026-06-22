@@ -39,6 +39,16 @@ Read this section first after compaction or handoff.
       tweak: 3/3 each passed
     - full `seize run test:e2e:production:readonly`: 65/65 passed
     - `codex-diff-check`
+  - PR #2847 first review loop was useful and fixed:
+    - persistent transient document responses now throw a direct
+      `Document navigation ... returned transient HTTP ... after retry` error.
+    - Google CSP report tests now cover exact-boundary negatives: 31 chars, 33
+      chars, non-hex same-length IDs, and trailing slashes.
+    - the Waves/Profile legacy-link test now selects the first internal
+      `/waves/{id}` link inside the wave-list region instead of the first
+      `Open ...` link, because live production can show external X links first.
+    - post-fix focused Waves/Profile production check passed, and full
+      `seize run test:e2e:production:readonly` passed 65/65 again.
   - Independent verifier `Heisenberg` found the ReMemes visible-title assertion
     was over-specific and recommended replacing exact text with the
     breakpoint-aware `Collection: ReMemes` button candidate. Fixed before PR

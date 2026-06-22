@@ -146,6 +146,25 @@ describe("Playwright read-only mutation guard", () => {
       action: "block",
       reason: "non-allowlisted-mutation",
     });
+
+    for (const url of [
+      "https://csp.withgoogle.com/csp/script-inclusions/1a74b362328347702024274e29d77eb",
+      "https://csp.withgoogle.com/csp/script-inclusions/1a74b362328347702024274e29d77eb55",
+      "https://csp.withgoogle.com/csp/script-inclusions/1a74b362328347702024274e29d77eg5",
+      "https://csp.withgoogle.com/csp/script-inclusions/1a74b362328347702024274e29d77eb5/",
+    ]) {
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://6529.io",
+          method: "POST",
+          readonly: true,
+          url,
+        })
+      ).toMatchObject({
+        action: "block",
+        reason: "non-allowlisted-mutation",
+      });
+    }
   });
 
   it("aborts Next.js dev inspector stack-frame lookups without recording an app mutation", () => {

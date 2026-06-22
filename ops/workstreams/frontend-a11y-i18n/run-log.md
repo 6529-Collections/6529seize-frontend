@@ -3410,3 +3410,34 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: commit, push, open PR, trigger all existing reviewbot lanes plus
   GLM swarm, iterate feedback, then merge/deploy when Codex and the bots stop
   adding material value.
+
+## 2026-06-22T17:58Z PR #2847 Reviewbot Follow-Up
+
+- PR #2847 opened and triggered:
+  `/6529bot review general wcag i18n security responsiveness glm-swarm`.
+- CI/status checks passed on first head:
+  CodeQL, DCO, Installed app checks, Plan risk and security checks, SonarCloud,
+  Snyk, and CodeRabbit.
+- 6529bot returned Good-to-merge / no-finding results for the visible Opus
+  lanes, plus useful nice-to-have feedback.
+- Fixed valid review/test-loop feedback:
+  - `gotoDocumentWithTransientRetry` now throws a direct error if the retried
+    document response is still 502/503/504.
+  - CSP report negative coverage now locks exact 32-hex behavior for 31-char,
+    33-char, same-length non-hex, and trailing-slash report IDs.
+  - The Waves/Profile legacy-link test now chooses the first internal
+    `/waves/{id}` link from the wave-list region instead of relying on the
+    first `Open ...` link, because live production can surface an external X
+    link first.
+- Dispositioned one bot note as a miss: ReMemes browse already awaits
+  `gotoReadyWithApiResponse` at line 277.
+- Post-fix validation passed:
+  - focused production Waves/Profile legacy-link test: 1 passed
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - full `seize run test:e2e:production:readonly`: 65/65 passed
+  - `codex-diff-check`
+- Next action: commit/push the follow-up, rerun PR checks and reviewbot lanes on
+  the new head, then merge/deploy if no material feedback remains.
