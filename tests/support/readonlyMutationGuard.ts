@@ -54,6 +54,12 @@ const GOOGLE_COLLECT_HOSTS = new Set([
   "www.google-analytics.com",
   "www.google.com",
 ]);
+const YOUTUBE_TELEMETRY_HOSTS = new Set([
+  "youtube.com",
+  "www.youtube.com",
+  "youtube-nocookie.com",
+  "www.youtube-nocookie.com",
+]);
 const WALLETCONNECT_RPC_HOST = "rpc.walletconnect.org";
 const SAFE_WALLETCONNECT_RPC_METHODS = new Set([
   "eth_accounts",
@@ -146,6 +152,25 @@ function isIgnoredExternalMutation(url: URL) {
     return true;
   }
 
+  if (url.hostname === "www.googletagmanager.com" && url.pathname === "/td") {
+    return true;
+  }
+
+  if (
+    YOUTUBE_TELEMETRY_HOSTS.has(url.hostname) &&
+    (url.pathname.startsWith("/api/stats/") ||
+      url.pathname === "/youtubei/v1/log_event")
+  ) {
+    return true;
+  }
+
+  if (
+    url.hostname === "jnn-pa.googleapis.com" &&
+    url.pathname === "/$rpc/google.internal.waa.v1.Waa/GenerateIT"
+  ) {
+    return true;
+  }
+
   return IGNORED_EXTERNAL_MUTATION_HOSTS.some((pattern) =>
     pattern.test(url.hostname)
   );
@@ -160,6 +185,26 @@ function isFirstPartyTelemetryEndpoint(url: URL, baseURL?: string) {
   return (
     isSameOrigin(url, baseURL) &&
     (url.pathname === "/monitoring" || url.pathname.startsWith("/monitoring/"))
+  );
+}
+
+function isFirstPartyReadonlyRouteHandler(
+  method: string,
+  url: URL,
+  baseURL?: string
+) {
+  return (
+    method === "POST" &&
+    isSameOrigin(url, baseURL) &&
+    url.pathname === "/api/open-graph"
+  );
+}
+
+function isNextDevInspectorEndpoint(url: URL, baseURL?: string) {
+  return (
+    isSameOrigin(url, baseURL) &&
+    (url.pathname === "/__nextjs_original-stack-frame" ||
+      url.pathname === "/__nextjs_original-stack-frames")
   );
 }
 
@@ -293,6 +338,14 @@ export function decideReadonlyRequest({
   const parsed = parseUrl(url);
   if (!parsed || !["http:", "https:"].includes(parsed.protocol)) {
     return { action: "allow", reason: "non-http-url" };
+  }
+
+  if (isFirstPartyReadonlyRouteHandler(upperMethod, parsed, baseURL)) {
+    return { action: "allow", reason: "first-party-readonly-route-handler" };
+  }
+
+  if (isNextDevInspectorEndpoint(parsed, baseURL)) {
+    return { action: "abort", reason: "ignored-next-dev-inspector" };
   }
 
   const endpoint = registryMatch(upperMethod, parsed, baseURL);
