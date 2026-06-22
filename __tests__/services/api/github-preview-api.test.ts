@@ -59,11 +59,11 @@ describe("fetchGithubPreview", () => {
     };
     fetchMock.mockResolvedValueOnce(
       createResponse({
-        results: {
-          [firstUrl]: firstPreview,
-          [secondUrl]: secondPreview,
-        },
-        errors: {},
+        results: [
+          { url: firstUrl, preview: firstPreview },
+          { url: secondUrl, preview: secondPreview },
+        ],
+        errors: [],
       })
     );
 
@@ -101,8 +101,8 @@ describe("fetchGithubPreview", () => {
     };
     fetchMock.mockResolvedValueOnce(
       createResponse({
-        results: { [url]: preview },
-        errors: {},
+        results: [{ url, preview }],
+        errors: [],
       })
     );
 
@@ -140,8 +140,8 @@ describe("fetchGithubPreview", () => {
     };
     fetchMock.mockResolvedValueOnce(
       createResponse({
-        results: { [url]: preview },
-        errors: {},
+        results: [{ url, preview }],
+        errors: [],
       })
     );
 

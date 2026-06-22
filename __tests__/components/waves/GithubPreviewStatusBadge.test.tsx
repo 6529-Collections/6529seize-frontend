@@ -50,8 +50,8 @@ const createBatchResponse = (
   ({
     ok: true,
     json: async () => ({
-      results: { [href]: preview },
-      errors: {},
+      results: [{ url: href, preview }],
+      errors: [],
     }),
   }) as Response;
 

@@ -88,19 +88,25 @@ describe("github-preview API route", () => {
     );
 
     await expect(response.json()).resolves.toMatchObject({
-      results: {
-        "https://github.com/o/r/issues/1": {
-          type: "github.issue",
-          title: "First issue",
-          state: "open",
+      results: [
+        {
+          url: "https://github.com/o/r/issues/1",
+          preview: {
+            type: "github.issue",
+            title: "First issue",
+            state: "open",
+          },
         },
-        "https://github.com/o/r/issues/2": {
-          type: "github.issue",
-          title: "Second issue",
-          state: "closed_completed",
+        {
+          url: "https://github.com/o/r/issues/2",
+          preview: {
+            type: "github.issue",
+            title: "Second issue",
+            state: "closed_completed",
+          },
         },
-      },
-      errors: {},
+      ],
+      errors: [],
     });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
@@ -124,16 +130,21 @@ describe("github-preview API route", () => {
     );
 
     await expect(response.json()).resolves.toMatchObject({
-      results: {
-        "https://github.com/o/r/issues/1": {
-          type: "github.issue",
-          title: "First issue",
+      results: [
+        {
+          url: "https://github.com/o/r/issues/1",
+          preview: {
+            type: "github.issue",
+            title: "First issue",
+          },
         },
-      },
-      errors: {
-        "https://github.com/o/r/settings":
-          "Only github.com repository URLs are supported.",
-      },
+      ],
+      errors: [
+        {
+          url: "https://github.com/o/r/settings",
+          error: "Only github.com repository URLs are supported.",
+        },
+      ],
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

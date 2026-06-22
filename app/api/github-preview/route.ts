@@ -7,10 +7,24 @@ interface GithubPreviewBatchRequest {
   readonly urls?: unknown;
 }
 
-interface GithubPreviewBatchResponse {
-  readonly results: Record<string, GithubPreviewResponse>;
-  readonly errors: Record<string, string>;
+interface GithubPreviewBatchResult {
+  readonly url: string;
+  readonly preview: GithubPreviewResponse;
 }
+
+interface GithubPreviewBatchError {
+  readonly url: string;
+  readonly error: string;
+}
+
+interface GithubPreviewBatchResponse {
+  readonly results: readonly GithubPreviewBatchResult[];
+  readonly errors: readonly GithubPreviewBatchError[];
+}
+
+type GithubPreviewBatchItem =
+  | GithubPreviewBatchResult
+  | GithubPreviewBatchError;
 
 const GITHUB_PREVIEW_BATCH_MAX_URLS = 10;
 const GITHUB_PREVIEW_METADATA_ERROR_MESSAGE =
@@ -63,20 +77,29 @@ export async function POST(request: Request) {
       );
     }
 
-    const response: GithubPreviewBatchResponse = {
-      results: {},
-      errors: {},
-    };
-
-    await Promise.all(
+    const items: readonly GithubPreviewBatchItem[] = await Promise.all(
       uniqueUrls.map(async (url) => {
         try {
-          response.results[url] = await resolveGithubPreview(url);
+          return {
+            url,
+            preview: await resolveGithubPreview(url),
+          };
         } catch (error: unknown) {
-          response.errors[url] = readErrorMessage(error);
+          return {
+            url,
+            error: readErrorMessage(error),
+          };
         }
       })
     );
+    const response: GithubPreviewBatchResponse = {
+      results: items.filter(
+        (item): item is GithubPreviewBatchResult => "preview" in item
+      ),
+      errors: items.filter(
+        (item): item is GithubPreviewBatchError => "error" in item
+      ),
+    };
 
     return NextResponse.json(response);
   } catch (error: unknown) {

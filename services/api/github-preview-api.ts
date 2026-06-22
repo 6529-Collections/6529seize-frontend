@@ -184,8 +184,18 @@ interface FetchGithubPreviewOptions {
 }
 
 interface GithubPreviewBatchResponse {
-  readonly results?: Record<string, GithubPreviewResponse | undefined>;
-  readonly errors?: Record<string, string | undefined>;
+  readonly results?:
+    | readonly {
+        readonly url: string;
+        readonly preview: GithubPreviewResponse;
+      }[]
+    | undefined;
+  readonly errors?:
+    | readonly {
+        readonly url: string;
+        readonly error: string;
+      }[]
+    | undefined;
 }
 
 type PendingGithubPreviewRequest = {
@@ -282,18 +292,24 @@ const sendGithubPreviewBatch = async (
     }
 
     const body = (await response.json()) as GithubPreviewBatchResponse;
-    const results = body.results ?? {};
-    const errors = body.errors ?? {};
+    const results = new Map(
+      (body.results ?? []).map((result) => [result.url, result.preview])
+    );
+    const errors = new Map(
+      (body.errors ?? []).map((error) => [error.url, error.error])
+    );
 
     requests.forEach((request) => {
-      const result = results[request.url];
+      const result = results.get(request.url);
       if (result) {
         request.resolve(result);
         return;
       }
 
       request.reject(
-        new Error(errors[request.url] ?? GITHUB_PREVIEW_METADATA_ERROR_MESSAGE)
+        new Error(
+          errors.get(request.url) ?? GITHUB_PREVIEW_METADATA_ERROR_MESSAGE
+        )
       );
     });
   } catch (error: unknown) {
