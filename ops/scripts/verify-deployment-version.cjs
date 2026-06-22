@@ -197,7 +197,7 @@ async function verifyDeploymentVersion(options) {
   const env = options.env || process.env;
   const fetchImpl = options.fetchImpl || globalThis.fetch;
   if (typeof fetchImpl !== "function") {
-    throw new Error("global fetch is not available");
+    throw new TypeError("global fetch is not available");
   }
 
   const expectedVersion = options.expectedVersion;
