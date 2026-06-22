@@ -12,7 +12,7 @@ jest.mock('@/services/api/common-api', () => ({
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
-    invalidateQueries: jest.fn(),
+    invalidateQueries: jest.fn(() => Promise.resolve()),
   }),
 }));
 
@@ -134,8 +134,10 @@ describe('WaveMute', () => {
     
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: 'Unable to mute wave',
         type: 'error',
+        title: "Couldn't mute this wave.",
+        description: 'Please try again.',
+        details: 'Unable to mute wave.',
       });
     });
   });
@@ -150,8 +152,10 @@ describe('WaveMute', () => {
     
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: 'Unable to unmute wave',
         type: 'error',
+        title: "Couldn't unmute this wave.",
+        description: 'Please try again.',
+        details: 'Unable to unmute wave.',
       });
     });
   });
@@ -170,4 +174,3 @@ describe('WaveMute', () => {
     });
   });
 });
-

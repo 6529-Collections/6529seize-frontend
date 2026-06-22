@@ -63,8 +63,10 @@ describe("WaveLeaderboardIdentity", () => {
       />
     );
 
-    expect(screen.getByText("Identity")).toBeInTheDocument();
     expect(screen.getByText("alice")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View alice's profile" })
+    ).toHaveAttribute("href", "/alice");
     expect(screen.getByText("0xabc")).toBeInTheDocument();
     expect(screen.getByTestId("identity-badges")).toBeInTheDocument();
   });

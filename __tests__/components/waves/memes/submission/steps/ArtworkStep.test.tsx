@@ -123,11 +123,11 @@ describe("ArtworkStep", () => {
     mockArtworkDetails.mockClear();
   });
 
-  it("renders responsive content container with mobile scroll and desktop split behavior", () => {
+  it("renders a scrollable content container", () => {
     render(<ArtworkStep {...createProps()} />);
     const contentContainer = screen.getByTestId("artwork-step-content");
     expect(contentContainer).toHaveClass("tw-overflow-y-auto");
-    expect(contentContainer).toHaveClass("lg:tw-overflow-hidden");
+    expect(contentContainer).toHaveClass("tw-scrollbar-thin");
   });
 
   it("shows upload tooltip when artwork missing", () => {

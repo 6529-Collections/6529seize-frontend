@@ -7,13 +7,16 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { areEqualAddresses } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
-import { ReviewDistributionPlanTableItemType } from "./ReviewDistributionPlanTable";
-import type { ReviewDistributionPlanTableItem } from "./ReviewDistributionPlanTable";
+import {
+  ReviewDistributionPlanTableItemType,
+  type ReviewDistributionPlanTableItem,
+} from "./ReviewDistributionPlanTable.types";
+import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
+
+export { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
 interface WalletResult {
   wallet: string;
@@ -105,17 +108,6 @@ export function SubscriptionLinks(
     </button>
   );
 }
-
-export const isSubscriptionsAdmin = (
-  connectedProfile: ApiIdentity | null,
-  distributionAdminWallets: string[] = []
-) => {
-  const connectedWallets =
-    connectedProfile?.wallets?.map((wallet) => wallet.wallet) ?? [];
-  return connectedWallets.some((w) =>
-    distributionAdminWallets.some((a) => areEqualAddresses(a, w))
-  );
-};
 
 const download = async (
   contract: string,

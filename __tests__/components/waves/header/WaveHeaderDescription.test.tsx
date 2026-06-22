@@ -1,8 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveHeaderDescription from '@/components/waves/header/WaveHeaderDescription';
-import { WaveHeaderPinnedSide } from '@/components/waves/header/WaveHeader';
+import WaveDescriptionPopover from '@/components/waves/header/WaveDescriptionPopover';
 import type { ApiWave } from '@/generated/models/ApiWave';
 
 jest.mock('react-use', () => ({
@@ -93,9 +92,22 @@ const mockButtonPosition = (overrides: Partial<DOMRect> = {}) => {
   }));
 };
 
-const renderComponentAndClickButton = async (side: WaveHeaderPinnedSide = WaveHeaderPinnedSide.LEFT) => {
-  render(<WaveHeaderDescription wave={mockWave} side={side} />);
-  const button = screen.getByRole('button');
+const renderComponentAndClickButton = async (
+  align: "left" | "right" = "left"
+) => {
+  render(
+    <WaveDescriptionPopover
+      wave={mockWave}
+      ariaLabel="Show wave description"
+      triggerClassName="description-trigger"
+      align={align}
+    >
+      <svg aria-hidden="true" />
+    </WaveDescriptionPopover>
+  );
+  const button = screen.getByRole('button', {
+    name: 'Show wave description',
+  });
   await userEvent.click(button);
   return button;
 };
@@ -127,9 +139,19 @@ describe('WaveHeaderDescription', () => {
   });
 
   it('renders pin button', () => {
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(
+      <WaveDescriptionPopover
+        wave={mockWave}
+        ariaLabel="Show wave description"
+        triggerClassName="description-trigger"
+      >
+        <svg aria-hidden="true" />
+      </WaveDescriptionPopover>
+    );
     
-    const button = screen.getByRole('button');
+    const button = screen.getByRole('button', {
+      name: 'Show wave description',
+    });
     expect(button).toBeInTheDocument();
     expect(button.querySelector('svg')).toBeInTheDocument();
   });
@@ -149,12 +171,12 @@ describe('WaveHeaderDescription', () => {
   });
 
   it('positions dropdown on the right side', async () => {
-    await renderComponentAndClickButton(WaveHeaderPinnedSide.RIGHT);
+    await renderComponentAndClickButton("right");
     await expectDropdownPositioned();
   });
 
   it('positions dropdown on the left side', async () => {
-    await renderComponentAndClickButton(WaveHeaderPinnedSide.LEFT);
+    await renderComponentAndClickButton("left");
     await expectDropdownPositioned();
   });
 
@@ -164,8 +186,8 @@ describe('WaveHeaderDescription', () => {
     
     await waitFor(() => {
       const dropdown = screen.getByTestId('mock-drop').parentElement;
-      expect(dropdown).toHaveClass('tw-w-full', 'tw-rounded-lg');
-      expect(dropdown).not.toHaveClass('lg:tw-max-w-[672px]');
+      expect(dropdown).toHaveClass('tw-rounded-lg');
+      expect(dropdown).not.toHaveStyle({ width: '672px' });
     });
   });
 
@@ -189,7 +211,8 @@ describe('WaveHeaderDescription', () => {
     
     await waitFor(() => {
       const dropdown = screen.getByTestId('mock-drop').parentElement;
-      expect(dropdown).toHaveClass('tw-w-full');
+      expect(dropdown?.getAttribute('style')).toContain('left: 12px');
+      expect(dropdown?.getAttribute('style')).toContain('right: 12px');
     });
   });
 
@@ -202,9 +225,7 @@ describe('WaveHeaderDescription', () => {
         'tw-bg-iron-800',
         'tw-shadow-xl',
         'tw-ring-1',
-        'tw-ring-iron-800',
-        'lg:tw-max-w-[672px]',
-        'tw-origin-top-left'
+        'tw-ring-iron-800'
       );
     });
   });

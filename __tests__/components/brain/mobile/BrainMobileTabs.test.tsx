@@ -183,6 +183,7 @@ describe("BrainMobileTabs", () => {
         showStreamBack={false}
         isApp={false}
         wave={createWave()}
+        hasPolls={true}
       />
     );
 
@@ -209,6 +210,7 @@ describe("BrainMobileTabs", () => {
         showStreamBack={false}
         isApp={false}
         wave={createWave()}
+        hasPolls={true}
       />
     );
 
