@@ -73,6 +73,12 @@ navigation because the frontend owns:
 The backend should own caching, retrieval, embeddings when added, job
 orchestration, LLM calls, message reactions, and bot replies.
 
+The backend also owns Help6529 Credit accounting. The V1 public behavior is
+indexed here so users can ask about it: the credit category is `Help6529
+Credits`, each bot question costs 1 REP in that category, signup grants 5,
+profile setup grants 5, daily activity grants 2 when a user sends any message
+that day, and automatic grants cap at 50.
+
 ## Agent Maintenance Contract
 
 Future agents must update the help bot knowledge materials when frontend changes
