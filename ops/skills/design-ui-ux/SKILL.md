@@ -22,8 +22,8 @@ Use this skill for user-facing design and UX work in this repository.
 5. Check shape, color, and surface-token choices. Use existing product radius
    patterns: `tw-rounded-lg` / `tw-rounded-xl` for framed surfaces,
    `tw-rounded-md` / `tw-rounded` for dense controls, and `tw-rounded-full` for
-   circular or pill UI. Use arbitrary colors or radii only with local precedent
-   or a documented product reason.
+   circular or pill UI. Use established local border, ring, and color patterns,
+   including white-with-opacity edges on layered dark surfaces.
 6. Keep the change scoped to the touched surface. Reuse the existing visual
    language, icon set, spacing scale, palette, styling library, and
    Bootstrap/Sass boundaries.
@@ -46,13 +46,15 @@ Use this skill for user-facing design and UX work in this repository.
   template UI.
 - New or migrated UI uses `tw-` Tailwind classes and modern tokens unless the
   touched surface is intentionally still legacy.
-- Dark-first surfaces, `iron-*` greys, typography, borders, and compact spacing
-  match current Tailwind patterns before older Bootstrap/Sass patterns.
+- Dark-first surfaces, `iron-*` greys, white-with-opacity borders/rings,
+  typography, and compact spacing match current Tailwind patterns before older
+  Bootstrap/Sass patterns.
 - Cards, dialogs, controls, and framed surfaces use existing radius patterns
   (`tw-rounded-lg` / `tw-rounded-xl` by default, `tw-rounded-full` for
   circular/pill UI).
-- New Bootstrap, React Bootstrap, global Sass, Sass module, hardcoded color, or
-  old spacing debt is absent or explicitly justified.
+- Color choices use Tailwind tokens or established local custom colors tied to
+  product meaning, media/art treatment, brand color, chart/domain state, or
+  legacy compatibility.
 - Product content remains primary, especially NFT/media/art imagery, avatars,
   wave names, badges, scores, and timestamps.
 - Long text, translated text, counters, and labels do not overlap or clip on

@@ -88,24 +88,26 @@ maintained legacy surfaces, with the exception documented.
 
 Use the existing Tailwind visual language for new and substantially touched UI:
 
-- Use `iron-*` neutrals for dark surfaces, borders, muted text, dividers, and
-  skeletons. Use `primary-*` for primary actions, active accents, carets, and
-  focus states. Use semantic tokens such as `error` and `success` for user-facing
-  status when available.
-- Prefer subtle borders and rings such as `tw-border-iron-*`, `tw-border-white/5`,
-  `tw-border-white/10`, `tw-ring-iron-*`, and `tw-ring-primary-*`. Reserve bright
-  or heavy borders for active, selected, warning, or error state.
+- Use `iron-*` neutrals for dark surfaces, muted text, dividers, and skeletons.
+  Use white-with-opacity borders and rings, such as `tw-border-white/5`,
+  `tw-border-white/10`, and `tw-ring-white/10`, for layered dark surfaces where
+  the local UI uses translucent light edges. Use `tw-border-iron-*` and
+  `tw-ring-iron-*` where the nearby pattern uses solid neutral boundaries.
+- Use `primary-*` for primary actions, active accents, carets, and focus states.
+  Use semantic tokens such as `error` and `success` for user-facing status when
+  available. Reserve bright or heavy borders for active, selected, warning, or
+  error state.
 - Use `tw-rounded-lg` and `tw-rounded-xl` as the standard radius for cards,
   dialogs, buttons, panels, and framed product surfaces. Use `tw-rounded-md`,
   `tw-rounded`, or smaller radii for dense inputs, table controls, thumbnails,
   and compact rows when the nearby pattern does.
 - Use `tw-rounded-full` for avatars, pills, badges, dots, circular icon buttons,
   and progress indicators.
-- Use larger radii, arbitrary radius values, arbitrary hex colors, and raw
-  `rgb()` / `rgba()` styling only when matching a nearby established surface, a
-  real media/art treatment, a third-party brand color, or a chart/domain state
-  that is not covered by current tokens; document the reason in the PR notes when
-  the choice is user-visible.
+- Follow established custom colors when a surface already uses them for real
+  product meaning, media/art treatment, third-party brand color, chart/domain
+  state, or legacy compatibility. Tie new user-visible custom color choices to a
+  nearby pattern or product reason, and document the reason in PR notes when the
+  choice creates a new visual convention.
 
 ## New PR Requirements
 
