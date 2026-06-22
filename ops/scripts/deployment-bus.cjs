@@ -10,7 +10,6 @@ const SHA256_RE = /^[0-9a-f]{64}$/i;
 const ETAG_RE = /^"?[0-9a-f]{32}(?:-\d+)?"?$/i;
 const CID_RE = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{20,})$/;
 const VALID_ENVIRONMENTS = new Set(["staging", "production"]);
-const DEPLOYED_ENVIRONMENTS = Object.freeze(["staging", "production"]);
 const REQUIRED_WEB_SURFACES = Object.freeze([
   "web:desktop-chromium",
   "web:mobile-chromium",
@@ -43,6 +42,13 @@ const VALIDATION_PACKS = Object.freeze({
       "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
     productionCommand:
       "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
+  }),
+  "playwright:production-readonly": createPlaywrightPack({
+    id: "playwright:production-readonly",
+    description:
+      "Aggregate production-safe read-only pack across public high-value app workflows.",
+    productionCommand: "seize run test:e2e:production:readonly",
+    surfaces: ["web:desktop-chromium"],
   }),
 });
 const DEFAULT_REQUIRED_PACKS = Object.freeze([
@@ -135,13 +141,19 @@ function createPlaywrightPack({
   description,
   stagingCommand,
   productionCommand,
+  surfaces = REQUIRED_WEB_SURFACES,
 }) {
+  const environments = [
+    ...(stagingCommand ? ["staging"] : []),
+    ...(productionCommand ? ["production"] : []),
+  ];
+
   return Object.freeze({
     id,
     size: "large",
     description,
-    environments: DEPLOYED_ENVIRONMENTS,
-    surfaces: REQUIRED_WEB_SURFACES,
+    environments,
+    surfaces,
     commands: Object.freeze({
       staging: stagingCommand,
       production: productionCommand,
@@ -937,7 +949,12 @@ function validateCanaryReadiness(manifest, errors) {
 
 function validateValidationPlan(manifest, errors, warnings) {
   const validation = manifest.validation || {};
-  const requiredPacks = validateRequiredPacks(validation, errors, warnings);
+  const requiredPacks = validateRequiredPacks(
+    manifest,
+    validation,
+    errors,
+    warnings
+  );
   if (!requiredPacks) {
     return;
   }
@@ -957,7 +974,7 @@ function validateValidationPlan(manifest, errors, warnings) {
   addReadinessFindings(manifest, errors, warnings);
 }
 
-function validateRequiredPacks(validation, errors, warnings) {
+function validateRequiredPacks(manifest, validation, errors, warnings) {
   const requiredPacks = validation.required_packs;
   if (!Array.isArray(requiredPacks) || requiredPacks.length === 0) {
     pushError(
@@ -969,9 +986,16 @@ function validateRequiredPacks(validation, errors, warnings) {
   }
 
   for (const packId of requiredPacks) {
-    if (!VALIDATION_PACKS[packId]) {
+    const pack = VALIDATION_PACKS[packId];
+    if (!pack) {
       warnings.push(
         `validation.required_packs: ${packId} is not a standard frontend pack; record command and artifacts in validation.checks`
+      );
+    } else if (!pack.commands[manifest.environment]) {
+      pushError(
+        errors,
+        "validation.required_packs",
+        `${packId} has no standard command for ${manifest.environment}`
       );
     }
   }
