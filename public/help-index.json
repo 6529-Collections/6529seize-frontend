@@ -933,6 +933,52 @@
       ]
     },
     {
+      "id": "delegation.register-consolidation",
+      "kind": "workflow",
+      "title": "Register Consolidation",
+      "link_label": "Register Consolidation",
+      "aliases": [
+        "register consolidation",
+        "register a consolidation",
+        "how do i register a consolidation",
+        "wallet consolidation",
+        "consolidate wallets",
+        "tdh consolidation",
+        "consolidation"
+      ],
+      "keywords": [
+        "consolidation",
+        "consolidate",
+        "register",
+        "wallet",
+        "wallets",
+        "tdh",
+        "primary",
+        "address",
+        "reciprocal",
+        "999"
+      ],
+      "facts": [
+        "Register Consolidation lives at /delegation/register-consolidation and can also be opened from the Delegation Center.",
+        "Use Register Consolidation to connect wallets you control for supported 6529 metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
+        "The form requires a connected wallet, Collection, and Consolidating With address; for TDH consolidation, use Any Collection or The Memes.",
+        "Consolidation should be reciprocal when two wallets are intended to be treated together, and it is not a delegation and does not grant rights."
+      ],
+      "canonical_path": "/delegation/register-consolidation",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/wallet-checker",
+        "/delegation/consolidation-use-cases",
+        "/delegation/assign-primary-address"
+      ],
+      "tags": ["delegation", "consolidation", "wallet"],
+      "source_refs": [
+        "ops/docs/delegation/feature-delegation-action-flows.md",
+        "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md",
+        "ops/docs/delegation/source-of-truth-spec.md"
+      ]
+    },
+    {
       "id": "delegation.mapping-tools",
       "kind": "route",
       "title": "Delegation and consolidation mapping tools",
