@@ -116,6 +116,16 @@ Surface matrix:
   endpoints are touched. It must run against a loopback base URL, but it is not
   a full network-isolation harness and is not a staging or production smoke
   pack.
+- `test:e2e:auth-sandbox` runs the local authenticated sandbox on desktop
+  Chromium. It includes the composer checks plus positive `/notifications`
+  and `/messages/create` flows with deterministic mock API data. It allows
+  only explicit local sandbox mutations such as notification mark-read and
+  synthetic direct-message creation with exact sandbox IDs, queryless paths, and
+  request bodies. Unknown mock API writes fail the sandbox request audit, and
+  unexpected same-origin Next.js API writes or unknown unsafe external browser
+  writes are blocked by a browser route guard. Known wallet and analytics SDK
+  background writes are still blocked in-browser, but they do not fail the test.
+  This pack must never run against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -224,8 +234,14 @@ Large-pack ownership:
   changing `/notifications`, notification read state, auth restoration, or the
   read-only mutation guard. It is a negative guard contract: it proves the
   mutation is detected and blocked before backend state changes. Full
-  notification UI coverage requires a disposable sandbox account/backend or a
-  user-equivalent product behavior that does not mark notifications read.
+  remote notification UI coverage requires a disposable sandbox account/backend
+  or a user-equivalent product behavior that does not mark notifications read.
+- `test:e2e:auth-sandbox` is owned by PR or train owners changing local
+  dev-auth behavior, notifications UI/filtering, direct-message creation,
+  composer shell behavior, or the sandbox mutation auditor. It is the positive
+  stateful counterpart to the remote read-only packs and must stay loopback
+  only; the mock API and spawned Next dev server are intentionally bound to
+  loopback hosts.
 - `test:e2e:profile-deep-links-readonly` is owned by PR or train owners
   changing public profile routing, query-preserving profile links, legacy
   waves/groups/followers redirects, profile tab canonicalization, query
