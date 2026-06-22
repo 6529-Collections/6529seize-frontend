@@ -1,14 +1,17 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import { useDebounce } from "react-use";
 import { AuthContext } from "@/components/auth/Auth";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  seedApiWavesDetailCacheIfMissing,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 interface SearchWavesParams {
   readonly author?: string | undefined;
@@ -36,6 +39,7 @@ export function useWaves({
   enabled = true,
   directMessage,
 }: UseWavesParams) {
+  const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const usePublicWaves = !connectedProfile?.handle || !!activeProfileProxy;
@@ -121,6 +125,10 @@ export function useWaves({
     }
     return authQuery.data?.pages.flat() ?? [];
   }, [enabled, authQuery.data, publicQuery.data, usePublicWaves]);
+
+  useEffect(() => {
+    seedApiWavesDetailCacheIfMissing(queryClient, waves);
+  }, [queryClient, waves]);
 
   const activeQuery = usePublicWaves ? publicQuery : authQuery;
   const lastPageSize = activeQuery.data?.pages.at(-1)?.length ?? 0;

@@ -1,9 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  seedWavePreviewCache,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
@@ -53,6 +56,7 @@ export const useWavesV2 = ({
   refetchIntervalInBackground = false,
   enabled = true,
 }: UseWavesV2Props) => {
+  const queryClient = useQueryClient();
   const queryKeyParams = useMemo(
     () =>
       getWavesV2OverviewQueryKeyParams({
@@ -143,6 +147,10 @@ export const useWavesV2 = ({
     () => query.data?.pages.flatMap((page) => page.waves) ?? [],
     [query.data]
   );
+
+  useEffect(() => {
+    seedWavePreviewCache(queryClient, waves);
+  }, [queryClient, waves]);
 
   const fetchNextPage = useCallback(() => {
     if (

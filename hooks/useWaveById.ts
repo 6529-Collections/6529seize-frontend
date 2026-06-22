@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getWaveQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWaveByIdOptions {
   readonly enabled?: boolean | undefined;
@@ -19,7 +19,7 @@ export function useWaveById(
     refetch,
     isFetching,
   } = useQuery<ApiWave>({
-    queryKey: [QueryKey.WAVE, { wave_id: waveId }],
+    queryKey: getWaveQueryKey(waveId),
     queryFn: async () => {
       if (!waveId) {
         throw new Error("Cannot fetch wave without a wave id");

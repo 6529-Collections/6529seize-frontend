@@ -9,7 +9,11 @@ import {
 import { jwtDecode } from "jwt-decode";
 import { getUserProfile } from "./server.helpers";
 import type { TypedFeedItem } from "@/types/feed.types";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  seedApiWavePreviewCache,
+  seedApiWavesDetailCacheIfMissing,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   fetchWavesV2Page,
   getWavesV2OverviewQueryKeyParams,
@@ -102,11 +106,13 @@ const prefetchAuthenticatedWaves = async ({
       if (pageParam) {
         queryParams["serial_no_less_than"] = `${pageParam}`;
       }
-      return await commonApiFetch<ApiWave[]>({
+      const waves = await commonApiFetch<ApiWave[]>({
         endpoint: `waves`,
         params: queryParams,
         headers,
       });
+      seedApiWavesDetailCacheIfMissing(queryClient, waves);
+      return waves;
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
@@ -213,10 +219,12 @@ const prefetchAuthenticatedWave = async ({
   await queryClient.prefetchQuery({
     queryKey: [QueryKey.WAVE, { wave_id: waveId }],
     queryFn: async () => {
-      return await commonApiFetch<ApiWave>({
+      const wave = await commonApiFetch<ApiWave>({
         endpoint: `waves/${waveId}`,
         headers,
       });
+      seedApiWavePreviewCache(queryClient, wave);
+      return wave;
     },
     staleTime: 60000,
   });

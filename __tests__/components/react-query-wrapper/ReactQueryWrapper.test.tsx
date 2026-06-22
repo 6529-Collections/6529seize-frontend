@@ -13,6 +13,68 @@ jest.mock("@/helpers/Helpers", () => ({
 
 const wait = require("@/helpers/Helpers").wait as jest.Mock;
 
+const createWave = (id: string, overrides: Record<string, unknown> = {}) =>
+  ({
+    id,
+    serial_no: 1,
+    name: `Wave ${id}`,
+    created_at: 1,
+    last_drop_time: 2,
+    picture: null,
+    author: {
+      handle: "alice",
+      primary_address: "0xalice",
+      level: 1,
+      pfp: null,
+    },
+    description_drop: {
+      id: `description-${id}`,
+      parts: [],
+    },
+    wave: {
+      type: "CHAT",
+      admin_group: { group: null },
+      authenticated_user_eligible_for_admin: false,
+      admin_drop_deletion_enabled: false,
+    },
+    chat: {
+      scope: { group: null },
+      enabled: true,
+      links_disabled: false,
+      authenticated_user_eligible: true,
+    },
+    visibility: {
+      scope: { group: null },
+    },
+    participation: {
+      scope: { group: null },
+      authenticated_user_eligible: true,
+      submission_strategy: null,
+    },
+    voting: {
+      scope: { group: null },
+      authenticated_user_eligible: true,
+      period: null,
+      credit_type: "TDH",
+      credit_nfts: null,
+      forbid_negative_votes: false,
+      credit_scope: "WAVE",
+    },
+    contributors_overview: [],
+    subscribed_actions: [],
+    metrics: {
+      subscribers_count: 3,
+      drops_count: 4,
+      latest_drop_timestamp: 2,
+      your_unread_drops_count: 0,
+      your_latest_read_timestamp: 0,
+      muted: false,
+    },
+    pinned: false,
+    identity_wave: false,
+    ...overrides,
+  }) as any;
+
 type ContextType = {
   setProfile: (profile: any) => void;
   setWaveDrops: (params: { waveDrops: any; waveId: string }) => void;
@@ -203,7 +265,7 @@ it("sets initial wave drops only when cache empty", () => {
 
 it("sets initial waves overview page only once", () => {
   const { client, ctx } = createTestSetup();
-  const waves = [{ id: "w1" }] as any;
+  const waves = [createWave("w1")];
   act(() => ctx.setWavesOverviewPage(waves));
   const key = [
     QueryKey.WAVES_OVERVIEW,
@@ -217,7 +279,19 @@ it("sets initial waves overview page only once", () => {
     pages: [waves],
     pageParams: [undefined],
   });
-  const other = [{ id: "w2" }] as any;
+  expect(client.getQueryData([QueryKey.WAVE, { wave_id: "w1" }])).toEqual(
+    waves[0]
+  );
+  expect(
+    client.getQueryData([QueryKey.WAVE_PREVIEW, { wave_id: "w1" }])
+  ).toMatchObject({
+    id: "w1",
+    name: "Wave w1",
+    totalDropsCount: 4,
+    subscribersCount: 3,
+  });
+
+  const other = [createWave("w2")];
   act(() => ctx.setWavesOverviewPage(other));
   expect(client.getQueryData(key)).toEqual({
     pages: [waves],
@@ -274,9 +348,17 @@ it("sets profile proxy and invalidates on modify", () => {
 
 it("sets wave data in cache", () => {
   const { client, ctx } = createTestSetup();
-  const wave = { id: "w123" } as any;
+  const wave = createWave("w123");
   act(() => ctx.setWave(wave));
   expect(client.getQueryData([QueryKey.WAVE, { wave_id: "w123" }])).toEqual(
     wave
   );
+  expect(
+    client.getQueryData([QueryKey.WAVE_PREVIEW, { wave_id: "w123" }])
+  ).toMatchObject({
+    id: "w123",
+    name: "Wave w123",
+    totalDropsCount: 4,
+    subscribersCount: 3,
+  });
 });

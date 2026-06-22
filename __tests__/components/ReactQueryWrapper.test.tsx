@@ -7,6 +7,69 @@ import { WAVE_FOLLOWING_WAVES_PARAMS, WAVE_DROPS_PARAMS } from "@/components/rea
 
 import { toggleWaveFollowing } from "@/components/react-query-wrapper/utils/toggleWaveFollowing";
 jest.mock("@/components/react-query-wrapper/utils/toggleWaveFollowing");
+
+const createWave = (id: string, overrides: Record<string, unknown> = {}) =>
+  ({
+    id,
+    serial_no: 1,
+    name: `Wave ${id}`,
+    created_at: 1,
+    last_drop_time: 2,
+    picture: null,
+    author: {
+      handle: "alice",
+      primary_address: "0xalice",
+      level: 1,
+      pfp: null,
+    },
+    description_drop: {
+      id: `description-${id}`,
+      parts: [],
+    },
+    wave: {
+      type: "CHAT",
+      admin_group: { group: null },
+      authenticated_user_eligible_for_admin: false,
+      admin_drop_deletion_enabled: false,
+    },
+    chat: {
+      scope: { group: null },
+      enabled: true,
+      links_disabled: false,
+      authenticated_user_eligible: true,
+    },
+    visibility: {
+      scope: { group: null },
+    },
+    participation: {
+      scope: { group: null },
+      authenticated_user_eligible: true,
+      submission_strategy: null,
+    },
+    voting: {
+      scope: { group: null },
+      authenticated_user_eligible: true,
+      period: null,
+      credit_type: "TDH",
+      credit_nfts: null,
+      forbid_negative_votes: false,
+      credit_scope: "WAVE",
+    },
+    contributors_overview: [],
+    subscribed_actions: [],
+    metrics: {
+      subscribers_count: 3,
+      drops_count: 4,
+      latest_drop_timestamp: 2,
+      your_unread_drops_count: 0,
+      your_latest_read_timestamp: 0,
+      muted: false,
+    },
+    pinned: false,
+    identity_wave: false,
+    ...overrides,
+  }) as any;
+
 function useContextValue() {
   const ctx = useContext(ReactQueryWrapperContext);
   return ctx;
@@ -77,7 +140,7 @@ test("setWavesOverviewPage only sets when no cache", () => {
     </QueryClientProvider>
   );
 
-  const waves = [{ id: "1" }] as any;
+  const waves = [createWave("1")];
   context.setWavesOverviewPage(waves);
   const key = [
     QueryKey.WAVES_OVERVIEW,
@@ -90,8 +153,19 @@ test("setWavesOverviewPage only sets when no cache", () => {
   ];
   const data = queryClient.getQueriesData({ queryKey: [QueryKey.WAVES_OVERVIEW] })[0]?.[1] as any;
   expect(data.pages[0]).toEqual(waves);
+  expect(queryClient.getQueryData([QueryKey.WAVE, { wave_id: "1" }])).toEqual(
+    waves[0]
+  );
+  expect(
+    queryClient.getQueryData([QueryKey.WAVE_PREVIEW, { wave_id: "1" }])
+  ).toMatchObject({
+    id: "1",
+    name: "Wave 1",
+    totalDropsCount: 4,
+    subscribersCount: 3,
+  });
 
-  const other = [{ id: "2" }] as any;
+  const other = [createWave("2")];
   context.setWavesOverviewPage(other);
   // should not overwrite existing data
   const dataAgain = queryClient.getQueriesData({ queryKey: [QueryKey.WAVES_OVERVIEW] })[0]?.[1] as any;
@@ -134,9 +208,17 @@ test("setWave stores wave in cache", () => {
       </ReactQueryWrapper>
     </QueryClientProvider>
   );
-  const wave = { id: "w1" } as any;
+  const wave = createWave("w1");
   context.setWave(wave);
   expect(queryClient.getQueryData([QueryKey.WAVE, { wave_id: "w1" }])).toEqual(wave);
+  expect(
+    queryClient.getQueryData([QueryKey.WAVE_PREVIEW, { wave_id: "w1" }])
+  ).toMatchObject({
+    id: "w1",
+    name: "Wave w1",
+    totalDropsCount: 4,
+    subscribersCount: 3,
+  });
 });
 
 test("onWaveFollowChange toggles and invalidates", () => {

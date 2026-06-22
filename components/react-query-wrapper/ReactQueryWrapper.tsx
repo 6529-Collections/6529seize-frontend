@@ -34,6 +34,8 @@ import {
 } from "./utils/query-utils";
 import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
 import type { SortDirection } from "@/entities/ISort";
+import { mapApiWaveToSidebarWave } from "@/services/api/waves-v2-api";
+import type { SidebarWave } from "@/types/waves.types";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -102,6 +104,7 @@ export enum QueryKey {
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVES_SEARCH = "WAVES_SEARCH",
   WAVE = "WAVE",
+  WAVE_PREVIEW = "WAVE_PREVIEW",
   WAVE_POLLS = "WAVE_POLLS",
   WAVE_METADATA = "WAVE_METADATA",
   WAVE_CURATIONS = "WAVE_CURATIONS",
@@ -135,6 +138,51 @@ export enum QueryKey {
   GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE = "GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE",
   CIC_OVERVIEW = "CIC_OVERVIEW",
 }
+
+export const getWaveQueryKey = (waveId: string | null) =>
+  [QueryKey.WAVE, { wave_id: waveId }] as const;
+
+export const getWavePreviewQueryKey = (waveId: string | null) =>
+  [QueryKey.WAVE_PREVIEW, { wave_id: waveId }] as const;
+
+export const seedWavePreviewCache = (
+  queryClient: QueryClient,
+  waves: readonly SidebarWave[]
+) => {
+  for (const wave of waves) {
+    queryClient.setQueryData<SidebarWave>(
+      getWavePreviewQueryKey(wave.id),
+      wave
+    );
+  }
+};
+
+export const seedApiWavePreviewCache = (
+  queryClient: QueryClient,
+  wave: ApiWave
+) => {
+  seedWavePreviewCache(queryClient, [mapApiWaveToSidebarWave(wave)]);
+};
+
+export const seedApiWaveDetailCacheIfMissing = (
+  queryClient: QueryClient,
+  wave: ApiWave
+) => {
+  const queryKey = getWaveQueryKey(wave.id);
+  if (queryClient.getQueryData<ApiWave>(queryKey) === undefined) {
+    queryClient.setQueryData<ApiWave>(queryKey, wave);
+  }
+  seedApiWavePreviewCache(queryClient, wave);
+};
+
+export const seedApiWavesDetailCacheIfMissing = (
+  queryClient: QueryClient,
+  waves: readonly ApiWave[]
+) => {
+  for (const wave of waves) {
+    seedApiWaveDetailCacheIfMissing(queryClient, wave);
+  }
+};
 
 interface ProfileRatersParams {
   readonly page: number;
@@ -312,13 +360,13 @@ const createReactQueryContextValue = (
   };
 
   const setWave = (wave: ApiWave) => {
-    queryClient.setQueryData<ApiWave>(
-      [QueryKey.WAVE, { wave_id: wave.id }],
-      wave
-    );
+    queryClient.setQueryData<ApiWave>(getWaveQueryKey(wave.id), wave);
+    seedApiWavePreviewCache(queryClient, wave);
   };
 
   const setWavesOverviewPage = (wavesOverview: ApiWave[]) => {
+    seedApiWavesDetailCacheIfMissing(queryClient, wavesOverview);
+
     const queryKey = [
       QueryKey.WAVES_OVERVIEW,
       {
@@ -972,6 +1020,9 @@ const createReactQueryContextValue = (
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVE],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVE_PREVIEW],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVE_OUTCOMES],

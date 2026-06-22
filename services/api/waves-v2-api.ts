@@ -166,6 +166,7 @@ const mapApiWaveOverviewToSidebarWave = (
       media: wave.description_drop.media ?? [],
     },
     totalDropsCount: wave.total_drops_count,
+    subscribersCount: wave.subscribers_count,
     isPrivate: wave.is_private,
     latestDropTimestamp: wave.last_drop_time,
     latestFollowedSubwaveDropTimestamp:
@@ -224,6 +225,7 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     hasSubwaves: wave.has_subwaves ?? false,
     descriptionDrop: getApiWaveDescriptionDrop(wave),
     totalDropsCount: wave.metrics.drops_count,
+    subscribersCount: wave.metrics.subscribers_count,
     isPrivate: Boolean(wave.visibility.scope.group) && !isDirectMessage,
     latestDropTimestamp: wave.metrics.latest_drop_timestamp,
     latestFollowedSubwaveDropTimestamp: null,
