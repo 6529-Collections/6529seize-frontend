@@ -2731,3 +2731,79 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   E2E pack passes after the overflow fix, so rerun
   `seize run test:e2e:production:public-content-readonly` only after this
   change is deployed.
+## 2026-06-21T22:35Z Authenticated Shell E2E Pack Started
+
+- Started clean worktree branch `codex/e2e-authenticated-shells-readonly` from
+  current `origin/main` after leaving the root checkout untouched.
+- Added the next read-only authenticated surface pack:
+  - `tests/auth/authenticated-shells-readonly.spec.ts` covers `/messages`,
+    `/{profile}/subscriptions`, and `/{profile}/proxy` across desktop and
+    mobile Chromium when dev auth is explicitly provided.
+  - The pack skips without `USE_DEV_AUTH=true`, `DEV_MODE_WALLET_ADDRESS`,
+    `DEV_MODE_AUTH_JWT`, and `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE`; committed
+    tests never contain or extract secrets.
+  - Assertions prove route shells render beyond the wallet gate and expose
+    their expected read-only affordances without clicking submit/create/assign
+    controls.
+- Added `test:e2e:authenticated-shells-readonly` and documented ownership in
+  `tests/README.md`.
+- Mirrored the narrow read-only telemetry guard hardening needed by route packs
+  that load GTM, YouTube, or Google WAA SDK endpoints; unknown POSTs and
+  registered first-party mutations remain blocked.
+- Real dev-auth validation against the production API with the read-only guard
+  found `/notifications` performs `POST /api/notifications/read` on
+  authenticated mount. That route is deliberately excluded from this read-only
+  pack until a mutation-safe notifications strategy exists.
+- Validation evidence:
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env, proving the committed pack is credential-free by default.
+  - DPAPI-backed dev-auth run against a fresh local frontend port with
+    production API/WebSocket endpoints and `PLAYWRIGHT_READONLY=1`: 6 passed
+    across desktop and mobile Chromium. The token was used only as an in-process
+    environment value and was not printed or persisted.
+  - A prior attempted `/notifications` inclusion failed safely because the
+    read-only guard blocked `POST https://api.6529.io/api/notifications/read`.
+- Follow-up review feedback on the adjacent public content E2E PR identified
+  YouTube no-cookie telemetry as another expected SDK POST family. The
+  authenticated-shell branch now covers `youtube-nocookie.com` and bare
+  `youtube.com` stats/log endpoints in the guard unit test while preserving the
+  default block for unknown external POSTs.
+- CodeRabbit review on PR #2816 correctly identified that the spec itself
+  should enforce `PLAYWRIGHT_READONLY=1`, not only the package script. The skip
+  gate, test docs, and active context now require explicit read-only mode before
+  authenticated credentials can run.
+- Follow-up validation after that fix:
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env.
+  - DPAPI-backed dev-auth run against a fresh local frontend port with
+    production API/WebSocket endpoints and `PLAYWRIGHT_READONLY=1`: 6 passed
+    across desktop and mobile Chromium.
+
+## 2026-06-22T02:09Z Authenticated Shell Rebase Over Public Content
+
+- Rebasing the authenticated-shell branch over merged PR #2815 produced only
+  expected train-aggregator conflicts in package scripts, test ownership docs,
+  run-log history, and the shared read-only mutation guard.
+- Resolution preserved the merged public-content pack's
+  `YOUTUBE_TELEMETRY_HOSTS` host-set implementation, including nocookie hosts,
+  while keeping the authenticated-shell pack and its explicit `--trace=off`
+  Playwright script hardening.
+- Local validation passed after the rebase:
+  - `seize run format:uncommitted`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`: 12 passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/auth-shells-secret-scan-rebased.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/auth-shells-workflow-security-rebased.json`
+  - `codex-diff-check`
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env, proving the committed pack remains credential-free by
+    default.
+  - `seize run test:e2e:public-content-readonly`: 26 passed.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+- Fresh secure dev-auth validation was not repeated in this resumed session:
+  the current process and worktree env files do not contain the dev-auth
+  variables, and no dedicated local Credential Manager target for the dev-auth
+  triplet is indexed. Do not mine Codex log databases for auth values; use a
+  proper local credential source if this rerun is required before merge.

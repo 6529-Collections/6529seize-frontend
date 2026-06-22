@@ -92,6 +92,11 @@ Surface matrix:
   Report, and Meme Calendar read-only pack on both baseline web projects.
 - `test:e2e:public-content-readonly` runs the public legacy content pack on
   both baseline web projects, with the mutation guard enabled even locally.
+- `test:e2e:authenticated-shells-readonly` runs authenticated, read-only
+  route-shell coverage for direct messages and own-profile subscriptions/proxy
+  tabs on both baseline web projects. It skips unless `PLAYWRIGHT_READONLY=1`,
+  `USE_DEV_AUTH=true`, `DEV_MODE_WALLET_ADDRESS`, `DEV_MODE_AUTH_JWT`, and
+  `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE` are provided by the caller.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -168,6 +173,16 @@ Large-pack ownership:
   education, museum, OM, news, capital, blog, author, legacy content rendering,
   image/link rendering, route canonicalizing, or read-only mutation guard
   behavior.
+- `test:e2e:authenticated-shells-readonly` is owned by PR or train owners
+  changing auth restoration, wallet/profile gating, direct messages,
+  subscriptions, profile proxy, profile tab visibility, or the read-only
+  mutation guard. The pack is explicitly read-only: it may render
+  create/assign/top-up affordances but must not click submit, post, assign,
+  sign, upload, or otherwise mutate backend state. Authenticated notifications
+  are excluded from this read-only pack because the current route marks
+  notifications read on mount with `POST /api/notifications/read`; keep that
+  behavior covered by a separate mutation-safety follow-up instead of allowing
+  it through the read-only guard.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.
