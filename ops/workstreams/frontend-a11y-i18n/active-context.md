@@ -4,6 +4,26 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-22T03:10Z:
+  - Current clean worktree branch:
+    `codex/e2e-notifications-mutation-guard`, based on current `origin/main`
+    after PR #2817.
+  - Active slice closes the authenticated notifications gap as a negative
+    mutation-guard contract, not as ordinary read-only UI coverage.
+  - `/notifications` remains excluded from
+    `test:e2e:authenticated-shells-readonly` because the current authenticated
+    route marks notifications read on mount with
+    `POST /api/notifications/read`.
+  - This branch adds named mutation-registry entries and guard unit coverage
+    for that mark-read request, plus a local/dev-auth-only
+    `test:e2e:notifications-mutation-guard` pack that proves the guard blocks
+    the side effect before backend state changes.
+  - Do not add staging or production notification smoke scripts until
+    notifications have a disposable sandbox account/backend or a
+    user-equivalent product-safe read-only test path.
+  - GLM reviewbot is live on `6529reviewbot` and remains additive. Do not
+    remove, downgrade, or make optional the existing Opus/general/WCAG/i18n/
+    security/responsiveness reviewbot lanes.
 - Latest testing-roadmap state, 2026-06-21T22:35Z:
   - Current clean worktree branch:
     `codex/e2e-authenticated-shells-readonly`, based on current `origin/main`.
@@ -260,7 +280,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-media-mint-detail`
+`codex/e2e-notifications-mutation-guard`
 
 ## Constraints
 
@@ -363,16 +383,17 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Commit, push, and open the `codex/e2e-media-mint-detail` PR with the
-   validation evidence listed above.
+1. Validate, commit, push, and open the
+   `codex/e2e-notifications-mutation-guard` PR with focused guard/unit,
+   Playwright typecheck, changed lint/typecheck, secret scan, workflow-security
+   scan, and default skipped-pack evidence.
 2. Iterate CodeRabbit, Sonar, CI, Opus reviewbot, GLM reviewbot, and any
    available specialized bots until Codex judges the loop is no longer adding
    material value. Keep all reviewbot lanes additive; do not remove existing
    bots.
-3. Merge the media/mint/detail E2E PR after checks and review signals are green
-   or consciously dispositioned, then deploy it through staging and production
-   using the deployment-bus process from the latest merged deployment-bus
-   runbook materials.
+3. Merge the notifications mutation-guard PR after checks and review signals
+   are green or consciously dispositioned. Do not deploy it as a notification
+   smoke pack; it is a local negative contract and docs/guard hardening slice.
 4. Record the PR #2809 production post-deploy watch checkpoint if the real
    30-minute observation window has elapsed and deployed-environment validation
    still passes. Leave release reports on hold if approved durable artifact
@@ -391,30 +412,33 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 9. Preserve unrelated dirty EmojiContext, RememeImage test, and bootstrap style
    files in other worktrees.
 
-## 2026-06-21 Current Autonomous Run
+## 2026-06-22 Current Autonomous Run
 
 - User asked to continue autonomous manager mode and finish the not-completed
   and partially-completed testing roadmap items, with important E2E coverage
   across app areas.
 - GLM reviewbot is live in `6529reviewbot`; keep it additive. Do not remove,
   downgrade, or replace existing reviewbots.
-- PR #2810 media/mint/detail E2E is open, bot/CI green, and has no unresolved
-  review threads. GitHub branch protection still reports `REVIEW_REQUIRED`;
-  an attempted approval from the PR author account was correctly rejected as
-  self-approval, so the PR is waiting on independent review before merge/deploy.
-- PR #2811 (`codex/e2e-delegation-readonly`) adds the next read-only pack plus
-  a Wallet Checker query-load fix discovered by that pack.
+- PRs #2810 through #2817 are merged into `origin/main`, adding public
+  read-only packs for social/profile, media/mint/detail, delegation,
+  network/open-data, collections/NextGen, public groups/tools, public content,
+  authenticated shell gates, and profile deep links.
+- Current branch `codex/e2e-notifications-mutation-guard` handles the
+  authenticated notifications gap as guard hardening, not as deployed read-only
+  smoke.
 - Deployment train policy remains: merge only after Codex, reviewbots, and CI
   stop adding material value; deploy staging first, validate exact merged SHA,
   then production from current `origin/main` with release evidence.
 
 ## Current Next Actions
 
-1. Get independent approval on PR #2810, then merge and deploy through staging
-   and production with media-readonly validation.
-2. Iterate PR #2811 reviewbots/CI and fix valid findings.
-3. Use subagent route-cluster findings to implement the next PRs:
-   NextGen/groups/tools, network/open-data/API/auth-adjacent read-only, then
-   broader static route coverage.
+1. Finish validation, PR publication, bot iteration, and merge for
+   `codex/e2e-notifications-mutation-guard`.
+2. Keep `/notifications` out of staging/production read-only smoke until a
+   disposable sandbox account/backend or product-safe non-mutating test path
+   exists.
+3. Start the next high-value E2E pack after this PR: composer/upload/link
+   preview sandbox coverage, read-only search and wave-detail interaction
+   coverage, or deployment evidence/version verification.
 4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.

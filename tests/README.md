@@ -97,6 +97,12 @@ Surface matrix:
   tabs on both baseline web projects. It skips unless `PLAYWRIGHT_READONLY=1`,
   `USE_DEV_AUTH=true`, `DEV_MODE_WALLET_ADDRESS`, `DEV_MODE_AUTH_JWT`, and
   `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE` are provided by the caller.
+- `test:e2e:notifications-mutation-guard` is a local/dev-auth-only negative
+  contract for `/notifications`. It verifies that the current authenticated
+  mount-time `POST /api/notifications/read` side effect is blocked by the
+  read-only mutation guard. It is not a staging or production smoke pack and
+  should not be converted into one until notifications have a sandbox-safe or
+  product-safe read-only test path.
 - `test:e2e:profile-deep-links-readonly` runs public profile legacy deep-link
   redirect coverage on both baseline web projects, with the mutation guard
   enabled even locally.
@@ -192,6 +198,12 @@ Large-pack ownership:
   notifications read on mount with `POST /api/notifications/read`; keep that
   behavior covered by a separate mutation-safety follow-up instead of allowing
   it through the read-only guard.
+- `test:e2e:notifications-mutation-guard` is owned by PR or train owners
+  changing `/notifications`, notification read state, auth restoration, or the
+  read-only mutation guard. It is a negative guard contract: it proves the
+  mutation is detected and blocked before backend state changes. Full
+  notification UI coverage requires a disposable sandbox account/backend or a
+  user-equivalent product behavior that does not mark notifications read.
 - `test:e2e:profile-deep-links-readonly` is owned by PR or train owners
   changing public profile routing, query-preserving profile links, legacy
   waves/groups/followers redirects, profile tab canonicalization, query

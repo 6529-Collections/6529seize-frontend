@@ -1,9 +1,45 @@
 {
   "schema_version": "frontend-testing.mutation-endpoint-registry.v1",
   "owner": "frontend-release-captain",
-  "updated_at": "2026-06-20T18:00:00.000Z",
+  "updated_at": "2026-06-22T03:10:00.000Z",
   "description": "Versioned registry contract for endpoints that must be blocked by read-only staging and production Playwright mutation guards.",
   "endpoints": [
+    {
+      "id": "notification-read-all",
+      "pattern": "http://localhost:*/api/notifications/read",
+      "methods": ["POST"],
+      "surface": "notifications",
+      "risk_level": 3,
+      "mutation": true,
+      "allowed_in_readonly_tests": false
+    },
+    {
+      "id": "notification-read-all-loopback",
+      "pattern": "http://127.0.0.1:*/api/notifications/read",
+      "methods": ["POST"],
+      "surface": "notifications",
+      "risk_level": 3,
+      "mutation": true,
+      "allowed_in_readonly_tests": false
+    },
+    {
+      "id": "staging-notification-read-all",
+      "pattern": "https://api.staging.6529.io/api/notifications/read",
+      "methods": ["POST"],
+      "surface": "notifications",
+      "risk_level": 3,
+      "mutation": true,
+      "allowed_in_readonly_tests": false
+    },
+    {
+      "id": "production-notification-read-all",
+      "pattern": "https://api.6529.io/api/notifications/read",
+      "methods": ["POST"],
+      "surface": "notifications",
+      "risk_level": 3,
+      "mutation": true,
+      "allowed_in_readonly_tests": false
+    },
     {
       "id": "staging-backend-api-mutations",
       "pattern": "https://api.staging.6529.io/**",

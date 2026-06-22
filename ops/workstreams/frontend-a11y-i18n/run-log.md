@@ -2851,3 +2851,58 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run typecheck:changed`
   - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/profile-deep-links-secret-scan-sonar-fix.json`
   - `codex-diff-check`
+
+## 2026-06-22T03:10Z Notifications Mutation-Guard Slice Started
+
+- Started branch `codex/e2e-notifications-mutation-guard` from current merged
+  `origin/main` after PR #2817.
+- This slice closes the explicit authenticated notifications gap without
+  weakening the read-only E2E contract:
+  - `/notifications` still stays out of `test:e2e:authenticated-shells-readonly`
+    because it marks notifications read on authenticated mount.
+  - Added named read-only mutation registry entries for
+    `POST /api/notifications/read` in local loopback, staging, and production
+    API shapes.
+  - Added unit coverage that those mark-read requests are blocked by a named
+    registry rule.
+  - Added `test:e2e:notifications-mutation-guard` as a local/dev-auth-only
+    negative contract. It asserts the route attempts its current mark-read
+    side effect and that the guard aborts it before backend state changes.
+- No staging or production notification smoke script was added. Full
+  notification UI coverage still needs a disposable sandbox account/backend or
+  a product-safe read-only behavior that does not mutate notification read
+  state.
+- Local validation for this slice:
+  - `seize install:frozen`
+  - `seize-local-dev bootstrap`
+  - `seize run build:env-schema`
+  - `seize run format:uncommitted`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`: 13 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- validate-mutation-registry --file ops/testing-strategy/mutation-endpoint-registry.json`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`: computed Level 4 because the registry and package scripts are promotion-safety controls.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/notifications-guard-secret-scan.json`: passed, 0 findings.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/notifications-guard-workflow-security.json`: passed, 0 findings.
+  - `seize run test:e2e:notifications-mutation-guard`: 1 skipped without
+    dev-auth env, proving the committed pack remains credential-free by
+    default.
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env, preserving the existing authenticated read-only contract.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts`: 35 passed.
+  - `git diff --check`
+- Independent reviewer `Pasteur` found one robustness issue in the negative
+  E2E: it initially waited for any blocked request before searching for the
+  notification mark-read request. Fixed the test to poll for the specific
+  `/api/notifications/read` blocked request, then reran:
+  - `seize run format:uncommitted`
+  - `seize run typecheck:playwright`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`: 13 passed.
+  - `seize run test:e2e:notifications-mutation-guard`: 1 skipped without
+    dev-auth env.
+- SonarCloud failed the first PR analysis with
+  `typescript:S6418` on the new E2E skip message because the message spelled
+  out a dev-auth token env var name. Removed sensitive env var names from the
+  user-facing skip text while preserving the actual configuration checks.
