@@ -2645,4 +2645,45 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run lint:changed`
   - `seize run typecheck:changed`: 1 changed TypeScript file passed.
   - `seize run typecheck:playwright`
+
+## 2026-06-21T18:20Z Public Groups And Tools E2E Pack Started
+
+- Started independent branch `codex/e2e-public-groups-tools-static` from
+  current `origin/main`
+  `f82890f24a4ef7643f143dca5791ad0c50e010f3` after leaving richer app E2E PRs
+  #2810, #2811, #2812, and #2813 open for required review approval.
+- Scoped the next safe read-only pack to shipped public routes on current main:
+  `/network/groups`, `/tools/subscriptions-report`, and
+  `/meme-calendar?locale=de-DE`.
+- Confirmed current `origin/main` does not contain an `app/tech` route; tech
+  route coverage remains deferred until that surface exists on main.
+- Added `tests/public-groups-tools/public-groups-tools-readonly.spec.ts` plus
+  local, staging, and production scripts:
+  `test:e2e:public-groups-tools-readonly`,
+  `test:e2e:staging:public-groups-tools-readonly`, and
+  `test:e2e:production:public-groups-tools-readonly`.
+- Safety/UX test intent before validation:
+  - Groups coverage asserts anonymous browse/search controls and no write-only
+    `Create New` or `My groups` controls.
+  - Subscriptions Report coverage waits for async tables/empty states, asserts
+    `Learn More`, keeps CSV download visible but unclicked, and keeps anonymous
+    `My Subscriptions` hidden.
+  - Meme Calendar coverage exercises locale query preservation and Local/UTC
+    state changes, then asserts calendar/download links by href without clicking
+    downloads or external Google Calendar.
+- Independent verifier `Aristotle` confirmed the scope should avoid nonexistent
+  `/tech` routes, legacy `/om/om-groups`, auth/write paths, download clicks,
+  external opens, exact countdowns, row counts, and broad API data assumptions.
+  Based on that review, the flaky profile Groups redirect overlap was kept out
+  of this pack and the two Meme Calendar `Meme #` inputs were asserted by
+  stable IDs instead of a duplicate accessible label.
+- Local validation passed:
+  - `seize run test:e2e:public-groups-tools-readonly`: 6 passed across
+    desktop and mobile Chromium.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+    origin/main --output
+    test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`

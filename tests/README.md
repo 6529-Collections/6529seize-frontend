@@ -88,6 +88,8 @@ Surface matrix:
 - `test:e2e:collections-readonly` runs the public NextGen, The Memes, Meme
   Lab, 6529 Gradient, and ReMemes browse/read-only pack on both baseline web
   projects.
+- `test:e2e:public-groups-tools-readonly` runs the public Groups, Subscriptions
+  Report, and Meme Calendar read-only pack on both baseline web projects.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -114,6 +116,12 @@ Surface matrix:
   against staging with the remote mutation guard and staging access unlock.
 - `test:e2e:production:collections-readonly` runs the collections read-only
   pack against production desktop web only as a public, read-only smoke.
+- `test:e2e:staging:public-groups-tools-readonly` runs the public Groups,
+  Subscriptions Report, and Meme Calendar read-only pack against staging with
+  the remote mutation guard and staging access unlock.
+- `test:e2e:production:public-groups-tools-readonly` runs the same public
+  Groups/Tools/Calendar pack against production desktop web only as a public,
+  read-only smoke.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -146,6 +154,10 @@ Large-pack ownership:
 - `test:e2e:collections-readonly` is owned by PR or train owners changing
   NextGen public collection/token routes, The Memes, Meme Lab, 6529 Gradient,
   ReMemes, collection sorting/filter shells, or collection browse cards.
+- `test:e2e:public-groups-tools-readonly` is owned by PR or train owners
+  changing public Groups, profile Groups redirects, Subscriptions Report, Meme
+  Calendar, subscription download affordances, calendar locale/timezone controls,
+  or read-only mutation guard behavior.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.
