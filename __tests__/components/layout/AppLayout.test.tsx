@@ -80,18 +80,25 @@ jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
     const [quickVoteSessionId, setQuickVoteSessionId] = React.useState(0);
     const nextSessionIdRef = React.useRef(1);
     const reservedSessionIdRef = React.useRef(null as number | null);
+    const closeQuickVote = () => setIsQuickVoteOpen(false);
+    const openQuickVote = () => {
+      const sessionId =
+        reservedSessionIdRef.current ?? nextSessionIdRef.current;
+      reservedSessionIdRef.current = null;
+      nextSessionIdRef.current = sessionId + 1;
+      setQuickVoteSessionId(sessionId);
+      setIsQuickVoteOpen(true);
+    };
 
     return {
-      closeQuickVote: () => setIsQuickVoteOpen(false),
-      isQuickVoteOpen,
-      openQuickVote: () => {
-        const sessionId =
-          reservedSessionIdRef.current ?? nextSessionIdRef.current;
-        reservedSessionIdRef.current = null;
-        nextSessionIdRef.current = sessionId + 1;
-        setQuickVoteSessionId(sessionId);
-        setIsQuickVoteOpen(true);
+      closeQuickVote,
+      dialogState: {
+        isOpen: isQuickVoteOpen,
+        onClose: closeQuickVote,
+        sessionId: quickVoteSessionId,
       },
+      isQuickVoteOpen,
+      openQuickVote,
       prefetchQuickVote: () => {
         if (reservedSessionIdRef.current === null) {
           reservedSessionIdRef.current = nextSessionIdRef.current;

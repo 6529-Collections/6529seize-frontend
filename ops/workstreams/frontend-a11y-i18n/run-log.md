@@ -2560,9 +2560,9 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run typecheck:changed`
   - `seize run typecheck:playwright`
   - `seize run testing-strategy -- scan-changed-secrets --changed-from
-     origin/main --output
-     test-results/app-pr-ci/network-open-data-secret-scan.json`
-   - `codex-diff-check`
+ origin/main --output
+ test-results/app-pr-ci/network-open-data-secret-scan.json`
+  - `codex-diff-check`
 
 ## 2026-06-21T23:59Z Network/Open Data Rebase Validation
 
@@ -2607,8 +2607,8 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
     project.
   - `seize run typecheck:playwright`
   - `seize run testing-strategy -- scan-changed-secrets --changed-from
-    origin/main --output
-    test-results/app-pr-ci/collections-readonly-secret-scan.json`: clean.
+origin/main --output
+test-results/app-pr-ci/collections-readonly-secret-scan.json`: clean.
   - `codex-diff-check`
 
 ## 2026-06-21T20:02Z Collections Verifier Follow-Up
@@ -2639,9 +2639,9 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run test:no-coverage -- __tests__/moreStaticPages.test.tsx`: 6
     passed.
   - `seize run test:no-coverage --findRelatedTests
-    components/6529Gradient/6529Gradient.tsx
-    tests/collections/nextgen-collections-readonly.spec.ts
-    --passWithNoTests`: 13 passed across 3 suites.
+components/6529Gradient/6529Gradient.tsx
+tests/collections/nextgen-collections-readonly.spec.ts
+--passWithNoTests`: 13 passed across 3 suites.
   - `seize run lint:changed`
   - `seize run typecheck:changed`: 1 changed TypeScript file passed.
   - `seize run typecheck:playwright`
@@ -2684,8 +2684,8 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run lint:changed`
   - `seize run typecheck:changed`
   - `seize run testing-strategy -- scan-changed-secrets --changed-from
-    origin/main --output
-    test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
+origin/main --output
+test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`
 
 ## 2026-06-21T21:07Z Public Content Read-Only Pack Started
@@ -2731,6 +2731,7 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   E2E pack passes after the overflow fix, so rerun
   `seize run test:e2e:production:public-content-readonly` only after this
   change is deployed.
+
 ## 2026-06-21T22:35Z Authenticated Shell E2E Pack Started
 
 - Started clean worktree branch `codex/e2e-authenticated-shells-readonly` from
@@ -3091,3 +3092,140 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - Treat the staging result as an environment/API stability signal to track,
     not evidence that this title assertion or aggregate production script change
     regressed application runtime behavior.
+
+## 2026-06-22T08:32Z Deployment Evidence Verification Slice Started
+
+- PR #2822 merged and shipped before this slice. Production deploy run
+  #27938016895 succeeded from
+  `7693d1138987175e0ccd6c54841d7547d99ce322`, and production post-deploy
+  validation passed: `seize run test:e2e:production:readonly` reported 65/65.
+- Started branch `codex/deployment-evidence-verification` from current
+  `origin/main` for the next testing roadmap gap: release workflows verified
+  git checkout / Elastic Beanstalk labels, but did not prove the live HTTP app
+  served the expected `/api/version` SHA.
+- Added `ops/scripts/verify-deployment-version.cjs` and package script
+  `verify:deployment-version`.
+  - The verifier performs GET-only `/api/version` checks.
+  - It requires HTTP 200, `Cache-Control` containing `no-store`, and exact
+    expected-version match.
+  - It retries for bounded deploy-readiness lag.
+  - It writes sanitized `deployment-version-evidence.json` without request
+    headers, cookies, or raw response bodies.
+  - It only sends the staging access cookie to `staging.6529.io` when the
+    caller provides `PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH` as an
+    environment value.
+- Wired the staging and production deploy workflows to run the verifier before
+  marking the deployment terminal/verified, upload `deployment-version-evidence.json`,
+  and record an `http-version-match` post-deploy-watch checkpoint on success.
+- Added optional deployment-bus pack `playwright:production-readonly` for the
+  existing aggregate `seize run test:e2e:production:readonly`.
+  - It records `web:desktop-chromium` only, matching the production aggregate
+    command.
+  - It is not in `DEFAULT_REQUIRED_PACKS` and is not required by staging or
+    production workflows yet.
+  - Deployment-bus validation now rejects known standard packs required in an
+    environment where that pack has no standard command, preventing a
+    null-command staging requirement.
+- Updated deployment-bus docs and test README to document the HTTP version
+  probe, optional production-readonly pack semantics, and durable-evidence
+  limits.
+- Validation completed before PR publication:
+  - `node --check ops/scripts/verify-deployment-version.cjs`
+  - `seize exec prettier --write ops/scripts/verify-deployment-version.cjs`
+  - focused ESLint on verifier/deployment-bus files
+  - `seize run test:no-coverage -- __tests__/scripts/verify-deployment-version.test.ts __tests__/scripts/deployment-bus.test.ts __tests__/app/api/version/route.test.ts __tests__/hooks/useVersion.test.tsx`: 4 suites, 51 tests passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`: Level 5 due production workflow/deploy authority.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/deployment-version-secret-scan.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/deployment-version-workflow-security.json`
+  - live production probe:
+    `seize run verify:deployment-version -- --base-url https://6529.io --expected-version 7693d1138987175e0ccd6c54841d7547d99ce322 --attempts 1 --delay-ms 1 --timeout-ms 10000 --output test-results/deployment-version-production-current.json`
+  - live staging probe against current `origin/1a-staging`
+    `7b094eb85737524d26c392d47847900ef9e116d8` passed with the same verifier.
+  - `codex-diff-check`
+  - `seize run test:e2e:production:readonly`: 65 passed.
+- Independent reviewer subagent `Kepler` is inspecting the final diff before
+  commit/PR publication.
+
+## 2026-06-22T09:10Z PR #2823 Reviewbot Iteration
+
+- Opened PR #2823:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2823
+- Sonar first reported two useful signals:
+  - `new Error()` should be a more specific `TypeError` for unavailable
+    `fetch`.
+  - new-code duplication exceeded the quality gate because the verifier copied
+    deployment-bus CLI argument parsing.
+- Addressed the `TypeError` finding in
+  `ops/scripts/verify-deployment-version.cjs`.
+- Addressed the duplication and 6529bot CLI-contract review by adding
+  `ops/scripts/cli-args.cjs`, importing it from both deployment CLIs, and adding
+  a no-network verifier CLI smoke test that proves the parser loads before the
+  script validates required options.
+- Validation for the parser-helper follow-up passed:
+  - `node --check ops/scripts/cli-args.cjs; node --check ops/scripts/deployment-bus.cjs; node --check ops/scripts/verify-deployment-version.cjs`
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 ops/scripts/cli-args.cjs ops/scripts/verify-deployment-version.cjs ops/scripts/deployment-bus.cjs __tests__/scripts/verify-deployment-version.test.ts __tests__/scripts/deployment-bus.test.ts`
+  - `seize run test:no-coverage -- __tests__/scripts/verify-deployment-version.test.ts __tests__/scripts/deployment-bus.test.ts`: 2 suites, 47 tests passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/deployment-version-secret-scan-cli-helper-rerun.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/deployment-version-workflow-security-cli-helper-rerun.json`
+  - `codex-diff-check`
+- Pushed head `dba0a6c6cf05fae6f68a786554d6e5388b33aa99`.
+- SonarCloud passed on the latest head with 0 new issues, 0 security hotspots,
+  and 0.0% new-code duplication.
+- As of this log entry, App PR CI, Dependency Governance, CodeQL, and latest
+  6529bot/GLM follow-up signals were still pending or queued.
+
+## 2026-06-22T10:25Z PR #2823 Shipped And Production Read-Only Harness Follow-Up
+
+- PR #2823 merged into `origin/main` as
+  `02382bc81f1d945083b28bf78641ab2469e2212e`.
+- Staged the release by merging current `origin/main` into `1a-staging` as
+  `43d6f711a7f3856c62b5544736d001319f285bef`.
+- Staging deploy run #27943628946 succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27943628946
+  - workflow `deployment-version-evidence.json` matched
+    `43d6f711a7f3856c62b5544736d001319f285bef`.
+  - local staging `/api/version` probe matched the same SHA.
+  - local staging validation passed:
+    `test:e2e:staging:smoke` 12 passed,
+    `test:e2e:staging` 24 passed / 6 skipped,
+    `test:e2e:wcag-i18n:surface-matrix` 6 passed.
+- Production deploy run #27944602623 succeeded from exact `origin/main` SHA
+  `02382bc81f1d945083b28bf78641ab2469e2212e`:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27944602623
+  - workflow `deployment-version-evidence.json` matched the production SHA.
+  - local production `/api/version` probe matched the production SHA.
+- Initial post-production `seize run test:e2e:production:readonly` run found two
+  failures:
+  - delegation wallet-checker empty-state test stayed on loading for 20s, then
+    passed immediately on isolated rerun. Treat as transient production/API
+    timing unless repeated.
+  - The Memes mint page test failed repeatedly because live production card
+    #512 renders dynamic iframe art and the test only accepted direct image
+    media. The read-only guard also blocked safe Ethereum JSON-RPC read POSTs
+    to `eth.llamarpc.com`, `cloudflare-eth.com`, and
+    `ethereum-rpc.publicnode.com`.
+- Started branch `codex/e2e-production-readonly-hardening` from current
+  `origin/main`.
+- Follow-up test-harness changes:
+  - `tests/media/media-mint-detail-readonly.spec.ts` now accepts either direct
+    image media or visible iframe art on the mint page.
+  - `tests/support/readonlyMutationGuard.ts` allows only safe Ethereum JSON-RPC
+    read methods on the observed public RPC hosts, while still blocking unsafe
+    methods such as `eth_sendRawTransaction` and unknown RPC hosts.
+  - `__tests__/playwright/readonlyMutationGuard.test.ts` covers the new public
+    RPC allow/block behavior.
+- Validation completed before PR publication:
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`:
+    14 passed.
+  - focused ESLint on changed guard/E2E files.
+  - production mint-page focused rerun: 1 passed.
+  - `seize run test:e2e:production:readonly`: 65 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    Level 3.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/production-readonly-hardening-secret-scan-clean.json`:
+    passed.

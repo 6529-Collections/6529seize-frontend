@@ -80,6 +80,11 @@ describe("AppWalletsContext", () => {
             <div data-testid="has-delete">
               {typeof context.deleteAppWallet === "function" ? "true" : "false"}
             </div>
+            <div data-testid="has-migrate">
+              {typeof context.migrateAppWallet === "function"
+                ? "true"
+                : "false"}
+            </div>
             <div data-testid="is-array">
               {Array.isArray(context.appWallets) ? "true" : "false"}
             </div>
@@ -107,6 +112,7 @@ describe("AppWalletsContext", () => {
       expect(screen.getByTestId("has-create")).toHaveTextContent("true");
       expect(screen.getByTestId("has-import")).toHaveTextContent("true");
       expect(screen.getByTestId("has-delete")).toHaveTextContent("true");
+      expect(screen.getByTestId("has-migrate")).toHaveTextContent("true");
       expect(screen.getByTestId("is-array")).toHaveTextContent("true");
       expect(screen.getByTestId("has-fetching")).toHaveTextContent("true");
       expect(screen.getByTestId("has-supported")).toHaveTextContent("true");
@@ -140,7 +146,6 @@ describe("AppWalletsContext", () => {
       expect(screen.getByTestId("wallets-length")).toHaveTextContent("0");
       expect(screen.getByTestId("supported")).toHaveTextContent("false");
     });
-
   });
 
   describe("useAppWallets hook", () => {
@@ -171,12 +176,17 @@ describe("AppWalletsContext", () => {
         return (
           <div>
             <div data-testid="render-count">{renderCount}</div>
-            <div data-testid="context-exists">{contextValue ? "true" : "false"}</div>
-            <div data-testid="context-functions-exist">{
-              typeof contextValue.createAppWallet === "function" &&
+            <div data-testid="context-exists">
+              {contextValue ? "true" : "false"}
+            </div>
+            <div data-testid="context-functions-exist">
+              {typeof contextValue.createAppWallet === "function" &&
               typeof contextValue.importAppWallet === "function" &&
-              typeof contextValue.deleteAppWallet === "function" ? "true" : "false"
-            }</div>
+              typeof contextValue.deleteAppWallet === "function" &&
+              typeof contextValue.migrateAppWallet === "function"
+                ? "true"
+                : "false"}
+            </div>
           </div>
         );
       };
@@ -192,8 +202,12 @@ describe("AppWalletsContext", () => {
         expect(screen.getByTestId("context-exists")).toHaveTextContent("true");
       });
 
-      expect(screen.getByTestId("context-functions-exist")).toHaveTextContent("true");
-      const initialRenderCount = parseInt(screen.getByTestId("render-count").textContent || "0");
+      expect(screen.getByTestId("context-functions-exist")).toHaveTextContent(
+        "true"
+      );
+      const initialRenderCount = Number.parseInt(
+        screen.getByTestId("render-count").textContent || "0"
+      );
 
       // Force a re-render with the same provider
       rerender(
@@ -207,9 +221,13 @@ describe("AppWalletsContext", () => {
         expect(screen.getByTestId("context-exists")).toHaveTextContent("true");
       });
 
-      expect(screen.getByTestId("context-functions-exist")).toHaveTextContent("true");
+      expect(screen.getByTestId("context-functions-exist")).toHaveTextContent(
+        "true"
+      );
       // Component should have re-rendered since we created a new provider instance
-      expect(parseInt(screen.getByTestId("render-count").textContent || "0")).toBeGreaterThan(initialRenderCount);
+      expect(
+        Number.parseInt(screen.getByTestId("render-count").textContent || "0")
+      ).toBeGreaterThan(initialRenderCount);
     });
   });
 
@@ -231,7 +249,9 @@ describe("AppWalletsContext", () => {
         return (
           <div>
             <div data-testid="supported">{appWalletsSupported.toString()}</div>
-            <button onClick={handleCreate} data-testid="create-btn">Create</button>
+            <button onClick={handleCreate} data-testid="create-btn">
+              Create
+            </button>
             <div data-testid="result">{result?.toString() || "null"}</div>
           </div>
         );
@@ -281,7 +301,9 @@ describe("AppWalletsContext", () => {
         return (
           <div>
             <div data-testid="supported">{appWalletsSupported.toString()}</div>
-            <button onClick={handleImport} data-testid="import-btn">Import</button>
+            <button onClick={handleImport} data-testid="import-btn">
+              Import
+            </button>
             <div data-testid="result">{result?.toString() || "null"}</div>
           </div>
         );
@@ -325,7 +347,9 @@ describe("AppWalletsContext", () => {
         return (
           <div>
             <div data-testid="supported">{appWalletsSupported.toString()}</div>
-            <button onClick={handleDelete} data-testid="delete-btn">Delete</button>
+            <button onClick={handleDelete} data-testid="delete-btn">
+              Delete
+            </button>
             <div data-testid="result">{result?.toString() || "null"}</div>
           </div>
         );

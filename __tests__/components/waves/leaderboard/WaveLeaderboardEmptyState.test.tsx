@@ -5,7 +5,16 @@ import { SubmissionStatus } from "@/hooks/useWave";
 import { WaveLeaderboardEmptyState } from "@/components/waves/leaderboard/drops/WaveLeaderboardEmptyState";
 import React from "react";
 
-jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
+jest.mock("@/hooks/useWave", () => {
+  return {
+    SubmissionStatus: {
+      NOT_STARTED: "NOT_STARTED",
+      ACTIVE: "ACTIVE",
+      ENDED: "ENDED",
+    },
+    useWave: jest.fn(),
+  };
+});
 jest.mock("@/components/utils/button/PrimaryButton", () => ({
   __esModule: true,
   default: ({ onClicked, children, disabled }: any) => (
@@ -107,9 +116,9 @@ describe("WaveLeaderboardEmptyState", () => {
     expect(
       screen.queryByText("Be the first to create a curated drop in this wave")
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByText("Curation wave submissions require at least Level 10.")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Level 10").closest("p")).toHaveTextContent(
+      "Curation wave submissions require at least Level 10."
+    );
     expect(
       screen.getByRole("link", { name: "Learn more about Network Levels" })
     ).toHaveAttribute("href", "https://6529.io/network/levels");

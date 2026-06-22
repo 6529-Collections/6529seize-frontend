@@ -22,6 +22,13 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 describe("TimelineToggleHeader", () => {
+  const timeLeft = {
+    days: 0,
+    hours: 1,
+    minutes: 2,
+    seconds: 3,
+  };
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -34,6 +41,7 @@ describe("TimelineToggleHeader", () => {
           isOpen={false}
           setIsOpen={setIsOpen}
           nextDecisionTime={Date.now() + 1000}
+          timeLeft={timeLeft}
         />
       </SeizeSettingsProvider>
     );
@@ -64,6 +72,7 @@ describe("TimelineToggleHeader", () => {
           isOpen={false}
           setIsOpen={jest.fn()}
           nextDecisionTime={nextDecisionTime}
+          timeLeft={timeLeft}
           isPaused
           currentPause={currentPause}
         />
@@ -93,6 +102,7 @@ describe("TimelineToggleHeader", () => {
           isOpen={false}
           setIsOpen={jest.fn()}
           nextDecisionTime={null}
+          timeLeft={timeLeft}
           isPaused
           currentPause={currentPause}
         />

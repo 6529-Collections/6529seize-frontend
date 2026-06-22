@@ -133,14 +133,16 @@ describe("UserPageStatsActivityOverview", () => {
       ),
     });
 
-    expect(
-      within(overviewTable).getByText(formatInteger(locale, 1000))
-    ).toBeInTheDocument();
-    expect(
-      within(overviewTable).getByText(
-        formatNumber(locale, 1.234, { maximumFractionDigits: 2 })
-      )
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        within(overviewTable).getByText(formatInteger(locale, 1000))
+      ).toBeInTheDocument();
+      expect(
+        within(overviewTable).getByText(
+          formatNumber(locale, 1.234, { maximumFractionDigits: 2 })
+        )
+      ).toBeInTheDocument();
+    });
   });
 
   it("shows an empty state instead of an empty season table", async () => {

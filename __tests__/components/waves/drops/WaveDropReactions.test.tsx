@@ -851,7 +851,7 @@ describe("WaveDropReactions", () => {
 
     const button = screen.getByRole("button");
     expect(button).toBeDisabled();
-    expect(button).not.toHaveAttribute("data-tooltip-id");
+    expect(button).toHaveAttribute("data-tooltip-id", "reaction-test-drop-gm");
     expect(button).toHaveTextContent("4");
 
     fireEvent.click(button);

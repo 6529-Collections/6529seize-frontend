@@ -175,71 +175,152 @@ const handleApiError = async (
   return Promise.reject(normalizedErrorMessage);
 };
 
-const executeApiRequest = async <T>(
+interface ExecuteApiRequestParams {
+  readonly url: string;
+  readonly method: string;
+  readonly headers: Record<string, string>;
+  readonly body?: BodyInit | undefined;
+  readonly signal?: AbortSignal | undefined;
+  readonly parseJson?: boolean | undefined;
+  readonly errorMode?: ApiErrorMode | undefined;
+  readonly credentials?: RequestCredentials | undefined;
+}
+
+type RequestStatus = number | "aborted" | "network_error" | "unknown";
+
+const createRequestInit = ({
+  method,
+  headers,
+  body,
+  signal,
+  credentials,
+}: Pick<
+  ExecuteApiRequestParams,
+  "method" | "headers" | "body" | "signal" | "credentials"
+>): RequestInit => {
+  const requestInit: RequestInit = {
+    method,
+    headers,
+  };
+  const hasBody = body !== undefined;
+  const hasSignal = signal !== undefined;
+  const hasCredentials = credentials !== undefined;
+
+  if (hasBody) {
+    requestInit.body = body;
+  }
+  if (hasSignal) {
+    requestInit.signal = signal;
+  }
+  if (hasCredentials) {
+    requestInit.credentials = credentials;
+  }
+
+  return requestInit;
+};
+
+const parseApiResponse = async <T>(
+  res: Response,
   url: string,
-  method: string,
-  headers: Record<string, string>,
-  body?: BodyInit,
-  signal?: AbortSignal,
-  parseJson: boolean = true,
-  errorMode: ApiErrorMode = "legacy-string"
+  parseJson: boolean
 ): Promise<T> => {
-  const requestStartedAtMs = getRequestTimingNow();
-  let status: number | "aborted" | "network_error" | "unknown" = "unknown";
+  if (!parseJson) {
+    return undefined as T;
+  }
 
   try {
-    const res = await fetch(url, {
-      method,
-      headers,
-      ...(body !== undefined ? { body: body } : {}),
-      ...(signal !== undefined ? { signal: signal } : {}),
-    });
+    return await res.json();
+  } catch (jsonError) {
+    const errorMessage =
+      jsonError instanceof Error ? jsonError.message : String(jsonError);
+    throw new Error(
+      `Failed to parse response as JSON from ${url}: ${errorMessage}`
+    );
+  }
+};
+
+const getErrorStatus = (
+  currentStatus: RequestStatus,
+  error: unknown
+): RequestStatus => {
+  if (currentStatus !== "unknown") {
+    return currentStatus;
+  }
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return "aborted";
+  }
+  if (error instanceof TypeError) {
+    return "network_error";
+  }
+  return currentStatus;
+};
+
+const getNetworkErrorMessage = (
+  errorMessage: string,
+  originalMessage: string,
+  url: string
+): string | null => {
+  if (
+    errorMessage.includes("load failed") ||
+    errorMessage.includes("failed to fetch")
+  ) {
+    return `Network request failed. Please check your connection and try again. (${url})`;
+  }
+  if (errorMessage.includes("network")) {
+    return `Network error: ${originalMessage} (${url})`;
+  }
+  return null;
+};
+
+const normalizeFetchError = (error: unknown, url: string): unknown => {
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return error;
+  }
+  if (error instanceof TypeError) {
+    const networkErrorMessage = getNetworkErrorMessage(
+      error.message.toLowerCase(),
+      error.message,
+      url
+    );
+    if (networkErrorMessage) {
+      return new Error(networkErrorMessage);
+    }
+  }
+  return error;
+};
+
+const executeApiRequest = async <T>({
+  url,
+  method,
+  headers,
+  body,
+  signal,
+  parseJson = true,
+  errorMode = "legacy-string",
+  credentials,
+}: ExecuteApiRequestParams): Promise<T> => {
+  const requestStartedAtMs = getRequestTimingNow();
+  let status: RequestStatus = "unknown";
+  const requestInit = createRequestInit({
+    method,
+    headers,
+    body,
+    signal,
+    credentials,
+  });
+
+  try {
+    const res = await fetch(url, requestInit);
     status = res.status;
 
     if (!res.ok) {
       return handleApiError(res, errorMode);
     }
 
-    if (!parseJson) {
-      return undefined as T;
-    }
-
-    try {
-      return await res.json();
-    } catch (jsonError) {
-      throw new Error(
-        `Failed to parse response as JSON from ${url}: ${
-          jsonError instanceof Error ? jsonError.message : String(jsonError)
-        }`
-      );
-    }
+    return await parseApiResponse<T>(res, url, parseJson);
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      if (status === "unknown") {
-        status = "aborted";
-      }
-      throw error;
-    }
-
-    if (error instanceof TypeError) {
-      if (status === "unknown") {
-        status = "network_error";
-      }
-      const errorMessage = error.message.toLowerCase();
-      if (
-        errorMessage.includes("load failed") ||
-        errorMessage.includes("failed to fetch")
-      ) {
-        throw new Error(
-          `Network request failed. Please check your connection and try again. (${url})`
-        );
-      }
-      if (errorMessage.includes("network")) {
-        throw new Error(`Network error: ${error.message} (${url})`);
-      }
-    }
-
-    throw error;
+    status = getErrorStatus(status, error);
+    throw normalizeFetchError(error, url);
   } finally {
     recordMobileLaunchApiRequest({
       endpoint: url,
@@ -276,13 +357,12 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     }
   );
 
-  return executeApiRequest<T>(
+  return executeApiRequest<T>({
     url,
-    "GET",
-    getHeaders(param.headers, false),
-    undefined,
-    param.signal
-  );
+    method: "GET",
+    headers: getHeaders(param.headers, false),
+    signal: param.signal,
+  });
 };
 
 interface RetryOptions {
@@ -410,21 +490,24 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   params?: Z | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
+  credentials?: RequestCredentials | undefined;
+  parseJson?: boolean | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
     param.params as Record<string, string> | undefined
   );
 
-  return executeApiRequest<U>(
+  return executeApiRequest<U>({
     url,
-    "POST",
-    getHeaders(param.headers, true),
-    JSON.stringify(param.body),
-    param.signal,
-    true,
-    param.errorMode ?? "legacy-string"
-  );
+    method: "POST",
+    headers: getHeaders(param.headers, true),
+    body: JSON.stringify(param.body),
+    signal: param.signal,
+    parseJson: param.parseJson ?? true,
+    errorMode: param.errorMode ?? "legacy-string",
+    credentials: param.credentials,
+  });
 };
 
 export const commonApiPostWithoutBodyAndResponse = async (param: {
@@ -433,14 +516,13 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
-  await executeApiRequest<void>(
+  await executeApiRequest<void>({
     url,
-    "POST",
-    getHeaders(param.headers, true),
-    "",
-    undefined,
-    false
-  );
+    method: "POST",
+    headers: getHeaders(param.headers, true),
+    body: "",
+    parseJson: false,
+  });
 };
 
 export const commonApiDelete = async (param: {
@@ -450,15 +532,13 @@ export const commonApiDelete = async (param: {
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
-  await executeApiRequest<void>(
+  await executeApiRequest<void>({
     url,
-    "DELETE",
-    getHeaders(param.headers),
-    undefined,
-    undefined,
-    false,
-    param.errorMode ?? "legacy-string"
-  );
+    method: "DELETE",
+    headers: getHeaders(param.headers),
+    parseJson: false,
+    errorMode: param.errorMode ?? "legacy-string",
+  });
 };
 
 export const commonApiDeleteWithBody = async <
@@ -476,12 +556,12 @@ export const commonApiDeleteWithBody = async <
     param.params as Record<string, string> | undefined
   );
 
-  return executeApiRequest<U>(
+  return executeApiRequest<U>({
     url,
-    "DELETE",
-    getHeaders(param.headers, true),
-    JSON.stringify(param.body)
-  );
+    method: "DELETE",
+    headers: getHeaders(param.headers, true),
+    body: JSON.stringify(param.body),
+  });
 };
 
 export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
@@ -496,13 +576,13 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
     param.params as Record<string, string> | undefined
   );
 
-  return executeApiRequest<U>(
+  return executeApiRequest<U>({
     url,
-    "PUT",
-    getHeaders(param.headers, true),
-    JSON.stringify(param.body),
-    param.signal
-  );
+    method: "PUT",
+    headers: getHeaders(param.headers, true),
+    body: JSON.stringify(param.body),
+    signal: param.signal,
+  });
 };
 
 export const commonApiPatch = async <T, U, Z = Record<string, string>>(param: {
@@ -517,13 +597,13 @@ export const commonApiPatch = async <T, U, Z = Record<string, string>>(param: {
     param.params as Record<string, string> | undefined
   );
 
-  return executeApiRequest<U>(
+  return executeApiRequest<U>({
     url,
-    "PATCH",
-    getHeaders(param.headers, true),
-    JSON.stringify(param.body),
-    param.signal
-  );
+    method: "PATCH",
+    headers: getHeaders(param.headers, true),
+    body: JSON.stringify(param.body),
+    signal: param.signal,
+  });
 };
 
 export const commonApiPostForm = async <U>(param: {
@@ -533,10 +613,10 @@ export const commonApiPostForm = async <U>(param: {
 }): Promise<U> => {
   const url = buildUrl(param.endpoint);
 
-  return executeApiRequest<U>(
+  return executeApiRequest<U>({
     url,
-    "POST",
-    getHeaders(param.headers, false),
-    param.body
-  );
+    method: "POST",
+    headers: getHeaders(param.headers, false),
+    body: param.body,
+  });
 };

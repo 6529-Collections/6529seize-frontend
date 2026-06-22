@@ -9,6 +9,7 @@ let cicProps: any = null;
 let repProps: any = null;
 let nftsProps: any = null;
 let collectionsProps: any = null;
+let xtdhGrantProps: any = null;
 let includeWalletsProps: any = null;
 let excludeWalletsProps: any = null;
 
@@ -47,6 +48,11 @@ jest.mock('@/components/groups/page/create/config/nfts/GroupCreateCollections', 
   default: (props: any) => { collectionsProps = props; return <div data-testid="collections" />; },
 }));
 
+jest.mock('@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrant', () => ({
+  __esModule: true,
+  default: (props: any) => { xtdhGrantProps = props; return <div data-testid="xtdh-grant" />; },
+}));
+
 jest.mock('@/components/groups/page/create/config/wallets/GroupCreateWallets', () => ({
   __esModule: true,
   GroupCreateWalletsType: { INCLUDE: 'INCLUDE', EXCLUDE: 'EXCLUDE' },
@@ -68,6 +74,7 @@ function renderComponent() {
   const wallets: string[] | null = ['a'];
   const excludeWallets: string[] | null = ['b'];
   const nfts: any = [];
+  const beneficiaryGrantId = 'grant-1';
   const setLevel = jest.fn();
   const setTDH = jest.fn();
   const setCIC = jest.fn();
@@ -75,6 +82,7 @@ function renderComponent() {
   const setWallets = jest.fn();
   const setExcludeWallets = jest.fn();
   const setNfts = jest.fn();
+  const setBeneficiaryGrantId = jest.fn();
 
   render(
     <GroupCreateConfig
@@ -85,6 +93,7 @@ function renderComponent() {
       wallets={wallets}
       excludeWallets={excludeWallets}
       nfts={nfts}
+      beneficiaryGrantId={beneficiaryGrantId}
       iAmIncluded={false}
       setLevel={setLevel}
       setTDH={setTDH}
@@ -93,10 +102,11 @@ function renderComponent() {
       setWallets={setWallets}
       setExcludeWallets={setExcludeWallets}
       setNfts={setNfts}
+      setBeneficiaryGrantId={setBeneficiaryGrantId}
     />
   );
 
-  return { level, tdh, cic, rep, wallets, excludeWallets, nfts, setLevel, setTDH, setCIC, setRep, setWallets, setExcludeWallets, setNfts };
+  return { level, tdh, cic, rep, wallets, excludeWallets, nfts, beneficiaryGrantId, setLevel, setTDH, setCIC, setRep, setWallets, setExcludeWallets, setNfts, setBeneficiaryGrantId };
 }
 
 describe('GroupCreateConfig', () => {
@@ -107,6 +117,7 @@ describe('GroupCreateConfig', () => {
     repProps = null;
     nftsProps = null;
     collectionsProps = null;
+    xtdhGrantProps = null;
     includeWalletsProps = null;
     excludeWalletsProps = null;
   });
@@ -131,6 +142,9 @@ describe('GroupCreateConfig', () => {
 
     expect(collectionsProps.nfts).toBe(refs.nfts);
     expect(collectionsProps.setNfts).toBe(refs.setNfts);
+
+    expect(xtdhGrantProps.beneficiaryGrantId).toBe(refs.beneficiaryGrantId);
+    expect(xtdhGrantProps.setBeneficiaryGrantId).toBe(refs.setBeneficiaryGrantId);
 
     expect(includeWalletsProps.type).toBe(GroupCreateWalletsType.INCLUDE);
     expect(includeWalletsProps.wallets).toBe(refs.wallets);

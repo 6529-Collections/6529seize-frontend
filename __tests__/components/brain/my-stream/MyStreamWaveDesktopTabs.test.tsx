@@ -123,7 +123,8 @@ function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
       wave={
         {
           id: "wave-1",
-          author: { id: "author-1" },
+          author: { id: "author-1", handle: "author" },
+          chat: { scope: { group: { is_direct_message: false } } },
           wave: {
             type: ApiWaveType.Approve,
             authenticated_user_eligible_for_admin: false,

@@ -152,6 +152,7 @@ describe("WaveWinners", () => {
     );
     expect(useWaveDecisions).toHaveBeenCalledWith({
       waveId: "w1",
+      wave: { ...wave, wave: { type: ApiWaveType.Approve } },
       enabled: true,
       loadAllPages: true,
       pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,

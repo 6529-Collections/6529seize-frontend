@@ -14,7 +14,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({
+  useMyStreamOptional: () => ({
     applyOptimisticDropUpdate: jest
       .fn()
       .mockReturnValue({ rollback: jest.fn() }),
@@ -68,7 +68,7 @@ const renderWithAuth = (
 describe("WaveDropActionsToggleLinkPreview", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCommonApiPost.mockResolvedValue({});
+    mockCommonApiPost.mockResolvedValue({ hide_link_preview: true });
   });
 
   afterEach(() => {
@@ -135,7 +135,7 @@ describe("WaveDropActionsToggleLinkPreview", () => {
     await waitFor(() => {
       expect(mockCommonApiPost).toHaveBeenCalledWith({
         endpoint: "drops/drop1/toggle-hide-link-preview",
-        body: {},
+        body: { hide_link_preview: true },
       });
     });
   });

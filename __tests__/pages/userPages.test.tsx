@@ -19,6 +19,7 @@ jest.mock("@/helpers/server.helpers", () => ({
 
 jest.mock("@/components/providers/metadata", () => ({
   getAppMetadata: jest.fn((v: any) => v),
+  getLargeSocialCardMetadata: jest.fn((v: any) => v),
 }));
 
 // Use the real helpers impl for metadata but we'll spy on the call
@@ -106,7 +107,7 @@ describe("user index page via createUserTabPage", () => {
     } as any);
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave" }),
-      "Home"
+      null
     );
     expect(getAppMetadata).toHaveBeenCalled();
   });
@@ -174,7 +175,7 @@ describe("proxy page via createUserTabPage", () => {
     } as any);
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave" }),
-      "Proxy"
+      "proxy"
     );
     expect(getAppMetadata).toHaveBeenCalled();
   });

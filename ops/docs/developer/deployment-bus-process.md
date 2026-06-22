@@ -97,14 +97,18 @@ Known current gaps after the first automation slice:
   post-deploy Playwright packs. The release captain or validation agents must
   run them and record results with `record-validation-check` until a later
   automation slice wires pack execution into the lane.
-- The workflows record post-deploy deploy-verification checkpoints. These are
-  useful watch evidence, but GitHub Actions run URLs and temporary artifacts do
-  not satisfy durable artifact pointer requirements.
+- The workflows record post-deploy deploy-verification checkpoints and run a
+  GET-only `/api/version` check against the deployed HTTP app. These are useful
+  watch evidence, but GitHub Actions run URLs and temporary artifacts do not
+  satisfy durable artifact pointer requirements.
 - The current standard pack plan requires desktop Chromium and mobile Chromium
   evidence for `playwright:core-smoke`, `playwright:surface-matrix`, and
-  `playwright:wcag-i18n`. Firefox, WebKit, Capacitor simulation, and Electron
-  simulation remain optional train/nightly or targeted validation lanes and
-  must not be described as real native or real Electron shell coverage.
+  `playwright:wcag-i18n`. The deployment bus also knows the optional
+  production-only `playwright:production-readonly` aggregate, which records
+  desktop Chromium production evidence when a release captain explicitly opts
+  into it. Firefox, WebKit, Capacitor simulation, and Electron simulation remain
+  optional train/nightly or targeted validation lanes and must not be described
+  as real native or real Electron shell coverage.
 - Backend coordination is still a cross-repo handoff, not a shared automated
   release train.
 

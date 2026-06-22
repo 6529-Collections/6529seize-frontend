@@ -48,8 +48,9 @@ describe("UserPageIdentityHeaderCICRateStats", () => {
     );
 
     expect(screen.getByText("alice").closest("a")).toHaveAttribute("href", "/alice");
-    expect(screen.getByText("f50")).toBeInTheDocument();
-    expect(screen.getByText("f4")).toBeInTheDocument();
-    expect(screen.getByText("f3")).toBeInTheDocument();
+    expect(screen.getByText("Proxy for")).toBeInTheDocument();
+    expect(screen.queryByText("f50")).not.toBeInTheDocument();
+    expect(screen.queryByText("f4")).not.toBeInTheDocument();
+    expect(screen.queryByText("f3")).not.toBeInTheDocument();
   });
 });

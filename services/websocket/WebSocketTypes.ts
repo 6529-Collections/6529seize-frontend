@@ -7,7 +7,7 @@ export type WebSocketMessage<T = {}> = {
   type: WsMessageType;
 } & T;
 
-export interface WebSocketMessageMetadata {
+interface WebSocketMessageMetadata {
   readonly reason?: string | undefined;
 }
 
@@ -50,6 +50,7 @@ export function getWebSocketMessageReason(payload: unknown): string | null {
  * Connection status for the WebSocket
  */
 export enum WebSocketStatus {
+  AUTHENTICATING = "authenticating",
   CONNECTED = "connected",
   CONNECTING = "connecting",
   DISCONNECTED = "disconnected",

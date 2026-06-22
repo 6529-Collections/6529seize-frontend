@@ -4,8 +4,17 @@ import VoteBreakdownTooltip from '@/components/waves/drops/participation/ratings
 import { getScaledImageUri } from '@/helpers/image.helpers';
 
 jest.mock('@/helpers/image.helpers', () => ({
-  getScaledImageUri: jest.fn(() => 'scaled'),
+  getScaledImageUri: jest.fn(() => 'https://cdn.test/scaled.png'),
   ImageScale: { W_AUTO_H_50: 'W_AUTO_H_50' },
+}));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
+  useSeizeConnectContext: () => ({ address: null }),
+}));
+jest.mock('@/components/auth/Auth', () => ({
+  useAuth: () => ({ activeProfileProxy: null }),
+}));
+jest.mock('@/hooks/useIdentity', () => ({
+  useIdentity: () => ({ profile: null }),
 }));
 
 describe('VoteBreakdownTooltip', () => {
@@ -28,8 +37,18 @@ describe('VoteBreakdownTooltip', () => {
     expect(screen.getByText('bob')).toBeInTheDocument();
     expect(screen.getByText('-3')).toBeInTheDocument();
     expect(screen.getByText('Voting Range')).toBeInTheDocument();
-    expect(screen.getByText('10 REP')).toBeInTheDocument();
-    expect(screen.getByText('2 REP')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === 'SPAN' && element.textContent === '10 Rep'
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === 'SPAN' && element.textContent === '2 Rep'
+      )
+    ).toBeInTheDocument();
   });
 
   it('hides sections when data absent', () => {
