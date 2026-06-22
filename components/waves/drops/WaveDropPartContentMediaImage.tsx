@@ -49,13 +49,15 @@ function ImageProcessingRetryState() {
 function ImageLoadErrorState({ onRetry }: { readonly onRetry: () => void }) {
   return (
     <div className="tw-flex tw-h-full tw-min-h-40 tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-py-8">
-      <span className="tw-text-sm tw-text-iron-400">Couldn’t load image.</span>
+      <span className="tw-text-sm tw-text-iron-400">
+        {t(DEFAULT_LOCALE, "drop.media.loadFailed")}
+      </span>
       <button
         type="button"
         onClick={onRetry}
         className="tw-rounded-md tw-bg-iron-700 tw-px-3 tw-py-1 tw-text-xs tw-text-white hover:tw-bg-iron-600"
       >
-        Retry
+        {t(DEFAULT_LOCALE, "drop.media.retry")}
       </button>
     </div>
   );
