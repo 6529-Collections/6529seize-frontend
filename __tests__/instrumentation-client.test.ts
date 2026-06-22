@@ -67,6 +67,39 @@ describe("instrumentation-client", () => {
     mockCaptureRouterTransitionStart.mockReset();
   });
 
+  it("drops Coinbase WalletLink websocket 1006 unhandled rejections", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "webSocket.onclose",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event, {
+      originalException: new Error("websocket error 1006:"),
+    });
+
+    expect(result).toBeNull();
+  });
+
   it("drops sampled-out first-party browser transport network errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {

@@ -116,6 +116,16 @@ Surface matrix:
   endpoints are touched. It must run against a loopback base URL, but it is not
   a full network-isolation harness and is not a staging or production smoke
   pack.
+- `test:e2e:auth-sandbox` runs the local authenticated sandbox on desktop
+  Chromium. It includes the composer checks plus positive `/notifications`
+  and `/messages/create` flows with deterministic mock API data. It allows
+  only explicit local sandbox mutations such as notification mark-read and
+  synthetic direct-message creation with exact sandbox IDs, queryless paths, and
+  request bodies. Unknown mock API writes fail the sandbox request audit, and
+  unexpected same-origin Next.js API writes or unknown unsafe external browser
+  writes are blocked by a browser route guard. Known wallet and analytics SDK
+  background writes are still blocked in-browser, but they do not fail the test.
+  This pack must never run against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -166,7 +176,10 @@ Surface matrix:
   smoke.
 - `test:e2e:production:readonly` runs the full production-safe read-only pack
   family in one Playwright invocation so release validation fails fast and
-  returns one aggregate status.
+  returns one aggregate status. Deployment-bus manifests know this as the
+  optional production-only `playwright:production-readonly` pack; record that
+  pack only with redacted durable evidence and desktop Chromium surface
+  metadata.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -221,8 +234,14 @@ Large-pack ownership:
   changing `/notifications`, notification read state, auth restoration, or the
   read-only mutation guard. It is a negative guard contract: it proves the
   mutation is detected and blocked before backend state changes. Full
-  notification UI coverage requires a disposable sandbox account/backend or a
-  user-equivalent product behavior that does not mark notifications read.
+  remote notification UI coverage requires a disposable sandbox account/backend
+  or a user-equivalent product behavior that does not mark notifications read.
+- `test:e2e:auth-sandbox` is owned by PR or train owners changing local
+  dev-auth behavior, notifications UI/filtering, direct-message creation,
+  composer shell behavior, or the sandbox mutation auditor. It is the positive
+  stateful counterpart to the remote read-only packs and must stay loopback
+  only; the mock API and spawned Next dev server are intentionally bound to
+  loopback hosts.
 - `test:e2e:profile-deep-links-readonly` is owned by PR or train owners
   changing public profile routing, query-preserving profile links, legacy
   waves/groups/followers redirects, profile tab canonicalization, query
@@ -238,6 +257,12 @@ Large-pack ownership:
   files to staging or production. Treat it as coverage for composer/drop/upload
   API safety, not as a guarantee that every external read-only media or metadata
   endpoint is isolated.
+- `test:e2e:production:readonly` is owned by the release captain or validation
+  agent after a production deploy. It is a production-safe aggregate of the
+  individual public read-only packs and is the command behind the optional
+  deployment-bus pack `playwright:production-readonly`. Do not make it a
+  staging requirement unless a real staging aggregate command and evidence path
+  exist.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.

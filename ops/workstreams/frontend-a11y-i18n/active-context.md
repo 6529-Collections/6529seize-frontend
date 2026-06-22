@@ -4,6 +4,132 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-22T12:15Z:
+  - PR #2838 is merged and deployed. Current production is serving
+    `a07a205a35282ef1d9697549ee9a167369b465c3`.
+  - Staging validation for current main passed before production:
+    version verifier matched staging SHA
+    `64bc9e277a125c7f38ea37cd11fb92957a42a31b`,
+    `test:e2e:staging:smoke` 12 passed,
+    `test:e2e:staging` 24 passed / 6 skipped, and
+    staging WCAG/i18n surface matrix 6 passed.
+  - Production deploy run #27949660165 succeeded from exact
+    `origin/main` SHA `a07a205a35282ef1d9697549ee9a167369b465c3`.
+    Local production `/api/version` matched that SHA, and
+    `seize run test:e2e:production:readonly` passed 65/65.
+  - Current branch:
+    `codex/auth-sandbox-e2e`, based on current `origin/main`
+    `a07a205a35282ef1d9697549ee9a167369b465c3`.
+  - Active slice adds positive local-only authenticated sandbox E2E coverage
+    for `/notifications` and `/messages/create`, while preserving the existing
+    composer/upload/link-preview sandbox. It reuses the local mock API/dev-auth
+    runner, refuses non-loopback base URLs, explicitly binds Next dev to a
+    loopback hostname, audits request logs so only exact sandbox IDs/bodies are
+    allowed for local mock API mutations on queryless paths, blocks oversized
+    mutation bodies as unsafe audit entries, and blocks unexpected same-origin
+    Next.js API writes or unknown unsafe external browser writes in the browser.
+    Known wallet and analytics SDK background writes are blocked in-browser but
+    do not fail the sandbox pack.
+  - Local validation passed for this active slice:
+    - `node --check tests/support/composerSandboxServer.cjs`
+    - focused ESLint on changed sandbox support/spec files
+    - `seize exec prettier --check ...` for changed docs/spec/support files
+    - `seize run typecheck:changed`
+    - `seize run test:e2e:auth-sandbox`: 4 passed
+    - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and mobile
+      Chromium
+    - `codex-diff-check`
+  - Independent verifier `Parfit` found that the first draft still bound Next
+    dev too broadly and classified allowed mutations by path only. Those
+    findings were fixed before PR publication.
+  - Independent verifier `Volta` found one more pre-publication hardening pass:
+    unknown external browser writes needed blocking, oversized mock mutation
+    bodies needed unsafe audit evidence, and allowed mock mutations needed empty
+    query strings. Those findings were fixed before PR publication.
+  - Local `seize run lint:changed` is not a useful signal in this worktree
+    because local branch `main` is stale (`7693d1138`) while this branch is
+    based on `origin/main` (`a07a205a3`), causing the script's Windows command
+    line to exceed the shell limit. Focused ESLint on the actual PR files is
+    clean.
+  - Next action: commit, push, open PR, trigger/iterate all reviewbot lanes
+    including GLM, then merge/deploy if CI and bots stop adding material value.
+- Previous testing-roadmap state, 2026-06-22T08:32Z:
+  - PR #2823 is merged and deployed. Production is serving
+    `02382bc81f1d945083b28bf78641ab2469e2212e`.
+  - Staging deploy run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27943628946
+    - staging SHA: `43d6f711a7f3856c62b5544736d001319f285bef`
+    - workflow HTTP version evidence matched the staging SHA.
+    - local staging validation passed:
+      `test:e2e:staging:smoke` 12 passed,
+      `test:e2e:staging` 24 passed / 6 skipped,
+      `test:e2e:wcag-i18n:surface-matrix` 6 passed.
+  - Production deploy run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27944602623
+    - workflow HTTP version evidence matched the production SHA.
+    - local production `/api/version` probe matched the production SHA.
+  - Current branch:
+    `codex/e2e-production-readonly-hardening`, based on current `origin/main`.
+  - Active follow-up fixes the production-readonly aggregate after live
+    validation found a real test-harness gap:
+    - current production mint card can render dynamic interactive art inside an
+      iframe, while the test only accepted direct `img[id^="image-"]` media.
+    - the read-only mutation guard blocked safe read-only Ethereum JSON-RPC
+      POSTs to known public RPC hosts used by the mint page.
+    - the app was not rolled back: production app runtime is healthy and this
+      branch changes test harness behavior only.
+  - Validation passed for this follow-up:
+    - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+    - focused ESLint on the changed E2E/guard files
+    - failing production mint test rerun: 1 passed
+    - full `seize run test:e2e:production:readonly`: 65 passed
+    - `seize run lint:changed`
+    - `seize run typecheck:changed`
+    - `codex-diff-check`
+    - clean risk floor: Level 3
+    - changed secret scan passed.
+  - Next action: commit, open PR, iterate all reviewbot lanes including the
+    now-live GLM reviewer, then merge/deploy if CI and bots add no further
+    value.
+- Previous testing-roadmap state, 2026-06-22T08:32Z:
+  - PR #2822 is merged and deployed. Production is serving
+    `7693d1138987175e0ccd6c54841d7547d99ce322`, and the full production-safe
+    read-only aggregate passed again: `seize run test:e2e:production:readonly`
+    reported 65/65 passed.
+  - Current branch: `codex/deployment-evidence-verification`, based on current
+    `origin/main`.
+  - Active slice closes a deployment evidence gap:
+    - adds `ops/scripts/verify-deployment-version.cjs` and
+      `seize run verify:deployment-version` to GET `/api/version`, require
+      HTTP 200, `Cache-Control: no-store`, and exact expected SHA match, with
+      bounded retry and redacted `deployment-version-evidence.json` output.
+    - wires staging and production workflows to run the HTTP version check
+      before marking deploys verified and upload the evidence JSON beside the
+      deployment-bus manifest/report.
+    - records an `http-version-match` post-deploy-watch checkpoint when the
+      workflow probe passes.
+    - adds optional deployment-bus pack `playwright:production-readonly` for
+      the existing production aggregate. It is production-only,
+      desktop-Chromium only, and intentionally not in `DEFAULT_REQUIRED_PACKS`
+      until durable artifact upload/recording is automated.
+    - rejects known standard packs when required in an unsupported environment,
+      so `playwright:production-readonly` cannot silently become a null-command
+      staging requirement.
+  - Validation passed for this slice:
+    `node --check ops/scripts/verify-deployment-version.cjs`; focused ESLint on
+    deployment-bus/verifier files; `seize run test:no-coverage --
+__tests__/scripts/verify-deployment-version.test.ts
+__tests__/scripts/deployment-bus.test.ts
+__tests__/app/api/version/route.test.ts
+__tests__/hooks/useVersion.test.tsx` (51 tests); `lint:changed`;
+    `typecheck:changed`; risk-floor computed Level 5; changed secret scan;
+    workflow-security scan; live production version probe; live staging version
+    probe; `codex-diff-check`; and production aggregate E2E 65/65.
+  - Reviewer subagent `Kepler` is inspecting the final uncommitted diff. Wait
+    for it before committing/publishing.
+  - GLM reviewbot is live and remains additive. Do not remove, downgrade, or
+    replace existing Opus/general/WCAG/i18n/security/responsiveness reviewbot
+    lanes.
 - Latest testing-roadmap state, 2026-06-22T05:45Z:
   - PR #2819 is merged into `origin/main` as
     `174b2d054 Add search and wave read-only E2E coverage (#2819)`.
@@ -307,7 +433,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-composer-sandbox`
+`codex/auth-sandbox-e2e`
 
 ## Constraints
 
@@ -472,14 +598,15 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Publish the production read-only aggregate follow-up PR from
-   `codex/fix-production-collections-readonly`, iterate CI/reviewbots, merge,
-   and deploy because it updates release-validation controls.
-2. Keep `/notifications` out of staging/production read-only smoke until a
-   disposable sandbox account/backend or product-safe non-mutating test path
-   exists.
-3. Start the next high-value E2E pack after this PR: wallet/native/Electron
-   shell coverage, deployment evidence/version verification, or the next
-   guarded authenticated sandbox pack.
-4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
+1. Commit, push, and open PR for `codex/auth-sandbox-e2e`.
+2. Trigger and iterate CI, CodeRabbit, Sonar, 6529bot, GLM, and specialized
+   reviewbot lanes until Codex judges the loop is no longer adding material
+   value.
+3. Merge the auth-sandbox E2E PR after checks and review signals are green or
+   consciously dispositioned, then deploy the resulting current `origin/main`
+   through staging and production with exact-SHA validation.
+4. Continue the next high-value E2E hardening slice: create-wave sandbox,
+   wallet/native/Electron shell coverage, real native runtime detection, or
+   upload/posting/admin guarded packs.
+5. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.
