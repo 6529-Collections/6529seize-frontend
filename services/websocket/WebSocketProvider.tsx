@@ -19,6 +19,9 @@ import { getAuthJwt } from "../auth/auth.utils";
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
 const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
+const AUTHENTICATION_TIMEOUT_MS = 8000;
+const AUTHENTICATION_FAILED_CLOSE_CODE = 4008;
+const AUTHENTICATION_TIMEOUT_CLOSE_CODE = 4011;
 
 type WebSocketMessagePayload = {
   readonly type?: unknown;
@@ -69,6 +72,23 @@ const normalizeIncomingMessage = (
   };
 };
 
+const WEBSOCKET_AUTHENTICATE = "AUTHENTICATE";
+const WEBSOCKET_AUTHENTICATED = "AUTHENTICATED";
+const WEBSOCKET_AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED";
+
+const createCredentialMarker = (credential: string): string => {
+  let primary = 0;
+  let secondary = 5381;
+
+  for (let index = 0; index < credential.length; index += 1) {
+    const code = credential.codePointAt(index) ?? 0;
+    primary = (primary * 31 + code) % 2_147_483_647;
+    secondary = (secondary * 33 + code) % 2_147_483_647;
+  }
+
+  return `${credential.length}:${primary}:${secondary}`;
+};
+
 /**
  * Calculate delay for exponential backoff
  */
@@ -105,48 +125,80 @@ export function WebSocketProvider({
   // Reconnection tracking
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const authenticationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isManualDisconnectRef = useRef(false);
   const reconnectTokenRef = useRef<string | undefined>(undefined);
+  const rejectedCredentialMarkerRef = useRef<string | null>(null);
+
+  const clearAuthenticationTimer = useCallback(() => {
+    if (authenticationTimerRef.current) {
+      clearTimeout(authenticationTimerRef.current);
+      authenticationTimerRef.current = null;
+    }
+  }, []);
 
   /**
    * Parse and route incoming WebSocket messages
    */
-  const handleMessage = useCallback((event: MessageEvent<unknown>) => {
-    if (typeof event.data !== "string") {
-      return;
-    }
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(event.data);
-    } catch {
-      return;
-    }
-
-    const message = normalizeIncomingMessage(parsed);
-    if (!message) {
-      return;
-    }
-
-    // Get subscribers for this message type
-    const subscribers = subscribersRef.current.get(message.type);
-
-    if (!subscribers) {
-      return;
-    }
-
-    setWebSocketMessageMetadata(message.data, {
-      reason: message.reason,
-    });
-
-    for (const subscriber of subscribers) {
-      try {
-        subscriber(message.data);
-      } catch {
-        // Keep one subscriber failure from blocking the remaining handlers.
+  const handleMessage = useCallback(
+    (event: MessageEvent<unknown>) => {
+      if (typeof event.data !== "string") {
+        return;
       }
-    }
-  }, []);
+
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+
+      const message = normalizeIncomingMessage(parsed);
+      if (!message) {
+        return;
+      }
+
+      if (message.type === WEBSOCKET_AUTHENTICATED) {
+        clearAuthenticationTimer();
+        setStatus(WebSocketStatus.CONNECTED);
+        reconnectAttemptsRef.current = 0;
+        return;
+      }
+
+      if (message.type === WEBSOCKET_AUTHENTICATION_FAILED) {
+        clearAuthenticationTimer();
+        rejectedCredentialMarkerRef.current = reconnectTokenRef.current
+          ? createCredentialMarker(reconnectTokenRef.current)
+          : null;
+        setStatus(WebSocketStatus.DISCONNECTED);
+        isManualDisconnectRef.current = true;
+        wsRef.current?.close(
+          AUTHENTICATION_FAILED_CLOSE_CODE,
+          "Authentication failed"
+        );
+        return;
+      }
+
+      // Get subscribers for this message type
+      const subscribers = subscribersRef.current.get(message.type);
+
+      if (!subscribers) {
+        return;
+      }
+
+      setWebSocketMessageMetadata(message.data, {
+        reason: message.reason,
+      });
+      for (const subscriber of subscribers) {
+        try {
+          subscriber(message.data);
+        } catch {
+          // Keep one subscriber failure from blocking the remaining handlers.
+        }
+      }
+    },
+    [clearAuthenticationTimer]
+  );
 
   /**
    * Clear any pending reconnection timer
@@ -195,6 +247,26 @@ export function WebSocketProvider({
    */
   const connect = useCallback(
     function connectSocket(token?: string) {
+      const useMessageAuth = !!token;
+      const credentialMarker = token ? createCredentialMarker(token) : null;
+
+      if (
+        useMessageAuth &&
+        credentialMarker !== null &&
+        rejectedCredentialMarkerRef.current === credentialMarker
+      ) {
+        reconnectTokenRef.current = token;
+        isManualDisconnectRef.current = true;
+        clearReconnectTimer();
+        reconnectAttemptsRef.current = 0;
+        setStatus(WebSocketStatus.DISCONNECTED);
+        return;
+      }
+
+      if (credentialMarker !== rejectedCredentialMarkerRef.current) {
+        rejectedCredentialMarkerRef.current = null;
+      }
+
       // Store token for potential reconnection
       reconnectTokenRef.current = token;
 
@@ -203,6 +275,7 @@ export function WebSocketProvider({
 
       // Close existing connection if any
       if (wsRef.current) {
+        clearAuthenticationTimer();
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -215,7 +288,7 @@ export function WebSocketProvider({
 
       // Build URL with optional token
       let url = config.url;
-      if (token) {
+      if (token && !useMessageAuth) {
         url += `?token=${encodeURIComponent(token)}`;
       }
 
@@ -229,8 +302,27 @@ export function WebSocketProvider({
             return;
           }
 
-          setStatus(WebSocketStatus.CONNECTED);
+          if (useMessageAuth) {
+            setStatus(WebSocketStatus.AUTHENTICATING);
+            ws.send(
+              JSON.stringify({
+                type: WEBSOCKET_AUTHENTICATE,
+                access_token: token,
+              })
+            );
+            authenticationTimerRef.current = setTimeout(() => {
+              if (wsRef.current === ws && ws.readyState === WebSocket.OPEN) {
+                isManualDisconnectRef.current = true;
+                ws.close(
+                  AUTHENTICATION_TIMEOUT_CLOSE_CODE,
+                  "Authentication timeout"
+                );
+              }
+            }, AUTHENTICATION_TIMEOUT_MS);
+            return;
+          }
 
+          setStatus(WebSocketStatus.CONNECTED);
           // Reset reconnect attempts on successful connection
           reconnectAttemptsRef.current = 0;
         };
@@ -249,6 +341,7 @@ export function WebSocketProvider({
           }
 
           // Clean up WebSocket
+          clearAuthenticationTimer();
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
 
@@ -275,13 +368,20 @@ export function WebSocketProvider({
         // Store the WebSocket reference
         wsRef.current = ws;
       } catch {
+        clearAuthenticationTimer();
         setStatus(WebSocketStatus.DISCONNECTED);
 
         // Schedule reconnect even for connection errors
         attemptReconnect(connectSocket);
       }
     },
-    [config.url, handleMessage, clearReconnectTimer, attemptReconnect]
+    [
+      config.url,
+      handleMessage,
+      clearReconnectTimer,
+      clearAuthenticationTimer,
+      attemptReconnect,
+    ]
   );
 
   /**
@@ -293,6 +393,7 @@ export function WebSocketProvider({
 
     // Clear any pending reconnect
     clearReconnectTimer();
+    clearAuthenticationTimer();
 
     // Reset reconnect attempts
     reconnectAttemptsRef.current = 0;
@@ -303,7 +404,7 @@ export function WebSocketProvider({
       wsRef.current = null;
       setStatus(WebSocketStatus.DISCONNECTED);
     }
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, clearAuthenticationTimer]);
 
   /**
    * Subscribe to a specific message type
@@ -357,6 +458,7 @@ export function WebSocketProvider({
     return () => {
       // Clear any pending reconnect
       clearReconnectTimer();
+      clearAuthenticationTimer();
 
       // Close the connection
       if (wsRef.current) {
@@ -364,7 +466,7 @@ export function WebSocketProvider({
         wsRef.current = null;
       }
     };
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, clearAuthenticationTimer]);
 
   // Create context value
   const contextValue: WebSocketContextValue = useMemo(

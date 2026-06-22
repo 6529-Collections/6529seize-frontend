@@ -87,6 +87,38 @@ test("normalizes announcement wave ids before matching", async () => {
   await waitFor(() => expect(screen.getByText("true")).toBeInTheDocument());
 });
 
+test("defaults missing auth settings to silent rollout", async () => {
+  fetchUrl.mockResolvedValue({
+    rememes_submission_tdh_threshold: 1,
+    all_drops_notifications_subscribers_limit: 2,
+    memes_wave_id: null,
+    curation_wave_id: null,
+    quorum_wave_id: null,
+    distribution_admin_wallets: [],
+    claims_admin_wallets: [],
+    announcements_wave_id: null,
+  });
+
+  function Consumer() {
+    const { isLoaded, seizeSettings } = useSeizeSettings();
+    return (
+      <div>
+        {`${isLoaded}-${seizeSettings.auth.structured_signatures_required}-${seizeSettings.auth.session_v2_migration_deadline === null}`}
+      </div>
+    );
+  }
+
+  render(
+    <SeizeSettingsProvider>
+      <Consumer />
+    </SeizeSettingsProvider>
+  );
+
+  await waitFor(() =>
+    expect(screen.getByText("true-false-true")).toBeInTheDocument()
+  );
+});
+
 test("captures initial load failures without leaking an unhandled rejection", async () => {
   const expectedError = new Error("network down");
   const onUnhandledRejection = jest.fn();

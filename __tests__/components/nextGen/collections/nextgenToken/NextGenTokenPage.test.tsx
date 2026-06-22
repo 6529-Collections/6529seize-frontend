@@ -13,15 +13,6 @@ jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   UserCICAndLevel: () => <div data-testid="user-cic-level" />,
 }));
 
-jest.mock(
-  "@/components/user/utils/raters-table/ProfileRatersTableItem",
-  () => ({
-    ProfileRatersTableItem: () => (
-      <div data-testid="profile-raters-table-item" />
-    ),
-  })
-);
-
 jest.mock("next/navigation", () => {
   return {
     __esModule: true,

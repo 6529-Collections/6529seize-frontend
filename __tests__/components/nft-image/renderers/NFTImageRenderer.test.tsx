@@ -22,6 +22,7 @@ jest.mock("next/image", () => {
   }: any) {
     let _src = src as string;
     const mockCurrentTarget = {
+      dataset: {},
       get src() {
         return _src;
       },

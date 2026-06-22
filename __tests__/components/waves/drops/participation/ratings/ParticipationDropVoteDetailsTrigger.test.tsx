@@ -139,7 +139,9 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
       name: triggerButtonName,
     });
 
-    expect(trigger).toHaveTextContent("21 voters");
+    expect(trigger).toHaveAccessibleName(triggerButtonName);
+    expect(trigger).toHaveTextContent("21");
+    expect(trigger).toHaveTextContent("voters");
     expect(trigger).toHaveClass(
       "tw-rounded-lg",
       "tw-border",

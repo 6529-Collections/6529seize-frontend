@@ -23,22 +23,28 @@ const mockWalletClient = {
   account: { address: "0x1234567890123456789012345678901234567890" },
 };
 
-const mockCreateWalletClient = jest.fn().mockReturnValue(mockWalletClient);
-const mockPrivateKeyToAccount = jest
-  .fn()
-  .mockReturnValue({ address: "0x1234567890123456789012345678901234567890" });
-const mockFallback = jest.fn();
-const mockHttp = jest.fn();
-
 jest.mock("viem/accounts", () => ({
-  privateKeyToAccount: mockPrivateKeyToAccount,
+  privateKeyToAccount: jest.fn(),
 }));
 
 jest.mock("viem", () => ({
-  createWalletClient: mockCreateWalletClient,
-  fallback: mockFallback,
-  http: mockHttp,
+  createWalletClient: jest.fn(),
+  fallback: jest.fn(),
+  http: jest.fn(),
 }));
+
+const mockViemAccounts = jest.requireMock("viem/accounts") as {
+  privateKeyToAccount: jest.Mock;
+};
+const mockViem = jest.requireMock("viem") as {
+  createWalletClient: jest.Mock;
+  fallback: jest.Mock;
+  http: jest.Mock;
+};
+const mockCreateWalletClient = mockViem.createWalletClient;
+const mockPrivateKeyToAccount = mockViemAccounts.privateKeyToAccount;
+const mockFallback = mockViem.fallback;
+const mockHttp = mockViem.http;
 
 const mockDecryptData = decryptData as jest.MockedFunction<typeof decryptData>;
 const mockAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
@@ -94,7 +100,7 @@ describe("wagmiAppWalletConnector", () => {
   describe("Capacitor environment tests", () => {
     beforeEach(() => {
       // Mock Capacitor environment
-      (global as any).window = {
+      (globalThis as any).window = {
         Capacitor: {
           isNativePlatform: jest.fn().mockReturnValue(true),
         },
@@ -103,7 +109,7 @@ describe("wagmiAppWalletConnector", () => {
 
     afterEach(() => {
       // Clean up global mock
-      delete (global as any).window;
+      delete (globalThis as any).window;
     });
 
     it("throws InvalidPasswordError when address mismatch in Capacitor", async () => {
@@ -176,16 +182,36 @@ describe("wagmiAppWalletConnector", () => {
       ).rejects.toThrow("Private key decryption returned empty result");
     });
 
-    it("accepts any private key format from successful decryption", async () => {
-      // The implementation doesn't validate private key format, it trusts decryption result
+    it("rejects decrypted private keys with invalid format", async () => {
       mockDecryptData
         .mockResolvedValueOnce(mockAppWallet.address) // Address decryption succeeds
-        .mockResolvedValueOnce("invalid_private_key_format"); // Any format is accepted
+        .mockResolvedValueOnce("invalid_private_key_format");
       mockAreEqualAddresses.mockReturnValue(true);
+      mockPrivateKeyToAccount.mockImplementationOnce(() => {
+        throw new Error("Invalid private key");
+      });
 
       await expect(
         connectorInstance.setPassword("validpass123")
-      ).resolves.toBeUndefined();
+      ).rejects.toThrow("Private key format is invalid");
+    });
+
+    it("rejects decrypted private keys that do not match the wallet address", async () => {
+      const validPrivateKey =
+        "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
+      mockDecryptData
+        .mockResolvedValueOnce(mockAppWallet.address)
+        .mockResolvedValueOnce(validPrivateKey);
+      mockPrivateKeyToAccount.mockReturnValueOnce({
+        address: "0x9999999999999999999999999999999999999999",
+      });
+      mockAreEqualAddresses
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false);
+
+      await expect(
+        connectorInstance.setPassword("validpass123")
+      ).rejects.toThrow("Decrypted private key does not match wallet address");
     });
 
     it("wraps unexpected errors in PrivateKeyDecryptionError", async () => {

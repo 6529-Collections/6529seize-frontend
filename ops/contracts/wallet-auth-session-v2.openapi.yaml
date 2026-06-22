@@ -1,0 +1,289 @@
+openapi: 3.1.0
+info:
+  title: 6529 Wallet Auth Session V2
+  version: 1.0.0
+  description: Contract for web cookie sessions, native refresh tokens, and connection sharing.
+servers:
+  - url: https://api.6529.io/api
+paths:
+  /auth/session-nonce:
+    get:
+      summary: Create a session-v2 signable login message
+      parameters:
+        - name: signer_address
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/EthereumAddress"
+        - name: client_type
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientType"
+        - name: chain_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            enum: [1]
+      responses:
+        "200":
+          description: Signable message created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionNonceResponse"
+  /auth/session-login:
+    post:
+      summary: Start a session-v2 wallet session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionLoginRequest"
+      responses:
+        "201":
+          description: Session created
+          headers:
+            Set-Cookie:
+              description: Web clients receive the HttpOnly 6529_session cookie.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/SessionWebResponse"
+                  - $ref: "#/components/schemas/SessionNativeResponse"
+  /auth/session-refresh:
+    post:
+      summary: Refresh a session-v2 wallet session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/SessionRefreshWebRequest"
+                - $ref: "#/components/schemas/SessionRefreshNativeRequest"
+      responses:
+        "201":
+          description: Session refreshed
+          headers:
+            Set-Cookie:
+              description: Web clients may receive a rotated HttpOnly 6529_session cookie.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/SessionWebResponse"
+                  - $ref: "#/components/schemas/SessionNativeResponse"
+  /auth/session-logout:
+    post:
+      summary: Revoke a session-v2 wallet session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/SessionLogoutWebRequest"
+                - $ref: "#/components/schemas/SessionLogoutNativeRequest"
+      responses:
+        "204":
+          description: Session revoked
+          headers:
+            Set-Cookie:
+              description: Web clients receive an expired 6529_session cookie.
+              schema:
+                type: string
+  /auth/connection-share:
+    post:
+      summary: Create a one-time connection sharing code
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConnectionShareRequest"
+      responses:
+        "201":
+          description: Connection share code created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateConnectionShareResponse"
+  /auth/connection-share/redeem:
+    post:
+      summary: Redeem a one-time connection sharing code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RedeemConnectionShareRequest"
+      responses:
+        "201":
+          description: Native session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionNativeResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ClientType:
+      type: string
+      enum: [web, native]
+    EthereumAddress:
+      type: string
+      pattern: "^0x[a-fA-F0-9]{40}$"
+    SessionNonceResponse:
+      type: object
+      required: [signable_message, server_signature]
+      additionalProperties: false
+      properties:
+        signable_message:
+          type: string
+        server_signature:
+          type: string
+    SessionLoginRequest:
+      type: object
+      required: [client_type, client_address, client_signature, server_signature]
+      additionalProperties: false
+      properties:
+        client_type:
+          $ref: "#/components/schemas/ClientType"
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
+        client_signature:
+          type: string
+        server_signature:
+          type: string
+        role:
+          type: string
+          nullable: true
+    SessionWebResponse:
+      type: object
+      required: [address, access_token, access_token_expires_at, client_type]
+      additionalProperties: false
+      properties:
+        address:
+          $ref: "#/components/schemas/EthereumAddress"
+        role:
+          type: string
+          nullable: true
+        access_token:
+          type: string
+        access_token_expires_at:
+          type: string
+          format: date-time
+        client_type:
+          type: string
+          enum: [web]
+    SessionNativeResponse:
+      allOf:
+        - $ref: "#/components/schemas/SessionWebResponse"
+        - type: object
+          required: [native_refresh_token, refresh_token_expires_at]
+          properties:
+            client_type:
+              type: string
+              enum: [native]
+            native_refresh_token:
+              type: string
+            refresh_token_expires_at:
+              type: string
+              format: date-time
+    SessionRefreshWebRequest:
+      type: object
+      required: [client_type]
+      additionalProperties: false
+      properties:
+        client_type:
+          type: string
+          enum: [web]
+    SessionRefreshNativeRequest:
+      type: object
+      required: [client_type, client_address, native_refresh_token]
+      additionalProperties: false
+      properties:
+        client_type:
+          type: string
+          enum: [native]
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
+        native_refresh_token:
+          type: string
+    SessionLogoutWebRequest:
+      type: object
+      required: [client_type, all_sessions]
+      additionalProperties: false
+      properties:
+        client_type:
+          type: string
+          enum: [web]
+        all_sessions:
+          type: boolean
+    SessionLogoutNativeRequest:
+      allOf:
+        - $ref: "#/components/schemas/SessionRefreshNativeRequest"
+        - type: object
+          required: [all_sessions]
+          properties:
+            all_sessions:
+              type: boolean
+    CreateConnectionShareRequest:
+      type: object
+      required: [target_client_type]
+      additionalProperties: false
+      properties:
+        target_client_type:
+          type: string
+          enum: [native]
+    CreateConnectionShareResponse:
+      type: object
+      required:
+        - connection_share_code
+        - expires_at
+        - address
+        - target_client_type
+        - deep_link_path
+      additionalProperties: false
+      properties:
+        connection_share_code:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        address:
+          $ref: "#/components/schemas/EthereumAddress"
+        role:
+          type: string
+          nullable: true
+        target_client_type:
+          type: string
+          enum: [native]
+        deep_link_path:
+          type: string
+          examples:
+            - "/accept-connection-sharing?connection_share_code=abc"
+    RedeemConnectionShareRequest:
+      type: object
+      required: [target_client_type, connection_share_code]
+      additionalProperties: false
+      properties:
+        target_client_type:
+          type: string
+          enum: [native]
+        connection_share_code:
+          type: string

@@ -4,7 +4,7 @@ import {
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError,
-  InvalidRoleStateError
+  InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { getNodeEnv, publicEnv } from "@/config/env";
@@ -21,9 +21,10 @@ interface ImmediateValidationParams {
 
 interface ImmediateValidationCallbacks {
   onShowSignModal: (show: boolean) => void;
+  onSessionUpgradeRequired?: (() => void) | undefined;
   onInvalidateCache: () => void;
   onReset: () => void;
-  onRemoveJwt: () => void;
+  onRemoveJwt: () => void | Promise<void>;
   onLogError: (type: string, error: unknown) => void;
 }
 
@@ -46,15 +47,17 @@ const isOperationValid = (
 const createCancelledResult = (): ImmediateValidationResult => ({
   validationCompleted: false,
   wasCancelled: true,
-  shouldShowModal: false
+  shouldShowModal: false,
 });
 
 // Helper function to check if error is an authentication role error
 const isAuthenticationRoleError = (error: unknown): boolean => {
-  return error instanceof MissingActiveProfileError ||
+  return (
+    error instanceof MissingActiveProfileError ||
     error instanceof RoleValidationError ||
     error instanceof AuthenticationRoleError ||
-    error instanceof InvalidRoleStateError;
+    error instanceof InvalidRoleStateError
+  );
 };
 
 // Helper function to handle invalid JWT when user is disconnected
@@ -65,12 +68,17 @@ const handleInvalidJwtWhenDisconnected = (
 };
 
 // Helper function to handle invalid JWT when user is connected
-const handleInvalidJwtWhenConnected = (
-  callbacks: ImmediateValidationCallbacks
-): void => {
-  callbacks.onRemoveJwt();
+const handleInvalidJwtWhenConnected = async (
+  callbacks: ImmediateValidationCallbacks,
+  abortSignal: AbortSignal
+): Promise<boolean> => {
+  await callbacks.onRemoveJwt();
+  if (abortSignal.aborted) {
+    return false;
+  }
   callbacks.onInvalidateCache();
   callbacks.onShowSignModal(true);
+  return true;
 };
 
 // Helper function to create validation result
@@ -81,16 +89,18 @@ const createValidationResult = (
 ): ImmediateValidationResult => ({
   validationCompleted,
   wasCancelled,
-  shouldShowModal
+  shouldShowModal,
 });
 
 // Helper function to handle JWT validation results
-const handleJwtValidationResult = (
+const handleJwtValidationResult = async (
   isValid: boolean,
   wasCancelled: boolean,
+  requiresSessionUpgrade: boolean | undefined,
   isConnected: boolean,
+  abortSignal: AbortSignal,
   callbacks: ImmediateValidationCallbacks
-): ImmediateValidationResult => {
+): Promise<ImmediateValidationResult> => {
   if (wasCancelled) {
     return createValidationResult(true, true, false);
   }
@@ -99,30 +109,41 @@ const handleJwtValidationResult = (
     return createValidationResult(true, false, false);
   }
 
+  if (requiresSessionUpgrade) {
+    callbacks.onSessionUpgradeRequired?.();
+    return createValidationResult(true, false, true);
+  }
+
   // Handle invalid JWT
   if (isConnected) {
-    handleInvalidJwtWhenConnected(callbacks);
+    const handled = await handleInvalidJwtWhenConnected(callbacks, abortSignal);
+    if (!handled) {
+      return createCancelledResult();
+    }
   } else {
     handleInvalidJwtWhenDisconnected(callbacks);
   }
-  
+
   return createValidationResult(true, false, isConnected);
 };
 
 // Helper function to handle validation errors
-const handleValidationError = (
+const handleValidationError = async (
   error: unknown,
   isConnected: boolean,
   abortSignal: AbortSignal,
   callbacks: ImmediateValidationCallbacks
-): ImmediateValidationResult => {
+): Promise<ImmediateValidationResult> => {
   if (isAuthenticationRoleError(error)) {
-    callbacks.onLogError('validateJwt_role_error', error);
-    callbacks.onRemoveJwt();
+    callbacks.onLogError("validateJwt_role_error", error);
+    await callbacks.onRemoveJwt();
+    if (abortSignal.aborted) {
+      return createCancelledResult();
+    }
     callbacks.onInvalidateCache();
     callbacks.onShowSignModal(true);
   } else {
-    callbacks.onLogError('validateJwt_general_error', error);
+    callbacks.onLogError("validateJwt_general_error", error);
     if (isConnected) {
       callbacks.onShowSignModal(true);
     }
@@ -137,7 +158,7 @@ const handleValidationError = (
 
 export const validateAuthImmediate = async ({
   params,
-  callbacks
+  callbacks,
 }: {
   params: ImmediateValidationParams;
   callbacks: ImmediateValidationCallbacks;
@@ -156,7 +177,7 @@ export const validateAuthImmediate = async ({
     activeProfileProxy,
     isConnected,
     operationId,
-    abortSignal
+    abortSignal,
   } = params;
 
   try {
@@ -165,28 +186,43 @@ export const validateAuthImmediate = async ({
       return createCancelledResult();
     }
 
-    const { isValid, wasCancelled } = await validateJwt({
-      jwt,
-      wallet: currentAddress,
-      role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
-      operationId,
-      abortSignal,
-      activeProfileProxy
-    });
+    const { isValid, wasCancelled, requiresSessionUpgrade } = await validateJwt(
+      {
+        jwt,
+        wallet: currentAddress,
+        role: activeProfileProxy
+          ? validateRoleForAuthentication(activeProfileProxy)
+          : null,
+        operationId,
+        abortSignal,
+        activeProfileProxy,
+      }
+    );
 
     // Post-validation check
     if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
       return createCancelledResult();
     }
 
-    return handleJwtValidationResult(isValid, wasCancelled, isConnected, callbacks);
-
+    return await handleJwtValidationResult(
+      isValid,
+      wasCancelled,
+      requiresSessionUpgrade,
+      isConnected,
+      abortSignal,
+      callbacks
+    );
   } catch (error) {
     // Only handle errors if operation is still valid
     if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
       return createCancelledResult();
     }
 
-    return handleValidationError(error, isConnected, abortSignal, callbacks);
+    return await handleValidationError(
+      error,
+      isConnected,
+      abortSignal,
+      callbacks
+    );
   }
 };

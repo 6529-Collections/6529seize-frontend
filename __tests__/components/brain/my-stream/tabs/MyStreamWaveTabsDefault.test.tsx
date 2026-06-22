@@ -114,6 +114,7 @@ describe("MyStreamWaveTabsDefault", () => {
         id: "drop-1",
         parts: [{ content: "A chill place to discuss drops" }],
       },
+      author: { id: "author-1", handle: "author" },
       contributors_overview: [],
       ...overrides,
       voting: {
@@ -497,7 +498,7 @@ describe("MyStreamWaveTabsDefault", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders share in mobile right action cluster and keeps search trigger", () => {
+  it("renders compact overflow actions and keeps search trigger", () => {
     mockUseBreakpoint.mockReturnValue("S");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -515,15 +516,19 @@ describe("MyStreamWaveTabsDefault", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Share wave" })
+      screen.getByRole("button", { name: "More wave actions" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Switch to gallery view" })
-    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    expect(
+      screen.getByRole("menuitem", { name: "Share wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("menuitem", { name: "Switch to gallery view" })
+    ).toBeInTheDocument();
   });
 
   it("toggles chat/gallery in compact mode", () => {
@@ -543,14 +548,15 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     fireEvent.click(
-      screen.getByRole("button", { name: "Switch to gallery view" })
+      screen.getByRole("menuitem", { name: "Switch to gallery view" })
     );
 
     expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps desktop action set at medium breakpoint", () => {
+  it("keeps tablet action set at medium breakpoint", () => {
     mockUseBreakpoint.mockReturnValue("MD");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -574,11 +580,11 @@ describe("MyStreamWaveTabsDefault", () => {
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Go back" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: "Go back" })
+    ).toBeInTheDocument();
   });
 
-  it("keeps compact subtitle trigger and search action", () => {
+  it("keeps compact title trigger and search action", () => {
     mockUseBreakpoint.mockReturnValue("S");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -598,9 +604,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
-    const subtitle = screen.getByText("A chill place to discuss drops");
-    expect(subtitle).toHaveClass("tw-truncate");
-    expect(subtitle).not.toHaveClass("tw-line-clamp-1");
+    expect(screen.getByRole("heading", { name: "Wave" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Show wave description" })
     ).toBeInTheDocument();
@@ -713,13 +717,11 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy wave link" }));
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Copy wave link" }));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
       "http://localhost/waves/w1"
     );
-    expect(
-      screen.getByRole("button", { name: "Link copied" })
-    ).toBeInTheDocument();
   });
 });

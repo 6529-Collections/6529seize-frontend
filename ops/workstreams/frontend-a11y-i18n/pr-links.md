@@ -38,3 +38,5 @@
 | Profile TDH history       | `codex/user-collected-tdh-history-a11y-i18n`            | #2639 | Open, review-ready only |
 | Profile tabs shell        | `codex/user-profile-tabs-a11y-i18n`                     | #2640 | Open, review-ready only |
 | Profile followers modal   | `codex/user-followers-modal-a11y-i18n`                  | #2641 | Open, review-ready only |
+| Composer sandbox E2E      | `codex/e2e-composer-sandbox`                           | #2820 | Merged and deployed       |
+| Production readonly aggregate | `codex/fix-production-collections-readonly`          | #2822 | Open, CI/reviewbot iteration |

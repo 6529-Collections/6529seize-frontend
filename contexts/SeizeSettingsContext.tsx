@@ -18,12 +18,21 @@ import { fetchUrl } from "@/services/6529api";
 import { SeizeSettingsMode } from "@/types/enums";
 import type { ReactNode } from "react";
 
-type TempApiSeizeSettings = ApiSeizeSettings & {
+type SeizeSettingsState = ApiSeizeSettings & {
   curation_wave_id: string | null;
 };
 
+type ApiSeizeSettingsResponse = Omit<ApiSeizeSettings, "auth"> & {
+  auth?: ApiSeizeSettings["auth"] | undefined;
+};
+
+const DEFAULT_AUTH_SETTINGS: ApiSeizeSettings["auth"] = {
+  structured_signatures_required: false,
+  session_v2_migration_deadline: null,
+};
+
 type SeizeSettingsContextType = {
-  seizeSettings: TempApiSeizeSettings;
+  seizeSettings: SeizeSettingsState;
   isMemesWave: (waveId: string | undefined | null) => boolean;
   isCurationWave: (waveId: string | undefined | null) => boolean;
   isQuorumWave: (waveId: string | undefined | null) => boolean;
@@ -49,7 +58,7 @@ export const SeizeSettingsProvider = ({
   children: ReactNode;
   mode?: SeizeSettingsMode;
 }) => {
-  const [seizeSettings, setSeizeSettings] = useState<TempApiSeizeSettings>({
+  const [seizeSettings, setSeizeSettings] = useState<SeizeSettingsState>({
     rememes_submission_tdh_threshold: 0,
     all_drops_notifications_subscribers_limit: 0,
     memes_wave_id: null,
@@ -58,6 +67,7 @@ export const SeizeSettingsProvider = ({
     announcements_wave_id: null,
     distribution_admin_wallets: [],
     claims_admin_wallets: [],
+    auth: DEFAULT_AUTH_SETTINGS,
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
@@ -71,7 +81,7 @@ export const SeizeSettingsProvider = ({
       }
 
       try {
-        const settings = await fetchUrl<TempApiSeizeSettings>(
+        const settings = await fetchUrl<ApiSeizeSettingsResponse>(
           `${publicEnv.API_ENDPOINT}/api/settings`
         );
 
@@ -82,6 +92,7 @@ export const SeizeSettingsProvider = ({
           ...settings,
           distribution_admin_wallets: settings.distribution_admin_wallets ?? [],
           claims_admin_wallets: settings.claims_admin_wallets ?? [],
+          auth: settings.auth ?? previous.auth,
           memes_wave_id:
             publicEnv.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
           curation_wave_id:

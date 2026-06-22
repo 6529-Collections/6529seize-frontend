@@ -255,7 +255,7 @@ const getChipClasses = (
 
   if (isInlineSidebarVariant(variant)) {
     variantClasses =
-      "tw-cursor-[inherit] tw-gap-[3px] tw-whitespace-nowrap tw-text-[11px] tw-font-semibold tw-leading-none";
+      "tw-cursor-help tw-gap-[3px] tw-whitespace-nowrap tw-text-[11px] tw-font-semibold tw-leading-none";
     sizeClasses = "";
   } else if (isInlineHeaderVariant(variant)) {
     variantClasses =
@@ -526,7 +526,7 @@ function WaveScoreSummaryPopoverContent({
   repSortScore,
   waveRep,
 }: {
-  readonly learnMoreHref: string;
+  readonly learnMoreHref?: string | undefined;
   readonly visibilityScore: string;
   readonly qualityScore: string | null;
   readonly hotnessScore: string | null;
@@ -579,7 +579,7 @@ function WaveScoreSummaryPopoverContent({
   ];
 
   return (
-    <div className="tw-w-56 tw-bg-iron-950 tw-p-3 tw-text-left tw-text-xs tw-text-iron-300">
+    <div className="tw-w-48 tw-bg-transparent tw-text-left tw-text-[11px] tw-leading-4 tw-text-iron-300">
       <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-3">
         <span className="tw-font-semibold tw-text-white">
           {t(WAVE_TRUST_LOCALE, "waves.score.summary.title")}
@@ -589,11 +589,11 @@ function WaveScoreSummaryPopoverContent({
         </span>
       </div>
       {rows.length > 0 && (
-        <div className="tw-mt-2 tw-space-y-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-2">
+        <div className="tw-mt-1.5 tw-space-y-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-1.5">
           {rows.map((row) => (
             <div
               key={row.label}
-              className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-3"
+              className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-2.5"
             >
               <span className="tw-min-w-0 tw-truncate tw-text-iron-500">
                 {row.label}
@@ -605,12 +605,14 @@ function WaveScoreSummaryPopoverContent({
           ))}
         </div>
       )}
-      <Link
-        href={learnMoreHref}
-        className="desktop-hover:hover:tw-text-primary-200 tw-mt-3 tw-inline-flex tw-items-center tw-rounded-md tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-      >
-        {t(WAVE_TRUST_LOCALE, "waves.score.summary.learnMore")}
-      </Link>
+      {learnMoreHref !== undefined && (
+        <Link
+          href={learnMoreHref}
+          className="desktop-hover:hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-items-center tw-rounded-md tw-text-[11px] tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          {t(WAVE_TRUST_LOCALE, "waves.score.summary.learnMore")}
+        </Link>
+      )}
     </div>
   );
 }
@@ -618,6 +620,7 @@ function WaveScoreSummaryPopoverContent({
 function WaveScoreSummaryHoverCard({
   children,
   learnMoreHref,
+  triggerDisplay,
   visibilityScore,
   qualityScore,
   hotnessScore,
@@ -625,7 +628,8 @@ function WaveScoreSummaryHoverCard({
   waveRep,
 }: {
   readonly children: ReactElement;
-  readonly learnMoreHref: string;
+  readonly learnMoreHref?: string | undefined;
+  readonly triggerDisplay?: "contents" | "inline-flex" | undefined;
   readonly visibilityScore: string;
   readonly qualityScore: string | null;
   readonly hotnessScore: string | null;
@@ -641,6 +645,8 @@ function WaveScoreSummaryHoverCard({
       hoverTransitionDelay={80}
       offset={8}
       openOnClick
+      triggerDisplay={triggerDisplay}
+      contentStyle={{ padding: "10px 12px" }}
       content={
         <WaveScoreSummaryPopoverContent
           learnMoreHref={learnMoreHref}
@@ -739,7 +745,8 @@ export function WaveTrustSignals({
       repSortScore,
       waveRep,
     });
-    const hasRichTooltip = learnMoreHref !== undefined;
+    const hasRichTooltip =
+      learnMoreHref !== undefined || isInlineSidebarVariant(variant);
     const hasNativeTitle = !hasRichTooltip && !isSidebarVariant(variant);
     const summaryLabel = summaryDetails.join(". ");
     const summaryTitle = hasNativeTitle ? summaryDetails.join("\n") : undefined;
@@ -751,6 +758,11 @@ export function WaveTrustSignals({
     );
     const summaryButtonResetClasses = isInlineHeaderVariant(variant)
       ? "tw-bg-transparent"
+      : isInlineSidebarVariant(variant)
+        ? "tw-bg-transparent tw-p-0"
+        : "";
+    const summaryButtonAffordanceClasses = isInlineSidebarVariant(variant)
+      ? "tw-rounded-sm desktop-hover:hover:tw-bg-white/[0.04]"
       : "";
     const showSummaryLabel = !isInlineSidebarVariant(variant);
     const summaryChipContent = (
@@ -780,6 +792,9 @@ export function WaveTrustSignals({
           {hasRichTooltip ? (
             <WaveScoreSummaryHoverCard
               learnMoreHref={learnMoreHref}
+              triggerDisplay={
+                isInlineSidebarVariant(variant) ? "inline-flex" : undefined
+              }
               visibilityScore={visibilityScore}
               qualityScore={qualityScore}
               hotnessScore={hotnessScore}
@@ -788,7 +803,7 @@ export function WaveTrustSignals({
             >
               <button
                 type="button"
-                className={`${summaryChipClasses} tw-border-0 tw-font-[inherit] tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${summaryButtonResetClasses}`}
+                className={`${summaryChipClasses} tw-border-0 tw-font-[inherit] tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${summaryButtonResetClasses} ${summaryButtonAffordanceClasses}`}
                 aria-label={summaryLabel}
               >
                 {summaryChipContent}

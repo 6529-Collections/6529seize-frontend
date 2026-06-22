@@ -77,21 +77,22 @@ const buildProfile = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe("ParticipationIdentityProfileCard", () => {
-  it("removes the secondary address and keeps richer inline profile content", () => {
+  it("renders inline profile content with the profile link and stats", () => {
     render(
       <ParticipationIdentityProfileCard profile={buildProfile() as any} />
     );
 
-    expect(screen.getByText("Identity")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /view simo's profile/i })
     ).toHaveAttribute("href", "/simo");
     expect(
       screen.queryByText("0x3a867c9b39c940e9467f5b3b43fa0e5a2bd1e6e")
     ).not.toBeInTheDocument();
-    expect(screen.getByText("2 submissions")).toBeInTheDocument();
-    expect(screen.getByText("2 minted memes")).toBeInTheDocument();
     expect(screen.getByText("+21")).toBeInTheDocument();
+    expect(screen.getByText("TDH")).toBeInTheDocument();
+    expect(screen.getByText("xTDH")).toBeInTheDocument();
+    expect(screen.getByText("NIC")).toBeInTheDocument();
+    expect(screen.getByText("Rep")).toBeInTheDocument();
   });
 
   it("keeps the address as the primary label when there is no handle", () => {
@@ -113,7 +114,7 @@ describe("ParticipationIdentityProfileCard", () => {
     expect(screen.queryByText("Archived")).not.toBeInTheDocument();
   });
 
-  it("renders the archived chip only when the profile is archived", () => {
+  it("does not render deprecated archived or activity chips", () => {
     render(
       <ParticipationIdentityProfileCard
         profile={
@@ -127,7 +128,10 @@ describe("ParticipationIdentityProfileCard", () => {
       />
     );
 
-    expect(screen.getByText("Archived")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /view simo's profile/i })
+    ).toHaveAttribute("href", "/simo");
+    expect(screen.queryByText("Archived")).not.toBeInTheDocument();
     expect(screen.queryByText("2 submissions")).not.toBeInTheDocument();
   });
 
@@ -136,21 +140,21 @@ describe("ParticipationIdentityProfileCard", () => {
       <ParticipationIdentityProfileCard profile={buildProfile() as any} />
     );
 
-    expect(screen.getByRole("link", { name: /tdh/i })).toHaveAttribute(
-      "href",
-      "/simo/collected"
-    );
-    expect(screen.getByRole("link", { name: /xtdh/i })).toHaveAttribute(
-      "href",
-      "/simo/xtdh"
-    );
-    expect(screen.getByRole("link", { name: /nic/i })).toHaveAttribute(
-      "href",
-      "/simo"
-    );
-    expect(screen.getByRole("link", { name: /rep/i })).toHaveAttribute(
-      "href",
-      "/simo"
-    );
+    const statLinks = screen.getAllByRole("link");
+    expect(
+      statLinks.find((link) => {
+        const text = link.textContent ?? "";
+        return text.includes("TDH") && !text.includes("xTDH");
+      })
+    ).toHaveAttribute("href", "/simo/collected");
+    expect(
+      statLinks.find((link) => link.textContent?.includes("xTDH"))
+    ).toHaveAttribute("href", "/simo/xtdh");
+    expect(
+      statLinks.find((link) => link.textContent?.includes("NIC"))
+    ).toHaveAttribute("href", "/simo");
+    expect(
+      statLinks.find((link) => link.textContent?.includes("Rep"))
+    ).toHaveAttribute("href", "/simo");
   });
 });

@@ -14,13 +14,13 @@ import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
   FetchResultsType,
   ReviewDistributionPlanTableItemType,
-} from "./ReviewDistributionPlanTable";
+} from "./ReviewDistributionPlanTable.types";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 import type {
   FullResultWallet,
   ReviewDistributionPlanTableItem,
   ReviewDistributionPlanTablePhase,
-} from "./ReviewDistributionPlanTable";
+} from "./ReviewDistributionPlanTable.types";
 
 export default function ReviewDistributionPlanTableRow({
   item,

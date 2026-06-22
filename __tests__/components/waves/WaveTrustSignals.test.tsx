@@ -87,7 +87,7 @@ describe("WaveTrustSignals", () => {
     expect(screen.queryByText("REP")).not.toBeInTheDocument();
   });
 
-  it("does not attach hover tooltip content in sidebar summary mode", () => {
+  it("renders sidebar summary score as an accessible details trigger", () => {
     render(
       <WaveTrustSignals
         waveRep={waveRep}
@@ -98,13 +98,22 @@ describe("WaveTrustSignals", () => {
       />
     );
 
-    const summaryBadge = screen.getByText("83").closest("[aria-label]");
+    const summaryBadge = screen.getByRole("button", {
+      name: /^Wave score 83\./,
+    });
 
     expect(summaryBadge).not.toBeNull();
     expect(screen.queryByText("Score")).not.toBeInTheDocument();
     expect(summaryBadge).not.toHaveAttribute("data-tooltip-content");
     expect(summaryBadge).not.toHaveAttribute("data-tooltip-id");
     expect(summaryBadge).not.toHaveAttribute("title");
+    fireEvent.click(summaryBadge);
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Learn more" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders nothing in summary mode without a combined score", () => {

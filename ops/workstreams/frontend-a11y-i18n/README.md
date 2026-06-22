@@ -13,7 +13,13 @@ page surfaces one PR at a time.
 3. `ops/skills/write-prs/SKILL.md`
 4. `ops/standards/README.md`
 5. `active-context.md`
-6. `run-log.md`
+6. `stack-audit.md`
+7. `audit-inventory.md`
+8. `combined-plan.md`
+9. `testing-improvement-plan.md`
+10. `mega-run-pr-playbook.md`
+11. `continuous-swarm-engine-notes.md`
+12. `run-log.md`
 
 ## Owned Paths
 
@@ -35,10 +41,20 @@ page surfaces one PR at a time.
 Every PR must record:
 
 - changed surface
+- pre-PR functionality, UX, safety, web, Mobile/Capacitor, and
+  Electron/Desktop Shell impact assessment
+- local testing strategy created before opening the PR
+- selected test packs from `testing-improvement-plan.md`
 - validation commands
-- browser or manual UI checks when visible behavior changes
+- Playwright browser checks when visible behavior changes
+- keyboard, focus, mobile, locale, and native-shell fallback decisions where
+  relevant
 - bot feedback decisions
 - remaining risks or exceptions
+
+Future self-organizing queue and Codex worker orchestration ideas live in
+`continuous-swarm-engine-notes.md`. They should not expand the immediate testing
+sidequest unless explicitly promoted into implementation work.
 
 ## Escalation Triggers
 

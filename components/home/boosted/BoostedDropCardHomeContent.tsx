@@ -17,11 +17,15 @@ import {
 import BoostedDropLinkPreview from "./BoostedDropLinkPreview";
 import {
   extractFirstUrl,
+  extractStandaloneMarkdownImage,
   removePreviewUrlFromContent,
 } from "./extractStandaloneUrl";
 
 type BoostedDropPart = ApiDrop["parts"][number];
-type BoostedDropMediaItem = BoostedDropPart["media"][number];
+type BoostedDropMediaItem = Pick<
+  BoostedDropPart["media"][number],
+  "mime_type" | "url"
+>;
 type OverflowElements = {
   readonly container: HTMLDivElement;
   readonly preview: HTMLDivElement;
@@ -39,6 +43,55 @@ const HOME_PREVIEW_CONTAINER_CLASSES = `tw-relative tw-flex ${HOME_ASPECT_RATIO_
 const HOME_TEXT_CONTAINER_CLASSES = `tw-relative tw-flex ${HOME_ASPECT_RATIO_CLASSES} tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12`;
 const CHAT_PREVIEW_WRAPPER_BASE_CLASSES =
   "tw-pointer-events-none tw-relative tw-z-30 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto";
+const IMAGE_MIME_TYPES_BY_TOKEN: Readonly<Record<string, string>> = {
+  avif: "image/avif",
+  gif: "image/gif",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  png: "image/png",
+  svg: "image/svg+xml",
+  webp: "image/webp",
+};
+
+const getImageMimeTypeFromToken = (
+  token: string | null | undefined
+): string | null => {
+  if (!token) {
+    return null;
+  }
+
+  const normalizedToken = token.toLowerCase().replace(/^\./, "");
+  return IMAGE_MIME_TYPES_BY_TOKEN[normalizedToken] ?? null;
+};
+
+const getStandaloneMarkdownImageMimeType = (url: string): string => {
+  try {
+    const parsedUrl = new URL(url);
+    const outputMimeType = getImageMimeTypeFromToken(
+      parsedUrl.searchParams.get("output")
+    );
+
+    if (outputMimeType) {
+      return outputMimeType;
+    }
+
+    const extension = parsedUrl.pathname.split(".").pop();
+    const extensionMimeType = getImageMimeTypeFromToken(extension);
+
+    if (extensionMimeType) {
+      return extensionMimeType;
+    }
+  } catch {
+    const extension = url.split(/[?#]/)[0]?.split(".").pop();
+    const extensionMimeType = getImageMimeTypeFromToken(extension);
+
+    if (extensionMimeType) {
+      return extensionMimeType;
+    }
+  }
+
+  return "image/*";
+};
 const HOME_PREVIEW_WRAPPER_BASE_CLASSES =
   "tw-pointer-events-none tw-relative tw-z-30 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto";
 const CHAT_TEXT_WRAPPER_CLASSES =
@@ -489,7 +542,24 @@ BoostedDropCardTextSection.displayName = "BoostedDropCardTextSection";
 
 const BoostedDropCardHomeContent = memo(
   ({ part, isChatVariant }: BoostedDropCardHomeContentProps) => {
-    const media = part?.media[0];
+    const standaloneMarkdownImage = useMemo(
+      () => extractStandaloneMarkdownImage(part?.content),
+      [part?.content]
+    );
+    const attachedMedia = part?.media[0];
+    const media = useMemo(
+      () =>
+        attachedMedia ??
+        (standaloneMarkdownImage
+          ? {
+              mime_type: getStandaloneMarkdownImageMimeType(
+                standaloneMarkdownImage.url
+              ),
+              url: standaloneMarkdownImage.url,
+            }
+          : undefined),
+      [attachedMedia, standaloneMarkdownImage]
+    );
 
     if (!media) {
       return (
