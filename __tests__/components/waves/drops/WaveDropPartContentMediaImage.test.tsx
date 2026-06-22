@@ -1,9 +1,31 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { forwardRef, type ComponentProps } from "react";
 import WaveDropPartContentMediaImage from "@/components/waves/drops/WaveDropPartContentMediaImage";
 import useCapacitor from "@/hooks/useCapacitor";
 
+type MockNextImageProps = ComponentProps<"img"> & {
+  readonly fill?: boolean | undefined;
+  readonly unoptimized?: boolean | undefined;
+};
+
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: forwardRef<HTMLImageElement, MockNextImageProps>(
+    // eslint-disable-next-line react/display-name
+    ({ fill: _fill, unoptimized: _unoptimized, alt, ...rest }, ref) => (
+      <img ref={ref} alt={alt ?? ""} {...rest} />
+    )
+  ),
+}));
+
 jest.mock("@/helpers/image.helpers", () => ({
-  getScaledImageUri: (_src: string) => _src,
+  getScaledImageUri: (_src: string) => `${_src}?scale=auto`,
   ImageScale: { AUTOx450: "AUTOx450", AUTOx1080: "AUTOx1080" },
 }));
 
@@ -27,6 +49,10 @@ beforeEach(() => {
       return undefined;
     }
   };
+});
+
+afterEach(() => {
+  jest.useRealTimers();
 });
 
 describe("WaveDropPartContentMediaImage", () => {
@@ -55,7 +81,7 @@ describe("WaveDropPartContentMediaImage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /open drop media/i }));
     expect(screen.getByAltText("Full size drop media")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /close modal/i }));
+    fireEvent.click(screen.getByTestId("modal-backdrop"));
     expect(
       screen.queryByAltText("Full size drop media")
     ).not.toBeInTheDocument();
@@ -78,5 +104,43 @@ describe("WaveDropPartContentMediaImage", () => {
     ).not.toBeInTheDocument();
 
     expect(requestFullscreen).not.toHaveBeenCalled();
+  });
+
+  it("auto-retries transient image load failures before showing manual retry", async () => {
+    jest.useFakeTimers();
+
+    render(
+      <WaveDropPartContentMediaImage src="https://example.com/path/image.png" />
+    );
+
+    const image = screen.getByAltText("Drop media");
+    expect(image).toHaveAttribute(
+      "src",
+      "https://example.com/path/image.png?scale=auto"
+    );
+
+    fireEvent.error(image);
+    await waitFor(() => {
+      expect(image).toHaveAttribute(
+        "src",
+        "https://example.com/path/image.png"
+      );
+    });
+
+    fireEvent.error(image);
+
+    expect(screen.getByText("Processing image")).toBeInTheDocument();
+    expect(screen.queryByText("Couldn’t load image.")).not.toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(1500);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByAltText("Drop media")).toHaveAttribute(
+        "src",
+        "https://example.com/path/image.png?scale=auto&drop_media_retry=1"
+      );
+    });
   });
 });
