@@ -11,11 +11,15 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
 import { HttpFile } from '../http/http';
 
 export class ApiDropMedia {
     'url': string;
     'mime_type': string;
+    'media_upload_id'?: string | null;
+    'media_status'?: ApiDropMediaStatus;
+    'media_error'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -33,6 +37,24 @@ export class ApiDropMedia {
             "baseName": "mime_type",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "media_upload_id",
+            "baseName": "media_upload_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "media_status",
+            "baseName": "media_status",
+            "type": "ApiDropMediaStatus",
+            "format": ""
+        },
+        {
+            "name": "media_error",
+            "baseName": "media_error",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -42,3 +64,5 @@ export class ApiDropMedia {
     public constructor() {
     }
 }
+
+

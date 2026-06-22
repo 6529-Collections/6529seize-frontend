@@ -138,10 +138,7 @@ export const getOptimisticDrop = (
     parts: dropRequest.parts.map((part, i) => ({
       part_id: i + 1,
       content: part.content ?? null,
-      media: part.media.map((media) => ({
-        url: media.url,
-        mime_type: media.mime_type,
-      })),
+      media: part.media,
       attachments: [],
       quoted_drop: part.quoted_drop
         ? {

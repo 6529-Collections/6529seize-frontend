@@ -20,6 +20,8 @@
     "included_prs",
     "backend_dependencies",
     "validation",
+    "post_deploy_watch",
+    "canary_readiness",
     "deployment",
     "long_running",
     "plans",
@@ -147,7 +149,15 @@
       "items": {
         "type": "object",
         "additionalProperties": true,
-        "required": ["number", "title", "merge_sha", "risk", "areas", "validation_owner", "status"],
+        "required": [
+          "number",
+          "title",
+          "merge_sha",
+          "risk",
+          "areas",
+          "validation_owner",
+          "status"
+        ],
         "properties": {
           "number": { "type": "integer" },
           "title": { "type": "string" },
@@ -180,12 +190,48 @@
     "validation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["core_smoke_owner", "required_packs", "exploratory_checks", "checks"],
+      "required": [
+        "core_smoke_owner",
+        "required_packs",
+        "exploratory_checks",
+        "checks"
+      ],
       "properties": {
         "core_smoke_owner": { "type": "string" },
         "required_packs": {
           "type": "array",
           "items": { "type": "string" }
+        },
+        "pack_plan": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "known",
+              "command",
+              "size",
+              "surfaces",
+              "artifact_paths",
+              "description"
+            ],
+            "properties": {
+              "id": { "type": "string" },
+              "known": { "type": "boolean" },
+              "command": { "type": ["string", "null"] },
+              "size": { "type": "string" },
+              "surfaces": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "artifact_paths": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "description": { "type": "string" }
+            }
+          }
         },
         "exploratory_checks": {
           "type": "array",
@@ -194,7 +240,141 @@
         "checks": {
           "type": "array",
           "items": { "type": "object", "additionalProperties": true }
+        },
+        "durable_artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "accepted_prefixes",
+            "git_lfs_allowed",
+            "notes"
+          ],
+          "properties": {
+            "required": { "type": "boolean" },
+            "accepted_prefixes": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "s3://6529-artifacts/",
+                  "https://artifacts.6529.io/",
+                  "ipfs://"
+                ]
+              }
+            },
+            "git_lfs_allowed": { "const": false },
+            "notes": { "type": "string" }
+          }
+        },
+        "auto_hold_criteria": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "hold_when", "recovery"],
+            "properties": {
+              "id": { "type": "string" },
+              "hold_when": { "type": "string" },
+              "recovery": { "type": "string" }
+            }
+          }
         }
+      }
+    },
+    "post_deploy_watch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "status",
+        "min_duration_minutes",
+        "observed_duration_minutes",
+        "started_at",
+        "completed_at",
+        "checkpoints",
+        "notes"
+      ],
+      "properties": {
+        "required": { "type": "boolean" },
+        "status": {
+          "enum": [
+            "not_started",
+            "in_progress",
+            "passed",
+            "failed",
+            "blocked",
+            "skipped"
+          ]
+        },
+        "min_duration_minutes": { "type": "integer", "minimum": 0 },
+        "observed_duration_minutes": { "type": "integer", "minimum": 0 },
+        "started_at": { "type": ["string", "null"], "format": "date-time" },
+        "completed_at": { "type": ["string", "null"], "format": "date-time" },
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "recorded_at", "evidence"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "status": {
+                "enum": [
+                  "not_run",
+                  "in_progress",
+                  "passed",
+                  "failed",
+                  "blocked",
+                  "skipped"
+                ]
+              },
+              "recorded_at": {
+                "type": ["string", "null"],
+                "format": "date-time"
+              },
+              "evidence": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "canary_readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_capability",
+        "traffic_splitting_supported",
+        "feature_flag_strategy",
+        "candidate_control_metrics",
+        "prerequisites_for_traffic_split",
+        "notes"
+      ],
+      "properties": {
+        "current_capability": {
+          "enum": [
+            "auto-hold-only",
+            "feature-flag-only",
+            "traffic-split",
+            "not-applicable"
+          ]
+        },
+        "traffic_splitting_supported": { "type": "boolean" },
+        "feature_flag_strategy": { "type": "string" },
+        "candidate_control_metrics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "prerequisites_for_traffic_split": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notes": { "type": ["string", "null"] }
       }
     },
     "deployment": {
@@ -245,7 +425,11 @@
     "human_gates": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["production_approval_required", "approvals", "override_reason"],
+      "required": [
+        "production_approval_required",
+        "approvals",
+        "override_reason"
+      ],
       "properties": {
         "production_approval_required": { "type": "boolean" },
         "approvals": {

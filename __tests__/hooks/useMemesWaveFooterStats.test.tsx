@@ -143,6 +143,18 @@ describe("useMemesWaveFooterStats", () => {
     expect(result.current.isReady).toBe(false);
   });
 
+  it("stays hidden while checking quick-vote availability", () => {
+    commonApiFetchMock.mockReturnValue(new Promise(() => {}) as any);
+
+    const { result } = renderHook(() => useMemesWaveFooterStats(), {
+      wrapper: createWrapper(),
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(result.current.isAvailable).toBe(false);
+    expect(result.current.isReady).toBe(false);
+  });
+
   it("fetches the first unvoted leaderboard item and derives footer stats from it", async () => {
     commonApiFetchMock.mockResolvedValue({
       drop: createDrop({
@@ -161,6 +173,7 @@ describe("useMemesWaveFooterStats", () => {
 
     await waitFor(() => expect(result.current.isReady).toBe(true));
 
+    expect(result.current.isAvailable).toBe(true);
     expect(result.current.leftThisRoundCount).toBe(2);
     expect(result.current.uncastPower).toBe(5_000);
     expect(result.current.unratedCount).toBe(7);
@@ -169,7 +182,7 @@ describe("useMemesWaveFooterStats", () => {
     expect(commonApiFetchMock).toHaveBeenCalledWith({
       endpoint: "waves/memes-wave/undiscovered-drop",
       params: undefined,
-      signal: expect.any(AbortSignal),
+      signal: expect.objectContaining({ aborted: false }),
     });
   });
 
@@ -194,6 +207,7 @@ describe("useMemesWaveFooterStats", () => {
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(1));
 
     expect(result.current.isReady).toBe(false);
+    expect(result.current.isAvailable).toBe(false);
     expect(result.current.leftThisRoundCount).toBe(0);
     expect(result.current.uncastPower).toBeNull();
     expect(result.current.unratedCount).toBe(0);

@@ -130,9 +130,55 @@ function hasBootstrapPackageUse(source) {
   );
 }
 
-function hasNodeModulesBootstrapStatement(source) {
+function hasUnexpectedBootstrapStatement(source) {
   return getSassImportStatements(source).some((line) =>
-    line.includes("node_modules/bootstrap/scss/bootstrap")
+    line.includes("bootstrap/scss/bootstrap") &&
+    !line.startsWith('@use "bootstrap/scss/bootstrap"') &&
+    !line.startsWith("@use 'bootstrap/scss/bootstrap'")
+  );
+}
+
+function readBalancedArrayInitializer(source, constName) {
+  const declaration = `const ${constName}`;
+  const declarationIndex = source.indexOf(declaration);
+  if (declarationIndex === -1) {
+    return null;
+  }
+
+  const arrayStartIndex = source.indexOf("[", declarationIndex);
+  if (arrayStartIndex === -1) {
+    return null;
+  }
+
+  let depth = 0;
+  for (let index = arrayStartIndex; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === "[") {
+      depth += 1;
+    } else if (char === "]") {
+      depth -= 1;
+      if (depth === 0) {
+        return source.slice(arrayStartIndex, index + 1);
+      }
+    }
+  }
+
+  return null;
+}
+
+function hasBootstrapLoadPathBeforeNodeModules(source) {
+  const initializer = readBalancedArrayInitializer(source, "SASS_LOAD_PATHS");
+  if (!initializer) {
+    return false;
+  }
+
+  const bootstrapIndex = initializer.indexOf('"bootstrap", "scss"');
+  const nodeModulesIndex = initializer.indexOf("  NODE_MODULES_PATH");
+
+  return (
+    bootstrapIndex !== -1 &&
+    nodeModulesIndex !== -1 &&
+    bootstrapIndex < nodeModulesIndex
   );
 }
 
@@ -146,18 +192,24 @@ if (!hasBootstrapPackageUse(bootstrapScss)) {
   );
 }
 
-if (hasNodeModulesBootstrapStatement(bootstrapScss)) {
+if (hasUnexpectedBootstrapStatement(bootstrapScss)) {
   failures.push(
-    `${bootstrapScssPath} must not import Bootstrap through a node_modules path.`
+    `${bootstrapScssPath} must use only the package-form Bootstrap Sass import.`
+  );
+}
+
+if (!hasBootstrapLoadPathBeforeNodeModules(nextConfig)) {
+  failures.push(
+    `${nextConfigPath} must keep SASS_LOAD_PATHS pointed at Bootstrap SCSS before node_modules.`
   );
 }
 
 if (
-  !nextConfig.includes("const SASS_LOAD_PATHS") ||
-  !nextConfig.includes('"node_modules"')
+  !nextConfig.includes("progress: BOOTSTRAP_PROGRESS_PARTIAL") ||
+  !nextConfig.includes('"./node_modules/bootstrap/scss/_progress.scss"')
 ) {
   failures.push(
-    `${nextConfigPath} must keep SASS_LOAD_PATHS pointed at node_modules.`
+    `${nextConfigPath} must keep Turbopack's Bootstrap progress partial alias to avoid resolving the JS progress package from Bootstrap Sass.`
   );
 }
 
@@ -166,10 +218,22 @@ const sassOptionsUsesLoadPaths =
   nextConfig.includes("loadPaths: SASS_LOAD_PATHS");
 const sassOptionsUsesQuietDeps =
   nextConfig.includes("sassOptions:") && nextConfig.includes("quietDeps: true");
+const sassOptionsSilencesBootstrapDeprecations =
+  nextConfig.includes("silenceDeprecations:") &&
+  nextConfig.includes('"import"') &&
+  nextConfig.includes('"global-builtin"') &&
+  nextConfig.includes('"color-functions"') &&
+  nextConfig.includes('"if-function"');
 
 if (!sassOptionsUsesLoadPaths || !sassOptionsUsesQuietDeps) {
   failures.push(
     `${nextConfigPath} must keep sassOptions.loadPaths and quietDeps enabled.`
+  );
+}
+
+if (!sassOptionsSilencesBootstrapDeprecations) {
+  failures.push(
+    `${nextConfigPath} must silence Bootstrap Sass dependency deprecation warnings.`
   );
 }
 

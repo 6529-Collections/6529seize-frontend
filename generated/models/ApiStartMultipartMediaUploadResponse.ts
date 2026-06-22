@@ -11,11 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
 import { HttpFile } from '../http/http';
 
 export class ApiStartMultipartMediaUploadResponse {
     'upload_id': string;
     'key': string;
+    'media_upload_id'?: string | null;
+    'media_status'?: ApiDropMediaStatus;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -33,6 +36,18 @@ export class ApiStartMultipartMediaUploadResponse {
             "baseName": "key",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "media_upload_id",
+            "baseName": "media_upload_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "media_status",
+            "baseName": "media_status",
+            "type": "ApiDropMediaStatus",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -42,3 +57,5 @@ export class ApiStartMultipartMediaUploadResponse {
     public constructor() {
     }
 }
+
+

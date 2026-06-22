@@ -1,6 +1,6 @@
 import type { CreateDropConfig } from "@/entities/IDrop";
-import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
+import { toApiCreateDropPart } from "../../utils/createDropRequestPart";
 import { generateDropPart } from "./waveMediaService";
 
 export const getCreateWaveDropRequest = async (
@@ -12,23 +12,7 @@ export const getCreateWaveDropRequest = async (
 
   return {
     title: drop.title ?? null,
-    parts: dropParts.map((part): ApiCreateDropPart => {
-      const requestPart: ApiCreateDropPart = {
-        content: part.content,
-        quoted_drop: part.quoted_drop,
-        media: part.media.map((media) => ({
-          url: media.url,
-          mime_type: media.mime_type,
-        })),
-      };
-
-      const attachments = part.attachments;
-      if (attachments !== undefined && attachments.length > 0) {
-        requestPart.attachments = attachments;
-      }
-
-      return requestPart;
-    }),
+    parts: dropParts.map(toApiCreateDropPart),
     referenced_nfts: drop.referenced_nfts.map((nft) => ({
       contract: nft.contract,
       token: nft.token,

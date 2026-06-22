@@ -1,0 +1,79 @@
+{
+  "schema_version": "frontend-testing.validation-manifest.v1",
+  "pr": {
+    "number": null,
+    "branch": "codex/testing-strategy-foundation",
+    "owner": "codex",
+    "verifier": "codex"
+  },
+  "risk": {
+    "computed_floor": 4,
+    "declared": 4,
+    "final": 4,
+    "reasons": [
+      {
+        "path": "ops/scripts/testing-strategy.cjs",
+        "level": 4,
+        "rule": "deployment-or-release-control",
+        "reason": "Operational testing controls affect promotion safety."
+      }
+    ],
+    "downgrade_approval": null
+  },
+  "changed_files": [
+    {
+      "path": "ops/scripts/testing-strategy.cjs",
+      "impact": ["testing-strategy", "release-controls"]
+    }
+  ],
+  "invariants": ["deployment_sha_consistency", "no_secret_leak"],
+  "hazards": [
+    {
+      "hazard": "Risk floor computes too low for guarded surfaces",
+      "severity": "high",
+      "likelihood": "medium",
+      "detection": "focused Jest path-classification tests",
+      "required_test": "seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts",
+      "rollback_or_fix_forward": "revert classifier change or add stricter path rule"
+    }
+  ],
+  "commands": [
+    {
+      "command": "seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts",
+      "status": "not-run",
+      "evidence": "to be filled by PR owner"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "jest-report",
+      "uri": "s3://6529-artifacts/example/frontend-testing/pr0/jest-report.json",
+      "sha256": "example-sha256-fill-with-real-value",
+      "redaction_status": "not-sensitive",
+      "retention_class": "pr-validation",
+      "producing_command": "seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts"
+    }
+  ],
+  "review": {
+    "reviewbot": {
+      "required_lanes": [
+        "general",
+        "wcag",
+        "i18n",
+        "security",
+        "responsiveness"
+      ],
+      "status": "pending",
+      "urls": []
+    },
+    "glm_swarm": {
+      "status": "not-run",
+      "urls": []
+    }
+  },
+  "deployment": {
+    "staging": null,
+    "production": null
+  },
+  "exceptions": []
+}
