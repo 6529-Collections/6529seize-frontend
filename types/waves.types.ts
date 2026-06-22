@@ -198,7 +198,6 @@ export interface SidebarWave {
   readonly hasSubwaves: boolean;
   readonly descriptionDrop: SidebarWaveDescriptionDrop;
   readonly totalDropsCount: number;
-  readonly subscribersCount?: number | undefined;
   readonly isPrivate: boolean;
   readonly latestDropTimestamp: number | null;
   readonly latestFollowedSubwaveDropTimestamp: number | null;

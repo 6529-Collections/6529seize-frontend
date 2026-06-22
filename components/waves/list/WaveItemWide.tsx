@@ -292,8 +292,7 @@ export default function WaveItemWide({
 
   const dropsCount =
     wave?.metrics.drops_count ?? wavePreview?.totalDropsCount ?? 0;
-  const subscribersCount =
-    wave?.metrics.subscribers_count ?? wavePreview?.subscribersCount ?? 0;
+  const subscribersCount = wave?.metrics.subscribers_count;
   const hasWaveData = Boolean(wave ?? wavePreview);
 
   return (
@@ -355,16 +354,18 @@ export default function WaveItemWide({
                   {dropsCount === 1 ? "Drop" : "Drops"}
                 </span>
               </span>
-              <span className="tw-inline-flex tw-items-center tw-gap-1">
-                <UserGroupIcon
-                  aria-hidden="true"
-                  className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
-                />
-                <span className="tw-font-medium">
-                  {numberWithCommas(subscribersCount)}
+              {subscribersCount !== undefined && (
+                <span className="tw-inline-flex tw-items-center tw-gap-1">
+                  <UserGroupIcon
+                    aria-hidden="true"
+                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
+                  />
+                  <span className="tw-font-medium">
+                    {numberWithCommas(subscribersCount)}
+                  </span>
+                  <span className="tw-text-iron-500">Joined</span>
                 </span>
-                <span className="tw-text-iron-500">Joined</span>
-              </span>
+              )}
             </div>
           )}
         </div>
