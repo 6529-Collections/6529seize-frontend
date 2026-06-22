@@ -6,13 +6,14 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 async function gotoReady(
   page: Page,
   path: string,
   options: { readySelector?: string } = {}
 ) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page, options);
   await expectNoHorizontalOverflow(page);
 }

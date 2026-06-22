@@ -6,6 +6,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 const SYNTHETIC_EMPTY_WALLET = "0x000000000000000000000000000000000000dEaD";
 
@@ -81,7 +82,7 @@ const COLLECTION_ROUTES = [
 ] as const;
 
 async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page);
   await expectNoHorizontalOverflow(page);
   await expect(page).not.toHaveTitle("404 | PAGE NOT FOUND");
@@ -148,7 +149,9 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
         ).toBeVisible();
       }
       await expectHeading(page, article.heading);
-      await expect(page.getByText("Loading delegation article...")).toBeHidden();
+      await expect(
+        page.getByText("Loading delegation article...")
+      ).toBeHidden();
     });
   }
 
@@ -158,7 +161,9 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expect(page).toHaveTitle("Wallet Checker | 6529.io");
     await expectHeading(page, "Wallet Checker");
     await expect(
-      page.getByText("This is read-only and does not require wallet connection.")
+      page.getByText(
+        "This is read-only and does not require wallet connection."
+      )
     ).toBeVisible();
 
     const input = page.getByLabel("Wallet address or ENS name");
