@@ -8,6 +8,7 @@ import { Children, Fragment, cloneElement, isValidElement } from "react";
 import type { ExtraProps } from "react-markdown";
 import emojiRegex from "emoji-regex";
 
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { ApiDropGroupMention as ApiDropGroupMentionValue } from "@/generated/models/ApiDropGroupMention";
@@ -91,38 +92,6 @@ interface MarkdownImageChunkItem {
 
 const customEmojiRegex = /(:\w+:)/g;
 const nativeEmojiRegex = emojiRegex();
-const contentSplitterBase = "\uE000drop-content-splitter\uE000";
-
-const getContentPartKey = (
-  partProps: DropListItemContentPartProps,
-  partIndex: number
-): string => `content-part:${partIndex}:${partProps.type}:${partProps.match}`;
-
-const getEmojiSegmentKey = (
-  partIndex: number,
-  segmentIndex: number,
-  segment: string
-): string => `emoji:${partIndex}:${segmentIndex}:${segment}`;
-
-const getTextSegmentKey = (
-  partIndex: number,
-  segmentIndex: number
-): string => `text:${partIndex}:${segmentIndex}`;
-
-const getParagraphKey = (index: number, variant: "blank" | "text"): string =>
-  `markdown-paragraph:${variant}:${index}`;
-
-const getContentSplitter = (content: string): string => {
-  let splitter = contentSplitterBase;
-  let suffix = 0;
-
-  while (content.includes(splitter)) {
-    suffix += 1;
-    splitter = `\uE000drop-content-splitter:${suffix}\uE000`;
-  }
-
-  return splitter;
-};
 
 const isReactNodeArray = (
   content: ReactNode | undefined
@@ -228,6 +197,7 @@ const containsOnlyNativeEmojis = (str: string): boolean => {
 };
 
 const CustomEmojiImage = ({ alt, bigEmoji, src }: CustomEmojiImageProps) => (
+  // eslint-disable-next-line @next/next/no-img-element -- Emoji markdown tokens have dynamic inline dimensions.
   <img
     src={src}
     alt={alt}
@@ -277,6 +247,8 @@ export const createMarkdownContentRenderers = ({
   const customPartRenderer = (
     content: string
   ): Array<ReactNode> | ReactNode => {
+    const splitter = getRandomObjectId();
+
     const values: Record<string, DropListItemContentPartProps> = {
       ...mentionedUsers.reduce(
         (acc, user) => ({
@@ -321,7 +293,6 @@ export const createMarkdownContentRenderers = ({
         {}
       ),
     };
-    const splitter = getContentSplitter(content);
 
     const areAllPartsEmojis = content
       .split(customEmojiRegex)
@@ -352,29 +323,23 @@ export const createMarkdownContentRenderers = ({
     return currentContent
       .split(splitter)
       .filter((part) => part !== "")
-      .map((part, partIndex): ReactNode => {
+      .map((part): ReactNode => {
         const partProps = values[part];
         if (partProps) {
-          return (
-            <DropListItemContentPart
-              key={getContentPartKey(partProps, partIndex)}
-              part={partProps}
-            />
-          );
+          const randomId = getRandomObjectId();
+          return <DropListItemContentPart key={randomId} part={partProps} />;
         }
 
         const segments = part.split(customEmojiRegex);
         return segments.map(
-          (segment, segmentIndex): ReactNode =>
+          (segment): ReactNode =>
             isCustomEmojiToken(segment) ? (
-              <Fragment
-                key={getEmojiSegmentKey(partIndex, segmentIndex, segment)}
-              >
+              <Fragment key={getRandomObjectId()}>
                 {renderEmoji(segment, areAllPartsEmojis)}
               </Fragment>
             ) : (
               <span
-                key={getTextSegmentKey(partIndex, segmentIndex)}
+                key={getRandomObjectId()}
                 className={areAllPartsEmojis ? "emoji-text-node" : undefined}
               >
                 {segment}
@@ -406,7 +371,6 @@ export const createMarkdownContentRenderers = ({
       HTMLAttributes<HTMLParagraphElement> &
       ExtraProps
   ) => {
-    let paragraphIndex = 0;
     const renderP = (
       paragraphParams: ClassAttributes<HTMLParagraphElement> &
         HTMLAttributes<HTMLParagraphElement> &
@@ -424,7 +388,7 @@ export const createMarkdownContentRenderers = ({
       if (isBlankLineParagraph) {
         return (
           <p
-            key={getParagraphKey(paragraphIndex++, "blank")}
+            key={getRandomObjectId()}
             aria-hidden="true"
             className="word-break tw-my-1 tw-h-2 tw-leading-none"
           >
@@ -435,7 +399,7 @@ export const createMarkdownContentRenderers = ({
 
       return (
         <p
-          key={getParagraphKey(paragraphIndex++, "text")}
+          key={getRandomObjectId()}
           className={`word-break tw-mb-1.5 tw-mt-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out last:tw-mb-0 ${textSizeClass}`}
         >
           {customRenderer(paragraphParams.children)}
