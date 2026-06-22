@@ -4,21 +4,20 @@
 
 Read this section first after compaction or handoff.
 
-- Latest testing-roadmap state, 2026-06-22T03:10Z:
+- Latest testing-roadmap state, 2026-06-22T04:25Z:
+  - PR #2818 merged into `origin/main` as
+    `d2b1c2ba4d9908ff0f592eeeb7200c80c578920c`, adding the authenticated
+    notifications mutation-guard contract without turning `/notifications`
+    into staging or production smoke.
   - Current clean worktree branch:
-    `codex/e2e-notifications-mutation-guard`, based on current `origin/main`
-    after PR #2817.
-  - Active slice closes the authenticated notifications gap as a negative
-    mutation-guard contract, not as ordinary read-only UI coverage.
-  - `/notifications` remains excluded from
-    `test:e2e:authenticated-shells-readonly` because the current authenticated
-    route marks notifications read on mount with
-    `POST /api/notifications/read`.
-  - This branch adds named mutation-registry entries and guard unit coverage
-    for that mark-read request, plus a local/dev-auth-only
-    `test:e2e:notifications-mutation-guard` pack that proves the guard blocks
-    the side effect before backend state changes.
-  - Do not add staging or production notification smoke scripts until
+    `codex/e2e-search-waves-readonly`, based on current `origin/main` after
+    PR #2818.
+  - Active slice adds a production-safe read-only pack for global header search
+    keyboard/navigation behavior and wave-local message search behavior.
+  - The pack has passed locally and on staging with desktop and mobile
+    Chromium, and on production with desktop Chromium only.
+  - Next action is PR publication and reviewbot/CI iteration.
+  - Keep `/notifications` out of staging or production smoke until
     notifications have a disposable sandbox account/backend or a
     user-equivalent product-safe read-only test path.
   - GLM reviewbot is live on `6529reviewbot` and remains additive. Do not
@@ -280,7 +279,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-notifications-mutation-guard`
+`codex/e2e-search-waves-readonly`
 
 ## Constraints
 
@@ -383,17 +382,16 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Validate, commit, push, and open the
-   `codex/e2e-notifications-mutation-guard` PR with focused guard/unit,
-   Playwright typecheck, changed lint/typecheck, secret scan, workflow-security
-   scan, and default skipped-pack evidence.
+1. Commit, push, and open the `codex/e2e-search-waves-readonly` PR with the
+   focused search/wave E2E pack, Playwright typecheck, changed lint/typecheck,
+   secret scan, workflow-security scan, critical-shell regression evidence,
+   staging/production pack evidence, and `codex-diff-check`.
 2. Iterate CodeRabbit, Sonar, CI, Opus reviewbot, GLM reviewbot, and any
    available specialized bots until Codex judges the loop is no longer adding
    material value. Keep all reviewbot lanes additive; do not remove existing
    bots.
-3. Merge the notifications mutation-guard PR after checks and review signals
-   are green or consciously dispositioned. Do not deploy it as a notification
-   smoke pack; it is a local negative contract and docs/guard hardening slice.
+3. Merge the search/wave read-only PR after checks and review signals are green
+   or consciously dispositioned.
 4. Record the PR #2809 production post-deploy watch checkpoint if the real
    30-minute observation window has elapsed and deployed-environment validation
    still passes. Leave release reports on hold if approved durable artifact
@@ -423,9 +421,9 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
   read-only packs for social/profile, media/mint/detail, delegation,
   network/open-data, collections/NextGen, public groups/tools, public content,
   authenticated shell gates, and profile deep links.
-- Current branch `codex/e2e-notifications-mutation-guard` handles the
-  authenticated notifications gap as guard hardening, not as deployed read-only
-  smoke.
+- PR #2818 merged the authenticated notifications guard hardening slice.
+- Current branch `codex/e2e-search-waves-readonly` adds read-only E2E coverage
+  for global search and wave-local message search interactions.
 - Deployment train policy remains: merge only after Codex, reviewbots, and CI
   stop adding material value; deploy staging first, validate exact merged SHA,
   then production from current `origin/main` with release evidence.
@@ -433,12 +431,12 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 ## Current Next Actions
 
 1. Finish validation, PR publication, bot iteration, and merge for
-   `codex/e2e-notifications-mutation-guard`.
+   `codex/e2e-search-waves-readonly`.
 2. Keep `/notifications` out of staging/production read-only smoke until a
    disposable sandbox account/backend or product-safe non-mutating test path
    exists.
 3. Start the next high-value E2E pack after this PR: composer/upload/link
-   preview sandbox coverage, read-only search and wave-detail interaction
-   coverage, or deployment evidence/version verification.
+   preview sandbox coverage, wallet/native/Electron shell coverage, or
+   deployment evidence/version verification.
 4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.
