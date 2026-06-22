@@ -657,6 +657,18 @@ function isSameAddress(actual, expected) {
   );
 }
 
+function compareStrings(a, b) {
+  return a.localeCompare(b);
+}
+
+function sortedStrings(values) {
+  return [...values].sort(compareStrings);
+}
+
+function sortedKeys(value) {
+  return Object.keys(value).sort(compareStrings);
+}
+
 function isExpectedDirectMessageBody(body) {
   if (!isPlainObject(body)) {
     return false;
@@ -677,8 +689,8 @@ function hasOnlyKeys(value, expectedKeys) {
     return false;
   }
 
-  const keys = Object.keys(value).sort();
-  const expected = [...expectedKeys].sort();
+  const keys = sortedKeys(value);
+  const expected = sortedStrings(expectedKeys);
   return (
     keys.length === expected.length &&
     keys.every((key, index) => key === expected[index])
@@ -1027,21 +1039,19 @@ function loggedRequestBody(pathname, body) {
       name: typeof body.name === "string" ? body.name : null,
       admin_group_id: body.wave?.admin_group?.group_id ?? null,
       description: isPlainObject(firstPart) ? firstPart.content : null,
-      keys: Object.keys(body).sort(),
+      keys: sortedKeys(body),
       description_drop_keys: isPlainObject(body.description_drop)
-        ? Object.keys(body.description_drop).sort()
+        ? sortedKeys(body.description_drop)
         : [],
       description_part_keys: isPlainObject(firstPart)
-        ? Object.keys(firstPart).sort()
+        ? sortedKeys(firstPart)
         : [],
       participation_keys: isPlainObject(body.participation)
-        ? Object.keys(body.participation).sort()
+        ? sortedKeys(body.participation)
         : [],
-      voting_keys: isPlainObject(body.voting)
-        ? Object.keys(body.voting).sort()
-        : [],
-      chat_keys: isPlainObject(body.chat) ? Object.keys(body.chat).sort() : [],
-      wave_keys: isPlainObject(body.wave) ? Object.keys(body.wave).sort() : [],
+      voting_keys: isPlainObject(body.voting) ? sortedKeys(body.voting) : [],
+      chat_keys: isPlainObject(body.chat) ? sortedKeys(body.chat) : [],
+      wave_keys: isPlainObject(body.wave) ? sortedKeys(body.wave) : [],
     };
   }
 
