@@ -4,6 +4,34 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-22T05:45Z:
+  - PR #2819 is merged into `origin/main` as
+    `174b2d054 Add search and wave read-only E2E coverage (#2819)`.
+  - Current branch: `codex/e2e-composer-sandbox`, based on that current
+    `origin/main`.
+  - PR #2820 is open:
+    https://github.com/6529-Collections/6529seize-frontend/pull/2820
+  - Active slice adds local-only authenticated composer/upload/link-preview
+    sandbox coverage. It starts a per-run mock API, runs Next against that mock
+    runtime, uses generated synthetic dev-auth data only, and verifies file
+    preview/removal plus deterministic link preview rendering on desktop and
+    mobile Chromium.
+  - The mock diagnostics record requests and fail the pack on dangerous
+    composer/upload mutation endpoints (`/api/drops`, `/api/drop-media`,
+    `/api/attachments`) and any other unhandled local mutation, while allowing
+    known local notification wave-read side effects as separate diagnostics.
+    The spec also refuses non-loopback Playwright base URLs so inherited shell
+    env cannot point the pack at staging or production.
+  - Local validation passed: `test:e2e:composer-sandbox`, Playwright typecheck,
+    changed lint/typecheck, `critical-shell`, changed secret scan,
+    workflow-security scan, and `codex-diff-check`. `quality:changed` still
+    fails locally at its aggregate format step in this Windows worktree, while
+    the equivalent direct subchecks pass.
+  - Next action is to iterate CI and all reviewbot lanes on PR #2820. Keep
+    GLM additive alongside existing reviewbots.
+  - GLM reviewbot is live on `6529reviewbot` and remains additive. Do not
+    remove, downgrade, or make optional the existing Opus/general/WCAG/i18n/
+    security/responsiveness reviewbot lanes.
 - Latest testing-roadmap state, 2026-06-22T04:25Z:
   - PR #2818 merged into `origin/main` as
     `d2b1c2ba4d9908ff0f592eeeb7200c80c578920c`, adding the authenticated
@@ -279,7 +307,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-search-waves-readonly`
+`codex/e2e-composer-sandbox`
 
 ## Constraints
 
@@ -423,21 +451,27 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
   network/open-data, collections/NextGen, public groups/tools, public content,
   authenticated shell gates, and profile deep links.
 - PR #2818 merged the authenticated notifications guard hardening slice.
-- Current branch `codex/e2e-search-waves-readonly` adds read-only E2E coverage
-  for global search and wave-local message search interactions.
+- PR #2819 merged the global search and wave-local message search E2E slice
+  into `origin/main` as `174b2d054 Add search and wave read-only E2E coverage
+(#2819)`.
+- Current branch `codex/e2e-composer-sandbox` adds local-only authenticated
+  composer/upload/link-preview sandbox coverage. It uses a per-run mock API and
+  generated synthetic dev-auth token, asserts the file-preview/remove and link
+  preview paths, and fails if the browser posts to dangerous composer/upload
+  mutation endpoints.
 - Deployment train policy remains: merge only after Codex, reviewbots, and CI
   stop adding material value; deploy staging first, validate exact merged SHA,
   then production from current `origin/main` with release evidence.
 
 ## Current Next Actions
 
-1. Finish validation, PR publication, bot iteration, and merge for
-   `codex/e2e-search-waves-readonly`.
+1. Finish CI/reviewbot iteration and merge readiness for PR #2820
+   (`codex/e2e-composer-sandbox`).
 2. Keep `/notifications` out of staging/production read-only smoke until a
    disposable sandbox account/backend or product-safe non-mutating test path
    exists.
-3. Start the next high-value E2E pack after this PR: composer/upload/link
-   preview sandbox coverage, wallet/native/Electron shell coverage, or
-   deployment evidence/version verification.
+3. Start the next high-value E2E pack after this PR: wallet/native/Electron
+   shell coverage, deployment evidence/version verification, or the next
+   guarded authenticated sandbox pack.
 4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.
