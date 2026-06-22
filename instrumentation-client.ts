@@ -19,6 +19,7 @@ import {
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
+  shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -111,6 +112,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterInjectedWalletCollision(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterInjectedWasmCspUnsafeEval(event, hint)) {
     return true;
   }
 

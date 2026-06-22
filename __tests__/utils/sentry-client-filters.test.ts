@@ -5,6 +5,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
+  shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -15,6 +16,13 @@ describe("sentry-client-filters", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
+  const wasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
+    "WebAssembly module violates the following Content Security policy directive",
+    "because 'unsafe-eval' is not an allowed source of script in the following",
+    "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
 
   const buildSpan = (overrides: Record<string, unknown> = {}) =>
     ({
@@ -117,6 +125,47 @@ describe("sentry-client-filters", () => {
                 },
               ],
             },
+          },
+        ],
+      },
+      ...overrides,
+    }) as any;
+
+  const createInjectedWasmCspUnsafeEvalEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    ({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///inject.js",
+                },
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [
+          {
+            category: "console",
+            message: [
+              "failed to asynchronously prepare wasm: CompileError:",
+              "WebAssembly.instantiate(): Compiling or instantiating",
+              "WebAssembly module violates the following Content Security",
+              "policy directive because 'unsafe-eval' is not an allowed source",
+              "of script",
+            ].join(" "),
           },
         ],
       },
@@ -2042,6 +2091,77 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters injected WebAssembly CSP unsafe-eval errors", () => {
+    // Arrange
+    const event = createInjectedWasmCspUnsafeEvalEvent();
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter WebAssembly CSP unsafe-eval errors with first-party frames", () => {
+    // Arrange
+    const event = createInjectedWasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///inject.js",
+                },
+                {
+                  filename: "https://6529.io/_next/static/chunks/app.js",
+                  abs_path: "https://6529.io/_next/static/chunks/app.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unrelated injected WebAssembly runtime errors", () => {
+    // Arrange
+    const event = createInjectedWasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: "Aborted(RuntimeError: unreachable)",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
 
     // Assert
     expect(result).toBe(false);

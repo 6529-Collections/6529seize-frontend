@@ -80,6 +80,7 @@ const filenameExceptions = [
   "injectLeap.js",
   "inject.chrome",
 ];
+const injectedWasmCspAppUriPath = "app:///inject.js";
 const injectedAppUriPath = "app:///injected/injected.js";
 const walletCollisionPatterns = [
   "tronlinkparams",
@@ -855,7 +856,16 @@ function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
   );
 }
 
-function hasOnlyAppUriFrames(frames: SentryStackFrame[] | undefined): boolean {
+function isInjectedWasmCspAppUriFrame(frame: SentryStackFrame): boolean {
+  return [frame.filename, frame.abs_path].some(
+    (path) =>
+      typeof path === "string" && path.includes(injectedWasmCspAppUriPath)
+  );
+}
+
+function hasOnlyAppUriFrames(
+  frames: SentryStackFrame[] | undefined
+): frames is SentryStackFrame[] {
   return (
     Array.isArray(frames) && frames.length > 0 && frames.every(isAppUriFrame)
   );
@@ -865,6 +875,16 @@ function hasInjectedAppUriFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return Array.isArray(frames) && frames.some(isInjectedAppUriFrame);
+}
+
+function hasInjectedWasmCspAppUriSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!hasOnlyAppUriFrames(frames)) {
+    return false;
+  }
+
+  return frames.some(isInjectedWasmCspAppUriFrame);
 }
 
 function getHintException(hint?: SentryEventHint): unknown {
@@ -1178,6 +1198,33 @@ function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
   );
 }
 
+function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  return (
+    normalizedValue.includes("webassembly.instantiate") &&
+    normalizedValue.includes("content security") &&
+    normalizedValue.includes("unsafe-eval")
+  );
+}
+
+function hasWasmCspUnsafeEvalMessage(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const candidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      matchesWasmCspUnsafeEvalMessage(candidate)
+  );
+}
+
 function isTwitterBrowser(event: SentryClientEvent): boolean {
   const contextBrowserName = getContextString(event, "browser", "name");
   if (contextBrowserName === "Twitter") {
@@ -1235,6 +1282,18 @@ export function shouldFilterInjectedWalletCollision(
   }
 
   return hasWalletCollisionSignature(event, hint);
+}
+
+export function shouldFilterInjectedWasmCspUnsafeEval(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (!hasInjectedWasmCspAppUriSignature(frames)) {
+    return false;
+  }
+
+  return hasWasmCspUnsafeEvalMessage(event, hint);
 }
 
 export const __testing = {
