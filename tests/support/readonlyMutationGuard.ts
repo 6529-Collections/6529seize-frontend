@@ -54,6 +54,12 @@ const GOOGLE_COLLECT_HOSTS = new Set([
   "www.google-analytics.com",
   "www.google.com",
 ]);
+const YOUTUBE_TELEMETRY_HOSTS = new Set([
+  "youtube.com",
+  "www.youtube.com",
+  "youtube-nocookie.com",
+  "www.youtube-nocookie.com",
+]);
 const WALLETCONNECT_RPC_HOST = "rpc.walletconnect.org";
 const SAFE_WALLETCONNECT_RPC_METHODS = new Set([
   "eth_accounts",
@@ -147,6 +153,21 @@ function isIgnoredExternalMutation(url: URL) {
   }
 
   if (url.hostname === "www.googletagmanager.com" && url.pathname === "/td") {
+    return true;
+  }
+
+  if (
+    YOUTUBE_TELEMETRY_HOSTS.has(url.hostname) &&
+    (url.pathname.startsWith("/api/stats/") ||
+      url.pathname === "/youtubei/v1/log_event")
+  ) {
+    return true;
+  }
+
+  if (
+    url.hostname === "jnn-pa.googleapis.com" &&
+    url.pathname === "/$rpc/google.internal.waa.v1.Waa/GenerateIT"
+  ) {
     return true;
   }
 

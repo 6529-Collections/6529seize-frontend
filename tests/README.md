@@ -90,6 +90,8 @@ Surface matrix:
   projects.
 - `test:e2e:public-groups-tools-readonly` runs the public Groups, Subscriptions
   Report, and Meme Calendar read-only pack on both baseline web projects.
+- `test:e2e:public-content-readonly` runs the public legacy content pack on
+  both baseline web projects, with the mutation guard enabled even locally.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -122,6 +124,10 @@ Surface matrix:
 - `test:e2e:production:public-groups-tools-readonly` runs the same public
   Groups/Tools/Calendar pack against production desktop web only as a public,
   read-only smoke.
+- `test:e2e:staging:public-content-readonly` runs the public content pack
+  against staging with the remote mutation guard and staging access unlock.
+- `test:e2e:production:public-content-readonly` runs the public content pack
+  against production desktop web only as a public, read-only smoke.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -158,6 +164,10 @@ Large-pack ownership:
   changing public Groups, profile Groups redirects, Subscriptions Report, Meme
   Calendar, subscription download affordances, calendar locale/timezone controls,
   or read-only mutation guard behavior.
+- `test:e2e:public-content-readonly` is owned by PR or train owners changing
+  education, museum, OM, news, capital, blog, author, legacy content rendering,
+  image/link rendering, route canonicalizing, or read-only mutation guard
+  behavior.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.

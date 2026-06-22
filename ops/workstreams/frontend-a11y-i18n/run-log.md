@@ -2687,3 +2687,47 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
     origin/main --output
     test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`
+
+## 2026-06-21T21:07Z Public Content Read-Only Pack Started
+
+- Started branch `codex/e2e-public-content-readonly` from current merged
+  `origin/main` for the next roadmap slice after the public social pack.
+- Implementing a read-only Playwright pack for public legacy content routes
+  across education, museum, OM, news, capital, blog, and author pages.
+- The pack runs locally with the mutation guard enabled, runs on desktop and
+  mobile Chromium for local/staging validation, and has a production desktop
+  read-only command for deployment-train smoke evidence.
+
+## 2026-06-21T21:55Z Public Content Read-Only Pack Ready
+
+- Implemented `tests/content/public-content-readonly.spec.ts` across public
+  education, museum, OM, news, capital, blog, and author routes.
+- Added local, staging, and production package scripts for the pack. Local and
+  staging run desktop and mobile Chromium; production is intentionally desktop
+  Chromium only for a public read-only post-deploy smoke.
+- Added a narrow mutation-guard allowance for YouTube `/api/stats/` telemetry
+  plus exact embedded-player telemetry endpoints for YouTube `/youtubei/v1/log_event`,
+  Google WAA `GenerateIT`, and GTM `/td`. Arbitrary YouTube, Google, and GTM
+  mutations are still blocked.
+- The route matrix uses canonical trailing-slash paths for legacy deep links
+  and normalizes the asserted browser path because Next strips the slash after
+  loading the page locally.
+- Added a global overflow guard for the legacy static-copy
+  `#sticky-social-icons-container`; these pages include the container inline and
+  it was adding 16px of horizontal scroll despite having no visible footprint.
+- Validation passed:
+  - `seize run test:e2e:public-content-readonly`: 26 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage --findRelatedTests tests/support/readonlyMutationGuard.ts --passWithNoTests`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/public-content-secret-scan.json`
+  - `codex-diff-check`
+- Pre-merge production command was attempted and failed with the known
+  undeployed baseline: production currently still has 16px horizontal overflow
+  from the legacy sticky social container on these routes. The branch-local
+  E2E pack passes after the overflow fix, so rerun
+  `seize run test:e2e:production:public-content-readonly` only after this
+  change is deployed.
