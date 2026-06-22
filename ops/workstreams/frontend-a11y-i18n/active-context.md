@@ -4,6 +4,70 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-22T17:31Z:
+  - PR #2846 is merged and deployed. Production serves
+    `cf0503f787ea4f0b86696f6e0dacc75c01e1ed3d`, and production smoke passed
+    after deploy.
+  - Post-deploy production read-only validation exposed test-harness drift, not
+    a live runtime rollback condition:
+    - ReMemes browse needed to wait on `/api/rememes` before asserting filters.
+    - Google CSP script-inclusion POST reports needed a narrow abort-only
+      read-only guard allowance.
+    - Legacy content routes can occasionally receive transient production
+      document 502s during live aggregate runs.
+    - The ReMemes detail fixture title is now `SeizeGenart | ReMemes`, with no
+      required `| 6529.io` suffix.
+  - Current branch:
+    `codex/production-readonly-flake-hardening`, based on current
+    `origin/main` `cf0503f787ea4f0b86696f6e0dacc75c01e1ed3d`.
+  - Active slice is test-only production-readonly hardening:
+    `gotoDocumentWithTransientRetry` retries one explicit 502/503/504 document
+    response, production-readonly packs share that helper, ReMemes browse uses
+    API-readiness plus breakpoint-aware collection identity checks, ReMemes
+    detail accepts the current live title contract, and the mutation guard
+    aborts only exact `csp.withgoogle.com/csp/script-inclusions/<32-hex>`
+    reports while continuing to block lookalikes.
+  - Local and live validation passed for the final diff:
+    - `seize exec prettier --check ...`
+    - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+    - `seize run typecheck:playwright`
+    - `seize run lint:changed`
+    - `seize run typecheck:changed`
+    - focused production ReMemes browse check: 1 passed
+    - focused production ReMemes detail check: 1 passed
+    - focused production ReMemes and `/education` soak before final verifier
+      tweak: 3/3 each passed
+    - full `seize run test:e2e:production:readonly`: 65/65 passed
+    - `codex-diff-check`
+  - PR #2847 first review loop was useful and fixed:
+    - persistent transient document responses now throw a direct
+      `Document navigation ... returned transient HTTP ... after retry` error.
+    - Google CSP report tests now cover exact-boundary negatives: 31 chars, 33
+      chars, non-hex same-length IDs, and trailing slashes.
+    - the Waves/Profile legacy-link test now selects the first internal
+      `/waves/{id}` link inside the wave-list region instead of the first
+      `Open ...` link, because live production can show external X links first.
+    - post-fix focused Waves/Profile production check passed, and full
+      `seize run test:e2e:production:readonly` passed 65/65 again.
+  - GLM swarm review on PR #2847 was useful and fixed:
+    - added unit coverage for `gotoDocumentWithTransientRetry` success,
+      non-transient pass-through, transient retry, persistent transient throw,
+      and transient-then-null behavior.
+    - made Google CSP report positive coverage a named test case.
+    - tightened Waves/Profile wave-id extraction to poll for actual UUID detail
+      paths inside the wave-list region, instead of any `/waves/` prefix.
+    - post-fix unit coverage passed 20 tests across route readiness and the
+      read-only guard, and full `seize run test:e2e:production:readonly`
+      passed 65/65 again.
+  - Independent verifier `Heisenberg` found the ReMemes visible-title assertion
+    was over-specific and recommended replacing exact text with the
+    breakpoint-aware `Collection: ReMemes` button candidate. Fixed before PR
+    publication.
+  - Next action: commit, push, open PR, trigger all existing reviewbot lanes
+    plus GLM swarm, iterate CI/review feedback, then merge/deploy if Codex,
+    bots, and checks stop adding material value.
+  - GLM reviewbot remains live and additive. Do not remove, downgrade, or make
+    optional any existing reviewbot lanes.
 - Latest testing-roadmap state, 2026-06-22T15:20Z:
   - PR #2844 is merged and deployed. Current production is serving
     `d26393b40d2fec0e9a2bf557f911324b27bc7686`.
@@ -476,7 +540,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-wave-create-sandbox`
+`codex/production-readonly-flake-hardening`
 
 ## Constraints
 
@@ -641,12 +705,13 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Finish local implementation and validation for `codex/e2e-wave-create-sandbox`.
+1. Commit, push, and open PR for
+   `codex/production-readonly-flake-hardening`.
 2. Trigger and iterate CI, CodeRabbit, Sonar, 6529bot, GLM, and specialized
    reviewbot lanes until Codex judges the loop is no longer adding material
    value.
-3. Merge the create-wave sandbox E2E PR after checks and review signals are
-   green or consciously dispositioned, then deploy the resulting current
+3. Merge the production-readonly hardening PR after checks and review signals
+   are green or consciously dispositioned, then deploy the resulting current
    `origin/main` through staging and production with exact-SHA validation.
 4. Continue the next high-value E2E hardening slice: wallet/native/Electron
    shell coverage, real native runtime detection, or upload/posting/admin
