@@ -36,6 +36,12 @@ type FailedBreadcrumbScanResult =
 type SentryExceptionValue = {
   type?: string | undefined;
   value?: string | undefined;
+  mechanism?:
+    | {
+        type?: string | undefined;
+        handled?: boolean | undefined;
+      }
+    | undefined;
   stacktrace?:
     | {
         frames?: SentryStackFrame[] | undefined;
@@ -88,6 +94,16 @@ const walletCollisionPatterns = [
   'cannot assign to read only property "ethereum"',
   "cannot redefine property: ethereum",
 ];
+const coinbaseWalletSdkPathTokens = [
+  "@coinbase/wallet-sdk",
+  "@coinbase+wallet-sdk",
+];
+const coinbaseWalletLinkWebSocketFile = "WalletLinkWebSocket.js";
+const coinbaseWalletLinkWebSocketCloseFunction = "webSocket.onclose";
+const browserUnhandledRejectionMechanism =
+  "auto.browser.global_handlers.onunhandledrejection";
+const coinbaseWalletLinkWebSocket1006Pattern =
+  /^websocket error 1006(?::.*)?$/i;
 const metaMaskMobileUpdateUrlFunction = "__mm__updateUrl";
 const jsonStringifyFunction = "JSON.stringify";
 const circularReactMetaElementMessagePatterns = [
@@ -890,6 +906,68 @@ function getHintExceptionStack(hint?: SentryEventHint): string {
   return "";
 }
 
+function isCoinbaseWalletLinkWebSocket1006Message(value: string): boolean {
+  return coinbaseWalletLinkWebSocket1006Pattern.test(value.trim());
+}
+
+function isCoinbaseWalletLinkWebSocketPath(path: string | undefined): boolean {
+  return (
+    typeof path === "string" &&
+    path.includes(coinbaseWalletLinkWebSocketFile) &&
+    coinbaseWalletSdkPathTokens.some((token) => path.includes(token))
+  );
+}
+
+function hasCoinbaseWalletLinkWebSocketFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) =>
+      [frame.filename, frame.abs_path].some(isCoinbaseWalletLinkWebSocketPath)
+    )
+  );
+}
+
+function hasCoinbaseWalletLinkWebSocketCloseFunction(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some(
+      (frame) => frame.function === coinbaseWalletLinkWebSocketCloseFunction
+    )
+  );
+}
+
+function hasCoinbaseWalletLinkWebSocketStack(hint?: SentryEventHint): boolean {
+  const stack = getHintExceptionStack(hint);
+  return (
+    stack.includes(coinbaseWalletLinkWebSocketFile) &&
+    coinbaseWalletSdkPathTokens.some((token) => stack.includes(token))
+  );
+}
+
+function hasCoinbaseWalletLinkWebSocketCloseStack(
+  hint?: SentryEventHint
+): boolean {
+  return getHintExceptionStack(hint).includes(
+    coinbaseWalletLinkWebSocketCloseFunction
+  );
+}
+
+function hasWalletLinkWebSocketUnhandledRejectionSignature(
+  value: SentryExceptionValue | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return (
+    value?.mechanism?.type === browserUnhandledRejectionMechanism &&
+    value.mechanism.handled === false &&
+    (hasCoinbaseWalletLinkWebSocketCloseFunction(value.stacktrace?.frames) ||
+      hasCoinbaseWalletLinkWebSocketCloseStack(hint))
+  );
+}
+
 function matchesWalletCollisionPattern(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return walletCollisionPatterns.some((pattern) =>
@@ -1221,6 +1299,33 @@ export function shouldFilterTwitterConfigReferenceError(
   return hasOnlyAppUriFrames(value.stacktrace?.frames);
 }
 
+export function shouldFilterCoinbaseWalletLinkWebSocket1006(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const messageCandidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+  const hasTargetMessage = messageCandidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      isCoinbaseWalletLinkWebSocket1006Message(candidate)
+  );
+
+  if (!hasTargetMessage) {
+    return false;
+  }
+
+  return (
+    hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
+    hasCoinbaseWalletLinkWebSocketStack(hint) ||
+    hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint)
+  );
+}
+
 export function shouldFilterInjectedWalletCollision(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1244,5 +1349,10 @@ export const __testing = {
   isTwitterBrowser,
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
+  isCoinbaseWalletLinkWebSocket1006Message,
+  isCoinbaseWalletLinkWebSocketPath,
+  hasCoinbaseWalletLinkWebSocketFrame,
+  hasCoinbaseWalletLinkWebSocketCloseFunction,
+  hasCoinbaseWalletLinkWebSocketCloseStack,
   shouldFilterThirdPartyTelemetrySpan,
 };

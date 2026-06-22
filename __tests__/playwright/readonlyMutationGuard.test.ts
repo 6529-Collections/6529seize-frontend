@@ -496,6 +496,64 @@ describe("Playwright read-only mutation guard", () => {
     }
   });
 
+  it("allows only read-only public Ethereum RPC POSTs", () => {
+    for (const url of [
+      "https://eth.llamarpc.com/",
+      "https://cloudflare-eth.com/",
+      "https://ethereum-rpc.publicnode.com/",
+    ]) {
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://6529.io",
+          method: "POST",
+          postData: JSON.stringify([
+            { id: 1, jsonrpc: "2.0", method: "eth_chainId" },
+            { id: 2, jsonrpc: "2.0", method: "eth_call" },
+          ]),
+          readonly: true,
+          url,
+        })
+      ).toMatchObject({
+        action: "allow",
+        reason: "read-only-ethereum-rpc",
+      });
+
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://6529.io",
+          method: "POST",
+          postData: JSON.stringify({
+            id: 1,
+            jsonrpc: "2.0",
+            method: "eth_sendRawTransaction",
+          }),
+          readonly: true,
+          url,
+        })
+      ).toMatchObject({
+        action: "block",
+        reason: "unsafe-ethereum-rpc",
+      });
+    }
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        postData: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          method: "eth_chainId",
+        }),
+        readonly: true,
+        url: "https://rpc.example.com/",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "non-allowlisted-mutation",
+    });
+  });
+
   it("redacts URL query strings in guard summaries", () => {
     expect(
       sanitizeReadonlyRequestUrl(
