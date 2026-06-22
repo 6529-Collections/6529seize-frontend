@@ -4,7 +4,7 @@
 
 Read this section first after compaction or handoff.
 
-- Latest testing-roadmap state, 2026-06-22T19:35Z:
+- Latest testing-roadmap state, 2026-06-22T21:07Z:
   - PR #2847 is merged and deployed. Production serves
     `0c55e0c628541fb2ac695d87f871568848e7c057`.
   - PR #2847 shipped test-only production-readonly hardening:
@@ -59,12 +59,23 @@ Read this section first after compaction or handoff.
     it must not be claimed as real packaged native or Electron verification.
   - PR #2848 is open:
     https://github.com/6529-Collections/6529seize-frontend/pull/2848
-    - Initial 6529bot Opus general review: Good to merge; WCAG: no findings.
+    - 6529bot Opus lanes on head `28b3866587b6` were clean: general Good to
+      merge, WCAG no findings, i18n no findings, security no findings, and
+      responsiveness passed on final-head rerun.
+    - GLM swarm on head `28b3866587b6` found useful advisory feedback. Valid
+      items were fixed locally: `test:e2e:native-sim` now uses an explicit
+      native-surface allowlist, iOS US and Android subscription checks assert
+      visibility before href, the country-check listener documents its
+      pre-navigation usage, the Capacitor `convertFileSrc` passthrough is
+      documented and currently has no app callers, `HeaderShare.test.tsx`
+      documents the JSDOM origin assumption, and the Electron app-wallet case
+      asserts the actual Capacitor web runtime plus Electron user-agent signal.
     - Independent local subagent reviewer found no P0/P1/P2 blockers and
       recommended future iOS US-visible coverage. That coverage is now added.
     - Review-response follow-up also gives country-check waits a clearer
       timeout failure message.
-    - CodeRabbit initially rate-limited; retry when the rate window clears.
+    - CodeRabbit status on head `28b3866587b6` was green; its docstring
+      coverage note was non-blocking for this test/docs slice.
   - The slice also repairs two existing relevant unit-test harness breaks so
     share and app-wallet connector coverage runs again: `HeaderShare.test.tsx`
     no longer redefines JSDOM `window.location`, and
@@ -77,7 +88,9 @@ Read this section first after compaction or handoff.
       simulation mobile-search miss; focused rerun of the failed case passed,
       and the latest full rerun passed 25 passed / 23 skipped.
     - `seize run test:e2e:surface-matrix`: latest 24 passed / 20 skipped.
-    - targeted share/wallet/Capacitor/AppKit Jest batch: 60 passed.
+    - targeted share/wallet/Capacitor/AppKit Jest batch: 60 passed before the
+      GLM follow-up; targeted share/wallet rerun after the GLM follow-up passed
+      57 tests across 2 suites.
     - `seize run lint:changed`, `seize run typecheck:changed`,
       risk floor Level 4, changed-secret scan clean, workflow-security scan
       clean, and `codex-diff-check`.
@@ -720,9 +733,9 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Final-review, commit, push, and open the `codex/e2e-native-shell-readonly`
-   PR with the local validation evidence above.
-2. For the PR, keep the established loop: strong local validation first,
+1. Commit and push the GLM follow-up on `codex/e2e-native-shell-readonly`,
+   update the PR evidence, then re-trigger latest-head reviewbot lanes.
+2. For PR #2848, keep the established loop: strong local validation first,
    then CI, CodeRabbit, Sonar, 6529bot Opus lanes, responsiveness, GLM swarm,
    and any specialized reviewbot lanes until Codex judges the loop is no
    longer adding material value.

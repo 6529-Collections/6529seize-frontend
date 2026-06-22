@@ -131,6 +131,7 @@ Object.assign(navigator, {
   },
 });
 
+// JSDOM owns window.location; this suite assumes no test mutates the origin.
 const TEST_ORIGIN = window.location.origin;
 
 describe("HeaderShare", () => {

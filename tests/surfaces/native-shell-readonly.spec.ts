@@ -39,6 +39,7 @@ async function mockCountryCheck(page: Page, country: string) {
 }
 
 async function waitForCountryCheck(page: Page) {
+  // Call without awaiting before navigation so the listener observes route load requests.
   try {
     return await page.waitForResponse(
       (response) => response.url().includes("/api/policies/country-check"),
@@ -158,9 +159,14 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(
       page.getByRole("heading", { level: 1, name: "Open Data" })
     ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Meme Subscriptions" })
-    ).toHaveAttribute("href", "/open-data/meme-subscriptions");
+    const subscriptionsLink = page.getByRole("link", {
+      name: "Meme Subscriptions",
+    });
+    await expect(subscriptionsLink).toBeVisible();
+    await expect(subscriptionsLink).toHaveAttribute(
+      "href",
+      "/open-data/meme-subscriptions"
+    );
   });
 
   test("Android native simulation keeps subscription downloads visible", async ({
@@ -180,9 +186,14 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(
       page.getByRole("heading", { level: 1, name: "Open Data" })
     ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Meme Subscriptions" })
-    ).toHaveAttribute("href", "/open-data/meme-subscriptions");
+    const subscriptionsLink = page.getByRole("link", {
+      name: "Meme Subscriptions",
+    });
+    await expect(subscriptionsLink).toBeVisible();
+    await expect(subscriptionsLink).toHaveAttribute(
+      "href",
+      "/open-data/meme-subscriptions"
+    );
   });
 
   test("Capacitor app-wallet shell renders the simulated empty wallet state", async ({
@@ -216,6 +227,16 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     );
 
     await gotoReady(page, "/tools/app-wallets");
+    await expect(await readShellRuntime(page)).toEqual(
+      expect.objectContaining({
+        capacitorIsNative: false,
+        capacitorPlatform: "web",
+        customPlatform: undefined,
+        navigatorStandalone: undefined,
+        surface: "electron-shell-sim",
+        userAgentHasElectron: true,
+      })
+    );
 
     await expect(
       page.getByRole("heading", { level: 1, name: "App Wallets" })

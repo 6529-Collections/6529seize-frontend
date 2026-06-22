@@ -3596,3 +3596,49 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `seize run test:e2e:surface-matrix`: 24 passed / 20 skipped.
 - Next action: commit and push the follow-up, then re-trigger/wait all CI and
   reviewbot lanes on the new head.
+
+## 2026-06-22T21:07Z PR #2848 GLM Follow-Up
+
+- GLM swarm review on head `28b3866587b6` was advisory but useful:
+  - flagged that broadening `test:e2e:native-sim` to every file under
+    `tests/surfaces` could accidentally add future specs to the native
+    simulation budget before they are skip-safe.
+  - suggested visible assertions before Meme Subscriptions href checks.
+  - suggested documenting the pre-navigation `waitForCountryCheck` listener
+    pattern.
+  - suggested confirming `convertFileSrc` passthrough expectations.
+  - suggested documenting the `HeaderShare.test.tsx` origin assumption.
+- Implemented the valid feedback:
+  - `test:e2e:native-sim` now runs an explicit allowlist:
+    `tests/surfaces/core-surfaces.spec.ts` and
+    `tests/surfaces/native-shell-readonly.spec.ts`.
+  - `tests/README.md` records that new native-sim specs must be added to the
+    allowlist intentionally after cross-project skip verification.
+  - iOS US and Android Open Data subscription checks assert visible link state
+    before href.
+  - `waitForCountryCheck` documents that callers start the wait before
+    navigation so it observes route-load requests.
+  - the Capacitor shim keeps existing `convertFileSrc` when present and
+    comments that current simulations do not exercise native file URL
+    conversion.
+  - `HeaderShare.test.tsx` documents that the suite relies on JSDOM owning
+    `window.location` and no test mutating the origin.
+  - Electron app-wallet coverage now also asserts the actual simulated runtime:
+    Capacitor package web runtime, no custom native platform, and Electron user
+    agent signal.
+- Local validation after the GLM follow-up:
+  - `seize exec prettier --write package.json tests/surfaces/native-shell-readonly.spec.ts tests/support/surfaceSimulation.ts tests/README.md __tests__/components/header/share/HeaderShare.test.tsx`
+  - `seize run test:e2e:native-shell-readonly`: 9 passed / 12 skipped.
+  - `seize run test:e2e:native-sim`: 25 passed / 23 skipped.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: 16 changed TypeScript files passed.
+  - `seize run test:no-coverage -- __tests__/components/header/share/HeaderShare.test.tsx __tests__/wagmiConfig/wagmiAppWalletConnector.test.ts`:
+    57 tests passed across 2 suites.
+  - `seize run test:e2e:surface-matrix`: 24 passed / 20 skipped.
+  - risk floor stayed Level 4 because of `package.json` validation-command
+    changes.
+  - changed-secret scan and workflow-security scan passed.
+  - `codex-diff-check`
+- Next action: commit/push this follow-up, update PR #2848 evidence, re-trigger
+  all reviewbot lanes on the new head, and iterate only on material findings.

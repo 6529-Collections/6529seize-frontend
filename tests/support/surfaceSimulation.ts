@@ -52,6 +52,11 @@ export async function installSurfaceSimulation(
           Capacitor?: Record<string, unknown> | undefined;
         };
         const existingCapacitor = runtime.Capacitor ?? {};
+        const convertFileSrc =
+          typeof existingCapacitor["convertFileSrc"] === "function"
+            ? existingCapacitor["convertFileSrc"]
+            : // Current surface simulations do not exercise native file URL conversion.
+              (filePath: string) => filePath;
         Object.defineProperty(runtime, "Capacitor", {
           configurable: true,
           writable: true,
@@ -62,10 +67,7 @@ export async function installSurfaceSimulation(
               existingCapacitor["Plugins"] !== null
                 ? existingCapacitor["Plugins"]
                 : {},
-            convertFileSrc:
-              typeof existingCapacitor["convertFileSrc"] === "function"
-                ? existingCapacitor["convertFileSrc"]
-                : (filePath: string) => filePath,
+            convertFileSrc,
             getPlatform: () => platform,
             isNativePlatform: () => true,
             isPluginAvailable:

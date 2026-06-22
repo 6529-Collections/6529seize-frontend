@@ -286,11 +286,13 @@ Large-pack ownership:
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.
-- `test:e2e:native-sim` is the broader native-adjacent smoke pack across the
-  simulated Capacitor and Electron projects. A PR owner should run it when
-  changing native runtime detection, deep links, wallet/native shell branching,
-  Electron share handoff behavior, Open Data native visibility, app-wallet
-  fallback behavior, or viewport assumptions.
+- `test:e2e:native-sim` is the broader native-adjacent smoke pack across an
+  explicit allowlist of simulated Capacitor and Electron specs. A PR owner
+  should run it when changing native runtime detection, deep links,
+  wallet/native shell branching, Electron share handoff behavior, Open Data
+  native visibility, app-wallet fallback behavior, or viewport assumptions. Add
+  new specs to the allowlist intentionally after verifying skip behavior across
+  all three simulation projects.
 - Large-pack failures belong to the PR or train owner until they are diagnosed
   as unrelated infrastructure. Do not quarantine, skip, or downgrade a failing
   large pack without recording the reason in the PR or release report.
