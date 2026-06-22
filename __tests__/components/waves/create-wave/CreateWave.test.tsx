@@ -562,12 +562,10 @@ describe("CreateWave", () => {
       fireEvent.click(completeButton);
 
       await waitFor(() => {
-        expect(mockAuthContext.setToast).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: expect.stringMatching(/wait for image uploads/i),
-            type: "error",
-          })
-        );
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          message: "Please wait for image uploads to finish.",
+          type: "error",
+        });
         expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
           "data-submitting",
           "false"
@@ -610,12 +608,10 @@ describe("CreateWave", () => {
         expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
       });
 
-      expect(mockAuthContext.setToast).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: expect.stringMatching(/wait for image uploads/i),
-          type: "error",
-        })
-      );
+      expect(mockAuthContext.setToast).not.toHaveBeenCalledWith({
+        message: "Please wait for image uploads to finish.",
+        type: "error",
+      });
     });
 
     it("shows error when admin group retrieval fails", async () => {
@@ -1021,13 +1017,10 @@ describe("CreateWave", () => {
       fireEvent.click(completeButton);
 
       await waitFor(() => {
-        expect(mockAuthContext.setToast).toHaveBeenCalledWith(
-          expect.objectContaining({
-            details: expect.stringMatching(/failed to create wave/i),
-            title: expect.stringMatching(/create this wave/i),
-            type: "error",
-          })
-        );
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          message: errorMessage,
+          type: "error",
+        });
         expect(mockGetDropSnapshot).toHaveBeenCalled();
         expect(mockRequestDrop).not.toHaveBeenCalled();
       });

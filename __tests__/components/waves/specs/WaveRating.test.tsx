@@ -110,7 +110,7 @@ describe("WaveRating", () => {
     const countRow = screen.getByText("2 Meme cards").closest("span");
     expect(countRow).toBeInTheDocument();
     expect(
-      screen.getByRole("button", {
+      within(countRow as HTMLElement).getByRole("button", {
         name: "View set",
       })
     ).toBeInTheDocument();

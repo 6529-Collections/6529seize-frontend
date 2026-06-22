@@ -372,7 +372,7 @@ export default function AppHeader() {
   const { openDirectMessage } = useCreateModalState();
   const {
     address,
-    hasValidWalletAuth: isAuthenticated,
+    isAuthenticated,
     isConnected,
     connectedAccounts,
     connectedAccountUnreadNotifications,

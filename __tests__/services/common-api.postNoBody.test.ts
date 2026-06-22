@@ -34,7 +34,7 @@ describe("commonApiPostWithoutBodyAndResponse", () => {
       ok: false,
       status: 400,
       statusText: "x",
-      text: async () => JSON.stringify({ error: "err" }),
+      json: async () => ({ error: "err" }),
     });
     await expect(
       commonApiPostWithoutBodyAndResponse({ endpoint: "e" })

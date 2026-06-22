@@ -11,7 +11,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 
 // Mock the API service
 jest.mock("@/services/6529api");
-jest.mock("@/constants/constants", () => ({
+jest.mock("@/constants", () => ({
   GRADIENT_CONTRACT: "0x0C58Ef43fF3032005e472cB5709f8908aCb00205",
   MEMES_CONTRACT: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
 }));

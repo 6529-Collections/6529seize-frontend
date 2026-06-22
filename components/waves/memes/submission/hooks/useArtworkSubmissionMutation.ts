@@ -345,9 +345,6 @@ export function useArtworkSubmissionMutation() {
 
       // Add signature to the request
       transformedRequest.signature = signatureResult.signature ?? null;
-      if (signatureResult.signatureMessage) {
-        transformedRequest.signature_message = signatureResult.signatureMessage;
-      }
 
       // Step 4: Submit the signed drop
       const result = await submissionMutation.mutateAsync({

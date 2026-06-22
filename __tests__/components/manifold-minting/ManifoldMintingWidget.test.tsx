@@ -12,9 +12,7 @@ import {
 jest.mock("wagmi");
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(() => ({
-    address: "0x1111111111111111111111111111111111111111",
-  })),
+  useSeizeConnectContext: jest.fn(() => ({ address: "0x1" })),
 }));
 
 jest.mock(
@@ -22,12 +20,7 @@ jest.mock(
   () =>
     function MockConnect(props: any) {
       return (
-        <button
-          data-testid="connect"
-          onClick={() =>
-            props.onMintFor("0x2222222222222222222222222222222222222222")
-          }
-        >
+        <button data-testid="connect" onClick={() => props.onMintFor("0xabc")}>
           connect
         </button>
       );
@@ -42,7 +35,7 @@ const reset = jest.fn();
   isPending: false,
 });
 (useWaitForTransactionReceipt as jest.Mock).mockReturnValue({});
-(useReadContract as jest.Mock).mockReturnValue({ data: 0n });
+(useReadContract as jest.Mock).mockReturnValue({ data: 0 });
 (useReadContracts as jest.Mock).mockReturnValue({ data: [{ result: false }] });
 
 const baseProps = {
@@ -71,7 +64,7 @@ describe("ManifoldMintingWidget", () => {
     render(<ManifoldMintingWidget {...baseProps} />);
     await user.click(screen.getByTestId("connect"));
     expect(
-      await screen.findByRole("button", { name: /SEIZE x1/i })
+      screen.getByRole("button", { name: /SEIZE x1/i })
     ).toBeInTheDocument();
   });
 

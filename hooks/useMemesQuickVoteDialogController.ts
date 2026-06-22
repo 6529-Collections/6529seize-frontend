@@ -67,6 +67,7 @@ export const useMemesQuickVoteDialogController =
 
       const sessionId = reserveSessionId();
       lastIssuedSessionIdRef.current = sessionId;
+      reservedSessionIdRef.current = null;
       setQuickVoteSessionId(sessionId);
     }, [quickVoteSessionId, reserveSessionId, retryDiscovery]);
 

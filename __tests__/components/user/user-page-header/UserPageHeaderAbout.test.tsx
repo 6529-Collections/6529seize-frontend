@@ -16,7 +16,7 @@ const profile: ApiIdentity = { handle: 'alice' } as any;
 describe('UserPageHeaderAbout', () => {
   it('toggles view on edit click', async () => {
     render(<UserPageHeaderAbout profile={profile} statement={null} canEdit={true} />);
-    await userEvent.click(screen.getAllByRole('button')[0]);
+    await userEvent.click(screen.getByRole('button'));
     expect(screen.getByTestId('edit')).toBeInTheDocument();
   });
 

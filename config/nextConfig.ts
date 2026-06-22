@@ -6,9 +6,14 @@ import { getMediaResolverHostname } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
 import path from "node:path";
 
+import { fileURLToPath } from "node:url";
+
 const HTML_LIMITED_METADATA_BOTS =
   /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
-const REPO_ROOT = path.resolve(process.cwd());
+const REPO_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  ".."
+);
 const NODE_MODULES_PATH = path.resolve(REPO_ROOT, "node_modules");
 const SASS_LOAD_PATHS = [
   path.resolve(NODE_MODULES_PATH, "bootstrap", "scss"),

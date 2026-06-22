@@ -377,7 +377,6 @@ describe("CreateWaveGroupSearchField", () => {
 
     const input = screen.getByRole("combobox", { name: "Search groups..." });
     await user.click(input);
-    await user.type(input, "Alpha");
     expect(await screen.findByRole("listbox")).toBeInTheDocument();
 
     const stopPropagationSpy = jest.spyOn(Event.prototype, "stopPropagation");
@@ -390,8 +389,6 @@ describe("CreateWaveGroupSearchField", () => {
     }
 
     await user.click(input);
-    await user.clear(input);
-    await user.type(input, "Beta");
     expect(await screen.findByRole("listbox")).toBeInTheDocument();
 
     await user.click(document.body);

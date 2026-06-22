@@ -17,10 +17,11 @@ export function useAuthenticatedContent() {
   const { showWaves, connectedProfile, fetchingProfile } =
     useContext(AuthContext);
   const { spaces } = useLayout();
-  const { hasValidWalletAuth } = useSeizeConnectContext();
+  const { isAuthenticated } = useSeizeConnectContext();
 
   const contentState = useMemo<ContentState>(() => {
-    if (!hasValidWalletAuth) {
+    // Not authenticated at all - check this FIRST before any loading states
+    if (!isAuthenticated) {
       return "not-authenticated";
     }
 
@@ -47,7 +48,7 @@ export function useAuthenticatedContent() {
     // All good, show content
     return "ready";
   }, [
-    hasValidWalletAuth,
+    isAuthenticated,
     fetchingProfile,
     connectedProfile,
     showWaves,
@@ -56,7 +57,7 @@ export function useAuthenticatedContent() {
 
   return {
     contentState,
-    isAuthenticated: hasValidWalletAuth,
+    isAuthenticated,
     connectedProfile,
     showWaves,
     fetchingProfile,

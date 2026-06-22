@@ -1,5 +1,4 @@
 import React from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import WaveDropActionsAddReaction from "@/components/waves/drops/WaveDropActionsAddReaction";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -124,45 +123,33 @@ const tempDrop = {
   stableHash: "hash-temp-001",
 } as ExtendedDrop;
 
-const renderWithQueryClient = (ui: React.ReactElement) => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
-
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
-};
-
 describe("WaveDropActionsAddReaction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("renders desktop button", () => {
-    renderWithQueryClient(<WaveDropActionsAddReaction drop={mockDrop} />);
+    render(<WaveDropActionsAddReaction drop={mockDrop} />);
     expect(
       screen.getByRole("button", { name: /add reaction/i })
     ).toBeInTheDocument();
   });
 
   it("renders mobile button", () => {
-    renderWithQueryClient(
-      <WaveDropActionsAddReaction drop={mockDrop} isMobile={true} />
-    );
+    render(<WaveDropActionsAddReaction drop={mockDrop} isMobile={true} />);
     expect(
       screen.getByRole("button", { name: /add reaction/i })
     ).toBeInTheDocument();
   });
 
   it("disables button when drop is temporary", () => {
-    renderWithQueryClient(<WaveDropActionsAddReaction drop={tempDrop} />);
+    render(<WaveDropActionsAddReaction drop={tempDrop} />);
     const button = screen.getByRole("button", { name: /add reaction/i });
     expect(button).toBeDisabled();
   });
 
   it("opens and closes picker on desktop button click", async () => {
-    renderWithQueryClient(<WaveDropActionsAddReaction drop={mockDrop} />);
+    render(<WaveDropActionsAddReaction drop={mockDrop} />);
     const button = screen.getByRole("button", { name: /add reaction/i });
 
     fireEvent.click(button);
@@ -175,7 +162,7 @@ describe("WaveDropActionsAddReaction", () => {
   });
 
   it("closes picker on outside click", async () => {
-    renderWithQueryClient(<WaveDropActionsAddReaction drop={mockDrop} />);
+    render(<WaveDropActionsAddReaction drop={mockDrop} />);
     const button = screen.getByRole("button", { name: /add reaction/i });
 
     fireEvent.click(button);
@@ -189,7 +176,7 @@ describe("WaveDropActionsAddReaction", () => {
 
   it("calls onAddReaction when emoji selected", async () => {
     const onAddReactionMock = jest.fn();
-    renderWithQueryClient(
+    render(
       <WaveDropActionsAddReaction
         drop={mockDrop}
         onAddReaction={onAddReactionMock}
@@ -211,7 +198,7 @@ describe("WaveDropActionsAddReaction", () => {
       new Error("Unauthorized")
     );
 
-    renderWithQueryClient(<WaveDropActionsAddReaction drop={mockDrop} />);
+    render(<WaveDropActionsAddReaction drop={mockDrop} />);
 
     fireEvent.click(screen.getByRole("button", { name: /add reaction/i }));
     fireEvent.click(await screen.findByText(/select emoji/i));
@@ -225,9 +212,7 @@ describe("WaveDropActionsAddReaction", () => {
   });
 
   it("opens and closes picker on mobile button click", async () => {
-    renderWithQueryClient(
-      <WaveDropActionsAddReaction drop={mockDrop} isMobile={true} />
-    );
+    render(<WaveDropActionsAddReaction drop={mockDrop} isMobile={true} />);
     const button = screen.getByRole("button", { name: /add reaction/i });
 
     fireEvent.click(button);
@@ -235,7 +220,7 @@ describe("WaveDropActionsAddReaction", () => {
   });
 
   it("forwards custom dialog z-index to the mobile wrapper", async () => {
-    renderWithQueryClient(
+    render(
       <WaveDropActionsAddReaction
         drop={mockDrop}
         isMobile={true}

@@ -5,22 +5,9 @@ import UserPageXtdhGrantedList from "@/components/user/xtdh/UserPageXtdhGrantedL
 const mockUseSearchParams = jest.fn();
 const mockRouterPush = jest.fn();
 const mockUseXtdhGrantsQuery = jest.fn();
-const mockUsePendingGrantsCount = jest.fn();
-const mockInvalidateQueries = jest.fn();
-
-jest.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({
-    invalidateQueries: mockInvalidateQueries,
-  }),
-}));
 
 jest.mock("@/hooks/useXtdhGrantsQuery", () => ({
   useXtdhGrantsQuery: (...args: unknown[]) => mockUseXtdhGrantsQuery(...args),
-}));
-
-jest.mock("@/hooks/usePendingGrantsCount", () => ({
-  usePendingGrantsCount: (...args: unknown[]) =>
-    mockUsePendingGrantsCount(...args),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -60,11 +47,6 @@ describe("UserPageXtdhGrantedList", () => {
       errorUpdatedAt: 0,
       fetchStatus: "idle",
       remove: jest.fn(),
-    });
-    mockUsePendingGrantsCount.mockReturnValue({
-      count: 0,
-      isError: false,
-      isLoading: false,
     });
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
   });

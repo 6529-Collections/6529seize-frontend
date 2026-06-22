@@ -3,11 +3,9 @@ import userEvent from "@testing-library/user-event";
 import UserPageRepNewRepSearch from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
 import { useQuery } from "@tanstack/react-query";
 
-jest.mock("@tanstack/react-query", () => ({
-  useMutation: jest.fn().mockReturnValue({ mutateAsync: jest.fn() }),
-  useQuery: jest.fn(),
-}));
+jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn(), useMutation: jest.fn().mockReturnValue({ mutateAsync: jest.fn() }) }));
 
+jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepSearchHeader", () => () => <div data-testid="header" />);
 jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepSearchDropdown", () => (props: any) => (
   <div data-testid="dropdown">
     {props.categories.map((c: string) => (
@@ -17,10 +15,7 @@ jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepSearchDropdown", () =>
 ));
 jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepError", () => () => <div data-testid="error" />);
 jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => () => <div data-testid="loader" />);
-jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
-  commonApiPost: jest.fn(),
-}));
+jest.mock("services/api/common-api", () => ({ commonApiFetch: jest.fn(), commonApiPost: jest.fn() }));
 
 describe("UserPageRepNewRepSearch", () => {
   it("shows dropdown results and handles selection", async () => {

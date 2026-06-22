@@ -354,7 +354,7 @@ describe("WaveSmallLeaderboardTopThreeDrop", () => {
 
   it("handles missing winning context gracefully", () => {
     const drop = createMockDrop({
-      winning_context: undefined,
+      ...(undefined !== undefined ? { winning_context: undefined } : {}),
     });
     render(
       <WaveSmallLeaderboardTopThreeDrop

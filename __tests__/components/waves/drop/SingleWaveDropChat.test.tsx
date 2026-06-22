@@ -55,15 +55,27 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
 }));
 
+// Mock globalThis.matchMedia for useDeviceInfo hook
+Object.defineProperty(globalThis, "matchMedia", {
+  writable: true,
+  value: jest.fn().mockImplementation(() => ({
+    matches: false,
+    media: "",
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
 describe("SingleWaveDropChat", () => {
   const createWave = (overrides: Record<string, unknown> = {}) =>
     ({
       id: "w1",
       metrics: { muted: false, your_unread_drops_count: 0 },
       wave: { type: ApiWaveType.Rank, winning_threshold: null },
-      chat: { authenticated_user_eligible: true },
-      voting: { authenticated_user_eligible: true },
-      participation: { authenticated_user_eligible: true },
       ...overrides,
     }) as any;
 
