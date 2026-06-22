@@ -1070,6 +1070,7 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   }
 
   if (pathname === "/api/drops") {
+    // The diagnostics reset bounds this synthetic chat submit to one accepted request.
     return isExpectedChatDropBody(body) && !hasAcceptedChatDropSubmit();
   }
 
@@ -1246,238 +1247,189 @@ function handleDiagnostics(method, pathname, res) {
   return false;
 }
 
-function handleMockApi(method, pathname, url, body, res, requestKind) {
-  if (pathname === "/api/community-members" && isSafeReadMethod(method)) {
-    const query = url.searchParams.get("param") ?? "";
-    const members =
-      query.trim().length >= 3 ? [dmRecipientCommunityMember] : [];
-    writeJson(res, 200, members);
-    return true;
-  }
+function writeJsonResponse(res, payload) {
+  writeJson(res, 200, payload);
+  return true;
+}
 
-  if (pathname === "/api/groups" && isSafeReadMethod(method)) {
-    writeJson(res, 200, []);
-    return true;
-  }
+function writeEmptyResponse(res, status) {
+  writeEmpty(res, status);
+  return true;
+}
 
-  if (pathname === "/api/v2/waves" && isSafeReadMethod(method)) {
-    writeJson(res, 200, { data: [localWaveOverview], page: 1, next: false });
-    return true;
-  }
+const mockApiExactReadRoutes = new Map([
+  ["/api/groups", () => []],
+  [
+    "/api/v2/waves",
+    () => ({ data: [localWaveOverview], page: 1, next: false }),
+  ],
+  ["/api/v2/official-waves", () => [localWaveOverview]],
+  [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
+  [
+    `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
+    () => ({ wave: dmWaveOverview, drops: [] }),
+  ],
+  [`/api/waves/${SANDBOX_CREATED_WAVE_ID}`, () => createdWave],
+  [
+    `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/drops`,
+    () => ({ wave: createdWaveOverview, drops: [createdWaveDrop] }),
+  ],
+  ["/api/v2/boosted-drops", () => emptyPage()],
+  ["/api/v2/drops", () => emptyPage()],
+  ["/api/feed", () => []],
+]);
 
-  if (pathname === "/api/v2/official-waves" && isSafeReadMethod(method)) {
-    writeJson(res, 200, [localWaveOverview]);
-    return true;
-  }
-
-  if (
-    pathname === `/api/waves/${SANDBOX_DM_WAVE_ID}` &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, dmWave);
-    return true;
-  }
-
-  if (
-    pathname === `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops` &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, { wave: dmWaveOverview, drops: [] });
-    return true;
-  }
-
-  if (
-    pathname === `/api/waves/${SANDBOX_CREATED_WAVE_ID}` &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, createdWave);
-    return true;
-  }
-
-  if (
-    pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/drops` &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, {
-      wave: createdWaveOverview,
-      drops: [createdWaveDrop],
-    });
-    return true;
-  }
-
-  if (/^\/api\/waves\/[^/]+$/.test(pathname) && isSafeReadMethod(method)) {
-    writeJson(res, 200, localWave);
-    return true;
-  }
-
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/drops$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, { wave: localWaveOverview, drops: [localDrop] });
-    return true;
-  }
-
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/search$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, { data: [], page: 1, next: false });
-    return true;
-  }
-
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/leaderboard$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, {
+const mockApiPatternReadRoutes = [
+  { pattern: /^\/api\/waves\/[^/]+$/, response: () => localWave },
+  {
+    pattern: /^\/api\/v2\/waves\/[^/]+\/drops$/,
+    response: () => ({ wave: localWaveOverview, drops: [localDrop] }),
+  },
+  {
+    pattern: /^\/api\/v2\/waves\/[^/]+\/search$/,
+    response: () => ({ data: [], page: 1, next: false }),
+  },
+  {
+    pattern: /^\/api\/v2\/waves\/[^/]+\/leaderboard$/,
+    response: () => ({
       wave: localWaveMin,
       drops: [],
       count: 0,
       page: 1,
       next: false,
-    });
-    return true;
+    }),
+  },
+  { pattern: /^\/api\/v2\/waves\/[^/]+\/polls$/, response: () => emptyPage() },
+  { pattern: /^\/api\/waves\/[^/]+\/subwaves$/, response: () => emptyPage() },
+  { pattern: /^\/api\/v2\/waves\/[^/]+\/metadata$/, response: () => [] },
+  { pattern: /^\/api\/v2\/drops\/[^/]+\/metadata$/, response: () => [] },
+  { pattern: /^\/api\/v2\/drops\/[^/]+\/reactions$/, response: () => [] },
+  { pattern: /^\/api\/identities\/[^/]+$/, response: () => localProfile },
+  { pattern: /^\/api\/profiles\/[^/]+\/proxies$/, response: () => [] },
+];
+
+function handleCommunityMemberRead(pathname, url, res) {
+  if (pathname !== "/api/community-members") {
+    return false;
   }
 
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/polls$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, emptyPage());
-    return true;
+  const query = url.searchParams.get("param") ?? "";
+  const members = query.trim().length >= 3 ? [dmRecipientCommunityMember] : [];
+  return writeJsonResponse(res, members);
+}
+
+function handleNotificationRead(pathname, url, res) {
+  if (pathname !== "/api/v2/notifications") {
+    return false;
   }
 
-  if (
-    /^\/api\/waves\/[^/]+\/subwaves$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, emptyPage());
-    return true;
+  return writeJsonResponse(res, notificationResponse(url.searchParams));
+}
+
+function handleExactMockApiRead(pathname, res) {
+  const response = mockApiExactReadRoutes.get(pathname);
+  if (!response) {
+    return false;
   }
 
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/metadata$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, []);
-    return true;
+  return writeJsonResponse(res, response());
+}
+
+function handlePatternMockApiRead(pathname, res) {
+  const route = mockApiPatternReadRoutes.find(({ pattern }) =>
+    pattern.test(pathname)
+  );
+  if (!route) {
+    return false;
   }
 
-  if (pathname === "/api/v2/boosted-drops" && isSafeReadMethod(method)) {
-    writeJson(res, 200, emptyPage());
-    return true;
+  return writeJsonResponse(res, route.response());
+}
+
+function handleMockApiRead(method, pathname, url, res) {
+  if (!isSafeReadMethod(method)) {
+    return false;
   }
 
-  if (pathname === "/api/v2/drops" && isSafeReadMethod(method)) {
-    writeJson(res, 200, emptyPage());
-    return true;
+  return (
+    handleCommunityMemberRead(pathname, url, res) ||
+    handleNotificationRead(pathname, url, res) ||
+    handleExactMockApiRead(pathname, res) ||
+    handlePatternMockApiRead(pathname, res)
+  );
+}
+
+function isNotificationMutationPath(pathname) {
+  return (
+    pathname === "/api/notifications/read" ||
+    Boolean(notificationIdFromPath(pathname))
+  );
+}
+
+const mockApiKnownPostRoutes = [
+  {
+    matches: (pathname) => pathname === "/api/groups",
+    respond: (res) =>
+      writeJsonResponse(res, { ...sandboxAdminGroup, visible: false }),
+  },
+  {
+    matches: (pathname) =>
+      pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible`,
+    respond: (res) => writeJsonResponse(res, sandboxAdminGroup),
+  },
+  {
+    matches: (pathname) => pathname === "/api/waves",
+    respond: (res) => writeJsonResponse(res, createdWave),
+  },
+  {
+    matches: (pathname) => Boolean(notificationWaveIdFromPath(pathname)),
+    respond: (res) => writeEmptyResponse(res, 204),
+  },
+  {
+    matches: isNotificationMutationPath,
+    respond: (res) => writeEmptyResponse(res, 204),
+  },
+  {
+    matches: (pathname) => pathname === "/api/waves/direct-message/new",
+    respond: (res) => writeJsonResponse(res, dmWave),
+  },
+];
+
+function handleAllowedChatDropPost(method, pathname, requestKind, res) {
+  if (method !== "POST" || pathname !== "/api/drops") {
+    return false;
   }
 
-  if (
-    /^\/api\/v2\/drops\/[^/]+\/metadata$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, []);
-    return true;
+  if (requestKind !== "allowed-sandbox-mutation") {
+    return false;
   }
 
-  if (
-    /^\/api\/v2\/drops\/[^/]+\/reactions$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, []);
-    return true;
+  return writeJsonResponse(res, submittedChatDrop);
+}
+
+function handleKnownSandboxPost(method, pathname, url, body, res) {
+  if (method !== "POST") {
+    return false;
   }
 
-  if (/^\/api\/identities\/[^/]+$/.test(pathname) && isSafeReadMethod(method)) {
-    writeJson(res, 200, localProfile);
-    return true;
+  if (!isKnownSandboxMutation(method, pathname, url.searchParams, body)) {
+    return false;
   }
 
-  if (
-    /^\/api\/profiles\/[^/]+\/proxies$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, []);
-    return true;
+  const route = mockApiKnownPostRoutes.find(({ matches }) => matches(pathname));
+  if (!route) {
+    return false;
   }
 
-  if (pathname === "/api/v2/notifications" && isSafeReadMethod(method)) {
-    writeJson(res, 200, notificationResponse(url.searchParams));
-    return true;
-  }
+  return route.respond(res);
+}
 
-  if (pathname === "/api/feed" && isSafeReadMethod(method)) {
-    writeJson(res, 200, []);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === "/api/drops" &&
-    requestKind === "allowed-sandbox-mutation"
-  ) {
-    writeJson(res, 200, submittedChatDrop);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === "/api/groups" &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeJson(res, 200, { ...sandboxAdminGroup, visible: false });
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible` &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeJson(res, 200, sandboxAdminGroup);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === "/api/waves" &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeJson(res, 200, createdWave);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    notificationWaveIdFromPath(pathname) &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeEmpty(res, 204);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    (pathname === "/api/notifications/read" ||
-      notificationIdFromPath(pathname)) &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeEmpty(res, 204);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === "/api/waves/direct-message/new" &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeJson(res, 200, dmWave);
-    return true;
-  }
-
-  return false;
+function handleMockApi(method, pathname, url, body, res, requestKind) {
+  return (
+    handleMockApiRead(method, pathname, url, res) ||
+    handleAllowedChatDropPost(method, pathname, requestKind, res) ||
+    handleKnownSandboxPost(method, pathname, url, body, res)
+  );
 }
 
 function readRequestBody(req) {
