@@ -1,4 +1,4 @@
 interface:
   display_name: "Design UI/UX"
   short_description: "Review UI against 6529 design and Tailwind migration standards."
-  default_prompt: "Use $design-ui-ux to review the touched frontend UI against the 6529 design, UX, and Tailwind migration standard and summarize required fixes."
+  default_prompt: "Use $design-ui-ux to review the touched frontend UI against the 6529 design, UX, and Tailwind migration standard and summarize evidence, risks, and any required fixes."

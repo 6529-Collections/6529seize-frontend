@@ -7,9 +7,9 @@ dark-first, dense, content-led, and built for repeated use. This standard is for
 contributors and agents creating or reviewing frontend work. It complements the
 WCAG 2.2 AA and i18n standards; it does not replace them.
 
-The goal is consistency and usability, not a new visual direction. Agents should
-derive decisions from the current codebase and rendered product before adding
-new UI patterns.
+The goal is consistency and usability, not a broad redesign or a new component
+language. Agents should derive decisions from the current codebase and rendered
+product before adding new UI patterns.
 
 The frontend is in a progressive styling migration. Tailwind CSS with the repo
 `tw-` prefix is the preferred direction for new and touched UI. Bootstrap,
@@ -35,9 +35,9 @@ do not need this standard unless they change visible frontend behavior.
 collecting, identity, and community participation. The UI should feel polished
 and premium while remaining fast, readable, and useful for repeated use. Product
 content should create the richness: artwork, media, avatars, profiles, waves,
-badges, activity, and collector context. Do not flatten social or art surfaces
-into a generic dashboard, spreadsheet-first utility interface, or template-like
-admin surface. Do not add decoration in place of real product content.
+badges, activity, and collector context. Social and art surfaces should stay
+content-led, native to 6529, and richer through real product content rather than
+generic admin patterns or decorative filler.
 
 ## 6529 UI Posture
 
@@ -89,11 +89,11 @@ maintained legacy surfaces, with the exception documented.
 Use the existing Tailwind visual language for new and substantially touched UI:
 
 - Use `iron-*` neutrals for dark surfaces, muted text, dividers, and skeletons.
-  When an element needs a visible edge, separator, focus ring, or layered
-  separation, match the local boundary treatment: white-with-opacity edges such
-  as `tw-border-white/5`, `tw-border-white/10`, and `tw-ring-white/10` on
-  translucent dark surfaces, or `tw-border-iron-*` and `tw-ring-iron-*` where
-  the nearby pattern uses solid neutral boundaries.
+  For framed surfaces such as cards, modals, dropdowns, inputs, tables, and
+  media previews, match the nearest boundary treatment: white-with-opacity edges
+  such as `tw-border-white/5`, `tw-border-white/10`, and `tw-ring-white/10` on
+  translucent dark layers, or `tw-border-iron-*` and `tw-ring-iron-*` on solid
+  neutral panels.
 - Use `primary-*` for primary actions, active accents, carets, and focus states.
   Use semantic tokens such as `error` and `success` for user-facing status when
   available. Reserve bright or heavy borders for active, selected, warning, or
@@ -119,7 +119,8 @@ Use the existing Tailwind visual language for new and substantially touched UI:
   both are available.
 - Use Tailwind utilities and shared Tailwind-based components for new or
   substantially touched UI. Use Sass modules only when they are already local to
-  the surface or when Tailwind cannot express the behavior cleanly.
+  the surface or when scoped CSS is needed for selectors, third-party markup, or
+  CSS behavior Tailwind cannot represent cleanly.
 - Keep legacy changes narrow. If a Bootstrap/Sass page is only being fixed,
   preserve behavior and avoid a broad redesign; migrate the touched UI toward
   Tailwind when practical and record remaining styling debt when not.
@@ -171,8 +172,8 @@ For visible UI changes, also collect browser evidence that covers:
 - Console/runtime evidence: no new page errors and no new relevant console
   errors on the checked surface.
 
-Initial browser evidence for this standard used `/waves` as a dense app surface
-for desktop and mobile review: dark UI, left rail navigation, compact
+Reference surface evidence for this standard used `/waves` as a dense app
+surface for desktop and mobile review: dark UI, left rail navigation, compact
 typography, avatar-heavy lists, badges, pinned/unread states, media cards, and
 subtle borders. It also found that some local routes can expose DOM geometry and
 page titles while screenshot evidence appears blank. UI/UX verification must
@@ -199,7 +200,7 @@ visible UI.
 
 ## Exceptions
 
-Exceptions are allowed only when a better-compliant result is out of scope,
+Exceptions are allowed only when a more compliant result is out of scope,
 blocked by existing debt, or blocked by third-party behavior. Record:
 
 - route or component
