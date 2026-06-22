@@ -46,7 +46,7 @@ expose different controls.
   - received proxy rows appear when available
   - connected-account rows can show unread count badges (`1-99+`) and can be
     used for direct account selection
-  - when fewer than three connected profiles are stored, an `Add` row appears
+  - when fewer than five connected profiles are stored, an `Add` row appears
     under the connected-profile list
 - Session actions:
   - wallet connected: `Disconnect Wallet`, desktop-web `Share`,
@@ -68,7 +68,7 @@ expose different controls.
     the active account
   - additional connected account avatars can show unread count badges (`1-99+`)
     and can be selected for account switch
-  - when fewer than three connected profiles are stored, a `+` button appears
+  - when fewer than five connected profiles are stored, a `+` button appears
     beside the additional-account avatars
 - Network label:
   - when the wallet has more than one supported chain, the footer shows
@@ -109,8 +109,8 @@ expose different controls.
 
 - Connect from web sidebar, then open dropdown actions.
 - Connect from app footer and continue on the same route.
-- Use `Add` or `+` to connect a second or third profile without leaving the
-  current route.
+- Use `Add` or `+` to connect another profile, up to the five-profile limit,
+  without leaving the current route.
 - Use connected-account rows in the web dropdown to switch profiles without
   leaving the menu.
 - Use a quick second activate on the web user row to cycle to the next
@@ -137,7 +137,7 @@ expose different controls.
 - Web dropdown always includes the base identity row.
 - Connected-account controls appear only when at least one connected account is
   available.
-- Add-account controls appear only while fewer than three connected profiles are
+- Add-account controls appear only while fewer than five connected profiles are
   stored.
 - Proxy rows appear only when active received proxies exist.
 - Proxy switching is not available in app footer.
@@ -179,7 +179,7 @@ expose different controls.
 ## Limitations / Notes
 
 - Account action sets intentionally differ between web dropdown and app footer.
-- At most three connected profiles can be stored at once.
+- At most five connected profiles can be stored at once.
 - Proxy switching is available only in the web dropdown.
 - `Disconnect Wallet` exists only in web dropdown; app footer uses full logout
   actions.
