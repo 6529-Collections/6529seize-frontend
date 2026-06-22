@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export class ApiSessionLoginRequest {
     'client_type': ApiSessionLoginRequestClientTypeEnum;
     'client_address': string;
@@ -94,4 +92,3 @@ export enum ApiSessionLoginRequestSignatureVersionEnum {
     NUMBER_1 = 1,
     NUMBER_2 = 2
 }
-

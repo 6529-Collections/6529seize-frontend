@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export class ApiSessionLogoutWebRequest {
     'client_type': ApiSessionLogoutWebRequestClientTypeEnum;
     'all_sessions'?: boolean;
@@ -46,4 +44,3 @@ export class ApiSessionLogoutWebRequest {
 export enum ApiSessionLogoutWebRequestClientTypeEnum {
     Web = 'web'
 }
-

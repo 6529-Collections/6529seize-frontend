@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export class ApiSessionNonceQuery {
     /**
     * Your wallet address
@@ -60,4 +58,3 @@ export enum ApiSessionNonceQueryClientTypeEnum {
     Web = 'web',
     Native = 'native'
 }
-
