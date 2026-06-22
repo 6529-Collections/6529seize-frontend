@@ -6,52 +6,21 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { gotoReady, gotoReadyWithApiResponse } from "../support/routeReadiness";
 import { isMobileSurfaceProject } from "../support/surfaceSimulation";
 
 const SETTLE_TIMEOUT_MS = 45000;
-const RESPONSE_TIMEOUT_MS = 20000;
 const NEXTGEN_TOKEN_ID = "10000000315";
-
-type ApiResponseMatcher = (url: URL) => boolean;
-
-async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
-  await waitForRouteReady(page);
-  await expectNoHorizontalOverflow(page);
-  await expect(page).not.toHaveTitle("404 | PAGE NOT FOUND");
-}
-
-async function waitForApiResponse(page: Page, matches: ApiResponseMatcher) {
-  const response = await page.waitForResponse(
-    (candidate) => {
-      try {
-        return matches(new URL(candidate.url()));
-      } catch {
-        return false;
-      }
-    },
-    { timeout: RESPONSE_TIMEOUT_MS }
-  );
-  expect(response.ok(), `${response.url()} returned ${response.status()}`).toBe(
-    true
-  );
-  return response;
-}
-
-async function gotoReadyWithApiResponse(
-  page: Page,
-  path: string,
-  matches: ApiResponseMatcher
-) {
-  const responsePromise = waitForApiResponse(page, matches);
-  await gotoReady(page, path);
-  return responsePromise;
-}
 
 async function isAnyVisible(locator: Locator) {
   const count = await locator.count();
   for (let index = 0; index < Math.min(count, 8); index++) {
-    if (await locator.nth(index).isVisible().catch(() => false)) {
+    if (
+      await locator
+        .nth(index)
+        .isVisible()
+        .catch(() => false)
+    ) {
       return true;
     }
   }
@@ -157,7 +126,9 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     ).toBeVisible();
   });
 
-  test("NextGen about page keeps product context readable", async ({ page }) => {
+  test("NextGen about page keeps product context readable", async ({
+    page,
+  }) => {
     await gotoReady(page, "/nextgen/about");
 
     await expect(page).toHaveTitle(/About.*NextGen|NextGen/);
@@ -307,7 +278,10 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
 
     await expect(page).toHaveTitle("ReMemes | Collections");
     await expectAnyVisible(
-      [page.getByAltText("ReMemes"), page.getByText("ReMemes", { exact: true })],
+      [
+        page.getByAltText("ReMemes"),
+        page.getByText("ReMemes", { exact: true }),
+      ],
       "Expected ReMemes title or logo to render"
     );
     for (const filter of [/^Sort:/, /^Token Type:/, /^Meme Reference:/]) {
