@@ -1,19 +1,22 @@
 "use client";
 
 import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
+import { primeMarketplacePreviewCacheFromNftLinks } from "@/components/waves/marketplace/common";
 import MarketplacePreview from "@/components/waves/MarketplacePreview";
+import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveSalesDecisions } from "@/hooks/waves/useWaveSalesDecisions";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLayout } from "./layout/LayoutContext";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useLayoutEffect, useMemo } from "react";
 
 interface MyStreamWaveSalesProps {
   readonly waveId: string;
 }
 
-const getFirstSaleUrl = (
-  nftLinks: { readonly url_in_text?: string | null | undefined }[] | undefined
-): string | null => {
+const getFirstSaleNftLink = (
+  nftLinks: readonly ApiDropNftLink[] | undefined
+): ApiDropNftLink | null => {
   for (const nftLink of nftLinks ?? []) {
     if (typeof nftLink.url_in_text !== "string") {
       continue;
@@ -21,7 +24,7 @@ const getFirstSaleUrl = (
 
     const url = nftLink.url_in_text.trim();
     if (url.length > 0) {
-      return url;
+      return nftLink;
     }
   }
 
@@ -42,6 +45,7 @@ const getSalesErrorMessage = (error: unknown): string | null => {
 
 const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   const { salesViewStyle } = useLayout();
+  const queryClient = useQueryClient();
   const {
     decisionPoints,
     error,
@@ -51,19 +55,34 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
     isFetching,
     isFetchingNextPage,
   } = useWaveSalesDecisions({ waveId });
-  const salesUrls = useMemo(
+  const saleNftLinks = useMemo(
     () =>
       decisionPoints
         .slice()
         .reverse()
         .flatMap((decisionPoint) =>
           decisionPoint.winners.flatMap((winner) => {
-            const url = getFirstSaleUrl(winner.drop.nft_links);
-            return url ? [url] : [];
+            const nftLink = getFirstSaleNftLink(winner.drop.nft_links);
+            return nftLink ? [nftLink] : [];
           })
         ),
     [decisionPoints]
   );
+  const salesUrls = useMemo(
+    () =>
+      saleNftLinks.flatMap((nftLink) => {
+        const url = nftLink.url_in_text?.trim();
+        return url ? [url] : [];
+      }),
+    [saleNftLinks]
+  );
+
+  useLayoutEffect(() => {
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks: saleNftLinks,
+    });
+  }, [queryClient, saleNftLinks]);
 
   const handleIntersection = useCallback(
     (isIntersecting: boolean) => {
