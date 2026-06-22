@@ -2807,3 +2807,36 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   variables, and no dedicated local Credential Manager target for the dev-auth
   triplet is indexed. Do not mine Codex log databases for auth values; use a
   proper local credential source if this rerun is required before merge.
+
+## 2026-06-22T02:15Z Profile Deep-Link E2E Pack Started
+
+- Started branch `codex/e2e-profile-tabs-readonly` from current merged
+  `origin/main` after PR #2815, then rebased over merged PR #2816.
+- Existing `test:e2e:social-readonly` already covers the public profile shell,
+  `/curations`, `/collected`, and `/xtdh`, so this slice deliberately avoids
+  duplicating those route-tab assertions.
+- Added `tests/social/profile-deep-links-readonly.spec.ts` for public profile
+  legacy redirect behavior:
+  - `/{handle}?source=e2e&view=legacy` keeps the canonical public profile
+    readable while preserving query state.
+  - `/{handle}/waves?source=e2e&serialNo=1` redirects to the canonical
+    public curation/profile shell while preserving query state.
+  - `/{handle}/groups?source=e2e` and `/{handle}/followers?source=e2e`
+    redirect back to the public profile shell without carrying obsolete query
+    state.
+- Added local, staging, and production package scripts for the pack. Local and
+  staging run desktop and mobile Chromium; production runs desktop Chromium as
+  a public read-only smoke.
+- Deferred `/rep` not-found coverage from the explorer suggestion because this
+  repo now has profile CMS catch-all routing, so `/rep` is not a stable simple
+  not-found contract.
+- Local validation passed after rebasing over PR #2816:
+  - `seize run test:e2e:profile-deep-links-readonly`: 8 passed.
+  - `seize run format:uncommitted`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/profile-deep-links-secret-scan.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/profile-deep-links-workflow-security.json`
+  - `codex-diff-check`
+  - `seize run test:e2e:social-readonly`: 12 passed.
