@@ -33,6 +33,12 @@ Use this skill for user-facing design and UX work in this repository.
 ## Review Checklist
 
 - The UI fits the local 6529 surface and does not read like a new product style.
+- The result feels sleek, current, polished, and premium without becoming
+  decorative or over-produced.
+- The surface is content-led and native to 6529: art, media, identity, waves,
+  profiles, badges, activity, and collector context create the richness.
+- Social and art surfaces do not collapse into generic dashboard, admin, or
+  template UI.
 - New or migrated UI uses `tw-` Tailwind classes and modern tokens unless the
   touched surface is intentionally still legacy.
 - Dark-first surfaces, `iron-*` greys, typography, borders, and compact spacing

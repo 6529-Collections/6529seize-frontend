@@ -29,6 +29,16 @@ copy old colors, spacing, or component chrome into new work.
 Backend-only changes, generated models, docs-only changes, and internal scripts
 do not need this standard unless they change visible frontend behavior.
 
+## Design Direction
+
+6529 should feel like a modern, sleek, content-led social product for art,
+collecting, identity, and community participation. The UI should feel polished
+and premium while remaining fast, readable, and useful for repeated use. Product
+content should create the richness: artwork, media, avatars, profiles, waves,
+badges, activity, and collector context. Do not flatten social or art surfaces
+into a generic dashboard, spreadsheet-first utility interface, or template-like
+admin surface. Do not add decoration in place of real product content.
+
 ## 6529 UI Posture
 
 - Treat 6529 as a working app, not a marketing site. Prefer dense but readable
