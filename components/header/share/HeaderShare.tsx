@@ -387,9 +387,11 @@ export function HeaderQRModal({
 
   const { hasValidWalletAuth } = useSeizeConnectContext();
   const { requestSessionUpgrade } = useAuth();
+  const activeWalletAddress = getWalletAddress();
+  const hasWalletAddress = Boolean(activeWalletAddress);
 
   const [activeTab, setActiveTab] = useState<Mode>(
-    hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE
+    hasValidWalletAuth || hasWalletAddress ? Mode.SHARE : Mode.NAVIGATE
   );
   const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.APP);
 
@@ -402,7 +404,7 @@ export function HeaderQRModal({
     useState<string>("");
   const [connectionShareStatus, setConnectionShareStatus] =
     useState<ConnectionShareStatus>(
-      hasValidWalletAuth ? "legacy-auth" : "unauthenticated"
+      hasValidWalletAuth || hasWalletAddress ? "legacy-auth" : "unauthenticated"
     );
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
@@ -569,7 +571,7 @@ export function HeaderQRModal({
     readonly signal?: AbortSignal | undefined;
     readonly walletAddress: string | null;
   }): Promise<string> {
-    if (!walletAddress || !hasValidWalletAuth) {
+    if (!walletAddress) {
       setUnavailableConnectionShare("unauthenticated");
       return "";
     }
@@ -636,7 +638,9 @@ export function HeaderQRModal({
       connectionShareAbortRef.current?.abort();
       connectionShareAbortRef.current = null;
       setConnectionShareStatus(
-        hasValidWalletAuth ? "legacy-auth" : "unauthenticated"
+        hasValidWalletAuth || hasWalletAddress
+          ? "legacy-auth"
+          : "unauthenticated"
       );
       setShareConnectionAppUrl("");
       setShareConnectionCoreUrl("");
@@ -648,7 +652,7 @@ export function HeaderQRModal({
     const controller = new AbortController();
     connectionShareAbortRef.current = controller;
 
-    void generateSources(getWalletAddress(), controller.signal);
+    void generateSources(activeWalletAddress, controller.signal);
 
     return () => {
       shareGenerationIdRef.current += 1;
@@ -657,10 +661,12 @@ export function HeaderQRModal({
         connectionShareAbortRef.current = null;
       }
     };
-  }, [show, hasValidWalletAuth]);
+  }, [show, hasValidWalletAuth, hasWalletAddress, activeWalletAddress]);
 
   useEffect(() => {
-    setActiveTab(hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE);
+    setActiveTab(
+      hasValidWalletAuth || hasWalletAddress ? Mode.SHARE : Mode.NAVIGATE
+    );
     setActiveSubTab(SubMode.APP);
     if (show) return;
     const timer = setTimeout(() => {
@@ -669,7 +675,7 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
-  }, [show, hasValidWalletAuth]);
+  }, [show, hasValidWalletAuth, hasWalletAddress]);
 
   useEffect(() => {
     if (show) {

@@ -214,7 +214,9 @@ describe("Basic Functionality", () => {
     });
 
     render(<ManifoldMinting {...defaultProps} />);
-    await screen.findByText("Error fetching mint information");
+    expect(
+      await screen.findByText("Error fetching mint information")
+    ).toBeInTheDocument();
   });
 
   test("shows loading state initially", () => {

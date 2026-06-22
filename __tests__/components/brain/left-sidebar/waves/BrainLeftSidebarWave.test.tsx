@@ -204,7 +204,7 @@ describe("BrainLeftSidebarWave", () => {
     const bellSlashIcons = document.querySelectorAll(
       '[data-icon="bell-slash"]'
     );
-    expect(bellSlashIcons.length).toBe(0);
+    expect(bellSlashIcons).toHaveLength(0);
   });
 
   it("hides the pin control when showPin is false", () => {

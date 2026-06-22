@@ -551,7 +551,7 @@ describe("MemesArtSubmissionFile", () => {
     });
 
     it("revokes object URLs on cleanup", () => {
-      const { unmount } = render(
+      const { queryByTestId, unmount } = render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
           <MemesArtSubmissionFile {...baseProps} />
         </AuthContext.Provider>
@@ -559,8 +559,7 @@ describe("MemesArtSubmissionFile", () => {
 
       unmount();
 
-      // Component should clean up properly without errors
-      expect(true).toBe(true); // No errors during unmount
+      expect(queryByTestId("artwork-upload-area")).not.toBeInTheDocument();
     });
   });
 

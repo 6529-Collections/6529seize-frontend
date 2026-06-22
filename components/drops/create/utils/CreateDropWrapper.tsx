@@ -363,13 +363,9 @@ const CreateDropWrapper = forwardRef<
         return wave.participation.required_media;
       }
       const medias = getMedias();
-      return wave.participation.required_media.filter((i) => {
-        const file = medias.find((j) => getRequirementFromFileType(j) === i);
-        if (!file) {
-          return true;
-        }
-        return false;
-      });
+      return wave.participation.required_media.filter(
+        (i) => !medias.some((j) => getRequirementFromFileType(j) === i)
+      );
     };
 
     const [missingMedia, setMissingMedia] = useState<

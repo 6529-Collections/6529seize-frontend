@@ -489,6 +489,119 @@ describe("HeaderShare", () => {
       ).toBe(false);
     });
 
+    it("asks the backend for a connection share when context auth is stale but a wallet is active", async () => {
+      const qrcode = require("qrcode");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        hasValidWalletAuth: false,
+        seizeConnect: jest.fn(),
+        seizeAcceptConnection: jest.fn(),
+        address: "0x1234567890123456789012345678901234567890",
+        hasInitializationError: false,
+        initializationError: null,
+      });
+      sessionV2.createConnectionShare.mockResolvedValue({
+        connection_share_code: "stale-context-share-code",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: null,
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?connection_share_code=stale-context-share-code",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining(
+            "connection_share_code=stale-context-share-code"
+          ),
+          { width: 500, margin: 0 }
+        )
+      );
+      expect(
+        screen.queryByText("Update Authentication")
+      ).not.toBeInTheDocument();
+    });
+
+    it("regenerates the connection share when the active wallet changes while the modal is open", async () => {
+      const qrcode = require("qrcode");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const firstAddress = "0x1111111111111111111111111111111111111111";
+      const secondAddress = "0x2222222222222222222222222222222222222222";
+      let activeAddress = firstAddress;
+      mockAuthUtils.getWalletAddress.mockImplementation(() => activeAddress);
+      mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
+        isAuthenticated: true,
+        hasValidWalletAuth: true,
+        seizeConnect: jest.fn(),
+        seizeAcceptConnection: jest.fn(),
+        address: activeAddress,
+        hasInitializationError: false,
+        initializationError: null,
+      }));
+      sessionV2.createConnectionShare
+        .mockResolvedValueOnce({
+          connection_share_code: "first-wallet-share-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: firstAddress,
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=first-wallet-share-code",
+        })
+        .mockResolvedValueOnce({
+          connection_share_code: "second-wallet-share-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: secondAddress,
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=second-wallet-share-code",
+        });
+
+      const { rerender } = renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining(
+            "connection_share_code=first-wallet-share-code"
+          ),
+          { width: 500, margin: 0 }
+        )
+      );
+
+      activeAddress = secondAddress;
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          <HeaderShare />
+        </QueryClientProvider>
+      );
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining(
+            "connection_share_code=second-wallet-share-code"
+          ),
+          { width: 500, margin: 0 }
+        )
+      );
+    });
+
     it("mints a fresh connection share code after the share modal closes", async () => {
       const qrcode = require("qrcode");
       const sessionV2 = require("@/services/auth/session-v2.utils");

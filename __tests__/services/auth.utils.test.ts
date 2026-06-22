@@ -134,7 +134,7 @@ describe("auth.utils", () => {
         jwt: "jwt-a",
       })
     );
-    expect(getRefreshToken()).toBe(null);
+    expect(getRefreshToken()).toBeNull();
     expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
       "6529-wallet-refresh-token"
     );
@@ -355,8 +355,8 @@ describe("auth.utils", () => {
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0x111");
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0x222");
     expect(getConnectedWalletAccounts()).toHaveLength(0);
-    expect(getWalletAddress()).toBe(null);
-    expect(getRefreshToken()).toBe(null);
+    expect(getWalletAddress()).toBeNull();
+    expect(getRefreshToken()).toBeNull();
     expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
       secure: true,
       sameSite: "strict",
@@ -376,7 +376,7 @@ describe("auth.utils", () => {
 
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xlegacy");
     expect(getConnectedWalletAccounts()).toHaveLength(0);
-    expect(getWalletAddress()).toBe(null);
+    expect(getWalletAddress()).toBeNull();
   });
 
   it("enforces max connected profiles when adding new addresses", () => {

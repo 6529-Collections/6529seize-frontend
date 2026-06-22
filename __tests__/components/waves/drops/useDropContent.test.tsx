@@ -131,7 +131,7 @@ describe("useDropContent", () => {
       });
 
       expect(result.current.isLoading).toBe(true);
-      expect(result.current.drop).toBe(null);
+      expect(result.current.drop).toBeNull();
       expect(result.current.content.segments).toEqual([
         { type: "text", content: "Loading..." },
       ]);
@@ -298,7 +298,7 @@ describe("useDropContent", () => {
         wrapper: createWrapper(),
       });
 
-      expect(result.current.drop).toBe(null);
+      expect(result.current.drop).toBeNull();
     });
 
     it("handles timeout errors with appropriate message", async () => {

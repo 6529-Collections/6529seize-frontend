@@ -197,8 +197,8 @@ export function createAppWalletConnector(
       const chainId = maybeChainId ?? chains[0]?.id;
 
       // Validate chainId
-      const validChain = chains.find((c) => c.id === chainId);
-      if (!validChain) {
+      const isValidChain = chains.some((c) => c.id === chainId);
+      if (!isValidChain) {
         throw new Error(
           `Chain ID ${chainId} is not supported. Supported chains: ${chains
             .map((c) => c.id)
