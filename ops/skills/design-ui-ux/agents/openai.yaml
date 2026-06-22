@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design UI/UX"
+  short_description: "Review frontend UI against 6529 design standards."
+  default_prompt: "Use $design-ui-ux to review the touched frontend UI against the 6529 design and UX standard and summarize required fixes."

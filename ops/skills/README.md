@@ -13,6 +13,9 @@ This folder stores repo-local Codex skills and agent guidance.
 - [Deploy 6529](deploy-6529/SKILL.md): carries approved frontend or
   coordinated frontend/backend releases through merge, staging, production,
   E2E validation, and deployment coordination.
+- [Design UI/UX](design-ui-ux/SKILL.md): guides frontend UI changes against
+  repo-specific design, responsive layout, interaction-state, media, and visual
+  evidence standards.
 - [I18n Localization](i18n-localization/SKILL.md): guides progressive
   frontend message extraction, locale formatting, and fallback review.
 - [React Doctor](react-doctor/SKILL.md): provides React-focused review and

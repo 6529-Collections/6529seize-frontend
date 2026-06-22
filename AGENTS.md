@@ -114,6 +114,11 @@ All project commands must go through the repo-local `6529` wrapper.
 - New and touched user-facing copy, accessible names, dates, numbers, and
   locale-sensitive sorting should follow
   `ops/standards/frontend-i18n-localization.md`.
+- New and touched user-facing UI should follow
+  `ops/standards/frontend-design-ui-ux.md` for repo-specific visual
+  consistency, responsive layout, interaction states, media behavior, and
+  browser evidence.
+- Use `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
 - Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
 - Use `ops/skills/i18n-localization/SKILL.md` for progressive localization
   work.
@@ -199,6 +204,7 @@ is available, use it; otherwise read the relevant files in
   - `ops/skills/write-prs/SKILL.md` for PR descriptions, bot iteration, merge
     gates, and deploy gates.
   - `ops/skills/commit-docs-updater/SKILL.md` for user-facing docs updates.
+  - `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
   - `ops/skills/react-doctor/SKILL.md` for React, Next.js, hook, routing, or UI
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
