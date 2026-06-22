@@ -75,12 +75,6 @@ function replaceAttachmentInPart(
 }
 
 const getIncomingWaveId = (drop: ApiDrop): string | null => {
-  const topLevelWaveId =
-    (drop as { readonly wave_id?: unknown }).wave_id;
-  if (typeof topLevelWaveId === "string" && topLevelWaveId.length > 0) {
-    return topLevelWaveId;
-  }
-
   const wave = (drop as { readonly wave?: { readonly id?: unknown } }).wave;
   return typeof wave?.id === "string" && wave.id.length > 0 ? wave.id : null;
 };
@@ -549,25 +543,7 @@ const useProcessIncomingDrop = ({
       type: ProcessIncomingDropType,
       options: ProcessIncomingDropOptions = {}
     ) => {
-      let resolvedDrop = drop;
-      let waveId = getIncomingWaveId(resolvedDrop);
-
-      if (waveId === null) {
-        try {
-          const fetchedDrop = await fetchDropByIdBatched(drop.id);
-          if (fetchedDrop) {
-            resolvedDrop = fetchedDrop;
-            waveId = getIncomingWaveId(resolvedDrop);
-          }
-        } catch (error) {
-          reportBackgroundTaskError(
-            "Failed to resolve incoming websocket drop by id:",
-            error
-          );
-          return;
-        }
-      }
-
+      const waveId = getIncomingWaveId(drop);
       if (waveId === null) {
         return;
       }
@@ -575,9 +551,9 @@ const useProcessIncomingDrop = ({
       if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
         const preferExistingPollVote = options.preferExistingPollVote;
         if (preferExistingPollVote === undefined) {
-          updateDropInCachedDrops(queryClient, resolvedDrop);
+          updateDropInCachedDrops(queryClient, drop);
         } else {
-          updateDropInCachedDrops(queryClient, resolvedDrop, {
+          updateDropInCachedDrops(queryClient, drop, {
             preferExistingPollVote,
           });
         }
@@ -595,9 +571,7 @@ const useProcessIncomingDrop = ({
         return;
       }
 
-      const existingDrop = currentData.drops.find(
-        (d) => d.id === resolvedDrop.id
-      );
+      const existingDrop = currentData.drops.find((d) => d.id === drop.id);
       if (existingDrop?.type === DropSize.LIGHT) {
         return;
       }
@@ -608,7 +582,7 @@ const useProcessIncomingDrop = ({
           return;
         }
         await applyCanonicalDropUpdateForExistingDrop({
-          dropId: resolvedDrop.id,
+          dropId: drop.id,
           existingDrop: existingFullDrop,
           waveId,
           type,
@@ -618,7 +592,7 @@ const useProcessIncomingDrop = ({
       }
 
       const optimisticDrop = buildOptimisticDrop({
-        drop: resolvedDrop,
+        drop,
         existingDrop: existingFullDrop,
         options,
       });
