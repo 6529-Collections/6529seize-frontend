@@ -89,10 +89,11 @@ maintained legacy surfaces, with the exception documented.
 Use the existing Tailwind visual language for new and substantially touched UI:
 
 - Use `iron-*` neutrals for dark surfaces, muted text, dividers, and skeletons.
-  Use white-with-opacity borders and rings, such as `tw-border-white/5`,
-  `tw-border-white/10`, and `tw-ring-white/10`, for layered dark surfaces where
-  the local UI uses translucent light edges. Use `tw-border-iron-*` and
-  `tw-ring-iron-*` where the nearby pattern uses solid neutral boundaries.
+  When an element needs a visible edge, separator, focus ring, or layered
+  separation, match the local boundary treatment: white-with-opacity edges such
+  as `tw-border-white/5`, `tw-border-white/10`, and `tw-ring-white/10` on
+  translucent dark surfaces, or `tw-border-iron-*` and `tw-ring-iron-*` where
+  the nearby pattern uses solid neutral boundaries.
 - Use `primary-*` for primary actions, active accents, carets, and focus states.
   Use semantic tokens such as `error` and `success` for user-facing status when
   available. Reserve bright or heavy borders for active, selected, warning, or

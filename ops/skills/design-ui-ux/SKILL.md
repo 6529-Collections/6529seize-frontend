@@ -22,7 +22,8 @@ Use this skill for user-facing design and UX work in this repository.
 5. Check shape, color, and surface-token choices. Use existing product radius
    patterns: `tw-rounded-lg` / `tw-rounded-xl` for framed surfaces,
    `tw-rounded-md` / `tw-rounded` for dense controls, and `tw-rounded-full` for
-   circular or pill UI. Use established local border, ring, and color patterns,
+   circular or pill UI. When an element needs a visible edge, separator, focus
+   ring, or layered separation, match the established local boundary treatment,
    including white-with-opacity edges on layered dark surfaces.
 6. Keep the change scoped to the touched surface. Reuse the existing visual
    language, icon set, spacing scale, palette, styling library, and
@@ -46,7 +47,7 @@ Use this skill for user-facing design and UX work in this repository.
   template UI.
 - New or migrated UI uses `tw-` Tailwind classes and modern tokens unless the
   touched surface is intentionally still legacy.
-- Dark-first surfaces, `iron-*` greys, white-with-opacity borders/rings,
+- Dark-first surfaces, `iron-*` greys, boundary treatments when present,
   typography, and compact spacing match current Tailwind patterns before older
   Bootstrap/Sass patterns.
 - Cards, dialogs, controls, and framed surfaces use existing radius patterns
