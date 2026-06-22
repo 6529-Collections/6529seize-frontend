@@ -75,6 +75,10 @@
       "aliases": [
         "connect wallet",
         "connect profile",
+        "can't connect wallet",
+        "cannot connect wallet",
+        "wallet not connecting",
+        "wallet won't connect",
         "wallet login",
         "sign in",
         "profile switch"
@@ -91,6 +95,7 @@
       "facts": [
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
+        "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],
       "canonical_path": "/",
@@ -169,7 +174,15 @@
         "profile subscriptions",
         "my subscriptions",
         "subscriptions tab",
-        "where are my subscriptions"
+        "where are my subscriptions",
+        "top up subscriptions",
+        "where do i top up subscriptions",
+        "change airdrop address",
+        "change my airdrop address",
+        "update airdrop address",
+        "update my airdrop address",
+        "subscription airdrop address",
+        "change subscription settings"
       ],
       "keywords": [
         "profile",
@@ -185,10 +198,10 @@
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
         "The tab shows balance, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
-        "Owners can update settings and top up; read-only viewers can inspect visible subscription information."
+        "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information."
       ],
       "canonical_path": "/{user}/subscriptions",
-      "related_paths": ["/{user}/subscriptions"],
+      "related_paths": ["/about/subscriptions", "/{user}/subscriptions"],
       "tags": ["profiles", "subscriptions"],
       "source_refs": [
         "ops/docs/profiles/tabs/feature-subscriptions-tab.md",
@@ -437,6 +450,45 @@
       "source_refs": ["ops/docs/network/feature-network-levels.md"]
     },
     {
+      "id": "help-bot.credits",
+      "kind": "business_rule",
+      "title": "Help6529 Credits",
+      "link_label": "REP Categories",
+      "aliases": [
+        "help6529 credits",
+        "help bot credits",
+        "helpbot credits",
+        "how do i get help6529 credits",
+        "how do i get help bot credits",
+        "why can't i ask help6529",
+        "low battery reaction",
+        "no help6529 credits"
+      ],
+      "keywords": [
+        "help6529",
+        "help",
+        "bot",
+        "credits",
+        "credit",
+        "rep",
+        "battery",
+        "low",
+        "question",
+        "activity"
+      ],
+      "facts": [
+        "Help6529 Credits are REP in the `Help6529 Credits` category.",
+        "Each Help6529 question costs 1 Help6529 Credit REP.",
+        "Automatic grants are signup +5, profile setup +5, and daily activity +2 when the user sends any message that day, capped at 50 automatic credits."
+      ],
+      "canonical_path": "/rep/categories",
+      "related_paths": ["/waves"],
+      "tags": ["help-bot", "credits", "rep"],
+      "source_refs": [
+        "ops/docs/specs/2026-06-19-6529-help-bot-knowledge-index.md"
+      ]
+    },
+    {
       "id": "waves.overview",
       "kind": "route",
       "title": "Waves",
@@ -471,7 +523,9 @@
       "title": "Create a wave from the Waves panel",
       "aliases": [
         "create wave",
+        "create a wave",
         "make a wave",
+        "make a new wave",
         "new wave",
         "start a wave",
         "plus icon",
@@ -956,7 +1010,13 @@
         "subscriptions eligibility",
         "eligible subscriptions",
         "subscription allowlist",
-        "phase eligibility"
+        "phase eligibility",
+        "can't mint with subscriptions",
+        "cannot mint with subscriptions",
+        "why can't i mint with subscriptions",
+        "subscription mint not working",
+        "subscription didn't mint",
+        "subscription failed to mint"
       ],
       "keywords": [
         "subscription",
@@ -987,6 +1047,11 @@
       "aliases": [
         "sent eth to subscription address",
         "sent eth to subscriptions address",
+        "sent eth to the subscription address",
+        "sent eth to the subscriptions address",
+        "sent eth but balance not showing",
+        "sent eth but don't see it",
+        "eth top up not showing",
         "subscription top up missing",
         "subscription top-up missing",
         "subscription balance not showing",
@@ -994,7 +1059,9 @@
         "top-up balance not showing",
         "deposit not showing in subscriptions",
         "subscription payment pending",
-        "where is my subscription top up"
+        "where is my subscription top up",
+        "where do i top up subscriptions",
+        "top up subscriptions"
       ],
       "keywords": [
         "subscription",
@@ -1292,7 +1359,13 @@
       "id": "media.rememes",
       "kind": "workflow",
       "title": "Rememes submissions",
-      "aliases": ["rememes", "re-memes", "rememe submission", "submit rememe"],
+      "aliases": [
+        "rememes",
+        "re-memes",
+        "rememe submission",
+        "submit rememe",
+        "submit a rememe"
+      ],
       "keywords": [
         "rememes",
         "re",
@@ -1607,6 +1680,11 @@
         "stale feed",
         "live connection",
         "reply notification but no chat message",
+        "reply notification not in chat",
+        "bot reply notification not in chat",
+        "reply notification there but not in the chat",
+        "bot reply notification there but not in the chat",
+        "notification but not in chat",
         "got notification but reply not in chat",
         "new reply not showing",
         "new message hidden",
@@ -2936,7 +3014,14 @@
       "id": "rememes.add",
       "kind": "workflow",
       "title": "Add a ReMeme submission",
-      "aliases": ["add rememe", "submit rememe", "rememe add", "new rememe"],
+      "aliases": [
+        "add rememe",
+        "add a rememe",
+        "submit rememe",
+        "submit a rememe",
+        "rememe add",
+        "new rememe"
+      ],
       "keywords": ["rememes", "add", "submit", "submission", "tdh"],
       "facts": [
         "The ReMemes add route lives at /rememes/add.",
