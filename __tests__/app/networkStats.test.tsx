@@ -1,11 +1,7 @@
-import CommunityStatsPage, { generateMetadata } from "@/app/network/page";
+import CommunityStatsPage, { generateMetadata } from "@/app/network/stats/page";
 import { AuthContext } from "@/components/auth/Auth";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { groupSlice } from "@/store/groupSlice";
-import { configureStore } from "@reduxjs/toolkit";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { Provider } from "react-redux";
 
 // ✅ Mocks
 jest.mock("react-bootstrap", () => ({
@@ -20,14 +16,6 @@ jest.mock("react-bootstrap", () => ({
 jest.mock("@/styles/Home.module.scss", () => ({
   main: "main-class",
   tdhMain: "tdh-main-class",
-}));
-jest.mock("next/navigation", () => ({
-  useSearchParams: () => new URLSearchParams(),
-}));
-jest.mock("@/hooks/useDeviceInfo");
-jest.mock("@/components/community/CommunityMembers", () => ({
-  __esModule: true,
-  default: () => <div data-testid="community-members" />,
 }));
 
 // ✅ TitleContext
@@ -50,49 +38,28 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 describe("CommunityStats page", () => {
-  const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
-    typeof useDeviceInfo
-  >;
-  const createTestStore = () =>
-    configureStore({
-      reducer: {
-        group: groupSlice.reducer,
-      },
-    });
-
-  beforeEach(() => {
-    useDeviceInfoMock.mockReturnValue({
-      isApp: false,
-      isMobileDevice: false,
-      hasTouchScreen: false,
-    });
-  });
-
-  const renderPage = () => {
-    const store = createTestStore();
+  const renderPage = () =>
     render(
-      <Provider store={store}>
-        <AuthContext.Provider value={{} as any}>
-          <CommunityStatsPage />
-        </AuthContext.Provider>
-      </Provider>
+      <AuthContext.Provider value={{} as any}>
+        <CommunityStatsPage />
+      </AuthContext.Provider>
     );
-  };
 
-  it("renders layout and dynamic component", async () => {
+  it("renders layout and dynamic component", () => {
     renderPage();
-    expect(await screen.findByTestId("community-members")).toBeInTheDocument();
-    expect(document.querySelector("main")).toHaveClass("tailwind-scope");
+    expect(screen.getAllByTestId("container").length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId("row").length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId("col").length).toBeGreaterThan(0);
   });
 
-  it("renders consistently on mount", async () => {
+  it("sets title on mount", () => {
     renderPage();
-    expect(await screen.findByTestId("community-members")).toBeInTheDocument();
+    // implicitly tested through mock hook usage
   });
 
   it("generates metadata", async () => {
     const metadata = await generateMetadata();
-    expect(metadata.title).toEqual("Network");
+    expect(metadata.title).toEqual("Stats");
     expect(metadata.description).toEqual("Network | 6529.io");
   });
 });

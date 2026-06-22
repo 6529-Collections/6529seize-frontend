@@ -3,16 +3,6 @@ import { NextgenView } from "@/types/enums";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
-const mockBuildNextgenLandingPageJsonLd = jest.fn(() => ({
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-}));
-
-jest.mock("@/lib/structured-data/nextgen", () => ({
-  buildNextgenLandingPageJsonLd: (...args: any[]) =>
-    mockBuildNextgenLandingPageJsonLd(...args),
-}));
-
 // Import after mocks are set up if you prefer; require works fine too
 const {
   default: NextGenPage,
@@ -46,13 +36,13 @@ jest.mock("@/components/nextGen/collections/NextGenArtists", () => () => (
 jest.mock("@/components/nextGen/collections/NextGenAbout", () => () => <div />);
 
 jest.mock("@/components/nextGen/collections/NextGenNavigationHeader", () => {
-  const { NextgenView } = jest.requireActual("@/types/enums");
+  const { NextgenView } = jest.requireActual("@/enums"); // <-- get enum from the real source
   return {
     __esModule: true,
     default: ({ view, setView }: any) => (
       <button
         data-testid="nav"
-        onClick={() => setView(NextgenView.ARTISTS)}
+        onClick={() => setView(NextgenView.ARTISTS)} // <-- now defined
       >
         {view}
       </button>
@@ -72,16 +62,6 @@ const useRouterMock = require("next/navigation").useRouter as jest.Mock;
 const useParamsMock = require("next/navigation").useParams as jest.Mock;
 const mockedFetch = commonApiFetch as jest.Mock;
 
-function createFeaturedCollection() {
-  return {
-    id: 1,
-    name: "6529 Gradient",
-    description: "Generative art from 6529.",
-    banner: "https://images.test/gradient-banner.png",
-    image: "https://images.test/gradient.png",
-  };
-}
-
 describe("generateMetadata", () => {
   it("returns metadata based on view", async () => {
     const md = await generateMetadata({
@@ -97,8 +77,7 @@ describe("NextGen page component", () => {
 
   beforeEach(() => {
     push.mockClear();
-    mockBuildNextgenLandingPageJsonLd.mockClear();
-    mockedFetch.mockReset().mockResolvedValue(createFeaturedCollection());
+    mockedFetch.mockReset().mockResolvedValue({ id: 1 }); // featured collection exists
     useRouterMock.mockReturnValue({ push });
     useParamsMock.mockReturnValue({ view: undefined }); // landing (no view)
     pushStateSpy = jest

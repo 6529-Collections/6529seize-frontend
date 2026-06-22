@@ -3,25 +3,26 @@ import { renderHook, act } from '@testing-library/react';
 import { useAppWalletPasswordModal } from '@/hooks/useAppWalletPasswordModal';
 
 // Mock the UnlockAppWalletModal component
+const MockUnlockAppWalletModal = jest.fn(({ show, onHide, onUnlock, address, address_hashed }) => (
+  show ? (
+    <div data-testid="unlock-modal">
+      <div data-testid="modal-address">{address}</div>
+      <div data-testid="modal-address-hashed">{address_hashed}</div>
+      <button data-testid="cancel-button" onClick={onHide}>
+        Cancel
+      </button>
+      <button
+        data-testid="unlock-button"
+        onClick={() => onUnlock('test-password')}
+      >
+        Unlock
+      </button>
+    </div>
+  ) : null
+));
+
 jest.mock('@/components/app-wallets/AppWalletModal', () => ({
-  UnlockAppWalletModal: jest.fn(
-    ({ show, onHide, onUnlock, address, address_hashed }) =>
-      show ? (
-        <div data-testid="unlock-modal">
-          <div data-testid="modal-address">{address}</div>
-          <div data-testid="modal-address-hashed">{address_hashed}</div>
-          <button data-testid="cancel-button" onClick={onHide}>
-            Cancel
-          </button>
-          <button
-            data-testid="unlock-button"
-            onClick={() => onUnlock('test-password')}
-          >
-            Unlock
-          </button>
-        </div>
-      ) : null
-  ),
+  UnlockAppWalletModal: MockUnlockAppWalletModal,
 }));
 
 describe('useAppWalletPasswordModal', () => {
@@ -85,7 +86,7 @@ describe('useAppWalletPasswordModal', () => {
 
     const resolvedPassword = await passwordPromise!;
     expect(resolvedPassword).toBe('test-password');
-    
+
     // Modal should be closed after unlock
     expect(result.current.modal.props.show).toBe(false);
     expect(result.current.modal.props.address).toBe('');
@@ -124,7 +125,7 @@ describe('useAppWalletPasswordModal', () => {
 
     expect(rejectionError!).toBeInstanceOf(Error);
     expect(rejectionError!.message).toBe('Password entry canceled.');
-    
+
     // Modal should be closed after cancel
     expect(result.current.modal.props.show).toBe(false);
     expect(result.current.modal.props.address).toBe('');
@@ -137,7 +138,7 @@ describe('useAppWalletPasswordModal', () => {
     // First request
     const firstAddress = '0x1111';
     const firstAddressHashed = 'hash1';
-    
+
     let firstPromise: Promise<string>;
     act(() => {
       firstPromise = result.current.requestPassword(firstAddress, firstAddressHashed);
@@ -157,7 +158,7 @@ describe('useAppWalletPasswordModal', () => {
     // Second request
     const secondAddress = '0x2222';
     const secondAddressHashed = 'hash2';
-    
+
     let secondPromise: Promise<string>;
     act(() => {
       secondPromise = result.current.requestPassword(secondAddress, secondAddressHashed);

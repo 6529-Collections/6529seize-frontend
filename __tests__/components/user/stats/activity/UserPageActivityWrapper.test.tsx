@@ -96,6 +96,8 @@ test("hydrates the active tab from query params and updates the url on change", 
 
   await user.click(screen.getByTestId("tab"));
 
+  expect(screen.getByTestId("dist")).toHaveAttribute("data-locale", "de-DE");
+
   expect(replace).toHaveBeenCalledWith(
     "/profile?activity=distributions&page=2&locale=de-DE",
     {

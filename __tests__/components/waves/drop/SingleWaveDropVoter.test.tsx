@@ -23,12 +23,7 @@ describe('SingleWaveDropVoter', () => {
     );
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByText(baseVoter.voter.handle)).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        (_, element) =>
-          element?.tagName === 'SPAN' && element.textContent === '3 Rep Total'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText('3 REP total')).toBeInTheDocument();
     const handleSpan = screen.getByText(baseVoter.voter.handle).parentElement as HTMLElement;
     expect(handleSpan.className).toContain('tw-inline-block');
     expect(handleSpan.className).toContain('tw-truncate');

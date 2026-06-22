@@ -161,7 +161,8 @@ describe("tools/block-finder/page.client.tsx (client)", () => {
 
     await waitFor(() => {
       expect(mockSetToast).toHaveBeenCalledWith({
-        message: "Add at least one block number when using a time window.",
+        message:
+          "You must provide some block number inclusions when using a time window!",
         type: "error",
       });
     });
@@ -180,7 +181,7 @@ describe("tools/block-finder/page.client.tsx (client)", () => {
 
     await waitFor(() => {
       expect(mockSetToast).toHaveBeenCalledWith({
-        message: "Enter block numbers separated by commas.",
+        message: "Block numbers must be numeric and comma-separated!",
         type: "error",
       });
     });

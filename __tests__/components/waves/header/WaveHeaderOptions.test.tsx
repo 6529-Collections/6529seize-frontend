@@ -87,7 +87,7 @@ test("opens and closes options", async () => {
   expect(screen.queryByTestId("delete")).toBeNull();
 });
 
-test("hides create subwave action for top-level admins", async () => {
+test("opens create subwave modal for top-level admins", async () => {
   const user = userEvent.setup();
   render(
     <WaveHeaderOptions
@@ -101,10 +101,17 @@ test("hides create subwave action for top-level admins", async () => {
   );
 
   await user.click(screen.getByRole("button", { name: /open options/i }));
-  expect(screen.queryByRole("menuitem", { name: "Create subwave" })).toBeNull();
-  expect(screen.getByTestId("mute")).toHaveAttribute("data-wave", "w1");
+  expect(
+    screen.getByRole("menuitem", { name: "Create subwave" })
+  ).toBeInTheDocument();
   expect(screen.queryByTestId("delete")).toBeNull();
-  expect(screen.queryByTestId("create-wave-modal")).toBeNull();
+
+  await user.click(screen.getByRole("menuitem", { name: "Create subwave" }));
+
+  expect(screen.getByTestId("create-wave-modal")).toHaveAttribute(
+    "data-parent",
+    "w1"
+  );
 });
 
 test("hides create subwave for non-admins and existing subwaves", async () => {

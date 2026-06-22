@@ -28,7 +28,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   scrollContainerRef,
   isCollapsed = false,
 }) => {
-  const { hasValidWalletAuth } = useSeizeConnectContext();
+  const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
     useCreateModalState();
@@ -83,7 +83,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     );
   }
 
-  if (!hasValidWalletAuth) {
+  if (!isAuthenticated) {
     return (
       <div className="tw-flex tw-h-full tw-flex-col tw-gap-y-4">
         <div className="tw-flex tw-flex-col tw-gap-y-4 tw-pt-8 tw-text-center">

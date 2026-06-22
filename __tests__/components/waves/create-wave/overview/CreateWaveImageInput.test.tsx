@@ -4,14 +4,9 @@ import CreateWaveImageInput from '@/components/waves/create-wave/overview/Create
 import { createMockAuthContext } from '@/__tests__/utils/testContexts';
 
 // Mock URL.createObjectURL
-Object.defineProperty(globalThis.URL, 'createObjectURL', {
+Object.defineProperty(global.URL, 'createObjectURL', {
   writable: true,
   value: jest.fn(() => 'mocked-object-url'),
-});
-
-Object.defineProperty(globalThis.URL, 'revokeObjectURL', {
-  writable: true,
-  value: jest.fn(),
 });
 
 describe('CreateWaveImageInput', () => {
@@ -47,11 +42,6 @@ describe('CreateWaveImageInput', () => {
     Object.defineProperty(file, 'size', { value: size });
     return file;
   };
-
-  const createFileList = (files: File[]) =>
-    Object.assign([...files], {
-      item: (index: number) => files[index] ?? null,
-    });
 
   it('renders upload area without image', () => {
     renderComponent();
@@ -97,7 +87,7 @@ describe('CreateWaveImageInput', () => {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const validFile = createMockFile('test.jpg', 'image/jpeg');
     
-    fireEvent.change(fileInput, { target: { files: createFileList([validFile]) } });
+    fireEvent.change(fileInput, { target: { files: [validFile] } });
     
     expect(mockSetFile).toHaveBeenCalledWith(validFile);
     expect(mockSetToast).not.toHaveBeenCalled();
@@ -109,15 +99,13 @@ describe('CreateWaveImageInput', () => {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const invalidFile = createMockFile('test.txt', 'text/plain');
     
-    fireEvent.change(fileInput, { target: { files: createFileList([invalidFile]) } });
+    fireEvent.change(fileInput, { target: { files: [invalidFile] } });
     
     expect(mockSetFile).not.toHaveBeenCalled();
-    expect(mockSetToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'error',
-        message: expect.stringMatching(/not supported/i),
-      })
-    );
+    expect(mockSetToast).toHaveBeenCalledWith({
+      type: 'error',
+      message: 'Invalid file type',
+    });
   });
 
   it('rejects file that is too large', () => {
@@ -126,15 +114,13 @@ describe('CreateWaveImageInput', () => {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const largeFile = createMockFile('large.jpg', 'image/jpeg', 11 * 1024 * 1024); // 11MB
     
-    fireEvent.change(fileInput, { target: { files: createFileList([largeFile]) } });
+    fireEvent.change(fileInput, { target: { files: [largeFile] } });
     
     expect(mockSetFile).not.toHaveBeenCalled();
-    expect(mockSetToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'error',
-        message: expect.stringMatching(/smaller than 10 MB/i),
-      })
-    );
+    expect(mockSetToast).toHaveBeenCalledWith({
+      type: 'error',
+      message: 'File size must be less than 10MB',
+    });
   });
 
   it('handles drag and drop with valid file', () => {
@@ -145,7 +131,7 @@ describe('CreateWaveImageInput', () => {
     
     const dropEvent = new Event('drop', { bubbles: true });
     Object.defineProperty(dropEvent, 'dataTransfer', {
-      value: { files: createFileList([validFile]) },
+      value: { files: [validFile] },
     });
     
     fireEvent(dropArea, dropEvent);
@@ -159,15 +145,15 @@ describe('CreateWaveImageInput', () => {
     const dropArea = document.querySelector('label') as HTMLElement;
     
     // Initial state - should not have dragging styles
-    expect(dropArea).toHaveClass('tw-border-white/10', 'tw-bg-iron-900/60');
+    expect(dropArea).toHaveClass('tw-bg-iron-900', 'tw-border-iron-700');
     
     // Drag enter
     fireEvent.dragEnter(dropArea);
-    expect(dropArea).toHaveClass('tw-border-white/20', 'tw-bg-iron-900');
+    expect(dropArea).toHaveClass('tw-border-iron-600', 'tw-bg-iron-800');
     
     // Drag leave
     fireEvent.dragLeave(dropArea);
-    expect(dropArea).toHaveClass('tw-border-white/10', 'tw-bg-iron-900/60');
+    expect(dropArea).toHaveClass('tw-bg-iron-900', 'tw-border-iron-700');
   });
 
   it('prevents default on drag events', () => {
@@ -192,7 +178,7 @@ describe('CreateWaveImageInput', () => {
     
     const dropEvent = new Event('drop', { bubbles: true });
     Object.defineProperty(dropEvent, 'dataTransfer', {
-      value: { files: createFileList([]) },
+      value: { files: [] },
     });
     
     fireEvent(dropArea, dropEvent);
@@ -218,7 +204,7 @@ describe('CreateWaveImageInput', () => {
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       const validFile = createMockFile(`test.${format.split('/')[1]}`, format);
       
-      fireEvent.change(fileInput, { target: { files: createFileList([validFile]) } });
+      fireEvent.change(fileInput, { target: { files: [validFile] } });
       
       expect(mockSetFile).toHaveBeenCalledWith(validFile);
       expect(mockSetToast).not.toHaveBeenCalled();

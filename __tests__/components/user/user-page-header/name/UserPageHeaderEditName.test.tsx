@@ -164,7 +164,7 @@ describe('UserPageHeaderEditName', () => {
     
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: 'Log in to save settings.',
+        message: 'You must be logged in to save settings',
         type: 'error',
       });
     });
