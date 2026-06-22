@@ -60,8 +60,9 @@ const CONTENT_ROUTES: RouteExpectation[] = [
   },
   {
     path: "/om",
-    text: "OM",
+    text: "IT IS TIME TO BUILD AN OPEN METAVERSE TOGETHER",
     links: ["/om/partnership-request/"],
+    images: true,
   },
   {
     path: "/news/introducing-om/",
@@ -128,10 +129,28 @@ function normalizeHref(href: string) {
 }
 
 async function expectRepresentativeImages(page: Page) {
-  const imagesWithSources = page.locator("img[src]").filter({
-    hasNot: page.locator("xpath=./self::img[@src='']"),
-  });
-  await expect(imagesWithSources.first()).toBeAttached();
+  await expect
+    .poll(
+      async () =>
+        page.locator("img[src]").evaluateAll((images) =>
+          images.some((image) => {
+            const rect = image.getBoundingClientRect();
+            const style = globalThis.getComputedStyle(image);
+            return (
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0 &&
+              image.naturalHeight > 0 &&
+              rect.width > 0 &&
+              rect.height > 0 &&
+              style.display !== "none" &&
+              style.visibility !== "hidden"
+            );
+          })
+        ),
+      { message: `Expected ${page.url()} to render at least one loaded image` }
+    )
+    .toBe(true);
 }
 
 async function expectTargetBlankLinksAreSafe(page: Page) {
