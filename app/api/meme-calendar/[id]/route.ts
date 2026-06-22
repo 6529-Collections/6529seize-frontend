@@ -1,7 +1,9 @@
-import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
+import {
+  getMintTimelineDetails,
+  toISO,
+} from "@/components/meme-calendar/meme-calendar.helpers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { buildMemeCalendarMintResponse } from "../meme-calendar-response";
 
 const POSITIVE_INTEGER_PATTERN = /^[1-9]\d*$/;
 
@@ -45,13 +47,20 @@ export async function GET(
   }
 
   try {
-    const now = new Date();
     const timeline = getMintTimelineDetails(mintId);
     if (!Number.isFinite(timeline.instantUtc.getTime())) {
       return unresolvedTimelineResponse();
     }
 
-    return NextResponse.json(buildMemeCalendarMintResponse(timeline, now));
+    return NextResponse.json({
+      mint_date: toISO(timeline.instantUtc),
+      season: timeline.seasonNumber,
+      year: timeline.yearNumber,
+      epoch: timeline.epochNumber,
+      period: timeline.periodNumber,
+      era: timeline.eraNumber,
+      eon: timeline.eonNumber,
+    });
   } catch {
     return unresolvedTimelineResponse();
   }

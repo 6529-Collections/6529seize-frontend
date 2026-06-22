@@ -6,15 +6,12 @@ jest.mock("next/server", () => ({
 
 import {
   getMintTimelineDetails,
-  getMintTimelineStatus,
   toISO,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import { GET } from "@/app/api/meme-calendar/[id]/route";
 
 describe("/api/meme-calendar/[id]", () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
     nextResponseJson.mockReset();
     nextResponseJson.mockImplementation(
       (
@@ -30,14 +27,9 @@ describe("/api/meme-calendar/[id]", () => {
     );
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it("returns mint calendar fields for a valid id", async () => {
     const id = 500;
     const expected = getMintTimelineDetails(id);
-    const now = new Date();
 
     const response = await GET({} as any, {
       params: Promise.resolve({ id: String(id) }),
@@ -45,19 +37,13 @@ describe("/api/meme-calendar/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(nextResponseJson).toHaveBeenCalledWith({
-      mint_number: expected.mintNumber,
       mint_date: toISO(expected.instantUtc),
-      mint_start: expected.instantUtc.toISOString(),
-      mint_end: expected.mintEndUtc.toISOString(),
-      status: getMintTimelineStatus(expected, now),
       season: expected.seasonNumber,
       year: expected.yearNumber,
       epoch: expected.epochNumber,
       period: expected.periodNumber,
       era: expected.eraNumber,
       eon: expected.eonNumber,
-      calendar_path: "/meme-calendar",
-      mint_path: `/the-memes/${id}`,
     });
   });
 
@@ -87,7 +73,8 @@ describe("/api/meme-calendar/[id]", () => {
     expect(response.status).toBe(400);
     expect(nextResponseJson).toHaveBeenCalledWith(
       {
-        error: "Invalid id. Use a positive integer in /api/meme-calendar/<id>.",
+        error:
+          "Invalid id. Use a positive integer in /api/meme-calendar/<id>.",
       },
       { status: 400 }
     );

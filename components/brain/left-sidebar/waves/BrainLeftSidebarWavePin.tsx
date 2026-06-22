@@ -164,7 +164,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     if (isPinned) {
       return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-iron-100 active:tw-bg-transparent tw-opacity-100";
     }
-    return "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700 tw-opacity-70";
+    return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-100 active:tw-bg-iron-700";
   };
 
   const getAriaLabel = () => {

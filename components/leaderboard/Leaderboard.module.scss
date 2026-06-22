@@ -5,6 +5,7 @@
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
   overflow-x: auto;
+  max-width: 100%;
 }
 
 .scrollContainer::-webkit-scrollbar {
@@ -234,7 +235,8 @@
   display: none;
 }
 
-@media only screen and (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
+@media only screen and (max-width: 760px),
+  (pointer: coarse) and (max-width: 900px) {
   .networkHeader {
     gap: 1rem;
   }
