@@ -14,6 +14,8 @@ import {
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const metaMaskCircularMetaElementMessage =
+    "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
 
   const buildSpan = (overrides: Record<string, unknown> = {}) =>
     ({
@@ -109,6 +111,35 @@ describe("sentry-client-filters", () => {
                     "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
                   abs_path:
                     "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    }) as any;
+
+  const createMetaMaskUpdateUrlCircularEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    ({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: metaMaskCircularMetaElementMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "JSON.stringify",
+                },
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "__mm__updateUrl",
                 },
               ],
             },
@@ -2142,6 +2173,111 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters MetaMask mobile update-url circular React meta element errors", () => {
+    // Arrange
+    const event = createMetaMaskUpdateUrlCircularEvent();
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters MetaMask mobile update-url circular errors from the original exception stack", () => {
+    // Arrange
+    const event = createMetaMaskUpdateUrlCircularEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: metaMaskCircularMetaElementMessage,
+          },
+        ],
+      },
+    });
+    const error = new TypeError(metaMaskCircularMetaElementMessage);
+    error.stack =
+      "TypeError: Converting circular structure to JSON\n    at JSON.stringify (<anonymous>:12:77)\n    at __mm__updateUrl (<anonymous>:36:7)";
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter generic app circular JSON errors without MetaMask update-url frames", () => {
+    // Arrange
+    const event = createMetaMaskUpdateUrlCircularEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: metaMaskCircularMetaElementMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "https://6529.io/_next/static/chunks/app.js",
+                  abs_path: "https://6529.io/_next/static/chunks/app.js",
+                  function: "JSON.stringify",
+                },
+                {
+                  filename: "https://6529.io/_next/static/chunks/app.js",
+                  abs_path: "https://6529.io/_next/static/chunks/app.js",
+                  function: "serializeMetadata",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter MetaMask update-url errors without the React meta element circular path", () => {
+    // Arrange
+    const event = createMetaMaskUpdateUrlCircularEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Converting circular structure to JSON --> starting at object with constructor 'Object'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "JSON.stringify",
+                },
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "__mm__updateUrl",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("does not filter injected wallet collisions when a web frame is present", () => {

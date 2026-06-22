@@ -104,6 +104,14 @@ const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
 const coinbaseWalletLinkWebSocket1006Pattern =
   /^websocket error 1006(?::.*)?$/i;
+const metaMaskMobileUpdateUrlFunction = "__mm__updateUrl";
+const jsonStringifyFunction = "JSON.stringify";
+const circularReactMetaElementMessagePatterns = [
+  "Converting circular structure to JSON",
+  "HTMLMetaElement",
+  "__reactFiber",
+  "stateNode",
+];
 const noisyThirdPartyTelemetryTargets = new Set([
   "cca-lite.coinbase.com/amp",
   "cca-lite.coinbase.com/metrics",
@@ -1179,6 +1187,75 @@ function hasWalletCollisionSignature(
   );
 }
 
+function hasCircularReactMetaElementMessage(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const candidates = [
+    value?.value,
+    getHintExceptionMessage(hint),
+    ...getBreadcrumbMessages(event),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      circularReactMetaElementMessagePatterns.every((pattern) =>
+        candidate.includes(pattern)
+      )
+  );
+}
+
+function getStackSignatureValues(
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): string[] {
+  const frameValues = Array.isArray(frames)
+    ? frames.flatMap((frame) => [
+        frame.function,
+        frame.filename,
+        frame.abs_path,
+      ])
+    : [];
+
+  return [...frameValues, getHintExceptionStack(hint)].filter(
+    (value): value is string => typeof value === "string" && value.length > 0
+  );
+}
+
+function hasMetaMaskUpdateUrlJsonStringifySignature(
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const stackSignatureValues = getStackSignatureValues(frames, hint);
+  return (
+    stackSignatureValues.some((value) =>
+      value.includes(metaMaskMobileUpdateUrlFunction)
+    ) &&
+    stackSignatureValues.some((value) => value.includes(jsonStringifyFunction))
+  );
+}
+
+function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (value?.type !== "TypeError") {
+    return false;
+  }
+
+  if (!hasCircularReactMetaElementMessage(event, hint)) {
+    return false;
+  }
+
+  return hasMetaMaskUpdateUrlJsonStringifySignature(
+    value.stacktrace?.frames,
+    hint
+  );
+}
+
 function isTwitterBrowser(event: SentryClientEvent): boolean {
   const contextBrowserName = getContextString(event, "browser", "name");
   if (contextBrowserName === "Twitter") {
@@ -1253,6 +1330,10 @@ export function shouldFilterInjectedWalletCollision(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
+  if (hasMetaMaskMobileUpdateUrlCircularJsonSignature(event, hint)) {
+    return true;
+  }
+
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
   if (!hasInjectedAppUriSignature(frames, hint)) {
     return false;
