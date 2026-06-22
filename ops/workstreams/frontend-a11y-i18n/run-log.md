@@ -2530,3 +2530,53 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
 - GitHub still reports `REVIEW_REQUIRED`; the authenticated PR author account
   cannot approve its own PR. Treat this as an independent-review gate, not as a
   test failure or bot finding.
+
+## 2026-06-21T19:25Z Network/Open Data Read-Only E2E Pack Started
+
+- Started `codex/e2e-network-open-data-readonly` from current `origin/main`
+  (`f82890f24a4ef7643f143dca5791ad0c50e010f3`) while PR #2811 delegation
+  reviewbot/CI checks were running.
+- Added `tests/network-open-data/network-open-data-api-readonly.spec.ts` for:
+  - Network public member table route with sorted URL state.
+  - Network Health public metric cards.
+  - Open Data index links.
+  - Open Data Network Metrics downloads.
+  - API documentation page readability and external docs link safety.
+  - Restricted route fail-closed shell.
+  - GET-only route-handler fail-closed checks for version, Alchemy metadata
+    input validation, Farcaster private/local URL blocking, and TikTok missing
+    URL input validation.
+- Added local, staging, and production `network-open-data-readonly` scripts and
+  README ownership notes.
+- Unsafe actions explicitly avoided: wallet connect/signing, posting, voting,
+  following, uploads, downloads, minting, purchases, transfers, admin actions,
+  Sentry example route, route-handler POST/PUT/PATCH/DELETE calls, and
+  executing API docs sample code.
+- Local validation completed:
+  - `seize run build:env-schema`
+  - `seize run test:e2e:network-open-data-readonly` (14 passed; desktop and
+    mobile Chromium)
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run typecheck:playwright`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+     origin/main --output
+     test-results/app-pr-ci/network-open-data-secret-scan.json`
+   - `codex-diff-check`
+
+## 2026-06-21T23:59Z Network/Open Data Rebase Validation
+
+- Rebasing PR #2812 after PR #2810 and PR #2811 merged produced only expected
+  train aggregator conflicts in `package.json`, `tests/README.md`, and this
+  run log. Resolution preserved media, delegation, and network/open-data
+  entries together.
+- First post-rebase local E2E run hit stale ignored `.next` route cache 404s on
+  routes that exist in the tree. Cleared only the worktree-local `.next` cache
+  and reran the pack successfully.
+- Rebased validation passed:
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/network-open-data-secret-scan-rebased.json`
+  - `codex-diff-check`
+  - `seize run test:e2e:network-open-data-readonly`: 14 passed.
