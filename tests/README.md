@@ -123,21 +123,25 @@ Surface matrix:
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
-  and deterministic link previews, and fails if composer submit/upload
-  endpoints are touched. It must run against a loopback base URL, but it is not
-  a full network-isolation harness and is not a staging or production smoke
-  pack.
+  and deterministic link previews, plus one exact synthetic chat-drop submit.
+  The mock API allows only that queryless `/api/drops` shape, with signer
+  limited to the configured sandbox wallet or the empty unsigned direct-contract
+  form; upload and attachment endpoints still fail closed. It must run against a
+  loopback base URL, but it is not a full network-isolation harness and is not a
+  staging or production smoke pack.
 - `test:e2e:auth-sandbox` runs the local authenticated sandbox on desktop
   Chromium. It includes the composer checks plus positive `/notifications`
   `/messages/create`, and `/waves/create` Chat-wave flows with deterministic
   mock API data. It allows only explicit local sandbox mutations such as
-  notification mark-read, synthetic direct-message creation, and synthetic
-  create-wave group/wave creation with exact sandbox IDs, queryless paths, and
-  request bodies. Unknown mock API writes fail the sandbox request audit, and
-  unexpected same-origin Next.js API writes or unknown unsafe external browser
-  writes are blocked by a browser route guard. Known wallet and analytics SDK
-  background writes are still blocked in-browser, but they do not fail the test.
-  This pack must never run against staging or production.
+  notification mark-read, synthetic direct-message creation, synthetic
+  create-wave group/wave creation, and the synthetic chat-drop submit with exact
+  sandbox IDs, queryless paths, and request bodies. The chat-drop signer is
+  bounded to the configured sandbox wallet or the empty unsigned direct-contract
+  form. Unknown mock API writes fail the sandbox request audit, and unexpected
+  same-origin Next.js API writes or unknown unsafe external browser writes are
+  blocked by a browser route guard. Known wallet and analytics SDK background
+  writes are still blocked in-browser, but they do not fail the test. This pack
+  must never run against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -291,10 +295,11 @@ Large-pack ownership:
 - `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
   composer input, attachment preview/removal, link preview rendering, dev-auth
   composer eligibility, or local sandbox/mock API coverage. The pack may use
-  local synthetic auth and a mock API, but it must never submit a drop or upload
-  files to staging or production. Treat it as coverage for composer/drop/upload
-  API safety, not as a guarantee that every external read-only media or metadata
-  endpoint is isolated.
+  local synthetic auth and a mock API, and it may submit only the synthetic
+  chat-drop shape modeled by the mock API with the bounded sandbox signer. It
+  must never submit drops or upload files to staging or production. Treat it as
+  coverage for composer/drop/upload API safety, not as a guarantee that every
+  external read-only media or metadata endpoint is isolated.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
   individual public read-only packs on desktop Chromium and is the command

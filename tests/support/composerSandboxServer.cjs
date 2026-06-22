@@ -35,9 +35,11 @@ const SANDBOX_NOTIFICATION_REACTION_DROP_ID =
 const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
 const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
+const SANDBOX_SUBMITTED_CHAT_DROP_ID = "00000000-0000-4000-8000-000000000539";
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
 const SANDBOX_CREATED_WAVE_DESCRIPTION =
   "Local-only create-wave description for Playwright.";
+const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
 const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
@@ -367,6 +369,55 @@ const localDrop = {
   nft_links: [],
 };
 
+const submittedChatDrop = {
+  id: SANDBOX_SUBMITTED_CHAT_DROP_ID,
+  serial_no: 2,
+  drop_type: "CHAT",
+  rank: null,
+  wave: localWaveMin,
+  author: localProfile,
+  created_at: CREATED_AT + 2000,
+  updated_at: null,
+  title: null,
+  parts: [
+    {
+      part_id: 1,
+      content: SANDBOX_CHAT_DROP_CONTENT,
+      media: [],
+      attachments: [],
+      quoted_drop: null,
+    },
+  ],
+  parts_count: 1,
+  referenced_nfts: [],
+  mentioned_users: [],
+  mentioned_groups: [],
+  mentioned_waves: [],
+  metadata: [],
+  rating: 0,
+  realtime_rating: 0,
+  rating_prediction: 0,
+  top_raters: [],
+  raters_count: 0,
+  context_profile_context: {
+    rating: 0,
+    min_rating: 0,
+    max_rating: 0,
+    reaction: null,
+    boosted: false,
+    bookmarked: false,
+    curatable: false,
+    curated: false,
+  },
+  subscribed_actions: [],
+  is_signed: false,
+  reactions: [],
+  boosts: 0,
+  is_additional_action_promised: false,
+  hide_link_preview: false,
+  nft_links: [],
+};
+
 const createdWaveMin = {
   ...localWaveMin,
   id: SANDBOX_CREATED_WAVE_ID,
@@ -684,6 +735,81 @@ function isExpectedDirectMessageBody(body) {
   );
 }
 
+function isExpectedChatDropPart(part) {
+  return (
+    hasOnlyKeys(part, ["content", "media", "quoted_drop"]) &&
+    part.content === SANDBOX_CHAT_DROP_CONTENT &&
+    part.quoted_drop === null &&
+    Array.isArray(part.media) &&
+    part.media.length === 0
+  );
+}
+
+function isExpectedChatDropSignerAddress(signerAddress) {
+  return signerAddress === "" || isSameAddress(signerAddress, SANDBOX_WALLET);
+}
+
+function isExpectedChatDropBody(body) {
+  if (
+    !hasOnlyKeys(body, [
+      "drop_type",
+      "is_safe_signature",
+      "mentioned_groups",
+      "mentioned_users",
+      "mentioned_waves",
+      "metadata",
+      "parts",
+      "referenced_nfts",
+      "signature",
+      "signer_address",
+      "title",
+      "wave_id",
+    ])
+  ) {
+    return false;
+  }
+
+  return (
+    body.wave_id === SANDBOX_WAVE_ID &&
+    body.drop_type === "CHAT" &&
+    body.title === null &&
+    body.signature === null &&
+    body.is_safe_signature === false &&
+    isExpectedChatDropSignerAddress(body.signer_address) &&
+    Array.isArray(body.parts) &&
+    body.parts.length === 1 &&
+    isExpectedChatDropPart(body.parts[0]) &&
+    Array.isArray(body.referenced_nfts) &&
+    body.referenced_nfts.length === 0 &&
+    Array.isArray(body.mentioned_users) &&
+    body.mentioned_users.length === 0 &&
+    Array.isArray(body.mentioned_groups) &&
+    body.mentioned_groups.length === 0 &&
+    Array.isArray(body.mentioned_waves) &&
+    body.mentioned_waves.length === 0 &&
+    Array.isArray(body.metadata) &&
+    body.metadata.length === 0
+  );
+}
+
+function hasAcceptedChatDropSubmit() {
+  return requests.some(
+    (request) =>
+      request.method === "POST" &&
+      request.path === "/api/drops" &&
+      request.kind === "allowed-sandbox-mutation"
+  );
+}
+
+function isLatestAllowedChatDropSubmit() {
+  const latestRequest = requests[requests.length - 1];
+  return (
+    latestRequest?.method === "POST" &&
+    latestRequest.path === "/api/drops" &&
+    latestRequest.kind === "allowed-sandbox-mutation"
+  );
+}
+
 function hasOnlyKeys(value, expectedKeys) {
   if (!isPlainObject(value)) {
     return false;
@@ -952,6 +1078,10 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
     return isEmptyRequestBody(body);
   }
 
+  if (pathname === "/api/drops") {
+    return isExpectedChatDropBody(body) && !hasAcceptedChatDropSubmit();
+  }
+
   if (pathname === "/api/groups") {
     return isExpectedCreateAdminGroupBody(body);
   }
@@ -987,11 +1117,11 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 }
 
 function classifyRequest(method, pathname, searchParams, body) {
-  if (isDangerousComposerMutation(method, pathname)) {
-    return "dangerous-composer-mutation";
-  }
   if (isKnownSandboxMutation(method, pathname, searchParams, body)) {
     return "allowed-sandbox-mutation";
+  }
+  if (isDangerousComposerMutation(method, pathname)) {
+    return "dangerous-composer-mutation";
   }
   if (!isSafeReadMethod(method)) {
     return "unhandled-mutation";
@@ -1028,6 +1158,38 @@ function loggedRequestBody(pathname, body) {
     return {
       visible: body.visible,
       old_version_id: body.old_version_id,
+    };
+  }
+
+  if (pathname === "/api/drops") {
+    const firstPart = Array.isArray(body.parts) ? body.parts[0] : null;
+    return {
+      wave_id: typeof body.wave_id === "string" ? body.wave_id : null,
+      drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
+      content: isPlainObject(firstPart) ? firstPart.content : null,
+      part_count: Array.isArray(body.parts) ? body.parts.length : 0,
+      part_keys: isPlainObject(firstPart) ? sortedKeys(firstPart) : [],
+      media_count: Array.isArray(firstPart?.media) ? firstPart.media.length : 0,
+      has_attachments:
+        isPlainObject(firstPart) &&
+        Object.prototype.hasOwnProperty.call(firstPart, "attachments"),
+      referenced_nfts_count: Array.isArray(body.referenced_nfts)
+        ? body.referenced_nfts.length
+        : 0,
+      mentioned_users_count: Array.isArray(body.mentioned_users)
+        ? body.mentioned_users.length
+        : 0,
+      mentioned_groups_count: Array.isArray(body.mentioned_groups)
+        ? body.mentioned_groups.length
+        : 0,
+      mentioned_waves_count: Array.isArray(body.mentioned_waves)
+        ? body.mentioned_waves.length
+        : 0,
+      metadata_count: Array.isArray(body.metadata) ? body.metadata.length : 0,
+      signature: body.signature,
+      is_safe_signature: body.is_safe_signature,
+      signer_address: body.signer_address,
+      keys: sortedKeys(body),
     };
   }
 
@@ -1256,6 +1418,15 @@ function handleMockApi(method, pathname, url, body, res) {
 
   if (pathname === "/api/feed" && isSafeReadMethod(method)) {
     writeJson(res, 200, []);
+    return true;
+  }
+
+  if (
+    method === "POST" &&
+    pathname === "/api/drops" &&
+    isLatestAllowedChatDropSubmit()
+  ) {
+    writeJson(res, 200, submittedChatDrop);
     return true;
   }
 
