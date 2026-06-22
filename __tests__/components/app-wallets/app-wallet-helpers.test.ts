@@ -80,6 +80,16 @@ describe("app-wallet-helpers", () => {
     );
   });
 
+  it("rejects v2 envelopes with unsupported KDF iteration counts", async () => {
+    const encrypted = await encryptData(salt, data, password);
+    const envelope = JSON.parse(encrypted);
+
+    envelope.kdf.iterations = 600001;
+
+    expect(isAppWalletEncryptedEnvelope(JSON.stringify(envelope))).toBe(false);
+    expect(getAppWalletEncryptionVersion(JSON.stringify(envelope))).toBe(1);
+  });
+
   it("throws when decrypting with wrong password", async () => {
     const encrypted = await encryptData(salt, data, password);
     await expect(

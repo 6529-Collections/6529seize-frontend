@@ -466,4 +466,33 @@ describe("SeizeConnectProvider add-account flow", () => {
       revokeError
     );
   });
+
+  it("clears active auth when logout all has no connected profile entries", async () => {
+    const authUtils = require("@/services/auth/auth.utils");
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    let activeAddress: string | null = ACTIVE_ADDRESS;
+
+    authUtils.getConnectedWalletAccounts.mockReturnValue([]);
+    authUtils.getWalletAddress.mockImplementation(() => activeAddress);
+    authUtils.removeAuthJwt.mockImplementation(() => {
+      activeAddress = null;
+    });
+    sessionV2.logoutSessionV2.mockResolvedValue(undefined);
+
+    render(
+      <SeizeConnectProvider>
+        <LogoutAllButton />
+      </SeizeConnectProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
+    });
+
+    await waitFor(() => expect(authUtils.removeAuthJwt).toHaveBeenCalled());
+    expect(sessionV2.logoutSessionV2).toHaveBeenCalledWith({
+      address: ACTIVE_ADDRESS,
+      allSessions: true,
+    });
+  });
 });

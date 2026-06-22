@@ -87,6 +87,15 @@ function isHex(value: unknown): value is string {
   return typeof value === "string" && HEX_PATTERN.test(value);
 }
 
+function isValidKdfIterations(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isSafeInteger(value) &&
+    value >= MIN_V2_DECRYPT_KDF_ITERATIONS &&
+    value <= CURRENT_KDF_ITERATIONS
+  );
+}
+
 function parseEnvelope(
   encryptedData: string
 ): AppWalletEncryptedEnvelopeV2 | null {
@@ -100,7 +109,7 @@ function parseEnvelope(
       parsed.algorithm !== ENCRYPTION_ALGORITHM ||
       parsed.kdf?.name !== "pbkdf2" ||
       parsed.kdf.hash !== "sha256" ||
-      parsed.kdf.iterations < MIN_V2_DECRYPT_KDF_ITERATIONS ||
+      !isValidKdfIterations(parsed.kdf.iterations) ||
       parsed.kdf.key_length !== ENCRYPTION_KEY_BYTES ||
       !isHex(parsed.kdf.salt) ||
       Buffer.from(parsed.kdf.salt, "hex").length < CURRENT_KDF_SALT_BYTES ||

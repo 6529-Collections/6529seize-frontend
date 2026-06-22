@@ -504,6 +504,10 @@ export function HeaderQRModal({
     const isStaleGeneration = () =>
       generationId !== shareGenerationIdRef.current || signal?.aborted;
 
+    setNavigateBrowserSrc("");
+    setNavigateAppSrc("");
+    setShareConnectionSrc("");
+
     const routerPath = buildRouterPath(pathname, searchParams);
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
     const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
@@ -613,7 +617,10 @@ export function HeaderQRModal({
     }
   }
 
-  function cacheConnectionShare(addressKey: string, share: ConnectionShare): void {
+  function cacheConnectionShare(
+    addressKey: string,
+    share: ConnectionShare
+  ): void {
     const expiresAtMs = Date.parse(share.expires_at);
     if (Number.isFinite(expiresAtMs)) {
       cachedConnectionShareRef.current = {
@@ -661,7 +668,14 @@ export function HeaderQRModal({
         connectionShareAbortRef.current = null;
       }
     };
-  }, [show, hasValidWalletAuth, hasWalletAddress, activeWalletAddress]);
+  }, [
+    show,
+    hasValidWalletAuth,
+    hasWalletAddress,
+    activeWalletAddress,
+    pathname,
+    searchParams,
+  ]);
 
   useEffect(() => {
     setActiveTab(

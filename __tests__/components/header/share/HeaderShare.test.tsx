@@ -67,6 +67,9 @@ jest.mock("viem", () => ({
   getAddress: jest.fn((address: string) => address.toLowerCase()),
 }));
 
+let mockPathname = "/mock-path";
+let mockSearchParams = new URLSearchParams("something=value");
+
 // next/navigation mocks
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -76,10 +79,8 @@ jest.mock("next/navigation", () => ({
     back: jest.fn(),
     forward: jest.fn(),
   }),
-  usePathname: () => "/mock-path",
-  useSearchParams: () => {
-    return new URLSearchParams("something=value");
-  },
+  usePathname: () => mockPathname,
+  useSearchParams: () => mockSearchParams,
 }));
 
 const queryClient = new QueryClient({
@@ -163,6 +164,8 @@ describe("HeaderShare", () => {
     mockAuthUtils.getWalletAddress.mockReturnValue(null);
     mockAuthUtils.getWalletRole.mockReturnValue(null);
     mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
+    mockPathname = "/mock-path";
+    mockSearchParams = new URLSearchParams("something=value");
 
     const auth = require("@/components/auth/Auth");
     auth.useAuth.mockReturnValue({
@@ -429,7 +432,9 @@ describe("HeaderShare", () => {
       });
       const sessionV2 = require("@/services/auth/session-v2.utils");
       sessionV2.createConnectionShare.mockRejectedValue(
-        new Error("Connection sharing requires an active session-v2 web session")
+        new Error(
+          "Connection sharing requires an active session-v2 web session"
+        )
       );
 
       renderWithProviders(<HeaderShare />);
@@ -597,6 +602,35 @@ describe("HeaderShare", () => {
           expect.stringContaining(
             "connection_share_code=second-wallet-share-code"
           ),
+          { width: 500, margin: 0 }
+        )
+      );
+    });
+
+    it("regenerates navigation QR codes when the current route changes while the modal is open", async () => {
+      const qrcode = require("qrcode");
+      const { rerender } = renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          `${testOrigin}/mock-path?something=value`,
+          { width: 500, margin: 0 }
+        )
+      );
+
+      mockPathname = "/new-route";
+      mockSearchParams = new URLSearchParams("next=value");
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          <HeaderShare />
+        </QueryClientProvider>
+      );
+
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          `${testOrigin}/new-route?next=value`,
           { width: 500, margin: 0 }
         )
       );

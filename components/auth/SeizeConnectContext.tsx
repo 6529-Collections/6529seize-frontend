@@ -224,13 +224,14 @@ const revokeActiveSessionForLogoutAll = async (): Promise<void> => {
 
 const clearAllAuthenticatedProfiles = async (): Promise<void> => {
   let remainingProfiles = getConnectedWalletAccounts().length;
+  let activeWalletAddress = getWalletAddress();
   const maxIterations = Math.max(
     MAX_CONNECTED_PROFILES * 2,
     remainingProfiles + 2
   );
   let iterations = 0;
 
-  while (remainingProfiles > 0) {
+  while (remainingProfiles > 0 || activeWalletAddress) {
     iterations += 1;
     if (iterations > maxIterations) {
       const iterationError = new AuthenticationError(
@@ -244,10 +245,15 @@ const clearAllAuthenticatedProfiles = async (): Promise<void> => {
     await removeAuthJwt();
 
     const nextRemainingProfiles = getConnectedWalletAccounts().length;
-    if (nextRemainingProfiles >= remainingProfiles) {
+    const nextActiveWalletAddress = getWalletAddress();
+    if (
+      nextRemainingProfiles >= remainingProfiles &&
+      nextActiveWalletAddress === activeWalletAddress
+    ) {
       throw new Error("Failed to clear all authenticated profiles.");
     }
     remainingProfiles = nextRemainingProfiles;
+    activeWalletAddress = nextActiveWalletAddress;
   }
 };
 

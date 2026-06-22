@@ -43,6 +43,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const signedPayloadRef = useRef<ReturnType<
     typeof buildNextgenAllowlistPayload
   > | null>(null);
+  const signerAddressRef = useRef<string | null>(null);
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -86,6 +87,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     setErrors([]);
     signatureMessageRef.current = null;
     signedPayloadRef.current = null;
+    signerAddressRef.current = null;
   }
 
   function uploadFile() {
@@ -94,16 +96,19 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     setUploading(true);
     signatureMessageRef.current = null;
     signedPayloadRef.current = null;
-    if (isStructuredSignaturesEnabled() && !account.address) {
+    signerAddressRef.current = null;
+    const signerAddress = account.address;
+    if (!signerAddress) {
       setUploading(false);
       setUploadError("Error: Connect a wallet before signing");
       return;
     }
     const payload = buildNextgenAllowlistPayload();
     signedPayloadRef.current = payload;
+    signerAddressRef.current = signerAddress;
     const signatureMessage = isStructuredSignaturesEnabled()
       ? buildNextgenAdminSignatureMessage({
-          address: account.address as string,
+          address: signerAddress,
           chainId: NEXTGEN_CHAIN_ID,
           payload,
         }).message
@@ -123,12 +128,18 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {
+      const signerAddress = signerAddressRef.current;
+      if (!signerAddress) {
+        setUploading(false);
+        setUploadError("Error: Connect a wallet before signing");
+        return;
+      }
       const formData = new FormData();
       formData.append("allowlist", allowlistFile);
       formData.append(
         "nextgen",
         JSON.stringify({
-          wallet: account.address as string,
+          wallet: signerAddress,
           signature: signMessage.data,
           ...(signatureMessageRef.current
             ? { signature_message: signatureMessageRef.current }
