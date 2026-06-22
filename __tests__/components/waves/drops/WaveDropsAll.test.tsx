@@ -222,6 +222,8 @@ function setupMocks(options: MockSetupOptions = {}) {
   scrollButtonProps = undefined;
   mockFetchNextPage.mockReset();
   mockFetchNextPage.mockResolvedValue(undefined);
+  mockWaitAndRevealDrop.mockReset();
+  mockWaitAndRevealDrop.mockResolvedValue(false);
 
   // Setup useVirtualizedWaveDrops mock
   const defaultWaveMessages: WaveMessagesMock = {
@@ -754,6 +756,53 @@ describe("WaveDropsAll", () => {
       });
 
       expect(mockForcePinToBottom).toHaveBeenCalled();
+    });
+
+    it("reveals explicit serial targets on Apple mobile while reading", async () => {
+      const initialDrop = createMockDrop({ id: "drop-1", serial_no: 1 });
+      const newDrop = createMockDrop({
+        id: "drop-2",
+        serial_no: 2,
+        created_at: Date.now() + 1000,
+      });
+
+      const { getWaveMessages, setWaveMessages } = setupMocks({
+        waveMessages: { drops: [initialDrop] },
+        scrollBehavior: {
+          isAtBottom: false,
+          shouldPinToBottom: false,
+          scrollIntent: "reading",
+        },
+        deviceInfo: { isAppleMobile: true },
+      });
+
+      const renderResult = renderComponent();
+      const { props } = renderResult;
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      act(() => {
+        const currentWaveMessages = getWaveMessages();
+        setWaveMessages(
+          currentWaveMessages
+            ? { ...currentWaveMessages, drops: [newDrop, initialDrop] }
+            : { drops: [newDrop, initialDrop] }
+        );
+        renderResult.rerender(
+          <WaveDropsAll {...props} initialDrop={newDrop.serial_no} />
+        );
+      });
+
+      await waitFor(() => {
+        expect(dropsProps.drops).toHaveLength(2);
+        expect(scrollButtonProps.newMessagesCount).toBe(0);
+      });
+
+      await waitFor(() => {
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(newDrop.serial_no);
+      });
     });
 
     it("shows new drops immediately on non-Apple mobile while reading", () => {

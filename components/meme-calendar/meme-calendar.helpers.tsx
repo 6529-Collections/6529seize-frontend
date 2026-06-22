@@ -508,7 +508,7 @@ export function dateFromMintNumber(n: number): Date {
 
 type DateRange = { start: Date; end: Date };
 
-interface MintTimelineDetails {
+export interface MintTimelineDetails {
   readonly mintNumber: number;
   readonly instantUtc: Date;
   readonly mintDayUtc: Date;
@@ -564,6 +564,39 @@ export function getMintTimelineDetails(
     eonNumber: displayedEonNumberFromIndex(seasonIndex),
     ranges,
   };
+}
+
+export type MintTimelineStatus = "past" | "live" | "upcoming";
+
+export function getMintTimelineStatus(
+  timeline: MintTimelineDetails,
+  now: Date = new Date()
+): MintTimelineStatus {
+  if (now < timeline.instantUtc) {
+    return "upcoming";
+  }
+  if (now < timeline.mintEndUtc) {
+    return "live";
+  }
+  return "past";
+}
+
+export function getNextMintTimelineDetails(
+  now: Date = new Date()
+): MintTimelineDetails {
+  return getMintTimelineDetails(getCanonicalNextMintNumber(now));
+}
+
+export function getCurrentMintTimelineDetails(
+  now: Date = new Date()
+): MintTimelineDetails | null {
+  const todayUtcDay = startOfUtcDay(now);
+  const candidateDay = prevMintDateOnOrBefore(todayUtcDay);
+  const timeline = getMintTimelineDetails(
+    getMintNumberForMintDate(candidateDay)
+  );
+
+  return getMintTimelineStatus(timeline, now) === "live" ? timeline : null;
 }
 
 // Build a matrix of weeks for a given month (numbers or nulls). Align by UTC weekday.
