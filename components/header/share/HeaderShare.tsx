@@ -56,13 +56,20 @@ function isAbortError(error: unknown, signal?: AbortSignal): boolean {
 }
 
 function isSessionUpgradeRequiredError(error: unknown): boolean {
-  const message =
-    error instanceof Error
-      ? error.message
-      : typeof error === "string"
-        ? error
-        : "";
+  const message = getErrorMessage(error);
   return message.toLowerCase().includes("session-v2");
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return "";
 }
 
 function buildRouterPath(
@@ -510,71 +517,16 @@ export function HeaderQRModal({
     setNavigateAppUrl(appUrl);
     setNavigateCoreUrl(coreUrl);
 
-    let shareConnectionAppUrl = "";
-    let shareConnectionCoreUrl = "";
+    const shareConnectionAppUrl = await generateConnectionShareUrls({
+      appScheme,
+      coreScheme,
+      isStaleGeneration,
+      signal,
+      walletAddress,
+    });
 
-    const canCreateConnectionShare =
-      !!walletAddress &&
-      hasValidWalletAuth &&
-      hasActiveSessionV2Auth({ address: walletAddress });
-
-    if (canCreateConnectionShare) {
-      try {
-        setConnectionShareStatus("loading");
-        const addressKey = walletAddress.toLowerCase();
-        const cachedShare = getCachedConnectionShare(
-          cachedConnectionShareRef.current,
-          addressKey
-        );
-        const share = cachedShare ?? (await createConnectionShare({ signal }));
-
-        if (isStaleGeneration()) {
-          return;
-        }
-
-        const expiresAtMs = Date.parse(share.expires_at);
-        if (Number.isFinite(expiresAtMs)) {
-          cachedConnectionShareRef.current = {
-            addressKey,
-            expiresAtMs,
-            share,
-          };
-        }
-
-        const shareUrls = buildConnectionShareUrls({
-          share,
-          appScheme,
-          coreScheme,
-        });
-
-        shareConnectionAppUrl = shareUrls.appUrl;
-        shareConnectionCoreUrl = shareUrls.coreUrl;
-
-        setConnectionShareStatus("ready");
-        setShareConnectionAppUrl(shareConnectionAppUrl);
-        setShareConnectionCoreUrl(shareConnectionCoreUrl);
-      } catch (error: unknown) {
-        if (isStaleGeneration() || isAbortError(error, signal)) {
-          return;
-        }
-        console.error("Failed to create connection share", error);
-        setConnectionShareStatus(
-          isSessionUpgradeRequiredError(error) ? "legacy-auth" : "error"
-        );
-        setShareConnectionAppUrl("");
-        setShareConnectionCoreUrl("");
-        setShareConnectionSrc("");
-      }
-    } else if (walletAddress && hasValidWalletAuth) {
-      setConnectionShareStatus("legacy-auth");
-      setShareConnectionAppUrl("");
-      setShareConnectionCoreUrl("");
-      setShareConnectionSrc("");
-    } else {
-      setConnectionShareStatus("unauthenticated");
-      setShareConnectionAppUrl("");
-      setShareConnectionCoreUrl("");
-      setShareConnectionSrc("");
+    if (isStaleGeneration()) {
+      return;
     }
 
     generateQrCodeSource({
@@ -605,6 +557,84 @@ export function HeaderQRModal({
         errorMessage: "Failed to generate share connection QR code",
       });
     }
+  }
+
+  async function generateConnectionShareUrls({
+    appScheme,
+    coreScheme,
+    isStaleGeneration,
+    signal,
+    walletAddress,
+  }: {
+    readonly appScheme: string;
+    readonly coreScheme: string;
+    readonly isStaleGeneration: IsStaleGeneration;
+    readonly signal?: AbortSignal | undefined;
+    readonly walletAddress: string | null;
+  }): Promise<string> {
+    if (!walletAddress || !hasValidWalletAuth) {
+      setUnavailableConnectionShare("unauthenticated");
+      return "";
+    }
+
+    if (!hasActiveSessionV2Auth({ address: walletAddress })) {
+      setUnavailableConnectionShare("legacy-auth");
+      return "";
+    }
+
+    try {
+      setConnectionShareStatus("loading");
+      const addressKey = walletAddress.toLowerCase();
+      const cachedShare = getCachedConnectionShare(
+        cachedConnectionShareRef.current,
+        addressKey
+      );
+      const share = cachedShare ?? (await createConnectionShare({ signal }));
+
+      if (isStaleGeneration()) {
+        return "";
+      }
+
+      cacheConnectionShare(addressKey, share);
+      const shareUrls = buildConnectionShareUrls({
+        share,
+        appScheme,
+        coreScheme,
+      });
+
+      setConnectionShareStatus("ready");
+      setShareConnectionAppUrl(shareUrls.appUrl);
+      setShareConnectionCoreUrl(shareUrls.coreUrl);
+      return shareUrls.appUrl;
+    } catch (error: unknown) {
+      if (isStaleGeneration() || isAbortError(error, signal)) {
+        return "";
+      }
+
+      console.error("Failed to create connection share", error);
+      setUnavailableConnectionShare(
+        isSessionUpgradeRequiredError(error) ? "legacy-auth" : "error"
+      );
+      return "";
+    }
+  }
+
+  function cacheConnectionShare(addressKey: string, share: ConnectionShare): void {
+    const expiresAtMs = Date.parse(share.expires_at);
+    if (Number.isFinite(expiresAtMs)) {
+      cachedConnectionShareRef.current = {
+        addressKey,
+        expiresAtMs,
+        share,
+      };
+    }
+  }
+
+  function setUnavailableConnectionShare(status: ConnectionShareStatus): void {
+    setConnectionShareStatus(status);
+    setShareConnectionAppUrl("");
+    setShareConnectionCoreUrl("");
+    setShareConnectionSrc("");
   }
 
   useEffect(() => {
@@ -861,7 +891,9 @@ export function HeaderQRModal({
               className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-white"
               onClick={() => {
                 onClose();
-                void requestSessionUpgrade?.();
+                requestSessionUpgrade?.().catch((error: unknown) => {
+                  console.error("Failed to request session upgrade", error);
+                });
               }}
             >
               Update
