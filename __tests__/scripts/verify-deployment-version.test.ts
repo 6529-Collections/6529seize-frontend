@@ -1,3 +1,5 @@
+const { spawnSync } = require("node:child_process");
+const path = require("node:path");
 const {
   STAGING_ACCESS_COOKIE_NAME,
   normalizeBaseUrl,
@@ -44,6 +46,27 @@ describe("verify-deployment-version", () => {
     expect(() => normalizeBaseUrl("https://user:pass@6529.io")).toThrow(
       "--base-url must not include credentials"
     );
+  });
+
+  it("loads the CLI argument parser before validating required options", () => {
+    const script = path.join(
+      process.cwd(),
+      "ops/scripts/verify-deployment-version.cjs"
+    );
+    const result = spawnSync(process.execPath, [script], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PLAYWRIGHT_STAGING_ACCESS_CODE: "",
+        STAGING_AUTH: "",
+      },
+    });
+    const output = `${result.stdout}${result.stderr}`;
+
+    expect(result.status).toBe(1);
+    expect(output).toContain("--expected-version is required");
+    expect(output).not.toContain("parseArgs is not a function");
   });
 
   it("passes when /api/version returns the expected version with no-store", async () => {

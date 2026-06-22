@@ -3,7 +3,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { parseArgs } = require("./deployment-bus.cjs");
+const { parseArgs } = require("./cli-args.cjs");
 
 const SCHEMA_VERSION = "deployment-version-evidence.v1";
 const VERSION_ENDPOINT_PATH = "/api/version";
