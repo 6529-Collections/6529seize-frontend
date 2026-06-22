@@ -1153,8 +1153,8 @@ function isThirdPartyWalletExtensionStack(value: string | undefined): boolean {
 
   return !(
     stack.includes("app:///") ||
-    stack.includes("https://6529.io") ||
-    stack.includes("https://www.6529.io") ||
+    stack.includes("http://") ||
+    stack.includes("https://") ||
     stack.includes("/_next/static/")
   );
 }

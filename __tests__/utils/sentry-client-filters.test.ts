@@ -1978,6 +1978,33 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter disconnected wallet-provider object rejections with web stack URLs", () => {
+    // Arrange
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4900,
+          message: "The provider is disconnected from all chains.",
+          stack: `${disconnectedProviderStack}\n    at app (https://6529.io/_next/static/chunks/app.js:1:1)`,
+        },
+      },
+    };
+
+    // Act
+    const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter non-reference errors from Twitter", () => {
     // Arrange
     const event = createTwitterConfigEvent({
