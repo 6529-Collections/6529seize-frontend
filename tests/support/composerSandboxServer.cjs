@@ -1,4 +1,3 @@
-const crypto = require("crypto");
 const http = require("http");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
@@ -319,7 +318,10 @@ function emptyPage() {
 }
 
 function normalizedPath(url) {
-  const pathname = url.pathname.replace(/\/+$/, "");
+  let pathname = url.pathname;
+  while (pathname.length > 1 && pathname.endsWith("/")) {
+    pathname = pathname.slice(0, -1);
+  }
   return pathname || "/";
 }
 
@@ -557,34 +559,6 @@ function handleRequest(req, res) {
   writeJson(res, 200, emptyPage());
 }
 
-function handleWebSocketUpgrade(req, socket) {
-  const key = req.headers["sec-websocket-key"];
-  if (typeof key !== "string") {
-    socket.destroy();
-    return;
-  }
-
-  const accept = crypto
-    // WebSocket handshakes require SHA-1; this local-only test server does not
-    // use the digest for security decisions or secret storage.
-    .createHash("sha1") // NOSONAR
-    .update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`)
-    .digest("base64");
-
-  socket.write(
-    [
-      "HTTP/1.1 101 Switching Protocols",
-      "Upgrade: websocket",
-      "Connection: Upgrade",
-      `Sec-WebSocket-Accept: ${accept}`,
-      "",
-      "",
-    ].join("\r\n")
-  );
-  socket.on("error", () => undefined);
-  socket.on("data", () => undefined);
-}
-
 function buildPublicRuntime() {
   return {
     ALLOWLIST_API_ENDPOINT: mockApiOrigin,
@@ -647,7 +621,6 @@ function startNextDev() {
 const server = http.createServer(handleRequest);
 let nextChild = null;
 
-server.on("upgrade", handleWebSocketUpgrade);
 server.on("error", (error) => {
   console.error(`Composer sandbox mock API failed: ${error.message}`);
   process.exit(1);
