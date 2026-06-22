@@ -246,7 +246,7 @@
     "@types/react-scroll": "1.8.10",
     "@types/react-toggle": "4.0.5",
     "autoprefixer": "10.4.27",
-    "babel-jest": "30.3.0",
+    "babel-jest": "30.4.1",
     "babel-plugin-react-compiler": "1.0.0",
     "baseline-browser-mapping": "2.10.10",
     "depcheck": "1.4.7",
