@@ -12,7 +12,7 @@ jest.mock('@/services/api/common-api', () => ({
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
-    invalidateQueries: jest.fn(() => Promise.resolve()),
+    invalidateQueries: jest.fn(),
   }),
 }));
 
@@ -51,13 +51,13 @@ describe('WaveMute', () => {
 
   it('renders Mute button when wave is not muted', () => {
     renderComponent(mockWaveNotMuted);
-    
+
     expect(screen.getByRole('menuitem')).toHaveTextContent('Mute');
   });
 
   it('renders Unmute button when wave is muted', () => {
     renderComponent(mockWaveMuted);
-    
+
     expect(screen.getByRole('menuitem')).toHaveTextContent('Unmute');
   });
 
@@ -65,11 +65,11 @@ describe('WaveMute', () => {
     const { commonApiPost } = require('@/services/api/common-api');
     const onSuccess = jest.fn();
     commonApiPost.mockResolvedValue({});
-    
+
     renderComponent(mockWaveNotMuted, onSuccess);
-    
+
     await userEvent.click(screen.getByRole('menuitem'));
-    
+
     await waitFor(() => {
       expect(commonApiPost).toHaveBeenCalledWith({
         endpoint: 'waves/wave-123/mute',
@@ -83,11 +83,11 @@ describe('WaveMute', () => {
     const { commonApiDelete } = require('@/services/api/common-api');
     const onSuccess = jest.fn();
     commonApiDelete.mockResolvedValue({});
-    
+
     renderComponent(mockWaveMuted, onSuccess);
-    
+
     await userEvent.click(screen.getByRole('menuitem'));
-    
+
     await waitFor(() => {
       expect(commonApiDelete).toHaveBeenCalledWith({
         endpoint: 'waves/wave-456/mute',
@@ -99,11 +99,11 @@ describe('WaveMute', () => {
   it('shows Muting with spinner while muting', async () => {
     const { commonApiPost } = require('@/services/api/common-api');
     commonApiPost.mockImplementation(() => new Promise(() => {}));
-    
+
     renderComponent(mockWaveNotMuted);
-    
+
     await userEvent.click(screen.getByRole('menuitem'));
-    
+
     await waitFor(() => {
       expect(screen.getByRole('menuitem')).toHaveTextContent('Muting');
       expect(screen.getByRole('menuitem').querySelector('.spinner')).toBeInTheDocument();
@@ -113,11 +113,11 @@ describe('WaveMute', () => {
   it('shows Unmuting with spinner while unmuting', async () => {
     const { commonApiDelete } = require('@/services/api/common-api');
     commonApiDelete.mockImplementation(() => new Promise(() => {}));
-    
+
     renderComponent(mockWaveMuted);
-    
+
     await userEvent.click(screen.getByRole('menuitem'));
-    
+
     await waitFor(() => {
       expect(screen.getByRole('menuitem')).toHaveTextContent('Unmuting');
       expect(screen.getByRole('menuitem').querySelector('.spinner')).toBeInTheDocument();
@@ -127,17 +127,15 @@ describe('WaveMute', () => {
   it('handles error when muting fails', async () => {
     const { commonApiPost } = require('@/services/api/common-api');
     commonApiPost.mockRejectedValue('Unable to mute wave');
-    
+
     renderComponent(mockWaveNotMuted);
-    
+
     await userEvent.click(screen.getByRole('menuitem'));
-    
+
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+        message: 'Unable to mute wave',
         type: 'error',
-        title: "Couldn't mute this wave.",
-        description: 'Please try again.',
-        details: 'Unable to mute wave.',
       });
     });
   });
@@ -145,17 +143,15 @@ describe('WaveMute', () => {
   it('handles error when unmuting fails', async () => {
     const { commonApiDelete } = require('@/services/api/common-api');
     commonApiDelete.mockRejectedValue('Unable to unmute wave');
-    
+
     renderComponent(mockWaveMuted);
-    
+
     await userEvent.click(screen.getByRole('menuitem'));
-    
+
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+        message: 'Unable to unmute wave',
         type: 'error',
-        title: "Couldn't unmute this wave.",
-        description: 'Please try again.',
-        details: 'Unable to unmute wave.',
       });
     });
   });
@@ -163,12 +159,12 @@ describe('WaveMute', () => {
   it('disables button while loading', async () => {
     const { commonApiPost } = require('@/services/api/common-api');
     commonApiPost.mockImplementation(() => new Promise(() => {}));
-    
+
     renderComponent(mockWaveNotMuted);
-    
+
     const menuitem = screen.getByRole('menuitem');
     await userEvent.click(menuitem);
-    
+
     await waitFor(() => {
       expect(menuitem).toBeDisabled();
     });

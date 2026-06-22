@@ -110,29 +110,6 @@ const renderComponent = () => {
   );
 };
 
-const rerenderComponent = (rerender: ReturnType<typeof render>["rerender"]) => {
-  rerender(
-    <TitleProvider>
-      <RememeAddPage />
-    </TitleProvider>
-  );
-};
-
-const mockEligibleProfile = () => {
-  mockUseAuth.mockReturnValue({
-    connectedProfile: { consolidation_key: "test-key" },
-  });
-  mockCommonApiFetch.mockResolvedValue({ boosted_tdh: 10000 });
-};
-
-const verifyAndClickAddRememe = async () => {
-  fireEvent.click(screen.getByText("Verify Rememe"));
-  await waitFor(() => {
-    expect(screen.getByText("Add Rememe")).not.toBeDisabled();
-  });
-  fireEvent.click(screen.getByText("Add Rememe"));
-};
-
 describe("RememeAddPage", () => {
   const defaultSignMessage = {
     signMessage: jest.fn(),
@@ -296,15 +273,12 @@ describe("RememeAddPage", () => {
     fireEvent.click(screen.getByText("Add Rememe"));
 
     expect(mockSignMessage).toHaveBeenCalledWith({
-      message: expect.stringContaining("Action: add_rememe"),
+      message: JSON.stringify({
+        contract: "0xtest",
+        token_ids: ["1"],
+        references: [1, 2],
+      }),
     });
-    const signedMessage = mockSignMessage.mock.calls[0][0].message;
-    expect(signedMessage).toEqual(expect.stringContaining("6529 Action"));
-    expect(signedMessage).toEqual(expect.stringContaining("Wallet: 0x123"));
-    expect(signedMessage).toEqual(expect.stringContaining("Payload Hash:"));
-    expect(signedMessage).toEqual(
-      expect.stringContaining("Purpose: Sign this message to add a 6529 ReMeme.")
-    );
   });
 
   it("shows signing state when message is pending", () => {
@@ -319,12 +293,11 @@ describe("RememeAddPage", () => {
   });
 
   it("shows submitting state during submission", async () => {
-    mockEligibleProfile();
-    const signMessageMock = {
+    mockUseSignMessage.mockReturnValue({
       ...defaultSignMessage,
-      signMessage: jest.fn(),
-    };
-    mockUseSignMessage.mockReturnValue(signMessageMock);
+      isSuccess: true,
+      data: "signature",
+    });
 
     (globalThis.fetch as jest.Mock).mockImplementation(
       () =>
@@ -340,17 +313,9 @@ describe("RememeAddPage", () => {
         })
     );
 
-    const { rerender } = renderComponent();
+    renderComponent();
 
-    await verifyAndClickAddRememe();
-    expect(signMessageMock.signMessage).toHaveBeenCalled();
-
-    mockUseSignMessage.mockReturnValue({
-      ...signMessageMock,
-      isSuccess: true,
-      data: "signature",
-    });
-    rerenderComponent(rerender);
+    fireEvent.click(screen.getByText("Verify Rememe"));
 
     await waitFor(() => {
       expect(screen.getByText("Adding Rememe")).toBeInTheDocument();
@@ -358,12 +323,11 @@ describe("RememeAddPage", () => {
   });
 
   it("handles successful submission", async () => {
-    mockEligibleProfile();
-    const signMessageMock = {
+    mockUseSignMessage.mockReturnValue({
       ...defaultSignMessage,
-      signMessage: jest.fn(),
-    };
-    mockUseSignMessage.mockReturnValue(signMessageMock);
+      isSuccess: true,
+      data: "signature",
+    });
 
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       status: 201,
@@ -373,18 +337,10 @@ describe("RememeAddPage", () => {
       }),
     });
 
-    const { rerender } = renderComponent();
+    renderComponent();
 
     // First verify rememe to set up the rememe data
-    await verifyAndClickAddRememe();
-    expect(signMessageMock.signMessage).toHaveBeenCalled();
-
-    mockUseSignMessage.mockReturnValue({
-      ...signMessageMock,
-      isSuccess: true,
-      data: "signature",
-    });
-    rerenderComponent(rerender);
+    fireEvent.click(screen.getByText("Verify Rememe"));
 
     await waitFor(() => {
       expect(screen.getByText("Status: Success")).toBeInTheDocument();
@@ -395,12 +351,11 @@ describe("RememeAddPage", () => {
   });
 
   it("handles submission errors", async () => {
-    mockEligibleProfile();
-    const signMessageMock = {
+    mockUseSignMessage.mockReturnValue({
       ...defaultSignMessage,
-      signMessage: jest.fn(),
-    };
-    mockUseSignMessage.mockReturnValue(signMessageMock);
+      isSuccess: true,
+      data: "signature",
+    });
 
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       status: 400,
@@ -410,18 +365,10 @@ describe("RememeAddPage", () => {
       }),
     });
 
-    const { rerender } = renderComponent();
+    renderComponent();
 
     // First verify rememe to set up the rememe data
-    await verifyAndClickAddRememe();
-    expect(signMessageMock.signMessage).toHaveBeenCalled();
-
-    mockUseSignMessage.mockReturnValue({
-      ...signMessageMock,
-      isSuccess: true,
-      data: "signature",
-    });
-    rerenderComponent(rerender);
+    fireEvent.click(screen.getByText("Verify Rememe"));
 
     await waitFor(() => {
       expect(screen.getByText("Status: Fail")).toBeInTheDocument();
@@ -430,12 +377,11 @@ describe("RememeAddPage", () => {
   });
 
   it("stops submitting and shows the backend error when submission fails", async () => {
-    mockEligibleProfile();
-    const signMessageMock = {
+    mockUseSignMessage.mockReturnValue({
       ...defaultSignMessage,
-      signMessage: jest.fn(),
-    };
-    mockUseSignMessage.mockReturnValue(signMessageMock);
+      isSuccess: true,
+      data: "signature",
+    });
 
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       status: 400,
@@ -445,17 +391,9 @@ describe("RememeAddPage", () => {
       }),
     });
 
-    const { rerender } = renderComponent();
+    renderComponent();
 
-    await verifyAndClickAddRememe();
-    expect(signMessageMock.signMessage).toHaveBeenCalled();
-
-    mockUseSignMessage.mockReturnValue({
-      ...signMessageMock,
-      isSuccess: true,
-      data: "signature",
-    });
-    rerenderComponent(rerender);
+    fireEvent.click(screen.getByText("Verify Rememe"));
 
     await waitFor(() => {
       expect(screen.getByText("Status: Fail")).toBeInTheDocument();
@@ -478,10 +416,10 @@ describe("RememeAddPage", () => {
   });
 
   it("handles add another button click", async () => {
-    mockEligibleProfile();
     const signMessageMock = {
       ...defaultSignMessage,
-      signMessage: jest.fn(),
+      isSuccess: true,
+      data: "signature",
     };
     mockUseSignMessage.mockReturnValue(signMessageMock);
 
@@ -493,18 +431,10 @@ describe("RememeAddPage", () => {
       }),
     });
 
-    const { rerender } = renderComponent();
+    renderComponent();
 
     // First trigger the verification to set up the rememe
-    await verifyAndClickAddRememe();
-    expect(signMessageMock.signMessage).toHaveBeenCalled();
-
-    mockUseSignMessage.mockReturnValue({
-      ...signMessageMock,
-      isSuccess: true,
-      data: "signature",
-    });
-    rerenderComponent(rerender);
+    fireEvent.click(screen.getByText("Verify Rememe"));
 
     // Wait for API call to complete and submission to succeed
     await waitFor(() => {

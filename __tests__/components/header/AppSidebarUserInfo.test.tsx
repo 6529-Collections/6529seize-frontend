@@ -47,7 +47,6 @@ function setup(options: any) {
   (useSeizeConnectContext as jest.Mock).mockReturnValue({
     address: options.address,
     isAuthenticated: !!options.address,
-    hasValidWalletAuth: !!options.address,
     isConnected: options.isConnected ?? false,
     connectedAccountUnreadNotifications:
       options.connectedAccountUnreadNotifications ?? {},

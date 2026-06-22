@@ -4,7 +4,7 @@
 
 `/tools/api` is a read-only guide for the 6529 REST API.
 
-- It explains wallet-signature authentication (`session-nonce -> sign -> session-login -> access_token`).
+- It explains wallet-signature authentication (`nonce -> sign -> login -> token`).
 - It shows a multipart media upload flow and drop creation flow.
 - It defines key API terms used in routes and payloads.
 - It links to the full external API reference: `https://api.6529.io/docs/`.
@@ -49,22 +49,21 @@
 
 ## Authentication Example Flow
 
-1. Request a native session nonce:
-   - `GET https://api.6529.io/api/auth/session-nonce?signer_address=<address>&client_type=native&chain_id=1`
-2. Read `signable_message` and `server_signature` from the response.
-3. Sign `signable_message` exactly with the same wallet private key.
+1. Request nonce:
+   - `GET https://api.6529.io/api/auth/nonce?signer_address=<address>&short_nonce=true`
+2. Read `nonce` and `server_signature` from the response.
+3. Sign `nonce` with the same wallet private key.
 4. Login:
-   - `POST https://api.6529.io/api/auth/session-login`
-   - JSON body: `client_type`, `client_address`, `client_signature`,
-     `server_signature`
-5. Read `access_token` from the login response.
-6. Call protected routes with `Authorization: Bearer <access_token>`.
+   - `POST https://api.6529.io/api/auth/login?signer_address=<address>`
+   - JSON body: `client_address`, `client_signature`, `server_signature`
+5. Read `token` from the login response.
+6. Call protected routes with `Authorization: Bearer <token>`.
    - The snippet uses `GET https://api.6529.io/api/feed` as the example.
 
-### Session Message Note
+### Nonce Format Note
 
-- The returned `signable_message` is the only text the wallet should sign.
-- Do not trim, normalize, rebuild, JSON-stringify, or sign a `nonce` field.
+- `short_nonce=true`: short nonce string (script-friendly).
+- `short_nonce=false`: long multiline nonce message.
 
 ## Multipart Media-Drop Example Flow
 

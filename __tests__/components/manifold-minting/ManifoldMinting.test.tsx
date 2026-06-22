@@ -31,10 +31,6 @@ jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
   __esModule: true,
   default: () => <div data-testid="countdown" />,
 }));
-jest.mock("@/components/drop-forge/DropForgeTestnetIndicator", () => ({
-  __esModule: true,
-  default: () => <div data-testid="testnet-indicator" />,
-}));
 
 // Mock the Time class used in the component
 jest.mock("@/helpers/time", () => ({
@@ -69,8 +65,6 @@ jest.mock("@/helpers/Helpers", () => ({
   fromGWEI: jest.fn((n: number) => n / 1000000000),
   getNameForContract: jest.fn(() => "Memes by 6529"),
   getPathForContract: jest.fn(() => "memes"),
-  isGradientsContract: jest.fn(() => false),
-  isMemesContract: jest.fn(() => true),
   numberWithCommas: jest.fn((n: number) => n.toLocaleString()),
   parseNftDescriptionToHtml: jest.fn((d: string) => d),
 }));
@@ -160,7 +154,6 @@ const createMockClaim = (overrides = {}) => ({
   totalMax: 1000,
   remaining: 900,
   cost: 50000000000000000, // 0.05 ETH in wei
-  costWei: 50000000000000000n,
   startDate: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
   endDate: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
   status: "active",
@@ -177,17 +170,6 @@ const defaultProps = {
   proxy: "0x2",
   abi: {},
   token_id: 123,
-  mintMetadata: {
-    tokenId: 123,
-    metadata: {
-      name: "Test NFT",
-      description: "Test description",
-      attributes: [],
-      image_url: "test.jpg",
-      animation_url: "",
-      animation_details: null,
-    },
-  },
   mint_date: {
     toMillis: jest.fn(() => Date.now()),
     toSeconds: jest.fn(() => Date.now() / 1000),
@@ -205,12 +187,12 @@ afterEach(() => {
 describe("Basic Functionality", () => {
   test("shows error message when hook reports error", async () => {
     let called = false;
-    useManifoldClaim.mockImplementation(({ onError }) => {
+    useManifoldClaim.mockImplementation((c, p, a, t, onError) => {
       if (!called) {
         called = true;
         onError();
       }
-      return { claim: undefined, isFetching: false };
+      return undefined;
     });
 
     render(<ManifoldMinting {...defaultProps} />);
@@ -218,7 +200,7 @@ describe("Basic Functionality", () => {
   });
 
   test("shows loading state initially", () => {
-    useManifoldClaim.mockReturnValue({ claim: undefined, isFetching: true });
+    useManifoldClaim.mockReturnValue(undefined);
     mockFetch.mockImplementation(() => new Promise(() => {})); // Never resolves
 
     render(<ManifoldMinting {...defaultProps} />);
@@ -226,10 +208,7 @@ describe("Basic Functionality", () => {
   });
 
   test("renders basic NFT information when data is available", async () => {
-    useManifoldClaim.mockReturnValue({
-      claim: createMockClaim(),
-      isFetching: false,
-    });
+    useManifoldClaim.mockReturnValue(createMockClaim());
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(createMockManifoldInstance()),
@@ -237,8 +216,9 @@ describe("Basic Functionality", () => {
 
     render(<ManifoldMinting {...defaultProps} />);
 
+    // Should render title and basic info - component renders "Mint" span and title text
     expect(
-      screen.getByRole("link", { name: "Test NFT" })
+      screen.getByRole("heading", { name: "Mint Test Meme" })
     ).toBeInTheDocument();
 
     // Wait for the NFT info to load and display
@@ -253,10 +233,7 @@ describe("Basic Functionality", () => {
 
 describe("Component Structure", () => {
   test("renders child components when data is available", async () => {
-    useManifoldClaim.mockReturnValue({
-      claim: createMockClaim(),
-      isFetching: false,
-    });
+    useManifoldClaim.mockReturnValue(createMockClaim());
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(createMockManifoldInstance()),
@@ -280,16 +257,12 @@ describe("Component Structure", () => {
 
   test("displays edition size and pricing information", async () => {
     useManifoldClaim.mockReturnValue(
-      {
-        claim: createMockClaim({
-          total: 100,
-          totalMax: 1000,
-          remaining: 900,
-          cost: 50000000000000000, // 0.05 ETH in wei
-          costWei: 50000000000000000n,
-        }),
-        isFetching: false,
-      }
+      createMockClaim({
+        total: 100,
+        totalMax: 1000,
+        remaining: 900,
+        cost: 50000000000000000, // 0.05 ETH in wei
+      })
     );
 
     mockFetch.mockResolvedValue({

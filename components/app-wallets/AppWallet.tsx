@@ -13,7 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import type { Dispatch, ReactNode, SetStateAction } from "react";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -21,10 +21,7 @@ import { useBalance, useChainId } from "wagmi";
 import { sepolia } from "viem/chains";
 
 import type { AppWallet } from "./AppWalletsContext";
-import {
-  APP_WALLET_MNEMONIC_UNAVAILABLE,
-  useAppWallets,
-} from "./AppWalletsContext";
+import { useAppWallets } from "./AppWalletsContext";
 
 import {
   areEqualAddresses,
@@ -35,13 +32,13 @@ import { useAuth } from "../auth/Auth";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import { UnlockAppWalletModal } from "./AppWalletModal";
 import { decryptData } from "./app-wallet-helpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 import { Share } from "@capacitor/share";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
-const SECRET_REVEAL_TIMEOUT_MS = 60000;
-const SECRET_CLIPBOARD_TTL_MS = 30000;
+const MNEMONIC_NA = "N/A";
 
 export default function AppWalletComponent(
   props: Readonly<{
@@ -53,7 +50,6 @@ export default function AppWalletComponent(
     fetchingAppWallets,
     appWallets,
     deleteAppWallet,
-    migrateAppWallet,
   } = useAppWallets();
 
   const appWallet = appWallets.find((w) =>
@@ -79,115 +75,26 @@ export default function AppWalletComponent(
   const [revealPhrase, setRevealPhrase] = useState(false);
   const [isRevealingPrivateKey, setIsRevealingPrivateKey] = useState(false);
   const [revealPrivateKey, setRevealPrivateKey] = useState(false);
-  const [isExportingPlaintext, setIsExportingPlaintext] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [addressCopied, setAddressCopied] = useState(false);
   const [mnemonicCopied, setMnemonicCopied] = useState(false);
   const [privateKeyCopied, setPrivateKeyCopied] = useState(false);
 
-  const setEncryptedPhrase = useCallback(() => {
+  function setEncryptedPhrase() {
     setPhrase(Array(12).fill("x".repeat(8)));
-  }, []);
+  }
 
-  const setEncryptedPrivateKey = useCallback(() => {
+  function setEncryptedPrivateKey() {
     setPrivateKey("0x" + "x".repeat(64));
-  }, []);
+  }
 
   useEffect(() => {
     setEncryptedPhrase();
     setEncryptedPrivateKey();
-    setMnemonicAvailable(
-      appWallet
-        ? (appWallet.has_mnemonic ??
-            appWallet.mnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE)
-        : false
-    );
-  }, [appWallet, setEncryptedPhrase, setEncryptedPrivateKey]);
+    setMnemonicAvailable(appWallet?.mnemonic !== MNEMONIC_NA);
+  }, [appWallet]);
 
-  const hidePhrase = useCallback(() => {
-    setRevealPhrase(false);
-    setEncryptedPhrase();
-  }, [setEncryptedPhrase]);
-
-  const hidePrivateKey = useCallback(() => {
-    setRevealPrivateKey(false);
-    setEncryptedPrivateKey();
-  }, [setEncryptedPrivateKey]);
-
-  useEffect(() => {
-    if (!revealPhrase) {
-      return;
-    }
-
-    const timeoutId = setTimeout(hidePhrase, SECRET_REVEAL_TIMEOUT_MS);
-    return () => clearTimeout(timeoutId);
-  }, [hidePhrase, revealPhrase]);
-
-  useEffect(() => {
-    if (!revealPrivateKey) {
-      return;
-    }
-
-    const timeoutId = setTimeout(hidePrivateKey, SECRET_REVEAL_TIMEOUT_MS);
-    return () => clearTimeout(timeoutId);
-  }, [hidePrivateKey, revealPrivateKey]);
-
-  const writeRecoveryFile = async (
-    fileName: string,
-    content: string,
-    title: string,
-    text: string
-  ) => {
-    try {
-      const result = await Filesystem.writeFile({
-        path: fileName,
-        data: content,
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-      });
-
-      await Share.share({
-        title,
-        text,
-        url: result.uri,
-        dialogTitle: "Share or Save File",
-      });
-    } catch {
-      alert("Unable to write file");
-    }
-  };
-
-  const doEncryptedDownload = async (wallet: AppWallet) => {
-    const fileName = `${wallet.name.replace(/\s+/g, "_")}-${
-      wallet.address
-    }-encrypted-recovery.json`;
-    const recoveryPayload = {
-      version: 2,
-      type: "6529-app-wallet-encrypted-recovery",
-      exported_at: new Date().toISOString(),
-      wallet: {
-        name: wallet.name,
-        created_at: wallet.created_at,
-        address: wallet.address,
-        imported: wallet.imported,
-        encryption_version: wallet.encryption_version ?? 1,
-        has_mnemonic:
-          wallet.has_mnemonic ??
-          wallet.mnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE,
-        address_hashed: wallet.address_hashed,
-        mnemonic: wallet.mnemonic,
-        private_key: wallet.private_key,
-      },
-    };
-
-    await writeRecoveryFile(
-      fileName,
-      JSON.stringify(recoveryPayload, null, 2),
-      "Encrypted Wallet Recovery File",
-      `${wallet.name} - ${wallet.address}`
-    );
-  };
-
-  const doPlaintextDownload = async (
+  const doDownload = async (
     wallet: AppWallet,
     decryptedMnemonic: string,
     decryptedPrivateKey: string
@@ -199,51 +106,25 @@ export default function AppWalletComponent(
 
     const fileName = `${wallet.name.replace(/\s+/g, "_")}-${
       wallet.address
-    }-plaintext-recovery.txt`;
-
-    await writeRecoveryFile(
-      fileName,
-      content,
-      "Plaintext Wallet Recovery File",
-      `${wallet.name} - ${wallet.address}`
-    );
-  };
-
-  const clearClipboardIfUnchanged = useCallback(async (value: string) => {
-    const clipboard = navigator.clipboard;
-    if (!clipboard?.writeText) {
-      return;
-    }
-
+    }.txt`;
     try {
-      if (!clipboard.readText) {
-        return;
-      }
+      const result = await Filesystem.writeFile({
+        path: fileName,
+        data: content,
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      });
 
-      const currentText = await clipboard.readText();
-      if (currentText !== value) {
-        return;
-      }
-
-      await clipboard.writeText("");
+      await Share.share({
+        title: "Wallet Recovery File",
+        text: `${wallet.name} - ${wallet.address}`,
+        url: result.uri,
+        dialogTitle: "Share or Save File",
+      });
     } catch {
-      // Clipboard read/write permissions vary by platform; clearing is best-effort.
+      alert("Unable to write file");
     }
-  }, []);
-
-  const copySecretToClipboard = useCallback(
-    async (value: string, setCopied: Dispatch<SetStateAction<boolean>>) => {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => {
-        setCopied(false);
-      }, 1500);
-      setTimeout(() => {
-        clearClipboardIfUnchanged(value);
-      }, SECRET_CLIPBOARD_TTL_MS);
-    },
-    [clearClipboardIfUnchanged]
-  );
+  };
 
   const doDelete = useCallback(
     async (name: string, address: string) => {
@@ -399,7 +280,7 @@ export default function AppWalletComponent(
                 icon={faFileDownload}
                 height={22}
                 data-tooltip-id={`download-${appWallet.address}`}
-                onClick={() => doEncryptedDownload(appWallet)}
+                onClick={() => setIsDownloading(true)}
               />
               <Tooltip
                 id={`download-${appWallet.address}`}
@@ -410,21 +291,14 @@ export default function AppWalletComponent(
                   padding: "4px 8px",
                 }}
               >
-                Download encrypted recovery file
+                Download Recovery File
               </Tooltip>
             </>
             <UnlockAppWalletModal
               address={appWallet.address}
               address_hashed={appWallet.address_hashed}
-              show={isExportingPlaintext}
-              onHide={() => setIsExportingPlaintext(false)}
-              onVerifiedUnlock={migrateAppWallet}
-              sensitiveAction={{
-                label: "plaintext export",
-                warning:
-                  "Plaintext recovery files expose the mnemonic and private key without encryption.",
-                confirmationText: "EXPORT",
-              }}
+              show={isDownloading}
+              onHide={() => setIsDownloading(false)}
               onUnlock={(pass: string) => {
                 decryptData(
                   appWallet.address,
@@ -432,23 +306,14 @@ export default function AppWalletComponent(
                   pass
                 ).then(async (decryptedPrivateKey) => {
                   let decryptedMnemonic = appWallet.mnemonic;
-                  if (
-                    appWallet.has_mnemonic ??
-                    decryptedMnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE
-                  ) {
+                  if (decryptedMnemonic !== MNEMONIC_NA) {
                     decryptedMnemonic = await decryptData(
                       appWallet.address,
                       appWallet.mnemonic,
                       pass
                     );
-                  } else {
-                    decryptedMnemonic = APP_WALLET_MNEMONIC_UNAVAILABLE;
                   }
-                  doPlaintextDownload(
-                    appWallet,
-                    decryptedMnemonic,
-                    decryptedPrivateKey
-                  );
+                  doDownload(appWallet, decryptedMnemonic, decryptedPrivateKey);
                 });
               }}
             />
@@ -518,13 +383,6 @@ export default function AppWalletComponent(
                 address_hashed={appWallet.address_hashed}
                 show={isRevealingPhrase}
                 onHide={() => setIsRevealingPhrase(false)}
-                onVerifiedUnlock={migrateAppWallet}
-                sensitiveAction={{
-                  label: "secret reveal",
-                  warning:
-                    "The recovery phrase will be visible on this device for a short time.",
-                  confirmationText: "REVEAL",
-                }}
                 onUnlock={(pass: string) => {
                   decryptData(appWallet.address, appWallet.mnemonic, pass).then(
                     (decryptedPhrase) => {
@@ -542,10 +400,11 @@ export default function AppWalletComponent(
                     height={22}
                     data-tooltip-id={`copy-mnemonic-${appWallet.address}`}
                     onClick={() => {
-                      copySecretToClipboard(
-                        phrase.join(" "),
-                        setMnemonicCopied
-                      );
+                      navigator.clipboard.writeText(phrase.join(" "));
+                      setMnemonicCopied(true);
+                      setTimeout(() => {
+                        setMnemonicCopied(false);
+                      }, 1500);
                     }}
                   />
                   <Tooltip
@@ -572,7 +431,7 @@ export default function AppWalletComponent(
               index={i + 1}
               word={w}
               hidden={!revealPhrase}
-              key={`${appWallet.address}-mnemonic-${i}`}
+              key={getRandomObjectId()}
             />
           ))
         ) : (
@@ -617,13 +476,6 @@ export default function AppWalletComponent(
               address_hashed={appWallet.address_hashed}
               show={isRevealingPrivateKey}
               onHide={() => setIsRevealingPrivateKey(false)}
-              onVerifiedUnlock={migrateAppWallet}
-              sensitiveAction={{
-                label: "secret reveal",
-                warning:
-                  "The private key will be visible on this device for a short time.",
-                confirmationText: "REVEAL",
-              }}
               onUnlock={(pass: string) => {
                 decryptData(
                   appWallet.address,
@@ -643,7 +495,11 @@ export default function AppWalletComponent(
                   height={22}
                   data-tooltip-id={`copy-private-key-${appWallet.address}`}
                   onClick={() => {
-                    copySecretToClipboard(privateKey, setPrivateKeyCopied);
+                    navigator.clipboard.writeText(privateKey);
+                    setPrivateKeyCopied(true);
+                    setTimeout(() => {
+                      setPrivateKeyCopied(false);
+                    }, 1500);
                   }}
                 />
                 <Tooltip
@@ -676,12 +532,6 @@ export default function AppWalletComponent(
             onClick={() => doDelete(appWallet.name, appWallet.address)}
           >
             Delete
-          </Button>
-          <Button
-            variant="outline-danger"
-            onClick={() => setIsExportingPlaintext(true)}
-          >
-            Export Plaintext Recovery
           </Button>
         </Col>
       </Row>

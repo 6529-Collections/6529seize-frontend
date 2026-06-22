@@ -57,5 +57,3 @@ export class ApiCompleteMultipartUploadResponse {
     public constructor() {
     }
 }
-
-

@@ -1,4 +1,7 @@
-import { MemePageCollectorsSubMenu } from "@/components/the-memes/MemePageCollectors";
+import {
+  MemePageCollectorsRightMenu,
+  MemePageCollectorsSubMenu,
+} from "@/components/the-memes/MemePageCollectors";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/helpers/Helpers", () => ({
@@ -42,12 +45,37 @@ const nftMeta = {
   percent_unique_cleaned_rank: 9,
 } as any;
 
+describe("MemePageCollectorsRightMenu", () => {
+  it("renders TDH breakdown when shown", () => {
+    render(<MemePageCollectorsRightMenu show nft={nft} />);
+    expect(
+      screen.getByRole("heading", { name: "TDH breakdown" })
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("TDH").length).toBeGreaterThan(0);
+    expect(screen.getByText("Unweighted TDH")).toBeInTheDocument();
+    expect(screen.getByText("Meme Rank")).toBeInTheDocument();
+    expect(screen.getByText("1.23")).toBeInTheDocument();
+    expect(screen.getByText("4.56")).toBeInTheDocument();
+    expect(screen.getByText("#7")).toBeInTheDocument();
+  });
+
+  it("returns null when not shown", () => {
+    const { container } = render(
+      <MemePageCollectorsRightMenu show={false} nft={nft} />
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+});
+
 describe("MemePageCollectorsSubMenu", () => {
-  it("renders collector stats and passes contract and id to leaderboard", () => {
+  it("passes contract and id to leaderboard", () => {
     render(<MemePageCollectorsSubMenu show nft={nft} nftMeta={nftMeta} />);
     expect(
+      screen.getByRole("heading", { name: "Meme Collectors" })
+    ).toBeInTheDocument();
+    expect(
       screen.getByLabelText(
-        "Unique % represents collector diversity. Higher percentage means more different collectors."
+        "Unique % represents collectors diversity. Higher percentage means more different collectors."
       )
     ).toBeInTheDocument();
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
@@ -58,13 +86,6 @@ describe("MemePageCollectorsSubMenu", () => {
   it("returns null when nft missing", () => {
     const { container } = render(
       <MemePageCollectorsSubMenu show nft={undefined} />
-    );
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it("returns null when not shown", () => {
-    const { container } = render(
-      <MemePageCollectorsSubMenu show={false} nft={nft} nftMeta={nftMeta} />
     );
     expect(container).toBeEmptyDOMElement();
   });

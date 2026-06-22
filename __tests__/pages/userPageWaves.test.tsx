@@ -17,7 +17,6 @@ jest.mock("@/helpers/server.helpers", () => ({
 
 jest.mock("@/components/providers/metadata", () => ({
   getAppMetadata: jest.fn((v: any) => v),
-  getLargeSocialCardMetadata: jest.fn((v: any) => v),
 }));
 
 // Mock layout to avoid needing React Query providers
@@ -115,7 +114,7 @@ describe("waves page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      "waves"
+      "Waves"
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(

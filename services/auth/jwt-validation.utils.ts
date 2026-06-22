@@ -1,11 +1,12 @@
 import { jwtDecode } from "jwt-decode";
 import {
+  getRefreshToken,
   getWalletAddress,
   getWalletRole,
-  hasActiveSessionV2Auth,
+  setAuthJwt,
   syncWalletRoleWithServer,
 } from "./auth.utils";
-import { persistSessionResponse, refreshSessionV2 } from "./session-v2.utils";
+import { redeemRefreshTokenWithRetries } from "./token-refresh.utils";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
@@ -37,33 +38,7 @@ interface ValidateJwtParams {
 interface ValidateJwtResult {
   isValid: boolean;
   wasCancelled: boolean;
-  requiresSessionUpgrade?: boolean;
 }
-
-type RefreshedSession = NonNullable<
-  Awaited<ReturnType<typeof refreshSessionV2>>
->;
-
-const INVALID_JWT_RESULT: ValidateJwtResult = {
-  isValid: false,
-  wasCancelled: false,
-};
-
-const CANCELLED_JWT_RESULT: ValidateJwtResult = {
-  isValid: false,
-  wasCancelled: true,
-};
-
-const VALID_JWT_RESULT: ValidateJwtResult = {
-  isValid: true,
-  wasCancelled: false,
-};
-
-const SESSION_UPGRADE_REQUIRED_RESULT: ValidateJwtResult = {
-  isValid: false,
-  wasCancelled: false,
-  requiresSessionUpgrade: true,
-};
 
 export const getRole = (jwt: string | null): string | null => {
   if (!jwt) return null;
@@ -90,11 +65,11 @@ const doJWTValidation = ({
 };
 
 const validateJwtInputs = (wallet: string, operationId: string): void => {
-  if (!wallet || typeof wallet !== "string") {
-    throw new Error("Invalid wallet address: must be non-empty string");
+  if (!wallet || typeof wallet !== 'string') {
+    throw new Error('Invalid wallet address: must be non-empty string');
   }
-  if (!operationId || typeof operationId !== "string") {
-    throw new Error("Invalid operationId: must be non-empty string");
+  if (!operationId || typeof operationId !== 'string') {
+    throw new Error('Invalid operationId: must be non-empty string');
   }
 };
 
@@ -114,13 +89,9 @@ const validateProxyRole = ({
 
   // Validate proxy structure
   const proxyCreatorId = activeProfileProxy.created_by?.id;
-  if (
-    !proxyCreatorId ||
-    typeof proxyCreatorId !== "string" ||
-    proxyCreatorId.trim().length === 0
-  ) {
+  if (!proxyCreatorId || typeof proxyCreatorId !== 'string' || proxyCreatorId.trim().length === 0) {
     throw new AuthenticationRoleError(
-      "Active profile proxy has invalid created_by.id - role validation cannot proceed"
+      'Active profile proxy has invalid created_by.id - role validation cannot proceed'
     );
   }
 
@@ -137,58 +108,41 @@ const validateProxyRole = ({
   }
 };
 
-const isAbortError = (error: unknown): boolean =>
-  typeof error === "object" &&
-  error !== null &&
-  "name" in error &&
-  error.name === "AbortError";
-
-const assertRefreshedSessionMatchesWallet = (
-  refreshedSession: RefreshedSession,
-  wallet: string
-): void => {
-  if (!areEqualAddresses(refreshedSession.address, wallet)) {
-    throw new Error(
-      `Address mismatch in token response: expected ${wallet}, got ${refreshedSession.address}`
-    );
-  }
-};
-
-const persistValidatedRefreshedSession = async ({
-  refreshedSession,
-  role,
-  activeProfileProxy,
+const synchronizeRoles = ({
+  walletRole,
+  freshTokenRole,
+  address,
+  refreshToken,
+  newToken,
 }: {
-  refreshedSession: RefreshedSession;
-  role: string | null;
-  activeProfileProxy?: ApiProfileProxy | null | undefined;
-}): Promise<void> => {
-  const walletRole = getWalletRole();
-  const freshTokenRole = getRole(refreshedSession.access_token);
-
-  if (role) {
-    validateProxyRole({
-      role,
-      activeProfileProxy,
-      freshTokenRole,
-    });
-  }
-
+  walletRole: string | null;
+  freshTokenRole: string | null;
+  address: string;
+  refreshToken: string;
+  newToken: string;
+}): void => {
+  // UPDATE LOCAL STORAGE: Sync local wallet role with server response
+  // The server response is authoritative - update local storage to match
   if (walletRole !== freshTokenRole) {
-    logErrorSecurely("JWT_ROLE_UPDATE", {
+    // Log the role change for security monitoring
+    logErrorSecurely('JWT_ROLE_UPDATE', {
       message: `Updating local wallet role from ${walletRole} to ${freshTokenRole}`,
       oldRole: walletRole,
       newRole: freshTokenRole,
-      address: refreshedSession.address,
+      address
     });
   }
 
-  const didPersist = await persistSessionResponse(refreshedSession);
-  if (!didPersist) {
-    throw new Error("Failed to persist refreshed session");
-  }
+  // Success - store the new JWT with the SERVER-PROVIDED role (not local role)
+  setAuthJwt(
+    address,
+    newToken,
+    refreshToken,
+    freshTokenRole ?? undefined  // ✅ USE SERVER ROLE, NOT LOCAL ROLE
+  );
 
-  syncWalletRoleWithServer(freshTokenRole, refreshedSession.address);
+  // Sync local wallet role with server role
+  syncWalletRoleWithServer(freshTokenRole, address);
 };
 
 const handleTokenRefresh = async ({
@@ -202,45 +156,75 @@ const handleTokenRefresh = async ({
   abortSignal: AbortSignal;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
 }): Promise<ValidateJwtResult> => {
+  const refreshToken = getRefreshToken();
   const walletAddress = getWalletAddress();
+
+  // If there's no refresh token, this is a first-time sign-in scenario
+  // Return false to trigger the sign modal, don't throw an error
+  if (!refreshToken) {
+    return { isValid: false, wasCancelled: false };
+  }
+
+  // If we have a refresh token but no wallet address, that's an error
+  if (!walletAddress) {
+    throw new Error('No wallet address available for JWT renewal');
+  }
 
   // Check for cancellation before proceeding
   if (abortSignal.aborted) {
-    return CANCELLED_JWT_RESULT;
+    return { isValid: false, wasCancelled: true };
   }
 
   try {
-    if (!walletAddress) {
-      return INVALID_JWT_RESULT;
-    }
-
-    const refreshedSession = await refreshSessionV2({
-      address: walletAddress,
-      abortSignal,
-    });
-
-    if (!refreshedSession) {
-      return INVALID_JWT_RESULT;
-    }
-
-    if (abortSignal.aborted) {
-      return CANCELLED_JWT_RESULT;
-    }
-
-    assertRefreshedSessionMatchesWallet(refreshedSession, wallet);
-    await persistValidatedRefreshedSession({
-      refreshedSession,
+    const redeemResponse = await redeemRefreshTokenWithRetries(
+      walletAddress,
+      refreshToken,
       role,
-      activeProfileProxy,
+      3,
+      abortSignal
+    );
+
+    // Check if operation was cancelled during token refresh
+    if (abortSignal.aborted) {
+      return { isValid: false, wasCancelled: true };
+    }
+
+    // Validate response data - fail fast on invalid response
+    if (!areEqualAddresses(redeemResponse.address, wallet)) {
+      throw new Error(
+        `Address mismatch in token response: expected ${wallet}, got ${redeemResponse.address}`
+      );
+    }
+
+    const walletRole = getWalletRole();
+    // CRITICAL FIX: Get role from the NEW token, not the old one
+    const freshTokenRole = getRole(redeemResponse.token);
+
+    // Role validation: Only validate when doing role-based authentication (proxy users)
+    if (role) {
+      validateProxyRole({
+        role,
+        activeProfileProxy,
+        freshTokenRole,
+      });
+    }
+
+    // Synchronize roles and update storage
+    synchronizeRoles({
+      walletRole,
+      freshTokenRole,
+      address: redeemResponse.address,
+      refreshToken,
+      newToken: redeemResponse.token,
     });
 
-    return VALID_JWT_RESULT;
-  } catch (error: unknown) {
+    return { isValid: true, wasCancelled: false };
+  } catch (error: any) {
     // Handle cancellation errors
-    if (error instanceof TokenRefreshCancelledError || isAbortError(error)) {
-      return CANCELLED_JWT_RESULT;
+    if (error instanceof TokenRefreshCancelledError || error.name === 'AbortError') {
+      return { isValid: false, wasCancelled: true };
     }
-    // Re-throw all other errors.
+    // Re-throw all other errors (including TokenRefreshError subclasses)
     throw error;
   }
 };
@@ -258,44 +242,22 @@ export const validateJwt = async ({
 
   // Check if already aborted
   if (abortSignal.aborted) {
-    return CANCELLED_JWT_RESULT;
+    return { isValid: false, wasCancelled: true };
   }
 
-  const hasValidLocalJwt = doJWTValidation({ jwt, wallet, role });
+  // Validate the current JWT
+  const isValid = doJWTValidation({ jwt, wallet, role });
 
-  if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
-    return VALID_JWT_RESULT;
+  // If JWT is valid, return success
+  if (isValid) {
+    return { isValid: true, wasCancelled: false };
   }
 
-  let refreshedResult: ValidateJwtResult;
-  try {
-    refreshedResult = await handleTokenRefresh({
-      wallet,
-      role,
-      abortSignal,
-      activeProfileProxy,
-    });
-  } catch (error: unknown) {
-    if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
-      return VALID_JWT_RESULT;
-    }
-    if (hasValidLocalJwt) {
-      return SESSION_UPGRADE_REQUIRED_RESULT;
-    }
-    throw error;
-  }
-
-  if (refreshedResult.isValid || refreshedResult.wasCancelled) {
-    return refreshedResult;
-  }
-
-  if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
-    return VALID_JWT_RESULT;
-  }
-
-  if (hasValidLocalJwt) {
-    return SESSION_UPGRADE_REQUIRED_RESULT;
-  }
-
-  return INVALID_JWT_RESULT;
+  // JWT is invalid, attempt token refresh
+  return await handleTokenRefresh({
+    wallet,
+    role,
+    abortSignal,
+    activeProfileProxy,
+  });
 };

@@ -7,11 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";
 import { postData } from "@/services/6529api";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import {
-  buildNextgenAdminSignatureMessage,
-  isStructuredSignaturesEnabled,
-} from "@/services/wallet-signatures/structured-wallet-signatures";
-import { FunctionSelectors, NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
   getCollectionIdsForAddress,
   useCollectionAdmin,
@@ -40,10 +36,6 @@ export default function NextGenAdminInitializeExternalBurnSwap(
   const account = useSeizeConnectContext();
   const signMessage = useSignMessage();
   const uuid = useRef(uuidv4()).current;
-  const signatureMessageRef = useRef<string | null>(null);
-  const signedPayloadRef = useRef<ReturnType<
-    typeof buildNextgenBurnPayload
-  > | null>(null);
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -91,27 +83,10 @@ export default function NextGenAdminInitializeExternalBurnSwap(
     setUploadError(undefined);
     signMessage.reset();
     contractWrite.reset();
-    signatureMessageRef.current = null;
-    signedPayloadRef.current = null;
     const valid = validate();
     if (valid) {
-      if (isStructuredSignaturesEnabled() && !account.address) {
-        setUploadError("Error: Connect a wallet before signing");
-        setLoading(false);
-        return;
-      }
-      const payload = buildNextgenBurnPayload();
-      signedPayloadRef.current = payload;
-      const signatureMessage = isStructuredSignaturesEnabled()
-        ? buildNextgenAdminSignatureMessage({
-            address: account.address as string,
-            chainId: NEXTGEN_CHAIN_ID,
-            payload,
-          }).message
-        : null;
-      signatureMessageRef.current = signatureMessage;
       signMessage.signMessage({
-        message: signatureMessage ?? uuid,
+        message: uuid,
       });
     } else {
       setLoading(false);
@@ -130,10 +105,14 @@ export default function NextGenAdminInitializeExternalBurnSwap(
       const data = {
         wallet: account.address as string,
         signature: signMessage.data,
-        ...(signatureMessageRef.current
-          ? { signature_message: signatureMessageRef.current }
-          : {}),
-        ...(signedPayloadRef.current ?? buildNextgenBurnPayload()),
+        uuid: uuid,
+        collection_id: mintCollectionID,
+        burn_collection: erc721Collection,
+        burn_collection_id: burnCollectionID,
+        min_token_index: tokenMin,
+        max_token_index: tokenMax,
+        burn_address: burnSwapAddress,
+        status: status,
       };
 
       postData(
@@ -190,19 +169,6 @@ export default function NextGenAdminInitializeExternalBurnSwap(
     }
   }
 
-  function buildNextgenBurnPayload() {
-    return {
-      uuid,
-      collection_id: Number(mintCollectionID),
-      burn_collection: erc721Collection,
-      burn_collection_id: Number(burnCollectionID),
-      min_token_index: Number(tokenMin),
-      max_token_index: Number(tokenMax),
-      burn_address: burnSwapAddress,
-      status,
-    };
-  }
-
   useEffect(() => {
     if (submitting) {
       contractWrite.writeContract({
@@ -254,8 +220,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
                 onChange={(e) => {
                   setStatus(false);
                   setMintCollectionID(e.target.value);
-                }}
-              >
+                }}>
                 <option value="" disabled>
                   Select Collection
                 </option>
@@ -291,8 +256,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
               <Button
                 className="seize-btn"
                 disabled={submitting || loading}
-                onClick={() => syncDB()}
-              >
+                onClick={() => syncDB()}>
                 Submit
               </Button>
             </Form.Group>

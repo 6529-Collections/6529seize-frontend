@@ -1270,7 +1270,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     // Use direct signature if there are no terms to display
     if (!wave.participation.terms) {
-      const { success, signature, signatureMessage } = await signDrop({
+      const { success, signature } = await signDrop({
         drop: requestBody,
         termsOfService: null,
       });
@@ -1282,7 +1282,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return {
         ...requestBody,
         signature,
-        ...(signatureMessage ? { signature_message: signatureMessage } : {}),
       };
     }
 
@@ -1292,7 +1291,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       const handleSigningComplete = (result: {
         success: boolean;
         signature?: string | undefined;
-        signatureMessage?: string | undefined;
       }) => {
         if (!result.success || !result.signature) {
           resolve(null);
@@ -1302,9 +1300,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         const updatedDropRequest = {
           ...requestBody,
           signature: result.signature,
-          ...(result.signatureMessage
-            ? { signature_message: result.signatureMessage }
-            : {}),
         };
         resolve(updatedDropRequest);
       };

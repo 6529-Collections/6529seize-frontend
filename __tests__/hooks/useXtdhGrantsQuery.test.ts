@@ -60,7 +60,7 @@ describe("useXtdhGrantsQuery", () => {
         grantor: "0xabc",
         page: 2,
         pageSize: 10,
-        statuses: ["GRANTED"],
+        status: "GRANTED",
         sortField: "created_at",
         sortDirection: SortDirection.ASC,
       })

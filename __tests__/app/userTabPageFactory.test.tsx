@@ -18,7 +18,6 @@ jest.mock("@/helpers/server.helpers", () => ({
 
 jest.mock("@/components/providers/metadata", () => ({
   getAppMetadata: jest.fn((v: any) => v),
-  getLargeSocialCardMetadata: jest.fn((v: any) => v),
 }));
 
 import * as Helpers from "@/helpers/Helpers";

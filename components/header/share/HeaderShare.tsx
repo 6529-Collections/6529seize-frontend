@@ -8,186 +8,20 @@ import yaml from "js-yaml";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Tooltip } from "react-tooltip";
-import { useAuth } from "@/components/auth/Auth";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useElectron } from "@/hooks/useElectron";
-import { getWalletAddress } from "@/services/auth/auth.utils";
-import { createConnectionShare } from "@/services/auth/session-v2.utils";
+import {
+  getRefreshToken,
+  getWalletAddress,
+  getWalletRole,
+} from "@/services/auth/auth.utils";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
-
-type ConnectionShare = Awaited<ReturnType<typeof createConnectionShare>>;
-
-type CachedConnectionShare = {
-  readonly addressKey: string;
-  readonly expiresAtMs: number;
-  readonly share: ConnectionShare;
-};
-
-type SetQrSource = (dataUrl: string) => void;
-type IsStaleGeneration = () => boolean | undefined;
-type SearchParamsLike = {
-  toString(): string;
-};
-type ConnectionShareStatus =
-  | "unauthenticated"
-  | "legacy-auth"
-  | "loading"
-  | "ready"
-  | "error";
-
-function isAbortError(error: unknown, signal?: AbortSignal): boolean {
-  return (
-    signal?.aborted === true ||
-    (typeof error === "object" &&
-      error !== null &&
-      "name" in error &&
-      error.name === "AbortError")
-  );
-}
-
-function isSessionUpgradeRequiredError(error: unknown): boolean {
-  const message = getErrorMessage(error);
-  return message.toLowerCase().includes("session-v2");
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  if (typeof error === "string") {
-    return error;
-  }
-
-  return "";
-}
-
-function buildRouterPath(
-  pathname: string | null,
-  searchParams: SearchParamsLike | null
-): string {
-  let routerPath = pathname ?? "";
-  if (routerPath.endsWith("/")) {
-    routerPath = routerPath.slice(0, -1);
-  }
-
-  const searchParamsString = searchParams?.toString() ?? "";
-  if (searchParamsString) {
-    return `${routerPath}?${searchParamsString}`;
-  }
-
-  return routerPath;
-}
-
-function getCachedConnectionShare(
-  cachedShare: CachedConnectionShare | null,
-  addressKey: string
-): ConnectionShare | null {
-  if (cachedShare?.addressKey === addressKey) {
-    const isReusable = cachedShare.expiresAtMs > Date.now() + 30_000;
-    if (isReusable) {
-      return cachedShare.share;
-    }
-  }
-
-  return null;
-}
-
-function buildConnectionShareUrls({
-  share,
-  appScheme,
-  coreScheme,
-}: {
-  readonly share: ConnectionShare;
-  readonly appScheme: string;
-  readonly coreScheme: string;
-}): {
-  readonly appUrl: string;
-  readonly coreUrl: string;
-} {
-  const shareParams = new URLSearchParams({
-    connection_share_code: share.connection_share_code,
-    address: share.address,
-  });
-
-  return {
-    appUrl: `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?${shareParams.toString()}`,
-    coreUrl: `${coreScheme}://${DeepLinkScope.NAVIGATE}${share.deep_link_path}`,
-  };
-}
-
-function generateQrCodeSource({
-  url,
-  setSource,
-  clearSource,
-  staleGeneration,
-  signal,
-  errorMessage,
-}: {
-  readonly url: string;
-  readonly setSource: SetQrSource;
-  readonly clearSource: () => void;
-  readonly staleGeneration: IsStaleGeneration;
-  readonly signal?: AbortSignal | undefined;
-  readonly errorMessage: string;
-}): void {
-  QRCode.toDataURL(url, { width: 500, margin: 0 })
-    .then((dataUrl: string) => {
-      if (staleGeneration()) {
-        return;
-      }
-      setSource(dataUrl);
-    })
-    .catch((error: unknown) => {
-      if (staleGeneration() || isAbortError(error, signal)) {
-        return;
-      }
-      console.error(errorMessage, error);
-      clearSource();
-    });
-}
-
-async function fetchCoreAppsVersions(): Promise<OSInfo[]> {
-  const fetchYml = async (url: string): Promise<LatestYml> => {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${url}`);
-    }
-
-    const text = await response.text();
-    return yaml.load(text) as LatestYml;
-  };
-
-  const enabledConfigs = CORE_OS_CONFIGS.filter((config) => config.enabled);
-  const results = await Promise.allSettled(
-    enabledConfigs.map((config) => fetchYml(config.url))
-  );
-
-  return results.flatMap((result, index) => {
-    const osConfig = enabledConfigs[index];
-    if (!osConfig) {
-      return [];
-    }
-
-    if (result.status === "fulfilled") {
-      return [{ ...osConfig, version: result.value.version }];
-    }
-
-    console.error(
-      `Failed to fetch or process ${osConfig.displayName}:`,
-      result.reason
-    );
-    return [];
-  });
-}
 
 interface OSInfo {
   name: "windows" | "mac" | "linux";
@@ -385,11 +219,10 @@ export function HeaderQRModal({
   const [shouldRender, setShouldRender] = useState(show);
   const [isVisible, setIsVisible] = useState(show);
 
-  const { hasValidWalletAuth } = useSeizeConnectContext();
-  const { requestSessionUpgrade } = useAuth();
+  const { isAuthenticated } = useSeizeConnectContext();
 
   const [activeTab, setActiveTab] = useState<Mode>(
-    hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE
+    isAuthenticated ? Mode.SHARE : Mode.NAVIGATE
   );
   const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.APP);
 
@@ -400,10 +233,6 @@ export function HeaderQRModal({
   const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
   const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
     useState<string>("");
-  const [connectionShareStatus, setConnectionShareStatus] =
-    useState<ConnectionShareStatus>(
-      hasValidWalletAuth ? "legacy-auth" : "unauthenticated"
-    );
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
@@ -414,9 +243,6 @@ export function HeaderQRModal({
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
-  const connectionShareAbortRef = useRef<AbortController | null>(null);
-  const shareGenerationIdRef = useRef(0);
-  const cachedConnectionShareRef = useRef<CachedConnectionShare | null>(null);
 
   const trapFocusInDialog = useCallback((event: KeyboardEvent) => {
     if (event.key !== "Tab") {
@@ -494,19 +320,25 @@ export function HeaderQRModal({
     [trapFocusInDialog]
   );
 
-  async function generateSources(
+  function generateSources(
+    refreshToken: string | null,
     walletAddress: string | null,
-    signal?: AbortSignal
+    role: string | null
   ) {
-    const generationId = ++shareGenerationIdRef.current;
-    const isStaleGeneration = () =>
-      generationId !== shareGenerationIdRef.current || signal?.aborted;
+    let routerPath = pathname ?? "";
+    if (routerPath.endsWith("/")) {
+      routerPath = routerPath.slice(0, -1);
+    }
 
-    const routerPath = buildRouterPath(pathname, searchParams);
+    const searchParamsString = searchParams?.toString() ?? "";
+    if (searchParamsString) {
+      routerPath += `?${searchParamsString}`;
+    }
+
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
     const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
 
-    const browserUrl = `${globalThis.window.location.origin}${routerPath}`;
+    const browserUrl = `${window.location.origin}${routerPath}`;
     const appUrl = `${appScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
     const coreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
 
@@ -514,153 +346,61 @@ export function HeaderQRModal({
     setNavigateAppUrl(appUrl);
     setNavigateCoreUrl(coreUrl);
 
-    const shareConnectionAppUrl = await generateConnectionShareUrls({
-      appScheme,
-      coreScheme,
-      isStaleGeneration,
-      signal,
-      walletAddress,
-    });
+    let shareConnectionAppUrl = "";
+    let shareConnectionCoreUrl = "";
 
-    if (isStaleGeneration()) {
-      return;
+    if (refreshToken && walletAddress) {
+      shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?token=${refreshToken}&address=${walletAddress}`;
+      shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}/accept-connection-sharing?token=${refreshToken}&address=${walletAddress}`;
+
+      if (role) {
+        shareConnectionAppUrl += `&role=${role}`;
+        shareConnectionCoreUrl += `&role=${role}`;
+      }
+      setShareConnectionAppUrl(shareConnectionAppUrl);
+      setShareConnectionCoreUrl(shareConnectionCoreUrl);
+    } else {
+      setShareConnectionSrc("");
     }
 
-    generateQrCodeSource({
-      url: browserUrl,
-      setSource: setNavigateBrowserSrc,
-      clearSource: () => setNavigateBrowserSrc(""),
-      staleGeneration: isStaleGeneration,
-      signal,
-      errorMessage: "Failed to generate browser QR code",
-    });
+    QRCode.toDataURL(browserUrl, { width: 500, margin: 0 })
+      .then((dataUrl: string) => {
+        setNavigateBrowserSrc(dataUrl);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to generate browser QR code", error);
+        setNavigateBrowserSrc("");
+      });
 
-    generateQrCodeSource({
-      url: appUrl,
-      setSource: setNavigateAppSrc,
-      clearSource: () => setNavigateAppSrc(""),
-      staleGeneration: isStaleGeneration,
-      signal,
-      errorMessage: "Failed to generate mobile app QR code",
-    });
+    QRCode.toDataURL(appUrl, { width: 500, margin: 0 })
+      .then((dataUrl: string) => {
+        setNavigateAppSrc(dataUrl);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to generate mobile app QR code", error);
+        setNavigateAppSrc("");
+      });
 
     if (shareConnectionAppUrl) {
-      generateQrCodeSource({
-        url: shareConnectionAppUrl,
-        setSource: setShareConnectionSrc,
-        clearSource: () => setShareConnectionSrc(""),
-        staleGeneration: isStaleGeneration,
-        signal,
-        errorMessage: "Failed to generate share connection QR code",
-      });
+      QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 })
+        .then((dataUrl: string) => {
+          setShareConnectionSrc(dataUrl);
+        })
+        .catch((error: unknown) => {
+          console.error("Failed to generate share connection QR code", error);
+          setShareConnectionSrc("");
+        });
     }
-  }
-
-  async function generateConnectionShareUrls({
-    appScheme,
-    coreScheme,
-    isStaleGeneration,
-    signal,
-    walletAddress,
-  }: {
-    readonly appScheme: string;
-    readonly coreScheme: string;
-    readonly isStaleGeneration: IsStaleGeneration;
-    readonly signal?: AbortSignal | undefined;
-    readonly walletAddress: string | null;
-  }): Promise<string> {
-    if (!walletAddress || !hasValidWalletAuth) {
-      setUnavailableConnectionShare("unauthenticated");
-      return "";
-    }
-
-    try {
-      setConnectionShareStatus("loading");
-      const addressKey = walletAddress.toLowerCase();
-      const cachedShare = getCachedConnectionShare(
-        cachedConnectionShareRef.current,
-        addressKey
-      );
-      const share = cachedShare ?? (await createConnectionShare({ signal }));
-
-      if (isStaleGeneration()) {
-        return "";
-      }
-
-      cacheConnectionShare(addressKey, share);
-      const shareUrls = buildConnectionShareUrls({
-        share,
-        appScheme,
-        coreScheme,
-      });
-
-      setConnectionShareStatus("ready");
-      setShareConnectionAppUrl(shareUrls.appUrl);
-      setShareConnectionCoreUrl(shareUrls.coreUrl);
-      return shareUrls.appUrl;
-    } catch (error: unknown) {
-      if (isStaleGeneration() || isAbortError(error, signal)) {
-        return "";
-      }
-
-      console.error("Failed to create connection share", error);
-      setUnavailableConnectionShare(
-        isSessionUpgradeRequiredError(error) ? "legacy-auth" : "error"
-      );
-      return "";
-    }
-  }
-
-  function cacheConnectionShare(addressKey: string, share: ConnectionShare): void {
-    const expiresAtMs = Date.parse(share.expires_at);
-    if (Number.isFinite(expiresAtMs)) {
-      cachedConnectionShareRef.current = {
-        addressKey,
-        expiresAtMs,
-        share,
-      };
-    }
-  }
-
-  function setUnavailableConnectionShare(status: ConnectionShareStatus): void {
-    setConnectionShareStatus(status);
-    setShareConnectionAppUrl("");
-    setShareConnectionCoreUrl("");
-    setShareConnectionSrc("");
   }
 
   useEffect(() => {
-    if (!show) {
-      shareGenerationIdRef.current += 1;
-      cachedConnectionShareRef.current = null;
-      connectionShareAbortRef.current?.abort();
-      connectionShareAbortRef.current = null;
-      setConnectionShareStatus(
-        hasValidWalletAuth ? "legacy-auth" : "unauthenticated"
-      );
-      setShareConnectionAppUrl("");
-      setShareConnectionCoreUrl("");
-      setShareConnectionSrc("");
-      return;
+    if (show) {
+      generateSources(getRefreshToken(), getWalletAddress(), getWalletRole());
     }
-
-    connectionShareAbortRef.current?.abort();
-    const controller = new AbortController();
-    connectionShareAbortRef.current = controller;
-
-    void generateSources(getWalletAddress(), controller.signal);
-
-    return () => {
-      shareGenerationIdRef.current += 1;
-      controller.abort();
-      if (connectionShareAbortRef.current === controller) {
-        connectionShareAbortRef.current = null;
-      }
-    };
-  }, [show, hasValidWalletAuth]);
+  }, [show]);
 
   useEffect(() => {
-    setActiveTab(hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE);
+    setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
     setActiveSubTab(SubMode.APP);
     if (show) return;
     const timer = setTimeout(() => {
@@ -669,7 +409,7 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
-  }, [show, hasValidWalletAuth]);
+  }, [show, isAuthenticated]);
 
   useEffect(() => {
     if (show) {
@@ -802,13 +542,6 @@ export function HeaderQRModal({
   };
 
   const getShareContent = () => {
-    if (connectionShareStatus !== "ready") {
-      return {
-        content: renderConnectionShareNotice(connectionShareStatus),
-        url: "",
-      };
-    }
-
     if (activeSubTab === SubMode.CORE) {
       return {
         content: renderCoreLink(shareConnectionCoreUrl),
@@ -827,73 +560,6 @@ export function HeaderQRModal({
     }
 
     return { content: <span>Invalid submode for SHARE</span>, url: "" };
-  };
-
-  const renderConnectionShareNotice = (status: ConnectionShareStatus) => {
-    const isLegacyAuth = status === "legacy-auth";
-    const title = (() => {
-      if (isLegacyAuth) {
-        return "Update Authentication";
-      }
-      if (status === "loading") {
-        return "Preparing Connection";
-      }
-      if (status === "error") {
-        return "Connection Sharing Unavailable";
-      }
-      return "Sign In Required";
-    })();
-    const message = (() => {
-      if (isLegacyAuth) {
-        return "You can't share a connection from your current authentication. Update to the new secure session first.";
-      }
-      if (status === "loading") {
-        return "Creating a one-time connection code.";
-      }
-      if (status === "error") {
-        return "We couldn't create a connection share. Close this dialog and try again.";
-      }
-      return "Connect and authenticate your wallet before sharing a connection.";
-    })();
-
-    return (
-      <div
-        className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-8 tw-text-center"
-        style={squareStyle}
-      >
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          <div className="tw-text-lg tw-font-semibold tw-text-iron-50">
-            {title}
-          </div>
-          <div className="tw-text-sm tw-leading-6 tw-text-iron-300">
-            {message}
-          </div>
-        </div>
-        {isLegacyAuth && (
-          <div className="tw-flex tw-w-full tw-gap-3">
-            <button
-              type="button"
-              className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-white"
-              onClick={() => {
-                onClose();
-                requestSessionUpgrade?.().catch((error: unknown) => {
-                  console.error("Failed to request session upgrade", error);
-                });
-              }}
-            >
-              Update
-            </button>
-          </div>
-        )}
-      </div>
-    );
   };
 
   const getAppsContent = () => {
@@ -1028,6 +694,7 @@ export function HeaderQRModal({
             Share
           </h2>
           <ModalMenu
+            isShareConnection={!!getRefreshToken()}
             activeTab={activeTab}
             activeSubTab={activeSubTab}
             onTabChange={(tab, subTab) => {
@@ -1043,16 +710,18 @@ export function HeaderQRModal({
 }
 
 function ModalMenu({
+  isShareConnection,
   activeTab,
   activeSubTab,
   onTabChange,
 }: {
+  readonly isShareConnection?: boolean | undefined;
   readonly activeTab: Mode;
   readonly activeSubTab: SubMode;
   readonly onTabChange: (tab: Mode, subTab: SubMode) => void;
 }) {
   const isElectron = useElectron() ?? false;
-  const topTabCount = 3;
+  const topTabCount = isShareConnection ? 3 : 2;
   const subTabCount = getSubTabCount(activeTab, isElectron);
   const subTabLabel = getSubTabLabel(activeTab);
   const getMenuButtonClass = (active: boolean) => {
@@ -1078,14 +747,16 @@ function ModalMenu({
             gridTemplateColumns: `repeat(${topTabCount}, minmax(0, 1fr))`,
           }}
         >
-          <button
-            type="button"
-            disabled={activeTab === Mode.SHARE}
-            className={getMenuButtonClass(activeTab === Mode.SHARE)}
-            onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
-          >
-            Connection
-          </button>
+          {isShareConnection && (
+            <button
+              type="button"
+              disabled={activeTab === Mode.SHARE}
+              className={getMenuButtonClass(activeTab === Mode.SHARE)}
+              onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
+            >
+              Connection
+            </button>
+          )}
           <button
             type="button"
             disabled={activeTab === Mode.NAVIGATE}
@@ -1150,11 +821,49 @@ function ModalMenu({
 }
 
 function CoreAppsDownload() {
-  const { data: versions = [] } = useQuery({
-    queryKey: ["core-apps-versions"],
-    queryFn: fetchCoreAppsVersions,
-    staleTime: 5 * 60 * 1000,
-  });
+  const [versions, setVersions] = useState<OSInfo[]>([]);
+
+  useEffect(() => {
+    const fetchYml = async (url: string): Promise<LatestYml> => {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}`);
+      }
+
+      const text = await response.text();
+      return yaml.load(text) as LatestYml;
+    };
+
+    const loadVersions = async () => {
+      const versions: OSInfo[] = [];
+      const enabledConfigs = CORE_OS_CONFIGS.filter((config) => config.enabled);
+      const results = await Promise.allSettled(
+        enabledConfigs.map((config) => fetchYml(config.url))
+      );
+
+      results.forEach((result, index) => {
+        const osConfig = enabledConfigs[index];
+        if (!osConfig) {
+          return;
+        }
+
+        if (result.status === "fulfilled") {
+          versions.push({ ...osConfig, version: result.value.version });
+          return;
+        }
+
+        console.error(
+          `Failed to fetch or process ${osConfig.displayName}:`,
+          result.reason
+        );
+      });
+
+      setVersions(versions);
+    };
+
+    loadVersions();
+  }, []);
 
   return (
     <div style={squareStyle}>

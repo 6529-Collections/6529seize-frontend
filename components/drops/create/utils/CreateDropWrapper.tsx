@@ -151,13 +151,12 @@ const CreateDropWrapper = forwardRef<
     },
     ref
   ) => {
-    const { isSafeWallet, address, hasValidWalletAuth } =
-      useSeizeConnectContext();
+    const { isSafeWallet, address, isAuthenticated } = useSeizeConnectContext();
     const breakpoint = useBreakpoint();
 
     // SECURITY: Fail-fast if wallet is not properly authenticated
     useEffect(() => {
-      if (!hasValidWalletAuth) {
+      if (!isAuthenticated) {
         throw new WalletValidationError(
           "Authentication required for drop creation. Please connect and authenticate your wallet."
         );
@@ -168,7 +167,7 @@ const CreateDropWrapper = forwardRef<
           "Authenticated wallet address is missing. Please reconnect your wallet."
         );
       }
-    }, [hasValidWalletAuth, address]);
+    }, [isAuthenticated, address]);
     const [screenType, setScreenType] = useState<CreateDropScreenType>(
       CreateDropScreenType.DESKTOP
     );
@@ -321,7 +320,7 @@ const CreateDropWrapper = forwardRef<
         }
         if (
           i.type === ApiWaveMetadataType.Number &&
-          Number.isNaN(Number(item.data_value))
+          isNaN(Number(item.data_value))
         ) {
           return true;
         }

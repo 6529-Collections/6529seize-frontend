@@ -1,6 +1,6 @@
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const mockIsMemesWave = jest.fn();
@@ -31,10 +31,7 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   }),
 }));
 
-Object.defineProperty(globalThis.navigator, "clipboard", {
-  configurable: true,
-  value: { writeText },
-});
+Object.assign(navigator, { clipboard: { writeText } });
 
 describe("WaveDropMobileMenuCopyLink", () => {
   beforeEach(() => {
@@ -47,6 +44,7 @@ describe("WaveDropMobileMenuCopyLink", () => {
 
   it("closes after clipboard success and only uses the timer to reset copied state", async () => {
     jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const clipboardWrite = createDeferredClipboardWrite();
     writeText.mockReturnValueOnce(clipboardWrite.promise);
     const onCopy = jest.fn();
@@ -60,7 +58,7 @@ describe("WaveDropMobileMenuCopyLink", () => {
     try {
       render(<WaveDropMobileMenuCopyLink drop={drop} onCopy={onCopy} />);
 
-      fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+      await user.click(screen.getByRole("button", { name: "Copy link" }));
 
       expect(writeText).toHaveBeenCalledWith(
         "https://base/waves/w1?serialNo=5"

@@ -7,10 +7,6 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { DropHasher } from "@/utils/drop-hasher";
 import { AuthContext } from "@/components/auth/Auth";
-import {
-  buildDropSignatureMessage,
-  isStructuredSignaturesEnabled,
-} from "@/services/wallet-signatures/structured-wallet-signatures";
 
 const DROP_SIGNATURE_FAILED_MESSAGE =
   "Signature failed. Make sure your wallet is connected and unlocked, and that you are using the wallet linked to your 6529 account. If it still fails, log out of 6529 and log back in, then try again.";
@@ -35,38 +31,19 @@ export const useDropSignature = () => {
   }: {
     drop: ApiCreateDropRequest;
     termsOfService: string | null;
-  }): Promise<{
-    success: boolean;
-    signature?: string | undefined;
-    signatureMessage?: string | undefined;
-  }> => {
+  }): Promise<{ success: boolean; signature?: string | undefined }> => {
     try {
       setIsLoading(true);
 
+      // Create hash of drop data
       const dropHasher = new DropHasher();
       const hash = dropHasher.hash({
         drop,
         termsOfService,
       });
-      if (isStructuredSignaturesEnabled() && !drop.signer_address) {
-        setToast({
-          message: DROP_SIGNATURE_FAILED_MESSAGE,
-          type: "error",
-        });
-        return { success: false };
-      }
-      const structuredMessage =
-        isStructuredSignaturesEnabled() && drop.signer_address
-          ? buildDropSignatureMessage({
-              address: drop.signer_address,
-              drop,
-              termsOfService,
-            }).message
-          : null;
 
-      const clientSignature = await getSignature({
-        message: structuredMessage ?? hash,
-      });
+      // Request user to sign the hash
+      const clientSignature = await getSignature({ message: hash });
 
       if (clientSignature.userRejected) {
         setToast({
@@ -84,11 +61,7 @@ export const useDropSignature = () => {
         return { success: false };
       }
 
-      return {
-        success: true,
-        signature: clientSignature.signature,
-        ...(structuredMessage ? { signatureMessage: structuredMessage } : {}),
-      };
+      return { success: true, signature: clientSignature.signature };
     } catch (error) {
       setToast({
         type: "error",

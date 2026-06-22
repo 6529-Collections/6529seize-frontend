@@ -97,7 +97,6 @@ describe("useWaveConfig", () => {
           approvalsTabLabel: "",
           approvedTabLabel: "",
         },
-        outcomesVisible: true,
       });
     });
 
