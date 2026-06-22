@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export class ApiRedeemConnectionShareRequest {
     'connection_share_code': string;
     'target_client_type': ApiRedeemConnectionShareRequestTargetClientTypeEnum;
@@ -46,4 +44,3 @@ export class ApiRedeemConnectionShareRequest {
 export enum ApiRedeemConnectionShareRequestTargetClientTypeEnum {
     Native = 'native'
 }
-

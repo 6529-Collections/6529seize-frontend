@@ -598,8 +598,7 @@ describe("HeaderShare", () => {
       expect(
         qrcode.toDataURL.mock.calls.some(
           (call: unknown[]) =>
-            typeof call[0] === "string" &&
-            call[0].includes("role=")
+            typeof call[0] === "string" && call[0].includes("role=")
         )
       ).toBe(false);
     });

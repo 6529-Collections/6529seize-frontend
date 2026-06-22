@@ -265,7 +265,9 @@ paths:
             type: integer
             minimum: 1
             default: 1
-          description: Chain id embedded in the structured session signature.
+          description: >
+            Backward-compatible request field. Session challenges are issued for
+            the backend-configured auth chain, not this client-supplied value.
       x-6529-query-schema:
         $ref: "#/components/schemas/ApiSessionNonceQuery"
       responses:
@@ -17314,7 +17316,9 @@ components:
           type: integer
           minimum: 1
           default: 1
-          description: Chain id embedded in the structured session signature.
+          description: >
+            Backward-compatible request field. Session challenges are issued for
+            the backend-configured auth chain, not this client-supplied value.
     ApiSessionNonceResponse:
       type: object
       required:

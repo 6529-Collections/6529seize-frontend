@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export class ApiSessionLogoutNativeRequest {
     'client_type': ApiSessionLogoutNativeRequestClientTypeEnum;
     'client_address': string;
@@ -60,4 +58,3 @@ export class ApiSessionLogoutNativeRequest {
 export enum ApiSessionLogoutNativeRequestClientTypeEnum {
     Native = 'native'
 }
-
