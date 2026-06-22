@@ -219,6 +219,17 @@ const enableAuthMigrationDeadline = (deadline = "2999-01-01T00:00:00.000Z") => {
   };
 };
 
+function createDeferredPromise<T>(): {
+  readonly promise: Promise<T>;
+  readonly resolve: (value: T) => void;
+} {
+  let resolvePromise!: (value: T) => void;
+  const promise = new Promise<T>((resolve) => {
+    resolvePromise = resolve;
+  });
+  return { promise, resolve: resolvePromise };
+}
+
 // Test helper components
 function ShowWaves() {
   const { showWaves } = useAuth();
@@ -1239,6 +1250,65 @@ describe("Auth component", () => {
       expect(screen.getByText(/Confirm in your wallet/i)).toBeInTheDocument();
     });
 
+    it("keeps the session upgrade modal visible while validation reruns", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const pendingValidation = createDeferredPromise<{
+        validationCompleted: boolean;
+        wasCancelled: boolean;
+        shouldShowModal: boolean;
+      }>();
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate
+        .mockImplementationOnce(async ({ callbacks }) => {
+          callbacks.onSessionUpgradeRequired();
+          return {
+            validationCompleted: true,
+            wasCancelled: false,
+            shouldShowModal: true,
+          };
+        })
+        .mockImplementationOnce(() => pendingValidation.promise);
+
+      const { rerender } = render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+
+      canSignActiveWallet = false;
+      rerender(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
+      });
+      expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+
+      pendingValidation.resolve({
+        validationCompleted: true,
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+    });
+
     it("shows a reshare notice for session upgrade when the active connection cannot sign", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
@@ -1322,7 +1392,13 @@ describe("Auth component", () => {
       const user = userEvent.setup();
       await user.click(screen.getByText("Connect"));
 
+      await waitFor(() => {
+        expect(mockSeizeDisconnect).toHaveBeenCalled();
+      });
       expect(mockSeizeConnect).toHaveBeenCalled();
+      expect(mockSeizeDisconnect.mock.invocationCallOrder[0]).toBeLessThan(
+        mockSeizeConnect.mock.invocationCallOrder[0]
+      );
     });
 
     it("temporarily dismisses the session upgrade prompt", async () => {
