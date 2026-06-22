@@ -5,6 +5,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
+  shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -89,6 +90,43 @@ describe("sentry-client-filters", () => {
           },
         ],
       },
+      ...overrides,
+    }) as any;
+
+  const createSentryRouteParameterizationEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    ({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          category: "navigation",
+          data: {
+            from: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+            to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          },
+        },
+      ],
       ...overrides,
     }) as any;
 
@@ -1676,6 +1714,102 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters Sentry route parameterization cyclic JSON errors", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter cyclic JSON errors with app-owned frames", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: false,
+                },
+                {
+                  filename:
+                    "https://6529.io/_next/static/chunks/app-client.js",
+                  function: "serializeWaveParams",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter cyclic JSON errors without the Sentry browser API mechanism", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: "auto.browser.browserapierrors.requestAnimationFrame",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter cyclic JSON errors without navigation breadcrumbs", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      breadcrumbs: [],
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("filters injected wallet collisions for tronlinkParams in app URI stacks", () => {

@@ -19,6 +19,7 @@ import {
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
+  shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -115,6 +116,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterTwitterConfigReferenceError(event)) {
+    return true;
+  }
+
+  if (shouldFilterSentryRouteParameterizationError(event)) {
     return true;
   }
 

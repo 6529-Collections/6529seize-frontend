@@ -12,6 +12,15 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const sentryRouteParameterizationMessage =
+    "JSON.stringify cannot serialize cyclic structures.";
+  const sentryRouteParameterizationMechanismType =
+    "auto.browser.browserapierrors.setTimeout";
+  const nativeJsonStringifyFrame = {
+    filename: "[native code]",
+    function: "stringify",
+    in_app: false,
+  };
 
   type BeforeSendResult = {
     tags?: Record<string, unknown> | undefined;
@@ -59,12 +68,66 @@ describe("instrumentation-client", () => {
     };
   };
 
+  const createSentryRouteParameterizationEvent = (
+    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame]
+  ) => ({
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: sentryRouteParameterizationMessage,
+          mechanism: {
+            type: sentryRouteParameterizationMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        category: "navigation",
+        data: {
+          from: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        },
+      },
+    ],
+  });
+
   beforeEach(() => {
     jest.resetModules();
     mockInit.mockReset();
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it("drops Sentry route parameterization cyclic JSON errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps cyclic JSON errors with app-owned frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent([
+      nativeJsonStringifyFrame,
+      {
+        filename: "https://6529.io/_next/static/chunks/app-client.js",
+        function: "serializeWaveParams",
+        in_app: true,
+      },
+    ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops sampled-out first-party browser transport network errors", () => {
