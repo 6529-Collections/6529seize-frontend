@@ -1323,15 +1323,18 @@ export default function TwitterPreviewCard({
     tweetId,
   });
 
-  const state: PreviewState = isLoading
-    ? { type: "loading" }
-    : twitterPreview
-      ? { type: "ready", preview: twitterPreview, fallback: false }
-      : {
-          type: "ready",
-          preview: fallbackPreview(href, tweetId),
-          fallback: true,
-        };
+  let state: PreviewState;
+  if (isLoading) {
+    state = { type: "loading" };
+  } else if (twitterPreview) {
+    state = { type: "ready", preview: twitterPreview, fallback: false };
+  } else {
+    state = {
+      type: "ready",
+      preview: fallbackPreview(href, tweetId),
+      fallback: true,
+    };
+  }
 
   const copyLink = (event: MouseEvent<HTMLButtonElement>) => {
     stopCardEvent(event);
