@@ -1,49 +1,13 @@
-import type { APIRequestContext, Page } from "@playwright/test";
+import type { APIRequestContext } from "@playwright/test";
 
+import { expect, test } from "../testHelpers";
 import {
-  expect,
-  expectNoHorizontalOverflow,
-  test,
-  waitForRouteReady,
-} from "../testHelpers";
+  gotoReady,
+  gotoReadyWithApiResponse,
+  RESPONSE_TIMEOUT_MS,
+  waitForApiResponse,
+} from "../support/routeReadiness";
 import { isDesktopWebProject } from "../support/surfaceSimulation";
-
-const RESPONSE_TIMEOUT_MS = 20000;
-type ApiResponseMatcher = (url: URL) => boolean;
-
-async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
-  await waitForRouteReady(page);
-  await expectNoHorizontalOverflow(page);
-  await expect(page).not.toHaveTitle("404 | PAGE NOT FOUND");
-}
-
-async function waitForApiResponse(page: Page, matches: ApiResponseMatcher) {
-  const response = await page.waitForResponse(
-    (candidate) => {
-      try {
-        return matches(new URL(candidate.url()));
-      } catch {
-        return false;
-      }
-    },
-    { timeout: RESPONSE_TIMEOUT_MS }
-  );
-  expect(response.ok(), `${response.url()} returned ${response.status()}`).toBe(
-    true
-  );
-  return response;
-}
-
-async function gotoReadyWithApiResponse(
-  page: Page,
-  path: string,
-  matches: ApiResponseMatcher
-) {
-  const responsePromise = waitForApiResponse(page, matches);
-  await gotoReady(page, path);
-  return responsePromise;
-}
 
 async function expectNoStoreJsonError(
   request: APIRequestContext,
@@ -76,9 +40,7 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
     await expect(
       page.getByRole("heading", { level: 1, name: "Network" })
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Nerd view" })
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Nerd view" })).toBeVisible();
 
     const body = (await response.json()) as { data?: unknown };
     expect(Array.isArray(body.data)).toBe(true);
@@ -224,9 +186,9 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
     const version = await request.get("/api/version");
     expect(version.status()).toBe(200);
     expect(version.headers()["cache-control"] ?? "").toContain("no-store");
-    expect(typeof ((await version.json()) as { version?: unknown }).version).toBe(
-      "string"
-    );
+    expect(
+      typeof ((await version.json()) as { version?: unknown }).version
+    ).toBe("string");
 
     await expectNoStoreJsonError(
       request,
@@ -247,13 +209,11 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
       "chainId is required"
     );
 
-    const farcaster = await request.get(
-      "/api/farcaster?url=http://127.0.0.1/"
-    );
+    const farcaster = await request.get("/api/farcaster?url=http://127.0.0.1/");
     expect(farcaster.status()).toBe(400);
-    expect(String(((await farcaster.json()) as { error?: unknown }).error)).toMatch(
-      /127\.0\.0\.1|not allowed|forbidden|public/i
-    );
+    expect(
+      String(((await farcaster.json()) as { error?: unknown }).error)
+    ).toMatch(/127\.0\.0\.1|not allowed|forbidden|public/i);
 
     const tiktok = await request.get("/api/tiktok");
     expect(tiktok.status()).toBe(400);
