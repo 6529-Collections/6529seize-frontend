@@ -8,7 +8,9 @@ Updated: 2026-06-17
 
 - Use the backend session-v2 wallet auth flow for first-party web and native clients.
 - Stop using legacy nonce/login/refresh-token auth in the frontend auth flow.
-- Keep web refresh state in the backend-owned HttpOnly `6529_session` cookie.
+- Keep web refresh state in backend-owned HttpOnly cookies: a compatibility
+  `6529_session` cookie plus address-scoped `6529_session_<address-hash>`
+  cookies for multi-account web sessions.
 - Keep native refresh state in secure storage and rotate it on every refresh.
 - Support connection sharing from an authenticated web session to a native client with a short-lived one-time code.
 - Keep access JWTs available for bearer-auth API calls.
@@ -48,7 +50,7 @@ Web login sends:
 }
 ```
 
-The backend returns `access_token`, `access_token_expires_at`, `address`, `role`, and `client_type`, and sets the HttpOnly `6529_session` cookie.
+The backend returns `access_token`, `access_token_expires_at`, `address`, `role`, and `client_type`, and sets the HttpOnly compatibility `6529_session` cookie plus an address-scoped session cookie. The frontend never reads either cookie.
 
 ### POST `/api/auth/session-refresh`
 
@@ -56,11 +58,12 @@ Web refresh sends cookies and this body:
 
 ```json
 {
-  "client_type": "web"
+  "client_type": "web",
+  "client_address": "<active wallet>"
 }
 ```
 
-Browser fetch calls must use `credentials: "include"` and axios calls must use `withCredentials: true`. The frontend continues using the returned access token and does not try to read the HttpOnly cookie.
+Browser fetch calls must use `credentials: "include"` and axios calls must use `withCredentials: true`. Current web clients include `client_address` so the backend refreshes the matching address-scoped cookie first and falls back to the compatibility cookie only when it belongs to that address. The frontend continues using the returned access token and does not try to read the HttpOnly cookie.
 
 ### POST `/api/auth/session-logout`
 
@@ -69,11 +72,12 @@ Web logout sends cookies and:
 ```json
 {
   "client_type": "web",
+  "client_address": "<active wallet>",
   "all_sessions": false
 }
 ```
 
-`all_sessions=true` revokes all wallet auth sessions for the address when the backend supports that scope.
+`all_sessions=true` revokes all wallet auth sessions for the verified target address. Supplying `client_address` prevents logout from revoking whichever account last wrote the compatibility cookie.
 
 ## Native Session Flow
 
@@ -186,7 +190,7 @@ Required rollout values:
 - Frontend auth uses `/auth/session-nonce`, `/auth/session-login`, `/auth/session-refresh`, and `/auth/session-logout`.
 - Frontend auth does not call legacy wallet nonce, login, or refresh-token redemption endpoints.
 - `signable_message` is signed exactly as returned.
-- Web refresh/logout include credentials.
+- Web refresh/logout include credentials and the active `client_address`.
 - Native refresh token rotation updates secure storage.
 - Connection sharing uses `/auth/connection-share`, `/auth/connection-share/redeem`, and `connection_share_code`.
 - Frontend contains no active obsolete connection sharing predecessor flow.

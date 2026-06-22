@@ -47,7 +47,7 @@ paths:
           description: Session created
           headers:
             Set-Cookie:
-              description: Web clients receive the HttpOnly 6529_session cookie.
+              description: Web clients receive the HttpOnly compatibility 6529_session cookie plus an address-scoped session cookie.
               schema:
                 type: string
           content:
@@ -72,7 +72,7 @@ paths:
           description: Session refreshed
           headers:
             Set-Cookie:
-              description: Web clients may receive a rotated HttpOnly 6529_session cookie.
+              description: Web clients may receive rotated HttpOnly compatibility and address-scoped session cookies.
               schema:
                 type: string
           content:
@@ -97,7 +97,7 @@ paths:
           description: Session revoked
           headers:
             Set-Cookie:
-              description: Web clients receive an expired 6529_session cookie.
+              description: Web clients receive expired session cookies for the addressed logout scope.
               schema:
                 type: string
   /auth/connection-share:
@@ -212,6 +212,8 @@ components:
         client_type:
           type: string
           enum: [web]
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
     SessionRefreshNativeRequest:
       type: object
       required: [client_type, client_address, native_refresh_token]
@@ -232,6 +234,8 @@ components:
         client_type:
           type: string
           enum: [web]
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
         all_sessions:
           type: boolean
     SessionLogoutNativeRequest:

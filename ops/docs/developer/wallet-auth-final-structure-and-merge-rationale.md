@@ -52,17 +52,28 @@ Web login posts:
 }
 ```
 
-The backend returns the short-lived access token and sets the HttpOnly `6529_session` cookie. The frontend keeps using `access_token` for bearer-auth API calls and never reads or stores `6529_session`.
+The backend returns the short-lived access token and sets HttpOnly web session
+cookies: a compatibility `6529_session` cookie plus an address-scoped
+`6529_session_<address-hash>` cookie. The frontend keeps using `access_token`
+for bearer-auth API calls and never reads or stores those cookies.
 
 Web refresh and logout use the browser-sent cookie and must include credentials:
 
 ```json
-{ "client_type": "web" }
+{ "client_type": "web", "client_address": "<active wallet>" }
 ```
 
 ```json
-{ "client_type": "web", "all_sessions": false }
+{
+  "client_type": "web",
+  "client_address": "<active wallet>",
+  "all_sessions": false
+}
 ```
+
+The active `client_address` keeps multi-account web refresh/logout bound to the
+address-scoped cookie for the selected profile instead of whichever account last
+wrote the compatibility cookie.
 
 ## Native Auth
 
@@ -130,7 +141,7 @@ The frontend no longer gates this implementation behind session-v2, legacy-refre
 
 - Session login requests `ApiSessionNonceResponse.signable_message` and never `nonce`.
 - Session nonce calls do not send `structured_signature`, `domain`, `client_origin`, or `session_type`.
-- Web refresh/logout requests include cookies.
+- Web refresh/logout requests include cookies and the active `client_address`.
 - Native refresh token rotation updates secure storage.
 - Connection sharing uses `/auth/connection-share`, `/auth/connection-share/redeem`, and `connection_share_code`.
 - Active frontend auth code has no legacy nonce/login/refresh-token redemption or obsolete connection sharing predecessor flow.

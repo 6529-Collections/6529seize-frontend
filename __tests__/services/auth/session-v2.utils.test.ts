@@ -236,6 +236,7 @@ describe("session-v2.utils", () => {
       endpoint: "auth/session-logout",
       body: {
         client_type: "web",
+        client_address: "0xabc",
         all_sessions: false,
       },
       credentials: "include",
@@ -261,6 +262,7 @@ describe("session-v2.utils", () => {
       endpoint: "auth/session-refresh",
       body: {
         client_type: "web",
+        client_address: "0xabc",
       },
       signal: undefined,
       credentials: "include",
@@ -281,6 +283,7 @@ describe("session-v2.utils", () => {
       endpoint: "auth/session-refresh",
       body: {
         client_type: "web",
+        client_address: "0xabc",
       },
       signal: undefined,
       credentials: "include",
@@ -358,6 +361,7 @@ describe("session-v2.utils", () => {
       endpoint: "auth/session-logout",
       body: {
         client_type: "web",
+        client_address: "0xabc",
         all_sessions: true,
       },
       credentials: "include",

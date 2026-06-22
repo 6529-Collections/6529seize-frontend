@@ -191,12 +191,14 @@ export async function refreshSessionV2({
     return await commonApiPost<
       {
         readonly client_type: "web";
+        readonly client_address: string;
       },
       SessionWebResponse
     >({
       endpoint: "auth/session-refresh",
       body: {
         client_type: "web",
+        client_address: address,
       },
       signal: abortSignal,
       credentials: "include",
@@ -312,6 +314,7 @@ export async function logoutSessionV2({
   await commonApiPost<
     {
       readonly client_type: "web";
+      readonly client_address: string | null;
       readonly all_sessions: boolean;
     },
     void
@@ -319,6 +322,7 @@ export async function logoutSessionV2({
     endpoint: "auth/session-logout",
     body: {
       client_type: "web",
+      client_address: address,
       all_sessions: allSessions,
     },
     credentials: "include",

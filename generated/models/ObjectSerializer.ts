@@ -816,12 +816,12 @@ import { ApiSaveProfileCmsPackageDraftRequest } from '../models/ApiSaveProfileCm
 import { ApiSeizeSettings } from '../models/ApiSeizeSettings';
 import { ApiSessionLoginRequest, ApiSessionLoginRequestClientTypeEnum      , ApiSessionLoginRequestWalletKindHintEnum  , ApiSessionLoginRequestSignatureVersionEnum   } from '../models/ApiSessionLoginRequest';
 import { ApiSessionLogoutNativeRequest, ApiSessionLogoutNativeRequestClientTypeEnum      } from '../models/ApiSessionLogoutNativeRequest';
-import { ApiSessionLogoutWebRequest, ApiSessionLogoutWebRequestClientTypeEnum    } from '../models/ApiSessionLogoutWebRequest';
+import { ApiSessionLogoutWebRequest, ApiSessionLogoutWebRequestClientTypeEnum     } from '../models/ApiSessionLogoutWebRequest';
 import { ApiSessionNativeResponse    , ApiSessionNativeResponseClientTypeEnum     } from '../models/ApiSessionNativeResponse';
 import { ApiSessionNonceQuery , ApiSessionNonceQueryClientTypeEnum    } from '../models/ApiSessionNonceQuery';
 import { ApiSessionNonceResponse } from '../models/ApiSessionNonceResponse';
 import { ApiSessionRefreshNativeRequest, ApiSessionRefreshNativeRequestClientTypeEnum     } from '../models/ApiSessionRefreshNativeRequest';
-import { ApiSessionRefreshWebRequest, ApiSessionRefreshWebRequestClientTypeEnum   } from '../models/ApiSessionRefreshWebRequest';
+import { ApiSessionRefreshWebRequest, ApiSessionRefreshWebRequestClientTypeEnum    } from '../models/ApiSessionRefreshWebRequest';
 import { ApiSessionWebResponse    , ApiSessionWebResponseClientTypeEnum   } from '../models/ApiSessionWebResponse';
 import { ApiSetPinnedDropRequest } from '../models/ApiSetPinnedDropRequest';
 import { ApiSetProfileWaveRequest } from '../models/ApiSetProfileWaveRequest';
