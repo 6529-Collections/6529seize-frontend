@@ -68,6 +68,60 @@ describe("Playwright read-only mutation guard", () => {
     });
   });
 
+  it("blocks notification mark-read mutations with a named registry rule", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "http://localhost:3001",
+        method: "POST",
+        readonly: true,
+        url: "http://localhost:3000/api/notifications/read",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "notification-read-all",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "http://localhost:3101",
+        method: "POST",
+        readonly: true,
+        url: "http://127.0.0.1:3000/api/notifications/read",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "notification-read-all-loopback",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://api.staging.6529.io/api/notifications/read",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "staging-notification-read-all",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://api.6529.io/api/notifications/read",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "production-notification-read-all",
+    });
+  });
+
   it("allows the same-origin open-graph metadata lookup in read-only mode", () => {
     expect(
       decideReadonlyRequest({
@@ -149,12 +203,142 @@ describe("Playwright read-only mutation guard", () => {
         baseURL: "https://staging.6529.io",
         method: "POST",
         readonly: true,
+        url: "https://www.googletagmanager.com/td?cid=redacted",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://www.youtube.com/api/stats/watchtime?ns=yt",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://www.youtube.com/youtubei/v1/log_event?key=redacted",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://youtube.com/api/stats/watchtime?ns=yt",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://youtube.com/youtubei/v1/log_event?key=redacted",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://youtube-nocookie.com/api/stats/watchtime?ns=yt",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://youtube-nocookie.com/youtubei/v1/log_event?key=redacted",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://www.youtube-nocookie.com/api/stats/watchtime?ns=yt",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/GenerateIT",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
         url: "https://pulse.walletconnect.org/batch?projectId=test",
       })
     ).toMatchObject({
       action: "abort",
       reason: "ignored-external-sdk-endpoint",
     });
+
+    for (const url of [
+      "https://www.googletagmanager.com/td?id=G-123",
+      "https://www.youtube.com/api/stats/watchtime",
+      "https://youtube.com/api/stats/watchtime",
+      "https://youtube.com/youtubei/v1/log_event?prettyPrint=false",
+      "https://www.youtube-nocookie.com/api/stats/watchtime",
+      "https://youtube-nocookie.com/youtubei/v1/log_event?prettyPrint=false",
+      "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/GenerateIT",
+    ]) {
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://6529.io",
+          method: "POST",
+          readonly: true,
+          url,
+        })
+      ).toMatchObject({
+        action: "abort",
+        reason: "ignored-external-sdk-endpoint",
+      });
+    }
   });
 
   it("aborts same-origin telemetry POSTs without allowing external lookalikes", () => {
@@ -202,6 +386,30 @@ describe("Playwright read-only mutation guard", () => {
         method: "POST",
         readonly: true,
         url: "https://example.com/write",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "non-allowlisted-mutation",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://youtube.com/youtubei/v1/player?key=redacted",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "non-allowlisted-mutation",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url: "https://youtube-nocookie.com/youtubei/v1/player?key=redacted",
       })
     ).toMatchObject({
       action: "block",

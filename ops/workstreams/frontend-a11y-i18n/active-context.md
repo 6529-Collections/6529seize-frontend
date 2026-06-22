@@ -4,6 +4,80 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-22T05:45Z:
+  - PR #2819 is merged into `origin/main` as
+    `174b2d054 Add search and wave read-only E2E coverage (#2819)`.
+  - Current branch: `codex/e2e-composer-sandbox`, based on that current
+    `origin/main`.
+  - PR #2820 is open:
+    https://github.com/6529-Collections/6529seize-frontend/pull/2820
+  - Active slice adds local-only authenticated composer/upload/link-preview
+    sandbox coverage. It starts a per-run mock API, runs Next against that mock
+    runtime, uses generated synthetic dev-auth data only, and verifies file
+    preview/removal plus deterministic link preview rendering on desktop and
+    mobile Chromium.
+  - The mock diagnostics record requests and fail the pack on dangerous
+    composer/upload mutation endpoints (`/api/drops`, `/api/drop-media`,
+    `/api/attachments`) and any other unhandled local mutation, while allowing
+    known local notification wave-read side effects as separate diagnostics.
+    The spec also refuses non-loopback Playwright base URLs so inherited shell
+    env cannot point the pack at staging or production.
+  - Local validation passed: `test:e2e:composer-sandbox`, Playwright typecheck,
+    changed lint/typecheck, `critical-shell`, changed secret scan,
+    workflow-security scan, and `codex-diff-check`. `quality:changed` still
+    fails locally at its aggregate format step in this Windows worktree, while
+    the equivalent direct subchecks pass.
+  - Next action is to iterate CI and all reviewbot lanes on PR #2820. Keep
+    GLM additive alongside existing reviewbots.
+  - GLM reviewbot is live on `6529reviewbot` and remains additive. Do not
+    remove, downgrade, or make optional the existing Opus/general/WCAG/i18n/
+    security/responsiveness reviewbot lanes.
+- Latest testing-roadmap state, 2026-06-22T04:25Z:
+  - PR #2818 merged into `origin/main` as
+    `d2b1c2ba4d9908ff0f592eeeb7200c80c578920c`, adding the authenticated
+    notifications mutation-guard contract without turning `/notifications`
+    into staging or production smoke.
+  - Current clean worktree branch:
+    `codex/e2e-search-waves-readonly`, based on current `origin/main` after
+    PR #2818.
+  - Active slice adds a production-safe read-only pack for global header search
+    keyboard/navigation behavior and wave-local message search behavior.
+  - The pack has passed locally and on staging with desktop and mobile
+    Chromium, and on production with desktop Chromium only.
+  - Next action is PR publication and reviewbot/CI iteration.
+  - Keep `/notifications` out of staging or production smoke until
+    notifications have a disposable sandbox account/backend or a
+    user-equivalent product-safe read-only test path.
+  - GLM reviewbot is live on `6529reviewbot` and remains additive. Do not
+    remove, downgrade, or make optional the existing Opus/general/WCAG/i18n/
+    security/responsiveness reviewbot lanes.
+- Latest testing-roadmap state, 2026-06-21T22:35Z:
+  - Current clean worktree branch:
+    `codex/e2e-authenticated-shells-readonly`, based on current `origin/main`.
+  - Active slice adds a credential-free-by-default authenticated read-only E2E
+    pack for `/messages`, `/{profile}/subscriptions`, and `/{profile}/proxy`.
+  - The pack uses the existing dev-auth runtime path only when the caller
+    provides `PLAYWRIGHT_READONLY=1`, `USE_DEV_AUTH=true`,
+    `DEV_MODE_WALLET_ADDRESS`, and `DEV_MODE_AUTH_JWT`, plus
+    `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE`. It skips loudly otherwise and never
+    commits or extracts local secrets.
+  - Authenticated `/notifications` is not part of the read-only pack because
+    live dev-auth validation with the mutation guard showed it auto-posts
+    `POST /api/notifications/read` on mount. Treat this as a separate
+    mutation-safety follow-up, not as an allowlist candidate.
+  - The intended validation bar before PR publication is focused Jest coverage
+    for the read-only guard, Playwright typecheck, changed lint/typecheck,
+    skipped-pack proof without dev auth, critical-shell regression, changed
+    secret scan, workflow security scan, and `codex-diff-check`. If secure
+    dev-auth env is present, also run the pack against both baseline web
+    projects.
+  - Already-merged read-only E2E packs before this branch include Waves/Profile,
+    media/mint/detail, delegation, Network/Open Data, collections, and public
+    Groups/Tools. Preserve their scripts, ownership docs, and run-log evidence
+    when rebasing this branch.
+  - GLM reviewbot is live on `6529reviewbot` and must remain additive. Do not
+    remove, downgrade, or make optional the existing Opus/general/WCAG/i18n/
+    security/responsiveness reviewbot lanes.
 - Latest testing-roadmap state, 2026-06-21T16:45Z:
   - PR #2806, PR #2805, and PR #2808 are merged and deployed to production.
     - PR #2806 merge SHA:
@@ -27,8 +101,9 @@ Read this section first after compaction or handoff.
     `s3://6529-artifacts/` storage path was not present during validation.
     Do not weaken durable-artifact holds or treat GitHub Actions artifacts as
     durable retained evidence.
-  - Current implementation branch: `codex/e2e-waves-profile`, based on
-    production `origin/main` `1bdddd30c16c53e08601bf2bbfb67a267f517738`.
+  - Current implementation branch at that time: `codex/e2e-waves-profile`,
+    based on production `origin/main`
+    `1bdddd30c16c53e08601bf2bbfb67a267f517738`.
   - Active E2E PR adds a read-only Waves/Profile pack across desktop and mobile
     Chromium plus staging/production scripts and a staging-access cookie seed
     helper. It covers `/waves`, legacy `/waves?wave=...&serialNo=...`, the
@@ -232,7 +307,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/testing-e2e-surface-matrix`
+`codex/e2e-composer-sandbox`
 
 ## Constraints
 
@@ -335,20 +410,23 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Next Actions
 
-1. Commit, push, and open the `codex/e2e-waves-profile` PR with the validation
-   evidence listed above.
-2. Iterate CodeRabbit, Sonar, CI, Opus reviewbot, and GLM reviewbot feedback on
-   the Waves/Profile E2E PR until Codex judges the loop is no longer adding
-   material value.
-3. Merge the Waves/Profile E2E PR after checks and review signals are green or
-   consciously dispositioned, then deploy it through staging and production with
-   `ops/skills/deploy-6529/SKILL.md`.
-4. Record the PR #2808 production post-deploy watch checkpoint only after the
-   real 30-minute observation window and deployed-environment validation pass.
-   Leave the release report on hold if approved durable artifact storage is not
-   wired.
-5. Start the next E2E packs in focused PRs: media/mint/detail, delegation,
-   NextGen/groups/tools, then broad network/open-data/static route matrices.
+1. Commit, push, and open the `codex/e2e-search-waves-readonly` PR with the
+   focused search/wave E2E pack, Playwright typecheck, changed lint/typecheck,
+   secret scan, workflow-security scan, critical-shell regression evidence,
+   staging/production pack evidence, and `codex-diff-check`.
+2. Iterate CodeRabbit, Sonar, CI, Opus reviewbot, GLM reviewbot, and any
+   available specialized bots until Codex judges the loop is no longer adding
+   material value. Keep all reviewbot lanes additive; do not remove existing
+   bots.
+3. Merge the search/wave read-only PR after checks and review signals are green
+   or consciously dispositioned.
+4. Record the PR #2809 production post-deploy watch checkpoint if the real
+   30-minute observation window has elapsed and deployed-environment validation
+   still passes. Leave release reports on hold if approved durable artifact
+   storage is not wired.
+5. Start the next E2E packs in focused PRs: composer/upload/link-preview
+   sandbox coverage, wallet/native/Electron shell coverage, and deployment
+   evidence/version verification.
 6. Reconcile the existing page-cluster PR stack from current `origin/main`
    before opening broad new implementation PRs.
 7. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR
@@ -360,3 +438,40 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
    review, not a local-test substitute.
 9. Preserve unrelated dirty EmojiContext, RememeImage test, and bootstrap style
    files in other worktrees.
+
+## 2026-06-22 Current Autonomous Run
+
+- User asked to continue autonomous manager mode and finish the not-completed
+  and partially-completed testing roadmap items, with important E2E coverage
+  across app areas.
+- GLM reviewbot is live in `6529reviewbot`; keep it additive. Do not remove,
+  downgrade, or replace existing reviewbots.
+- PRs #2810 through #2817 are merged into `origin/main`, adding public
+  read-only packs for social/profile, media/mint/detail, delegation,
+  network/open-data, collections/NextGen, public groups/tools, public content,
+  authenticated shell gates, and profile deep links.
+- PR #2818 merged the authenticated notifications guard hardening slice.
+- PR #2819 merged the global search and wave-local message search E2E slice
+  into `origin/main` as `174b2d054 Add search and wave read-only E2E coverage
+(#2819)`.
+- Current branch `codex/e2e-composer-sandbox` adds local-only authenticated
+  composer/upload/link-preview sandbox coverage. It uses a per-run mock API and
+  generated synthetic dev-auth token, asserts the file-preview/remove and link
+  preview paths, and fails if the browser posts to dangerous composer/upload
+  mutation endpoints.
+- Deployment train policy remains: merge only after Codex, reviewbots, and CI
+  stop adding material value; deploy staging first, validate exact merged SHA,
+  then production from current `origin/main` with release evidence.
+
+## Current Next Actions
+
+1. Finish CI/reviewbot iteration and merge readiness for PR #2820
+   (`codex/e2e-composer-sandbox`).
+2. Keep `/notifications` out of staging/production read-only smoke until a
+   disposable sandbox account/backend or product-safe non-mutating test path
+   exists.
+3. Start the next high-value E2E pack after this PR: wallet/native/Electron
+   shell coverage, deployment evidence/version verification, or the next
+   guarded authenticated sandbox pack.
+4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
+   artifact pointers or weaken release holds.

@@ -156,6 +156,7 @@ export default function GradientsComponent() {
                 wallets={[owner]}
                 display={nft.owner_display}
                 hideCopy={true}
+                disableLink={true}
               />
             )}
             {ownsNft && <YouOwnNftBadge />}
