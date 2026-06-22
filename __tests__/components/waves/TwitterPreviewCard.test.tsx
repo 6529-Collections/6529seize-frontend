@@ -1,8 +1,9 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TwitterPreviewCard from "@/components/waves/TwitterPreviewCard";
 import { fetchTwitterPreview } from "@/services/api/twitter-preview-api";
+import { renderWithQueryClient as render } from "../../utils/reactQuery";
 
 jest.mock("@/services/api/twitter-preview-api", () => ({
   fetchTwitterPreview: jest.fn(),
@@ -100,6 +101,38 @@ describe("TwitterPreviewCard", () => {
     expect(
       screen.queryByRole("link", { name: "Read 3,951 replies" })
     ).not.toBeInTheDocument();
+  });
+
+  it("deduplicates duplicate tweet preview requests by tweet id", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2049202644879565155",
+      url: "https://x.com/Mayudropsphotos/status/2049202644879565155?s=20",
+      authorName: "Mayudrops",
+      authorHandle: "Mayudropsphotos",
+      text: "Same post",
+    });
+
+    render(
+      <>
+        <TwitterPreviewCard
+          href="https://x.com/Mayudropsphotos/status/2049202644879565155?s=20"
+          tweetId="2049202644879565155"
+        />
+        <TwitterPreviewCard
+          href="https://twitter.com/Mayudropsphotos/status/2049202644879565155?ref_src=twsrc%5Etfw"
+          tweetId="2049202644879565155"
+        />
+      </>
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("twitter-post-preview")).toHaveLength(2);
+    });
+
+    expect(mockedFetchTwitterPreview).toHaveBeenCalledTimes(1);
+    expect(mockedFetchTwitterPreview).toHaveBeenCalledWith(
+      "https://x.com/Mayudropsphotos/status/2049202644879565155?s=20"
+    );
   });
 
   it("renders playable video media when available", async () => {
