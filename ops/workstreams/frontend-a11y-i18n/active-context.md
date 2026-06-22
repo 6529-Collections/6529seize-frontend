@@ -511,17 +511,19 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Wait for reviewer subagent `Kepler` on the deployment evidence diff. Fix any
-   valid findings before PR publication.
-2. Commit, push, and open the `codex/deployment-evidence-verification` PR with
-   the Level 5 risk, workflow change, version probe, optional
-   `playwright:production-readonly` pack, validation evidence, and explicit note
-   that the pack remains additive/opt-in until durable artifact automation is
-   wired.
-3. Iterate CI, CodeRabbit, Opus reviewbot, GLM reviewbot, Sonar, Snyk, CodeQL,
-   and workflow checks until Codex judges the loop is no longer adding material
-   value.
-4. Merge and deploy this release-control PR through staging and production,
+1. Continue PR #2823
+   (`codex/deployment-evidence-verification`) review/check iteration on head
+   `dba0a6c6cf05fae6f68a786554d6e5388b33aa99`.
+2. Wait for App PR CI, Dependency Governance, CodeQL, 6529bot follow-up, GLM
+   reviewbot if it posts on this repo, and any remaining installed-app checks to
+   reach terminal status. CodeRabbit is rate-limited on this PR; keep its
+   existing review signal, but do not treat rate limiting as a hard block unless
+   it later posts an actionable finding.
+3. Confirm the latest 6529bot follow-up has no new blocking findings. The prior
+   `874ccc35` finding was addressed by moving the shared parser into
+   `ops/scripts/cli-args.cjs` and adding a verifier CLI smoke test.
+4. Update the PR body validation notes if needed, then merge and deploy this
+   release-control PR through staging and production,
    because it changes deployment workflows. Validate exact deployed SHAs and run
    the production read-only aggregate after production.
 5. Keep `/notifications` out of staging/production read-only smoke until a

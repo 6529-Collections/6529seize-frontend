@@ -3147,3 +3147,31 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `seize run test:e2e:production:readonly`: 65 passed.
 - Independent reviewer subagent `Kepler` is inspecting the final diff before
   commit/PR publication.
+
+## 2026-06-22T09:10Z PR #2823 Reviewbot Iteration
+
+- Opened PR #2823:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2823
+- Sonar first reported two useful signals:
+  - `new Error()` should be a more specific `TypeError` for unavailable
+    `fetch`.
+  - new-code duplication exceeded the quality gate because the verifier copied
+    deployment-bus CLI argument parsing.
+- Addressed the `TypeError` finding in
+  `ops/scripts/verify-deployment-version.cjs`.
+- Addressed the duplication and 6529bot CLI-contract review by adding
+  `ops/scripts/cli-args.cjs`, importing it from both deployment CLIs, and adding
+  a no-network verifier CLI smoke test that proves the parser loads before the
+  script validates required options.
+- Validation for the parser-helper follow-up passed:
+  - `node --check ops/scripts/cli-args.cjs; node --check ops/scripts/deployment-bus.cjs; node --check ops/scripts/verify-deployment-version.cjs`
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 ops/scripts/cli-args.cjs ops/scripts/verify-deployment-version.cjs ops/scripts/deployment-bus.cjs __tests__/scripts/verify-deployment-version.test.ts __tests__/scripts/deployment-bus.test.ts`
+  - `seize run test:no-coverage -- __tests__/scripts/verify-deployment-version.test.ts __tests__/scripts/deployment-bus.test.ts`: 2 suites, 47 tests passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/deployment-version-secret-scan-cli-helper-rerun.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/deployment-version-workflow-security-cli-helper-rerun.json`
+  - `codex-diff-check`
+- Pushed head `dba0a6c6cf05fae6f68a786554d6e5388b33aa99`.
+- SonarCloud passed on the latest head with 0 new issues, 0 security hotspots,
+  and 0.0% new-code duplication.
+- As of this log entry, App PR CI, Dependency Governance, CodeQL, and latest
+  6529bot/GLM follow-up signals were still pending or queued.
