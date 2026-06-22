@@ -1794,7 +1794,9 @@
       ],
       "facts": [
         "The Identity tab lives at /{user}/identity.",
-        "It surfaces profile identity, REP behavior, NIC/statements, and activity log behavior where available.",
+        "NIC stands for Network Identity Credits.",
+        "NIC is the trust signal identities give each other in the 6529 network.",
+        "The Identity tab surfaces profile identity, REP behavior, NIC/statements, and activity log behavior where available.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}/identity",
