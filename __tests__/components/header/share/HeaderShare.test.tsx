@@ -419,7 +419,7 @@ describe("HeaderShare", () => {
       expect(signals[0]?.aborted).toBe(true);
     });
 
-    it("shows an upgrade action instead of creating a connection share for legacy auth", async () => {
+    it("shows an upgrade action when the backend requires session-v2 auth", async () => {
       const auth = require("@/components/auth/Auth");
       const requestSessionUpgrade = jest.fn().mockResolvedValue({
         success: true,
@@ -427,8 +427,10 @@ describe("HeaderShare", () => {
       auth.useAuth.mockReturnValue({
         requestSessionUpgrade,
       });
-      mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
       const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.createConnectionShare.mockRejectedValue(
+        new Error("Connection sharing requires an active session-v2 web session")
+      );
 
       renderWithProviders(<HeaderShare />);
 
@@ -442,16 +444,17 @@ describe("HeaderShare", () => {
           "You can't share a connection from your current authentication. Update to the new secure session first."
         )
       ).toBeInTheDocument();
-      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1);
 
       await userEvent.click(screen.getByRole("button", { name: "Update" }));
 
       expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
     });
 
-    it("generates connection QR codes from one-time connection share codes", async () => {
+    it("generates connection QR codes from one-time connection share codes even when the local v2 marker is stale", async () => {
       const qrcode = require("qrcode");
       const sessionV2 = require("@/services/auth/session-v2.utils");
+      mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
       sessionV2.createConnectionShare.mockResolvedValue({
         connection_share_code: "share-code",
         expires_at: new Date(Date.now() + 300_000).toISOString(),

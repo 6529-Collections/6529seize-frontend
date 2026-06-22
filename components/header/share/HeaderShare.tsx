@@ -15,10 +15,7 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useElectron } from "@/hooks/useElectron";
-import {
-  getWalletAddress,
-  hasActiveSessionV2Auth,
-} from "@/services/auth/auth.utils";
+import { getWalletAddress } from "@/services/auth/auth.utils";
 import { createConnectionShare } from "@/services/auth/session-v2.utils";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
@@ -574,11 +571,6 @@ export function HeaderQRModal({
   }): Promise<string> {
     if (!walletAddress || !hasValidWalletAuth) {
       setUnavailableConnectionShare("unauthenticated");
-      return "";
-    }
-
-    if (!hasActiveSessionV2Auth({ address: walletAddress })) {
-      setUnavailableConnectionShare("legacy-auth");
       return "";
     }
 
