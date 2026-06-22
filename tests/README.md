@@ -106,6 +106,9 @@ Surface matrix:
 - `test:e2e:profile-deep-links-readonly` runs public profile legacy deep-link
   redirect coverage on both baseline web projects, with the mutation guard
   enabled even locally.
+- `test:e2e:search-waves-readonly` runs global header search keyboard and
+  navigation coverage plus wave-local message search coverage on both baseline
+  web projects, with the mutation guard enabled even locally.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -147,6 +150,12 @@ Surface matrix:
   access unlock.
 - `test:e2e:production:profile-deep-links-readonly` runs the profile deep-link
   redirect pack against production desktop web only as a public, read-only
+  smoke.
+- `test:e2e:staging:search-waves-readonly` runs the search and wave-detail
+  read-only pack against staging with the remote mutation guard and staging
+  access unlock.
+- `test:e2e:production:search-waves-readonly` runs the search and wave-detail
+  read-only pack against production desktop web only as a public, read-only
   smoke.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
@@ -208,6 +217,10 @@ Large-pack ownership:
   changing public profile routing, query-preserving profile links, legacy
   waves/groups/followers redirects, profile tab canonicalization, query
   preservation, or read-only mutation guard behavior.
+- `test:e2e:search-waves-readonly` is owned by PR or train owners changing
+  header search, site search result catalog entries, wave-local message search,
+  public wave detail routing, search modal keyboard/focus behavior, or
+  read-only mutation guard behavior on search and wave surfaces.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.

@@ -2906,3 +2906,67 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   `typescript:S6418` on the new E2E skip message because the message spelled
   out a dev-auth token env var name. Removed sensitive env var names from the
   user-facing skip text while preserving the actual configuration checks.
+
+## 2026-06-22T03:45Z Search And Wave Detail Read-Only Pack Started
+
+- PR #2818 merged into `origin/main` as
+  `d2b1c2ba4d9908ff0f592eeeb7200c80c578920c`, closing the notifications
+  mutation-guard slice without adding unsafe deployed notification smoke.
+- Started branch `codex/e2e-search-waves-readonly` from current merged
+  `origin/main`.
+- This slice adds production-safe read-only E2E coverage for:
+  - global header search keyboard open/close/focus restoration,
+    character-threshold state, result rendering, and navigation to the Wave
+    Score network page.
+  - wave-local message search modal behavior on a public wave, including
+    minimum query guidance, no-match handling, clear control, and read-only
+    mutation guard coverage.
+- Non-goals for this slice:
+  - no posting, replying, voting, reacting, uploading, signing, notification
+    read-state mutation, external share, clipboard, or admin/moderation action.
+  - no staging or production notification smoke until there is a disposable
+    sandbox account/backend or a product-safe non-mutating notification path.
+- Planned validation before PR publication: `test:e2e:search-waves-readonly`,
+  Playwright typecheck, changed lint/typecheck, changed secret scan, workflow
+  security scan, critical-shell regression, and `codex-diff-check`.
+
+## 2026-06-22T04:25Z Search And Wave Detail Read-Only Pack Validated
+
+- Adjusted the test design after local and staging runs showed the sidebar
+  header search remains global on wave routes; wave-local search is exposed by
+  the dedicated `Search messages in this wave` control on the wave detail
+  panel.
+- Local wave detail uses a browser-scoped fixture for one synthetic public wave
+  because the current local seed data returns real `/api/waves/{id}` list
+  entries but 500s on their detail fetches. Staging and production scripts use
+  real public wave data and do not install that local fixture.
+- Validation completed before PR publication:
+  - `seize install:frozen`
+  - `seize-local-dev bootstrap`
+  - `seize run build:env-schema`
+  - `seize run format:uncommitted`
+  - `seize run test:e2e:search-waves-readonly`: 4 passed across desktop and
+    mobile Chromium.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    computed Level 4 because package scripts are release-validation controls.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/search-waves-secret-scan-final.json`:
+    passed, 0 findings.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/search-waves-workflow-security-final.json`:
+    passed, 0 findings.
+  - `seize run test:e2e:staging:search-waves-readonly`: first run stopped
+    before testing because staging access was not loaded in the shell; rerun
+    with the local Credential Manager target `STAGING_AUTH` passed 4 tests
+    across desktop and mobile Chromium.
+  - `seize run test:e2e:production:search-waves-readonly`: 2 passed on desktop
+    Chromium.
+  - `codex-diff-check`
+- Independent reviewer `Zeno` found that the first local browser fixtures
+  would fulfill any HTTP method for matching synthetic wave routes, which could
+  hide a future local unsafe method request before the read-only guard reported
+  it. Fixed the fixture helper to allow only `GET` and `HEAD`, and to fail
+  loudly on any other matching method. Also removed stale active-context next
+  pack guidance that referenced already-merged E2E areas.
