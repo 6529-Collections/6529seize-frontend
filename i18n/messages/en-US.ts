@@ -990,6 +990,8 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
   "drop.media.processing": "Processing image",
   "drop.media.unavailable": "Image unavailable",
+  "drop.media.loadFailed": "Couldn’t load image.",
+  "drop.media.retry": "Retry",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
   ...USER_PROFILE_TABS_MESSAGES,
