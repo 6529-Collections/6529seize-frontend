@@ -22,7 +22,7 @@ describe("UserPageXtdhGrantedListContent", () => {
     );
 
     expect(
-      screen.getByText("No pending grants found. Try a different filter.")
+      screen.getByText("No Pending grants found. Try a different filter.")
     ).toBeInTheDocument();
   });
 

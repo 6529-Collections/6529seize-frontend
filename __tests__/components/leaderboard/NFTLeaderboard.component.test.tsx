@@ -19,6 +19,10 @@ jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
 const commonApiFetch = require('@/services/api/common-api').commonApiFetch as jest.Mock;
 
 describe('NFTLeaderboard component', () => {
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+  });
+
   beforeEach(() => {
     commonApiFetch.mockReset();
   });

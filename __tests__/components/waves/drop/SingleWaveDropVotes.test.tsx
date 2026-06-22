@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SingleWaveDropVotes } from '@/components/waves/drop/SingleWaveDropVotes';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 jest.mock('@/components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: (props: any) => <div data-testid='progress' data-current={props.current} data-projected={props.projected}/>}));
@@ -13,19 +14,21 @@ const dropBase: any = {
   rating_prediction: -5,
   raters_count: 2,
   top_raters: [ { profile: { handle:'bob', pfp:null }, rating: 3 } ],
-  wave: { voting_credit_type: 'CIC' },
+  wave: { voting_credit_type: ApiWaveCreditType.Rep },
   context_profile_context: { rating: -2 }
 };
 
 it('shows user vote when voting ended', () => {
   useDropInteractionRules.mockReturnValue({ isVotingEnded: true, isWinner: false });
   render(<SingleWaveDropVotes drop={dropBase} />);
-  expect(screen.getByText('Your vote:')).toBeInTheDocument();
-  expect(screen.getByText('2')).toBeInTheDocument();
+  expect(screen.getByText('Your votes:')).toBeInTheDocument();
+  expect(
+    screen.getByText((_, element) => element?.textContent === "-2 Rep")
+  ).toBeInTheDocument();
 });
 
 it('hides user vote when voting ongoing', () => {
   useDropInteractionRules.mockReturnValue({ isVotingEnded: false, isWinner: false });
   render(<SingleWaveDropVotes drop={dropBase} />);
-  expect(screen.queryByText('Your vote:')).toBeNull();
+  expect(screen.queryByText('Your votes:')).toBeNull();
 });

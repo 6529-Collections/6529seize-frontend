@@ -32,6 +32,14 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebsocketStatus: jest.fn(() => "disconnected"),
 }));
 
+jest.mock("@/hooks/useWaveById", () => ({
+  useWaveById: jest.fn(() => ({
+    wave: null,
+    isLoading: false,
+    isFetching: false,
+  })),
+}));
+
 jest.mock("@/contexts/wave/hooks/useActiveWaveManager", () => ({
   useActiveWaveManager: jest.fn(() => ({
     activeWaveId: "wave-1",

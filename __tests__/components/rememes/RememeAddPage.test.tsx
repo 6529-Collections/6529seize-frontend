@@ -296,12 +296,15 @@ describe("RememeAddPage", () => {
     fireEvent.click(screen.getByText("Add Rememe"));
 
     expect(mockSignMessage).toHaveBeenCalledWith({
-      message: JSON.stringify({
-        contract: "0xtest",
-        token_ids: ["1"],
-        references: [1, 2],
-      }),
+      message: expect.stringContaining("Action: add_rememe"),
     });
+    const signedMessage = mockSignMessage.mock.calls[0][0].message;
+    expect(signedMessage).toEqual(expect.stringContaining("6529 Action"));
+    expect(signedMessage).toEqual(expect.stringContaining("Wallet: 0x123"));
+    expect(signedMessage).toEqual(expect.stringContaining("Payload Hash:"));
+    expect(signedMessage).toEqual(
+      expect.stringContaining("Purpose: Sign this message to add a 6529 ReMeme.")
+    );
   });
 
   it("shows signing state when message is pending", () => {

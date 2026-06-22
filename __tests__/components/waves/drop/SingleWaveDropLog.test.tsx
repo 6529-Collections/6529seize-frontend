@@ -13,11 +13,13 @@ jest.mock('@/helpers/AllowlistToolHelpers', () => ({ isEthereumAddress: () => tr
 jest.mock('@/components/common/SystemAdjustmentPill', () => ({ SystemAdjustmentPill: () => <span data-testid="pill" /> }));
 
 describe('SingleWaveDropLog', () => {
-  const baseLog:any = { created_at: Date.now(), invoker:{ handle:'0xabc', pfp:'' }, contents:{ oldVote:0, newVote:1 }, id:'1' };
+  const baseLog:any = { created_at: new Date(), invoker:{ handle:'0xabc', pfp:'' }, contents:{ oldVote:0, newVote:1 }, id:'1' };
   it('renders desktop layout with pill', () => {
     render(<SingleWaveDropLog log={{ ...baseLog, contents:{ oldVote:1, newVote:2, reason:'CREDIT_OVERSPENT' } }} creditType={ApiWaveCreditType.Tdh} />);
     expect(screen.getByText('0xabc')).toBeInTheDocument();
-    expect(screen.getByText('2 TDH')).toBeInTheDocument();
+    expect(
+      screen.getByText((_, element) => element?.textContent === '2 TDH')
+    ).toBeInTheDocument();
     expect(screen.getByTestId('pill')).toBeInTheDocument();
     expect(document.body.innerHTML).toContain('tw-truncate');
   });

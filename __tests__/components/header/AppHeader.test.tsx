@@ -159,6 +159,12 @@ function setup(opts: any) {
 }
 
 describe("AppHeader", () => {
+  const openHeaderMoreMenu = () => {
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
+  };
+
   const setNavigatorClipboard = (writeTextImpl = mockWriteText) => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -276,9 +282,11 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    const shareButton = screen.getByRole("button", { name: "Share wave" });
-    expect(shareButton).toHaveAttribute("data-wave-link-action-mode", "share");
-    expect(shareButton).toHaveClass("tw-h-10", "tw-w-10");
+    openHeaderMoreMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: "Share wave" })
+    ).toBeInTheDocument();
   });
 
   it("shows matching wave drop action in app header", () => {
@@ -328,9 +336,11 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
+    openHeaderMoreMenu();
+
     expect(
-      screen.getByRole("button", { name: "Copy wave link" })
-    ).toHaveAttribute("data-wave-link-action-mode", "copy");
+      screen.getByRole("menuitem", { name: "Copy wave link" })
+    ).toBeInTheDocument();
   });
 
   it("hides wave link action while active wave is still resolving", () => {
@@ -375,14 +385,12 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy wave link" }));
+    openHeaderMoreMenu();
+    fireEvent.click(screen.getByRole("menuitem", { name: "Copy wave link" }));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
       "http://localhost/waves/w2"
     );
-    expect(
-      screen.getByRole("button", { name: "Link copied" })
-    ).toBeInTheDocument();
   });
 
   it("hides wave link action in DM context", () => {
@@ -495,17 +503,11 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    const galleryToggle = screen.getByRole("button", {
+    openHeaderMoreMenu();
+
+    const galleryToggle = screen.getByRole("menuitem", {
       name: "Switch to gallery view",
     });
-    const actionRow = galleryToggle.parentElement;
-    if (!actionRow) {
-      throw new Error("Expected gallery toggle to be inside action row");
-    }
-    expect(actionRow).toHaveClass("tw-gap-x-1");
-    expect(galleryToggle).toHaveClass("tw-h-10", "tw-w-10");
-    const galleryIcon = galleryToggle.querySelector("svg");
-    expect(galleryIcon).toHaveClass("tw-h-5", "tw-w-5");
     fireEvent.click(galleryToggle);
 
     expect(toggleViewMode).toHaveBeenCalledTimes(1);

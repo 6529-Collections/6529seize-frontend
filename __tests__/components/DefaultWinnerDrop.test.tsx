@@ -70,20 +70,16 @@ const setViewportWidth = (width: number) => {
 
 /** Mocks hover media queries used by drop action interaction mode. */
 const setHoverSupport = (hasHover: boolean) => {
-  Object.defineProperty(globalThis, "matchMedia", {
-    configurable: true,
-    writable: true,
-    value: jest.fn((query: string) => ({
-      matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
-      media: query,
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
-  });
+  globalThis.window.matchMedia = jest.fn((query: string) => ({
+    matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })) as typeof window.matchMedia;
 };
 
 describe("DefaultWinnerDrop", () => {
@@ -93,7 +89,8 @@ describe("DefaultWinnerDrop", () => {
     wave: { id: "w", name: "wave" },
     parts: [{ part_id: 1 }],
     metadata: [],
-    author: { cic: "g" },
+    reactions: [],
+    author: { cic: "g", handle: "artist" },
   };
 
   beforeEach(() => {
