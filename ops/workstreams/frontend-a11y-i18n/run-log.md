@@ -2778,3 +2778,32 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - DPAPI-backed dev-auth run against a fresh local frontend port with
     production API/WebSocket endpoints and `PLAYWRIGHT_READONLY=1`: 6 passed
     across desktop and mobile Chromium.
+
+## 2026-06-22T02:09Z Authenticated Shell Rebase Over Public Content
+
+- Rebasing the authenticated-shell branch over merged PR #2815 produced only
+  expected train-aggregator conflicts in package scripts, test ownership docs,
+  run-log history, and the shared read-only mutation guard.
+- Resolution preserved the merged public-content pack's
+  `YOUTUBE_TELEMETRY_HOSTS` host-set implementation, including nocookie hosts,
+  while keeping the authenticated-shell pack and its explicit `--trace=off`
+  Playwright script hardening.
+- Local validation passed after the rebase:
+  - `seize run format:uncommitted`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`: 12 passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/auth-shells-secret-scan-rebased.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/auth-shells-workflow-security-rebased.json`
+  - `codex-diff-check`
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env, proving the committed pack remains credential-free by
+    default.
+  - `seize run test:e2e:public-content-readonly`: 26 passed.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+- Fresh secure dev-auth validation was not repeated in this resumed session:
+  the current process and worktree env files do not contain the dev-auth
+  variables, and no dedicated local Credential Manager target for the dev-auth
+  triplet is indexed. Do not mine Codex log databases for auth values; use a
+  proper local credential source if this rerun is required before merge.
