@@ -6,7 +6,7 @@ user-facing product docs.
 
 ## New PR Quality Bar
 
-New frontend work must avoid adding accessibility or localization debt.
+New frontend work must avoid adding accessibility, localization, or UI/UX debt.
 
 - Follow [WCAG 2.2 AA](frontend-accessibility-wcag-22-aa.md) for user-facing UI,
   including keyboard access, visible focus, semantic controls, labels, color
@@ -14,6 +14,10 @@ New frontend work must avoid adding accessibility or localization debt.
 - Follow [I18n and Localization](frontend-i18n-localization.md) for
   user-facing copy, accessible names, dates, numbers, sorting, and locale
   fallbacks.
+- Follow [Design and UI/UX](frontend-design-ui-ux.md) for repo-specific visual
+  consistency, Tailwind-first styling migration, responsive layout, interaction
+  states, media treatment, loading, empty, error, and visual evidence
+  expectations.
 - If a touched page is not fully migrated yet, make the touched UI meet these
   standards and record any remaining page-level debt.
 - Document exceptions with owner, reason, user impact, and a follow-up path.

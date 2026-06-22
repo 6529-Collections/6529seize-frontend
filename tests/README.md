@@ -166,7 +166,10 @@ Surface matrix:
   smoke.
 - `test:e2e:production:readonly` runs the full production-safe read-only pack
   family in one Playwright invocation so release validation fails fast and
-  returns one aggregate status.
+  returns one aggregate status. Deployment-bus manifests know this as the
+  optional production-only `playwright:production-readonly` pack; record that
+  pack only with redacted durable evidence and desktop Chromium surface
+  metadata.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -238,6 +241,12 @@ Large-pack ownership:
   files to staging or production. Treat it as coverage for composer/drop/upload
   API safety, not as a guarantee that every external read-only media or metadata
   endpoint is isolated.
+- `test:e2e:production:readonly` is owned by the release captain or validation
+  agent after a production deploy. It is a production-safe aggregate of the
+  individual public read-only packs and is the command behind the optional
+  deployment-bus pack `playwright:production-readonly`. Do not make it a
+  staging requirement unless a real staging aggregate command and evidence path
+  exist.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.
