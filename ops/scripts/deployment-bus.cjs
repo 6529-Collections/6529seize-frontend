@@ -10,44 +10,44 @@ const SHA256_RE = /^[0-9a-f]{64}$/i;
 const ETAG_RE = /^"?[0-9a-f]{32}(?:-\d+)?"?$/i;
 const CID_RE = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{20,})$/;
 const VALID_ENVIRONMENTS = new Set(["staging", "production"]);
+const DEPLOYED_ENVIRONMENTS = Object.freeze(["staging", "production"]);
+const REQUIRED_WEB_SURFACES = Object.freeze([
+  "web:desktop-chromium",
+  "web:mobile-chromium",
+]);
+const PLAYWRIGHT_ARTIFACT_PATTERNS = Object.freeze([
+  "test-results/playwright/**",
+  "playwright-report/**",
+]);
 const VALIDATION_PACKS = Object.freeze({
-  "playwright:core-smoke": Object.freeze({
+  "playwright:core-smoke": createPlaywrightPack({
     id: "playwright:core-smoke",
-    size: "large",
     description: "Read-only core route smoke pack for deployed web health.",
-    environments: Object.freeze(["staging", "production"]),
-    surfaces: Object.freeze(["web:desktop-chromium"]),
-    commands: Object.freeze({
-      staging: "seize run test:e2e:staging",
-      production:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke",
-    }),
-    artifacts: Object.freeze([
-      "test-results/playwright/**",
-      "playwright-report/**",
-    ]),
+    stagingCommand: "seize run test:e2e:staging:smoke",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix",
   }),
-  "playwright:wcag-i18n": Object.freeze({
+  "playwright:surface-matrix": createPlaywrightPack({
+    id: "playwright:surface-matrix",
+    description:
+      "Read-only route, navigation, search, network, and delegation surface matrix.",
+    stagingCommand: "seize run test:e2e:staging",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix",
+  }),
+  "playwright:wcag-i18n": createPlaywrightPack({
     id: "playwright:wcag-i18n",
-    size: "large",
     description:
       "Read-only WCAG/i18n route evidence pack for deployed public routes.",
-    environments: Object.freeze(["staging", "production"]),
-    surfaces: Object.freeze(["web:desktop-chromium"]),
-    commands: Object.freeze({
-      staging:
-        "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n",
-      production:
-        "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n",
-    }),
-    artifacts: Object.freeze([
-      "test-results/playwright/**",
-      "playwright-report/**",
-    ]),
+    stagingCommand:
+      "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
+    productionCommand:
+      "PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
   }),
 });
 const DEFAULT_REQUIRED_PACKS = Object.freeze([
   "playwright:core-smoke",
+  "playwright:surface-matrix",
   "playwright:wcag-i18n",
 ]);
 const APPROVED_DURABLE_ARTIFACT_PREFIXES = Object.freeze([
@@ -77,6 +77,28 @@ const VALID_CHECK_STATUSES = new Set([
   "timeout",
   "skipped",
   "not_run",
+]);
+const VALID_POST_DEPLOY_WATCH_STATUSES = new Set([
+  "not_started",
+  "in_progress",
+  "passed",
+  "failed",
+  "blocked",
+  "skipped",
+]);
+const VALID_POST_DEPLOY_WATCH_CHECKPOINT_STATUSES = new Set([
+  "not_run",
+  "in_progress",
+  "passed",
+  "failed",
+  "blocked",
+  "skipped",
+]);
+const VALID_CANARY_CAPABILITIES = new Set([
+  "auto-hold-only",
+  "feature-flag-only",
+  "traffic-split",
+  "not-applicable",
 ]);
 const VALID_STATUSES = new Set([
   "collecting",
@@ -108,13 +130,35 @@ const GITHUB_DEPLOYMENT_STATES = new Set([
   "success",
 ]);
 
+function createPlaywrightPack({
+  id,
+  description,
+  stagingCommand,
+  productionCommand,
+}) {
+  return Object.freeze({
+    id,
+    size: "large",
+    description,
+    environments: DEPLOYED_ENVIRONMENTS,
+    surfaces: REQUIRED_WEB_SURFACES,
+    commands: Object.freeze({
+      staging: stagingCommand,
+      production: productionCommand,
+    }),
+    artifacts: PLAYWRIGHT_ARTIFACT_PATTERNS,
+  });
+}
+
 function parseArgs(argv) {
   const args = { _: [] };
+  let index = 0;
 
-  for (let i = 0; i < argv.length; i += 1) {
-    const token = argv[i];
+  while (index < argv.length) {
+    const token = argv[index];
     if (!token.startsWith("--")) {
       args._.push(token);
+      index += 1;
       continue;
     }
 
@@ -122,17 +166,19 @@ function parseArgs(argv) {
     const eqIndex = rawKey.indexOf("=");
     if (eqIndex !== -1) {
       args[rawKey.slice(0, eqIndex)] = rawKey.slice(eqIndex + 1);
+      index += 1;
       continue;
     }
 
-    const next = argv[i + 1];
-    if (!next || next.startsWith("--")) {
+    const nextToken = argv[index + 1];
+    if (!nextToken || nextToken.startsWith("--")) {
       args[rawKey] = true;
+      index += 1;
       continue;
     }
 
-    args[rawKey] = next;
-    i += 1;
+    args[rawKey] = nextToken;
+    index += 2;
   }
 
   return args;
@@ -313,6 +359,10 @@ function buildManifest(options, env = process.env) {
   const packPlan = buildPackPlanList(requiredPacks, environment);
   const productionLikeEvidenceRequired =
     environment === "production" || productionEligible;
+  const postDeployWatchRequired =
+    environment === "production"
+      ? true
+      : parseBoolean(options.postDeployWatchRequired, false);
   const longRunning =
     complexity === "complex" || expectedDurationMinutes > 120
       ? {
@@ -404,13 +454,75 @@ function buildManifest(options, env = process.env) {
             "Upload redacted evidence to approved storage and record the URI, hash/CID/ETag, retention, and redaction status.",
         },
         {
+          id: "required-pack-command-mismatch",
+          hold_when:
+            "A standard required validation pack's latest passing check does not record the expected pack-plan command.",
+          recovery:
+            "Rerun the standard command or record a release-captain exception outside the standard pack.",
+        },
+        {
+          id: "required-pack-surface-evidence-missing",
+          hold_when:
+            "A standard required validation pack's latest passing check does not list all required pack-plan surfaces.",
+          recovery:
+            "Rerun the full pack or record all covered surfaces before promotion.",
+        },
+        {
           id: "candidate-sha-mismatch",
           hold_when:
             "Production candidate SHA differs from current origin/main or from the staging-validated release set.",
           recovery:
             "Rerun staging for the current candidate or remove superseded work from the train.",
         },
+        {
+          id: "post-deploy-watch-validation-checkpoint-missing",
+          hold_when:
+            "A production release manifest lacks a passed release-captain-validation checkpoint with evidence.",
+          recovery:
+            "Run production-safe validation, then record the release-captain-validation checkpoint with canonical evidence before release notes.",
+        },
       ],
+    },
+    post_deploy_watch: {
+      required: postDeployWatchRequired,
+      status: options.postDeployWatchStatus || "not_started",
+      min_duration_minutes: parseInteger(
+        options.postDeployWatchMinDurationMinutes,
+        environment === "production" ? 30 : 0
+      ),
+      observed_duration_minutes: parseInteger(
+        options.postDeployWatchObservedDurationMinutes,
+        0
+      ),
+      started_at: options.postDeployWatchStartedAt || null,
+      completed_at: options.postDeployWatchCompletedAt || null,
+      checkpoints: parseJsonOption(options.postDeployWatchCheckpoints, []),
+      notes:
+        options.postDeployWatchNotes ||
+        "Post-deploy watch records health evidence before release notes. It is separate from traffic-split canary rollout.",
+    },
+    canary_readiness: {
+      current_capability:
+        options.canaryCapability ||
+        (environment === "production" ? "auto-hold-only" : "not-applicable"),
+      traffic_splitting_supported: parseBoolean(
+        options.trafficSplittingSupported,
+        false
+      ),
+      feature_flag_strategy:
+        options.featureFlagStrategy ||
+        "App-specific flags only; no deployment-bus traffic splitting.",
+      candidate_control_metrics: parseCsv(
+        options.candidateControlMetrics ||
+          "version-match,core-route-smoke,api-health,static-asset-health,frontend-error-rate"
+      ),
+      prerequisites_for_traffic_split: parseCsv(
+        options.canaryPrerequisites ||
+          "traffic-router-support,automated-health-thresholds,rollback-automation,artifact-storage-ready"
+      ),
+      notes:
+        options.canaryNotes ||
+        "Current deployment bus supports auto-hold plus explicit watch. Traffic-split canary rollout is a future infrastructure capability.",
     },
     deployment: {
       github_deployment_id: options.githubDeploymentId || null,
@@ -636,6 +748,8 @@ function validateManifest(manifest) {
     pushError(errors, "validation.core_smoke_owner", "required");
   }
   validateValidationPlan(manifest, errors, warnings);
+  validatePostDeployWatch(manifest, errors);
+  validateCanaryReadiness(manifest, errors);
   if (!Array.isArray(manifest.progress) || manifest.progress.length === 0) {
     pushError(errors, "progress", "must include at least one event");
   }
@@ -650,6 +764,175 @@ function validateManifest(manifest) {
   }
 
   return { ok: errors.length === 0, errors, warnings };
+}
+
+function validatePostDeployWatch(manifest, errors) {
+  const postDeployWatch = manifest.post_deploy_watch;
+  if (!postDeployWatch) {
+    if (manifest.environment === "production") {
+      pushError(
+        errors,
+        "post_deploy_watch",
+        "required for production manifests"
+      );
+    }
+    return;
+  }
+
+  if (typeof postDeployWatch.required !== "boolean") {
+    pushError(errors, "post_deploy_watch.required", "must be boolean");
+  }
+  if (
+    manifest.environment === "production" &&
+    postDeployWatch.required !== true
+  ) {
+    pushError(
+      errors,
+      "post_deploy_watch.required",
+      "must be true for production manifests"
+    );
+  }
+  if (!VALID_POST_DEPLOY_WATCH_STATUSES.has(postDeployWatch.status)) {
+    pushError(
+      errors,
+      "post_deploy_watch.status",
+      `must be one of ${[...VALID_POST_DEPLOY_WATCH_STATUSES].join(", ")}`
+    );
+  }
+  if (
+    !Number.isInteger(postDeployWatch.min_duration_minutes) ||
+    postDeployWatch.min_duration_minutes < 0
+  ) {
+    pushError(
+      errors,
+      "post_deploy_watch.min_duration_minutes",
+      "must be a non-negative integer"
+    );
+  }
+  if (
+    !Number.isInteger(postDeployWatch.observed_duration_minutes) ||
+    postDeployWatch.observed_duration_minutes < 0
+  ) {
+    pushError(
+      errors,
+      "post_deploy_watch.observed_duration_minutes",
+      "must be a non-negative integer"
+    );
+  }
+  validateOptionalIso(
+    errors,
+    "post_deploy_watch.started_at",
+    postDeployWatch.started_at
+  );
+  validateOptionalIso(
+    errors,
+    "post_deploy_watch.completed_at",
+    postDeployWatch.completed_at
+  );
+  validateWatchCheckpoints(postDeployWatch.checkpoints, errors);
+}
+
+function validateOptionalIso(errors, pathName, value) {
+  if (value === null || value === undefined || value === "") {
+    return;
+  }
+  validateIso(errors, pathName, value);
+}
+
+function validateWatchCheckpoints(checkpoints, errors) {
+  if (!Array.isArray(checkpoints)) {
+    pushError(errors, "post_deploy_watch.checkpoints", "must be an array");
+    return;
+  }
+
+  checkpoints.forEach((checkpoint, index) => {
+    const pathName = `post_deploy_watch.checkpoints[${index}]`;
+    if (!checkpoint?.id) {
+      pushError(errors, `${pathName}.id`, "required");
+    }
+    if (!VALID_POST_DEPLOY_WATCH_CHECKPOINT_STATUSES.has(checkpoint?.status)) {
+      pushError(
+        errors,
+        `${pathName}.status`,
+        `must be one of ${[...VALID_POST_DEPLOY_WATCH_CHECKPOINT_STATUSES].join(", ")}`
+      );
+    }
+    validateOptionalIso(
+      errors,
+      `${pathName}.recorded_at`,
+      checkpoint?.recorded_at
+    );
+    if (
+      checkpoint?.evidence !== undefined &&
+      !Array.isArray(checkpoint.evidence)
+    ) {
+      pushError(errors, `${pathName}.evidence`, "must be an array");
+    } else if (Array.isArray(checkpoint?.evidence)) {
+      checkpoint.evidence.forEach((uri, evidenceIndex) => {
+        if (typeof uri !== "string") {
+          pushError(
+            errors,
+            `${pathName}.evidence[${evidenceIndex}]`,
+            "must be a string"
+          );
+          return;
+        }
+        if (uri.includes("?") || uri.includes("#")) {
+          pushError(
+            errors,
+            `${pathName}.evidence[${evidenceIndex}]`,
+            "evidence URI must not include query strings or fragments"
+          );
+        }
+      });
+    }
+  });
+}
+
+function validateCanaryReadiness(manifest, errors) {
+  const canaryReadiness = manifest.canary_readiness;
+  if (!canaryReadiness) {
+    return;
+  }
+
+  if (!VALID_CANARY_CAPABILITIES.has(canaryReadiness.current_capability)) {
+    pushError(
+      errors,
+      "canary_readiness.current_capability",
+      `must be one of ${[...VALID_CANARY_CAPABILITIES].join(", ")}`
+    );
+  }
+  if (typeof canaryReadiness.traffic_splitting_supported !== "boolean") {
+    pushError(
+      errors,
+      "canary_readiness.traffic_splitting_supported",
+      "must be boolean"
+    );
+  }
+  if (
+    canaryReadiness.current_capability === "traffic-split" &&
+    canaryReadiness.traffic_splitting_supported !== true
+  ) {
+    pushError(
+      errors,
+      "canary_readiness.traffic_splitting_supported",
+      "must be true when current_capability is traffic-split"
+    );
+  }
+  if (!Array.isArray(canaryReadiness.candidate_control_metrics)) {
+    pushError(
+      errors,
+      "canary_readiness.candidate_control_metrics",
+      "must be an array"
+    );
+  }
+  if (!Array.isArray(canaryReadiness.prerequisites_for_traffic_split)) {
+    pushError(
+      errors,
+      "canary_readiness.prerequisites_for_traffic_split",
+      "must be an array"
+    );
+  }
 }
 
 function validateValidationPlan(manifest, errors, warnings) {
@@ -892,6 +1175,9 @@ function parseArtifactPointers(value, options = {}) {
     ...(options.retentionUntil
       ? { retention_until: options.retentionUntil }
       : {}),
+    ...(options.retentionPolicy
+      ? { retention_policy: options.retentionPolicy }
+      : {}),
   }));
 }
 
@@ -1053,6 +1339,29 @@ function latestCheckForPack(checks, packId) {
   return latest;
 }
 
+function expectedCommandForStandardPack(manifest, packId) {
+  const pack = VALIDATION_PACKS[packId];
+  if (!pack) {
+    return null;
+  }
+  return pack.commands[manifest.environment] || null;
+}
+
+function missingStandardPackSurfaces(packId, check) {
+  const expectedSurfaces = VALIDATION_PACKS[packId]?.surfaces;
+  if (!expectedSurfaces || expectedSurfaces.length === 0) {
+    return [];
+  }
+
+  const recordedSurfaces = Array.isArray(check?.surfaces)
+    ? new Set(check.surfaces)
+    : new Set();
+
+  return [...expectedSurfaces].filter(
+    (surface) => !recordedSurfaces.has(surface)
+  );
+}
+
 function evaluateReleaseReadiness(manifest) {
   const holds = [];
   const warnings = [];
@@ -1079,6 +1388,24 @@ function evaluateReleaseReadiness(manifest) {
         message: `${packId} has no passed validation check recorded`,
       });
     } else if (
+      expectedCommandForStandardPack(manifest, packId) &&
+      latestCheck?.command !== expectedCommandForStandardPack(manifest, packId)
+    ) {
+      holds.push({
+        id: "required-pack-command-mismatch",
+        pack: packId,
+        message: `${packId} latest passing check did not record the expected command`,
+      });
+    } else if (missingStandardPackSurfaces(packId, latestCheck).length > 0) {
+      holds.push({
+        id: "required-pack-surface-evidence-missing",
+        pack: packId,
+        message: `${packId} latest passing check is missing required surfaces: ${missingStandardPackSurfaces(
+          packId,
+          latestCheck
+        ).join(", ")}`,
+      });
+    } else if (
       validation.durable_artifacts?.required === true &&
       approvedDurableArtifactsForCheck(manifest, latestCheck).length === 0
     ) {
@@ -1090,11 +1417,85 @@ function evaluateReleaseReadiness(manifest) {
     }
   }
 
+  evaluatePostDeployWatchReadiness(manifest, holds);
+
   if (manifest.production_eligible !== true) {
     warnings.push("Manifest is not production eligible.");
   }
 
   return { ok: holds.length === 0, holds, warnings };
+}
+
+function evaluatePostDeployWatchReadiness(manifest, holds) {
+  if (manifest.environment !== "production") {
+    return;
+  }
+
+  const postDeployWatch = manifest.post_deploy_watch;
+  if (!postDeployWatch || postDeployWatch.required !== true) {
+    holds.push({
+      id: "post-deploy-watch-required",
+      message: "production release requires a post-deploy watch contract",
+    });
+    return;
+  }
+
+  if (["failed", "blocked"].includes(postDeployWatch.status)) {
+    holds.push({
+      id: "post-deploy-watch-failed",
+      message: `post-deploy watch recorded ${postDeployWatch.status}`,
+    });
+    return;
+  }
+
+  if (postDeployWatch.status !== "passed") {
+    holds.push({
+      id: "post-deploy-watch-missing",
+      message: "post-deploy watch has not recorded a passed status",
+    });
+    return;
+  }
+
+  if (
+    postDeployWatch.observed_duration_minutes <
+    postDeployWatch.min_duration_minutes
+  ) {
+    holds.push({
+      id: "post-deploy-watch-too-short",
+      message: `post-deploy watch observed ${postDeployWatch.observed_duration_minutes}m, below required ${postDeployWatch.min_duration_minutes}m`,
+    });
+  }
+
+  const failedCheckpoint = postDeployWatch.checkpoints?.find((checkpoint) =>
+    ["failed", "blocked"].includes(checkpoint.status)
+  );
+  if (failedCheckpoint) {
+    holds.push({
+      id: "post-deploy-watch-checkpoint-failed",
+      message: `${failedCheckpoint.id} recorded ${failedCheckpoint.status}`,
+    });
+  }
+
+  const releaseCaptainCheckpoint = postDeployWatch.checkpoints?.find(
+    (checkpoint) => checkpoint.id === "release-captain-validation"
+  );
+  if (
+    releaseCaptainCheckpoint?.status !== "passed" ||
+    !hasCheckpointEvidence(releaseCaptainCheckpoint)
+  ) {
+    holds.push({
+      id: "post-deploy-watch-validation-checkpoint-missing",
+      message:
+        "post-deploy watch requires a passed release-captain-validation checkpoint with evidence",
+    });
+  }
+}
+
+function hasCheckpointEvidence(checkpoint) {
+  return (
+    Array.isArray(checkpoint?.evidence) &&
+    checkpoint.evidence.some((uri) => typeof uri === "string" && uri.trim())
+  );
 }
 
 function recordValidationCheck(manifest, options) {
@@ -1120,12 +1521,18 @@ function recordValidationCheck(manifest, options) {
       cid: options.artifactCid,
       retentionDays: options.retentionDays,
       retentionUntil: options.retentionUntil,
+      retentionPolicy: options.retentionPolicy,
     }
   );
   const check = {
     pack,
     status,
     command: options.command || packPlan.command,
+    surfaces: parseCsv(
+      options.surfaces ||
+        options.surface ||
+        (Array.isArray(packPlan.surfaces) ? packPlan.surfaces.join(",") : "")
+    ),
     owner:
       options.owner ||
       validation.core_smoke_owner ||
@@ -1226,6 +1633,10 @@ function formatRecordedChecks(manifest) {
       const command = check.command
         ? `\n  - command: \`${check.command}\``
         : "";
+      const surfaces =
+        Array.isArray(check.surfaces) && check.surfaces.length > 0
+          ? `\n  - surfaces: ${check.surfaces.join(", ")}`
+          : "";
       const artifacts = checkArtifacts(check)
         .map((artifact) => {
           const uri = formatArtifactUriForReport(artifactUri(artifact));
@@ -1255,7 +1666,7 @@ function formatRecordedChecks(manifest) {
       const artifactList = artifacts.map((uri) => `    - ${uri}`).join("\n");
       const artifactLines =
         artifacts.length > 0 ? `\n  - artifacts:\n${artifactList}` : "";
-      return `- ${pack}: ${status}${command}${artifactLines}`;
+      return `- ${pack}: ${status}${command}${surfaces}${artifactLines}`;
     })
     .join("\n");
 }
@@ -1312,6 +1723,14 @@ function createReleaseReport(manifest, options = {}) {
     "",
     formatMarkdownList([...new Set(warnings)]),
     "",
+    "## Post-Deploy Watch",
+    "",
+    formatPostDeployWatch(manifest),
+    "",
+    "## Canary Readiness",
+    "",
+    formatCanaryReadiness(manifest),
+    "",
     "## Included PRs",
     "",
     formatMarkdownList(
@@ -1326,6 +1745,55 @@ function createReleaseReport(manifest, options = {}) {
     `- accepted prefixes: ${(manifest.validation?.durable_artifacts?.accepted_prefixes || APPROVED_DURABLE_ARTIFACT_PREFIXES).join(", ")}`,
     "- Git LFS allowed: false",
     "",
+  ].join("\n");
+}
+
+function formatPostDeployWatch(manifest) {
+  const watch = manifest.post_deploy_watch;
+  if (!watch) {
+    return "- no post-deploy watch contract recorded";
+  }
+
+  const checkpointLines =
+    Array.isArray(watch.checkpoints) && watch.checkpoints.length > 0
+      ? watch.checkpoints
+          .map((checkpoint) => {
+            const evidence =
+              Array.isArray(checkpoint.evidence) &&
+              checkpoint.evidence.length > 0
+                ? `; evidence: ${checkpoint.evidence
+                    .map(formatArtifactUriForReport)
+                    .join(", ")}`
+                : "";
+            const notes = checkpoint.notes
+              ? `; notes: ${checkpoint.notes}`
+              : "";
+            return `  - ${checkpoint.id}: ${checkpoint.status}${evidence}${notes}`;
+          })
+          .join("\n")
+      : "  - no checkpoints recorded";
+
+  return [
+    `- required: ${watch.required === true}`,
+    `- status: ${watch.status}`,
+    `- duration: ${watch.observed_duration_minutes || 0}/${watch.min_duration_minutes || 0} minutes`,
+    "- checkpoints:",
+    checkpointLines,
+  ].join("\n");
+}
+
+function formatCanaryReadiness(manifest) {
+  const canary = manifest.canary_readiness;
+  if (!canary) {
+    return "- no canary readiness contract recorded";
+  }
+
+  return [
+    `- current capability: ${canary.current_capability}`,
+    `- traffic splitting supported: ${canary.traffic_splitting_supported === true}`,
+    `- feature flag strategy: ${canary.feature_flag_strategy || "not recorded"}`,
+    `- candidate/control metrics: ${(canary.candidate_control_metrics || []).join(", ") || "none"}`,
+    `- traffic-split prerequisites: ${(canary.prerequisites_for_traffic_split || []).join(", ") || "none"}`,
   ].join("\n");
 }
 
@@ -1348,6 +1816,100 @@ function heartbeatManifest(manifest, options) {
       },
     ],
   };
+  return next;
+}
+
+function recordPostDeployWatch(manifest, options) {
+  const now = options.now || new Date().toISOString();
+  const existingWatch = manifest.post_deploy_watch || {};
+  const status = options.status || existingWatch.status || "in_progress";
+  if (!VALID_POST_DEPLOY_WATCH_STATUSES.has(status)) {
+    throw new Error(`Invalid post-deploy watch status: ${status}`);
+  }
+
+  const startedAt =
+    options.startedAt ||
+    existingWatch.started_at ||
+    (status === "in_progress" ? now : null);
+  const completedAt =
+    options.completedAt ||
+    existingWatch.completed_at ||
+    (["passed", "failed", "blocked", "skipped"].includes(status) ? now : null);
+  const watch = {
+    required:
+      existingWatch.required !== undefined
+        ? existingWatch.required
+        : manifest.environment === "production",
+    status,
+    min_duration_minutes:
+      existingWatch.min_duration_minutes ??
+      (manifest.environment === "production" ? 30 : 0),
+    observed_duration_minutes: parseInteger(
+      options.observedDurationMinutes,
+      existingWatch.observed_duration_minutes || 0
+    ),
+    started_at: startedAt,
+    completed_at: completedAt,
+    checkpoints: updateWatchCheckpoints(existingWatch.checkpoints || [], {
+      id: options.checkpoint || options.checkpointId,
+      status: options.checkpointStatus || defaultWatchCheckpointStatus(status),
+      evidence: parseCsv(options.evidence || options.evidenceUri),
+      notes: options.notes,
+      recorded_at: now,
+    }),
+    notes: options.notes || existingWatch.notes || null,
+  };
+
+  return {
+    ...manifest,
+    updated_at: now,
+    lane: {
+      ...manifest.lane,
+      heartbeat_at: now,
+    },
+    post_deploy_watch: watch,
+    progress: [
+      ...(Array.isArray(manifest.progress) ? manifest.progress : []),
+      {
+        at: now,
+        phase: "post-deploy-watch",
+        status: manifest.status,
+        message: `Post-deploy watch recorded as ${status}`,
+      },
+    ],
+  };
+}
+
+function defaultWatchCheckpointStatus(status) {
+  return status === "not_started" ? "not_run" : status;
+}
+
+function updateWatchCheckpoints(checkpoints, update) {
+  if (!update.id) {
+    return Array.isArray(checkpoints) ? checkpoints : [];
+  }
+
+  const nextCheckpoint = {
+    id: update.id,
+    status: update.status,
+    recorded_at: update.recorded_at,
+    evidence: update.evidence,
+    ...(update.notes ? { notes: update.notes } : {}),
+  };
+  const next = Array.isArray(checkpoints) ? [...checkpoints] : [];
+  const index = next.findIndex((checkpoint) => checkpoint.id === update.id);
+  if (index === -1) {
+    next.push(nextCheckpoint);
+  } else {
+    next[index] = {
+      ...next[index],
+      ...nextCheckpoint,
+      evidence:
+        nextCheckpoint.evidence.length > 0
+          ? nextCheckpoint.evidence
+          : next[index].evidence || [],
+    };
+  }
   return next;
 }
 
@@ -1603,9 +2165,10 @@ function usage() {
   node ops/scripts/deployment-bus.cjs create-manifest --environment staging --staging-deploy-sha <sha> --output <file>
   node ops/scripts/deployment-bus.cjs validate-manifest --file <file>
   node ops/scripts/deployment-bus.cjs summarize-manifest --file <file>
-  node ops/scripts/deployment-bus.cjs record-validation-check --file <file> --pack playwright:core-smoke --status passed --artifact-uri s3://6529-artifacts/... --redaction-status verified-redacted --artifact-sha256 <hex> --retention-days 90
+  node ops/scripts/deployment-bus.cjs record-validation-check --file <file> --pack playwright:core-smoke --status passed --surfaces web:desktop-chromium,web:mobile-chromium --artifact-uri s3://6529-artifacts/... --redaction-status verified-redacted --artifact-sha256 <hex> --retention-days 90
   node ops/scripts/deployment-bus.cjs release-report --file <file> --output <markdown-file>
   node ops/scripts/deployment-bus.cjs heartbeat-manifest --file <file> --message <text> [--status deploying] [--phase build]
+  node ops/scripts/deployment-bus.cjs record-post-deploy-watch --file <file> --status passed --observed-duration-minutes 30 --checkpoint version-match --evidence https://github.com/.../actions/runs/...
   node ops/scripts/deployment-bus.cjs production-preflight --file <file> --current-main-sha <sha> [--remote origin] [--branch main]
   node ops/scripts/deployment-bus.cjs github-create-deployment --file <file> --ref <sha> --environment <name>
   node ops/scripts/deployment-bus.cjs github-create-status --deployment-id <id> --state in_progress
@@ -1646,6 +2209,22 @@ async function main(argv = process.argv.slice(2), env = process.env) {
             exploratoryChecks: args["exploratory-checks"],
             validationChecks: args["validation-checks"],
             durableArtifactsRequired: args["durable-artifacts-required"],
+            postDeployWatchRequired: args["post-deploy-watch-required"],
+            postDeployWatchStatus: args["post-deploy-watch-status"],
+            postDeployWatchMinDurationMinutes:
+              args["post-deploy-watch-min-duration-minutes"],
+            postDeployWatchObservedDurationMinutes:
+              args["post-deploy-watch-observed-duration-minutes"],
+            postDeployWatchStartedAt: args["post-deploy-watch-started-at"],
+            postDeployWatchCompletedAt: args["post-deploy-watch-completed-at"],
+            postDeployWatchCheckpoints: args["post-deploy-watch-checkpoints"],
+            postDeployWatchNotes: args["post-deploy-watch-notes"],
+            canaryCapability: args["canary-capability"],
+            trafficSplittingSupported: args["traffic-splitting-supported"],
+            featureFlagStrategy: args["feature-flag-strategy"],
+            candidateControlMetrics: args["candidate-control-metrics"],
+            canaryPrerequisites: args["canary-prerequisites"],
+            canaryNotes: args["canary-notes"],
             rollbackPlan: args["rollback-plan"],
             fixForwardPlan: args["fix-forward-plan"],
             approvals: args.approvals,
@@ -1690,6 +2269,7 @@ async function main(argv = process.argv.slice(2), env = process.env) {
           pack: args.pack,
           status: args.status,
           command: args.command,
+          surfaces: args.surfaces || args.surface,
           owner: args.owner,
           artifactUri: args["artifact-uri"] || args["artifact-uris"],
           redactionStatus: args["redaction-status"],
@@ -1698,6 +2278,7 @@ async function main(argv = process.argv.slice(2), env = process.env) {
           artifactCid: args["artifact-cid"],
           retentionDays: args["retention-days"],
           retentionUntil: args["retention-until"],
+          retentionPolicy: args["retention-policy"],
           runUrl: args["run-url"],
           source: args.source,
           notes: args.notes,
@@ -1741,6 +2322,29 @@ async function main(argv = process.argv.slice(2), env = process.env) {
           status: args.status,
           phase: args.phase,
           message: args.message,
+          now: args.now,
+        });
+        const result = validateManifest(manifest);
+        printValidation(result);
+        if (!result.ok) {
+          process.exitCode = 1;
+          return;
+        }
+        writeJson(args.output || file, manifest);
+        writeStdout(`Updated ${args.output || file}`);
+        break;
+      }
+      case "record-post-deploy-watch": {
+        const file = args.file;
+        const manifest = recordPostDeployWatch(readJson(file), {
+          status: args.status,
+          observedDurationMinutes: args["observed-duration-minutes"],
+          startedAt: args["started-at"],
+          completedAt: args["completed-at"],
+          checkpoint: args.checkpoint,
+          checkpointStatus: args["checkpoint-status"],
+          evidence: args.evidence || args["evidence-uri"],
+          notes: args.notes,
           now: args.now,
         });
         const result = validateManifest(manifest);
@@ -1826,6 +2430,7 @@ module.exports = {
   heartbeatManifest,
   parseArgs,
   productionPreflight,
+  recordPostDeployWatch,
   recordValidationCheck,
   summarizeManifest,
   validateManifest,

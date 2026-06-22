@@ -76,6 +76,16 @@
   :root {
     --android-keyboard-height: 0px;
   }
+
+  #sticky-social-icons-container {
+    overflow: clip !important;
+  }
+
+  @supports not (overflow: clip) {
+    #sticky-social-icons-container {
+      overflow: hidden !important;
+    }
+  }
 }
 
 // add the code bellow

@@ -2052,6 +2052,31 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
     generation. Nonfatal build warnings observed: known dynamic OG metadata
     image route warning and Node `punycode` deprecation warning.
 
+## 2026-06-21T10:25Z PR 4 Surface Matrix Start
+
+- Restarted the next autonomous testing-roadmap train from a clean
+  `codex/testing-e2e-surface-matrix` worktree based on merged PR #2804 /
+  current `origin/main`.
+- Confirmed another local checkout is on an unrelated dirty branch and left it
+  untouched.
+- Added named Playwright projects for:
+  - `web-desktop-chromium`
+  - `web-mobile-chromium`
+  - `web-desktop-firefox`
+  - `web-desktop-webkit`
+  - `capacitor-ios-sim`
+  - `capacitor-android-sim`
+  - `electron-shell-sim`
+- Added shared Playwright surface simulation setup for Capacitor custom
+  platforms, Electron user-agent simulation, and surface labels.
+- Added `tests/surfaces/core-surfaces.spec.ts` for high-value public flows:
+  header search to Wave Score, sidebar Network to TDH, mobile About to The
+  Memes, Wave Score input validation, TDH cross-links, delegation center
+  disconnected render, and delegation FAQ child article navigation.
+- Updated package scripts and deployment-bus pack metadata so standard deployed
+  evidence covers desktop and mobile Chromium while Firefox/WebKit/native/Electron
+  simulation remain optional train/nightly lanes.
+
 ## 2026-06-21T09:10Z PR 5 Sonar Follow-Up
 
 - Addressed SonarCloud maintainability feedback on PR #2804 before continuing
@@ -2067,3 +2092,947 @@ test:e2e:smoke`: first run after production build hit stale local dev cache
   - `seize exec eslint ops/scripts/deployment-bus.cjs __tests__/scripts/deployment-bus.test.ts --no-warn-ignored --max-warnings=0`
   - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
     23 passed.
+
+## 2026-06-21T11:18Z Critical Shell E2E Guards
+
+- Started independent branch `codex/testing-critical-e2e-guards` from current
+  `origin/main` after leaving PR #2805 stable for required review approval.
+- Added `test:e2e:critical-shell`, a read-only Playwright pack covering:
+  - wallet/auth/operator gates: `/emma`, `/drop-forge`, `/tools/app-wallets`,
+    `/tools/6529bot/admin`, `/notifications`, and `/messages`;
+  - high-value public/tool shells: `/waves`, `/open-data`, and
+    `/tools/block-finder`.
+- Wired `playwright_critical_shell` into `ops/scripts/testing-strategy.cjs` and
+  App PR CI for guarded, build-sensitive, or deleted runtime source changes.
+- Updated the reviewbot contract test for the now-live `glm-swarm` lane:
+  GLM must remain additive and the five existing initial lanes remain the
+  mandatory floor.
+- Local validation:
+  - `node --check ops/scripts/testing-strategy.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts`:
+    35 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize-local-dev bootstrap`: assigned frontend port `3162`.
+  - `seize run testing-strategy -- ci-plan --changed-from origin/main --output test-results/app-pr-ci/critical-shell-ci-plan.json`:
+    Level 4 with `playwright_critical_shell` required.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/critical-shell-secret-scan.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/critical-shell-workflow-security.json`:
+    clean.
+  - `$env:PORT_SEARCH_LIMIT='10'; $env:BASE_ENDPOINT='http://localhost:3162'; $env:PLAYWRIGHT_BASE_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run test:e2e:critical-shell`:
+    7 passed.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed full prebuild,
+    lint, production Next build, static generation, and sitemap generation.
+    Observed known non-fatal dynamic OG metadata and `punycode` warnings.
+  - `$env:PORT_SEARCH_LIMIT='10'; $env:BASE_ENDPOINT='http://localhost:3162'; $env:PLAYWRIGHT_BASE_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run test:e2e:smoke`:
+    6 passed.
+  - Restored three generated API model files rewritten by the build because
+    this PR does not intentionally change generated API models.
+  - `codex-diff-check`
+
+## 2026-06-21T12:35Z Critical Shell Review Follow-Up
+
+- Independent verifier found that the `/waves` case disabled all console-error
+  assertions, which would hide real route-shell console failures.
+- Replaced the route-wide bypass with scoped console allowances:
+  - the critical-shell pack tolerates the known local emoji-list fetch console
+    error from the shared local backend returning 404 for the proxied emoji
+    list;
+  - only the `/waves` assertion tolerates the known generic Chromium 500
+    resource message from local feed API health, while still failing on other
+    console errors.
+- Added Jest coverage proving explicit console allowances do not mask a second
+  actionable console error.
+- Local validation after the follow-up:
+  - `seize run test:no-coverage -- __tests__/playwright/pageAssertions.test.ts`:
+    3 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - cleared ignored `.next` and Playwright `test-results` after one stale local
+    dev compile served `/tools/6529bot/admin` as the 404 shell;
+  - `$env:PORT='3162'; $env:PORT_SEARCH_LIMIT='10'; $env:BASE_ENDPOINT='http://localhost:3162'; $env:PLAYWRIGHT_BASE_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_URL='http://localhost:3162'; $env:PLAYWRIGHT_WEB_SERVER_COMMAND='seize run dev'; seize run test:e2e:critical-shell`:
+    7 passed.
+
+## 2026-06-21T09:42Z PR 4 Surface Matrix Validation Complete
+
+- Completed the local PR4 surface-matrix branch
+  `codex/testing-e2e-surface-matrix` from current `origin/main`.
+- Final implementation scope:
+  - named Playwright projects for desktop Chromium, mobile Chromium, Firefox,
+    WebKit, Capacitor iOS/Android simulation, and Electron shell simulation;
+  - shared surface simulation setup for Capacitor custom platform labels, iOS
+    EULA consent seeding, Electron/mobile surface labels, and project helpers;
+  - high-value read-only E2E coverage for desktop search, desktop Network
+    navigation, mobile menu navigation, mobile search, Wave Score validation,
+    TDH reference links, delegation disconnected-safe rendering, Delegation FAQ
+    article navigation, and required surface setup checks;
+  - deployment-bus required pack metadata for `playwright:core-smoke`,
+    `playwright:surface-matrix`, and `playwright:wcag-i18n`, including
+    command/surface readiness holds and release-report surface output;
+  - package scripts and docs for smoke, surface-matrix, browser-diversity,
+    WCAG/i18n surface, staging, and native/Electron simulation lanes.
+- Local validation passed:
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run typecheck:playwright`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    29 passed.
+  - `seize run test:e2e:surface-matrix`: 25 passed, 7 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `seize run test:e2e:browser-diversity`: 18 passed, 8 skipped.
+  - `seize run test:e2e:native-sim`: 17 passed, 13 skipped.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+origin/main --output test-results/app-pr-ci/pr4-secret-scan.json`: clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from
+origin/main --output
+test-results/app-pr-ci/pr4-workflow-security.json`: clean.
+  - `codex-diff-check`
+- Browser diversity validation required installing local Playwright Firefox and
+  WebKit browsers before the final pass.
+- Residual caveat for PR description: Capacitor and Electron lanes are explicit
+  browser simulations for shell-sensitive layout and route checks. They are not
+  a substitute for real packaged native/Electron app smoke once that runner
+  exists.
+
+## 2026-06-21T10:09Z PR 4 Verifier Follow-Up
+
+- Reused independent verifier lane `Feynman` for a read-only final diff review.
+- Fixed all material verifier findings before PR publication:
+  - staging and production deployment workflows now include
+    `playwright:surface-matrix` in the explicit `--required-packs` manifest
+    creation list;
+  - Playwright's default local web-server command now uses the repo-owned
+    `require-6529-command` plus `dev-with-fallback` path instead of the local
+    Codex `seize` helper;
+  - `deployment-bus-process.md` now matches the desktop/mobile Chromium
+    required-pack state and keeps Firefox/WebKit/Capacitor/Electron simulation
+    as optional train/nightly or targeted validation.
+- Updated the profile native CMS checklist command from the old Playwright
+  `chromium` project name to `web-desktop-chromium`.
+- Post-fix validation:
+  - workflow YAML parse for app PR CI, staging deploy, and production deploy
+    workflows passed.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from
+origin/main --output
+test-results/app-pr-ci/pr4-workflow-security.json`: clean.
+  - `seize run test:e2e:surface-matrix`: 25 passed, 7 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed after deleting a
+    stale ignored `.next` cache that had a corrupt dev `routes.d.ts`; known
+    warnings were Node `punycode` deprecation and the existing dynamic OG image
+    metadata route warning.
+  - `codex-diff-check`
+- Build regeneration temporarily added EOF blank-line noise to three generated
+  model files; the noise was removed before PR staging and generated files are
+  clean again.
+
+## 2026-06-21T11:05Z PR 4 Sonar And Surface Follow-Up
+
+- Addressed PR #2805 Sonar duplication feedback by extracting repeated
+  deployment-bus fixture objects and repeated surface-matrix assertions into
+  small local helpers.
+- Removed the legacy `/waves?wave=...` redirect assertion from the required
+  `playwright:surface-matrix` pack after local dev no longer performed the
+  redirect reliably. The required pack now only claims the stable high-value
+  route, search, navigation, network, delegation, and surface-setup flows it
+  proves.
+- Accepted CodeRabbit's low-risk wording nit for the staging E2E script docs in
+  `tests/README.md`.
+- After Sonar reported remaining duplication at 3.5%, refactored
+  `ops/scripts/deployment-bus.cjs` again to use shared Playwright pack builders
+  and a non-duplicated CLI argument parser shape.
+- Follow-up validation passed:
+  - `seize run format:changed`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    29 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - `seize run test:e2e:surface-matrix`: 24 passed, 6 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `seize run test:e2e:browser-diversity`: 18 passed, 6 skipped.
+  - `seize run test:e2e:native-sim`: 16 passed, 11 skipped.
+- Native simulation still logs the expected iOS `Keyboard` plugin shim warning,
+  but the lane passes and remains documented as simulation evidence only.
+
+## 2026-06-21T13:12Z PR 4 Rebase On Critical-Shell Main
+
+- Rebased PR #2805 branch `codex/testing-e2e-surface-matrix` onto
+  `origin/main` after PR #2806 merged as
+  `745130a19785fdc844410a2798ba63a6db8256e8`.
+- Preserved both PR4 surface-matrix scripts and the merged critical-shell
+  script. `test:e2e:critical-shell` is explicitly scoped to
+  `--project=web-desktop-chromium` so the new Playwright project matrix does
+  not fan the critical-shell lane out unexpectedly.
+- Independent verifier `Galileo` found no local rebased-diff blocker; it
+  confirmed the GitHub PR branch was stale and caught the local generated EOF
+  drift left by a build attempt.
+- Independent roadmap auditor `Fermat` confirmed the next incomplete roadmap
+  work after PR4 is PR7 canary/watch/reporting, API-backed read-only E2E,
+  authenticated read-only E2E, profile/page-cluster E2E, real native/Electron
+  smoke, native runtime centralization, and upload/posting/admin guard packs.
+- Rebased local validation passed:
+  - `seize run format:changed`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/deployment-bus.test.ts`:
+    29 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run test:e2e:surface-matrix`: 24 passed, 6 skipped.
+  - `seize run test:e2e:wcag-i18n:surface-matrix`: 6 passed.
+  - `seize run test:e2e:browser-diversity`: 18 passed, 6 skipped.
+  - `seize run test:e2e:native-sim`: 16 passed, 11 skipped.
+  - `seize run testing-strategy -- validate-workflow-security --output
+test-results/app-pr-ci/pr4-workflow-security-rebased.json`: clean.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
+    clean.
+  - `$env:CIRCLE_NODE_TOTAL='1'; seize run build`: passed after clearing stale
+    ignored `.next` dev type cache. The first build attempt failed on a corrupt
+    `.next/dev/types/routes.d.ts`, and the clean-cache rerun passed. Known
+    non-fatal output remains the Node `punycode` deprecation and existing
+    dynamic OG image metadata route warning.
+  - `codex-diff-check`
+- Build regeneration again added EOF blank-line noise to three generated model
+  files; those generated files were restored and the worktree is clean before
+  the PR branch push.
+
+## 2026-06-21T15:05Z Surface Matrix Train Deployed And PR7a Started
+
+- PR #2806 critical route-shell guards merged and deployed:
+  - merge SHA: `745130a19785fdc844410a2798ba63a6db8256e8`
+  - PR: https://github.com/6529-Collections/6529seize-frontend/pull/2806
+- PR #2805 surface matrix and deployment evidence hardening merged and
+  deployed:
+  - merge SHA / production version:
+    `cd8635e004191fc0509f253bc8d9a66c8ff51805`
+  - PR: https://github.com/6529-Collections/6529seize-frontend/pull/2805
+- Staging deployment:
+  - run: https://github.com/6529-Collections/6529seize-frontend/actions/runs/27906005657
+  - staging SHA: `ab1077c2d8949d421cf755872efc0868fe04057b`
+  - production candidate SHA:
+    `cd8635e004191fc0509f253bc8d9a66c8ff51805`
+  - validation: staging smoke 12 passed, staging surface matrix 24 passed / 6
+    skipped, staging WCAG/i18n surface matrix 6 passed.
+- Production deployment:
+  - run: https://github.com/6529-Collections/6529seize-frontend/actions/runs/27906579357
+  - production deployed SHA/version:
+    `cd8635e004191fc0509f253bc8d9a66c8ff51805`
+  - validation: `/api/version` matched deployed SHA, smoke surface matrix 12
+    passed, full surface matrix 24 passed / 6 skipped, WCAG/i18n surface
+    matrix 6 passed.
+- Public closeout notes:
+  - release note `4.41.7` drop:
+    `72478e18-4a9a-4841-a0c1-e47c1626ec59`
+  - Follow The Repo deployment note drop:
+    `b551b85c-93c8-41b6-b8c7-a2e515310736`
+- Residual operational gap:
+  - durable artifact pointers are schema/validator enforced, but the expected
+    approved storage path `s3://6529-artifacts/` was not present. Treat artifact
+    storage wiring as an infra follow-up; do not weaken durable-artifact holds
+    or treat GitHub Actions artifacts as durable retained evidence.
+- Started branch `codex/testing-roadmap-e2e-next` from deployed `origin/main`
+  for the next roadmap run.
+- Subagent audit consensus:
+  - PR7a should add executable post-deploy watch/canary-readiness reporting
+    without requiring new infra secrets;
+  - the first richer app E2E PR after PR7a should cover Waves and public profile
+    identity workflows before media/delegation, NextGen/groups/tools, and broad
+    network/open-data/static route matrices.
+- PR7a implementation in progress:
+  - `post_deploy_watch` manifest and release-report section;
+  - `canary_readiness` current-capability contract;
+  - staging and production workflow watch checkpoints;
+  - production `released` readiness hold until post-deploy watch passes;
+  - `record-post-deploy-watch` CLI command;
+  - `record-validation-check --retention-policy` support.
+
+## 2026-06-21T16:45Z PR7a Deployed And Waves/Profile E2E Pack Ready
+
+- PR #2808 deployment-bus post-deploy watch evidence merged and deployed:
+  - merge SHA / production version:
+    `1bdddd30c16c53e08601bf2bbfb67a267f517738`
+  - PR: https://github.com/6529-Collections/6529seize-frontend/pull/2808
+  - staging run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27909464160
+  - production run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27909937482
+- Production validation passed after deploy:
+  - production smoke: 12 passed.
+  - production surface matrix: 24 passed / 6 expected project-scope skips.
+  - production WCAG/i18n surface matrix: 6 passed.
+  - production Waves/Profile social read-only pack: 6 passed.
+- The PR #2808 production manifest correctly remains on hold until the
+  release-captain post-deploy watch checkpoint and approved durable artifact
+  pointers are available. The approved `s3://6529-artifacts/` bucket name was
+  not present to the current AWS identity; do not fake artifact URIs or weaken
+  durable-artifact holds.
+- Started branch `codex/e2e-waves-profile` from deployed `origin/main`
+  `1bdddd30c16c53e08601bf2bbfb67a267f517738`.
+- Implemented the first richer app E2E pack:
+  - `tests/social/waves-profile-readonly.spec.ts` covers `/waves`, legacy
+    `/waves?wave=...&serialNo=...`, the public `punk6529` profile shell, and
+    `/punk6529/curations`, `/punk6529/collected`, `/punk6529/xtdh`.
+  - `package.json` adds local, staging, and production social read-only
+    scripts.
+  - `tests/testHelpers.ts` seeds the staging access cookie from local
+    credential-backed env values before page navigation, keeping the UI unlock
+    path as fallback and never logging the secret value.
+  - `tests/README.md` records the new pack ownership and deployment commands.
+- Validation passed for the active E2E branch:
+  - `seize run test:e2e:social-readonly`: 12 passed.
+  - `seize run test:e2e:staging:social-readonly`: 12 passed.
+  - `seize run test:e2e:production:social-readonly`: 6 passed.
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`
+  - `seize run lint:changed`
+  - `codex-diff-check`
+- PR #2809 App PR CI initially failed because the related-Jest workflow step
+  passed an extra argument separator before `--findRelatedTests`, causing Jest
+  to treat `--passWithNoTests` as a literal pattern for Playwright-only changes.
+  Fixed `.github/workflows/app-pr-ci.yml` to pass Jest flags directly through
+  the repo wrapper. Follow-up validation passed:
+  - `seize run test:no-coverage --findRelatedTests tests/social/waves-profile-readonly.spec.ts tests/testHelpers.ts --passWithNoTests`
+  - `seize run testing-strategy -- validate-workflow-security --output test-results/app-pr-ci/pr2809-workflow-security.json`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/pr2809-secret-scan.json`
+- CodeRabbit and independent verifier feedback produced two low-risk hardening
+  fixes:
+  - Scope the social-read-only scripts to
+    `tests/social/waves-profile-readonly.spec.ts` so future non-read-only
+    social specs cannot be swept into staging/production read-only scripts.
+  - Assert public profile handle visibility directly instead of depending on
+    disabled edit-control accessible names.
+  - Follow-up validation passed: `seize run test:e2e:social-readonly`,
+    `seize run lint:changed`, `seize run typecheck:changed`, and
+    `codex-diff-check`.
+- Next PRs should keep expanding read-only coverage by user journey, not by
+  shallow route count: media/mint/detail first, then delegation,
+  NextGen/groups/tools, then broad network/open-data/static route matrices.
+
+## 2026-06-21T18:18Z Media/Mint/Detail E2E Pack Ready
+
+- PR #2809 Waves/Profile read-only E2E was merged and deployed:
+  - merge SHA / production version:
+    `f82890f24a4ef7643f143dca5791ad0c50e010f3`
+  - staging run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27911257533
+  - production run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27911610405
+- Started branch `codex/e2e-media-mint-detail` from production `origin/main`
+  `f82890f24a4ef7643f143dca5791ad0c50e010f3`.
+- Implemented the next richer read-only app pack:
+  - `tests/media/media-mint-detail-readonly.spec.ts` covers The Memes card
+    detail, The Memes activity focus with locale-preserving links, The Memes
+    mint page, Meme Lab activity focus, and production-only ReMemes detail
+    tabs/links.
+  - `package.json` adds local, staging, and production media-readonly scripts.
+  - `tests/README.md` records pack ownership and the production-only ReMemes
+    fixture limitation.
+- Independent verifier feedback before PR publication:
+  - confirmed the work was not yet committed, so the future PR would currently
+    contain none of the media-pack changes;
+  - flagged Meme Lab activity row assertions as potentially local-data
+    sensitive, so row-count checks now run only off local base URLs;
+  - flagged README overclaiming for local ReMemes coverage, so docs now state
+    exact ReMemes detail assertions are production-only until local/staging
+    have a stable matching fixture.
+- Staging validation initially found the ReMemes production fixture falls back
+  to the collection route on staging (`Rememes | Collections`). The spec now
+  skips that exact fixture on local and staging but keeps it enforced in the
+  production pack.
+- Local validation passed after clearing a stale ignored `.next` dev cache that
+  served dynamic media routes as the 404 shell:
+  - `seize run test:e2e:media-readonly`: 8 passed, 2 expected skips.
+  - `seize run test:e2e:staging:media-readonly`: 8 passed, 2 expected skips.
+  - `seize run test:e2e:production:media-readonly`: 5 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage --findRelatedTests tests/media/media-mint-detail-readonly.spec.ts --passWithNoTests`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/media-readonly-secret-scan.json`: clean.
+  - `codex-diff-check`
+- Next focused E2E slices remain: delegation first, then NextGen/groups/tools,
+  then broad network/open-data/static route matrices, followed by API-backed or
+  authenticated read-only flows, upload/posting/admin guards, and real
+  native/Electron smoke.
+
+## 2026-06-21T20:58Z Media Sonar Follow-Up
+
+- Investigated PR #2810's passed Sonar gate that still reported one new
+  maintainability issue.
+- Fixed the remaining minor regex smell in
+  `tests/media/media-mint-detail-readonly.spec.ts` by using `\d` instead of
+  `[0-9]` in the mint-page title assertion.
+- Local validation for the follow-up passed:
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: no changed app TypeScript files in the
+    typecheck project.
+  - After stopping a stale local Next dev process on the worktree's assigned
+    port and clearing ignored `.next`, explicit assigned-port rerun:
+    `seize run test:e2e:media-readonly`: 8 passed, 2 expected production-only
+    skips.
+  - `codex-diff-check`
+
+## 2026-06-21T19:30Z Delegation Read-Only E2E Pack Started
+
+- Started `codex/e2e-delegation-readonly` from current `origin/main`
+  (`f82890f24a4ef7643f143dca5791ad0c50e010f3`) after PR #2809 production
+  deploy.
+- Added `tests/delegation/delegation-readonly.spec.ts` for:
+  - Delegation Center disconnected-safe actions, collection choices, and
+    Etherscan/GitHub references.
+  - Top-level delegation articles and a FAQ child article.
+  - Wallet Checker invalid input and a synthetic public empty-state address.
+  - Disconnected write-route guards for register delegation, register
+    consolidation, register delegation manager, and assign primary address.
+  - Collection-scope disconnected gates for Any Collection, The Memes,
+    Meme Lab, and 6529 Gradient.
+- Added local, staging, and production `delegation-readonly` scripts and README
+  ownership notes.
+- Unsafe actions explicitly avoided: wallet connect clicks, on-chain form
+  submit paths, lock/unlock, edit/revoke, posting, uploads, purchases,
+  transfers, and external link navigation.
+- First local E2E run exposed a real Wallet Checker query-load bug:
+  direct-loading `/delegation/wallet-checker?address=...` populated the input
+  but left the internal wallet address state empty, causing an invalid-address
+  alert instead of the public read-only empty-state check.
+- Fixed `components/delegation/walletChecker/WalletChecker.tsx` to initialize
+  and sync the wallet address state from `address_query`.
+- Added a unit regression in `__tests__/components/walletChecker.test.tsx`.
+- Validation passed:
+  - `seize run test:e2e:delegation-readonly`: 30 passed.
+  - `seize run test:no-coverage -- __tests__/components/walletChecker.test.tsx`:
+    5 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run typecheck:playwright`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/delegation-readonly-secret-scan.json`
+  - `codex-diff-check`
+- Opened PR #2811:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2811
+
+## 2026-06-21T20:15Z PR #2810 Gate Status
+
+- PR #2810 media/mint/detail is bot/CI green:
+  - CodeQL actions/javascript-typescript/python passed.
+  - CodeRabbit passed; no unresolved review threads.
+  - 6529bot follow-up on latest head reported no new findings.
+  - DCO, Snyk, and SonarCloud passed.
+- GitHub still reports `REVIEW_REQUIRED`; the authenticated PR author account
+  cannot approve its own PR. Treat this as an independent-review gate, not as a
+  test failure or bot finding.
+
+## 2026-06-21T19:25Z Network/Open Data Read-Only E2E Pack Started
+
+- Started `codex/e2e-network-open-data-readonly` from current `origin/main`
+  (`f82890f24a4ef7643f143dca5791ad0c50e010f3`) while PR #2811 delegation
+  reviewbot/CI checks were running.
+- Added `tests/network-open-data/network-open-data-api-readonly.spec.ts` for:
+  - Network public member table route with sorted URL state.
+  - Network Health public metric cards.
+  - Open Data index links.
+  - Open Data Network Metrics downloads.
+  - API documentation page readability and external docs link safety.
+  - Restricted route fail-closed shell.
+  - GET-only route-handler fail-closed checks for version, Alchemy metadata
+    input validation, Farcaster private/local URL blocking, and TikTok missing
+    URL input validation.
+- Added local, staging, and production `network-open-data-readonly` scripts and
+  README ownership notes.
+- Unsafe actions explicitly avoided: wallet connect/signing, posting, voting,
+  following, uploads, downloads, minting, purchases, transfers, admin actions,
+  Sentry example route, route-handler POST/PUT/PATCH/DELETE calls, and
+  executing API docs sample code.
+- Local validation completed:
+  - `seize run build:env-schema`
+  - `seize run test:e2e:network-open-data-readonly` (14 passed; desktop and
+    mobile Chromium)
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run typecheck:playwright`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+     origin/main --output
+     test-results/app-pr-ci/network-open-data-secret-scan.json`
+   - `codex-diff-check`
+
+## 2026-06-21T23:59Z Network/Open Data Rebase Validation
+
+- Rebasing PR #2812 after PR #2810 and PR #2811 merged produced only expected
+  train aggregator conflicts in `package.json`, `tests/README.md`, and this
+  run log. Resolution preserved media, delegation, and network/open-data
+  entries together.
+- First post-rebase local E2E run hit stale ignored `.next` route cache 404s on
+  routes that exist in the tree. Cleared only the worktree-local `.next` cache
+  and reran the pack successfully.
+- Rebased validation passed:
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/network-open-data-secret-scan-rebased.json`
+  - `codex-diff-check`
+  - `seize run test:e2e:network-open-data-readonly`: 14 passed.
+
+## 2026-06-21T19:35Z Collections Read-Only E2E Pack Started
+
+- Started `codex/e2e-nextgen-collections-readonly` from current deployed
+  `origin/main` (`f82890f24a4ef7643f143dca5791ad0c50e010f3`).
+- Added `tests/collections/nextgen-collections-readonly.spec.ts` for:
+  - NextGen landing, about page, collection-list, Pebbles detail tabs, Pebbles
+    art browse, and minted-token detail/rarity routes.
+  - The Memes, Meme Lab, 6529 Gradient, and ReMemes public browse shells.
+  - Desktop and mobile route readiness, horizontal overflow, public card/empty
+    settling, and read-only mutation guard coverage through shared helpers.
+- Added local, staging, and production `collections-readonly` scripts and README
+  ownership notes.
+- Fixed a 6529 Gradient runtime markup regression found by the pack: gradient
+  cards no longer render an owner profile link nested inside the outer NFT card
+  link.
+- Unsafe actions explicitly avoided: wallet connect/signing, minting, transfers,
+  admin/manager routes, Rememe add/upload, LFG-style actions, NextGen display
+  center render/download actions, external clicks, exact live-data counts, and
+  order-sensitive assertions.
+- Validation passed:
+  - `seize run test:e2e:collections-readonly`: 20 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: no changed TS files in the app typecheck
+    project.
+  - `seize run typecheck:playwright`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+    origin/main --output
+    test-results/app-pr-ci/collections-readonly-secret-scan.json`: clean.
+  - `codex-diff-check`
+
+## 2026-06-21T20:02Z Collections Verifier Follow-Up
+
+- Independent verifier found one low-severity coverage gap: the shared
+  route-ready helper checked horizontal overflow before async card/filter
+  content finished settling.
+- Tightened `expectCardsOrEmpty()` so every async card/empty-state assertion is
+  followed by a final no-horizontal-overflow assertion.
+- Follow-up validation passed:
+  - `seize run test:e2e:collections-readonly`: 20 passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:playwright`
+
+## 2026-06-21T20:40Z Collections PR CI Follow-Up
+
+- App PR CI failed the related-Jest step on PR #2813 because direct unit tests
+  invoked the Meme Lab collection page without `searchParams`; the route had
+  correctly moved to Next.js promise search params but assumed the prop was
+  always supplied.
+- Made `app/meme-lab/collection/[collection]/page.tsx` and its metadata path
+  tolerate omitted `searchParams`, defaulting to the same empty-query behavior
+  used by real requests.
+- Updated `__tests__/moreStaticPages.test.tsx` to assert the full current
+  `MemeLabCollection` prop contract, including default locale and null sort
+  state.
+- Follow-up validation passed:
+  - `seize run test:no-coverage -- __tests__/moreStaticPages.test.tsx`: 6
+    passed.
+  - `seize run test:no-coverage --findRelatedTests
+    components/6529Gradient/6529Gradient.tsx
+    tests/collections/nextgen-collections-readonly.spec.ts
+    --passWithNoTests`: 13 passed across 3 suites.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: 1 changed TypeScript file passed.
+  - `seize run typecheck:playwright`
+
+## 2026-06-21T18:20Z Public Groups And Tools E2E Pack Started
+
+- Started independent branch `codex/e2e-public-groups-tools-static` from
+  current `origin/main`
+  `f82890f24a4ef7643f143dca5791ad0c50e010f3` after leaving richer app E2E PRs
+  #2810, #2811, #2812, and #2813 open for required review approval.
+- Scoped the next safe read-only pack to shipped public routes on current main:
+  `/network/groups`, `/tools/subscriptions-report`, and
+  `/meme-calendar?locale=de-DE`.
+- Confirmed current `origin/main` does not contain an `app/tech` route; tech
+  route coverage remains deferred until that surface exists on main.
+- Added `tests/public-groups-tools/public-groups-tools-readonly.spec.ts` plus
+  local, staging, and production scripts:
+  `test:e2e:public-groups-tools-readonly`,
+  `test:e2e:staging:public-groups-tools-readonly`, and
+  `test:e2e:production:public-groups-tools-readonly`.
+- Safety/UX test intent before validation:
+  - Groups coverage asserts anonymous browse/search controls and no write-only
+    `Create New` or `My groups` controls.
+  - Subscriptions Report coverage waits for async tables/empty states, asserts
+    `Learn More`, keeps CSV download visible but unclicked, and keeps anonymous
+    `My Subscriptions` hidden.
+  - Meme Calendar coverage exercises locale query preservation and Local/UTC
+    state changes, then asserts calendar/download links by href without clicking
+    downloads or external Google Calendar.
+- Independent verifier `Aristotle` confirmed the scope should avoid nonexistent
+  `/tech` routes, legacy `/om/om-groups`, auth/write paths, download clicks,
+  external opens, exact countdowns, row counts, and broad API data assumptions.
+  Based on that review, the flaky profile Groups redirect overlap was kept out
+  of this pack and the two Meme Calendar `Meme #` inputs were asserted by
+  stable IDs instead of a duplicate accessible label.
+- Local validation passed:
+  - `seize run test:e2e:public-groups-tools-readonly`: 6 passed across
+    desktop and mobile Chromium.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from
+    origin/main --output
+    test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
+  - `codex-diff-check`
+
+## 2026-06-21T21:07Z Public Content Read-Only Pack Started
+
+- Started branch `codex/e2e-public-content-readonly` from current merged
+  `origin/main` for the next roadmap slice after the public social pack.
+- Implementing a read-only Playwright pack for public legacy content routes
+  across education, museum, OM, news, capital, blog, and author pages.
+- The pack runs locally with the mutation guard enabled, runs on desktop and
+  mobile Chromium for local/staging validation, and has a production desktop
+  read-only command for deployment-train smoke evidence.
+
+## 2026-06-21T21:55Z Public Content Read-Only Pack Ready
+
+- Implemented `tests/content/public-content-readonly.spec.ts` across public
+  education, museum, OM, news, capital, blog, and author routes.
+- Added local, staging, and production package scripts for the pack. Local and
+  staging run desktop and mobile Chromium; production is intentionally desktop
+  Chromium only for a public read-only post-deploy smoke.
+- Added a narrow mutation-guard allowance for YouTube `/api/stats/` telemetry
+  plus exact embedded-player telemetry endpoints for YouTube `/youtubei/v1/log_event`,
+  Google WAA `GenerateIT`, and GTM `/td`. Arbitrary YouTube, Google, and GTM
+  mutations are still blocked.
+- The route matrix uses canonical trailing-slash paths for legacy deep links
+  and normalizes the asserted browser path because Next strips the slash after
+  loading the page locally.
+- Added a global overflow guard for the legacy static-copy
+  `#sticky-social-icons-container`; these pages include the container inline and
+  it was adding 16px of horizontal scroll despite having no visible footprint.
+- Validation passed:
+  - `seize run test:e2e:public-content-readonly`: 26 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage --findRelatedTests tests/support/readonlyMutationGuard.ts --passWithNoTests`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/public-content-secret-scan.json`
+  - `codex-diff-check`
+- Pre-merge production command was attempted and failed with the known
+  undeployed baseline: production currently still has 16px horizontal overflow
+  from the legacy sticky social container on these routes. The branch-local
+  E2E pack passes after the overflow fix, so rerun
+  `seize run test:e2e:production:public-content-readonly` only after this
+  change is deployed.
+## 2026-06-21T22:35Z Authenticated Shell E2E Pack Started
+
+- Started clean worktree branch `codex/e2e-authenticated-shells-readonly` from
+  current `origin/main` after leaving the root checkout untouched.
+- Added the next read-only authenticated surface pack:
+  - `tests/auth/authenticated-shells-readonly.spec.ts` covers `/messages`,
+    `/{profile}/subscriptions`, and `/{profile}/proxy` across desktop and
+    mobile Chromium when dev auth is explicitly provided.
+  - The pack skips without `USE_DEV_AUTH=true`, `DEV_MODE_WALLET_ADDRESS`,
+    `DEV_MODE_AUTH_JWT`, and `PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE`; committed
+    tests never contain or extract secrets.
+  - Assertions prove route shells render beyond the wallet gate and expose
+    their expected read-only affordances without clicking submit/create/assign
+    controls.
+- Added `test:e2e:authenticated-shells-readonly` and documented ownership in
+  `tests/README.md`.
+- Mirrored the narrow read-only telemetry guard hardening needed by route packs
+  that load GTM, YouTube, or Google WAA SDK endpoints; unknown POSTs and
+  registered first-party mutations remain blocked.
+- Real dev-auth validation against the production API with the read-only guard
+  found `/notifications` performs `POST /api/notifications/read` on
+  authenticated mount. That route is deliberately excluded from this read-only
+  pack until a mutation-safe notifications strategy exists.
+- Validation evidence:
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env, proving the committed pack is credential-free by default.
+  - DPAPI-backed dev-auth run against a fresh local frontend port with
+    production API/WebSocket endpoints and `PLAYWRIGHT_READONLY=1`: 6 passed
+    across desktop and mobile Chromium. The token was used only as an in-process
+    environment value and was not printed or persisted.
+  - A prior attempted `/notifications` inclusion failed safely because the
+    read-only guard blocked `POST https://api.6529.io/api/notifications/read`.
+- Follow-up review feedback on the adjacent public content E2E PR identified
+  YouTube no-cookie telemetry as another expected SDK POST family. The
+  authenticated-shell branch now covers `youtube-nocookie.com` and bare
+  `youtube.com` stats/log endpoints in the guard unit test while preserving the
+  default block for unknown external POSTs.
+- CodeRabbit review on PR #2816 correctly identified that the spec itself
+  should enforce `PLAYWRIGHT_READONLY=1`, not only the package script. The skip
+  gate, test docs, and active context now require explicit read-only mode before
+  authenticated credentials can run.
+- Follow-up validation after that fix:
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env.
+  - DPAPI-backed dev-auth run against a fresh local frontend port with
+    production API/WebSocket endpoints and `PLAYWRIGHT_READONLY=1`: 6 passed
+    across desktop and mobile Chromium.
+
+## 2026-06-22T02:09Z Authenticated Shell Rebase Over Public Content
+
+- Rebasing the authenticated-shell branch over merged PR #2815 produced only
+  expected train-aggregator conflicts in package scripts, test ownership docs,
+  run-log history, and the shared read-only mutation guard.
+- Resolution preserved the merged public-content pack's
+  `YOUTUBE_TELEMETRY_HOSTS` host-set implementation, including nocookie hosts,
+  while keeping the authenticated-shell pack and its explicit `--trace=off`
+  Playwright script hardening.
+- Local validation passed after the rebase:
+  - `seize run format:uncommitted`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`: 12 passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/auth-shells-secret-scan-rebased.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/auth-shells-workflow-security-rebased.json`
+  - `codex-diff-check`
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env, proving the committed pack remains credential-free by
+    default.
+  - `seize run test:e2e:public-content-readonly`: 26 passed.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+- Fresh secure dev-auth validation was not repeated in this resumed session:
+  the current process and worktree env files do not contain the dev-auth
+  variables, and no dedicated local Credential Manager target for the dev-auth
+  triplet is indexed. Do not mine Codex log databases for auth values; use a
+  proper local credential source if this rerun is required before merge.
+
+## 2026-06-22T02:15Z Profile Deep-Link E2E Pack Started
+
+- Started branch `codex/e2e-profile-tabs-readonly` from current merged
+  `origin/main` after PR #2815, then rebased over merged PR #2816.
+- Existing `test:e2e:social-readonly` already covers the public profile shell,
+  `/curations`, `/collected`, and `/xtdh`, so this slice deliberately avoids
+  duplicating those route-tab assertions.
+- Added `tests/social/profile-deep-links-readonly.spec.ts` for public profile
+  legacy redirect behavior:
+  - `/{handle}?source=e2e&view=legacy` keeps the canonical public profile
+    readable while preserving query state.
+  - `/{handle}/waves?source=e2e&serialNo=1` redirects to the canonical
+    public curation/profile shell while preserving query state.
+  - `/{handle}/groups?source=e2e` and `/{handle}/followers?source=e2e`
+    redirect back to the public profile shell without carrying obsolete query
+    state.
+- Added local, staging, and production package scripts for the pack. Local and
+  staging run desktop and mobile Chromium; production runs desktop Chromium as
+  a public read-only smoke.
+- Deferred `/rep` not-found coverage from the explorer suggestion because this
+  repo now has profile CMS catch-all routing, so `/rep` is not a stable simple
+  not-found contract.
+- Local validation passed after rebasing over PR #2816:
+  - `seize run test:e2e:profile-deep-links-readonly`: 8 passed.
+  - `seize run format:uncommitted`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/profile-deep-links-secret-scan.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/profile-deep-links-workflow-security.json`
+  - `codex-diff-check`
+  - `seize run test:e2e:social-readonly`: 12 passed.
+- Follow-up validation after SonarCloud flagged duplicate new code:
+  - Extracted shared public-profile E2E assertions into
+    `tests/social/profileReadonlyHelpers.ts` for both the existing social pack
+    and the new profile deep-link pack.
+  - `seize run test:e2e:profile-deep-links-readonly`: 8 passed.
+  - `seize run test:e2e:social-readonly`: 12 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/profile-deep-links-secret-scan-sonar-fix.json`
+  - `codex-diff-check`
+
+## 2026-06-22T03:10Z Notifications Mutation-Guard Slice Started
+
+- Started branch `codex/e2e-notifications-mutation-guard` from current merged
+  `origin/main` after PR #2817.
+- This slice closes the explicit authenticated notifications gap without
+  weakening the read-only E2E contract:
+  - `/notifications` still stays out of `test:e2e:authenticated-shells-readonly`
+    because it marks notifications read on authenticated mount.
+  - Added named read-only mutation registry entries for
+    `POST /api/notifications/read` in local loopback, staging, and production
+    API shapes.
+  - Added unit coverage that those mark-read requests are blocked by a named
+    registry rule.
+  - Added `test:e2e:notifications-mutation-guard` as a local/dev-auth-only
+    negative contract. It asserts the route attempts its current mark-read
+    side effect and that the guard aborts it before backend state changes.
+- No staging or production notification smoke script was added. Full
+  notification UI coverage still needs a disposable sandbox account/backend or
+  a product-safe read-only behavior that does not mutate notification read
+  state.
+- Local validation for this slice:
+  - `seize install:frozen`
+  - `seize-local-dev bootstrap`
+  - `seize run build:env-schema`
+  - `seize run format:uncommitted`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`: 13 passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- validate-mutation-registry --file ops/testing-strategy/mutation-endpoint-registry.json`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`: computed Level 4 because the registry and package scripts are promotion-safety controls.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/notifications-guard-secret-scan.json`: passed, 0 findings.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/notifications-guard-workflow-security.json`: passed, 0 findings.
+  - `seize run test:e2e:notifications-mutation-guard`: 1 skipped without
+    dev-auth env, proving the committed pack remains credential-free by
+    default.
+  - `seize run test:e2e:authenticated-shells-readonly`: 6 skipped without
+    dev-auth env, preserving the existing authenticated read-only contract.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts`: 35 passed.
+  - `git diff --check`
+- Independent reviewer `Pasteur` found one robustness issue in the negative
+  E2E: it initially waited for any blocked request before searching for the
+  notification mark-read request. Fixed the test to poll for the specific
+  `/api/notifications/read` blocked request, then reran:
+  - `seize run format:uncommitted`
+  - `seize run typecheck:playwright`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`: 13 passed.
+  - `seize run test:e2e:notifications-mutation-guard`: 1 skipped without
+    dev-auth env.
+- SonarCloud failed the first PR analysis with
+  `typescript:S6418` on the new E2E skip message because the message spelled
+  out a dev-auth token env var name. Removed sensitive env var names from the
+  user-facing skip text while preserving the actual configuration checks.
+
+## 2026-06-22T03:45Z Search And Wave Detail Read-Only Pack Started
+
+- PR #2818 merged into `origin/main` as
+  `d2b1c2ba4d9908ff0f592eeeb7200c80c578920c`, closing the notifications
+  mutation-guard slice without adding unsafe deployed notification smoke.
+- Started branch `codex/e2e-search-waves-readonly` from current merged
+  `origin/main`.
+- This slice adds production-safe read-only E2E coverage for:
+  - global header search keyboard open/close/focus restoration,
+    character-threshold state, result rendering, and navigation to the Wave
+    Score network page.
+  - wave-local message search modal behavior on a public wave, including
+    minimum query guidance, no-match handling, clear control, and read-only
+    mutation guard coverage.
+- Non-goals for this slice:
+  - no posting, replying, voting, reacting, uploading, signing, notification
+    read-state mutation, external share, clipboard, or admin/moderation action.
+  - no staging or production notification smoke until there is a disposable
+    sandbox account/backend or a product-safe non-mutating notification path.
+- Planned validation before PR publication: `test:e2e:search-waves-readonly`,
+  Playwright typecheck, changed lint/typecheck, changed secret scan, workflow
+  security scan, critical-shell regression, and `codex-diff-check`.
+
+## 2026-06-22T04:25Z Search And Wave Detail Read-Only Pack Validated
+
+- Adjusted the test design after local and staging runs showed the sidebar
+  header search remains global on wave routes; wave-local search is exposed by
+  the dedicated `Search messages in this wave` control on the wave detail
+  panel.
+- Local wave detail uses a browser-scoped fixture for one synthetic public wave
+  because the current local seed data returns real `/api/waves/{id}` list
+  entries but 500s on their detail fetches. Staging and production scripts use
+  real public wave data and do not install that local fixture.
+- Validation completed before PR publication:
+  - `seize install:frozen`
+  - `seize-local-dev bootstrap`
+  - `seize run build:env-schema`
+  - `seize run format:uncommitted`
+  - `seize run test:e2e:search-waves-readonly`: 4 passed across desktop and
+    mobile Chromium.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    computed Level 4 because package scripts are release-validation controls.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/search-waves-secret-scan-final.json`:
+    passed, 0 findings.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/search-waves-workflow-security-final.json`:
+    passed, 0 findings.
+  - `seize run test:e2e:staging:search-waves-readonly`: first run stopped
+    before testing because staging access was not loaded in the shell; rerun
+    with the local Credential Manager target `STAGING_AUTH` passed 4 tests
+    across desktop and mobile Chromium.
+  - `seize run test:e2e:production:search-waves-readonly`: 2 passed on desktop
+    Chromium.
+  - `codex-diff-check`
+- Independent reviewer `Zeno` found that the first local browser fixtures
+  would fulfill any HTTP method for matching synthetic wave routes, which could
+  hide a future local unsafe method request before the read-only guard reported
+  it. Fixed the fixture helper to allow only `GET` and `HEAD`, and to fail
+  loudly on any other matching method. Also removed stale active-context next
+  pack guidance that referenced already-merged E2E areas.
+
+## 2026-06-22T05:45Z Composer Sandbox E2E Pack Validated
+
+- PR #2819 merged into `origin/main` as
+  `174b2d054 Add search and wave read-only E2E coverage (#2819)`.
+- Started branch `codex/e2e-composer-sandbox` from current `origin/main` for
+  the next unfinished high-value E2E pack: local-only authenticated
+  composer/upload/link-preview sandbox coverage.
+- Added `tests/support/composerSandboxServer.cjs`, a local mock API plus Next
+  dev runner that:
+  - builds the env schema before starting Next, because direct Next startup
+    bypasses the repo `predev` script.
+  - points runtime API, allowlist API, WebSocket, and base endpoint values at
+    local-only origins.
+  - generates synthetic dev-auth data at runtime without committing a
+    token-shaped literal or reading local secrets.
+  - records browser requests through `/__composer-sandbox/requests`.
+  - classifies `/api/drops`, `/api/drop-media`, and `/api/attachments`
+    mutations as dangerous composer/upload mutations.
+  - keeps known notification wave-read side effects separate from dangerous
+    composer mutations, while failing the spec on either dangerous composer
+    mutations or any unhandled local mutation.
+- Added `tests/social/waves-composer-sandbox.spec.ts`, a local-only Playwright
+  pack gated by `PLAYWRIGHT_COMPOSER_SANDBOX=1` and `PLAYWRIGHT_ENV=local`.
+  It covers desktop and mobile Chromium file attachment preview/removal,
+  link-preview rendering, composer post-button enablement, and mock mutation
+  diagnostics.
+- Added `PLAYWRIGHT_FORCE_WEB_SERVER` support in `playwright.config.ts` so this
+  sandbox pack always starts its intended local Next/mock server instead of
+  accidentally reusing a stale local dev server.
+- Added a spec-level loopback assertion so inherited Playwright URL env cannot
+  send this local sandbox pack to staging or production.
+- Added `test:e2e:composer-sandbox` to `package.json` and documented ownership
+  and local-only safety in `tests/README.md`.
+- Validation completed before PR publication:
+  - `seize-local-dev bootstrap`
+  - `seize install:frozen`
+  - `seize run format:uncommitted`
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `seize exec prettier --write tests/support/composerSandboxServer.cjs`
+  - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and mobile
+    Chromium.
+  - `seize run typecheck:playwright`
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/support/composerSandboxServer.cjs tests/social/waves-composer-sandbox.spec.ts playwright.config.ts`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    computed Level 4 because `package.json` scripts are release-validation
+    controls.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/composer-sandbox-secret-scan-final.json`:
+    passed, 0 findings.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/composer-sandbox-workflow-security-final.json`:
+    passed, 0 findings.
+  - `PLAYWRIGHT_READONLY=1 seize run test:e2e:critical-shell`: 7 passed.
+  - `codex-diff-check`
+- Local `seize run quality:changed` still fails at its aggregate format step in
+  this Windows worktree, while the direct equivalent checks
+  (`format:changed`, `lint:changed`, and `typecheck:changed`) pass. Treat this
+  as a local wrapper aggregation caveat rather than a code failure unless CI
+  reproduces it.
+- This pack is intentionally not a staging or production smoke. It exercises
+  authenticated composer-adjacent behavior only against the local mock API and
+  must remain separate from deployed-environment read-only packs unless a
+  disposable backend sandbox and explicit mutation plan are added.
+- Opened PR #2820:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2820

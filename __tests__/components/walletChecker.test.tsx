@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import WalletChecker from "@/components/delegation/walletChecker/WalletChecker";
 import { fetchUrl } from "@/services/6529api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -122,6 +122,35 @@ describe("WalletChecker", () => {
     expect(mockFetchUrl).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/consolidations/0x1111111111111111111111111111111111111111?show_incomplete=true"
     );
+  });
+
+  it("fetches data when loaded with an address query", async () => {
+    mockFetchUrl.mockResolvedValue({ data: [] });
+    const setAddressQuery = jest.fn();
+    const address = "0x1111111111111111111111111111111111111111";
+
+    render(
+      <TestWrapper>
+        <WalletChecker
+          address_query={address}
+          setAddressQuery={setAddressQuery}
+        />
+      </TestWrapper>
+    );
+
+    expect(screen.getByPlaceholderText("0x... or ENS")).toHaveValue(address);
+    await waitFor(() => {
+      expect(setAddressQuery).toHaveBeenCalledWith(address);
+    });
+    expect(mockFetchUrl).toHaveBeenCalledWith(
+      `https://api.test.6529.io/api/delegations/${address}`
+    );
+    expect(mockFetchUrl).toHaveBeenCalledWith(
+      `https://api.test.6529.io/api/consolidations/${address}?show_incomplete=true`
+    );
+    expect(
+      screen.queryByText("Enter a valid Ethereum address or ENS name.")
+    ).not.toBeInTheDocument();
   });
 
   it("accepts uppercase ENS suffixes after resolution", async () => {

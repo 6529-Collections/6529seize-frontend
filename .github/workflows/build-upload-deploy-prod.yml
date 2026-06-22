@@ -60,7 +60,7 @@ jobs:
             --environment production \
             --production-candidate-sha "${COMMIT_SHA}" \
             --production-eligible true \
-            --required-packs "playwright:core-smoke,playwright:wcag-i18n" \
+            --required-packs "playwright:core-smoke,playwright:surface-matrix,playwright:wcag-i18n" \
             --release-captain "github-actions/${{ github.actor }}" \
             --status queued \
             --phase queued \
@@ -370,6 +370,34 @@ jobs:
             --description "$description" \
             --environment-url "https://6529.io" \
             --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Record production post-deploy watch checkpoint
+        if: always() && hashFiles('deployment-bus-manifest.json') != ''
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            watch_status="in_progress"
+            checkpoint_status="passed"
+            observed_minutes="0"
+            notes="Elastic Beanstalk health/readiness and deployed version validation passed; release-captain post-deploy watch still needs deployed-environment validation evidence."
+          else
+            watch_status="failed"
+            checkpoint_status="failed"
+            observed_minutes="0"
+            notes="Production workflow did not complete deploy verification successfully."
+          fi
+
+          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
+            --file deployment-bus-manifest.json \
+            --status "$watch_status" \
+            --observed-duration-minutes "$observed_minutes" \
+            --checkpoint eb-version-health \
+            --checkpoint-status "$checkpoint_status" \
+            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --notes "$notes"
 
       - name: Create production release report
         if: always()

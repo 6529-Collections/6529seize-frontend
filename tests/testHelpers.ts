@@ -1,5 +1,5 @@
 import { test as base } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { BrowserContext, Page } from "@playwright/test";
 
 import {
   assertNoPageErrors,
@@ -7,8 +7,10 @@ import {
   attachPageDiagnosticsArtifact,
 } from "./support/pageAssertions";
 import { installReadonlyMutationGuard } from "./support/readonlyMutationGuard";
+import { installSurfaceSimulation } from "./support/surfaceSimulation";
 
 const STAGING_HOSTNAME = "staging.6529.io";
+const STAGING_ACCESS_COOKIE_NAME = "x-6529-auth";
 const STAGING_ACCESS_CODE =
   process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] ?? process.env["STAGING_AUTH"];
 const ACCESS_INPUT_SELECTOR =
@@ -33,6 +35,26 @@ async function installStagingAccessUnlock(page: Page) {
 
   page.goto = gotoWithAccessUnlock as Page["goto"];
   await gotoWithAccessUnlock("/", { waitUntil: "domcontentloaded" });
+}
+
+async function seedStagingAccessCookie(
+  context: BrowserContext,
+  baseURL?: string
+) {
+  if (!shouldUnlockStaging(baseURL) || !STAGING_ACCESS_CODE) {
+    return;
+  }
+
+  await context.addCookies([
+    {
+      domain: STAGING_HOSTNAME,
+      name: STAGING_ACCESS_COOKIE_NAME,
+      path: "/",
+      sameSite: "Strict",
+      secure: true,
+      value: STAGING_ACCESS_CODE,
+    },
+  ]);
 }
 
 async function submitStagingAccess(page: Page, goto: PageGoto) {
@@ -125,7 +147,9 @@ function shouldUnlockStaging(baseURL?: string) {
 }
 
 const test = base.extend({
-  context: async ({ context, baseURL }, runTest) => {
+  context: async ({ context, baseURL }, runTest, testInfo) => {
+    await seedStagingAccessCookie(context, baseURL);
+    await installSurfaceSimulation(context, testInfo.project.name, baseURL);
     const guard = await installReadonlyMutationGuard(context, baseURL);
 
     await runTest(context);
