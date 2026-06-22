@@ -20,6 +20,8 @@ export const FR_FR_MESSAGES = {
   "profileCms.interactive.exitFullscreen": "Quitter le plein ecran",
   "drop.media.processing": "Image en cours de traitement",
   "drop.media.unavailable": "Image indisponible",
+  "drop.media.loadFailed": "Impossible de charger l'image.",
+  "drop.media.retry": "Reessayer",
   "drop.media.processingFailed": "Le traitement de l'image a echoue.",
   "drop.media.processingTimedOut": "Le traitement de l'image a expire.",
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
