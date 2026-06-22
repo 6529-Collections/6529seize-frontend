@@ -153,10 +153,11 @@
       ],
       "facts": [
         "Profile tabs split profile content into sections such as Identity, Collected, Groups, Waves, Subscriptions, Proxy, Brain, and xTDH.",
-        "The active tab can be opened directly through a route such as /{user}/identity or /{user}/groups.",
+        "The default Identity tab opens at /{user}; legacy /{user}/identity redirects there.",
+        "Other profile tabs can be opened directly through routes such as /{user}/groups or /{user}/collected.",
         "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
       ],
-      "canonical_path": "/{user}/identity",
+      "canonical_path": "/{user}",
       "related_paths": [
         "/{user}/identity",
         "/{user}/collected",
@@ -216,7 +217,12 @@
         "proxy tab",
         "profile proxy",
         "proxy actions",
-        "profile delegation"
+        "profile delegation",
+        "proxy credit",
+        "proxy credits",
+        "allocate rep proxy",
+        "allocate nic proxy",
+        "acting as proxy"
       ],
       "keywords": [
         "profile",
@@ -224,17 +230,26 @@
         "actions",
         "permissions",
         "authorized",
-        "wallet"
+        "wallet",
+        "credit",
+        "spent",
+        "rep",
+        "nic"
       ],
       "facts": [
         "The Profile Proxy tab exposes profile proxy relationships and actions.",
         "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
+        "Current proxy action creation supports Allocate Rep and Allocate NIC actions with a granted Credit amount and read-only Spent total.",
+        "Proxy action availability and profile rating behavior depend on whether the active proxy has the relevant Allocate Rep or Allocate NIC permission.",
         "Proxy and delegation are related concepts but live in separate product areas."
       ],
       "canonical_path": "/{user}/proxy",
       "related_paths": ["/{user}/proxy", "/delegation/delegation-center"],
       "tags": ["profiles", "proxy"],
-      "source_refs": ["ops/docs/profiles/tabs/feature-proxy-tab.md"]
+      "source_refs": [
+        "ops/docs/profiles/tabs/feature-proxy-tab.md",
+        "entities/IProxy.ts"
+      ]
     },
     {
       "id": "profiles.brain-tab",
@@ -271,7 +286,16 @@
       "id": "network.tdh",
       "kind": "glossary",
       "title": "TDH",
-      "aliases": ["tdh", "total days held", "total day held"],
+      "aliases": [
+        "tdh",
+        "total days held",
+        "total day held",
+        "what does tdh stand for",
+        "tdh meaning",
+        "tdh rate",
+        "hodl rate",
+        "total dynamic head"
+      ],
       "keywords": [
         "tdh",
         "total",
@@ -280,12 +304,16 @@
         "boost",
         "boosted",
         "unboosted",
-        "metric"
+        "metric",
+        "rate",
+        "hodl"
       ],
       "facts": [
         "TDH stands for Total Days Held.",
+        "TDH does not stand for Total Dynamic Head.",
         "TDH is a time-weighted NFT holding metric that starts from days held and applies edition-size weighting plus active boosters.",
-        "TDH updates on a daily cadence and is used across Network surfaces."
+        "TDH updates on a daily cadence and is used across Network surfaces.",
+        "The Memes and other NFT surfaces can show a per-card TDH or HODL rate."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": ["/network/definitions", "/network/tdh/historic-boosts"],
@@ -479,7 +507,9 @@
       "facts": [
         "Help6529 Credits are REP in the `Help6529 Credits` category.",
         "Each Help6529 question costs 1 Help6529 Credit REP.",
-        "Automatic grants are signup +5, profile setup +5, and daily activity +5 when the user sends any message that day, capped at 100 automatic credits."
+        "Automatic grants are signup +5, profile setup +5, and daily activity +5 when the user sends any message that day.",
+        "Automatic daily activity grants do not have a balance cap.",
+        "Only Help6529 Credit REP granted by help6529 counts toward bot-question balance; ratings from other profiles in that category do not count."
       ],
       "canonical_path": "/rep/categories",
       "related_paths": ["/waves"],
@@ -735,7 +765,13 @@
         "rate a drop",
         "vote on a drop",
         "boost drop",
-        "drop voting"
+        "drop voting",
+        "drop rating",
+        "drop rep",
+        "clap",
+        "clap rating",
+        "wave rep",
+        "rate wave drop"
       ],
       "keywords": [
         "reaction",
@@ -745,11 +781,17 @@
         "voting",
         "boost",
         "drop",
-        "slider"
+        "slider",
+        "clap",
+        "rep",
+        "credit"
       ],
       "facts": [
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
+        "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
+        "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
+        "Boosting is a per-user flame toggle on full drop cards and boosted cards in wave and direct-message threads.",
         "Wave creator badges and drop state indicators explain context around submitted drops."
       ],
       "canonical_path": "/waves",
@@ -759,6 +801,45 @@
         "ops/docs/waves/drop-actions/feature-reactions-and-ratings.md",
         "ops/docs/waves/drop-actions/feature-vote-slider.md",
         "ops/docs/waves/drop-actions/feature-drop-boosting.md"
+      ]
+    },
+    {
+      "id": "waves.slow-mode",
+      "kind": "business_rule",
+      "title": "Wave slow mode",
+      "aliases": [
+        "slow mode",
+        "wave slow mode",
+        "chat slow mode",
+        "send again cooldown",
+        "one message every",
+        "slow mode cooldown"
+      ],
+      "keywords": [
+        "waves",
+        "slow",
+        "mode",
+        "cooldown",
+        "chat",
+        "message",
+        "interval",
+        "seconds",
+        "minutes",
+        "hours"
+      ],
+      "facts": [
+        "Wave chat config can set slow_mode_cooldown_ms.",
+        "The Wave settings UI shows Slow mode as On with a formatted interval or Off.",
+        "When slow mode is active, the composer can show messages like `Slow mode: send again in ...` or `Slow mode: one message every ...`.",
+        "Slow mode must be at least 1 second when enabled."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves/create"],
+      "tags": ["waves", "chat", "settings"],
+      "source_refs": [
+        "components/waves/specs/WaveSlowMode.tsx",
+        "components/waves/SlowModeChatNotice.tsx",
+        "generated/models/ApiWaveChatConfig.ts"
       ]
     },
     {
@@ -905,7 +986,13 @@
       "id": "delegation.overview",
       "kind": "route",
       "title": "Delegation center",
-      "aliases": ["delegation", "delegate", "delegations", "delegation center"],
+      "aliases": [
+        "delegation",
+        "delegate",
+        "delegations",
+        "delegation center",
+        "delegation manager"
+      ],
       "keywords": [
         "delegation",
         "delegate",
@@ -1668,7 +1755,13 @@
         "notifications",
         "notification feed",
         "alerts",
-        "unread notifications"
+        "unread notifications",
+        "reply notifications",
+        "reaction notifications",
+        "drop reacted notification",
+        "drop boosted notification",
+        "rep notification",
+        "nic notification"
       ],
       "keywords": [
         "notifications",
@@ -1676,11 +1769,18 @@
         "filters",
         "read",
         "paging",
-        "alerts"
+        "alerts",
+        "mentions",
+        "replies",
+        "identity",
+        "reactions",
+        "boosts"
       ],
       "facts": [
         "The notifications feed lives at /notifications.",
         "It supports feed filters, row actions, read state, paging, and navigation to related app content.",
+        "Cause filters include Mentions, Replies, Identity, Reactions, and Invites.",
+        "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
       ],
       "canonical_path": "/notifications",
@@ -1700,19 +1800,39 @@
         "push notifications",
         "mobile push",
         "phone alerts",
-        "notification permission"
+        "notification permission",
+        "push notification settings",
+        "drop replied push",
+        "drop reacted push",
+        "drop boosted push",
+        "identity rep push",
+        "identity nic push"
       ],
-      "keywords": ["mobile", "push", "notifications", "permission", "alerts"],
+      "keywords": [
+        "mobile",
+        "push",
+        "notifications",
+        "permission",
+        "alerts",
+        "settings",
+        "reply",
+        "react",
+        "boost",
+        "rep",
+        "nic"
+      ],
       "facts": [
         "Mobile push notifications are documented under the Notifications area.",
         "Push notification behavior depends on mobile app support and notification permissions.",
+        "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, and Wave Invites.",
         "Use the notifications feed when a user wants to inspect in-app notification history."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/open-mobile"],
       "tags": ["notifications", "mobile"],
       "source_refs": [
-        "ops/docs/notifications/feature-mobile-push-notifications.md"
+        "ops/docs/notifications/feature-mobile-push-notifications.md",
+        "components/header/PushNotificationSettings.tsx"
       ]
     },
     {
@@ -1826,6 +1946,11 @@
         "identity tab",
         "profile identity",
         "nic",
+        "what is nic",
+        "what does nic stand for",
+        "network identity credits",
+        "network identity check",
+        "rate nic",
         "rep dialog",
         "activity log"
       ],
@@ -1835,18 +1960,21 @@
         "nic",
         "rep",
         "statements",
+        "rating",
+        "credits",
+        "check",
         "activity",
         "log"
       ],
       "facts": [
-        "The Identity tab lives at /{user}/identity.",
-        "NIC stands for Network Identity Credits.",
-        "NIC is the trust signal identities give each other in the 6529 network.",
-        "The Identity tab surfaces profile identity, REP behavior, NIC/statements, and activity log behavior where available.",
+        "The combined Identity tab is the default profile tab at /{user}; /{user}/identity is a legacy redirect.",
+        "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
+        "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
+        "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "Owner and permission rules affect which identity actions are visible."
       ],
-      "canonical_path": "/{user}/identity",
-      "related_paths": ["/{user}", "/rep/categories"],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}/identity", "/rep/categories"],
       "tags": ["profiles", "identity"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-tab.md"]
     },
@@ -1856,6 +1984,9 @@
       "title": "Profile identity statements",
       "aliases": [
         "identity statements",
+        "nic statements",
+        "id statements",
+        "profile nic statements",
         "add statement",
         "profile statement",
         "statement modal"
@@ -1863,20 +1994,96 @@
       "keywords": [
         "identity",
         "statements",
+        "nic",
+        "consolidated",
+        "addresses",
+        "primary",
         "modal",
         "profile",
         "add",
         "visibility"
       ],
       "facts": [
-        "Identity statements are managed from profile identity surfaces.",
+        "Identity statements are managed from profile identity surfaces on /{user}.",
+        "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
         "The add modal supports documented statement types and visibility rules.",
-        "Statement loading, errors, and recovery are documented separately from general profile tab navigation."
+        "Statement rows can expose Open, Copy, Delete, and Set Primary actions depending on statement type, ownership, and wallet state."
       ],
-      "canonical_path": "/{user}/identity",
-      "related_paths": ["/{user}/identity"],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}/identity", "/delegation/wallet-checker"],
       "tags": ["profiles", "identity", "statements"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-statements.md"]
+    },
+    {
+      "id": "profiles.primary-address",
+      "kind": "route",
+      "title": "Primary address reference",
+      "aliases": [
+        "primary address",
+        "on-chain primary address",
+        "primary wallet",
+        "set primary",
+        "primary address table",
+        "current selected primary address"
+      ],
+      "keywords": [
+        "primary",
+        "address",
+        "wallet",
+        "consolidation",
+        "table",
+        "profile",
+        "set"
+      ],
+      "facts": [
+        "/about/primary-address is a public, read-only primary-address reference table.",
+        "The table shows Profile Handle, Current Selected Primary Address, and Primary Address Changed To columns loaded from /primary_address.csv.",
+        "Non-primary consolidated wallet rows on profile identity statements can expose Set Primary when the connected wallet owns the profile and no proxy profile is active."
+      ],
+      "canonical_path": "/about/primary-address",
+      "related_paths": ["/{user}", "/delegation/assign-primary-address"],
+      "tags": ["profiles", "identity", "wallet"],
+      "source_refs": [
+        "ops/docs/profiles/about/feature-primary-address-reference-table.md",
+        "ops/docs/profiles/tabs/feature-identity-statements.md"
+      ]
+    },
+    {
+      "id": "profiles.activity-log",
+      "kind": "ui_affordance",
+      "title": "Profile activity log",
+      "aliases": [
+        "activity log",
+        "profile activity log",
+        "rep activity log",
+        "nic activity log",
+        "rep given activity",
+        "rep received activity",
+        "identity activity"
+      ],
+      "keywords": [
+        "profile",
+        "activity",
+        "log",
+        "rep",
+        "nic",
+        "incoming",
+        "outgoing",
+        "filters"
+      ],
+      "facts": [
+        "The profile Identity tab includes activity logs for REP and NIC where data is available.",
+        "Desktop activity logs support matter filters such as All, REP, and NIC plus direction filters such as All, Incoming, and Outgoing.",
+        "Mobile splits REP activity under the Rep subview and NIC activity under the Identity subview."
+      ],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}/identity"],
+      "tags": ["profiles", "activity", "rep", "nic"],
+      "source_refs": [
+        "ops/docs/profiles/tabs/feature-identity-tab.md",
+        "components/profile-activity/ProfileActivityLogs.tsx",
+        "components/user/rep/UserPageCombinedActivityLog.tsx"
+      ]
     },
     {
       "id": "profiles.collected-tab",
@@ -1886,6 +2093,12 @@
         "collected tab",
         "profile collected",
         "owned nfts",
+        "owner balances",
+        "owners balances",
+        "wallet balances",
+        "collected stats",
+        "tdh history",
+        "boost breakdown",
         "transfer mode"
       ],
       "keywords": [
@@ -1893,12 +2106,19 @@
         "collected",
         "nfts",
         "stats",
+        "balances",
+        "owners",
+        "tdh",
+        "history",
+        "boost",
         "transfer",
         "holdings"
       ],
       "facts": [
         "The Collected tab lives at /{user}/collected.",
-        "It shows collected NFT context, stats summary, and transfer-mode behavior where available.",
+        "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
+        "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
+        "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
       "canonical_path": "/{user}/collected",
@@ -1906,7 +2126,8 @@
       "tags": ["profiles", "collected", "nfts"],
       "source_refs": [
         "app/[user]/collected/page.tsx",
-        "ops/docs/profiles/tabs/feature-collected-tab.md"
+        "ops/docs/profiles/tabs/feature-collected-tab.md",
+        "components/user/collected/stats/useCollectedStatsData.ts"
       ]
     },
     {
@@ -2178,17 +2399,40 @@
       "id": "waves.composer.mentions",
       "kind": "ui_affordance",
       "title": "Wave mentions",
-      "aliases": ["mention user", "tag someone", "@ mention", "wave mentions"],
-      "keywords": ["waves", "mentions", "tag", "profile", "composer"],
+      "aliases": [
+        "mention user",
+        "tag someone",
+        "@ mention",
+        "wave mentions",
+        "group mention",
+        "@all",
+        "mention all",
+        "mentioned groups",
+        "mentioned waves"
+      ],
+      "keywords": [
+        "waves",
+        "mentions",
+        "tag",
+        "profile",
+        "composer",
+        "group",
+        "all"
+      ],
       "facts": [
-        "Wave mentions are typed in the composer and documented as a composer feature.",
-        "Mention behavior depends on profile lookup and composer state.",
+        "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
+        "The special @all group mention can submit mentioned_groups metadata when the current wave/drop context allows mentioning all.",
+        "Mention behavior depends on composer state, supported metadata, and the user's eligibility in the current wave.",
         "The @help6529 helper bot trigger also uses mention detection, but the bot runtime is implemented in the backend."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "composer", "mentions"],
-      "source_refs": ["ops/docs/waves/composer/feature-wave-mentions.md"]
+      "source_refs": [
+        "ops/docs/waves/composer/feature-wave-mentions.md",
+        "helpers/waves/drop-group-mentions.ts",
+        "components/waves/CreateDropContent.tsx"
+      ]
     },
     {
       "id": "waves.composer.markdown",
@@ -2751,17 +2995,40 @@
       "id": "network.wave-score",
       "kind": "route",
       "title": "Network wave score",
-      "aliases": ["wave score", "network wave score", "wave score page"],
-      "keywords": ["network", "wave", "score", "metrics"],
+      "aliases": [
+        "wave score",
+        "network wave score",
+        "wave score page",
+        "wave rep",
+        "raw wave rep",
+        "wave rep score",
+        "wave quality score"
+      ],
+      "keywords": [
+        "network",
+        "wave",
+        "score",
+        "metrics",
+        "rep",
+        "quality",
+        "hotness",
+        "visibility"
+      ],
       "facts": [
         "Network wave score has a dedicated route at /network/wave-score.",
         "Use this route when users ask where wave score information lives.",
+        "Wave REP is a TDH-credit REP signal for a wave; it is signed and log-scaled before weighting in Wave Score.",
+        "Wave REP is the largest single quality component on the Wave Score transparency page.",
+        "Raw Wave REP can be very large or very negative; the score maps it to a bounded component for discovery math.",
         "Wave-specific participation remains under individual wave routes."
       ],
       "canonical_path": "/network/wave-score",
       "related_paths": ["/network", "/waves"],
       "tags": ["network", "waves"],
-      "source_refs": ["app/network/wave-score/page.tsx"]
+      "source_refs": [
+        "app/network/wave-score/page.tsx",
+        "components/waves/discovery/WaveScoreTransparencyPage.tsx"
+      ]
     },
     {
       "id": "network.prenodes",
@@ -2845,11 +3112,36 @@
         "meme card tabs",
         "card page tabs",
         "focus links",
-        "meme card detail"
+        "meme card detail",
+        "specific card",
+        "card number",
+        "meme card number",
+        "meme #",
+        "the memes #",
+        "tdh rate of meme",
+        "hodl rate of meme",
+        "edition size of meme",
+        "supply of meme"
       ],
-      "keywords": ["memes", "card", "tabs", "focus", "detail", "route"],
+      "keywords": [
+        "memes",
+        "card",
+        "number",
+        "tabs",
+        "focus",
+        "detail",
+        "tdh",
+        "hodl",
+        "edition",
+        "supply",
+        "mint",
+        "route"
+      ],
       "facts": [
         "Individual Meme Card pages live at /the-memes/{id}.",
+        "Use /the-memes/{id} for a specific Meme Card number such as Meme #1 or The Memes #1.",
+        "Meme Card preview/data surfaces expose fields such as edition size, TDH rate, season, mint date, and supply when available.",
+        "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
         "Card tabs and focus links are documented for deep-linking into card page sections.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."
       ],
@@ -2858,7 +3150,9 @@
       "tags": ["memes", "card"],
       "source_refs": [
         "app/the-memes/[id]/page.tsx",
-        "ops/docs/media/memes/feature-card-tabs-and-focus-links.md"
+        "ops/docs/media/memes/feature-card-tabs-and-focus-links.md",
+        "app/api/open-graph/6529/service.ts",
+        "generated/models/ApiNft.ts"
       ]
     },
     {
@@ -3329,6 +3623,42 @@
         "app/open-data/royalties/page.tsx",
         "ops/docs/open-data/feature-royalties-uploads.md"
       ]
+    },
+    {
+      "id": "tools.emma",
+      "kind": "route",
+      "title": "EMMA distribution plan tool",
+      "aliases": [
+        "emma",
+        "emma plans",
+        "distribution plan tool",
+        "allowlist tool",
+        "multiphase allowlist",
+        "janus",
+        "airdrop plan",
+        "public mint phase"
+      ],
+      "keywords": [
+        "tools",
+        "emma",
+        "distribution",
+        "plan",
+        "allowlist",
+        "airdrop",
+        "mint",
+        "janus",
+        "tdh"
+      ],
+      "facts": [
+        "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
+        "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
+        "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
+        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation."
+      ],
+      "canonical_path": "/emma",
+      "related_paths": ["/emma/plans"],
+      "tags": ["tools", "emma", "allowlist"],
+      "source_refs": ["app/emma/page.tsx", "app/emma/plans/page.tsx"]
     },
     {
       "id": "tools.api-auth-media-drop",

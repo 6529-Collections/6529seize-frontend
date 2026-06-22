@@ -76,8 +76,8 @@ orchestration, LLM calls, message reactions, and bot replies.
 The backend also owns Help6529 Credit accounting. The V1 public behavior is
 indexed here so users can ask about it: the credit category is `Help6529
 Credits`, each bot question costs 1 REP in that category, signup grants 5,
-profile setup grants 5, daily activity grants 2 when a user sends any message
-that day, and automatic grants cap at 50.
+profile setup grants 5, and daily activity grants 5 when a user sends any
+message that day. Automatic daily activity grants do not have a balance cap.
 
 ## Agent Maintenance Contract
 
