@@ -875,9 +875,7 @@ function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
     return false;
   }
 
-  return [frame.filename, frame.abs_path].some(
-    (path) => path === "[native code]"
-  );
+  return [frame.filename, frame.abs_path].includes("[native code]");
 }
 
 function hasAppOwnedFrame(frames: SentryStackFrame[] | undefined): boolean {
