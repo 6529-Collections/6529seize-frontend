@@ -396,8 +396,9 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
    30-minute observation window has elapsed and deployed-environment validation
    still passes. Leave release reports on hold if approved durable artifact
    storage is not wired.
-5. Start the next E2E packs in focused PRs: delegation first, then
-   NextGen/groups/tools, then broad network/open-data/static route matrices.
+5. Start the next E2E packs in focused PRs: composer/upload/link-preview
+   sandbox coverage, wallet/native/Electron shell coverage, and deployment
+   evidence/version verification.
 6. Reconcile the existing page-cluster PR stack from current `origin/main`
    before opening broad new implementation PRs.
 7. For every implementation PR, complete the `mega-run-pr-playbook.md` pre-PR

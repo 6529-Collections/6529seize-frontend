@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import type { Locator, Page, Route } from "@playwright/test";
 
 import {
   expect,
@@ -214,7 +214,7 @@ function isLocalBaseURL(baseURL: string | undefined) {
 
 async function installLocalActiveWaveSearchFixture(page: Page) {
   await page.route(`**/api/waves/${LOCAL_ACTIVE_WAVE_ID}**`, async (route) => {
-    await route.fulfill({
+    await fulfillLocalReadOnlyFixture(route, {
       contentType: "application/json",
       json: localFixtureWave,
       status: 200,
@@ -224,7 +224,7 @@ async function installLocalActiveWaveSearchFixture(page: Page) {
   await page.route(
     `**/api/v2/waves/${LOCAL_ACTIVE_WAVE_ID}/search**`,
     async (route) => {
-      await route.fulfill({
+      await fulfillLocalReadOnlyFixture(route, {
         contentType: "application/json",
         json: {
           data: [],
@@ -239,7 +239,7 @@ async function installLocalActiveWaveSearchFixture(page: Page) {
   await page.route(
     `**/api/v2/waves/${LOCAL_ACTIVE_WAVE_ID}/drops**`,
     async (route) => {
-      await route.fulfill({
+      await fulfillLocalReadOnlyFixture(route, {
         contentType: "application/json",
         json: {
           drops: [],
@@ -249,6 +249,22 @@ async function installLocalActiveWaveSearchFixture(page: Page) {
       });
     }
   );
+}
+
+async function fulfillLocalReadOnlyFixture(
+  route: Route,
+  response: Parameters<Route["fulfill"]>[0]
+) {
+  const method = route.request().method().toUpperCase();
+
+  if (method !== "GET" && method !== "HEAD") {
+    const pathname = new URL(route.request().url()).pathname;
+    throw new Error(
+      `Local read-only wave fixture refused ${method} ${pathname}.`
+    );
+  }
+
+  await route.fulfill(response);
 }
 
 async function openLocalWaveSearchModal(page: Page) {

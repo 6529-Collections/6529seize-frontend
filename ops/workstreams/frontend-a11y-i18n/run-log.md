@@ -2964,3 +2964,9 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run test:e2e:production:search-waves-readonly`: 2 passed on desktop
     Chromium.
   - `codex-diff-check`
+- Independent reviewer `Zeno` found that the first local browser fixtures
+  would fulfill any HTTP method for matching synthetic wave routes, which could
+  hide a future local unsafe method request before the read-only guard reported
+  it. Fixed the fixture helper to allow only `GET` and `HEAD`, and to fail
+  loudly on any other matching method. Also removed stale active-context next
+  pack guidance that referenced already-merged E2E areas.
