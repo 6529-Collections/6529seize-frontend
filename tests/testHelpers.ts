@@ -1,12 +1,68 @@
 import { test as base } from "@playwright/test";
+import type { BrowserContext, Page } from "@playwright/test";
+
+import {
+  assertNoPageErrors,
+  attachPageDiagnostics,
+  attachPageDiagnosticsArtifact,
+} from "./support/pageAssertions";
+import { installReadonlyMutationGuard } from "./support/readonlyMutationGuard";
+import { installSurfaceSimulation } from "./support/surfaceSimulation";
 
 const STAGING_HOSTNAME = "staging.6529.io";
+const STAGING_ACCESS_COOKIE_NAME = "x-6529-auth";
 const STAGING_ACCESS_CODE =
   process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] ?? process.env["STAGING_AUTH"];
+const ACCESS_INPUT_SELECTOR =
+  'input[aria-label="Team access code"], input[placeholder="Team Login"]';
+type PageGoto = (...args: Parameters<Page["goto"]>) => ReturnType<Page["goto"]>;
 
-async function unlockStagingAccess(page: import("@playwright/test").Page) {
-  await page.goto("/");
-  if (!isAccessUrl(page.url())) {
+async function installStagingAccessUnlock(page: Page) {
+  const originalGoto = page.goto.bind(page) as PageGoto;
+  const gotoWithAccessUnlock: PageGoto = async (...args) => {
+    const response = await originalGoto(...args);
+    if (!(await isAccessGateVisible(page))) {
+      return response;
+    }
+
+    if (!isStagingPage(page)) {
+      return response;
+    }
+
+    await submitStagingAccess(page, originalGoto);
+    return originalGoto(...args);
+  };
+
+  page.goto = gotoWithAccessUnlock as Page["goto"];
+  await gotoWithAccessUnlock("/", { waitUntil: "domcontentloaded" });
+}
+
+async function seedStagingAccessCookie(
+  context: BrowserContext,
+  baseURL?: string
+) {
+  if (!shouldUnlockStaging(baseURL) || !STAGING_ACCESS_CODE) {
+    return;
+  }
+
+  await context.addCookies([
+    {
+      domain: STAGING_HOSTNAME,
+      name: STAGING_ACCESS_COOKIE_NAME,
+      path: "/",
+      sameSite: "Strict",
+      secure: true,
+      value: STAGING_ACCESS_CODE,
+    },
+  ]);
+}
+
+async function submitStagingAccess(page: Page, goto: PageGoto) {
+  if (!(await isAccessGateVisible(page))) {
+    return;
+  }
+
+  if (!isStagingPage(page)) {
     return;
   }
 
@@ -16,25 +72,32 @@ async function unlockStagingAccess(page: import("@playwright/test").Page) {
     );
   }
 
-  const accessInput = page
-    .locator(
-      'input[aria-label="Team access code"], input[placeholder="Team Login"]'
-    )
-    .first();
+  const accessInput = page.locator(ACCESS_INPUT_SELECTOR).first();
 
+  await accessInput.waitFor({ state: "visible", timeout: 5000 });
   await accessInput.fill(STAGING_ACCESS_CODE);
-  await Promise.all([
-    page
-      .waitForURL((url) => !isAccessPath(url), { timeout: 10000 })
-      .catch(() => undefined),
-    accessInput.press("Enter"),
-  ]);
+  const loginDialog = page
+    .waitForEvent("dialog", { timeout: 10000 })
+    .then(async (dialog) => {
+      await dialog.accept();
+    })
+    .catch(() => undefined);
 
-  if (isAccessUrl(page.url())) {
-    await page.goto("/");
+  await accessInput.press("Enter");
+  await loginDialog;
+  await page
+    .waitForURL((url) => !isAccessPath(url), { timeout: 10000 })
+    .catch(() => undefined);
+
+  if (await isAccessGateVisible(page)) {
+    if (!isStagingPage(page)) {
+      return;
+    }
+
+    await goto("/", { waitUntil: "domcontentloaded" });
   }
 
-  if (isAccessUrl(page.url())) {
+  if (await isAccessGateVisible(page)) {
     throw new Error("Staging access gate did not unlock.");
   }
 }
@@ -51,6 +114,26 @@ function isAccessUrl(url: string) {
   }
 }
 
+function isStagingPage(page: Page) {
+  try {
+    return new URL(page.url()).hostname === STAGING_HOSTNAME;
+  } catch {
+    return false;
+  }
+}
+
+async function isAccessGateVisible(page: Page) {
+  if (isAccessUrl(page.url())) {
+    return true;
+  }
+
+  return page
+    .locator(ACCESS_INPUT_SELECTOR)
+    .first()
+    .isVisible({ timeout: 500 })
+    .catch(() => false);
+}
+
 function shouldUnlockStaging(baseURL?: string) {
   if (!baseURL) {
     return false;
@@ -64,14 +147,60 @@ function shouldUnlockStaging(baseURL?: string) {
 }
 
 const test = base.extend({
-  page: async ({ page, baseURL }, runTest) => {
+  context: async ({ context, baseURL }, runTest, testInfo) => {
+    await seedStagingAccessCookie(context, baseURL);
+    await installSurfaceSimulation(context, testInfo.project.name, baseURL);
+    const guard = await installReadonlyMutationGuard(context, baseURL);
+
+    await runTest(context);
+
+    guard.assertNoBlockedRequests();
+  },
+  page: async ({ page, baseURL }, runTest, testInfo) => {
+    const diagnostics = attachPageDiagnostics(page);
+
     if (shouldUnlockStaging(baseURL)) {
-      await unlockStagingAccess(page);
+      await installStagingAccessUnlock(page);
     }
 
     await runTest(page);
+
+    await attachPageDiagnosticsArtifact(testInfo, diagnostics);
+    assertNoPageErrors(diagnostics);
   },
 });
 
 export { expect } from "@playwright/test";
+export {
+  assertNoConsoleErrors,
+  assertNoPageErrors,
+  captureSafeScreenshot,
+  expectNoHorizontalOverflow,
+  waitForRouteReady,
+} from "./support/pageAssertions";
+export {
+  expectAxeClean,
+  getUnexpectedAxeViolations,
+  summarizeAxeViolations,
+  validateAxeAllowances,
+  WCAG_22_AA_TAGS,
+  type AxeViolationAllowance,
+} from "./support/a11yAssertions";
+export {
+  expectKeyboardFocusVisibleWithinTabs,
+  getFocusedElementSummary,
+  pressTab,
+  type FocusSummary,
+} from "./support/keyboardFocus";
+export {
+  getLocaleStressPaths,
+  LONG_TEXT_STRESS_LOCALE,
+  ROUTE_LOCALE_PARAM,
+  withLocale,
+} from "./support/i18nFixtures";
+export {
+  resolvePlaywrightTestSize,
+  tagTestTitle,
+  TEST_SIZE_TAGS,
+} from "./support/testSizes";
 export { test };

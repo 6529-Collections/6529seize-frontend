@@ -17,10 +17,10 @@ export default async function MemeLabCollectionPage({
   searchParams,
 }: {
   readonly params: Promise<{ collection: string }>;
-  readonly searchParams: Promise<MemeLabCollectionSearchParams>;
+  readonly searchParams?: Promise<MemeLabCollectionSearchParams>;
 }) {
   const { collection } = await params;
-  const resolvedSearchParams = await searchParams;
+  const resolvedSearchParams = (await searchParams) ?? {};
   const locale = getMemeLabRouteLocale(resolvedSearchParams);
   const collectionName = getMemeLabCollectionName(collection);
 
@@ -43,10 +43,10 @@ export async function generateMetadata({
   searchParams,
 }: {
   readonly params: Promise<{ collection: string }>;
-  readonly searchParams: Promise<MemeLabCollectionSearchParams>;
+  readonly searchParams?: Promise<MemeLabCollectionSearchParams>;
 }): Promise<Metadata> {
   const { collection } = await params;
-  const locale = getMemeLabRouteLocale(await searchParams);
+  const locale = getMemeLabRouteLocale((await searchParams) ?? {});
   const collectionName = getMemeLabCollectionName(collection);
   return getAppMetadata({
     title: t(locale, "memeLab.collections.documentTitle", {

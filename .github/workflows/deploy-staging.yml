@@ -65,6 +65,7 @@ jobs:
             --staging-deploy-sha "${{ steps.expected-commit.outputs.sha }}" \
             --production-candidate-sha "${{ steps.production-candidate.outputs.sha }}" \
             --production-eligible "${{ steps.production-candidate.outputs.eligible }}" \
+            --required-packs "playwright:core-smoke,playwright:surface-matrix,playwright:wcag-i18n" \
             --release-captain "github-actions/${{ github.actor }}" \
             --status queued \
             --phase queued \
@@ -417,17 +418,26 @@ jobs:
           case "$JOB_STATUS" in
             success)
               state="success"
+              manifest_status="deploy_verified"
               description="Staging deployment verified"
               ;;
             cancelled)
               state="error"
+              manifest_status="cancelled"
               description="Staging deployment cancelled before verification"
               ;;
             *)
               state="failure"
+              manifest_status="failed"
               description="Staging deployment failed before verification"
               ;;
           esac
+
+          node ops/scripts/deployment-bus.cjs heartbeat-manifest \
+            --file deployment-bus-manifest.json \
+            --status "$manifest_status" \
+            --phase terminal \
+            --message "$description"
 
           node ops/scripts/deployment-bus.cjs github-create-status \
             --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
@@ -436,11 +446,50 @@ jobs:
             --environment-url "https://staging.6529.io" \
             --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
+      - name: Record staging post-deploy watch
+        if: always() && hashFiles('deployment-bus-manifest.json') != ''
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            watch_status="passed"
+            observed_minutes="15"
+            notes="SSM deployment completed and staging deployed SHA verification passed."
+          else
+            watch_status="failed"
+            observed_minutes="0"
+            notes="Staging workflow did not complete deploy verification successfully."
+          fi
+
+          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
+            --file deployment-bus-manifest.json \
+            --status "$watch_status" \
+            --observed-duration-minutes "$observed_minutes" \
+            --checkpoint staging-deploy-verification \
+            --checkpoint-status "$watch_status" \
+            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --notes "$notes"
+
+      - name: Create staging release report
+        if: always()
+        run: |
+          if [ -f deployment-bus-manifest.json ]; then
+            node ops/scripts/deployment-bus.cjs release-report \
+              --file deployment-bus-manifest.json \
+              --output deployment-release-report.md
+          else
+            echo "No deployment-bus-manifest.json was created; skipping release report."
+          fi
+
       - name: Upload deployment bus manifest
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: deployment-bus-staging-${{ steps.expected-commit.outputs.sha || github.run_id }}
-          path: deployment-bus-manifest.json
+          path: |
+            deployment-bus-manifest.json
+            deployment-release-report.md
           if-no-files-found: ignore
           retention-days: 30
