@@ -7,14 +7,34 @@ import {
 } from "../testHelpers";
 
 export const RESPONSE_TIMEOUT_MS = 20000;
+const TRANSIENT_DOCUMENT_STATUS_CODES = new Set([502, 503, 504]);
+const TRANSIENT_DOCUMENT_RETRY_DELAY_MS = 1000;
 
 export type ApiResponseMatcher = (url: URL) => boolean;
 
 export async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page);
   await expectNoHorizontalOverflow(page);
   await expect(page).not.toHaveTitle("404 | PAGE NOT FOUND");
+}
+
+export async function gotoDocumentWithTransientRetry(page: Page, path: string) {
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+    const shouldRetry =
+      attempt === 1 &&
+      response !== null &&
+      TRANSIENT_DOCUMENT_STATUS_CODES.has(response.status());
+
+    if (!shouldRetry) {
+      return response;
+    }
+
+    await page.waitForTimeout(TRANSIENT_DOCUMENT_RETRY_DELAY_MS);
+  }
+
+  return null;
 }
 
 export async function waitForApiResponse(

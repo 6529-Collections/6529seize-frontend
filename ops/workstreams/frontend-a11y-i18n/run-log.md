@@ -3371,3 +3371,42 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
     and `codex-diff-check`
 - Hubble re-reviewed the updated diff and found no remaining publication
   blockers.
+
+## 2026-06-22T17:31Z Production Read-Only Aggregate Hardening Slice
+
+- PR #2846 merged and shipped to production as
+  `cf0503f787ea4f0b86696f6e0dacc75c01e1ed3d`.
+- Started fresh branch `codex/production-readonly-flake-hardening` from that
+  `origin/main` to fix post-deploy production-readonly test-harness drift.
+- Implemented test-only hardening:
+  - `tests/support/routeReadiness.ts` now has
+    `gotoDocumentWithTransientRetry`, which retries one top-level document
+    navigation only for explicit 502/503/504 responses.
+  - Production-readonly packs that had local navigation wrappers now use that
+    helper.
+  - ReMemes browse waits for `/api/rememes` before asserting filter and card
+    readiness.
+  - ReMemes browse keeps page-identity coverage with the visible logo or the
+    breakpoint-specific `Collection: ReMemes` control, instead of exact body
+    text that does not exist on current production.
+  - ReMemes detail title accepts the current production contract
+    `SeizeGenart | ReMemes`, while still allowing the previous site suffix.
+  - The read-only mutation guard aborts exact Google CSP
+    `csp/script-inclusions/<32-hex>` report POSTs and continues blocking
+    malformed lookalikes.
+- Independent verifier `Heisenberg` diagnosed the ReMemes browse failure as a
+  test over-assertion, not a product regression, and recommended the
+  breakpoint-aware header identity candidate now in the diff.
+- Final validation passed:
+  - `seize exec prettier --check ...`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - focused production ReMemes browse check: 1 passed
+  - focused production ReMemes detail check: 1 passed
+  - full `seize run test:e2e:production:readonly`: 65/65 passed
+  - `codex-diff-check`
+- Next action: commit, push, open PR, trigger all existing reviewbot lanes plus
+  GLM swarm, iterate feedback, then merge/deploy when Codex and the bots stop
+  adding material value.

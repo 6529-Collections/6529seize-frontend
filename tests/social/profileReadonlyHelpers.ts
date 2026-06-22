@@ -5,11 +5,12 @@ import {
   expectNoHorizontalOverflow,
   waitForRouteReady,
 } from "../testHelpers";
+import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 export const PROFILE_HANDLE = "punk6529";
 
 export async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page);
   await expectNoHorizontalOverflow(page);
 }
