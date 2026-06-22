@@ -98,6 +98,7 @@
     "react-doctor:diff": "node scripts/require-6529-command.cjs && node scripts/react-doctor-diff.cjs",
     "dependency:risk-gate": "node scripts/require-6529-command.cjs && node scripts/dependency-risk-gate.cjs",
     "deployment-bus": "node scripts/require-6529-command.cjs && node ops/scripts/deployment-bus.cjs",
+    "verify:deployment-version": "node scripts/require-6529-command.cjs && node ops/scripts/verify-deployment-version.cjs",
     "testing-strategy": "node scripts/require-6529-command.cjs && node ops/scripts/testing-strategy.cjs",
     "format": "node scripts/require-6529-command.cjs && prettier --write .",
     "format:check": "node scripts/require-6529-command.cjs && prettier --check .",
