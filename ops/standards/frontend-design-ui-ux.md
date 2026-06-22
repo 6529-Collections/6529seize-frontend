@@ -85,6 +85,33 @@ Avoid new React Bootstrap usage, Bootstrap utility classes, or Sass-only styling
 for new/migrated UI unless the PR is deliberately maintaining a legacy surface
 and the exception is documented.
 
+## Shape, Color, And Surface Tokens
+
+Use the existing Tailwind visual language for new and substantially touched UI:
+
+- Use `iron-*` neutrals for dark surfaces, borders, muted text, dividers, and
+  skeletons. Use `primary-*` for primary actions, active accents, carets, and
+  focus states. Use semantic tokens such as `error` and `success` for user-facing
+  status when available.
+- Prefer subtle borders and rings such as `tw-border-iron-*`, `tw-border-white/5`,
+  `tw-border-white/10`, `tw-ring-iron-*`, and `tw-ring-primary-*`. Avoid bright
+  or heavy borders unless they communicate active, selected, warning, or error
+  state.
+- Prefer `tw-rounded-lg` and `tw-rounded-xl` for cards, dialogs, buttons, panels,
+  and framed product surfaces. Use `tw-rounded-md`, `tw-rounded`, or smaller
+  radii for dense inputs, table controls, thumbnails, and compact rows when the
+  nearby pattern does.
+- Use `tw-rounded-full` for avatars, pills, badges, dots, circular icon buttons,
+  and progress indicators.
+- Do not introduce `tw-rounded-3xl` in new or touched UI. Existing occurrences
+  may remain until their surface is intentionally restyled, but they are not
+  precedent for future implementation.
+- Treat `tw-rounded-2xl`, arbitrary radius values, arbitrary hex colors, and raw
+  `rgb()` / `rgba()` styling as exceptions. Use them only when matching a nearby
+  established surface, a real media/art treatment, a third-party brand color, or
+  a chart/domain state that is not covered by current tokens; document the reason
+  in the PR notes when the choice is user-visible.
+
 ## New PR Requirements
 
 - Reuse existing layout and component patterns before creating a new pattern,

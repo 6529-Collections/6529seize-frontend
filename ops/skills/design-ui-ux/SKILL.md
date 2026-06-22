@@ -19,15 +19,18 @@ Use this skill for user-facing design and UX work in this repository.
    tokens, and shared Tailwind-based components for new or migrated UI. Use
    existing Sass or Bootstrap patterns only when maintaining a legacy surface or
    when a narrow exception is justified.
-5. Keep the change scoped to the touched surface. Do not introduce a new visual
+5. Check shape, color, and surface-token choices. Do not introduce
+   `tw-rounded-3xl` for future UI, and treat arbitrary colors or radii as
+   exceptions that need local precedent or a documented product reason.
+6. Keep the change scoped to the touched surface. Do not introduce a new visual
    language, icon set, spacing scale, palette, styling library, or new
    Bootstrap/Sass debt.
-6. Verify desktop and mobile rendering for visible UI changes. Check overflow,
+7. Verify desktop and mobile rendering for visible UI changes. Check overflow,
    clipping, readable text, focus, hover/touch alternatives, media behavior,
    and loading/empty/error/disabled states that the change can affect.
-7. Use screenshot or pixel sanity evidence when the visual result matters. Do
+8. Use screenshot or pixel sanity evidence when the visual result matters. Do
    not rely only on DOM presence when a route can render blank or unreadable.
-8. In PR notes or closeout, summarize the UI pattern reused, migration judgment,
+9. In PR notes or closeout, summarize the UI pattern reused, migration judgment,
    evidence collected, unchecked states, and any documented exceptions.
 
 ## Review Checklist
@@ -43,6 +46,9 @@ Use this skill for user-facing design and UX work in this repository.
   touched surface is intentionally still legacy.
 - Dark-first surfaces, `iron-*` greys, typography, borders, and compact spacing
   match current Tailwind patterns before older Bootstrap/Sass patterns.
+- Cards, dialogs, controls, and framed surfaces use existing radius patterns
+  (`tw-rounded-lg` / `tw-rounded-xl` by default, `tw-rounded-full` for
+  circular/pill UI) and do not introduce `tw-rounded-3xl`.
 - New Bootstrap, React Bootstrap, global Sass, Sass module, hardcoded color, or
   old spacing debt is absent or explicitly justified.
 - Product content remains primary, especially NFT/media/art imagery, avatars,
