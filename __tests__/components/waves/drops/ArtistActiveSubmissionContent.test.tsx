@@ -7,11 +7,12 @@ import type { ApiProfileMin } from '@/generated/models/ApiProfileMin';
 
 // Mock dependencies
 const mockPush = jest.fn();
+const mockUseSearchParams = jest.fn(() => new URLSearchParams());
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
   usePathname: () => '/test-path',
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockUseSearchParams(),
 }));
 
 jest.mock('framer-motion', () => ({
@@ -97,6 +98,7 @@ describe('ArtistActiveSubmissionContent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
     // Reset to default mock state with submissions
     const { useUserArtSubmissions, useSubmissionDrops } = require('@/hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
@@ -116,16 +118,11 @@ describe('ArtistActiveSubmissionContent', () => {
     });
   });
 
-  it('returns null when searchParams is null', () => {
-    const originalMock = require('next/navigation').useSearchParams;
-    require('next/navigation').useSearchParams = jest.fn().mockReturnValue(null);
-    
+  it('renders when search params are empty', () => {
     const { container } = renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
-    
-    expect(container.firstChild).toBeNull();
-    
-    // Restore original mock
-    require('next/navigation').useSearchParams = originalMock;
+
+    expect(container.firstChild).not.toBeNull();
+    expect(screen.getByText('Test Artwork 1')).toBeInTheDocument();
   });
 
   it('renders submissions when data is available', () => {

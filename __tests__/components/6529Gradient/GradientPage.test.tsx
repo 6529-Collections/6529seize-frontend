@@ -6,6 +6,7 @@ import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
@@ -42,6 +43,9 @@ jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
   default: () => <div data-testid="links" />,
 }));
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: () => ({ profile: null, isLoading: false }),
+}));
 jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
   __esModule: true,
   default: (props: any) => (
@@ -55,6 +59,7 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
 jest.mock("@/components/nft-transfer/TransferSingle", () => ({
   __esModule: true,
   default: () => <div data-testid="transfer-action" />,
+  TransferSingleActions: () => <div data-testid="transfer-action" />,
 }));
 jest.mock("@/hooks/useCapacitor", () => () => ({ isIos: false }));
 
@@ -129,19 +134,24 @@ function renderPage({
   readonly connectedAddress?: string | undefined;
 } = {}) {
   mockConnectedAddress = connectedAddress;
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
 
   return render(
-    <TitleProvider>
-      <AuthContext.Provider
-        value={{ connectedProfile: { wallets: [{ wallet }] } } as any}
-      >
-        <CookieConsentProvider>
-          <SeizeConnectProvider>
-            <GradientPageComponent id="1" />
-          </SeizeConnectProvider>
-        </CookieConsentProvider>
-      </AuthContext.Provider>
-    </TitleProvider>
+    <QueryClientProvider client={queryClient}>
+      <TitleProvider>
+        <AuthContext.Provider
+          value={{ connectedProfile: { wallets: [{ wallet }] } } as any}
+        >
+          <CookieConsentProvider>
+            <SeizeConnectProvider>
+              <GradientPageComponent id="1" />
+            </SeizeConnectProvider>
+          </CookieConsentProvider>
+        </AuthContext.Provider>
+      </TitleProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -207,7 +217,7 @@ describe("GradientPage", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Gradient 1 - Gradient #1" })
+      screen.getByRole("heading", { name: "Gradient #1" })
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "6529 Gradient" })).toHaveAttribute(
       "href",
@@ -236,7 +246,9 @@ describe("GradientPage", () => {
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getByText("Card Details")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Card Details" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Mint Date")).toBeInTheDocument();
     expect(screen.getByText("Artist")).toBeInTheDocument();
     expect(screen.getByTestId("artist")).toBeInTheDocument();
@@ -254,7 +266,7 @@ describe("GradientPage", () => {
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getAllByText("TDH")).toHaveLength(2); // heading and metric label
+    expect(screen.getAllByText("TDH")).toHaveLength(1);
     expect(screen.getByText("100")).toBeInTheDocument(); // boosted_tdh
     expect(screen.getByText("Unweighted TDH")).toBeInTheDocument();
     expect(screen.getByText("50")).toBeInTheDocument(); // tdh__raw
@@ -317,14 +329,19 @@ describe("GradientPage", () => {
   });
 
   it("handles wallet connection state changes", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     const { rerender } = render(
-      <TitleProvider>
-        <AuthContext.Provider value={{ connectedProfile: null } as any}>
-          <CookieConsentProvider>
-            <GradientPageComponent id="1" />
-          </CookieConsentProvider>
-        </AuthContext.Provider>
-      </TitleProvider>
+      <QueryClientProvider client={queryClient}>
+        <TitleProvider>
+          <AuthContext.Provider value={{ connectedProfile: null } as any}>
+            <CookieConsentProvider>
+              <GradientPageComponent id="1" />
+            </CookieConsentProvider>
+          </AuthContext.Provider>
+        </TitleProvider>
+      </QueryClientProvider>
     );
 
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
@@ -339,15 +356,19 @@ describe("GradientPage", () => {
 
     // Rerender with connected profile
     rerender(
-      <TitleProvider>
-        <AuthContext.Provider
-          value={{ connectedProfile: { wallets: [{ wallet: "0x1" }] } } as any}
-        >
-          <CookieConsentProvider>
-            <GradientPageComponent id="1" />
-          </CookieConsentProvider>
-        </AuthContext.Provider>
-      </TitleProvider>
+      <QueryClientProvider client={queryClient}>
+        <TitleProvider>
+          <AuthContext.Provider
+            value={
+              { connectedProfile: { wallets: [{ wallet: "0x1" }] } } as any
+            }
+          >
+            <CookieConsentProvider>
+              <GradientPageComponent id="1" />
+            </CookieConsentProvider>
+          </AuthContext.Provider>
+        </TitleProvider>
+      </QueryClientProvider>
     );
 
     // Should now show as owner

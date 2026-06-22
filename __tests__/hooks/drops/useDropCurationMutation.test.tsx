@@ -130,8 +130,10 @@ describe("useDropCurationMutation", () => {
 
     await waitFor(() => {
       expect(setToast).toHaveBeenCalledWith({
-        message: "Failed to curate drop: boom",
         type: "error",
+        title: "Couldn't curate this drop.",
+        description: "Please try again.",
+        details: "boom.",
       });
     });
     expect(invalidateDrops).not.toHaveBeenCalled();

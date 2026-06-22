@@ -1,21 +1,18 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { AppWalletsProvider, useAppWallets } from '@/components/app-wallets/AppWalletsContext';
+import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
 
 jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
   default: jest.fn().mockReturnValue({ isCapacitor: true })
 }));
 
-const setMock = jest.fn().mockResolvedValue({ value: true });
-const keysMock = jest.fn().mockResolvedValue({ value: [] });
-const getMock = jest.fn().mockResolvedValue({ value: '{}' });
-
 jest.mock('capacitor-secure-storage-plugin', () => ({
   SecureStoragePlugin: {
-    keys: keysMock,
-    set: setMock,
-    get: getMock,
+    keys: jest.fn().mockResolvedValue({ value: [] }),
+    set: jest.fn().mockResolvedValue({ value: true }),
+    get: jest.fn().mockResolvedValue({ value: '{}' }),
     remove: jest.fn().mockResolvedValue({ value: true })
   }
 }));
@@ -25,6 +22,8 @@ jest.mock('@/components/app-wallets/app-wallet-helpers', () => ({ encryptData: j
 jest.mock('@/helpers/time', () => ({ Time: { now: () => ({ toSeconds: () => 1 }) } }));
 
 describe('AppWalletsContext importAppWallet', () => {
+  const secureStorage = SecureStoragePlugin as jest.Mocked<typeof SecureStoragePlugin>;
+
   it('imports wallet when supported', async () => {
     const wrapper = ({ children }: any) => <AppWalletsProvider>{children}</AppWalletsProvider>;
     const { result } = renderHook(() => useAppWallets(), { wrapper });
@@ -45,7 +44,7 @@ describe('AppWalletsContext importAppWallet', () => {
     
     // If storage was called, verify it was called correctly
     if (result.current.appWalletsSupported) {
-      expect(setMock).toHaveBeenCalled();
+      expect(secureStorage.set).toHaveBeenCalled();
     }
   });
 });

@@ -3,9 +3,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { CurationWaveBadge } from "@/components/waves/drops/CurationWaveBadge";
 
-jest.mock("@/hooks/isMobileDevice", () => ({
+jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: jest.fn(() => false),
+  default: jest.fn(() => ({ hasTouchScreen: false })),
 }));
 
 jest.mock("@/helpers/image.helpers", () => ({
@@ -26,11 +26,20 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <span data-testid="wave-fallback-icon" />,
 }));
 
-jest.mock("react-tooltip", () => ({
-  Tooltip: ({ children, id, isOpen }: any) => (
-    <div data-testid="tooltip" id={id} data-open={String(isOpen)}>
+jest.mock("@/components/utils/tooltip/HoverCard", () => ({
+  __esModule: true,
+  default: ({ children, content, ariaLabel }: any) => (
+    <div>
+      <div data-testid="hover-card" aria-label={ariaLabel}>
+        {content}
+      </div>
       {children}
     </div>
+  ),
+}));
+jest.mock("@/components/waves/drops/CurationWavePreviewCard", () => ({
+  CurationWavePreviewCard: ({ fallbackName }: any) => (
+    <div data-testid="preview-card">{fallbackName ?? "Featured wave"}</div>
   ),
 }));
 
@@ -55,7 +64,13 @@ describe("CurationWaveBadge", () => {
       "src",
       "scaled:https://example.com/wave.png"
     );
-    expect(screen.getByTestId("tooltip")).toHaveTextContent("Profile Wave");
+    expect(screen.getByTestId("hover-card")).toHaveAttribute(
+      "aria-label",
+      "Wave details for Profile Wave"
+    );
+    expect(screen.getByTestId("preview-card")).toHaveTextContent(
+      "Profile Wave"
+    );
 
     fireEvent.click(screen.getByRole("button"));
 
@@ -69,7 +84,13 @@ describe("CurationWaveBadge", () => {
       "aria-label",
       "Open featured wave"
     );
-    expect(screen.getByTestId("tooltip")).toHaveTextContent("Featured wave");
+    expect(screen.getByTestId("hover-card")).toHaveAttribute(
+      "aria-label",
+      "Wave details for Featured wave"
+    );
+    expect(screen.getByTestId("preview-card")).toHaveTextContent(
+      "Featured wave"
+    );
     expect(screen.queryByTestId("wave-image")).toBeNull();
     expect(screen.getByTestId("wave-fallback-icon")).toBeInTheDocument();
   });
@@ -87,6 +108,8 @@ describe("CurationWaveBadge", () => {
 
     expect(screen.queryByTestId("wave-image")).toBeNull();
     expect(screen.getByTestId("wave-fallback-icon")).toBeInTheDocument();
-    expect(screen.getByTestId("tooltip")).toHaveTextContent("Profile Wave");
+    expect(screen.getByTestId("preview-card")).toHaveTextContent(
+      "Profile Wave"
+    );
   });
 });

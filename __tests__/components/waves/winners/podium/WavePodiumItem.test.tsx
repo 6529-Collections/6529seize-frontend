@@ -81,18 +81,14 @@ it("renders placeholder when no winner", () => {
 
 it("calls onDropClick when clicked", () => {
   const onDropClick = jest.fn();
-  render(
+  const { container } = render(
     <WavePodiumItem
       winner={{ drop } as any}
       position="first"
       onDropClick={onDropClick}
     />
   );
-  expect(screen.getByTestId("identity")).toBeInTheDocument();
-  fireEvent.click(
-    screen.getByRole("link", { name: /alice/i }).parentElement!.parentElement!
-      .parentElement!.parentElement!
-  );
+  fireEvent.click(container.querySelector(".tw-cursor-pointer")!);
   expect(onDropClick).toHaveBeenCalledWith(drop);
 });
 

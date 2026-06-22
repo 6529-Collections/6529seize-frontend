@@ -11,10 +11,11 @@ import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useContext, useEffect, useState } from "react";
 import type {
   FullResultWallet,
-  ReviewDistributionPlanTablePhase} from "./ReviewDistributionPlanTable";
+  ReviewDistributionPlanTablePhase,
+} from "./ReviewDistributionPlanTable.types";
 import {
-  FetchResultsType
-} from "./ReviewDistributionPlanTable";
+  FetchResultsType,
+} from "./ReviewDistributionPlanTable.types";
 
 export default function ReviewDistributionPlanTableHeader({
   rows,

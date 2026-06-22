@@ -60,7 +60,7 @@ const collection: any = {
 
 describe('NextGenCollectionHeader', () => {
   it('renders back link text depending on path', () => {
-    Object.defineProperty(window, 'location', { value: { pathname: '/x/art' }, writable: true });
+    window.history.pushState({}, '', '/x/art');
     render(<NextGenBackToCollectionPageLink collection={collection} />);
     expect(screen.getByText('Back to collection page')).toBeInTheDocument();
   });
