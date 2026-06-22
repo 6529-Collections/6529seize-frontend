@@ -98,29 +98,6 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
-  it("preserves the authenticating websocket status in breadcrumbs", () => {
-    beginReactionMutation({
-      dropId: "drop-authenticating",
-      waveId: "wave-1",
-      source: "quick-react",
-      action: "add",
-      previousReaction: null,
-      intendedReaction: ":smile:",
-      optimisticReaction: ":smile:",
-      profileId: "profile-1",
-      websocketStatus: WebSocketStatus.AUTHENTICATING,
-    });
-
-    expect(addBreadcrumbMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: "reaction.intent",
-        data: expect.objectContaining({
-          websocket_status: WebSocketStatus.AUTHENTICATING,
-        }),
-      })
-    );
-  });
-
   it("captures a classified failure event for auth errors", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-2",

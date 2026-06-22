@@ -25,16 +25,6 @@ function getSectionSummaryElement(heading: string): HTMLElement {
   return summary;
 }
 
-function openSection(heading: string): void {
-  const summary = getSectionSummaryElement(heading);
-  const details = summary.closest("details");
-  if (!details) {
-    throw new Error(`Expected details for section heading: ${heading}`);
-  }
-  details.open = true;
-  fireEvent(details, new Event("toggle", { bubbles: true }));
-}
-
 function getDetailsToggle(): HTMLElement {
   return screen.getByRole("button", { name: /show details/i });
 }
@@ -104,7 +94,7 @@ describe("QuorumProposalCompactContent", () => {
     );
 
     fireEvent.click(getDetailsToggle());
-    openSection("Problem Statement");
+    fireEvent.click(getSectionSummaryElement("Problem Statement"));
 
     expect(screen.getByText("Too many drops.")).toBeInTheDocument();
     expect(screen.queryByText("Add a countdown.")).toBeNull();
@@ -172,7 +162,7 @@ describe("QuorumProposalCompactContent", () => {
     );
 
     fireEvent.click(getDetailsToggle());
-    openSection("Problem Statement");
+    fireEvent.click(getSectionSummaryElement("Problem Statement"));
     fireEvent.click(screen.getByText("Too many drops."));
 
     expect(onParentClick).not.toHaveBeenCalled();

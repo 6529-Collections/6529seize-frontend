@@ -58,28 +58,32 @@ describe("useGlobalTdhStats", () => {
     expect(capturedConfig.queryKey).toEqual([QueryKey.GLOBAL_TDH_STATS]);
 
     commonApiFetch.mockResolvedValueOnce({
+      tdh: 10,
+      tdh_rate: 2,
       xtdh: 20,
       xtdh_rate: 4,
-      multiplier: 3,
-      outgoing_rate: 1,
-      outgoing_total: 5,
-      outgoing_collections_count: 6,
-      outgoing_tokens_count: 7,
+      xtdh_multiplier: 3,
+      granted_xtdh_rate: 1,
+      granted_xtdh: 5,
+      granted_target_collections_count: 6,
+      granted_target_tokens_count: 7,
     });
 
     const result = await capturedConfig.queryFn();
 
     expect(commonApiFetch).toHaveBeenCalledWith(
-      expect.objectContaining({ endpoint: "xtdh/stats" })
+      expect.objectContaining({ endpoint: "tdh-stats" })
     );
     expect(result).toEqual({
+      tdh: 10,
+      tdhRate: 2,
       xtdh: 20,
       xtdhRate: 4,
-      multiplier: 3,
-      outgoingRate: 1,
-      outgoingTotal: 5,
-      outgoingCollectionsCount: 6,
-      outgoingTokensCount: 7,
+      xtdhMultiplier: 3,
+      grantedXtdhRate: 1,
+      grantedXtdh: 5,
+      grantedCollectionsCount: 6,
+      grantedTokensCount: 7,
     });
   });
 
@@ -93,25 +97,29 @@ describe("useGlobalTdhStats", () => {
     renderHook(() => useGlobalTdhStats());
 
     commonApiFetch.mockResolvedValueOnce({
+      tdh: -5,
+      tdh_rate: undefined,
       xtdh: "100",
       xtdh_rate: 8.5,
-      multiplier: null,
-      outgoing_rate: -3,
-      outgoing_total: 4.2,
-      outgoing_collections_count: 7.8,
-      outgoing_tokens_count: "n/a",
+      xtdh_multiplier: null,
+      granted_xtdh_rate: -3,
+      granted_xtdh: 4.2,
+      granted_target_collections_count: 7.8,
+      granted_target_tokens_count: "n/a",
     });
 
     const result = await capturedConfig.queryFn();
 
     expect(result).toEqual({
+      tdh: 0,
+      tdhRate: null,
       xtdh: 0,
       xtdhRate: 8.5,
-      multiplier: null,
-      outgoingRate: 0,
-      outgoingTotal: 4.2,
-      outgoingCollectionsCount: 7,
-      outgoingTokensCount: 0,
+      xtdhMultiplier: null,
+      grantedXtdhRate: 0,
+      grantedXtdh: 4.2,
+      grantedCollectionsCount: 7,
+      grantedTokensCount: 0,
     });
   });
 });

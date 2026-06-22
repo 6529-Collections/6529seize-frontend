@@ -107,17 +107,8 @@ test("calls signMessage when form is valid", async () => {
   await user.click(radios[0]);
   await user.click(screen.getByText("Submit"));
   expect(signMessageState.signMessage).toHaveBeenCalledWith({
-    message: expect.stringContaining("Nonce: test-uuid"),
+    message: "test-uuid",
   });
-  const signedMessage = signMessageState.signMessage.mock.calls[0][0].message;
-  expect(signedMessage).toEqual(expect.stringContaining("6529 Action"));
-  expect(signedMessage).toEqual(expect.stringContaining("Action: nextgen_admin"));
-  expect(signedMessage).toEqual(expect.stringContaining("Payload Hash:"));
-  expect(signedMessage).toEqual(
-    expect.stringContaining(
-      "Purpose: Sign this message to perform a 6529 NextGen admin action."
-    )
-  );
 });
 
 test("writes contract after successful sign message and api call", async () => {

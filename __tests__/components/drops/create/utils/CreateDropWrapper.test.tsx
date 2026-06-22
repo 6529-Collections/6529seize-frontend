@@ -11,14 +11,7 @@ import {
 // Mock the SeizeConnectContext
 const mockUseSeizeConnectContext = jest.fn();
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => {
-    const context = mockUseSeizeConnectContext();
-    return {
-      ...context,
-      hasValidWalletAuth:
-        context?.hasValidWalletAuth ?? context?.isAuthenticated ?? false,
-    };
-  },
+  useSeizeConnectContext: () => mockUseSeizeConnectContext(),
 }));
 
 // Mock react-use breakpoint

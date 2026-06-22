@@ -22,9 +22,9 @@ jest.mock('next/link', () => {
 });
 
 jest.mock('@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogDrop', () => ({
-  WaveLeaderboardRightSidebarActivityLogDrop: function({ onDropClick }: any) {
+  WaveLeaderboardRightSidebarActivityLogDrop: function({ log, onDropClick }: any) {
     return (
-      <button onClick={onDropClick} data-testid="drop-click-button">
+      <button onClick={() => onDropClick(log)} data-testid="drop-click-button">
         Drop Button
       </button>
     );
@@ -75,11 +75,6 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     return render(<WaveLeaderboardRightSidebarActivityLog {...defaultProps} {...props} />);
   };
 
-  const getVoteText = (text: string) =>
-    screen.getByText((_, element) =>
-      element?.textContent?.replace(/\s+/g, " ").trim() === text
-    );
-
   it('renders the activity log container', () => {
     renderComponent();
     
@@ -95,7 +90,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     
     const clockIcon = document.querySelector('svg');
     expect(clockIcon).toBeInTheDocument();
-    expect(clockIcon).toHaveClass('tw-size-3.5', 'tw-text-iron-400');
+    expect(clockIcon).toHaveClass('tw-w-3.5', 'tw-h-3.5', 'tw-text-iron-400');
   });
 
   it('renders drop click button component', () => {
@@ -112,7 +107,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     const dropButton = screen.getByTestId('drop-click-button');
     await user.click(dropButton);
     
-    expect(mockOnDropClick).toHaveBeenCalledTimes(1);
+    expect(mockOnDropClick).toHaveBeenCalledWith(mockLog);
   });
 
   it('displays voter information with profile picture', () => {
@@ -171,7 +166,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     renderComponent();
     
     expect(screen.getByText('1,000 →')).toBeInTheDocument();
-    expect(getVoteText('1,000 Rep')).toBeInTheDocument();
+    expect(screen.getByText('1,000 REP')).toBeInTheDocument();
   });
 
   it('displays "voted" text for first-time votes', () => {
@@ -189,7 +184,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
   it('applies green color for positive new votes', () => {
     renderComponent();
     
-    const newVoteSpan = getVoteText('1,000 Rep');
+    const newVoteSpan = screen.getByText('1,000 REP');
     expect(newVoteSpan).toHaveClass('tw-text-green');
   });
 
@@ -201,7 +196,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     
     renderComponent({ log: negativeVoteLog });
     
-    const newVoteSpan = getVoteText('-5 Rep');
+    const newVoteSpan = screen.getByText('-5 REP');
     expect(newVoteSpan).toHaveClass('tw-text-red');
   });
 
@@ -225,7 +220,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
   it('displays correct credit type', () => {
     renderComponent({ creditType: ApiWaveCreditType.Tdh });
     
-    expect(getVoteText('1,000 TDH')).toBeInTheDocument();
+    expect(screen.getByText('1,000 TDH')).toBeInTheDocument();
   });
 
   it('formats numbers with commas in vote display', () => {
@@ -249,7 +244,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     const oldVoteSpan = screen.getByText('1,000 →');
     expect(oldVoteSpan).toHaveClass('tw-text-sm', 'tw-text-iron-500', 'tw-whitespace-nowrap');
     
-    const newVoteSpan = getVoteText('1,000 Rep');
+    const newVoteSpan = screen.getByText('1,000 REP');
     expect(newVoteSpan).toHaveClass('tw-text-sm', 'tw-font-semibold', 'tw-whitespace-nowrap');
   });
 

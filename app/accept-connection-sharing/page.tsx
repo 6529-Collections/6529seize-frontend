@@ -1,14 +1,9 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import AcceptConnectionSharingPageClient from "./page.client";
 
 export default function AcceptConnectionSharingPage() {
-  return (
-    <Suspense fallback={null}>
-      <AcceptConnectionSharingPageClient />
-    </Suspense>
-  );
+  return <AcceptConnectionSharingPageClient />;
 }
 
 export async function generateMetadata(): Promise<Metadata> {

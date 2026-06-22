@@ -49,7 +49,7 @@ export class WalletErrorBoundary extends Component<Props, State> {
 
   private readonly handleReset = async () => {
     try {
-      await clearAllWalletAuth();
+      clearAllWalletAuth();
       localStorage.clear();
       window.location.reload();
     } catch (error) {

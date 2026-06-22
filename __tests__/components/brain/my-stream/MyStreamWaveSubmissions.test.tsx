@@ -9,12 +9,6 @@ import {
 let searchParamsString = "";
 const push = jest.fn();
 const replace = jest.fn();
-let mockApprovalWaveStatus = {
-  winningThreshold: undefined as number | undefined,
-  winningThresholdMinDurationMs: undefined as number | undefined,
-  isVotingClosed: false,
-  isVotingControlsLocked: false,
-};
 
 jest.mock("@/hooks/useWaveDropsLeaderboard");
 jest.mock("@/hooks/useIntersectionObserver", () => ({
@@ -65,9 +59,6 @@ jest.mock(
     WaveLeaderboardLoadingBar: () => <div data-testid="loading-bar" />,
   })
 );
-jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
-  useApprovalWaveStatus: () => mockApprovalWaveStatus,
-}));
 
 const useWaveDropsLeaderboardMock = useWaveDropsLeaderboard as jest.Mock;
 
@@ -77,12 +68,6 @@ describe("MyStreamWaveSubmissions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     searchParamsString = "";
-    mockApprovalWaveStatus = {
-      winningThreshold: undefined,
-      winningThresholdMinDurationMs: undefined,
-      isVotingClosed: false,
-      isVotingControlsLocked: false,
-    };
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [],
       fetchNextPage: jest.fn(),
@@ -155,12 +140,6 @@ describe("MyStreamWaveSubmissions", () => {
         no_of_decisions_done: 1,
       },
     } as any;
-    mockApprovalWaveStatus = {
-      winningThreshold: 7,
-      winningThresholdMinDurationMs: 120_000,
-      isVotingClosed: true,
-      isVotingControlsLocked: true,
-    };
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [{ id: "drop-1" }],
       fetchNextPage: jest.fn(),

@@ -6,11 +6,6 @@ import { UserRejectedRequestError } from "viem";
 
 jest.mock("wagmi", () => ({ useSignMessage: jest.fn() }));
 
-jest.mock("@/services/wallet-signatures/structured-wallet-signatures", () => ({
-  buildDropSignatureMessage: jest.fn(),
-  isStructuredSignaturesEnabled: jest.fn(() => false),
-}));
-
 const mockHash = "hash";
 jest.mock("@/utils/drop-hasher", () => ({
   DropHasher: class {

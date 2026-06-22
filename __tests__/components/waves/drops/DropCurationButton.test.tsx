@@ -44,7 +44,7 @@ describe("DropCurationButton", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders curate button without local tooltip chrome", () => {
+  it("renders curate button tooltip with local stacking and absolute positioning", () => {
     render(
       <DropCurationButton
         dropId="drop-1"
@@ -55,7 +55,14 @@ describe("DropCurationButton", () => {
     );
 
     expect(screen.getByRole("button", { name: "Curate drop" })).toBeVisible();
-    expect(screen.queryByTestId("tooltip-curate-drop-drop-1")).toBeNull();
+    expect(screen.getByTestId("tooltip-curate-drop-drop-1")).toHaveAttribute(
+      "data-position-strategy",
+      "absolute"
+    );
+    expect(screen.getByTestId("tooltip-curate-drop-drop-1")).toHaveAttribute(
+      "data-z-index",
+      "20"
+    );
   });
 
   it("calls toggleCuration with expected payload on click", () => {

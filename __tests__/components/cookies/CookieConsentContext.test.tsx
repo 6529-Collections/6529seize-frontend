@@ -25,10 +25,7 @@ jest.mock("@/services/api/common-api", () => ({
 
 // Mock AuthContext
 jest.mock("@/components/auth/Auth", () => ({
-  AuthContext: jest.requireActual("react").createContext({
-    setToast: jest.fn(),
-  }),
-  useAuth: () => ({
+  AuthContext: React.createContext({
     setToast: jest.fn(),
   }),
 }));

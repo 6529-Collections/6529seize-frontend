@@ -48,7 +48,6 @@ describe("useConnectedAccountsUnreadNotifications", () => {
         queryKey: [
           QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
           "connected-account-unread-counts",
-          "v2",
           ["0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
         ],
       })

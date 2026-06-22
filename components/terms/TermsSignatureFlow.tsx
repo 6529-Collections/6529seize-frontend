@@ -13,7 +13,6 @@ interface TermsSignatureFlowProps {
 interface SigningCompleteResult {
   success: boolean;
   signature?: string | undefined;
-  signatureMessage?: string | undefined;
 }
 
 /**

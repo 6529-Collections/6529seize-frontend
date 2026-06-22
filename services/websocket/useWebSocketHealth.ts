@@ -155,8 +155,7 @@ export function useWebSocketHealth() {
       webSocketStateRef.current;
     if (
       currentStatus === WebSocketStatus.CONNECTED ||
-      currentStatus === WebSocketStatus.CONNECTING ||
-      currentStatus === WebSocketStatus.AUTHENTICATING
+      currentStatus === WebSocketStatus.CONNECTING
     ) {
       currentConnect(currentToken);
     }

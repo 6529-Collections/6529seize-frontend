@@ -18,13 +18,11 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
 }));
 
-let shouldAutoAuthenticate = true;
-
 class MockWebSocket {
-  static readonly OPEN = 1;
-  static readonly CONNECTING = 0;
-  static readonly CLOSING = 2;
-  static readonly CLOSED = 3;
+  static OPEN = 1;
+  static CONNECTING = 0;
+  static CLOSING = 2;
+  static CLOSED = 3;
 
   readyState = 0; // Start as CONNECTING
   onopen: ((event: Event) => void) | null = null;
@@ -47,18 +45,6 @@ class MockWebSocket {
     this.readyState = MockWebSocket.OPEN;
     if (this.onopen) {
       this.onopen(new Event("open"));
-    }
-    if (
-      shouldAutoAuthenticate &&
-      this.sent.some((message) => {
-        try {
-          return JSON.parse(message).type === "AUTHENTICATE";
-        } catch {
-          return false;
-        }
-      })
-    ) {
-      this.triggerMessage({ type: "AUTHENTICATED" });
     }
   }
 
@@ -89,26 +75,25 @@ describe("WebSocketProvider", () => {
   let mockGetAuthJwt: jest.MockedFunction<typeof authUtils.getAuthJwt>;
 
   beforeEach(() => {
-    originalWs = globalThis.WebSocket;
-    (globalThis as any).WebSocket = jest.fn(
+    originalWs = global.WebSocket;
+    (global as any).WebSocket = jest.fn(
       (url: string) => new MockWebSocket(url)
     );
-    (globalThis as any).WebSocket.OPEN = 1;
-    (globalThis as any).WebSocket.CONNECTING = 0;
-    (globalThis as any).WebSocket.CLOSING = 2;
-    (globalThis as any).WebSocket.CLOSED = 3;
+    (global as any).WebSocket.OPEN = 1;
+    (global as any).WebSocket.CONNECTING = 0;
+    (global as any).WebSocket.CLOSING = 2;
+    (global as any).WebSocket.CLOSED = 3;
 
     mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
       typeof authUtils.getAuthJwt
     >;
     mockGetAuthJwt.mockReturnValue("fresh-token");
-    shouldAutoAuthenticate = true;
 
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    (globalThis as any).WebSocket = originalWs;
+    (global as any).WebSocket = originalWs;
     jest.useRealTimers();
   });
 
@@ -140,9 +125,11 @@ describe("WebSocketProvider", () => {
       });
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
-      expect(globalThis.WebSocket).toHaveBeenCalledWith("ws://test");
+      expect(global.WebSocket).toHaveBeenCalledWith(
+        "ws://test?token=test-token"
+      );
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -162,181 +149,7 @@ describe("WebSocketProvider", () => {
         result.current.connect();
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledWith("ws://test");
-    });
-
-    it("uses message-based authentication when a token is provided", () => {
-      jest.useFakeTimers();
-      shouldAutoAuthenticate = false;
-      mockGetAuthJwt.mockReturnValue("test-token");
-      const wrapper = createWrapper({ url: "ws://test" });
-      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
-        wrapper,
-      });
-
-      act(() => {
-        result.current.connect("test-token");
-      });
-
-      expect(globalThis.WebSocket).toHaveBeenCalledWith("ws://test");
-
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
-        .mock.results[0]?.value as MockWebSocket;
-
-      act(() => {
-        ws.triggerOpen();
-      });
-
-      expect(result.current.status).toBe(WebSocketStatus.AUTHENTICATING);
-      expect(ws.send).toHaveBeenCalledWith(
-        JSON.stringify({
-          type: "AUTHENTICATE",
-          access_token: "test-token",
-        })
-      );
-
-      act(() => {
-        ws.triggerMessage({ type: "AUTHENTICATED" });
-      });
-
-      expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
-      act(() => {
-        jest.advanceTimersByTime(8000);
-      });
-      expect(ws.close).not.toHaveBeenCalledWith(4011, "Authentication timeout");
-
-      act(() => {
-        ws.triggerClose(1006, "Unexpected close");
-        jest.advanceTimersByTime(2000);
-      });
-
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
-
-      const reconnectedWs = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[1]?.value as MockWebSocket;
-
-      act(() => {
-        reconnectedWs.triggerOpen();
-      });
-
-      expect(reconnectedWs.send).toHaveBeenCalledWith(
-        JSON.stringify({
-          type: "AUTHENTICATE",
-          access_token: "test-token",
-        })
-      );
-    });
-
-    it("keeps sockets disconnected when message authentication fails", () => {
-      jest.useFakeTimers();
-      shouldAutoAuthenticate = false;
-      mockGetAuthJwt.mockReturnValue("bad-token");
-      const wrapper = createWrapper({ url: "ws://test" });
-      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
-        wrapper,
-      });
-
-      act(() => {
-        result.current.connect("bad-token");
-      });
-
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
-        .mock.results[0]?.value as MockWebSocket;
-
-      act(() => {
-        ws.triggerOpen();
-      });
-
-      expect(result.current.status).toBe(WebSocketStatus.AUTHENTICATING);
-
-      act(() => {
-        ws.triggerMessage({ type: "AUTHENTICATION_FAILED" });
-      });
-
-      expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
-      expect(ws.close).toHaveBeenCalledWith(4008, "Authentication failed");
-
-      act(() => {
-        result.current.connect("bad-token");
-      });
-
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
-
-      act(() => {
-        ws.triggerClose(4008, "Authentication failed");
-        jest.advanceTimersByTime(10000);
-      });
-
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
-    });
-
-    it("closes sockets when message authentication times out", () => {
-      jest.useFakeTimers();
-      shouldAutoAuthenticate = false;
-      const wrapper = createWrapper({ url: "ws://test" });
-      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
-        wrapper,
-      });
-
-      act(() => {
-        result.current.connect("stuck-token");
-      });
-
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
-        .mock.results[0]?.value as MockWebSocket;
-
-      act(() => {
-        ws.triggerOpen();
-      });
-
-      expect(result.current.status).toBe(WebSocketStatus.AUTHENTICATING);
-
-      act(() => {
-        jest.advanceTimersByTime(7999);
-      });
-      expect(ws.close).not.toHaveBeenCalledWith(4011, "Authentication timeout");
-
-      act(() => {
-        jest.advanceTimersByTime(1);
-      });
-
-      expect(ws.close).toHaveBeenCalledWith(4011, "Authentication timeout");
-
-      act(() => {
-        ws.triggerClose(4011, "Authentication timeout");
-        jest.advanceTimersByTime(10000);
-      });
-
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
-    });
-
-    it("allows reconnect after message authentication fails when the token changes", () => {
-      shouldAutoAuthenticate = false;
-      const wrapper = createWrapper({ url: "ws://test" });
-      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
-        wrapper,
-      });
-
-      act(() => {
-        result.current.connect("bad-token");
-      });
-
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
-        .mock.results[0]?.value as MockWebSocket;
-
-      act(() => {
-        ws.triggerOpen();
-        ws.triggerMessage({ type: "AUTHENTICATION_FAILED" });
-      });
-
-      act(() => {
-        result.current.connect("fresh-token");
-      });
-
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(global.WebSocket).toHaveBeenCalledWith("ws://test");
     });
 
     it("disconnects intentionally and prevents reconnection", () => {
@@ -350,7 +163,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -376,7 +189,7 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(5000);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
 
       jest.useRealTimers();
     });
@@ -393,7 +206,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -440,7 +253,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -478,7 +291,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -526,7 +339,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       // Try to send when connecting - should not send
@@ -560,7 +373,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -587,7 +400,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -631,9 +444,8 @@ describe("WebSocketProvider", () => {
         result.current.connect("original-token");
       });
 
-      const ws1 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[0]?.value as MockWebSocket;
+      const ws1 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
         ws1.triggerOpen();
@@ -653,12 +465,13 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(1000);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenLastCalledWith(
+        "ws://test?token=fresh-token"
+      );
 
-      const ws2 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[1]?.value as MockWebSocket;
+      const ws2 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[1]?.value as MockWebSocket;
 
       // Simulate another failure
       act(() => {
@@ -670,7 +483,7 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(1500);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(3);
+      expect(global.WebSocket).toHaveBeenCalledTimes(3);
     });
 
     it("stops reconnecting after max attempts", () => {
@@ -689,9 +502,8 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws1 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[0]?.value as MockWebSocket;
+      const ws1 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
         ws1.triggerOpen();
@@ -707,9 +519,8 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(100);
       });
 
-      const ws2 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[1]?.value as MockWebSocket;
+      const ws2 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[1]?.value as MockWebSocket;
 
       // Fail second attempt
       act(() => {
@@ -721,9 +532,8 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(150); // 100 * 1.5^1
       });
 
-      const ws3 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[2]?.value as MockWebSocket;
+      const ws3 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[2]?.value as MockWebSocket;
 
       // Fail third attempt - should stop trying
       act(() => {
@@ -735,7 +545,7 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(1000);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(3);
+      expect(global.WebSocket).toHaveBeenCalledTimes(3);
     });
 
     it("does not reconnect when no fresh token is available", () => {
@@ -750,7 +560,7 @@ describe("WebSocketProvider", () => {
         result.current.connect(); // Connect without token
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -767,7 +577,7 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(5000);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
     });
 
     it("resets reconnect attempts on successful connection", () => {
@@ -782,9 +592,8 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws1 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[0]?.value as MockWebSocket;
+      const ws1 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
         ws1.triggerOpen();
@@ -799,9 +608,8 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(100);
       });
 
-      const ws2 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[1]?.value as MockWebSocket;
+      const ws2 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[1]?.value as MockWebSocket;
 
       // This time connection succeeds
       act(() => {
@@ -820,7 +628,7 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(100);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(3);
+      expect(global.WebSocket).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -829,7 +637,7 @@ describe("WebSocketProvider", () => {
       jest.useFakeTimers();
 
       // Mock WebSocket constructor to throw
-      (globalThis as any).WebSocket = jest.fn(() => {
+      (global as any).WebSocket = jest.fn(() => {
         throw new Error("WebSocket creation failed");
       });
 
@@ -849,7 +657,7 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(2000);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
 
       jest.useRealTimers();
     });
@@ -864,7 +672,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -886,9 +694,8 @@ describe("WebSocketProvider", () => {
         result.current.connect("token1");
       });
 
-      const ws1 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[0]?.value as MockWebSocket;
+      const ws1 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
         ws1.triggerOpen();
@@ -899,13 +706,14 @@ describe("WebSocketProvider", () => {
         result.current.connect("token2");
       });
 
-      const ws2 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[1]?.value as MockWebSocket;
+      const ws2 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[1]?.value as MockWebSocket;
 
       expect(ws1.close).toHaveBeenCalled();
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenLastCalledWith(
+        "ws://test?token=token2"
+      );
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
 
@@ -919,7 +727,7 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(5000);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
 
       act(() => {
         ws2.triggerOpen();
@@ -938,17 +746,15 @@ describe("WebSocketProvider", () => {
         result.current.connect("token1");
       });
 
-      const ws1 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[0]?.value as MockWebSocket;
+      const ws1 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
         result.current.connect("token2");
       });
 
-      const ws2 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[1]?.value as MockWebSocket;
+      const ws2 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[1]?.value as MockWebSocket;
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
 
@@ -977,7 +783,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -1042,7 +848,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -1082,7 +888,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -1111,7 +917,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -1139,7 +945,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -1160,7 +966,7 @@ describe("WebSocketProvider", () => {
       });
 
       // Should not attempt reconnect after unmount
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
 
       jest.useRealTimers();
     });
@@ -1176,8 +982,8 @@ describe("WebSocketProvider", () => {
         result.current.connect("token1");
       });
 
-      let ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
-        .mock.results[0]?.value as MockWebSocket;
+      let ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>).mock
+        .results[0]?.value as MockWebSocket;
 
       act(() => {
         ws.triggerOpen();
@@ -1196,7 +1002,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token2");
       });
 
-      ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>).mock
+      ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>).mock
         .results[1]?.value as MockWebSocket;
 
       act(() => {
@@ -1204,8 +1010,10 @@ describe("WebSocketProvider", () => {
       });
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenLastCalledWith(
+        "ws://test?token=token2"
+      );
     });
   });
 
@@ -1227,7 +1035,7 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
@@ -1243,14 +1051,14 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(customDelay - 1);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
 
       // Should reconnect after custom delay
       act(() => {
         jest.advanceTimersByTime(1);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
 
       jest.useRealTimers();
     });
@@ -1273,9 +1081,8 @@ describe("WebSocketProvider", () => {
         result.current.connect("token");
       });
 
-      const ws1 = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[0]?.value as MockWebSocket;
+      const ws1 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
 
       act(() => {
         ws1.triggerOpen();
@@ -1284,9 +1091,8 @@ describe("WebSocketProvider", () => {
       // Fail and reconnect maxAttempts times
       for (let i = 0; i < maxAttempts; i++) {
         const wsIndex = i;
-        const ws = (
-          globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-        ).mock.results[wsIndex]?.value as MockWebSocket;
+        const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+          .mock.results[wsIndex]?.value as MockWebSocket;
 
         act(() => {
           ws.triggerClose(1006);
@@ -1300,9 +1106,8 @@ describe("WebSocketProvider", () => {
       }
 
       // One final failure after max attempts should not schedule another reconnect.
-      const lastWs = (
-        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
-      ).mock.results[maxAttempts]?.value as MockWebSocket;
+      const lastWs = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[maxAttempts]?.value as MockWebSocket;
       act(() => {
         lastWs.triggerClose(1006);
       });
@@ -1311,7 +1116,7 @@ describe("WebSocketProvider", () => {
         jest.advanceTimersByTime(1000);
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledTimes(maxAttempts + 1); // Initial + maxAttempts reconnects
+      expect(global.WebSocket).toHaveBeenCalledTimes(maxAttempts + 1); // Initial + maxAttempts reconnects
 
       jest.useRealTimers();
     });

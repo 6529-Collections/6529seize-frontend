@@ -9,21 +9,19 @@ jest.mock(
       const React = require("react");
       const onMintFor = props.onMintFor;
       React.useEffect(() => {
-        onMintFor("0x1111111111111111111111111111111111111111");
+        onMintFor("0x1");
       }, [onMintFor]);
       return <div />;
     }
 );
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({
-    address: "0x1111111111111111111111111111111111111111",
-  }),
+  useSeizeConnectContext: () => ({ address: "0x1" }),
 }));
 
 const readContractsData = { data: [] };
 jest.mock("wagmi", () => ({
-  useReadContract: () => ({ data: 0n }),
+  useReadContract: () => ({ data: 0 }),
   useReadContracts: () => readContractsData,
   useWaitForTransactionReceipt: () => ({
     isPending: false,
@@ -54,7 +52,7 @@ describe("ManifoldMintingWidget", () => {
     isFinalized: false,
   } as any;
 
-  it("shows seize button and pending text", async () => {
+  it("shows seize button and pending text", () => {
     render(
       <ManifoldMintingWidget
         contract="0x"
@@ -67,7 +65,7 @@ describe("ManifoldMintingWidget", () => {
         setMintForAddress={() => {}}
       />
     );
-    expect(await screen.findByText(/SEIZE x1/)).toBeInTheDocument();
+    expect(screen.getByText(/SEIZE x1/)).toBeInTheDocument();
     expect(screen.getByText(/Confirm in your wallet/)).toBeInTheDocument();
   });
 });
