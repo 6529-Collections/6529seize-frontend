@@ -98,17 +98,25 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     await expect(page.getByText("Past Drops", { exact: true })).toBeVisible();
 
     await expectSubscriptionsSettled(page);
+    const upcomingDrops = page.getByTestId(
+      "subscriptions-report-upcoming-drops"
+    );
+    const pastDrops = page.getByTestId("subscriptions-report-past-drops");
     await expectAnyVisible(
       [
-        page.getByText("Table listing upcoming meme card subscriptions"),
-        page.getByText("No Subscriptions Found").first(),
+        upcomingDrops.getByText(
+          "Table listing upcoming meme card subscriptions"
+        ),
+        upcomingDrops.getByText("No Subscriptions Found"),
       ],
       "upcoming subscriptions table or empty state"
     );
     await expectAnyVisible(
       [
-        page.getByText("Table listing past meme card subscription redemptions"),
-        page.getByText("No Subscriptions Found").last(),
+        pastDrops.getByText(
+          "Table listing past meme card subscription redemptions"
+        ),
+        pastDrops.getByText("No Subscriptions Found"),
       ],
       "past subscriptions table or empty state"
     );
