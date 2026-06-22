@@ -12,6 +12,10 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const objectCapturedPromiseRejectionMessage =
+    "Object captured as promise rejection with keys: code, message, stack";
+  const disconnectedProviderStack =
+    "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
 
   type BeforeSendResult = {
     tags?: Record<string, unknown> | undefined;
@@ -65,6 +69,35 @@ describe("instrumentation-client", () => {
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it("drops disconnected wallet-provider object promise rejections", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "wallet-provider-disconnected",
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4900,
+          message: "The provider is disconnected from all chains.",
+          stack: disconnectedProviderStack,
+        },
+      },
+      tags: {
+        mechanism: "auto.browser.global_handlers.onunhandledrejection",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
   });
 
   it("drops sampled-out first-party browser transport network errors", () => {

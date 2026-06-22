@@ -18,6 +18,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
+  shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedWalletCollision,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
@@ -111,6 +112,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterInjectedWalletCollision(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
     return true;
   }
 
