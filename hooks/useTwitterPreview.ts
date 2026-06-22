@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { TweetPreview } from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
 import { fetchTwitterPreview } from "@/services/api/twitter-preview-api";
 
+const TWITTER_PREVIEW_QUERY_KEY = "TWITTER_PREVIEW";
 const TWITTER_PREVIEW_STALE_TIME_MS = 10 * 60 * 1000;
 const TWITTER_PREVIEW_GC_TIME_MS = 60 * 60 * 1000;
 
@@ -21,7 +21,7 @@ export function useTwitterPreview({
   return useQuery<TweetPreview, Error>({
     // Tweet ID is the cache identity; href variants only decide the first fetch URL.
     queryKey: [
-      QueryKey.TWITTER_PREVIEW,
+      TWITTER_PREVIEW_QUERY_KEY,
       { tweetId: getTwitterPreviewCacheKey(href, tweetId) },
     ],
     queryFn: async () => await fetchTwitterPreview(href),
