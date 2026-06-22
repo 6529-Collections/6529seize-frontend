@@ -51,22 +51,32 @@ Read this section first after compaction or handoff.
     `0c55e0c628541fb2ac695d87f871568848e7c057`.
   - Active slice is test-only native/Electron simulated shell hardening:
     Capacitor simulation exposes both package and global runtime signals,
-    Open Data native subscription visibility gets iOS/Android coverage,
+    Open Data native subscription visibility gets iOS hide, iOS US-visible, and
+    Android visible coverage,
     Capacitor app-wallet empty-state behavior and Electron app-wallet
     unsupported behavior are checked separately, and the Electron share modal is
     checked for desktop handoff suppression. This is simulation evidence only;
     it must not be claimed as real packaged native or Electron verification.
+  - PR #2848 is open:
+    https://github.com/6529-Collections/6529seize-frontend/pull/2848
+    - Initial 6529bot Opus general review: Good to merge; WCAG: no findings.
+    - Independent local subagent reviewer found no P0/P1/P2 blockers and
+      recommended future iOS US-visible coverage. That coverage is now added.
+    - Review-response follow-up also gives country-check waits a clearer
+      timeout failure message.
+    - CodeRabbit initially rate-limited; retry when the rate window clears.
   - The slice also repairs two existing relevant unit-test harness breaks so
     share and app-wallet connector coverage runs again: `HeaderShare.test.tsx`
     no longer redefines JSDOM `window.location`, and
     `wagmiAppWalletConnector.test.ts` uses hoist-safe viem mocks.
   - Local validation passed for this active slice:
     - `seize run typecheck:playwright`
-    - `seize run test:e2e:native-shell-readonly`: 8 passed / 10 skipped.
-    - `seize run test:e2e:native-sim`: first run hit a transient iOS
+    - `seize run test:e2e:native-shell-readonly`: latest 9 passed / 12
+      skipped.
+    - `seize run test:e2e:native-sim`: initial run hit a transient iOS
       simulation mobile-search miss; focused rerun of the failed case passed,
-      and the full rerun passed 24 passed / 21 skipped.
-    - `seize run test:e2e:surface-matrix`: 24 passed / 18 skipped.
+      and the latest full rerun passed 25 passed / 23 skipped.
+    - `seize run test:e2e:surface-matrix`: latest 24 passed / 20 skipped.
     - targeted share/wallet/Capacitor/AppKit Jest batch: 60 passed.
     - `seize run lint:changed`, `seize run typecheck:changed`,
       risk floor Level 4, changed-secret scan clean, workflow-security scan

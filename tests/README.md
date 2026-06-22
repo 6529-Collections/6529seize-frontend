@@ -111,7 +111,8 @@ Surface matrix:
   web projects, with the mutation guard enabled even locally.
 - `test:e2e:native-shell-readonly` runs simulation-only Capacitor and Electron
   shell contracts with the read-only mutation guard enabled. It covers
-  Capacitor runtime signals, iOS non-US Open Data subscription hiding, Android
+  Capacitor runtime signals, iOS Open Data subscription hiding and US-visible
+  subscription behavior, Android
   subscription visibility, the Capacitor app-wallet simulated empty state,
   Electron app-wallet unsupported copy, and Electron share-modal desktop
   handoff suppression.

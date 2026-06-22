@@ -3563,3 +3563,36 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`
 - Next action: final diff review, commit/push/open PR, then iterate all
   reviewbot lanes including GLM.
+
+## 2026-06-22T20:27Z PR #2848 Review-Response Follow-Up
+
+- Opened PR #2848:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2848
+- Triggered reviewbot lanes with:
+  `/6529bot review general wcag i18n security responsiveness glm-swarm`.
+- Initial 6529bot Opus feedback:
+  - general: Good to merge, with nice-to-have suggestions around clearer
+    country-check waits, shim consistency, and native-sim runtime budget.
+  - WCAG: no findings.
+- CodeRabbit initially rate-limited and must be retried after its rate window.
+- Independent local subagent reviewer `Mendel` found no P0/P1/P2 blockers and
+  suggested future iOS US-visible subscription coverage.
+- Implemented low-churn review feedback before waiting for the rest of the
+  review loop:
+  - added iOS US-visible Open Data subscription coverage.
+  - replaced raw `page.waitForResponse` country-check waits with
+    `waitForCountryCheck`, which keeps the same route behavior but fails with a
+    direct `/api/policies/country-check` message on timeout.
+  - updated `tests/README.md` to document both iOS hide and iOS US-visible
+    coverage.
+- Local validation after this follow-up:
+  - `seize exec prettier --write tests/surfaces/native-shell-readonly.spec.ts tests/README.md`
+  - `seize run test:e2e:native-shell-readonly`: 9 passed / 12 skipped.
+  - `seize run test:e2e:native-sim`: 25 passed / 23 skipped.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: 16 changed TypeScript files passed.
+  - `codex-diff-check`
+  - `seize run test:e2e:surface-matrix`: 24 passed / 20 skipped.
+- Next action: commit and push the follow-up, then re-trigger/wait all CI and
+  reviewbot lanes on the new head.

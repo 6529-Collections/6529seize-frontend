@@ -38,6 +38,20 @@ async function mockCountryCheck(page: Page, country: string) {
   });
 }
 
+async function waitForCountryCheck(page: Page) {
+  try {
+    return await page.waitForResponse(
+      (response) => response.url().includes("/api/policies/country-check"),
+      { timeout: 10_000 }
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Expected /api/policies/country-check while loading /open-data: ${message}`
+    );
+  }
+}
+
 async function readShellRuntime(page: Page): Promise<ShellRuntime> {
   return page.evaluate(() => {
     const runtime = globalThis as typeof globalThis & {
@@ -111,9 +125,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     );
 
     await mockCountryCheck(page, "FR");
-    const countryCheck = page.waitForResponse((response) =>
-      response.url().includes("/api/policies/country-check")
-    );
+    const countryCheck = waitForCountryCheck(page);
 
     await gotoReady(page, "/open-data");
     await countryCheck;
@@ -129,6 +141,28 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     ).toHaveCount(0);
   });
 
+  test("iOS native simulation keeps US subscription downloads visible", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "capacitor-ios-sim",
+      "iOS subscription visibility is covered on the iOS Capacitor simulation"
+    );
+
+    await mockCountryCheck(page, "US");
+    const countryCheck = waitForCountryCheck(page);
+
+    await gotoReady(page, "/open-data");
+    await countryCheck;
+
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Open Data" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Meme Subscriptions" })
+    ).toHaveAttribute("href", "/open-data/meme-subscriptions");
+  });
+
   test("Android native simulation keeps subscription downloads visible", async ({
     page,
   }, testInfo) => {
@@ -138,9 +172,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     );
 
     await mockCountryCheck(page, "FR");
-    const countryCheck = page.waitForResponse((response) =>
-      response.url().includes("/api/policies/country-check")
-    );
+    const countryCheck = waitForCountryCheck(page);
 
     await gotoReady(page, "/open-data");
     await countryCheck;
