@@ -90,6 +90,15 @@ test("calls signMessage when form valid", async () => {
   await user.type(screen.getAllByRole("textbox")[4], "addr");
   fireEvent.click(screen.getByText("Submit"));
   expect(signMessageState.signMessage).toHaveBeenCalledWith({
-    message: "uuid",
+    message: expect.stringContaining("Nonce: uuid"),
   });
+  const signedMessage = signMessageState.signMessage.mock.calls[0][0].message;
+  expect(signedMessage).toEqual(expect.stringContaining("6529 Action"));
+  expect(signedMessage).toEqual(expect.stringContaining("Action: nextgen_admin"));
+  expect(signedMessage).toEqual(expect.stringContaining("Payload Hash:"));
+  expect(signedMessage).toEqual(
+    expect.stringContaining(
+      "Purpose: Sign this message to perform a 6529 NextGen admin action."
+    )
+  );
 });

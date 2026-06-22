@@ -71,6 +71,24 @@ beforeAll(() => {
   // Mock URL.createObjectURL and revokeObjectURL
   global.URL.createObjectURL = jest.fn(() => "mock-blob-url");
   global.URL.revokeObjectURL = jest.fn();
+
+  window.IntersectionObserver = jest.fn((callback) => {
+    const observer = {
+      observe: jest.fn(),
+      unobserve: jest.fn(),
+      disconnect: jest.fn(),
+      takeRecords: jest.fn(() => []),
+      root: null,
+      rootMargin: "",
+      thresholds: [],
+    } as unknown as IntersectionObserver;
+
+    (observer.observe as jest.Mock).mockImplementation(() =>
+      callback([{ isIntersecting: true } as IntersectionObserverEntry], observer)
+    );
+
+    return observer;
+  }) as any;
 });
 
 // Mock child components with relaxed validation for testing
@@ -568,11 +586,11 @@ describe("MemesArtSubmissionFile", () => {
     it("renders sandboxed iframe for approved ipfs.io URLs", () => {
       renderInteractivePreview();
 
-      const iframe = screen.getByTitle("Interactive artwork preview");
+      const iframe = screen.getByTitle(/^Interactive artwork preview/);
       expect(iframe).toBeInTheDocument();
       expect(iframe).toHaveAttribute(
         "src",
-        `https://ipfs.io/ipfs/${VALID_IPFS_CID}`
+        `https://media.6529.io/ipfs/${VALID_IPFS_CID}`
       );
       expect(iframe).toHaveAttribute("sandbox");
       expect(iframe.getAttribute("sandbox")).toContain("allow-scripts");
@@ -587,11 +605,11 @@ describe("MemesArtSubmissionFile", () => {
         externalValidationStatus: "valid",
       });
 
-      const iframe = screen.getByTitle("Interactive artwork preview");
+      const iframe = screen.getByTitle(/^Interactive artwork preview/);
       expect(iframe).toBeInTheDocument();
       expect(iframe).toHaveAttribute(
         "src",
-        `https://arweave.net/${VALID_ARWEAVE_TX_ID}`
+        `https://media.6529.io/arweave/${VALID_ARWEAVE_TX_ID}`
       );
     });
 
@@ -604,7 +622,7 @@ describe("MemesArtSubmissionFile", () => {
         externalValidationStatus: "valid",
       });
 
-      const iframe = screen.getByTitle("Interactive artwork preview");
+      const iframe = screen.getByTitle(/^Interactive artwork preview/);
       expect(iframe).toBeInTheDocument();
       expect(iframe).toHaveAttribute(
         "src",

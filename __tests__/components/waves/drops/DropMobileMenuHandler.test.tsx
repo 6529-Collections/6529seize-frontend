@@ -47,19 +47,30 @@ const setViewportWidth = (width: number) => {
 
 /** Mocks hover media queries used by drop action interaction mode. */
 const setHoverSupport = (hasHover: boolean) => {
+  const matchMedia = jest.fn((query: string) => ({
+    matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  }));
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "matchMedia");
+  if (descriptor && !descriptor.configurable) {
+    if (descriptor.writable) {
+      globalThis.matchMedia = matchMedia;
+    } else if (jest.isMockFunction(descriptor.value)) {
+      descriptor.value.mockImplementation(matchMedia);
+    }
+    return;
+  }
+
   Object.defineProperty(globalThis, "matchMedia", {
     configurable: true,
     writable: true,
-    value: jest.fn((query: string) => ({
-      matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
-      media: query,
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
+    value: matchMedia,
   });
 };
 

@@ -57,7 +57,7 @@ describe('useAddWaveMutation', () => {
         wave: {},
         outcomes: []
       }
-    }));
+    });
     expect(onSuccess).toHaveBeenCalledWith({ id: 1 }, variables);
     expect(onSettled).toHaveBeenCalled();
     expect(onError).not.toHaveBeenCalled();

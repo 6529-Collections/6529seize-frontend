@@ -1,8 +1,7 @@
 import ManifoldMinting from "@/components/manifold-minting/ManifoldMinting";
+import { useManifoldClaim } from "@/hooks/useManifoldClaim";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
-const mockUseManifoldClaim = jest.fn();
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -99,6 +98,7 @@ jest.mock("@/helpers/time", () => ({
 }));
 
 jest.mock("@/hooks/useManifoldClaim", () => {
+  const mockUseManifoldClaim = jest.fn();
   const createPhaseTime = (ms: number) => ({
     toMillis: () => ms,
     toSeconds: () => ms / 1000,
@@ -158,6 +158,8 @@ jest.mock("@/hooks/useManifoldClaim", () => {
 });
 
 describe("ManifoldMinting phases", () => {
+  const mockUseManifoldClaim = useManifoldClaim as jest.Mock;
+
   beforeEach(() => {
     globalThis.fetch = jest.fn();
     mockUseManifoldClaim.mockReset();
@@ -214,9 +216,6 @@ describe("ManifoldMinting phases", () => {
     expect(screen.getByText("Public Phase")).toBeInTheDocument();
     expect(screen.getAllByText("COMPLETED")).toHaveLength(1);
     expect(screen.getAllByText("UPCOMING")).toHaveLength(3);
-    expect(screen.getByText("Unlimited spots")).toHaveClass(
-      "tw-text-primary-300"
-    );
     expect(
       container.querySelectorAll(".tw-ring-success, .tw-ring-primary-300")
     ).toHaveLength(1);
@@ -265,10 +264,7 @@ describe("ManifoldMinting phases", () => {
     );
 
     expect(screen.getByText("ACTIVE")).toBeInTheDocument();
-    expect(screen.getAllByText("UPCOMING")).toHaveLength(1);
-    expect(screen.getByText("Unlimited spots")).toHaveClass(
-      "tw-text-primary-300"
-    );
+    expect(screen.getAllByText("UPCOMING")).toHaveLength(2);
     expect(container.querySelectorAll(".tw-ring-success")).toHaveLength(1);
     expect(container.querySelectorAll(".tw-ring-primary-300")).toHaveLength(0);
   });

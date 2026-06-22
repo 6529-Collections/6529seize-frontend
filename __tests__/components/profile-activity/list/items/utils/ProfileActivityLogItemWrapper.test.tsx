@@ -7,6 +7,9 @@ jest.mock("@/components/user/utils/CommonProfileLink", () => ({
   __esModule: true,
   default: jest.fn(() => <div data-testid="link" />),
 }));
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: () => ({ profile: null }),
+}));
 const {
   default: CommonProfileLink,
 } = require("@/components/user/utils/CommonProfileLink");

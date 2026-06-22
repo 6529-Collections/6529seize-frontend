@@ -8,6 +8,10 @@ jest.mock("@/hooks/waves/useWaveRankReward", () => ({
   useWaveRankReward: (args: any) => mockUseWaveRankReward(args),
 }));
 
+jest.mock("react-tooltip", () => ({
+  Tooltip: ({ children }: any) => <div role="tooltip">{children}</div>,
+}));
+
 describe("WaveSmallLeaderboardItemOutcomes", () => {
   const drop: any = { rank: 1, wave: { id: "w1" } };
 
@@ -24,8 +28,9 @@ describe("WaveSmallLeaderboardItemOutcomes", () => {
     });
 
     render(<WaveSmallLeaderboardItemOutcomes drop={drop} />);
-    expect(screen.getByRole("button")).toBeInTheDocument();
-    expect(screen.getByText("Outcome:")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Outcome" })
+    ).toBeInTheDocument();
   });
 
   it("hides when no outcomes and not loading", () => {
