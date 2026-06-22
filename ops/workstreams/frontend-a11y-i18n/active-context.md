@@ -4,6 +4,49 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-22T15:20Z:
+  - PR #2844 is merged and deployed. Current production is serving
+    `d26393b40d2fec0e9a2bf557f911324b27bc7686`.
+  - Staging deploy for #2844 used branch `1a-staging` SHA
+    `a803ae9d61e396112153418fb8b03f4a11cce562`; staging version verification,
+    smoke, surface matrix, and WCAG/i18n validation passed before production.
+  - Production deploy run #27956752856 succeeded from exact merge SHA
+    `d26393b40d2fec0e9a2bf557f911324b27bc7686`; local production
+    `/api/version` matched and `seize run test:e2e:production:readonly`
+    passed 65/65.
+  - Current branch:
+    `codex/e2e-wave-create-sandbox`, based on current `origin/main`
+    `d26393b40d2fec0e9a2bf557f911324b27bc7686`.
+  - Active slice adds positive local-only authenticated sandbox E2E coverage
+    for `/waves/create` Chat-wave creation. It extends the existing mock API
+    runner and mutation auditor so create-wave may only create the exact
+    synthetic "Only playwright" admin group, publish that group, and create the
+    exact synthetic Chat wave body before routing to the deterministic created
+    wave detail page.
+  - Local validation passed for this active slice:
+    - `node --check tests/support/composerSandboxServer.cjs`
+    - focused ESLint on changed sandbox support/spec files
+    - `seize exec prettier --check ...` for changed docs/spec/support/package
+      files
+    - `seize run typecheck:playwright`
+    - `seize run typecheck:changed`
+    - `seize run lint:changed`
+    - focused `tests/social/create-wave-sandbox.spec.ts`: 1 passed
+    - `seize run test:e2e:auth-sandbox`: 5 passed
+    - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and
+      mobile Chromium
+    - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+      Level 4
+    - changed-secret scan and workflow-security scan passed
+    - `codex-diff-check`
+  - Independent verifier `Hubble` initially found that the create-wave
+    mutation validators checked expected values but still allowed arbitrary
+    extra nested fields. Fixed by adding recursive exact-key checks for the
+    synthetic admin group and wave body, then Hubble re-reviewed and found no
+    remaining publication blockers.
+  - Next action: commit/push/open PR and iterate CI plus all reviewbot lanes.
+  - GLM reviewbot remains live and additive. Do not remove, downgrade, or make
+    optional any existing reviewbot lanes.
 - Latest testing-roadmap state, 2026-06-22T12:15Z:
   - PR #2838 is merged and deployed. Current production is serving
     `a07a205a35282ef1d9697549ee9a167369b465c3`.
@@ -433,7 +476,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/auth-sandbox-e2e`
+`codex/e2e-wave-create-sandbox`
 
 ## Constraints
 
@@ -598,15 +641,15 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Commit, push, and open PR for `codex/auth-sandbox-e2e`.
+1. Finish local implementation and validation for `codex/e2e-wave-create-sandbox`.
 2. Trigger and iterate CI, CodeRabbit, Sonar, 6529bot, GLM, and specialized
    reviewbot lanes until Codex judges the loop is no longer adding material
    value.
-3. Merge the auth-sandbox E2E PR after checks and review signals are green or
-   consciously dispositioned, then deploy the resulting current `origin/main`
-   through staging and production with exact-SHA validation.
-4. Continue the next high-value E2E hardening slice: create-wave sandbox,
-   wallet/native/Electron shell coverage, real native runtime detection, or
-   upload/posting/admin guarded packs.
+3. Merge the create-wave sandbox E2E PR after checks and review signals are
+   green or consciously dispositioned, then deploy the resulting current
+   `origin/main` through staging and production with exact-SHA validation.
+4. Continue the next high-value E2E hardening slice: wallet/native/Electron
+   shell coverage, real native runtime detection, or upload/posting/admin
+   guarded packs.
 5. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.
