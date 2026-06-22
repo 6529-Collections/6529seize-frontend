@@ -19,7 +19,7 @@ describe("instrumentation-client", () => {
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
     function: "stringify",
-    in_app: false,
+    in_app: true,
   };
 
   type BeforeSendResult = {

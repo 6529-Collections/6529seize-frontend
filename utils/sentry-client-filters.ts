@@ -870,10 +870,6 @@ function hasInjectedAppUriFrame(
   return Array.isArray(frames) && frames.some(isInjectedAppUriFrame);
 }
 
-function hasInAppFrame(frames: SentryStackFrame[] | undefined): boolean {
-  return Array.isArray(frames) && frames.some((frame) => frame.in_app === true);
-}
-
 function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
   if (frame.function !== "stringify") {
     return false;
@@ -881,6 +877,15 @@ function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
 
   return [frame.filename, frame.abs_path].some(
     (path) => path === "[native code]"
+  );
+}
+
+function hasAppOwnedFrame(frames: SentryStackFrame[] | undefined): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some(
+      (frame) => frame.in_app === true && !isNativeJsonStringifyFrame(frame)
+    )
   );
 }
 
@@ -1207,7 +1212,7 @@ export function shouldFilterSentryRouteParameterizationError(
   }
 
   const frames = value.stacktrace?.frames;
-  if (hasInAppFrame(frames) || !hasNativeJsonStringifyFrame(frames)) {
+  if (hasAppOwnedFrame(frames) || !hasNativeJsonStringifyFrame(frames)) {
     return false;
   }
 

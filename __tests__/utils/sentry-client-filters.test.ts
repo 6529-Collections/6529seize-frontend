@@ -111,7 +111,7 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "[native code]",
                   function: "stringify",
-                  in_app: false,
+                  in_app: true,
                 },
               ],
             },
@@ -1744,7 +1744,7 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "[native code]",
                   function: "stringify",
-                  in_app: false,
+                  in_app: true,
                 },
                 {
                   filename:
@@ -1783,7 +1783,7 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "[native code]",
                   function: "stringify",
-                  in_app: false,
+                  in_app: true,
                 },
               ],
             },
