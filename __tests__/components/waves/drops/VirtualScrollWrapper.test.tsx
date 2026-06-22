@@ -116,6 +116,12 @@ describe("IntersectionObserver Configuration", () => {
     });
 
     expect(isWaveDropNearViewport("wave", "drop-1")).toBe(false);
+
+    act(() => {
+      intersectionCb([{ isIntersecting: true } as any]);
+    });
+
+    expect(isWaveDropNearViewport("wave", "drop-1")).toBe(true);
   });
 });
 

@@ -158,9 +158,6 @@ export default function VirtualScrollWrapper({
       if (containerRef.current) {
         observer.unobserve(containerRef.current);
       }
-      if (dropId) {
-        clearWaveDropNearViewport(waveId, dropId);
-      }
     };
   }, [
     dropId,
@@ -173,6 +170,16 @@ export default function VirtualScrollWrapper({
     type,
     waveId,
   ]);
+
+  useEffect(() => {
+    if (!dropId) {
+      return;
+    }
+
+    return () => {
+      clearWaveDropNearViewport(waveId, dropId);
+    };
+  }, [dropId, waveId]);
 
   /**
    * Determine if we should render the actual children
