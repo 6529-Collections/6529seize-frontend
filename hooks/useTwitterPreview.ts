@@ -19,6 +19,7 @@ export function useTwitterPreview({
   readonly tweetId: string;
 }) {
   return useQuery<TweetPreview, Error>({
+    // Tweet ID is the cache identity; href variants only decide the first fetch URL.
     queryKey: [
       QueryKey.TWITTER_PREVIEW,
       { tweetId: getTwitterPreviewCacheKey(href, tweetId) },
