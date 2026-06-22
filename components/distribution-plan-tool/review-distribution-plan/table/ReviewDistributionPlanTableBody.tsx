@@ -6,7 +6,7 @@ import ReviewDistributionPlanTableRow from "./ReviewDistributionPlanTableRow";
 import type {
   ReviewDistributionPlanTableItem,
   ReviewDistributionPlanTablePhase,
-} from "./ReviewDistributionPlanTable";
+} from "./ReviewDistributionPlanTable.types";
 
 export default function ReviewDistributionPlanTableBody({
   rows,

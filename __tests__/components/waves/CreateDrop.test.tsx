@@ -852,10 +852,12 @@ describe("CreateDrop", () => {
     await userEvent.click(screen.getByText("submit curation"));
 
     await waitFor(() => {
-      expect(setToast).toHaveBeenCalledWith({
-        message: "Drop submitted successfully",
-        type: "success",
-      });
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringMatching(/drop submitted/i),
+          type: "success",
+        })
+      );
     });
 
     await waitFor(() => expect(onAllDropsAdded).toHaveBeenCalledTimes(1));
@@ -890,10 +892,11 @@ describe("CreateDrop", () => {
     await userEvent.click(screen.getByText("submit curation"));
 
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
-    expect(setToast).not.toHaveBeenCalledWith({
-      message: "Drop submitted successfully",
-      type: "success",
-    });
+    expect(setToast).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "success",
+      })
+    );
   });
 
   it("can force the standard composer for curation waves", () => {

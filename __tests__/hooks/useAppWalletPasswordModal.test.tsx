@@ -3,26 +3,25 @@ import { renderHook, act } from '@testing-library/react';
 import { useAppWalletPasswordModal } from '@/hooks/useAppWalletPasswordModal';
 
 // Mock the UnlockAppWalletModal component
-const MockUnlockAppWalletModal = jest.fn(({ show, onHide, onUnlock, address, address_hashed }) => (
-  show ? (
-    <div data-testid="unlock-modal">
-      <div data-testid="modal-address">{address}</div>
-      <div data-testid="modal-address-hashed">{address_hashed}</div>
-      <button data-testid="cancel-button" onClick={onHide}>
-        Cancel
-      </button>
-      <button
-        data-testid="unlock-button"
-        onClick={() => onUnlock('test-password')}
-      >
-        Unlock
-      </button>
-    </div>
-  ) : null
-));
-
 jest.mock('@/components/app-wallets/AppWalletModal', () => ({
-  UnlockAppWalletModal: MockUnlockAppWalletModal,
+  UnlockAppWalletModal: jest.fn(
+    ({ show, onHide, onUnlock, address, address_hashed }) =>
+      show ? (
+        <div data-testid="unlock-modal">
+          <div data-testid="modal-address">{address}</div>
+          <div data-testid="modal-address-hashed">{address_hashed}</div>
+          <button data-testid="cancel-button" onClick={onHide}>
+            Cancel
+          </button>
+          <button
+            data-testid="unlock-button"
+            onClick={() => onUnlock('test-password')}
+          >
+            Unlock
+          </button>
+        </div>
+      ) : null
+  ),
 }));
 
 describe('useAppWalletPasswordModal', () => {

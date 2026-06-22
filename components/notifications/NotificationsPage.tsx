@@ -13,7 +13,7 @@ import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import ConnectWallet from "@/components/common/ConnectWallet";
 
 export default function NotificationsPage() {
-  const { isAuthenticated } = useSeizeConnectContext();
+  const { hasValidWalletAuth } = useSeizeConnectContext();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const { activeDrop: modalDrop, isDropOpen, onDropClose } = useDropModal();
   const { isApp } = useDeviceInfo();
@@ -23,12 +23,12 @@ export default function NotificationsPage() {
     setActiveDrop(null);
   };
 
-  if (!isAuthenticated) {
+  if (!hasValidWalletAuth) {
     return <ConnectWallet />;
   }
 
   return (
-    <div className="tw-h-full tw-bg-black tailwind-scope tw-relative tw-overflow-hidden">
+    <div className="tailwind-scope tw-relative tw-h-full tw-overflow-hidden tw-bg-black">
       {isDropOpen &&
         modalDrop &&
         (isApp ? (

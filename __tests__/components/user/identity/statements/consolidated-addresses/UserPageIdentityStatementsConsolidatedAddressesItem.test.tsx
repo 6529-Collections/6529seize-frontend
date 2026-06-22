@@ -42,7 +42,11 @@ jest.mock("wagmi", () => ({
 }));
 
 function renderComponent(props: any = {}) {
-  const wallet = { wallet: "0x1234567890abcdef", display: "Disp", tdh: 0 };
+  const wallet = {
+    wallet: "0x1234567890abcdef",
+    display: "disp.eth",
+    tdh: 0,
+  };
   const onToggleOpen = jest.fn();
   return render(
     <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
@@ -109,7 +113,7 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
     fireEvent.click(screen.getByRole("button", { name: "Copy ens name" }));
 
     expect(mockCopy).toHaveBeenNthCalledWith(1, "0x1234567890abcdef");
-    expect(mockCopy).toHaveBeenNthCalledWith(2, "Disp");
+    expect(mockCopy).toHaveBeenNthCalledWith(2, "disp.eth");
 
     act(() => {
       jest.advanceTimersByTime(1000);

@@ -16,6 +16,7 @@ export class DropHasher {
       obj.terms_of_service = termsOfService;
     }
     delete obj.signature;
+    delete obj.signature_message;
     const serialisedObj = this.canonicalJSONStringify(obj);
     return sha256(serialisedObj);
   }
