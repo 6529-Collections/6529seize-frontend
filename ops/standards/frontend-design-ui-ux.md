@@ -79,10 +79,16 @@ sets, or styling libraries when an existing token or pattern covers the need.
 - Respect reduced motion and keep animations short, purposeful, and consistent
   with existing motion.
 
-## Evidence Requirements
+## Verification
 
-Do not claim UI readiness from code inspection alone. For visible UI changes,
-collect the strongest focused evidence practical for the touched surface:
+Do not claim UI readiness from code inspection alone. Use the strongest focused
+checks available for the touched surface:
+
+- `6529 run lint:changed`
+- `6529 run typecheck:changed`
+- `6529 run check:changed`
+
+For visible UI changes, also collect browser evidence that covers:
 
 - Source evidence: the nearby components, style modules, tokens, and docs used
   as the pattern.
@@ -98,19 +104,18 @@ collect the strongest focused evidence practical for the touched surface:
 - Console/runtime evidence: no new page errors and no new relevant console
   errors on the checked surface.
 
-The initial evidence pass for this standard found `/waves` useful as a dense app
-surface for desktop and mobile review: dark UI, left rail navigation, compact
+Initial browser evidence for this standard used `/waves` as a dense app surface
+for desktop and mobile review: dark UI, left rail navigation, compact
 typography, avatar-heavy lists, badges, pinned/unread states, media cards, and
 subtle borders. It also found that some local routes can expose DOM geometry and
-page titles while screenshot evidence appears blank. Future UI/UX automation
-must check both DOM geometry and rendered pixels.
+page titles while screenshot evidence appears blank. UI/UX verification must
+therefore check both DOM geometry and rendered pixels.
 
-## Agent Self-Review
+## Review Checklist
 
-Before opening or updating a PR with visible UI changes, agents should be able
-to answer:
+For each touched page or component:
 
-- Which existing route, component, or style source did this match?
+- Which existing route, component, or style source did it match?
 - Which tokens, fonts, colors, spacing, and surface patterns were reused?
 - Which desktop and mobile widths were checked?
 - Which loading, empty, error, and disabled states were checked or unaffected?
