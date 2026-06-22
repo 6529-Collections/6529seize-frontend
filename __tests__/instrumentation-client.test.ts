@@ -75,11 +75,16 @@ describe("instrumentation-client", () => {
           {
             type: "Error",
             value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
                 {
                   filename:
-                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "webSocket.onclose",
                 },
               ],
             },

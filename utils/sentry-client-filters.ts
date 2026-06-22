@@ -1,6 +1,7 @@
 export type SentryStackFrame = {
   filename?: string | undefined;
   abs_path?: string | undefined;
+  function?: string | undefined;
 };
 
 export type SentryTransactionSpan = {
@@ -35,6 +36,12 @@ type FailedBreadcrumbScanResult =
 type SentryExceptionValue = {
   type?: string | undefined;
   value?: string | undefined;
+  mechanism?:
+    | {
+        type?: string | undefined;
+        handled?: boolean | undefined;
+      }
+    | undefined;
   stacktrace?:
     | {
         frames?: SentryStackFrame[] | undefined;
@@ -92,6 +99,9 @@ const coinbaseWalletSdkPathTokens = [
   "@coinbase+wallet-sdk",
 ];
 const coinbaseWalletLinkWebSocketFile = "WalletLinkWebSocket.js";
+const coinbaseWalletLinkWebSocketCloseFunction = "webSocket.onclose";
+const browserUnhandledRejectionMechanism =
+  "auto.browser.global_handlers.onunhandledrejection";
 const coinbaseWalletLinkWebSocket1006Pattern =
   /^websocket error 1006(?::.*)?$/i;
 const noisyThirdPartyTelemetryTargets = new Set([
@@ -911,11 +921,42 @@ function hasCoinbaseWalletLinkWebSocketFrame(
   );
 }
 
+function hasCoinbaseWalletLinkWebSocketCloseFunction(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some(
+      (frame) => frame.function === coinbaseWalletLinkWebSocketCloseFunction
+    )
+  );
+}
+
 function hasCoinbaseWalletLinkWebSocketStack(hint?: SentryEventHint): boolean {
   const stack = getHintExceptionStack(hint);
   return (
     stack.includes(coinbaseWalletLinkWebSocketFile) &&
     coinbaseWalletSdkPathTokens.some((token) => stack.includes(token))
+  );
+}
+
+function hasCoinbaseWalletLinkWebSocketCloseStack(
+  hint?: SentryEventHint
+): boolean {
+  return getHintExceptionStack(hint).includes(
+    coinbaseWalletLinkWebSocketCloseFunction
+  );
+}
+
+function hasWalletLinkWebSocketUnhandledRejectionSignature(
+  value: SentryExceptionValue | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return (
+    value?.mechanism?.type === browserUnhandledRejectionMechanism &&
+    value.mechanism.handled === false &&
+    (hasCoinbaseWalletLinkWebSocketCloseFunction(value.stacktrace?.frames) ||
+      hasCoinbaseWalletLinkWebSocketCloseStack(hint))
   );
 }
 
@@ -1203,7 +1244,8 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
 
   return (
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
-    hasCoinbaseWalletLinkWebSocketStack(hint)
+    hasCoinbaseWalletLinkWebSocketStack(hint) ||
+    hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint)
   );
 }
 
@@ -1229,5 +1271,7 @@ export const __testing = {
   isCoinbaseWalletLinkWebSocket1006Message,
   isCoinbaseWalletLinkWebSocketPath,
   hasCoinbaseWalletLinkWebSocketFrame,
+  hasCoinbaseWalletLinkWebSocketCloseFunction,
+  hasCoinbaseWalletLinkWebSocketCloseStack,
   shouldFilterThirdPartyTelemetrySpan,
 };

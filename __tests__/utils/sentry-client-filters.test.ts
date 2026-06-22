@@ -1846,6 +1846,68 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters Coinbase WalletLink websocket 1006 close errors before source-map symbolication", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "webSocket.onclose",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters pre-symbolication Coinbase WalletLink websocket 1006 close errors from the original exception stack", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+          },
+        ],
+      },
+    });
+    const error = new Error("websocket error 1006:");
+    error.stack =
+      "Error: websocket error 1006:\n    at webSocket.onclose (https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js:1:1)";
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Coinbase WalletLink websocket 1006 close errors from the original exception stack", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
@@ -1884,6 +1946,72 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "services/websocket/WebSocketProvider.tsx",
                   abs_path: "services/websocket/WebSocketProvider.tsx",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter handled websocket 1006 errors from raw browser frames", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: true,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "webSocket.onclose",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw browser websocket 1006 errors without the WalletLink close function", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "onclose",
                 },
               ],
             },
