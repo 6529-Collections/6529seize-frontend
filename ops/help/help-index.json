@@ -479,7 +479,7 @@
       "facts": [
         "Help6529 Credits are REP in the `Help6529 Credits` category.",
         "Each Help6529 question costs 1 Help6529 Credit REP.",
-        "Automatic grants are signup +5, profile setup +5, and daily activity +2 when the user sends any message that day, capped at 50 automatic credits."
+        "Automatic grants are signup +5, profile setup +5, and daily activity +5 when the user sends any message that day, capped at 100 automatic credits."
       ],
       "canonical_path": "/rep/categories",
       "related_paths": ["/waves"],
