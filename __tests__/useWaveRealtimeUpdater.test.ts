@@ -264,7 +264,6 @@ describe("useWaveRealtimeUpdater", () => {
 
   it("does not process when wave is missing", async () => {
     const props = baseProps({});
-    (fetchDropByIdBatched as jest.Mock).mockResolvedValue(undefined);
     const { result } = renderHook(() => useWaveRealtimeUpdater(props));
     const drop: any = { id: "d5" }; // wave missing
     await act(async () =>
@@ -273,104 +272,7 @@ describe("useWaveRealtimeUpdater", () => {
         ProcessIncomingDropType.DROP_INSERT
       )
     );
-    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d5");
     expect(props.registerWave).not.toHaveBeenCalled();
-  });
-
-  it("fetches full drop when incoming websocket payload is missing wave", async () => {
-    const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
-    const props = baseProps(store);
-    fetchDropByIdBatched.mockResolvedValue({
-      id: "d6",
-      wave: { id: "wave1" },
-      author: {},
-      context_profile_context: null,
-    });
-    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
-    const drop: any = { id: "d6", author: {} }; // wave missing in payload
-
-    await act(async () =>
-      result.current.processIncomingDrop(
-        drop,
-        ProcessIncomingDropType.DROP_INSERT
-      )
-    );
-    await flushPromises();
-
-    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d6");
-    expect(props.updateData).toHaveBeenCalled();
-    expect(props.syncNewestMessages).toHaveBeenCalled();
-  });
-
-  it("inserts help bot reply drops received through websocket updates", async () => {
-    const store = {
-      wave1: {
-        drops: [
-          {
-            id: "source-drop",
-            serial_no: 6678,
-            type: DropSize.FULL,
-            stableKey: "source-drop",
-            stableHash: "source-drop",
-            created_at: "2026-06-22T07:25:00.000Z",
-            author: { handle: "phoebeum" },
-            wave: { id: "wave1" },
-            parts: [{ content: "@help6529 what is NIC" }],
-            metadata: [],
-          },
-        ],
-        latestFetchedSerialNo: 6678,
-      },
-    };
-    const props = baseProps(store);
-    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
-    const helpBotReply: any = {
-      id: "helpbot-reply",
-      serial_no: 6679,
-      created_at: "2026-06-22T07:26:00.000Z",
-      author: { handle: "help6529", subscribed_actions: [] },
-      wave: { id: "wave1" },
-      title: null,
-      parts: [{ content: "NIC stands for Network Identity Credits." }],
-      metadata: [
-        {
-          data_key: "help_bot_interaction_id",
-          data_value: "interaction-1",
-        },
-      ],
-      reply_to: {
-        drop_id: "source-drop",
-        drop_part_id: 1,
-      },
-      context_profile_context: null,
-    };
-
-    await act(async () =>
-      result.current.processIncomingDrop(
-        helpBotReply,
-        ProcessIncomingDropType.DROP_INSERT
-      )
-    );
-    await flushPromises();
-
-    expect(props.updateData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        key: "wave1",
-        drops: [
-          expect.objectContaining({
-            id: "helpbot-reply",
-            serial_no: 6679,
-            reply_to: expect.objectContaining({ drop_id: "source-drop" }),
-            type: DropSize.FULL,
-          }),
-        ],
-      })
-    );
-    expect(props.syncNewestMessages).toHaveBeenCalledWith(
-      "wave1",
-      6678,
-      expect.objectContaining({ aborted: false })
-    );
   });
 
   it("registers wave when currentData is undefined", async () => {

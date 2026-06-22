@@ -7,7 +7,7 @@ jest.mock("next/server", () => ({
 import {
   getCurrentMintTimelineDetails,
   getNextMintTimelineDetails,
-} from "@/components/meme-calendar/meme-calendar.helpers";
+} from "@/app/api/meme-calendar/meme-calendar-response";
 import { GET } from "@/app/api/meme-calendar/current/route";
 
 describe("/api/meme-calendar/current", () => {
