@@ -2902,3 +2902,7 @@ origin/main --output test-results/app-pr-ci/pr4-secret-scan-rebased.json`:
   - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`: 13 passed.
   - `seize run test:e2e:notifications-mutation-guard`: 1 skipped without
     dev-auth env.
+- SonarCloud failed the first PR analysis with
+  `typescript:S6418` on the new E2E skip message because the message spelled
+  out a dev-auth token env var name. Removed sensitive env var names from the
+  user-facing skip text while preserving the actual configuration checks.

@@ -4,7 +4,7 @@ import { expectNoHorizontalOverflow } from "../support/pageAssertions";
 import { installReadonlyMutationGuard } from "../support/readonlyMutationGuard";
 
 const DEV_AUTH_SKIP_MESSAGE =
-  "Notification mutation-guard E2E requires PLAYWRIGHT_READONLY=1, USE_DEV_AUTH=true, DEV_MODE_WALLET_ADDRESS, DEV_MODE_AUTH_JWT, and PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE.";
+  "Notification mutation-guard E2E requires read-only mode plus local dev-auth wallet, token, and profile-handle configuration.";
 
 const NOTIFICATION_READ_RULE_IDS = new Set([
   "notification-read-all",
