@@ -21,6 +21,7 @@ import {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -125,6 +126,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterReactDomInsertBeforeNotFoundError(event)) {
+    return true;
+  }
+
+  if (shouldFilterSentryRouteParameterizationError(event)) {
     return true;
   }
 
