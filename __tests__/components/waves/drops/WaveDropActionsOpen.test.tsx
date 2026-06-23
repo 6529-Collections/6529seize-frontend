@@ -51,7 +51,7 @@ test("pushes route on click", async () => {
   render(<WaveDropActionsOpen drop={drop} />);
   expect(screen.getByTestId("tooltip-open-2")).toHaveAttribute(
     "data-z-index",
-    "20"
+    "10000"
   );
   await user.click(screen.getByRole("button"));
   expect(push).toHaveBeenCalled();

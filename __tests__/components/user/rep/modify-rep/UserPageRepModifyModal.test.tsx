@@ -11,12 +11,14 @@ import Modal from '@/components/user/rep/modify-rep/UserPageRepModifyModal';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useRepAllocation } from '@/hooks/useRepAllocation';
 
 jest.mock('@tanstack/react-query');
-jest.mock('@/components/user/rep/rep-category-modal/RepCategoryRatersList', () => () => null);
+jest.mock('@/hooks/useRepAllocation');
 
 const useQueryMock = useQuery as jest.Mock;
 const useMutationMock = useMutation as jest.Mock;
+const useRepAllocationMock = useRepAllocation as jest.Mock;
 
 const auth = {
   requestAuth: jest.fn().mockResolvedValue({ success: false }),
@@ -31,6 +33,17 @@ beforeEach(() => {
   jest.clearAllMocks();
   useQueryMock.mockReturnValue({});
   useMutationMock.mockReturnValue({ mutateAsync: jest.fn() });
+  useRepAllocationMock.mockImplementation(({ category }: { category: string }) => ({
+    repState: {
+      category,
+      rating: 1234,
+      contributor_count: 7,
+      rater_contribution: 1234,
+    },
+    heroAvailableRep: 5000,
+    minMaxValues: { min: -5000, max: 5000 },
+    proxyAvailableCredit: null,
+  }));
 });
 
 describe('UserPageRepModifyModal — edit mode (canEditRep=true)', () => {
@@ -60,8 +73,8 @@ describe('UserPageRepModifyModal — edit mode (canEditRep=true)', () => {
   });
 });
 
-describe('UserPageRepModifyModal — read-only mode (canEditRep=false)', () => {
-  it('renders category name, total rep and rater count', () => {
+describe('UserPageRepModifyModal — allocation form', () => {
+  it('renders category name and allocation controls', () => {
     render(
       <ReactQueryWrapperContext.Provider value={rq}>
         <AuthContext.Provider value={auth}>
@@ -78,11 +91,11 @@ describe('UserPageRepModifyModal — read-only mode (canEditRep=false)', () => {
     );
 
     expect(screen.getByText('Artist')).toBeInTheDocument();
-    expect(screen.getByText('1,234')).toBeInTheDocument();
-    expect(screen.getByText('7')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
 
-  it('does not render the edit form or save button', () => {
+  it('renders the edit form even when legacy canEditRep prop is false', () => {
     render(
       <ReactQueryWrapperContext.Provider value={rq}>
         <AuthContext.Provider value={auth}>
@@ -98,8 +111,8 @@ describe('UserPageRepModifyModal — read-only mode (canEditRep=false)', () => {
       </ReactQueryWrapperContext.Provider>
     );
 
-    expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
 
   it('calls onClose when close button clicked', async () => {

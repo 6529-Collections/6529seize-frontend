@@ -34,9 +34,7 @@ describe("CreateDropIdentityField", () => {
     );
 
     expect(
-      screen.getByText(
-        "Your identity will be used automatically for this submission."
-      )
+      screen.getByText("Add content below to submit this drop.")
     ).toBeInTheDocument();
     expect(screen.getByText("viewer")).toBeInTheDocument();
     expect(screen.getByText("0xviewer")).toBeInTheDocument();

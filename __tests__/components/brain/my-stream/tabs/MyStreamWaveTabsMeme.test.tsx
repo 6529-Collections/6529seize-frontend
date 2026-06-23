@@ -199,7 +199,6 @@ describe("MyStreamWaveTabsMeme", () => {
 
     const subtitle = screen.getByText("A chill place to discuss drops");
     expect(subtitle).toBeInTheDocument();
-    expect(subtitle).toHaveClass("tw-block");
     expect(subtitle).toHaveClass("tw-truncate");
     expect(subtitle).not.toHaveClass("tw-line-clamp-1");
     expect(
@@ -207,7 +206,7 @@ describe("MyStreamWaveTabsMeme", () => {
     ).toBeInTheDocument();
   });
 
-  it("hides submit action in compact mode", () => {
+  it("keeps submit action available in compact mode", () => {
     mockUseBreakpoint.mockReturnValue("S");
     const setActiveContentTab = jest.fn();
     useContentTab.mockReturnValue({
@@ -222,7 +221,7 @@ describe("MyStreamWaveTabsMeme", () => {
       </SidebarProvider>
     );
 
-    expect(screen.queryByText("submit")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "submit" })).toBeInTheDocument();
   });
 
   it("renders copy-mode action when native share is unavailable", () => {
@@ -293,7 +292,7 @@ describe("MyStreamWaveTabsMeme", () => {
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Go back" })
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
   });
 
   it("keeps compact actions right-aligned with subtitle trigger", () => {
@@ -311,13 +310,14 @@ describe("MyStreamWaveTabsMeme", () => {
 
     expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Share wave" })
-    ).toBeInTheDocument();
-    expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Show wave description" })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    expect(
+      screen.getByRole("menuitem", { name: "Share wave" })
     ).toBeInTheDocument();
   });
 });

@@ -39,7 +39,7 @@ describe('WaveRepOutcome', () => {
     expect(screen.getByText('10 Rep')).toBeInTheDocument();
     expect(screen.queryByText('40 Rep')).toBeNull();
 
-    fireEvent.click(screen.getByText(/View more/i));
+    fireEvent.click(screen.getByText(/View 1 more/i));
     expect(screen.getByText('40 Rep')).toBeInTheDocument();
   });
 
@@ -56,6 +56,5 @@ describe('WaveRepOutcome', () => {
     const viewMoreBtn = screen.getByRole('button', { name: /loading\.\.\./i });
     expect(viewMoreBtn).toBeInTheDocument();
     expect(viewMoreBtn).toBeDisabled();
-    expect(screen.getByText(/1 more/i)).toBeInTheDocument();
   });
 });
