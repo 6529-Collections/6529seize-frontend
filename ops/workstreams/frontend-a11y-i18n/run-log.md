@@ -3642,3 +3642,517 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`
 - Next action: commit/push this follow-up, update PR #2848 evidence, re-trigger
   all reviewbot lanes on the new head, and iterate only on material findings.
+
+## 2026-06-23T05:00Z Admin/Destructive Guard Pack
+
+- Started branch `codex/e2e-admin-destructive-guards` in
+  `D:\repos\6529seize-frontend-admin-guards`, based on `origin/main`
+  `fe4af27e79e1`.
+- Local env bootstrapped with `seize-local-dev bootstrap`; assigned frontend
+  port is `3180`, pointing at the shared local API/WebSocket.
+- Target slice is test-only E2E hardening for fail-closed destructive/admin
+  surfaces:
+  - NextGen manager disconnected/non-admin permission boundary and hidden admin
+    action buttons.
+  - Drop Forge landing/craft/launch permission fallback and hidden claim/action
+    controls without wallet authority.
+  - public Groups API/card readiness plus hidden create/my-groups/edit/delete
+    and Rep/NIC bulk-vote controls without a connected profile.
+- Planned wiring:
+  - `test:e2e:admin-guards-readonly` for local desktop/mobile.
+  - staging and production read-only variants.
+  - inclusion in aggregate `test:e2e:production:readonly`.
+- Validation target before PR:
+  `seize run test:e2e:admin-guards-readonly`,
+  `seize run typecheck:playwright`, `seize run lint:package-json`,
+  `seize run lint:changed`, `seize run typecheck:changed`, focused
+  risk/security scans as applicable, and `codex-diff-check`.
+
+## 2026-06-23T05:32Z Admin/Destructive Guard Validation
+
+- Implemented:
+  - `tests/admin/admin-destructive-guards-readonly.spec.ts`.
+  - package scripts `test:e2e:admin-guards-readonly`,
+    `test:e2e:staging:admin-guards-readonly`, and
+    `test:e2e:production:admin-guards-readonly`.
+  - aggregate `test:e2e:production:readonly` now includes the admin guard pack.
+  - `tests/README.md` documents scope and ownership.
+- Local validation:
+  - First run failed before tests because fresh worktree lacked
+    `config/env.schema.runtime.cjs`; fixed with `seize run build:env-schema`.
+  - First real run found the NextGen manager disconnected state shows the
+    `Connect` boundary, not the non-admin text. Updated the assertion to accept
+    either the disconnected Connect boundary or the explicit non-admin
+    restriction while still requiring all admin actions to be absent.
+  - Independent verifier found missing NextGen button labels, a brittle Drop
+    Forge countdown assertion, and Groups controls that could be checked before
+    card render. Fixed by adding the exact `Upload Allowlist` and
+    `Update Script By Index` labels, removing the countdown assertion, and
+    waiting for `/api/groups` plus a rendered group card when the API returns
+    groups.
+  - `seize run test:e2e:admin-guards-readonly`: 6/6 passed.
+  - `seize run typecheck:playwright`: passed.
+  - `seize run lint:package-json`: passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/admin/admin-destructive-guards-readonly.spec.ts`:
+    passed.
+  - `seize run typecheck:changed`: no changed TypeScript files are included in
+    `tsconfig.typecheck.json`, expected for a Playwright-only spec.
+  - `seize run lint:changed`: passed.
+  - `compute-risk-floor --changed-from origin/main`: passed, Level 4 due
+    `package.json` release-validation script changes.
+  - `scan-changed-secrets --changed-from origin/main`: clean.
+  - First workflow-security scan used an obsolete subcommand name; reran current
+    `validate-workflow-security` command successfully.
+  - `codex-diff-check`: passed.
+- Remote read-only validation:
+  - First staging run failed before navigation because `STAGING_AUTH` was not in
+    the worktree shell env.
+  - Reran staging with `STAGING_AUTH` loaded only for the child process from
+    local Windows Credential Manager target `STAGING_AUTH`; no value was
+    printed or persisted.
+  - `seize run test:e2e:staging:admin-guards-readonly`: 6/6 passed.
+  - `seize run test:e2e:production:admin-guards-readonly`: 3/3 passed.
+  - `seize run test:e2e:production:readonly`: 68/68 passed, proving aggregate
+    release validation includes and survives the new pack.
+
+## 2026-06-23T05:39Z Admin/Destructive Guard Bot Nice-To-Haves
+
+- Opened PR #2855 and triggered:
+  `/6529bot review general wcag i18n security responsiveness glm-swarm`.
+- CodeRabbit reported no actionable comments.
+- 6529bot general/WCAG/i18n lanes on head `8541744c865f` were
+  good-to-merge/no-findings, with non-blocking brittleness suggestions.
+- Implemented useful low-cost suggestions before waiting for all checks:
+  - exact anchored accessible-name matching for NextGen and Groups denied
+    buttons.
+  - a combined 30s `expectAnyVisible` poll instead of sequential 1s checks.
+  - clearer `/api/groups` non-JSON parse error.
+  - an explicit comment for the intentionally weaker empty-groups readiness
+    path.
+- Next action: rerun focused local/staging/production validation, commit/push a
+  follow-up, and re-trigger reviewbot lanes on the new head.
+
+## 2026-06-23T06:57Z Admin/Destructive Guard Latest-Head GLM Follow-Up
+
+- Fixed reviewbot GLM-swarm empty internal reviewer handling in
+  `6529reviewbot` first, then reran `/6529bot review glm-swarm` on PR #2855.
+- Latest GLM-swarm run reviewed head `2612d7a07483` and succeeded with one
+  partial reviewer slice (`correctness-regression: empty_output`), confirming
+  the bot-infra failure is no longer blocking advisory feedback.
+- Accepted useful latest-head GLM feedback:
+  - `expectAnyVisible` now uses labeled candidates, an explicit poll interval,
+    and a short per-candidate visibility timeout so permission-boundary
+    failures are clearer and less CPU-noisy.
+  - `tests/README.md` now states that production read-only aggregate evidence
+    is desktop Chromium only, while mobile-web admin guard evidence remains in
+    local and staging targeted commands.
+- Deferred remaining GLM suggestions as already covered or non-blocking:
+  - empty Groups data is intentionally route-level only; destructive
+    route-level controls are still asserted absent and the no-card limitation is
+    documented in the spec.
+  - local readonly packs consistently omit `PLAYWRIGHT_ENV=local`; the admin
+    guard spec does not branch on that variable.
+
+## 2026-06-23T07:21Z Admin/Destructive Guard Follow-Up Validation
+
+- Revalidated the latest GLM follow-up edits before push:
+  - `seize run typecheck:playwright`: passed.
+  - focused ESLint on `tests/admin/admin-destructive-guards-readonly.spec.ts`:
+    passed.
+  - `seize run lint:package-json`: passed.
+  - `seize run lint:changed`: passed.
+  - `seize run typecheck:changed`: no changed TypeScript files are included in
+    `tsconfig.typecheck.json`, expected for Playwright-only spec changes.
+  - `compute-risk-floor --changed-from origin/main`: passed.
+  - `scan-changed-secrets --changed-from origin/main`: clean.
+  - `validate-workflow-security --changed-from origin/main`: passed.
+  - `codex-diff-check`: passed.
+  - `seize run test:e2e:admin-guards-readonly`: 6/6 passed across desktop and
+    mobile Chromium locally.
+  - `seize run test:e2e:staging:admin-guards-readonly`: 6/6 passed across
+    desktop and mobile Chromium after loading `STAGING_AUTH` only into the
+    child process from Windows Credential Manager; no credential value was
+    printed or persisted.
+  - `seize run test:e2e:production:readonly`: 68/68 passed on production
+    desktop Chromium with the admin guard pack included.
+- One staging retry used an incorrect UTF-8 decode of the Windows credential
+  blob and failed at the access gate before route assertions. Reran with the
+  correct UTF-16 decode and passed.
+- Next action: commit and push the follow-up, then re-trigger the full
+  6529reviewbot lane set on PR #2855.
+
+## 2026-06-23T07:34Z Admin/Destructive Guard Rebase Validation
+
+- Rebasing PR #2855 onto current `origin/main` completed cleanly after main
+  advanced to `d0bf12f52`.
+- Rebased validation:
+  - `seize run typecheck:playwright`: passed.
+  - `seize run lint:package-json`: passed.
+  - `codex-diff-check`: passed.
+  - `seize run typecheck:changed`: passed for 29 changed TypeScript files.
+  - `compute-risk-floor --changed-from origin/main`: passed.
+  - `scan-changed-secrets --changed-from origin/main`: clean.
+  - `validate-workflow-security --changed-from origin/main`: passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0
+    tests/admin/admin-destructive-guards-readonly.spec.ts`: passed.
+  - `seize run test:e2e:admin-guards-readonly`: 6/6 passed across desktop and
+    mobile Chromium locally.
+  - `seize run test:e2e:staging:admin-guards-readonly`: 6/6 passed across
+    desktop and mobile Chromium with `STAGING_AUTH` loaded only into the child
+    process from Windows Credential Manager.
+  - `seize run test:e2e:production:admin-guards-readonly`: 3/3 passed on
+    production desktop Chromium.
+- `seize run lint:changed` failed after the rebase because that script compares
+  against local `main`, which lagged behind `origin/main` in this worktree and
+  expanded to an over-long Windows command line. The actual
+  `origin/main...HEAD` JS/TS changed-file set is only
+  `tests/admin/admin-destructive-guards-readonly.spec.ts`, and the direct
+  ESLint command above passed.
+- Next action: amend the follow-up commit with this evidence, force-push with
+  lease, then trigger the full existing 6529reviewbot lane set plus GLM-swarm.
+
+## 2026-06-23T08:10Z PR #2850 Rebase Restart
+
+- PR #2855 was merged to `origin/main` as
+  `0ae8b27f6b1d1f1ec1061fe8180d2d87cb18c6e7`, so PR #2850
+  (`codex/e2e-upload-admin-guards`) needed a current-main rebase before it
+  could be merged.
+- Started the rebase in
+  `D:\repos\6529seize-frontend-native-shell-readonly`.
+- The first rebase conflict was limited to workstream memory files:
+  `ops/workstreams/frontend-a11y-i18n/active-context.md` and
+  `ops/workstreams/frontend-a11y-i18n/run-log.md`.
+- Resolved by keeping the newer main-side deployment/admin-guard timeline and
+  adding this current PR #2850 note instead of preserving stale "current
+  branch" text from before the later deployment train.
+- Next action: finish the rebase, run the focused chat-drop sandbox validation
+  set, push the rebased head, and re-trigger the unchanged existing
+  reviewbot lanes plus GLM-swarm.
+
+## 2026-06-23T09:16Z PR #2851 Rebase After PR #2850 Merge
+
+- Started rebasing PR #2851 (`codex/native-package-evidence-e2e`) in
+  `D:\repos\6529seize-frontend-native-package-evidence` onto current
+  `origin/main` after PR #2850 merged as
+  `eec7dbecb1ff28ae357a3df707ba2051dea2b8e0`.
+- Conflict during the first commit was limited to workstream memory files:
+  `ops/workstreams/frontend-a11y-i18n/active-context.md` and
+  `ops/workstreams/frontend-a11y-i18n/run-log.md`.
+- Resolved by keeping the newer main-side #2850 timeline and adding this
+  current PR #2851 rebase note; package, tests, docs, and deployment-bus files
+  auto-merged on the first commit.
+- Next action: finish the rebase, rerun the native-surface evidence validation
+  set, push the rebased head, and trigger the unchanged existing reviewbot
+  lanes plus GLM-swarm.
+
+## 2026-06-23T09:38Z PR #2851 Rebase After PR #2854 Merge
+
+- Rebased PR #2851 onto `origin/main`
+  `daeac04bcb701786b5429a54ec832c0a24b42fd2` after PR #2854 merged.
+- First-commit conflict was in `ops/scripts/deployment-bus.cjs`, where the
+  merged `deployment:http-version` durable artifact pack overlapped the new
+  `native:surface-evidence` optional pack. Resolved by preserving both
+  registry entries and both artifact patterns.
+- Incorporated the worker's latest CodeRabbit cleanup commit
+  `e7d1f8e852958bcc9a347a9d77a19c1ab6f50eed`, rebased as current head
+  `4151a1bb8`.
+- Rebased validation passed:
+  - `node --check ops/scripts/native-surface-evidence.cjs`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+    60 passed.
+  - `seize run test:native-evidence`: passed; evidence tier is
+    `browser-simulation`, not real packaged runtime evidence.
+  - `seize run typecheck:playwright`: passed.
+  - `seize run typecheck:changed`: 39 changed TypeScript files passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 __tests__/scripts/deployment-bus.test.ts __tests__/scripts/native-surface-evidence.test.ts tests/support/surfaceSimulation.ts tests/surfaces/native-shell-readonly.spec.ts`:
+    passed.
+  - `seize run lint:package-json`: passed.
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --output test-results/app-pr-ci/native-evidence-risk-floor-rebased.json`:
+    Level 4 because deployment and test-control tooling changed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/native-evidence-secret-scan-rebased.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/native-evidence-workflow-security-rebased.json`:
+    clean, no changed workflow files.
+  - `codex-diff-check`
+  - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 expected skips
+    across Capacitor iOS/Android simulation and Electron shell simulation.
+- Next action: commit this memory update, force-push PR #2851, trigger all
+  existing 6529bot lanes plus GLM-swarm, and merge after checks and material
+  bot feedback are clear.
+
+## 2026-06-23T10:05Z PR #2851 Current-Main Rebase
+
+- `origin/main` advanced to
+  `32fa30b4eecfa9b103f67c5499f981292d63d167` via PR #2787.
+- Rebased PR #2851 (`codex/native-package-evidence-e2e`) onto that current
+  main cleanly, without conflict.
+- Validation on the refreshed head passed:
+  - `node --check ops/scripts/native-surface-evidence.cjs`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run lint:package-json`
+  - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+    60 passed.
+  - `seize run test:native-evidence`: passed; evidence tier is
+    `browser-simulation`, not real packaged runtime evidence.
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`: 43 changed TypeScript files passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 __tests__/scripts/deployment-bus.test.ts __tests__/scripts/native-surface-evidence.test.ts tests/support/surfaceSimulation.ts tests/surfaces/native-shell-readonly.spec.ts`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --output test-results/app-pr-ci/native-evidence-risk-floor-main-32fa30.json`:
+    Level 4 because deployment and test-control tooling changed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/native-evidence-secret-scan-main-32fa30.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/native-evidence-workflow-security-main-32fa30.json`:
+    clean, no changed workflow files.
+  - `codex-diff-check`
+  - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 expected skips
+    across Capacitor iOS/Android simulation and Electron shell simulation.
+- Next action: commit this memory update, force-push PR #2851, post concise
+  evidence, trigger reviewbot lanes in a plain command comment, and merge after
+  CI and material bot feedback are clear.
+- CodeRabbit later flagged the native messages heading assertion as broad.
+  This is intentional because local auth can render the messages page or its
+  wallet/profile gate in the native simulation; added an inline comment and
+  validated with focused ESLint, Playwright typecheck, and `codex-diff-check`.
+
+## 2026-06-23T10:30Z PR #2852 Current-Main Rebase After #2851 Merge
+
+- PR #2851 merged into `origin/main` as
+  `8c1ec66ea31d6ef952586b17716f0f43030c1ec2`.
+- Rebased PR #2852 (`codex/e2e-wallet-signing-guards`) onto that current main.
+  Conflicts were limited to stale workstream memory entries and were resolved by
+  keeping the newer main-side timeline, then updating `active-context.md` with
+  the current #2852/#2853 queue state.
+- The branch delta remains test/docs/tooling only: reaction sandbox coverage,
+  review polish comments, and the GLM-requested
+  `PLAYWRIGHT_AUTH_SANDBOX=1` guard on `test:e2e:reaction-sandbox`.
+- Validation on the rebased head passed:
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `seize run lint:package-json`
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/social/wave-reaction-sandbox.spec.ts tests/support/composerSandboxServer.cjs`
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`: 43 changed TypeScript files passed.
+  - `seize run test:e2e:reaction-sandbox`: 1 passed with
+    `PLAYWRIGHT_AUTH_SANDBOX=1`.
+  - `seize run test:e2e:auth-sandbox`: 9 passed.
+  - `seize run test:e2e:composer-sandbox`: 10 passed across desktop/mobile
+    Chromium.
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --output test-results/app-pr-ci/reaction-sandbox-risk-floor-after-2851.json`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/reaction-sandbox-secret-scan-after-2851.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/reaction-sandbox-workflow-security-after-2851.json`
+- Next action: commit this memory update, force-push the current #2852 head,
+  trigger CodeRabbit plus the existing 6529bot lanes and GLM-swarm on the exact
+  pushed commit, then merge if CI and material bot feedback remain clear.
+
+## 2026-06-23T10:42Z PR #2852 Bot Feedback Patch
+
+- Addressed remaining current-file review feedback before merge:
+  - CodeRabbit's Open Graph fixture concern was valid; `fulfillOpenGraphBatch`
+    now falls back to the deterministic preview URL when `postDataJSON()` sees
+    an empty or invalid request body.
+  - GLM-swarm's reaction-method concern was behaviorally safe already because
+    unsupported writes on `/api/drops/:id/reaction` classify as
+    `dangerous-composer-mutation` and return `409`; added an explicit negative
+    Playwright assertion to lock that invariant.
+- Focused validation passed after the patch:
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/social/wave-reaction-sandbox.spec.ts tests/support/composerSandboxServer.cjs`
+  - `seize run typecheck:playwright`
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `codex-diff-check`
+  - `seize run test:e2e:reaction-sandbox`: 2 passed, including the unsupported
+    reaction mutation rejection case.
+- Next action: commit, force-push, rerun exact-head reviewbot/CI signals, and
+  merge #2852 once no material feedback remains.
+
+## 2026-06-23T11:15Z PR #2853 Rebase After #2852 Merge
+
+- PR #2852 merged into `origin/main` as
+  `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
+- Started rebasing PR #2853 (`codex/e2e-wallet-signing-sandbox`) onto that
+  current main. The first commit conflicted where the signed-drop sandbox
+  overlapped the newly merged reaction sandbox.
+- Resolution strategy:
+  - keep the current main/reaction-sandbox refactor as the base;
+  - preserve the signed-drop E2E spec and add the signature sandbox script;
+  - include both reaction and signature specs in `test:e2e:auth-sandbox`;
+  - add signed Rank-wave mock fixtures and exact read routes without reusing
+    the `...0539` chat-drop ID from #2852;
+  - keep newer main-side workstream history and record this fresh rebase note.
+- Next action: finish the rebase, run the signature/reaction/auth sandbox packs
+  plus signing unit tests and static checks, then push and re-trigger the review
+  loop for PR #2853.
+
+## 2026-06-23T11:22Z PR #2853 Negative Assertion Follow-Up Replayed
+
+- Replayed the PR #2853 follow-up that strengthens the signed-drop fail-closed
+  assertion.
+- The signature sandbox now samples the local request ledger for a short
+  negative assertion window and fails if any late `/api/drops` POST appears,
+  instead of checking the ledger only once.
+- Next action: continue the rebase and run the full focused validation set on
+  the rebased head.
+
+## 2026-06-23T11:28Z PR #2853 Rebased Validation Complete
+
+- Completed the PR #2853 rebase onto merged #2852/main
+  `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
+- Current branch delta is test/docs/tooling only: signed-drop sandbox E2E,
+  mock signature Rank-wave fixtures, the `test:e2e:signature-sandbox` script,
+  `test:e2e:auth-sandbox` inclusion, signing test harness updates, and
+  workstream/test docs.
+- Focused local validation passed on the rebased head:
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - package JSON parse plus `seize run lint:package-json`
+  - focused ESLint for the signed/reaction sandbox specs, sandbox server, and
+    `__tests__/hooks/useSecureSign.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run test:e2e:reaction-sandbox`: 2 passed.
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+  - `seize run test:e2e:composer-sandbox`: 10 passed across desktop/mobile.
+  - focused signing/composer Jest batch: 7 suites, 73 tests passed.
+  - risk floor Level 4, changed-secret scan clean, workflow-security scan
+    clean.
+- Local `seize run lint:changed` is still not useful in this worktree because
+  the branch comparison against local `main` creates a Windows command-line
+  length overflow; focused ESLint on the actual PR files passed.
+- Next action: force-with-lease push the rebased branch, trigger CodeRabbit and
+  all existing 6529bot lanes including GLM-swarm/responsiveness on the exact
+  pushed head, then merge when CI and material review feedback are clear.
+
+## 2026-06-23T11:40Z PR #2853 Final Reviewbot Hardening
+
+- Addressed the remaining useful advisory feedback from the latest #2853 bot
+  loop:
+  - the terms-copy assertion is now scoped to the Terms of Service dialog;
+  - the spec asserts the real signing-failure toast before the no-write ledger
+    check, proving the signing branch was reached rather than merely no-oping;
+  - the signature-wave fixture documents its intentional inherited open
+    visibility, eligibility, and period gates.
+- Kept the timed negative ledger loop instead of converting it to
+  `expect.poll`, because this check must stay green for the full assertion
+  window and should not pass on the first zero sample.
+- Focused validation passed:
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/social/wave-signature-sandbox.spec.ts tests/support/composerSandboxServer.cjs`
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run typecheck:playwright`
+  - `codex-diff-check`
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+- Next action: commit, push the final head, re-trigger the review loop, and
+  merge after CI and material bot feedback are clear.
+
+## 2026-06-23T11:58Z PR #2853 Related-Jest CI Hang Fix
+
+- Final-head App PR CI exposed a real required-check hang in the `Run related
+  Jest tests` step. The workflow fed changed Jest test files into
+  `jest --findRelatedTests`, and `--findRelatedTests
+  __tests__/hooks/useSecureSign.test.ts` reproduced the hang locally.
+- Patched `.github/workflows/app-pr-ci.yml` so the related-Jest lane:
+  - skips Playwright specs under `tests/*.spec.ts(x)`;
+  - runs changed Jest test files directly;
+  - keeps `--findRelatedTests` for non-test source files;
+  - uses `--forceExit`, matching the repo's existing JSON Jest scripts, so
+    known open-handle leaks cannot hold the required app-check job forever.
+- Validation passed:
+  - `seize run test:no-coverage -- __tests__/hooks/useSecureSign.test.ts --passWithNoTests --forceExit`: 30 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi`: 43 passed.
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - workflow-security scan clean.
+  - changed-secret scan clean.
+  - risk floor recomputed.
+  - `codex-diff-check`.
+- Next action: commit and push the CI harness fix, which will cancel the hung
+  old app-check run and restart CI on the corrected head.
+
+## 2026-06-23T12:35Z PR #2853 Current-Main Validation
+
+- Rebased PR #2853 onto current `origin/main`
+  `3682d3fb3 Polish wave sidebar spacing and grouped message timestamps
+  (#2845)`.
+- A first post-rebase signed-sandbox run saw a transient app 404 from the local
+  dev server; rerunning from a clean sandbox port state passed and the broader
+  auth sandbox also passed, confirming the branch did not need a route or
+  fixture change.
+- Focused validation on the current-main head passed:
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi`: 43 passed.
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize run typecheck:changed`: passed for 57 changed TypeScript files.
+  - focused ESLint for `__tests__/hooks/useSecureSign.test.ts`,
+    `tests/social/wave-signature-sandbox.spec.ts`, and
+    `tests/support/composerSandboxServer.cjs`.
+  - `codex-diff-check`.
+  - risk floor Level 4, changed-secret scan clean, workflow-security scan
+    clean.
+- Local `seize run lint:changed` still hit the Windows command-line length
+  issue caused by the script's local-`main` comparison in this worktree; the
+  focused ESLint command over the actual PR lintable files passed.
+- Next action: commit this validation note, force-with-lease push the rebased
+  branch, restart CodeRabbit and all 6529bot review lanes on the pushed head,
+  then merge when CI and material review feedback are clear.
+
+## 2026-06-23T12:45Z PR #2853 Related-Jest Hardening Follow-Up
+
+- The first current-main CI retry still sat in `Run related Jest tests` longer
+  than expected. Before waiting for the full job timeout, hardened the workflow
+  again so the required check is bounded and its intent is explicit.
+- Updated `.github/workflows/app-pr-ci.yml` related-Jest classification:
+  - Playwright specs under `tests/**/*.spec.ts(x)` are skipped for Jest.
+  - Only `*.test.ts(x)` files are treated as direct Jest tests.
+  - Any remaining `*.spec.ts(x)` files are skipped as non-Jest specs instead
+    of being guessed into Jest.
+  - Direct-Jest and related-source Jest invocations now run with
+    `timeout 180s`, `--runInBand`, and `--forceExit` so open handles cannot
+    hang the app PR CI job indefinitely.
+- Validation passed:
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize run test:no-coverage -- __tests__/hooks/useSecureSign.test.ts --passWithNoTests --runInBand --forceExit`: 30 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi` with `--runInBand --forceExit`: 43 passed.
+  - risk floor recomputed.
+  - changed-secret scan clean.
+  - workflow-security scan clean.
+  - `codex-diff-check`.
+- Next action: commit, push, let concurrency cancel the still-running old app
+  PR CI run, then verify the new CI head exits the related-Jest step.
+
+## 2026-06-23T13:00Z PR #2853 Direct-Jest CI Fix
+
+- GitHub app PR CI proved the previous bounded related-Jest step still failed:
+  `__tests__/hooks/useSecureSign.test.ts` passed in about 18s, then the process
+  stayed open until the 180s shell timeout killed the step with exit code 124.
+- Updated `.github/workflows/app-pr-ci.yml` so this CI step invokes Jest
+  directly through the repo wrapper:
+  - `./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests`.
+  - `--forceExit` and other Jest options now appear before direct test file
+    paths and before `--findRelatedTests` source paths.
+  - Added `run_jest_with_timeout` to emit a distinct GitHub error message if a
+    future related-Jest run times out.
+- Validation passed:
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests __tests__/hooks/useSecureSign.test.ts`:
+    30 passed and exited cleanly.
+  - `codex-diff-check -- .github/workflows/app-pr-ci.yml`.
+- Next action: commit and push, update PR #2853 notes, restart CodeRabbit and
+  6529bot lanes on the new head, then merge once CI and material bot feedback
+  are clear.
+
+## 2026-06-23T13:08Z PR #2853 GLM Follow-Up
+
+- Latest-head GLM swarm review was advisory-only and found no high-confidence
+  production regression, but flagged one useful CI fidelity point: direct Jest
+  invocation should preserve the package script's explicit `NODE_ENV=test`.
+- Verified `package.json` `test:no-coverage` only adds
+  `NODE_ENV=test jest --silent --verbose=false --coverage=false`; the direct CI
+  helper already carries the Jest flags, and now sets `NODE_ENV=test`.
+- Verified the signed-drop Playwright regex intentionally matches the prefix of
+  the current production signing failure string in
+  `hooks/drops/useDropSignature.ts`.
+- Next action: validate the exact direct-Jest command again, commit, push, and
+  rerun CI/reviewbot latest-head checks.

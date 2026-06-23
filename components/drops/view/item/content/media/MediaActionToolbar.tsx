@@ -13,7 +13,7 @@ import type React from "react";
 const BASE_BUTTON_CLASS =
   "tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-100 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700 disabled:tw-cursor-default disabled:tw-opacity-60";
 
-export type MediaActionLabels = {
+type MediaActionLabels = {
   readonly close?: string | undefined;
   readonly download?: string | undefined;
   readonly downloading?: string | undefined;

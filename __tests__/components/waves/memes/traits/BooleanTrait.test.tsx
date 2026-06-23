@@ -238,7 +238,7 @@ describe('BooleanTrait', () => {
     render(<BooleanTrait {...defaultProps} />);
 
     const buttonsContainer = screen.getByRole('button', { name: 'Yes' }).parentElement;
-    expect(buttonsContainer).toHaveClass('tw-flex', 'tw-gap-3', 'tw-w-full');
+    expect(buttonsContainer).toHaveClass('tw-flex', 'tw-gap-1');
     expect(buttonsContainer).toHaveAttribute('data-field', 'punk6529');
   });
 });

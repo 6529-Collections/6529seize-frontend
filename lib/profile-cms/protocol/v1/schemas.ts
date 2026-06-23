@@ -43,7 +43,7 @@ const blockValueSchema: z.ZodType<
   ])
 );
 
-export const profileRefSchema = z
+const profileRefSchema = z
   .object({
     handle: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_-]{1,63}$/),
     profile_id: z.string().optional(),
@@ -51,7 +51,7 @@ export const profileRefSchema = z
   })
   .strict();
 
-export const themeSchema = z
+const themeSchema = z
   .object({
     mode: z.enum(["light", "dark", "system"]),
     accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
@@ -59,7 +59,7 @@ export const themeSchema = z
   })
   .strict();
 
-export const pageMetadataPartialSchema = z
+const pageMetadataPartialSchema = z
   .object({
     title: z.string().min(1).max(160).optional(),
     description: z.string().max(300).optional(),
@@ -74,7 +74,7 @@ export const pageMetadataPartialSchema = z
   })
   .strict();
 
-export const pageMetadataSchema = pageMetadataPartialSchema
+const pageMetadataSchema = pageMetadataPartialSchema
   .extend({
     title: z.string().min(1).max(160),
     description: z.string().max(300),
@@ -83,7 +83,7 @@ export const pageMetadataSchema = pageMetadataPartialSchema
   })
   .strict();
 
-export const metadataDefaultSchema = z
+const metadataDefaultSchema = z
   .object({
     scope: z
       .object({
@@ -96,14 +96,14 @@ export const metadataDefaultSchema = z
   })
   .strict();
 
-export const searchConfigSchema = z
+const searchConfigSchema = z
   .object({
     enabled: z.boolean().optional(),
     manifest_asset_id: idSchema.optional(),
   })
   .strict();
 
-export const siteManifestSchema = z
+const siteManifestSchema = z
   .object({
     title: z.string().min(1).max(160),
     description: z.string().max(300).optional(),
@@ -118,7 +118,7 @@ export const siteManifestSchema = z
   })
   .strict();
 
-export const interactivePolicySchema = z
+const interactivePolicySchema = z
   .object({
     hydration: z.enum(CMS_HYDRATION_POLICIES),
     requires_user_activation: z.boolean().optional(),
@@ -136,7 +136,7 @@ export const blockSchema = z
   })
   .catchall(blockValueSchema);
 
-export const sourceRefSchema = z
+const sourceRefSchema = z
   .object({
     source_packet_id: idSchema.optional(),
     field_sources: z.record(z.string()).optional(),
@@ -154,7 +154,7 @@ export const pageSchema = z
   })
   .strict();
 
-export const routeSchema = z
+const routeSchema = z
   .object({
     path: cmsPathSchema,
     kind: z.enum(CMS_ROUTE_KINDS),
@@ -181,7 +181,7 @@ export const assetSchema = z
   })
   .strict();
 
-export const displayVariantSchema = z
+const displayVariantSchema = z
   .object({
     asset_id: idSchema,
     role: z.enum(CMS_DISPLAY_VARIANT_ROLES),
@@ -191,7 +191,7 @@ export const displayVariantSchema = z
   })
   .strict();
 
-export const snapshotSchema = z
+const snapshotSchema = z
   .object({
     owner: z.string().optional(),
     block_number: z.number().int().min(0).optional(),
@@ -199,7 +199,7 @@ export const snapshotSchema = z
   })
   .strict();
 
-export const nftMediaProfileSchema = z
+const nftMediaProfileSchema = z
   .object({
     id: idSchema,
     chain_id: z.number().int().min(1),
@@ -214,7 +214,7 @@ export const nftMediaProfileSchema = z
   })
   .strict();
 
-export const deepZoomManifestSchema = z
+const deepZoomManifestSchema = z
   .object({
     id: idSchema,
     source_asset_id: idSchema,
@@ -226,7 +226,7 @@ export const deepZoomManifestSchema = z
   })
   .strict();
 
-export const artworkPlacementSchema = z
+const artworkPlacementSchema = z
   .object({
     id: idSchema,
     asset_id: idSchema,
@@ -240,7 +240,7 @@ export const artworkPlacementSchema = z
   })
   .strict();
 
-export const exhibitionRoomSchema = z
+const exhibitionRoomSchema = z
   .object({
     id: idSchema,
     title: z.string().min(1),
@@ -252,7 +252,7 @@ export const exhibitionRoomSchema = z
   })
   .strict();
 
-export interface CmsNavigationItemShape {
+interface CmsNavigationItemShape {
   label: string;
   page_id?: string | undefined;
   url?: string | undefined;
@@ -271,14 +271,14 @@ export const navigationItemSchema: z.ZodType<CmsNavigationItemShape> = z.lazy(
       .strict()
 );
 
-export const navigationSchema = z
+const navigationSchema = z
   .object({
     id: idSchema,
     items: z.array(navigationItemSchema),
   })
   .strict();
 
-export const taxonomySchema = z
+const taxonomySchema = z
   .object({
     id: idSchema,
     name: z.string(),
@@ -294,7 +294,7 @@ export const taxonomySchema = z
   })
   .strict();
 
-export const sourcePacketSchema = z
+const sourcePacketSchema = z
   .object({
     id: idSchema,
     source_type: z.enum(CMS_SOURCE_PACKET_TYPES),
@@ -303,7 +303,7 @@ export const sourcePacketSchema = z
   })
   .catchall(blockValueSchema);
 
-export const buildManifestSchema = z
+const buildManifestSchema = z
   .object({
     renderer: z.string().optional(),
     renderer_version: z.string().optional(),
@@ -329,7 +329,7 @@ export const cmsPayloadSchema = z
   })
   .strict();
 
-export const integritySchema = z
+const integritySchema = z
   .object({
     canonicalization: z.literal(CMS_CANONICALIZATION),
     hash_algorithm: z.literal(CMS_HASH_ALGORITHM),
@@ -339,7 +339,7 @@ export const integritySchema = z
   })
   .strict();
 
-export const signatureEnvelopeSchema = z
+const signatureEnvelopeSchema = z
   .object({
     type: z.enum(CMS_SIGNATURE_TYPES),
     signer: z.string(),
@@ -349,7 +349,7 @@ export const signatureEnvelopeSchema = z
   })
   .strict();
 
-export const storageReceiptSchema = z
+const storageReceiptSchema = z
   .object({
     provider: z.enum(CMS_STORAGE_PROVIDERS),
     uri: uriSchema,
@@ -361,7 +361,7 @@ export const storageReceiptSchema = z
   })
   .strict();
 
-export const packageProvenanceSchema = z
+const packageProvenanceSchema = z
   .object({
     builder: z.string(),
     builder_version: z.string().optional(),
@@ -415,7 +415,7 @@ export const validationResultSchema = z
   })
   .strict();
 
-export const agentPatchOperationSchema = z
+const agentPatchOperationSchema = z
   .object({
     op: z.enum([
       "add_page",

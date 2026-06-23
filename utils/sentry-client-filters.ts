@@ -2,6 +2,7 @@ export type SentryStackFrame = {
   filename?: string | undefined;
   abs_path?: string | undefined;
   function?: string | undefined;
+  in_app?: boolean | undefined;
 };
 
 export type SentryTransactionSpan = {
@@ -53,6 +54,7 @@ type SentryTags = Record<string, unknown>;
 
 export type SentryClientEvent = {
   event_id?: string | undefined;
+  transaction?: string | undefined;
   message?: string | undefined;
   exception?:
     | {
@@ -60,6 +62,12 @@ export type SentryClientEvent = {
       }
     | undefined;
   contexts?: Record<string, SentryContext | undefined> | undefined;
+  extra?: Record<string, unknown> | undefined;
+  request?:
+    | {
+        url?: string | undefined;
+      }
+    | undefined;
   tags?: SentryTags | undefined;
   breadcrumbs?:
     | SentryBreadcrumb[]
@@ -86,6 +94,7 @@ const filenameExceptions = [
   "injectLeap.js",
   "inject.chrome",
 ];
+const injectedWasmCspAppUriPath = "app:///inject.js";
 const injectedAppUriPath = "app:///injected/injected.js";
 const walletCollisionPatterns = [
   "tronlinkparams",
@@ -117,8 +126,26 @@ const noisyThirdPartyTelemetryTargets = new Set([
   "cca-lite.coinbase.com/metrics",
   "region1.google-analytics.com/g/collect",
 ]);
+const objectCapturedPromiseRejectionMessage =
+  "Object captured as promise rejection with keys: code, message, stack";
+const providerDisconnectedCode = 4900;
+const providerDisconnectedMessage =
+  "The provider is disconnected from all chains.";
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
+const REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE =
+  "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+const REACT_DOM_RUNTIME_FRAME_PATTERNS = [
+  "next/dist/compiled/react-dom/",
+  "react-dom/cjs/react-dom-client.production.js",
+  "react-dom-client.production.js",
+];
+const WAVES_ROUTE_PATH = "/waves";
+
+const sentryRouteParameterizationMechanismType =
+  "auto.browser.browserapierrors.setTimeout";
+const sentryRouteParameterizationMessage =
+  "JSON.stringify cannot serialize cyclic structures.";
 const URL_IN_PARENS_PATTERN = /\(([^)]+)\)/g;
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
@@ -129,6 +156,10 @@ const FILTERED_URL_TOKENS = new Set(["[filtered]", "[redacted]", "filtered"]);
 
 function getStringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function getBooleanValue(value: unknown): boolean | undefined {
@@ -171,6 +202,66 @@ function getEventMessage(event: SentryClientEvent): string {
   }
 
   return typeof event.message === "string" ? event.message : "";
+}
+
+function getFramePaths(frame: SentryStackFrame): string[] {
+  return [frame.filename, frame.abs_path].filter(
+    (value): value is string => typeof value === "string" && value.length > 0
+  );
+}
+
+function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
+  const paths = getFramePaths(frame);
+  return paths.some((path) =>
+    REACT_DOM_RUNTIME_FRAME_PATTERNS.some((pattern) => path.includes(pattern))
+  );
+}
+
+function hasOnlyReactDomRuntimeFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.length > 0 &&
+    frames.every(isReactDomRuntimeFrame)
+  );
+}
+
+function getRoutePathFromString(value: string): string | null {
+  const candidate = value.trim();
+  if (!candidate) {
+    return null;
+  }
+
+  if (candidate.startsWith("/") && !candidate.startsWith("//")) {
+    return candidate.split(/[?#]/, 1)[0] ?? null;
+  }
+
+  try {
+    return new URL(candidate).pathname;
+  } catch {
+    return null;
+  }
+}
+
+function isWavesRoutePath(path: string | null): boolean {
+  return (
+    path !== null &&
+    (path === WAVES_ROUTE_PATH || path.startsWith(`${WAVES_ROUTE_PATH}/`))
+  );
+}
+
+function hasWavesRoute(event: SentryClientEvent): boolean {
+  const candidates = [
+    event.transaction,
+    getStringValue(event.tags?.["transaction"]),
+    getStringValue(event.tags?.["url"]),
+    event.request?.url,
+  ];
+
+  return candidates.some((candidate) =>
+    candidate ? isWavesRoutePath(getRoutePathFromString(candidate)) : false
+  );
 }
 
 function getUrlCandidatesFromText(value: string): string[] {
@@ -871,7 +962,16 @@ function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
   );
 }
 
-function hasOnlyAppUriFrames(frames: SentryStackFrame[] | undefined): boolean {
+function isInjectedWasmCspAppUriFrame(frame: SentryStackFrame): boolean {
+  return [frame.filename, frame.abs_path].some(
+    (path) =>
+      typeof path === "string" && path.includes(injectedWasmCspAppUriPath)
+  );
+}
+
+function hasOnlyAppUriFrames(
+  frames: SentryStackFrame[] | undefined
+): frames is SentryStackFrame[] {
   return (
     Array.isArray(frames) && frames.length > 0 && frames.every(isAppUriFrame)
   );
@@ -883,8 +983,54 @@ function hasInjectedAppUriFrame(
   return Array.isArray(frames) && frames.some(isInjectedAppUriFrame);
 }
 
+function hasInjectedWasmCspAppUriSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!hasOnlyAppUriFrames(frames)) {
+    return false;
+  }
+
+  return frames.some(isInjectedWasmCspAppUriFrame);
+}
+
+function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
+  if (frame.function !== "stringify") {
+    return false;
+  }
+
+  return [frame.filename, frame.abs_path].includes("[native code]");
+}
+
+function hasAppOwnedFrame(frames: SentryStackFrame[] | undefined): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some(
+      (frame) => frame.in_app === true && !isNativeJsonStringifyFrame(frame)
+    )
+  );
+}
+
+function hasNativeJsonStringifyFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
+}
+
 function getHintException(hint?: SentryEventHint): unknown {
   return hint?.originalException ?? hint?.syntheticException;
+}
+
+function getSerializedObjectRejection(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): Record<string, unknown> | null {
+  const serialized = event.extra?.["__serialized__"];
+  if (isRecord(serialized)) {
+    return serialized;
+  }
+
+  const hintException = getHintException(hint);
+  return isRecord(hintException) ? hintException : null;
 }
 
 function getHintExceptionMessage(hint?: SentryEventHint): string {
@@ -1005,6 +1151,17 @@ function getBreadcrumbValues(event: SentryClientEvent): SentryBreadcrumb[] {
   }
 
   return [];
+}
+
+function hasNavigationBreadcrumb(event: SentryClientEvent): boolean {
+  return getBreadcrumbValues(event).some((breadcrumb) => {
+    const data = breadcrumb.data;
+    return (
+      breadcrumb.category === "navigation" &&
+      typeof data?.["from"] === "string" &&
+      typeof data?.["to"] === "string"
+    );
+  });
 }
 
 function getContextString(
@@ -1187,6 +1344,42 @@ function hasWalletCollisionSignature(
   );
 }
 
+function hasOnlyThirdPartyWalletExtensionFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!Array.isArray(frames) || frames.length === 0) {
+    return true;
+  }
+
+  return frames.every((frame) =>
+    isThirdPartyWalletExtensionStack(
+      [frame.filename, frame.abs_path].filter(Boolean).join("\n")
+    )
+  );
+}
+
+function isThirdPartyWalletExtensionStack(value: string | undefined): boolean {
+  const stack = value?.toLowerCase();
+  if (!stack) {
+    return false;
+  }
+
+  if (!stack.includes("chrome-extension://")) {
+    return false;
+  }
+
+  if (!stack.includes("/background.js")) {
+    return false;
+  }
+
+  return !(
+    stack.includes("app:///") ||
+    stack.includes("http://") ||
+    stack.includes("https://") ||
+    stack.includes("/_next/static/")
+  );
+}
+
 function hasCircularReactMetaElementMessage(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1256,6 +1449,33 @@ function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
   );
 }
 
+function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  return (
+    normalizedValue.includes("webassembly.instantiate") &&
+    normalizedValue.includes("content security") &&
+    normalizedValue.includes("unsafe-eval")
+  );
+}
+
+function hasWasmCspUnsafeEvalMessage(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const candidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      matchesWasmCspUnsafeEvalMessage(candidate)
+  );
+}
+
 function isTwitterBrowser(event: SentryClientEvent): boolean {
   const contextBrowserName = getContextString(event, "browser", "name");
   if (contextBrowserName === "Twitter") {
@@ -1299,6 +1519,54 @@ export function shouldFilterTwitterConfigReferenceError(
   return hasOnlyAppUriFrames(value.stacktrace?.frames);
 }
 
+export function shouldFilterDisconnectedWalletProviderRejection(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  if (getEventMessage(event) !== objectCapturedPromiseRejectionMessage) {
+    return false;
+  }
+
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (!hasOnlyThirdPartyWalletExtensionFrames(frames)) {
+    return false;
+  }
+
+  const serialized = getSerializedObjectRejection(event, hint);
+  if (!serialized) {
+    return false;
+  }
+
+  const code = getNumericValue(serialized["code"]);
+  const message = getStringValue(serialized["message"])?.trim();
+  const stack = getStringValue(serialized["stack"]);
+
+  return (
+    code === providerDisconnectedCode &&
+    message === providerDisconnectedMessage &&
+    isThirdPartyWalletExtensionStack(stack)
+  );
+}
+
+export function shouldFilterReactDomInsertBeforeNotFoundError(
+  event: SentryClientEvent
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (value?.type !== "NotFoundError") {
+    return false;
+  }
+
+  if (value.value !== REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE) {
+    return false;
+  }
+
+  if (!hasWavesRoute(event)) {
+    return false;
+  }
+
+  return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
+}
+
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1326,6 +1594,34 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   );
 }
 
+export function shouldFilterSentryRouteParameterizationError(
+  event: SentryClientEvent
+): boolean {
+  // Sentry SDK route parameterization noise; keep app-owned cyclic JSON errors.
+  const value = event.exception?.values?.[0];
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== sentryRouteParameterizationMessage
+  ) {
+    return false;
+  }
+
+  const mechanism = value.mechanism;
+  if (
+    mechanism?.type !== sentryRouteParameterizationMechanismType ||
+    mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  const frames = value.stacktrace?.frames;
+  if (hasAppOwnedFrame(frames) || !hasNativeJsonStringifyFrame(frames)) {
+    return false;
+  }
+
+  return hasNavigationBreadcrumb(event);
+}
+
 export function shouldFilterInjectedWalletCollision(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1342,6 +1638,18 @@ export function shouldFilterInjectedWalletCollision(
   return hasWalletCollisionSignature(event, hint);
 }
 
+export function shouldFilterInjectedWasmCspUnsafeEval(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (!hasInjectedWasmCspAppUriSignature(frames)) {
+    return false;
+  }
+
+  return hasWasmCspUnsafeEvalMessage(event, hint);
+}
+
 export const __testing = {
   filenameExceptions,
   hasOnlyAppUriFrames,
@@ -1349,6 +1657,9 @@ export const __testing = {
   isTwitterBrowser,
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
+  REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
+  sentryRouteParameterizationMechanismType,
+  sentryRouteParameterizationMessage,
   isCoinbaseWalletLinkWebSocket1006Message,
   isCoinbaseWalletLinkWebSocketPath,
   hasCoinbaseWalletLinkWebSocketFrame,

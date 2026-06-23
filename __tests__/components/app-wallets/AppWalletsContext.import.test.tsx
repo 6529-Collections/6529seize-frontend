@@ -7,18 +7,19 @@ jest.mock('@/hooks/useCapacitor', () => ({
   default: jest.fn().mockReturnValue({ isCapacitor: true })
 }));
 
-const setMock = jest.fn().mockResolvedValue({ value: true });
-const keysMock = jest.fn().mockResolvedValue({ value: [] });
-const getMock = jest.fn().mockResolvedValue({ value: '{}' });
-
 jest.mock('capacitor-secure-storage-plugin', () => ({
   SecureStoragePlugin: {
-    keys: keysMock,
-    set: setMock,
-    get: getMock,
+    keys: jest.fn().mockResolvedValue({ value: [] }),
+    set: jest.fn().mockResolvedValue({ value: true }),
+    get: jest.fn().mockResolvedValue({ value: '{}' }),
     remove: jest.fn().mockResolvedValue({ value: true })
   }
 }));
+
+const secureStorageMock = jest.requireMock(
+  'capacitor-secure-storage-plugin'
+).SecureStoragePlugin;
+const setMock = secureStorageMock.set as jest.Mock;
 
 jest.mock('@/components/app-wallets/app-wallet-helpers', () => ({ encryptData: jest.fn(async (_a,_b,v) => v) }));
 

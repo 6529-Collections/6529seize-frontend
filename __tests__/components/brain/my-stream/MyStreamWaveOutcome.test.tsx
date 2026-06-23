@@ -11,9 +11,24 @@ jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ outcomeViewStyle: { height: 50 } })
 }));
 
+jest.mock('@/hooks/waves/useWaveOutcomesQuery', () => ({
+  useWaveOutcomesQuery: () => ({
+    outcomes: [
+      { index: 1, credit: 1, type: 'A' },
+      { index: 2, credit: 2, type: 'B' },
+    ],
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isFetching: false,
+    isFetchingNextPage: false,
+    isLoading: false,
+    errorMessage: null,
+  }),
+}));
+
 describe('MyStreamWaveOutcome', () => {
   it('renders outcomes with provided style', () => {
-    const wave = { outcomes: [{ credit:1, type:'A' }, { credit:2, type:'B' }] } as any;
+    const wave = { id: 'wave-1' } as any;
     const { container } = render(<MyStreamWaveOutcome wave={wave} />);
     const div = container.firstChild as HTMLElement;
     expect(div.style.height).toBe('50px');

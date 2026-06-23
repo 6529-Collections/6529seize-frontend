@@ -207,11 +207,11 @@ export const buildInlineGroupName = ({
   waveName,
   groupLabel,
 }: {
-  readonly waveName: string;
-  readonly groupLabel: string;
+  readonly waveName: string | null | undefined;
+  readonly groupLabel: string | null | undefined;
 }): string => {
-  const normalizedWaveName = waveName.trim();
-  const normalizedGroupLabel = groupLabel.trim();
+  const normalizedWaveName = waveName?.trim() ?? "";
+  const normalizedGroupLabel = groupLabel?.trim() ?? "";
 
   if (!normalizedWaveName.length) {
     return normalizedGroupLabel || "Wave Group";

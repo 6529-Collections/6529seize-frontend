@@ -26,10 +26,9 @@ import type {
   TweetPreviewVideoVariant,
 } from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
-import { fetchTwitterPreview } from "@/services/api/twitter-preview-api";
-import SeizeVideoPlayer, {
-  type SeizeVideoTemplate,
-} from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import { useTwitterPreview } from "@/hooks/useTwitterPreview";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import type { SeizeVideoTemplate } from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 
 type PreviewState =
   | { readonly type: "loading" }
@@ -1317,33 +1316,24 @@ export default function TwitterPreviewCard({
   href,
   tweetId,
 }: TwitterPreviewCardProps) {
-  const [state, setState] = useState<PreviewState>({ type: "loading" });
   const [copied, setCopied] = useState(false);
+  const { data: twitterPreview, isLoading } = useTwitterPreview({
+    href,
+    tweetId,
+  });
 
-  useEffect(() => {
-    let active = true;
-    setState({ type: "loading" });
-
-    fetchTwitterPreview(href)
-      .then((preview) => {
-        if (active) {
-          setState({ type: "ready", preview, fallback: false });
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setState({
-            type: "ready",
-            preview: fallbackPreview(href, tweetId),
-            fallback: true,
-          });
-        }
-      });
-
-    return () => {
-      active = false;
+  let state: PreviewState;
+  if (isLoading) {
+    state = { type: "loading" };
+  } else if (twitterPreview) {
+    state = { type: "ready", preview: twitterPreview, fallback: false };
+  } else {
+    state = {
+      type: "ready",
+      preview: fallbackPreview(href, tweetId),
+      fallback: true,
     };
-  }, [href, tweetId]);
+  }
 
   const copyLink = (event: MouseEvent<HTMLButtonElement>) => {
     stopCardEvent(event);
@@ -1362,10 +1352,7 @@ export default function TwitterPreviewCard({
   const authorHref =
     preview.authorUrl ??
     (preview.authorHandle ? `https://x.com/${preview.authorHandle}` : href);
-  const xPostPath = useMemo(
-    () => getXPostPath(preview.url || href),
-    [href, preview.url]
-  );
+  const xPostPath = useMemo(() => getXPostPath(href), [href]);
   const timestamp = useMemo(() => formatTweetTimestamp(preview), [preview]);
 
   if (state.type === "loading") {

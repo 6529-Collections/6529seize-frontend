@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import type { SupportedLocale } from "@/i18n/locales";
 
 const SHORT_DATE_FORMAT = {
   day: "numeric",
@@ -91,11 +91,4 @@ export function compareLocalized(
 export function roundTo(value: number, fractionDigits: number): number {
   const multiplier = 10 ** fractionDigits;
   return Math.round(value * multiplier) / multiplier;
-}
-
-export function formatDefaultLocaleNumber(
-  value: number | null | undefined,
-  options: Intl.NumberFormatOptions = {}
-): string {
-  return formatNumber(DEFAULT_LOCALE, value, options);
 }

@@ -4,9 +4,7 @@ import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 
 type UploadedDropMedia = CreateDropRequestPart["media"][number];
 
-export const toApiCreateDropMedia = (
-  media: UploadedDropMedia
-): ApiCreateDropMedia => {
+const toApiCreateDropMedia = (media: UploadedDropMedia): ApiCreateDropMedia => {
   const requestMedia: ApiCreateDropMedia = {
     url: media.url,
     mime_type: media.mime_type,

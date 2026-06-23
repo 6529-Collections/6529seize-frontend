@@ -36,6 +36,10 @@ interface NextPageLightProps {
 interface AroundSerialNoState {
   isFetching: boolean;
   pendingSerialNo: number | null;
+  activeSerialNo: number | null;
+  lastSuccessfullyFetchedSerialNo: number | null;
+  lastFetchedMinSerialNo: number | null;
+  lastFetchedMaxSerialNo: number | null;
 }
 
 export function useWavePagination({
@@ -54,32 +58,51 @@ export function useWavePagination({
   // Track state for fetching around a serial number
   const aroundSerialNoStates = useRef<Record<string, AroundSerialNoState>>({});
 
-  const aroundQueueLastSuccessfullyFetchedSerialNoRef = useRef<number | null>(
-    null
+  const isSerialCoveredByLastAroundFetch = useCallback(
+    (state: AroundSerialNoState, serialNo: number): boolean =>
+      state.lastFetchedMinSerialNo !== null &&
+      state.lastFetchedMaxSerialNo !== null &&
+      serialNo >= state.lastFetchedMinSerialNo &&
+      serialNo <= state.lastFetchedMaxSerialNo,
+    []
   );
-  const aroundQueueLastFetchedMinSerialNoRef = useRef<number | null>(null);
-  const aroundQueueLastFetchedMaxSerialNoRef = useRef<number | null>(null);
+
+  const hasHydratedDropForSerialNo = useCallback(
+    (waveId: string, serialNo: number): boolean =>
+      getData(waveId)?.drops.some(
+        (drop) =>
+          drop.serial_no === serialNo && drop.type !== DropSize.LIGHT
+      ) ?? false,
+    [getData]
+  );
 
   const determineSerialToFetch = useCallback(
-    (pendingSerialNo: number | null): number | null => {
+    (waveId: string, state: AroundSerialNoState): number | null => {
+      const pendingSerialNo = state.pendingSerialNo;
+
       if (pendingSerialNo === null) {
         return null;
       }
 
+      if (isSerialCoveredByLastAroundFetch(state, pendingSerialNo)) {
+        return hasHydratedDropForSerialNo(waveId, pendingSerialNo)
+          ? null
+          : pendingSerialNo;
+      }
+
       const lastSuccessfullyFetchedSerialNo =
-        aroundQueueLastSuccessfullyFetchedSerialNoRef.current;
+        state.lastSuccessfullyFetchedSerialNo;
 
       if (lastSuccessfullyFetchedSerialNo === null) {
         return pendingSerialNo;
       }
 
       if (pendingSerialNo === lastSuccessfullyFetchedSerialNo) {
-        return pendingSerialNo;
+        return null;
       }
 
       if (pendingSerialNo > lastSuccessfullyFetchedSerialNo) {
-        const lastFetchedMaxSerialNo =
-          aroundQueueLastFetchedMaxSerialNoRef.current;
+        const lastFetchedMaxSerialNo = state.lastFetchedMaxSerialNo;
         if (lastFetchedMaxSerialNo === null) {
           return pendingSerialNo;
         }
@@ -92,8 +115,7 @@ export function useWavePagination({
         return lastFetchedMaxSerialNo + (WAVE_DROPS_PARAMS.limit - 1);
       } else {
         // pendingSerialNo < lastSuccessfullyFetchedSerialNo
-        const lastFetchedMinSerialNo =
-          aroundQueueLastFetchedMinSerialNoRef.current;
+        const lastFetchedMinSerialNo = state.lastFetchedMinSerialNo;
         if (lastFetchedMinSerialNo === null) {
           return pendingSerialNo;
         }
@@ -106,7 +128,7 @@ export function useWavePagination({
         return lastFetchedMinSerialNo - (WAVE_DROPS_PARAMS.limit - 1);
       }
     },
-    [] // No dependencies as it only uses refs
+    [hasHydratedDropForSerialNo, isSerialCoveredByLastAroundFetch]
   );
 
   /**
@@ -347,13 +369,15 @@ export function useWavePagination({
       }
 
       // Guard 2: No pending request
-      const serialToFetch = determineSerialToFetch(state.pendingSerialNo);
+      const serialToFetch = determineSerialToFetch(waveId, state);
       if (serialToFetch === null) {
+        state.pendingSerialNo = null;
         return;
       }
 
       // Mark as busy and clear pending request
       state.isFetching = true;
+      state.activeSerialNo = serialToFetch;
       state.pendingSerialNo = null;
 
       // Unique key for abort controller, distinct from pagination
@@ -366,8 +390,6 @@ export function useWavePagination({
           serialToFetch,
           controller.signal
         );
-
-        aroundQueueLastSuccessfullyFetchedSerialNoRef.current = serialToFetch;
 
         if (result) {
           updateData({
@@ -384,18 +406,21 @@ export function useWavePagination({
 
           if (result.length > 0) {
             const serials = result.map((drop) => drop.serial_no);
-            aroundQueueLastFetchedMinSerialNoRef.current = Math.min(...serials);
-            aroundQueueLastFetchedMaxSerialNoRef.current = Math.max(...serials);
+            state.lastSuccessfullyFetchedSerialNo = serialToFetch;
+            state.lastFetchedMinSerialNo = Math.min(...serials);
+            state.lastFetchedMaxSerialNo = Math.max(...serials);
           } else {
-            aroundQueueLastFetchedMinSerialNoRef.current = null;
-            aroundQueueLastFetchedMaxSerialNoRef.current = null;
+            state.lastSuccessfullyFetchedSerialNo = null;
+            state.lastFetchedMinSerialNo = null;
+            state.lastFetchedMaxSerialNo = null;
             console.warn(
               `[WavePagination] Fetched around serial no ${serialToFetch}, received an empty list of drops.`
             );
           }
         } else {
-          aroundQueueLastFetchedMinSerialNoRef.current = null;
-          aroundQueueLastFetchedMaxSerialNoRef.current = null;
+          state.lastSuccessfullyFetchedSerialNo = null;
+          state.lastFetchedMinSerialNo = null;
+          state.lastFetchedMaxSerialNo = null;
           console.warn(
             `[WavePagination] Fetched around serial no ${serialToFetch}, no new data (null result).`
           );
@@ -413,6 +438,7 @@ export function useWavePagination({
         }
       } finally {
         state.isFetching = false;
+        state.activeSerialNo = null;
         cleanupController(abortKey, controller);
         // Trigger processing again in case a new request came in during the fetch
         _processAroundSerialNoQueue(waveId).catch(() => undefined);
@@ -432,21 +458,38 @@ export function useWavePagination({
         aroundSerialNoStates.current[waveId] = {
           isFetching: false,
           pendingSerialNo: null,
+          activeSerialNo: null,
+          lastSuccessfullyFetchedSerialNo: null,
+          lastFetchedMinSerialNo: null,
+          lastFetchedMaxSerialNo: null,
         };
       }
 
-      // Store the latest requested serial number
-      aroundSerialNoStates.current[waveId].pendingSerialNo = serialNo;
+      const state = aroundSerialNoStates.current[waveId];
 
-      // If a request is already in flight, abort it so only the latest will be processed
-      if (aroundSerialNoStates.current[waveId].isFetching) {
-        cancelAbort(`${waveId}-around`);
+      if (
+        !state ||
+        state.activeSerialNo === serialNo ||
+        state.pendingSerialNo === serialNo ||
+        (isSerialCoveredByLastAroundFetch(state, serialNo) &&
+          hasHydratedDropForSerialNo(waveId, serialNo))
+      ) {
+        return;
       }
+
+      // Store the latest requested serial number. If another request is in
+      // flight, let it finish so light-drop hydration coalesces instead of
+      // producing repeated aborted /drops calls.
+      state.pendingSerialNo = serialNo;
 
       // Trigger the processing queue
       _processAroundSerialNoQueue(waveId).catch(() => undefined);
     },
-    [cancelAbort, _processAroundSerialNoQueue] // Dependency: the internal processing function
+    [
+      _processAroundSerialNoQueue,
+      hasHydratedDropForSerialNo,
+      isSerialCoveredByLastAroundFetch,
+    ]
   );
 
   return {

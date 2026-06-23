@@ -48,8 +48,6 @@ import type {
   NativeFullscreenVideo,
 } from "./SeizeVideoPlayer.fullscreen";
 
-export type { SeizeVideoControls, SeizeVideoMode, SeizeVideoTemplate };
-
 interface SeizeVideoPlayerProps {
   readonly src?: string | undefined;
   readonly videoRef?: React.Ref<HTMLVideoElement | null> | undefined;
