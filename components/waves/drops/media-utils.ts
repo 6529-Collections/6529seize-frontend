@@ -42,7 +42,7 @@ const isVideoUrl = (url: string): boolean => {
 /**
  * Determines if a MIME type is a video type
  */
-const isVideoMimeType = (mimeType: string): boolean => {
+export const isVideoMimeType = (mimeType: string): boolean => {
   return mimeType.startsWith("video/");
 };
 
@@ -131,7 +131,7 @@ const removeSquareBrackets = (text: string): string => {
 /**
  * Processes content by removing square brackets and extracting media
  */
-const processContent = (
+export const processContent = (
   content: string,
   apiMedia: MediaItem[] = []
 ): ProcessedContent => {

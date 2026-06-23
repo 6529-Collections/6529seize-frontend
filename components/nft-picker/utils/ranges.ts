@@ -90,14 +90,14 @@ export function removeTokenFromRanges(
   return canonicalizeRanges(result);
 }
 
-function bigintCompare(a: bigint, b: bigint): number {
+export function bigintCompare(a: bigint, b: bigint): number {
   if (a === b) {
     return 0;
   }
   return a < b ? -1 : 1;
 }
 
-function sortAndDedupIds(ids: readonly bigint[]): TokenSelection {
+export function sortAndDedupIds(ids: readonly bigint[]): TokenSelection {
   const sorted = [...ids].sort(bigintCompare);
   const result: TokenSelection = [];
   for (const id of sorted) {

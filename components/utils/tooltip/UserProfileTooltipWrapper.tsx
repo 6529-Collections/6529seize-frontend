@@ -9,7 +9,7 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 
 interface UserProfileTooltipWrapperProps {
-  readonly user: string;
+  readonly user?: string | null | undefined;
   readonly children: React.ReactElement;
   readonly placement?: "top" | "bottom" | "left" | "right" | "auto" | undefined;
 }
@@ -20,7 +20,7 @@ export default function UserProfileTooltipWrapper({
   placement = "auto",
 }: UserProfileTooltipWrapperProps) {
   const { hasTouchScreen } = useDeviceInfo();
-  const trimmedUser = user.trim();
+  const trimmedUser = user?.trim() ?? "";
   const ariaLabel = trimmedUser
     ? `User profile for ${trimmedUser}`
     : "User profile";
@@ -69,7 +69,7 @@ export default function UserProfileTooltipWrapper({
       <HoverCard
         content={
           <UserProfileTooltip
-            user={user}
+            user={trimmedUser}
             onArtistPreviewOpen={handleArtistPreviewOpen}
           />
         }

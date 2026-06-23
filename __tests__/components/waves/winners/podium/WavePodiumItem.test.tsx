@@ -88,11 +88,9 @@ it("calls onDropClick when clicked", () => {
       onDropClick={onDropClick}
     />
   );
-  expect(screen.getByTestId("identity")).toBeInTheDocument();
-  fireEvent.click(
-    screen.getByRole("link", { name: /alice/i }).parentElement!.parentElement!
-      .parentElement!.parentElement!
-  );
+  const [identityLink] = screen.getAllByRole("link", { name: /alice/i });
+  expect(identityLink).toBeInTheDocument();
+  fireEvent.click(identityLink.closest(".tw-cursor-pointer")!);
   expect(onDropClick).toHaveBeenCalledWith(drop);
 });
 

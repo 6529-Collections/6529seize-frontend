@@ -219,8 +219,17 @@ describe("CreateWaveDatesApproveEnd", () => {
       "data-selected-timestamp",
       "null"
     );
-    expect(screen.getByTestId("time")).toHaveAttribute("data-hours", "9");
-    expect(screen.getByTestId("time")).toHaveAttribute("data-minutes", "16");
+    const initialDisplayedDate = new Date(
+      getEarliestValidEndTimestamp(baseDates.submissionStartDate)
+    );
+    expect(screen.getByTestId("time")).toHaveAttribute(
+      "data-hours",
+      String(initialDisplayedDate.getHours())
+    );
+    expect(screen.getByTestId("time")).toHaveAttribute(
+      "data-minutes",
+      String(initialDisplayedDate.getMinutes())
+    );
 
     rerender(
       <CreateWaveDatesApproveEnd
@@ -238,8 +247,17 @@ describe("CreateWaveDatesApproveEnd", () => {
       "data-selected-timestamp",
       "null"
     );
-    expect(screen.getByTestId("time")).toHaveAttribute("data-hours", "12");
-    expect(screen.getByTestId("time")).toHaveAttribute("data-minutes", "46");
+    const updatedDisplayedDate = new Date(
+      getEarliestValidEndTimestamp(updatedSubmissionStartDate)
+    );
+    expect(screen.getByTestId("time")).toHaveAttribute(
+      "data-hours",
+      String(updatedDisplayedDate.getHours())
+    );
+    expect(screen.getByTestId("time")).toHaveAttribute(
+      "data-minutes",
+      String(updatedDisplayedDate.getMinutes())
+    );
   });
 
   it("shows the end date controls without an end date", () => {

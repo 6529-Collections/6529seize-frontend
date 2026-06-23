@@ -239,9 +239,9 @@ export default function MyStreamWaveTabsHeader({
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
-  const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const isDirectMessage = wave.chat?.scope?.group?.is_direct_message ?? false;
   const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
-  const waveAuthorHandle = wave.author.handle?.toLowerCase() ?? null;
+  const waveAuthorHandle = wave.author?.handle?.toLowerCase() ?? null;
   const showWaveRepAction =
     connectedHandle !== null &&
     !activeProfileProxy &&
@@ -254,7 +254,7 @@ export default function MyStreamWaveTabsHeader({
     connectedProfile,
     activeProfileProxyCreatedBy: activeProfileProxy?.created_by,
   });
-  const wavePictureContributors = wave.contributors_overview.map((c) => ({
+  const wavePictureContributors = (wave.contributors_overview ?? []).map((c) => ({
     pfp: c.contributor_pfp,
     identity: c.contributor_identity,
   }));
