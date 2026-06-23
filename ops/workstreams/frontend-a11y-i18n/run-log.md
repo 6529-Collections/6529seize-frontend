@@ -3963,3 +3963,21 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
     reaction mutation rejection case.
 - Next action: commit, force-push, rerun exact-head reviewbot/CI signals, and
   merge #2852 once no material feedback remains.
+
+## 2026-06-23T11:15Z PR #2853 Rebase After #2852 Merge
+
+- PR #2852 merged into `origin/main` as
+  `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
+- Started rebasing PR #2853 (`codex/e2e-wallet-signing-sandbox`) onto that
+  current main. The first commit conflicted where the signed-drop sandbox
+  overlapped the newly merged reaction sandbox.
+- Resolution strategy:
+  - keep the current main/reaction-sandbox refactor as the base;
+  - preserve the signed-drop E2E spec and add the signature sandbox script;
+  - include both reaction and signature specs in `test:e2e:auth-sandbox`;
+  - add signed Rank-wave mock fixtures and exact read routes without reusing
+    the `...0539` chat-drop ID from #2852;
+  - keep newer main-side workstream history and record this fresh rebase note.
+- Next action: finish the rebase, run the signature/reaction/auth sandbox packs
+  plus signing unit tests and static checks, then push and re-trigger the review
+  loop for PR #2853.

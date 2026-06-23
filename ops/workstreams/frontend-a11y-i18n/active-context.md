@@ -90,6 +90,17 @@ Read this section first after compaction or handoff.
       force-push.
 
 - Latest testing-roadmap state, 2026-06-22T21:07Z:
+  - Current active branch:
+    `codex/e2e-wallet-signing-sandbox`, based on current `origin/main`
+    `fe4af27e7 Add native shell read-only E2E coverage`.
+  - Active slice is local-only wallet/signing sandbox hardening. It must not
+    add a signing backdoor to app code. The intended coverage is a deterministic
+    non-chat Rank wave with `participation.signature_required` and terms that
+    drives the real Submit drop modal plus terms dialog, then proves an unsigned
+    `/api/drops` POST is not attempted when no wallet signature is available.
+  - Existing open reviewbot PRs remain intact: #2850, #2851, and #2852 are
+    watched for CI/reviewbot state but must not be overwritten from this
+    worktree.
   - PR #2847 is merged and deployed. Production serves
     `0c55e0c628541fb2ac695d87f871568848e7c057`.
   - PR #2847 shipped test-only production-readonly hardening:
@@ -820,13 +831,12 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 1. PR #2851 (`codex/native-package-evidence-e2e`) merged into `origin/main` as
    `8c1ec66ea31d6ef952586b17716f0f43030c1ec2`.
-2. PR #2852 (`codex/e2e-wallet-signing-guards`) is rebased on top of that
-   merged #2851 head. The current delta keeps the reaction sandbox, review
-   polish, and GLM fix that adds `PLAYWRIGHT_AUTH_SANDBOX=1` to the standalone
-   reaction pack. Run the focused validation, push, trigger latest-head
-   reviewbot lanes, and merge once CI and material bot feedback are clear.
-3. PR #2853 (`codex/e2e-wallet-signing-sandbox`) remains conflict-blocked
-   behind #2852 and should be rebased after #2852 lands.
+2. PR #2852 (`codex/e2e-wallet-signing-guards`) merged into `origin/main` as
+   `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
+3. PR #2853 (`codex/e2e-wallet-signing-sandbox`) is rebasing onto the merged
+   #2852 head. Preserve the newly merged reaction sandbox and layer the
+   signed-drop sandbox on top, then rerun focused local validation before
+   pushing.
 4. Deploy merged testing-roadmap slices through staging first, validate exact
    staged SHA, then production from current `origin/main` with exact-SHA
    validation and production-safe E2E evidence.
