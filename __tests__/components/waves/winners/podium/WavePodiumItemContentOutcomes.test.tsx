@@ -22,9 +22,10 @@ test("renders icons for all outcome types", () => {
 
   render(<WavePodiumItemContentOutcomes winner={winner} />);
 
-  // Three icons inside the button container
-  const button = screen.getByRole("button");
-  expect(button.querySelectorAll("svg").length).toBeGreaterThanOrEqual(3);
+  expect(screen.getByRole("button")).toHaveTextContent("Outcome");
+  expect(screen.getByTestId("tooltip-outcome-1-test-drop-id")).toHaveTextContent(
+    "NIC10Rep5Amanual"
+  );
 });
 
 test("returns null when no outcomes", () => {

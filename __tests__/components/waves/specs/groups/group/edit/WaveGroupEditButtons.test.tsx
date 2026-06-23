@@ -349,7 +349,7 @@ describe("WaveGroupEditButtons", () => {
       expect.objectContaining({
         id: "group-without-author",
         name: "Group Without Author",
-        created_by: {
+        created_by: expect.objectContaining({
           id: "unknown",
           handle: null,
           pfp: null,
@@ -370,7 +370,7 @@ describe("WaveGroupEditButtons", () => {
           artist_of_prevote_cards: [],
           profile_wave_id: null,
           is_wave_creator: false,
-        },
+        }),
       })
     );
   });

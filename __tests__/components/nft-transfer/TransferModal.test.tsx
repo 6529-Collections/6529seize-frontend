@@ -182,7 +182,7 @@ describe("TransferModal", () => {
     const user = userEvent.setup();
     openModal();
 
-    const input = screen.getByPlaceholderText(/search by handle/i);
+    const input = screen.getByPlaceholderText(/search profile by handle/i);
     await user.type(input, "rec");
 
     await waitFor(() => expect(mockCommonApiFetch).toHaveBeenCalled());

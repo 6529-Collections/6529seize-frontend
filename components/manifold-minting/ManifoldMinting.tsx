@@ -379,8 +379,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   const [needsClamping, setNeedsClamping] = useState<boolean>(false);
   const descriptionRef = useRef<HTMLDivElement>(null);
 
-  const { claim: manifoldClaim, isFetching: isManifoldClaimFetching } =
-    useManifoldClaim({
+  const manifoldClaimState = useManifoldClaim({
       chainId: props.chain.id,
       contract: props.contract,
       proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
@@ -390,6 +389,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         setIsError(true);
       },
     });
+  const manifoldClaim = manifoldClaimState?.claim;
+  const isManifoldClaimFetching = manifoldClaimState?.isFetching ?? false;
 
   const [fee, setFee] = useState<number>(0);
   const [mintForAddress, setMintForAddress] = useState<string | null>(null);

@@ -16,23 +16,20 @@ jest.mock('wagmi', () => ({
   WagmiProvider: ({ children }: any) => React.createElement('div', { 'data-testid': 'wagmi-provider' }, children),
 }));
 
-// Create a mock that can be used both in tests and jest.mock
-class MockUserRejectedRequestError extends Error {
-  constructor(message?: string) {
-    super(message);
-    this.name = 'UserRejectedRequestError';
-    // Set the prototype explicitly for instanceof checks to work
-    Object.setPrototypeOf(this, MockUserRejectedRequestError.prototype);
-  }
-}
-
 // Mock viem module at the top level before any imports
-jest.mock('viem', () => ({
-  UserRejectedRequestError: MockUserRejectedRequestError,
-}));
+jest.mock('viem', () => {
+  class MockUserRejectedRequestError extends Error {
+    constructor(message?: string) {
+      super(message);
+      this.name = 'UserRejectedRequestError';
+      Object.setPrototypeOf(this, MockUserRejectedRequestError.prototype);
+    }
+  }
 
-// Make the mock available to tests
-const UserRejectedRequestError = MockUserRejectedRequestError;
+  return {
+    UserRejectedRequestError: MockUserRejectedRequestError,
+  };
+});
 
 const mockUseAppKitAccount = useAppKitAccount as jest.MockedFunction<typeof useAppKitAccount>;
 const mockUseSignMessage = useSignMessage as jest.MockedFunction<typeof useSignMessage>;

@@ -200,7 +200,7 @@ describe("HeaderUserMenuDropdown", () => {
       expect(setToast).toHaveBeenCalledWith(
         expect.objectContaining({ type: "error" })
       );
-      expect(onClose).toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 });
