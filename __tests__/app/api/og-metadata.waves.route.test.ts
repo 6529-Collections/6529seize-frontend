@@ -73,19 +73,18 @@ describe("/api/og-metadata/waves/[id]", () => {
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test/api/og-metadata/waves/wave%201",
-      { next: { revalidate: 86400 } }
+      { next: { revalidate: 3600 } }
     );
     expect(mockLoadMontserratFonts).toHaveBeenCalledTimes(1);
     expect(mockImageResponse).toHaveBeenCalledTimes(1);
-    expect(mockImageResponse.mock.calls[0]?.[1]).toEqual({
-      width: 1200,
-      height: 630,
-      fonts: mockFonts,
-      headers: {
-        "Cache-Control":
-          "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000",
-      },
+    const imageOptions = mockImageResponse.mock.calls[0]?.[1];
+    expect(imageOptions?.width).toBe(1200);
+    expect(imageOptions?.height).toBe(630);
+    expect(imageOptions?.headers).toEqual({
+      "Cache-Control":
+        "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
     });
+    expect(imageOptions?.fonts).toBe(mockFonts);
     expect(response).toBe(mockImageResponse.mock.results[0]?.value);
   });
 

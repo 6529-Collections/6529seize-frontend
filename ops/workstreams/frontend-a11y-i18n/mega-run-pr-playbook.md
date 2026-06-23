@@ -43,10 +43,10 @@ Keep a strong local environment for the whole mega run:
 For every page cluster, assess all three surfaces. If a surface is not relevant,
 say why.
 
-| Surface | Required questions | Minimum local validation |
-| --- | --- | --- |
-| Web | What desktop and mobile web routes, auth states, loading states, URL params, metadata, and navigation paths can change? | Desktop and mobile Playwright smoke for changed routes; keyboard/focus checks; console/page-error review; route docs review. |
-| Mobile/Capacitor | Does the change affect app shell, deep links, safe areas, keyboard behavior, push/share/upload flows, scanner, hidden desktop-only controls, or Capacitor-only branches? | Mobile viewport Playwright checks; user-agent or runtime-flag simulation where practical; virtual keyboard and safe-area review when forms or fixed UI are touched. |
+| Surface                | Required questions                                                                                                                                                        | Minimum local validation                                                                                                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web                    | What desktop and mobile web routes, auth states, loading states, URL params, metadata, and navigation paths can change?                                                   | Desktop and mobile Playwright smoke for changed routes; keyboard/focus checks; console/page-error review; route docs review.                                                                |
+| Mobile/Capacitor       | Does the change affect app shell, deep links, safe areas, keyboard behavior, push/share/upload flows, scanner, hidden desktop-only controls, or Capacitor-only branches?  | Mobile viewport Playwright checks; user-agent or runtime-flag simulation where practical; virtual keyboard and safe-area review when forms or fixed UI are touched.                         |
 | Electron/Desktop Shell | Does the change affect share/deep-link flows, desktop app connection handoff, hidden Electron branches, external links, storage, window sizing, or desktop-only controls? | Browser checks for Electron-gated UI branches where simulation exists; route docs/code review for shell-specific branches; explicit residual risk if native Electron cannot be run locally. |
 
 ## Pre-PR Impact And Testing Plan Template
@@ -196,11 +196,11 @@ This PR is part of the frontend WCAG 2.2 AA and i18n migration mega run.
 
 ## Surface Impact
 
-| Surface | Impact | Validation |
-| --- | --- | --- |
-| Web |  |  |
-| Mobile/Capacitor |  |  |
-| Electron/Desktop Shell |  |  |
+| Surface                | Impact | Validation |
+| ---------------------- | ------ | ---------- |
+| Web                    |        |            |
+| Mobile/Capacitor       |        |            |
+| Electron/Desktop Shell |        |            |
 
 ## Safety And Security Review
 
@@ -283,4 +283,8 @@ For a page-cluster PR, desktop web and mobile viewport Playwright are normally
 When native Capacitor or Electron runtime cannot be exercised locally, document
 the unavailable native capability with the evidence label used. Do not use
 `shell-smoke` or `real-device` when only `simulated` browser Playwright was run.
-Inspect the native-gated branch in code and record the residual risk.
+Run `seize run test:native-evidence` for native-adjacent PRs, inspect the
+native-gated branch in code, and record the residual risk. Use
+`test:native-evidence:package-prereqs` only as a package-prerequisite gate;
+real packaged native or Electron claims still need separate package-build and
+runtime-smoke artifacts.

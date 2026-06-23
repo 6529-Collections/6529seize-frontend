@@ -353,6 +353,30 @@ jobs:
             --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             --notes "GET /api/version matched the production commit SHA."
 
+      - name: Upload durable production version evidence
+        id: durable-version-evidence
+        continue-on-error: true
+        env:
+          DEPLOYMENT_ARTIFACT_S3_PREFIX: ${{ vars.DEPLOYMENT_ARTIFACT_S3_PREFIX || 's3://6529reviewbot-prod-artifacts/frontend-deployment/' }}
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs upload-validation-artifact \
+            --file deployment-bus-manifest.json \
+            --pack deployment:http-version \
+            --status passed \
+            --source-file deployment-version-evidence.json \
+            --artifact-name deployment-version-evidence.json \
+            --s3-prefix "${DEPLOYMENT_ARTIFACT_S3_PREFIX}" \
+            --retention-policy standard-90-days \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --notes "Durable production GET /api/version evidence."
+
+      - name: Warn if durable production evidence upload failed
+        if: steps.durable-version-evidence.outcome == 'failure'
+        run: |
+          echo "::warning::Durable production version evidence upload failed. The deployment can continue, but release readiness remains incomplete until artifact storage/IAM is fixed and evidence is recorded."
+
       - name: Mark production deployment terminal
         if: always() && steps.deployment-record.outputs.deployment_id != ''
         env:

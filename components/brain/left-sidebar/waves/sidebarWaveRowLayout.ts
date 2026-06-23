@@ -9,9 +9,12 @@ interface SidebarWaveRowLayoutClasses {
   readonly rowPaddingClasses: string;
   readonly rowGapClasses: string;
   readonly linkGapClasses: string;
+  readonly rowHeightClasses: string;
 }
 
 const DEFAULT_LINK_GAP_CLASSES = "tw-space-x-3";
+const DEFAULT_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[62px]";
+const CHILD_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[54px]";
 
 const rowLayoutByVariant = {
   app: {
@@ -19,11 +22,13 @@ const rowLayoutByVariant = {
       rowPaddingClasses: "tw-pl-[82px] tw-pr-5 md:tw-pl-[78px]",
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
+      rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
     },
     default: {
       rowPaddingClasses: "tw-px-5",
       rowGapClasses: "tw-gap-x-4",
       linkGapClasses: DEFAULT_LINK_GAP_CLASSES,
+      rowHeightClasses: DEFAULT_ROW_HEIGHT_CLASSES,
     },
   },
   web: {
@@ -31,11 +36,13 @@ const rowLayoutByVariant = {
       rowPaddingClasses: "tw-pl-[82px] tw-pr-5 md:tw-pl-[70px]",
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
+      rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
     },
     default: {
       rowPaddingClasses: "tw-px-5",
       rowGapClasses: "tw-gap-x-4",
       linkGapClasses: DEFAULT_LINK_GAP_CLASSES,
+      rowHeightClasses: DEFAULT_ROW_HEIGHT_CLASSES,
     },
   },
 } as const satisfies Record<

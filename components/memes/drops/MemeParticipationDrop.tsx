@@ -125,7 +125,7 @@ export default function MemeParticipationDrop({
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
       <MemeDropHeader title={title} />
       {drop.is_additional_action_promised === true && (
-        <AdditionalActionPromiseBadge />
+        <AdditionalActionPromiseBadge focusable={!isContentInteractive} />
       )}
     </div>
   );

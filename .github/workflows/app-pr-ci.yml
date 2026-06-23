@@ -259,7 +259,92 @@ jobs:
             exit 0
           fi
 
-          ./bin/6529 run test:no-coverage --findRelatedTests "${existing_files[@]}" --passWithNoTests
+          jest_test_files=()
+          related_source_files=()
+          for file in "${existing_files[@]}"; do
+            case "$file" in
+              tests/*.spec.ts|tests/*.spec.tsx|tests/**/*.spec.ts|tests/**/*.spec.tsx)
+                echo "Skipping Playwright spec for related Jest coverage: $file"
+                ;;
+              *.test.ts|*.test.tsx)
+                jest_test_files+=("$file")
+                ;;
+              *.spec.ts|*.spec.tsx)
+                echo "Skipping non-Jest spec for related Jest coverage: $file"
+                ;;
+              *)
+                related_source_files+=("$file")
+                ;;
+            esac
+          done
+
+          run_jest_with_timeout() {
+            local timeout_seconds="$1"
+            local label="$2"
+            shift 2
+
+            set +e
+            NODE_ENV=test timeout "${timeout_seconds}s" ./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests "$@"
+            local status=$?
+            set -e
+
+            if [ "$status" -eq 124 ]; then
+              echo "::error::${label} timed out after ${timeout_seconds}s"
+            fi
+
+            return "$status"
+          }
+
+          run_related_jest_with_timeout() {
+            local list_timeout_seconds="$1"
+            local chunk_timeout_seconds="$2"
+            shift 2
+
+            local related_tests_file
+            related_tests_file="$(mktemp)"
+
+            set +e
+            NODE_ENV=test timeout "${list_timeout_seconds}s" ./bin/6529 exec jest --listTests --findRelatedTests "$@" > "${related_tests_file}"
+            local list_status=$?
+            set -e
+
+            if [ "$list_status" -eq 124 ]; then
+              echo "::error::Related Jest test discovery timed out after ${list_timeout_seconds}s"
+            fi
+
+            if [ "$list_status" -ne 0 ]; then
+              rm -f "${related_tests_file}"
+              return "$list_status"
+            fi
+
+            mapfile -t related_jest_tests < "${related_tests_file}"
+            rm -f "${related_tests_file}"
+
+            if [ "${#related_jest_tests[@]}" -eq 0 ]; then
+              echo "No related Jest tests found."
+              return 0
+            fi
+
+            local chunk_size=40
+            local chunk_number=1
+            for ((offset = 0; offset < ${#related_jest_tests[@]}; offset += chunk_size)); do
+              local chunk=("${related_jest_tests[@]:offset:chunk_size}")
+              run_jest_with_timeout "${chunk_timeout_seconds}" "Related Jest tests chunk ${chunk_number}" --runTestsByPath "${chunk[@]}"
+              chunk_number=$((chunk_number + 1))
+            done
+          }
+
+          if [ "${#jest_test_files[@]}" -gt 0 ]; then
+            run_jest_with_timeout 180 "Direct Jest tests" "${jest_test_files[@]}"
+          fi
+
+          if [ "${#related_source_files[@]}" -gt 0 ]; then
+            run_related_jest_with_timeout 180 240 "${related_source_files[@]}"
+          fi
+
+          if [ "${#jest_test_files[@]}" -eq 0 ] && [ "${#related_source_files[@]}" -eq 0 ]; then
+            echo "No Jest-related source or test files need coverage."
+          fi
 
       - name: Build app
         if: needs.plan.outputs.build_required == 'true'

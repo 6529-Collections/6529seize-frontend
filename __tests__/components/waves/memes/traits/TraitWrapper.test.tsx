@@ -5,7 +5,7 @@ import { TraitWrapper } from "@/components/waves/memes/traits/TraitWrapper";
 describe("TraitWrapper", () => {
   it("shows a neutral required marker for standard fields", () => {
     render(
-      <TraitWrapper label="Label">
+      <TraitWrapper label="Label" showRequiredMarker>
         <input />
       </TraitWrapper>
     );
@@ -14,15 +14,14 @@ describe("TraitWrapper", () => {
     expect(requiredMarker).toHaveClass("tw-text-iron-500");
   });
 
-  it("shows a neutral required marker for boolean fields", () => {
+  it("does not show a required marker for boolean fields", () => {
     render(
-      <TraitWrapper label="Toggle" isBoolean>
+      <TraitWrapper label="Toggle" isBoolean showRequiredMarker>
         <button type="button">Yes</button>
       </TraitWrapper>
     );
 
-    const requiredMarker = screen.getByText("*");
-    expect(requiredMarker).toHaveClass("tw-text-iron-500");
+    expect(screen.queryByText("*")).not.toBeInTheDocument();
   });
 
   it("hides the required marker for read-only fields", () => {
