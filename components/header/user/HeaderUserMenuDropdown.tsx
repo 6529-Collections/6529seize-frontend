@@ -7,6 +7,7 @@ import {
   faRightFromBracket,
   faShuffle,
   faShareNodes,
+  faShieldHalved,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
@@ -49,6 +50,8 @@ export default function HeaderUserMenuDropdown({
     activeProfileProxy,
     setActiveProfileProxy,
     receivedProfileProxies,
+    requestSessionUpgrade,
+    sessionUpgradeRequired,
     setToast,
   } = useContext(AuthContext);
   const hasProxySection =
@@ -288,6 +291,30 @@ export default function HeaderUserMenuDropdown({
                           width={20}
                         />
                         <span>Connect Wallet</span>
+                      </button>
+                    )}
+                    {sessionUpgradeRequired && requestSessionUpgrade && (
+                      <button
+                        onClick={() => {
+                          void runMenuAction({
+                            action: requestSessionUpgrade,
+                            pendingKey: "upgrade-auth",
+                            errorMessage:
+                              "Failed to start authentication upgrade. Please try again.",
+                          });
+                        }}
+                        disabled={pendingAction !== null}
+                        type="button"
+                        aria-label="Upgrade Authentication"
+                        title="Upgrade Authentication"
+                        className="tw-relative tw-mt-2 tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <FontAwesomeIcon
+                          icon={faShieldHalved}
+                          height={20}
+                          width={20}
+                        />
+                        <span>Upgrade Authentication</span>
                       </button>
                     )}
                   </li>

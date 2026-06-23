@@ -65,6 +65,8 @@ function renderDropdown(options: any) {
     activeProfileProxy: null,
     setActiveProfileProxy: jest.fn(),
     receivedProfileProxies: [{ id: "proxy-1" }],
+    requestSessionUpgrade: options.requestSessionUpgrade || jest.fn(),
+    sessionUpgradeRequired: options.sessionUpgradeRequired ?? false,
     setToast: jest.fn(),
   } as any;
   (useChainSwitcher as jest.Mock).mockReturnValue({
@@ -124,6 +126,28 @@ describe("HeaderUserMenuDropdown", () => {
     fireEvent.click(screen.getAllByRole("button", { name: /disconnect/i })[0]);
     await waitFor(() => {
       expect(seizeDisconnect).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it("starts authentication upgrade when legacy session action is shown", async () => {
+    const requestSessionUpgrade = jest.fn().mockResolvedValue({
+      success: false,
+    });
+    const { onClose } = renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+      requestSessionUpgrade,
+      sessionUpgradeRequired: true,
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Upgrade Authentication" })
+    );
+
+    await waitFor(() => {
+      expect(requestSessionUpgrade).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
   });
