@@ -268,6 +268,41 @@ describe("deployment bus manifest", () => {
     });
   });
 
+  it("supports native surface evidence as an optional standard pack", () => {
+    const requiredPacks = [
+      ...DEFAULT_REQUIRED_PACKS,
+      "native:surface-evidence",
+    ];
+    const manifest = buildManifest({
+      environment: "staging",
+      stagingDeploySha: STAGING_SHA,
+      productionCandidateSha: MAIN_SHA,
+      productionEligible: "true",
+      requiredPacks: requiredPacks.join(","),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(VALIDATION_PACKS["native:surface-evidence"]).toMatchObject({
+      size: "large",
+      artifacts: ["test-results/native-surface-evidence*.json"],
+    });
+    expect(manifest.validation.required_packs).toEqual(requiredPacks);
+    expect(manifest.validation.pack_plan).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "native:surface-evidence",
+          command: "seize run test:native-evidence",
+          surfaces: ["native:surface-evidence-classifier"],
+        }),
+      ])
+    );
+    expect(validateManifest(manifest)).toEqual({
+      ok: true,
+      errors: [],
+      warnings: [],
+    });
+  });
+
   it("rejects production-only standard packs on staging manifests", () => {
     const manifest = buildManifest({
       environment: "staging",
