@@ -147,7 +147,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         metadata_count: 0,
         signature: null,
         is_safe_signature: false,
-        signer_address: SANDBOX_WALLET,
+        signer_address: expect.stringMatching(
+          new RegExp(`^${SANDBOX_WALLET}$`, "i")
+        ),
       }),
     });
 
