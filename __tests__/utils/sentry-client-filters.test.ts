@@ -5,6 +5,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
+  shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -16,7 +17,6 @@ import {
   type SentryStackFrame,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
-import type { SentryClientEvent } from "@/utils/sentry-client-filters";
 
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
@@ -25,6 +25,10 @@ type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const objectCapturedPromiseRejectionMessage =
+    "Object captured as promise rejection with keys: code, message, stack";
+  const disconnectedProviderStack =
+    "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
@@ -2664,6 +2668,33 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("filters disconnected wallet-provider object rejections from extension stacks", () => {
+    // Arrange
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4900,
+          message: "The provider is disconnected from all chains.",
+          stack: disconnectedProviderStack,
+        },
+      },
+    };
+
+    // Act
+    const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters injected WebAssembly CSP unsafe-eval errors", () => {
     // Arrange
     const event = createInjectedWasmCspUnsafeEvalEvent();
@@ -2673,6 +2704,41 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("does not filter disconnected wallet-provider object rejections with app frames", () => {
+    // Arrange
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///components/providers/WagmiSetup.tsx",
+                  abs_path: "app:///components/providers/WagmiSetup.tsx",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4900,
+          message: "The provider is disconnected from all chains.",
+          stack: disconnectedProviderStack,
+        },
+      },
+    };
+
+    // Act
+    const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("does not filter WebAssembly CSP unsafe-eval errors with first-party frames", () => {
@@ -2702,6 +2768,33 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter disconnected wallet-provider object rejections with web stack URLs", () => {
+    // Arrange
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4900,
+          message: "The provider is disconnected from all chains.",
+          stack: `${disconnectedProviderStack}\n    at app (https://6529.io/_next/static/chunks/app.js:1:1)`,
+        },
+      },
+    };
+
+    // Act
+    const result = shouldFilterDisconnectedWalletProviderRejection(event);
 
     // Assert
     expect(result).toBe(false);
