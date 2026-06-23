@@ -258,7 +258,7 @@
     "baseline-browser-mapping": "2.10.10",
     "depcheck": "1.4.7",
     "dotenv": "16.6.1",
-    "esbuild": "0.25.12",
+    "esbuild": "0.28.1",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "eslint-config-prettier": "10.1.8",
