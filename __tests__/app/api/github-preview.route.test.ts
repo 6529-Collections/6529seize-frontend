@@ -430,6 +430,34 @@ describe("github-preview API route", () => {
     });
   });
 
+  it("suppresses excerpts for extensionless GitHub binary files", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "ASSET",
+        path: "ASSET",
+        size: 4,
+        encoding: "base64",
+        content: Buffer.from([0, 1, 2, 3]).toString("base64"),
+        html_url: "https://github.com/o/r/blob/main/ASSET",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/ASSET")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      title: "ASSET",
+      extension: null,
+      fileKind: "unknown",
+      isBinary: false,
+      lineCount: null,
+      excerpt: null,
+    });
+  });
+
   it("maps GitHub PDF files as metadata-only previews", async () => {
     fetchMock.mockResolvedValueOnce(
       jsonResponse({

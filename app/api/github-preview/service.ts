@@ -1155,7 +1155,8 @@ function decodeGithubContentBuffer(
   }
 
   try {
-    return Buffer.from(content.content.replace(/\s/g, ""), "base64");
+    const buffer = Buffer.from(content.content.replace(/\s/g, ""), "base64");
+    return buffer.byteLength <= CONTENT_EXCERPT_MAX_BYTES ? buffer : null;
   } catch {
     return null;
   }
