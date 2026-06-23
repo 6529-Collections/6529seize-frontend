@@ -140,19 +140,25 @@ Surface matrix:
   form; upload and attachment endpoints still fail closed. It must run against a
   loopback base URL, but it is not a full network-isolation harness and is not a
   staging or production smoke pack.
+- `test:e2e:reaction-sandbox` runs a local-only authenticated Waves reaction
+  sandbox on desktop Chromium. It adds and removes the deterministic quick
+  reaction on the synthetic sandbox drop, then verifies that only the exact
+  queryless `POST` and `DELETE` reaction mutations for that drop were allowed.
+  All other drop, drop-media, and attachment writes remain unsafe.
 - `test:e2e:auth-sandbox` runs the local authenticated sandbox on desktop
   Chromium. It includes the composer checks plus positive `/notifications`
-  `/messages/create`, and `/waves/create` Chat-wave flows with deterministic
-  mock API data. It allows only explicit local sandbox mutations such as
-  notification mark-read, synthetic direct-message creation, synthetic
-  create-wave group/wave creation, and the synthetic chat-drop submit with exact
-  sandbox IDs, queryless paths, and request bodies. The chat-drop signer is
-  bounded to the configured sandbox wallet or the empty unsigned direct-contract
-  form. Unknown mock API writes fail the sandbox request audit, and unexpected
-  same-origin Next.js API writes or unknown unsafe external browser writes are
-  blocked by a browser route guard. Known wallet and analytics SDK background
-  writes are still blocked in-browser, but they do not fail the test. This pack
-  must never run against staging or production.
+  `/messages/create`, `/waves/create` Chat-wave, and quick reaction add/remove
+  flows with deterministic mock API data. It allows only explicit local sandbox
+  mutations such as notification mark-read, synthetic direct-message creation,
+  synthetic create-wave group/wave creation, exact synthetic chat-drop submit,
+  and exact synthetic drop reaction add/remove with sandbox IDs, queryless
+  paths, and request bodies. The chat-drop signer is bounded to the configured
+  sandbox wallet or the empty unsigned direct-contract form. Unknown mock API
+  writes fail the sandbox request audit, and unexpected same-origin Next.js API
+  writes or unknown unsafe external browser writes are blocked by a browser
+  route guard. Known wallet and analytics SDK background writes are still
+  blocked in-browser, but they do not fail the test. This pack must never run
+  against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -287,10 +293,11 @@ Large-pack ownership:
   or a user-equivalent product behavior that does not mark notifications read.
 - `test:e2e:auth-sandbox` is owned by PR or train owners changing local
   dev-auth behavior, notifications UI/filtering, direct-message creation,
-  create-wave wizard behavior, composer shell behavior, or the sandbox mutation
-  auditor. It is the positive stateful counterpart to the remote read-only packs
-  and must stay loopback only; the mock API and spawned Next dev server are
-  intentionally bound to loopback hosts.
+  create-wave wizard behavior, composer shell behavior, wave reaction
+  add/remove behavior, or the sandbox mutation auditor. It is the positive
+  stateful counterpart to the remote read-only packs and must stay loopback
+  only; the mock API and spawned Next dev server are intentionally bound to
+  loopback hosts.
 - `test:e2e:profile-deep-links-readonly` is owned by PR or train owners
   changing public profile routing, query-preserving profile links, legacy
   waves/groups/followers redirects, profile tab canonicalization, query
@@ -324,6 +331,12 @@ Large-pack ownership:
   must never submit drops or upload files to staging or production. Treat it as
   coverage for composer/drop/upload API safety, not as a guarantee that every
   external read-only media or metadata endpoint is isolated.
+- `test:e2e:reaction-sandbox` is owned by PR or train owners changing
+  `useDropReaction`, quick reactions, reaction chip removal, reaction
+  optimistic updates, wave drop action visibility, or local sandbox/mock API
+  coverage for drop reaction writes. The pack may use local synthetic auth and
+  a mock API, but it must never allow broad `/api/drops/**` writes beyond the
+  exact sandbox reaction endpoint and body.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
   individual public read-only packs on desktop Chromium and is the command
