@@ -1,8 +1,9 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
 import type { EnsPreview } from "@/components/waves/ens/types";
+import type { ExternalFileKind } from "@/lib/link-preview/fileKinds";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
-interface LinkPreviewMedia {
+export interface LinkPreviewMedia {
   readonly url?: string | null | undefined;
   readonly secureUrl?: string | null | undefined;
   readonly type?: string | null | undefined;
@@ -24,7 +25,45 @@ interface LinkPreviewBase {
   readonly favicons?: readonly string[] | null | undefined;
   readonly image?: LinkPreviewMedia | null | undefined;
   readonly images?: readonly LinkPreviewMedia[] | null | undefined;
+  readonly source?: string | null | undefined;
+  readonly author?: string | null | undefined;
+  readonly publishedTime?: string | null | undefined;
+  readonly modifiedTime?: string | null | undefined;
+  readonly section?: string | null | undefined;
   readonly [key: string]: unknown;
+}
+
+export type SeizeCollectionPreviewKind =
+  | "the-memes"
+  | "meme-lab"
+  | "6529-gradient"
+  | "nextgen-token"
+  | "rememes";
+
+export interface SeizeCollectionPreviewPerson {
+  readonly label?: string | null | undefined;
+  readonly name: string;
+  readonly href?: string | null | undefined;
+}
+
+export interface SeizeCollectionPreviewFact {
+  readonly label: string;
+  readonly value: string;
+}
+
+export interface SeizeCollectionPreviewTrait {
+  readonly label: string;
+  readonly value: string;
+}
+
+export interface SeizeCollectionLinkPreview extends LinkPreviewBase {
+  readonly type: "6529.collection";
+  readonly kind: SeizeCollectionPreviewKind;
+  readonly title: string;
+  readonly kicker?: string | null | undefined;
+  readonly people?: readonly SeizeCollectionPreviewPerson[] | null | undefined;
+  readonly facts?: readonly SeizeCollectionPreviewFact[] | null | undefined;
+  readonly traits?: readonly SeizeCollectionPreviewTrait[] | null | undefined;
 }
 
 type GoogleWorkspaceAvailability = "public" | "restricted";
@@ -70,6 +109,39 @@ export type GoogleWorkspaceLinkPreview =
   | GoogleSheetsLinkPreview
   | GoogleSlidesLinkPreview;
 
+export interface YoutubeVideoLinkPreview extends LinkPreviewBase {
+  readonly type: "youtube.video";
+  readonly provider?: string | null | undefined;
+  readonly providerUrl?: string | null | undefined;
+  readonly videoId: string;
+  readonly watchUrl: string;
+  readonly embedUrl: string;
+  readonly thumbnailUrl?: string | null | undefined;
+  readonly thumbnailWidth?: number | null | undefined;
+  readonly thumbnailHeight?: number | null | undefined;
+  readonly authorName?: string | null | undefined;
+  readonly authorUrl?: string | null | undefined;
+  readonly playlistId?: string | null | undefined;
+  readonly playlistIndex?: string | null | undefined;
+  readonly startSeconds?: number | null | undefined;
+}
+
+export type FarcasterEmbedKind = "miniapp" | "frame" | "legacy-frame";
+export type FarcasterEmbedType = "farcaster.miniapp" | "farcaster.frame";
+
+export interface FarcasterEmbedLinkPreview extends LinkPreviewBase {
+  readonly type: FarcasterEmbedType;
+  readonly embedKind: FarcasterEmbedKind;
+  readonly appName?: string | null | undefined;
+  readonly buttonTitle?: string | null | undefined;
+  readonly actionType?: string | null | undefined;
+  readonly actionUrl?: string | null | undefined;
+  readonly imageUrl?: string | null | undefined;
+  readonly splashImageUrl?: string | null | undefined;
+  readonly splashBackgroundColor?: string | null | undefined;
+  readonly buttons?: readonly string[] | null | undefined;
+}
+
 interface ManifoldListingDetails {
   readonly listingId: string;
   readonly creatorHandle?: string | null | undefined;
@@ -85,13 +157,32 @@ interface GenericLinkPreviewResponse extends LinkPreviewBase {
   readonly type?: string | null | undefined;
 }
 
+export interface ExternalFileLinkPreviewResponse extends LinkPreviewBase {
+  readonly type: "external.file";
+  readonly title: string;
+  readonly fileName: string;
+  readonly extension: string | null;
+  readonly fileKind: ExternalFileKind;
+  readonly contentType: string | null;
+  readonly sizeBytes: number | null;
+  readonly sourceHost: string;
+  readonly trust: "external_unscanned";
+  readonly links: {
+    readonly open: string;
+  };
+}
+
 type EnsLinkPreviewResponse = EnsPreview & LinkPreviewBase;
 
 export type LinkPreviewResponse =
   | GenericLinkPreviewResponse
   | EnsLinkPreviewResponse
   | ManifoldListingLinkPreview
-  | GoogleWorkspaceLinkPreview;
+  | ExternalFileLinkPreviewResponse
+  | SeizeCollectionLinkPreview
+  | GoogleWorkspaceLinkPreview
+  | YoutubeVideoLinkPreview
+  | FarcasterEmbedLinkPreview;
 
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;

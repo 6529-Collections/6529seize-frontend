@@ -114,7 +114,7 @@ describe("GithubLinkPreview", () => {
     );
   });
 
-  it("renders a compact PR card with inline status and no OpenGraph image", async () => {
+  it("renders a rich PR card with inline status and no OpenGraph image", async () => {
     mockedFetchGithubPreview.mockResolvedValue({
       type: "github.pull_request",
       owner: "6529-Collections",
@@ -122,10 +122,30 @@ describe("GithubLinkPreview", () => {
       number: 355,
       title: "[codex] Hydrate command reviews and expose PR costs",
       state: "merged",
-      reviewState: "none",
+      reviewState: "approved",
       mergeableState: "clean",
       merged: true,
       draft: false,
+      author: "alice",
+      updatedAt: "2026-06-16T00:00:00Z",
+      comments: 4,
+      commits: 3,
+      changedFiles: 6,
+      additions: 120,
+      deletions: 15,
+      baseRef: "main",
+      headRef: "codex/github-preview-cards",
+      checks: {
+        state: "success",
+        total: 3,
+        successful: 3,
+        failed: 0,
+        pending: 0,
+      },
+      labels: [
+        { name: "frontend", color: "0e8a16" },
+        { name: "github", color: "5319e7" },
+      ],
       url: "https://github.com/6529-Collections/6529Stream/pull/355",
     });
 
@@ -146,9 +166,25 @@ describe("GithubLinkPreview", () => {
       "aria-label",
       expect.stringContaining("Open GitHub pull request")
     );
+    expect(screen.getByTestId("github-preview-accent")).toHaveAttribute(
+      "data-accent-kind",
+      "pull"
+    );
+    expect(screen.getByTestId("github-preview-kind-badge")).toHaveTextContent(
+      "Pull request"
+    );
     expect(card).not.toHaveClass("tw-h-[10rem]");
     expect(card).not.toHaveClass("md:tw-h-[11rem]");
     expect(screen.getByAltText("")).toHaveAttribute("src", "/github_w.png");
+    expect(screen.getByText(/by @alice/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/codex\/github-preview-cards -> main/)
+    ).toBeInTheDocument();
+    expect(screen.getByText("Checks")).toBeInTheDocument();
+    expect(screen.getByText("3 passing")).toBeInTheDocument();
+    expect(screen.getByText("Diff")).toBeInTheDocument();
+    expect(screen.getByText("+120 / -15")).toBeInTheDocument();
+    expect(screen.getByText("frontend")).toBeInTheDocument();
 
     const badge = screen.getByTestId("github-preview-status-badge");
     expect(badge).toHaveTextContent("Merged");
@@ -206,6 +242,9 @@ describe("GithubLinkPreview", () => {
       openIssues: 9,
       visibility: "public",
       archived: false,
+      pushedAt: "2026-06-16T00:00:00Z",
+      topics: ["nextjs", "bots"],
+      license: "MIT",
       url: "https://github.com/6529-Collections/6529Stream",
     });
 
@@ -214,6 +253,10 @@ describe("GithubLinkPreview", () => {
     );
 
     expect(screen.getByText("Repository")).toBeInTheDocument();
+    expect(screen.getByTestId("github-preview-accent")).toHaveAttribute(
+      "data-accent-kind",
+      "repository"
+    );
     expect(mockedFetchGithubPreview).toHaveBeenCalledWith(
       "https://github.com/6529-Collections/6529Stream"
     );
@@ -222,8 +265,10 @@ describe("GithubLinkPreview", () => {
       expect(screen.getByText(/Streaming API and bots/)).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/TypeScript/)).toBeInTheDocument();
+    expect(screen.getAllByText(/TypeScript/).length).toBeGreaterThan(0);
     expect(screen.queryByTestId("github-preview-status-badge")).toBeNull();
+    expect(screen.getByText("nextjs")).toBeInTheDocument();
+    expect(screen.getByText("License")).toBeInTheDocument();
   });
 
   it("renders enriched file links", async () => {
@@ -236,6 +281,15 @@ describe("GithubLinkPreview", () => {
       ref: "main",
       size: 2048,
       itemCount: null,
+      language: "TypeScript",
+      lineCount: 12,
+      lineStart: 10,
+      lineEnd: 12,
+      excerpt: [
+        "export function handler() {",
+        "  return Response.json({ ok: true });",
+        "}",
+      ],
       url: "https://github.com/6529-Collections/6529Stream/blob/main/src/app.ts",
     });
 
@@ -244,13 +298,124 @@ describe("GithubLinkPreview", () => {
     );
 
     expect(screen.getByText("File")).toBeInTheDocument();
+    expect(screen.getByTestId("github-preview-accent")).toHaveAttribute(
+      "data-accent-kind",
+      "file"
+    );
 
     await waitFor(() => {
       expect(screen.getByText("app.ts")).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/src\/app\.ts/)).toBeInTheDocument();
-    expect(screen.getByText(/2 KB/)).toBeInTheDocument();
+    expect(screen.getAllByText(/src\/app\.ts/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/2 KB/).length).toBeGreaterThan(0);
+    expect(screen.getByText("TypeScript")).toBeInTheDocument();
+    expect(screen.getByText("L10-L12")).toBeInTheDocument();
+    expect(screen.getByTestId("github-file-excerpt")).toHaveTextContent(
+      "Response.json"
+    );
+  });
+
+  it("renders GitHub PDF files without an excerpt", async () => {
+    mockedFetchGithubPreview.mockResolvedValue({
+      type: "github.file",
+      owner: "6529-Collections",
+      repo: "6529Stream",
+      title: "safety-plan.pdf",
+      path: "docs/safety-plan.pdf",
+      ref: "main",
+      size: 4096,
+      itemCount: null,
+      extension: "pdf",
+      fileKind: "pdf",
+      mimeType: "application/pdf",
+      isBinary: true,
+      language: null,
+      lineCount: null,
+      lineStart: null,
+      lineEnd: null,
+      excerpt: null,
+      url: "https://github.com/6529-Collections/6529Stream/blob/main/docs/safety-plan.pdf",
+    });
+
+    render(
+      <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream/blob/main/docs/safety-plan.pdf" />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("safety-plan.pdf")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("PDF file")).toBeInTheDocument();
+    expect(screen.getByText("application/pdf")).toBeInTheDocument();
+    expect(screen.getAllByText(/4 KB/).length).toBeGreaterThan(0);
+    expect(screen.queryByTestId("github-file-excerpt")).toBeNull();
+  });
+
+  it("renders enriched issue links", async () => {
+    mockedFetchGithubPreview.mockResolvedValue({
+      type: "github.issue",
+      owner: "6529-Collections",
+      repo: "6529Stream",
+      number: 392,
+      title: "Tighten link previews",
+      state: "open",
+      author: "alice",
+      updatedAt: "2026-06-16T00:00:00Z",
+      comments: 2,
+      labels: [{ name: "frontend", color: "0e8a16" }],
+      assignees: ["alice", "bob"],
+      url: "https://github.com/6529-Collections/6529Stream/issues/392",
+    });
+
+    render(
+      <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream/issues/392" />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Tighten link previews")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/by @alice/)).toBeInTheDocument();
+    expect(screen.getByText("Assignees")).toBeInTheDocument();
+    expect(screen.getAllByText("@alice +1").length).toBeGreaterThan(0);
+    expect(screen.getByText("2 comments")).toBeInTheDocument();
+    expect(screen.getByText("frontend")).toBeInTheDocument();
+  });
+
+  it("renders enriched directory links", async () => {
+    mockedFetchGithubPreview.mockResolvedValue({
+      type: "github.directory",
+      owner: "6529-Collections",
+      repo: "6529Stream",
+      title: "src",
+      path: "src",
+      ref: "main",
+      size: null,
+      itemCount: 3,
+      language: null,
+      lineCount: null,
+      excerpt: null,
+      entries: ["app.ts", "api", "components"],
+      fileCount: 1,
+      directoryCount: 2,
+      url: "https://github.com/6529-Collections/6529Stream/tree/main/src",
+    });
+
+    render(
+      <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream/tree/main/src" />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("src")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Items")).toBeInTheDocument();
+    expect(screen.getByText("3 items")).toBeInTheDocument();
+    expect(screen.getByText("Folders")).toBeInTheDocument();
+    expect(screen.getByText("2 folders")).toBeInTheDocument();
+    expect(screen.getByText("app.ts")).toBeInTheDocument();
+    expect(screen.getByText("components")).toBeInTheDocument();
   });
 
   it("does not fetch rich metadata for unsupported GitHub subroutes", () => {

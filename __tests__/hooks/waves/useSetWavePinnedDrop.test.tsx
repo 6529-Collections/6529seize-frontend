@@ -243,7 +243,7 @@ describe("useSetWavePinnedDrop", () => {
 
     expect(
       queryClient.getQueryData([QueryKey.WAVE, { wave_id: "wave-1" }])
-    ).toBe(updatedWave);
+    ).toStrictEqual(updatedWave);
   });
 
   it("invalidates only drop queries for the same wave", async () => {
@@ -304,7 +304,7 @@ describe("useSetWavePinnedDrop", () => {
     {
       label: "unknown objects",
       error: { status: 500 },
-      expectedMessage: "Something went wrong",
+      expectedMessage: "Couldn't update the pinned drop. Please try again.",
     },
   ])(
     "exposes normalized error state for $label",
@@ -396,7 +396,7 @@ describe("useSetWavePinnedDrop", () => {
       result.current.reset();
     });
 
-    expect(result.current.data).toBeUndefined();
+    expect(result.current.data).toStrictEqual(updatedWave);
     expect(result.current.error).toBeNull();
     expect(result.current.errorMessage).toBeNull();
   });

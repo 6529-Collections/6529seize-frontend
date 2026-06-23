@@ -16,6 +16,7 @@ import { HttpFile } from '../http/http';
 export class ApiAvailableRatingCredit {
     'cic_credit'?: number;
     'rep_credit'?: number;
+    'wave_rep_credit'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -31,6 +32,12 @@ export class ApiAvailableRatingCredit {
         {
             "name": "rep_credit",
             "baseName": "rep_credit",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "wave_rep_credit",
+            "baseName": "wave_rep_credit",
             "type": "number",
             "format": "int64"
         }    ];

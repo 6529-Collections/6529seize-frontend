@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useAuth } from "@/components/auth/Auth";
@@ -30,7 +30,6 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   const { pinnedIds, isOperationInProgress, canPinWave } =
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
-  const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
 
   const isCurrentlyProcessing = isOperationInProgress(waveId);
   const isPinned = pinnedIds.includes(waveId);
@@ -43,11 +42,6 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     [canPinWave, waveId]
   );
 
-  // Helper function to hide tooltip
-  const hideTooltip = useCallback(() => setShowMaxLimitTooltip(false), []);
-
-  // Helper function to show error toast
-  // Memoize tooltip content to prevent unnecessary re-calculations
   const tooltipContent = useMemo(() => {
     if (isPinned) return PIN_ACTIONS.UNPIN;
     if (canPinCurrentWave) return PIN_ACTIONS.PIN;
@@ -56,7 +50,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   const buttonStyles = useMemo(() => {
     if (isPinned) {
-      return "tw-border-0 tw-bg-iron-800 tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/10 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white";
+      return "tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-bg-transparent";
     }
     return "tw-border-0 tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700";
   }, [isPinned]);
@@ -64,25 +58,6 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   const ariaLabel = useMemo(() => {
     return isPinned ? PIN_ACTIONS.UNPIN : PIN_ACTIONS.PIN;
   }, [isPinned]);
-
-  // Reset tooltip state when pinned state changes
-  useEffect(() => {
-    hideTooltip();
-  }, [isPinned, hideTooltip]);
-
-  // Also reset tooltip state when pinnedIds array changes
-  useEffect(() => {
-    if (canPinCurrentWave) {
-      hideTooltip();
-    }
-  }, [pinnedIds, canPinCurrentWave, hideTooltip]);
-
-  // Auto-hide tooltip after 3 seconds with proper cleanup
-  useEffect(() => {
-    if (!showMaxLimitTooltip) return;
-    const timer = setTimeout(hideTooltip, 3000);
-    return () => clearTimeout(timer);
-  }, [showMaxLimitTooltip, hideTooltip]);
 
   // Don't render if user is not authenticated or using proxy
   if (!connectedProfile?.handle || activeProfileProxy) {
@@ -101,7 +76,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     return null;
   }
 
-  const handleClick = async (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
 
@@ -112,12 +87,10 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     try {
       if (isPinned) {
         waves.removePinnedWave(waveId);
-        hideTooltip();
         return;
       }
 
       if (!canPinWave(waveId)) {
-        setShowMaxLimitTooltip(true);
         setToast({
           type: "error",
           title: `Maximum ${MAX_PINNED_WAVES} pinned waves reached.`,
@@ -154,7 +127,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
-          fill="none"
+          fill={isPinned ? "currentColor" : "none"}
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"

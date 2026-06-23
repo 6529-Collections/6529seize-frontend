@@ -7,9 +7,7 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsImgSelectFile from "@/components/user/settings/UserSettingsImgSelectFile";
-import type {
-  NFTLite,
-} from "@/components/user/settings/UserSettingsImgSelectMeme";
+import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import UserSettingsImgSelectMeme from "@/components/user/settings/UserSettingsImgSelectMeme";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
@@ -23,7 +21,7 @@ import {
 } from "@/services/api/common-api";
 import { getUploadErrorMessage } from "@/services/api/upload-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { FormEvent} from "react";
+import type { FormEvent } from "react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -199,22 +197,23 @@ export default function UserPageHeaderEditPfp({
       <button
         type="button"
         aria-label="Close edit profile picture modal"
-        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-sm tw-cursor-pointer tw-border-none tw-p-0"
+        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0 tw-backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-center tw-justify-center tw-p-2 lg:tw-p-4">
+      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
         <div
           ref={modalRef}
-          className="sm:tw-max-w-3xl md:tw-max-w-2xl tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8">
+          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-3xl md:tw-max-w-2xl lg:tw-p-8"
+        >
           <form onSubmit={onSubmit}>
             <UserSettingsImgSelectMeme
               memes={memes ?? []}
               onMeme={setSelectedMemeAndRemoveFile}
             />
 
-            <div className="tw-inline-flex tw-items-center tw-my-2 tw-justify-center tw-w-full">
-              <hr className="tw-w-full tw-h-px tw-border tw-bg-iron-800" />
-              <span className="tw-absolute tw-px-3 tw-font-semibold tw-text-sm tw-uppercase tw-text-iron-300">
+            <div className="tw-my-2 tw-inline-flex tw-w-full tw-items-center tw-justify-center">
+              <hr className="tw-h-px tw-w-full tw-border tw-bg-iron-800" />
+              <span className="tw-absolute tw-px-3 tw-text-sm tw-font-semibold tw-uppercase tw-text-iron-300">
                 or
               </span>
             </div>
@@ -225,7 +224,7 @@ export default function UserPageHeaderEditPfp({
             />
             {error && <p className="tw-mt-3 tw-text-sm tw-text-red">{error}</p>}
             <div className="tw-pt-6">
-              <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
+              <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
                 <UserSettingsSave
                   loading={saving}
                   disabled={!file && !selectedMeme}
@@ -234,7 +233,8 @@ export default function UserPageHeaderEditPfp({
                 <SecondaryButton
                   disabled={saving}
                   onClicked={onClose}
-                  className="tw-w-full sm:tw-w-auto tw-mt-3 sm:tw-mt-0">
+                  className="tw-mt-3 tw-w-full sm:tw-mt-0 sm:tw-w-auto"
+                >
                   Cancel
                 </SecondaryButton>
               </div>

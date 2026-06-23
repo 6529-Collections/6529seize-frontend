@@ -74,19 +74,32 @@ export default function CommonTabs<T, U = unknown>(
     (index: number) => {
       const total = items.length;
       if (!total) {
-        return;
+        return undefined;
       }
 
       const normalizedIndex = ((index % total) + total) % total;
       const targetItem = items[normalizedIndex];
       if (!targetItem) {
-        return;
+        return undefined;
       }
 
       const tab = tabRefs.current.get(targetItem.key);
       tab?.focus();
+      return targetItem;
     },
     [items]
+  );
+
+  const focusAndSelectTab = useCallback(
+    (index: number) => {
+      const targetItem = focusTab(index);
+      if (!targetItem || targetItem.value === activeItem) {
+        return;
+      }
+
+      setSelected(targetItem.value);
+    },
+    [activeItem, focusTab, setSelected]
   );
 
   const handleKeyDown = useCallback(
@@ -95,30 +108,30 @@ export default function CommonTabs<T, U = unknown>(
         case "ArrowRight":
         case "Right": {
           event.preventDefault();
-          focusTab(currentIndex + 1);
+          focusAndSelectTab(currentIndex + 1);
           break;
         }
         case "ArrowLeft":
         case "Left": {
           event.preventDefault();
-          focusTab(currentIndex - 1);
+          focusAndSelectTab(currentIndex - 1);
           break;
         }
         case "Home": {
           event.preventDefault();
-          focusTab(0);
+          focusAndSelectTab(0);
           break;
         }
         case "End": {
           event.preventDefault();
-          focusTab(items.length - 1);
+          focusAndSelectTab(items.length - 1);
           break;
         }
         default:
           break;
       }
     },
-    [focusTab, items.length]
+    [focusAndSelectTab, items.length]
   );
 
   return (

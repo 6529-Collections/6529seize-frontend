@@ -1,0 +1,979 @@
+# Profile Native CMS Run Log
+
+## 2026-06-18 - Phase 7 FE 3D Rooms And Object Viewer Lane
+
+Started the bounded frontend 3D MVP on `codex/cms-3d-rooms-mvp`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before browser validation:
+
+- Added a deferred Three.js client island for CMS `object_viewer` and
+  `room_viewer` blocks.
+- Added GLB/glTF object-viewer activation when the CMS asset is a model or has
+  a GLB/glTF MIME/extension, with poster/source fallback, progress, error, and
+  performance-budget warning states.
+- Added simple deterministic exhibition room rendering with wall/floor shell,
+  room presets (`wall`, `salon`, `white_cube`, `dark_room`), framed artwork
+  placements, faithful unlit 2D art surfaces, DOM work links, and raycast click
+  navigation to the canonical detail page.
+- Added mobile fallback behavior: mobile users receive the poster/static view
+  and 2D links rather than loading the WebGL room.
+- Extended the builder MVP with a `3D room` primitive so authors can choose a
+  room style, provide artwork, preview the real renderer, and export/import a
+  package with a matching faithful 2D detail route.
+- Added focused tests for aspect fitting, room package generation, runtime
+  route rendering, deferred canvas/poster/link rendering, mobile fallback, and
+  builder preview.
+- Added a narrow local Three.js declaration file because `seize add -D
+  @types/three` was blocked by the secure install firewall bootstrap before
+  dependency resolution; the runtime dependency itself already exists.
+
+Validation completed so far:
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --testMatch "**/*.test.ts" "**/*.test.tsx"
+  --runTestsByPath __tests__/lib/profile-cms/runtime/threeD.test.ts
+  __tests__/lib/profile-cms/builder/package.test.ts
+  __tests__/components/profile-cms/CmsThreeDViewer.test.tsx
+  __tests__/components/profile-cms/CmsSiteRenderer.test.tsx
+  __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx
+  __tests__/app/profile-cms-route.test.tsx --runInBand` (6 suites, 28 tests)
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff` (99/100; non-blocking warnings for existing
+  builder state count and renderer `<img>` pattern)
+- Browser verification on `http://localhost:3142/punk6529/cms/builder` with
+  system Chrome through Playwright:
+  - Desktop poster screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-poster.png`
+  - Desktop ready screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-ready.png`
+  - Desktop canvas screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-canvas.png`
+  - Mobile fallback screenshot:
+    `.codex/artifacts/cms-3d-room-mobile-fallback.png`
+  - Canvas screenshot pixel check: 714x620, 442,680 nonblack pixels out of
+    442,680 (`1.0` ratio).
+  - Canvas center click navigated to
+    `http://localhost:3142/punk6529/rooms/work-4/index.html`.
+  - Mobile fallback had no `Enter room` button and displayed the static
+    fallback copy/2D links.
+  - No unfiltered browser console or page errors were reported during the final
+    3D smoke pass.
+
+PR status:
+
+- Opened draft PR #2736:
+  `https://github.com/6529-Collections/6529seize-frontend/pull/2736`
+- Base: `codex/profile-cms-builder-mvp`
+- Head: `codex/cms-3d-rooms-mvp`
+- Follow-up verification passed:
+  - `codex-diff-check`
+  - GitHub checks: CodeRabbit, DCO, and `security/snyk (6529)` all pass.
+  - No review threads or actionable bot comments were returned on the latest
+    head before handoff.
+
+Follow-up after initial PR publication:
+
+- SonarCloud reported four viewer-local issues on the first PR head:
+  `CmsThreeDViewer` cognitive complexity, two `void` operator usages, and one
+  negated JSX condition.
+- Refactored the viewer overlay and canvas hit-test paths into smaller helpers,
+  replaced fire-and-forget `void` calls with handled promise callbacks, and
+  switched the poster overlay to the repo's `next/image` + `unoptimized`
+  pattern for arbitrary CMS poster URLs.
+- Re-ran focused validation:
+  - `seize run format:changed`
+  - `seize run test:no-coverage -- --testMatch "**/*.test.ts"
+    "**/*.test.tsx" --runTestsByPath
+    __tests__/lib/profile-cms/runtime/threeD.test.ts
+    __tests__/lib/profile-cms/builder/package.test.ts
+    __tests__/components/profile-cms/CmsThreeDViewer.test.tsx
+    __tests__/components/profile-cms/CmsSiteRenderer.test.tsx
+    __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx
+    __tests__/app/profile-cms-route.test.tsx --runInBand` (6 suites,
+    28 tests)
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run react-doctor:diff` (100/100)
+  - `codex-diff-check`
+- Re-ran browser verification on
+  `http://localhost:3142/punk6529/cms/builder` with system Chrome through
+  Playwright:
+  - Desktop poster screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-poster.png`
+  - Desktop ready screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-ready.png`
+  - Desktop canvas screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-sonar-fix-canvas.png`
+  - Mobile fallback screenshot:
+    `.codex/artifacts/cms-3d-room-mobile-sonar-fix-fallback.png`
+  - Canvas screenshot pixel check: 670x620, 381,900 nonblack pixels out of
+    415,400 nontransparent pixels (`0.919` ratio).
+  - Canvas center click navigated to
+    `http://localhost:3142/punk6529/rooms/work-4/index.html`.
+  - Mobile fallback stayed at `data-cms-3d-status="mobile-fallback"`, had no
+    `Enter room` button, showed fallback copy, and exposed two canonical
+    `/punk6529/rooms/work-4/index.html` links.
+  - No browser page errors were reported. The local dev page still logged
+    ambient app/provider resource errors for unavailable emoji/API resources in
+    this no-backend smoke setup; those did not affect the 3D assertions.
+
+Follow-up after 6529bot review feedback:
+
+- Addressed the two Important viewer findings:
+  - Added an explicit one-shot auto-start ref so non-activation viewers cannot
+    re-trigger automatic WebGL loads merely because `status` changed.
+  - Replaced failed room artwork texture loads with a dark fallback art plane
+    and simple red geometry cue instead of a blank white clickable plane.
+- Also tightened review nits by adding a legacy `matchMedia.addListener`
+  fallback, surfacing room placement budget warnings, and documenting that
+  builder-generated `/{handle}/rooms/work-{n}/index.html` pages are canonical
+  CMS detail routes for authored room works until NFT chain metadata exists.
+- The legacy media-query fallback uses a narrow structural type so the runtime
+  fallback remains available without calling deprecated DOM signatures directly.
+- Re-ran focused validation:
+  - `seize run format:changed`
+  - `seize run test:no-coverage -- --testMatch "**/*.test.ts"
+    "**/*.test.tsx" --runTestsByPath
+    __tests__/lib/profile-cms/runtime/threeD.test.ts
+    __tests__/lib/profile-cms/builder/package.test.ts
+    __tests__/components/profile-cms/CmsThreeDViewer.test.tsx
+    __tests__/components/profile-cms/CmsSiteRenderer.test.tsx
+    __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx
+    __tests__/app/profile-cms-route.test.tsx --runInBand` (6 suites,
+    29 tests)
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run react-doctor:diff` (100/100)
+  - `codex-diff-check`
+- Re-ran browser verification on
+  `http://localhost:3142/punk6529/cms/builder` with system Chrome through
+  Playwright:
+  - Desktop poster screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-poster.png`
+  - Desktop ready screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-ready.png`
+  - Desktop canvas screenshot:
+    `.codex/artifacts/cms-3d-room-desktop-placeholder-geom-canvas.png`
+  - Mobile fallback screenshot:
+    `.codex/artifacts/cms-3d-room-mobile-placeholder-geom-fallback.png`
+  - Canvas screenshot pixel check: 670x620, 415,400 nonblack pixels out of
+    415,400 nontransparent pixels (`1.0` ratio).
+  - Ready-state DOM link tray passed a Playwright trial click, confirming it
+    remains visible and hit-testable above the canvas.
+  - Canvas center click navigated to
+    `http://localhost:3142/punk6529/rooms/work-4/index.html`.
+  - Mobile fallback stayed at `data-cms-3d-status="mobile-fallback"`, had no
+    `Enter room` button, showed fallback copy, and exposed two canonical
+    `/punk6529/rooms/work-4/index.html` links.
+  - No browser page errors were reported. Ambient provider/API console resource
+    errors remained in this no-backend local smoke setup and did not affect the
+    3D assertions.
+
+## 2026-06-17
+
+### Current Objective
+
+Define the full roadmap for a profile-native 6529 CMS that can launch before
+full decentralization while minimizing future migration cost.
+
+The CMS should let any profile publish a website at `/{handle}/index.html`,
+with the normal profile page staying at `/{handle}`.
+
+### Current Status
+
+Roadmap/spec docs exist and are being iterated:
+
+- `ops/workstreams/profile-native-cms-roadmap/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+- `ops/workstreams/profile-native-cms-roadmap/product-technical-roadmap.md`
+- `ops/workstreams/profile-native-cms-roadmap/run-log.md`
+
+No implementation code has been changed in this specific roadmap pass. This is
+planning/spec work.
+
+### Decisions Captured
+
+- CMS capability should be available to all profiles.
+- Museum, Capital, About, Education, Blog, News, OM, and similar sections should
+  become profile-owned CMS sites, not privileged app route families.
+- `/{handle}` remains the profile page.
+- `/{handle}/index.html` is the primary profile website.
+- The profile page should link directly to the CMS site when a primary site is
+  published.
+- The first real publish path should use decentralized storage from the start.
+- AWS/S3/CloudFront can accelerate content, but should not be canonical.
+- The durable artifact should be a signed, content-addressed, portable CMS
+  package.
+- 6529 should not pay for arbitrary user inference.
+- Instead, 6529 should expose AI-agent affordances: schemas, MCP tools,
+  `SKILL.md`, source packets, validation output, package examples, and patch
+  import/review.
+- Astro/Starlight exporters are not needed in V1.
+- Jekyll/Hugo/Eleventy/Docusaurus/VitePress/MkDocs/Gatsby/Zola exporters are
+  also not needed in V1.
+- We should steal proven static-site ideas and implement them natively in the
+  6529 CMS package/renderer.
+
+### Prior Art Studied
+
+Astro/Starlight:
+
+- Typed content collections.
+- Source loaders.
+- Static-first islands.
+- Frontmatter-style metadata.
+- Generated navigation.
+- Static search.
+- I18n-ready fields.
+- Plugin boundaries.
+- Docs ergonomics.
+- Editor/agent schema support.
+
+Additional static-site systems:
+
+- Jekyll: front matter, front matter defaults, collections.
+- Hugo: archetypes, taxonomies.
+- Eleventy: data cascade, pagination, permalinks, collections, directory data.
+- Docusaurus: sidebar, docs versioning, i18n.
+- VitePress: frontmatter, build-time data loading.
+- MkDocs/Material: simple site config, docs defaults, search/i18n ergonomics.
+- Gatsby: source plugin/data normalization idea, without GraphQL lock-in.
+- Zola: single-binary/local-first/static/no-database posture.
+
+### Native 6529 Ideas Added From Prior Art
+
+- Typed CMS collections.
+- Site manifest.
+- Scoped metadata defaults.
+- Data cascade and override semantics.
+- Archetypes as page/site creation recipes.
+- Taxonomies, tags, terms, and facets.
+- Safe block macros.
+- Deterministic pagination.
+- Permalinks, aliases, and route collision validation.
+- Static search manifest.
+- I18n-ready package fields.
+- Source loaders/source packets.
+- Markdown import/export for docs/posts.
+- Controlled theme slots rather than arbitrary runtime swizzling.
+- Static build manifest.
+- Standalone validator/exporter/local tooling direction.
+
+### Current Roadmap Shape
+
+Near-term sequence:
+
+1. Lock V1 cutline.
+2. Decide storage/signing/hash/pointer/route/media details.
+3. Add package schemas for typed collections, site manifest, defaults, cascade,
+   archetypes, taxonomies, macros, pagination, permalinks, aliases, search,
+   locale/i18n, loader outputs, plugin manifests, and build manifests.
+4. Add profile CMS route and profile-page website button.
+5. Add signed publish flow with IPFS/Arweave receipts.
+6. Harden renderer and validator.
+7. Add plain static HTML export.
+8. Build dashboard/builder V1.
+9. Expand wallet gallery generator into home, collection, NFT, taxonomy, and
+   paginated pages.
+10. Add AI-agent affordances.
+11. Add 3D rooms.
+12. Add transaction explainers.
+13. Add standalone validator/renderer and mirror/Electron workflows.
+
+### Open Decisions
+
+- Required storage policy: IPFS only, Arweave only, or one required plus one
+  recommended.
+- Signature scheme: EIP-712 now or EIP-191 first.
+- Canonical JSON/hash implementation.
+- Pointer concurrency and rollback event model.
+- Route conflict policy for handles that overlap app routes.
+- Initial package size/media upload limits.
+- First 6529 collections that get custom native templates.
+- Which AI-agent affordances ship in V1.
+- Whether agent patch import is V1 or V1.1.
+
+### Next Work
+
+If continuing this roadmap/spec exercise:
+
+1. Review the schema list and turn it into concrete JSON schema file names.
+2. Define V1 package manifest shape in more detail.
+3. Define V1 route manifest shape in more detail.
+4. Define V1 static export output directory shape.
+5. Define V1 MCP tool list and permissions.
+6. Define first `SKILL.md` files and what each should contain.
+7. Decide whether to keep this in frontend repo or move to 6529mono before
+   implementation planning begins.
+
+## 2026-06-17: Phase 0 And Phase 1 Delivery
+
+### Current Objective
+
+Enter `6529-autonomous-manager` mode with subagents and deliver Phase 0 and
+Phase 1 for the profile-native CMS roadmap.
+
+### Output
+
+Added Phase 0:
+
+- `ops/workstreams/profile-native-cms-roadmap/phase-0/decision-record.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-0/storm-lanes.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-0/test-matrix.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-0/pr-wave-plan.md`
+
+Added Phase 1:
+
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/schema-index.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/schemas/cms-package-v1.schema.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/schemas/agent-patch-v1.schema.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/schemas/validation-result-v1.schema.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/minimal-profile-homepage.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/wallet-gallery.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/collection-page.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/nft-detail.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/art-media.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/exhibition-room.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/legacy-migration.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/invalid/missing-signature.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/invalid/route-collision.package.json`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/hash-test-vectors.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/validation-plan.md`
+
+### Subagent Review Integrated
+
+- Schema/fixture review: keep the Phase 1 corpus portable, then move or mirror
+  executable protocol code into `lib/profile-cms/protocol/v1/` or a shared
+  6529mono package.
+- Publish/storage review: spell out canonicalization, signing, EIP-1271/Safe,
+  storage receipts, replay protection, pointer concurrency, rollback, and
+  idempotency.
+- Frontend route/render review: make `/{handle}` and
+  `/{handle}/index.html` distinct, reserve app roots, keep CMS pages outside
+  profile-tab layout, and classify CMS analytics separately.
+- Manager review: distinguish docs-only readiness from code landed, define
+  artifact paths, owner/signoff state, validator behavior, and residual gaps.
+
+### Validation Evidence
+
+Completed locally:
+
+- JSON parse for all Phase 1 schemas and fixtures.
+- Focused route duplicate check across valid and invalid fixtures.
+- `codex-diff-check -- ops/workstreams/profile-native-cms-roadmap` passed.
+- Non-ASCII scan for Markdown and JSON artifacts found no non-ASCII.
+- `node -e "require.resolve('ajv')"` confirmed `ajv` is not currently
+  resolvable, so full schema validation is explicitly deferred.
+- Documentation memory updated after review.
+
+Known gaps:
+
+- Full JSON Schema validation has not run because `ajv` is not currently
+  resolvable in the local Node environment.
+- Hash vectors are placeholder-shaped until RFC 8785 canonicalization lands.
+- No runtime FE or BE code was changed in this pass.
+
+### Next Work
+
+Wave 0 implementation:
+
+1. Add executable protocol code and schema validation.
+2. Generate real canonical hash vectors.
+3. Wire FE and BE tests to the same fixture corpus.
+4. Start route/render and publish/storage implementation behind feature flags.
+
+### Second-Pass Review
+
+Found and fixed:
+
+- `legacy-migration.package.json` was marked valid but emitted a CMS alias at
+  `/museum/the-memes/index.html`, outside the owning `6529museum` profile
+  namespace. The fixture now keeps the imported legacy route as provenance
+  metadata and emits the alias at
+  `/6529museum/legacy/museum/the-memes/index.html`.
+
+Additional validation completed:
+
+- Custom semantic pass over all fixtures for route namespace, duplicate routes,
+  page references, navigation references, metadata social-image references,
+  block asset/page/NFT references, NFT media profile asset references, deep zoom
+  references, room placement references, taxonomy page references, signatures,
+  storage receipts, and primary routes.
+- All seven valid fixtures passed that semantic pass.
+- `invalid/route-collision.package.json` still fails the intended duplicate
+  route check.
+- Python `jsonschema` is also unavailable locally, matching the existing
+  `ajv` full-schema-validation gap.
+
+### PR Bot Review Iteration
+
+PR #2707 bot feedback:
+
+- 6529bot security: no security findings; non-blocking notes on unsafe URL
+  schemes, extensible block fields, fixture signatures, signer normalization,
+  and EIP-55 validation.
+- 6529bot general: good to merge; non-blocking notes on route kind semantics,
+  route/profile namespace validation, `unknown` block semantics, and placeholder
+  hashes.
+- CodeRabbit: review rate limit reached, with status context passing and no
+  actionable inline findings.
+
+Changes made from bot feedback:
+
+- Added first-class `html_embed` block type.
+- Removed `unknown` from the V1 valid block type enum.
+- Changed the mixed-media fixture to use `html_embed` instead of `unknown`.
+- Added `invalid/unknown-block.package.json` to document fail-closed behavior.
+- Expanded validation-plan semantic checks for route kind variants, alias/redirect
+  namespace matching, unsafe URL schemes, unknown URL-bearing block properties,
+  production rejection of fixture signatures, signer normalization, and EIP-55
+  validation.
+- Tightened roadmap language so unsupported blocks fail closed in V1.
+
+## 2026-06-17: Wave 0 Executable Protocol Bridge
+
+### Current Objective
+
+Turn the Phase 1 CMS protocol artifacts into executable frontend code that
+future FE, BE, renderer, builder, and agent lanes can validate against.
+
+### Output
+
+Added executable protocol package:
+
+- `lib/profile-cms/protocol/v1/constants.ts`
+- `lib/profile-cms/protocol/v1/schemas.ts`
+- `lib/profile-cms/protocol/v1/canonical-json.ts`
+- `lib/profile-cms/protocol/v1/hash.ts`
+- `lib/profile-cms/protocol/v1/validation.ts`
+- `lib/profile-cms/protocol/v1/index.ts`
+
+Added tests:
+
+- `__tests__/lib/profile-cms/protocol/v1/canonical-json.test.ts`
+- `__tests__/lib/profile-cms/protocol/v1/hash.test.ts`
+- `__tests__/lib/profile-cms/protocol/v1/fixtures.test.ts`
+
+Updated docs:
+
+- `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/schema-index.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/hash-test-vectors.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/validation-plan.md`
+
+### Implementation Notes
+
+- Runtime validation uses existing direct `zod` dependency, not a new AJV
+  dependency.
+- JSON Schema files remain the protocol reference.
+- Canonical JSON rejects undefined, functions, symbols, bigint, non-finite
+  numbers, non-plain objects, and cycles.
+- Hash helper uses `sha256:<64 lowercase hex>`.
+- Package hash input omits `integrity.package_hash`, `signatures`, and
+  `storage` to avoid self-reference and mutable envelope coupling.
+- Default validation accepts fixture signatures/storage for fixture/dev usage.
+  Production mode can disable both.
+- Hash enforcement is optional so placeholder-hash fixtures can stay useful
+  until publish/signing finalizes.
+
+### Validation Evidence
+
+Completed locally:
+
+- `seize run test:no-coverage -- __tests__/lib/profile-cms/protocol/v1`
+  passed.
+- `seize run lint:changed` passed.
+- `seize run typecheck:changed` passed.
+- `codex-diff-check -- lib/profile-cms __tests__/lib/profile-cms ops/workstreams/profile-native-cms-roadmap`
+  passed.
+
+Coverage from that slice:
+
+- Canonical JSON object ordering, array order, and invalid input rejection.
+- RFC 8785/JCS-oriented numeric edge cases and astral-key ordering.
+- Hash vectors for object ordering and unicode title.
+- Computed minimal-profile payload and package hash enforcement.
+- Mutation detection for payload/package hash mismatch.
+- All seven valid Phase 1 fixtures pass.
+- All three invalid fixtures return documented error codes.
+- Production-mode fixture signature/storage rejection.
+- Unsafe URL-scheme rejection.
+- Plain HTTP asset URI rejection.
+- Unsafe relative URL rejection for backslash and encoded scheme-relative forms.
+- Uppercase hash hex and non-`sha256:` prefix rejection.
+- Type-vs-format schema failures for block types and hash fields.
+- Signature/storage envelope exclusion from package hash input.
+
+### Bot Review Iteration
+
+6529bot general review requested changes on:
+
+- Making the canonical number path explicit and adding JCS edge vectors.
+- Adding an astral-key ordering vector.
+- Narrowing `block_type` issue mapping to enum failures only.
+- Narrowing `hash.invalid` issue mapping to regex failures on known hash fields.
+- Excluding signatures/storage from package hash input and documenting that
+  production signatures attest through EIP-712 rather than signing over their
+  own signature envelope.
+- Removing plain `http:` from the CMS URI allowlist.
+- Rejecting unsafe relative URL forms with backslashes, control characters, and
+  encoded scheme-relative prefixes.
+
+Follow-up changes were made and revalidated locally.
+
+### Remaining Work
+
+- Decide whether to move the executable protocol into a shared 6529mono package
+  before BE adoption.
+- Add BE tests against the same fixture corpus.
+- Start Wave 1 route/render/profile-button work behind feature flags.
+
+## 2026-06-17: Art And NFT Display Research
+
+### Current Objective
+
+Go deep on best practices for displaying art and NFTs in both 2D and 3D.
+
+### Output
+
+Added:
+
+- `ops/workstreams/profile-native-cms-roadmap/art-nft-display-best-practices.md`
+
+Linked it from:
+
+- `ops/workstreams/profile-native-cms-roadmap/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+
+### Research Sources
+
+Reviewed official or primary docs for:
+
+- IIIF Image and Presentation APIs.
+- ERC-721 and OpenSea metadata standards.
+- Khronos glTF and glTF PBR.
+- three.js GLTFLoader, DRACOLoader, KTX2Loader, LoadingManager.
+- model-viewer.
+- web.dev image performance and lazy loading.
+- WCAG 2.2, W3C alt text guidance, captions, and transcripts.
+- C2PA/content credentials.
+
+### Design Conclusions
+
+2D:
+
+- Art display should be art-first, aspect-ratio preserving, and faithful by
+  default.
+- Detail pages should never depend on cropped marketplace-style thumbnails.
+- Grids can have dense/cropped modes, but detail views need full artwork.
+- High-resolution still images need optional deep zoom/IIIF-like tile manifests.
+- Every heavy/non-instant media type needs a poster and fallback.
+- Provenance, source media, display derivatives, social images, and original
+  assets should be represented separately.
+
+3D:
+
+- V1 should ship simple 3D rooms and object viewers, not a full 3D world editor.
+- 2D art inside 3D rooms needs a faithful display mode where room lighting does
+  not alter the artwork pixels.
+- 3D rooms must always link each work to a faithful 2D detail page.
+- GLB/glTF should be the runtime default for 3D assets.
+- Posters, deferred loading, mobile fallback, canvas nonblank tests, and
+  performance budgets are required.
+
+Schema implications:
+
+- Add `art_asset`.
+- Add `display_variant`.
+- Add `nft_media_profile`.
+- Add `deep_zoom_manifest`.
+- Add `exhibition_room`.
+- Add `artwork_placement`.
+- Add `interactive_policy`.
+
+### Next Work
+
+- Fold the new art/NFT schema implications into the main product roadmap schema
+  and track sections.
+- Decide whether V1 object viewer uses `model-viewer`, Three.js directly, or
+  both.
+- Define V1 media size/texture budgets.
+- Define V1 3D room template and fallback behavior.
+- Decide which 6529 collections get custom art display templates first.
+
+## 2026-06-17: Agentic Storm Phase Plan
+
+### Current Objective
+
+Do a final roadmap review and reorganize the work into logical phases for an
+aggressive multi-agent implementation storm.
+
+### Output
+
+Added:
+
+- `ops/workstreams/profile-native-cms-roadmap/agentic-storm-execution-plan.md`
+
+Updated:
+
+- `ops/workstreams/profile-native-cms-roadmap/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+
+### Phase Structure
+
+The roadmap is now organized into these execution phases:
+
+1. Command Center And Decision Lock.
+2. Protocol And Fixture Foundation.
+3. Native Renderer, Routes, And Static Export.
+4. Publish, Storage, Signing, And Pointer Ledger.
+5. Builder MVP.
+6. Wallet Gallery Generator.
+7. Art/NFT Display Excellence.
+8. 3D Rooms And Object Viewer.
+9. AI-Agent Affordances.
+10. Institutional Migration Pilot.
+11. Decentralization Hardening.
+
+### Storm Design
+
+The storm plan defines:
+
+- Storm rules.
+- Critical path.
+- Parallelization map.
+- Suggested agent roster.
+- PR wave plan.
+- Launch readiness gate.
+- Anti-patterns.
+- First 72 hours plan.
+
+### Key Recommendation
+
+Start with Phase 0 and Phase 1 only:
+
+- Lock decisions.
+- Assign lanes.
+- Build shared package schemas.
+- Build shared fixture corpus.
+- Build validator/hash test vectors.
+
+Only then fan agents out across route/render, publish/storage, builder, wallet
+gallery, art display, 3D, AI-agent affordances, and migration lanes.
+
+## 2026-06-17 - FE Runtime Bridge
+
+- Created isolated branch/worktree `codex/profile-cms-runtime-bridge`.
+- Added frontend runtime bridge scope for profile-native CMS sites only:
+  `/{handle}/index.html` route support, primary-site package adapter,
+  V1 static renderer, and profile Website link plumbing.
+- Documented the expected backend contract:
+  `GET /api/profile-cms/:handle/primary` returning
+  `{ package, package_id, version, package_hash, payload_hash, updated_at,
+  published_at? }`, with `404` for no primary site.
+- Safety notes: API packages enforce V1 hashes and reject fixture artifacts;
+  dev fixture fallback is non-production opt-in; raw HTML is not executed;
+  sandboxed embeds exclude `allow-same-origin`.
+- Focused validation passed:
+  `seize run test:no-coverage -- __tests__/lib/profile-cms/runtime/routes.test.ts __tests__/lib/profile-cms/runtime/fetcher.test.ts __tests__/components/profile-cms/CmsSiteRenderer.test.tsx __tests__/components/user/user-page-header/UserPageHeader.test.tsx __tests__/app/profile-cms-route.test.tsx --runInBand`,
+  `seize run lint:changed`, `seize run typecheck:changed`,
+  `seize run react-doctor:diff`, and `codex-diff-check`.
+- Local browser smoke was timeboxed. The dev server reached Ready on the
+  assigned port, then Turbopack exited because the temporary clean worktree
+  dependency junction points outside the project root. This is a local
+  dependency-shape caveat from avoiding another broad install, not a CMS
+  runtime error.
+
+## 2026-06-17 - Builder MVP Stacked Lane
+
+Started FE CMS Builder + Publish UI MVP on
+`codex/profile-cms-builder-mvp`, stacked on PR #2720 head
+`d50547de0ad62e36da881659a80173d6cf619059`.
+
+Scope guardrails:
+
+- FE builder/publish UX only.
+- No V1 protocol, hash, or canonicalization changes.
+- No wallet gallery generator, NFT indexer, storage upload, 3D rooms, or
+  AI-agent MCP work.
+- Existing runtime bridge branch remains untouched except as the stacked base.
+
+Implemented locally before validation:
+
+- Hidden feature-flagged `/{handle}/cms/builder` route.
+- Builder package helper that emits a one-page V1 package candidate, computes
+  existing V1 hashes, and validates via the merged V1 validator.
+- Builder UI with template picker, homepage metadata, navigation label, block
+  editor, real `CmsSiteRenderer` preview, validation checklist, JSON
+  import/export, and honest save/validate/publish adapter states.
+- Narrow write adapter boundary and assumptions doc for backend save,
+  server-validate, and publish endpoints.
+
+Focused validation passed:
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- __tests__/lib/profile-cms/builder/package.test.ts __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx __tests__/app/profile-cms-builder-route.test.tsx --runInBand`
+  (3 suites, 9 tests)
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+- Local browser smoke was timeboxed. The assigned dev server reached Ready on
+  the builder worktree port, then exited because the local helper/process
+  environment surfaced `PORT_SEARCH_LIMIT=0`, even though tracked config only
+  declares `PORT_SEARCH_LIMIT` as an optional positive number and the worktree
+  `.env` does not set it. This is being treated as a local helper/process-env
+  caveat, not a tracked CMS builder code defect.
+
+PR status:
+
+- Opened stacked FE PR #2726:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2726
+- Base: `codex/profile-cms-runtime-bridge`
+- Head: `codex/profile-cms-builder-mvp`
+- Initial CodeRabbit status was success, but the explicit review request hit
+  the organization review rate limit. No actionable review findings were
+  returned before handoff.
+- 6529bot review on the first head returned actionable findings. Follow-up
+  hardening gated draft saves to the connected non-proxy owner profile,
+  converted failed profile lookups to `notFound()`, ignored stale async action
+  results after editor changes, localized builder block/severity/error chrome,
+  split template status text, documented builder locale fallback debt, and
+  switched unresolved publish endpoint display to `:id`.
+- 6529bot follow-up asked whether server-validate should share the owner gate
+  and whether profile lookup must return an id. Follow-up tightened both: save
+  and server-validate now require the connected non-proxy owner profile before
+  any backend request, and the builder route returns `notFound()` unless profile
+  lookup returns an id.
+
+## 2026-06-18 - FE Wallet Gallery Builder Flow
+
+Started the Phase 5 frontend wallet gallery builder lane on
+`codex/cms-gallery-builder-flow`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before final validation:
+
+- Enabled the wallet gallery template inside the existing profile CMS builder
+  surface.
+- Added wallet/ENS input, parser validation, snapshot request/review state, and
+  a narrow `profile-cms/gallery/snapshots` adapter.
+- Added a fixture-backed snapshot fallback for local preview while the backend
+  deterministic wallet-snapshot -> CMS V1 generator lands.
+- Added reviewed asset controls for hide/unhide, feature/unfeature, and simple
+  priority ordering.
+- Rendered generated gallery candidates through the existing `CmsSiteRenderer`.
+- Kept save draft, server validate, and publish paths behind the existing
+  connected non-proxy profile-owner gate.
+
+Backend contract notes:
+
+- The backend generator remains the durable source of truth for generated
+  wallet gallery CMS packages.
+- The frontend `buildWalletGalleryCmsPackage(...)` helper is temporary preview
+  fallback only and uses existing `CmsPackageV1` fields.
+- The documented replacement path is to keep snapshot review controls, send
+  reviewed choices to the backend generator once merged, and use the returned
+  `CmsPackageV1` for preview/save/publish.
+
+Focused validation passed:
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --runTestsByPath __tests__/lib/profile-cms/builder/gallery.test.ts __tests__/lib/profile-cms/builder/api.test.ts __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx --testMatch **/*.test.ts --testMatch **/*.test.tsx --testPathIgnorePatterns=node_modules --testPathIgnorePatterns=.next --testPathIgnorePatterns=/tests/ --testPathIgnorePatterns=/e2e/`
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+
+Local browser smoke passed on `http://localhost:3138/punk6529/cms/builder`
+with viewport screenshots for desktop snapshot review, desktop preview, and
+mobile snapshot review under `.codex/artifacts/`.
+
+## 2026-06-18 - Phase 6 FE Art/NFT Display Excellence
+
+Started worker branch `codex/cms-art-display-excellence`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before validation:
+
+- Narrow `use client` art inspection island with keyboard close/next/previous,
+  zoom controls, fullscreen action, metadata toggle, and mobile-friendly fixed
+  overlay.
+- Art-first gallery rendering for `gallery`, `lightbox_gallery`, and generated
+  wallet gallery blocks, with editorial, dense, contact-sheet, and clean modes
+  driven by existing free-form block fields.
+- NFT/card detail composition with large 2D media, original-vs-derivative
+  badges, traits, collection context, source snapshot facts, package/storage
+  provenance, and related works.
+- Mixed media fallback improvements for audio posters while keeping HTML/model
+  execution behind the existing sandbox/static fallback policies.
+- Fixture expansions for contact-sheet galleries, NFT traits/source packets,
+  multi-work generated galleries, and audio poster fallback.
+
+Contract notes:
+
+- No V1 schema drift. New fixture hints use block/source packet extension
+  fields that are already accepted by the V1 contract.
+- 3D/model blocks remain static fallback in this lane; primary inspection is
+  2D and accessible.
+
+Focused validation completed:
+
+- `seize run format:changed`
+- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx __tests__/lib/profile-cms/protocol/v1/fixtures.test.ts`
+  passed after the temporary config worked around the Windows worktree path
+  regex issue; the temporary config was removed.
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+
+Browser smoke:
+
+- `seize-local-dev start-frontend` reached the assigned port, then the local
+  helper/process environment surfaced `PORT_SEARCH_LIMIT=0`, which the Next
+  env schema rejects.
+- `seize run dev` with a positive `PORT_SEARCH_LIMIT` reached Ready, then
+  Turbopack rejected the temporary `node_modules` junction because it points
+  outside the project root.
+- `seize run dev:webpack` reached Ready on port `3141`, but Playwright
+  screenshots against a temporary local fixture-preview route timed out after
+  webpack chunk loading errors from the same cross-worktree dependency shape.
+- No browser screenshots were produced. Focused renderer tests remain the
+  visual/interaction validation evidence for this local pass.
+
+## 2026-06-18 - Phase 8 AI-Agent Affordances Lane
+
+Started FE AI-agent affordances on
+`codex/cms-ai-agent-affordances-ui`, stacked on
+`codex/profile-cms-builder-mvp`.
+
+Implemented locally before validation:
+
+- Client-side package JSON, source packet JSON, and schema bundle downloads from
+  the builder/package workspaces.
+- Source packet viewer that separates facts, author copy, derived metadata,
+  validation diagnostics, and source handling rules.
+- Draft-only agent patch review UI with paste/upload, schema/target validation,
+  diff preview, local package validation, unsafe URL rejection, and explicit
+  apply-to-draft action.
+- External-agent `SKILL.md`, MCP read-tool interface docs, profile docs, and
+  backend contract notes.
+
+Backend contract note:
+
+- No new backend writes are assumed. Future read tools should be read-only and
+  should not save, sign, store, or publish packages.
+
+Focused validation passed:
+
+- `seize exec jest --testMatch=**/*.test.ts --testMatch=**/*.test.tsx --testPathIgnorePatterns=/node_modules/ --testPathIgnorePatterns=/.next/ --testPathIgnorePatterns=/tests/ --testPathIgnorePatterns=/e2e/ --runTestsByPath __tests__/lib/profile-cms/builder/agent.test.ts __tests__/lib/profile-cms/builder/package.test.ts __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx --runInBand --silent --verbose=false --coverage=false`
+  (3 suites, 18 tests)
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff` (score 99/100; non-blocking warnings remain
+  for existing builder component size/state count)
+
+Browser smoke:
+
+- Attempted on assigned port `3139`, but local dev server startup is blocked by
+  local helper/process env behavior: `seize-local-dev start-frontend` exits on
+  `PORT_SEARCH_LIMIT=0`; direct `seize run dev` starts on occupied port `3001`.
+  No screenshot captured.
+## 2026-06-18 - Phase 5-8 QA Integration Lane
+
+### Current Objective
+
+Own the QA/integration lane for Phase 5 wallet gallery, Phase 6 art/NFT
+display, Phase 7 3D rooms, and Phase 8 AI-agent affordances while feature
+workers prepare their branches.
+
+### Output
+
+Added:
+
+- `ops/workstreams/profile-native-cms-roadmap/phase-5-8-qa-checklist.md`
+- `__tests__/components/profile-cms/CmsSiteRenderer.phase5-8.test.tsx`
+- `tests/profile-cms/phase5-8-smoke.spec.ts`
+
+Updated:
+
+- `ops/workstreams/profile-native-cms-roadmap/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+
+### Integration Notes
+
+- QA branch: `codex/cms-phase5-8-qa-integration`.
+- Base branch: `codex/profile-cms-builder-mvp`.
+- Builder MVP reference PR: #2726.
+- Expected worker branches
+  `codex/cms-gallery-builder-flow`, `codex/cms-art-display-excellence`,
+  `codex/cms-3d-rooms-mvp`, and
+  `codex/cms-ai-agent-affordances-ui` currently have no diff from the builder
+  base in this local worktree. An explicit fetch did not find a remote
+  `codex/cms-gallery-builder-flow` ref, so those branches are tracked as
+  expected/local-only until pushed.
+
+### Coverage Prepared
+
+- Fixture regression coverage now renders wallet gallery home, collection page,
+  NFT detail page, mixed media/object fallback, and 3D room fallback packages
+  through `CmsSiteRenderer`.
+- Optional Playwright smoke coverage is prepared for gallery builder flow,
+  generated gallery home, collection page, NFT detail page, social preview
+  metadata, 3D room canvas/mobile fallback, and agent patch review flow. The
+  smoke spec is disabled by default and requires
+  `RUN_PROFILE_CMS_PHASE5_8_E2E=true` plus per-route env vars so it can run
+  against whichever worker branch exposes each surface first.
+
+### Validation
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --testMatch "**/__tests__/components/profile-cms/CmsSiteRenderer.phase5-8.test.tsx" --runInBand`
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `seize exec playwright test tests/profile-cms/phase5-8-smoke.spec.ts --list`
+
+### Remaining Risks
+
+- Browser smoke is not yet evidence of worker functionality because the Phase
+  5-8 worker branches have not landed runnable diffs in this worktree.
+- The current app-level runtime fixture primary only covers the minimal
+  `punk6529` homepage. Full generated gallery/collection/NFT/room browser smoke
+  needs worker routes, a fixture route, or backend/profile data availability.
+- Existing Playwright specs in `tests/` import `../testHelpers`, but no tracked
+  `tests/testHelpers.ts` is present in this checkout. The new Phase 5-8 smoke
+  spec imports Playwright directly to avoid depending on that missing helper.
+
+## 2026-06-18 - Phase 5-8 QA Review Follow-Up
+
+### Feedback Addressed
+
+- 6529bot general review requested a stronger smoke harness after PR #2733 was
+  opened as a draft.
+- Updated the Playwright smoke helper to settle briefly and re-assert collected
+  page/console errors after navigation and after route-level assertions.
+- Replaced the implicit `/` route fallback with an explicit missing-env failure
+  when smoke is enabled.
+- Named the horizontal overflow tolerance and documented why it exists.
+- Added a WebGL `readPixels` caveat to blank-canvas failure messages so 3D
+  worker branches inspect the screenshot before treating the result as proof of
+  an empty render.
+- Added a checklist note to migrate English smoke selectors to stable
+  locale-independent contracts when localized worker branches land.
+
+### Validation
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- --testMatch "**/__tests__/components/profile-cms/CmsSiteRenderer.phase5-8.test.tsx" --runInBand`
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `seize exec playwright test tests/profile-cms/phase5-8-smoke.spec.ts --list`

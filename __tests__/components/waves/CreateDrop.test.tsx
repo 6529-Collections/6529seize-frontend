@@ -853,7 +853,7 @@ describe("CreateDrop", () => {
 
     await waitFor(() => {
       expect(setToast).toHaveBeenCalledWith({
-        message: "Drop submitted successfully",
+        message: "Drop submitted.",
         type: "success",
       });
     });
@@ -891,7 +891,7 @@ describe("CreateDrop", () => {
 
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
     expect(setToast).not.toHaveBeenCalledWith({
-      message: "Drop submitted successfully",
+      message: "Drop submitted.",
       type: "success",
     });
   });

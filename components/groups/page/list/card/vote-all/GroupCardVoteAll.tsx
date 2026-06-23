@@ -18,6 +18,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 import GroupCardActionWrapper from "../GroupCardActionWrapper";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+import type { GroupCardRateMatter } from "../GroupCard";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
 import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
@@ -29,11 +30,11 @@ export default function GroupCardVoteAll({
   group,
   onCancel,
 }: {
-  readonly matter: ApiRateMatter;
+  readonly matter: GroupCardRateMatter;
   readonly group?: ApiGroupFull | undefined;
   readonly onCancel: () => void;
 }) {
-  const SUCCESS_LABEL: Record<ApiRateMatter, string> = {
+  const SUCCESS_LABEL: Record<GroupCardRateMatter, string> = {
     [ApiRateMatter.Cic]: "NIC distributed.",
     [ApiRateMatter.Rep]: "Rep distributed.",
   };

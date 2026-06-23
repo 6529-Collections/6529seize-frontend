@@ -102,6 +102,7 @@ describe("CollectedStatsSeasonTile", () => {
 
     expect(container.querySelectorAll("circle")).toHaveLength(1);
     expect(container.querySelector("animate")).not.toBeInTheDocument();
+    expect(screen.getByText("0 sets")).toBeInTheDocument();
   });
 
   it("skips the entry animation when reduced motion is enabled", () => {
@@ -181,7 +182,7 @@ describe("CollectedStatsSeasonTile", () => {
     const button = screen.getByRole("button", { name: /szn2/i });
 
     expect(button).toHaveClass("tw-border-transparent", "tw-bg-transparent");
-    expect(button).toHaveClass("desktop-hover:hover:tw-scale-[1.03]");
+    expect(button).toHaveClass("desktop-hover:hover:tw-scale-105");
     expect(button).not.toHaveClass(
       "hover:tw-scale-[1.01]",
       "focus-visible:tw-scale-[1.01]"
@@ -234,5 +235,47 @@ describe("CollectedStatsSeasonTile", () => {
       "sm:tw-w-[88px]",
       "tw-px-2"
     );
+  });
+
+  it("uses source-locale set count labels", () => {
+    const { rerender } = render(
+      <CollectedStatsSeasonTile
+        season={buildSeason({ setsHeld: 1 })}
+        isSelected={false}
+        showDetailText={false}
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("1 set")).toBeInTheDocument();
+
+    rerender(
+      <CollectedStatsSeasonTile
+        season={buildSeason({ setsHeld: 3 })}
+        isSelected={false}
+        showDetailText={false}
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("3 sets")).toBeInTheDocument();
+
+    rerender(
+      <CollectedStatsSeasonTile
+        season={buildSeason({ setsHeld: 3000 })}
+        isSelected={false}
+        showDetailText={false}
+        locale="de-DE"
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("3.000 sets")).toBeInTheDocument();
   });
 });

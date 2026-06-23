@@ -3,23 +3,37 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ExpandedWave } from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/ExpandedWave";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
+import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
+
+type MockWavePinProps = {
+  readonly className?: string;
+  readonly isPinned?: boolean;
+};
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children, onMouseEnter, onClick, className }: any) => (
+  default: ({
+    href,
+    children,
+    onMouseEnter,
+    onClick,
+    className,
+    ...rest
+  }: any) => (
     <a
       href={href}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
       className={className}
+      {...rest}
     >
       {children}
     </a>
   ),
 }));
 
-jest.mock("@/components/waves/WavePicture", () => (props: any) => (
-  <img data-testid="wave-picture" alt={props.name} />
+jest.mock("@/components/waves/WavePicture", () => () => (
+  <span data-testid="wave-picture" />
 ));
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime",
@@ -27,13 +41,33 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>
+  () => (props: MockWavePinProps) => (
+    <button
+      type="button"
+      className={props.className}
+      data-testid="pin"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+    >
+      {String(props.isPinned)}
+    </button>
+  )
 );
 
 const baseWave = createMockMinimalWave({
   id: "1",
   name: "Chat Wave",
 });
+const waveScore = {
+  visibility_score: 83,
+  quality_score: 78,
+  hotness_score: 92,
+  rep_sort_score: 41,
+} as ApiWaveScore;
+
+const getWaveRow = (): HTMLElement => screen.getByRole("group");
 
 const renderExpandedWave = (
   overrides: Partial<React.ComponentProps<typeof ExpandedWave>> = {}
@@ -73,42 +107,30 @@ describe("ExpandedWave", () => {
       showPin: true,
     });
 
-    const row = screen.getByRole("link").parentElement;
+    const row = getWaveRow();
 
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
     expect(row).toHaveClass("tw-px-5");
     expect(row).toHaveClass("tw-gap-x-4");
+    expect(row).toHaveClass("tw-items-center");
+    expect(row).not.toHaveClass("tw-items-start");
+    expect(row).toHaveClass("tw-h-full");
+    expect(row).toHaveClass("tw-min-h-[62px]");
     expect(row).not.toHaveClass("tw-pl-2");
-    expect(screen.getByRole("link").previousElementSibling).toBeNull();
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
-    );
   });
 
-  it("reserves the expand column for a non-expandable row in an expandable list", () => {
-    renderExpandedWave({
-      showPin: true,
-      reserveExpandControlSpace: true,
-    });
+  it("opens the wave from the stretched row link", async () => {
+    const user = userEvent.setup();
+    const { onClick } = renderExpandedWave();
 
-    const row = screen.getByRole("link").parentElement;
+    await user.click(screen.getByRole("link", { name: "Chat Wave" }));
 
-    expect(
-      screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
-    ).not.toBeInTheDocument();
-    expect(row).toHaveClass("tw-pl-2");
-    expect(row).toHaveClass("md:tw-pl-1");
-    expect(row).toHaveClass("tw-gap-x-2");
-    expect(row).toHaveClass("md:tw-gap-x-1");
-    expect(screen.getByRole("link").previousElementSibling).not.toBeNull();
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
-    );
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the subwave expand button before the pin without opening the wave", async () => {
+  it("renders one row link and keeps the subwave expand button separate", async () => {
     const user = userEvent.setup();
     const { onClick, onToggleExpand } = renderExpandedWave({
       canExpand: true,
@@ -123,33 +145,70 @@ describe("ExpandedWave", () => {
     expect(expandButton).toHaveAttribute("aria-expanded", "false");
     expect(expandButton).not.toHaveClass("tw-absolute");
     expect(expandButton).toHaveClass("tw-relative");
-    expect(expandButton).toHaveClass("tw-size-6");
-    expect(expandButton).toHaveClass("md:tw-size-5");
+    expect(expandButton).toHaveClass("tw-inline-flex");
+    expect(expandButton).toHaveClass("tw-size-5");
     expect(expandButton).toHaveClass("tw-rounded-full");
     expect(expandButton).toHaveClass("tw-border-0");
     expect(expandButton).toHaveClass("tw-bg-transparent");
     expect(expandButton).toHaveClass("desktop-hover:hover:tw-bg-iron-700/70");
+    expect(expandButton.querySelector("svg")).toHaveClass("tw-size-3.5");
     expect(expandButton.querySelector(".tw-bg-primary-400")).toBeNull();
-    const unreadSubwavesDot = screen
-      .getByRole("link")
-      .querySelector(".tw-bg-primary-400");
+    const unreadSubwavesDot = getWaveRow().querySelector(".tw-bg-primary-400");
     expect(unreadSubwavesDot).not.toBeNull();
     expect(unreadSubwavesDot).toHaveClass("tw-right-[-3px]");
     expect(unreadSubwavesDot).toHaveClass("tw-top-[-3px]");
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-pl-2");
-    expect(screen.getByRole("link").parentElement).toHaveClass("md:tw-pl-1");
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-gap-x-2");
-    expect(screen.getByRole("link").parentElement).toHaveClass("md:tw-gap-x-1");
-    expect(screen.getByRole("link").previousElementSibling).toContainElement(
-      expandButton
-    );
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
-    );
+    expect(getWaveRow()).toHaveClass("tw-px-5");
+    expect(getWaveRow()).toHaveClass("tw-gap-x-4");
+    expect(getWaveRow()).toHaveClass("tw-items-center");
+    expect(getWaveRow()).not.toHaveClass("tw-items-start");
+    expect(getWaveRow()).toHaveClass("tw-h-full");
+    expect(getWaveRow()).toHaveClass("tw-min-h-[62px]");
+    expect(getWaveRow()).not.toHaveClass("tw-pl-2");
+    const rowLink = screen.getByRole("link", { name: "Chat Wave" });
+    expect(rowLink).toHaveClass("tw-static");
+    expect(rowLink).toHaveClass("before:tw-absolute");
+    expect(rowLink).toHaveClass("before:tw-inset-0");
+    expect(rowLink).toHaveClass("before:tw-z-[5]");
+    expect(rowLink).toHaveClass("before:tw-content-['']");
+    expect(rowLink).toHaveClass("focus-visible:before:tw-ring-2");
+    expect(expandButton.closest("a")).toBeNull();
+    expect(expandButton.parentElement).toHaveClass("tw-z-10");
+    const avatar = screen.getByTestId("sidebar-wave-avatar");
+    expect(avatar).toHaveAttribute("aria-hidden", "true");
+    expect(avatar.closest("a")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
 
     await user.click(expandButton);
 
     expect(onToggleExpand).toHaveBeenCalledWith("1");
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("anchors the expanded title tooltip to the visible row link", () => {
+    renderExpandedWave({
+      showExpandedTooltip: true,
+      showPin: true,
+    });
+
+    const rowLink = screen.getByRole("link", { name: "Chat Wave" });
+    const tooltipAnchor = screen.getByText("Chat Wave");
+
+    expect(rowLink).not.toHaveAttribute("data-tooltip-id");
+    expect(tooltipAnchor.closest("a")).toBe(rowLink);
+    expect(tooltipAnchor).toHaveAttribute("data-tooltip-id", "wave-expanded-1");
+    expect(tooltipAnchor).toHaveAttribute("data-tooltip-content", "Chat Wave");
+    expect(tooltipAnchor).toHaveClass("tw-relative");
+    expect(tooltipAnchor).toHaveClass("tw-z-[6]");
+  });
+
+  it("does not navigate when the pin control is clicked", async () => {
+    const user = userEvent.setup();
+    const { onClick } = renderExpandedWave({
+      showPin: true,
+    });
+
+    await user.click(screen.getByTestId("pin"));
+
     expect(onClick).not.toHaveBeenCalled();
   });
 
@@ -164,24 +223,22 @@ describe("ExpandedWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-pl-[84px]");
-    expect(screen.getByRole("link").parentElement).toHaveClass(
-      "md:tw-pl-[72px]"
-    );
+    expect(getWaveRow()).toHaveClass("tw-pl-[82px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-[70px]");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );
-    const rail = screen
-      .getByRole("link")
-      .parentElement?.querySelector(".tw-w-px");
+    const rail = getWaveRow().querySelector(".tw-w-px");
     expect(rail).not.toBeNull();
     expect(rail).toHaveClass("tw-left-14");
     expect(rail).toHaveClass("md:tw-left-11");
     expect(rail).toHaveClass("-tw-top-1");
     expect(rail).toHaveClass("tw-bottom-4");
-    expect(
-      screen.getByRole("link").parentElement?.querySelector(".tw-h-px")
-    ).toBeNull();
+    expect(getWaveRow()).toHaveClass("tw-items-center");
+    expect(getWaveRow()).not.toHaveClass("tw-items-start");
+    expect(getWaveRow()).toHaveClass("tw-h-full");
+    expect(getWaveRow()).toHaveClass("tw-min-h-[54px]");
+    expect(getWaveRow().querySelector(".tw-h-px")).toBeNull();
     expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
   });
 
@@ -196,8 +253,33 @@ describe("ExpandedWave", () => {
     });
 
     expect(expandButton).toHaveClass("tw-bg-iron-700/60");
-    expect(expandButton).toHaveClass("tw-text-iron-300");
+    expect(expandButton).toHaveClass("tw-text-iron-200");
     expect(expandButton).toHaveClass("tw-opacity-100");
+  });
+
+  it("places the timestamp below the title and pushes score to the far edge", () => {
+    renderExpandedWave({
+      wave: createMockMinimalWave({
+        id: "1",
+        name: "Chat Wave",
+        waveScore,
+      }),
+    });
+
+    const timestamp = screen.getByTestId("drop-time");
+    const timestampWrapper = timestamp.parentElement;
+    const textStack = timestampWrapper?.parentElement;
+    const metadataRow = textStack?.parentElement;
+    const score = screen
+      .getByText("83")
+      .closest("[aria-label]")
+      ?.closest(".tw-ml-auto");
+
+    expect(textStack?.children[1]).toBe(timestampWrapper);
+    expect(metadataRow?.children[1]).toBe(score);
+    expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
+    expect(timestampWrapper).not.toHaveClass("-tw-mt-0.5");
+    expect(score).toHaveClass("tw-ml-auto");
   });
 
   it("overlaps non-final child rails to avoid visible line gaps", () => {
@@ -206,9 +288,7 @@ describe("ExpandedWave", () => {
       isLastSubwave: false,
     });
 
-    const rail = screen
-      .getByRole("link")
-      .parentElement?.querySelector(".tw-w-px");
+    const rail = getWaveRow().querySelector(".tw-w-px");
 
     expect(rail).not.toBeNull();
     expect(rail).toHaveClass("-tw-top-1");
@@ -225,10 +305,7 @@ describe("ExpandedWave", () => {
         onPrefetchSubwaves,
       });
 
-      const waveRow = screen.getByRole("link").parentElement;
-      if (waveRow === null) {
-        throw new Error("Expected wave link to have a row parent");
-      }
+      const waveRow = getWaveRow();
 
       fireEvent.mouseEnter(waveRow);
 
@@ -256,10 +333,7 @@ describe("ExpandedWave", () => {
         onPrefetchSubwaves,
       });
 
-      const row = screen.getByRole("link").parentElement;
-      if (row === null) {
-        throw new Error("Expected wave link to have a row parent");
-      }
+      const row = getWaveRow();
 
       fireEvent.mouseEnter(row);
       fireEvent.mouseLeave(row);

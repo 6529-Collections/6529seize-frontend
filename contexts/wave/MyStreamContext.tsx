@@ -44,6 +44,7 @@ interface WavesContextData {
   readonly removePinnedWave: (id: string) => void;
   readonly loadSubwavesForParent: (parentWaveId: string) => void;
   readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
+  readonly loadingSubwaveParentIds: readonly string[];
   readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
@@ -125,10 +126,12 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
     supportsPinning: true,
     otherListWaveIds: dmWaveIds,
+    preserveBackendWaveOrder: true,
   });
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
     supportsPinning: false,
     otherListWaveIds: mainWaveIds,
+    sortMutedLast: false,
   });
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
@@ -309,6 +312,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       removePinnedWave: wavesHookData.removePinnedWave,
       loadSubwavesForParent: wavesHookData.loadSubwavesForParent,
       prefetchSubwavesForParent: wavesHookData.prefetchSubwavesForParent,
+      loadingSubwaveParentIds: wavesHookData.loadingSubwaveParentIds,
       restoreWaveUnreadCount: wavesHookData.restoreWaveUnreadCount,
     };
 
@@ -322,6 +326,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       removePinnedWave: dmWavesHookData.removePinnedWave,
       loadSubwavesForParent: dmWavesHookData.loadSubwavesForParent,
       prefetchSubwavesForParent: dmWavesHookData.prefetchSubwavesForParent,
+      loadingSubwaveParentIds: dmWavesHookData.loadingSubwaveParentIds,
       restoreWaveUnreadCount: dmWavesHookData.restoreWaveUnreadCount,
     };
 
@@ -360,6 +365,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     wavesHookData.removePinnedWave,
     wavesHookData.loadSubwavesForParent,
     wavesHookData.prefetchSubwavesForParent,
+    wavesHookData.loadingSubwaveParentIds,
     wavesHookData.restoreWaveUnreadCount,
     dmWavesHookData.waves,
     dmWavesHookData.isFetching,
@@ -370,6 +376,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.removePinnedWave,
     dmWavesHookData.loadSubwavesForParent,
     dmWavesHookData.prefetchSubwavesForParent,
+    dmWavesHookData.loadingSubwaveParentIds,
     dmWavesHookData.restoreWaveUnreadCount,
     activeWaveId,
     activeWaveData,

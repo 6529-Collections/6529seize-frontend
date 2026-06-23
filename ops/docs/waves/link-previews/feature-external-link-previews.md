@@ -7,9 +7,13 @@ Parent: [Link Previews Index](README.md)
 Wave markdown renders generic external-link cards for eligible `http://` and
 `https://` URLs when no provider-specific handler matches first.
 
-Generic cards can show domain, title, description, and image.
-In chat and direct-message layouts, cards render in a fixed-height frame to
-reduce layout shift while loading.
+Generic website and article previews can use source/site, title, description,
+image, author, published date, and favicon metadata when the destination
+publishes it. Generic file previews use response headers and the URL only:
+filename, host, file type, MIME type, and size when available. The card omits
+missing fields instead of reserving empty space. In chat and direct-message
+layouts, cards render in a fixed-height frame to reduce layout shift while
+loading.
 
 ## Location in the Site
 
@@ -29,8 +33,8 @@ reduce layout shift while loading.
 
 1. Open a drop containing an eligible URL.
 2. A loading skeleton appears while preview metadata is fetched.
-3. If metadata resolves, the drop shows a card with title, description, domain,
-   and optional image.
+3. If metadata resolves, the drop shows a card from the available metadata,
+   usually source/site, title, description, and optional image.
 4. In chat/message cards, side actions show copy/open controls; eligible authors
    can also see `Hide link previews`.
 5. In home-style cards, side action buttons are not shown.
@@ -38,6 +42,13 @@ reduce layout shift while loading.
 ## Common Scenarios
 
 - News, blog, and docs URLs render as generic external cards.
+- Article metadata can include author and published date details when the
+  destination exposes standard article metadata.
+- Raw PDF, CSV, image, archive, document, spreadsheet, presentation, binary, and
+  unknown file links render as metadata-only file cards.
+- PDF file links show a `PDF` badge, source host, MIME/size facts when known,
+  and open the original source URL directly.
+- Sites can provide favicon metadata for compact source identification.
 - Repeated views of the same URL can resolve faster because preview responses
   are cached.
 - Long unbroken metadata text wraps inside the card to avoid horizontal overflow.
@@ -56,6 +67,12 @@ reduce layout shift while loading.
   and fall back to regular clickable links.
 - Some URLs route to dedicated handlers first; this page only covers the generic
   external-card path.
+- Generic external file cards never inline-render, iframe, download, scan, or
+  proxy the file body.
+- External file links must not show `Scanned and validated`; that claim belongs
+  only to backend-uploaded attachments that pass the 6529 attachment pipeline.
+- GitHub file and directory links use the GitHub preview handler, not the generic
+  external-card path. GitHub binary, PDF, and large files are also metadata-only.
 
 ## Failure and Recovery
 
@@ -72,6 +89,9 @@ reduce layout shift while loading.
 - Card quality depends on metadata published by the destination.
 - Slow or redirect-heavy destinations can degrade preview quality or fall back to
   non-rich link states.
+- Link-preview chrome uses the app message catalog, but the wave preview stack
+  does not yet pass an active route locale into this component. Until that route
+  migration happens, generic preview labels and dates use the default locale.
 - This page does not cover provider-specific cards.
 
 ## Related Pages

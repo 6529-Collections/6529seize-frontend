@@ -1,8 +1,8 @@
 import {
   getInitialRouterValues,
-  printNftContent,
   sortChanged,
 } from "@/components/memelab/MemeLab";
+import { printNftContent } from "@/components/memelab/memeLabCardContent";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
@@ -86,6 +86,27 @@ describe("MemeLab utilities", () => {
       </div>
     );
     expect(container.textContent).toContain("Collectors: 2");
+  });
+
+  it("printNftContent formats metrics with the requested locale", () => {
+    const nft: LabNFT = {
+      id: 1,
+      supply: 1234,
+    } as any;
+
+    const { container } = render(
+      <div>
+        {printNftContent(
+          nft,
+          MemeLabSort.EDITION_SIZE,
+          [],
+          VolumeType.ALL_TIME,
+          "de-DE"
+        )}
+      </div>
+    );
+
+    expect(container.textContent).toContain("Edition Size: 1.234");
   });
 
   it("sortChanged sorts and updates router", () => {

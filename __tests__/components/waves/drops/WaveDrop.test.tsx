@@ -8,6 +8,7 @@ import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { editSlice } from "@/store/editSlice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 
 const mockWaveDropActions = jest.fn();
 const mockWaveDropContent = jest.fn();
@@ -29,9 +30,10 @@ jest.mock("@/components/waves/drops/WaveDropContent", () => {
         <button
           type="button"
           data-testid="content"
-          onClick={() =>
-            props.onLinkCardActionsActiveChange?.("https://example.com", true)
-          }
+          onClick={() => {
+            props.onDropContentClick?.(props.drop);
+            props.onLinkCardActionsActiveChange?.("https://example.com", true);
+          }}
         />
         <button
           type="button"
@@ -60,9 +62,11 @@ jest.mock("@/components/waves/drops/WaveDropRatings", () => () => (
 jest.mock("@/components/waves/drops/WaveDropReactions", () => () => (
   <div data-testid="reactions" />
 ));
-jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => () => (
-  <div data-testid="mobile" />
-));
+let mobileMenuProps: any;
+jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
+  mobileMenuProps = props;
+  return <div data-testid="mobile" data-open={String(props.isOpen)} />;
+});
 
 jest.mock("@/hooks/isMobileDevice");
 jest.mock("@/hooks/useHasTouchInput", () => ({
@@ -147,6 +151,16 @@ const setHoverSupport = (initialHasHover: boolean) => {
   };
 };
 
+/** Sets the jsdom viewport width and notifies resize subscribers. */
+const setViewportWidth = (width: number) => {
+  Object.defineProperty(globalThis.window, "innerWidth", {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  globalThis.window.dispatchEvent(new Event("resize"));
+};
+
 // Create a test store
 const createTestStore = () =>
   configureStore({
@@ -206,13 +220,21 @@ describe("WaveDrop", () => {
     mockWaveDropHeader.mockClear();
     mockMutate.mockClear();
     mockEditMentionedGroups = [];
+    mobileMenuProps = undefined;
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(false);
     isTouchDeviceMock.mockReturnValue(false);
     setHoverSupport(false);
+    setViewportWidth(1440);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("shows actions on desktop", () => {
+    setHoverSupport(true);
+
     const { getByTestId } = renderWithRedux(
       <WaveDrop
         drop={drop}
@@ -264,11 +286,12 @@ describe("WaveDrop", () => {
     );
   });
 
-  it("enables touch entry when hover support is removed while open", () => {
+  it("keeps touch sheet entry for touch-only detection on a wide viewport without hover", () => {
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
-    isTouchDeviceMock.mockReturnValue(false);
-    const hoverSupport = setHoverSupport(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(1440);
 
     renderWithRedux(
       <WaveDrop
@@ -287,23 +310,106 @@ describe("WaveDrop", () => {
       />
     );
 
-    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
-      expect.objectContaining({ showActionsButton: false })
-    );
-
-    act(() => {
-      hoverSupport.setHasHover(false);
-    });
-
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
     expect(getLastMockProps(mockWaveDropHeader)).toEqual(
       expect.objectContaining({ showActionsButton: true })
     );
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: true })
+    );
+
+    act(() => {
+      getLastMockProps(mockWaveDropHeader).onOpenActions({
+        stopPropagation: jest.fn(),
+      });
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(true);
+  });
+
+  it("keeps touch entry in compact touch layouts even when hover is available", () => {
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(false);
+    setHoverSupport(true);
+    setViewportWidth(800);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
+      expect.objectContaining({ showActionsButton: true })
+    );
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: true })
+    );
+  });
+
+  it("clears an open touch sheet when the layout switches to desktop hover mode", () => {
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(false);
+    setHoverSupport(true);
+    setViewportWidth(800);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    act(() => {
+      getLastMockProps(mockWaveDropHeader).onOpenActions({
+        stopPropagation: jest.fn(),
+      });
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(true);
+
+    act(() => {
+      setViewportWidth(1440);
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(false);
+
+    act(() => {
+      setViewportWidth(800);
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(false);
   });
 
   it("keeps mobile drop interactions for true mobile devices", () => {
     isMobileMock.mockReturnValue(true);
     hasTouchInputMock.mockReturnValue(false);
     isTouchDeviceMock.mockReturnValue(false);
+    setViewportWidth(390);
 
     renderWithRedux(
       <WaveDrop
@@ -328,11 +434,12 @@ describe("WaveDrop", () => {
     );
   });
 
-  it("keeps desktop actions with touch entry for touch-only non-mobile devices", () => {
+  it("keeps touch entry for touch-only compact layouts", () => {
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(true);
     setHoverSupport(false);
+    setViewportWidth(800);
 
     renderWithRedux(
       <WaveDrop
@@ -351,9 +458,12 @@ describe("WaveDrop", () => {
       />
     );
 
-    expect(screen.getByTestId("actions")).toBeInTheDocument();
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
     expect(getLastMockProps(mockWaveDropHeader)).toEqual(
       expect.objectContaining({ showActionsButton: true })
+    );
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: true })
     );
   });
 
@@ -362,6 +472,7 @@ describe("WaveDrop", () => {
     hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(false);
     setHoverSupport(false);
+    setViewportWidth(800);
 
     renderWithRedux(
       <WaveDrop
@@ -380,10 +491,206 @@ describe("WaveDrop", () => {
       />
     );
 
-    expect(screen.getByTestId("actions")).toBeInTheDocument();
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
     expect(getLastMockProps(mockWaveDropHeader)).toEqual(
       expect.objectContaining({ showActionsButton: true })
     );
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: true })
+    );
+  });
+
+  it("suppresses the synthetic click after an extended touch long press opens the sheet", () => {
+    jest.useFakeTimers();
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(800);
+    const onDropContentClick = jest.fn();
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={onDropContentClick}
+      />
+    );
+
+    fireEvent.touchStart(screen.getByTestId("content"), {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    act(() => {
+      jest.advanceTimersByTime(1300);
+    });
+    fireEvent.touchEnd(screen.getByTestId("content"));
+    fireEvent.click(screen.getByTestId("content"));
+
+    expect(mobileMenuProps.isOpen).toBe(true);
+    expect(onDropContentClick).not.toHaveBeenCalled();
+  });
+
+  it("keeps normal short clicks on touch layouts", () => {
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(800);
+    const onDropContentClick = jest.fn();
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={onDropContentClick}
+      />
+    );
+
+    fireEvent.touchStart(screen.getByTestId("content"), {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    fireEvent.touchEnd(screen.getByTestId("content"));
+    fireEvent.click(screen.getByTestId("content"));
+
+    expect(onDropContentClick).toHaveBeenCalledTimes(1);
+    expect(onDropContentClick).toHaveBeenCalledWith(drop);
+  });
+
+  it("renders one swipe timestamp affordance for grouped messages without an author row", () => {
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const groupedDrop = {
+      ...drop,
+      id: "current-grouped",
+      created_at: 1_700_000_040_000,
+      stableHash: "current-grouped",
+    };
+
+    renderWithRedux(
+      <WaveDrop
+        drop={groupedDrop}
+        previousDrop={previousGroupedDrop}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("header")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("grouped-drop-hover-timestamp")
+    ).not.toBeInTheDocument();
+    const timestamp = screen.getByTestId("grouped-drop-swipe-timestamp");
+    expect(timestamp).toBeInTheDocument();
+    expect(timestamp).toHaveClass("tw-w-[9.25rem]");
+    expect(timestamp.querySelector("p")).toHaveClass("tw-whitespace-nowrap");
+  });
+
+  it("reveals a grouped message timestamp on left swipe without opening long press actions", () => {
+    jest.useFakeTimers();
+    isMobileMock.mockReturnValue(true);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(390);
+    const onDropContentClick = jest.fn();
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const groupedDrop = {
+      ...drop,
+      id: "current-grouped",
+      created_at: 1_700_000_040_000,
+      stableHash: "current-grouped",
+    };
+
+    renderWithRedux(
+      <WaveDrop
+        drop={groupedDrop}
+        previousDrop={previousGroupedDrop}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={onDropContentClick}
+      />
+    );
+
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: true })
+    );
+
+    const content = screen.getByTestId("content");
+    const dropRoot = screen.getByTestId(
+      "grouped-drop-swipeable-content"
+    ).parentElement!;
+    act(() => {
+      fireEvent.touchStart(dropRoot, {
+        changedTouches: [{ clientX: 220, clientY: 40 }],
+        targetTouches: [{ clientX: 220, clientY: 40 }],
+        touches: [{ clientX: 220, clientY: 40 }],
+      });
+      fireEvent.touchMove(dropRoot, {
+        changedTouches: [{ clientX: 48, clientY: 44 }],
+        targetTouches: [{ clientX: 48, clientY: 44 }],
+        touches: [{ clientX: 48, clientY: 44 }],
+      });
+    });
+
+    expect(
+      screen.getByTestId("grouped-drop-swipeable-content").style.transform
+    ).toBe("translateX(-148px)");
+    expect(
+      screen.getByTestId("grouped-drop-swipe-timestamp").style.opacity
+    ).toBe("1");
+
+    act(() => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(mobileMenuProps.isOpen).toBe(false);
+
+    fireEvent.touchEnd(dropRoot);
+    fireEvent.click(content);
+
+    expect(onDropContentClick).not.toHaveBeenCalled();
   });
 
   it("hides actions on mobile", () => {
@@ -409,6 +716,8 @@ describe("WaveDrop", () => {
 
   it("suppresses row actions while link card actions are active", () => {
     isMobileMock.mockReturnValue(false);
+    setHoverSupport(true);
+
     renderWithRedux(
       <WaveDrop
         drop={drop}

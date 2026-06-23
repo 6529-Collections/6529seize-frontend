@@ -1,0 +1,98 @@
+name: Publish Delegation Docs Content
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build and receipt the bundle without publishing to IPFS"
+        required: true
+        default: true
+        type: boolean
+      skip_gateway_verify:
+        description: "Skip post-publish verification through the configured IPFS gateway"
+        required: true
+        default: false
+        type: boolean
+      skip_cdn_sync:
+        description: "Skip optional S3/CloudFront acceleration mirror sync"
+        required: true
+        default: false
+        type: boolean
+      version:
+        description: "Delegation docs package version"
+        required: true
+        default: "delegation-docs-2026-06-16"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    env:
+      DELEGATION_DOCS_VERSION: ${{ inputs.version }}
+      DELEGATION_DOCS_IPFS_API_ENDPOINT: ${{ secrets.DELEGATION_DOCS_IPFS_API_ENDPOINT }}
+      DELEGATION_DOCS_IPFS_API_BEARER_TOKEN: ${{ secrets.DELEGATION_DOCS_IPFS_API_BEARER_TOKEN }}
+      DELEGATION_DOCS_IPFS_API_AUTH_HEADER: ${{ secrets.DELEGATION_DOCS_IPFS_API_AUTH_HEADER }}
+      DELEGATION_DOCS_IPFS_GATEWAY_BASE_URL: ${{ vars.DELEGATION_DOCS_IPFS_GATEWAY_BASE_URL }}
+      DELEGATION_DOCS_CDN_S3_URI: ${{ vars.DELEGATION_DOCS_CDN_S3_URI }}
+      DELEGATION_DOCS_CDN_BASE_URL: ${{ vars.DELEGATION_DOCS_CDN_BASE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Configure AWS credentials for optional CDN sync
+        if: ${{ inputs.dry_run == false && inputs.skip_cdn_sync == false && startsWith(vars.DELEGATION_DOCS_CDN_S3_URI, 's3://') }}
+        uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.DELEGATION_DOCS_CDN_AWS_REGION || 'us-east-1' }}
+
+      - name: Publish delegation docs package
+        run: |
+          args=()
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          if [ "${{ inputs.skip_gateway_verify }}" = "true" ]; then
+            args+=(--skip-gateway-verify)
+          fi
+          if [ "${{ inputs.skip_cdn_sync }}" = "true" ]; then
+            args+=(--skip-cdn-sync)
+          fi
+          node ops/scripts/publish-delegation-docs-content.mjs "${args[@]}"
+
+      - name: Upload publish receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: delegation-docs-ipfs-receipt
+          path: tmp/delegation-docs-publish/*.json

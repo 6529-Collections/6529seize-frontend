@@ -1,11 +1,17 @@
 import React from "react";
 import clsx from "clsx";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { getDropImageGalleryItemId } from "@/components/drops/view/part/dropImageGallery";
 import { ImageScale } from "@/helpers/image.helpers";
 import WaveDropPartContentMediaImage from "./WaveDropPartContentMediaImage";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { t } from "@/i18n/messages";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 
 function isRenderableMedia(mimeType: string, url: string): boolean {
   return (
@@ -19,6 +25,38 @@ function isRenderableMedia(mimeType: string, url: string): boolean {
     url.endsWith(".gltf")
   );
 }
+
+function isImageMediaProcessing(
+  media: ApiDropPart["media"][number]
+): boolean {
+  return (
+    media.mime_type.includes("image") &&
+    (media.media_status === ApiDropMediaStatus.Uploading ||
+      media.media_status === ApiDropMediaStatus.Processing)
+  );
+}
+
+function isImageMediaFailed(media: ApiDropPart["media"][number]): boolean {
+  return (
+    media.mime_type.includes("image") &&
+    media.media_status === ApiDropMediaStatus.Failed
+  );
+}
+
+const ImageProcessingPlaceholder: React.FC<{
+  readonly failed: boolean;
+}> = ({ failed }) => (
+  <div className="tw-flex tw-h-full tw-min-h-40 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-center">
+    <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
+      {!failed && <CircleLoader size={CircleLoaderSize.LARGE} />}
+      <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+        {failed
+          ? t(DEFAULT_LOCALE, "drop.media.unavailable")
+          : t(DEFAULT_LOCALE, "drop.media.processing")}
+      </span>
+    </div>
+  </div>
+);
 
 interface WaveDropPartContentMediasProps {
   readonly activePart: ApiDropPart;
@@ -61,11 +99,13 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     reserveMediaHeight,
     useNaturalHeightMedia,
     useCompactLink,
+    alignStart,
   }: {
     readonly groupedImage: boolean;
     readonly reserveMediaHeight: boolean;
     readonly useNaturalHeightMedia: boolean;
     readonly useCompactLink: boolean;
+    readonly alignStart: boolean;
   }) => {
     if (useCompactLink) {
       return "tw-w-full";
@@ -84,7 +124,10 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     }
 
     if (useNaturalHeightMedia) {
-      return "tw-flex tw-w-full tw-min-w-[min(200px,100%)] tw-max-h-64 tw-items-center tw-justify-center";
+      return clsx(
+        "tw-flex tw-w-full tw-min-w-[min(200px,100%)] tw-items-start",
+        alignStart ? "tw-justify-start" : "tw-justify-center"
+      );
     }
 
     return clsx(
@@ -103,23 +146,26 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       fullWidthMedia && media.mime_type.includes("image");
     const useImageReservedHeight =
       !fullWidthMedia && media.mime_type.includes("image");
-    const useVideoReservedHeight =
-      !fullWidthMedia && media.mime_type.includes("video");
-    const useNaturalHeightVideo =
-      fullWidthMedia && media.mime_type.includes("video");
+    const useVideoReservedHeight = false;
+    const useNaturalHeightVideo = media.mime_type.includes("video");
     const galleryItemId = media.mime_type.includes("image")
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
     const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
+    const isProcessingImage = isImageMediaProcessing(media);
+    const isFailedImage = isImageMediaFailed(media);
     const mediaContainerClassName = getMediaContainerClassName({
       groupedImage,
       reserveMediaHeight: useImageReservedHeight || useVideoReservedHeight,
       useNaturalHeightMedia: useNaturalHeightImage || useNaturalHeightVideo,
       useCompactLink,
+      alignStart: useNaturalHeightVideo,
     });
     let mediaContent;
 
-    if (disableMediaInteraction) {
+    if (isProcessingImage || isFailedImage) {
+      mediaContent = <ImageProcessingPlaceholder failed={isFailedImage} />;
+    } else if (disableMediaInteraction) {
       mediaContent = (
         <MediaDisplay
           media_mime_type={media.mime_type}
@@ -190,6 +236,12 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   };
 
   activePart.media.forEach((media, i) => {
+    if (isImageMediaProcessing(media) || isImageMediaFailed(media)) {
+      flushImageRun();
+      mediaElements.push(renderMedia(media, i));
+      return;
+    }
+
     if (!disableMediaInteraction && media.mime_type.includes("image")) {
       imageRun.push({ media, index: i });
       return;

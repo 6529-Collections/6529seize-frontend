@@ -266,7 +266,7 @@ describe("GroupAssignmentPanel dialog layout", () => {
     await user.click(screen.getByRole("button", { name: "clear group" }));
 
     expect(onChange).not.toHaveBeenCalledWith(null);
-    expect(screen.getByText("Existing Group")).toBeInTheDocument();
+    expect(screen.getAllByText("Existing Group").length).toBeGreaterThan(0);
   });
 
   it("creates and attaches a valid new group draft", async () => {

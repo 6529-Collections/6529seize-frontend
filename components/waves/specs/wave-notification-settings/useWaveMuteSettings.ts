@@ -41,9 +41,14 @@ export function useWaveMuteSettings(wave: ApiWave) {
         : "Unable to mute wave";
       setToast({
         type: "error",
-        title: isMuted ? "Couldn't unmute this wave." : "Couldn't mute this wave.",
+        title: isMuted
+          ? "Couldn't unmute this wave."
+          : "Couldn't mute this wave.",
         description: "Please try again.",
-        details: getToastErrorDetails(error, getErrorMessage(error, defaultMessage)),
+        details: getToastErrorDetails(
+          error,
+          getErrorMessage(error, defaultMessage)
+        ),
       });
     } finally {
       setMuteLoading(false);

@@ -10,6 +10,7 @@ import {
   readLimitedJson,
   readLimitedText,
 } from "@/lib/fetch/limitedBody";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import {
   UrlGuardError,
   assertPublicUrl,
@@ -19,7 +20,16 @@ import {
 } from "@/lib/security/urlGuard";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import LruTtlCache from "@/lib/cache/lruTtl";
-import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import {
+  detectExternalFileKind,
+  getFileExtension,
+  getNormalizedMimeType,
+  isClearlyFileLikeUrl,
+} from "@/lib/link-preview/fileKinds";
+import type {
+  ExternalFileLinkPreviewResponse,
+  LinkPreviewResponse,
+} from "@/services/api/link-preview-api";
 import {
   HTML_ACCEPT_HEADER,
   LINK_PREVIEW_USER_AGENT,
@@ -30,7 +40,10 @@ import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 import { createFoundationPlan } from "./foundation/service";
 import { createManifoldPlan } from "./manifold/service";
 import { createOpenSeaPlan } from "./opensea/service";
+import { createFirstParty6529Plan } from "./6529/service";
 import { createTransientPlan } from "./transient/service";
+import { createYoutubePlan } from "./youtube/service";
+import { buildFarcasterEmbedResponse } from "./farcaster/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -73,6 +86,10 @@ type HostOverrides = {
   readonly domain: string;
   readonly headers?: HeaderOverrides | undefined;
   readonly userAgent?: string | undefined;
+};
+
+type PreviewContext = {
+  readonly apiAuth?: string | null | undefined;
 };
 
 const HOST_OVERRIDES: readonly HostOverrides[] = [
@@ -314,6 +331,9 @@ async function extractHtmlResponse(
       { allowMissing: true }
     );
     const html = await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
+    if (contentType === null && !looksLikeHtmlDocument(html)) {
+      throw new UnsupportedContentTypeError(null, "HTML");
+    }
     const finalUrl = response.url || fallbackUrl.toString();
 
     return {
@@ -332,12 +352,16 @@ async function extractHtmlResponse(
   }
 }
 
+function looksLikeHtmlDocument(value: string): boolean {
+  return /^\s*(?:<!doctype\s+html\b|<html\b|<head\b|<body\b|<meta\b|<title\b|<!--)/i.test(
+    value
+  );
+}
+
 /**
- * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
+ * Fetches remote generic preview content through the public URL guard.
  */
-async function fetchHtml(
-  url: URL
-): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
+async function fetchGenericResponse(url: URL): Promise<Response> {
   const response = await fetchPublicUrl(
     url,
     {},
@@ -351,7 +375,167 @@ async function fetchHtml(
 
   ensureSuccessfulResponse(response);
 
+  return response;
+}
+
+/**
+ * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
+ */
+async function fetchHtml(
+  url: URL
+): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
+  const response = await fetchGenericResponse(url);
   return extractHtmlResponse(response, url);
+}
+
+function isHtmlDocumentContentType(contentType: string | null): boolean {
+  if (!contentType) {
+    return false;
+  }
+
+  const mimeType = getNormalizedMimeType(contentType);
+  return (
+    mimeType === "text/html" ||
+    mimeType === "application/xhtml+xml" ||
+    mimeType === "application/xml" ||
+    mimeType === "text/xml" ||
+    Boolean(mimeType?.endsWith("+xml"))
+  );
+}
+
+function parseContentLength(headers: Headers): number | null {
+  const rawContentLength = headers.get("content-length")?.trim();
+  if (!rawContentLength || !/^\d+$/.test(rawContentLength)) {
+    return null;
+  }
+
+  const parsed = Number(rawContentLength);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+}
+
+async function cancelResponseBody(response: Response): Promise<void> {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Best effort: file previews intentionally do not consume response bodies.
+  }
+}
+
+function decodeHeaderValue(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function normalizeContentDispositionFilenameStar(value: string): string {
+  const trimmed = value.trim().replace(/^"|"$/g, "");
+  const parts = trimmed.split("'");
+  if (parts.length >= 3 && parts[0]) {
+    return parts.slice(2).join("'");
+  }
+  return trimmed;
+}
+
+function sanitizeFileName(value: string | null | undefined): string | null {
+  const normalized = value
+    ?.replace(/[\u0000-\u001f\u007f]/g, "")
+    .split(/[\\/]/)
+    .findLast((segment) => segment.length > 0)
+    ?.trim();
+
+  if (!normalized) {
+    return null;
+  }
+
+  return normalized.slice(0, 180);
+}
+
+function getContentDispositionFileName(headers: Headers): string | null {
+  const contentDisposition = headers.get("content-disposition");
+  if (!contentDisposition) {
+    return null;
+  }
+
+  const encodedMatch = /filename\*\s*=\s*([^;]+)/i.exec(contentDisposition);
+  if (encodedMatch?.[1]) {
+    return sanitizeFileName(
+      decodeHeaderValue(
+        normalizeContentDispositionFilenameStar(encodedMatch[1])
+      )
+    );
+  }
+
+  const quotedMatch = /filename\s*=\s*"([^"]+)"/i.exec(contentDisposition);
+  if (quotedMatch?.[1]) {
+    return sanitizeFileName(quotedMatch[1]);
+  }
+
+  const plainMatch = /filename\s*=\s*([^;]+)/i.exec(contentDisposition);
+  return sanitizeFileName(plainMatch?.[1]);
+}
+
+function getUrlFileName(url: URL): string | null {
+  return sanitizeFileName(
+    decodeHeaderValue(url.pathname.split("/").at(-1) ?? "")
+  );
+}
+
+function getSourceHost(url: URL): string {
+  return url.hostname.replace(/^www\./i, "");
+}
+
+function shouldUseExternalFilePreview(
+  response: Response,
+  finalUrl: URL
+): boolean {
+  if (isClearlyFileLikeUrl(finalUrl)) {
+    return true;
+  }
+
+  const contentType = response.headers.get("content-type");
+  // Explicit non-HTML payloads, including JSON, are metadata-only file
+  // previews; external bodies are not proxied or decoded here.
+  return Boolean(contentType) && !isHtmlDocumentContentType(contentType);
+}
+
+function buildExternalFileResponse(
+  response: Response,
+  finalUrl: URL
+): ExternalFileLinkPreviewResponse {
+  const contentType = response.headers.get("content-type")?.trim() ?? null;
+  const fileName =
+    getContentDispositionFileName(response.headers) ??
+    getUrlFileName(finalUrl) ??
+    getSourceHost(finalUrl);
+  const extension =
+    getFileExtension(fileName) ?? getFileExtension(finalUrl.pathname);
+  const fileKind = detectExternalFileKind({ extension, contentType });
+
+  return {
+    type: "external.file",
+    title: fileName,
+    fileName,
+    extension,
+    fileKind,
+    contentType,
+    sizeBytes: parseContentLength(response.headers),
+    sourceHost: getSourceHost(finalUrl),
+    trust: "external_unscanned",
+    links: {
+      open: finalUrl.toString(),
+    },
+  };
+}
+
+function getFetchedFinalUrl(response: Response, fallbackUrl: URL): URL {
+  const finalUrl = response.url || fallbackUrl.toString();
+  try {
+    return new URL(finalUrl);
+  } catch {
+    throw new UrlGuardError("Invalid redirect URL", "invalid-url", 502);
+  }
 }
 
 function handleGuardError(error: unknown, fallbackStatus = 400) {
@@ -399,24 +583,65 @@ function createGenericPlan(url: URL): PreviewPlan {
   return {
     cacheKey: `generic:${url.toString()}`,
     execute: async () => {
-      const { html, contentType, finalUrl } = await fetchHtml(url);
-      const finalUrlInstance = new URL(finalUrl);
+      const response = await fetchGenericResponse(url);
+      const finalUrlInstance = getFetchedFinalUrl(response, url);
       await assertPublicUrl(finalUrlInstance, PUBLIC_URL_OPTIONS);
+
+      if (shouldUseExternalFilePreview(response, finalUrlInstance)) {
+        const data = buildExternalFileResponse(response, finalUrlInstance);
+        await cancelResponseBody(response);
+        return { data, ttl: CACHE_TTL_MS };
+      }
+
+      const {
+        html,
+        contentType,
+        finalUrl: htmlFinalUrl,
+      } = await extractHtmlResponse(response, finalUrlInstance);
       const googleWorkspace = await buildGoogleWorkspaceResponse(
         finalUrlInstance,
         html,
         url
       );
-      const data =
-        googleWorkspace ??
-        buildResponse(finalUrlInstance, html, contentType, finalUrl);
+      if (googleWorkspace) {
+        return { data: googleWorkspace, ttl: CACHE_TTL_MS };
+      }
+
+      const genericData = buildResponse(
+        finalUrlInstance,
+        html,
+        contentType,
+        htmlFinalUrl
+      );
+      const farcasterEmbed = await buildFarcasterEmbedResponse(
+        finalUrlInstance,
+        html,
+        genericData,
+        {
+          assertPublicUrl: (candidate) =>
+            assertPublicUrl(candidate, PUBLIC_URL_OPTIONS),
+        }
+      );
+      const data = farcasterEmbed ?? genericData;
       return { data, ttl: CACHE_TTL_MS };
     },
   };
 }
 
+function getRequestApiAuth(request: NextRequest): string | null {
+  const cookieStore = (
+    request as {
+      readonly cookies?: {
+        get: (name: string) => { readonly value?: string } | undefined;
+      };
+    }
+  ).cookies;
+  return cookieStore?.get(API_AUTH_COOKIE)?.value ?? null;
+}
+
 async function resolveLinkPreview(
-  rawUrl: string | null
+  rawUrl: string | null,
+  context?: PreviewContext
 ): Promise<LinkPreviewResponse> {
   const ensTarget = detectEnsTarget(rawUrl);
   if (ensTarget) {
@@ -424,49 +649,48 @@ async function resolveLinkPreview(
   }
 
   const targetUrl = parsePublicUrl(rawUrl);
-  await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
+  const firstParty6529Plan = createFirstParty6529Plan(targetUrl, context);
 
-  const manifoldPlan = createManifoldPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const foundationPlan = createFoundationPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const openSeaPlan = createOpenSeaPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const transientPlan = createTransientPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
+  if (!firstParty6529Plan) {
+    await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
+  }
+
   const plan =
-    manifoldPlan ??
-    foundationPlan ??
-    openSeaPlan ??
-    transientPlan ??
+    firstParty6529Plan ??
+    createYoutubePlan(targetUrl) ??
+    createManifoldPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createFoundationPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createOpenSeaPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createTransientPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
 
-  const cached = cache.get(plan.cacheKey);
-
-  if (cached) {
-    return cached;
+  if (firstParty6529Plan) {
+    return executeFirstParty6529Plan(firstParty6529Plan, targetUrl);
   }
 
-  const { data, ttl } = await plan.execute();
-  cache.set(plan.cacheKey, data, ttl);
-
-  return data;
+  return executePlan(plan);
 }
 
 export async function GET(request: NextRequest) {
   const rawUrl = request.nextUrl.searchParams.get("url");
 
   try {
-    const preview = await resolveLinkPreview(rawUrl);
+    const preview = await resolveLinkPreview(rawUrl, {
+      apiAuth: getRequestApiAuth(request),
+    });
     return NextResponse.json(preview);
   } catch (error) {
     return handlePreviewError(error);
@@ -520,12 +744,41 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
-async function resolveBatchUrl(url: string): Promise<BatchResult> {
+async function resolveBatchUrl(
+  url: string,
+  context?: PreviewContext
+): Promise<BatchResult> {
   try {
-    const data = await resolveLinkPreview(url);
+    const data = await resolveLinkPreview(url, context);
     return { url, data };
   } catch (error) {
     return { url, error: getErrorMessage(error) };
+  }
+}
+
+async function executePlan(plan: PreviewPlan): Promise<LinkPreviewResponse> {
+  const cached = cache.get(plan.cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  const { data, ttl } = await plan.execute();
+  cache.set(plan.cacheKey, data, ttl);
+
+  return data;
+}
+
+async function executeFirstParty6529Plan(
+  plan: PreviewPlan,
+  targetUrl: URL
+): Promise<LinkPreviewResponse> {
+  try {
+    return await executePlan(plan);
+  } catch {
+    await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
+    const fallbackPlan = createGenericPlan(targetUrl);
+    return executePlan(fallbackPlan);
   }
 }
 
@@ -563,10 +816,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const context: PreviewContext = {
+    apiAuth: getRequestApiAuth(request),
+  };
   const batchResults = await mapWithConcurrency(
     urls,
     BATCH_CONCURRENCY,
-    resolveBatchUrl
+    (url) => resolveBatchUrl(url, context)
   );
   const results: Record<string, LinkPreviewResponse> = {};
   const errors: Record<string, string> = {};

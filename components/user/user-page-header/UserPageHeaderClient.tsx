@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
@@ -17,8 +18,11 @@ import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import UserFollowBtn from "../utils/UserFollowBtn";
+import WebsiteIcon from "../utils/icons/WebsiteIcon";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
 import UserPageHeaderName from "./name/UserPageHeaderName";
@@ -35,6 +39,7 @@ type Props = {
   readonly initialStatements: CicStatement[];
   readonly profileEnabledAt: string | null;
   readonly followersCount: number | null;
+  readonly cmsWebsiteHref?: string | null | undefined;
 };
 
 export default function UserPageHeaderClient({
@@ -46,6 +51,7 @@ export default function UserPageHeaderClient({
   initialStatements,
   profileEnabledAt,
   followersCount,
+  cmsWebsiteHref,
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
@@ -62,6 +68,7 @@ export default function UserPageHeaderClient({
     handleOrWallet: normalizedHandleOrWallet,
     initialProfile,
   });
+  const locale = DEFAULT_LOCALE;
 
   const profile = useMemo(
     () => hydratedProfile ?? initialProfile,
@@ -201,6 +208,18 @@ export default function UserPageHeaderClient({
               </div>
 
               <div className="tw-order-2 tw-mb-2 tw-mt-2 tw-flex tw-items-center tw-gap-3 tw-self-start md:tw-order-3 md:tw-mb-0">
+                {cmsWebsiteHref && profile.handle ? (
+                  <Link
+                    className="tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition hover:tw-border-primary-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                    href={cmsWebsiteHref}
+                    aria-label={t(locale, "profileCms.header.openWebsite", {
+                      handle: profile.handle,
+                    })}
+                  >
+                    <WebsiteIcon />
+                    <span>{t(locale, "profileCms.header.website")}</span>
+                  </Link>
+                ) : null}
                 {!isMyProfile && profile.handle && connectedProfile?.handle ? (
                   <UserFollowBtn
                     handle={profile.handle}

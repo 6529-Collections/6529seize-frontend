@@ -84,6 +84,7 @@ export default function WaveDropPartContentAttachments({
               mimeType={attachment.mime_type}
               attachmentUrl={attachment.url}
               fileName={attachment.file_name}
+              safety={attachment.safety}
             />
           );
         }

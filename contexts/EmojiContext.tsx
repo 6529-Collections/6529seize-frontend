@@ -10,7 +10,12 @@ import {
 } from "react";
 import data from "@emoji-mart/data";
 
-const S3_EMOJI_URL = `https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json?t=${Date.now()}`;
+import { getProfileCmsAssetProxyUrl } from "@/lib/profile-cms/runtime/mediaProxy";
+
+const EMOJI_CDN_BASE = "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji";
+const S3_EMOJI_URL = getProfileCmsAssetProxyUrl(
+  `${EMOJI_CDN_BASE}/emoji-list.json`
+);
 
 interface BaseEmoji {
   id: string;
@@ -56,7 +61,7 @@ export const EmojiProvider = ({ children }: { children: React.ReactNode }) => {
 
   const categoryIcons = {
     "6529": {
-      src: "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/6529white.webp",
+      src: getProfileCmsAssetProxyUrl(`${EMOJI_CDN_BASE}/6529white.webp`),
     },
   };
 
@@ -74,7 +79,7 @@ export const EmojiProvider = ({ children }: { children: React.ReactNode }) => {
           keywords: id.replaceAll("_", " "),
           skins: [
             {
-              src: `https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/${id}.webp`,
+              src: getProfileCmsAssetProxyUrl(`${EMOJI_CDN_BASE}/${id}.webp`),
             },
           ],
         }));

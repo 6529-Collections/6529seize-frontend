@@ -94,6 +94,7 @@ describe("UserPageHeader", () => {
           ]}
           profileEnabledAt="2024-01-01T00:00:00Z"
           followersCount={5}
+          cmsWebsiteHref={null}
         />
       </AuthContext.Provider>
     );
@@ -118,10 +119,55 @@ describe("UserPageHeader", () => {
           ]}
           profileEnabledAt="2024-01-01T00:00:00Z"
           followersCount={5}
+          cmsWebsiteHref={null}
         />
       </AuthContext.Provider>
     );
 
     expect(screen.queryByTestId("follow")).not.toBeInTheDocument();
+  });
+
+  it("renders profile website link when a primary CMS site exists", () => {
+    render(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref="/bob/index.html"
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Open bob website" })
+    ).toHaveAttribute("href", "/bob/index.html");
+  });
+
+  it("does not render profile website link without a primary CMS site", () => {
+    render(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.queryByRole("link", { name: "Open bob website" })
+    ).not.toBeInTheDocument();
   });
 });

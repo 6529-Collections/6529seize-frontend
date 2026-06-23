@@ -9,12 +9,218 @@ import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { SidebarWave } from "@/types/waves.types";
+import { formatInteger, formatNumber } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import {
+  FireIcon,
+  ScaleIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 interface ExploreWaveCardProps {
   readonly wave: SidebarWave;
 }
+
+interface ExploreWaveMetric {
+  readonly ariaLabel: string;
+  readonly icon: ReactNode;
+  readonly toneClasses: string;
+  readonly value: string;
+}
+
+const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
+const METRIC_CHIP_CLASSES =
+  "tw-inline-flex tw-items-center tw-cursor-help tw-gap-1 tw-whitespace-nowrap tw-rounded-md tw-px-1.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none";
+const METRIC_ICON_CLASSES = "tw-size-3.5 tw-flex-shrink-0";
+const METRIC_VALUE_CLASSES = "tw-text-[11px] tw-font-semibold tw-tabular-nums";
+const METRIC_SEPARATOR_CLASSES =
+  "tw-text-[11px] tw-leading-none tw-text-iron-500/70";
+
+const getDropsCountMessageKey = (
+  count: number
+):
+  | "waves.explore.card.dropsCount.one"
+  | "waves.explore.card.dropsCount.other" => {
+  const pluralCategory = new Intl.PluralRules(EXPLORE_WAVE_CARD_LOCALE).select(
+    count
+  );
+
+  return pluralCategory === "one"
+    ? "waves.explore.card.dropsCount.one"
+    : "waves.explore.card.dropsCount.other";
+};
+
+const formatCompactNumber = (value: number): string =>
+  formatNumber(EXPLORE_WAVE_CARD_LOCALE, value, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
+
+const formatScore = (value: number | null | undefined): string | null => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return formatInteger(EXPLORE_WAVE_CARD_LOCALE, Math.round(value));
+};
+
+const formatRep = (value: number | null | undefined): string | null => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return null;
+  }
+
+  if (value > 0) {
+    return `+${formatCompactNumber(value)}`;
+  }
+
+  return formatCompactNumber(value);
+};
+
+const formatRepAccessibleValue = (
+  value: number | null | undefined
+): string | null => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return null;
+  }
+
+  const formatted = formatInteger(EXPLORE_WAVE_CARD_LOCALE, Math.abs(value));
+  if (value > 0) {
+    return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repPositive", {
+      value: formatted,
+    });
+  }
+  if (value < 0) {
+    return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repNegative", {
+      value: formatted,
+    });
+  }
+  return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repNeutral", {
+    value: formatted,
+  });
+};
+
+const getVisibilityToneClasses = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
+  }
+
+  if (value >= 85) {
+    return "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300";
+  }
+
+  if (value >= 65) {
+    return "tw-text-sky-400 desktop-hover:hover:tw-text-sky-300";
+  }
+
+  if (value < 35) {
+    return "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300";
+  }
+
+  return "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
+};
+
+const getRepToneClasses = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || value === 0) {
+    return "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
+  }
+
+  return value > 0
+    ? "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300"
+    : "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300";
+};
+
+const getRepAriaLabel = (wave: SidebarWave, repScore: string): string => {
+  const repAccessibleValue = formatRepAccessibleValue(wave.waveRep?.total_rep);
+
+  if (repAccessibleValue !== null) {
+    return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repAriaRaw", {
+      value: repAccessibleValue,
+    });
+  }
+
+  return t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repAriaScore", {
+    repScore,
+  });
+};
+
+const getExploreWaveMetrics = (wave: SidebarWave): ExploreWaveMetric[] => {
+  const visibilityScore = formatScore(wave.waveScore?.visibility_score);
+  const hotnessScore = formatScore(wave.waveScore?.hotness_score);
+  const repScore =
+    wave.waveRep === null
+      ? formatScore(wave.waveScore?.rep_sort_score)
+      : formatRep(wave.waveRep.total_rep);
+  const metrics: ExploreWaveMetric[] = [];
+
+  if (visibilityScore !== null) {
+    metrics.push({
+      ariaLabel: t(
+        EXPLORE_WAVE_CARD_LOCALE,
+        "waves.score.details.visibilityAria",
+        { visibilityScore }
+      ),
+      icon: (
+        <ShieldCheckIcon
+          className={METRIC_ICON_CLASSES}
+          strokeWidth={1.5}
+          aria-hidden="true"
+        />
+      ),
+      toneClasses: getVisibilityToneClasses(wave.waveScore?.visibility_score),
+      value: visibilityScore,
+    });
+  }
+
+  if (hotnessScore !== null) {
+    metrics.push({
+      ariaLabel: t(
+        EXPLORE_WAVE_CARD_LOCALE,
+        "waves.score.details.hotnessAria",
+        { hotnessScore }
+      ),
+      icon: (
+        <FireIcon
+          className={METRIC_ICON_CLASSES}
+          strokeWidth={1.5}
+          aria-hidden="true"
+        />
+      ),
+      toneClasses: "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
+      value: hotnessScore,
+    });
+  }
+
+  if (repScore !== null) {
+    metrics.push({
+      ariaLabel: getRepAriaLabel(wave, repScore),
+      icon: (
+        <ScaleIcon
+          className={METRIC_ICON_CLASSES}
+          strokeWidth={1.5}
+          aria-hidden="true"
+        />
+      ),
+      toneClasses: getRepToneClasses(wave.waveRep?.total_rep),
+      value: repScore,
+    });
+  }
+
+  return metrics;
+};
+
+const getMetricsSummaryLabel = (
+  metrics: readonly ExploreWaveMetric[]
+): string | null => {
+  if (metrics.length === 0) {
+    return null;
+  }
+
+  return metrics.map((metric) => metric.ariaLabel).join(". ");
+};
 
 export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const waveHref = getWaveRoute({
@@ -34,13 +240,42 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const lastMessageTime = wave.latestDropTimestamp;
   const hasDrops = lastMessageTime !== null;
   const descriptionPreview = getWavePreviewContent(wave);
+  const formattedDropsCount = formatInteger(
+    EXPLORE_WAVE_CARD_LOCALE,
+    wave.totalDropsCount
+  );
+  const dropsCountLabel = hasDrops
+    ? t(
+        EXPLORE_WAVE_CARD_LOCALE,
+        getDropsCountMessageKey(wave.totalDropsCount),
+        {
+          count: formattedDropsCount,
+          timeAgo: getTimeAgoShort(lastMessageTime),
+        }
+      )
+    : null;
+  const metrics = getExploreWaveMetrics(wave);
+  const scoreSummaryLabel = getMetricsSummaryLabel(metrics);
+  const cardAriaLabel =
+    scoreSummaryLabel === null
+      ? t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.viewAriaLabel", {
+          waveName: wave.name,
+        })
+      : t(
+          EXPLORE_WAVE_CARD_LOCALE,
+          "waves.explore.card.viewWithScoreAriaLabel",
+          {
+            waveName: wave.name,
+            scoreSummary: scoreSummaryLabel,
+          }
+        );
 
   return (
     <Link
       href={waveHref}
       prefetch={false}
       className="tw-group tw-relative tw-block tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500/30"
-      aria-label={`View wave ${wave.name}`}
+      aria-label={cardAriaLabel}
     >
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-white/10" />
       <div
@@ -50,7 +285,9 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         {wave.picture && (
           <Image
             src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
-            alt={`${wave.name} cover`}
+            alt={t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.coverAlt", {
+              waveName: wave.name,
+            })}
             fill
             sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
             className="tw-object-cover tw-transition-transform tw-duration-700 tw-will-change-transform desktop-hover:group-hover:tw-scale-105"
@@ -62,6 +299,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         <span className="tw-m-0 tw-line-clamp-1 tw-break-words tw-text-sm tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80 sm:tw-text-base">
           {wave.name}
         </span>
+        <ExploreWaveCompactMetrics metrics={metrics} />
 
         {descriptionPreview && (
           <MessagePreviewContent previewContent={descriptionPreview} />
@@ -73,21 +311,51 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
               <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/60" />
               <span className="tw-relative tw-inline-flex tw-h-2 tw-w-2 tw-rounded-full tw-bg-success" />
             </span>
-            <span className="tw-text-iron-300">
-              {getTimeAgoShort(lastMessageTime)} ·{" "}
-              {wave.totalDropsCount.toLocaleString()}
-            </span>{" "}
-            drops
+            <span className="tw-text-iron-300">{dropsCountLabel}</span>
           </div>
         )}
 
         {!hasDrops && (
           <div className="tw-mt-3 tw-text-[11px] tw-text-iron-500 sm:tw-text-xs">
-            No drops yet
+            {t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.noDropsYet")}
           </div>
         )}
       </div>
     </Link>
+  );
+}
+
+function ExploreWaveCompactMetrics({
+  metrics,
+}: {
+  readonly metrics: readonly ExploreWaveMetric[];
+}) {
+  if (metrics.length === 0) {
+    return null;
+  }
+
+  return (
+    <span className="explore-wave-card-metrics tw-mt-3 tw-flex tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-hidden">
+      {metrics.map((metric, index) => (
+        <span
+          key={`${metric.ariaLabel}-${metric.value}`}
+          className="tw-contents"
+        >
+          {index > 0 && (
+            <span className={METRIC_SEPARATOR_CLASSES} aria-hidden="true">
+              &bull;
+            </span>
+          )}
+          <span
+            className={`${METRIC_CHIP_CLASSES} ${metric.toneClasses}`}
+            aria-label={metric.ariaLabel}
+          >
+            {metric.icon}
+            <span className={METRIC_VALUE_CLASSES}>{metric.value}</span>
+          </span>
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -104,7 +372,7 @@ function MessagePreviewContent({
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-1 tw-overflow-hidden tw-text-iron-500"
+      className="tw-mt-2.5 tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-1 tw-overflow-hidden tw-text-iron-500"
       textClassName="tw-line-clamp-2 tw-break-words tw-text-[10px] tw-font-normal tw-leading-tight sm:tw-text-xs"
       linkify={false}
     />

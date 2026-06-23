@@ -1,0 +1,629 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/cms-package-v1.schema.json",
+  "title": "6529 CMS Package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "package_id",
+    "profile",
+    "site",
+    "payload",
+    "integrity",
+    "signatures",
+    "storage",
+    "provenance"
+  ],
+  "properties": {
+    "schema": { "const": "6529.cms.package.v1" },
+    "package_id": { "$ref": "#/$defs/id" },
+    "profile": { "$ref": "#/$defs/profile_ref" },
+    "site": { "$ref": "#/$defs/site_manifest" },
+    "payload": { "$ref": "#/$defs/payload" },
+    "integrity": { "$ref": "#/$defs/integrity" },
+    "signatures": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/signature_envelope" }
+    },
+    "storage": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/storage_receipt" }
+    },
+    "provenance": { "$ref": "#/$defs/package_provenance" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._:-]{1,127}$"
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,127}$"
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^/[a-zA-Z0-9._~!$&'()*+,;=:@/-]+/index\\.html$"
+    },
+    "uri": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "profile_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["handle"],
+      "properties": {
+        "handle": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{1,63}$"
+        },
+        "profile_id": { "type": "string" },
+        "primary_wallet": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$"
+        }
+      }
+    },
+    "site_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "base_path",
+        "default_locale",
+        "theme",
+        "navigation_id"
+      ],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "description": { "type": "string", "maxLength": 300 },
+        "base_path": { "$ref": "#/$defs/path" },
+        "default_locale": {
+          "type": "string",
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+        },
+        "direction": { "enum": ["ltr", "rtl"] },
+        "theme": { "$ref": "#/$defs/theme" },
+        "navigation_id": { "$ref": "#/$defs/id" },
+        "metadata_defaults": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/metadata_default" }
+        },
+        "search": { "$ref": "#/$defs/search_config" },
+        "required_renderer_capabilities": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "accent"],
+      "properties": {
+        "mode": { "enum": ["light", "dark", "system"] },
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "tokens": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          }
+        }
+      }
+    },
+    "metadata_default": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "values"],
+      "properties": {
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "collection": { "type": "string" },
+            "path_prefix": { "type": "string" },
+            "page_type": { "type": "string" }
+          }
+        },
+        "values": { "$ref": "#/$defs/page_metadata_partial" }
+      }
+    },
+    "search_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "manifest_asset_id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "routes", "pages", "assets", "navigation"],
+      "properties": {
+        "schema": { "const": "6529.cms.payload.v1" },
+        "routes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/route" }
+        },
+        "pages": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/page" }
+        },
+        "assets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/asset" }
+        },
+        "nft_media_profiles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nft_media_profile" }
+        },
+        "deep_zoom_manifests": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/deep_zoom_manifest" }
+        },
+        "exhibition_rooms": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/exhibition_room" }
+        },
+        "navigation": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/navigation" }
+        },
+        "taxonomies": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/taxonomy" }
+        },
+        "source_packets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source_packet" }
+        },
+        "build_manifest": { "$ref": "#/$defs/build_manifest" }
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind"],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "kind": { "enum": ["page", "redirect", "alias"] },
+        "page_id": { "$ref": "#/$defs/id" },
+        "target": { "type": "string" }
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "path", "metadata", "blocks"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": {
+          "enum": [
+            "page",
+            "post",
+            "gallery",
+            "collection",
+            "nft_detail",
+            "card_detail",
+            "room",
+            "transaction"
+          ]
+        },
+        "path": { "$ref": "#/$defs/path" },
+        "metadata": { "$ref": "#/$defs/page_metadata" },
+        "blocks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/block" }
+        },
+        "source": { "$ref": "#/$defs/source_ref" }
+      }
+    },
+    "page_metadata": {
+      "allOf": [
+        { "$ref": "#/$defs/page_metadata_partial" },
+        {
+          "type": "object",
+          "required": ["title", "description", "locale", "canonical_url"]
+        }
+      ]
+    },
+    "page_metadata_partial": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "description": { "type": "string", "maxLength": 300 },
+        "locale": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$" },
+        "canonical_url": { "$ref": "#/$defs/uri" },
+        "social_image_asset_id": { "$ref": "#/$defs/id" },
+        "square_social_image_asset_id": { "$ref": "#/$defs/id" },
+        "navigation_label": { "type": "string", "maxLength": 80 },
+        "search": { "enum": ["include", "exclude"] },
+        "robots": { "enum": ["index", "noindex"] },
+        "last_updated": { "type": "string", "format": "date-time" }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "block_type"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "block_type": {
+          "enum": [
+            "heading",
+            "rich_text",
+            "image",
+            "video",
+            "audio",
+            "gallery",
+            "quote",
+            "callout",
+            "button_link",
+            "nft_reference",
+            "collection_reference",
+            "transaction_reference",
+            "generated_wallet_gallery",
+            "lightbox_gallery",
+            "deep_zoom",
+            "html_embed",
+            "object_viewer",
+            "room_viewer"
+          ]
+        },
+        "interactive_policy": { "$ref": "#/$defs/interactive_policy" }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "uri", "content_hash", "mime_type"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": {
+          "enum": [
+            "image",
+            "video",
+            "audio",
+            "model",
+            "document",
+            "html",
+            "social_image",
+            "search_index",
+            "build_manifest"
+          ]
+        },
+        "uri": { "$ref": "#/$defs/uri" },
+        "content_hash": { "$ref": "#/$defs/hash" },
+        "mime_type": { "type": "string" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "duration_seconds": { "type": "number", "minimum": 0 },
+        "file_size_bytes": { "type": "integer", "minimum": 0 },
+        "roles": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "original",
+              "thumbnail",
+              "grid",
+              "detail",
+              "fullscreen",
+              "poster",
+              "tile",
+              "social",
+              "fallback"
+            ]
+          }
+        },
+        "alt_text": { "type": "string" },
+        "decorative": { "type": "boolean" },
+        "rights": { "type": "string" }
+      }
+    },
+    "nft_media_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "chain_id",
+        "contract",
+        "token_id",
+        "display_variants"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "chain_id": { "type": "integer", "minimum": 1 },
+        "contract": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+        "token_id": { "type": "string", "minLength": 1 },
+        "metadata_uri": { "$ref": "#/$defs/uri" },
+        "metadata_hash": { "$ref": "#/$defs/hash" },
+        "original_asset_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" }
+        },
+        "display_variants": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/display_variant" }
+        },
+        "poster_asset_id": { "$ref": "#/$defs/id" },
+        "snapshot": { "$ref": "#/$defs/snapshot" }
+      }
+    },
+    "display_variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "role"],
+      "properties": {
+        "asset_id": { "$ref": "#/$defs/id" },
+        "role": {
+          "enum": ["grid", "detail", "fullscreen", "poster", "social", "tile"]
+        },
+        "crop_mode": { "enum": ["preserve", "cover", "contain"] },
+        "background": { "type": "string" },
+        "source_asset_id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "deep_zoom_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source_asset_id", "tile_size", "levels", "format"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "source_asset_id": { "$ref": "#/$defs/id" },
+        "tile_size": { "type": "integer", "minimum": 128 },
+        "levels": { "type": "integer", "minimum": 1 },
+        "format": { "enum": ["jpg", "png", "webp", "avif"] },
+        "tile_uri_template": { "$ref": "#/$defs/uri" },
+        "content_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "exhibition_room": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "room_type",
+        "placements",
+        "fallback_page_id"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "room_type": { "enum": ["wall", "salon", "white_cube", "dark_room"] },
+        "poster_asset_id": { "$ref": "#/$defs/id" },
+        "fallback_page_id": { "$ref": "#/$defs/id" },
+        "navigation_mode": { "enum": ["orbit", "guided_hotspots", "walk"] },
+        "placements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/artwork_placement" }
+        }
+      }
+    },
+    "artwork_placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "asset_id", "detail_page_id", "display_mode"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "asset_id": { "$ref": "#/$defs/id" },
+        "nft_media_profile_id": { "$ref": "#/$defs/id" },
+        "detail_page_id": { "$ref": "#/$defs/id" },
+        "position": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
+        "rotation": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
+        "size": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number", "exclusiveMinimum": 0 }
+        },
+        "display_mode": { "enum": ["faithful", "gallery"] },
+        "label": { "type": "string" }
+      }
+    },
+    "interactive_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hydration"],
+      "properties": {
+        "hydration": {
+          "enum": [
+            "static",
+            "client_island",
+            "deferred_island",
+            "sandboxed_embed"
+          ]
+        },
+        "requires_user_activation": { "type": "boolean" },
+        "fallback_asset_id": { "$ref": "#/$defs/id" },
+        "sandbox_permissions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "performance_budget": {
+          "type": "object",
+          "additionalProperties": { "type": ["number", "string"] }
+        }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "items"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/navigation_item" }
+        }
+      }
+    },
+    "navigation_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string" },
+        "page_id": { "$ref": "#/$defs/id" },
+        "url": { "$ref": "#/$defs/uri" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/navigation_item" }
+        }
+      }
+    },
+    "taxonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "terms"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string" },
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["slug", "label"],
+            "properties": {
+              "slug": { "$ref": "#/$defs/slug" },
+              "label": { "type": "string" },
+              "page_id": { "$ref": "#/$defs/id" }
+            }
+          }
+        }
+      }
+    },
+    "source_packet": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "source_type", "captured_at"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "source_type": {
+          "enum": [
+            "wallet",
+            "nft_metadata",
+            "collection",
+            "transaction",
+            "profile",
+            "import"
+          ]
+        },
+        "captured_at": { "type": "string", "format": "date-time" },
+        "content_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_packet_id": { "$ref": "#/$defs/id" },
+        "field_sources": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner": { "type": "string" },
+        "block_number": { "type": "integer", "minimum": 0 },
+        "captured_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "build_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "renderer": { "type": "string" },
+        "renderer_version": { "type": "string" },
+        "route_count": { "type": "integer", "minimum": 0 },
+        "asset_count": { "type": "integer", "minimum": 0 },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalization",
+        "hash_algorithm",
+        "payload_hash",
+        "package_hash"
+      ],
+      "properties": {
+        "canonicalization": { "const": "jcs-rfc8785" },
+        "hash_algorithm": { "const": "sha256" },
+        "payload_hash": { "$ref": "#/$defs/hash" },
+        "package_hash": { "$ref": "#/$defs/hash" },
+        "note": { "type": "string" }
+      }
+    },
+    "signature_envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "signer", "signature", "signed_at"],
+      "properties": {
+        "type": { "enum": ["eip712", "fixture"] },
+        "signer": { "type": "string" },
+        "signature": { "type": "string" },
+        "signed_at": { "type": "string", "format": "date-time" },
+        "domain": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "storage_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "uri", "content_hash", "recorded_at"],
+      "properties": {
+        "provider": { "enum": ["ipfs", "arweave", "s3", "fixture"] },
+        "uri": { "$ref": "#/$defs/uri" },
+        "content_hash": { "$ref": "#/$defs/hash" },
+        "provider_content_id": { "type": "string" },
+        "pinned": { "type": "boolean" },
+        "canonical": { "type": "boolean" },
+        "recorded_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "package_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["builder", "created_at"],
+      "properties": {
+        "builder": { "type": "string" },
+        "builder_version": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

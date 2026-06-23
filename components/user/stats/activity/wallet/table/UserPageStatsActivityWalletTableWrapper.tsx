@@ -5,8 +5,10 @@ import CommonTablePagination from "@/components/utils/table/paginator/CommonTabl
 import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
+import { getWalletActivityEmptyMessage } from "../wallet-activity.messages";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
@@ -21,6 +23,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   loading,
   setPage,
   onActiveFilter,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly filter: UserPageStatsActivityWalletFilterType;
   readonly profile: ApiIdentity;
@@ -36,20 +39,8 @@ export default function UserPageStatsActivityWalletTableWrapper({
   readonly onActiveFilter: (
     filter: UserPageStatsActivityWalletFilterType
   ) => void;
+  readonly locale?: SupportedLocale | undefined;
 }) {
-  const FILTER_TO_NO_DATA: Record<
-    UserPageStatsActivityWalletFilterType,
-    string
-  > = {
-    [UserPageStatsActivityWalletFilterType.ALL]: "No transactions",
-    [UserPageStatsActivityWalletFilterType.AIRDROPS]: "No airdrops",
-    [UserPageStatsActivityWalletFilterType.MINTS]: "No mints",
-    [UserPageStatsActivityWalletFilterType.SALES]: "No sales",
-    [UserPageStatsActivityWalletFilterType.PURCHASES]: "No purchases",
-    [UserPageStatsActivityWalletFilterType.TRANSFERS]: "No transfers",
-    [UserPageStatsActivityWalletFilterType.BURNS]: "No burns",
-  };
-
   if (isFirstLoading) {
     return (
       <div className="tw-mt-2 tw-h-96 tw-w-full sm:tw-mt-4">
@@ -64,6 +55,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
         <UserPageStatsActivityWalletFilter
           activeFilter={filter}
           setActiveFilter={onActiveFilter}
+          locale={locale}
         />
         {loading && <CircleLoader />}
       </div>
@@ -76,6 +68,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
               memes={memes}
               memeLab={memeLab}
               nextgenCollections={nextgenCollections}
+              locale={locale}
             />
             {totalPages > 1 && (
               <CommonTablePagination
@@ -89,9 +82,9 @@ export default function UserPageStatsActivityWalletTableWrapper({
             )}
           </div>
         ) : (
-          <div className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
-            {FILTER_TO_NO_DATA[filter]}
-          </div>
+          <output className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
+            {getWalletActivityEmptyMessage(filter, locale)}
+          </output>
         )}
       </div>
     </div>

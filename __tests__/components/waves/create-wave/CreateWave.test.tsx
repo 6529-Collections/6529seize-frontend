@@ -563,7 +563,7 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-          message: "Please wait for image uploads to finish.",
+          message: "Wait for image uploads to finish.",
           type: "error",
         });
         expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
@@ -609,7 +609,7 @@ describe("CreateWave", () => {
       });
 
       expect(mockAuthContext.setToast).not.toHaveBeenCalledWith({
-        message: "Please wait for image uploads to finish.",
+        message: "Wait for image uploads to finish.",
         type: "error",
       });
     });
@@ -745,9 +745,9 @@ describe("CreateWave", () => {
           data_value: "Selected",
         },
       });
-      expect(
-        mockedCreateWaveMetadata.mock.invocationCallOrder[0]
-      ).toBeLessThan(mockRouter.push.mock.invocationCallOrder[0]);
+      expect(mockedCreateWaveMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRouter.push.mock.invocationCallOrder[0]
+      );
     });
 
     it("saves hidden outcome display metadata for rank waves", async () => {
@@ -1018,7 +1018,9 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-          message: errorMessage,
+          title: "Couldn't create this wave.",
+          description: "Please try again.",
+          details: `${errorMessage}.`,
           type: "error",
         });
         expect(mockGetDropSnapshot).toHaveBeenCalled();

@@ -1,13 +1,30 @@
 import MemeLabComponent from "@/components/memelab/MemeLab";
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getMemeLabRouteLocale,
+  getSearchParamValue,
+  type MemeLabListSearchParams,
+} from "@/components/memelab/memeLabRouteParams";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
+import { t } from "@/i18n/messages";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildCollectionPageJsonLd } from "@/lib/structured-data/nft";
 import { CC0_LICENSE_URL } from "@/lib/structured-data/utils";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
-export default function MemeLab() {
+type MemeLabPageProps = {
+  readonly searchParams?: Promise<MemeLabListSearchParams>;
+};
+
+export default async function MemeLab({ searchParams }: MemeLabPageProps = {}) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = getMemeLabRouteLocale(resolvedSearchParams);
+
   return (
     <main className={styles["main"]}>
       <JsonLdScript
@@ -20,16 +37,28 @@ export default function MemeLab() {
           license: CC0_LICENSE_URL,
         })}
       />
-      <MemeLabComponent />
+      <MemeLabComponent
+        initialSort={getSearchParamValue(resolvedSearchParams.sort)}
+        initialSortDirection={getSearchParamValue(
+          resolvedSearchParams.sort_dir
+        )}
+        locale={locale}
+      />
     </main>
   );
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: "Meme Lab",
-    ogImage: `${publicEnv.BASE_ENDPOINT}/meme-lab.jpg`,
-    description: "Collections",
-    twitterCard: "summary_large_image",
-  });
+export async function generateMetadata({
+  searchParams,
+}: MemeLabPageProps = {}): Promise<Metadata> {
+  const locale = getMemeLabRouteLocale((await searchParams) ?? {});
+
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: t(locale, "memeLab.title"),
+      ogImage: getCollectionSocialCardImagePath("meme-lab"),
+      ogImageAlt: "Meme Lab collection social card",
+      description: t(locale, "memeLab.description.collections"),
+    })
+  );
 }

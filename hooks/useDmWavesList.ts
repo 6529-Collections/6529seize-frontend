@@ -8,6 +8,7 @@ import {
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 
 const noopWaveAction = () => {};
 
@@ -36,7 +37,7 @@ const useDmWavesList = () => {
     status,
     refetch,
   } = useWavesV2({
-    overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+    overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     directMessage: true,
     viewerIdentityKey,

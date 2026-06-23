@@ -1,4 +1,10 @@
-const BANNER_IMAGE_PREFIXES = ["http://", "https://", "ipfs://"];
+const BANNER_IMAGE_PREFIXES = [
+  "http://",
+  "https://",
+  "ipfs://",
+  "ipns://",
+  "ar://",
+];
 
 const isBannerImageUrl = (value?: string | null): value is string => {
   if (!value) {

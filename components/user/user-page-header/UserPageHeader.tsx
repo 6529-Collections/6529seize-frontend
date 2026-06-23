@@ -10,6 +10,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 
 import UserPageHeaderClient from "./UserPageHeaderClient";
 import { getRandomColor } from "@/helpers/Helpers";
+import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
 
 async function fetchStatements(
   handleOrWallet: string,
@@ -88,11 +89,15 @@ export default async function UserPageHeader({
   const headers = await getAppCommonHeaders();
   const normalizedHandle = handleOrWallet.toLowerCase();
 
-  const [statementsResult, profileLogResult, followersResult] =
+  const cmsHandle = profile.handle?.toLowerCase() ?? null;
+  const [statementsResult, profileLogResult, followersResult, cmsSiteResult] =
     await Promise.allSettled([
       fetchStatements(normalizedHandle, headers),
       fetchProfileEnabledLog(normalizedHandle, headers),
       fetchFollowersCount(profile.id, headers),
+      cmsHandle
+        ? getProfileCmsPrimarySite({ handle: cmsHandle, headers })
+        : Promise.resolve(null),
     ]);
 
   const statements: CicStatement[] =
@@ -115,6 +120,11 @@ export default async function UserPageHeader({
       profileEnabledAt={extractProfileEnabledAt(profileLog)}
       followersCount={
         followersResult.status === "fulfilled" ? followersResult.value : null
+      }
+      cmsWebsiteHref={
+        cmsHandle && cmsSiteResult.status === "fulfilled" && cmsSiteResult.value
+          ? `/${encodeURIComponent(cmsHandle)}/index.html`
+          : null
       }
     />
   );

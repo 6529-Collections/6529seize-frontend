@@ -9,7 +9,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getAppMetadata,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import WavesPageClient from "./page.client";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { prefetchWavesOverview } from "@/helpers/stream.helpers";
@@ -25,7 +28,6 @@ import {
   getWaveRouteWithSearchParams,
   type RouteSearchParams,
 } from "@/helpers/navigation.helpers";
-import { publicEnv } from "@/config/env";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import {
   buildWavePageJsonLd,
@@ -318,16 +320,14 @@ export async function buildWavesMetadata(
     }
   }
 
-  return getAppMetadata({
-    title: `${waveName} by ${authorHandle}`,
-    description: "Waves",
-    ogImage: `${
-      publicEnv.BASE_ENDPOINT
-    }/api/og-metadata/waves/${encodeURIComponent(waveId)}`,
-    ogImageHeight: 630,
-    ogImageWidth: 1200,
-    twitterCard: "summary_large_image",
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: `${waveName} by ${authorHandle}`,
+      description: "Waves",
+      ogImage: `/api/og-metadata/waves/${encodeURIComponent(waveId)}`,
+      ogImageAlt: `${waveName} wave social card`,
+    })
+  );
 }
 
 const getDropAuthorDisplay = (
@@ -366,31 +366,25 @@ const buildDropPageMetadata = ({
     return null;
   }
 
-  const ogImage = `${
-    publicEnv.BASE_ENDPOINT
-  }/api/og-metadata/drops/${encodeURIComponent(dropId)}`;
+  const ogImage = `/api/og-metadata/drops/${encodeURIComponent(dropId)}`;
 
   if (drop.drop_type === ApiDropMainType.Submission) {
     const title = getDropTitle(drop.title, `Drop #${drop.serial_no}`);
-    return {
+    return getLargeSocialCardMetadata({
       title: `${title} by ${author}`,
       description: `${waveName} | Waves`,
       ogImage,
-      ogImageHeight: 630,
-      ogImageWidth: 1200,
-      twitterCard: "summary_large_image" as const,
-    };
+      ogImageAlt: `${title} drop social card`,
+    });
   }
 
   if (drop.drop_type === ApiDropMainType.Chat) {
-    return {
+    return getLargeSocialCardMetadata({
       title: `${author} in ${waveName}`,
       description: "Waves",
       ogImage,
-      ogImageHeight: 630,
-      ogImageWidth: 1200,
-      twitterCard: "summary_large_image" as const,
-    };
+      ogImageAlt: `${author} drop in ${waveName} social card`,
+    });
   }
 
   return null;

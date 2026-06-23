@@ -146,12 +146,12 @@ jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   default: () => <div data-testid="nft-attributes" />,
 }));
 
-jest.mock("@/components/nft-attributes/NftStats", () => ({
-  NftPageStats: () => <tr data-testid="nft-stats" />,
-}));
+const mockPrintMemeReferences = jest.fn(() => (
+  <div data-testid="meme-references" />
+));
 
 jest.mock("@/components/rememes/RememePage", () => ({
-  printMemeReferences: () => <div data-testid="meme-references" />,
+  printMemeReferences: (...args: unknown[]) => mockPrintMemeReferences(...args),
 }));
 
 jest.mock("@/components/the-memes/ArtistProfileHandle", () => ({
@@ -208,10 +208,23 @@ const expectAbortSignalOptions = expect.objectContaining({
   signal: expect.objectContaining({ aborted: false }),
 });
 
-function mockSearchParamsWithFocus(focus: MEME_FOCUS | null = null) {
+const MEME_LAB_TEST_MINT_DATE_FORMAT = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+} satisfies Intl.DateTimeFormatOptions;
+
+function mockSearchParamsWithFocus(
+  focus: MEME_FOCUS | null = null,
+  locale?: string
+) {
   const values = new Map<string, string>();
   if (focus) {
     values.set("focus", focus);
+  }
+  if (locale) {
+    values.set("locale", locale);
   }
   const queryString = new URLSearchParams(Array.from(values)).toString();
 
@@ -402,15 +415,18 @@ describe("MemeLabPageComponent", () => {
     expect(
       screen.getByRole("heading", { name: "Meme Lab Card 1 - Test NFT" })
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Meme Lab" })).toHaveAttribute(
-      "href",
-      "/meme-lab"
-    );
+    expect(
+      screen.getByRole("link", { name: "Back to Meme Lab" })
+    ).toHaveAttribute("href", "/meme-lab");
     expect(
       screen.getByRole("navigation", { name: "Meme Lab page sections" })
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Overview" })).toHaveClass(
       "tw-border-primary-400"
+    );
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
     );
     expect(
       screen.queryByRole("button", { name: "The Art" })
@@ -1113,6 +1129,76 @@ describe("MemeLabPageComponent", () => {
           { scroll: false }
         );
       });
+    });
+
+    it("preserves locale when tab changes", async () => {
+      const mockReplace = jest.fn();
+      mockUseRouter.mockReturnValue({
+        replace: mockReplace,
+      });
+      mockSearchParamsWithFocus(null, "de-DE");
+
+      setupMockApiCalls();
+
+      await act(async () => {
+        renderWithQueryClient(
+          <MemeLabPageComponent nftId="1" locale="de-DE" />
+        );
+      });
+
+      expect(
+        screen.getByRole("link", { name: "Back to Meme Lab" })
+      ).toHaveAttribute("href", "/meme-lab?locale=de-DE");
+      expect(
+        screen.getByText(
+          new Intl.DateTimeFormat(
+            "de-DE",
+            MEME_LAB_TEST_MINT_DATE_FORMAT
+          ).format(new Date("2023-01-01"))
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Test Collection" })
+      ).toHaveAttribute(
+        "href",
+        "/meme-lab/collection/Test-Collection?locale=de-DE"
+      );
+
+      await act(async () => {
+        screen.getByRole("button", { name: "Collectors" }).click();
+      });
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith(
+          "/meme-lab/1?locale=de-DE&focus=collectors",
+          { scroll: false }
+        );
+      });
+    });
+
+    it("passes locale to Meme reference links", async () => {
+      mockSearchParamsWithFocus(MEME_FOCUS.REFERENCES, "de-DE");
+
+      setupMockApiCalls();
+
+      await act(async () => {
+        renderWithQueryClient(
+          <MemeLabPageComponent nftId="1" locale="de-DE" />
+        );
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("heading", { name: "The Memes References" })
+        ).toBeInTheDocument();
+      });
+      expect(mockPrintMemeReferences).toHaveBeenCalledWith(
+        expect.any(Array),
+        "the-memes",
+        true,
+        true,
+        "de-DE"
+      );
     });
   });
 });

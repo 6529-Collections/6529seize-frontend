@@ -1,6 +1,20 @@
 import type { NextRequest } from "next/server";
+import { ReadableStream as NodeReadableStream } from "node:stream/web";
+import { MessagePort as NodeMessagePort } from "node:worker_threads";
 
 import { publicEnv } from "@/config/env";
+
+if (typeof globalThis.ReadableStream === "undefined") {
+  Object.defineProperty(globalThis, "ReadableStream", {
+    value: NodeReadableStream,
+  });
+}
+
+if (typeof globalThis.MessagePort === "undefined") {
+  Object.defineProperty(globalThis, "MessagePort", {
+    value: NodeMessagePort,
+  });
+}
 
 const mockFetchPublicUrl = jest.fn();
 
@@ -65,6 +79,10 @@ jest.mock("@/app/api/open-graph/transient/service", () => ({
   createTransientPlan: jest.fn(() => null),
 }));
 
+jest.mock("@/app/api/open-graph/6529/service", () => ({
+  createFirstParty6529Plan: jest.fn(() => null),
+}));
+
 jest.mock("@/app/api/open-graph/ens", () => ({
   detectEnsTarget: jest.fn(),
   fetchEnsPreview: jest.fn(),
@@ -98,6 +116,9 @@ let opensea: {
 };
 let transient: {
   createTransientPlan: jest.Mock;
+};
+let firstParty6529: {
+  createFirstParty6529Plan: jest.Mock;
 };
 let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
 let ensRouteModule: {
@@ -174,6 +195,9 @@ async function loadRoute(): Promise<void> {
   ) as {
     createTransientPlan: jest.Mock;
   };
+  firstParty6529 = jest.requireMock("@/app/api/open-graph/6529/service") as {
+    createFirstParty6529Plan: jest.Mock;
+  };
   ensRouteModule = jest.requireMock("@/app/api/open-graph/ens") as {
     detectEnsTarget: jest.Mock;
     fetchEnsPreview: jest.Mock;
@@ -194,6 +218,7 @@ describe("open-graph API route", () => {
     foundation.createFoundationPlan.mockReturnValue(null);
     opensea.createOpenSeaPlan.mockReturnValue(null);
     transient.createTransientPlan.mockReturnValue(null);
+    firstParty6529.createFirstParty6529Plan.mockReturnValue(null);
     compound.createCompoundPlan.mockReturnValue(null);
     utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
     mockFetch.mockReset();
@@ -317,6 +342,10 @@ describe("open-graph API route", () => {
     const first = await GET(request);
     const second = await GET(request);
 
+    expect(firstParty6529.createFirstParty6529Plan).toHaveBeenCalledWith(
+      new URL("http://safe.example/article"),
+      { apiAuth: null }
+    );
     expect(compound.createCompoundPlan).toHaveBeenCalledWith(
       new URL("http://safe.example/article")
     );
@@ -368,6 +397,1062 @@ describe("open-graph API route", () => {
       "text/html",
       "https://cdn.safe.example/page"
     );
+  });
+
+  it("passes through richer generic article metadata from the parser", async () => {
+    const html =
+      "<html><head><title>Article</title></head><body></body></html>";
+    const responsePayload = {
+      requestUrl: "https://news.example/articles/richer-card",
+      url: "https://news.example/articles/richer-card",
+      title: "A richer generic link preview",
+      description: "Article dek from destination metadata.",
+      siteName: "Example News",
+      mediaType: "article",
+      contentType: "text/html; charset=utf-8",
+      favicon: "https://news.example/favicon.ico",
+      favicons: ["https://news.example/favicon.ico"],
+      image: {
+        url: "https://news.example/images/richer-card.jpg",
+        secureUrl: "https://news.example/images/richer-card.jpg",
+        alt: "Article hero image",
+      },
+      images: [
+        {
+          url: "https://news.example/images/richer-card.jpg",
+          secureUrl: "https://news.example/images/richer-card.jpg",
+          alt: "Article hero image",
+        },
+      ],
+      author: "Example Reporter",
+      publishedTime: "2026-06-16T12:00:00.000Z",
+    };
+
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html; charset=utf-8" },
+      body: html,
+      url: "https://news.example/articles/richer-card",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        expect(url).toEqual(
+          new URL("https://news.example/articles/richer-card")
+        );
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
+    utils.buildResponse.mockReturnValue(responsePayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://news.example/articles/richer-card"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(responsePayload);
+    expect(utils.buildResponse).toHaveBeenCalledWith(
+      new URL("https://news.example/articles/richer-card"),
+      html,
+      "text/html; charset=utf-8",
+      "https://news.example/articles/richer-card"
+    );
+  });
+
+  it("returns typed Farcaster Mini App previews from fc:miniapp metadata", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Example Mini",
+          url: "/launch",
+          splashImageUrl: "https://mini.example/splash.png",
+          splashBackgroundColor: "#855dcd",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="OG Example Mini" />
+          <meta property="og:description" content="Launch the example app" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "OG Example Mini",
+      description: "Launch the example app",
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        embedKind: "miniapp",
+        url: "https://mini.example/app",
+        title: "Example Mini",
+        appName: "Example Mini",
+        buttonTitle: "Launch",
+        actionType: "launch_miniapp",
+        actionUrl: "https://mini.example/launch",
+        imageUrl: "https://mini.example/preview.png",
+        splashImageUrl: "https://mini.example/splash.png",
+        splashBackgroundColor: "#855dcd",
+        mediaType: "application",
+      })
+    );
+    expect(body.image).toEqual({
+      url: "https://mini.example/preview.png",
+      secureUrl: "https://mini.example/preview.png",
+    });
+    expect(body.images).toEqual([body.image]);
+    expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+      new URL("https://mini.example/preview.png"),
+      expect.any(Object)
+    );
+    expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+      new URL("https://mini.example/launch"),
+      expect.any(Object)
+    );
+    expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+      new URL("https://mini.example/splash.png"),
+      expect.any(Object)
+    );
+  });
+
+  it("uses JSON fc:frame metadata as a backward-compatible Mini App preview", async () => {
+    const frameMetadata = {
+      version: "1",
+      imageUrl: "https://frame.example/frame.png",
+      button: {
+        title: "Start",
+        action: {
+          type: "launch_frame",
+          name: "Frame Thing",
+          url: "https://frame.example/play",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:frame' content='${JSON.stringify(frameMetadata)}' />
+          <title>Frame fallback title</title>
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://frame.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://frame.example/app",
+      url: "https://frame.example/app",
+      title: "Frame fallback title",
+      description: null,
+      siteName: "Frame Example",
+      source: "frame.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://frame.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        embedKind: "frame",
+        title: "Frame Thing",
+        buttonTitle: "Start",
+        actionUrl: "https://frame.example/play",
+      })
+    );
+  });
+
+  it("keeps the canonical URL when Mini App actions point to another host", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Cross Host Mini",
+          url: "https://launch.example/app",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Cross Host Mini" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "Cross Host Mini",
+      description: null,
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        url: "https://mini.example/app",
+        actionUrl: "https://launch.example/app",
+      })
+    );
+  });
+
+  it("returns typed previews for legacy Farcaster frame metadata", async () => {
+    const html = `
+      <html>
+        <head>
+          <meta name="fc:frame" content="vNext" />
+          <meta name="fc:frame:image" content="/legacy.png" />
+          <meta name="fc:frame:button:1" content="Mint" />
+          <meta name="fc:frame:button:1:action" content="link" />
+          <meta name="fc:frame:button:1:target" content="/mint" />
+          <meta property="og:title" content="Legacy Frame" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://legacy.example/frame",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://legacy.example/frame",
+      url: "https://legacy.example/frame",
+      title: "Legacy Frame",
+      description: null,
+      siteName: "Legacy Example",
+      source: "legacy.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://legacy.example/frame"
+      ),
+    } as any);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual(
+      expect.objectContaining({
+        type: "farcaster.frame",
+        embedKind: "legacy-frame",
+        title: "Legacy Frame",
+        appName: null,
+        buttonTitle: "Mint",
+        actionUrl: "https://legacy.example/mint",
+        imageUrl: "https://legacy.example/legacy.png",
+        buttons: ["Mint"],
+      })
+    );
+  });
+
+  it("uses only link-action targets for legacy Farcaster frame navigation", async () => {
+    const html = `
+      <html>
+        <head>
+          <meta name="fc:frame" content="vNext" />
+          <meta name="fc:frame:image" content="/legacy.png" />
+          <meta name="fc:frame:button:1" content="Vote" />
+          <meta name="fc:frame:button:1:action" content="post" />
+          <meta name="fc:frame:button:1:target" content="/vote" />
+          <meta name="fc:frame:button:2" content="View" />
+          <meta name="fc:frame:button:2:action" content="link" />
+          <meta name="fc:frame:button:2:target" content="/view" />
+          <meta property="og:title" content="Legacy Frame" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://legacy.example/frame",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://legacy.example/frame",
+      url: "https://legacy.example/frame",
+      title: "Legacy Frame",
+      description: null,
+      siteName: "Legacy Example",
+      source: "legacy.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://legacy.example/frame"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.frame",
+        embedKind: "legacy-frame",
+        buttonTitle: "View",
+        actionUrl: "https://legacy.example/view",
+        buttons: ["Vote", "View"],
+      })
+    );
+  });
+
+  it("falls back to the Mini App URL when action schemes are unsafe", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Unsafe Action Mini",
+          url: "javascript:alert(1)",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Unsafe Action Mini" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "Unsafe Action Mini",
+      description: null,
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        actionType: "launch_miniapp",
+        actionUrl: "https://mini.example/app",
+      })
+    );
+  });
+
+  it("drops unknown Mini App action types", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "surprise_action",
+          name: "Unknown Action Mini",
+          url: "https://mini.example/launch",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Unknown Action Mini" />
+        </head>
+      </html>
+    `;
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "Unknown Action Mini",
+      description: null,
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        actionType: null,
+        actionUrl: "https://mini.example/launch",
+      })
+    );
+  });
+
+  it("drops Mini App splash images when they are not public", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "https://mini.example/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Private Splash Mini",
+          url: "https://mini.example/launch",
+          splashImageUrl: "http://127.0.0.1/splash.png",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Private Splash Mini" />
+        </head>
+      </html>
+    `;
+    guard.assertPublicUrl.mockImplementation(async (url: URL) => {
+      if (url.hostname === "127.0.0.1") {
+        throw new UrlGuardError("private URL", "private-url", 400);
+      }
+    });
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://mini.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "https://mini.example/app",
+      url: "https://mini.example/app",
+      title: "Private Splash Mini",
+      description: null,
+      siteName: "Mini Example",
+      source: "mini.example",
+      image: null,
+      images: [],
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://mini.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        type: "farcaster.miniapp",
+        splashImageUrl: null,
+      })
+    );
+  });
+
+  it("falls back to generic metadata when Mini App JSON is malformed", async () => {
+    const html = `
+      <html>
+        <head>
+          <meta name="fc:miniapp" content="{not json" />
+          <meta property="og:title" content="Plain Page" />
+        </head>
+      </html>
+    `;
+    const genericPayload = {
+      requestUrl: "https://plain.example/app",
+      url: "https://plain.example/app",
+      title: "Plain Page",
+      description: null,
+      siteName: "Plain Example",
+      source: "plain.example",
+      image: null,
+      images: [],
+    };
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://plain.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue(genericPayload);
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://plain.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(genericPayload);
+  });
+
+  it("drops Mini App metadata when media URLs are not public", async () => {
+    const miniAppMetadata = {
+      version: "1",
+      imageUrl: "http://127.0.0.1/preview.png",
+      button: {
+        title: "Launch",
+        action: {
+          type: "launch_miniapp",
+          name: "Private Media Mini",
+          url: "https://private-media.example/launch",
+        },
+      },
+    };
+    const html = `
+      <html>
+        <head>
+          <meta name='fc:miniapp' content='${JSON.stringify(
+            miniAppMetadata
+          )}' />
+          <meta property="og:title" content="Private Media Mini" />
+        </head>
+      </html>
+    `;
+    const genericPayload = {
+      requestUrl: "https://private-media.example/app",
+      url: "https://private-media.example/app",
+      title: "Private Media Mini",
+      description: null,
+      siteName: "Private Media Example",
+      source: "private-media.example",
+      image: null,
+      images: [],
+    };
+    guard.assertPublicUrl.mockImplementation(async (url: URL) => {
+      if (url.hostname === "127.0.0.1") {
+        throw new UrlGuardError("private URL", "private-url", 400);
+      }
+    });
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "text/html" },
+        body: html,
+        url: "https://private-media.example/app",
+      })
+    );
+    utils.buildResponse.mockReturnValue(genericPayload);
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://private-media.example/app"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(genericPayload);
+  });
+
+  it("returns typed YouTube video previews before generic metadata", async () => {
+    const oembedPayload = {
+      title: "A Good Video",
+      author_name: "Channel 6529",
+      author_url: "https://www.youtube.com/@6529",
+      provider_name: "YouTube",
+      provider_url: "https://www.youtube.com/",
+      thumbnail_url: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+      thumbnail_width: 480,
+      thumbnail_height: 360,
+    };
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(oembedPayload),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const youtubeUrl =
+      "https://music.youtube.com/watch?v=abc123XYZ_0&t=1m30s&list=PL123456&index=4";
+    const request = {
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any;
+
+    const response = await GET(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      type: "youtube.video",
+      requestUrl:
+        "https://music.youtube.com/watch?v=abc123XYZ_0&t=1m30s&list=PL123456&index=4",
+      url: "https://www.youtube.com/watch?v=abc123XYZ_0&list=PL123456&index=4&t=90s",
+      title: "A Good Video",
+      description: null,
+      siteName: "YouTube",
+      mediaType: "video",
+      source: "YouTube",
+      provider: "YouTube",
+      providerUrl: "https://www.youtube.com/",
+      videoId: "abc123XYZ_0",
+      watchUrl:
+        "https://www.youtube.com/watch?v=abc123XYZ_0&list=PL123456&index=4&t=90s",
+      embedUrl:
+        "https://www.youtube-nocookie.com/embed/abc123XYZ_0?rel=0&playsinline=1&list=PL123456&index=4&start=90",
+      thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+      thumbnailWidth: 480,
+      thumbnailHeight: 360,
+      image: {
+        url: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+        secureUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+        width: 480,
+        height: 360,
+      },
+      images: [
+        {
+          url: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+          secureUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+          width: 480,
+          height: 360,
+        },
+      ],
+      author: "Channel 6529",
+      authorName: "Channel 6529",
+      authorUrl: "https://www.youtube.com/@6529",
+      playlistId: "PL123456",
+      playlistIndex: "4",
+      startSeconds: 90,
+    });
+    expect(mockFetchPublicUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "https://www.youtube.com/oembed?format=json&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dabc123XYZ_0%26list%3DPL123456%26index%3D4",
+      }),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          accept: "application/json",
+        }),
+      })
+    );
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+    expect(manifold.createManifoldPlan).not.toHaveBeenCalled();
+    expect(foundation.createFoundationPlan).not.toHaveBeenCalled();
+    expect(opensea.createOpenSeaPlan).not.toHaveBeenCalled();
+    expect(transient.createTransientPlan).not.toHaveBeenCalled();
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+  });
+
+  it("drops untrusted YouTube thumbnail hosts from oEmbed responses", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Thumbnail Host Check",
+          author_name: "Channel 6529",
+          thumbnail_url: "https://preview.evil.example/hqdefault.jpg",
+          thumbnail_width: 480,
+          thumbnail_height: 360,
+        }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const youtubeUrl = "https://youtu.be/thumb12345";
+    const request = {
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any;
+
+    const response = await GET(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual(
+      expect.objectContaining({
+        type: "youtube.video",
+        title: "Thumbnail Host Check",
+        thumbnailUrl: null,
+        image: null,
+        images: [],
+      })
+    );
+  });
+
+  it("returns an error when YouTube oEmbed is unavailable", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(404, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ error: "not found" }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const youtubeUrl = "https://youtu.be/missing123";
+    const request = {
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(502);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "YouTube preview unavailable." },
+      { status: 502 }
+    );
+  });
+
+  it("does not cache empty successful YouTube oEmbed responses", async () => {
+    mockFetchPublicUrl
+      .mockResolvedValueOnce(
+        createResponse(200, {
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({}),
+          url: "https://www.youtube.com/oembed",
+        })
+      )
+      .mockResolvedValueOnce(
+        createResponse(200, {
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            title: "Recovered Video",
+            thumbnail_url: "https://i.ytimg.com/vi/recover123/hqdefault.jpg",
+          }),
+          url: "https://www.youtube.com/oembed",
+        })
+      );
+
+    const youtubeUrl = "https://youtu.be/recover123";
+    const firstResponse = await GET({
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any);
+    const secondResponse = await GET({
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any);
+
+    expect(firstResponse.status).toBe(502);
+    expect(secondResponse.status).toBe(200);
+    expect(await secondResponse.json()).toEqual(
+      expect.objectContaining({
+        type: "youtube.video",
+        title: "Recovered Video",
+        thumbnailUrl: "https://i.ytimg.com/vi/recover123/hqdefault.jpg",
+      })
+    );
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects oversized YouTube oEmbed bodies", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Oversized",
+          padding: "x".repeat(70 * 1024),
+        }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const youtubeUrl = "https://youtu.be/oversized1";
+    const request = {
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(413);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "Preview response is too large to process safely." },
+      { status: 413 }
+    );
+  });
+
+  it("keeps separate final cache entries but shares oEmbed fetches for YouTube start times", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Shared Video",
+          thumbnail_url: "https://i.ytimg.com/vi/cache12345/hqdefault.jpg",
+        }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const firstUrl = "https://youtu.be/cache12345?t=42";
+    const secondUrl = "https://youtu.be/cache12345?t=90";
+    const firstResponse = await GET({
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(firstUrl)}`
+      ),
+    } as any);
+    const secondResponse = await GET({
+      nextUrl: new URL(
+        `https://app.local/api/open-graph?url=${encodeURIComponent(secondUrl)}`
+      ),
+    } as any);
+
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(200);
+    expect(await firstResponse.json()).toEqual(
+      expect.objectContaining({
+        title: "Shared Video",
+        startSeconds: 42,
+        watchUrl: "https://www.youtube.com/watch?v=cache12345&t=42s",
+      })
+    );
+    expect(await secondResponse.json()).toEqual(
+      expect.objectContaining({
+        title: "Shared Video",
+        startSeconds: 90,
+        watchUrl: "https://www.youtube.com/watch?v=cache12345&t=90s",
+      })
+    );
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses first-party 6529 plans before provider and generic plans", async () => {
+    const firstPartyData = {
+      type: "6529.collection",
+      kind: "the-memes",
+      title: "The Collective Synapse",
+      kicker: "The Memes #509",
+    };
+    const execute = jest.fn(async () => ({
+      data: firstPartyData,
+      ttl: 45_000,
+    }));
+    const cookies = {
+      get: jest.fn(() => ({ value: "cookie-secret" })),
+    };
+
+    firstParty6529.createFirstParty6529Plan.mockReturnValue({
+      cacheKey: "6529:auth:the-memes:/the-memes/509",
+      execute,
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://6529.io/the-memes/509"
+      ),
+      cookies,
+      headers: new Headers({ "x-6529-auth": "header-secret" }),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(firstPartyData);
+    expect(firstParty6529.createFirstParty6529Plan).toHaveBeenCalledWith(
+      new URL("https://6529.io/the-memes/509"),
+      { apiAuth: "cookie-secret" }
+    );
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(guard.assertPublicUrl).not.toHaveBeenCalled();
+    expect(manifold.createManifoldPlan).not.toHaveBeenCalled();
+    expect(foundation.createFoundationPlan).not.toHaveBeenCalled();
+    expect(opensea.createOpenSeaPlan).not.toHaveBeenCalled();
+    expect(transient.createTransientPlan).not.toHaveBeenCalled();
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("falls back to generic metadata when first-party 6529 enrichment fails", async () => {
+    const html =
+      "<html><head><title>The Collective Synapse</title></head><body></body></html>";
+    const fallbackData = {
+      requestUrl: "https://6529.io/the-memes/509",
+      url: "https://6529.io/the-memes/509",
+      title: "The Collective Synapse",
+      description: "The Memes #509 | Collections | 6529.io",
+      siteName: "6529.io",
+      image: {
+        url: "https://cdn.6529.io/memes/509.png",
+        secureUrl: "https://cdn.6529.io/memes/509.png",
+      },
+      images: [],
+    };
+    const execute = jest.fn(async () => {
+      throw new Error("The Memes card was not found.");
+    });
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+      url: "https://6529.io/the-memes/509",
+    });
+
+    firstParty6529.createFirstParty6529Plan.mockReturnValue({
+      cacheKey: "6529:staging:the-memes:/the-memes/509",
+      execute,
+    });
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        expect(url).toEqual(new URL("https://6529.io/the-memes/509"));
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
+    utils.buildResponse.mockReturnValue(fallbackData);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://6529.io/the-memes/509"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(fallbackData);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+      new URL("https://6529.io/the-memes/509"),
+      expect.any(Object)
+    );
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(utils.buildResponse).toHaveBeenCalledWith(
+      new URL("https://6529.io/the-memes/509"),
+      html,
+      "text/html",
+      "https://6529.io/the-memes/509"
+    );
+  });
+
+  it("does not trust caller-supplied auth headers for first-party 6529 plans", async () => {
+    const firstPartyData = {
+      type: "6529.collection",
+      kind: "the-memes",
+      title: "The Collective Synapse",
+    };
+    const execute = jest.fn(async () => ({
+      data: firstPartyData,
+      ttl: 45_000,
+    }));
+
+    firstParty6529.createFirstParty6529Plan.mockReturnValue({
+      cacheKey: "6529:public:the-memes:/the-memes/509",
+      execute,
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://6529.io/the-memes/509"
+      ),
+      headers: new Headers({ "x-6529-auth": "header-secret" }),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(firstPartyData);
+    expect(firstParty6529.createFirstParty6529Plan).toHaveBeenCalledWith(
+      new URL("https://6529.io/the-memes/509"),
+      { apiAuth: null }
+    );
+    expect(execute).toHaveBeenCalledTimes(1);
   });
 
   it("applies host-specific overrides for facebook", async () => {
@@ -510,7 +1595,7 @@ describe("open-graph API route", () => {
     expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 
-  it("rejects non-HTML preview responses", async () => {
+  it("returns metadata-only file previews for non-HTML responses", async () => {
     const fetchResponse = createResponse(200, {
       headers: { "content-type": "image/png" },
       body: "png",
@@ -533,11 +1618,171 @@ describe("open-graph API route", () => {
 
     const response = await GET(request);
 
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      type: "external.file",
+      title: "file.png",
+      fileName: "file.png",
+      extension: "png",
+      fileKind: "image",
+      contentType: "image/png",
+      sizeBytes: null,
+      sourceHost: "image.example",
+      trust: "external_unscanned",
+      links: {
+        open: "https://image.example/file.png",
+      },
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("returns metadata-only file previews for explicit JSON responses", async () => {
+    const fetchResponse = createResponse(200, {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "18",
+      },
+      body: '{"ok":true}',
+      url: "https://api.example/data",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://api.example/data"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      type: "external.file",
+      title: "data",
+      fileName: "data",
+      extension: null,
+      fileKind: "code",
+      contentType: "application/json; charset=utf-8",
+      sizeBytes: 18,
+      sourceHost: "api.example",
+      trust: "external_unscanned",
+      links: {
+        open: "https://api.example/data",
+      },
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("rejects missing-content-type non-HTML bodies instead of parsing OpenGraph", async () => {
+    const fetchResponse = createResponse(200, {
+      body: "\u0000\u0001not-html",
+      url: "https://files.example/download",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://files.example/download"
+      ),
+    } as any);
+
     expect(response.status).toBe(415);
     expect(await response.json()).toEqual({
       error: "Preview URL did not return readable HTML metadata.",
     });
     expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("uses sanitized content-disposition filenames for external files", async () => {
+    const fetchResponse = createResponse(200, {
+      headers: {
+        "content-type": "application/pdf",
+        "content-length": "2048",
+        "content-disposition": "attachment; filename*=UTF-8''Safety%20Plan.pdf",
+      },
+      body: "%PDF",
+      url: "https://files.example/download?id=1",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://files.example/download?id=1"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      type: "external.file",
+      title: "Safety Plan.pdf",
+      fileName: "Safety Plan.pdf",
+      extension: "pdf",
+      fileKind: "pdf",
+      contentType: "application/pdf",
+      sizeBytes: 2048,
+      sourceHost: "files.example",
+      trust: "external_unscanned",
+      links: {
+        open: "https://files.example/download?id=1",
+      },
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("strips charset and language prefixes from encoded content-disposition filenames", async () => {
+    const fetchResponse = createResponse(200, {
+      headers: {
+        "content-type": "application/pdf",
+        "content-disposition":
+          "attachment; filename*=iso-8859-1'en-US'Report%20Q2.pdf",
+      },
+      body: "%PDF",
+      url: "https://files.example/download",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://files.example/download"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        type: "external.file",
+        title: "Report Q2.pdf",
+        fileName: "Report Q2.pdf",
+        extension: "pdf",
+        fileKind: "pdf",
+      })
+    );
   });
 
   it("uses compound plan when available", async () => {
@@ -792,6 +2037,42 @@ describe("open-graph API route", () => {
           requestUrl: "https://two.example/article",
           title: "Preview two.example",
         },
+      },
+      errors: {},
+    });
+  });
+
+  it("returns typed YouTube previews from batch requests", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(200, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Batch Video",
+          author_name: "Batch Channel",
+          thumbnail_url: "https://i.ytimg.com/vi/batch12345/hqdefault.jpg",
+        }),
+        url: "https://www.youtube.com/oembed",
+      })
+    );
+
+    const url = "https://youtu.be/batch12345?t=42";
+    const request = createJsonRequest({
+      urls: [url],
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      results: {
+        [url]: expect.objectContaining({
+          type: "youtube.video",
+          title: "Batch Video",
+          videoId: "batch12345",
+          watchUrl: "https://www.youtube.com/watch?v=batch12345&t=42s",
+          embedUrl:
+            "https://www.youtube-nocookie.com/embed/batch12345?rel=0&playsinline=1&start=42",
+        }),
       },
       errors: {},
     });

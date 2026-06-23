@@ -4,15 +4,29 @@ import BrainLeftSidebarWave from "@/components/brain/left-sidebar/waves/BrainLef
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
+
+type MockWavePinProps = {
+  readonly className?: string;
+  readonly isPinned?: boolean;
+};
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children, onMouseEnter, onClick, className }: any) => (
+  default: ({
+    href,
+    children,
+    onMouseEnter,
+    onClick,
+    className,
+    ...rest
+  }: any) => (
     <a
       href={href}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
       className={className}
+      {...rest}
     >
       {children}
     </a>
@@ -26,8 +40,8 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(),
 }));
 jest.mock("@/hooks/usePrefetchWaveData");
-jest.mock("@/components/waves/WavePicture", () => (props: any) => (
-  <img data-testid="wave-picture" alt={props.name} />
+jest.mock("@/components/waves/WavePicture", () => () => (
+  <span data-testid="wave-picture" />
 ));
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime",
@@ -35,11 +49,31 @@ jest.mock(
 );
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin",
-  () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>
+  () => (props: MockWavePinProps) => (
+    <button
+      type="button"
+      className={props.className}
+      data-testid="pin"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+    >
+      {String(props.isPinned)}
+    </button>
+  )
 );
 
 const mockedPrefetch = usePrefetchWaveData as jest.Mock;
 const mockedUseMyStream = useMyStream as jest.Mock;
+
+const getWaveRow = (): HTMLElement => {
+  const row = screen.getByRole("link").closest(".tw-group");
+  if (row === null) {
+    throw new Error("Expected wave link to have a row ancestor");
+  }
+  return row as HTMLElement;
+};
 
 describe("BrainLeftSidebarWave", () => {
   const prefetch = jest.fn();
@@ -60,6 +94,12 @@ describe("BrainLeftSidebarWave", () => {
     firstUnreadDropSerialNo: null,
     isMuted: false,
   } as any;
+  const waveScore = {
+    visibility_score: 83,
+    quality_score: 78,
+    hotness_score: 92,
+    rep_sort_score: 41,
+  } as ApiWaveScore;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -191,43 +231,21 @@ describe("BrainLeftSidebarWave", () => {
   it("uses normal row padding when a wave has no subwaves", () => {
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
 
-    const row = screen.getByRole("link").parentElement;
+    const row = getWaveRow();
 
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
     expect(row).toHaveClass("tw-px-5");
     expect(row).toHaveClass("tw-gap-x-4");
+    expect(row).toHaveClass("tw-items-center");
+    expect(row).not.toHaveClass("tw-items-start");
+    expect(row).toHaveClass("tw-h-full");
+    expect(row).toHaveClass("tw-min-h-[62px]");
     expect(row).not.toHaveClass("tw-pl-2");
-    expect(screen.getByRole("link").previousElementSibling).toBeNull();
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
-    );
   });
 
-  it("reserves the expand column for a non-expandable row in an expandable list", () => {
-    render(
-      <BrainLeftSidebarWave
-        wave={baseWave}
-        onHover={onHover}
-        reserveExpandControlSpace
-      />
-    );
-
-    const row = screen.getByRole("link").parentElement;
-
-    expect(
-      screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
-    ).not.toBeInTheDocument();
-    expect(row).toHaveClass("tw-pl-2");
-    expect(row).toHaveClass("tw-gap-x-2");
-    expect(screen.getByRole("link").previousElementSibling).not.toBeNull();
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
-    );
-  });
-
-  it("renders the subwave expand button before the pin without opening the wave", async () => {
+  it("renders one row link and keeps the subwave expand button separate", async () => {
     const onToggleExpand = jest.fn();
     const user = userEvent.setup();
 
@@ -248,31 +266,52 @@ describe("BrainLeftSidebarWave", () => {
     expect(expandButton).toHaveAttribute("aria-expanded", "false");
     expect(expandButton).not.toHaveClass("tw-absolute");
     expect(expandButton).toHaveClass("tw-relative");
-    expect(expandButton).toHaveClass("tw-size-6");
-    expect(expandButton).toHaveClass("md:tw-size-5");
+    expect(expandButton).toHaveClass("tw-inline-flex");
+    expect(expandButton).toHaveClass("tw-size-5");
     expect(expandButton).toHaveClass("tw-rounded-full");
     expect(expandButton).toHaveClass("tw-border-0");
     expect(expandButton).toHaveClass("tw-bg-transparent");
     expect(expandButton).toHaveClass("desktop-hover:hover:tw-bg-iron-700/70");
+    expect(expandButton.querySelector("svg")).toHaveClass("tw-size-3.5");
     expect(expandButton.querySelector(".tw-bg-primary-400")).toBeNull();
-    const unreadSubwavesDot = screen
-      .getByRole("link")
-      .querySelector(".tw-bg-primary-400");
+    const unreadSubwavesDot = getWaveRow().querySelector(".tw-bg-primary-400");
     expect(unreadSubwavesDot).not.toBeNull();
     expect(unreadSubwavesDot).toHaveClass("tw-right-[-3px]");
     expect(unreadSubwavesDot).toHaveClass("tw-top-[-3px]");
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-pl-2");
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-gap-x-2");
-    expect(screen.getByRole("link").previousElementSibling).toContainElement(
-      expandButton
-    );
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
-    );
+    expect(getWaveRow()).toHaveClass("tw-px-5");
+    expect(getWaveRow()).toHaveClass("tw-gap-x-4");
+    expect(getWaveRow()).toHaveClass("tw-items-center");
+    expect(getWaveRow()).not.toHaveClass("tw-items-start");
+    expect(getWaveRow()).toHaveClass("tw-h-full");
+    expect(getWaveRow()).toHaveClass("tw-min-h-[62px]");
+    expect(getWaveRow()).not.toHaveClass("tw-pl-2");
+    const rowLink = screen.getByRole("link", { name: "Chat Wave" });
+    expect(rowLink).toHaveClass("tw-static");
+    expect(rowLink).toHaveClass("before:tw-absolute");
+    expect(rowLink).toHaveClass("before:tw-inset-0");
+    expect(rowLink).toHaveClass("before:tw-z-[5]");
+    expect(rowLink).toHaveClass("before:tw-content-['']");
+    expect(rowLink).toHaveClass("focus-visible:before:tw-ring-2");
+    expect(expandButton.closest("a")).toBeNull();
+    expect(expandButton.parentElement).toHaveClass("tw-z-10");
+    const avatar = screen.getByTestId("sidebar-wave-avatar");
+    expect(avatar).toHaveAttribute("aria-hidden", "true");
+    expect(avatar.closest("a")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
 
     await user.click(expandButton);
 
     expect(onToggleExpand).toHaveBeenCalledWith("1");
+    expect(setActiveWave).not.toHaveBeenCalled();
+  });
+
+  it("does not navigate when the pin control is clicked", async () => {
+    const user = userEvent.setup();
+
+    render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} showPin />);
+
+    await user.click(screen.getByTestId("pin"));
+
     expect(setActiveWave).not.toHaveBeenCalled();
   });
 
@@ -290,10 +329,7 @@ describe("BrainLeftSidebarWave", () => {
         />
       );
 
-      const waveRow = screen.getByRole("link").parentElement;
-      if (waveRow === null) {
-        throw new Error("Expected wave link to have a row parent");
-      }
+      const waveRow = getWaveRow();
 
       fireEvent.mouseEnter(waveRow);
 
@@ -327,8 +363,54 @@ describe("BrainLeftSidebarWave", () => {
     });
 
     expect(expandButton).toHaveClass("tw-bg-iron-700/60");
-    expect(expandButton).toHaveClass("tw-text-iron-300");
+    expect(expandButton).toHaveClass("tw-text-iron-200");
     expect(expandButton).toHaveClass("tw-opacity-100");
+  });
+
+  it("shows a busy expand control while subwaves are loading", () => {
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        canExpand
+        isLoadingSubwaves
+        onToggleExpand={jest.fn()}
+      />
+    );
+
+    const expandButton = screen.getByRole("button", {
+      name: "Loading Chat Wave subwaves",
+    });
+
+    expect(expandButton).toHaveAttribute("aria-expanded", "false");
+    expect(expandButton).toHaveAttribute("aria-busy", "true");
+    expect(expandButton).toHaveClass("tw-bg-iron-700/60");
+    expect(expandButton.querySelector("svg")).toHaveClass("tw-animate-spin");
+  });
+
+  it("places the timestamp below the title and pushes score to the far edge", () => {
+    render(
+      <BrainLeftSidebarWave
+        wave={{ ...baseWave, waveScore }}
+        onHover={onHover}
+      />
+    );
+
+    const timestamp = screen.getByTestId("drop-time");
+    const timestampWrapper = timestamp.parentElement;
+    const textStack = timestampWrapper?.parentElement;
+    const metadataRow = textStack?.parentElement;
+    const score = screen
+      .getByText("83")
+      .closest("[aria-label]")
+      ?.closest(".tw-ml-auto");
+
+    expect(timestamp).toHaveTextContent("123");
+    expect(textStack?.children[1]).toBe(timestampWrapper);
+    expect(metadataRow?.children[1]).toBe(score);
+    expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
+    expect(timestampWrapper).not.toHaveClass("-tw-mt-0.5");
+    expect(score).toHaveClass("tw-ml-auto");
   });
 
   it("cancels subwave prefetch when hover intent ends early", () => {
@@ -345,10 +427,7 @@ describe("BrainLeftSidebarWave", () => {
         />
       );
 
-      const row = screen.getByRole("link").parentElement;
-      if (row === null) {
-        throw new Error("Expected wave link to have a row parent");
-      }
+      const row = getWaveRow();
 
       fireEvent.mouseEnter(row);
       fireEvent.mouseLeave(row);
@@ -377,22 +456,22 @@ describe("BrainLeftSidebarWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-pl-[84px]");
-    expect(screen.getByRole("link").parentElement).toHaveClass("md:tw-pl-20");
+    expect(getWaveRow()).toHaveClass("tw-pl-[82px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-[78px]");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );
-    const rail = screen
-      .getByRole("link")
-      .parentElement?.querySelector(".tw-w-px");
+    const rail = getWaveRow().querySelector(".tw-w-px");
     expect(rail).not.toBeNull();
     expect(rail).toHaveClass("tw-left-14");
     expect(rail).toHaveClass("md:tw-left-[52px]");
     expect(rail).toHaveClass("-tw-top-1");
     expect(rail).toHaveClass("tw-bottom-4");
-    expect(
-      screen.getByRole("link").parentElement?.querySelector(".tw-h-px")
-    ).toBeNull();
+    expect(getWaveRow()).toHaveClass("tw-items-center");
+    expect(getWaveRow()).not.toHaveClass("tw-items-start");
+    expect(getWaveRow()).toHaveClass("tw-h-full");
+    expect(getWaveRow()).toHaveClass("tw-min-h-[54px]");
+    expect(getWaveRow().querySelector(".tw-h-px")).toBeNull();
     expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
   });
 });

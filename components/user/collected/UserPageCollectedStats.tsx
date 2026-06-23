@@ -5,6 +5,7 @@ import { SEARCH_PARAM_ACTIVITY } from "@/components/user/stats/activity/activity
 import type { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useSearchParams } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
@@ -53,6 +54,7 @@ interface UserPageCollectedStatsProps {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
   readonly initialStatsData: UserPageStatsInitialData;
+  readonly locale?: SupportedLocale | undefined;
   readonly activeCollection?: CollectedCollectionType | null | undefined;
   readonly activeSeasonNumber?: number | null | undefined;
   readonly onCollectionShortcut?:
@@ -70,6 +72,7 @@ export default function UserPageCollectedStats({
   profile,
   activeAddress,
   initialStatsData,
+  locale = DEFAULT_LOCALE,
   activeCollection = null,
   activeSeasonNumber = null,
   onCollectionShortcut,
@@ -103,8 +106,8 @@ export default function UserPageCollectedStats({
 
   const { mainMetrics, allSeasons, startedSeasons, notStartedSeasons } =
     useMemo(
-      () => buildCollectedStatsViewModel(collectedStats),
-      [collectedStats]
+      () => buildCollectedStatsViewModel(collectedStats, locale),
+      [collectedStats, locale]
     );
   const {
     containerRef: desktopSeasonsRef,
@@ -161,6 +164,7 @@ export default function UserPageCollectedStats({
             activeCollection={activeCollection}
             isDetailsOpen={isDetailsOpen}
             detailsId={detailsId}
+            locale={locale}
             onToggleDetails={() => setIsDetailsOpen((current) => !current)}
             onCollectionShortcut={onCollectionShortcut}
           />
@@ -173,6 +177,7 @@ export default function UserPageCollectedStats({
             notStartedSeasons={notStartedSeasons}
             activeSeasonId={activeSeasonId}
             activeSeasonNumber={activeSeasonNumber}
+            locale={locale}
             hasTouchScreen={hasTouchScreen}
             isDesktopLayout={isDesktopSeasonsLayout}
             isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
@@ -201,6 +206,7 @@ export default function UserPageCollectedStats({
         tdh={tdh}
         ownerBalance={ownerBalance}
         balanceMemes={balanceMemes}
+        locale={locale}
       />
     </section>
   );

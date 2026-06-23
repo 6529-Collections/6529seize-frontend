@@ -1,11 +1,11 @@
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
 
-export interface SidebarWaveGroups {
+interface SidebarWaveGroups {
   readonly announcementWaves: MinimalWave[];
-  readonly officialWaves: MinimalWave[];
+  readonly highlyRatedWaves: MinimalWave[];
   readonly pinnedWaves: MinimalWave[];
-  readonly regularWaves: MinimalWave[];
+  readonly followingWaves: MinimalWave[];
+  readonly allWaves: MinimalWave[];
 }
 
 export const isValidSidebarWave = (wave: unknown): wave is MinimalWave => {
@@ -18,7 +18,8 @@ export const isValidSidebarWave = (wave: unknown): wave is MinimalWave => {
     typeof w.id === "string" &&
     w.id.length > 0 &&
     typeof w.name === "string" &&
-    typeof w.isPinned === "boolean"
+    typeof w.isPinned === "boolean" &&
+    typeof w.isFollowing === "boolean"
   );
 };
 
@@ -61,30 +62,55 @@ export const groupSidebarWaves = ({
   readonly waves: readonly MinimalWave[];
 }): SidebarWaveGroups => {
   const announcementWaves: MinimalWave[] = [];
-  const officialWaves: MinimalWave[] = [];
+  const highlyRatedWaves: MinimalWave[] = [];
   const pinnedWaves: MinimalWave[] = [];
-  const regularWaves: MinimalWave[] = [];
+  const followingWaves: MinimalWave[] = [];
+  const allWaves: MinimalWave[] = [];
 
   for (const wave of waves) {
     if (isAnnouncementsWave?.(wave.id) === true) {
       announcementWaves.push(wave);
-    } else if (wave.isOfficial) {
-      officialWaves.push(wave);
     } else if (wave.isPinned) {
       pinnedWaves.push(wave);
+    } else if (wave.sidebarSection === "highly-rated") {
+      highlyRatedWaves.push(wave);
     } else {
-      regularWaves.push(wave);
+      allWaves.push(wave);
+    }
+
+    if (wave.isFollowing || wave.isFollowedSubwaveContainer) {
+      followingWaves.push(wave);
     }
   }
 
   return {
     announcementWaves,
-    officialWaves,
+    highlyRatedWaves,
     pinnedWaves,
-    regularWaves,
+    followingWaves,
+    allWaves,
   };
 };
 
-export const hasExpandableTopLevelRows = (
-  rows: readonly SidebarWaveTreeRow[]
-) => rows.some((row) => row.depth === 0 && row.canExpand);
+const groupDirectMessageSidebarWaves = (
+  waves: readonly MinimalWave[]
+): SidebarWaveGroups => ({
+  announcementWaves: [],
+  highlyRatedWaves: [],
+  pinnedWaves: [],
+  followingWaves: [],
+  allWaves: [...waves],
+});
+
+export const groupSidebarWavesForView = ({
+  isAnnouncementsWave,
+  isDirectMessage,
+  waves,
+}: {
+  readonly isAnnouncementsWave?: ((waveId: string) => boolean) | undefined;
+  readonly isDirectMessage: boolean;
+  readonly waves: readonly MinimalWave[];
+}): SidebarWaveGroups =>
+  isDirectMessage
+    ? groupDirectMessageSidebarWaves(waves)
+    : groupSidebarWaves({ isAnnouncementsWave, waves });

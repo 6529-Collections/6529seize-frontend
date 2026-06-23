@@ -6,6 +6,10 @@ function renderWithTime(ts: number) {
   render(<WaveDropTime timestamp={ts} />);
 }
 
+function renderCompactRevealWithTime(ts: number) {
+  render(<WaveDropTime timestamp={ts} variant="compactReveal" />);
+}
+
 test('shows time for today', () => {
   const now = Date.now();
   renderWithTime(now);
@@ -19,4 +23,24 @@ test('shows yesterday prefix', () => {
   renderWithTime(yesterday);
   const timeStr = new Date(yesterday).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
   expect(screen.getByText(`Yesterday - ${timeStr}`)).toBeInTheDocument();
+});
+
+test("compact reveal includes time for non-today timestamps", () => {
+  const now = Date.now();
+  const yesterday = now - 24 * 60 * 60 * 1000;
+  renderCompactRevealWithTime(yesterday);
+  const timeStr = new Date(yesterday).toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const label = screen.getByText(`Yesterday, ${timeStr}`);
+  expect(label).toHaveClass("tw-whitespace-nowrap");
+});
+
+test("compact reveal skips invalid timestamps instead of throwing", () => {
+  const { container } = render(
+    <WaveDropTime timestamp="not-a-real-time" variant="compactReveal" />
+  );
+
+  expect(container.firstChild).toBeNull();
 });

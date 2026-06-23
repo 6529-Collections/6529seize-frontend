@@ -162,11 +162,11 @@ describe("MemesArtSubmissionContainer", () => {
     formState.setExternalMediaHash = jest.fn((hash: string) => {
       formState.externalMediaHashInput = hash;
       if (hash) {
-        formState.externalMediaUrl = `${formState.externalMediaProvider === "arweave" ? "https://arweave.net/" : "ipfs://"}${hash}`;
+        formState.externalMediaUrl = `${formState.externalMediaProvider === "arweave" ? "ar://" : "ipfs://"}${hash}`;
         formState.externalMediaPreviewUrl =
           formState.externalMediaProvider === "arweave"
-            ? `https://arweave.net/${hash}`
-            : `https://ipfs.io/ipfs/${hash}`;
+            ? `https://media.6529.io/arweave/${hash}`
+            : `https://media.6529.io/ipfs/${hash}`;
         formState.isExternalMediaValid = true;
         formState.externalMediaValidationStatus = "valid";
         formState.externalMediaError = null;

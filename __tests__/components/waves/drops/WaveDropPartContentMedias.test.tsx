@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import WaveDropPartContentMedias from "@/components/waves/drops/WaveDropPartContentMedias";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 
 jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
   __esModule: true,
@@ -76,8 +77,9 @@ describe("WaveDropPartContentMedias", () => {
     );
     expect(image.parentElement).toHaveClass("tw-h-64");
     expect(video).toBeInTheDocument();
-    expect(video).toHaveAttribute("data-fill-video-container", "true");
-    expect(video.parentElement).toHaveClass("tw-h-64");
+    expect(video).toHaveAttribute("data-fill-video-container", "false");
+    expect(video.parentElement).not.toHaveClass("tw-h-64");
+    expect(video.parentElement).toHaveClass("tw-items-start");
     expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
   });
 
@@ -137,7 +139,7 @@ describe("WaveDropPartContentMedias", () => {
     expect(video.parentElement).not.toHaveClass("tw-h-64");
   });
 
-  it("uses custom reserved height classes for normal image media", () => {
+  it("uses custom reserved height classes for normal image media only", () => {
     render(
       <WaveDropPartContentMedias
         activePart={basePart}
@@ -148,8 +150,12 @@ describe("WaveDropPartContentMedias", () => {
     expect(screen.getByTestId("wave-image-media").parentElement).toHaveClass(
       "tw-h-96"
     );
-    expect(screen.getByTestId("drop-media").parentElement).toHaveClass(
+    expect(screen.getByTestId("drop-media").parentElement).not.toHaveClass(
       "tw-h-96"
+    );
+    expect(screen.getByTestId("drop-media")).toHaveAttribute(
+      "data-fill-video-container",
+      "false"
     );
   });
 
@@ -169,5 +175,45 @@ describe("WaveDropPartContentMedias", () => {
 
     expect(screen.getAllByTestId("media-display")).toHaveLength(2);
     expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
+  });
+
+  it("shows a processing placeholder for image media that is not ready", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            {
+              mime_type: "image/png",
+              url: "u1",
+              media_status: ApiDropMediaStatus.Processing,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Processing image")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-image-media")).toBeNull();
+  });
+
+  it("shows a failed placeholder for image media that failed processing", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            {
+              mime_type: "image/png",
+              url: "u1",
+              media_status: ApiDropMediaStatus.Failed,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Image unavailable")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-image-media")).toBeNull();
   });
 });

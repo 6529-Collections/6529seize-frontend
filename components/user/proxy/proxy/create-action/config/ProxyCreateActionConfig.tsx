@@ -11,6 +11,7 @@ import ProxyCreateActionConfigAllocateCic from "./ProxyCreateActionConfigAllocat
 import ProxyCreateActionConfigAllocateRep from "./ProxyCreateActionConfigAllocateRep";
 import ProxyCreateActionConfigCreateDropToWave from "./ProxyCreateActionConfigCreateDropToWave";
 import ProxyCreateActionConfigCreateWave from "./ProxyCreateActionConfigCreateWave";
+import ProxyCreateActionConfigPublishCms from "./ProxyCreateActionConfigPublishCms";
 import ProxyCreateActionConfigRateWaveDrop from "./ProxyCreateActionConfigRateWaveDrop";
 import ProxyCreateActionConfigReadWave from "./ProxyCreateActionConfigReadWave";
 import CommonTimeSelect from "@/components/utils/time/CommonTimeSelect";
@@ -81,6 +82,13 @@ export default function ProxyCreateActionConfig({
     ),
     [ApiProfileProxyActionType.RateWaveDrop]: (
       <ProxyCreateActionConfigRateWaveDrop
+        endTime={endTime}
+        onSubmit={submit}
+        onCancel={onCancel}
+      />
+    ),
+    [ApiProfileProxyActionType.PublishCms]: (
+      <ProxyCreateActionConfigPublishCms
         endTime={endTime}
         onSubmit={submit}
         onCancel={onCancel}

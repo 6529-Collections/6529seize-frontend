@@ -8,89 +8,75 @@ import {
 } from "@/constants/constants";
 import type { Distribution } from "@/entities/IDistribution";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { areEqualAddresses, capitalizeEveryWord } from "@/helpers/Helpers";
-import { useEffect, useState } from "react";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { useMemo } from "react";
+import {
+  getDistributionPhaseLabel,
+  getDistributionsMessage,
+} from "./distributions.messages";
+import {
+  DistributionCollection,
+  type DistributionTableItem,
+} from "./distributions.types";
 import UserPageStatsActivityDistributionsTableItem from "./UserPageStatsActivityDistributionsTableItem";
 
-export enum DistributionCollection {
-  MEMES = "MEMES",
-  GRADIENTS = "GRADIENTS",
-  MEMELAB = "MEMELAB",
+function getAvailablePhases(items: Distribution[]): string[] {
+  const phases: Set<string> = new Set();
+  for (const item of items) {
+    for (const phase of item.phases) {
+      phases.add(phase);
+    }
+  }
+  return Array.from(phases);
 }
 
-export interface DistributionTableItem {
-  readonly collection: DistributionCollection;
-  readonly tokenId: number;
-  readonly name: string;
-  readonly wallet: string;
-  readonly phases: number[];
-  readonly amountMinted: number;
-  readonly amountTotal: number;
-  readonly date: string;
+function getCollectionEnum(contract: string): DistributionCollection {
+  if (areEqualAddresses(contract, MEMES_CONTRACT)) {
+    return DistributionCollection.MEMES;
+  }
+  if (areEqualAddresses(contract, GRADIENT_CONTRACT)) {
+    return DistributionCollection.GRADIENTS;
+  }
+
+  if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
+    return DistributionCollection.MEMELAB;
+  }
+  throw new Error(`Unknown contract ${contract}`);
+}
+
+function getItemPhaseAmount({
+  phase,
+  item,
+}: {
+  readonly phase: string;
+  readonly item: Distribution;
+}): number {
+  if (phase.toUpperCase() === "AIRDROP") {
+    return item.airdrops ?? 0;
+  }
+
+  const allowlistPhase = item.allowlist.find(
+    (allowlistItem) => allowlistItem.phase === phase
+  );
+  return allowlistPhase?.spots ?? 0;
 }
 
 export default function UserPageStatsActivityDistributionsTable({
   items,
   profile,
   loading,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly items: Distribution[];
   readonly profile: ApiIdentity;
   readonly loading: boolean;
+  readonly locale?: SupportedLocale | undefined;
 }) {
-  const getAvailablePhases = (): string[] => {
-    const phases: Set<string> = new Set();
-    for (const item of items) {
-      for (const p of item.phases) {
-        phases.add(p);
-      }
-    }
-    return Array.from(phases);
-  };
-
-  const [availablePhases, setAvailablePhases] =
-    useState<string[]>(getAvailablePhases());
-
-  const [results, setResults] = useState<DistributionTableItem[]>([]);
-
-  const getCollectionEnum = (contract: string): DistributionCollection => {
-    if (areEqualAddresses(contract, MEMES_CONTRACT)) {
-      return DistributionCollection.MEMES;
-    }
-    if (areEqualAddresses(contract, GRADIENT_CONTRACT)) {
-      return DistributionCollection.GRADIENTS;
-    }
-
-    if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
-      return DistributionCollection.MEMELAB;
-    }
-    throw new Error(`Unknown contract ${contract}`);
-  };
-
-  const getItemPhaseAmount = ({
-    phase,
-    item,
-  }: {
-    readonly phase: string;
-    readonly item: Distribution;
-  }): number => {
-    let count = 0;
-
-    if (phase.toUpperCase() === "AIRDROP") {
-      count = item.airdrops;
-    } else {
-      const p = item.allowlist.find((a) => a.phase === phase);
-      count = p?.spots ?? 0;
-    }
-
-    return count ?? 0;
-  };
-
-  useEffect(() => {
-    const phases = getAvailablePhases();
-    setAvailablePhases(phases);
-    setResults(
+  const availablePhases = useMemo(() => getAvailablePhases(items), [items]);
+  const results = useMemo<DistributionTableItem[]>(
+    () =>
       items.map((item) => ({
         collection: getCollectionEnum(item.contract),
         tokenId: item.card_id,
@@ -101,71 +87,114 @@ export default function UserPageStatsActivityDistributionsTable({
           )?.display ??
           item.wallet_display ??
           item.wallet,
-        phases: phases.map((phase) => getItemPhaseAmount({ phase, item })),
+        phases: availablePhases.map((phase) => ({
+          phase,
+          amount: getItemPhaseAmount({ phase, item }),
+        })),
         amountMinted: item.minted,
         amountTotal: item.total_count,
         date: item.mint_date,
-      }))
-    );
-  }, [items]);
+      })),
+    [availablePhases, items, profile.wallets]
+  );
 
   return (
     <table className="tw-min-w-full tw-divide-y tw-divide-iron-700">
+      <caption className="tw-sr-only">
+        {getDistributionsMessage(
+          "user.collected.stats.distributions.tableCaption",
+          undefined,
+          locale
+        )}
+      </caption>
       <thead className="tw-bg-iron-900">
         <tr>
           <th
             scope="col"
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
           >
-            Collection
+            {getDistributionsMessage(
+              "user.collected.stats.distributions.columns.collection",
+              undefined,
+              locale
+            )}
           </th>
           <th
             scope="col"
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
-            Token
+            {getDistributionsMessage(
+              "user.collected.stats.distributions.columns.token",
+              undefined,
+              locale
+            )}
           </th>
           <th
             scope="col"
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
-            Name
+            {getDistributionsMessage(
+              "user.collected.stats.distributions.columns.name",
+              undefined,
+              locale
+            )}
           </th>
 
           <th
             scope="col"
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
-            Wallet
+            {getDistributionsMessage(
+              "user.collected.stats.distributions.columns.wallet",
+              undefined,
+              locale
+            )}
           </th>
           {availablePhases.map((phase) => (
             <th
-              key={getRandomObjectId()}
+              key={phase}
               scope="col"
               className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
             >
-              {capitalizeEveryWord(phase.replaceAll("_", " "))}
+              {getDistributionPhaseLabel(phase, locale)}
             </th>
           ))}
           <th
             scope="col"
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
-            Minted
+            {getDistributionsMessage(
+              "user.collected.stats.distributions.columns.minted",
+              undefined,
+              locale
+            )}
           </th>
           <th
             scope="col"
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
-            Total
+            {getDistributionsMessage(
+              "user.collected.stats.distributions.columns.total",
+              undefined,
+              locale
+            )}
           </th>
           <th
             scope="col"
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
-            <div className={loading ? "tw-opacity-100" : "tw-opacity-0"}>
-              <CircleLoader />
-            </div>
+            {loading ? (
+              <div>
+                <span className="tw-sr-only">
+                  {getDistributionsMessage(
+                    "user.collected.stats.distributions.loading",
+                    undefined,
+                    locale
+                  )}
+                </span>
+                <CircleLoader />
+              </div>
+            ) : null}
           </th>
         </tr>
       </thead>
@@ -174,6 +203,8 @@ export default function UserPageStatsActivityDistributionsTable({
           <UserPageStatsActivityDistributionsTableItem
             key={`${item.collection}-${item.tokenId}-${item.wallet}`}
             item={item}
+            formatNumber={(value) => formatInteger(locale, value)}
+            locale={locale}
           />
         ))}
       </tbody>

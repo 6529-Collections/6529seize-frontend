@@ -6,9 +6,7 @@ export default function AboutDataDecentral() {
     <Container>
       <Row>
         <Col>
-          <h1>
-            Data Decentralization
-          </h1>
+          <h1>Data Decentralization</h1>
         </Col>
       </Row>
       <Row className="pt-3 pb-3">
@@ -52,9 +50,10 @@ export default function AboutDataDecentral() {
             <li>
               6529 Team addresses. A record of these can be found on Arweave{" "}
               <Link
-                href={`https://arweave.net/fy83ffOGqR9cR2zooI7u9JxsG0oEWVJxH3B-bNxXKJg`}
+                href={`https://media.6529.io/arweave/fy83ffOGqR9cR2zooI7u9JxsG0oEWVJxH3B-bNxXKJg`}
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 here
               </Link>
               . We will move this list 100% on-chain in the coming weeks.

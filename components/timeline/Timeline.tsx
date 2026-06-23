@@ -5,24 +5,33 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { numberWithCommasFromString } from "@/helpers/Helpers";
 import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
 import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import { formatDate } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface Props {
   nft: BaseNFT;
   steps: NFTHistory[];
+  locale?: SupportedLocale;
 }
 
+const TIMELINE_DATE_FORMAT = {
+  day: "2-digit",
+  hour: "2-digit",
+  hour12: false,
+  minute: "2-digit",
+  month: "2-digit",
+  timeZone: "UTC",
+  year: "numeric",
+} satisfies Intl.DateTimeFormatOptions;
+
 export default function Timeline(props: Readonly<Props>) {
+  const locale = props.locale ?? DEFAULT_LOCALE;
+
   const getDateDisplay = (date: Date) => {
-    date = new Date(date);
-    return `${date.getUTCFullYear()}/${(date.getUTCMonth() + 1)
-      .toString()
-      .padStart(2, "0")}/${date
-      .getUTCDate()
-      .toString()
-      .padStart(2, "0")} - ${date
-      .getUTCHours()
-      .toString()
-      .padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}`;
+    return t(locale, "timeline.date.utc", {
+      date: formatDate(locale, date, TIMELINE_DATE_FORMAT),
+    });
   };
 
   const getType = () => {
@@ -58,13 +67,12 @@ export default function Timeline(props: Readonly<Props>) {
   };
 
   function printAttribute(label: string, value: any, fullWidth?: boolean) {
+    const displayValue = String(numberWithCommasFromString(value));
+
     return (
       <Col sm={12} md={fullWidth ? 12 : 6}>
         <b>{label}:</b>{" "}
-        <div
-          dangerouslySetInnerHTML={{
-            __html: numberWithCommasFromString(value).replaceAll("\n", "<br>"),
-          }}></div>
+        <div className={styles["metadataValue"]}>{displayValue}</div>
       </Col>
     );
   }
@@ -73,13 +81,15 @@ export default function Timeline(props: Readonly<Props>) {
     if (from && to) {
       return (
         <>
-          {printAttribute("From", from)}
-          {printAttribute("To", to)}
+          {printAttribute(t(locale, "timeline.fields.from"), from)}
+          {printAttribute(t(locale, "timeline.fields.to"), to)}
         </>
       );
     }
 
-    const label = from ? "Removed Value" : "Added Value";
+    const label = from
+      ? t(locale, "timeline.fields.removedValue")
+      : t(locale, "timeline.fields.addedValue");
     const nonUndefined = from || to;
     return printAttribute(label, nonUndefined, true);
   }
@@ -99,13 +109,15 @@ export default function Timeline(props: Readonly<Props>) {
     if (from && to) {
       return (
         <>
-          {printLink("From", from)}
-          {printLink("To", to)}
+          {printLink(t(locale, "timeline.fields.from"), from)}
+          {printLink(t(locale, "timeline.fields.to"), to)}
         </>
       );
     }
 
-    const label = from ? "Removed URL" : "Added URL";
+    const label = from
+      ? t(locale, "timeline.fields.removedUrl")
+      : t(locale, "timeline.fields.addedUrl");
     const nonUndefined = from || to;
     return printLink(label, nonUndefined);
   }
@@ -114,7 +126,12 @@ export default function Timeline(props: Readonly<Props>) {
     return (
       <Col className="d-flex align-items-start flex-column gap-1">
         <b>{label}:</b>
-        <TimelineMediaComponent type={MediaType.IMAGE} url={value} />
+        <TimelineMediaComponent
+          type={MediaType.IMAGE}
+          url={value}
+          label={label}
+          locale={locale}
+        />
       </Col>
     );
   }
@@ -123,13 +140,15 @@ export default function Timeline(props: Readonly<Props>) {
     if (from && to) {
       return (
         <>
-          {printImage("From", from)}
-          {printImage("To", to)}
+          {printImage(t(locale, "timeline.fields.from"), from)}
+          {printImage(t(locale, "timeline.fields.to"), to)}
         </>
       );
     }
 
-    const label = from ? "Removed Image" : "Added Image";
+    const label = from
+      ? t(locale, "timeline.fields.removedImage")
+      : t(locale, "timeline.fields.addedImage");
     const nonUndefined = from || to;
     return printImage(label, nonUndefined);
   }
@@ -138,7 +157,12 @@ export default function Timeline(props: Readonly<Props>) {
     return (
       <Col className="d-flex align-items-start flex-column gap-1">
         <b>{label}:</b>
-        <TimelineMediaComponent type={getType()} url={value} />
+        <TimelineMediaComponent
+          type={getType()}
+          url={value}
+          label={label}
+          locale={locale}
+        />
       </Col>
     );
   }
@@ -147,13 +171,15 @@ export default function Timeline(props: Readonly<Props>) {
     if (from && to) {
       return (
         <>
-          {printAnimation("From", from)}
-          {printAnimation("To", to)}
+          {printAnimation(t(locale, "timeline.fields.from"), from)}
+          {printAnimation(t(locale, "timeline.fields.to"), to)}
         </>
       );
     }
 
-    const label = from ? "Removed Animation" : "Added Animation";
+    const label = from
+      ? t(locale, "timeline.fields.removedAnimation")
+      : t(locale, "timeline.fields.addedAnimation");
     const nonUndefined = from || to;
     return printAnimation(label, nonUndefined);
   }
@@ -167,9 +193,17 @@ export default function Timeline(props: Readonly<Props>) {
     } else if (isUrlKey(change.key)) {
       content = printFromToUrls(change.from, change.to);
     } else if (change.key.endsWith("(Added)")) {
-      content = printAttribute("Value", change.to, true);
+      content = printAttribute(
+        t(locale, "timeline.fields.value"),
+        change.to,
+        true
+      );
     } else if (change.key.endsWith("(Removed)")) {
-      content = printAttribute("Value", change.from, true);
+      content = printAttribute(
+        t(locale, "timeline.fields.value"),
+        change.from,
+        true
+      );
     } else {
       content = printFromToFields(change.from, change.to);
     }
@@ -185,10 +219,11 @@ export default function Timeline(props: Readonly<Props>) {
             key={`timeline-${step.block}`}
             className={`${styles["timelineContainer"]} ${
               index % 2 === 0 ? styles["right"] : styles["left"]
-            }`}>
+            }`}
+          >
             <div className={styles["content"]}>
               <h5 className="m-0 mb-3">
-                {`${getDateDisplay(step.transaction_date)} UTC`}
+                {getDateDisplay(step.transaction_date)}
               </h5>
               <Container className="no-padding">
                 <Row className="pb-1">
@@ -199,10 +234,13 @@ export default function Timeline(props: Readonly<Props>) {
                         href={step.uri}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="d-flex align-items-center justify-content-center gap-2 decoration-none">
-                        URI
+                        aria-label={t(locale, "timeline.links.uriAriaLabel")}
+                        className="d-flex align-items-center justify-content-center gap-2 decoration-none"
+                      >
+                        {t(locale, "timeline.links.uri")}
                         <FontAwesomeIcon
                           icon={faExternalLinkSquare}
+                          aria-hidden="true"
                           className={styles["linkIcon"]}
                         />
                       </a>
@@ -210,10 +248,13 @@ export default function Timeline(props: Readonly<Props>) {
                         href={`https://etherscan.io/tx/${step.transaction_hash}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="d-flex align-items-center justify-content-center gap-2 decoration-none">
-                        TXN
+                        aria-label={t(locale, "timeline.links.txnAriaLabel")}
+                        className="d-flex align-items-center justify-content-center gap-2 decoration-none"
+                      >
+                        {t(locale, "timeline.links.txn")}
                         <FontAwesomeIcon
                           icon={faExternalLinkSquare}
+                          aria-hidden="true"
                           className={styles["linkIcon"]}
                         />
                       </a>

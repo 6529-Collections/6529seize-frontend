@@ -1,4 +1,7 @@
 import DropAttachmentDisplay from "@/components/drops/view/item/content/attachments/DropAttachmentDisplay";
+import { ApiAttachmentSafetyScanner } from "@/generated/models/ApiAttachmentSafetyScanner";
+import { ApiAttachmentSafetyStatus } from "@/generated/models/ApiAttachmentSafetyStatus";
+import { ApiAttachmentSafetyValidation } from "@/generated/models/ApiAttachmentSafetyValidation";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -142,6 +145,43 @@ describe("DropAttachmentDisplay", () => {
     expect(screen.queryByText("original.pdf")).not.toBeInTheDocument();
   });
 
+  it("shows scanned safety metadata only when provided by the attachment API", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="https://example.com/files/paper.pdf"
+        fileName="paper.pdf"
+        safety={{
+          status: ApiAttachmentSafetyStatus.ScannedValidated,
+          scanner: ApiAttachmentSafetyScanner.Guardduty,
+          validation: ApiAttachmentSafetyValidation.PublicIpfsValidated,
+          size_bytes: 2048,
+          sha256: "abc123def456",
+        }}
+      />
+    );
+
+    expect(screen.getByText("Scanned and validated")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Scanned and validated attachment",
+      })
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Attachment options" })
+    );
+    await user.click(
+      screen.getByRole("button", { name: "View safety details" })
+    );
+
+    expect(screen.getByText("Attachment safety")).toBeInTheDocument();
+    expect(screen.getByText("Size 2 KB")).toBeInTheDocument();
+    expect(screen.getByText("abc123def456")).toBeInTheDocument();
+  });
+
   it("renders a CSV preview after the user requests it", async () => {
     const user = userEvent.setup();
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
@@ -270,7 +310,7 @@ describe("DropAttachmentDisplay", () => {
     );
   });
 
-  it("opens attachment preview without loading metadata", async () => {
+  it("opens attachment preview without rendering metadata", async () => {
     const user = userEvent.setup();
     const fetchSpy = jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
@@ -290,19 +330,18 @@ describe("DropAttachmentDisplay", () => {
     );
 
     expect(screen.getByTitle("sample.pdf")).toBeInTheDocument();
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalled();
     expect(screen.queryByText(/"name": "Sample"/)).not.toBeInTheDocument();
   });
 
-  it("renders IPFS attachment metadata from the root CID", async () => {
+  it("keeps metadata actions out of the attachment menu", async () => {
     const user = userEvent.setup();
-    const writeText = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText },
-    });
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
+      headers: { get: () => null },
+      arrayBuffer: async () =>
+        new TextEncoder().encode(JSON.stringify({ name: "Sample", edition: 1 }))
+          .buffer,
       text: async () => JSON.stringify({ name: "Sample", edition: 1 }),
     } as Response);
 
@@ -317,35 +356,20 @@ describe("DropAttachmentDisplay", () => {
     await user.click(
       screen.getByRole("button", { name: "Attachment options" })
     );
-    await user.click(screen.getByRole("button", { name: "View metadata" }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/"name": "Sample"/)).toBeInTheDocument();
-    });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json",
-      expect.objectContaining({ signal: expect.any(AbortSignal) })
-    );
-
-    const copyMetadataButton = screen.getByRole("button", {
-      name: "Copy metadata link",
-    });
-    await user.click(copyMetadataButton);
-
-    expect(writeText).toHaveBeenCalledWith(
-      "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json"
-    );
-    expect(copyMetadataButton).toHaveAttribute("title", "Copied");
-    await user.click(
-      screen.getByRole("button", { name: "Close attachment details" })
-    );
+    expect(screen.queryByRole("button", { name: "View metadata" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "View safety details" })
+    ).toBeNull();
     expect(screen.queryByText(/"name": "Sample"/)).not.toBeInTheDocument();
   });
 
-  it("shows a metadata not found message when metadata cannot load", async () => {
+  it("does not show metadata errors in the attachment menu", async () => {
     const user = userEvent.setup();
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
+      headers: { get: () => null },
+      arrayBuffer: async () => new ArrayBuffer(0),
       text: async () => "",
     } as Response);
 
@@ -360,11 +384,12 @@ describe("DropAttachmentDisplay", () => {
     await user.click(
       screen.getByRole("button", { name: "Attachment options" })
     );
-    await user.click(screen.getByRole("button", { name: "View metadata" }));
 
-    await waitFor(() => {
-      expect(screen.getByText("Metadata not found.")).toBeInTheDocument();
-    });
+    expect(screen.queryByRole("button", { name: "View metadata" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "View safety details" })
+    ).toBeNull();
+    expect(screen.queryByText("Metadata not found.")).not.toBeInTheDocument();
   });
 
   it("copies attachment links from the options menu", async () => {

@@ -4,6 +4,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import type { ChangeEvent, FC, RefObject } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import { TraitWrapper } from "../../traits/TraitWrapper";
 import { MediaUploadItem, useMediaUpload } from "../hooks/useMediaUpload";
 import FormSection from "../ui/FormSection";
@@ -134,13 +135,14 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
         className="tw-relative tw-aspect-square tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900"
       >
         {isVideo ? (
-          <video
+          <SeizeVideoPlayer
             src={item.previewUrl}
+            template="poster-gated"
             className={previewClassName}
-            controls
             muted
-            playsInline
             preload="metadata"
+            layout="fill"
+            showActions={false}
           />
         ) : (
           <Image

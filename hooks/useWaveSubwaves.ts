@@ -3,6 +3,7 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
+import { compareSubwavesByLatestActivity } from "@/helpers/waves/subwave-activity.helpers";
 import {
   fetchWaveSubwavesPage,
   type WaveSubwavesQueryKeyParams,
@@ -11,9 +12,9 @@ import type { SidebarWave } from "@/types/waves.types";
 import { useQueries } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
-export const WAVE_SUBWAVES_PAGE_SIZE = 100;
+const WAVE_SUBWAVES_PAGE_SIZE = 100;
 
-export function getWaveSubwavesQueryKeyParams(
+function getWaveSubwavesQueryKeyParams(
   parentWaveId: string,
   viewerIdentityKey?: string | null | undefined
 ): WaveSubwavesQueryKeyParams {
@@ -88,7 +89,7 @@ export async function fetchAllWaveSubwaves({
     page += 1;
   }
 
-  return waves;
+  return [...waves].sort(compareSubwavesByLatestActivity);
 }
 
 export function useWaveSubwavesMap({

@@ -39,9 +39,9 @@ verify the result in Wallet Checker.
 1. Open `/delegation/delegation-center`.
 2. Pick an action path:
    - center cards:
-     - `Delegation` -> `/delegation/register-delegation`
-     - `Consolidation` -> `/delegation/register-consolidation`
-     - `Delegation Manager` -> `/delegation/register-sub-delegation`
+     - `Register Delegation` -> `/delegation/register-delegation`
+     - `Register Consolidation` -> `/delegation/register-consolidation`
+     - `Register Delegation Manager` -> `/delegation/register-sub-delegation`
    - collection cards:
      - `/delegation/any-collection`
      - `/delegation/the-memes`

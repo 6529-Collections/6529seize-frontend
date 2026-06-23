@@ -40,6 +40,9 @@ suppress those controls.
   TikTok, Farcaster/Warpcast, and Tenor GIF previews.
 - [Wave Drop Knowledge and Workspace Previews](feature-knowledge-and-workspace-previews.md):
   Google Workspace and Wikimedia previews.
+- [Wave Drop 6529 Collection Previews](feature-6529-collection-previews.md):
+  first-party cards for The Memes, Meme Lab, 6529 Gradient, NextGen, and
+  ReMemes links.
 - [Wave Drop Web3 Preview Cards](feature-web3-preview-cards.md): ENS,
   marketplace, Art Blocks, Compound, and `pepe.wtf` previews.
 
