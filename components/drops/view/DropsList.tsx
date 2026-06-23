@@ -280,6 +280,7 @@ const DropsList = memo(
           >
             <VirtualScrollWrapper
               scrollContainerRef={getItemData.scrollContainerRef}
+              dropId={drop.id}
               dropSerialNo={drop.serial_no}
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
               type={drop.type}

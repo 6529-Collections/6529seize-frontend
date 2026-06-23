@@ -1,6 +1,10 @@
 import { act, cleanup, render } from "@testing-library/react";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import {
+  clearWaveDropNearViewport,
+  isWaveDropNearViewport,
+} from "@/contexts/wave/drop-visibility";
 
 jest.useFakeTimers();
 
@@ -27,6 +31,7 @@ afterEach(() => {
   unobserve.mockClear();
   disconnect.mockClear();
   intersectionObserverOptions = null;
+  clearWaveDropNearViewport("wave", "drop-1");
   cleanup();
 });
 
@@ -34,12 +39,13 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({ fetchAroundSerialNo: jest.fn() })),
 }));
 
-function setup(size: DropSize) {
+function setup(size: DropSize, dropId?: string) {
   const scrollRef = { current: document.createElement("div") };
   const { container } = render(
     <VirtualScrollWrapper
       scrollContainerRef={scrollRef}
       delay={1000}
+      dropId={dropId}
       dropSerialNo={1}
       waveId="wave"
       type={size}>
@@ -67,7 +73,7 @@ test("renders placeholder when out of view", () => {
   const placeholder = div.firstChild as HTMLElement;
   expect(placeholder.getAttribute("style")).toContain("height: 123px");
   expect(placeholder.tagName).toBe("DIV");
-  expect(placeholder.children.length).toBe(0);
+  expect(placeholder.children).toHaveLength(0);
 });
 
 test("fetches light drop when entering view", () => {
@@ -94,6 +100,28 @@ describe("IntersectionObserver Configuration", () => {
   test("observes container element on mount", () => {
     const { container } = setup(DropSize.FULL);
     expect(observe).toHaveBeenCalledWith(container.firstChild);
+  });
+
+  test("updates drop near-viewport registry from observer state", () => {
+    setup(DropSize.FULL, "drop-1");
+
+    act(() => {
+      intersectionCb([{ isIntersecting: true } as any]);
+    });
+
+    expect(isWaveDropNearViewport("wave", "drop-1")).toBe(true);
+
+    act(() => {
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+
+    expect(isWaveDropNearViewport("wave", "drop-1")).toBe(false);
+
+    act(() => {
+      intersectionCb([{ isIntersecting: true } as any]);
+    });
+
+    expect(isWaveDropNearViewport("wave", "drop-1")).toBe(true);
   });
 });
 
