@@ -15,7 +15,6 @@ import {
 
 const MAX_BATCH_SIZE = 100;
 
-/** @api */
 export async function getTokensMetadata(
   params: TokenMetadataParams
 ): Promise<TokenMetadata[]> {

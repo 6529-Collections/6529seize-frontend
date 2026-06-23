@@ -17,7 +17,6 @@ import {
   toAbsoluteHttpUrl,
 } from "./utils";
 
-export type NftCollectionKind = "memes" | "meme-lab" | "gradient";
 type NftStructuredDataApiPath = "nfts" | "nfts_memelab";
 
 const fetchNftForStructuredDataCached = cache(

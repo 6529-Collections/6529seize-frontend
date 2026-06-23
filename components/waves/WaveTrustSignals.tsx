@@ -360,20 +360,6 @@ const getRepScore = ({
   return formatRep(waveRep.total_rep);
 };
 
-export const hasWaveTrustSignals = ({
-  waveRep,
-  waveScore,
-}: {
-  readonly waveRep?: ApiWaveRepSummary | null | undefined;
-  readonly waveScore?: ApiWaveScore | null | undefined;
-}): boolean => {
-  const visibilityScore = formatScore(waveScore?.visibility_score);
-  const hotnessScore = formatScore(waveScore?.hotness_score);
-  const repScore = getRepScore({ waveRep, waveScore });
-
-  return visibilityScore !== null || hotnessScore !== null || repScore !== null;
-};
-
 export const hasWaveTrustSummaryScore = (
   waveScore?: ApiWaveScore | null | undefined
 ): boolean => formatScore(waveScore?.visibility_score) !== null;
@@ -443,28 +429,6 @@ const buildSummaryDetails = ({
         ]),
     ...(repDetail === null ? [] : [repDetail]),
   ];
-};
-
-export const getWaveTrustSummaryLabel = ({
-  waveRep,
-  waveScore,
-}: {
-  readonly waveRep?: ApiWaveRepSummary | null | undefined;
-  readonly waveScore?: ApiWaveScore | null | undefined;
-}): string | null => {
-  const visibilityScore = formatScore(waveScore?.visibility_score);
-
-  if (visibilityScore === null) {
-    return null;
-  }
-
-  return buildSummaryDetails({
-    visibilityScore,
-    qualityScore: formatScore(waveScore?.quality_score),
-    hotnessScore: formatScore(waveScore?.hotness_score),
-    repSortScore: formatScore(waveScore?.rep_sort_score),
-    waveRep,
-  }).join(". ");
 };
 
 const buildHotnessDetails = ({

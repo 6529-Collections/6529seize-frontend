@@ -47,7 +47,7 @@ type PrimarySiteEnvelopeHashes = {
   readonly payloadHash: string;
 };
 
-export type ProfileCmsPrimarySite = {
+type ProfileCmsPrimarySite = {
   readonly cmsPackage: CmsPackageV1;
   readonly packageId?: string | undefined;
   readonly version?: string | undefined;

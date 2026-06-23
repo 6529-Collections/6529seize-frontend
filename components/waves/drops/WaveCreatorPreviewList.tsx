@@ -18,7 +18,7 @@ interface UseWaveCreatorPreviewWavesParams {
   readonly enabled: boolean;
 }
 
-export interface WaveCreatorPreviewWavesState {
+interface WaveCreatorPreviewWavesState {
   readonly waves: ApiWave[];
   readonly isFetching: boolean;
   readonly isFetchingNextPage: boolean;
