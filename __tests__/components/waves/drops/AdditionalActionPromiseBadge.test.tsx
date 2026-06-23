@@ -2,9 +2,11 @@ import type { ReactElement, ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
-const TOOLTIP_COPY =
-  "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.";
+const BADGE_LABEL = t(DEFAULT_LOCALE, "drops.additionalActionBadge.label");
+const TOOLTIP_COPY = t(DEFAULT_LOCALE, "drops.additionalActionBadge.tooltip");
 
 jest.mock("@/components/utils/tooltip/CustomTooltip", () => ({
   __esModule: true,
@@ -42,7 +44,7 @@ describe("AdditionalActionPromiseBadge", () => {
     expect(markup).toContain("<button");
     expect(markup).toContain('type="button"');
     expect(markup).toContain("tw-cursor-help");
-    expect(markup).toContain("Additional Action");
+    expect(markup).toContain(BADGE_LABEL);
     expect(descriptionId).toBeTruthy();
     expect(markup).toContain(
       `<span id="${descriptionId}" class="tw-sr-only">${TOOLTIP_COPY}</span>`
