@@ -36,3 +36,11 @@ test("compact reveal includes time for non-today timestamps", () => {
   const label = screen.getByText(`Yesterday, ${timeStr}`);
   expect(label).toHaveClass("tw-whitespace-nowrap");
 });
+
+test("compact reveal skips invalid timestamps instead of throwing", () => {
+  const { container } = render(
+    <WaveDropTime timestamp="not-a-real-time" variant="compactReveal" />
+  );
+
+  expect(container.firstChild).toBeNull();
+});

@@ -100,24 +100,22 @@ function SidebarCategoryLabel({
   label,
   tooltipContent,
   tooltipId,
-  showTooltipTrigger = true,
 }: {
   readonly label: string;
   readonly tooltipContent?: string | undefined;
   readonly tooltipId?: string | undefined;
-  readonly showTooltipTrigger?: boolean;
 }) {
   return (
-    <div className="tw-px-4 tw-pb-1.5 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+    <div className="tw-px-4 tw-pb-2 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
       <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
         <span>{label}</span>
-        {showTooltipTrigger && tooltipContent && tooltipId && (
+        {tooltipContent && tooltipId && (
           <button
             type="button"
             aria-label={tooltipContent}
             data-tooltip-id={tooltipId}
             data-tooltip-content={tooltipContent}
-            className="tw-inline-flex tw-size-3 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors focus:tw-text-iron-300 focus:tw-outline-none desktop-hover:hover:tw-text-iron-400"
+            className="-tw-my-1.5 tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors active:tw-text-iron-300 focus:tw-text-iron-300 focus:tw-outline-none desktop-hover:hover:tw-text-iron-400"
           >
             <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3" />
           </button>
@@ -432,7 +430,6 @@ const UnifiedWavesListWaves = forwardRef<
                   label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
                   tooltipContent={highlyRatedInfoTooltip}
                   tooltipId={HIGHLY_RATED_INFO_TOOLTIP_ID}
-                  showTooltipTrigger={!hasTouchScreen}
                 />
                 <HighlyRatedWavesToggle
                   paddingClassName="tw-px-4"
@@ -557,16 +554,24 @@ const UnifiedWavesListWaves = forwardRef<
         ) : (
           <div ref={listContainerRef} style={emptyPlaceholderStyle} />
         )}
-        {!hasTouchScreen && (
-          <ReactTooltip
-            id={HIGHLY_RATED_INFO_TOOLTIP_ID}
-            place="top"
-            offset={8}
-            opacity={1}
-            style={TOOLTIP_STYLE}
-            border="1px solid #4C4C55"
-          />
-        )}
+        <ReactTooltip
+          id={HIGHLY_RATED_INFO_TOOLTIP_ID}
+          place="top"
+          offset={8}
+          opacity={1}
+          openOnClick
+          closeOnScroll
+          openEvents={{ mouseover: true, focus: true, click: true }}
+          closeEvents={{ mouseout: true, blur: true }}
+          globalCloseEvents={{
+            escape: true,
+            scroll: true,
+            resize: true,
+            clickOutsideAnchor: true,
+          }}
+          style={TOOLTIP_STYLE}
+          border="1px solid #4C4C55"
+        />
       </div>
     );
   }
