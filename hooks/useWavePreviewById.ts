@@ -31,10 +31,11 @@ const retryWavePreviewFetch = (
 ): void => {
   emptyWavePreviewRetriesInFlight.add(waveId);
   refetch()
+    .catch(ignoreWavePreviewRefetchError)
     .finally(() => {
       emptyWavePreviewRetriesInFlight.delete(waveId);
-    })
-    .catch(ignoreWavePreviewRefetchError);
+      releaseWavePreviewFetch(waveId);
+    });
 };
 
 const subscribeToWavePreviewStore = (listener: () => void): (() => void) => {

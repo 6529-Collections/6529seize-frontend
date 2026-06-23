@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import {
   resetWavePreviewFetchGateForTests,
   useWavePreviewById,
@@ -184,7 +184,7 @@ describe("useWavePreviewById", () => {
     });
   });
 
-  it("requeues one empty preview retry before disabling the query", async () => {
+  it("retries one empty preview before disabling the query", async () => {
     const fetchingWaveIds = new Set(["wave-1"]);
     mockedUseWaveById.mockImplementation(
       (waveId, options?: UseWaveByIdOptions) =>
@@ -213,14 +213,6 @@ describe("useWavePreviewById", () => {
       expect(refetchWaveMock).toHaveBeenCalledTimes(1);
     });
 
-    fetchingWaveIds.add("wave-1");
-    rerender();
-
-    await waitFor(() => {
-      expect(getLatestEnabledByWaveId()["wave-1"]).toBe(true);
-    });
-
-    fetchingWaveIds.delete("wave-1");
     mockedUseWaveById.mockClear();
     rerender();
 
@@ -262,9 +254,78 @@ describe("useWavePreviewById", () => {
     });
   });
 
+  it("keeps a shared retry alive when one duplicate subscriber unmounts", async () => {
+    const fetchingWaveIds = new Set(["same-wave"]);
+    mockedUseWaveById.mockImplementation(
+      (waveId, options?: UseWaveByIdOptions) =>
+        createUseWaveByIdResult({
+          wave: undefined,
+          isFetching: Boolean(
+            options?.enabled && waveId && fetchingWaveIds.has(waveId)
+          ),
+          isLoading: Boolean(
+            options?.enabled && waveId && fetchingWaveIds.has(waveId)
+          ),
+        })
+    );
+
+    const first = renderHook(() => useWavePreviewById("same-wave"));
+    const second = renderHook(() => useWavePreviewById("same-wave"));
+
+    await waitFor(() => {
+      expect(getLatestEnabledByWaveId()["same-wave"]).toBe(true);
+    });
+
+    second.unmount();
+    fetchingWaveIds.delete("same-wave");
+    first.rerender();
+
+    await waitFor(() => {
+      expect(refetchWaveMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("releases the preview slot when an empty retry rejects", async () => {
+    const fetchingWaveIds = new Set(["wave-1"]);
+    refetchWaveMock.mockRejectedValueOnce(new Error("refetch failed"));
+    mockedUseWaveById.mockImplementation(
+      (waveId, options?: UseWaveByIdOptions) =>
+        createUseWaveByIdResult({
+          wave: undefined,
+          isFetching: Boolean(
+            options?.enabled && waveId && fetchingWaveIds.has(waveId)
+          ),
+          isLoading: Boolean(
+            options?.enabled && waveId && fetchingWaveIds.has(waveId)
+          ),
+        })
+    );
+
+    const { rerender } = renderHook(() => useWavePreviewById("wave-1"));
+
+    await waitFor(() => {
+      expect(getLatestEnabledByWaveId()["wave-1"]).toBe(true);
+    });
+
+    fetchingWaveIds.delete("wave-1");
+    rerender();
+
+    await waitFor(() => {
+      expect(refetchWaveMock).toHaveBeenCalledTimes(1);
+      expect(getLatestEnabledByWaveId()["wave-1"]).toBe(false);
+    });
+  });
+
   it("releases the preview slot when an empty retry returns wave data", async () => {
     const fetchingWaveIds = new Set(["wave-1"]);
     const loadedWaveIds = new Set<string>();
+    let resolveRefetch: ((value: WaveRefetchResult) => void) | undefined;
+    refetchWaveMock.mockImplementationOnce(
+      () =>
+        new Promise<WaveRefetchResult>((resolve) => {
+          resolveRefetch = resolve;
+        })
+    );
     mockedUseWaveById.mockImplementation(
       (waveId, options?: UseWaveByIdOptions) =>
         createUseWaveByIdResult({
@@ -292,15 +353,10 @@ describe("useWavePreviewById", () => {
       expect(refetchWaveMock).toHaveBeenCalledTimes(1);
     });
 
-    fetchingWaveIds.add("wave-1");
-    rerender();
-
-    await waitFor(() => {
-      expect(getLatestEnabledByWaveId()["wave-1"]).toBe(true);
-    });
-
-    fetchingWaveIds.delete("wave-1");
     loadedWaveIds.add("wave-1");
+    await act(async () => {
+      resolveRefetch?.(mockRefetchResult);
+    });
     mockedUseWaveById.mockClear();
     rerender();
 
