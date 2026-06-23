@@ -90,25 +90,36 @@ Known current gaps after the first automation slice:
     release-report fields, and release-captain validation updates;
   - feature flags: app-specific only, not a generic release-lane capability;
   - traffic-split canary rollout: not currently supported by the deployment bus;
-  - durable artifact storage: schema and validator are ready, but the approved
-    private storage/IAM/upload path still needs infrastructure wiring.
+  - durable artifact storage: deployment HTTP version evidence attempts an
+    approved private S3 upload when deploy verification passes; upload failure
+    warns but does not block the already-verified deployment, and no durable
+    artifact pointer is recorded unless the upload succeeds. Full
+    required-pack artifact capture still needs validation-pack automation.
 - Release reports evaluate whether required packs and durable artifact pointers
   are recorded, but the workflows still do not automatically run those
   post-deploy Playwright packs. The release captain or validation agents must
   run them and record results with `record-validation-check` until a later
   automation slice wires pack execution into the lane.
 - The workflows record post-deploy deploy-verification checkpoints and run a
-  GET-only `/api/version` check against the deployed HTTP app. These are useful
-  watch evidence, but GitHub Actions run URLs and temporary artifacts do not
-  satisfy durable artifact pointer requirements.
+  GET-only `/api/version` check against the deployed HTTP app. The redacted
+  version-evidence JSON is uploaded to approved S3 storage as
+  `deployment:http-version` evidence when the artifact IAM/storage path is
+  available. If that upload fails, the workflow emits a warning and leaves
+  release readiness incomplete instead of recording a fake durable pointer.
+  GitHub Actions run URLs and temporary artifacts remain useful context, but
+  only approved durable pointers satisfy durable artifact requirements.
 - The current standard pack plan requires desktop Chromium and mobile Chromium
   evidence for `playwright:core-smoke`, `playwright:surface-matrix`, and
   `playwright:wcag-i18n`. The deployment bus also knows the optional
   production-only `playwright:production-readonly` aggregate, which records
   desktop Chromium production evidence when a release captain explicitly opts
-  into it. Firefox, WebKit, Capacitor simulation, and Electron simulation remain
-  optional train/nightly or targeted validation lanes and must not be described
-  as real native or real Electron shell coverage.
+  into it, plus optional `native:surface-evidence`, which records the native
+  evidence classifier output without running simulator specs. Firefox, WebKit,
+  Capacitor simulation, and Electron simulation remain optional train/nightly or
+  targeted validation lanes and must not be described as real native or real
+  Electron shell coverage. Package-prerequisite evidence also is not enough for
+  real native or packaged Electron claims; those claims require separate
+  package-build and runtime-smoke artifacts.
 - Backend coordination is still a cross-repo handoff, not a shared automated
   release train.
 

@@ -2,6 +2,9 @@
 "use strict";
 
 const fs = require("node:fs");
+const crypto = require("node:crypto");
+const childProcess = require("node:child_process");
+const os = require("node:os");
 const path = require("node:path");
 const { parseArgs } = require("./cli-args.cjs");
 
@@ -18,6 +21,9 @@ const REQUIRED_WEB_SURFACES = Object.freeze([
 const PLAYWRIGHT_ARTIFACT_PATTERNS = Object.freeze([
   "test-results/playwright/**",
   "playwright-report/**",
+]);
+const NATIVE_EVIDENCE_ARTIFACT_PATTERNS = Object.freeze([
+  "test-results/native-surface-evidence*.json",
 ]);
 const VALIDATION_PACKS = Object.freeze({
   "playwright:core-smoke": createPlaywrightPack({
@@ -51,6 +57,30 @@ const VALIDATION_PACKS = Object.freeze({
     productionCommand: "seize run test:e2e:production:readonly",
     surfaces: ["web:desktop-chromium"],
   }),
+  "deployment:http-version": Object.freeze({
+    id: "deployment:http-version",
+    description:
+      "Durable redacted GET /api/version evidence from the deploy workflow.",
+    commands: Object.freeze({
+      staging:
+        "node ops/scripts/deployment-bus.cjs upload-validation-artifact --pack deployment:http-version",
+      production:
+        "node ops/scripts/deployment-bus.cjs upload-validation-artifact --pack deployment:http-version",
+    }),
+    size: "small",
+    surfaces: Object.freeze([]),
+    artifacts: Object.freeze(["deployment-version-evidence.json"]),
+  }),
+  "native:surface-evidence": createValidationPack({
+    id: "native:surface-evidence",
+    size: "large",
+    description:
+      "Classifies native coverage as browser simulation or package-prerequisite evidence.",
+    stagingCommand: "seize run test:native-evidence",
+    productionCommand: "seize run test:native-evidence",
+    surfaces: ["native:surface-evidence-classifier"],
+    artifacts: NATIVE_EVIDENCE_ARTIFACT_PATTERNS,
+  }),
 });
 const DEFAULT_REQUIRED_PACKS = Object.freeze([
   "playwright:core-smoke",
@@ -59,9 +89,12 @@ const DEFAULT_REQUIRED_PACKS = Object.freeze([
 ]);
 const APPROVED_DURABLE_ARTIFACT_PREFIXES = Object.freeze([
   "s3://6529-artifacts/",
+  "s3://6529reviewbot-prod-artifacts/frontend-deployment/",
   "https://artifacts.6529.io/",
   "ipfs://",
 ]);
+const DEFAULT_DEPLOYMENT_ARTIFACT_S3_PREFIX =
+  "s3://6529reviewbot-prod-artifacts/frontend-deployment/";
 const VALID_RETENTION_POLICIES = new Set([
   "standard-30-days",
   "standard-90-days",
@@ -136,6 +169,42 @@ const GITHUB_DEPLOYMENT_STATES = new Set([
   "pending",
   "success",
 ]);
+const REDACTION_TEXT = "[REDACTED]";
+const SECRET_JSON_KEY_RE =
+  /^(?:authorization|cookie|api[_-]?key|token|secret|password|private[_-]?key|staging_auth|staging_api_key|playwright_staging_access_code)$/i;
+const ARTIFACT_SECRET_PATTERNS = Object.freeze([
+  {
+    name: "authorization-header",
+    pattern:
+      /\bAuthorization:\s*[A-Za-z][A-Za-z0-9._~-]*\s+[A-Za-z0-9._~+/=-]{12,}/gi,
+  },
+  {
+    name: "staging-access-code",
+    pattern:
+      /\b(?:PLAYWRIGHT_STAGING_ACCESS_CODE|STAGING_AUTH|STAGING_API_KEY)\s*[=:]\s*["']?[^"'\s,;]{4,}/gi,
+  },
+  {
+    name: "secret-assignment",
+    pattern:
+      /\b(?:api[_-]?key|token|secret|password|private[_-]?key)\s*[=:]\s*["']?[^"'\s,;]{8,}/gi,
+  },
+  {
+    name: "aws-access-key",
+    pattern: /\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/g,
+  },
+  {
+    name: "github-token",
+    pattern: /\bgh[pousr]_[A-Za-z0-9_]{20,}\b/g,
+  },
+  {
+    name: "windows-local-path",
+    pattern: /\b[A-Z]:\\Users\\[^\\\s]+\\[^\n\r"]*/g,
+  },
+  {
+    name: "hidden-prompt-marker",
+    pattern: /\b(?:BEGIN|END) (?:SYSTEM|DEVELOPER|HIDDEN) PROMPT\b/gi,
+  },
+]);
 
 function createPlaywrightPack({
   id,
@@ -144,6 +213,26 @@ function createPlaywrightPack({
   productionCommand,
   surfaces = REQUIRED_WEB_SURFACES,
 }) {
+  return createValidationPack({
+    id,
+    size: "large",
+    description,
+    stagingCommand,
+    productionCommand,
+    surfaces,
+    artifacts: PLAYWRIGHT_ARTIFACT_PATTERNS,
+  });
+}
+
+function createValidationPack({
+  id,
+  size = "large",
+  description,
+  stagingCommand,
+  productionCommand,
+  surfaces = REQUIRED_WEB_SURFACES,
+  artifacts = PLAYWRIGHT_ARTIFACT_PATTERNS,
+}) {
   const environments = [
     ...(stagingCommand ? ["staging"] : []),
     ...(productionCommand ? ["production"] : []),
@@ -151,7 +240,7 @@ function createPlaywrightPack({
 
   return Object.freeze({
     id,
-    size: "large",
+    size,
     description,
     environments,
     surfaces,
@@ -159,7 +248,7 @@ function createPlaywrightPack({
       staging: stagingCommand,
       production: productionCommand,
     }),
-    artifacts: PLAYWRIGHT_ARTIFACT_PATTERNS,
+    artifacts,
   });
 }
 
@@ -178,6 +267,392 @@ function writeJson(file, value) {
 
 function writeStdout(value) {
   process.stdout.write(`${value}\n`);
+}
+
+function splitArtifactLines(text) {
+  const lines = [];
+  let start = 0;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char !== "\r" && char !== "\n") {
+      continue;
+    }
+
+    lines.push(text.slice(start, index));
+    if (char === "\r" && text[index + 1] === "\n") {
+      index += 1;
+    }
+    start = index + 1;
+  }
+
+  lines.push(text.slice(start));
+  return lines;
+}
+
+function firstNonWhitespaceIndex(text) {
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char !== " " && char !== "\t" && char !== "\r") {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function isCookieHeaderLine(line) {
+  const start = firstNonWhitespaceIndex(line);
+  if (start < 0) {
+    return false;
+  }
+
+  const headerPrefix = "cookie:";
+  return (
+    line.slice(start, start + headerPrefix.length).toLowerCase() ===
+      headerPrefix && line.indexOf("=", start + headerPrefix.length) >= 0
+  );
+}
+
+function redactCookieHeaders(text) {
+  return splitArtifactLines(text)
+    .map((line) => {
+      if (!isCookieHeaderLine(line)) {
+        return line;
+      }
+      const colonIndex = line.indexOf(":");
+      return `${line.slice(0, colonIndex + 1)} ${REDACTION_TEXT}`;
+    })
+    .join("\n");
+}
+
+function artifactSecretPatterns() {
+  return ARTIFACT_SECRET_PATTERNS.map(({ name, pattern }) => ({
+    name,
+    pattern: new RegExp(pattern.source, pattern.flags),
+  }));
+}
+
+function redactPatternText(text) {
+  const redactedPatterns = artifactSecretPatterns().reduce(
+    (next, { pattern }) => next.replace(pattern, REDACTION_TEXT),
+    text
+  );
+  return redactCookieHeaders(redactedPatterns);
+}
+
+function redactJsonSecrets(value) {
+  if (Array.isArray(value)) {
+    return value.map(redactJsonSecrets);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, childValue]) => [
+        key,
+        SECRET_JSON_KEY_RE.test(key)
+          ? REDACTION_TEXT
+          : redactJsonSecrets(childValue),
+      ])
+    );
+  }
+
+  if (typeof value === "string") {
+    return redactPatternText(value);
+  }
+
+  return value;
+}
+
+function redactJsonText(text) {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return text;
+  }
+
+  try {
+    return JSON.stringify(redactJsonSecrets(JSON.parse(text)), null, 2);
+  } catch {
+    return text;
+  }
+}
+
+function redactArtifactText(text) {
+  return redactPatternText(redactJsonText(text));
+}
+
+function collectJsonSecretFindings(value, pathParts = []) {
+  if (Array.isArray(value)) {
+    return value.flatMap((childValue, index) =>
+      collectJsonSecretFindings(childValue, [...pathParts, String(index)])
+    );
+  }
+
+  if (!value || typeof value !== "object") {
+    return [];
+  }
+
+  return Object.entries(value).flatMap(([key, childValue]) => {
+    const path = [...pathParts, key];
+    if (SECRET_JSON_KEY_RE.test(key) && childValue !== REDACTION_TEXT) {
+      return [
+        {
+          pattern: "json-secret-key",
+          sample: path.join(".").slice(0, 80),
+        },
+      ];
+    }
+    return collectJsonSecretFindings(childValue, path);
+  });
+}
+
+function jsonSecretFindings(text) {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return [];
+  }
+
+  try {
+    return collectJsonSecretFindings(JSON.parse(text));
+  } catch {
+    return [];
+  }
+}
+
+function verifyArtifactTextRedacted(text) {
+  const findings = jsonSecretFindings(text);
+
+  for (const { name, pattern } of artifactSecretPatterns()) {
+    const match = pattern.exec(text);
+    if (match?.[0]) {
+      findings.push({
+        pattern: name,
+        sample: match[0].slice(0, 80),
+      });
+    }
+  }
+
+  const cookieHeader = splitArtifactLines(text).find(isCookieHeaderLine);
+  if (cookieHeader) {
+    findings.push({
+      pattern: "cookie-header",
+      sample: cookieHeader.slice(0, 80),
+    });
+  }
+
+  return {
+    ok: findings.length === 0,
+    findings,
+  };
+}
+
+function sha256Hex(buffer) {
+  return crypto.createHash("sha256").update(buffer).digest("hex");
+}
+
+function safeS3KeySegment(value, fallback = "artifact") {
+  const text = String(value || fallback)
+    .trim()
+    .replace(/[^A-Za-z0-9._/-]+/g, "-")
+    .replace(/\/+/g, "/");
+  const segments = text
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter((segment) => segment && segment !== "." && segment !== "..");
+  return segments.join("/") || fallback;
+}
+
+function ensureTrailingSlash(value) {
+  return value.endsWith("/") ? value : `${value}/`;
+}
+
+function parseS3Uri(uri) {
+  if (!uri.startsWith("s3://")) {
+    throw new Error(
+      `S3 artifact prefix must start with s3://, received: ${uri}`
+    );
+  }
+  const withoutScheme = uri.slice("s3://".length);
+  const slashIndex = withoutScheme.indexOf("/");
+  const bucket =
+    slashIndex === -1 ? withoutScheme : withoutScheme.slice(0, slashIndex);
+  const keyPrefix =
+    slashIndex === -1 ? "" : withoutScheme.slice(slashIndex + 1);
+  if (!bucket) {
+    throw new Error("S3 artifact prefix must include a bucket name");
+  }
+  return {
+    bucket,
+    keyPrefix,
+  };
+}
+
+function artifactUploadPrefix(options, env) {
+  const prefix =
+    options.s3Prefix ||
+    env.DEPLOYMENT_ARTIFACT_S3_PREFIX ||
+    DEFAULT_DEPLOYMENT_ARTIFACT_S3_PREFIX;
+  const normalized = ensureTrailingSlash(String(prefix || "").trim());
+  if (!isApprovedDurableArtifactPrefix(normalized)) {
+    throw new Error(
+      `Artifact S3 prefix must be approved by the deployment bus: ${normalized}`
+    );
+  }
+  return normalized;
+}
+
+function inferContentType(file) {
+  const extension = path.extname(file).toLowerCase();
+  if (extension === ".json") {
+    return "application/json";
+  }
+  if (extension === ".md") {
+    return "text/markdown; charset=utf-8";
+  }
+  return "text/plain; charset=utf-8";
+}
+
+function assertTextArtifactBuffer(buffer, sourceFile) {
+  if (buffer.includes(0)) {
+    throw new Error(
+      `Refusing to upload ${sourceFile}: deployment-bus artifact upload currently supports text evidence only`
+    );
+  }
+}
+
+function redactedArtifactBuffer(sourceFile) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI reads caller-supplied evidence files.
+  const raw = fs.readFileSync(sourceFile);
+  assertTextArtifactBuffer(raw, sourceFile);
+  const redactedText = redactArtifactText(raw.toString("utf8"));
+  const verification = verifyArtifactTextRedacted(redactedText);
+  if (!verification.ok) {
+    throw new Error(
+      `Refusing to upload unredacted artifact ${sourceFile}: ${verification.findings
+        .map((finding) => finding.pattern)
+        .join(", ")}`
+    );
+  }
+  return Buffer.from(redactedText, "utf8");
+}
+
+function buildArtifactTargetUri(manifest, options, env = process.env) {
+  const now = options.now || new Date().toISOString();
+  const prefix = artifactUploadPrefix(options, env);
+  parseS3Uri(prefix);
+  const artifactName = safeS3KeySegment(
+    path.basename(
+      options.artifactName ||
+        path.basename(options.sourceFile || "artifact.txt")
+    )
+  );
+  const releaseId = safeS3KeySegment(
+    manifest.release_id || "unassigned-release"
+  );
+  const pack = safeS3KeySegment(options.pack || "unmapped-pack");
+  return `${prefix}${releaseId}/${pack}/${timestampSlug(now)}-${artifactName}`;
+}
+
+function writeTempArtifact(buffer, options) {
+  if (options.redactedOutput) {
+    const target = path.resolve(options.redactedOutput);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes caller-supplied redacted evidence paths.
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes caller-supplied redacted evidence paths.
+    fs.writeFileSync(target, buffer);
+    return { file: target, remove: false };
+  }
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "deployment-bus-"));
+  const tempFile = path.join(tempDir, "artifact");
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Writes a temp artifact created by this process.
+  fs.writeFileSync(tempFile, buffer);
+  return { file: tempFile, remove: true, tempDir };
+}
+
+function safeCommandError(stderr) {
+  return String(stderr || "")
+    .split(/\r?\n/)
+    .map((line) => line.replace(/([?&][^=\s]+)=([^&\s]+)/g, "$1=[redacted]"))
+    .join("\n")
+    .trim();
+}
+
+function uploadFileToS3(localFile, targetUri, options) {
+  const contentType =
+    options.contentType || inferContentType(options.sourceFile);
+  const args = [
+    "s3",
+    "cp",
+    localFile,
+    targetUri,
+    "--only-show-errors",
+    "--content-type",
+    contentType,
+    "--metadata",
+    `sha256=${options.sha256},redaction-status=verified-redacted,retention-policy=${options.retentionPolicy}`,
+  ];
+  const result = childProcess.spawnSync(options.awsCommand || "aws", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  if (result.status !== 0) {
+    throw new Error(
+      safeCommandError(result.stderr) ||
+        "aws s3 cp failed while uploading artifact"
+    );
+  }
+}
+
+function uploadValidationArtifact(manifest, options, env = process.env) {
+  if (!options.sourceFile) {
+    throw new Error("upload-validation-artifact requires --source-file");
+  }
+  if (!options.pack) {
+    throw new Error("upload-validation-artifact requires --pack");
+  }
+
+  const now = options.now || new Date().toISOString();
+  const targetUri = buildArtifactTargetUri(manifest, { ...options, now }, env);
+  const buffer = redactedArtifactBuffer(options.sourceFile);
+  const sha256 = sha256Hex(buffer);
+  const retentionPolicy = options.retentionPolicy || "standard-90-days";
+  if (!isValidRetentionPolicy(retentionPolicy)) {
+    throw new Error(
+      `--retention-policy must be one of ${[...VALID_RETENTION_POLICIES].join(", ")}`
+    );
+  }
+
+  const temp = writeTempArtifact(buffer, options);
+  try {
+    uploadFileToS3(temp.file, targetUri, {
+      sourceFile: options.sourceFile,
+      contentType: options.contentType,
+      awsCommand: options.awsCommand,
+      sha256,
+      retentionPolicy,
+    });
+  } finally {
+    if (temp.remove) {
+      fs.rmSync(temp.tempDir, { recursive: true, force: true });
+    }
+  }
+
+  return recordValidationCheck(manifest, {
+    pack: options.pack,
+    status: options.status || "passed",
+    command: options.command,
+    surfaces: options.surfaces || options.surface,
+    owner: options.owner,
+    artifactUri: targetUri,
+    artifactSha256: sha256,
+    redactionStatus: "verified-redacted",
+    retentionPolicy,
+    runUrl: options.runUrl,
+    source: options.source || "deployment-bus-artifact-upload",
+    notes: options.notes,
+    now,
+  });
 }
 
 function parseBoolean(value, fallback = false) {
@@ -2157,6 +2632,7 @@ function usage() {
   node ops/scripts/deployment-bus.cjs validate-manifest --file <file>
   node ops/scripts/deployment-bus.cjs summarize-manifest --file <file>
   node ops/scripts/deployment-bus.cjs record-validation-check --file <file> --pack playwright:core-smoke --status passed --surfaces web:desktop-chromium,web:mobile-chromium --artifact-uri s3://6529-artifacts/... --redaction-status verified-redacted --artifact-sha256 <hex> --retention-days 90
+  node ops/scripts/deployment-bus.cjs upload-validation-artifact --file <file> --pack deployment:http-version --source-file deployment-version-evidence.json --s3-prefix s3://6529reviewbot-prod-artifacts/frontend-deployment/
   node ops/scripts/deployment-bus.cjs release-report --file <file> --output <markdown-file>
   node ops/scripts/deployment-bus.cjs heartbeat-manifest --file <file> --message <text> [--status deploying] [--phase build]
   node ops/scripts/deployment-bus.cjs record-post-deploy-watch --file <file> --status passed --observed-duration-minutes 30 --checkpoint version-match --evidence https://github.com/.../actions/runs/...
@@ -2275,6 +2751,39 @@ async function main(argv = process.argv.slice(2), env = process.env) {
           notes: args.notes,
           now: args.now,
         });
+        const result = validateManifest(manifest);
+        printValidation(result);
+        if (!result.ok) {
+          process.exitCode = 1;
+          return;
+        }
+        writeJson(args.output || file, manifest);
+        writeStdout(`Updated ${args.output || file}`);
+        break;
+      }
+      case "upload-validation-artifact": {
+        const file = args.file;
+        const manifest = uploadValidationArtifact(
+          readJson(file),
+          {
+            pack: args.pack,
+            status: args.status,
+            command: args.command,
+            surfaces: args.surfaces || args.surface,
+            owner: args.owner,
+            sourceFile: args["source-file"],
+            artifactName: args["artifact-name"],
+            s3Prefix: args["s3-prefix"],
+            retentionPolicy: args["retention-policy"],
+            contentType: args["content-type"],
+            runUrl: args["run-url"],
+            source: args.source,
+            notes: args.notes,
+            redactedOutput: args["redacted-output"],
+            now: args.now,
+          },
+          env
+        );
         const result = validateManifest(manifest);
         printValidation(result);
         if (!result.ok) {
@@ -2423,6 +2932,9 @@ module.exports = {
   productionPreflight,
   recordPostDeployWatch,
   recordValidationCheck,
+  redactArtifactText,
   summarizeManifest,
+  uploadValidationArtifact,
   validateManifest,
+  verifyArtifactTextRedacted,
 };

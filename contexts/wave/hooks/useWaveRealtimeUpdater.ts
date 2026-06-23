@@ -25,6 +25,7 @@ import {
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
+import { isWaveDropNearViewport } from "@/contexts/wave/drop-visibility";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -593,6 +594,12 @@ const useProcessIncomingDrop = ({
           type,
           options,
         });
+        if (
+          type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
+          isWaveDropNearViewport(waveId, drop.id)
+        ) {
+          markActiveWaveAsRead(waveId);
+        }
         return;
       }
 

@@ -52,6 +52,10 @@ jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
   })),
 }));
 
+jest.mock("@/contexts/wave/drop-visibility", () => ({
+  isWaveDropNearViewport: jest.fn(() => true),
+}));
+
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
     cancelQueries: mockCancelQueries,
@@ -70,6 +74,7 @@ const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const {
   recordReactionRealtimeReconciliation,
 } = require("@/utils/monitoring/dropReactionMonitoring");
+const { isWaveDropNearViewport } = require("@/contexts/wave/drop-visibility");
 const { getAuthJwt } = require("@/services/auth/auth.utils");
 const getAuthJwtMock = getAuthJwt as jest.Mock;
 
@@ -89,6 +94,7 @@ describe("useWaveRealtimeUpdater", () => {
   beforeEach(() => {
     setDocumentVisibilityState("visible");
     getAuthJwtMock.mockReturnValue("test-jwt");
+    (isWaveDropNearViewport as jest.Mock).mockReturnValue(true);
     (recordReactionRealtimeReconciliation as jest.Mock).mockReturnValue({
       shouldApplyCanonicalDrop: true,
       expectedReaction: null,
@@ -222,6 +228,96 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.updateData).toHaveBeenCalled();
   });
 
+  it("marks active wave as read after visible reaction updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-active",
+            type: DropSize.FULL,
+            stableKey: "d4-active",
+            stableHash: "d4-active",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-active",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d4-active", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
+  it("does not mark active wave as read when reaction target is not near viewport", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-offscreen",
+            type: DropSize.FULL,
+            stableKey: "d4-offscreen",
+            stableHash: "d4-offscreen",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    (isWaveDropNearViewport as jest.Mock).mockReturnValue(false);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-offscreen",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d4-offscreen",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(isWaveDropNearViewport).toHaveBeenCalledWith(
+      "wave1",
+      "d4-offscreen"
+    );
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+  });
+
   it("skips stale DROP_REACTION_UPDATE canonical drops", async () => {
     const store = {
       wave1: {
@@ -238,6 +334,7 @@ describe("useWaveRealtimeUpdater", () => {
       },
     };
     const props = baseProps(store);
+    props.activeWaveId = "wave1";
     fetchDropByIdBatched.mockResolvedValue({
       id: "d4-stale",
       author: {},
@@ -268,6 +365,56 @@ describe("useWaveRealtimeUpdater", () => {
     expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4-stale");
     expect(props.updateData).not.toHaveBeenCalled();
     expect(mockSetQueriesData).not.toHaveBeenCalled();
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
+  it("does not mark background wave as read after reaction updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-background",
+            type: DropSize.FULL,
+            stableKey: "d4-background",
+            stableHash: "d4-background",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave2";
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-background",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d4-background",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 
   it("does not process when wave is missing", async () => {

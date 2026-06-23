@@ -49,6 +49,12 @@ App PR CI:
 - Uploaded PR CI artifacts are short-term debugging evidence. Durable
   deployment-train evidence still belongs on approved 6529-controlled artifact
   storage, not Git LFS.
+- Deployment workflows use `deployment-bus upload-validation-artifact` to
+  redact, hash, upload, and record GET `/api/version` evidence as
+  `deployment:http-version` when the approved artifact store is writable. A
+  failed upload warns and records no durable pointer. This is durable
+  deployment evidence, but it does not replace the required Playwright pack
+  artifacts for release readiness.
 
 WCAG and i18n route evidence:
 
@@ -118,8 +124,13 @@ Surface matrix:
   Capacitor runtime signals, iOS Open Data subscription hiding and US-visible
   subscription behavior, Android
   subscription visibility, the Capacitor app-wallet simulated empty state,
-  Electron app-wallet unsupported copy, and Electron share-modal desktop
-  handoff suppression.
+  Capacitor `/messages` native app chrome, Electron app-wallet unsupported
+  copy, and Electron share-modal desktop handoff suppression.
+- `test:native-evidence` runs the native surface evidence classifier. The
+  command must pass before native-adjacent PRs claim simulation-contract
+  coverage. `test:native-evidence:package-prereqs` is a stricter prerequisites
+  gate for checked-in Capacitor/Electron package structure and compatible host
+  tooling, but it still does not run package builds or runtime smoke tests.
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
@@ -129,19 +140,28 @@ Surface matrix:
   form; upload and attachment endpoints still fail closed. It must run against a
   loopback base URL, but it is not a full network-isolation harness and is not a
   staging or production smoke pack.
+- `test:e2e:reaction-sandbox` runs a local-only authenticated Waves reaction
+  sandbox on desktop Chromium. It adds and removes the deterministic quick
+  reaction on the synthetic sandbox drop, then verifies that only the exact
+  queryless `POST` and `DELETE` reaction mutations for that drop were allowed.
+  The standalone script keeps both `PLAYWRIGHT_AUTH_SANDBOX=1` and
+  `PLAYWRIGHT_COMPOSER_SANDBOX=1` enabled so its mutation auditor matches the
+  aggregate authenticated sandbox pack. All other drop, drop-media, and
+  attachment writes remain unsafe.
 - `test:e2e:auth-sandbox` runs the local authenticated sandbox on desktop
   Chromium. It includes the composer checks plus positive `/notifications`
-  `/messages/create`, and `/waves/create` Chat-wave flows with deterministic
-  mock API data. It allows only explicit local sandbox mutations such as
-  notification mark-read, synthetic direct-message creation, synthetic
-  create-wave group/wave creation, and the synthetic chat-drop submit with exact
-  sandbox IDs, queryless paths, and request bodies. The chat-drop signer is
-  bounded to the configured sandbox wallet or the empty unsigned direct-contract
-  form. Unknown mock API writes fail the sandbox request audit, and unexpected
-  same-origin Next.js API writes or unknown unsafe external browser writes are
-  blocked by a browser route guard. Known wallet and analytics SDK background
-  writes are still blocked in-browser, but they do not fail the test. This pack
-  must never run against staging or production.
+  `/messages/create`, `/waves/create` Chat-wave, and quick reaction add/remove
+  flows with deterministic mock API data. It allows only explicit local sandbox
+  mutations such as notification mark-read, synthetic direct-message creation,
+  synthetic create-wave group/wave creation, exact synthetic chat-drop submit,
+  and exact synthetic drop reaction add/remove with sandbox IDs, queryless
+  paths, and request bodies. The chat-drop signer is bounded to the configured
+  sandbox wallet or the empty unsigned direct-contract form. Unknown mock API
+  writes fail the sandbox request audit, and unexpected same-origin Next.js API
+  writes or unknown unsafe external browser writes are blocked by a browser
+  route guard. Known wallet and analytics SDK background writes are still
+  blocked in-browser, but they do not fail the test. This pack must never run
+  against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -214,6 +234,11 @@ Surface matrix:
 - Capacitor simulations expose both `CapacitorCustomPlatform` and a minimal
   `globalThis.Capacitor` shim so Playwright can catch hook-based and direct
   runtime-detection drift. This still does not prove native plugin behavior.
+- The native evidence classifier records that distinction in executable form:
+  current simulator projects are evidence tier `browser-simulation`, while
+  package-prerequisite readiness requires Capacitor/Electron package files to be
+  committed plus compatible host tooling such as Android build tools, macOS/Xcode
+  for iOS, or an Electron main process and package command.
 
 Large-pack ownership:
 
@@ -271,10 +296,11 @@ Large-pack ownership:
   or a user-equivalent product behavior that does not mark notifications read.
 - `test:e2e:auth-sandbox` is owned by PR or train owners changing local
   dev-auth behavior, notifications UI/filtering, direct-message creation,
-  create-wave wizard behavior, composer shell behavior, or the sandbox mutation
-  auditor. It is the positive stateful counterpart to the remote read-only packs
-  and must stay loopback only; the mock API and spawned Next dev server are
-  intentionally bound to loopback hosts.
+  create-wave wizard behavior, composer shell behavior, wave reaction
+  add/remove behavior, or the sandbox mutation auditor. It is the positive
+  stateful counterpart to the remote read-only packs and must stay loopback
+  only; the mock API and spawned Next dev server are intentionally bound to
+  loopback hosts.
 - `test:e2e:profile-deep-links-readonly` is owned by PR or train owners
   changing public profile routing, query-preserving profile links, legacy
   waves/groups/followers redirects, profile tab canonicalization, query
@@ -285,13 +311,21 @@ Large-pack ownership:
   read-only mutation guard behavior on search and wave surfaces.
 - `test:e2e:native-shell-readonly` is owned by PR or train owners changing
   Capacitor runtime detection, Electron detection, app-wallet support fallback,
-  native subscription visibility, header share/deep-link handoff behavior,
-  mobile-shell viewport setup, or read-only mutation guard behavior on
+  native subscription visibility, native messages shell routing, header
+  share/deep-link handoff behavior, mobile-shell viewport setup, or read-only
+  mutation guard behavior on
   native-adjacent shells. Treat failures as shell-branching signals, not as
   proof about real secure storage, real mobile plugins, or packaged Electron.
   The Capacitor browser simulation uses Capacitor's web plugin fallback for app
   wallets, so it covers the empty supported wallet shell and not real native
   secure storage.
+- `test:native-evidence` is owned by PR or train owners changing native
+  simulation config, Capacitor/Electron dependencies, native runtime detection,
+  or any PR description that discusses native package evidence. A passing run
+  proves the classifier and simulator contracts are present. It does not prove
+  real packages. A passing `test:native-evidence:package-prereqs` run proves only
+  checked-in package prerequisites; real packaged native/Electron claims still
+  require separate package-build and runtime-smoke evidence.
 - `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
   composer input, attachment preview/removal, link preview rendering, dev-auth
   composer eligibility, or local sandbox/mock API coverage. The pack may use
@@ -300,6 +334,12 @@ Large-pack ownership:
   must never submit drops or upload files to staging or production. Treat it as
   coverage for composer/drop/upload API safety, not as a guarantee that every
   external read-only media or metadata endpoint is isolated.
+- `test:e2e:reaction-sandbox` is owned by PR or train owners changing
+  `useDropReaction`, quick reactions, reaction chip removal, reaction
+  optimistic updates, wave drop action visibility, or local sandbox/mock API
+  coverage for drop reaction writes. The pack may use local synthetic auth and
+  a mock API, but it must never allow broad `/api/drops/**` writes beyond the
+  exact sandbox reaction endpoint and body.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
   individual public read-only packs on desktop Chromium and is the command

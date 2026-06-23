@@ -3828,3 +3828,138 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: finish the rebase, run the focused chat-drop sandbox validation
   set, push the rebased head, and re-trigger the unchanged existing
   reviewbot lanes plus GLM-swarm.
+
+## 2026-06-23T09:16Z PR #2851 Rebase After PR #2850 Merge
+
+- Started rebasing PR #2851 (`codex/native-package-evidence-e2e`) in
+  `D:\repos\6529seize-frontend-native-package-evidence` onto current
+  `origin/main` after PR #2850 merged as
+  `eec7dbecb1ff28ae357a3df707ba2051dea2b8e0`.
+- Conflict during the first commit was limited to workstream memory files:
+  `ops/workstreams/frontend-a11y-i18n/active-context.md` and
+  `ops/workstreams/frontend-a11y-i18n/run-log.md`.
+- Resolved by keeping the newer main-side #2850 timeline and adding this
+  current PR #2851 rebase note; package, tests, docs, and deployment-bus files
+  auto-merged on the first commit.
+- Next action: finish the rebase, rerun the native-surface evidence validation
+  set, push the rebased head, and trigger the unchanged existing reviewbot
+  lanes plus GLM-swarm.
+
+## 2026-06-23T09:38Z PR #2851 Rebase After PR #2854 Merge
+
+- Rebased PR #2851 onto `origin/main`
+  `daeac04bcb701786b5429a54ec832c0a24b42fd2` after PR #2854 merged.
+- First-commit conflict was in `ops/scripts/deployment-bus.cjs`, where the
+  merged `deployment:http-version` durable artifact pack overlapped the new
+  `native:surface-evidence` optional pack. Resolved by preserving both
+  registry entries and both artifact patterns.
+- Incorporated the worker's latest CodeRabbit cleanup commit
+  `e7d1f8e852958bcc9a347a9d77a19c1ab6f50eed`, rebased as current head
+  `4151a1bb8`.
+- Rebased validation passed:
+  - `node --check ops/scripts/native-surface-evidence.cjs`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+    60 passed.
+  - `seize run test:native-evidence`: passed; evidence tier is
+    `browser-simulation`, not real packaged runtime evidence.
+  - `seize run typecheck:playwright`: passed.
+  - `seize run typecheck:changed`: 39 changed TypeScript files passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 __tests__/scripts/deployment-bus.test.ts __tests__/scripts/native-surface-evidence.test.ts tests/support/surfaceSimulation.ts tests/surfaces/native-shell-readonly.spec.ts`:
+    passed.
+  - `seize run lint:package-json`: passed.
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --output test-results/app-pr-ci/native-evidence-risk-floor-rebased.json`:
+    Level 4 because deployment and test-control tooling changed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/native-evidence-secret-scan-rebased.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/native-evidence-workflow-security-rebased.json`:
+    clean, no changed workflow files.
+  - `codex-diff-check`
+  - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 expected skips
+    across Capacitor iOS/Android simulation and Electron shell simulation.
+- Next action: commit this memory update, force-push PR #2851, trigger all
+  existing 6529bot lanes plus GLM-swarm, and merge after checks and material
+  bot feedback are clear.
+
+## 2026-06-23T10:05Z PR #2851 Current-Main Rebase
+
+- `origin/main` advanced to
+  `32fa30b4eecfa9b103f67c5499f981292d63d167` via PR #2787.
+- Rebased PR #2851 (`codex/native-package-evidence-e2e`) onto that current
+  main cleanly, without conflict.
+- Validation on the refreshed head passed:
+  - `node --check ops/scripts/native-surface-evidence.cjs`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run lint:package-json`
+  - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+    60 passed.
+  - `seize run test:native-evidence`: passed; evidence tier is
+    `browser-simulation`, not real packaged runtime evidence.
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`: 43 changed TypeScript files passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 __tests__/scripts/deployment-bus.test.ts __tests__/scripts/native-surface-evidence.test.ts tests/support/surfaceSimulation.ts tests/surfaces/native-shell-readonly.spec.ts`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --output test-results/app-pr-ci/native-evidence-risk-floor-main-32fa30.json`:
+    Level 4 because deployment and test-control tooling changed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/native-evidence-secret-scan-main-32fa30.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/native-evidence-workflow-security-main-32fa30.json`:
+    clean, no changed workflow files.
+  - `codex-diff-check`
+  - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 expected skips
+    across Capacitor iOS/Android simulation and Electron shell simulation.
+- Next action: commit this memory update, force-push PR #2851, post concise
+  evidence, trigger reviewbot lanes in a plain command comment, and merge after
+  CI and material bot feedback are clear.
+- CodeRabbit later flagged the native messages heading assertion as broad.
+  This is intentional because local auth can render the messages page or its
+  wallet/profile gate in the native simulation; added an inline comment and
+  validated with focused ESLint, Playwright typecheck, and `codex-diff-check`.
+
+## 2026-06-23T10:30Z PR #2852 Current-Main Rebase After #2851 Merge
+
+- PR #2851 merged into `origin/main` as
+  `8c1ec66ea31d6ef952586b17716f0f43030c1ec2`.
+- Rebased PR #2852 (`codex/e2e-wallet-signing-guards`) onto that current main.
+  Conflicts were limited to stale workstream memory entries and were resolved by
+  keeping the newer main-side timeline, then updating `active-context.md` with
+  the current #2852/#2853 queue state.
+- The branch delta remains test/docs/tooling only: reaction sandbox coverage,
+  review polish comments, and the GLM-requested
+  `PLAYWRIGHT_AUTH_SANDBOX=1` guard on `test:e2e:reaction-sandbox`.
+- Validation on the rebased head passed:
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `seize run lint:package-json`
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/social/wave-reaction-sandbox.spec.ts tests/support/composerSandboxServer.cjs`
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`: 43 changed TypeScript files passed.
+  - `seize run test:e2e:reaction-sandbox`: 1 passed with
+    `PLAYWRIGHT_AUTH_SANDBOX=1`.
+  - `seize run test:e2e:auth-sandbox`: 9 passed.
+  - `seize run test:e2e:composer-sandbox`: 10 passed across desktop/mobile
+    Chromium.
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --output test-results/app-pr-ci/reaction-sandbox-risk-floor-after-2851.json`
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/reaction-sandbox-secret-scan-after-2851.json`
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/reaction-sandbox-workflow-security-after-2851.json`
+- Next action: commit this memory update, force-push the current #2852 head,
+  trigger CodeRabbit plus the existing 6529bot lanes and GLM-swarm on the exact
+  pushed commit, then merge if CI and material bot feedback remain clear.
+
+## 2026-06-23T10:42Z PR #2852 Bot Feedback Patch
+
+- Addressed remaining current-file review feedback before merge:
+  - CodeRabbit's Open Graph fixture concern was valid; `fulfillOpenGraphBatch`
+    now falls back to the deterministic preview URL when `postDataJSON()` sees
+    an empty or invalid request body.
+  - GLM-swarm's reaction-method concern was behaviorally safe already because
+    unsupported writes on `/api/drops/:id/reaction` classify as
+    `dangerous-composer-mutation` and return `409`; added an explicit negative
+    Playwright assertion to lock that invariant.
+- Focused validation passed after the patch:
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/social/wave-reaction-sandbox.spec.ts tests/support/composerSandboxServer.cjs`
+  - `seize run typecheck:playwright`
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `codex-diff-check`
+  - `seize run test:e2e:reaction-sandbox`: 2 passed, including the unsupported
+    reaction mutation rejection case.
+- Next action: commit, force-push, rerun exact-head reviewbot/CI signals, and
+  merge #2852 once no material feedback remains.
