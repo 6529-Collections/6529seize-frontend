@@ -818,13 +818,13 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. PR #2851 (`codex/native-package-evidence-e2e`) is rebased onto current
-   `origin/main` after PR #2787, with local native evidence, deployment-bus,
-   and native-shell validation green. Push the refreshed head, re-trigger the
-   existing reviewbot lanes plus GLM-swarm, and merge once CI and material bot
-   feedback are clear.
-2. PR #2852 (`codex/e2e-wallet-signing-guards`) is the reaction sandbox train
-   ahead of PR #2853 and is being monitored on its refreshed current-main head.
+1. PR #2851 (`codex/native-package-evidence-e2e`) merged into `origin/main` as
+   `8c1ec66ea31d6ef952586b17716f0f43030c1ec2`.
+2. PR #2852 (`codex/e2e-wallet-signing-guards`) is rebased on top of that
+   merged #2851 head. The current delta keeps the reaction sandbox, review
+   polish, and GLM fix that adds `PLAYWRIGHT_AUTH_SANDBOX=1` to the standalone
+   reaction pack. Run the focused validation, push, trigger latest-head
+   reviewbot lanes, and merge once CI and material bot feedback are clear.
 3. PR #2853 (`codex/e2e-wallet-signing-sandbox`) remains conflict-blocked
    behind #2852 and should be rebased after #2852 lands.
 4. Deploy merged testing-roadmap slices through staging first, validate exact
