@@ -452,6 +452,33 @@ describe("github-preview API route", () => {
       title: "ASSET",
       extension: null,
       fileKind: "unknown",
+      isBinary: true,
+      lineCount: null,
+      excerpt: null,
+    });
+  });
+
+  it("suppresses oversized decoded GitHub file excerpts", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "large.txt",
+        path: "large.txt",
+        encoding: "base64",
+        content: Buffer.from("a".repeat(64 * 1024 + 1)).toString("base64"),
+        html_url: "https://github.com/o/r/blob/main/large.txt",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/large.txt")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      title: "large.txt",
+      extension: "txt",
+      fileKind: "text",
       isBinary: false,
       lineCount: null,
       excerpt: null,

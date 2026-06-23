@@ -1185,17 +1185,17 @@ function hasBinaryBytePattern(buffer: Buffer): boolean {
 const decodeTextContent = (
   content: GithubContentApiItem,
   isBinary: boolean
-): string | null => {
+): { readonly text: string | null; readonly detectedBinary: boolean } => {
   if (isBinary) {
-    return null;
+    return { text: null, detectedBinary: true };
   }
 
   const buffer = decodeGithubContentBuffer(content);
   if (!buffer || hasBinaryBytePattern(buffer)) {
-    return null;
+    return { text: null, detectedBinary: Boolean(buffer) };
   }
 
-  return buffer.toString("utf8");
+  return { text: buffer.toString("utf8"), detectedBinary: false };
 };
 
 const buildContentExcerpt = (
@@ -1207,18 +1207,20 @@ const buildContentExcerpt = (
   readonly excerpt: readonly string[] | null;
   readonly lineStart: number | null;
   readonly lineEnd: number | null;
+  readonly detectedBinary: boolean;
 } => {
   const decoded = decodeTextContent(content, isBinary);
-  if (!decoded) {
+  if (!decoded.text) {
     return {
       lineCount: null,
       excerpt: null,
       lineStart: resource.lineStart,
       lineEnd: resource.lineEnd,
+      detectedBinary: decoded.detectedBinary,
     };
   }
 
-  const lines = decoded.replace(/\r\n/g, "\n").split("\n");
+  const lines = decoded.text.replace(/\r\n/g, "\n").split("\n");
   const lineCount = lines.length;
   const requestedStart = resource.lineStart ?? 1;
   if (requestedStart > lineCount) {
@@ -1227,6 +1229,7 @@ const buildContentExcerpt = (
       excerpt: null,
       lineStart: null,
       lineEnd: null,
+      detectedBinary: false,
     };
   }
 
@@ -1248,6 +1251,7 @@ const buildContentExcerpt = (
     excerpt,
     lineStart: resource.lineStart,
     lineEnd: normalizedLineEnd,
+    detectedBinary: false,
   };
 };
 
@@ -1302,8 +1306,23 @@ const buildContentPreview = (
     type === "github.file"
       ? detectExternalFileKind({ extension, contentType: mimeType })
       : null;
-  const isBinary =
+  const isBinaryByKind =
     type === "github.file" && fileKind ? isBinaryFileKind(fileKind) : null;
+  const contentExcerpt =
+    type === "github.file"
+      ? buildContentExcerpt(content, resource, Boolean(isBinaryByKind))
+      : null;
+  const { detectedBinary, ...contentExcerptResponse } = contentExcerpt ?? {
+    lineCount: null,
+    excerpt: null,
+    lineStart: null,
+    lineEnd: null,
+    detectedBinary: false,
+  };
+  const isBinary =
+    type === "github.file"
+      ? Boolean(isBinaryByKind || detectedBinary)
+      : null;
 
   return {
     type,
@@ -1322,14 +1341,7 @@ const buildContentPreview = (
       type === "github.file"
         ? getFileLanguage(path)
         : null,
-    ...(type === "github.file"
-      ? buildContentExcerpt(content, resource, Boolean(isBinary))
-      : {
-          lineCount: null,
-          excerpt: null,
-          lineStart: null,
-          lineEnd: null,
-        }),
+    ...contentExcerptResponse,
     entries: null,
     fileCount: null,
     directoryCount: null,
