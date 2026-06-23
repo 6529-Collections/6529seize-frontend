@@ -11,7 +11,7 @@ import {
   useRef,
 } from "react";
 import type { EditorState } from "lexical";
-import { RootNode, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import { COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -61,6 +61,7 @@ import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
+import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -148,7 +149,6 @@ const CreateDropInput = forwardRef<
         GroupMentionNode,
         HashtagNode,
         WaveMentionNode,
-        RootNode,
         HeadingNode,
         ListNode,
         ListItemNode,
@@ -312,6 +312,7 @@ const CreateDropInput = forwardRef<
               />
               <HistoryPlugin />
               <OnChangePlugin onChange={onEditorStateChange} />
+              <RootBlockGuardPlugin />
               <NewMentionsPlugin
                 waveId={waveId}
                 onSelect={onMentionedUserAdded}

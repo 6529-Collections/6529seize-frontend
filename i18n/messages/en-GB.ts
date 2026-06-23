@@ -19,6 +19,8 @@ export const EN_GB_MESSAGES = {
   "profileCms.interactive.exitFullscreen": "Exit full screen",
   "drop.media.processing": "Processing image",
   "drop.media.unavailable": "Image unavailable",
+  "drop.media.loadFailed": "Couldn’t load image.",
+  "drop.media.retry": "Retry",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
