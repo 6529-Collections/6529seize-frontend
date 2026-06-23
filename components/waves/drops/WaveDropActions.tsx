@@ -14,6 +14,7 @@ import WaveDropActionsMore from "./WaveDropActionsMore";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropActionsReply from "./WaveDropActionsReply";
+import { useWaveDropLayers } from "./WaveDropLayerContext";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
@@ -35,6 +36,7 @@ export default function WaveDropActions({
   const { isMemesWave } = useSeizeSettings();
   const { connectedProfile } = useAuth();
   const compact = useCompactMode();
+  const { desktopActionsZIndexClassName } = useWaveDropLayers();
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const showGuestCopyOnly = !connectedProfile?.handle;
 
@@ -55,7 +57,7 @@ export default function WaveDropActions({
 
   return (
     <div
-      className={`tw-absolute tw-right-2 tw-z-20 ${
+      className={`tw-absolute tw-right-2 ${desktopActionsZIndexClassName} ${
         compact ? "-tw-top-4" : "-tw-top-9"
       } tw-transition-opacity tw-duration-200 tw-ease-in-out ${visibilityClasses}`}
     >
