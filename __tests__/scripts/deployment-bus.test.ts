@@ -12,10 +12,15 @@ const {
   productionPreflight,
   recordPostDeployWatch,
   recordValidationCheck,
+  redactArtifactText,
   summarizeManifest,
+  uploadValidationArtifact,
   validateManifest,
+  verifyArtifactTextRedacted,
 } = require("../../ops/scripts/deployment-bus.cjs");
+const childProcess = require("node:child_process");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 
 const STAGING_SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
@@ -57,6 +62,29 @@ function releasePackCheck({ pack, command, artifact, surfaces }) {
     surfaces: surfaces ?? [...REQUIRED_WEB_SURFACES],
     artifacts: [artifact],
   };
+}
+
+function withTempArtifactDir(callback) {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "tmp-artifact-"));
+  try {
+    return callback(tempDir);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+function mockSuccessfulS3Upload() {
+  return jest.spyOn(childProcess, "spawnSync").mockReturnValue({
+    status: 0,
+    stdout: "",
+    stderr: "",
+  });
+}
+
+function writeJsonEvidence(tempDir, fileName, value) {
+  const sourceFile = path.join(tempDir, fileName);
+  fs.writeFileSync(sourceFile, JSON.stringify(value));
+  return sourceFile;
 }
 
 function releaseReadyValidationChecks() {
@@ -529,6 +557,282 @@ describe("deployment bus manifest", () => {
       retention_policy: "standard-90-days",
     });
     expect(validateManifest(updated).errors).toEqual([]);
+  });
+
+  it("uploads redacted validation evidence to approved S3 storage", () => {
+    withTempArtifactDir((tempDir) => {
+      const redactedOutput = path.join(tempDir, "redacted.json");
+      const tokenValue = ["fake", "token", "value", "1234567890"].join("-");
+      const stagingEnvKey = ["STAGING", "AUTH"].join("_");
+      const stagingValue = ["fake", "stage", "code"].join("-");
+      const sourceFile = writeJsonEvidence(
+        tempDir,
+        "deployment-version-evidence.json",
+        {
+          status: "ok",
+          authorization: ["Authorization", `Bearer ${tokenValue}`].join(": "),
+          staging: `${stagingEnvKey}=${stagingValue}`,
+        }
+      );
+      const spawnSpy = mockSuccessfulS3Upload();
+      const base = buildManifest({
+        environment: "staging",
+        stagingDeploySha: STAGING_SHA,
+        productionCandidateSha: MAIN_SHA,
+        now: "2026-06-18T12:00:00.000Z",
+      });
+
+      const updated = uploadValidationArtifact(
+        base,
+        {
+          pack: "deployment:http-version",
+          status: "passed",
+          sourceFile,
+          artifactName: "deployment-version-evidence.json",
+          s3Prefix: "s3://6529reviewbot-prod-artifacts/frontend-deployment/",
+          retentionPolicy: "standard-90-days",
+          redactedOutput,
+          now: "2026-06-18T12:30:00.000Z",
+        },
+        {}
+      );
+
+      const check = updated.validation.checks[0];
+      const artifact = check.artifacts[0];
+      const redacted = fs.readFileSync(redactedOutput, "utf8");
+      expect(check).toMatchObject({
+        pack: "deployment:http-version",
+        status: "passed",
+        command: VALIDATION_PACKS["deployment:http-version"].commands.staging,
+        surfaces: [],
+      });
+      expect(redacted).toContain("[REDACTED]");
+      expect(redacted).not.toContain(tokenValue);
+      expect(redacted).not.toContain(stagingValue);
+      expect(verifyArtifactTextRedacted(redacted)).toEqual({
+        ok: true,
+        findings: [],
+      });
+      expect(artifact).toMatchObject({
+        uri: "s3://6529reviewbot-prod-artifacts/frontend-deployment/fe-staging-20260618T120000Z-bbbbbbbbbbbb/deployment-http-version/20260618T123000Z-deployment-version-evidence.json",
+        redaction_status: "verified-redacted",
+        retention_policy: "standard-90-days",
+      });
+      expect(artifact.sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(spawnSpy).toHaveBeenCalledWith(
+        "aws",
+        expect.arrayContaining([
+          "s3",
+          "cp",
+          redactedOutput,
+          artifact.uri,
+          "--only-show-errors",
+        ]),
+        expect.any(Object)
+      );
+      expect(validateManifest(updated).errors).toEqual([]);
+      expect(evaluateReleaseReadiness(updated).holds).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: "required-pack-missing-terminal-evidence",
+            pack: "playwright:core-smoke",
+          }),
+          expect.objectContaining({
+            id: "required-pack-missing-terminal-evidence",
+            pack: "playwright:surface-matrix",
+          }),
+          expect.objectContaining({
+            id: "required-pack-missing-terminal-evidence",
+            pack: "playwright:wcag-i18n",
+          }),
+        ])
+      );
+      expect(
+        evaluateReleaseReadiness({
+          ...updated,
+          validation: {
+            ...updated.validation,
+            required_packs: ["deployment:http-version"],
+          },
+        }).holds
+      ).toEqual([]);
+    });
+  });
+
+  it("records workflow-shaped durable evidence without explicit surfaces", () => {
+    withTempArtifactDir((tempDir) => {
+      const sourceFile = writeJsonEvidence(
+        tempDir,
+        "deployment-version-evidence.json",
+        {
+          status: "ok",
+          expected_sha: STAGING_SHA,
+        }
+      );
+      const spawnSpy = mockSuccessfulS3Upload();
+      const base = buildManifest({
+        environment: "staging",
+        stagingDeploySha: STAGING_SHA,
+        productionCandidateSha: MAIN_SHA,
+        now: "2026-06-18T12:00:00.000Z",
+      });
+
+      const updated = uploadValidationArtifact(
+        base,
+        {
+          pack: "deployment:http-version",
+          status: "passed",
+          sourceFile,
+          artifactName: "deployment-version-evidence.json",
+          retentionPolicy: "standard-90-days",
+          runUrl:
+            "https://github.com/6529-Collections/6529seize-frontend/actions/runs/1",
+          notes: "Durable staging GET /api/version evidence.",
+          now: "2026-06-18T12:30:00.000Z",
+        },
+        {
+          DEPLOYMENT_ARTIFACT_S3_PREFIX:
+            "s3://6529reviewbot-prod-artifacts/frontend-deployment/",
+        }
+      );
+
+      const check = updated.validation.checks[0];
+      expect(check).toMatchObject({
+        pack: "deployment:http-version",
+        status: "passed",
+        surfaces: [],
+      });
+      expect(check.artifacts[0].uri).toBe(
+        "s3://6529reviewbot-prod-artifacts/frontend-deployment/fe-staging-20260618T120000Z-bbbbbbbbbbbb/deployment-http-version/20260618T123000Z-deployment-version-evidence.json"
+      );
+      expect(validateManifest(updated).errors).toEqual([]);
+      expect(spawnSpy).toHaveBeenCalledWith(
+        "aws",
+        expect.arrayContaining([
+          "s3",
+          "cp",
+          expect.any(String),
+          check.artifacts[0].uri,
+          "--only-show-errors",
+        ]),
+        expect.any(Object)
+      );
+    });
+  });
+
+  it("rejects unapproved S3 artifact prefixes before upload", () => {
+    withTempArtifactDir((tempDir) => {
+      const sourceFile = writeJsonEvidence(tempDir, "evidence.json", {
+        status: "ok",
+      });
+      const spawnSpy = jest.spyOn(childProcess, "spawnSync");
+      const base = buildManifest({
+        environment: "staging",
+        stagingDeploySha: STAGING_SHA,
+        productionCandidateSha: MAIN_SHA,
+        now: "2026-06-18T12:00:00.000Z",
+      });
+
+      expect(() =>
+        uploadValidationArtifact(
+          base,
+          {
+            pack: "deployment:http-version",
+            sourceFile,
+            s3Prefix: "s3://unapproved-artifacts/",
+          },
+          {}
+        )
+      ).toThrow("Artifact S3 prefix must be approved by the deployment bus");
+      expect(spawnSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  it("removes traversal segments from artifact S3 keys", () => {
+    withTempArtifactDir((tempDir) => {
+      const sourceFile = writeJsonEvidence(tempDir, "evidence.json", {
+        status: "ok",
+      });
+      mockSuccessfulS3Upload();
+      const base = buildManifest({
+        environment: "staging",
+        stagingDeploySha: STAGING_SHA,
+        productionCandidateSha: MAIN_SHA,
+        now: "2026-06-18T12:00:00.000Z",
+      });
+
+      const updated = uploadValidationArtifact(
+        base,
+        {
+          pack: "a/../../x",
+          sourceFile,
+          artifactName: "../../deployment-version-evidence.json",
+          s3Prefix: "s3://6529reviewbot-prod-artifacts/frontend-deployment/",
+          retentionPolicy: "standard-90-days",
+          now: "2026-06-18T12:30:00.000Z",
+        },
+        {}
+      );
+
+      const artifactUri = updated.validation.checks[0].artifacts[0].uri;
+      expect(artifactUri).not.toContain("..");
+      expect(artifactUri).toContain("/a/x/");
+      expect(artifactUri).toContain(
+        "/20260618T123000Z-deployment-version-evidence.json"
+      );
+    });
+  });
+
+  it("redacts deployment artifact text with the shared release patterns", () => {
+    const cookieLine = ["Cookie", "session=fake-cookie-value"].join(": ");
+    const tokenValue = ["fake", "token", "value", "1234567890"].join("-");
+    const authLine = ["Authorization", `Bearer ${tokenValue}`].join(": ");
+    const basicAuthLine = ["Authorization", `Basic ${tokenValue}`].join(": ");
+    const raw = `${cookieLine}\n${authLine}\n${basicAuthLine}`;
+    const redacted = redactArtifactText(raw);
+
+    expect(redacted).toContain("[REDACTED]");
+    expect(redacted).not.toContain(tokenValue);
+    expect(verifyArtifactTextRedacted(redacted)).toEqual({
+      ok: true,
+      findings: [],
+    });
+
+    const overlappingKey = ["STAGING", "API", "KEY"].join("_");
+    const overlappingValue = ["fake", "token", "value", "1234567890"].join("-");
+    const overlapping = redactArtifactText(
+      `${overlappingKey}=${overlappingValue}`
+    );
+    expect(overlapping).toBe("[REDACTED]");
+    expect(overlapping).not.toContain(overlappingValue);
+    expect(verifyArtifactTextRedacted(overlapping)).toEqual({
+      ok: true,
+      findings: [],
+    });
+  });
+
+  it("redacts pretty-printed JSON secret keys before verification", () => {
+    const tokenValue = ["json", "secret", "value", "1234567890"].join("-");
+    const raw = `{
+  "status": "ok",
+  "nested": {
+    "token":
+      "${tokenValue}"
+  }
+}`;
+
+    expect(verifyArtifactTextRedacted(raw)).toMatchObject({
+      ok: false,
+      findings: [expect.objectContaining({ pattern: "json-secret-key" })],
+    });
+
+    const redacted = redactArtifactText(raw);
+    expect(redacted).toContain("[REDACTED]");
+    expect(redacted).not.toContain(tokenValue);
+    expect(verifyArtifactTextRedacted(redacted)).toEqual({
+      ok: true,
+      findings: [],
+    });
   });
 
   it("passes release readiness with required packs and durable artifacts", () => {

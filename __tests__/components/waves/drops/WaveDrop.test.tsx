@@ -576,7 +576,7 @@ describe("WaveDrop", () => {
     expect(onDropContentClick).toHaveBeenCalledWith(drop);
   });
 
-  it("renders a muted timestamp affordance for grouped messages without an author row", () => {
+  it("renders one swipe timestamp affordance for grouped messages without an author row", () => {
     const previousGroupedDrop = {
       ...drop,
       id: "previous-grouped",
@@ -608,11 +608,12 @@ describe("WaveDrop", () => {
 
     expect(screen.queryByTestId("header")).not.toBeInTheDocument();
     expect(
-      screen.getByTestId("grouped-drop-hover-timestamp")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("grouped-drop-swipe-timestamp")
-    ).toBeInTheDocument();
+      screen.queryByTestId("grouped-drop-hover-timestamp")
+    ).not.toBeInTheDocument();
+    const timestamp = screen.getByTestId("grouped-drop-swipe-timestamp");
+    expect(timestamp).toBeInTheDocument();
+    expect(timestamp).toHaveClass("tw-w-[9.25rem]");
+    expect(timestamp.querySelector("p")).toHaveClass("tw-whitespace-nowrap");
   });
 
   it("reveals a grouped message timestamp on left swipe without opening long press actions", () => {
@@ -663,9 +664,9 @@ describe("WaveDrop", () => {
     ).parentElement!;
     act(() => {
       fireEvent.touchStart(dropRoot, {
-        changedTouches: [{ clientX: 120, clientY: 40 }],
-        targetTouches: [{ clientX: 120, clientY: 40 }],
-        touches: [{ clientX: 120, clientY: 40 }],
+        changedTouches: [{ clientX: 220, clientY: 40 }],
+        targetTouches: [{ clientX: 220, clientY: 40 }],
+        touches: [{ clientX: 220, clientY: 40 }],
       });
       fireEvent.touchMove(dropRoot, {
         changedTouches: [{ clientX: 48, clientY: 44 }],
@@ -676,7 +677,7 @@ describe("WaveDrop", () => {
 
     expect(
       screen.getByTestId("grouped-drop-swipeable-content").style.transform
-    ).toBe("translateX(-72px)");
+    ).toBe("translateX(-148px)");
     expect(
       screen.getByTestId("grouped-drop-swipe-timestamp").style.opacity
     ).toBe("1");
@@ -690,6 +691,65 @@ describe("WaveDrop", () => {
     fireEvent.click(content);
 
     expect(onDropContentClick).not.toHaveBeenCalled();
+  });
+
+  it("reveals a grouped message timestamp with desktop mouse drag", () => {
+    setHoverSupport(true);
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const groupedDrop = {
+      ...drop,
+      id: "current-grouped",
+      created_at: 1_700_000_040_000,
+      stableHash: "current-grouped",
+    };
+
+    renderWithRedux(
+      <WaveDrop
+        drop={groupedDrop}
+        previousDrop={previousGroupedDrop}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const dropRoot = screen.getByTestId(
+      "grouped-drop-swipeable-content"
+    ).parentElement!;
+
+    fireEvent.mouseDown(dropRoot, {
+      button: 0,
+      clientX: 220,
+      clientY: 40,
+    });
+    fireEvent.mouseMove(dropRoot, {
+      clientX: 40,
+      clientY: 42,
+    });
+
+    expect(
+      screen.getByTestId("grouped-drop-swipeable-content").style.transform
+    ).toBe("translateX(-148px)");
+    expect(
+      screen.getByTestId("grouped-drop-swipe-timestamp").style.opacity
+    ).toBe("1");
+
+    fireEvent.mouseUp(dropRoot);
+
+    expect(
+      screen.getByTestId("grouped-drop-swipeable-content").style.transform
+    ).toBe("");
   });
 
   it("hides actions on mobile", () => {

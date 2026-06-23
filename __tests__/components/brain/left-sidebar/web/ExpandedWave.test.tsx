@@ -114,6 +114,8 @@ describe("ExpandedWave", () => {
     ).not.toBeInTheDocument();
     expect(row).toHaveClass("tw-px-5");
     expect(row).toHaveClass("tw-gap-x-4");
+    expect(row).toHaveClass("tw-h-full");
+    expect(row).toHaveClass("tw-min-h-[62px]");
     expect(row).not.toHaveClass("tw-pl-2");
   });
 
@@ -155,6 +157,8 @@ describe("ExpandedWave", () => {
     expect(unreadSubwavesDot).toHaveClass("tw-top-[-3px]");
     expect(getWaveRow()).toHaveClass("tw-px-5");
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
+    expect(getWaveRow()).toHaveClass("tw-h-full");
+    expect(getWaveRow()).toHaveClass("tw-min-h-[62px]");
     expect(getWaveRow()).not.toHaveClass("tw-pl-2");
     const rowLink = screen.getByRole("link", { name: "Chat Wave" });
     expect(rowLink).toHaveClass("tw-static");
@@ -226,6 +230,8 @@ describe("ExpandedWave", () => {
     expect(rail).toHaveClass("md:tw-left-11");
     expect(rail).toHaveClass("-tw-top-1");
     expect(rail).toHaveClass("tw-bottom-4");
+    expect(getWaveRow()).toHaveClass("tw-h-full");
+    expect(getWaveRow()).toHaveClass("tw-min-h-[54px]");
     expect(getWaveRow().querySelector(".tw-h-px")).toBeNull();
     expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
   });
