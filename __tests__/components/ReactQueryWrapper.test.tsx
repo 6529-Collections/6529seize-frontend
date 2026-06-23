@@ -90,12 +90,18 @@ test("setWavesOverviewPage only sets when no cache", () => {
   ];
   const data = queryClient.getQueriesData({ queryKey: [QueryKey.WAVES_OVERVIEW] })[0]?.[1] as any;
   expect(data.pages[0]).toEqual(waves);
+  expect(queryClient.getQueryData([QueryKey.WAVE, { wave_id: "1" }])).toEqual(
+    waves[0]
+  );
 
   const other = [{ id: "2" }] as any;
   context.setWavesOverviewPage(other);
   // should not overwrite existing data
   const dataAgain = queryClient.getQueriesData({ queryKey: [QueryKey.WAVES_OVERVIEW] })[0]?.[1] as any;
   expect(dataAgain.pages[0]).toEqual(waves);
+  expect(queryClient.getQueryData([QueryKey.WAVE, { wave_id: "2" }])).toEqual(
+    other[0]
+  );
 });
 
 test("setWaveDrops caches drops when empty", () => {
@@ -121,7 +127,6 @@ test("setWaveDrops caches drops when empty", () => {
   const dropData = queryClient.getQueriesData({ queryKey: [QueryKey.DROPS] })[0]?.[1] as any;
   expect(dropData.pages[0]).toEqual(dropsData);
 });
-
 
 test("setWave stores wave in cache", () => {
   const queryClient = new QueryClient();
