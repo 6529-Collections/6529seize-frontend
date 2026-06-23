@@ -61,7 +61,12 @@ const YOUTUBE_TELEMETRY_HOSTS = new Set([
   "www.youtube-nocookie.com",
 ]);
 const WALLETCONNECT_RPC_HOST = "rpc.walletconnect.org";
-const SAFE_WALLETCONNECT_RPC_METHODS = new Set([
+const PUBLIC_ETHEREUM_RPC_HOSTS = new Set([
+  "cloudflare-eth.com",
+  "eth.llamarpc.com",
+  "ethereum-rpc.publicnode.com",
+]);
+const SAFE_ETHEREUM_RPC_METHODS = new Set([
   "eth_accounts",
   "eth_blockNumber",
   "eth_call",
@@ -84,6 +89,13 @@ const SAFE_WALLETCONNECT_RPC_METHODS = new Set([
   "net_version",
   "web3_clientVersion",
 ]);
+
+function isGoogleCspReportEndpoint(url: URL) {
+  return (
+    url.hostname === "csp.withgoogle.com" &&
+    /^\/csp\/script-inclusions\/[a-f0-9]{32}$/i.test(url.pathname)
+  );
+}
 
 function parseUrl(url: string) {
   try {
@@ -164,6 +176,10 @@ function isIgnoredExternalMutation(url: URL) {
     return true;
   }
 
+  if (isGoogleCspReportEndpoint(url)) {
+    return true;
+  }
+
   if (
     url.hostname === "jnn-pa.googleapis.com" &&
     url.pathname === "/$rpc/google.internal.waa.v1.Waa/GenerateIT"
@@ -212,6 +228,10 @@ function isWalletConnectRpc(url: URL) {
   return url.hostname === WALLETCONNECT_RPC_HOST && url.pathname === "/v1/";
 }
 
+function isPublicEthereumRpc(url: URL) {
+  return PUBLIC_ETHEREUM_RPC_HOSTS.has(url.hostname) && url.pathname === "/";
+}
+
 function parseJsonRpcPayload(postData?: string | null) {
   if (!postData) {
     return null;
@@ -231,7 +251,7 @@ function getJsonRpcCalls(payload: unknown) {
   return [payload];
 }
 
-function isSafeWalletConnectRpcPost(postData?: string | null) {
+function isSafeEthereumRpcPost(postData?: string | null) {
   const payload = parseJsonRpcPayload(postData);
   if (!payload) {
     return false;
@@ -248,9 +268,7 @@ function isSafeWalletConnectRpcPost(postData?: string | null) {
     }
 
     const method = (call as { method?: unknown }).method;
-    return (
-      typeof method === "string" && SAFE_WALLETCONNECT_RPC_METHODS.has(method)
-    );
+    return typeof method === "string" && SAFE_ETHEREUM_RPC_METHODS.has(method);
   });
 }
 
@@ -362,11 +380,19 @@ export function decideReadonlyRequest({
   }
 
   if (isWalletConnectRpc(parsed)) {
-    if (isSafeWalletConnectRpcPost(postData)) {
+    if (isSafeEthereumRpcPost(postData)) {
       return { action: "allow", reason: "read-only-walletconnect-rpc" };
     }
 
     return { action: "block", reason: "unsafe-walletconnect-rpc" };
+  }
+
+  if (isPublicEthereumRpc(parsed)) {
+    if (isSafeEthereumRpcPost(postData)) {
+      return { action: "allow", reason: "read-only-ethereum-rpc" };
+    }
+
+    return { action: "block", reason: "unsafe-ethereum-rpc" };
   }
 
   if (isIgnoredExternalMutation(parsed)) {

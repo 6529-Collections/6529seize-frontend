@@ -32,12 +32,12 @@ function releaseArtifact(uri, metadata) {
   };
 }
 
-function releasePackCheck({ pack, command, artifact }) {
+function releasePackCheck({ pack, command, artifact, surfaces }) {
   return {
     pack,
     status: "passed",
     command,
-    surfaces: [...REQUIRED_WEB_SURFACES],
+    surfaces: surfaces ?? [...REQUIRED_WEB_SURFACES],
     artifacts: [artifact],
   };
 }
@@ -184,6 +184,86 @@ describe("deployment bus manifest", () => {
       current_capability: "auto-hold-only",
       traffic_splitting_supported: false,
     });
+  });
+
+  it("supports the production read-only aggregate as required production evidence", () => {
+    const requiredPacks = [
+      ...DEFAULT_REQUIRED_PACKS,
+      "playwright:production-readonly",
+    ];
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      status: "released",
+      requiredPacks: requiredPacks.join(","),
+      validationChecks: JSON.stringify([
+        ...releaseReadyValidationChecks(),
+        releasePackCheck({
+          pack: "playwright:production-readonly",
+          command: "seize run test:e2e:production:readonly",
+          surfaces: ["web:desktop-chromium"],
+          artifact: releaseArtifact(
+            "s3://6529-artifacts/frontend/release/production-readonly.json",
+            { sha256: ARTIFACT_SHA256 }
+          ),
+        }),
+      ]),
+      postDeployWatchStatus: "passed",
+      postDeployWatchObservedDurationMinutes: "30",
+      postDeployWatchStartedAt: "2026-06-18T13:00:00.000Z",
+      postDeployWatchCompletedAt: "2026-06-18T13:30:00.000Z",
+      postDeployWatchCheckpoints: JSON.stringify(
+        releaseReadyPostDeployWatch().checkpoints
+      ),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(manifest.validation.required_packs).toEqual(requiredPacks);
+    expect(manifest.validation.pack_plan).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "playwright:production-readonly",
+          command: "seize run test:e2e:production:readonly",
+          surfaces: ["web:desktop-chromium"],
+        }),
+      ])
+    );
+    expect(validateManifest(manifest)).toEqual({
+      ok: true,
+      errors: [],
+      warnings: [],
+    });
+    expect(evaluateReleaseReadiness(manifest)).toEqual({
+      ok: true,
+      holds: [],
+      warnings: [],
+    });
+  });
+
+  it("rejects production-only standard packs on staging manifests", () => {
+    const manifest = buildManifest({
+      environment: "staging",
+      stagingDeploySha: STAGING_SHA,
+      productionCandidateSha: MAIN_SHA,
+      productionEligible: "true",
+      requiredPacks: [
+        ...DEFAULT_REQUIRED_PACKS,
+        "playwright:production-readonly",
+      ].join(","),
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    expect(manifest.validation.pack_plan).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "playwright:production-readonly",
+          command: null,
+        }),
+      ])
+    );
+    expect(validateManifest(manifest).errors).toContain(
+      "validation.required_packs: playwright:production-readonly has no standard command for staging"
+    );
   });
 
   it("forces durable evidence for production-like manifests", () => {

@@ -81,7 +81,7 @@ describe('WaveDropActionsMarkUnread', () => {
     });
 
     renderComponent();
-    
+
     await userEvent.click(screen.getByLabelText('Mark as unread'));
 
     await waitFor(() => {
@@ -100,7 +100,7 @@ describe('WaveDropActionsMarkUnread', () => {
     });
 
     renderComponent();
-    
+
     await userEvent.click(screen.getByLabelText('Mark as unread'));
 
     await waitFor(() => {
@@ -116,7 +116,7 @@ describe('WaveDropActionsMarkUnread', () => {
     commonApiPost.mockRejectedValue('API Error');
 
     renderComponent();
-    
+
     await userEvent.click(screen.getByLabelText('Mark as unread'));
 
     await waitFor(() => {
@@ -132,7 +132,7 @@ describe('WaveDropActionsMarkUnread', () => {
     commonApiPost.mockImplementation(() => new Promise(() => {}));
 
     renderComponent();
-    
+
     await userEvent.click(screen.getByLabelText('Mark as unread'));
 
     await waitFor(() => {
@@ -145,7 +145,7 @@ describe('WaveDropActionsMarkUnread', () => {
     commonApiPost.mockImplementation(() => new Promise(() => {}));
 
     renderComponent();
-    
+
     const button = screen.getByLabelText('Mark as unread');
     await userEvent.click(button);
 
@@ -154,4 +154,3 @@ describe('WaveDropActionsMarkUnread', () => {
     });
   });
 });
-

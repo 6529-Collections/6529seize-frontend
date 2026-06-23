@@ -158,7 +158,7 @@ describe('jwt-validation.utils', () => {
 
       it('should check abort signal before token refresh', async () => {
         const abortController = new AbortController();
-        
+
         // Mock invalid JWT to trigger refresh flow
         const mockPayload = {
           id: 'user-id',
@@ -276,12 +276,12 @@ describe('jwt-validation.utils', () => {
           role: 'user'
         };
         mockedJwtDecode.mockReturnValue(mockPayload);
-        
+
         // Mock refresh flow
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
         mockedGetWalletRole.mockReturnValue('user');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -331,7 +331,7 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const mockRefreshResponse = {
           address: '0x456', // Different address
           token: 'new-jwt-token'
@@ -371,7 +371,7 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -397,7 +397,7 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -428,7 +428,7 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -456,7 +456,7 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -488,7 +488,7 @@ describe('jwt-validation.utils', () => {
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
         mockedGetWalletRole.mockReturnValue('user');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -520,7 +520,7 @@ describe('jwt-validation.utils', () => {
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
         mockedGetWalletRole.mockReturnValue('user');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -554,7 +554,7 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         // Mock an error that has the TokenRefreshCancelledError characteristics
         const mockError = {
           name: 'TokenRefreshCancelledError',
@@ -579,7 +579,7 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const abortError = new Error('Aborted');
         abortError.name = 'AbortError';
         mockedRedeemRefreshTokenWithRetries.mockRejectedValue(abortError);
@@ -600,7 +600,7 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const customError = new Error('Custom refresh error');
         mockedRedeemRefreshTokenWithRetries.mockRejectedValue(customError);
 
@@ -624,7 +624,7 @@ describe('jwt-validation.utils', () => {
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
         mockedGetWalletRole.mockReturnValue('user'); // Different from server role
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -657,7 +657,7 @@ describe('jwt-validation.utils', () => {
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
         mockedGetWalletRole.mockReturnValue('admin'); // Same as server role
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -685,7 +685,7 @@ describe('jwt-validation.utils', () => {
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
         mockedGetWalletRole.mockReturnValue('local-role'); // Different from server
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -714,7 +714,7 @@ describe('jwt-validation.utils', () => {
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
         mockedGetWalletRole.mockReturnValue('user');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
@@ -742,12 +742,12 @@ describe('jwt-validation.utils', () => {
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'new-jwt-token'
         };
-        
+
         // Mock successful refresh but abort after
         mockedRedeemRefreshTokenWithRetries.mockImplementation(async () => {
           abortController.abort();
@@ -779,7 +779,7 @@ describe('jwt-validation.utils', () => {
 
         mockedGetRefreshToken.mockReturnValue('refresh-token');
         mockedGetWalletAddress.mockReturnValue('0x123');
-        
+
         const mockRefreshResponse = {
           address: '0x123',
           token: 'malformed-jwt-token'
@@ -817,7 +817,7 @@ describe('jwt-validation.utils', () => {
       it('should handle empty JWT token gracefully', async () => {
         // Mock no refresh token to simulate first-time sign-in scenario
         mockedGetRefreshToken.mockReturnValue(null);
-        
+
         const result = await validateJwt({
           ...validParams,
           jwt: ''
