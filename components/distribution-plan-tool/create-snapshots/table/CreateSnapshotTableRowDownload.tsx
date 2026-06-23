@@ -54,9 +54,8 @@ export default function CreateSnapshotTableRowDownload({
     if (loadingType) return;
     setLoadingType(fetchType);
     const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${tokenPoolId}/tokens`;
-    const { success, data } = await distributionPlanApiFetch<
-      DistributionPlanSnapshotToken[]
-    >(endpoint);
+    const { success, data } =
+      await distributionPlanApiFetch<DistributionPlanSnapshotToken[]>(endpoint);
     if (!success || !data) {
       return;
     }

@@ -25,7 +25,8 @@ export default function ReviewDistributionPlanTable() {
       buildReviewDistributionPlanTableRows({
         phases,
         connectedProfile,
-        distributionAdminWallets: seizeSettings.distribution_admin_wallets ?? [],
+        distributionAdminWallets:
+          seizeSettings.distribution_admin_wallets ?? [],
       })
     );
   }, [phases, connectedProfile, seizeSettings.distribution_admin_wallets]);
