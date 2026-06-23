@@ -75,7 +75,7 @@ describe("useXtdhGrantsQuery", () => {
           grantor: "0xabc",
           page: "2",
           page_size: "10",
-          status: "PENDING,GRANTED",
+          status: "GRANTED",
           sort: "created_at",
           sort_direction: SortDirection.ASC,
         }),

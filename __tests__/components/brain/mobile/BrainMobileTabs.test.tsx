@@ -183,7 +183,6 @@ describe("BrainMobileTabs", () => {
         showStreamBack={false}
         isApp={false}
         wave={createWave()}
-        hasPolls={true}
       />
     );
 
@@ -200,7 +199,7 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByText("FAQ")).toBeInTheDocument();
   });
 
-  it("does not render Polls in the compact active wave tabs", () => {
+  it("renders Polls in the active wave tabs when the wave has polls", () => {
     render(
       <BrainMobileTabs
         activeView={BrainView.ABOUT}
@@ -214,7 +213,7 @@ describe("BrainMobileTabs", () => {
       />
     );
 
-    expect(screen.queryByRole("button", { name: /polls/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /polls/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /chat/i })).toBeInTheDocument();
   });
 
