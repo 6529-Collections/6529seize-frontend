@@ -466,6 +466,97 @@ describe("Auth component", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("reauthenticates invalid legacy auth during the session-v2 grace window", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockRemoveAuthJwt =
+        authUtils.removeAuthJwt as jest.MockedFunction<any>;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "web",
+        address: validAddress,
+        role: null,
+        access_token: "session-access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      };
+      mockGetAuthJwt.mockReturnValue("expired-legacy-jwt");
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+      });
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+
+        return (
+          <>
+            <button
+              onClick={async () => {
+                const response = await requestAuth();
+                setResult(String(response.success));
+              }}
+              data-testid="expired-legacy-auth"
+            >
+              auth
+            </button>
+            <span data-testid="expired-legacy-auth-result">{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("expired-legacy-auth"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("expired-legacy-auth-result")
+        ).toHaveTextContent("true");
+      });
+      expect(mockValidateJwt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          jwt: "expired-legacy-jwt",
+          wallet: validAddress,
+          role: null,
+        })
+      );
+      expect(mockRemoveAuthJwt).toHaveBeenCalled();
+      expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+        signerAddress: validAddress,
+      });
+      expect(mockSignMessage).toHaveBeenCalledWith("sign this message exactly");
+      await waitFor(() =>
+        expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
+          serverSignature: "server-signature",
+          clientSignature: "0xsignature",
+          signerAddress: validAddress,
+          role: null,
+        })
+      );
+      expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
+        sessionResponse
+      );
+      expect(
+        screen.queryByText("Upgrade Authentication")
+      ).not.toBeInTheDocument();
+    });
+
     it("uses session nonce signable_message for web sign-in", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
