@@ -19,6 +19,15 @@ describe("instrumentation-client", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const sentryRouteParameterizationMessage =
+    "JSON.stringify cannot serialize cyclic structures.";
+  const sentryRouteParameterizationMechanismType =
+    "auto.browser.browserapierrors.setTimeout";
+  const nativeJsonStringifyFrame = {
+    filename: "[native code]",
+    function: "stringify",
+    in_app: true,
+  };
 
   type BeforeSendResult = {
     tags?: Record<string, unknown> | undefined;
@@ -65,6 +74,35 @@ describe("instrumentation-client", () => {
       extra?: Record<string, unknown>;
     };
   };
+
+  const createSentryRouteParameterizationEvent = (
+    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame]
+  ) => ({
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: sentryRouteParameterizationMessage,
+          mechanism: {
+            type: sentryRouteParameterizationMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        category: "navigation",
+        data: {
+          from: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        },
+      },
+    ],
+  });
 
   beforeEach(() => {
     jest.resetModules();
@@ -131,6 +169,31 @@ describe("instrumentation-client", () => {
     });
 
     expect(result).toBeNull();
+  });
+
+  it("drops Sentry route parameterization cyclic JSON errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps cyclic JSON errors with app-owned frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent([
+      nativeJsonStringifyFrame,
+      {
+        filename: "https://6529.io/_next/static/chunks/app-client.js",
+        function: "serializeWaveParams",
+        in_app: true,
+      },
+    ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops sampled-out first-party browser transport network errors", () => {
