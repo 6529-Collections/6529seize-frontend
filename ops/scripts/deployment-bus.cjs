@@ -22,6 +22,9 @@ const PLAYWRIGHT_ARTIFACT_PATTERNS = Object.freeze([
   "test-results/playwright/**",
   "playwright-report/**",
 ]);
+const NATIVE_EVIDENCE_ARTIFACT_PATTERNS = Object.freeze([
+  "test-results/native-surface-evidence*.json",
+]);
 const VALIDATION_PACKS = Object.freeze({
   "playwright:core-smoke": createPlaywrightPack({
     id: "playwright:core-smoke",
@@ -67,6 +70,16 @@ const VALIDATION_PACKS = Object.freeze({
     size: "small",
     surfaces: Object.freeze([]),
     artifacts: Object.freeze(["deployment-version-evidence.json"]),
+  }),
+  "native:surface-evidence": createValidationPack({
+    id: "native:surface-evidence",
+    size: "large",
+    description:
+      "Classifies native coverage as browser simulation or package-prerequisite evidence.",
+    stagingCommand: "seize run test:native-evidence",
+    productionCommand: "seize run test:native-evidence",
+    surfaces: ["native:surface-evidence-classifier"],
+    artifacts: NATIVE_EVIDENCE_ARTIFACT_PATTERNS,
   }),
 });
 const DEFAULT_REQUIRED_PACKS = Object.freeze([
@@ -200,6 +213,26 @@ function createPlaywrightPack({
   productionCommand,
   surfaces = REQUIRED_WEB_SURFACES,
 }) {
+  return createValidationPack({
+    id,
+    size: "large",
+    description,
+    stagingCommand,
+    productionCommand,
+    surfaces,
+    artifacts: PLAYWRIGHT_ARTIFACT_PATTERNS,
+  });
+}
+
+function createValidationPack({
+  id,
+  size = "large",
+  description,
+  stagingCommand,
+  productionCommand,
+  surfaces = REQUIRED_WEB_SURFACES,
+  artifacts = PLAYWRIGHT_ARTIFACT_PATTERNS,
+}) {
   const environments = [
     ...(stagingCommand ? ["staging"] : []),
     ...(productionCommand ? ["production"] : []),
@@ -207,7 +240,7 @@ function createPlaywrightPack({
 
   return Object.freeze({
     id,
-    size: "large",
+    size,
     description,
     environments,
     surfaces,
@@ -215,7 +248,7 @@ function createPlaywrightPack({
       staging: stagingCommand,
       production: productionCommand,
     }),
-    artifacts: PLAYWRIGHT_ARTIFACT_PATTERNS,
+    artifacts,
   });
 }
 

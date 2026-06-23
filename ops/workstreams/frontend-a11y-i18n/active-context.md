@@ -4,25 +4,41 @@
 
 Read this section first after compaction or handoff.
 
-- Latest testing-roadmap state, 2026-06-23T08:10Z:
+- Latest testing-roadmap state, 2026-06-23T09:38Z:
   - Current rebase worktree:
-    `D:\repos\6529seize-frontend-native-shell-readonly`.
+    `D:\repos\6529seize-frontend-native-package-evidence`.
   - Current active branch:
-    `codex/e2e-upload-admin-guards`, rebasing PR #2850 onto current
-    `origin/main` after PR #2855 merged.
-  - Active slice is local-only guarded chat-drop sandbox E2E coverage:
-    the mock composer sandbox allows exactly one synthetic chat-drop POST with
-    the expected body and signature shape, then rejects duplicate or non-exact
-    drop bodies with 409 responses. All other dangerous composer/drop/media
-    mutation paths remain fail-closed.
-  - Rebase conflict was limited to workstream memory files
-    (`active-context.md`, `run-log.md`). Code conflicts have not appeared in
-    the sandbox server or Playwright spec so far.
-  - Before republishing PR #2850, rerun focused sandbox validation, Playwright
-    typecheck, changed typecheck/lint or focused ESLint as needed, risk/secret
-    scans, workflow-security scan, and `codex-diff-check`, then trigger the
-    unchanged existing reviewbot lanes plus GLM-swarm. Do not weaken any
-    existing reviewbot lane.
+    `codex/native-package-evidence-e2e`, PR #2851, rebased onto current
+    `origin/main` `daeac04bcb701786b5429a54ec832c0a24b42fd2` after PR #2850
+    and PR #2854 merged.
+  - Active slice is test-only native surface evidence classification:
+    add a read-only `native-surface-evidence.cjs` classifier, optional
+    deployment-bus pack `native:surface-evidence`, package scripts, tests, and
+    docs that distinguish browser simulation, package prerequisites, and real
+    packaged native/Electron runtime evidence.
+  - Rebase conflict was in `ops/scripts/deployment-bus.cjs`, where PR #2854
+    added `deployment:http-version` durable upload evidence and PR #2851 adds
+    `native:surface-evidence`; both validation packs are preserved.
+  - Latest CodeRabbit test feedback on
+    `__tests__/scripts/native-surface-evidence.test.ts` is fixed in head
+    `4151a1bb8`.
+  - Latest rebased validation passed:
+    - `node --check ops/scripts/native-surface-evidence.cjs`
+    - `node --check ops/scripts/deployment-bus.cjs`
+    - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+      60 passed.
+    - `seize run test:native-evidence`
+    - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 skipped.
+    - `seize run typecheck:playwright`
+    - `seize run typecheck:changed`: 39 changed TypeScript files passed.
+    - focused ESLint on native evidence, deployment bus, surface simulation,
+      and native-shell spec files.
+    - `seize run lint:package-json`
+    - risk floor Level 4, changed-secret scan clean, workflow-security scan
+      clean, and `codex-diff-check`.
+  - Next action: commit this memory update, force-push PR #2851, trigger all
+    reviewbot lanes including GLM-swarm, then merge after checks and material
+    bot feedback are clear.
 
 - Latest testing-roadmap state, 2026-06-23T05:00Z:
   - Current active worktree:
@@ -802,14 +818,17 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Commit and push the GLM follow-up on `codex/e2e-native-shell-readonly`,
-   update the PR evidence, then re-trigger latest-head reviewbot lanes.
-2. For PR #2848, keep the established loop: strong local validation first,
-   then CI, CodeRabbit, Sonar, 6529bot Opus lanes, responsiveness, GLM swarm,
-   and any specialized reviewbot lanes until Codex judges the loop is no
-   longer adding material value.
-3. Deploy merged testing-roadmap slices through staging first, validate exact
+1. PR #2851 (`codex/native-package-evidence-e2e`) is rebased onto current
+   `origin/main` after PR #2787, with local native evidence, deployment-bus,
+   and native-shell validation green. Push the refreshed head, re-trigger the
+   existing reviewbot lanes plus GLM-swarm, and merge once CI and material bot
+   feedback are clear.
+2. PR #2852 (`codex/e2e-wallet-signing-guards`) is the reaction sandbox train
+   ahead of PR #2853 and is being monitored on its refreshed current-main head.
+3. PR #2853 (`codex/e2e-wallet-signing-sandbox`) remains conflict-blocked
+   behind #2852 and should be rebased after #2852 lands.
+4. Deploy merged testing-roadmap slices through staging first, validate exact
    staged SHA, then production from current `origin/main` with exact-SHA
    validation and production-safe E2E evidence.
-4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
+5. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.
