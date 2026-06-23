@@ -81,7 +81,7 @@ describe('WaveDropActionsMarkUnread', () => {
     });
 
     renderComponent();
-    
+
     await userEvent.click(screen.getByLabelText('Mark as unread'));
 
     await waitFor(() => {
@@ -100,12 +100,12 @@ describe('WaveDropActionsMarkUnread', () => {
     });
 
     renderComponent();
-    
+
     await userEvent.click(screen.getByLabelText('Mark as unread'));
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: 'Marked as unread',
+        message: 'Marked as unread.',
         type: 'success',
       });
     });
@@ -116,13 +116,15 @@ describe('WaveDropActionsMarkUnread', () => {
     commonApiPost.mockRejectedValue('API Error');
 
     renderComponent();
-    
+
     await userEvent.click(screen.getByLabelText('Mark as unread'));
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: 'API Error',
         type: 'error',
+        title: "Couldn't mark this drop as unread.",
+        description: 'Please try again.',
+        details: 'API Error.',
       });
     });
   });
@@ -132,7 +134,7 @@ describe('WaveDropActionsMarkUnread', () => {
     commonApiPost.mockImplementation(() => new Promise(() => {}));
 
     renderComponent();
-    
+
     await userEvent.click(screen.getByLabelText('Mark as unread'));
 
     await waitFor(() => {
@@ -145,7 +147,7 @@ describe('WaveDropActionsMarkUnread', () => {
     commonApiPost.mockImplementation(() => new Promise(() => {}));
 
     renderComponent();
-    
+
     const button = screen.getByLabelText('Mark as unread');
     await userEvent.click(button);
 
@@ -154,4 +156,3 @@ describe('WaveDropActionsMarkUnread', () => {
     });
   });
 });
-

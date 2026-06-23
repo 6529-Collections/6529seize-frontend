@@ -42,6 +42,21 @@ export const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   groupId: null,
 };
 
+type RatingMatterWithApiFilter = RateMatter.REP | RateMatter.WAVE_REP;
+
+const RATING_MATTERS_WITH_API_FILTER: readonly RateMatter[] = [
+  RateMatter.REP,
+  RateMatter.WAVE_REP,
+] as const;
+
+function shouldIncludeRatingMatter(
+  matter: ActivityLogParams["matter"]
+): matter is RatingMatterWithApiFilter {
+  return (
+    matter !== null && RATING_MATTERS_WITH_API_FILTER.includes(matter)
+  );
+}
+
 export const convertActivityLogParams = ({
   params,
   disableActiveGroup,
@@ -57,7 +72,7 @@ export const convertActivityLogParams = ({
       : "",
   };
 
-  if (params.matter === RateMatter.REP) {
+  if (shouldIncludeRatingMatter(params.matter)) {
     converted.rating_matter = params.matter;
   }
   if (params.groupId && !params.handleOrWallet && !disableActiveGroup) {

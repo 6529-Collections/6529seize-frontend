@@ -17,8 +17,8 @@ describe("Marketplace placeholder cards", () => {
     );
 
     const media = screen.getByTestId("marketplace-preview-placeholder-media");
-    expect(media).toHaveClass("tw-aspect-[16/9]");
-    expect(media).toHaveClass("tw-min-h-[14rem]");
+    expect(media).toHaveClass("tw-h-64");
+    expect(media).toHaveClass("md:tw-h-72");
     expect(
       screen.getByTestId("marketplace-preview-placeholder-footer")
     ).toBeInTheDocument();
@@ -49,8 +49,8 @@ describe("Marketplace placeholder cards", () => {
     );
 
     const media = screen.getByTestId("marketplace-preview-unavailable-media");
-    expect(media).toHaveClass("tw-aspect-[16/9]");
-    expect(media).toHaveClass("tw-min-h-[14rem]");
+    expect(media).toHaveClass("tw-h-64");
+    expect(media).toHaveClass("md:tw-h-72");
     expect(screen.getByText("Preview unavailable")).toBeInTheDocument();
     expect(
       screen.queryByTestId("marketplace-preview-unavailable-footer")

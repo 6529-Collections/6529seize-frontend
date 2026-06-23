@@ -6,6 +6,7 @@ The `Collected` tab at `/{user}/collected` combines profile holdings browsing
 with an integrated stats summary and an expandable details panel.
 
 It has two top-level views:
+
 - `Native`: profile card holdings for The Memes, Gradients, NextGen, and Meme Lab.
 - `Network`: xTDH token holdings by contract.
 
@@ -55,6 +56,8 @@ Transfer mode is part of the Native collected view (not a separate route).
 2. Review the top stats block:
    - headline metrics can include `NextGen`, `Meme Sets`, `Memes`,
      `Gradients`, and `Boost`
+   - headline metric labels, multiplier values, unique-count copy, and the
+     `Details` toggle are message-backed from the source locale
    - collection-backed metrics (`NextGen`, `Meme Sets`, `Memes`, `Gradients`)
      act as shortcuts into that collection; clicking the active metric clears
      that collection filter
@@ -63,15 +66,42 @@ Transfer mode is part of the Native collected view (not a separate route).
      full set; it shows the lowest full-set count across those seasons
    - `Seasons` tiles show started Meme seasons, complete-set counts, and
      progress toward the next set
+   - `Seasons` heading/count text, show more/less controls, unseized labels,
+     and tile set-count text are message-backed from the source locale
+   - season tile labels and progress detail copy are message-backed from the
+     source locale
    - hover/focus previews a season tile's progress text; click applies or
      clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
 3. Click `Details` to expand the integrated stats panel.
 4. In `Details`, review:
    - `Collected` totals and per-season Meme tables
+     - collected details headings, table headers, row labels, and per-season
+       labels are message-backed from the source locale
+     - collected details tables include screen-reader captions and row headers
+       for assistive technologies
    - `Activity Overview`
+   - Activity Overview heading, table headings, row labels, and per-season
+     labels are message-backed from the source locale
+   - Activity Overview tables include screen-reader captions and row headers
+     for assistive technologies
    - lower section tabs: `Wallet Activity`, `Distributions`, `TDH History`
+     - lower Activity tab labels and the tab-list accessible name are
+       message-backed from the source locale
+     - lower Activity tabs expose tab/panel relationships and support keyboard
+       arrow, Home, and End navigation
+   - `Wallet Activity`
+     - Wallet Activity heading, filter labels, filter accessible names, empty
+       states, and transaction table caption are message-backed from the source
+       locale
+   - `Distributions`
+     - Distributions heading, empty state, table caption, table headings,
+       collection names, token link accessible names, and relative time display
+       are message-backed or locale-formatted from the source locale
    - `Boost Breakdown`
+   - Boost Breakdown static labels and table headings are message-backed from
+     the source locale; the table exposes a screen-reader caption, row
+     headers, and keyboard-focusable info triggers.
 5. Choose `View`:
    - `Native` for profile card holdings.
    - `Network` for xTDH token holdings.
@@ -80,14 +110,25 @@ Transfer mode is part of the Native collected view (not a separate route).
    - Network collection: contract list from current xTDH collections.
    - Memes-only filters: `Seized` and `Season`.
    - Address filter (`All Addresses` or one wallet) is available in native view.
+   - View, collection, sort, seized, and filter-scroll control names are
+     message-backed from the source locale.
 7. Apply sort and browse pages.
 8. In native view (outside transfer mode), open token routes from cards:
    - `/the-memes/{id}`, `/6529-gradient/{id}`, `/nextgen/token/{id}`, `/meme-lab/{id}`.
-9. If transfer is available, click `Transfer`:
-   - cards switch from links to selection controls
-   - ERC-1155 cards support quantity selection
-   - ERC-721 cards are single-select
-10. Use the sticky transfer panel to review selection and continue.
+   - Native card results render as a labelled `Collected cards` list with one
+     list item per card for assistive technologies.
+9. In network view, review xTDH token holdings:
+   - Network card results render as a labelled `Collected network cards` list
+     with one list item per token for assistive technologies.
+   - Network card copy and image alternatives are message-backed from the
+     source locale.
+10. If transfer is available, click `Transfer`:
+
+- cards switch from links to selection controls
+- ERC-1155 cards support quantity selection
+- ERC-721 cards are single-select
+
+11. Use the sticky transfer panel to review selection and continue.
 
 ## Common Scenarios
 
@@ -146,8 +187,11 @@ Transfer mode is part of the Native collected view (not a separate route).
 
 - Initial load shows skeleton placeholders.
 - If native collected data fails, the tab falls back to empty-state copy
-  (for example `No cards to display`).
-- If network token data fails, network cards can fall back to `No tokens found`.
+  (for example `No cards to display`). Empty-state copy is message-backed from
+  the source locale and announced as status text for assistive technologies.
+- If network token data fails, network cards can fall back to
+  `No network tokens found`. This copy follows the same message-backed status
+  pattern as the native collected view.
 - Inside `Details`:
   - Wallet Activity empty states are filter-specific (`No transactions`,
     `No sales`, `No burns`, and similar).

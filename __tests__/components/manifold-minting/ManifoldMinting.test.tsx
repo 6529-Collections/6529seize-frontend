@@ -27,6 +27,10 @@ jest.mock("@/components/manifold-minting/ManifoldMintingWidget", () => ({
   __esModule: true,
   default: () => <div data-testid="widget" />,
 }));
+jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
+  __esModule: true,
+  default: () => <div data-testid="marketplace-links" />,
+}));
 jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
   __esModule: true,
   default: () => <div data-testid="countdown" />,
@@ -154,6 +158,7 @@ const createMockClaim = (overrides = {}) => ({
   totalMax: 1000,
   remaining: 900,
   cost: 50000000000000000, // 0.05 ETH in wei
+  costWei: 50000000000000000n,
   startDate: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
   endDate: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
   status: "active",
@@ -163,13 +168,28 @@ const createMockClaim = (overrides = {}) => ({
   ...overrides,
 });
 
+const createMockClaimState = (overrides = {}) => ({
+  claim: createMockClaim(overrides),
+  isFetching: false,
+});
+
 const defaultProps = {
   title: "Test Meme",
   contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
   chain: { id: 1 } as any,
   proxy: "0x2",
   abi: {},
-  token_id: 123,
+  mintMetadata: {
+    tokenId: 123,
+    metadata: {
+      name: "Test NFT",
+      description: "Test description",
+      attributes: [],
+      image_url: "test.jpg",
+      animation_url: "",
+      animation_details: null,
+    },
+  },
   mint_date: {
     toMillis: jest.fn(() => Date.now()),
     toSeconds: jest.fn(() => Date.now() / 1000),
@@ -187,7 +207,7 @@ afterEach(() => {
 describe("Basic Functionality", () => {
   test("shows error message when hook reports error", async () => {
     let called = false;
-    useManifoldClaim.mockImplementation((c, p, a, t, onError) => {
+    useManifoldClaim.mockImplementation(({ onError }: any) => {
       if (!called) {
         called = true;
         onError();
@@ -208,7 +228,7 @@ describe("Basic Functionality", () => {
   });
 
   test("renders basic NFT information when data is available", async () => {
-    useManifoldClaim.mockReturnValue(createMockClaim());
+    useManifoldClaim.mockReturnValue(createMockClaimState());
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(createMockManifoldInstance()),
@@ -216,10 +236,10 @@ describe("Basic Functionality", () => {
 
     render(<ManifoldMinting {...defaultProps} />);
 
-    // Should render title and basic info - component renders "Mint" span and title text
-    expect(
-      screen.getByRole("heading", { name: "Mint Test Meme" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Test NFT" })).toHaveAttribute(
+      "href",
+      "/memes/123"
+    );
 
     // Wait for the NFT info to load and display
     await waitFor(
@@ -233,7 +253,7 @@ describe("Basic Functionality", () => {
 
 describe("Component Structure", () => {
   test("renders child components when data is available", async () => {
-    useManifoldClaim.mockReturnValue(createMockClaim());
+    useManifoldClaim.mockReturnValue(createMockClaimState());
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(createMockManifoldInstance()),
@@ -257,7 +277,7 @@ describe("Component Structure", () => {
 
   test("displays edition size and pricing information", async () => {
     useManifoldClaim.mockReturnValue(
-      createMockClaim({
+      createMockClaimState({
         total: 100,
         totalMax: 1000,
         remaining: 900,

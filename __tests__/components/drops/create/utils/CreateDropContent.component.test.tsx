@@ -127,6 +127,13 @@ jest.mock(
     return null;
   }
 );
+jest.mock(
+  "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
 jest.mock("@/components/waves/CreateDropEmojiPicker", () => (props: any) => {
   mockEmojiPickerProps = props;
   return <div />;

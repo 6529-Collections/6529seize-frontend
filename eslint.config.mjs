@@ -31,29 +31,63 @@ try {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const nextCoreWebVitalsPlugins =
+  nextCoreWebVitals.find((config) => config.plugins)?.plugins ?? {};
+const nextReactPlugin = nextCoreWebVitalsPlugins.react;
+
+if (!nextReactPlugin) {
+  throw new Error(
+    "eslint-config-next/core-web-vitals did not expose the react plugin; react rule overrides would be inert."
+  );
+}
+
+const deepFreezeRuleConfig = (value, seen = new WeakSet()) => {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) {
+    return value;
+  }
+
+  if (seen.has(value)) {
+    return value;
+  }
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    for (const nestedValue of value) {
+      deepFreezeRuleConfig(nestedValue, seen);
+    }
+    return Object.freeze(value);
+  }
+
+  if (Object.getPrototypeOf(value) === Object.prototype) {
+    for (const nestedValue of Object.values(value)) {
+      deepFreezeRuleConfig(nestedValue, seen);
+    }
+  }
+
+  return Object.freeze(value);
+};
+
 // =============================================================================
 // PLUGINS
 // =============================================================================
-// Note: jsx-a11y is already included via eslint-config-next, so we don't register it again
-const plugins = {
+// React is included via eslint-config-next, but flat config rule overrides need
+// the plugin registered in the same config object.
+export const basePlugins = Object.freeze({
   "unused-imports": unusedImports,
   "react-hooks": reactHooks,
   "@typescript-eslint": tseslint.plugin,
+  react: nextReactPlugin,
   import: importPlugin,
   sonarjs: sonarjs,
   security: security,
   promise: promise,
   tailwindcss: tailwindcss,
-};
-
-if (reactCompilerPlugin) {
-  plugins["react-compiler"] = reactCompilerPlugin;
-}
+});
 
 // =============================================================================
 // RULES
 // =============================================================================
-const rules = {
+export const baseRules = deepFreezeRuleConfig({
   // -------------------------------------------------------------------------
   // Next.js Rules - Production Grade
   // -------------------------------------------------------------------------
@@ -393,118 +427,142 @@ const rules = {
   // Arrays
   "array-callback-return": ["off", { allowImplicit: true }],
   "no-array-constructor": "error",
-};
+});
 
-// Add React Compiler rule if available
-if (reactCompilerPlugin) {
-  rules["react-compiler/react-compiler"] = "off";
-}
+export const baseGlobalIgnores = Object.freeze([
+  "**/node_modules",
+  "**/.next",
+  "**/dist",
+  "**/out",
+  "**/public",
+  "**/coverage",
+  "**/generated",
+  "**/__tests__/**",
+  "**/tests/**",
+  "**/__mocks__/**",
+  "**/e2e/**",
+  "**/test-results/**",
+  "config/**",
+  "*.js",
+  "*.mjs",
+  "*.ts",
+  "*.tsx",
+  "scripts/**",
+  "stubs/**",
+  "standalone/standalone-memes-mint/src/next.config.ts",
+  "standalone/standalone-memes-mint/src/postcss.config.js",
+  "standalone/standalone-memes-mint/src/tailwind.config.cjs",
+  "standalone/standalone-memes-mint/src/.next-static-export/**",
+  "**/.next-static-export/**",
+  ".claude/**",
+  ".codex/**",
+  ".deepsec/**",
+]);
+
+export const typeCheckedFileIgnores = Object.freeze([
+  "scripts/**",
+  "**/next.config.*",
+  "**/.next-static-export/**",
+  "config/env.ts",
+  "config/serverEnv.ts",
+  "config/alchemyEnv.ts",
+  "config/reviewbotUsageEnv.ts",
+  "__tests__/config/env.base-endpoint.test.ts",
+  "**/playwright.config.ts",
+  "tests/**",
+]);
 
 // =============================================================================
 // EXPORT CONFIG
 // =============================================================================
-export default defineConfig([
-  // Global ignores
-  globalIgnores([
-    "**/node_modules",
-    "**/.next",
-    "**/dist",
-    "**/out",
-    "**/public",
-    "**/coverage",
-    "**/generated",
-    "**/__tests__/**",
-    "**/tests/**",
-    "**/__mocks__/**",
-    "**/e2e/**",
-    "**/test-results/**",
-    "config/**",
-    "*.js",
-    "*.mjs",
-    "*.ts",
-    "*.tsx",
-    "scripts/**",
-    "stubs/**",
-    "standalone/standalone-memes-mint/src/next.config.ts",
-    "standalone/standalone-memes-mint/src/postcss.config.js",
-    "standalone/standalone-memes-mint/src/tailwind.config.cjs",
-    "standalone/standalone-memes-mint/src/.next-static-export/**",
-    "**/.next-static-export/**",
-    ".claude/**",
-    ".codex/**",
-    ".deepsec/**",
-  ]),
+export const createEslintConfig = ({
+  rulesOverride = {},
+  extraPlugins = {},
+  additionalConfigs = [],
+  globalIgnorePatterns = baseGlobalIgnores,
+  reactCompilerRule = "off",
+} = {}) => {
+  const plugins = { ...basePlugins, ...extraPlugins };
+  if (reactCompilerPlugin) {
+    plugins["react-compiler"] = reactCompilerPlugin;
+  }
 
-  // Base config with Next.js rules
-  {
-    extends: [...nextCoreWebVitals],
-    plugins,
-    rules,
-    settings: {
-      "import/resolver": {
-        typescript: {
-          alwaysTryTypes: true,
-          project: `${__dirname}/tsconfig.json`,
+  const rules = { ...baseRules, ...rulesOverride };
+  if (reactCompilerPlugin) {
+    rules["react-compiler/react-compiler"] = reactCompilerRule;
+  }
+
+  return defineConfig([
+    // Global ignores
+    globalIgnores([...globalIgnorePatterns]),
+
+    // Base config with Next.js rules
+    {
+      extends: [...nextCoreWebVitals],
+      plugins,
+      rules,
+      settings: {
+        "import/resolver": {
+          typescript: {
+            alwaysTryTypes: true,
+            project: `${__dirname}/tsconfig.json`,
+          },
+          node: true,
         },
-        node: true,
-      },
-      tailwindcss: {
-        config: `${__dirname}/tailwind.config.js`,
-        callees: ["classnames", "clsx", "cn", "cva"],
-      },
-    },
-  },
-
-  // Standalone build/export scripts legitimately use computed paths and stdout logging.
-  {
-    files: ["standalone/standalone-memes-mint/scripts/**/*.{js,cjs,mjs}"],
-    rules: {
-      "security/detect-non-literal-fs-filename": "off",
-      "no-console": "off",
-    },
-  },
-
-  // Non-TypeScript files should not run type-aware @typescript-eslint rules.
-  {
-    files: ["**/*.{js,cjs,mjs}"],
-    extends: [tseslint.configs.disableTypeChecked],
-  },
-
-  // TypeScript-specific rules with type-checking
-  {
-    files: ["**/*.{ts,tsx}"],
-    ignores: [
-      "scripts/**",
-      "**/next.config.*",
-      "**/.next-static-export/**",
-      "config/env.ts",
-      "config/serverEnv.ts",
-      "config/alchemyEnv.ts",
-      "config/reviewbotUsageEnv.ts",
-      "__tests__/config/env.base-endpoint.test.ts",
-      "**/playwright.config.ts",
-      "tests/**",
-    ],
-    languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        project: `${__dirname}/tsconfig.json`,
-        tsconfigRootDir: __dirname,
-      },
-    },
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        {
-          selector:
-            "MemberExpression[object.name='process'][property.name='env']",
-          message:
-            "Accessing process.env is restricted. Use environment variables safely.",
+        tailwindcss: {
+          config: `${__dirname}/tailwind.config.js`,
+          callees: ["classnames", "clsx", "cn", "cva"],
         },
+      },
+    },
+
+    // Build/export/publish scripts legitimately use computed paths and stdout logging.
+    {
+      files: [
+        "ops/scripts/publish-delegation-docs-content.mjs",
+        "standalone/standalone-memes-mint/scripts/**/*.{js,cjs,mjs}",
       ],
+      rules: {
+        "security/detect-non-literal-fs-filename": "off",
+        "no-console": "off",
+      },
     },
-  },
 
-  // Prettier - MUST be last to override formatting rules
-  eslintConfigPrettier,
-]);
+    // Non-TypeScript files should not run type-aware @typescript-eslint rules.
+    {
+      files: ["**/*.{js,cjs,mjs}"],
+      extends: [tseslint.configs.disableTypeChecked],
+    },
+
+    // TypeScript-specific rules with type-checking
+    {
+      files: ["**/*.{ts,tsx}"],
+      ignores: [...typeCheckedFileIgnores],
+      languageOptions: {
+        parser: tseslint.parser,
+        parserOptions: {
+          project: `${__dirname}/tsconfig.json`,
+          tsconfigRootDir: __dirname,
+        },
+      },
+      rules: {
+        "no-restricted-syntax": [
+          "error",
+          {
+            selector:
+              "MemberExpression[object.name='process'][property.name='env']",
+            message:
+              "Accessing process.env is restricted. Use environment variables safely.",
+          },
+        ],
+      },
+    },
+
+    ...additionalConfigs,
+
+    // Prettier - MUST be last to override formatting rules
+    eslintConfigPrettier,
+  ]);
+};
+
+export default createEslintConfig();

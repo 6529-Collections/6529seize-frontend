@@ -96,6 +96,7 @@ const SUBMISSION_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 const URL_TOKEN_PATTERN = /^(?:https?:\/\/|www\.)\S+$/i;
+const CONTENT_REFERENCE_PATTERN = /([@#])\[([^\]\r\n]+)\]/g;
 const IMAGE_URL_PATTERN = /\.(?:avif|gif|jpe?g|png|webp)(?:$|[?#])/i;
 const INTERACTIVE_URL_PATTERN = /\.(?:glb|gltf|html?)(?:$|[?#])/i;
 const VIDEO_URL_PATTERN = /\.(?:m4v|mov|mp4|webm)(?:$|[?#])/i;
@@ -123,8 +124,18 @@ type DropContentLineKind =
   | "video"
   | "file"
   | "attachment-summary";
+type DropContentSegmentKind = "text" | "reference";
+type DropContentLineSegment = {
+  readonly kind: DropContentSegmentKind;
+  readonly text: string;
+};
 type DropContentLine = {
   readonly kind: DropContentLineKind;
+  readonly segments?: readonly DropContentLineSegment[] | undefined;
+  readonly text: string;
+};
+type DropContentWord = {
+  readonly kind: DropContentSegmentKind;
   readonly text: string;
 };
 type DropMediaItem = {
@@ -275,11 +286,13 @@ const addHardWrappedTokenLines = ({
   lines,
   token,
   kind,
+  segmentKind,
   maxLines,
 }: {
   readonly lines: DropContentLine[];
   readonly token: string;
   readonly kind: DropContentLineKind;
+  readonly segmentKind?: DropContentSegmentKind | undefined;
   readonly maxLines: number;
 }): void => {
   let remaining = token;
@@ -293,10 +306,18 @@ const addHardWrappedTokenLines = ({
         ? appendContentEllipsis(prefix)
         : prefix;
 
-    lines.push({
-      kind,
-      text,
-    });
+    lines.push(
+      segmentKind
+        ? {
+            kind,
+            segments: [{ kind: segmentKind, text }],
+            text,
+          }
+        : {
+            kind,
+            text,
+          }
+    );
 
     remaining = remaining.slice(prefix.length);
   }
@@ -308,10 +329,50 @@ const addTrailingContentEllipsis = (lines: DropContentLine[]): void => {
     return;
   }
 
+  const text = appendContentEllipsis(lastLine.text);
+  const segments = lastLine.segments
+    ? getSegmentsForLineText(lastLine.segments, text)
+    : undefined;
+
   lines.splice(-1, 1, {
     ...lastLine,
-    text: appendContentEllipsis(lastLine.text),
+    ...(segments ? { segments } : {}),
+    text,
   });
+};
+
+const getSegmentsForLineText = (
+  segments: readonly DropContentLineSegment[],
+  text: string
+): readonly DropContentLineSegment[] => {
+  const nextSegments: DropContentLineSegment[] = [];
+  let cursor = 0;
+
+  for (const segment of segments) {
+    if (cursor >= text.length) {
+      break;
+    }
+
+    const nextCursor = Math.min(cursor + segment.text.length, text.length);
+    nextSegments.push({
+      ...segment,
+      text: text.slice(cursor, nextCursor),
+    });
+    cursor = nextCursor;
+  }
+
+  if (cursor < text.length) {
+    const remainingText = text.slice(cursor);
+    const lastSegment = nextSegments.at(-1);
+    if (lastSegment) {
+      nextSegments.splice(-1, 1, {
+        ...lastSegment,
+        text: `${lastSegment.text}${remainingText}`,
+      });
+    }
+  }
+
+  return nextSegments;
 };
 
 const isUrlToken = (value: string): boolean => URL_TOKEN_PATTERN.test(value);
@@ -620,16 +681,33 @@ const getDropText = (
 type ContentLineBuildContext = {
   lines: DropContentLine[];
   currentLine: string;
+  currentSegments: DropContentLineSegment[];
   readonly maxLines: number;
 };
+
+const hasReferenceSegment = (
+  segments: readonly DropContentLineSegment[]
+): boolean => segments.some((segment) => segment.kind === "reference");
 
 const flushCurrentContentLine = (context: ContentLineBuildContext): void => {
   if (!context.currentLine || context.lines.length >= context.maxLines) {
     return;
   }
 
-  context.lines.push({ kind: "text", text: context.currentLine });
+  context.lines.push(
+    hasReferenceSegment(context.currentSegments)
+      ? {
+          kind: "text",
+          segments: context.currentSegments,
+          text: context.currentLine,
+        }
+      : {
+          kind: "text",
+          text: context.currentLine,
+        }
+  );
   context.currentLine = "";
+  context.currentSegments = [];
 };
 
 const addEllipsisIfMoreWordsRemain = ({
@@ -639,7 +717,7 @@ const addEllipsisIfMoreWordsRemain = ({
 }: {
   readonly context: ContentLineBuildContext;
   readonly index: number;
-  readonly words: readonly string[];
+  readonly words: readonly DropContentWord[];
 }): void => {
   if (context.lines.length === context.maxLines && index < words.length - 1) {
     addTrailingContentEllipsis(context.lines);
@@ -655,7 +733,7 @@ const appendUrlContentLine = ({
   readonly context: ContentLineBuildContext;
   readonly index: number;
   readonly word: string;
-  readonly words: readonly string[];
+  readonly words: readonly DropContentWord[];
 }): void => {
   flushCurrentContentLine(context);
   addHardWrappedTokenLines({
@@ -678,16 +756,31 @@ const appendLongContentWord = ({
 }: {
   readonly context: ContentLineBuildContext;
   readonly index: number;
-  readonly word: string;
-  readonly words: readonly string[];
+  readonly word: DropContentWord;
+  readonly words: readonly DropContentWord[];
 }): void => {
   addHardWrappedTokenLines({
     lines: context.lines,
-    token: word,
+    token: word.text,
     kind: "text",
+    segmentKind: word.kind,
     maxLines: context.maxLines,
   });
   addEllipsisIfMoreWordsRemain({ context, index, words });
+};
+
+const appendCurrentContentWord = (
+  context: ContentLineBuildContext,
+  word: DropContentWord
+): void => {
+  if (context.currentLine) {
+    context.currentLine = `${context.currentLine} ${word.text}`;
+    context.currentSegments.push({ kind: "text", text: " " });
+  } else {
+    context.currentLine = word.text;
+  }
+
+  context.currentSegments.push(word);
 };
 
 const appendTextContentLine = ({
@@ -698,20 +791,20 @@ const appendTextContentLine = ({
 }: {
   readonly context: ContentLineBuildContext;
   readonly index: number;
-  readonly word: string;
-  readonly words: readonly string[];
+  readonly word: DropContentWord;
+  readonly words: readonly DropContentWord[];
 }): void => {
   const nextLine = context.currentLine
-    ? `${context.currentLine} ${word}`
-    : word;
+    ? `${context.currentLine} ${word.text}`
+    : word.text;
   if (fitsContentLine(nextLine)) {
-    context.currentLine = nextLine;
+    appendCurrentContentWord(context, word);
     return;
   }
 
   flushCurrentContentLine(context);
-  if (fitsContentLine(word)) {
-    context.currentLine = word;
+  if (fitsContentLine(word.text)) {
+    appendCurrentContentWord(context, word);
     return;
   }
 
@@ -723,6 +816,43 @@ const getNormalizedContentParagraph = (value: string): string =>
 
 const getContentParagraphs = (value: string): readonly string[] =>
   value.split(/\r\n|\n|\r/);
+
+const getTextContentWords = (value: string): readonly DropContentWord[] =>
+  value
+    .split(" ")
+    .filter(Boolean)
+    .map((text) => ({ kind: "text" as const, text }));
+
+const getReferenceContentWord = (
+  marker: string,
+  label: string
+): DropContentWord | null => {
+  const text = getUsableText(label)?.replace(/\s+/g, " ");
+  return text ? { kind: "reference", text: `${marker}${text}` } : null;
+};
+
+const getContentWords = (paragraph: string): readonly DropContentWord[] => {
+  const words: DropContentWord[] = [];
+  let lastIndex = 0;
+
+  for (const match of paragraph.matchAll(CONTENT_REFERENCE_PATTERN)) {
+    const matchIndex = match.index ?? 0;
+    words.push(...getTextContentWords(paragraph.slice(lastIndex, matchIndex)));
+
+    const marker = match[1];
+    const label = match[2];
+    const referenceWord =
+      marker && label ? getReferenceContentWord(marker, label) : null;
+    if (referenceWord) {
+      words.push(referenceWord);
+    }
+
+    lastIndex = matchIndex + match[0].length;
+  }
+
+  words.push(...getTextContentWords(paragraph.slice(lastIndex)));
+  return words;
+};
 
 const hasRemainingContentParagraph = ({
   paragraphs,
@@ -751,7 +881,7 @@ const appendContentParagraph = ({
   readonly context: ContentLineBuildContext;
   readonly paragraph: string;
 }): void => {
-  const words = paragraph.split(" ");
+  const words = getContentWords(paragraph);
 
   for (const [index, word] of words.entries()) {
     if (context.lines.length === context.maxLines) {
@@ -759,8 +889,8 @@ const appendContentParagraph = ({
       break;
     }
 
-    if (isUrlToken(word)) {
-      appendUrlContentLine({ context, index, word, words });
+    if (word.kind === "text" && isUrlToken(word.text)) {
+      appendUrlContentLine({ context, index, word: word.text, words });
       continue;
     }
 
@@ -783,6 +913,7 @@ const getContentLines = ({
   const context: ContentLineBuildContext = {
     lines: [],
     currentLine: "",
+    currentSegments: [],
     maxLines,
   };
 
@@ -1759,6 +1890,14 @@ const getContentLineRows = (
   });
 };
 
+const getContentSegmentColor = (segment: DropContentLineSegment): string =>
+  segment.kind === "reference" ? LINK_TEXT : "#ffffff";
+
+const getContentLineSegments = (
+  line: DropContentLine
+): readonly DropContentLineSegment[] =>
+  line.segments ?? [{ kind: "text", text: line.text }];
+
 const DropContentLines = ({
   contentLines,
   contentTop,
@@ -1810,7 +1949,16 @@ const DropContentLines = ({
         >
           {line.kind === "video" ? <VideoContentIcon /> : null}
           {line.kind === "file" ? <FileContentIcon /> : null}
-          {line.text}
+          {line.segments
+            ? getContentLineSegments(line).map((segment, segmentIndex) => (
+                <span
+                  key={`${key}-${segmentIndex}`}
+                  style={{ color: getContentSegmentColor(segment) }}
+                >
+                  {segment.text}
+                </span>
+              ))
+            : line.text}
         </div>
       ))}
     </div>

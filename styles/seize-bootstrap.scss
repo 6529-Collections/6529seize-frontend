@@ -8,8 +8,7 @@ $orange: #ffa500;
 $yellow: #ffff00;
 // Add any other Bootstrap variables you want to set globally BEFORE the import.
 
-// Import Bootstrap's full SCSS using @use and configure its variables.
-@use "../node_modules/bootstrap/scss/bootstrap" with (
+@use "bootstrap/scss/bootstrap" with (
   $pink: $pink,
   $green: $green,
   $blue: $blue,

@@ -24,11 +24,16 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 // Mock AuthContext
-jest.mock("@/components/auth/Auth", () => ({
-  AuthContext: React.createContext({
+jest.mock("@/components/auth/Auth", () => {
+  const React = require("react");
+  const authValue = {
     setToast: jest.fn(),
-  }),
-}));
+  };
+  return {
+    AuthContext: React.createContext(authValue),
+    useAuth: () => authValue,
+  };
+});
 
 // Dummy component using the context
 const DummyConsumer = () => {

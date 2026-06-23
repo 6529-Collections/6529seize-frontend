@@ -4,6 +4,7 @@ import RepCategorySearch, {
   RepCategorySearchSize,
 } from "@/components/utils/input/rep-category/RepCategorySearch";
 import type { CreditDirection } from "../GroupCard";
+import type { GroupCardRateMatter } from "../GroupCard";
 import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
 
 import type { JSX } from "react";
@@ -18,7 +19,7 @@ export default function GroupCardVoteAllInputs({
   setAmountToAdd,
   setCreditDirection,
 }: {
-  readonly matter: ApiRateMatter;
+  readonly matter: GroupCardRateMatter;
   readonly group: ApiGroupFull;
   readonly amountToAdd: number | null;
   readonly category: string | null;
@@ -27,7 +28,7 @@ export default function GroupCardVoteAllInputs({
   readonly setAmountToAdd: (amountToGive: number | null) => void;
   readonly setCreditDirection: (creditDirection: CreditDirection) => void;
 }) {
-  const components: Record<ApiRateMatter, JSX.Element> = {
+  const components: Record<GroupCardRateMatter, JSX.Element> = {
     [ApiRateMatter.Cic]: (
       <div className="tw-w-full xl:tw-max-w-[17.156rem]">
         <GroupCardActionNumberInput
@@ -41,7 +42,7 @@ export default function GroupCardVoteAllInputs({
       </div>
     ),
     [ApiRateMatter.Rep]: (
-      <div className="tw-w-full tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-gap-x-4 tw-gap-y-4 sm:tw-flex-nowrap">
         <div className="tw-w-full md:tw-w-[58%]">
           <GroupCardActionNumberInput
             label="Rep"

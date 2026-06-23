@@ -1,6 +1,5 @@
 import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { publicEnv } from "@/config/env";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildNextgenCollectionPageJsonLd } from "@/lib/structured-data/nextgen";
@@ -8,7 +7,11 @@ import styles from "@/styles/Home.module.scss";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchCollection, getCollectionView } from "../page-utils";
+import {
+  fetchCollection,
+  getCollectionView,
+  getNextgenCollectionMetadata,
+} from "../page-utils";
 
 export async function generateMetadata({
   params,
@@ -26,14 +29,9 @@ export async function generateMetadata({
   if (resolvedView !== NextgenCollectionView.OVERVIEW) {
     title += ` | ${resolvedView}`;
   }
-  return getAppMetadata({
+  return getNextgenCollectionMetadata({
+    collection: resolvedCollection,
     title,
-    ogImage:
-      resolvedCollection.banner ||
-      resolvedCollection.image ||
-      `${publicEnv.BASE_ENDPOINT}/nextgen.png`,
-    description: "NextGen",
-    twitterCard: "summary_large_image",
   });
 }
 

@@ -19,6 +19,16 @@ const normalizeUrlCandidate = (value: string): string => {
   return /^[a-z][a-z\d+\-.]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
 };
 
+const normalizeTweetText = (value: string): string | undefined => {
+  const normalized = value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n");
+
+  return readString(normalized);
+};
+
 const parseHandleFromUrl = (url: string | undefined): string | undefined => {
   if (!url) {
     return undefined;
@@ -46,7 +56,7 @@ const findMediaLink = (
     (element: ReturnType<typeof $.root>[number]) => {
       const href = $(element).attr("href") ?? "";
       const text = $(element).text();
-      return isPicTwitterUrl(href) || isPicTwitterUrl(text);
+      return isPicTwitterUrl(href) || (isTcoUrl(href) && isPicTwitterUrl(text));
     }
   );
 
@@ -69,6 +79,15 @@ const isPicTwitterUrl = (value: string): boolean => {
   }
 };
 
+const isTcoUrl = (value: string): boolean => {
+  try {
+    const parsed = new URL(normalizeUrlCandidate(value));
+    return matchesDomainOrSubdomain(parsed.hostname, "t.co");
+  } catch {
+    return false;
+  }
+};
+
 export function parseTwitterOEmbed(
   oembed: TwitterOEmbedResponse,
   sourceUrl: string,
@@ -77,7 +96,9 @@ export function parseTwitterOEmbed(
   const $ = cheerio.load(oembed.html ?? "");
   const paragraph = $("blockquote p").first();
   paragraph.find("br").replaceWith("\n");
-  const text = readString(paragraph.clone().children().remove().end().text());
+  const text = normalizeTweetText(
+    paragraph.clone().children().remove().end().text()
+  );
   const tweetUrl =
     readString($("blockquote a").last().attr("href")) ?? sourceUrl;
   const createdAtText = readString($("blockquote a").last().text());

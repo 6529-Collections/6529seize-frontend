@@ -23,7 +23,7 @@ type CollectedStatsFetchState = {
   readonly shouldFetchBalanceMemes: boolean;
 };
 
-type CollectedStatsTdh = ConsolidatedTDH | TDH | undefined;
+type CollectedStatsTdh = ConsolidatedTDH | TDH;
 
 const DETAILS_DATA_STALE_TIME = 60_000;
 
@@ -41,10 +41,11 @@ const fetchStatsQuery = async <T>({
   }
 
   try {
-    return await commonApiFetch<T>({
+    const result = await commonApiFetch<T | undefined>({
       endpoint,
       signal,
     });
+    return result ?? fallback;
   } catch (error: unknown) {
     if (isAbortError(error)) {
       throw error;
@@ -119,7 +120,7 @@ const buildCollectedStatsDataResult = ({
   readonly shouldFetchSeasons: boolean;
   readonly shouldFetchTdh: boolean;
   readonly statsPath: string | null;
-  readonly tdh: CollectedStatsTdh;
+  readonly tdh: CollectedStatsTdh | undefined;
 }): UseCollectedStatsDataResult => ({
   statsPath,
   collectedStats: shouldFetchCollectedStats
@@ -162,19 +163,17 @@ export function useCollectedStatsData({
     statsPath,
   });
 
-  const { data: fetchedCollectedStats } = useQuery<
-    ApiCollectedStats | undefined
-  >({
+  const { data: fetchedCollectedStats } = useQuery<ApiCollectedStats | null>({
     queryKey: [STATS_QUERY_KEY, "collected-stats", collectedStatsIdentityKey],
     enabled: shouldFetchCollectedStats,
     retry: false,
     queryFn: ({ signal }) =>
-      fetchStatsQuery<ApiCollectedStats | undefined>({
+      fetchStatsQuery<ApiCollectedStats | null>({
         endpoint:
           collectedStatsIdentityKey === null
             ? null
             : `collected-stats/${encodeURIComponent(collectedStatsIdentityKey)}`,
-        fallback: undefined,
+        fallback: null,
         signal,
       }),
   });
@@ -192,28 +191,28 @@ export function useCollectedStatsData({
       }),
   });
 
-  const { data: fetchedTdh } = useQuery<CollectedStatsTdh>({
+  const { data: fetchedTdh } = useQuery<CollectedStatsTdh | null>({
     queryKey: [STATS_QUERY_KEY, "tdh", statsPath],
     enabled: shouldFetchTdh,
     retry: false,
     staleTime: DETAILS_DATA_STALE_TIME,
     queryFn: ({ signal }) =>
-      fetchStatsQuery<ConsolidatedTDH | TDH | undefined>({
+      fetchStatsQuery<CollectedStatsTdh | null>({
         endpoint: statsPath === null ? null : `tdh/${statsPath}`,
-        fallback: undefined,
+        fallback: null,
         signal,
       }),
   });
 
-  const { data: fetchedOwnerBalance } = useQuery<OwnerBalance | undefined>({
+  const { data: fetchedOwnerBalance } = useQuery<OwnerBalance | null>({
     queryKey: [STATS_QUERY_KEY, "owner-balance", statsPath],
     enabled: shouldFetchOwnerBalance,
     retry: false,
     staleTime: DETAILS_DATA_STALE_TIME,
     queryFn: ({ signal }) =>
-      fetchStatsQuery<OwnerBalance | undefined>({
+      fetchStatsQuery<OwnerBalance | null>({
         endpoint: statsPath === null ? null : `owners-balances/${statsPath}`,
-        fallback: undefined,
+        fallback: null,
         signal,
       }),
   });
@@ -234,9 +233,9 @@ export function useCollectedStatsData({
 
   return buildCollectedStatsDataResult({
     balanceMemes: fetchedBalanceMemes,
-    collectedStats: fetchedCollectedStats,
+    collectedStats: fetchedCollectedStats ?? undefined,
     initialStatsData,
-    ownerBalance: fetchedOwnerBalance,
+    ownerBalance: fetchedOwnerBalance ?? undefined,
     seasons: fetchedSeasons,
     shouldFetchBalanceMemes,
     shouldFetchCollectedStats,
@@ -244,6 +243,6 @@ export function useCollectedStatsData({
     shouldFetchSeasons,
     shouldFetchTdh,
     statsPath,
-    tdh: fetchedTdh,
+    tdh: fetchedTdh ?? undefined,
   });
 }

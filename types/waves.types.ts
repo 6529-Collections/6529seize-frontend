@@ -5,8 +5,11 @@ import type { ApiWaveParticipationSubmissionStrategy } from "@/generated/models/
 import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
 import type { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import type { ApiWaveRepSummary } from "@/generated/models/ApiWaveRepSummary";
+import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 
 export enum MyStreamWaveTab {
   CHAT = "CHAT",
@@ -186,6 +189,7 @@ export interface SidebarWave {
   readonly name: string;
   readonly type: ApiWaveType;
   readonly createdAt: number;
+  readonly creator: ApiProfileMin | null;
   readonly picture: string | null;
   readonly contributors: readonly SidebarWaveContributor[];
   readonly isDirectMessage: boolean;
@@ -196,12 +200,18 @@ export interface SidebarWave {
   readonly totalDropsCount: number;
   readonly isPrivate: boolean;
   readonly latestDropTimestamp: number | null;
+  readonly latestFollowedSubwaveDropTimestamp: number | null;
   readonly firstUnreadDropSerialNo: number | null;
+  readonly firstUnreadFollowedSubwaveDropSerialNo: number | null;
   readonly unreadDropsCount: number;
+  readonly followedSubwavesCount: number;
+  readonly unreadFollowedSubwaveDrops: number;
   readonly latestReadTimestamp: number;
   readonly pinned: boolean;
   readonly muted: boolean;
   readonly subscribed: boolean;
+  readonly waveRep: ApiWaveRepSummary | null;
+  readonly waveScore: ApiWaveScore | null;
 }
 
 export interface SidebarWavesPage {

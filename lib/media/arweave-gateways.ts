@@ -1,44 +1,39 @@
-// Ordered list: the array order defines the Arweave fallback retry order.
-const ARWEAVE_GATEWAY_HOSTS = [
-  "arweave.net",
-  "ardrive.net",
-  "gateway.arweave.net",
-  "gateway.ar.io",
-] as const;
+import {
+  ARWEAVE_GATEWAY_HOSTS,
+  ARWEAVE_TX_SUBDOMAIN_SUFFIXES,
+  DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  canonicalizeGatewayHostname,
+  parseDecentralizedMediaRef,
+} from "./decentralized-media";
 
-// gateway.ar.io redirects interactive content to <txid>.ar.io (not
-// <txid>.gateway.ar.io), so CSP / remote-pattern lists must also allow ar.io.
 const ADDITIONAL_CSP_HOSTS = ["ar.io"] as const;
 
 const dedupe = (values: readonly string[]): string[] =>
   Array.from(new Set(values));
 
-export const canonicalizeArweaveGatewayHostname = (
-  hostname: string
-): string => {
-  let normalized = hostname.trim().toLowerCase();
-  while (normalized.endsWith(".")) {
-    normalized = normalized.slice(0, -1);
-  }
-  return normalized;
-};
-
-export const ARWEAVE_FALLBACK_HOSTS = [...ARWEAVE_GATEWAY_HOSTS];
+export const canonicalizeArweaveGatewayHostname = (hostname: string): string =>
+  canonicalizeGatewayHostname(hostname);
 
 const ARWEAVE_GATEWAY_EXACT_HOSTS = dedupe(ARWEAVE_GATEWAY_HOSTS);
 
-const ARWEAVE_GATEWAY_WILDCARD_BASE_HOSTS = dedupe(ARWEAVE_GATEWAY_HOSTS);
+const ARWEAVE_GATEWAY_WILDCARD_BASE_HOSTS = dedupe([
+  ...ARWEAVE_GATEWAY_HOSTS,
+  ...ARWEAVE_TX_SUBDOMAIN_SUFFIXES.map((suffix) => suffix.slice(1)),
+]);
 
-export const ARWEAVE_GATEWAY_CSP_SOURCES = dedupe(
-  [...ARWEAVE_GATEWAY_HOSTS, ...ADDITIONAL_CSP_HOSTS].flatMap((hostname) => [
-    `https://${hostname}`,
-    `https://*.${hostname}`,
-  ])
-);
+export const ARWEAVE_GATEWAY_CSP_SOURCES = dedupe([
+  DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  ...ARWEAVE_GATEWAY_HOSTS.map((hostname) => `https://${hostname}`),
+  ...ARWEAVE_GATEWAY_HOSTS.map((hostname) => `https://*.${hostname}`),
+  ...ADDITIONAL_CSP_HOSTS.map((hostname) => `https://${hostname}`),
+  ...ADDITIONAL_CSP_HOSTS.map((hostname) => `https://*.${hostname}`),
+]);
 
-export const ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES = dedupe(
-  ARWEAVE_GATEWAY_HOSTS.flatMap((hostname) => [hostname, `**.${hostname}`])
-);
+export const ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES = dedupe([
+  "media.6529.io",
+  ...ARWEAVE_GATEWAY_HOSTS.flatMap((hostname) => [hostname, `**.${hostname}`]),
+  ...ADDITIONAL_CSP_HOSTS.flatMap((hostname) => [hostname, `**.${hostname}`]),
+]);
 
 export const isArweaveGatewayRuntimeHost = (hostname: string): boolean => {
   const normalized = canonicalizeArweaveGatewayHostname(hostname);
@@ -56,25 +51,10 @@ export const isArweaveGatewayRuntimeHost = (hostname: string): boolean => {
 };
 
 export const stripArweaveGatewayUrlPrefix = (value: string): string => {
-  try {
-    const parsed = new URL(value);
-    if (!/^https?:$/i.test(parsed.protocol)) {
-      return value;
-    }
-
-    if (!isArweaveGatewayRuntimeHost(parsed.hostname)) {
-      return value;
-    }
-
-    const strippedValue =
-      `${parsed.pathname}${parsed.search}${parsed.hash}`.replace(/^\/+/, "");
-
-    if (!strippedValue) {
-      return value;
-    }
-
-    return strippedValue;
-  } catch {
+  const parsed = parseDecentralizedMediaRef(value);
+  if (parsed?.protocol !== "arweave") {
     return value;
   }
+
+  return parsed.path ? `${parsed.id}/${parsed.path}` : parsed.id;
 };

@@ -2,6 +2,13 @@ name: Web Deploy - PROD
 
 on: workflow_dispatch
 
+permissions:
+  contents: read
+
+concurrency:
+  group: web-deploy-prod
+  cancel-in-progress: false
+
 env:
   AWS_BUCKET: "seize-web"
   COMMIT_SHA: "${{ github.sha }}"
@@ -20,15 +27,77 @@ env:
   ASSETS_FROM_S3: "true"
 
 jobs:
-  build-upload-deploy:
+  assert-main-ref:
+    name: Assert main ref
     runs-on: ubuntu-latest
+    permissions: {}
+
+    steps:
+      - name: Assert production deploy runs from main
+        run: |
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "::error::Production deploys must be run from the main branch. Selected ref: ${GITHUB_REF_NAME} (${GITHUB_SHA})."
+            exit 1
+          fi
+
+  build-upload-deploy:
+    needs: assert-main-ref
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    environment: production
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Create deployment bus manifest
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs create-manifest \
+            --environment production \
+            --production-candidate-sha "${COMMIT_SHA}" \
+            --production-eligible true \
+            --required-packs "playwright:core-smoke,playwright:surface-matrix,playwright:wcag-i18n" \
+            --release-captain "github-actions/${{ github.actor }}" \
+            --status queued \
+            --phase queued \
+            --message "Production deployment queued for ${COMMIT_SHA}" \
+            --workflow-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --output deployment-bus-manifest.json
+
+      - name: Create GitHub deployment record
+        id: deployment-record
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          deployment_id="$(node ops/scripts/deployment-bus.cjs github-create-deployment \
+            --file deployment-bus-manifest.json \
+            --ref "${COMMIT_SHA}" \
+            --environment production \
+            --task deploy:production \
+            --description "Production deployment bus ${COMMIT_SHA}")"
+          echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
+
+      - name: Mark production deployment queued
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state queued \
+            --description "Production deployment bus queued" \
+            --environment-url "https://6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "22"
 
@@ -117,25 +186,84 @@ jobs:
           fi
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Confirm main did not advance before production mutation
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags origin main
+          latest_main_sha="$(git rev-parse origin/main)"
+          node ops/scripts/deployment-bus.cjs production-preflight \
+            --file deployment-bus-manifest.json \
+            --current-main-sha "$latest_main_sha" \
+            --remote origin \
+            --branch main
+
       - name: Upload assets to S3
-        run: aws s3 sync target s3://${{ env.AWS_BUCKET }}/web_build/${{ env.COMMIT_SHA }}/
+        run: aws s3 sync target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/"
 
       - name: Get commit message
-        run: echo "COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
+        run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s)" >> "$GITHUB_ENV"
 
-      - name: Create new ElasticBeanstalk Application Version
+      - name: Mark production deployment in progress
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          aws elasticbeanstalk create-application-version \
-          --application-name "${{ env.BEANSTALK_APP_NAME }}" \
-          --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
-          --version-label "${{ env.COMMIT_SHA }}" \
-          --description "${{ env.COMMIT_MESSAGE }}"
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state in_progress \
+            --description "Production Elastic Beanstalk deployment starting" \
+            --environment-url "https://6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Ensure ElasticBeanstalk Application Version
+        run: |
+          set -euo pipefail
+
+          SOURCE_BUNDLE_KEY="web_build/${COMMIT_SHA}/package.zip"
+
+          create_application_version() {
+            aws elasticbeanstalk create-application-version \
+              --application-name "${BEANSTALK_APP_NAME}" \
+              --source-bundle "S3Bucket=${AWS_BUCKET},S3Key=${SOURCE_BUNDLE_KEY}" \
+              --version-label "${COMMIT_SHA}" \
+              --description "${COMMIT_MESSAGE}"
+          }
+
+          APPLICATION_VERSION_JSON=$(aws elasticbeanstalk describe-application-versions \
+            --application-name "${BEANSTALK_APP_NAME}" \
+            --version-labels "${COMMIT_SHA}" \
+            --output json)
+          VERSION_COUNT=$(jq '.ApplicationVersions | length' <<< "$APPLICATION_VERSION_JSON")
+
+          case "$VERSION_COUNT" in
+            0)
+              echo "Creating Elastic Beanstalk application version ${COMMIT_SHA}."
+              create_application_version
+              ;;
+            1)
+              EXISTING_BUCKET=$(jq -r '.ApplicationVersions[0].SourceBundle.S3Bucket // ""' <<< "$APPLICATION_VERSION_JSON")
+              EXISTING_KEY=$(jq -r '.ApplicationVersions[0].SourceBundle.S3Key // ""' <<< "$APPLICATION_VERSION_JSON")
+
+              if [ "$EXISTING_BUCKET" = "$AWS_BUCKET" ] && [ "$EXISTING_KEY" = "$SOURCE_BUNDLE_KEY" ]; then
+                echo "Elastic Beanstalk application version ${COMMIT_SHA} already exists with the expected source bundle; reusing it."
+              else
+                echo "::error::Elastic Beanstalk application version ${COMMIT_SHA} already exists with unexpected source s3://${EXISTING_BUCKET}/${EXISTING_KEY}; expected s3://${AWS_BUCKET}/${SOURCE_BUNDLE_KEY}. Refusing to replace an unexpected production version label automatically."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::Expected at most one Elastic Beanstalk application version for ${COMMIT_SHA}, found ${VERSION_COUNT}."
+              exit 1
+              ;;
+          esac
 
       - name: Deploy new Version to ElasticBeanstalk with Runtime Environment Variables
         env:
@@ -156,16 +284,28 @@ jobs:
               "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SENTRY_SERVER_INSTRUMENTATION,Value=false"
 
       - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment-record.outputs.deployment_id }}
+          GITHUB_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           echo "Warmup..."
           MAX_RETRIES=20
           COUNTER=0
           sleep 120
           while : ; do
-            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
-            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Status' --output text)
+            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names "${BEANSTALK_ENV_NAME}" --query 'Environments[0].Health' --output text)
+            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names "${BEANSTALK_ENV_NAME}" --query 'Environments[0].Status' --output text)
             echo "Environment health: $ENV_HEALTH"
             echo "Environment status: $ENV_STATUS"
+            if [ $((COUNTER % 5)) -eq 0 ]; then
+              node ops/scripts/deployment-bus.cjs github-create-status \
+                --deployment-id "$DEPLOYMENT_ID" \
+                --state in_progress \
+                --description "Production EB health=$ENV_HEALTH status=$ENV_STATUS after $COUNTER checks" \
+                --environment-url "https://6529.io" \
+                --log-url "$RUN_URL" || true
+            fi
             if [[ $ENV_HEALTH == "Green" && $ENV_STATUS == "Ready" ]]; then
               echo "Environment is healthy and ready!"
               break
@@ -181,7 +321,7 @@ jobs:
       - name: Validate Deployment
         run: |
           DEPLOYED_BEANSTALK_VERSION=$(aws elasticbeanstalk describe-environments \
-            --environment-names ${{ env.BEANSTALK_ENV_NAME }} \
+            --environment-names "${BEANSTALK_ENV_NAME}" \
             --query 'Environments[0].VersionLabel' \
             --output text)
           echo "Current deployed version is $DEPLOYED_BEANSTALK_VERSION"
@@ -191,6 +331,141 @@ jobs:
           else
             echo "Deployed version valid!"
           fi
+
+      - name: Verify production HTTP version
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/verify-deployment-version.cjs \
+            --base-url https://6529.io \
+            --expected-version "${COMMIT_SHA}" \
+            --attempts 12 \
+            --delay-ms 10000 \
+            --timeout-ms 10000 \
+            --output deployment-version-evidence.json
+
+          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
+            --file deployment-bus-manifest.json \
+            --status in_progress \
+            --observed-duration-minutes 0 \
+            --checkpoint http-version-match \
+            --checkpoint-status passed \
+            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --notes "GET /api/version matched the production commit SHA."
+
+      - name: Upload durable production version evidence
+        id: durable-version-evidence
+        continue-on-error: true
+        env:
+          DEPLOYMENT_ARTIFACT_S3_PREFIX: ${{ vars.DEPLOYMENT_ARTIFACT_S3_PREFIX || 's3://6529reviewbot-prod-artifacts/frontend-deployment/' }}
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/deployment-bus.cjs upload-validation-artifact \
+            --file deployment-bus-manifest.json \
+            --pack deployment:http-version \
+            --status passed \
+            --source-file deployment-version-evidence.json \
+            --artifact-name deployment-version-evidence.json \
+            --s3-prefix "${DEPLOYMENT_ARTIFACT_S3_PREFIX}" \
+            --retention-policy standard-90-days \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --notes "Durable production GET /api/version evidence."
+
+      - name: Warn if durable production evidence upload failed
+        if: steps.durable-version-evidence.outcome == 'failure'
+        run: |
+          echo "::warning::Durable production version evidence upload failed. The deployment can continue, but release readiness remains incomplete until artifact storage/IAM is fixed and evidence is recorded."
+
+      - name: Mark production deployment terminal
+        if: always() && steps.deployment-record.outputs.deployment_id != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+
+          case "$JOB_STATUS" in
+            success)
+              state="success"
+              manifest_status="deploy_verified"
+              description="Production deployment verified"
+              ;;
+            cancelled)
+              state="error"
+              manifest_status="cancelled"
+              description="Production deployment cancelled before verification"
+              ;;
+            *)
+              state="failure"
+              manifest_status="failed"
+              description="Production deployment failed before verification"
+              ;;
+          esac
+
+          node ops/scripts/deployment-bus.cjs heartbeat-manifest \
+            --file deployment-bus-manifest.json \
+            --status "$manifest_status" \
+            --phase terminal \
+            --message "$description"
+
+          node ops/scripts/deployment-bus.cjs github-create-status \
+            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
+            --state "$state" \
+            --description "$description" \
+            --environment-url "https://6529.io" \
+            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Record production post-deploy watch checkpoint
+        if: always() && hashFiles('deployment-bus-manifest.json') != ''
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            watch_status="in_progress"
+            checkpoint_status="passed"
+            observed_minutes="0"
+            notes="Elastic Beanstalk health/readiness and deployed version validation passed; release-captain post-deploy watch still needs deployed-environment validation evidence."
+          else
+            watch_status="failed"
+            checkpoint_status="failed"
+            observed_minutes="0"
+            notes="Production workflow did not complete deploy verification successfully."
+          fi
+
+          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
+            --file deployment-bus-manifest.json \
+            --status "$watch_status" \
+            --observed-duration-minutes "$observed_minutes" \
+            --checkpoint eb-version-health \
+            --checkpoint-status "$checkpoint_status" \
+            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --notes "$notes"
+
+      - name: Create production release report
+        if: always()
+        run: |
+          if [ -f deployment-bus-manifest.json ]; then
+            node ops/scripts/deployment-bus.cjs release-report \
+              --file deployment-bus-manifest.json \
+              --output deployment-release-report.md
+          else
+            echo "No deployment-bus-manifest.json was created; skipping release report."
+          fi
+
+      - name: Upload deployment bus manifest
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: deployment-bus-production-${{ env.COMMIT_SHA || github.run_id }}
+          path: |
+            deployment-bus-manifest.json
+            deployment-release-report.md
+            deployment-version-evidence.json
+          if-no-files-found: ignore
+          retention-days: 90
 
       - name: Notify about failure
         uses: sarisia/actions-status-discord@v1

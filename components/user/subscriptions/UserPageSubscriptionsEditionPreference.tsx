@@ -83,7 +83,7 @@ export default function UserPageSubscriptionsEditionPreference(
         <Col>
           <h5 className="tw-mb-0">
             Edition Preference{" "}
-            <span className="tw-text-iron-400 tw-text-sm tw-font-semibold tw-whitespace-nowrap">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-400">
               Eligibility x{subscriptionEligibilityCount}
             </span>
           </h5>
@@ -93,7 +93,8 @@ export default function UserPageSubscriptionsEditionPreference(
         <Col className="tw-flex tw-items-center tw-gap-2">
           <label
             htmlFor={"subscription-all-editions-mode"}
-            className="font-color">
+            className="font-color"
+          >
             <b>One edition</b>
           </label>
           <Toggle
@@ -105,7 +106,8 @@ export default function UserPageSubscriptionsEditionPreference(
           />
           <label
             htmlFor={"subscription-all-editions-mode"}
-            className="font-color">
+            className="font-color"
+          >
             <b>All eligible</b>
           </label>
           {isUpdatingAllEditions && (

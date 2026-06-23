@@ -143,6 +143,66 @@ describe("renderDropOgImage", () => {
     expect(textNodes).not.toContain("Drop #6411");
   });
 
+  it("renders mention and wave markdown tokens without brackets", () => {
+    const element = renderDropOgImage({
+      id: "6412",
+      origin: "http://localhost:3001",
+      author: undefined,
+      wave: undefined,
+      drop: {
+        id: "drop-1",
+        serial_no: 6412,
+        drop_type: "CHAT" as any,
+        content: "Color refs for @[prxt0] and #[The Memes - Main Stage] inline",
+      },
+    });
+
+    const styles = collectStyles(element);
+    const textNodes = collectTextNodes(element);
+    const renderedText = textNodes.join("");
+
+    expect(renderedText).toContain("@prxt0");
+    expect(renderedText).toContain("#The Memes - Main Stage");
+    expect(renderedText).not.toContain("@[prxt0]");
+    expect(renderedText).not.toContain("#[The Memes - Main Stage]");
+    expect(styles).toContainEqual(
+      expect.objectContaining({
+        color: "#79B8FF",
+      })
+    );
+  });
+
+  it("renders trailing ellipsis on segmented content lines", () => {
+    const element = renderDropOgImage({
+      id: "6413",
+      origin: "http://localhost:3001",
+      author: undefined,
+      wave: undefined,
+      drop: {
+        id: "drop-1",
+        serial_no: 6413,
+        drop_type: "CHAT" as any,
+        content: [
+          "one",
+          "two",
+          "three",
+          "four",
+          "five",
+          "six",
+          "seven",
+          "@[eight]",
+          "nine",
+        ].join("\n"),
+      },
+    });
+
+    const textNodes = collectTextNodes(element);
+
+    expect(textNodes).toContain("@eight...");
+    expect(textNodes).not.toContain("@eight");
+    expect(textNodes).not.toContain("nine");
+  });
+
   it("renders submission drops with winner, media type, visual image, and votes", () => {
     const element = renderDropOgImage({
       id: "5905",
@@ -203,7 +263,7 @@ describe("renderDropOgImage", () => {
         "TDH",
         "5",
         "Voters",
-        "Won",
+        "Winner",
         "Jun 3, 2026",
       ])
     );
@@ -227,7 +287,7 @@ describe("renderDropOgImage", () => {
     expect(styles).toContainEqual(
       expect.objectContaining({
         gap: 12,
-        justifyContent: "center",
+        justifyContent: "flex-start",
         top: 138,
         width: 1108,
       })
@@ -284,7 +344,13 @@ describe("renderDropOgImage", () => {
       "http://localhost:3001/api/og-metadata/image?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fsubmission.mp4&w=1108"
     );
     expect(textNodes).toEqual(
-      expect.arrayContaining(["video submission", "Video", "1", "TDH", "Voter"])
+      expect.arrayContaining([
+        "video submission",
+        "submission.mp4",
+        "1",
+        "TDH",
+        "Voter",
+      ])
     );
     expect(styles).toContainEqual(
       expect.objectContaining({
@@ -696,9 +762,7 @@ describe("renderDropOgImage", () => {
     const styles = collectStyles(element);
     const textNodes = collectTextNodes(element);
 
-    expect(textNodes).toEqual(
-      expect.arrayContaining(["one.mp4", "two.mp4", "three.mp4", "+1 videos"])
-    );
+    expect(textNodes).toEqual(expect.arrayContaining(["three.mp4", "+1 videos"]));
     expect(textNodes).not.toContain("four.mp4");
     expect(styles).toContainEqual(
       expect.objectContaining({
@@ -765,7 +829,7 @@ describe("renderDropOgImage", () => {
       "http://localhost:3001/api/og-metadata/image?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fone.mp4&w=548"
     );
     expect(textNodes).toEqual(
-      expect.arrayContaining(["mixed media", "one.mp4", "two.mp4", "+1 videos"])
+      expect.arrayContaining(["mixed media", "+1 videos"])
     );
     expect(textNodes).not.toContain("three.mp4");
   });

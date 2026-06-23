@@ -38,6 +38,8 @@ const getOptimisticPoll = (
     voted: [],
     multichoice: dropRequest.poll.multichoice,
     anonymous: dropRequest.poll.anonymous ?? false,
+    only_droppers_can_respond:
+      dropRequest.poll.only_droppers_can_respond ?? false,
     closing_time: dropRequest.poll.closing_time,
     is_open: dropRequest.poll.closing_time > Date.now(),
   };
@@ -136,10 +138,7 @@ export const getOptimisticDrop = (
     parts: dropRequest.parts.map((part, i) => ({
       part_id: i + 1,
       content: part.content ?? null,
-      media: part.media.map((media) => ({
-        url: media.url,
-        mime_type: media.mime_type,
-      })),
+      media: part.media,
       attachments: [],
       quoted_drop: part.quoted_drop
         ? {

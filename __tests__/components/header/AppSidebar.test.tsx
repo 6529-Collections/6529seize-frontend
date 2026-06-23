@@ -1,6 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import AppSidebar from "@/components/header/AppSidebar";
+import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
 let headerProps: any = null;
 let menuProps: any = null;
@@ -20,6 +21,9 @@ jest.mock("@/components/header/AppUserConnect", () => (props: any) => {
 });
 
 jest.mock("@/components/app-wallets/AppWalletsContext");
+jest.mock("@/hooks/useDropForgePermissions", () => ({
+  useDropForgePermissions: () => ({ ...DEFAULT_DROP_FORGE_PERMISSIONS }),
+}));
 
 ((describe) => {
   const {
@@ -49,11 +53,28 @@ jest.mock("@/components/app-wallets/AppWalletsContext");
       expect(networkChildren).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ label: "xTDH", path: "/xtdh" }),
+          expect.objectContaining({
+            label: "Wave Score",
+            path: "/network/wave-score",
+          }),
         ])
       );
+      const xtdhIndex = networkChildren.findIndex(
+        (child: any) => child.label === "xTDH"
+      );
+      const waveScoreIndex = networkChildren.findIndex(
+        (child: any) => child.label === "Wave Score"
+      );
+      expect(waveScoreIndex).toBe(xtdhIndex + 1);
       expect(
         menuProps.menu.find((m: any) => m.label === "Tools").children[0]
       ).toEqual({ label: "App Wallets", path: "/tools/app-wallets" });
+      const aboutChildren = menuProps.menu.find(
+        (m: any) => m.label === "About"
+      ).children;
+      expect(
+        aboutChildren.some((child: any) => child.label === "Release Notes")
+      ).toBe(false);
       headerProps.onClose();
       expect(onClose).toHaveBeenCalled();
       connectProps.onNavigate();

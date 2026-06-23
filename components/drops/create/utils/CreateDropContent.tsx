@@ -3,7 +3,6 @@
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import type { EditorState } from "lexical";
-import { RootNode } from "lexical";
 import { MentionNode } from "../lexical/nodes/MentionNode";
 import { HashtagNode } from "../lexical/nodes/HashtagNode";
 import { WaveMentionNode } from "../lexical/nodes/WaveMentionNode";
@@ -72,6 +71,7 @@ import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
 import PlainTextPastePlugin from "../lexical/plugins/PlainTextPastePlugin";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import EditablePlugin from "../lexical/plugins/EditablePlugin";
+import RootBlockGuardPlugin from "../lexical/plugins/RootBlockGuardPlugin";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -137,7 +137,6 @@ const CreateDropContent = forwardRef<
         MentionNode,
         HashtagNode,
         WaveMentionNode,
-        RootNode,
         HeadingNode,
         ListNode,
         ListItemNode,
@@ -327,6 +326,7 @@ const CreateDropContent = forwardRef<
               <HistoryPlugin />
 
               <OnChangePlugin onChange={onEditorStateChange} />
+              <RootBlockGuardPlugin />
               <NewMentionsPlugin
                 waveId={waveId}
                 onSelect={onMentionedUserAdded}

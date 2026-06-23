@@ -164,4 +164,27 @@ describe("FilePreview", () => {
     expect(screen.getByTestId("loader")).toBeInTheDocument();
     expect(screen.getByText("50%")).toBeInTheDocument();
   });
+
+  it("shows image processing state after upload progress completes", async () => {
+    render(
+      <FilePreview
+        files={[{ file, label: null }]}
+        uploadingFiles={[
+          {
+            file,
+            isUploading: true,
+            progress: 100,
+            phase: "processing",
+          },
+        ]}
+        removeFile={jest.fn()}
+        disabled={false}
+      />
+    );
+
+    expect(await screen.findByRole("img")).toHaveAttribute("src", "blob:url");
+    expect(screen.getByTestId("loader")).toBeInTheDocument();
+    expect(screen.getByText("Processing image")).toBeInTheDocument();
+    expect(screen.queryByText("100%")).toBeNull();
+  });
 });

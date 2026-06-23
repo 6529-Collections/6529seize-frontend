@@ -25,7 +25,7 @@ describe("EnsPreviewCard", () => {
       contenthash: {
         protocol: "ipfs",
         decoded: "ipfs://bafy",
-        gatewayUrl: "https://cf-ipfs.com/ipfs/bafy",
+        gatewayUrl: "https://media.6529.io/ipfs/bafy",
       },
       ownership: {
         registryOwner: "0x0000000000000000000000000000000000000003",
@@ -36,8 +36,9 @@ describe("EnsPreviewCard", () => {
       },
       links: {
         app: "https://app.ens.domains/name/vitalik.eth",
-        etherscan: "https://etherscan.io/address/0x0000000000000000000000000000000000000001",
-        open: "https://cf-ipfs.com/ipfs/bafy",
+        etherscan:
+          "https://etherscan.io/address/0x0000000000000000000000000000000000000001",
+        open: "https://media.6529.io/ipfs/bafy",
       },
     };
 
@@ -50,7 +51,10 @@ describe("EnsPreviewCard", () => {
       "href",
       preview.links.etherscan
     );
-    expect(screen.getByText("Open content")).toHaveAttribute("href", preview.links.open);
+    expect(screen.getByText("Open content")).toHaveAttribute(
+      "href",
+      preview.links.open
+    );
   });
 
   it("renders ENS address information", () => {
@@ -63,7 +67,8 @@ describe("EnsPreviewCard", () => {
       avatarUrl: null,
       links: {
         app: "https://app.ens.domains/address/0x0000000000000000000000000000000000000001",
-        etherscan: "https://etherscan.io/address/0x0000000000000000000000000000000000000001",
+        etherscan:
+          "https://etherscan.io/address/0x0000000000000000000000000000000000000001",
       },
     };
 
@@ -82,10 +87,10 @@ describe("EnsPreviewCard", () => {
       contenthash: {
         protocol: "ipns",
         decoded: "ipns://example",
-        gatewayUrl: "https://cf-ipfs.com/ipns/example",
+        gatewayUrl: "https://media.6529.io/ipns/example",
       },
       links: {
-        open: "https://cf-ipfs.com/ipns/example",
+        open: "https://media.6529.io/ipns/example",
         app: "https://app.ens.domains/name/site.eth",
       },
     };

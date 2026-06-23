@@ -6,13 +6,14 @@ import { SignalSlashIcon } from "@heroicons/react/24/outline";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import {
   fetchGithubPreview,
-  type GithubPreviewResponse,
+  type GithubStatusPreviewResponse,
 } from "@/services/api/github-preview-api";
 
 interface GithubPreviewStatusBadgeProps {
   readonly href: string;
-  readonly initialPreview?: GithubPreviewResponse | null | undefined;
+  readonly initialPreview?: GithubStatusPreviewResponse | null | undefined;
   readonly compact?: boolean | undefined;
+  readonly placement?: "absolute" | "inline" | undefined;
 }
 
 type BadgeTone = "green" | "purple" | "red" | "gray" | "amber";
@@ -26,7 +27,19 @@ interface BadgeViewModel {
 
 interface GithubPreviewUrlInfo {
   readonly url: URL;
+  readonly owner: string;
+  readonly repo: string;
   readonly kind: "issue" | "pull";
+}
+
+interface GithubRepositoryLabel {
+  readonly label: string;
+  readonly ariaLabel: string;
+}
+
+interface KnownGithubRepositoryLabel {
+  readonly label: string;
+  readonly compactLabel: string;
 }
 
 const parseGithubPreviewUrl = (href: string): URL | null => {
@@ -56,19 +69,60 @@ const parseGithubPreviewUrlInfo = (
     return null;
   }
 
-  const [, , kind] = url.pathname.split("/").filter(Boolean);
+  const [owner, repo, kind] = url.pathname.split("/").filter(Boolean);
+  if (!owner || !repo) {
+    return null;
+  }
+
   if (kind === "pull") {
-    return { url, kind: "pull" };
+    return { url, owner, repo, kind: "pull" };
   }
 
   if (kind === "issues") {
-    return { url, kind: "issue" };
+    return { url, owner, repo, kind: "issue" };
   }
 
   return null;
 };
 
-const getBadgeViewModel = (preview: GithubPreviewResponse): BadgeViewModel => {
+const KNOWN_6529_REPOSITORY_LABELS: Record<
+  string,
+  KnownGithubRepositoryLabel
+> = {
+  "6529seize-frontend": { label: "Frontend", compactLabel: "FE" },
+  "6529seize-backend": { label: "Backend", compactLabel: "BE" },
+  "6529stream": { label: "Stream", compactLabel: "Stream" },
+  "6529-safe-app": { label: "Safe App", compactLabel: "Safe" },
+  "6529reviewbot": { label: "Review Bot", compactLabel: "Bot" },
+};
+
+const getGithubRepositoryLabel = (
+  githubInfo: GithubPreviewUrlInfo,
+  compact: boolean
+): GithubRepositoryLabel | null => {
+  if (githubInfo.owner.toLowerCase() !== "6529-collections") {
+    return null;
+  }
+
+  const repoKey = githubInfo.repo.toLowerCase();
+  const knownLabel = KNOWN_6529_REPOSITORY_LABELS[repoKey];
+  const ariaLabel = `6529-Collections/${githubInfo.repo}`;
+  if (knownLabel) {
+    return {
+      label: compact ? knownLabel.compactLabel : knownLabel.label,
+      ariaLabel,
+    };
+  }
+
+  return {
+    label: githubInfo.repo,
+    ariaLabel,
+  };
+};
+
+const getBadgeViewModel = (
+  preview: GithubStatusPreviewResponse
+): BadgeViewModel => {
   if (preview.type === "github.issue") {
     switch (preview.state) {
       case "open":
@@ -129,7 +183,7 @@ const VISIBLE_REFRESH_INTERVAL_MS = 30 * 1000;
 type GithubStatusState =
   | { readonly type: "idle" }
   | { readonly type: "loading" }
-  | { readonly type: "success"; readonly preview: GithubPreviewResponse }
+  | { readonly type: "success"; readonly preview: GithubStatusPreviewResponse }
   | { readonly type: "error"; readonly message: string };
 
 const getErrorMessage = (error: unknown): string => {
@@ -174,7 +228,7 @@ interface IssueAssigneeLabels {
 }
 
 const getIssueAssigneeLabels = (
-  preview: GithubPreviewResponse
+  preview: GithubStatusPreviewResponse
 ): IssueAssigneeLabels | null => {
   if (preview.type !== "github.issue") {
     return null;
@@ -221,6 +275,7 @@ export default function GithubPreviewStatusBadge({
   href,
   initialPreview,
   compact = false,
+  placement = "absolute",
 }: GithubPreviewStatusBadgeProps) {
   const githubInfo = useMemo(() => parseGithubPreviewUrlInfo(href), [href]);
   const badgeRef = useRef<HTMLSpanElement | null>(null);
@@ -278,7 +333,14 @@ export default function GithubPreviewStatusBadge({
     fetchGithubPreview(githubInfo.url.toString())
       .then((response) => {
         if (active) {
-          setStatus({ type: "success", preview: response });
+          if (
+            response.type === "github.issue" ||
+            response.type === "github.pull_request"
+          ) {
+            setStatus({ type: "success", preview: response });
+          } else {
+            setStatus({ type: "idle" });
+          }
         }
       })
       .catch((error: unknown) => {
@@ -306,7 +368,14 @@ export default function GithubPreviewStatusBadge({
       fetchGithubPreview(githubInfo.url.toString(), { bypassCache: true })
         .then((response) => {
           if (active) {
-            setStatus({ type: "success", preview: response });
+            if (
+              response.type === "github.issue" ||
+              response.type === "github.pull_request"
+            ) {
+              setStatus({ type: "success", preview: response });
+            } else {
+              setStatus({ type: "idle" });
+            }
           }
         })
         .catch((error: unknown) => {
@@ -338,18 +407,35 @@ export default function GithubPreviewStatusBadge({
   const detail = compact ? undefined : viewModel.detail;
   const issueAssigneeLabels =
     status.type === "success" ? getIssueAssigneeLabels(status.preview) : null;
-  const title = getBadgeTitle(
+  const statusTitle = getBadgeTitle(
     status,
     viewModel,
     issueAssigneeLabels?.desktop ?? detail
   );
+  const repoLabel = getGithubRepositoryLabel(githubInfo, compact);
+  const title = repoLabel
+    ? `${repoLabel.ariaLabel}: ${statusTitle}`
+    : statusTitle;
+  const placementClasses =
+    placement === "absolute"
+      ? "tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-max-w-[calc(100%-1rem)]"
+      : "tw-relative tw-max-w-full";
   const badge = (
     <span
       ref={badgeRef}
-      className={`tw-pointer-events-auto tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-inline-flex tw-max-w-[calc(100%-1rem)] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-shadow-lg tw-backdrop-blur-md ${TONE_CLASSES[viewModel.tone]}`}
+      className={`tw-pointer-events-auto tw-inline-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-shadow-lg tw-backdrop-blur-md ${placementClasses} ${TONE_CLASSES[viewModel.tone]}`}
       data-testid="github-preview-status-badge"
       aria-label={title}
     >
+      {repoLabel && (
+        <span
+          className="tw-inline-flex tw-max-w-28 tw-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-cyan-300/35 tw-bg-cyan-950/80 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-bold tw-uppercase tw-leading-none tw-text-cyan-100"
+          data-testid="github-preview-repo-label"
+          title={repoLabel.ariaLabel}
+        >
+          <span className="tw-truncate">{repoLabel.label}</span>
+        </span>
+      )}
       {viewModel.loading && (
         <span className="tw-h-2 tw-w-2 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-current tw-border-r-transparent" />
       )}
@@ -360,7 +446,9 @@ export default function GithubPreviewStatusBadge({
           strokeWidth={2}
         />
       ) : (
-        <span className="tw-line-clamp-1 tw-capitalize">{viewModel.label}</span>
+        <span className="tw-line-clamp-1 tw-min-w-0 tw-capitalize">
+          {viewModel.label}
+        </span>
       )}
       {detail && (
         <span className="tw-hidden tw-font-medium tw-normal-case tw-opacity-70 sm:tw-inline">
@@ -399,6 +487,10 @@ export default function GithubPreviewStatusBadge({
   );
 
   if (status.type !== "error") {
+    return badge;
+  }
+
+  if (placement === "inline") {
     return badge;
   }
 

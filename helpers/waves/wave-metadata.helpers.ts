@@ -160,15 +160,13 @@ const getMetadataRequest = ({
   };
 };
 
-export const getCreateWaveDisplayMetadataRequests = (
-  {
-    display,
-    waveType,
-  }: {
-    readonly display: CreateWaveDisplayConfig | null | undefined;
-    readonly waveType: ApiWaveType;
-  }
-): ApiCreateWaveMetadataRequest[] => {
+export const getCreateWaveDisplayMetadataRequests = ({
+  display,
+  waveType,
+}: {
+  readonly display: CreateWaveDisplayConfig | null | undefined;
+  readonly waveType: ApiWaveType;
+}): ApiCreateWaveMetadataRequest[] => {
   if (!display || waveType === ApiWaveType.Chat) {
     return [];
   }

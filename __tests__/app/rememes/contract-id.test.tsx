@@ -1,19 +1,29 @@
 import ReMeme, { generateMetadata } from "@/app/rememes/[contract]/[id]/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { formatAddress } from "@/helpers/Helpers";
-import { fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-jest.mock("@/services/6529api");
+jest.mock("@/services/api/common-api");
 jest.mock("@/helpers/Helpers");
+jest.mock("@/helpers/server.app.helpers", () => ({
+  getAppCommonHeaders: jest.fn().mockResolvedValue({ "x-test": "1" }),
+}));
+
+const mockRememePage = jest.fn(
+  (props: { contract: string; id: string; locale: string }) => (
+    <div data-testid="rememe-page-component" data-locale={props.locale}>
+      RememePageComponent
+    </div>
+  )
+);
 
 jest.mock("@/components/rememes/RememePage", () => {
   return {
     __esModule: true,
-    default: () => (
-      <div data-testid="rememe-page-component">RememePageComponent</div>
-    ),
+    default: (props: { contract: string; id: string; locale: string }) =>
+      mockRememePage(props),
   };
 });
 
@@ -50,7 +60,7 @@ describe("ReMeme page", () => {
   it("renders RememePageComponent with correct props", async () => {
     const props = { contract: "0x123abc", id: "456" };
 
-    (fetchUrl as jest.Mock).mockResolvedValue({
+    (commonApiFetch as jest.Mock).mockResolvedValue({
       data: [
         {
           metadata: { name: "Test ReMeme" },
@@ -66,6 +76,25 @@ describe("ReMeme page", () => {
     expect(
       await screen.findByTestId("rememe-page-component")
     ).toBeInTheDocument();
+    expect(mockRememePage).toHaveBeenCalledWith({
+      contract: "0x123abc",
+      id: "456",
+      locale: "en-US",
+    });
+  });
+
+  it("passes supported locale search params to RememePage", async () => {
+    const resolved = await ReMeme({
+      params: Promise.resolve({ contract: "0x123abc", id: "456" }),
+      searchParams: Promise.resolve({ locale: "de-DE" }),
+    });
+
+    render(<TestProvider>{resolved}</TestProvider>);
+
+    expect(await screen.findByTestId("rememe-page-component")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
   });
 
   it("sets page title on mount", () => {
@@ -95,7 +124,21 @@ describe("ReMeme generateMetadata", () => {
   const mockFormatAddress = formatAddress as jest.MockedFunction<
     typeof formatAddress
   >;
-  const mockFetchUrl = fetchUrl as jest.MockedFunction<typeof fetchUrl>;
+  const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<
+    typeof commonApiFetch
+  >;
+
+  const getImageUrl = (
+    metadata: Awaited<ReturnType<typeof generateMetadata>>
+  ) => {
+    const [image] = metadata.openGraph?.images as {
+      alt: string;
+      height: number;
+      url: string;
+      width: number;
+    }[];
+    return new URL(image.url);
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -111,51 +154,69 @@ describe("ReMeme generateMetadata", () => {
         },
       ],
     };
-    mockFetchUrl.mockResolvedValue(mockResponse);
+    mockCommonApiFetch.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
-    expect(mockFetchUrl).toHaveBeenCalledWith(
-      "https://api.test.6529.io/api/rememes?contract=0x123abc&id=456"
-    );
-    expect(result.title).toBe("Custom ReMeme Name");
+    expect(mockCommonApiFetch).toHaveBeenCalledWith({
+      endpoint: "rememes",
+      headers: { "x-test": "1" },
+      params: { contract: "0x123abc", id: "456" },
+    });
+    expect(result.title).toBe("Custom ReMeme Name | ReMemes");
     expect(result.description).toContain("ReMemes");
-    const imgs = Array.isArray(result.openGraph?.images)
-      ? result.openGraph?.images
-      : [result.openGraph?.images];
-    expect(imgs?.[0]).toBe("https://test.6529.io/custom-image.png");
+    const imageUrl = getImageUrl(result);
+    expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
+    expect(imageUrl.searchParams.get("image")).toBe(
+      "https://test.6529.io/custom-image.png"
+    );
+  });
+
+  it("encodes reserved route params before fetching metadata", async () => {
+    mockCommonApiFetch.mockResolvedValue({ data: [] });
+
+    await generateMetadata({
+      params: Promise.resolve({
+        contract: "collection/alpha",
+        id: "token#1",
+      }),
+    });
+
+    expect(mockCommonApiFetch).toHaveBeenCalledWith({
+      endpoint: "rememes",
+      headers: { "x-test": "1" },
+      params: { contract: "collection/alpha", id: "token#1" },
+    });
   });
 
   it("returns metadata with default name and image when API returns empty data", async () => {
     const mockResponse = { data: [] };
-    mockFetchUrl.mockResolvedValue(mockResponse);
+    mockCommonApiFetch.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
     expect(mockFormatAddress).toHaveBeenCalledWith("0x123abc");
-    expect(result.title).toBe("0x123...abc #456");
-    const imgs2 = Array.isArray(result.openGraph?.images)
-      ? result.openGraph?.images
-      : [result.openGraph?.images];
-    expect(imgs2?.[0]).toBe("https://test.6529.io/6529io.png");
+    expect(result.title).toBe("0x123...abc #456 | ReMemes");
+    const imageUrl = getImageUrl(result);
+    expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
+    expect(imageUrl.searchParams.get("image")).toBeNull();
   });
 
   it("returns default metadata when API returns null", async () => {
-    mockFetchUrl.mockResolvedValue(null);
+    mockCommonApiFetch.mockResolvedValue(null);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
-    expect(result.title).toBe("0x123...abc #456");
-    const imgs3 = Array.isArray(result.openGraph?.images)
-      ? result.openGraph?.images
-      : [result.openGraph?.images];
-    expect(imgs3?.[0]).toBe("https://test.6529.io/6529io.png");
+    expect(result.title).toBe("0x123...abc #456 | ReMemes");
+    const imageUrl = getImageUrl(result);
+    expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
+    expect(imageUrl.searchParams.get("image")).toBeNull();
   });
 
   it("handles data with partial metadata", async () => {
@@ -167,17 +228,18 @@ describe("ReMeme generateMetadata", () => {
         },
       ],
     };
-    mockFetchUrl.mockResolvedValue(mockResponse);
+    mockCommonApiFetch.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
-    expect(result.title).toBe("0x123...abc #456");
-    const imgs4 = Array.isArray(result.openGraph?.images)
-      ? result.openGraph?.images
-      : [result.openGraph?.images];
-    expect(imgs4?.[0]).toBe("https://test.com/partial-image.png");
+    expect(result.title).toBe("0x123...abc #456 | ReMemes");
+    const imageUrl = getImageUrl(result);
+    expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
+    expect(imageUrl.searchParams.get("image")).toBe(
+      "https://test.com/partial-image.png"
+    );
   });
 
   it("uses fallback ogImage when image is null", async () => {
@@ -189,16 +251,14 @@ describe("ReMeme generateMetadata", () => {
         },
       ],
     };
-    mockFetchUrl.mockResolvedValue(mockResponse);
+    mockCommonApiFetch.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
-    // When image is null, it falls back to the default image (6529io.png), not the re-memes fallback
-    const imgs5 = Array.isArray(result.openGraph?.images)
-      ? result.openGraph?.images
-      : [result.openGraph?.images];
-    expect(imgs5?.[0]).toBe("https://test.6529.io/6529io.png");
+    const imageUrl = getImageUrl(result);
+    expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
+    expect(imageUrl.searchParams.get("image")).toBeNull();
   });
 });

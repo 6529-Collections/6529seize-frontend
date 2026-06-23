@@ -30,9 +30,10 @@ It checks delegations, delegation managers, and consolidation relationships.
 
 ## User Journey
 
-1. Enter a `0x...` address or `.eth` ENS in `Wallet Address`.
-2. Select `Check` (or press Enter).
-3. While reads are running, the button shows `Checking...`.
+1. Enter a `0x...` address or `.eth` ENS in `Wallet address or ENS name`.
+2. Select `Check Wallet` (or press Enter).
+3. While reads are running, the page shows `Checking delegation records...` and
+   the button shows `Checking...`.
 4. Review results in `Delegations`, `Delegation Managers`, and `Consolidations`.
 5. If `Incomplete Consolidation` appears, follow each recommended reverse-direction action.
 6. Select `Clear` before checking a different wallet.
@@ -46,26 +47,28 @@ It checks delegations, delegation managers, and consolidation relationships.
 
 ## Edge Cases
 
-- Invalid input shows `Invalid address`.
+- Invalid input shows `Enter a valid Ethereum address or ENS name.`.
 - ENS input support is `.eth` names. Non-`.eth` name input is treated as invalid.
 - If `?address=<wallet-or-ens>` is present, an initial check starts
   automatically after resolution to a valid address.
 - Successful `.eth` resolution rewrites `?address=` to the resolved `0x...` address.
 - ENS resolution blocks submit while address resolution is still loading.
-- `Check` stays disabled while input is invalid or resolution is still loading.
-- While a check is in progress, `Check` and `Enter` do not start another request.
+- `Check Wallet` stays disabled while input is invalid or resolution is still
+  loading.
+- While a check is in progress, `Check Wallet` and `Enter` do not start another
+  request.
 - After results load, the input is disabled until `Clear` is selected.
 - `Clear` resets input/results and removes the `address` query param.
 - Consolidation output can include directional pairs until reciprocal
   consolidation is completed.
-- API read failures show `No delegations found`, `No delegation managers found`,
-  and/or `No consolidations found` instead of a dedicated error panel.
+- API read failures show
+  `Some delegation records could not be loaded. Try again in a moment.`.
 
 ## Failure and Recovery
 
-- If results are empty, confirm wallet/ENS input and rerun `Check`.
+- If results are empty, confirm wallet/ENS input and rerun `Check Wallet`.
 - If the input is disabled after a previous run, select `Clear`, enter a new
-  wallet, then run `Check`.
+  wallet, then run `Check Wallet`.
 - If a deep-linked value cannot resolve to a valid address, correct the value
   and retry.
 - If incomplete-consolidation recommendations appear, register missing reverse

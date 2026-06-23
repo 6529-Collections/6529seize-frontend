@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -9,6 +9,7 @@ import WaveDropPartDrop from "./WaveDropPartDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { DropContentPresentation } from "./dropContentPresentation";
+import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 
 interface WaveDropPartProps {
   readonly drop: ExtendedDrop;
@@ -86,6 +87,34 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
+    const {
+      markNextClickForSuppression,
+      releaseSuppressionAfterTouchEnd,
+      clearSuppression,
+      handleClickCapture,
+    } = useLongPressClickSuppression();
+
+    useEffect(() => {
+      if (hasTouch) {
+        return;
+      }
+
+      if (longPressTimeout.current) {
+        clearTimeout(longPressTimeout.current);
+        longPressTimeout.current = null;
+      }
+      setLongPressTriggered(false);
+      clearSuppression();
+    }, [hasTouch, clearSuppression, setLongPressTriggered]);
+
+    useEffect(() => {
+      return () => {
+        if (longPressTimeout.current) {
+          clearTimeout(longPressTimeout.current);
+          longPressTimeout.current = null;
+        }
+      };
+    }, []);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
       if (isTemporaryDrop || !hasTouch) return;
@@ -94,6 +123,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
       touchStartY.current = e.touches[0]!.clientY;
 
       longPressTimeout.current = setTimeout(() => {
+        markNextClickForSuppression();
         setLongPressTriggered(true);
         onLongPress();
       }, LONG_PRESS_DURATION);
@@ -121,6 +151,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         clearTimeout(longPressTimeout.current);
         longPressTimeout.current = null;
       }
+      releaseSuppressionAfterTouchEnd();
       setLongPressTriggered(false);
     };
 
@@ -158,6 +189,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
 
     return (
       <div
+        onClickCapture={handleClickCapture}
         onClick={handleClick}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

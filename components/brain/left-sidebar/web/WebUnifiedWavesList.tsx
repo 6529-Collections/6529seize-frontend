@@ -6,6 +6,10 @@ import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { useAuth } from "@/components/auth/Auth";
 
 interface WebUnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -32,6 +36,10 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
     showProfileFeedShortcut = true,
   } = props;
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [following] = useShowFollowingWaves();
+  const { connectedProfile, activeProfileProxy } = useAuth();
+  const isJoinedFilterActive =
+    following && !!connectedProfile?.handle && !activeProfileProxy;
 
   // Use the custom hook for infinite scroll
   useInfiniteScroll(
@@ -67,6 +75,11 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
           sortedWaves={waves}
           isFetching={isFetching}
           isFetchingNextPage={isFetchingNextPage}
+          emptyMessage={
+            isJoinedFilterActive
+              ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
+              : undefined
+          }
         />
       </div>
     </div>

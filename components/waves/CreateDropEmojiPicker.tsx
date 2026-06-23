@@ -140,6 +140,8 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
           onClick={handleTogglePicker}
           disabled={disabled}
           type="button"
+          aria-label={isPickerOpen ? "Close emoji picker" : "Open emoji picker"}
+          aria-expanded={isPickerOpen}
         >
           <svg
             className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out"

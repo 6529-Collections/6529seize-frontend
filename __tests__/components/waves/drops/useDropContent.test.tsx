@@ -26,6 +26,25 @@ jest.mock("@/components/waves/drops/media-utils", () => ({
     segments: content ? [{ type: "text", content }] : [],
     apiMedia,
   }),
+  buildProcessedContent: (
+    content: string | null | undefined,
+    media: Array<{ url: string; mime_type: string }> | null | undefined,
+    fallbackText = "Media"
+  ) => {
+    const apiMedia = (media ?? []).map((item) => ({
+      alt: "Media",
+      url: item.url,
+      type: item.mime_type?.startsWith("video/") ? "video" : "image",
+    }));
+    return {
+      segments: content
+        ? [{ type: "text", content }]
+        : apiMedia.length
+          ? []
+          : [{ type: "text", content: fallbackText }],
+      apiMedia,
+    };
+  },
 }));
 
 const mockFetchDropByIdBatched = fetchDropByIdBatched as jest.MockedFunction<

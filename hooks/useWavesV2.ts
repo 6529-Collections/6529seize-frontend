@@ -5,6 +5,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
+import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import type { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import {
@@ -21,8 +23,16 @@ interface UseWavesV2Props {
   readonly viewerIdentityKey?: string | null | undefined;
   readonly directMessage?: boolean | undefined;
   readonly pinned?: ApiWavesPinFilter | undefined;
-  readonly refetchInterval?: number | undefined;
+  readonly excludeFollowed?: boolean | undefined;
+  readonly scoreSort?: ApiWaveScoreSort | undefined;
+  readonly minVisibilityScore?: number | undefined;
+  readonly minQualityScore?: number | undefined;
+  readonly minHotnessScore?: number | undefined;
+  readonly minRepSortScore?: number | undefined;
+  readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
+  readonly refetchInterval?: number | false | undefined;
   readonly refetchIntervalInBackground?: boolean | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 export const useWavesV2 = ({
@@ -32,8 +42,16 @@ export const useWavesV2 = ({
   viewerIdentityKey,
   directMessage,
   pinned,
+  excludeFollowed,
+  scoreSort,
+  minVisibilityScore,
+  minQualityScore,
+  minHotnessScore,
+  minRepSortScore,
+  visibilityTier,
   refetchInterval = Infinity,
   refetchIntervalInBackground = false,
+  enabled = true,
 }: UseWavesV2Props) => {
   const queryKeyParams = useMemo(
     () =>
@@ -43,6 +61,13 @@ export const useWavesV2 = ({
         following,
         directMessage,
         pinned,
+        excludeFollowed,
+        scoreSort,
+        minVisibilityScore,
+        minQualityScore,
+        minHotnessScore,
+        minRepSortScore,
+        visibilityTier,
         viewerIdentityKey,
       }),
     [
@@ -51,6 +76,13 @@ export const useWavesV2 = ({
       following,
       directMessage,
       pinned,
+      excludeFollowed,
+      scoreSort,
+      minVisibilityScore,
+      minQualityScore,
+      minHotnessScore,
+      minRepSortScore,
+      visibilityTier,
       viewerIdentityKey,
     ]
   );
@@ -72,6 +104,13 @@ export const useWavesV2 = ({
         following,
         directMessage,
         pinned,
+        excludeFollowed,
+        scoreSort,
+        minVisibilityScore,
+        minQualityScore,
+        minHotnessScore,
+        minRepSortScore,
+        visibilityTier,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
@@ -96,6 +135,7 @@ export const useWavesV2 = ({
     },
     refetchInterval,
     refetchIntervalInBackground,
+    enabled,
     ...getDefaultQueryRetry(handleRetryFailure),
   });
 

@@ -12,6 +12,15 @@ wrapper expects that location.
 
 - `docs-area-remediator-local/`: local validators and remediation helpers for
   `ops/docs`.
+- `deployment-bus.cjs`: deployment bus manifest, validation, heartbeat,
+  production-preflight, and GitHub Deployment status helper.
+- `native-surface-evidence.cjs`: executable native-surface evidence
+  classifier. It reports whether current Capacitor/Electron coverage is only
+  browser simulation or whether package prerequisites are present.
+- `testing-strategy.cjs`: frontend testing strategy risk-floor classifier,
+  app PR CI planner, changed-file secret scanner, pull-request workflow
+  security checker, validation manifest checker, and mutation endpoint registry
+  checker.
 - `run-docs-area-remediator-loop.sh`: iterative docs remediation loop.
 - `process-docs-commit-queue.sh`: docs update queue helper for commit-based
   remediation workflows.

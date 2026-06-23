@@ -1,17 +1,51 @@
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import styles from "./UserPageStats.module.scss";
 
-export function UserPageStatsTableHead() {
+function getTableColumnLabels(locale: SupportedLocale) {
+  return {
+    total: t(locale, "user.collected.stats.details.tables.column.total"),
+    memes: t(locale, "user.collected.stats.details.tables.column.memes"),
+    nextGen: t(locale, "user.collected.stats.details.tables.column.nextGen"),
+    gradient: t(locale, "user.collected.stats.details.tables.column.gradient"),
+    memeLab: t(locale, "user.collected.stats.details.tables.column.memeLab"),
+  };
+}
+
+export function UserPageStatsTableHead({
+  caption,
+  locale = DEFAULT_LOCALE,
+}: Readonly<{
+  caption?: string;
+  locale?: SupportedLocale | undefined;
+}> = {}) {
+  const labels = getTableColumnLabels(locale);
+  const columns = [
+    labels.total,
+    labels.memes,
+    labels.nextGen,
+    labels.gradient,
+    labels.memeLab,
+  ];
+
   return (
-    <thead>
-      <tr>
-        <th></th>
-        <th className="text-right !tw-text-[#93939f]">Total</th>
-        <th className="text-right !tw-text-[#93939f]">Memes</th>
-        <th className="text-right !tw-text-[#93939f]">NextGen</th>
-        <th className="text-right !tw-text-[#93939f]">Gradient</th>
-        <th className="text-right !tw-text-[#93939f]">Meme Lab</th>
-      </tr>
-    </thead>
+    <>
+      {caption ? <caption className="tw-sr-only">{caption}</caption> : null}
+      <thead>
+        <tr>
+          <th aria-hidden="true"></th>
+          {columns.map((label) => (
+            <th
+              key={label}
+              scope="col"
+              className="text-right !tw-text-[#93939f]"
+            >
+              {label}
+            </th>
+          ))}
+        </tr>
+      </thead>
+    </>
   );
 }
 
@@ -21,7 +55,7 @@ export function UserPageStatsTableHr(
   }>
 ) {
   return (
-    <tr>
+    <tr aria-hidden="true">
       <td colSpan={props.span} className={styles["collectedAccordionTableHr"]}>
         <hr className="mb-1 mt-1 tw-border-[#93939f]" />
       </td>

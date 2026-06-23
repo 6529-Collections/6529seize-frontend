@@ -63,7 +63,6 @@ describe("WaveLeaderboardIdentity", () => {
       />
     );
 
-    expect(screen.getByText("Identity")).toBeInTheDocument();
     expect(screen.getByText("alice")).toBeInTheDocument();
     expect(screen.getByText("0xabc")).toBeInTheDocument();
     expect(screen.getByTestId("identity-badges")).toBeInTheDocument();

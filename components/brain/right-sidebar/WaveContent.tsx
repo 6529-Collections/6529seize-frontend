@@ -9,6 +9,7 @@ import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import BrainRightSidebarSettings from "./BrainRightSidebarSettings";
 import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
+import WaveRepDetails from "./WaveRepDetails";
 import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
 
@@ -40,6 +41,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   const isCompetitionWave = isRankWave || isApproveWave;
   const options: TabOption[] = [
     { key: SidebarTab.ABOUT, label: "About" },
+    { key: SidebarTab.REP, label: "REP" },
     { key: SidebarTab.SETTINGS, label: "Settings" },
     ...(isCompetitionWave
       ? [
@@ -68,6 +70,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
         )}
       </div>
     ),
+    [SidebarTab.REP]: <WaveRepDetails wave={wave} />,
     [SidebarTab.SETTINGS]: <BrainRightSidebarSettings wave={wave} />,
     ...(isCompetitionWave
       ? {

@@ -1,10 +1,6 @@
 import UserPageCollectedFilters from "@/components/user/collected/filters/UserPageCollectedFilters";
-import type {
-  CollectionSeized} from "@/entities/IProfile";
-import {
-  CollectedCollectionType,
-  CollectionSort,
-} from "@/entities/IProfile";
+import type { CollectionSeized } from "@/entities/IProfile";
+import { CollectedCollectionType, CollectionSort } from "@/entities/IProfile";
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -509,7 +505,8 @@ describe("UserPageCollectedFilters", () => {
     await waitFor(() => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         "scroll",
-        expect.any(Function)
+        expect.any(Function),
+        { passive: true }
       );
       expect(windowAddEventListenerSpy).toHaveBeenCalledWith(
         "resize",

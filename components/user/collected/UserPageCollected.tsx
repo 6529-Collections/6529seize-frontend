@@ -21,6 +21,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { normalizeLocale } from "@/i18n/locales";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -343,6 +344,7 @@ export default function UserPageCollected({
   const params = useParams();
   const router = useRouter();
   const user = params?.["user"]?.toString().toLowerCase() ?? "";
+  const locale = normalizeLocale(searchParams.get("locale"));
 
   const getFilters = useCallback((): ProfileCollectedFilters => {
     const addressParam = searchParams.get(SEARCH_PARAMS_FIELDS.address);
@@ -860,6 +862,7 @@ export default function UserPageCollected({
           filters.accountForConsolidations ? null : filters.handleOrWallet
         }
         initialStatsData={initialStatsData}
+        locale={locale}
         activeCollection={filters.collection}
         activeSeasonNumber={effectiveSeasonId}
         onCollectionShortcut={setCollectionShortcut}
@@ -893,6 +896,7 @@ export default function UserPageCollected({
                 page={filters.page}
                 setPage={setPage}
                 next={dataNetwork?.next ?? false}
+                locale={locale}
               />
             ) : (
               <UserPageCollectedCards
@@ -904,6 +908,7 @@ export default function UserPageCollected({
                 setPage={setPage}
                 dataTransfer={dataTransfer ?? []}
                 isTransferLoading={isFetchingTransfer}
+                locale={locale}
               />
             )}
           </div>

@@ -51,7 +51,9 @@ const getValidationErrorMessage = (
     normalizeWaveTabLabel(display.approvedTabLabel),
   ];
 
-  if (labels.some((label) => label.length > APPROVE_WAVE_TAB_LABEL_MAX_LENGTH)) {
+  if (
+    labels.some((label) => label.length > APPROVE_WAVE_TAB_LABEL_MAX_LENGTH)
+  ) {
     return `Labels must be ${APPROVE_WAVE_TAB_LABEL_MAX_LENGTH} characters or fewer.`;
   }
 
@@ -157,7 +159,8 @@ export default function WaveApproveTabLabels({
         if (!success) {
           setToast({
             type: "error",
-            message: "Couldn't authenticate. Reconnect your wallet and try again.",
+            message:
+              "Couldn't authenticate. Reconnect your wallet and try again.",
           });
           return;
         }

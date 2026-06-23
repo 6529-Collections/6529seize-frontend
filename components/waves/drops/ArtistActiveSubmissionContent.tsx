@@ -61,7 +61,7 @@ export const ArtistActiveSubmissionContent: React.FC<
 
   const handleDropClick = useCallback(
     (dropId: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       params.set("drop", dropId);
       router.push(`${pathname}?${params.toString()}`);
       if (compact && isSmallScreen) {

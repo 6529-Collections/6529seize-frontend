@@ -160,10 +160,8 @@ describe("LFGSlideshow", () => {
     expect(video).toBeInTheDocument();
     expect(video).toHaveAttribute("src", "video.mp4");
     expect(video).toHaveAttribute("poster", "poster.png");
-    expect(video?.querySelector("track")).toHaveAttribute(
-      "src",
-      expect.stringContaining("data:text/vtt")
-    );
+    expect(video).toHaveAttribute("controls");
+    expect(video?.querySelector("track")).toBeNull();
   });
 
   it("uses the original image field", async () => {
