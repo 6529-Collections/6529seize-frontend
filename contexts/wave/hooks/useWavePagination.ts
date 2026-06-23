@@ -392,8 +392,6 @@ export function useWavePagination({
         );
 
         if (result) {
-          state.lastSuccessfullyFetchedSerialNo = serialToFetch;
-
           updateData({
             key: waveId,
             drops: result.map((drop) => {
@@ -408,9 +406,11 @@ export function useWavePagination({
 
           if (result.length > 0) {
             const serials = result.map((drop) => drop.serial_no);
+            state.lastSuccessfullyFetchedSerialNo = serialToFetch;
             state.lastFetchedMinSerialNo = Math.min(...serials);
             state.lastFetchedMaxSerialNo = Math.max(...serials);
           } else {
+            state.lastSuccessfullyFetchedSerialNo = null;
             state.lastFetchedMinSerialNo = null;
             state.lastFetchedMaxSerialNo = null;
             console.warn(
@@ -418,6 +418,7 @@ export function useWavePagination({
             );
           }
         } else {
+          state.lastSuccessfullyFetchedSerialNo = null;
           state.lastFetchedMinSerialNo = null;
           state.lastFetchedMaxSerialNo = null;
           console.warn(

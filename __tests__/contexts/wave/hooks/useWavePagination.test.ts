@@ -286,4 +286,43 @@ describe('useWavePagination', () => {
 
     expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(2);
   });
+
+  it('refetches the same serial after an empty around-serial result', async () => {
+    const initial: Record<string, WaveState> = {
+      wave1: {
+        id: 'wave1',
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: true,
+        drops: [],
+        latestFetchedSerialNo: null,
+      },
+    };
+
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    fetchAroundSerialNoWaveMessages
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ id: 'd', serial_no: 100 }]);
+
+    const { result } = setup(initial);
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(2);
+    warnSpy.mockRestore();
+  });
 });
