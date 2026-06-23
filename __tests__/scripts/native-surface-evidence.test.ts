@@ -188,6 +188,42 @@ describe("native surface evidence", () => {
     );
   });
 
+  it("keeps simulation availability when a surface also has package prerequisites", () => {
+    const cwd = fixture(
+      {
+        "android/app/build.gradle":
+          "plugins { id 'com.android.application' }\n",
+        "capacitor.config.ts": "export default {};\n",
+        "playwright.config.ts":
+          'export default { projects: [{ name: "capacitor-android-sim" }] };',
+      },
+      {
+        dependencies: { "@capacitor/core": "7.4.1" },
+        devDependencies: { "@capacitor/cli": "7.4.1" },
+      },
+      { playwrightConfigPath: null }
+    );
+
+    const evidence = createNativeEvidence({
+      cwd,
+      commandRunner: commandRunner(["adb", "java", "gradle"]),
+      platform: "linux",
+    });
+    const android = evidence.surfaces.find(
+      (surface) => surface.name === "capacitor-android"
+    );
+
+    expect(android).toMatchObject({
+      evidence_tier: "package-prerequisites",
+      simulation_project: "capacitor-android-sim",
+    });
+    expect(evidence.summary).toMatchObject({
+      highest_available_tier: "package-prerequisites",
+      package_prerequisites_ready: true,
+      simulation_available: true,
+    });
+  });
+
   it("does not treat a Gradle wrapper alone as an Android native project", () => {
     const cwd = fixture(
       {

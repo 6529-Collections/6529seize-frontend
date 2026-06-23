@@ -400,7 +400,7 @@ function createNativeEvidence(options = {}) {
     (surface) => surface.package_prerequisites_ready
   );
   const simulationAvailable = surfaces.some(
-    (surface) => surface.evidence_tier === "browser-simulation"
+    (surface) => surface.simulation_project !== null
   );
 
   const evidence = {
