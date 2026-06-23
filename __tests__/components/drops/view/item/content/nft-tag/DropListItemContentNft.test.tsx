@@ -31,7 +31,6 @@ describe('DropListItemContentNft', () => {
   });
 
   it('defaults to external link for other contracts', async () => {
-    const { MEMES_CONTRACT } = require('@/constants/constants');
     render(<DropListItemContentNft nft={{ ...baseNft, contract: '0xabc' }} />);
     await waitFor(() => expect(screen.getByTestId('link')).toHaveAttribute('href', `https://opensea.io/assets/ethereum/0xabc/${baseNft.token}`));
     expect(screen.getByTestId('link')).toHaveAttribute('target', '_blank');
