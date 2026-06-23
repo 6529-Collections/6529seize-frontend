@@ -90,6 +90,13 @@ const SAFE_ETHEREUM_RPC_METHODS = new Set([
   "web3_clientVersion",
 ]);
 
+function isGoogleCspReportEndpoint(url: URL) {
+  return (
+    url.hostname === "csp.withgoogle.com" &&
+    /^\/csp\/script-inclusions\/[a-f0-9]{32}$/i.test(url.pathname)
+  );
+}
+
 function parseUrl(url: string) {
   try {
     return new URL(url);
@@ -166,6 +173,10 @@ function isIgnoredExternalMutation(url: URL) {
     (url.pathname.startsWith("/api/stats/") ||
       url.pathname === "/youtubei/v1/log_event")
   ) {
+    return true;
+  }
+
+  if (isGoogleCspReportEndpoint(url)) {
     return true;
   }
 
@@ -257,9 +268,7 @@ function isSafeEthereumRpcPost(postData?: string | null) {
     }
 
     const method = (call as { method?: unknown }).method;
-    return (
-      typeof method === "string" && SAFE_ETHEREUM_RPC_METHODS.has(method)
-    );
+    return typeof method === "string" && SAFE_ETHEREUM_RPC_METHODS.has(method);
   });
 }
 
