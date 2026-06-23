@@ -1186,6 +1186,21 @@ export default function Auth({
       role,
     });
 
+    if (
+      validationResult.requiresSessionUpgrade &&
+      signModalReason !== "session-upgrade"
+    ) {
+      const promptStatus = getOrCreateSessionUpgradePromptStatus(
+        walletAddress,
+        authRolloutSettings
+      );
+      if (promptStatus.timeLeftMs <= 0) {
+        await expireSessionUpgradeAuth(walletAddress);
+        return false;
+      }
+      return finishAuthorizedWalletAuthentication();
+    }
+
     if (!validationResult.isValid) {
       const canReauthenticate = await prepareAuthorizedWalletReauthentication({
         walletAddress,
