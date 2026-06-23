@@ -89,7 +89,13 @@ export const ExpandedWave = ({
   const shouldShowPinButton = showPin && depth === 0;
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowDropTime = presentLatestDropTimestamp !== null;
-  const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
+  const rowVerticalPaddingClasses = isChildRow ? "tw-py-1.5" : "tw-py-2";
+  const {
+    rowPaddingClasses,
+    rowGapClasses,
+    linkGapClasses,
+    rowHeightClasses,
+  } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
       variant: "web",
@@ -145,7 +151,7 @@ export const ExpandedWave = ({
       onMouseEnter={handleRowMouseEnter}
       onMouseLeave={cancelSubwavePrefetch}
       role="group"
-      className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
@@ -160,7 +166,7 @@ export const ExpandedWave = ({
         />
       )}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
@@ -187,45 +193,54 @@ export const ExpandedWave = ({
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
-            <div className="-tw-mt-1 tw-mb-1 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1.5">
-              <Link
-                href={href}
-                prefetch={false}
-                onClick={onClick}
-                className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${
-                  isActive
-                    ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-                    : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-                }`}
-              >
-                <div
-                  ref={nameRef}
-                  className="tw-relative tw-z-[6] tw-truncate tw-text-sm"
-                  {...tooltipAttributes}
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-0.5">
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
+                <Link
+                  href={href}
+                  prefetch={false}
+                  onClick={onClick}
+                  className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${
+                    isActive
+                      ? "tw-text-white desktop-hover:group-hover:tw-text-white"
+                      : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+                  }`}
                 >
-                  {formattedWaveName}
-                </div>
-              </Link>
-              {shouldShowExpandControl && (
-                <span className="tw-relative tw-z-10 tw-inline-flex">
-                  <SidebarWaveExpandControl
-                    formattedWaveName={formattedWaveName}
-                    isExpanded={isExpanded}
-                    isLoading={isLoadingSubwaves}
-                    onBlur={cancelSubwavePrefetch}
-                    onClick={handleToggleExpand}
-                    onFocus={scheduleSubwavePrefetch}
-                    shouldShowButton={shouldShowExpandControl}
+                  <div
+                    ref={nameRef}
+                    className="tw-relative tw-z-[6] tw-truncate tw-text-sm tw-leading-tight"
+                    {...tooltipAttributes}
+                  >
+                    {formattedWaveName}
+                  </div>
+                </Link>
+                {shouldShowExpandControl && (
+                  <span className="tw-relative tw-z-10 tw-inline-flex">
+                    <SidebarWaveExpandControl
+                      formattedWaveName={formattedWaveName}
+                      isExpanded={isExpanded}
+                      isLoading={isLoadingSubwaves}
+                      onBlur={cancelSubwavePrefetch}
+                      onClick={handleToggleExpand}
+                      onFocus={scheduleSubwavePrefetch}
+                      shouldShowButton={shouldShowExpandControl}
+                    />
+                  </span>
+                )}
+                {shouldShowPinButton && (
+                  <BrainLeftSidebarWavePin
+                    waveId={waveId}
+                    isPinned={isPinned}
+                    compact
+                    className="tw-relative tw-z-10 tw-shrink-0"
                   />
-                </span>
-              )}
-              {shouldShowPinButton && (
-                <BrainLeftSidebarWavePin
-                  waveId={waveId}
-                  isPinned={isPinned}
-                  compact
-                  className="tw-relative tw-z-10 -tw-mt-1 tw-shrink-0"
-                />
+                )}
+              </div>
+              {shouldShowDropTime && (
+                <div className="tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-leading-none tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
+                  <BrainLeftSidebarWaveDropTime
+                    time={presentLatestDropTimestamp}
+                  />
+                </div>
               )}
             </div>
             {hasSummaryScore && (
@@ -239,11 +254,6 @@ export const ExpandedWave = ({
               </span>
             )}
           </div>
-          {shouldShowDropTime && (
-            <div className="tw-mt-0.5 tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
-              <BrainLeftSidebarWaveDropTime time={presentLatestDropTimestamp} />
-            </div>
-          )}
         </div>
       </div>
       {showExpandedTooltip && (

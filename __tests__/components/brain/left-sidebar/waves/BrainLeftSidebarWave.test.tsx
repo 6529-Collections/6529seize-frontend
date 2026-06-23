@@ -238,6 +238,10 @@ describe("BrainLeftSidebarWave", () => {
     ).not.toBeInTheDocument();
     expect(row).toHaveClass("tw-px-5");
     expect(row).toHaveClass("tw-gap-x-4");
+    expect(row).toHaveClass("tw-items-center");
+    expect(row).not.toHaveClass("tw-items-start");
+    expect(row).toHaveClass("tw-h-full");
+    expect(row).toHaveClass("tw-min-h-[62px]");
     expect(row).not.toHaveClass("tw-pl-2");
   });
 
@@ -276,6 +280,10 @@ describe("BrainLeftSidebarWave", () => {
     expect(unreadSubwavesDot).toHaveClass("tw-top-[-3px]");
     expect(getWaveRow()).toHaveClass("tw-px-5");
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
+    expect(getWaveRow()).toHaveClass("tw-items-center");
+    expect(getWaveRow()).not.toHaveClass("tw-items-start");
+    expect(getWaveRow()).toHaveClass("tw-h-full");
+    expect(getWaveRow()).toHaveClass("tw-min-h-[62px]");
     expect(getWaveRow()).not.toHaveClass("tw-pl-2");
     const rowLink = screen.getByRole("link", { name: "Chat Wave" });
     expect(rowLink).toHaveClass("tw-static");
@@ -389,10 +397,20 @@ describe("BrainLeftSidebarWave", () => {
     );
 
     const timestamp = screen.getByTestId("drop-time");
-    const score = screen.getByRole("button", { name: /Wave score 83/ });
+    const timestampWrapper = timestamp.parentElement;
+    const textStack = timestampWrapper?.parentElement;
+    const metadataRow = textStack?.parentElement;
+    const score = screen
+      .getByText("83")
+      .closest("[aria-label]")
+      ?.closest(".tw-ml-auto");
 
     expect(timestamp).toHaveTextContent("123");
-    expect(score).toBeInTheDocument();
+    expect(textStack?.children[1]).toBe(timestampWrapper);
+    expect(metadataRow?.children[1]).toBe(score);
+    expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
+    expect(timestampWrapper).not.toHaveClass("-tw-mt-0.5");
+    expect(score).toHaveClass("tw-ml-auto");
   });
 
   it("cancels subwave prefetch when hover intent ends early", () => {
@@ -449,6 +467,10 @@ describe("BrainLeftSidebarWave", () => {
     expect(rail).toHaveClass("md:tw-left-[52px]");
     expect(rail).toHaveClass("-tw-top-1");
     expect(rail).toHaveClass("tw-bottom-4");
+    expect(getWaveRow()).toHaveClass("tw-items-center");
+    expect(getWaveRow()).not.toHaveClass("tw-items-start");
+    expect(getWaveRow()).toHaveClass("tw-h-full");
+    expect(getWaveRow()).toHaveClass("tw-min-h-[54px]");
     expect(getWaveRow().querySelector(".tw-h-px")).toBeNull();
     expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
   });
