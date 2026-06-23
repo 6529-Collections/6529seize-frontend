@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Create deployment bus manifest
         run: |
@@ -97,7 +97,7 @@ jobs:
             --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "22"
 
@@ -186,7 +186,7 @@ jobs:
           fi
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -205,10 +205,10 @@ jobs:
             --branch main
 
       - name: Upload assets to S3
-        run: aws s3 sync target s3://${{ env.AWS_BUCKET }}/web_build/${{ env.COMMIT_SHA }}/
+        run: aws s3 sync target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/"
 
       - name: Get commit message
-        run: echo "COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
+        run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s)" >> "$GITHUB_ENV"
 
       - name: Mark production deployment in progress
         env:
@@ -232,7 +232,7 @@ jobs:
           create_application_version() {
             aws elasticbeanstalk create-application-version \
               --application-name "${BEANSTALK_APP_NAME}" \
-              --source-bundle S3Bucket="${AWS_BUCKET}",S3Key="${SOURCE_BUNDLE_KEY}" \
+              --source-bundle "S3Bucket=${AWS_BUCKET},S3Key=${SOURCE_BUNDLE_KEY}" \
               --version-label "${COMMIT_SHA}" \
               --description "${COMMIT_MESSAGE}"
           }
@@ -294,8 +294,8 @@ jobs:
           COUNTER=0
           sleep 120
           while : ; do
-            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
-            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Status' --output text)
+            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names "${BEANSTALK_ENV_NAME}" --query 'Environments[0].Health' --output text)
+            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names "${BEANSTALK_ENV_NAME}" --query 'Environments[0].Status' --output text)
             echo "Environment health: $ENV_HEALTH"
             echo "Environment status: $ENV_STATUS"
             if [ $((COUNTER % 5)) -eq 0 ]; then
@@ -321,7 +321,7 @@ jobs:
       - name: Validate Deployment
         run: |
           DEPLOYED_BEANSTALK_VERSION=$(aws elasticbeanstalk describe-environments \
-            --environment-names ${{ env.BEANSTALK_ENV_NAME }} \
+            --environment-names "${BEANSTALK_ENV_NAME}" \
             --query 'Environments[0].VersionLabel' \
             --output text)
           echo "Current deployed version is $DEPLOYED_BEANSTALK_VERSION"
