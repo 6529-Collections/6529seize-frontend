@@ -158,6 +158,7 @@ describe("HeaderShare", () => {
     // Reset QRCode mock
     const qrcode = require("qrcode");
     qrcode.toDataURL.mockResolvedValue("data:image/png;base64,FAKE_QR_CODE");
+    window.history.pushState({}, "", "/test-path?something=value");
   });
 
   afterEach(() => {

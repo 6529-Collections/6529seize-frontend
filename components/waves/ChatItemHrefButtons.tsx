@@ -204,7 +204,8 @@ export default function ChatItemHrefButtons({
         return;
       }
 
-      shouldRestoreTriggerFocusRef.current = true;
+      event.stopPropagation();
+      closeMenu({ restoreFocusToTrigger: true });
     };
 
     globalThis.window.addEventListener("keydown", handleKeyDown, true);
