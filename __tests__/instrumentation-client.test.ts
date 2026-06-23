@@ -12,6 +12,22 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const wasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
+    "WebAssembly module violates the following Content Security policy directive",
+    "because 'unsafe-eval' is not an allowed source of script in the following",
+    "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
+  const sentryRouteParameterizationMessage =
+    "JSON.stringify cannot serialize cyclic structures.";
+  const sentryRouteParameterizationMechanismType =
+    "auto.browser.browserapierrors.setTimeout";
+  const nativeJsonStringifyFrame = {
+    filename: "[native code]",
+    function: "stringify",
+    in_app: true,
+  };
 
   type BeforeSendResult = {
     tags?: Record<string, unknown> | undefined;
@@ -59,12 +75,67 @@ describe("instrumentation-client", () => {
     };
   };
 
+  const createSentryRouteParameterizationEvent = (
+    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame]
+  ) => ({
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: sentryRouteParameterizationMessage,
+          mechanism: {
+            type: sentryRouteParameterizationMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        category: "navigation",
+        data: {
+          from: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        },
+      },
+    ],
+  });
+
   beforeEach(() => {
     jest.resetModules();
     mockInit.mockReset();
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it("drops injected WebAssembly CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
   });
 
   it("drops Coinbase WalletLink websocket 1006 unhandled rejections", () => {
@@ -98,6 +169,31 @@ describe("instrumentation-client", () => {
     });
 
     expect(result).toBeNull();
+  });
+
+  it("drops Sentry route parameterization cyclic JSON errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps cyclic JSON errors with app-owned frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent([
+      nativeJsonStringifyFrame,
+      {
+        filename: "https://6529.io/_next/static/chunks/app-client.js",
+        function: "serializeWaveParams",
+        in_app: true,
+      },
+    ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops sampled-out first-party browser transport network errors", () => {

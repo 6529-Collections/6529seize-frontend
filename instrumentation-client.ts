@@ -20,6 +20,8 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterInjectedWalletCollision,
+  shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -115,11 +117,19 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterInjectedWasmCspUnsafeEval(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
     return true;
   }
 
   if (shouldFilterTwitterConfigReferenceError(event)) {
+    return true;
+  }
+
+  if (shouldFilterSentryRouteParameterizationError(event)) {
     return true;
   }
 
