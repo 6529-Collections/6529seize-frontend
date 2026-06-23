@@ -16,6 +16,12 @@ describe("instrumentation-client", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const reactDomInsertBeforeMessage =
+    "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+  const reactDomFrame = {
+    filename:
+      "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+  };
   const wasmCspUnsafeEvalMessage = [
     "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
     "WebAssembly module violates the following Content Security policy directive",
@@ -137,6 +143,33 @@ describe("instrumentation-client", () => {
       },
       tags: {
         mechanism: "auto.browser.global_handlers.onunhandledrejection",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops exact React DOM insertBefore NotFoundError events on waves routes with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "react-dom-insert-before-event",
+      transaction: "/waves",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomInsertBeforeMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/waves",
+        url: "/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099",
       },
     };
 
