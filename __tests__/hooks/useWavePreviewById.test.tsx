@@ -156,6 +156,50 @@ describe("useWavePreviewById", () => {
     expect(refetchWaveMock).toHaveBeenCalledTimes(1);
   });
 
+  it("releases the preview slot when an empty retry returns wave data", async () => {
+    const fetchingWaveIds = new Set(["wave-1"]);
+    const loadedWaveIds = new Set<string>();
+    mockedUseWaveById.mockImplementation((waveId: string, options: any) => ({
+      wave: loadedWaveIds.has(waveId) ? { id: waveId } : undefined,
+      isFetching: Boolean(options?.enabled && fetchingWaveIds.has(waveId)),
+      isLoading: Boolean(options?.enabled && fetchingWaveIds.has(waveId)),
+      refetch: refetchWaveMock,
+    }));
+
+    const { result, rerender } = renderHook(() =>
+      useWavePreviewById("wave-1")
+    );
+
+    await waitFor(() => {
+      expect(getLatestEnabledByWaveId()["wave-1"]).toBe(true);
+    });
+
+    fetchingWaveIds.delete("wave-1");
+    rerender();
+
+    await waitFor(() => {
+      expect(refetchWaveMock).toHaveBeenCalledTimes(1);
+    });
+
+    fetchingWaveIds.add("wave-1");
+    rerender();
+
+    await waitFor(() => {
+      expect(getLatestEnabledByWaveId()["wave-1"]).toBe(true);
+    });
+
+    fetchingWaveIds.delete("wave-1");
+    loadedWaveIds.add("wave-1");
+    mockedUseWaveById.mockClear();
+    rerender();
+
+    await waitFor(() => {
+      expect(result.current.wave).toEqual({ id: "wave-1" });
+      expect(getLatestEnabledByWaveId()["wave-1"]).toBe(false);
+    });
+    expect(refetchWaveMock).toHaveBeenCalledTimes(1);
+  });
+
   it("does not carry an enabled fetch state across wave id changes", async () => {
     const { rerender } = renderHook(
       ({ waveId }: { waveId: string }) => useWavePreviewById(waveId),

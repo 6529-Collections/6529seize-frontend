@@ -122,7 +122,6 @@ export function useWavePreviewById(waveId: string): {
 
   useEffect(() => {
     if (hasWave) {
-      fetchCycleStartedRef.current = false;
       emptyPreviewRetryCountRef.current = 0;
     }
   }, [hasWave]);
@@ -136,24 +135,17 @@ export function useWavePreviewById(waveId: string): {
   }, [hasWave, waveId]);
 
   useEffect(() => {
-    if (!fetchEnabled) {
+    if (!waveId || !fetchEnabled) {
       fetchCycleStartedRef.current = false;
       return;
     }
 
     if (isFetching || isLoading) {
       fetchCycleStartedRef.current = true;
+      return;
     }
-  }, [fetchEnabled, isFetching, isLoading]);
 
-  useEffect(() => {
-    if (
-      !waveId ||
-      !fetchEnabled ||
-      isFetching ||
-      isLoading ||
-      !fetchCycleStartedRef.current
-    ) {
+    if (!fetchCycleStartedRef.current) {
       return;
     }
 
@@ -165,8 +157,6 @@ export function useWavePreviewById(waveId: string): {
         void refetch();
         return;
       }
-
-      emptyPreviewRetryCountRef.current = 0;
     }
 
     releaseWavePreviewFetch(waveId);
