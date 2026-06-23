@@ -7,9 +7,7 @@ import React, {
   useEffectEvent,
   useMemo,
 } from "react";
-import type {
-  UnifiedWavesListWavesHandle,
-} from "../left-sidebar/waves/UnifiedWavesListWaves";
+import type { UnifiedWavesListWavesHandle } from "../left-sidebar/waves/UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "../left-sidebar/waves/UnifiedWavesListWaves";
 import { UnifiedWavesListLoader } from "../left-sidebar/waves/UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
@@ -29,20 +27,15 @@ interface DirectMessagesListProps {
 const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   scrollContainerRef,
 }) => {
-  const { isAuthenticated } = useSeizeConnectContext();
+  const { hasValidWalletAuth } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
 
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
   const hasFetchedRef = useRef(false);
   const { directMessages, registerWave } = useMyStream();
-  const {
-    list,
-    hasNextPage,
-    isFetchingNextPage,
-    isFetching,
-    fetchNextPage,
-  } = directMessages;
+  const { list, hasNextPage, isFetchingNextPage, isFetching, fetchNextPage } =
+    directMessages;
 
   useEffect(() => {
     hasFetchedRef.current = false;
@@ -65,28 +58,32 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
       return;
     }
 
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting) {
-        fetchNextPageIfNeeded();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          fetchNextPageIfNeeded();
+        }
+      },
+      {
+        root: listHandle?.containerRef.current,
+        rootMargin: "100px",
       }
-    }, {
-      root: listHandle?.containerRef.current,
-      rootMargin: "100px",
-    });
+    );
 
     observer.observe(sentinel);
 
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, list.length > 0]);
 
-  const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
+  const shouldShowPlaceholder =
+    !hasValidWalletAuth || !connectedProfile?.handle;
   const wavesWithPinned = useMemo(
     () => list.map((w) => ({ ...w, isPinned: false })),
-    [list],
+    [list]
   );
 
   if (shouldShowPlaceholder) {
-    if (!isAuthenticated) {
+    if (!hasValidWalletAuth) {
       return <ConnectWallet />;
     }
 
@@ -102,7 +99,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     return (
       <div
         id="my-stream-connect"
-        className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-h-full tw-p-6 tailwind-scope"
+        className="tailwind-scope tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-gap-8 tw-p-6 md:tw-flex-row"
       >
         <Image
           unoptimized
@@ -112,9 +109,9 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
           alt="Brain"
           width={304}
           height={450}
-          className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+          className="tw-h-auto tw-max-w-[30vw] tw-rounded-md tw-shadow-lg md:tw-max-w-[200px]"
         />
-        <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+        <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-text-center md:tw-items-start md:tw-text-left">
           {placeholderContent}
         </div>
       </div>
@@ -123,9 +120,9 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
 
   return (
     <div className="tw-mb-4">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
+      <div className="tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800">
         {!isApp && (
-          <div className="tw-px-4 tw-mb-4">
+          <div className="tw-mb-4 tw-px-4">
             <BrainLeftSidebarCreateADirectMessageButton />
           </div>
         )}

@@ -76,6 +76,12 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettings: () => ({
+    isMemesWave: () => false,
+    isQuorumWave: () => false,
+  }),
+}));
 
 const useDeviceInfo = require("@/hooks/useDeviceInfo").default as jest.Mock;
 const useLongPressInteraction = require("@/hooks/useLongPressInteraction")

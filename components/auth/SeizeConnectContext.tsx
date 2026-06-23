@@ -25,10 +25,12 @@ import {
   type ConnectedWalletAccount,
   getConnectedWalletAccounts,
   getWalletAddress,
+  isAuthAddressAuthorized,
   removeAuthJwt,
   setActiveWalletAccount,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
+import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { WalletInitializationError } from "@/src/errors/wallet";
@@ -124,7 +126,16 @@ interface SeizeConnectContextType {
   /** Whether a wallet is currently connected to the app */
   isConnected: boolean;
 
-  /** Whether the user is authenticated with a wallet address */
+  /** Whether the active wallet has a live signer connection */
+  canSignActiveWallet: boolean;
+
+  /** Whether there is an active wallet address, regardless of auth validity */
+  hasActiveWalletAddress: boolean;
+
+  /** Whether the active wallet address has valid auth state */
+  hasValidWalletAuth: boolean;
+
+  /** @deprecated Use hasActiveWalletAddress or hasValidWalletAuth. */
   isAuthenticated: boolean;
 
   /** Current connection state for better timing control */
@@ -189,6 +200,63 @@ const createWalletError = (
   );
 };
 
+const getLogoutSessionError = (error: unknown, message: string): Error =>
+  error instanceof Error ? error : new Error(message);
+
+const revokeActiveSessionForLogoutAll = async (): Promise<void> => {
+  const activeAddress = getWalletAddress();
+  if (!activeAddress) {
+    return;
+  }
+
+  try {
+    await logoutSessionV2({
+      address: activeAddress,
+      allSessions: true,
+    });
+  } catch (error: unknown) {
+    logError(
+      "seizeDisconnectAndLogoutAll.logoutSessionV2",
+      getLogoutSessionError(error, "Failed to revoke session during logout all")
+    );
+  }
+};
+
+const clearAllAuthenticatedProfiles = async (): Promise<void> => {
+  let remainingProfiles = getConnectedWalletAccounts().length;
+  let activeWalletAddress = getWalletAddress();
+  const maxIterations = Math.max(
+    MAX_CONNECTED_PROFILES * 2,
+    remainingProfiles + 2
+  );
+  let iterations = 0;
+
+  while (remainingProfiles > 0 || activeWalletAddress) {
+    iterations += 1;
+    if (iterations > maxIterations) {
+      const iterationError = new AuthenticationError(
+        `Failed to clear all authenticated profiles: exceeded ${maxIterations} iterations during logout cleanup.`
+      );
+      logError("seizeDisconnectAndLogoutAll", iterationError);
+      throw iterationError;
+    }
+
+    await revokeActiveSessionForLogoutAll();
+    await removeAuthJwt();
+
+    const nextRemainingProfiles = getConnectedWalletAccounts().length;
+    const nextActiveWalletAddress = getWalletAddress();
+    if (
+      nextRemainingProfiles >= remainingProfiles &&
+      nextActiveWalletAddress === activeWalletAddress
+    ) {
+      throw new Error("Failed to clear all authenticated profiles.");
+    }
+    remainingProfiles = nextRemainingProfiles;
+    activeWalletAddress = nextActiveWalletAddress;
+  }
+};
+
 // Address validation utilities
 interface AddressValidationResult {
   isValid: boolean;
@@ -202,10 +270,6 @@ interface AddressValidationResult {
     | undefined;
 }
 
-const isCapacitorPlatform = (): boolean => {
-  return !!globalThis.window?.Capacitor?.isNativePlatform?.();
-};
-
 const normalizeAddress = (address: string): string => address.toLowerCase();
 
 const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
@@ -213,17 +277,6 @@ const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
 const validateStoredAddress = (
   storedAddress: string
 ): AddressValidationResult => {
-  // Capacitor-specific validation (more lenient)
-  if (isCapacitorPlatform()) {
-    if (storedAddress.startsWith("0x") && storedAddress.length === 42) {
-      return {
-        isValid: true,
-        normalizedAddress: storedAddress.toLowerCase(),
-      };
-    }
-  }
-
-  // Standard validation using viem
   if (isAddress(storedAddress)) {
     return {
       isValid: true,
@@ -249,6 +302,17 @@ const validateStoredAddress = (
       debugAddress,
     },
   };
+};
+
+const clearInvalidStoredAuthState = async (): Promise<void> => {
+  try {
+    await removeAuthJwt();
+  } catch (cleanupError) {
+    logError(
+      "auth_cleanup_during_init",
+      new Error(`Failed to clear invalid auth state: ${cleanupError}`)
+    );
+  }
 };
 
 // Unified Wallet State Machine - eliminates multiple state variables and inconsistencies
@@ -277,14 +341,7 @@ const handleInitializationError = (
     );
 
     // Clear invalid stored address
-    try {
-      removeAuthJwt();
-    } catch (cleanupError) {
-      logError(
-        "auth_cleanup_during_init",
-        new Error(`Failed to clear invalid auth state: ${cleanupError}`)
-      );
-    }
+    void clearInvalidStoredAuthState();
 
     const initError = new WalletInitializationError(
       "Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.",
@@ -831,7 +888,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      removeAuthJwt();
+      try {
+        await logoutSessionV2({ address: getWalletAddress() });
+      } catch (error: unknown) {
+        const revokeError =
+          error instanceof Error
+            ? error
+            : new Error("Failed to revoke session during logout");
+        logError("seizeDisconnectAndLogout.logoutSessionV2", revokeError);
+      }
+      await removeAuthJwt();
       refreshStoredConnectedAccounts();
 
       const nextActiveAddress = getWalletAddress();
@@ -842,7 +908,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error: unknown) {
       const authError = new AuthenticationError(
-        "Failed to clear authentication state after successful wallet disconnect",
+        "Failed to revoke authentication state after successful wallet disconnect",
         error
       );
       logError("seizeDisconnectAndLogout", authError);
@@ -873,31 +939,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      let remainingProfiles = getConnectedWalletAccounts().length;
-      const maxIterations = Math.max(
-        MAX_CONNECTED_PROFILES * 2,
-        remainingProfiles + 2
-      );
-      let iterations = 0;
-
-      while (remainingProfiles > 0) {
-        iterations += 1;
-        if (iterations > maxIterations) {
-          const iterationError = new AuthenticationError(
-            `Failed to clear all authenticated profiles: exceeded ${maxIterations} iterations during logout cleanup.`
-          );
-          logError("seizeDisconnectAndLogoutAll", iterationError);
-          throw iterationError;
-        }
-
-        removeAuthJwt();
-        const nextRemainingProfiles = getConnectedWalletAccounts().length;
-        if (nextRemainingProfiles >= remainingProfiles) {
-          throw new Error("Failed to clear all authenticated profiles.");
-        }
-        remainingProfiles = nextRemainingProfiles;
-      }
-
+      await clearAllAuthenticatedProfiles();
       refreshStoredConnectedAccounts();
       setDisconnected();
     } catch (error: unknown) {
@@ -1155,6 +1197,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   }, [activeAddress, storedConnectedAccounts]);
 
+  const hasActiveWalletAddress = !!activeAddress;
+  const hasValidWalletAuth = useMemo(
+    () =>
+      isAuthAddressAuthorized({
+        address: activeAddress,
+        connectedAccounts: storedConnectedAccounts,
+      }),
+    [activeAddress, storedConnectedAccounts]
+  );
+
   const jwtPollingStoredConnectedAccounts = useMemo(() => {
     if (!activeAddress) {
       return storedConnectedAccounts;
@@ -1225,7 +1277,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAddConnectedAccount,
       seizeConnectOpen: state.open,
       isConnected: isActiveWalletConnected,
-      isAuthenticated: !!activeAddress,
+      canSignActiveWallet: isActiveWalletConnected,
+      hasActiveWalletAddress,
+      hasValidWalletAuth,
+      isAuthenticated: hasValidWalletAuth,
       connectionState: walletState.status, // Unified state machine
       walletState, // Expose unified state for advanced consumers
       hasInitializationError,
@@ -1236,6 +1291,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }),
     [
       activeAddress,
+      hasActiveWalletAddress,
+      hasValidWalletAuth,
       isActiveWalletConnected,
       connectedAccounts,
       walletInfo?.name,

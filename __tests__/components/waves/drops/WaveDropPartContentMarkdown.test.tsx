@@ -41,6 +41,17 @@ jest.mock(
 
 const basePart: any = { content: "hello", quoted_drop: null };
 const wave: any = { id: "w" };
+const createDrop = (overrides: Record<string, unknown> = {}) =>
+  ({
+    id: "drop-1",
+    serial_no: 2,
+    author: { handle: "alice" },
+    wave,
+    parts: [],
+    created_at: 0,
+    updated_at: null,
+    ...overrides,
+  }) as any;
 
 beforeEach(() => {
   markdownProps = undefined;
@@ -67,7 +78,7 @@ it("renders quoted drop", () => {
     content: "c",
     quoted_drop: { drop_id: "d", drop_part_id: 1, drop: null },
   } as any;
-  const drop = { id: "root-drop", serial_no: 7 } as any;
+  const drop = createDrop({ id: "root-drop", serial_no: 7 });
   const onLinkCardActionsActiveChange = jest.fn();
   render(
     <WaveDropPartContentMarkdown
@@ -91,14 +102,11 @@ it("renders quoted drop", () => {
 });
 
 it("passes link preview toggle control for author drops with links", () => {
-  const drop = {
-    id: "drop-1",
+  const drop = createDrop({
     serial_no: 1,
     hide_link_preview: false,
-    author: { handle: "alice" },
-    wave: { id: "w" },
     parts: [{ content: "https://example.com" }],
-  } as any;
+  });
 
   render(
     <AuthContext.Provider
@@ -128,14 +136,11 @@ it("passes link preview toggle control for author drops with links", () => {
 });
 
 it("keeps link preview toggle control stable across equivalent drop rerenders", () => {
-  const drop = {
-    id: "drop-1",
+  const drop = createDrop({
     serial_no: 1,
     hide_link_preview: false,
-    author: { handle: "alice" },
-    wave: { id: "w" },
     parts: [{ content: "https://example.com" }],
-  } as any;
+  });
 
   const authContextValue = {
     connectedProfile: { handle: "alice" },
@@ -201,7 +206,7 @@ it("renders the compact quorum proposal view when parsing succeeds", () => {
       referencedNfts={[]}
       part={proposalPart}
       wave={wave}
-      drop={{ id: "drop-1", serial_no: 2 } as any}
+      drop={createDrop({ id: "drop-1", serial_no: 2 })}
       onQuoteClick={jest.fn()}
       contentPresentation="quorumCompact"
     />
@@ -239,7 +244,7 @@ it("renders compact quorum cards when intermediate sections are omitted", () => 
       referencedNfts={[]}
       part={proposalPart}
       wave={wave}
-      drop={{ id: "drop-1", serial_no: 2 } as any}
+      drop={createDrop({ id: "drop-1", serial_no: 2 })}
       onQuoteClick={jest.fn()}
       contentPresentation="quorumCompact"
     />
@@ -279,7 +284,7 @@ it("falls back to regular markdown for out-of-order quorum headings", () => {
       referencedNfts={[]}
       part={proposalPart}
       wave={wave}
-      drop={{ id: "drop-1", serial_no: 2 } as any}
+      drop={createDrop({ id: "drop-1", serial_no: 2 })}
       onQuoteClick={jest.fn()}
       contentPresentation="quorumCompact"
     />
@@ -320,7 +325,7 @@ it("falls back to regular markdown when quorum headings go out of order after a 
       referencedNfts={[]}
       part={proposalPart}
       wave={wave}
-      drop={{ id: "drop-1", serial_no: 2 } as any}
+      drop={createDrop({ id: "drop-1", serial_no: 2 })}
       onQuoteClick={jest.fn()}
       contentPresentation="quorumCompact"
     />
@@ -330,7 +335,7 @@ it("falls back to regular markdown when quorum headings go out of order after a 
   expect(screen.queryByTestId("compact")).toBeNull();
 });
 
-it("keeps repeated canonical headings inside the final compact quorum section", () => {
+it("folds repeated canonical headings into the final compact quorum section", () => {
   const proposalPart = {
     content: [
       "# Slow Mode",
@@ -357,7 +362,7 @@ it("keeps repeated canonical headings inside the final compact quorum section", 
       referencedNfts={[]}
       part={proposalPart}
       wave={wave}
-      drop={{ id: "drop-1", serial_no: 2 } as any}
+      drop={createDrop({ id: "drop-1", serial_no: 2 })}
       onQuoteClick={jest.fn()}
       contentPresentation="quorumCompact"
     />
@@ -396,7 +401,7 @@ it("keeps embedded level-two headings inside the same compact quorum section", (
       referencedNfts={[]}
       part={proposalPart}
       wave={wave}
-      drop={{ id: "drop-1", serial_no: 2 } as any}
+      drop={createDrop({ id: "drop-1", serial_no: 2 })}
       onQuoteClick={jest.fn()}
       contentPresentation="quorumCompact"
     />
@@ -445,7 +450,7 @@ it("keeps canonical embedded headings inside the same compact quorum section", (
       referencedNfts={[]}
       part={proposalPart}
       wave={wave}
-      drop={{ id: "drop-1", serial_no: 2 } as any}
+      drop={createDrop({ id: "drop-1", serial_no: 2 })}
       onQuoteClick={jest.fn()}
       contentPresentation="quorumCompact"
     />

@@ -103,7 +103,7 @@ describe("useNFTCollections", () => {
       expect(result.current.loading).toBe(false);
     });
 
-    it("initializes with empty initial data and loading state", () => {
+    it("initializes empty initial NFT data in loading state", () => {
       const initialData = {
         nfts: [],
         nextgenCollections: [],
@@ -264,47 +264,67 @@ describe("useNFTCollections", () => {
     });
   });
 
-  describe("IMPLEMENTATION BUGS: API Error Handling Issues", () => {
-    it("documents unhandled promise rejection bug when memes API fails", () => {
-      // Test documents the current buggy behavior - should not be used in production
-      const mockError = jest.fn();
-      const originalConsoleError = console.error;
-      console.error = mockError;
+  describe("API Error Handling", () => {
+    let consoleErrorSpy: jest.SpyInstance;
 
-      // This setup will cause unhandled promise rejection in real usage
-      // The hook has no try-catch blocks around fetchUrl calls
-      const { result } = renderHook(() => useNFTCollections());
-
-      expect(result.current.loading).toBe(true);
-      expect(result.current.nfts).toEqual([]);
-      expect(result.current.nextgenCollections).toEqual([]);
-
-      console.error = originalConsoleError;
+    beforeEach(() => {
+      consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
     });
 
-    it("documents promise chain break when gradients API fails", () => {
-      // Test documents the current buggy behavior
-      const mockError = jest.fn();
-      const originalConsoleError = console.error;
-      console.error = mockError;
-
-      // In real usage, if gradients fetch fails, the promise chain breaks
-      // and setLoading(false) is never called
-      const { result } = renderHook(() => useNFTCollections());
-
-      expect(result.current.loading).toBe(true);
-      expect(result.current.nfts).toEqual([]);
-
-      console.error = originalConsoleError;
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
     });
 
-    it("documents that NextGen API failures are silently ignored", () => {
-      // NextGen API failures don't break the main NFT functionality
-      // This is actually acceptable behavior since they're independent
+    it("clears loading and NFT data when the memes API fails", async () => {
+      mockFetchUrl.mockRejectedValueOnce(new Error("memes failed"));
+
       const { result } = renderHook(() => useNFTCollections());
 
-      expect(result.current.loading).toBe(true);
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.nfts).toEqual([]);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Failed to fetch NFT collections",
+        expect.any(Error)
+      );
+    });
+
+    it("clears loading and NFT data when the gradients API fails", async () => {
+      mockFetchAllPages.mockRejectedValueOnce(new Error("gradients failed"));
+
+      const { result } = renderHook(() => useNFTCollections());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.nfts).toEqual([]);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Failed to fetch NFT collections",
+        expect.any(Error)
+      );
+    });
+
+    it("clears NextGen collections when that API fails", async () => {
+      mockCommonApiFetch.mockRejectedValueOnce(new Error("nextgen failed"));
+
+      const { result } = renderHook(() => useNFTCollections());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
       expect(result.current.nextgenCollections).toEqual([]);
+      await waitFor(() => {
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          "Failed to fetch NextGen collections list",
+          expect.any(Error)
+        );
+      });
     });
   });
 

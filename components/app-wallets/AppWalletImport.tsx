@@ -14,11 +14,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ethers } from "ethers";
 import { CreateAppWalletModal } from "./AppWalletModal";
 import { useAuth } from "../auth/Auth";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { useAppWallets } from "./AppWalletsContext";
+import {
+  APP_WALLET_MNEMONIC_UNAVAILABLE,
+  useAppWallets,
+} from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
-const MNEMONIC_NA = "N/A";
+const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE;
+const MNEMONIC_WORD_FIELD_IDS = Array.from(
+  { length: 12 },
+  (_, index) => `mnemonic-word-${index + 1}`
+);
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unknown error";
+}
 
 export default function AppWalletImport() {
   const [isMnemonic, setIsMnemonic] = useState(true);
@@ -107,8 +117,8 @@ function AppWalletImportMnemonic() {
     try {
       const wallet = ethers.Wallet.fromPhrase(phrase.join(" "));
       setValidatedWallet(wallet);
-    } catch (e: any) {
-      setError(`Error: ${e.message}`);
+    } catch (error: unknown) {
+      setError(`Error: ${getErrorMessage(error)}`);
     }
   };
 
@@ -125,7 +135,7 @@ function AppWalletImportMnemonic() {
             sm={4}
             md={3}
             className="pt-2 pb-2"
-            key={getRandomObjectId()}
+            key={MNEMONIC_WORD_FIELD_IDS[i]}
           >
             <Container className={`${styles["phrase"]}`}>
               <Row>
@@ -169,7 +179,7 @@ function AppWalletImportMnemonic() {
             variant="warning"
             onClick={clear}
             className="font-bolder"
-            disabled={!phrase.some((w) => w) && !isCompletePhrase()}
+            disabled={!phrase.some(Boolean) && !isCompletePhrase()}
           >
             Clear
           </Button>
@@ -216,8 +226,8 @@ function AppWalletImportPrivateKey() {
     try {
       const wallet = new ethers.Wallet(privateKey);
       setValidatedWallet(wallet);
-    } catch (e: any) {
-      setError(`Error: ${e.message}`);
+    } catch (error: unknown) {
+      setError(`Error: ${getErrorMessage(error)}`);
     }
   };
 
@@ -265,7 +275,10 @@ function AppWalletImportPrivateKey() {
       </Row>
       {error && <ValidationError error={error} />}
       {validatedWallet && (
-        <ValidatedWallet wallet={validatedWallet} mnemonic={MNEMONIC_NA} />
+        <ValidatedWallet
+          wallet={validatedWallet}
+          mnemonic={MNEMONIC_UNAVAILABLE}
+        />
       )}
     </Container>
   );

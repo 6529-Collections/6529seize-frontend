@@ -139,6 +139,10 @@ jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
   }),
 }));
 
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveOutcomeVisibility: () => true,
+}));
+
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({ isApp: mockIsApp }),

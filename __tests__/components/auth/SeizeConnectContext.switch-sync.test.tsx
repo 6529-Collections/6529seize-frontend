@@ -31,6 +31,10 @@ jest.mock("viem", () => ({
   getAddress: jest.fn((address: string) => address.toLowerCase()),
 }));
 
+jest.mock("wagmi", () => ({
+  useAccount: jest.fn(() => ({})),
+}));
+
 jest.mock("@/hooks/useConnectedAccountsUnreadNotifications", () => ({
   useConnectedAccountsUnreadNotifications: jest.fn(() => ({})),
 }));
@@ -46,10 +50,28 @@ jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
   getConnectedWalletAccounts: jest.fn(() => []),
   getWalletAddress: jest.fn(() => null),
+  isAuthAddressAuthorized: jest.fn(
+    ({
+      address,
+      connectedAccounts,
+    }: {
+      readonly address: string | null | undefined;
+      readonly connectedAccounts: readonly { readonly address: string }[];
+    }) =>
+      !!address &&
+      connectedAccounts.some(
+        (account) => account.address.toLowerCase() === address.toLowerCase()
+      )
+  ),
   setActiveWalletAccount: jest.fn(() => true),
   removeAuthJwt: jest.fn(),
   WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
   PROFILE_SWITCHED_EVENT: "6529-profile-switched",
+}));
+
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: jest.fn(() => "web"),
+  logoutSessionV2: jest.fn(() => Promise.resolve()),
 }));
 
 const addressA = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";

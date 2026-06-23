@@ -31,7 +31,6 @@ import {
   useState,
 } from "react";
 import useDownloader from "@/hooks/useDownloader";
-import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import {
   DistributionAirdropsPhase,
   DistributionPhaseAirdropsModal,
@@ -44,6 +43,7 @@ import {
 } from "./ReviewDistributionPlanTableSubscriptionFooterGithubUploadModal";
 import { DistributionPhotosViewerModal } from "./ReviewDistributionPlanTableSubscriptionFooterPhotosViewer";
 import { UploadDistributionPhotosModal } from "./ReviewDistributionPlanTableSubscriptionFooterUploadPhotos";
+import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
 function getErrorMessage(error: unknown): string {
   if (typeof error === "string") {

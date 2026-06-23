@@ -229,6 +229,7 @@ const baseGroup = {
 
 const wave: any = {
   id: "w1",
+  name: "Wave 1",
   visibility: { scope: { group: baseGroup } },
   participation: {
     scope: { group: baseGroup },

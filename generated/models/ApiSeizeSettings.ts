@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiAuthSettings } from '../models/ApiAuthSettings';
 import { HttpFile } from '../http/http';
 
 export class ApiSeizeSettings {
@@ -22,6 +23,7 @@ export class ApiSeizeSettings {
     'claims_admin_wallets': Array<string>;
     'announcements_wave_id': string | null;
     'quorum_wave_id': string | null;
+    'auth': ApiAuthSettings;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -74,6 +76,12 @@ export class ApiSeizeSettings {
             "name": "quorum_wave_id",
             "baseName": "quorum_wave_id",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "auth",
+            "baseName": "auth",
+            "type": "ApiAuthSettings",
             "format": ""
         }    ];
 
