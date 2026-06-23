@@ -18,6 +18,7 @@ const nextBin = require.resolve("next/dist/bin/next", { paths: [repoRoot] });
 
 const SANDBOX_WAVE_ID = "00000000-0000-4000-8000-000000000529";
 const SANDBOX_DROP_ID = "00000000-0000-4000-8000-000000000530";
+const SANDBOX_REACTION = ":+1:";
 const SANDBOX_WALLET =
   process.env.DEV_MODE_WALLET_ADDRESS ||
   "0x0000000000000000000000000000000000000529";
@@ -44,6 +45,8 @@ const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
 const requests = [];
+// Shared by the single-worker local sandbox runner and reset before each test.
+let sandboxDropReaction = null;
 const MAX_REQUEST_BODY_BYTES = 16 * 1024;
 
 function encodeJwtPart(value) {
@@ -417,6 +420,57 @@ const submittedChatDrop = {
   hide_link_preview: false,
   nft_links: [],
 };
+
+function localProfileMin() {
+  return {
+    id: localProfile.id,
+    handle: localProfile.handle,
+    pfp: localProfile.pfp,
+    banner1_color: localProfile.banner1_color,
+    banner2_color: localProfile.banner2_color,
+    cic: localProfile.cic,
+    rep: localProfile.rep,
+    tdh: localProfile.tdh,
+    tdh_rate: localProfile.tdh_rate,
+    xtdh: localProfile.xtdh,
+    xtdh_rate: localProfile.xtdh_rate,
+    level: localProfile.level,
+    classification: localProfile.classification,
+    sub_classification: localProfile.sub_classification,
+    primary_address: localProfile.primary_address,
+    subscribed_actions: localProfile.subscribed_actions,
+    archived: localProfile.archived,
+    active_main_stage_submission_ids:
+      localProfile.active_main_stage_submission_ids,
+    winner_main_stage_drop_ids: localProfile.winner_main_stage_drop_ids,
+    artist_of_prevote_cards: localProfile.artist_of_prevote_cards,
+    profile_wave_id: localProfile.profile_wave_id,
+    is_wave_creator: localProfile.is_wave_creator,
+  };
+}
+
+function reactedLocalDrop() {
+  return {
+    ...localDrop,
+    reactions: [
+      {
+        reaction: SANDBOX_REACTION,
+        count: 1,
+        profiles: [localProfileMin()],
+      },
+    ],
+    context_profile_context: {
+      ...localDrop.context_profile_context,
+      reaction: SANDBOX_REACTION,
+    },
+  };
+}
+
+function currentLocalDrop() {
+  return sandboxDropReaction === SANDBOX_REACTION
+    ? reactedLocalDrop()
+    : localDrop;
+}
 
 const createdWaveMin = {
   ...localWaveMin,
@@ -1052,16 +1106,40 @@ function notificationWaveIdFromPath(pathname) {
   );
 }
 
+function isSandboxReactionPath(pathname) {
+  return pathname === `/api/drops/${SANDBOX_DROP_ID}/reaction`;
+}
+
+function isExpectedReactionBody(body) {
+  return hasOnlyKeys(body, ["reaction"]) && body.reaction === SANDBOX_REACTION;
+}
+
+function isExpectedReactionMutation(method, pathname, body) {
+  if (!isSandboxReactionPath(pathname)) {
+    return false;
+  }
+
+  if (method === "POST") {
+    return isExpectedReactionBody(body);
+  }
+
+  return method === "DELETE" && isEmptyRequestBody(body);
+}
+
 function hasEmptySearchParams(searchParams) {
   return searchParams.toString() === "";
 }
 
 function isKnownSandboxMutation(method, pathname, searchParams, body) {
-  if (method !== "POST") {
+  if (!hasEmptySearchParams(searchParams)) {
     return false;
   }
 
-  if (!hasEmptySearchParams(searchParams)) {
+  if (isExpectedReactionMutation(method, pathname, body)) {
+    return true;
+  }
+
+  if (method !== "POST") {
     return false;
   }
 
@@ -1109,6 +1187,8 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 }
 
 function classifyRequest(method, pathname, searchParams, body) {
+  // The sandbox allowlist intentionally wins over the broad drop-write guard,
+  // but only after exact path, empty-query, and body checks pass.
   if (isKnownSandboxMutation(method, pathname, searchParams, body)) {
     return "allowed-sandbox-mutation";
   }
@@ -1127,6 +1207,12 @@ function classifyRequest(method, pathname, searchParams, body) {
 function loggedRequestBody(pathname, body) {
   if (!isPlainObject(body)) {
     return undefined;
+  }
+
+  if (isSandboxReactionPath(pathname)) {
+    return {
+      reaction: body.reaction,
+    };
   }
 
   if (pathname === "/api/waves/direct-message/new") {
@@ -1241,6 +1327,7 @@ function handleDiagnostics(method, pathname, res) {
   }
   if (pathname === "/__composer-sandbox/reset" && method === "POST") {
     requests.length = 0;
+    sandboxDropReaction = null;
     writeJson(res, 200, { ok: true });
     return true;
   }
@@ -1283,7 +1370,7 @@ const mockApiPatternReadRoutes = [
   { pattern: /^\/api\/waves\/[^/]+$/, response: () => localWave },
   {
     pattern: /^\/api\/v2\/waves\/[^/]+\/drops$/,
-    response: () => ({ wave: localWaveOverview, drops: [localDrop] }),
+    response: () => ({ wave: localWaveOverview, drops: [currentLocalDrop()] }),
   },
   {
     pattern: /^\/api\/v2\/waves\/[^/]+\/search$/,
@@ -1407,6 +1494,27 @@ function handleAllowedChatDropPost(method, pathname, requestKind, res) {
   return writeJsonResponse(res, submittedChatDrop);
 }
 
+function handleAllowedReactionMutation(method, pathname, url, body, res) {
+  if (
+    !isSandboxReactionPath(pathname) ||
+    !isKnownSandboxMutation(method, pathname, url.searchParams, body)
+  ) {
+    return false;
+  }
+
+  if (method === "POST") {
+    sandboxDropReaction = SANDBOX_REACTION;
+    return writeJsonResponse(res, reactedLocalDrop());
+  }
+
+  if (method === "DELETE") {
+    sandboxDropReaction = null;
+    return writeEmptyResponse(res, 204);
+  }
+
+  return false;
+}
+
 function handleKnownSandboxPost(method, pathname, url, body, res) {
   if (method !== "POST") {
     return false;
@@ -1428,6 +1536,7 @@ function handleMockApi(method, pathname, url, body, res, requestKind) {
   return (
     handleMockApiRead(method, pathname, url, res) ||
     handleAllowedChatDropPost(method, pathname, requestKind, res) ||
+    handleAllowedReactionMutation(method, pathname, url, body, res) ||
     handleKnownSandboxPost(method, pathname, url, body, res)
   );
 }
