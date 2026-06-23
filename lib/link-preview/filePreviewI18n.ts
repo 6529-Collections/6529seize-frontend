@@ -1,9 +1,25 @@
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { MessageKey } from "@/i18n/messages/en-US";
 import type { ExternalFileKind } from "@/lib/link-preview/fileKinds";
 
 const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB"] as const;
+const FILE_KIND_LABEL_KEYS = {
+  pdf: "linkPreview.file.kind.pdf",
+  csv: "linkPreview.file.kind.csv",
+  text: "linkPreview.file.kind.text",
+  code: "linkPreview.file.kind.code",
+  image: "linkPreview.file.kind.image",
+  audio: "linkPreview.file.kind.audio",
+  video: "linkPreview.file.kind.video",
+  archive: "linkPreview.file.kind.archive",
+  document: "linkPreview.file.kind.document",
+  spreadsheet: "linkPreview.file.kind.spreadsheet",
+  presentation: "linkPreview.file.kind.presentation",
+  binary: "linkPreview.file.kind.binary",
+  unknown: "linkPreview.file.kind.unknown",
+} as const satisfies Record<ExternalFileKind, MessageKey>;
 
 type FileSizeUnit = (typeof FILE_SIZE_UNITS)[number];
 
@@ -55,34 +71,7 @@ export function getLocalizedFileKindLabel(
   locale: SupportedLocale,
   kind: ExternalFileKind
 ): string {
-  switch (kind) {
-    case "pdf":
-      return t(locale, "linkPreview.file.kind.pdf");
-    case "csv":
-      return t(locale, "linkPreview.file.kind.csv");
-    case "text":
-      return t(locale, "linkPreview.file.kind.text");
-    case "code":
-      return t(locale, "linkPreview.file.kind.code");
-    case "image":
-      return t(locale, "linkPreview.file.kind.image");
-    case "audio":
-      return t(locale, "linkPreview.file.kind.audio");
-    case "video":
-      return t(locale, "linkPreview.file.kind.video");
-    case "archive":
-      return t(locale, "linkPreview.file.kind.archive");
-    case "document":
-      return t(locale, "linkPreview.file.kind.document");
-    case "spreadsheet":
-      return t(locale, "linkPreview.file.kind.spreadsheet");
-    case "presentation":
-      return t(locale, "linkPreview.file.kind.presentation");
-    case "binary":
-      return t(locale, "linkPreview.file.kind.binary");
-    case "unknown":
-      return t(locale, "linkPreview.file.kind.unknown");
-  }
+  return t(locale, FILE_KIND_LABEL_KEYS[kind]);
 }
 
 export function getLocalizedGithubFileKindLabel(
