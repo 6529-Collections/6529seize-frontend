@@ -170,6 +170,16 @@ const DEFAULT_AUTH_ROLLOUT_SETTINGS: AuthRolloutSettings = {
   sessionV2MigrationDeadline: null,
 };
 
+const normalizeSessionV2MigrationDeadline = (
+  deadline: Date | string | null | undefined
+): string | null => {
+  if (deadline instanceof Date) {
+    return Number.isFinite(deadline.getTime()) ? deadline.toISOString() : null;
+  }
+
+  return deadline ?? null;
+};
+
 const normalizeReminderAddress = (address: string): string =>
   address.toLowerCase();
 
@@ -550,9 +560,9 @@ export default function Auth({
     return {
       structuredSignaturesRequired:
         settingsAuth.structured_signatures_required === true,
-      sessionV2MigrationDeadline:
-        settingsAuth.session_v2_migration_deadline ??
-        DEFAULT_AUTH_ROLLOUT_SETTINGS.sessionV2MigrationDeadline,
+      sessionV2MigrationDeadline: normalizeSessionV2MigrationDeadline(
+        settingsAuth.session_v2_migration_deadline
+      ),
     };
   }, [settingsAuth]);
 
