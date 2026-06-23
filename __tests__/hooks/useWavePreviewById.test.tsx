@@ -8,6 +8,7 @@ import { useWaveById } from "@/hooks/useWaveById";
 jest.mock("@/hooks/useWaveById", () => ({ useWaveById: jest.fn() }));
 
 const mockedUseWaveById = useWaveById as jest.Mock;
+const refetchWaveMock = jest.fn();
 
 const getLatestEnabledByWaveId = (): Record<string, boolean | undefined> =>
   mockedUseWaveById.mock.calls.reduce<Record<string, boolean | undefined>>(
@@ -22,10 +23,12 @@ describe("useWavePreviewById", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetWavePreviewFetchGateForTests();
+    refetchWaveMock.mockResolvedValue(undefined);
     mockedUseWaveById.mockImplementation((waveId: string, options: any) => ({
       wave: undefined,
       isFetching: Boolean(options?.enabled),
       isLoading: Boolean(options?.enabled),
+      refetch: refetchWaveMock,
     }));
   });
 
@@ -34,6 +37,7 @@ describe("useWavePreviewById", () => {
       wave: { id: "cached-wave" },
       isFetching: false,
       isLoading: false,
+      refetch: refetchWaveMock,
     });
 
     const { result } = renderHook(() => useWavePreviewById("cached-wave"));
@@ -83,10 +87,12 @@ describe("useWavePreviewById", () => {
 
   it("starts the next queued preview when an active fetch settles", async () => {
     const fetchingWaveIds = new Set(["wave-1", "wave-2", "wave-3"]);
+    const loadedWaveIds = new Set<string>();
     mockedUseWaveById.mockImplementation((waveId: string, options: any) => ({
-      wave: undefined,
+      wave: loadedWaveIds.has(waveId) ? { id: waveId } : undefined,
       isFetching: Boolean(options?.enabled && fetchingWaveIds.has(waveId)),
       isLoading: Boolean(options?.enabled && fetchingWaveIds.has(waveId)),
+      refetch: refetchWaveMock,
     }));
 
     const { rerender } = renderHook(() => {
@@ -101,6 +107,7 @@ describe("useWavePreviewById", () => {
     });
 
     fetchingWaveIds.delete("wave-1");
+    loadedWaveIds.add("wave-1");
     fetchingWaveIds.add("wave-4");
     rerender();
 
@@ -109,12 +116,13 @@ describe("useWavePreviewById", () => {
     });
   });
 
-  it("disables a preview query after its fetch settles", async () => {
+  it("requeues one empty preview retry before disabling the query", async () => {
     const fetchingWaveIds = new Set(["wave-1"]);
     mockedUseWaveById.mockImplementation((waveId: string, options: any) => ({
       wave: undefined,
       isFetching: Boolean(options?.enabled && fetchingWaveIds.has(waveId)),
       isLoading: Boolean(options?.enabled && fetchingWaveIds.has(waveId)),
+      refetch: refetchWaveMock,
     }));
 
     const { rerender } = renderHook(() => useWavePreviewById("wave-1"));
@@ -124,11 +132,28 @@ describe("useWavePreviewById", () => {
     });
 
     fetchingWaveIds.delete("wave-1");
+    mockedUseWaveById.mockClear();
+    rerender();
+
+    await waitFor(() => {
+      expect(refetchWaveMock).toHaveBeenCalledTimes(1);
+    });
+
+    fetchingWaveIds.add("wave-1");
+    rerender();
+
+    await waitFor(() => {
+      expect(getLatestEnabledByWaveId()["wave-1"]).toBe(true);
+    });
+
+    fetchingWaveIds.delete("wave-1");
+    mockedUseWaveById.mockClear();
     rerender();
 
     await waitFor(() => {
       expect(getLatestEnabledByWaveId()["wave-1"]).toBe(false);
     });
+    expect(refetchWaveMock).toHaveBeenCalledTimes(1);
   });
 
   it("does not carry an enabled fetch state across wave id changes", async () => {

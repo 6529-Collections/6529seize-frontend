@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveById } from "@/hooks/useWaveById";
 
 const MAX_CONCURRENT_WAVE_PREVIEW_FETCHES = 3;
+const MAX_EMPTY_WAVE_PREVIEW_RETRIES = 1;
 
 const activeWavePreviewFetches = new Set<string>();
 const queuedWavePreviewFetches: string[] = [];
@@ -102,15 +103,29 @@ const releaseWavePreviewFetch = (waveId: string): void => {
 export function useWavePreviewById(waveId: string): {
   readonly wave: ApiWave | undefined;
 } {
+  const emptyPreviewRetryCountRef = useRef(0);
+  const fetchCycleStartedRef = useRef(false);
   const fetchEnabled = useSyncExternalStore(
     subscribeToWavePreviewStore,
     () => activeWavePreviewFetches.has(waveId),
     () => false
   );
-  const { wave, isFetching, isLoading } = useWaveById(waveId, {
+  const { wave, isFetching, isLoading, refetch } = useWaveById(waveId, {
     enabled: fetchEnabled,
   });
   const hasWave = Boolean(wave);
+
+  useEffect(() => {
+    fetchCycleStartedRef.current = false;
+    emptyPreviewRetryCountRef.current = 0;
+  }, [waveId]);
+
+  useEffect(() => {
+    if (hasWave) {
+      fetchCycleStartedRef.current = false;
+      emptyPreviewRetryCountRef.current = 0;
+    }
+  }, [hasWave]);
 
   useEffect(() => {
     if (!waveId || hasWave) {
@@ -121,12 +136,41 @@ export function useWavePreviewById(waveId: string): {
   }, [hasWave, waveId]);
 
   useEffect(() => {
-    if (!waveId || !fetchEnabled || isFetching || isLoading) {
+    if (!fetchEnabled) {
+      fetchCycleStartedRef.current = false;
       return;
     }
 
+    if (isFetching || isLoading) {
+      fetchCycleStartedRef.current = true;
+    }
+  }, [fetchEnabled, isFetching, isLoading]);
+
+  useEffect(() => {
+    if (
+      !waveId ||
+      !fetchEnabled ||
+      isFetching ||
+      isLoading ||
+      !fetchCycleStartedRef.current
+    ) {
+      return;
+    }
+
+    fetchCycleStartedRef.current = false;
+
+    if (!hasWave) {
+      if (emptyPreviewRetryCountRef.current < MAX_EMPTY_WAVE_PREVIEW_RETRIES) {
+        emptyPreviewRetryCountRef.current += 1;
+        void refetch();
+        return;
+      }
+
+      emptyPreviewRetryCountRef.current = 0;
+    }
+
     releaseWavePreviewFetch(waveId);
-  }, [fetchEnabled, isFetching, isLoading, waveId]);
+  }, [fetchEnabled, hasWave, isFetching, isLoading, refetch, waveId]);
 
   return useMemo(() => ({ wave }), [wave]);
 }
