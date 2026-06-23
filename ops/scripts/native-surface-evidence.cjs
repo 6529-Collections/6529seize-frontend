@@ -11,6 +11,13 @@ const CAPACITOR_SIM_PROJECTS = {
   "capacitor-android": "capacitor-android-sim",
 };
 const ELECTRON_SIM_PROJECT = "electron-shell-sim";
+const COMMAND_TIMEOUT_MS = 5000;
+const PLAYWRIGHT_CONFIG_FILES = Object.freeze([
+  "playwright.config.ts",
+  "playwright.config.js",
+  "playwright.config.mjs",
+  "playwright.config.cjs",
+]);
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -79,6 +86,19 @@ function readRepoTextFile(cwd, relativePath) {
   }
 }
 
+function readFirstExistingRepoTextFile(cwd, relativePaths) {
+  for (const relativePath of relativePaths) {
+    if (exists(cwd, relativePath)) {
+      return {
+        relativePath,
+        text: readRepoTextFile(cwd, relativePath),
+      };
+    }
+  }
+
+  return null;
+}
+
 function dependencyVersion(packageJson, name) {
   return (
     packageJson.dependencies?.[name] ?? packageJson.devDependencies?.[name]
@@ -122,6 +142,8 @@ function defaultCommandRunner(command, args) {
   return spawnSync(command, args, {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
+    timeout: COMMAND_TIMEOUT_MS,
+    windowsHide: true,
   });
 }
 
@@ -144,7 +166,10 @@ function collectHostCapabilities(options) {
 
 function collectRepoState(cwd) {
   const packageJson = readPackageJson(cwd);
-  const playwrightConfigText = readRepoTextFile(cwd, "playwright.config.ts");
+  const playwrightConfig = readFirstExistingRepoTextFile(
+    cwd,
+    PLAYWRIGHT_CONFIG_FILES
+  );
 
   const capacitorConfigFiles = existingFiles(cwd, [
     "capacitor.config.ts",
@@ -205,12 +230,15 @@ function collectRepoState(cwd) {
       electron_main: electronMainFiles,
     },
     playwright: {
-      projects: [
-        ...Object.values(CAPACITOR_SIM_PROJECTS),
-        ELECTRON_SIM_PROJECT,
-      ].filter((projectName) =>
-        playwrightConfigDefinesProject(playwrightConfigText, projectName)
-      ),
+      config_file: playwrightConfig?.relativePath ?? null,
+      projects: playwrightConfig
+        ? [
+            ...Object.values(CAPACITOR_SIM_PROJECTS),
+            ELECTRON_SIM_PROJECT,
+          ].filter((projectName) =>
+            playwrightConfigDefinesProject(playwrightConfig.text, projectName)
+          )
+        : [],
     },
   };
 }
@@ -389,6 +417,7 @@ function createNativeEvidence(options = {}) {
           : "none",
       package_prerequisites_ready: packagePrerequisitesReady,
       simulation_available: simulationAvailable,
+      // This classifier is a contract marker only; real runtime proof must come from separate package-build/smoke artifacts.
       actual_package_runtime_evidence: false,
     },
   };

@@ -73,6 +73,7 @@ const VALIDATION_PACKS = Object.freeze({
   }),
   "native:surface-evidence": createValidationPack({
     id: "native:surface-evidence",
+    size: "large",
     description:
       "Classifies native coverage as browser simulation or package-prerequisite evidence.",
     stagingCommand: "seize run test:native-evidence",

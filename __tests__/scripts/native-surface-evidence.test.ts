@@ -28,6 +28,10 @@ const {
         has_capacitor_script: boolean;
         has_electron_script: boolean;
       };
+      playwright: {
+        config_file: string | null;
+        projects: string[];
+      };
     };
     surfaces: Array<{
       name: string;
@@ -54,7 +58,8 @@ const {
 
 function writeFixtureRepo(
   files: Record<string, string> = {},
-  packageJson: Record<string, unknown> = {}
+  packageJson: Record<string, unknown> = {},
+  options: { readonly playwrightConfigPath?: string | null } = {}
 ) {
   const cwd = fs.mkdtempSync(
     path.join(os.tmpdir(), "6529-native-surface-evidence-")
@@ -74,13 +79,19 @@ function writeFixtureRepo(
       2
     )}\n`
   );
-  fs.writeFileSync(
-    path.join(cwd, "playwright.config.ts"),
-    [
-      'export default { projects: [{ name: "capacitor-ios-sim" },',
-      '{ name: "capacitor-android-sim" }, { name: "electron-shell-sim" }] };',
-    ].join(" ")
-  );
+  const playwrightConfigPath =
+    options.playwrightConfigPath === undefined
+      ? "playwright.config.ts"
+      : options.playwrightConfigPath;
+  if (playwrightConfigPath) {
+    fs.writeFileSync(
+      path.join(cwd, playwrightConfigPath),
+      [
+        'export default { projects: [{ name: "capacitor-ios-sim" },',
+        '{ name: "capacitor-android-sim" }, { name: "electron-shell-sim" }] };',
+      ].join(" ")
+    );
+  }
 
   for (const [relativePath, text] of Object.entries(files)) {
     const target = path.join(cwd, relativePath);
@@ -109,9 +120,10 @@ describe("native surface evidence", () => {
 
   function fixture(
     files: Record<string, string> = {},
-    packageJson: Record<string, unknown> = {}
+    packageJson: Record<string, unknown> = {},
+    options: { readonly playwrightConfigPath?: string | null } = {}
   ) {
-    const cwd = writeFixtureRepo(files, packageJson);
+    const cwd = writeFixtureRepo(files, packageJson, options);
     tempDirs.push(cwd);
     return cwd;
   }
@@ -271,6 +283,49 @@ describe("native surface evidence", () => {
         "capacitor-ios-sim"
       )
     ).toBe(true);
+  });
+
+  it("detects simulation projects from non-TypeScript Playwright config files", () => {
+    const cwd = fixture(
+      {},
+      {},
+      { playwrightConfigPath: "playwright.config.js" }
+    );
+
+    const evidence = createNativeEvidence({
+      cwd,
+      commandRunner: commandRunner([]),
+      platform: "linux",
+    });
+
+    expect(evidence.repo.playwright).toMatchObject({
+      config_file: "playwright.config.js",
+      projects: [
+        "capacitor-ios-sim",
+        "capacitor-android-sim",
+        "electron-shell-sim",
+      ],
+    });
+    expect(evidence.summary.highest_available_tier).toBe("browser-simulation");
+  });
+
+  it("treats a missing Playwright config as no simulation evidence instead of crashing", () => {
+    const cwd = fixture({}, {}, { playwrightConfigPath: null });
+
+    const evidence = createNativeEvidence({
+      cwd,
+      commandRunner: commandRunner([]),
+      platform: "linux",
+    });
+
+    expect(evidence.repo.playwright).toMatchObject({
+      config_file: null,
+      projects: [],
+    });
+    expect(evidence.summary).toMatchObject({
+      highest_available_tier: "none",
+      simulation_available: false,
+    });
   });
 
   it("parses boolean and value CLI arguments", () => {
