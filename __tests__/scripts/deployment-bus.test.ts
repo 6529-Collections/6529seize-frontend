@@ -8,6 +8,7 @@ const {
   createReleaseReport,
   evaluateReleaseReadiness,
   heartbeatManifest,
+  parseArgs,
   productionPreflight,
   recordPostDeployWatch,
   recordValidationCheck,
@@ -22,6 +23,22 @@ const MAIN_SHA = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 const ARTIFACT_SHA256 =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const REQUIRED_WEB_SURFACES = ["web:desktop-chromium", "web:mobile-chromium"];
+
+describe("deployment bus cli args", () => {
+  it("preserves explicit empty string option values", () => {
+    expect(
+      parseArgs([
+        "--production-candidate-sha",
+        "",
+        "--production-eligible",
+        "false",
+      ])
+    ).toMatchObject({
+      "production-candidate-sha": "",
+      "production-eligible": "false",
+    });
+  });
+});
 
 function releaseArtifact(uri, metadata) {
   return {
