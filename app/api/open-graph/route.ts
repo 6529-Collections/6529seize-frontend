@@ -442,8 +442,7 @@ function sanitizeFileName(value: string | null | undefined): string | null {
   const normalized = value
     ?.replace(/[\u0000-\u001f\u007f]/g, "")
     .split(/[\\/]/)
-    .filter(Boolean)
-    .at(-1)
+    .findLast((segment) => segment.length > 0)
     ?.trim();
 
   if (!normalized) {
@@ -459,9 +458,7 @@ function getContentDispositionFileName(headers: Headers): string | null {
     return null;
   }
 
-  const encodedMatch = contentDisposition.match(
-    /filename\*\s*=\s*([^;]+)/i
-  );
+  const encodedMatch = /filename\*\s*=\s*([^;]+)/i.exec(contentDisposition);
   if (encodedMatch?.[1]) {
     return sanitizeFileName(
       decodeHeaderValue(
@@ -470,12 +467,12 @@ function getContentDispositionFileName(headers: Headers): string | null {
     );
   }
 
-  const quotedMatch = contentDisposition.match(/filename\s*=\s*"([^"]+)"/i);
+  const quotedMatch = /filename\s*=\s*"([^"]+)"/i.exec(contentDisposition);
   if (quotedMatch?.[1]) {
     return sanitizeFileName(quotedMatch[1]);
   }
 
-  const plainMatch = contentDisposition.match(/filename\s*=\s*([^;]+)/i);
+  const plainMatch = /filename\s*=\s*([^;]+)/i.exec(contentDisposition);
   return sanitizeFileName(plainMatch?.[1]);
 }
 

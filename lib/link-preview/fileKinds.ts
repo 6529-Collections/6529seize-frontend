@@ -145,8 +145,8 @@ export function getFileExtension(
   value: string | null | undefined
 ): string | null {
   const path = value?.split(/[?#]/)[0] ?? "";
-  const fileName = path.split("/").filter(Boolean).at(-1) ?? "";
-  const match = fileName.match(/\.([A-Za-z0-9]{1,16})$/);
+  const fileName = path.split("/").findLast((part) => part.length > 0) ?? "";
+  const match = /\.([A-Za-z0-9]{1,16})$/.exec(fileName);
   return match?.[1]?.toLowerCase() ?? null;
 }
 
