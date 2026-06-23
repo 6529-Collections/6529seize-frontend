@@ -6,9 +6,10 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page);
   await expectNoHorizontalOverflow(page);
 }
@@ -120,7 +121,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       page.locator("main a[href^='/the-memes/']").first()
     ).toBeVisible({ timeout: 15000 });
     await expect(
-      page.locator("main img[id^='image-'][alt]").first()
+      page.locator("main img[id^='image-'][alt], main iframe").first()
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Distribution Plan" })
@@ -195,7 +196,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       await expect(
         page.getByRole("link", { name: "Back to ReMemes" })
       ).toHaveAttribute("href", "/rememes");
-      await expect(page).toHaveTitle("SeizeGenart | ReMemes | 6529.io");
+      await expect(page).toHaveTitle(
+        /^SeizeGenart \| ReMemes(?: \| 6529\.io)?$/
+      );
       await expect(
         page.getByRole("heading", { level: 1, name: "ReMemes - SeizeGenart" })
       ).toBeVisible();

@@ -19,6 +19,8 @@ export const DE_DE_MESSAGES = {
   "profileCms.interactive.exitFullscreen": "Vollbild beenden",
   "drop.media.processing": "Bild wird verarbeitet",
   "drop.media.unavailable": "Bild nicht verfuegbar",
+  "drop.media.loadFailed": "Bild konnte nicht geladen werden.",
+  "drop.media.retry": "Erneut versuchen",
   "drop.media.processingFailed": "Bildverarbeitung fehlgeschlagen.",
   "drop.media.processingTimedOut": "Zeitlimit fuer Bildverarbeitung erreicht.",
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,

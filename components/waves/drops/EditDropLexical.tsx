@@ -83,6 +83,8 @@ import {
 import { areMentionedGroupsEqual } from "@/helpers/waves/drop-group-mentions";
 import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
+import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
+import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
@@ -324,7 +326,7 @@ function InitialContentPlugin({
         );
       }
 
-      root.selectEnd();
+      $selectEndOfRootBlock(root);
     });
   }, [editor, initialContent, transformers]);
 
@@ -677,6 +679,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             onSelect={handleWaveMentionSelect}
           />
           <EmojiPlugin />
+          <RootBlockGuardPlugin />
           <InitialContentPlugin
             initialContent={editorInitialContent}
             transformers={importMarkdownTransformers}

@@ -407,6 +407,29 @@ jobs:
             exit 1
           fi
 
+      - name: Verify staging HTTP version
+        env:
+          STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
+        run: |
+          set -euo pipefail
+
+          node ops/scripts/verify-deployment-version.cjs \
+            --base-url https://staging.6529.io \
+            --expected-version "${{ steps.expected-commit.outputs.sha }}" \
+            --attempts 12 \
+            --delay-ms 10000 \
+            --timeout-ms 10000 \
+            --output deployment-version-evidence.json
+
+          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
+            --file deployment-bus-manifest.json \
+            --status in_progress \
+            --observed-duration-minutes 0 \
+            --checkpoint http-version-match \
+            --checkpoint-status passed \
+            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --notes "GET /api/version matched the staging deploy SHA."
+
       - name: Mark staging deployment terminal
         if: always() && steps.deployment-record.outputs.deployment_id != ''
         env:
@@ -491,5 +514,6 @@ jobs:
           path: |
             deployment-bus-manifest.json
             deployment-release-report.md
+            deployment-version-evidence.json
           if-no-files-found: ignore
           retention-days: 30
