@@ -18,7 +18,8 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
-import { BOTTOM_NAVIGATION_MESSAGES } from "@/i18n/messages";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
@@ -90,6 +91,7 @@ interface BottomNavigationProps {
 
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
+const BOTTOM_NAVIGATION_LOCALE = DEFAULT_LOCALE;
 
 type BottomNavVariant = "floating" | "fixed";
 
@@ -268,8 +270,7 @@ const BottomNavigationResolvedContent: React.FC<
   return (
     <nav
       ref={setMobileNavRef}
-      aria-hidden={hidden ? "true" : undefined}
-      aria-label={BOTTOM_NAVIGATION_MESSAGES.primaryNavigationLabel}
+      aria-label={t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.ariaLabel")}
       className={getNavClassName({ hidden, variant })}
       inert={hidden}
     >

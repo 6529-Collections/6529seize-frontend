@@ -10,10 +10,6 @@ export const TAB_TOGGLE_WITH_OVERFLOW_MESSAGES = {
   overflowMenuAriaLabel: "More tabs",
 } as const;
 
-export const BOTTOM_NAVIGATION_MESSAGES = {
-  primaryNavigationLabel: "Primary",
-} as const;
-
 type MessageParams = Record<string, string | number>;
 
 const MESSAGE_DICTIONARIES: Record<
