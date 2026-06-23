@@ -5,7 +5,7 @@ import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsBoost from "./WaveDropActionsBoost";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
@@ -22,6 +22,7 @@ interface WaveDropActionsProps {
   readonly onReply: () => void;
   readonly onEdit?: (() => void) | undefined;
   readonly suppressed?: boolean | undefined;
+  readonly style?: CSSProperties | undefined;
 }
 
 export default function WaveDropActions({
@@ -31,6 +32,7 @@ export default function WaveDropActions({
   onReply,
   onEdit,
   suppressed = false,
+  style,
 }: WaveDropActionsProps) {
   const { isMemesWave } = useSeizeSettings();
   const { connectedProfile } = useAuth();
@@ -55,6 +57,7 @@ export default function WaveDropActions({
 
   return (
     <div
+      style={style}
       className={`tw-absolute tw-right-2 tw-z-20 ${
         compact ? "-tw-top-4" : "-tw-top-9"
       } tw-transition-opacity tw-duration-200 tw-ease-in-out ${visibilityClasses}`}

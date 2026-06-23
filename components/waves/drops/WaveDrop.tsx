@@ -435,6 +435,16 @@ const getGroupedTimestampContentStyle = (
   return { transform: `translateX(-${offset}px)` };
 };
 
+const getGroupedTimestampActionStyle = (
+  offset: number
+): CSSProperties | undefined => {
+  if (offset <= 0) {
+    return undefined;
+  }
+
+  return { transform: `translateX(${offset}px)` };
+};
+
 const getGroupedTimestampOpacityStyle = (offset: number): CSSProperties => ({
   opacity: Math.min(1, offset / GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX),
 });
@@ -612,6 +622,7 @@ const getContentBlock = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  groupedTimestampSwipeOffset,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -655,6 +666,7 @@ const getContentBlock = ({
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly groupedTimestampSwipeOffset: number;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -742,6 +754,7 @@ const getContentBlock = ({
           onReply={handleOnReply}
           onEdit={handleOnEdit}
           suppressed={hasActiveLinkCardActions}
+          style={getGroupedTimestampActionStyle(groupedTimestampSwipeOffset)}
         />
       )}
   </>
@@ -1323,6 +1336,7 @@ const WaveDrop = ({
     quotePath,
     embedDepth,
     maxEmbedDepth,
+    groupedTimestampSwipeOffset: timestampSwipeOffset,
   });
 
   const contentOffsetClass = inlineAuthorOnDesktop
