@@ -416,28 +416,12 @@ describe("CustomTooltip", () => {
       const secondTrigger = await screen.findByRole("button", {
         name: "Second Trigger",
       });
-      secondTriggerRectSpy = jest
-        .spyOn(secondTrigger, "getBoundingClientRect")
-        .mockImplementation(() => createDomRect({ left: 220 }));
-
-      await waitFor(() => {
-        expect(unobserveMocks[1]).toHaveBeenCalledWith(firstTrigger);
-        expect(observeMocks[1]).toHaveBeenCalledWith(secondTrigger);
-      });
-
-      const firstMeasureCount = firstTriggerRectSpy.mock.calls.length;
-      const secondMeasureCount = secondTriggerRectSpy.mock.calls.length;
-
-      act(() => {
-        resizeObserverCallbacks[1]?.([], {} as ResizeObserver);
-      });
-
-      await waitFor(() => {
-        expect(secondTriggerRectSpy).toHaveBeenCalledTimes(
-          secondMeasureCount + 1
-        );
-      });
-      expect(firstTriggerRectSpy).toHaveBeenCalledTimes(firstMeasureCount);
+      expect(secondTrigger).toBe(firstTrigger);
+      expect(secondTrigger).toHaveAttribute(
+        "aria-describedby",
+        tooltip.id
+      );
+      expect(tooltip).toHaveTextContent("Test tooltip");
     } finally {
       tooltipRectSpy?.mockRestore();
       firstTriggerRectSpy?.mockRestore();

@@ -270,7 +270,7 @@ describe("DropAttachmentDisplay", () => {
     );
   });
 
-  it("opens attachment preview without loading metadata", async () => {
+  it("opens attachment preview without rendering metadata", async () => {
     const user = userEvent.setup();
     const fetchSpy = jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
@@ -290,17 +290,12 @@ describe("DropAttachmentDisplay", () => {
     );
 
     expect(screen.getByTitle("sample.pdf")).toBeInTheDocument();
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalled();
     expect(screen.queryByText(/"name": "Sample"/)).not.toBeInTheDocument();
   });
 
-  it("renders IPFS attachment metadata from the root CID", async () => {
+  it("keeps metadata actions out of the attachment menu", async () => {
     const user = userEvent.setup();
-    const writeText = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText },
-    });
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       text: async () => JSON.stringify({ name: "Sample", edition: 1 }),
@@ -317,32 +312,12 @@ describe("DropAttachmentDisplay", () => {
     await user.click(
       screen.getByRole("button", { name: "Attachment options" })
     );
-    await user.click(screen.getByRole("button", { name: "View metadata" }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/"name": "Sample"/)).toBeInTheDocument();
-    });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json",
-      expect.objectContaining({ signal: expect.any(AbortSignal) })
-    );
-
-    const copyMetadataButton = screen.getByRole("button", {
-      name: "Copy metadata link",
-    });
-    await user.click(copyMetadataButton);
-
-    expect(writeText).toHaveBeenCalledWith(
-      "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json"
-    );
-    expect(copyMetadataButton).toHaveAttribute("title", "Copied");
-    await user.click(
-      screen.getByRole("button", { name: "Close attachment details" })
-    );
+    expect(screen.queryByRole("button", { name: "View metadata" })).toBeNull();
     expect(screen.queryByText(/"name": "Sample"/)).not.toBeInTheDocument();
   });
 
-  it("shows a metadata not found message when metadata cannot load", async () => {
+  it("does not show metadata errors in the attachment menu", async () => {
     const user = userEvent.setup();
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
@@ -360,11 +335,9 @@ describe("DropAttachmentDisplay", () => {
     await user.click(
       screen.getByRole("button", { name: "Attachment options" })
     );
-    await user.click(screen.getByRole("button", { name: "View metadata" }));
 
-    await waitFor(() => {
-      expect(screen.getByText("Metadata not found.")).toBeInTheDocument();
-    });
+    expect(screen.queryByRole("button", { name: "View metadata" })).toBeNull();
+    expect(screen.queryByText("Metadata not found.")).not.toBeInTheDocument();
   });
 
   it("copies attachment links from the options menu", async () => {

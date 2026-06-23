@@ -117,3 +117,17 @@ export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
     };
   }
 };
+
+export const getInitialRatersParams = ({
+  handleOrWallet,
+  given,
+  matter,
+}: {
+  handleOrWallet: string;
+  given: boolean;
+  matter: string;
+}) => ({
+  handleOrWallet,
+  given,
+  matter,
+});

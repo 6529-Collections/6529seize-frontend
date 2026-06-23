@@ -198,7 +198,9 @@ describe("SingleWaveDropVoters", () => {
 
     expect(setToastMock).toHaveBeenCalledWith({
       type: "error",
-      message: "Download failed: backend unavailable",
+      title: "Couldn't download voters.",
+      description: "Please try again.",
+      details: "backend unavailable",
     });
   });
 });

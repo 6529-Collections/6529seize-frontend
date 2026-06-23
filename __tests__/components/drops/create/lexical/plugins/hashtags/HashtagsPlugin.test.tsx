@@ -52,11 +52,11 @@ test('renders without crashing', () => {
 });
 
 test('getPossibleQueryMatch finds hashtag info', () => {
-  const match = getPossibleQueryMatch(' #hello');
+  const match = getPossibleQueryMatch(' $hello');
   expect(match).toEqual({
     leadOffset: 1,
     matchingString: 'hello',
-    replaceableString: '#hello',
+    replaceableString: '$hello',
   });
 });
 

@@ -97,7 +97,7 @@ describe("Rememes component", () => {
       "https://api.test.6529.io/api/rememes?page_size=40&page=1",
       expect.objectContaining({ signal: expect.any(Object) })
     );
-    expect(screen.getByText("#1")).toBeInTheDocument();
+    expect(await screen.findByText("#1")).toBeInTheDocument();
     const resultsList = screen.getByRole("list", {
       name: "ReMemes results",
     });

@@ -29,8 +29,8 @@ describe('CreateWavesMainStepIcon', () => {
     // Check for checkmark SVG
     const svg = icon.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveAttribute('width', '13');
-    expect(svg).toHaveAttribute('height', '11');
+    expect(svg).toHaveAttribute('width', '11');
+    expect(svg).toHaveAttribute('height', '9');
   });
 
   it('renders ACTIVE status with circle icon and shadow', () => {
@@ -46,8 +46,8 @@ describe('CreateWavesMainStepIcon', () => {
     // Check for circle SVG
     const svg = icon.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveAttribute('width', '8');
-    expect(svg).toHaveAttribute('height', '8');
+    expect(svg).toHaveAttribute('width', '6');
+    expect(svg).toHaveAttribute('height', '6');
     
     const circle = svg?.querySelector('circle');
     expect(circle).toHaveAttribute('fill', 'white');
@@ -67,8 +67,8 @@ describe('CreateWavesMainStepIcon', () => {
     const svg = icon.querySelector('svg');
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveClass('tw-text-iron-500');
-    expect(svg).toHaveAttribute('width', '8');
-    expect(svg).toHaveAttribute('height', '8');
+    expect(svg).toHaveAttribute('width', '6');
+    expect(svg).toHaveAttribute('height', '6');
     
     const circle = svg?.querySelector('circle');
     expect(circle).toHaveAttribute('fill', 'currentColor');
@@ -82,8 +82,8 @@ describe('CreateWavesMainStepIcon', () => {
       'tw-relative',
       'tw-z-10',
       'tw-flex',
-      'tw-h-7',
-      'tw-w-7',
+      'tw-h-6',
+      'tw-w-6',
       'tw-items-center',
       'tw-justify-center',
       'tw-rounded-full',
@@ -135,38 +135,38 @@ describe('CreateWavesMainStepIcon', () => {
     renderComponent(CreateWaveStepStatus.ACTIVE);
     
     const svg = screen.getByTestId('wave-step-icon').querySelector('svg');
-    expect(svg).toHaveAttribute('viewBox', '0 0 8 8');
+    expect(svg).toHaveAttribute('viewBox', '0 0 6 6');
     expect(svg).toHaveAttribute('fill', 'none');
     expect(svg).toHaveAttribute('xmlns', 'http://www.w3.org/2000/svg');
     
     const circle = svg?.querySelector('circle');
-    expect(circle).toHaveAttribute('cx', '4');
-    expect(circle).toHaveAttribute('cy', '4');
-    expect(circle).toHaveAttribute('r', '4');
+    expect(circle).toHaveAttribute('cx', '3');
+    expect(circle).toHaveAttribute('cy', '3');
+    expect(circle).toHaveAttribute('r', '3');
   });
 
   it('renders different icons for each status', () => {
     // Test DONE status
     const { unmount: unmountDone } = renderComponent(CreateWaveStepStatus.DONE);
     let svg = screen.getByTestId('wave-step-icon').querySelector('svg');
-    expect(svg).toHaveAttribute('width', '13');
-    expect(svg).toHaveAttribute('height', '11');
+    expect(svg).toHaveAttribute('width', '11');
+    expect(svg).toHaveAttribute('height', '9');
     expect(svg?.querySelector('path')).toBeInTheDocument();
     unmountDone();
     
     // Test ACTIVE status
     const { unmount: unmountActive } = renderComponent(CreateWaveStepStatus.ACTIVE);
     svg = screen.getByTestId('wave-step-icon').querySelector('svg');
-    expect(svg).toHaveAttribute('width', '8');
-    expect(svg).toHaveAttribute('height', '8');
+    expect(svg).toHaveAttribute('width', '6');
+    expect(svg).toHaveAttribute('height', '6');
     expect(svg?.querySelector('circle')).toHaveAttribute('fill', 'white');
     unmountActive();
     
     // Test PENDING status
     renderComponent(CreateWaveStepStatus.PENDING);
     svg = screen.getByTestId('wave-step-icon').querySelector('svg');
-    expect(svg).toHaveAttribute('width', '8');
-    expect(svg).toHaveAttribute('height', '8');
+    expect(svg).toHaveAttribute('width', '6');
+    expect(svg).toHaveAttribute('height', '6');
     expect(svg?.querySelector('circle')).toHaveAttribute('fill', 'currentColor');
     expect(svg).toHaveClass('tw-text-iron-500');
   });

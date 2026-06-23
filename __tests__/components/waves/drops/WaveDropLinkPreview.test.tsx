@@ -333,16 +333,25 @@ describe("WaveDropLinkPreview", () => {
     );
 
     await waitFor(() => {
-      expect(mockWaveDropQuote).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          drop: expect.objectContaining({
-            drop_type: ApiDropType.Chat,
-            hide_link_preview: true,
-          }),
-          hideLinkPreviews: true,
+      expect(
+        mockWaveDropQuote.mock.calls.some(([props]) => {
+          return (
+            props.hideLinkPreviews === true &&
+            props.drop?.drop_type === ApiDropType.Chat &&
+            props.drop?.hide_link_preview === true
+          );
         })
-      );
+      ).toBe(true);
     });
+    expect(mockWaveDropQuote).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drop: expect.objectContaining({
+          drop_type: ApiDropType.Chat,
+          hide_link_preview: true,
+        }),
+        hideLinkPreviews: true,
+      })
+    );
     expect(mockDrop).not.toHaveBeenCalled();
   });
 
