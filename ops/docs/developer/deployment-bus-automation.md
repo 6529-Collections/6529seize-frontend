@@ -53,9 +53,16 @@ Validate and summarize:
   --pack playwright:core-smoke \
   --status passed \
   --surfaces web:desktop-chromium,web:mobile-chromium \
-  --artifact-uri s3://6529-artifacts/frontend/<release-id>/core-smoke.json \
+  --artifact-uri s3://6529reviewbot-prod-artifacts/frontend-deployment/<release-id>/core-smoke.json \
   --redaction-status verified-redacted \
   --artifact-sha256 <sha256> \
+  --retention-policy standard-90-days
+6529 run deployment-bus -- upload-validation-artifact \
+  --file deployment-bus-manifest.json \
+  --pack deployment:http-version \
+  --status passed \
+  --source-file deployment-version-evidence.json \
+  --s3-prefix s3://6529reviewbot-prod-artifacts/frontend-deployment/ \
   --retention-policy standard-90-days
 6529 run deployment-bus -- record-post-deploy-watch \
   --file deployment-bus-manifest.json \
@@ -170,10 +177,22 @@ Current auto-hold criteria:
   set.
 
 Durable evidence must point at approved 6529-controlled artifact storage such
-as `s3://6529-artifacts/`, `https://artifacts.6529.io/`, or `ipfs://` for
-intentionally public redacted provenance. Git LFS and committed generated files
-are not durable release evidence stores. Do not record temporary signed URLs,
-query-string credentials, fragments, local paths, or unredacted artifacts.
+as `s3://6529reviewbot-prod-artifacts/frontend-deployment/`,
+`s3://6529-artifacts/` once that dedicated bucket exists,
+`https://artifacts.6529.io/`, or `ipfs://` for intentionally public redacted
+provenance. Git LFS and committed generated files are not durable release
+evidence stores. Do not record temporary signed URLs, query-string credentials,
+fragments, local paths, or unredacted artifacts.
+
+Use `upload-validation-artifact` when the evidence is a text or JSON file. The
+command redacts known secret patterns, verifies the redacted file, uploads it
+to an approved S3 prefix, records SHA-256 and retention metadata, and appends a
+validation check to the manifest. It fails before upload for unapproved S3
+prefixes or unredacted evidence. It currently supports text evidence only; do
+not use it for raw Playwright traces until a binary scrubbing contract exists.
+Deploy workflows run this as a non-blocking feedback step: successful uploads
+record durable evidence, while failed uploads warn and leave release readiness
+incomplete without inventing an artifact pointer.
 
 GitHub Actions workflow artifacts and run URLs are useful temporary evidence,
 but they are not durable artifact pointers. They can appear in post-deploy watch
