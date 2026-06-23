@@ -49,6 +49,12 @@ App PR CI:
 - Uploaded PR CI artifacts are short-term debugging evidence. Durable
   deployment-train evidence still belongs on approved 6529-controlled artifact
   storage, not Git LFS.
+- Deployment workflows use `deployment-bus upload-validation-artifact` to
+  redact, hash, upload, and record GET `/api/version` evidence as
+  `deployment:http-version` when the approved artifact store is writable. A
+  failed upload warns and records no durable pointer. This is durable
+  deployment evidence, but it does not replace the required Playwright pack
+  artifacts for release readiness.
 
 WCAG and i18n route evidence:
 
