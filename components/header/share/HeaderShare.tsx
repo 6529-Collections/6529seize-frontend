@@ -41,6 +41,10 @@ type ConnectionShareStatus =
   | "loading"
   | "ready"
   | "error";
+type TerminalConnectionShareStatus = Extract<
+  ConnectionShareStatus,
+  "legacy-auth" | "error"
+>;
 
 function isAbortError(error: unknown, signal?: AbortSignal): boolean {
   return (
@@ -84,6 +88,16 @@ function buildRouterPath(
   }
 
   return routerPath;
+}
+
+function buildConnectionShareFailureKey({
+  addressKey,
+  routerPath,
+}: {
+  readonly addressKey: string;
+  readonly routerPath: string;
+}): string {
+  return `${addressKey}:${routerPath}`;
 }
 
 function getCachedConnectionShare(
@@ -380,6 +394,7 @@ export function HeaderQRModal({
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const searchParamsString = searchParams?.toString() ?? "";
   const isMobile = useIsMobileDevice();
 
   const [shouldRender, setShouldRender] = useState(show);
@@ -419,6 +434,9 @@ export function HeaderQRModal({
   const connectionShareAbortRef = useRef<AbortController | null>(null);
   const shareGenerationIdRef = useRef(0);
   const cachedConnectionShareRef = useRef<CachedConnectionShare | null>(null);
+  const terminalConnectionShareFailuresRef = useRef<
+    Map<string, TerminalConnectionShareStatus>
+  >(new Map());
 
   const trapFocusInDialog = useCallback((event: KeyboardEvent) => {
     if (event.key !== "Tab") {
@@ -526,6 +544,7 @@ export function HeaderQRModal({
       isStaleGeneration,
       signal,
       walletAddress,
+      routerPath,
     });
 
     if (isStaleGeneration()) {
@@ -566,6 +585,7 @@ export function HeaderQRModal({
     appScheme,
     coreScheme,
     isStaleGeneration,
+    routerPath,
     signal,
     walletAddress,
   }: {
@@ -574,15 +594,27 @@ export function HeaderQRModal({
     readonly isStaleGeneration: IsStaleGeneration;
     readonly signal?: AbortSignal | undefined;
     readonly walletAddress: string | null;
+    readonly routerPath: string;
   }): Promise<string> {
     if (!walletAddress) {
       setUnavailableConnectionShare("unauthenticated");
       return "";
     }
 
+    const addressKey = walletAddress.toLowerCase();
+    const failureKey = buildConnectionShareFailureKey({
+      addressKey,
+      routerPath,
+    });
+    const terminalFailure =
+      terminalConnectionShareFailuresRef.current.get(failureKey);
+    if (terminalFailure) {
+      setUnavailableConnectionShare(terminalFailure);
+      return "";
+    }
+
     try {
       setConnectionShareStatus("loading");
-      const addressKey = walletAddress.toLowerCase();
       const cachedShare = getCachedConnectionShare(
         cachedConnectionShareRef.current,
         addressKey
@@ -600,6 +632,7 @@ export function HeaderQRModal({
         coreScheme,
       });
 
+      terminalConnectionShareFailuresRef.current.delete(failureKey);
       setConnectionShareStatus("ready");
       setShareConnectionAppUrl(shareUrls.appUrl);
       setShareConnectionCoreUrl(shareUrls.coreUrl);
@@ -610,9 +643,13 @@ export function HeaderQRModal({
       }
 
       console.error("Failed to create connection share", error);
-      setUnavailableConnectionShare(
-        isSessionUpgradeRequiredError(error) ? "legacy-auth" : "error"
+      const terminalStatus: TerminalConnectionShareStatus =
+        isSessionUpgradeRequiredError(error) ? "legacy-auth" : "error";
+      terminalConnectionShareFailuresRef.current.set(
+        failureKey,
+        terminalStatus
       );
+      setUnavailableConnectionShare(terminalStatus);
       return "";
     }
   }
@@ -639,9 +676,14 @@ export function HeaderQRModal({
   }
 
   useEffect(() => {
+    terminalConnectionShareFailuresRef.current.clear();
+  }, [activeWalletAddress, hasValidWalletAuth]);
+
+  useEffect(() => {
     if (!show) {
       shareGenerationIdRef.current += 1;
       cachedConnectionShareRef.current = null;
+      terminalConnectionShareFailuresRef.current.clear();
       connectionShareAbortRef.current?.abort();
       connectionShareAbortRef.current = null;
       setConnectionShareStatus(
@@ -674,7 +716,7 @@ export function HeaderQRModal({
     hasWalletAddress,
     activeWalletAddress,
     pathname,
-    searchParams,
+    searchParamsString,
   ]);
 
   useEffect(() => {
@@ -903,6 +945,7 @@ export function HeaderQRModal({
               className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-white"
               onClick={() => {
                 onClose();
+                terminalConnectionShareFailuresRef.current.clear();
                 requestSessionUpgrade?.().catch((error: unknown) => {
                   console.error("Failed to request session upgrade", error);
                 });
