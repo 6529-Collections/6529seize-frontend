@@ -5,6 +5,7 @@ jest.mock("next/server", () => ({
 }));
 
 import {
+  MEME_CALENDAR_API_CACHE_HEADERS,
   getCurrentMintTimelineDetails,
   getNextMintTimelineDetails,
 } from "@/app/api/meme-calendar/meme-calendar-response";
@@ -36,24 +37,27 @@ describe("/api/meme-calendar/current", () => {
     const response = await GET();
 
     expect(response.status).toBe(200);
-    expect(nextResponseJson).toHaveBeenCalledWith({
-      status: "live",
-      current: {
-        mint_number: expected.mintNumber,
-        mint_date: "2024-07-03",
-        mint_start: "2024-07-03T14:40:00.000Z",
-        mint_end: "2024-07-04T14:00:00.000Z",
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      {
         status: "live",
-        season: expected.seasonNumber,
-        year: expected.yearNumber,
-        epoch: expected.epochNumber,
-        period: expected.periodNumber,
-        era: expected.eraNumber,
-        eon: expected.eonNumber,
-        calendar_path: "/meme-calendar",
-        mint_path: `/the-memes/${expected.mintNumber}`,
+        current: {
+          mint_number: expected.mintNumber,
+          mint_date: "2024-07-03",
+          mint_start: "2024-07-03T14:40:00.000Z",
+          mint_end: "2024-07-04T14:00:00.000Z",
+          status: "live",
+          season: expected.seasonNumber,
+          year: expected.yearNumber,
+          epoch: expected.epochNumber,
+          period: expected.periodNumber,
+          era: expected.eraNumber,
+          eon: expected.eonNumber,
+          calendar_path: "/meme-calendar",
+          mint_path: `/the-memes/${expected.mintNumber}`,
+        },
       },
-    });
+      { headers: MEME_CALENDAR_API_CACHE_HEADERS }
+    );
   });
 
   it("returns the next mint when nothing is live", async () => {
@@ -63,15 +67,18 @@ describe("/api/meme-calendar/current", () => {
     const response = await GET();
 
     expect(response.status).toBe(200);
-    expect(nextResponseJson).toHaveBeenCalledWith({
-      status: "none",
-      current: null,
-      next: expect.objectContaining({
-        mint_number: expected.mintNumber,
-        mint_start: "2024-07-03T14:40:00.000Z",
-        mint_end: "2024-07-04T14:00:00.000Z",
-        status: "upcoming",
-      }),
-    });
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      {
+        status: "none",
+        current: null,
+        next: expect.objectContaining({
+          mint_number: expected.mintNumber,
+          mint_start: "2024-07-03T14:40:00.000Z",
+          mint_end: "2024-07-04T14:00:00.000Z",
+          status: "upcoming",
+        }),
+      },
+      { headers: MEME_CALENDAR_API_CACHE_HEADERS }
+    );
   });
 });

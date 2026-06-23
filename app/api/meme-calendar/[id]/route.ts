@@ -1,13 +1,20 @@
 import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { buildMemeCalendarMintResponse } from "../meme-calendar-response";
+import {
+  buildMemeCalendarMintResponse,
+  MEME_CALENDAR_API_CACHE_HEADERS,
+} from "../meme-calendar-response";
 
 const POSITIVE_INTEGER_PATTERN = /^[1-9]\d*$/;
+const MAX_MINT_ID = 100_000;
 
 const invalidIdResponse = () =>
   NextResponse.json(
-    { error: "Invalid id. Use a positive integer in /api/meme-calendar/<id>." },
+    {
+      error:
+        "Invalid id. Use a positive integer up to 100000 in /api/meme-calendar/<id>.",
+    },
     { status: 400 }
   );
 
@@ -26,7 +33,7 @@ function parseMintId(id: string): number | null {
   }
 
   const mintId = Number(id);
-  if (!Number.isSafeInteger(mintId)) {
+  if (!Number.isSafeInteger(mintId) || mintId > MAX_MINT_ID) {
     return null;
   }
 
@@ -51,7 +58,9 @@ export async function GET(
       return unresolvedTimelineResponse();
     }
 
-    return NextResponse.json(buildMemeCalendarMintResponse(timeline, now));
+    return NextResponse.json(buildMemeCalendarMintResponse(timeline, now), {
+      headers: MEME_CALENDAR_API_CACHE_HEADERS,
+    });
   } catch {
     return unresolvedTimelineResponse();
   }
