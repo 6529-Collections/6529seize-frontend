@@ -258,6 +258,7 @@
               "items": {
                 "enum": [
                   "s3://6529-artifacts/",
+                  "s3://6529reviewbot-prod-artifacts/frontend-deployment/",
                   "https://artifacts.6529.io/",
                   "ipfs://"
                 ]
