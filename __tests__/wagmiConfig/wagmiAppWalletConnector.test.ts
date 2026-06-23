@@ -15,13 +15,16 @@ import {
   jest,
 } from "@jest/globals";
 
+// Mock all viem functions
+const mockWalletClient = {
+  account: { address: "0x1234567890123456789012345678901234567890" },
+};
+
 // Mock dependencies
 jest.mock("@/components/app-wallets/app-wallet-helpers");
 jest.mock("@/helpers/Helpers");
 jest.mock("viem/accounts", () => ({
-  privateKeyToAccount: jest
-    .fn()
-    .mockReturnValue({ address: "0x1234567890123456789012345678901234567890" }),
+  privateKeyToAccount: jest.fn(),
 }));
 
 jest.mock("viem", () => ({
@@ -30,18 +33,20 @@ jest.mock("viem", () => ({
   http: jest.fn(),
 }));
 
-// Mock all viem functions
-const mockWalletClient = {
-  account: { address: "0x1234567890123456789012345678901234567890" },
-};
-
-const { privateKeyToAccount: mockPrivateKeyToAccount } =
-  jest.requireMock("viem/accounts");
 const {
   createWalletClient: mockCreateWalletClient,
   fallback: mockFallback,
   http: mockHttp,
-} = jest.requireMock("viem");
+} = jest.requireMock("viem") as {
+  createWalletClient: jest.Mock;
+  fallback: jest.Mock;
+  http: jest.Mock;
+};
+const { privateKeyToAccount: mockPrivateKeyToAccount } = jest.requireMock(
+  "viem/accounts"
+) as {
+  privateKeyToAccount: jest.Mock;
+};
 
 const mockDecryptData = decryptData as jest.MockedFunction<typeof decryptData>;
 const mockAreEqualAddresses = areEqualAddresses as jest.MockedFunction<

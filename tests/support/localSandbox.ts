@@ -226,6 +226,8 @@ function isSameLoopbackOrigin(actual: URL, expected: URL) {
 function isAllowedBlockedExternalWrite(url: URL) {
   return (
     (url.hostname === "cca-lite.coinbase.com" && url.pathname === "/amp") ||
+    (url.hostname === "cca-lite.coinbase.com" && url.pathname === "/metrics") ||
+    (url.hostname === "pulse.walletconnect.org" && url.pathname === "/batch") ||
     (url.hostname === "rpc.walletconnect.org" &&
       url.pathname.startsWith("/v1/")) ||
     (url.hostname === "www.google-analytics.com" &&
