@@ -1,29 +1,20 @@
 import { render, screen } from "@testing-library/react";
-import XtdhReceivedSection from "@/components/xtdh/received";
 import UserPageXtdhReceived from "@/components/xtdh/user/received";
 
-jest.mock("@/components/xtdh/received", () => ({
-  __esModule: true,
-  default: jest.fn(({ profileId }: { readonly profileId: string | null }) => (
-    <section data-testid="received-section">{profileId}</section>
-  )),
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/alice/xtdh/received",
+  useRouter: () => ({ replace: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
-const mockReceivedSection = XtdhReceivedSection as jest.MockedFunction<
-  typeof XtdhReceivedSection
->;
-
 describe("UserPageXtdhReceived", () => {
-  beforeEach(() => {
-    mockReceivedSection.mockClear();
-  });
-
-  it("passes the profile id to the received xTDH section", () => {
+  it("renders helper text and info icon", () => {
     render(<UserPageXtdhReceived profileId="simo" />);
 
-    expect(screen.getByTestId("received-section")).toHaveTextContent("simo");
-    expect(mockReceivedSection.mock.calls[0]?.[0]).toEqual({
-      profileId: "simo",
-    });
+    expect(screen.getByRole("heading", { name: "xTDH Collections" }))
+      .toBeInTheDocument();
+    expect(
+      screen.getByText(/Collections where this identity accrues xTDH\./i),
+    ).toBeInTheDocument();
   });
 });

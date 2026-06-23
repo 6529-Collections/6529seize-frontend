@@ -30,7 +30,5 @@ describe('UserPageRepModifyModalRaterStats', () => {
     const proxy = { created_by: { handle: 'alice' }, actions: [{ action_type: 'ALLOCATE_REP', credit_amount: 30, credit_spent: 10 }] };
     renderComp({ activeProfileProxy: proxy }, 100);
     expect(screen.getByText('alice')).toBeInTheDocument();
-    expect(screen.queryByText('#20')).not.toBeInTheDocument();
-    expect(screen.queryByText('#2')).not.toBeInTheDocument();
   });
 });

@@ -12,9 +12,7 @@ import {
 jest.mock("wagmi");
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(() => ({
-    address: "0x1111111111111111111111111111111111111111",
-  })),
+  useSeizeConnectContext: jest.fn(() => ({ address: "0x1" })),
 }));
 
 jest.mock(
@@ -25,9 +23,8 @@ jest.mock(
         <button
           data-testid="connect"
           onClick={() =>
-            props.onMintFor("0x2222222222222222222222222222222222222222")
-          }
-        >
+            props.onMintFor("0x0000000000000000000000000000000000000abc")
+          }>
           connect
         </button>
       );
@@ -55,6 +52,7 @@ const baseProps = {
     phase: ManifoldPhase.PUBLIC,
     instanceId: 1,
     cost: 1,
+    costWei: 1n,
     startDate: 0,
     isFinalized: false,
   } as any,
@@ -71,7 +69,7 @@ describe("ManifoldMintingWidget", () => {
     render(<ManifoldMintingWidget {...baseProps} />);
     await user.click(screen.getByTestId("connect"));
     expect(
-      await screen.findByRole("button", { name: /SEIZE x1/i })
+      screen.getByRole("button", { name: /SEIZE x1/i })
     ).toBeInTheDocument();
   });
 

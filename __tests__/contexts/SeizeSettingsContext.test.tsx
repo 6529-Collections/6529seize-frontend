@@ -4,6 +4,7 @@ import {
 } from "@/contexts/SeizeSettingsContext";
 import { SeizeSettingsMode } from "@/types/enums";
 import { render, screen, waitFor } from "@testing-library/react";
+import { render as pureRender } from "@testing-library/react/pure";
 
 jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
 const { fetchUrl } = jest.requireMock("@/services/6529api");
@@ -191,5 +192,7 @@ test("hook outside provider throws", () => {
     useSeizeSettings();
     return null;
   }
-  expect(() => render(<CallHook />)).toThrow();
+  expect(() => pureRender(<CallHook />)).toThrow(
+    "useSeizeSettings must be used within a SeizeSettingsProvider"
+  );
 });

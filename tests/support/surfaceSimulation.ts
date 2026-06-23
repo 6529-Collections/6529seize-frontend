@@ -30,6 +30,10 @@ export function isCapacitorSimulationProject(projectName: string) {
   return Object.hasOwn(CAPACITOR_PROJECT_PLATFORMS, projectName);
 }
 
+export function isElectronSimulationProject(projectName: string) {
+  return projectName === "electron-shell-sim";
+}
+
 export async function installSurfaceSimulation(
   context: BrowserContext,
   projectName: string,
@@ -43,6 +47,34 @@ export async function installSurfaceSimulation(
         Object.defineProperty(globalThis, "CapacitorCustomPlatform", {
           configurable: true,
           value: { name: platform },
+        });
+        const runtime = globalThis as typeof globalThis & {
+          Capacitor?: Record<string, unknown> | undefined;
+        };
+        const existingCapacitor = runtime.Capacitor ?? {};
+        const convertFileSrc =
+          typeof existingCapacitor["convertFileSrc"] === "function"
+            ? existingCapacitor["convertFileSrc"]
+            : // Current surface simulations do not exercise native file URL conversion.
+              (filePath: string) => filePath;
+        Object.defineProperty(runtime, "Capacitor", {
+          configurable: true,
+          writable: true,
+          value: {
+            ...existingCapacitor,
+            Plugins:
+              typeof existingCapacitor["Plugins"] === "object" &&
+              existingCapacitor["Plugins"] !== null
+                ? existingCapacitor["Plugins"]
+                : {},
+            convertFileSrc,
+            getPlatform: () => platform,
+            isNativePlatform: () => true,
+            isPluginAvailable:
+              typeof existingCapacitor["isPluginAvailable"] === "function"
+                ? existingCapacitor["isPluginAvailable"]
+                : () => false,
+          },
         });
         Object.defineProperty(globalThis.navigator, "standalone", {
           configurable: true,

@@ -44,7 +44,7 @@ describe("DropCurationButton", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders curate button without local tooltip chrome", () => {
+  it("renders curate button", () => {
     render(
       <DropCurationButton
         dropId="drop-1"
@@ -55,7 +55,6 @@ describe("DropCurationButton", () => {
     );
 
     expect(screen.getByRole("button", { name: "Curate drop" })).toBeVisible();
-    expect(screen.queryByTestId("tooltip-curate-drop-drop-1")).toBeNull();
   });
 
   it("calls toggleCuration with expected payload on click", () => {

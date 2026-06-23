@@ -229,17 +229,18 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
       ? detailedReactionsState.reactions
       : null;
   const detailsLoading = detailsLoadingDropId === drop.id;
+  const dropReactions = drop.reactions ?? [];
 
   const reactionsWithDetails = useMemo(() => {
     if (!detailedReactions) {
-      return drop.reactions;
+      return dropReactions;
     }
 
     const detailsByReaction = new Map(
       detailedReactions.map((reaction) => [reaction.reaction, reaction])
     );
 
-    return drop.reactions.map((reaction) => {
+    return dropReactions.map((reaction) => {
       const detailedReaction = detailsByReaction.get(reaction.reaction);
       if (!detailedReaction) {
         return reaction;
@@ -257,7 +258,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
         count: getReactionCount(reaction),
       };
     });
-  }, [detailedReactions, drop.reactions]);
+  }, [detailedReactions, dropReactions]);
 
   const loadReactionDetails = useCallback(() => {
     if (detailedReactions) {
@@ -402,7 +403,6 @@ function WaveDropReaction({
   const prevTotalRef = useRef(total);
   const prevContextReactionRef = useRef(drop.context_profile_context?.reaction);
   const prevProfilesRef = useRef(reaction.profiles);
-  const prevReactionTotalRef = useRef(getReactionCount(reaction));
 
   // Sync selected when context reaction changes from server
   useEffect(() => {
@@ -423,15 +423,17 @@ function WaveDropReaction({
 
   useEffect(() => {
     const nextTotal = getReactionCount(reaction);
-    const profilesChanged = reaction.profiles !== prevProfilesRef.current;
-    const totalChanged = nextTotal !== prevReactionTotalRef.current;
-
-    if (!profilesChanged && !totalChanged) {
+    if (nextTotal === prevTotalRef.current) {
       return;
     }
 
+    if (reaction.profiles === prevProfilesRef.current) {
+      const timeoutId = setTimeout(() => {
+        setTotal((current) => (current === nextTotal ? current : nextTotal));
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
     prevProfilesRef.current = reaction.profiles;
-    prevReactionTotalRef.current = nextTotal;
 
     const timeoutId = setTimeout(() => {
       setTotal((current) => (current === nextTotal ? current : nextTotal));

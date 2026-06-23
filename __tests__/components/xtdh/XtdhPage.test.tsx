@@ -53,13 +53,9 @@ describe("XtdhPage", () => {
   it("renders network stats when loaded", () => {
     mockUseGlobalTdhStats.mockReturnValue({
       data: {
-        xtdh: 200,
-        xtdhRate: 10,
         multiplier: 2,
+        xtdhRate: 10,
         outgoingRate: 6,
-        outgoingTotal: 12,
-        outgoingCollectionsCount: 3,
-        outgoingTokensCount: 4,
       },
       isLoading: false,
       isError: false,
@@ -71,10 +67,10 @@ describe("XtdhPage", () => {
 
     expect(screen.getByText("xTDH Network Overview")).toBeInTheDocument();
     expect(screen.getByText("Multiplier")).toBeInTheDocument();
-    expect(screen.getByText("xTDH Rate")).toBeInTheDocument();
-    expect(screen.getByText("Granted")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText("xTDH Rate")).toBeInTheDocument();
     expect(screen.getByText("10")).toBeInTheDocument();
+    expect(screen.getByText("Granted")).toBeInTheDocument();
     expect(screen.getByText("6")).toBeInTheDocument();
     expect(screen.getByTestId("xtdh-received-section")).toBeInTheDocument();
   });

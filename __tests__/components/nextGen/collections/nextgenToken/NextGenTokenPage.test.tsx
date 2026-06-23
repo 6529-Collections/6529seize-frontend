@@ -8,7 +8,6 @@ jest.mock("@/helpers/Helpers", () => {
   };
 });
 
-// Mock user components that cause dependency issues
 jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   UserCICAndLevel: () => <div data-testid="user-cic-level" />,
 }));

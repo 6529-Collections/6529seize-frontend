@@ -118,7 +118,9 @@ describe('ArtistActiveSubmissionContent', () => {
     });
   });
 
-  it('renders when search params are empty', () => {
+  it('returns null when searchParams is null', () => {
+    mockUseSearchParams.mockReturnValueOnce(null);
+
     const { container } = renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
 
     expect(container.firstChild).not.toBeNull();

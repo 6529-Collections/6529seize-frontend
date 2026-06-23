@@ -31,16 +31,15 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   }),
 }));
 
-Object.defineProperty(globalThis.navigator, "clipboard", {
-  configurable: true,
-  value: { writeText },
-});
-
 describe("WaveDropMobileMenuCopyLink", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     writeText.mockReset();
     writeText.mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
     mockIsMemesWave.mockReturnValue(false);
     mockIsQuorumWave.mockReturnValue(false);
   });

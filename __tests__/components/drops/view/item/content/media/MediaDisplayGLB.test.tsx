@@ -15,14 +15,14 @@ describe('MediaDisplayGLB', () => {
     const el = container.querySelector('model-viewer');
     expect(el).toHaveAttribute('auto-rotate');
     expect(el).toHaveAttribute('disable-pan');
-    expect(el).not.toHaveAttribute('camera-controls'); // Added dynamically via JS
+    expect(el).toHaveAttribute('camera-controls');
   });
 
   it('shows 3D cube button by default', () => {
     const { container } = render(<MediaDisplayGLB src="asset.glb" />);
     const button = container.querySelector('button');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveAttribute('aria-label', 'Enable 3D controls');
+    expect(button).toHaveAttribute('aria-label', 'Disable 3D controls');
   });
 
   it('hides 3D cube button when disableMediaInteractions is true', () => {

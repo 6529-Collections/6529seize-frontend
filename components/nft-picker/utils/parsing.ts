@@ -1,7 +1,7 @@
 import type { ParseError, TokenRange } from "../types";
 import { BIGINT_ONE, BIGINT_ZERO, MAX_ENUMERATION } from "./constants";
 import { makeError, throwParseErrors } from "./errors";
-import { canonicalizeRanges } from "./ranges";
+import { canonicalizeRanges, fromCanonicalRanges } from "./ranges";
 
 interface Segment {
   value: string;
@@ -218,4 +218,8 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
     throwParseErrors([parseError], parseError.message);
   }
   return canonical;
+}
+
+export function parseTokenExpressionToBigints(input: string): bigint[] {
+  return fromCanonicalRanges(parseTokenExpressionToRanges(input));
 }

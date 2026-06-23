@@ -141,9 +141,9 @@ describe("WaveSmallLeaderboardTopThreeDrop", () => {
     );
 
     expect(screen.getByTestId("winner-badge")).toBeInTheDocument();
-    expect(
-      screen.getByText("Winner Badge - Rank: 1 Time: 1234567890")
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("winner-badge")).toHaveTextContent(
+      "Winner Badge - Rank: 1 Time: 1234567890"
+    );
   });
 
   it("renders drop with rank 2 styling", () => {
@@ -157,9 +157,9 @@ describe("WaveSmallLeaderboardTopThreeDrop", () => {
     );
 
     expect(screen.getByTestId("winner-badge")).toBeInTheDocument();
-    expect(
-      screen.getByText("Winner Badge - Rank: 2 Time: 1234567890")
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("winner-badge")).toHaveTextContent(
+      "Winner Badge - Rank: 2 Time: 1234567890"
+    );
   });
 
   it("renders drop with rank 3 styling", () => {
@@ -173,9 +173,9 @@ describe("WaveSmallLeaderboardTopThreeDrop", () => {
     );
 
     expect(screen.getByTestId("winner-badge")).toBeInTheDocument();
-    expect(
-      screen.getByText("Winner Badge - Rank: 3 Time: 1234567890")
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("winner-badge")).toHaveTextContent(
+      "Winner Badge - Rank: 3 Time: 1234567890"
+    );
   });
 
   it("does not render winner badge when rank is null", () => {
@@ -364,6 +364,8 @@ describe("WaveSmallLeaderboardTopThreeDrop", () => {
       />
     );
 
-    expect(screen.getByText("Winner Badge - Rank: 1")).toBeInTheDocument();
+    expect(screen.getByTestId("winner-badge")).toHaveTextContent(
+      "Winner Badge - Rank: 1"
+    );
   });
 });

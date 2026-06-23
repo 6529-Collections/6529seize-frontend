@@ -105,9 +105,9 @@ it('shows toast when runTest fails with api error', async () => {
 
   await waitFor(() => expect(hookState.runTest).toHaveBeenCalled());
   expect(auth.setToast).toHaveBeenCalledWith({
-    type: 'error',
     title: "Couldn't test this group.",
-    description: 'Please check the group setup and try again.',
-    details: 'failed',
+    description: "Please check the group setup and try again.",
+    details: "failed",
+    type: 'error',
   });
 });

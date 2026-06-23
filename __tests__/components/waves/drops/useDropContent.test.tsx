@@ -26,21 +26,22 @@ jest.mock("@/components/waves/drops/media-utils", () => ({
     segments: content ? [{ type: "text", content }] : [],
     apiMedia,
   }),
-  buildProcessedContent: (content: string, media: any[] = []) => {
+  buildProcessedContent: (
+    content: string | null | undefined,
+    media: Array<{ url: string; mime_type: string }> | null | undefined,
+    fallbackText = "Media"
+  ) => {
     const apiMedia = (media ?? []).map((item) => ({
       alt: "Media",
       url: item.url,
       type: item.mime_type?.startsWith("video/") ? "video" : "image",
     }));
-    let segments: any[] = [];
-    if (content) {
-      segments = [{ type: "text", content }];
-    } else if (apiMedia.length === 0) {
-      segments = [{ type: "text", content: "Media" }];
-    }
-
     return {
-      segments,
+      segments: content
+        ? [{ type: "text", content }]
+        : apiMedia.length
+          ? []
+          : [{ type: "text", content: fallbackText }],
       apiMedia,
     };
   },
@@ -131,7 +132,7 @@ describe("useDropContent", () => {
       });
 
       expect(result.current.isLoading).toBe(true);
-      expect(result.current.drop).toBeNull();
+      expect(result.current.drop).toBe(null);
       expect(result.current.content.segments).toEqual([
         { type: "text", content: "Loading..." },
       ]);
@@ -298,7 +299,7 @@ describe("useDropContent", () => {
         wrapper: createWrapper(),
       });
 
-      expect(result.current.drop).toBeNull();
+      expect(result.current.drop).toBe(null);
     });
 
     it("handles timeout errors with appropriate message", async () => {

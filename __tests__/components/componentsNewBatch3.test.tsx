@@ -31,12 +31,6 @@ describe('Complex Components Import Tests', () => {
       expect(typeof UserPageLayout.default).toBe('function');
     });
 
-    it('should import WaveDescriptionPopover without errors', async () => {
-      const WaveDescriptionPopover = await import('../../components/waves/header/WaveDescriptionPopover');
-      expect(WaveDescriptionPopover.default).toBeDefined();
-      expect(typeof WaveDescriptionPopover.default).toBe('function');
-    });
-
     it('should import CreateDropActions without errors', async () => {
       const CreateDropActions = await import('../../components/waves/CreateDropActions');
       expect(CreateDropActions.default).toBeDefined();
@@ -70,7 +64,6 @@ describe('Complex Components Import Tests', () => {
         import('../../components/user/user-page-header/name/UserPageHeaderEditName'),
         import('../../components/drops/view/part/DropPartMarkdownWithPropLogger'),
         import('../../components/user/layout/UserPageLayout'),
-        import('../../components/waves/header/WaveDescriptionPopover'),
         import('../../components/waves/CreateDropActions'),
         import('../../components/drops/view/item/rate/give/DropListItemRateGiveSubmit'),
         import('../../components/user/rep/modify-rep/UserPageRepModifyModalRaterStats'),
@@ -96,7 +89,6 @@ describe('Complex Components Import Tests', () => {
         'UserPageHeaderEditName',
         'DropPartMarkdownWithPropLogger',
         'UserPageLayout',
-        'WaveDescriptionPopover',
         'CreateDropActions',
         'DropListItemRateGiveSubmit',
         'UserPageRepModifyModalRaterStats',
@@ -176,14 +168,11 @@ describe('Complex Components Import Tests', () => {
     });
 
     it('should handle sequential imports', async () => {
-      const component1 = await import('../../components/waves/header/WaveDescriptionPopover');
+      const component1 = await import('../../components/waves/CreateDropActions');
       expect(component1.default).toBeDefined();
 
-      const component2 = await import('../../components/waves/CreateDropActions');
+      const component2 = await import('../../components/drops/view/item/rate/give/DropListItemRateGiveSubmit');
       expect(component2.default).toBeDefined();
-
-      const component3 = await import('../../components/drops/view/item/rate/give/DropListItemRateGiveSubmit');
-      expect(component3.default).toBeDefined();
     });
   });
 });

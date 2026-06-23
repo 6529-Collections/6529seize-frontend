@@ -9,7 +9,7 @@ jest.mock(
       const React = require("react");
       const onMintFor = props.onMintFor;
       React.useEffect(() => {
-        onMintFor("0x1111111111111111111111111111111111111111");
+        onMintFor("0x0000000000000000000000000000000000000001");
       }, [onMintFor]);
       return <div />;
     }
@@ -17,7 +17,7 @@ jest.mock(
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
-    address: "0x1111111111111111111111111111111111111111",
+    address: "0x0000000000000000000000000000000000000001",
   }),
 }));
 
@@ -46,6 +46,7 @@ describe("ManifoldMintingWidget", () => {
     totalMax: 1,
     remaining: 1,
     cost: 0,
+    costWei: 0n,
     startDate: 0,
     endDate: 0,
     status: ManifoldClaimStatus.ACTIVE,
@@ -54,7 +55,7 @@ describe("ManifoldMintingWidget", () => {
     isFinalized: false,
   } as any;
 
-  it("shows seize button and pending text", async () => {
+  it("shows seize button and pending text", () => {
     render(
       <ManifoldMintingWidget
         contract="0x"
@@ -67,7 +68,7 @@ describe("ManifoldMintingWidget", () => {
         setMintForAddress={() => {}}
       />
     );
-    expect(await screen.findByText(/SEIZE x1/)).toBeInTheDocument();
+    expect(screen.getByText(/SEIZE x1/)).toBeInTheDocument();
     expect(screen.getByText(/Confirm in your wallet/)).toBeInTheDocument();
   });
 });

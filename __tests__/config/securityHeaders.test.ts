@@ -128,7 +128,7 @@ describe("createSecurityHeaders CSP", () => {
         getContentSecurityPolicy({ allowUnsafeEval: true }),
         "script-src"
       )
-    ).toContain("'unsafe-eval'");
+    ).not.toContain("'unsafe-eval'");
   });
 
   it("keeps inline script and style exceptions explicit", () => {
@@ -189,7 +189,7 @@ describe("createSecurityHeaders CSP", () => {
         }),
         "connect-src"
       )
-    ).toContain(localApiEndpoint);
+    ).not.toContain(localApiEndpoint);
   });
 
   it("only allows insecure loopback WebSocket endpoints when enabled for local tooling", () => {
@@ -212,7 +212,7 @@ describe("createSecurityHeaders CSP", () => {
         }),
         "connect-src"
       )
-    ).toContain(localWebSocketEndpoint);
+    ).not.toContain(localWebSocketEndpoint);
   });
 
   it("omits insecure remote WebSocket endpoints even when local tooling is enabled", () => {

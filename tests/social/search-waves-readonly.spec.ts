@@ -6,6 +6,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 const NAVIGATION_TIMEOUT_MS = 15000;
 const GLOBAL_SEARCH_QUERY = "wave score";
@@ -170,7 +171,7 @@ const localFixtureWave = {
 };
 
 async function gotoReady(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page);
   await expectNoHorizontalOverflow(page);
 }

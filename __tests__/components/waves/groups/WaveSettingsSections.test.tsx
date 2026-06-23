@@ -607,13 +607,12 @@ describe("WaveSettingsSections", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
-      expect(setToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          details: expect.stringMatching(/metadata failed/i),
-          title: expect.stringMatching(/save these tab labels/i),
-          type: "error",
-        })
-      );
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        title: "Couldn't save these tab labels.",
+        description: "Please try again.",
+        details: "metadata failed.",
+      });
     });
     expect(screen.getByLabelText("Approvals tab label")).toBeInTheDocument();
   });

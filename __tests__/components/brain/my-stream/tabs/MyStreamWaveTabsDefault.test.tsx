@@ -114,7 +114,6 @@ describe("MyStreamWaveTabsDefault", () => {
         id: "drop-1",
         parts: [{ content: "A chill place to discuss drops" }],
       },
-      author: { id: "author-1", handle: "author" },
       contributors_overview: [],
       ...overrides,
       voting: {
@@ -498,7 +497,7 @@ describe("MyStreamWaveTabsDefault", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders compact overflow actions and keeps search trigger", () => {
+  it("renders share in mobile right action cluster and keeps search trigger", () => {
     mockUseBreakpoint.mockReturnValue("S");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -515,9 +514,6 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
-    expect(
-      screen.getByRole("button", { name: "More wave actions" })
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
@@ -556,7 +552,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps tablet action set at medium breakpoint", () => {
+  it("keeps desktop action set at medium breakpoint", () => {
     mockUseBreakpoint.mockReturnValue("MD");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -580,11 +576,11 @@ describe("MyStreamWaveTabsDefault", () => {
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Go back" })
+      screen.queryByRole("button", { name: "Go back" })
     ).toBeInTheDocument();
   });
 
-  it("keeps compact title trigger and search action", () => {
+  it("keeps compact subtitle trigger and search action", () => {
     mockUseBreakpoint.mockReturnValue("S");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -604,7 +600,9 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Wave" })).toBeInTheDocument();
+    expect(
+      screen.queryByText("A chill place to discuss drops")
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Show wave description" })
     ).toBeInTheDocument();
@@ -723,5 +721,8 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
       "http://localhost/waves/w1"
     );
+    expect(
+      screen.getByRole("menuitem", { name: "Link copied" })
+    ).toBeInTheDocument();
   });
 });

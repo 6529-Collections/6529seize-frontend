@@ -256,13 +256,10 @@ describe("ExpandedWave", () => {
 
     const timestamp = screen.getByTestId("drop-time");
     const timestampWrapper = timestamp.parentElement;
-    const contentColumn = timestampWrapper?.parentElement;
-    const titleRow = contentColumn?.children[0];
-    const scoreButton = screen.getByText("83").closest("[aria-label]");
-    const score = scoreButton?.closest(".tw-relative");
+    const score = screen.getByText("83").closest(".tw-ml-auto");
 
-    expect(contentColumn?.children[1]).toBe(timestampWrapper);
-    expect(titleRow?.children[1]).toBe(score);
+    expect(timestampWrapper).toBeInTheDocument();
+    expect(score).toBeInTheDocument();
     expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
     expect(score).toHaveClass("tw-ml-auto");
   });

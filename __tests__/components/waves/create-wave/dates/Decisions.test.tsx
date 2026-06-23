@@ -1,5 +1,4 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen } from "@testing-library/react";
 import Decisions from "@/components/waves/create-wave/dates/Decisions";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
@@ -47,7 +46,6 @@ describe("Decisions", () => {
   } as any;
 
   it("updates decisions when subsequent decisions added", async () => {
-    const user = userEvent.setup();
     const setDates = jest.fn();
     render(
       <Decisions
@@ -60,7 +58,7 @@ describe("Decisions", () => {
         onInteraction={jest.fn()}
       />
     );
-    await user.click(screen.getByTestId("sub"));
+    fireEvent.click(screen.getByTestId("sub"));
     expect(setDates).toHaveBeenCalledWith({
       ...baseDates,
       subsequentDecisions: [1],
@@ -68,7 +66,6 @@ describe("Decisions", () => {
   });
 
   it("enables rolling mode and sets dates", async () => {
-    const user = userEvent.setup();
     const setDates = jest.fn();
     const onRollingEnabled = jest.fn();
     render(
@@ -82,7 +79,7 @@ describe("Decisions", () => {
         onInteraction={jest.fn()}
       />
     );
-    await user.click(screen.getByRole("switch"));
+    fireEvent.click(screen.getByRole("switch"));
     expect(onRollingEnabled).toHaveBeenCalled();
     expect(setDates).toHaveBeenCalledWith(
       expect.objectContaining({ isRolling: true, endDate: null })

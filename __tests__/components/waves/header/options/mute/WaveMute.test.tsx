@@ -134,10 +134,10 @@ describe('WaveMute', () => {
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        type: 'error',
         title: "Couldn't mute this wave.",
         description: 'Please try again.',
         details: 'Unable to mute wave.',
+        type: 'error',
       });
     });
   });
@@ -152,10 +152,10 @@ describe('WaveMute', () => {
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        type: 'error',
         title: "Couldn't unmute this wave.",
         description: 'Please try again.',
         details: 'Unable to unmute wave.',
+        type: 'error',
       });
     });
   });

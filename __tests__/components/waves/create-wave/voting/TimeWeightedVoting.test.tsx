@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import TimeWeightedVoting from "@/components/waves/create-wave/voting/TimeWeightedVoting";
 
@@ -119,16 +119,15 @@ describe("TimeWeightedVoting", () => {
   });
 
   it("rejects pasted interval text that is not only digits", async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderComponent(baseConfig, onChange);
 
     const input = screen.getByTestId(
       "averaging-interval-input"
     ) as HTMLInputElement;
-    await user.clear(input);
+    fireEvent.change(input, { target: { value: "" } });
     onChange.mockClear();
-    await user.paste("10abc");
+    fireEvent.change(input, { target: { value: "10abc" } });
 
     expect(input.value).toBe("");
     expect(onChange).not.toHaveBeenCalled();

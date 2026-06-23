@@ -34,7 +34,7 @@ const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT =>
     image: "https://example.com/image.png",
     thumbnail: "https://example.com/thumb.png",
     scaled: "https://example.com/scaled.png",
-    animation: undefined,
+    animation: "https://example.com/animation.html",
     metadata: {
       image: "https://example.com/metadata-image.png",
       name: "Test HTML NFT",
@@ -50,7 +50,7 @@ const createMockNFTLite = (overrides: any = {}) => ({
   id: 1,
   name: "Test HTML NFT Lite",
   image: "https://example.com/image.png",
-  animation: undefined,
+  animation: "https://example.com/animation.html",
   metadata: {
     animation_url: "https://example.com/animation_url.html",
   },
@@ -306,9 +306,9 @@ describe("NFTHTMLRenderer", () => {
   });
 
   describe("Edge Cases and Error Handling", () => {
-    it("handles undefined metadata gracefully", () => {
+    it("uses the top-level animation when metadata is undefined", () => {
       const nft = createMockNFT({
-        metadata: undefined,
+        metadata: undefined as any,
       });
       const props = createDefaultProps({ nft, id: "test-iframe" });
 
@@ -316,7 +316,10 @@ describe("NFTHTMLRenderer", () => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
+      expect(screen.getByTitle("test-iframe")).toHaveAttribute(
+        "src",
+        "https://example.com/animation.html"
+      );
     });
 
     it("handles empty metadata object gracefully", () => {
@@ -327,7 +330,9 @@ describe("NFTHTMLRenderer", () => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
+      const iframe = screen.getByTitle("test-iframe");
+      expect(iframe).toBeInTheDocument();
+      expect(iframe).toHaveAttribute("src", "https://example.com/animation.html");
     });
 
     it("handles minimal NFT properties", () => {
@@ -390,6 +395,7 @@ describe("NFTHTMLRenderer", () => {
       // Note: In a real application, iframe src should be validated/sanitized
       // This test documents current behavior
       const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation: "https://untrusted-domain.com/content.html",
         },
@@ -417,6 +423,7 @@ describe("NFTHTMLRenderer", () => {
       // Test safe URLs that don't crash JSDOM
       safeUrls.forEach((url, index) => {
         const nft = createMockNFT({
+          animation: "",
           metadata: {
             animation: url,
           },
@@ -438,6 +445,7 @@ describe("NFTHTMLRenderer", () => {
       // React itself doesn't block these at render time, but JSDOM throws an error
       // when the iframe tries to load the javascript: URL
       const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation: 'javascript:alert("xss")',
         },
@@ -461,6 +469,7 @@ describe("NFTHTMLRenderer", () => {
       const baseNft = createMockNFT();
       const nft = {
         ...baseNft,
+        animation: "",
         metadata: {
           ...baseNft.metadata,
           animation: "", // Empty string is falsy, so will use animation_url
@@ -532,6 +541,7 @@ describe("NFTHTMLRenderer", () => {
   describe("Animation Source Priority Logic", () => {
     it("prioritizes metadata.animation over animation_url when both exist", () => {
       const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation: "https://priority.com/animation.html",
           animation_url: "https://fallback.com/animation.html",
@@ -552,6 +562,7 @@ describe("NFTHTMLRenderer", () => {
 
       falsyValues.forEach((falsyValue, index) => {
         const nft = createMockNFT({
+          animation: "",
           metadata: {
             animation: falsyValue,
             animation_url: "https://fallback.com/animation.html",
@@ -571,6 +582,7 @@ describe("NFTHTMLRenderer", () => {
 
     it("handles NFTLite type correctly (no metadata property check)", () => {
       const nftLite = createMockNFTLite({
+        animation: "",
         metadata: {
           animation_url: "https://nftlite.com/animation.html",
         },

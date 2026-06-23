@@ -113,7 +113,6 @@ function setup(opts: any) {
   (useSeizeConnectContext as jest.Mock).mockReturnValue({
     address: opts.address ?? null,
     isAuthenticated: opts.isAuthenticated ?? false,
-    hasValidWalletAuth: opts.isAuthenticated ?? false,
     isConnected: opts.isConnected ?? false,
     connectedAccounts: opts.connectedAccounts ?? [],
     seizeSwitchConnectedAccount: opts.seizeSwitchConnectedAccount ?? jest.fn(),
@@ -159,12 +158,6 @@ function setup(opts: any) {
 }
 
 describe("AppHeader", () => {
-  const openHeaderMoreMenu = () => {
-    fireEvent.click(
-      screen.getByRole("button", { name: "More header actions" })
-    );
-  };
-
   const setNavigatorClipboard = (writeTextImpl = mockWriteText) => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -282,11 +275,17 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    openHeaderMoreMenu();
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
 
-    expect(
-      screen.getByRole("menuitem", { name: "Share wave" })
-    ).toBeInTheDocument();
+    const shareItem = screen.getByRole("menuitem", { name: "Share wave" });
+    fireEvent.click(shareItem);
+
+    expect(mockShare).toHaveBeenCalledWith({
+      title: "WaveOne",
+      url: "http://localhost/waves/w1",
+    });
   });
 
   it("shows matching wave drop action in app header", () => {
@@ -336,7 +335,9 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    openHeaderMoreMenu();
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
 
     expect(
       screen.getByRole("menuitem", { name: "Copy wave link" })
@@ -385,7 +386,9 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    openHeaderMoreMenu();
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
     fireEvent.click(screen.getByRole("menuitem", { name: "Copy wave link" }));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
@@ -448,9 +451,8 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: true },
     });
 
-    expect(
-      screen.getByRole("link", { name: "View prxt0's profile" })
-    ).toHaveAttribute("href", "/prxt0");
+    expect(screen.getByRole("link", { name: "View prxt0's profile" }))
+      .toHaveAttribute("href", "/prxt0");
     expect(
       screen.queryByRole("button", { name: /copy wave link|share wave/i })
     ).not.toBeInTheDocument();
@@ -503,11 +505,15 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    openHeaderMoreMenu();
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
 
     const galleryToggle = screen.getByRole("menuitem", {
       name: "Switch to gallery view",
     });
+    const galleryIcon = galleryToggle.querySelector("svg");
+    expect(galleryIcon).toHaveClass("tw-h-4", "tw-w-4");
     fireEvent.click(galleryToggle);
 
     expect(toggleViewMode).toHaveBeenCalledTimes(1);

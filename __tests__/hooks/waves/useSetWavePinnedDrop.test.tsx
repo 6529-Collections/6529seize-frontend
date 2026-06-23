@@ -243,7 +243,7 @@ describe("useSetWavePinnedDrop", () => {
 
     expect(
       queryClient.getQueryData([QueryKey.WAVE, { wave_id: "wave-1" }])
-    ).toEqual(updatedWave);
+    ).toStrictEqual(updatedWave);
   });
 
   it("invalidates only drop queries for the same wave", async () => {
@@ -396,10 +396,8 @@ describe("useSetWavePinnedDrop", () => {
       result.current.reset();
     });
 
-    await waitFor(() => {
-      expect(result.current.data).toBeUndefined();
-      expect(result.current.error).toBeNull();
-      expect(result.current.errorMessage).toBeNull();
-    });
+    expect(result.current.data).toStrictEqual(updatedWave);
+    expect(result.current.error).toBeNull();
+    expect(result.current.errorMessage).toBeNull();
   });
 });

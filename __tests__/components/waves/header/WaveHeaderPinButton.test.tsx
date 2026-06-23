@@ -36,7 +36,19 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
 }));
 
 jest.mock("react-tooltip", () => ({
-  Tooltip: ({ id }: any) => <div data-testid={`tooltip-${id}`} />,
+  Tooltip: ({ children, id, content }: any) => {
+    const triggerContent =
+      typeof document === "undefined"
+        ? undefined
+        : document
+            .querySelector(`[data-tooltip-id="${id}"]`)
+            ?.getAttribute("data-tooltip-content");
+    return (
+      <div data-testid={`tooltip-${id}`}>
+        {children ?? content ?? triggerContent}
+      </div>
+    );
+  },
 }));
 
 const mockAuth = {
@@ -337,7 +349,7 @@ describe("WaveHeaderPinButton", () => {
         type: "error",
         title: "Couldn't pin this wave.",
         description: "Please try again.",
-        details: expect.stringContaining("Network error"),
+        details: "Network error. Please check your connection and try again.",
       });
     });
 
@@ -364,7 +376,7 @@ describe("WaveHeaderPinButton", () => {
         type: "error",
         title: "Couldn't unpin this wave.",
         description: "Please try again.",
-        details: expect.stringContaining("Server error"),
+        details: "Server error.",
       });
     });
 
@@ -383,7 +395,7 @@ describe("WaveHeaderPinButton", () => {
         type: "error",
         title: "Couldn't pin this wave.",
         description: "Please try again.",
-        details: expect.stringContaining("String error"),
+        details: "String error.",
       });
     });
   });
@@ -450,8 +462,11 @@ describe("WaveHeaderPinButton", () => {
       renderComponent();
       const button = screen.getByRole("button");
       const icon = button.querySelector("svg");
+      const tooltipId = button.getAttribute("data-tooltip-id");
 
-      expect(button).toHaveClass("tw-text-iron-300");
+      expect(button).toHaveClass("tw-bg-transparent", "tw-text-iron-300");
+      expect(button).toHaveAttribute("data-tooltip-content", "Unpin wave");
+      expect(screen.getByTestId(`tooltip-${tooltipId}`)).toBeInTheDocument();
       expect(icon).toHaveClass("tw-rotate-[-45deg]");
     });
   });

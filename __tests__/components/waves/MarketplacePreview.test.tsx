@@ -159,7 +159,7 @@ describe("MarketplacePreview", () => {
     }
   );
 
-  it("renders supported marketplace previews immediately", () => {
+  it("renders marketplace previews immediately", () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
     mockUseInView.mockReturnValue([{ current: null }, false]);
 
@@ -185,7 +185,7 @@ describe("MarketplacePreview", () => {
     expect(screen.getByTestId("marketplace-unavailable")).toBeInTheDocument();
   });
 
-  it("does not gate previews on viewport visibility", () => {
+  it("does not depend on viewport preloading", () => {
     render(<MarketplacePreview href="https://transient.xyz/mint/edition-1" />);
 
     expect(mockUseInView).not.toHaveBeenCalled();

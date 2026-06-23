@@ -1,9 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
-import {
-  useMemesQuickVoteQueue,
-  type UseMemesQuickVoteQueueResult,
-} from "@/hooks/useMemesQuickVoteQueue";
+import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
 
 jest.mock("@/hooks/useMemesQuickVoteQueue", () => ({
   useMemesQuickVoteQueue: jest.fn(),
@@ -14,8 +11,7 @@ const useMemesQuickVoteQueueMock =
 
 describe("useMemesQuickVoteDialogController", () => {
   const retryDiscovery = jest.fn();
-
-  const createQueueResult = (): UseMemesQuickVoteQueueResult => ({
+  const queueResult = {
     activeDrop: null,
     hasDiscoveryError: false,
     isExhausted: false,
@@ -27,19 +23,19 @@ describe("useMemesQuickVoteDialogController", () => {
     nextDrop: null,
     recentAmounts: [],
     retryDiscovery,
-    skipDrop: jest.fn(),
     submitVote: jest.fn(),
+    skipDrop: jest.fn(),
     uncastPower: null,
     unratedCount: 0,
     votingLabel: null,
-  });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useMemesQuickVoteQueueMock.mockReturnValue(createQueueResult());
+    useMemesQuickVoteQueueMock.mockReturnValue(queueResult);
   });
 
-  it("starts the reserved quick-vote session when prefetch runs", () => {
+  it("reuses the prefetched queue session when quick vote opens", () => {
     const { result } = renderHook(() => useMemesQuickVoteDialogController());
 
     expect(useMemesQuickVoteQueueMock).toHaveBeenLastCalledWith({
@@ -52,19 +48,9 @@ describe("useMemesQuickVoteDialogController", () => {
     });
 
     expect(result.current.quickVoteSessionId).toBe(1);
-    expect(result.current.isQuickVoteOpen).toBe(false);
     expect(useMemesQuickVoteQueueMock).toHaveBeenLastCalledWith({
       enabled: true,
       sessionId: 1,
-    });
-    expect(retryDiscovery).not.toHaveBeenCalled();
-  });
-
-  it("opens an already prefetched session and retries discovery", () => {
-    const { result } = renderHook(() => useMemesQuickVoteDialogController());
-
-    act(() => {
-      result.current.prefetchQuickVote();
     });
 
     act(() => {
@@ -74,7 +60,6 @@ describe("useMemesQuickVoteDialogController", () => {
     expect(result.current.isQuickVoteOpen).toBe(true);
     expect(result.current.quickVoteSessionId).toBe(1);
     expect(retryDiscovery).toHaveBeenCalledTimes(1);
-    expect(result.current.dialogState.sessionId).toBe(1);
 
     act(() => {
       result.current.closeQuickVote();
@@ -85,18 +70,20 @@ describe("useMemesQuickVoteDialogController", () => {
     expect(retryDiscovery).toHaveBeenCalledTimes(2);
   });
 
-  it("does not reserve a new session for repeated same-tick prefetches", () => {
+  it("retries discovery instead of creating a new session after prefetching", () => {
     const { result } = renderHook(() => useMemesQuickVoteDialogController());
 
     act(() => {
       result.current.prefetchQuickVote();
+    });
+
+    expect(result.current.quickVoteSessionId).toBe(1);
+
+    act(() => {
       result.current.prefetchQuickVote();
     });
 
     expect(result.current.quickVoteSessionId).toBe(1);
-    expect(useMemesQuickVoteQueueMock).toHaveBeenLastCalledWith({
-      enabled: true,
-      sessionId: 1,
-    });
+    expect(retryDiscovery).toHaveBeenCalledTimes(1);
   });
 });

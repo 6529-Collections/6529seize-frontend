@@ -204,7 +204,7 @@ describe("BrainLeftSidebarWave", () => {
     const bellSlashIcons = document.querySelectorAll(
       '[data-icon="bell-slash"]'
     );
-    expect(bellSlashIcons).toHaveLength(0);
+    expect(bellSlashIcons.length).toBe(0);
   });
 
   it("hides the pin control when showPin is false", () => {
@@ -389,16 +389,10 @@ describe("BrainLeftSidebarWave", () => {
     );
 
     const timestamp = screen.getByTestId("drop-time");
-    const timestampWrapper = timestamp.parentElement;
-    const contentColumn = timestampWrapper?.parentElement;
-    const titleRow = contentColumn?.children[0];
-    const scoreButton = screen.getByText("83").closest("[aria-label]");
-    const score = scoreButton?.closest(".tw-relative");
+    const score = screen.getByRole("button", { name: /Wave score 83/ });
 
-    expect(contentColumn?.children[1]).toBe(timestampWrapper);
-    expect(titleRow?.children[1]).toBe(score);
-    expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
-    expect(score).toHaveClass("tw-ml-auto");
+    expect(timestamp).toHaveTextContent("123");
+    expect(score).toBeInTheDocument();
   });
 
   it("cancels subwave prefetch when hover intent ends early", () => {

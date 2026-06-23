@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import QuorumProposalCompactContent from "@/components/waves/quorum/QuorumProposalCompactContent";
+import QuorumProposalCompactContent, {
+  getQuorumProposalCompactSectionKey,
+} from "@/components/waves/quorum/QuorumProposalCompactContent";
 
 jest.mock(
   "@/components/drops/view/part/DropPartMarkdownWithPropLogger",
@@ -17,22 +19,17 @@ const proposal = {
   ],
 } as const;
 
+const openProblemStatementKey = getQuorumProposalCompactSectionKey(
+  proposal.sections[0],
+  0
+);
+
 function getSectionSummaryElement(heading: string): HTMLElement {
   const summary = screen.getByText(heading).closest("summary");
   if (!summary) {
     throw new Error(`Expected summary for section heading: ${heading}`);
   }
   return summary;
-}
-
-function openSection(heading: string): void {
-  const summary = getSectionSummaryElement(heading);
-  const details = summary.closest("details");
-  if (!details) {
-    throw new Error(`Expected details for section heading: ${heading}`);
-  }
-  details.open = true;
-  fireEvent(details, new Event("toggle", { bubbles: true }));
 }
 
 function getDetailsToggle(): HTMLElement {
@@ -95,6 +92,8 @@ describe("QuorumProposalCompactContent", () => {
     render(
       <QuorumProposalCompactContent
         proposal={proposal}
+        areDetailsVisible={true}
+        openSectionKeys={[openProblemStatementKey]}
         mentionedUsers={[]}
         mentionedGroups={[]}
         mentionedWaves={[]}
@@ -102,9 +101,6 @@ describe("QuorumProposalCompactContent", () => {
         onQuoteClick={jest.fn()}
       />
     );
-
-    fireEvent.click(getDetailsToggle());
-    openSection("Problem Statement");
 
     expect(screen.getByText("Too many drops.")).toBeInTheDocument();
     expect(screen.queryByText("Add a countdown.")).toBeNull();
@@ -162,6 +158,8 @@ describe("QuorumProposalCompactContent", () => {
       <div onClick={onParentClick}>
         <QuorumProposalCompactContent
           proposal={proposal}
+          areDetailsVisible={true}
+          openSectionKeys={[openProblemStatementKey]}
           mentionedUsers={[]}
           mentionedGroups={[]}
           mentionedWaves={[]}
@@ -171,8 +169,6 @@ describe("QuorumProposalCompactContent", () => {
       </div>
     );
 
-    fireEvent.click(getDetailsToggle());
-    openSection("Problem Statement");
     fireEvent.click(screen.getByText("Too many drops."));
 
     expect(onParentClick).not.toHaveBeenCalled();

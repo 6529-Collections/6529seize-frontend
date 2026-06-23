@@ -261,9 +261,14 @@ describe('useSlideshowConfig', () => {
       const { unmount: unmount3 } = renderHook(() => useSlideshowConfig());
       unmount3();
       
-      // Should have equal number of add and remove calls
-      expect(addEventListenerSpy).toHaveBeenCalledTimes(3);
-      expect(removeEventListenerSpy).toHaveBeenCalledTimes(3);
+      const addedResizeListeners = addEventListenerSpy.mock.calls.filter(
+        ([event]) => event === "resize"
+      );
+      const removedResizeListeners = removeEventListenerSpy.mock.calls.filter(
+        ([event]) => event === "resize"
+      );
+      expect(addedResizeListeners).toHaveLength(3);
+      expect(removedResizeListeners).toHaveLength(3);
       
       addEventListenerSpy.mockRestore();
       removeEventListenerSpy.mockRestore();

@@ -20,7 +20,9 @@ const useMutationMock = jest.fn((options: any) => {
   return { mutateAsync };
 });
 
-jest.mock('@tanstack/react-query', () => ({ useMutation: (opts: any) => useMutationMock(opts) }));
+jest.mock('@tanstack/react-query', () => ({
+  useMutation: (opts: any) => useMutationMock(opts),
+}));
 
 describe('useAddWaveMutation', () => {
   it('posts new wave and triggers callbacks', async () => {

@@ -182,9 +182,7 @@ describe("TransferModal", () => {
     const user = userEvent.setup();
     openModal();
 
-    const input = screen.getByPlaceholderText(
-      /search profile by handle, ens or wallet/i
-    );
+    const input = screen.getByPlaceholderText(/search profile by handle/i);
     await user.type(input, "rec");
 
     await waitFor(() => expect(mockCommonApiFetch).toHaveBeenCalled());
@@ -259,7 +257,7 @@ describe("TransferModal", () => {
 
     // Each tx card should show "Successful" (exact match; exclude header text)
     const successBadges = await screen.findAllByText(/^Successful$/i);
-    expect(successBadges).toHaveLength(2);
+    expect(successBadges.length).toBe(2);
   });
 
   it("handles a single ERC721 success and shows 'Transfer Successful'", async () => {
@@ -310,7 +308,7 @@ describe("TransferModal", () => {
 
     await screen.findByText(/transfer successful/i);
     const successBadges = await screen.findAllByText(/^successful$/i);
-    expect(successBadges).toHaveLength(1);
+    expect(successBadges.length).toBe(1);
   });
 
   it("handles a single ERC721 failure and shows 'Transfer Failed'", async () => {
@@ -399,7 +397,7 @@ describe("TransferModal", () => {
     await screen.findByText(/transfer complete: 1 successful, 1 failed/i);
 
     const successBadges = await screen.findAllByText(/^successful$/i);
-    expect(successBadges).toHaveLength(1);
+    expect(successBadges.length).toBe(1);
     const errorBadges = await screen.findAllByText(/error/i);
     expect(errorBadges.length).toBeGreaterThan(0);
   });
@@ -576,7 +574,7 @@ describe("TransferModal", () => {
 
     // Two cards rendered — one per origin group
     const cards = await screen.findAllByText(/Originator: ext:/i);
-    expect(cards).toHaveLength(2);
+    expect(cards.length).toBe(2);
   });
 
   it("creates individual entries for ERC721 and uses 'erc721' origin key", async () => {
@@ -644,7 +642,7 @@ describe("TransferModal", () => {
 
     // And origin should be erc721
     const erc721Origins = await screen.findAllByText(/Originator: erc721/i);
-    expect(erc721Origins).toHaveLength(2);
+    expect(erc721Origins.length).toBe(2);
   });
 
   it("displays warning banner when transactions are pending", async () => {

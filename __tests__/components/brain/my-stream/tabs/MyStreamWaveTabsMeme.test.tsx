@@ -120,11 +120,7 @@ describe("MyStreamWaveTabsMeme", () => {
         id: "drop-1",
         parts: [{ content: "A chill place to discuss drops" }],
       },
-      author: { id: "author-1", handle: "author" },
       contributors_overview: [],
-      wave: {
-        authenticated_user_eligible_for_admin: false,
-      },
       voting: {
         authenticated_user_eligible: true,
       },
@@ -140,17 +136,6 @@ describe("MyStreamWaveTabsMeme", () => {
         },
       },
     }) as any;
-
-  const renderTabs = (wave = createWave(false)) =>
-    render(
-      <SidebarProvider>
-        <MyStreamWaveTabsMeme
-          wave={wave}
-          activeCurationId={null}
-          onSelectCuration={jest.fn()}
-        />
-      </SidebarProvider>
-    );
 
   beforeEach(() => {
     mockPush.mockClear();
@@ -172,7 +157,11 @@ describe("MyStreamWaveTabsMeme", () => {
       setActiveContentTab,
     });
     const wave = createWave(false);
-    renderTabs(wave);
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={wave} />
+      </SidebarProvider>
+    );
     expect(screen.getByTestId("desktop")).toHaveTextContent("CHAT");
     fireEvent.click(screen.getByText("submit"));
     expect(screen.getByTestId("modal")).toHaveTextContent("open");
@@ -184,7 +173,11 @@ describe("MyStreamWaveTabsMeme", () => {
       setActiveContentTab: jest.fn(),
     });
 
-    renderTabs(createWave(false));
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
 
     expect(screen.getByRole("button", { name: "Share wave" })).toHaveAttribute(
       "data-wave-link-action-mode",
@@ -198,7 +191,11 @@ describe("MyStreamWaveTabsMeme", () => {
       setActiveContentTab: jest.fn(),
     });
 
-    renderTabs(createWave(false));
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
 
     const subtitle = screen.getByText("A chill place to discuss drops");
     expect(subtitle).toBeInTheDocument();
@@ -209,7 +206,7 @@ describe("MyStreamWaveTabsMeme", () => {
     ).toBeInTheDocument();
   });
 
-  it("keeps submit action in compact mode", () => {
+  it("keeps submit action available in compact mode", () => {
     mockUseBreakpoint.mockReturnValue("S");
     const setActiveContentTab = jest.fn();
     useContentTab.mockReturnValue({
@@ -218,9 +215,13 @@ describe("MyStreamWaveTabsMeme", () => {
     });
     const wave = createWave(false);
 
-    renderTabs(wave);
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={wave} />
+      </SidebarProvider>
+    );
 
-    expect(screen.getByText("submit")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "submit" })).toBeInTheDocument();
   });
 
   it("renders copy-mode action when native share is unavailable", () => {
@@ -230,7 +231,11 @@ describe("MyStreamWaveTabsMeme", () => {
       setActiveContentTab: jest.fn(),
     });
 
-    renderTabs(createWave(false));
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
 
     expect(
       screen.getByRole("button", { name: "Copy wave link" })
@@ -252,7 +257,11 @@ describe("MyStreamWaveTabsMeme", () => {
       setActiveContentTab: jest.fn(),
     });
 
-    renderTabs(createWave(true));
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(true)} />
+      </SidebarProvider>
+    );
 
     expect(
       screen.queryByRole("button", { name: /wave link|share wave/i })
@@ -269,7 +278,11 @@ describe("MyStreamWaveTabsMeme", () => {
       setActiveContentTab: jest.fn(),
     });
 
-    renderTabs(createWave(false));
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
 
     expect(
       screen.getByRole("button", { name: "Share wave" })
@@ -278,7 +291,7 @@ describe("MyStreamWaveTabsMeme", () => {
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Go back" })
+      screen.queryByRole("button", { name: "Go back" })
     ).toBeInTheDocument();
   });
 
@@ -289,17 +302,22 @@ describe("MyStreamWaveTabsMeme", () => {
       setActiveContentTab: jest.fn(),
     });
 
-    renderTabs(createWave(false));
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
 
     expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "More wave actions" })
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Show wave description" })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    expect(
+      screen.getByRole("menuitem", { name: "Share wave" })
     ).toBeInTheDocument();
   });
 });

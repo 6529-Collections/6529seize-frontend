@@ -10,8 +10,9 @@ const mockUseDownloader = jest.fn();
 const mockGetStagingAuth = jest.fn();
 const mockGetAuthJwt = jest.fn();
 const mockFetchAllPages = jest.fn();
+const mockDistributionAdminWallets = ["0x1"];
 
-jest.mock("@/hooks/useDownloader", () => ({
+jest.mock("react-use-downloader", () => ({
   __esModule: true,
   default: (...args: any[]) => mockUseDownloader(...args),
 }));
@@ -26,8 +27,9 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 jest.mock(
-  "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription.utils",
+  "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription",
   () => ({
+    download: jest.fn(async () => ({ success: true, message: "ok" })),
     isSubscriptionsAdmin: jest.fn(),
   })
 );
@@ -104,14 +106,14 @@ jest.mock(
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
     seizeSettings: {
-      distribution_admin_wallets: ["0x1"],
+      distribution_admin_wallets: mockDistributionAdminWallets,
     },
   }),
 }));
 
 const {
   isSubscriptionsAdmin,
-} = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription.utils");
+} = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
 
 const authCtx = {
   connectedProfile: { wallets: [{ wallet: "0x1" }] },
@@ -595,12 +597,12 @@ test("upload artist airdrops handles exceptions", async () => {
   await user.click(screen.getByTestId("upload-artist-airdrops-button"));
 
   await waitFor(() => {
-    expect(authCtx.setToast).toHaveBeenCalledWith(expect.objectContaining({
+    expect(authCtx.setToast).toHaveBeenCalledWith({
       type: "error",
       title: "Couldn't upload artist airdrops.",
       description: "Please check the CSV and try again.",
-      details: expect.stringContaining("Network error"),
-    }));
+      details: "Network error. Please check your connection and try again.",
+    });
   });
 });
 
@@ -645,7 +647,7 @@ test("downloads artist airdrops csv with the response filename", async () => {
   await user.click(downloadButton);
 
   await waitFor(() => {
-    expect(mockUseDownloader).toHaveBeenCalledWith();
+    expect(mockUseDownloader).toHaveBeenCalled();
     expect(mockDownload).toHaveBeenCalledWith(
       expect.stringContaining(
         "/api/distributions/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123/artist-airdrops"

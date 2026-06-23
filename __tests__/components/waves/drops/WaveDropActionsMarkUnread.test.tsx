@@ -10,7 +10,7 @@ jest.mock('@/services/api/common-api', () => ({
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
-    invalidateQueries: jest.fn().mockResolvedValue(undefined),
+    invalidateQueries: jest.fn(),
   }),
 }));
 
@@ -123,8 +123,8 @@ describe('WaveDropActionsMarkUnread', () => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
         type: 'error',
         title: "Couldn't mark this drop as unread.",
-        description: "Please try again.",
-        details: "API Error.",
+        description: 'Please try again.',
+        details: 'API Error.',
       });
     });
   });

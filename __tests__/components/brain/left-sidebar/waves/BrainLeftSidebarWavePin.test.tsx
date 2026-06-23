@@ -17,8 +17,9 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
 
 // Mock react-tooltip
 jest.mock("react-tooltip", () => ({
-  Tooltip: ({ children, id }: any) => (
+  Tooltip: ({ children, content, id }: any) => (
     <div data-testid={`tooltip-${id}`} role="tooltip">
+      {content}
       {children}
     </div>
   ),
@@ -125,7 +126,6 @@ describe("BrainLeftSidebarWavePin", () => {
       type: "error",
       message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
     });
-    expect(screen.getByTestId("tooltip-wave-pin-1")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /pin wave/i })).toHaveAttribute(
       "data-tooltip-content",
       `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`

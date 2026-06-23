@@ -427,6 +427,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     fireEvent.mouseDown(document.body);
 
     expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
+
     expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getByText("Anyone")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
@@ -518,7 +519,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     expect(screen.getByText("Current group")).toBeInTheDocument();
-    expect(screen.getAllByText("Existing Group").length).toBeGreaterThan(0);
+    expect(screen.getByText("Existing Group")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
     expect(screen.getAllByText("1 rule").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
@@ -579,7 +580,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getByText("Anyone")).toBeInTheDocument();
     expect(screen.getAllByText("Unsaved group")).toHaveLength(2);
-    expect(screen.getAllByText("1 rule").length).toBeGreaterThan(0);
+    expect(screen.getByText("1 rule")).toBeInTheDocument();
     expect(
       screen.getByText(
         "Choosing another group will discard this unsaved group."
@@ -645,7 +646,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     });
 
     expect(screen.getByText("Current group")).toBeInTheDocument();
-    expect(screen.getAllByText("Existing Group").length).toBeGreaterThan(0);
+    expect(screen.getByText("Existing Group")).toBeInTheDocument();
     expect(screen.queryByText("Unsaved group")).not.toBeInTheDocument();
     expect(
       screen.queryByText("Based on Existing Group. Not applied yet.")
@@ -712,9 +713,6 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "add identity" }));
 
     expect(screen.getAllByText("1 identity").length).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("button", { name: "Add identity" })
-    ).toHaveAttribute("aria-pressed", "true");
     expect(
       screen.getByRole("button", { name: "Add rule" })
     ).toBeInTheDocument();

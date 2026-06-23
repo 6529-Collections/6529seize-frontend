@@ -46,7 +46,7 @@ describe("DropdownTrait", () => {
     );
     const select = screen.getByRole("combobox") as HTMLSelectElement;
     expect(select.value).toBe("Common");
-    expect(select).toHaveClass("tw-ring-emerald-500/30");
+    expect(select).toHaveClass("tw-ring-emerald-600/45");
     rerender(
       <DropdownTrait
         label="Rarity"
@@ -57,7 +57,7 @@ describe("DropdownTrait", () => {
       />
     );
     expect(select.value).toBe("Rare");
-    expect(select).toHaveClass("tw-ring-emerald-500/30");
+    expect(select).toHaveClass("tw-ring-emerald-600/45");
   });
 
   it("uses muted text for the empty option and bright text for a selected option", () => {

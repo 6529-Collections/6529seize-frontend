@@ -109,6 +109,13 @@ Surface matrix:
 - `test:e2e:search-waves-readonly` runs global header search keyboard and
   navigation coverage plus wave-local message search coverage on both baseline
   web projects, with the mutation guard enabled even locally.
+- `test:e2e:native-shell-readonly` runs simulation-only Capacitor and Electron
+  shell contracts with the read-only mutation guard enabled. It covers
+  Capacitor runtime signals, iOS Open Data subscription hiding and US-visible
+  subscription behavior, Android
+  subscription visibility, the Capacitor app-wallet simulated empty state,
+  Electron app-wallet unsupported copy, and Electron share-modal desktop
+  handoff suppression.
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
@@ -188,6 +195,9 @@ Surface matrix:
   but they are not evidence that the real native or desktop shells were tested.
 - The iOS Capacitor simulation seeds the app's existing EULA consent cookie so
   route-level smoke tests exercise the page shell instead of the legal modal.
+- Capacitor simulations expose both `CapacitorCustomPlatform` and a minimal
+  `globalThis.Capacitor` shim so Playwright can catch hook-based and direct
+  runtime-detection drift. This still does not prove native plugin behavior.
 
 Large-pack ownership:
 
@@ -251,6 +261,15 @@ Large-pack ownership:
   header search, site search result catalog entries, wave-local message search,
   public wave detail routing, search modal keyboard/focus behavior, or
   read-only mutation guard behavior on search and wave surfaces.
+- `test:e2e:native-shell-readonly` is owned by PR or train owners changing
+  Capacitor runtime detection, Electron detection, app-wallet support fallback,
+  native subscription visibility, header share/deep-link handoff behavior,
+  mobile-shell viewport setup, or read-only mutation guard behavior on
+  native-adjacent shells. Treat failures as shell-branching signals, not as
+  proof about real secure storage, real mobile plugins, or packaged Electron.
+  The Capacitor browser simulation uses Capacitor's web plugin fallback for app
+  wallets, so it covers the empty supported wallet shell and not real native
+  secure storage.
 - `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
   composer input, attachment preview/removal, link preview rendering, dev-auth
   composer eligibility, or local sandbox/mock API coverage. The pack may use
@@ -267,9 +286,13 @@ Large-pack ownership:
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.
-- `test:e2e:native-sim` is a native-adjacent smoke pack. A PR owner should run
-  it when changing native runtime detection, deep links, wallet/native shell
-  branching, or viewport assumptions.
+- `test:e2e:native-sim` is the broader native-adjacent smoke pack across an
+  explicit allowlist of simulated Capacitor and Electron specs. A PR owner
+  should run it when changing native runtime detection, deep links,
+  wallet/native shell branching, Electron share handoff behavior, Open Data
+  native visibility, app-wallet fallback behavior, or viewport assumptions. Add
+  new specs to the allowlist intentionally after verifying skip behavior across
+  all three simulation projects.
 - Large-pack failures belong to the PR or train owner until they are diagnosed
   as unrelated infrastructure. Do not quarantine, skip, or downgrade a failing
   large pack without recording the reason in the PR or release report.

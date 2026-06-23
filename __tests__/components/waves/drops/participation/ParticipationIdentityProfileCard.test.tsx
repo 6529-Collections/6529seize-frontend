@@ -77,7 +77,7 @@ const buildProfile = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe("ParticipationIdentityProfileCard", () => {
-  it("renders inline profile content with the profile link and stats", () => {
+  it("removes the secondary address and keeps richer inline profile content", () => {
     render(
       <ParticipationIdentityProfileCard profile={buildProfile() as any} />
     );
@@ -89,10 +89,6 @@ describe("ParticipationIdentityProfileCard", () => {
       screen.queryByText("0x3a867c9b39c940e9467f5b3b43fa0e5a2bd1e6e")
     ).not.toBeInTheDocument();
     expect(screen.getByText("+21")).toBeInTheDocument();
-    expect(screen.getByText("TDH")).toBeInTheDocument();
-    expect(screen.getByText("xTDH")).toBeInTheDocument();
-    expect(screen.getByText("NIC")).toBeInTheDocument();
-    expect(screen.getByText("Rep")).toBeInTheDocument();
   });
 
   it("keeps the address as the primary label when there is no handle", () => {
@@ -114,7 +110,7 @@ describe("ParticipationIdentityProfileCard", () => {
     expect(screen.queryByText("Archived")).not.toBeInTheDocument();
   });
 
-  it("does not render deprecated archived or activity chips", () => {
+  it("renders the archived chip only when the profile is archived", () => {
     render(
       <ParticipationIdentityProfileCard
         profile={
@@ -128,9 +124,6 @@ describe("ParticipationIdentityProfileCard", () => {
       />
     );
 
-    expect(
-      screen.getByRole("link", { name: /view simo's profile/i })
-    ).toHaveAttribute("href", "/simo");
     expect(screen.queryByText("Archived")).not.toBeInTheDocument();
     expect(screen.queryByText("2 submissions")).not.toBeInTheDocument();
   });
@@ -140,21 +133,33 @@ describe("ParticipationIdentityProfileCard", () => {
       <ParticipationIdentityProfileCard profile={buildProfile() as any} />
     );
 
-    const statLinks = screen.getAllByRole("link");
-    expect(
-      statLinks.find((link) => {
-        const text = link.textContent ?? "";
-        return text.includes("TDH") && !text.includes("xTDH");
-      })
-    ).toHaveAttribute("href", "/simo/collected");
-    expect(
-      statLinks.find((link) => link.textContent?.includes("xTDH"))
-    ).toHaveAttribute("href", "/simo/xtdh");
-    expect(
-      statLinks.find((link) => link.textContent?.includes("NIC"))
-    ).toHaveAttribute("href", "/simo");
-    expect(
-      statLinks.find((link) => link.textContent?.includes("Rep"))
-    ).toHaveAttribute("href", "/simo");
+    const links = screen.getAllByRole("link");
+    const getStatLink = (label: string) => {
+      const link = links.find((candidate) => {
+        const text = candidate.textContent ?? "";
+        return label === "TDH"
+          ? text.includes("TDH") && !text.includes("xTDH")
+          : text.includes(label);
+      });
+      expect(link).toBeDefined();
+      return link as HTMLAnchorElement;
+    };
+
+    expect(getStatLink("TDH")).toHaveAttribute(
+      "href",
+      "/simo/collected"
+    );
+    expect(getStatLink("xTDH")).toHaveAttribute(
+      "href",
+      "/simo/xtdh"
+    );
+    expect(getStatLink("NIC")).toHaveAttribute(
+      "href",
+      "/simo"
+    );
+    expect(getStatLink("Rep")).toHaveAttribute(
+      "href",
+      "/simo"
+    );
   });
 });

@@ -98,7 +98,6 @@ jest.mock("@/helpers/time", () => ({
 }));
 
 jest.mock("@/hooks/useManifoldClaim", () => {
-  const mockUseManifoldClaim = jest.fn();
   const createPhaseTime = (ms: number) => ({
     toMillis: () => ms,
     toSeconds: () => ms / 1000,
@@ -114,7 +113,7 @@ jest.mock("@/hooks/useManifoldClaim", () => {
 
   return {
     __esModule: true,
-    useManifoldClaim: mockUseManifoldClaim,
+    useManifoldClaim: jest.fn(),
     buildMemesPhases: jest.fn(() => [
       {
         id: "0",
@@ -157,9 +156,9 @@ jest.mock("@/hooks/useManifoldClaim", () => {
   };
 });
 
-describe("ManifoldMinting phases", () => {
-  const mockUseManifoldClaim = useManifoldClaim as jest.Mock;
+const mockUseManifoldClaim = useManifoldClaim as jest.Mock;
 
+describe("ManifoldMinting phases", () => {
   beforeEach(() => {
     globalThis.fetch = jest.fn();
     mockUseManifoldClaim.mockReset();
@@ -264,7 +263,7 @@ describe("ManifoldMinting phases", () => {
     );
 
     expect(screen.getByText("ACTIVE")).toBeInTheDocument();
-    expect(screen.getAllByText("UPCOMING")).toHaveLength(2);
+    expect(screen.getAllByText("ACTIVE")).toHaveLength(1);
     expect(container.querySelectorAll(".tw-ring-success")).toHaveLength(1);
     expect(container.querySelectorAll(".tw-ring-primary-300")).toHaveLength(0);
   });

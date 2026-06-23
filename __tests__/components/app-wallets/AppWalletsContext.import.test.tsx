@@ -17,6 +17,11 @@ jest.mock('capacitor-secure-storage-plugin', () => ({
   }
 }));
 
+const secureStorageMock = jest.requireMock(
+  'capacitor-secure-storage-plugin'
+).SecureStoragePlugin;
+const setMock = secureStorageMock.set as jest.Mock;
+
 jest.mock('@/components/app-wallets/app-wallet-helpers', () => ({ encryptData: jest.fn(async (_a,_b,v) => v) }));
 
 jest.mock('@/helpers/time', () => ({ Time: { now: () => ({ toSeconds: () => 1 }) } }));

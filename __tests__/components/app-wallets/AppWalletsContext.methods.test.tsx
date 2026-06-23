@@ -63,6 +63,12 @@ jest.mock("@/helpers/time", () => ({
   Time: { now: () => ({ toSeconds: () => 1 }) },
 }));
 
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  measureMobileLaunchAsync: jest.fn(
+    async (_stepName: string, task: () => unknown) => await task()
+  ),
+}));
+
 describe("AppWalletsContext methods", () => {
   beforeEach(() => {
     mockSet.mockClear();
