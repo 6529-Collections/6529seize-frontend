@@ -71,7 +71,7 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   const salesUrls = useMemo(
     () =>
       saleNftLinks.flatMap((nftLink) => {
-        const url = nftLink.url_in_text?.trim();
+        const url = nftLink.url_in_text.trim();
         return url ? [url] : [];
       }),
     [saleNftLinks]
