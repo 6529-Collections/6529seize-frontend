@@ -293,6 +293,20 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters React DOM insertBefore NotFoundError events when request URL identifies a waves route", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        transaction: undefined,
+        tags: {},
+        request: {
+          url: "https://6529.io/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099?view=full",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
   it("keeps React DOM insertBefore NotFoundError events when an app frame is present", () => {
     const result = shouldFilterReactDomInsertBeforeNotFoundError(
       createReactDomInsertBeforeEvent({
