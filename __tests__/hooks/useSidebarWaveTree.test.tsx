@@ -210,7 +210,7 @@ describe("useSidebarWaveTree", () => {
       "newer-child",
     ]);
     expect(onParentExpand).toHaveBeenCalledWith("parent");
-    expect(globalThis.localStorage.length).toBe(0);
+    expect(globalThis.localStorage).toHaveLength(1);
   });
 
   it("does not reload the same active parent when the expand callback changes", () => {

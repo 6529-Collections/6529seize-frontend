@@ -9,19 +9,21 @@ jest.mock(
       const React = require("react");
       const onMintFor = props.onMintFor;
       React.useEffect(() => {
-        onMintFor("0x1");
+        onMintFor("0x0000000000000000000000000000000000000001");
       }, [onMintFor]);
       return <div />;
     }
 );
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: "0x1" }),
+  useSeizeConnectContext: () => ({
+    address: "0x0000000000000000000000000000000000000001",
+  }),
 }));
 
 const readContractsData = { data: [] };
 jest.mock("wagmi", () => ({
-  useReadContract: () => ({ data: 0 }),
+  useReadContract: () => ({ data: 0n }),
   useReadContracts: () => readContractsData,
   useWaitForTransactionReceipt: () => ({
     isPending: false,
@@ -44,6 +46,7 @@ describe("ManifoldMintingWidget", () => {
     totalMax: 1,
     remaining: 1,
     cost: 0,
+    costWei: 0n,
     startDate: 0,
     endDate: 0,
     status: ManifoldClaimStatus.ACTIVE,

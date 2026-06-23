@@ -25,7 +25,7 @@ describe("WaveSmallLeaderboardItemOutcomes", () => {
 
     render(<WaveSmallLeaderboardItemOutcomes drop={drop} />);
     expect(screen.getByRole("button")).toBeInTheDocument();
-    expect(screen.getByText("Outcome:")).toBeInTheDocument();
+    expect(screen.getByText("Outcome")).toBeInTheDocument();
   });
 
   it("hides when no outcomes and not loading", () => {

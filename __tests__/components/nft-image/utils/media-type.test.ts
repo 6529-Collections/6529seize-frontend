@@ -167,6 +167,7 @@ describe("media-type utils", () => {
         it("returns html for uppercase HTML", () => {
           const nft = createMockNFT({
             metadata: {
+              animation: "https://example.com/interactive.html",
               animation_details: { format: "HTML" },
             },
           });
@@ -178,6 +179,7 @@ describe("media-type utils", () => {
         it("returns html for lowercase html", () => {
           const nft = createMockNFT({
             metadata: {
+              animation: "https://example.com/interactive.html",
               animation_details: { format: "html" },
             },
           });
@@ -189,6 +191,7 @@ describe("media-type utils", () => {
         it("returns html for mixed case Html", () => {
           const nft = createMockNFT({
             metadata: {
+              animation: "https://example.com/interactive.html",
               animation_details: { format: "Html" },
             },
           });
@@ -374,6 +377,7 @@ describe("media-type utils", () => {
       it("handles deeply nested metadata structure correctly", () => {
         const nft = createMockNFT({
           metadata: {
+            animation: "https://example.com/interactive.html",
             other_property: "value",
             animation_details: {
               format: "html",
@@ -450,7 +454,10 @@ describe("media-type utils", () => {
     describe("type safety", () => {
       it("works with BaseNFT type", () => {
         const nft: BaseNFT = createMockNFT({
-          metadata: { animation_details: { format: "html" } },
+          metadata: {
+            animation: "https://example.com/interactive.html",
+            animation_details: { format: "html" },
+          },
         });
 
         const result = getMediaType(nft, true);
