@@ -3,6 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
+const TEST_COMMAND_TIMEOUT_MS = 10_000;
+
+// The evidence script is a CommonJS CLI module; require keeps tests on the same
+// exported surface that Node uses when the script runs directly.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
   NATIVE_EVIDENCE_SCHEMA_VERSION,
@@ -382,6 +386,7 @@ describe("native surface evidence", () => {
       {
         cwd: process.cwd(),
         encoding: "utf8",
+        timeout: TEST_COMMAND_TIMEOUT_MS,
       }
     );
 
@@ -399,6 +404,7 @@ describe("native surface evidence", () => {
     const result = spawnSync(process.execPath, [script, "--require-real"], {
       cwd: process.cwd(),
       encoding: "utf8",
+      timeout: TEST_COMMAND_TIMEOUT_MS,
     });
 
     expect(result.status).toBe(1);
@@ -419,6 +425,7 @@ describe("native surface evidence", () => {
     const result = spawnSync(process.execPath, [script, "--cwd", cwd], {
       cwd: process.cwd(),
       encoding: "utf8",
+      timeout: TEST_COMMAND_TIMEOUT_MS,
     });
 
     expect(result.status).toBe(1);
@@ -445,6 +452,7 @@ describe("native surface evidence", () => {
       {
         cwd: process.cwd(),
         encoding: "utf8",
+        timeout: TEST_COMMAND_TIMEOUT_MS,
       }
     );
     const evidence = JSON.parse(fs.readFileSync(outputPath, "utf8"));
