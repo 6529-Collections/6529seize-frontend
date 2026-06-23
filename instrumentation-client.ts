@@ -19,6 +19,7 @@ import {
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
+  shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -115,6 +116,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterInjectedWalletCollision(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
     return true;
   }
 
