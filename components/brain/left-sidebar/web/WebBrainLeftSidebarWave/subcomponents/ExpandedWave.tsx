@@ -151,7 +151,7 @@ export const ExpandedWave = ({
       onMouseEnter={handleRowMouseEnter}
       onMouseLeave={cancelSubwavePrefetch}
       role="group"
-      className={`tw-group tw-relative tw-flex tw-items-start ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
