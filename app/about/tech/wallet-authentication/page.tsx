@@ -80,9 +80,8 @@ export default function WalletAuthenticationPage() {
                           </h2>
                           <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
                             <li>
-                              If you see{" "}
-                              <strong>Upgrade Authentication</strong>, connect
-                              the same wallet and sign the message.
+                              If you see <strong>Upgrade Authentication</strong>
+                              , connect the same wallet and sign the message.
                             </li>
                             <li>
                               The signature does not cost gas and does not send
@@ -103,9 +102,9 @@ export default function WalletAuthenticationPage() {
                             Why you may see this prompt
                           </h2>
                           <p className="tw-mb-3">
-                            Some older sessions can keep working for a short
-                            grace period. During that time, 6529 may remind you
-                            to upgrade before the older session expires.
+                            Some older sessions can keep working until the
+                            upgrade deadline. During that time, 6529 may remind
+                            you to upgrade before the older session expires.
                           </p>
                           <p className="tw-mb-0">
                             Some newer features, including mobile connection

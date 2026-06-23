@@ -121,7 +121,6 @@ type MutableCurrentRef<T> = {
 };
 
 interface SessionUpgradeReminderState {
-  readonly startedAt: number;
   readonly dismissedUntil: number;
 }
 
@@ -166,7 +165,6 @@ interface RunImmediateAuthValidationParams {
 
 const SESSION_UPGRADE_REMINDER_STORAGE_KEY =
   "6529-session-v2-upgrade-reminders";
-const SESSION_UPGRADE_GRACE_MS = 72 * 60 * 60 * 1000;
 const SESSION_UPGRADE_REMINDER_MS = 2 * 60 * 60 * 1000;
 const DEFAULT_AUTH_ROLLOUT_SETTINGS: AuthRolloutSettings = {
   structuredSignaturesRequired: false,
@@ -209,13 +207,10 @@ const parseSessionUpgradeReminders = (): Record<
 
       const record = value as Partial<SessionUpgradeReminderState>;
       if (
-        typeof record.startedAt === "number" &&
-        Number.isFinite(record.startedAt) &&
         typeof record.dismissedUntil === "number" &&
         Number.isFinite(record.dismissedUntil)
       ) {
         reminders[address] = {
-          startedAt: record.startedAt,
           dismissedUntil: record.dismissedUntil,
         };
       }
@@ -262,19 +257,14 @@ const getSessionUpgradeGlobalDeadline = (
 };
 
 const getSessionUpgradeEffectiveDeadline = (
-  reminder: SessionUpgradeReminderState,
   settings: AuthRolloutSettings,
   now: number = Date.now()
-): number => {
+): number | null => {
   if (settings.structuredSignaturesRequired) {
     return now;
   }
 
-  const localDeadline = reminder.startedAt + SESSION_UPGRADE_GRACE_MS;
-  const globalDeadline = getSessionUpgradeGlobalDeadline(settings);
-  return globalDeadline === null
-    ? localDeadline
-    : Math.min(localDeadline, globalDeadline);
+  return getSessionUpgradeGlobalDeadline(settings);
 };
 
 const setSessionUpgradeReminder = (
@@ -300,7 +290,6 @@ const getOrCreateSessionUpgradePromptStatus = (
 ): SessionUpgradePromptStatus => {
   const existingReminder = getSessionUpgradeReminder(address);
   const reminder = existingReminder ?? {
-    startedAt: now,
     dismissedUntil: 0,
   };
 
@@ -308,8 +297,8 @@ const getOrCreateSessionUpgradePromptStatus = (
     setSessionUpgradeReminder(address, reminder);
   }
 
-  const deadline = getSessionUpgradeEffectiveDeadline(reminder, settings, now);
-  const timeLeftMs = Math.max(0, deadline - now);
+  const deadline = getSessionUpgradeEffectiveDeadline(settings, now);
+  const timeLeftMs = deadline === null ? 0 : Math.max(0, deadline - now);
   const canDismiss = timeLeftMs > 0;
 
   return {
@@ -324,14 +313,13 @@ const dismissSessionUpgradePrompt = (
   settings: AuthRolloutSettings,
   now: number = Date.now()
 ): SessionUpgradePromptStatus => {
-  const reminder = getSessionUpgradeReminder(address) ?? {
-    startedAt: now,
-    dismissedUntil: 0,
-  };
-  const deadline = getSessionUpgradeEffectiveDeadline(reminder, settings, now);
-  const dismissedUntil = Math.min(now + SESSION_UPGRADE_REMINDER_MS, deadline);
+  const deadline = getSessionUpgradeEffectiveDeadline(settings, now);
+  const timeLeftMs = deadline === null ? 0 : Math.max(0, deadline - now);
+  const canDismiss = timeLeftMs > 0;
+  const dismissedUntil = canDismiss
+    ? Math.min(now + SESSION_UPGRADE_REMINDER_MS, deadline ?? now)
+    : now;
   const nextReminder = {
-    startedAt: reminder.startedAt,
     dismissedUntil,
   };
 
@@ -339,24 +327,30 @@ const dismissSessionUpgradePrompt = (
 
   return {
     shouldShow: now >= dismissedUntil,
-    canDismiss: deadline > now,
-    timeLeftMs: Math.max(0, deadline - now),
+    canDismiss,
+    timeLeftMs,
   };
 };
 
 const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
   if (timeLeftMs <= 0) {
-    return "0 minutes";
+    return "now";
   }
 
   const oneHourMs = 60 * 60 * 1000;
-  if (timeLeftMs <= oneHourMs) {
-    const totalMinutes = Math.ceil(timeLeftMs / (60 * 1000));
-    return `${totalMinutes} ${totalMinutes === 1 ? "minute" : "minutes"}`;
+  const oneDayMs = 24 * oneHourMs;
+  const wholeDays = Math.floor(timeLeftMs / oneDayMs);
+
+  if (wholeDays > 3) {
+    return `${wholeDays} days`;
   }
 
-  const totalHours = Math.ceil(timeLeftMs / oneHourMs);
-  return `${totalHours} ${totalHours === 1 ? "hour" : "hours"}`;
+  const wholeHours = Math.floor(timeLeftMs / oneHourMs);
+  if (wholeHours < 1) {
+    return "less than 1 hour";
+  }
+
+  return `${wholeHours} ${wholeHours === 1 ? "hour" : "hours"}`;
 };
 
 const getSessionUpgradePromptMode = (
@@ -1064,7 +1058,7 @@ export default function Auth({
       setSessionUpgradeCanDismiss(status.canDismiss);
       if (status.timeLeftMs <= 0) {
         expireSessionUpgradeAuth(address).catch((error) => {
-          logErrorSecurely("session_upgrade_grace_expired_logout", error);
+          logErrorSecurely("session_upgrade_deadline_expired_logout", error);
         });
         return;
       }
@@ -1463,7 +1457,8 @@ export default function Auth({
   // Computed modal visibility to prevent flickering during rapid state changes
   const shouldShowSignModal = useMemo(() => {
     const shouldHideDuringValidation =
-      authLoadingState === "validating" && signModalReason !== "session-upgrade";
+      authLoadingState === "validating" &&
+      signModalReason !== "session-upgrade";
     return (
       showSignModal &&
       !shouldHideDuringValidation &&
@@ -1518,7 +1513,7 @@ export default function Auth({
   const signModalSharedConnectionListItem =
     "If this is a shared connection, reshare the connection from a device that is already signed in with the new authentication.";
   const signModalSecondaryListItem = isSessionUpgradePrompt
-    ? `Temporary access time remaining: ${sessionUpgradeTimeLeftText}.`
+    ? `Time left to upgrade: ${sessionUpgradeTimeLeftText}.`
     : "Your signature will not cost any gas and is purely for authentication purposes.";
   const signModalConfirmText = isDisconnectedWebSessionUpgradePrompt
     ? "Connect"

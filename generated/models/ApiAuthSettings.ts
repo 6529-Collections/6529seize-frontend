@@ -19,7 +19,7 @@ export class ApiAuthSettings {
     */
     'structured_signatures_required': boolean;
     /**
-    * Always-present, nullable global deadline for frontend v1-auth to session-v2 migration prompts, formatted as an ISO datetime with timezone. Null means no migration prompt should be shown unless strict structured signatures are required.
+    * Always-present, nullable global deadline for frontend v1-auth to session-v2 migration countdown and cutoff behavior, formatted as an ISO datetime with timezone. Null means no migration prompt should be shown unless strict structured signatures are required.
     */
     'session_v2_migration_deadline': Date | null;
 
