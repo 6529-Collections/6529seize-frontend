@@ -15,7 +15,14 @@ import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type {
   DropIdentityMode,
@@ -36,8 +43,56 @@ import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
+import WaveDropTime from "./time/WaveDropTime";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
+const TOUCH_MOVE_THRESHOLD_PX = 10;
+const GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX = 16;
+const GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX = 148;
+const GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO = 1.15;
+const PRIMARY_POINTER_BUTTON = 0;
+
+type TouchCoordinates = Pick<Touch, "clientX" | "clientY">;
+type TimestampSwipeStart = {
+  readonly x: number;
+  readonly y: number;
+  readonly pointerId?: number | undefined;
+};
+
+const getPrimaryTouch = (event: React.TouchEvent): TouchCoordinates | null =>
+  event.touches[0] ?? event.targetTouches[0] ?? event.changedTouches[0] ?? null;
+
+const getPointerType = (event: React.PointerEvent<HTMLDivElement>): string =>
+  event.pointerType || "mouse";
+
+const getPointerId = (event: React.PointerEvent<HTMLDivElement>): number =>
+  Number.isFinite(event.pointerId) ? event.pointerId : -1;
+
+const isPrimaryPointerButton = (
+  event: React.PointerEvent<HTMLDivElement>
+): boolean => {
+  const maybeButton = (event as React.PointerEvent<HTMLDivElement> & {
+    readonly button?: number | undefined;
+  }).button;
+
+  return (
+    maybeButton === undefined ||
+    maybeButton === PRIMARY_POINTER_BUTTON ||
+    event.buttons === 1
+  );
+};
+
+const isInteractiveSwipeTarget = (target: EventTarget | null): boolean => {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  return Boolean(
+    target.closest(
+      "a, button, input, textarea, select, summary, [role='button'], [contenteditable='true']"
+    )
+  );
+};
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -313,8 +368,12 @@ const handleTouchStartInternal = ({
     return;
   }
 
-  const touch = event.touches[0];
-  touchStartPosition.current = { x: touch!.clientX, y: touch!.clientY };
+  const touch = getPrimaryTouch(event);
+  if (!touch) {
+    return;
+  }
+
+  touchStartPosition.current = { x: touch.clientX, y: touch.clientY };
   longPressTimeoutRef.current = setTimeout(onLongPress, 500);
 };
 
@@ -350,14 +409,115 @@ const handleTouchMoveInternal = ({
     return;
   }
 
-  const touch = event.touches[0];
-  const moveThreshold = 10;
-  const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
-  const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
+  const touch = getPrimaryTouch(event);
+  if (!touch) {
+    return;
+  }
 
-  if (deltaX > moveThreshold || deltaY > moveThreshold) {
+  const deltaX = Math.abs(touch.clientX - touchStartPosition.current.x);
+  const deltaY = Math.abs(touch.clientY - touchStartPosition.current.y);
+
+  if (deltaX > TOUCH_MOVE_THRESHOLD_PX || deltaY > TOUCH_MOVE_THRESHOLD_PX) {
     clearLongPressTimeout({ longPressTimeoutRef });
   }
+};
+
+const clampGroupedTimestampSwipeOffset = (offset: number): number =>
+  Math.min(GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX, Math.max(0, offset));
+
+const getGroupedTimestampContentStyle = (
+  offset: number
+): CSSProperties | undefined => {
+  if (offset <= 0) {
+    return undefined;
+  }
+
+  return { transform: `translateX(-${offset}px)` };
+};
+
+const getGroupedTimestampActionStyle = (
+  offset: number
+): CSSProperties | undefined => {
+  if (offset <= 0) {
+    return undefined;
+  }
+
+  return { transform: `translateX(${offset}px)` };
+};
+
+const getGroupedTimestampOpacityStyle = (offset: number): CSSProperties => ({
+  opacity: Math.min(1, offset / GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX),
+});
+
+const releasePointerCapture = (
+  event: React.PointerEvent<HTMLDivElement>,
+  pointerId: number | undefined
+) => {
+  if (pointerId === undefined) {
+    return;
+  }
+
+  if (
+    typeof event.currentTarget.hasPointerCapture !== "function" ||
+    typeof event.currentTarget.releasePointerCapture !== "function" ||
+    !event.currentTarget.hasPointerCapture(pointerId)
+  ) {
+    return;
+  }
+
+  event.currentTarget.releasePointerCapture(pointerId);
+};
+
+const setPointerCapture = (
+  event: React.PointerEvent<HTMLDivElement>,
+  pointerId: number
+) => {
+  if (
+    typeof event.currentTarget.hasPointerCapture !== "function" ||
+    typeof event.currentTarget.setPointerCapture !== "function" ||
+    event.currentTarget.hasPointerCapture(pointerId)
+  ) {
+    return;
+  }
+
+  event.currentTarget.setPointerCapture(pointerId);
+};
+
+const shouldShowGroupedDropTimestamp = ({
+  shouldGroupWithPreviousDrop,
+  showAuthorInfo,
+  identityMode,
+  isProfileView,
+  location,
+}: {
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly showAuthorInfo: boolean;
+  readonly identityMode: DropIdentityMode;
+  readonly isProfileView: boolean;
+  readonly location: DropLocation;
+}): boolean =>
+  location === DropLocation.WAVE &&
+  identityMode === "default" &&
+  shouldGroupWithPreviousDrop &&
+  !showAuthorInfo &&
+  !isProfileView;
+
+const GroupedDropTimestamp = ({
+  swipeOffset = 0,
+  timestamp,
+}: {
+  readonly swipeOffset?: number;
+  readonly timestamp: number;
+}) => {
+  return (
+    <div
+      className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 tw-flex tw-w-[9.25rem] -tw-translate-y-1/2 tw-justify-end tw-overflow-visible tw-text-right tw-transition-opacity tw-duration-150"
+      data-testid="grouped-drop-swipe-timestamp"
+      style={getGroupedTimestampOpacityStyle(swipeOffset)}
+    >
+      <WaveDropTime timestamp={timestamp} size="xs" variant="compactReveal" />
+    </div>
+  );
 };
 
 const getAuthorHeader = ({
@@ -462,6 +622,7 @@ const getContentBlock = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  groupedTimestampSwipeOffset,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -505,6 +666,7 @@ const getContentBlock = ({
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly groupedTimestampSwipeOffset: number;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -592,6 +754,7 @@ const getContentBlock = ({
           onReply={handleOnReply}
           onEdit={handleOnEdit}
           suppressed={hasActiveLinkCardActions}
+          style={getGroupedTimestampActionStyle(groupedTimestampSwipeOffset)}
         />
       )}
   </>
@@ -660,6 +823,9 @@ const WaveDrop = ({
   const [activeLinkCardActionIds, setActiveLinkCardActionIds] = useState<
     string[]
   >([]);
+  const [timestampSwipeOffset, setTimestampSwipeOffset] = useState(0);
+  const [isTimestampSwipeDragging, setIsTimestampSwipeDragging] =
+    useState(false);
   const [boostAnimation, setBoostAnimation] =
     useState<BoostAnimationState | null>(null);
   const dropRef = useRef<HTMLDivElement>(null);
@@ -668,6 +834,7 @@ const WaveDrop = ({
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
+  const timestampSwipeStartRef = useRef<TimestampSwipeStart | null>(null);
   const {
     markNextClickForSuppression,
     releaseSuppressionAfterTouchEnd,
@@ -703,6 +870,13 @@ const WaveDrop = ({
     shouldGroupWithPreviousDrop,
     isProfileView,
   });
+  const showGroupedTimestamp = shouldShowGroupedDropTimestamp({
+    shouldGroupWithPreviousDrop,
+    showAuthorInfo,
+    identityMode,
+    isProfileView,
+    location,
+  });
   const showActionsButton = shouldShowTouchActionsButton({
     showInteractions,
     hasTouch: canUseTouchActionSheet,
@@ -723,6 +897,12 @@ const WaveDrop = ({
     shouldGroupWithPreviousDrop,
     previousDrop,
   });
+
+  const resetTimestampSwipe = useCallback(() => {
+    timestampSwipeStartRef.current = null;
+    setTimestampSwipeOffset(0);
+    setIsTimestampSwipeDragging(false);
+  }, []);
 
   const handleLongPress = useCallback(() => {
     if (!allowLongPress) return;
@@ -745,8 +925,33 @@ const WaveDrop = ({
         longPressTimeoutRef,
         onLongPress: handleLongPress,
       });
+
+      if (showGroupedTimestamp && canUseTouchActionSheet && !isEditing) {
+        const touch = getPrimaryTouch(e);
+        if (!touch) {
+          resetTimestampSwipe();
+          return;
+        }
+
+        timestampSwipeStartRef.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
+        setTimestampSwipeOffset(0);
+        setIsTimestampSwipeDragging(false);
+        return;
+      }
+
+      resetTimestampSwipe();
     },
-    [allowLongPress, handleLongPress, isEditing]
+    [
+      allowLongPress,
+      canUseTouchActionSheet,
+      handleLongPress,
+      isEditing,
+      resetTimestampSwipe,
+      showGroupedTimestamp,
+    ]
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -754,8 +959,9 @@ const WaveDrop = ({
       longPressTimeoutRef,
       touchStartPosition,
     });
+    resetTimestampSwipe();
     releaseSuppressionAfterTouchEnd();
-  }, [releaseSuppressionAfterTouchEnd]);
+  }, [releaseSuppressionAfterTouchEnd, resetTimestampSwipe]);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
@@ -765,8 +971,148 @@ const WaveDrop = ({
         touchStartPosition,
         longPressTimeoutRef,
       });
+
+      const swipeStart = timestampSwipeStartRef.current;
+      if (
+        !swipeStart ||
+        !showGroupedTimestamp ||
+        !canUseTouchActionSheet ||
+        isEditing
+      ) {
+        return;
+      }
+
+      const touch = getPrimaryTouch(e);
+      if (!touch) {
+        return;
+      }
+
+      const swipeDeltaX = swipeStart.x - touch.clientX;
+      const deltaY = Math.abs(touch.clientY - swipeStart.y);
+      const isActivatedSwipe =
+        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
+        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
+
+      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
+        return;
+      }
+
+      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
+        resetTimestampSwipe();
+        return;
+      }
+
+      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
+      if (nextOffset <= 0) {
+        return;
+      }
+
+      clearLongPressTimeout({ longPressTimeoutRef });
+      markNextClickForSuppression();
+      setLongPressTriggered(false);
+      setIsSlideUp(false);
+      setIsTimestampSwipeDragging(true);
+      setTimestampSwipeOffset(nextOffset);
+
+      if (e.cancelable) {
+        e.preventDefault();
+      }
     },
-    [allowLongPress]
+    [
+      allowLongPress,
+      canUseTouchActionSheet,
+      isEditing,
+      isTimestampSwipeDragging,
+      markNextClickForSuppression,
+      resetTimestampSwipe,
+      showGroupedTimestamp,
+    ]
+  );
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const pointerType = getPointerType(event);
+      if (
+        pointerType === "touch" ||
+        !isPrimaryPointerButton(event) ||
+        !showGroupedTimestamp ||
+        isEditing ||
+        isInteractiveSwipeTarget(event.target)
+      ) {
+        return;
+      }
+
+      timestampSwipeStartRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        pointerId: getPointerId(event),
+      };
+      setTimestampSwipeOffset(0);
+      setIsTimestampSwipeDragging(false);
+    },
+    [isEditing, showGroupedTimestamp]
+  );
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const swipeStart = timestampSwipeStartRef.current;
+      const pointerId = getPointerId(event);
+      if (
+        swipeStart?.pointerId !== pointerId ||
+        getPointerType(event) === "touch" ||
+        !showGroupedTimestamp ||
+        isEditing
+      ) {
+        return;
+      }
+
+      const swipeDeltaX = swipeStart.x - event.clientX;
+      const deltaY = Math.abs(event.clientY - swipeStart.y);
+      const isActivatedSwipe =
+        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
+        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
+
+      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
+        return;
+      }
+
+      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
+        resetTimestampSwipe();
+        releasePointerCapture(event, swipeStart.pointerId);
+        return;
+      }
+
+      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
+      if (nextOffset <= 0) {
+        return;
+      }
+
+      setPointerCapture(event, pointerId);
+
+      markNextClickForSuppression();
+      setIsTimestampSwipeDragging(true);
+      setTimestampSwipeOffset(nextOffset);
+
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+    },
+    [
+      isEditing,
+      isTimestampSwipeDragging,
+      markNextClickForSuppression,
+      resetTimestampSwipe,
+      showGroupedTimestamp,
+    ]
+  );
+
+  const handlePointerEnd = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const swipeStart = timestampSwipeStartRef.current;
+      releasePointerCapture(event, swipeStart?.pointerId);
+      resetTimestampSwipe();
+    },
+    [resetTimestampSwipe]
   );
 
   const handleOnReply = useCallback(() => {
@@ -930,10 +1276,19 @@ const WaveDrop = ({
 
     clearLongPressTimeout({ longPressTimeoutRef });
     touchStartPosition.current = null;
+    resetTimestampSwipe();
     setIsSlideUp(false);
     setLongPressTriggered(false);
     clearSuppression();
-  }, [canUseTouchActionSheet, clearSuppression]);
+  }, [canUseTouchActionSheet, clearSuppression, resetTimestampSwipe]);
+
+  useEffect(() => {
+    if (showGroupedTimestamp) {
+      return;
+    }
+
+    resetTimestampSwipe();
+  }, [resetTimestampSwipe, showGroupedTimestamp]);
 
   // Derive effective menu state - menu can't be open while editing
   const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
@@ -981,6 +1336,7 @@ const WaveDrop = ({
     quotePath,
     embedDepth,
     maxEmbedDepth,
+    groupedTimestampSwipeOffset: timestampSwipeOffset,
   });
 
   const contentOffsetClass = inlineAuthorOnDesktop
@@ -1014,6 +1370,14 @@ const WaveDrop = ({
     location,
     isProfileView,
   });
+  const groupedTimestampTransitionClass = isTimestampSwipeDragging
+    ? "tw-will-change-transform"
+    : "tw-transition-transform tw-duration-150 tw-ease-out";
+  const swipeableContentClass = `tw-relative tw-z-10 ${
+    showGroupedTimestamp ? groupedTimestampTransitionClass : ""
+  }`;
+  const swipeableContentStyle =
+    getGroupedTimestampContentStyle(timestampSwipeOffset);
 
   return (
     <div className={outerClass}>
@@ -1026,11 +1390,29 @@ const WaveDrop = ({
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         onTouchMove={handleTouchMove}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
         onClickCapture={handleClickCapture}
       >
-        {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
-        {reactionsRow}
-        {footerRow}
+        {showGroupedTimestamp && (
+          <GroupedDropTimestamp
+            swipeOffset={timestampSwipeOffset}
+            timestamp={drop.created_at}
+          />
+        )}
+        <div
+          className={swipeableContentClass}
+          data-testid={
+            showGroupedTimestamp ? "grouped-drop-swipeable-content" : undefined
+          }
+          style={swipeableContentStyle}
+        >
+          {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
+          {reactionsRow}
+          {footerRow}
+        </div>
         {showInteractions && (
           <WaveDropMobileMenu
             drop={drop}
