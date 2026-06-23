@@ -4,6 +4,26 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-23T08:10Z:
+  - Current rebase worktree:
+    `D:\repos\6529seize-frontend-native-shell-readonly`.
+  - Current active branch:
+    `codex/e2e-upload-admin-guards`, rebasing PR #2850 onto current
+    `origin/main` after PR #2855 merged.
+  - Active slice is local-only guarded chat-drop sandbox E2E coverage:
+    the mock composer sandbox allows exactly one synthetic chat-drop POST with
+    the expected body and signature shape, then rejects duplicate or non-exact
+    drop bodies with 409 responses. All other dangerous composer/drop/media
+    mutation paths remain fail-closed.
+  - Rebase conflict was limited to workstream memory files
+    (`active-context.md`, `run-log.md`). Code conflicts have not appeared in
+    the sandbox server or Playwright spec so far.
+  - Before republishing PR #2850, rerun focused sandbox validation, Playwright
+    typecheck, changed typecheck/lint or focused ESLint as needed, risk/secret
+    scans, workflow-security scan, and `codex-diff-check`, then trigger the
+    unchanged existing reviewbot lanes plus GLM-swarm. Do not weaken any
+    existing reviewbot lane.
+
 - Latest testing-roadmap state, 2026-06-23T05:00Z:
   - Current active worktree:
     `D:\repos\6529seize-frontend-admin-guards`.
