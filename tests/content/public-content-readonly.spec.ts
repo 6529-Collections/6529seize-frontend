@@ -6,6 +6,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 type RouteExpectation = {
   path: string;
@@ -93,7 +94,7 @@ const CONTENT_ROUTES: RouteExpectation[] = [
 ];
 
 async function gotoContentRoute(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page, { readySelector: "body" });
   await expect(page).not.toHaveTitle(/404|PAGE NOT FOUND/i);
   await expectNoHorizontalOverflow(page);

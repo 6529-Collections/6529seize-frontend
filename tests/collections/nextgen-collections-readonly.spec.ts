@@ -274,15 +274,19 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   test("ReMemes browse page keeps public filters and cards reachable", async ({
     page,
   }) => {
-    await gotoReady(page, "/rememes");
+    await gotoReadyWithApiResponse(
+      page,
+      "/rememes",
+      (url) => url.pathname === "/api/rememes"
+    );
 
     await expect(page).toHaveTitle("ReMemes | Collections");
     await expectAnyVisible(
       [
         page.getByAltText("ReMemes"),
-        page.getByText("ReMemes", { exact: true }),
+        page.getByRole("button", { name: "Collection: ReMemes" }),
       ],
-      "Expected ReMemes title or logo to render"
+      "Expected ReMemes collection header to render"
     );
     for (const filter of [/^Sort:/, /^Token Type:/, /^Meme Reference:/]) {
       await expect(page.getByRole("button", { name: filter })).toBeVisible();

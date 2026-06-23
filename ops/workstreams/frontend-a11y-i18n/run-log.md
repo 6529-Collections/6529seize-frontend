@@ -3323,3 +3323,322 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and mobile
     Chromium.
   - risk floor and changed-secret scan.
+
+## 2026-06-22T15:20Z Create-Wave Sandbox E2E Slice Started
+
+- PR #2844 merged and shipped to production. Production now serves
+  `d26393b40d2fec0e9a2bf557f911324b27bc7686`, and post-deploy
+  `seize run test:e2e:production:readonly` passed 65/65.
+- Started branch `codex/e2e-wave-create-sandbox` from current `origin/main`
+  for the next positive authenticated local-sandbox E2E slice.
+- Extended the local mock API plan for `/waves/create` so the create-wave
+  wizard can exercise the real Chat-wave path with synthetic dev-auth:
+  Overview name, default public groups, description editor, automatic
+  "Only playwright" admin group creation, group publish, wave creation, and
+  navigation to a deterministic created wave detail page.
+- The mutation auditor for this slice should allow only exact queryless
+  sandbox POSTs to `/api/groups`, `/api/groups/{sandbox-admin-id}/visible`,
+  and `/api/waves` with the expected bodies. Unknown mock API writes,
+  same-origin app API writes, dangerous composer/upload paths, oversized bodies,
+  and unknown unsafe external browser writes remain failures.
+- Local validation completed before independent review:
+  - `seize install:frozen`
+  - `node --check tests/support/composerSandboxServer.cjs`
+  - focused ESLint on changed sandbox support/spec files
+  - Prettier check for changed docs/spec/support/package files
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`
+  - `seize run lint:changed`
+  - focused create-wave sandbox rerun: 1 passed
+  - `seize run test:e2e:auth-sandbox`: 5 passed
+  - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and mobile
+    Chromium
+  - risk floor computed Level 4 because `package.json` updates a
+    release-validation control
+  - changed-secret scan and workflow-security scan passed
+  - `codex-diff-check`
+- Independent verifier `Hubble` found one high pre-publication issue: the
+  create-wave mutation validators enforced expected values but did not reject
+  arbitrary extra nested fields. Fixed by adding recursive exact-key checks for
+  the admin group body, description drop/part body, voting, participation, chat,
+  wave config, and top-level create-wave body. Runtime period values remain
+  dynamic but key-exact and must be finite positive numbers with `max >= min`.
+- Post-fix validation passed:
+  - focused create-wave sandbox rerun: 1 passed
+  - `seize run test:e2e:auth-sandbox`: 5 passed
+  - focused ESLint, Prettier check, Playwright typecheck, changed typecheck,
+    `lint:changed`, risk floor, changed-secret scan, workflow-security scan,
+    and `codex-diff-check`
+- Hubble re-reviewed the updated diff and found no remaining publication
+  blockers.
+
+## 2026-06-22T17:31Z Production Read-Only Aggregate Hardening Slice
+
+- PR #2846 merged and shipped to production as
+  `cf0503f787ea4f0b86696f6e0dacc75c01e1ed3d`.
+- Started fresh branch `codex/production-readonly-flake-hardening` from that
+  `origin/main` to fix post-deploy production-readonly test-harness drift.
+- Implemented test-only hardening:
+  - `tests/support/routeReadiness.ts` now has
+    `gotoDocumentWithTransientRetry`, which retries one top-level document
+    navigation only for explicit 502/503/504 responses.
+  - Production-readonly packs that had local navigation wrappers now use that
+    helper.
+  - ReMemes browse waits for `/api/rememes` before asserting filter and card
+    readiness.
+  - ReMemes browse keeps page-identity coverage with the visible logo or the
+    breakpoint-specific `Collection: ReMemes` control, instead of exact body
+    text that does not exist on current production.
+  - ReMemes detail title accepts the current production contract
+    `SeizeGenart | ReMemes`, while still allowing the previous site suffix.
+  - The read-only mutation guard aborts exact Google CSP
+    `csp/script-inclusions/<32-hex>` report POSTs and continues blocking
+    malformed lookalikes.
+- Independent verifier `Heisenberg` diagnosed the ReMemes browse failure as a
+  test over-assertion, not a product regression, and recommended the
+  breakpoint-aware header identity candidate now in the diff.
+- Final validation passed:
+  - `seize exec prettier --check ...`
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - focused production ReMemes browse check: 1 passed
+  - focused production ReMemes detail check: 1 passed
+  - full `seize run test:e2e:production:readonly`: 65/65 passed
+  - `codex-diff-check`
+- Next action: commit, push, open PR, trigger all existing reviewbot lanes plus
+  GLM swarm, iterate feedback, then merge/deploy when Codex and the bots stop
+  adding material value.
+
+## 2026-06-22T17:58Z PR #2847 Reviewbot Follow-Up
+
+- PR #2847 opened and triggered:
+  `/6529bot review general wcag i18n security responsiveness glm-swarm`.
+- CI/status checks passed on first head:
+  CodeQL, DCO, Installed app checks, Plan risk and security checks, SonarCloud,
+  Snyk, and CodeRabbit.
+- 6529bot returned Good-to-merge / no-finding results for the visible Opus
+  lanes, plus useful nice-to-have feedback.
+- Fixed valid review/test-loop feedback:
+  - `gotoDocumentWithTransientRetry` now throws a direct error if the retried
+    document response is still 502/503/504.
+  - CSP report negative coverage now locks exact 32-hex behavior for 31-char,
+    33-char, same-length non-hex, and trailing-slash report IDs.
+  - The Waves/Profile legacy-link test now chooses the first internal
+    `/waves/{id}` link from the wave-list region instead of relying on the
+    first `Open ...` link, because live production can surface an external X
+    link first.
+- Dispositioned one bot note as a miss: ReMemes browse already awaits
+  `gotoReadyWithApiResponse` at line 277.
+- Post-fix validation passed:
+  - focused production Waves/Profile legacy-link test: 1 passed
+  - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - full `seize run test:e2e:production:readonly`: 65/65 passed
+  - `codex-diff-check`
+- Next action: commit/push the follow-up, rerun PR checks and reviewbot lanes on
+  the new head, then merge/deploy if no material feedback remains.
+
+## 2026-06-22T18:18Z PR #2847 GLM Swarm Follow-Up
+
+- GLM swarm reviewed head `efe131b4dd44` and found useful additional test
+  harness hardening ideas.
+- Fixed valid GLM feedback:
+  - added `__tests__/playwright/routeReadiness.test.ts` covering
+    `gotoDocumentWithTransientRetry` success, non-transient pass-through,
+    transient retry, persistent transient throw, and transient-then-null
+    behavior.
+  - made exact Google CSP script-inclusion report positive coverage an explicit
+    named unit test.
+  - tightened the Waves/Profile legacy-link selector to poll for UUID-shaped
+    `/waves/{id}` detail paths inside the wave-list region, avoiding future
+    `/waves/create` or `/waves/feed` false positives.
+- Post-fix validation passed:
+  - `seize run test:no-coverage -- __tests__/playwright/routeReadiness.test.ts __tests__/playwright/readonlyMutationGuard.test.ts`:
+    20 tests passed.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - focused production Waves/Profile legacy-link test: 1 passed
+  - full `seize run test:e2e:production:readonly`: 65/65 passed
+  - `codex-diff-check`
+- Next action: commit/push this GLM follow-up and rerun PR checks plus bots on
+  the final head.
+
+## 2026-06-22T19:35Z PR #2847 Merged And Deployed
+
+- PR #2847 merged into `origin/main` as
+  `0c55e0c628541fb2ac695d87f871568848e7c057`.
+- Final PR readiness before merge:
+  - required PR CI passed: CodeQL, DCO, Installed app checks, Plan risk and
+    security checks, SonarCloud, Snyk, and CodeRabbit status.
+  - 6529bot final-head Opus lanes were clean: general Good to merge, WCAG no
+    findings, i18n no findings, security no findings.
+  - 6529bot responsiveness passed on final-head rerun across web desktop, web
+    mobile, native simulation, and Electron simulation.
+  - GLM swarm found useful feedback on the previous head; all valid items were
+    fixed in the final head. Two final-head GLM reruns failed in the reviewbot
+    worker with the same empty-output error before producing review text, so
+    this was treated as bot-infra noise instead of an unresolved frontend
+    finding.
+- Staged the release by merging current `origin/main` into `1a-staging` as
+  `0fdc39ecddebc8f6730da82ff9838284924e9492`.
+- Staging deploy run #27976114194 succeeded:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27976114194
+  - workflow HTTP version verification matched the staging deploy SHA.
+  - local staging `/api/version` matched
+    `0fdc39ecddebc8f6730da82ff9838284924e9492`.
+  - `seize run test:e2e:staging`: 24 passed / 6 skipped.
+  - manual broad staging read-only aggregate: 127 passed / 2 skipped / 1
+    transient mobile NextGen staging API network miss; the exact failed case
+    passed on focused rerun.
+- Production deploy run #27977449591 succeeded from exact `origin/main` SHA:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/27977449591
+  - workflow HTTP version verification matched the production SHA.
+  - local production `/api/version` matched
+    `0c55e0c628541fb2ac695d87f871568848e7c057`.
+  - `seize run test:e2e:production:readonly`: 65/65 passed.
+- Release notes posted:
+  - 6529 Releases drop #1123251:
+    https://6529.io/waves/05b14183-e153-4e47-bc66-42a0f49102d4?drop=62b11757-72d5-4cbe-83b2-95a550710648
+  - Follow The Repo drop #1123253:
+    https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4?drop=d18e6cc7-eb53-473c-a94c-d1edcb4be808
+- Next slice candidates remain wallet/native/Electron shell coverage, real
+  native runtime detection, and upload/posting/admin guarded packs.
+
+## 2026-06-22T20:05Z Native And Electron Simulated Shell Slice
+
+- Started branch `codex/e2e-native-shell-readonly` from current `origin/main`
+  `0c55e0c628541fb2ac695d87f871568848e7c057`.
+- Scope is test-only:
+  - expose a minimal `globalThis.Capacitor` shim in the Playwright Capacitor
+    simulations, while preserving the existing `CapacitorCustomPlatform`
+    signal.
+  - add read-only E2E coverage for Capacitor runtime signals, iOS/Android Open
+    Data subscription visibility, Capacitor app-wallet empty-state behavior,
+    Electron app-wallet unsupported behavior, and Electron share-modal desktop
+    handoff suppression.
+  - document the focused `test:e2e:native-shell-readonly` pack and broaden
+    `test:e2e:native-sim` to include all surface specs.
+- Boundary: these are browser simulations only. They should catch shell
+  branching drift, but they must not be presented as real packaged iOS,
+  Android, or Electron runtime evidence.
+- Explorer `Ampere` independently confirmed the high-value scope and
+  recommended adding the direct `globalThis.Capacitor` signal plus app-wallet
+  and Electron share-modal assertions.
+- First focused run showed the Capacitor browser simulation uses the secure
+  storage plugin's web fallback and renders an empty supported wallet state,
+  not native unsupported copy. The test and docs now assert that actual
+  simulation contract and leave real native secure storage as a separate
+  non-browser evidence requirement.
+- Targeted unit validation initially exposed two existing test-harness breaks:
+  `HeaderShare.test.tsx` redefined JSDOM's non-configurable
+  `window.location`, and `wagmiAppWalletConnector.test.ts` used viem mock
+  factories that tripped Jest hoisting. Both are fixed in this slice so the
+  relevant share/wallet unit coverage is usable again.
+- Local validation completed:
+  - `seize-local-dev bootstrap`
+  - `seize install:frozen`
+  - `seize run build:env-schema`
+  - targeted Prettier on changed files
+  - `seize run typecheck:playwright`
+  - `seize run test:e2e:native-shell-readonly`: 8 passed / 10 skipped
+  - `seize run test:e2e:native-sim`: first run found a transient iOS
+    simulation mobile-search miss; the exact failed case passed on focused
+    rerun, and the full rerun passed 24 passed / 21 skipped.
+  - `seize run test:e2e:surface-matrix`: 24 passed / 18 skipped.
+  - `seize run test:no-coverage -- __tests__/hooks/useCapacitor.test.ts __tests__/components/header/share/HeaderShare.test.tsx __tests__/utils/appkit-initialization.utils.test.ts __tests__/wagmiConfig/wagmiAppWalletConnector.test.ts`:
+    60 tests passed.
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+    Level 4, driven by `package.json` validation-command changes.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/native-shell-secret-scan.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/native-shell-workflow-security.json`:
+    clean.
+  - `codex-diff-check`
+- Next action: final diff review, commit/push/open PR, then iterate all
+  reviewbot lanes including GLM.
+
+## 2026-06-22T20:27Z PR #2848 Review-Response Follow-Up
+
+- Opened PR #2848:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2848
+- Triggered reviewbot lanes with:
+  `/6529bot review general wcag i18n security responsiveness glm-swarm`.
+- Initial 6529bot Opus feedback:
+  - general: Good to merge, with nice-to-have suggestions around clearer
+    country-check waits, shim consistency, and native-sim runtime budget.
+  - WCAG: no findings.
+- CodeRabbit initially rate-limited and must be retried after its rate window.
+- Independent local subagent reviewer `Mendel` found no P0/P1/P2 blockers and
+  suggested future iOS US-visible subscription coverage.
+- Implemented low-churn review feedback before waiting for the rest of the
+  review loop:
+  - added iOS US-visible Open Data subscription coverage.
+  - replaced raw `page.waitForResponse` country-check waits with
+    `waitForCountryCheck`, which keeps the same route behavior but fails with a
+    direct `/api/policies/country-check` message on timeout.
+  - updated `tests/README.md` to document both iOS hide and iOS US-visible
+    coverage.
+- Local validation after this follow-up:
+  - `seize exec prettier --write tests/surfaces/native-shell-readonly.spec.ts tests/README.md`
+  - `seize run test:e2e:native-shell-readonly`: 9 passed / 12 skipped.
+  - `seize run test:e2e:native-sim`: 25 passed / 23 skipped.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: 16 changed TypeScript files passed.
+  - `codex-diff-check`
+  - `seize run test:e2e:surface-matrix`: 24 passed / 20 skipped.
+- Next action: commit and push the follow-up, then re-trigger/wait all CI and
+  reviewbot lanes on the new head.
+
+## 2026-06-22T21:07Z PR #2848 GLM Follow-Up
+
+- GLM swarm review on head `28b3866587b6` was advisory but useful:
+  - flagged that broadening `test:e2e:native-sim` to every file under
+    `tests/surfaces` could accidentally add future specs to the native
+    simulation budget before they are skip-safe.
+  - suggested visible assertions before Meme Subscriptions href checks.
+  - suggested documenting the pre-navigation `waitForCountryCheck` listener
+    pattern.
+  - suggested confirming `convertFileSrc` passthrough expectations.
+  - suggested documenting the `HeaderShare.test.tsx` origin assumption.
+- Implemented the valid feedback:
+  - `test:e2e:native-sim` now runs an explicit allowlist:
+    `tests/surfaces/core-surfaces.spec.ts` and
+    `tests/surfaces/native-shell-readonly.spec.ts`.
+  - `tests/README.md` records that new native-sim specs must be added to the
+    allowlist intentionally after cross-project skip verification.
+  - iOS US and Android Open Data subscription checks assert visible link state
+    before href.
+  - `waitForCountryCheck` documents that callers start the wait before
+    navigation so it observes route-load requests.
+  - the Capacitor shim keeps existing `convertFileSrc` when present and
+    comments that current simulations do not exercise native file URL
+    conversion.
+  - `HeaderShare.test.tsx` documents that the suite relies on JSDOM owning
+    `window.location` and no test mutating the origin.
+  - Electron app-wallet coverage now also asserts the actual simulated runtime:
+    Capacitor package web runtime, no custom native platform, and Electron user
+    agent signal.
+- Local validation after the GLM follow-up:
+  - `seize exec prettier --write package.json tests/surfaces/native-shell-readonly.spec.ts tests/support/surfaceSimulation.ts tests/README.md __tests__/components/header/share/HeaderShare.test.tsx`
+  - `seize run test:e2e:native-shell-readonly`: 9 passed / 12 skipped.
+  - `seize run test:e2e:native-sim`: 25 passed / 23 skipped.
+  - `seize run typecheck:playwright`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed`: 16 changed TypeScript files passed.
+  - `seize run test:no-coverage -- __tests__/components/header/share/HeaderShare.test.tsx __tests__/wagmiConfig/wagmiAppWalletConnector.test.ts`:
+    57 tests passed across 2 suites.
+  - `seize run test:e2e:surface-matrix`: 24 passed / 20 skipped.
+  - risk floor stayed Level 4 because of `package.json` validation-command
+    changes.
+  - changed-secret scan and workflow-security scan passed.
+  - `codex-diff-check`
+- Next action: commit/push this follow-up, update PR #2848 evidence, re-trigger
+  all reviewbot lanes on the new head, and iterate only on material findings.
