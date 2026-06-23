@@ -48,13 +48,51 @@ import WaveDropTime from "./time/WaveDropTime";
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
 const TOUCH_MOVE_THRESHOLD_PX = 10;
 const GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX = 16;
-const GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX = 72;
+const GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX = 148;
 const GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO = 1.15;
+const PRIMARY_POINTER_BUTTON = 0;
 
 type TouchCoordinates = Pick<Touch, "clientX" | "clientY">;
+type TimestampSwipeStart = {
+  readonly x: number;
+  readonly y: number;
+  readonly pointerId?: number | undefined;
+};
 
 const getPrimaryTouch = (event: React.TouchEvent): TouchCoordinates | null =>
   event.touches[0] ?? event.targetTouches[0] ?? event.changedTouches[0] ?? null;
+
+const getPointerType = (event: React.PointerEvent<HTMLDivElement>): string =>
+  event.pointerType || "mouse";
+
+const getPointerId = (event: React.PointerEvent<HTMLDivElement>): number =>
+  Number.isFinite(event.pointerId) ? event.pointerId : -1;
+
+const isPrimaryPointerButton = (
+  event: React.PointerEvent<HTMLDivElement>
+): boolean => {
+  const maybeButton = (event as React.PointerEvent<HTMLDivElement> & {
+    readonly button?: number | undefined;
+  }).button;
+
+  return (
+    maybeButton === undefined ||
+    maybeButton === PRIMARY_POINTER_BUTTON ||
+    event.buttons === 1
+  );
+};
+
+const isInteractiveSwipeTarget = (target: EventTarget | null): boolean => {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  return Boolean(
+    target.closest(
+      "a, button, input, textarea, select, summary, [role='button'], [contenteditable='true']"
+    )
+  );
+};
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -401,6 +439,40 @@ const getGroupedTimestampOpacityStyle = (offset: number): CSSProperties => ({
   opacity: Math.min(1, offset / GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX),
 });
 
+const releasePointerCapture = (
+  event: React.PointerEvent<HTMLDivElement>,
+  pointerId: number | undefined
+) => {
+  if (pointerId === undefined) {
+    return;
+  }
+
+  if (
+    typeof event.currentTarget.hasPointerCapture !== "function" ||
+    typeof event.currentTarget.releasePointerCapture !== "function" ||
+    !event.currentTarget.hasPointerCapture(pointerId)
+  ) {
+    return;
+  }
+
+  event.currentTarget.releasePointerCapture(pointerId);
+};
+
+const setPointerCapture = (
+  event: React.PointerEvent<HTMLDivElement>,
+  pointerId: number
+) => {
+  if (
+    typeof event.currentTarget.hasPointerCapture !== "function" ||
+    typeof event.currentTarget.setPointerCapture !== "function" ||
+    event.currentTarget.hasPointerCapture(pointerId)
+  ) {
+    return;
+  }
+
+  event.currentTarget.setPointerCapture(pointerId);
+};
+
 const shouldShowGroupedDropTimestamp = ({
   shouldGroupWithPreviousDrop,
   showAuthorInfo,
@@ -421,32 +493,19 @@ const shouldShowGroupedDropTimestamp = ({
   !isProfileView;
 
 const GroupedDropTimestamp = ({
-  placement,
   swipeOffset = 0,
   timestamp,
 }: {
-  readonly placement: "desktop" | "mobile";
   readonly swipeOffset?: number;
   readonly timestamp: number;
 }) => {
-  if (placement === "desktop") {
-    return (
-      <div
-        className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3 tw-z-20 tw-hidden tw-w-[3.25rem] tw-justify-end tw-pr-3 tw-opacity-0 tw-transition-opacity tw-duration-150 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 md:tw-flex"
-        data-testid="grouped-drop-hover-timestamp"
-      >
-        <WaveDropTime timestamp={timestamp} size="xs" />
-      </div>
-    );
-  }
-
   return (
     <div
-      className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 -tw-translate-y-1/2 tw-transition-opacity tw-duration-150 md:tw-hidden"
+      className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 tw-flex tw-w-[9.25rem] -tw-translate-y-1/2 tw-justify-end tw-overflow-visible tw-text-right tw-transition-opacity tw-duration-150"
       data-testid="grouped-drop-swipe-timestamp"
       style={getGroupedTimestampOpacityStyle(swipeOffset)}
     >
-      <WaveDropTime timestamp={timestamp} size="xs" />
+      <WaveDropTime timestamp={timestamp} size="xs" variant="compactReveal" />
     </div>
   );
 };
@@ -762,7 +821,7 @@ const WaveDrop = ({
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
-  const timestampSwipeStartRef = useRef<{ x: number; y: number } | null>(null);
+  const timestampSwipeStartRef = useRef<TimestampSwipeStart | null>(null);
   const {
     markNextClickForSuppression,
     releaseSuppressionAfterTouchEnd,
@@ -956,6 +1015,171 @@ const WaveDrop = ({
       showGroupedTimestamp,
     ]
   );
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const pointerType = getPointerType(event);
+      if (
+        pointerType === "touch" ||
+        !isPrimaryPointerButton(event) ||
+        !showGroupedTimestamp ||
+        isEditing ||
+        isInteractiveSwipeTarget(event.target)
+      ) {
+        return;
+      }
+
+      timestampSwipeStartRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        pointerId: getPointerId(event),
+      };
+      setTimestampSwipeOffset(0);
+      setIsTimestampSwipeDragging(false);
+    },
+    [isEditing, showGroupedTimestamp]
+  );
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const swipeStart = timestampSwipeStartRef.current;
+      const pointerId = getPointerId(event);
+      if (
+        !swipeStart ||
+        swipeStart.pointerId !== pointerId ||
+        getPointerType(event) === "touch" ||
+        !showGroupedTimestamp ||
+        isEditing
+      ) {
+        return;
+      }
+
+      const swipeDeltaX = swipeStart.x - event.clientX;
+      const deltaY = Math.abs(event.clientY - swipeStart.y);
+      const isActivatedSwipe =
+        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
+        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
+
+      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
+        return;
+      }
+
+      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
+        resetTimestampSwipe();
+        releasePointerCapture(event, swipeStart.pointerId);
+        return;
+      }
+
+      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
+      if (nextOffset <= 0) {
+        return;
+      }
+
+      setPointerCapture(event, pointerId);
+
+      markNextClickForSuppression();
+      setIsTimestampSwipeDragging(true);
+      setTimestampSwipeOffset(nextOffset);
+
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+    },
+    [
+      isEditing,
+      isTimestampSwipeDragging,
+      markNextClickForSuppression,
+      resetTimestampSwipe,
+      showGroupedTimestamp,
+    ]
+  );
+
+  const handlePointerEnd = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const swipeStart = timestampSwipeStartRef.current;
+      releasePointerCapture(event, swipeStart?.pointerId);
+      resetTimestampSwipe();
+    },
+    [resetTimestampSwipe]
+  );
+
+  const handleMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (
+        event.button !== PRIMARY_POINTER_BUTTON ||
+        !showGroupedTimestamp ||
+        isEditing ||
+        isInteractiveSwipeTarget(event.target)
+      ) {
+        return;
+      }
+
+      timestampSwipeStartRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+      setTimestampSwipeOffset(0);
+      setIsTimestampSwipeDragging(false);
+    },
+    [isEditing, showGroupedTimestamp]
+  );
+
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      const swipeStart = timestampSwipeStartRef.current;
+      if (
+        !swipeStart ||
+        swipeStart.pointerId !== undefined ||
+        !showGroupedTimestamp ||
+        isEditing
+      ) {
+        return;
+      }
+
+      const swipeDeltaX = swipeStart.x - event.clientX;
+      const deltaY = Math.abs(event.clientY - swipeStart.y);
+      const isActivatedSwipe =
+        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
+        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
+
+      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
+        return;
+      }
+
+      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
+        resetTimestampSwipe();
+        return;
+      }
+
+      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
+      if (nextOffset <= 0) {
+        return;
+      }
+
+      markNextClickForSuppression();
+      setIsTimestampSwipeDragging(true);
+      setTimestampSwipeOffset(nextOffset);
+
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+    },
+    [
+      isEditing,
+      isTimestampSwipeDragging,
+      markNextClickForSuppression,
+      resetTimestampSwipe,
+      showGroupedTimestamp,
+    ]
+  );
+
+  const handleMouseEnd = useCallback(() => {
+    if (timestampSwipeStartRef.current?.pointerId !== undefined) {
+      return;
+    }
+
+    resetTimestampSwipe();
+  }, [resetTimestampSwipe]);
 
   const handleOnReply = useCallback(() => {
     // Cancel any active edit mode first
@@ -1231,20 +1455,21 @@ const WaveDrop = ({
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         onTouchMove={handleTouchMove}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseEnd}
+        onMouseLeave={handleMouseEnd}
         onClickCapture={handleClickCapture}
       >
         {showGroupedTimestamp && (
-          <>
-            <GroupedDropTimestamp
-              placement="desktop"
-              timestamp={drop.created_at}
-            />
-            <GroupedDropTimestamp
-              placement="mobile"
-              swipeOffset={timestampSwipeOffset}
-              timestamp={drop.created_at}
-            />
-          </>
+          <GroupedDropTimestamp
+            swipeOffset={timestampSwipeOffset}
+            timestamp={drop.created_at}
+          />
         )}
         <div
           className={swipeableContentClass}

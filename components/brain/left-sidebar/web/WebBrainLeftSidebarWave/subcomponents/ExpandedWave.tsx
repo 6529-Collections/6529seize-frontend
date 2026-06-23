@@ -90,7 +90,12 @@ export const ExpandedWave = ({
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowDropTime = presentLatestDropTimestamp !== null;
   const rowVerticalPaddingClasses = isChildRow ? "tw-py-1.5" : "tw-py-2";
-  const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
+  const {
+    rowPaddingClasses,
+    rowGapClasses,
+    linkGapClasses,
+    rowHeightClasses,
+  } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
       variant: "web",
@@ -146,7 +151,7 @@ export const ExpandedWave = ({
       onMouseEnter={handleRowMouseEnter}
       onMouseLeave={cancelSubwavePrefetch}
       role="group"
-      className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-relative tw-flex tw-items-start ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
