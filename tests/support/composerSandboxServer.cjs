@@ -35,9 +35,11 @@ const SANDBOX_NOTIFICATION_REACTION_DROP_ID =
 const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
 const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
+const SANDBOX_SUBMITTED_CHAT_DROP_ID = "00000000-0000-4000-8000-000000000539";
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
 const SANDBOX_CREATED_WAVE_DESCRIPTION =
   "Local-only create-wave description for Playwright.";
+const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
 const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
@@ -367,6 +369,55 @@ const localDrop = {
   nft_links: [],
 };
 
+const submittedChatDrop = {
+  id: SANDBOX_SUBMITTED_CHAT_DROP_ID,
+  serial_no: 2,
+  drop_type: "CHAT",
+  rank: null,
+  wave: localWaveMin,
+  author: localProfile,
+  created_at: CREATED_AT + 2000,
+  updated_at: null,
+  title: null,
+  parts: [
+    {
+      part_id: 1,
+      content: SANDBOX_CHAT_DROP_CONTENT,
+      media: [],
+      attachments: [],
+      quoted_drop: null,
+    },
+  ],
+  parts_count: 1,
+  referenced_nfts: [],
+  mentioned_users: [],
+  mentioned_groups: [],
+  mentioned_waves: [],
+  metadata: [],
+  rating: 0,
+  realtime_rating: 0,
+  rating_prediction: 0,
+  top_raters: [],
+  raters_count: 0,
+  context_profile_context: {
+    rating: 0,
+    min_rating: 0,
+    max_rating: 0,
+    reaction: null,
+    boosted: false,
+    bookmarked: false,
+    curatable: false,
+    curated: false,
+  },
+  subscribed_actions: [],
+  is_signed: false,
+  reactions: [],
+  boosts: 0,
+  is_additional_action_promised: false,
+  hide_link_preview: false,
+  nft_links: [],
+};
+
 const createdWaveMin = {
   ...localWaveMin,
   id: SANDBOX_CREATED_WAVE_ID,
@@ -684,6 +735,72 @@ function isExpectedDirectMessageBody(body) {
   );
 }
 
+function isExpectedChatDropPart(part) {
+  return (
+    hasOnlyKeys(part, ["content", "media", "quoted_drop"]) &&
+    part.content === SANDBOX_CHAT_DROP_CONTENT &&
+    part.quoted_drop === null &&
+    Array.isArray(part.media) &&
+    part.media.length === 0
+  );
+}
+
+function isExpectedChatDropSignerAddress(signerAddress) {
+  return signerAddress === "" || isSameAddress(signerAddress, SANDBOX_WALLET);
+}
+
+function isExpectedChatDropBody(body) {
+  if (
+    !hasOnlyKeys(body, [
+      "drop_type",
+      "is_safe_signature",
+      "mentioned_groups",
+      "mentioned_users",
+      "mentioned_waves",
+      "metadata",
+      "parts",
+      "referenced_nfts",
+      "signature",
+      "signer_address",
+      "title",
+      "wave_id",
+    ])
+  ) {
+    return false;
+  }
+
+  return (
+    body.wave_id === SANDBOX_WAVE_ID &&
+    body.drop_type === "CHAT" &&
+    body.title === null &&
+    body.signature === null &&
+    body.is_safe_signature === false &&
+    isExpectedChatDropSignerAddress(body.signer_address) &&
+    Array.isArray(body.parts) &&
+    body.parts.length === 1 &&
+    isExpectedChatDropPart(body.parts[0]) &&
+    Array.isArray(body.referenced_nfts) &&
+    body.referenced_nfts.length === 0 &&
+    Array.isArray(body.mentioned_users) &&
+    body.mentioned_users.length === 0 &&
+    Array.isArray(body.mentioned_groups) &&
+    body.mentioned_groups.length === 0 &&
+    Array.isArray(body.mentioned_waves) &&
+    body.mentioned_waves.length === 0 &&
+    Array.isArray(body.metadata) &&
+    body.metadata.length === 0
+  );
+}
+
+function hasAcceptedChatDropSubmit() {
+  return requests.some(
+    (request) =>
+      request.method === "POST" &&
+      request.path === "/api/drops" &&
+      request.kind === "allowed-sandbox-mutation"
+  );
+}
+
 function hasOnlyKeys(value, expectedKeys) {
   if (!isPlainObject(value)) {
     return false;
@@ -952,6 +1069,11 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
     return isEmptyRequestBody(body);
   }
 
+  if (pathname === "/api/drops") {
+    // The diagnostics reset bounds this synthetic chat submit to one accepted request.
+    return isExpectedChatDropBody(body) && !hasAcceptedChatDropSubmit();
+  }
+
   if (pathname === "/api/groups") {
     return isExpectedCreateAdminGroupBody(body);
   }
@@ -987,11 +1109,11 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 }
 
 function classifyRequest(method, pathname, searchParams, body) {
-  if (isDangerousComposerMutation(method, pathname)) {
-    return "dangerous-composer-mutation";
-  }
   if (isKnownSandboxMutation(method, pathname, searchParams, body)) {
     return "allowed-sandbox-mutation";
+  }
+  if (isDangerousComposerMutation(method, pathname)) {
+    return "dangerous-composer-mutation";
   }
   if (!isSafeReadMethod(method)) {
     return "unhandled-mutation";
@@ -1031,6 +1153,37 @@ function loggedRequestBody(pathname, body) {
     };
   }
 
+  if (pathname === "/api/drops") {
+    const firstPart = Array.isArray(body.parts) ? body.parts[0] : null;
+    return {
+      wave_id: typeof body.wave_id === "string" ? body.wave_id : null,
+      drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
+      content: isPlainObject(firstPart) ? firstPart.content : null,
+      part_count: Array.isArray(body.parts) ? body.parts.length : 0,
+      part_keys: isPlainObject(firstPart) ? sortedKeys(firstPart) : [],
+      media_count: Array.isArray(firstPart?.media) ? firstPart.media.length : 0,
+      has_attachments:
+        isPlainObject(firstPart) && Object.hasOwn(firstPart, "attachments"),
+      referenced_nfts_count: Array.isArray(body.referenced_nfts)
+        ? body.referenced_nfts.length
+        : 0,
+      mentioned_users_count: Array.isArray(body.mentioned_users)
+        ? body.mentioned_users.length
+        : 0,
+      mentioned_groups_count: Array.isArray(body.mentioned_groups)
+        ? body.mentioned_groups.length
+        : 0,
+      mentioned_waves_count: Array.isArray(body.mentioned_waves)
+        ? body.mentioned_waves.length
+        : 0,
+      metadata_count: Array.isArray(body.metadata) ? body.metadata.length : 0,
+      signature: body.signature,
+      is_safe_signature: body.is_safe_signature,
+      signer_address: body.signer_address,
+      keys: sortedKeys(body),
+    };
+  }
+
   if (pathname === "/api/waves") {
     const firstPart = Array.isArray(body.description_drop?.parts)
       ? body.description_drop.parts[0]
@@ -1061,18 +1214,20 @@ function loggedRequestBody(pathname, body) {
 function recordRequest(method, url, body) {
   const pathname = normalizedPath(url);
   if (pathname.startsWith("/__composer-sandbox")) {
-    return;
+    return undefined;
   }
   if (method === "OPTIONS") {
-    return;
+    return undefined;
   }
   const loggedBody = loggedRequestBody(pathname, body);
+  const kind = classifyRequest(method, pathname, url.searchParams, body);
   requests.push({
     method,
     path: pathname,
-    kind: classifyRequest(method, pathname, url.searchParams, body),
+    kind,
     ...(loggedBody === undefined ? {} : { body: loggedBody }),
   });
+  return kind;
 }
 
 function requestLog() {
@@ -1092,229 +1247,189 @@ function handleDiagnostics(method, pathname, res) {
   return false;
 }
 
-function handleMockApi(method, pathname, url, body, res) {
-  if (pathname === "/api/community-members" && isSafeReadMethod(method)) {
-    const query = url.searchParams.get("param") ?? "";
-    const members =
-      query.trim().length >= 3 ? [dmRecipientCommunityMember] : [];
-    writeJson(res, 200, members);
-    return true;
-  }
+function writeJsonResponse(res, payload) {
+  writeJson(res, 200, payload);
+  return true;
+}
 
-  if (pathname === "/api/groups" && isSafeReadMethod(method)) {
-    writeJson(res, 200, []);
-    return true;
-  }
+function writeEmptyResponse(res, status) {
+  writeEmpty(res, status);
+  return true;
+}
 
-  if (pathname === "/api/v2/waves" && isSafeReadMethod(method)) {
-    writeJson(res, 200, { data: [localWaveOverview], page: 1, next: false });
-    return true;
-  }
+const mockApiExactReadRoutes = new Map([
+  ["/api/groups", () => []],
+  [
+    "/api/v2/waves",
+    () => ({ data: [localWaveOverview], page: 1, next: false }),
+  ],
+  ["/api/v2/official-waves", () => [localWaveOverview]],
+  [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
+  [
+    `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
+    () => ({ wave: dmWaveOverview, drops: [] }),
+  ],
+  [`/api/waves/${SANDBOX_CREATED_WAVE_ID}`, () => createdWave],
+  [
+    `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/drops`,
+    () => ({ wave: createdWaveOverview, drops: [createdWaveDrop] }),
+  ],
+  ["/api/v2/boosted-drops", () => emptyPage()],
+  ["/api/v2/drops", () => emptyPage()],
+  ["/api/feed", () => []],
+]);
 
-  if (pathname === "/api/v2/official-waves" && isSafeReadMethod(method)) {
-    writeJson(res, 200, [localWaveOverview]);
-    return true;
-  }
-
-  if (
-    pathname === `/api/waves/${SANDBOX_DM_WAVE_ID}` &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, dmWave);
-    return true;
-  }
-
-  if (
-    pathname === `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops` &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, { wave: dmWaveOverview, drops: [] });
-    return true;
-  }
-
-  if (
-    pathname === `/api/waves/${SANDBOX_CREATED_WAVE_ID}` &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, createdWave);
-    return true;
-  }
-
-  if (
-    pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/drops` &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, {
-      wave: createdWaveOverview,
-      drops: [createdWaveDrop],
-    });
-    return true;
-  }
-
-  if (/^\/api\/waves\/[^/]+$/.test(pathname) && isSafeReadMethod(method)) {
-    writeJson(res, 200, localWave);
-    return true;
-  }
-
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/drops$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, { wave: localWaveOverview, drops: [localDrop] });
-    return true;
-  }
-
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/search$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, { data: [], page: 1, next: false });
-    return true;
-  }
-
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/leaderboard$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, {
+const mockApiPatternReadRoutes = [
+  { pattern: /^\/api\/waves\/[^/]+$/, response: () => localWave },
+  {
+    pattern: /^\/api\/v2\/waves\/[^/]+\/drops$/,
+    response: () => ({ wave: localWaveOverview, drops: [localDrop] }),
+  },
+  {
+    pattern: /^\/api\/v2\/waves\/[^/]+\/search$/,
+    response: () => ({ data: [], page: 1, next: false }),
+  },
+  {
+    pattern: /^\/api\/v2\/waves\/[^/]+\/leaderboard$/,
+    response: () => ({
       wave: localWaveMin,
       drops: [],
       count: 0,
       page: 1,
       next: false,
-    });
-    return true;
+    }),
+  },
+  { pattern: /^\/api\/v2\/waves\/[^/]+\/polls$/, response: () => emptyPage() },
+  { pattern: /^\/api\/waves\/[^/]+\/subwaves$/, response: () => emptyPage() },
+  { pattern: /^\/api\/v2\/waves\/[^/]+\/metadata$/, response: () => [] },
+  { pattern: /^\/api\/v2\/drops\/[^/]+\/metadata$/, response: () => [] },
+  { pattern: /^\/api\/v2\/drops\/[^/]+\/reactions$/, response: () => [] },
+  { pattern: /^\/api\/identities\/[^/]+$/, response: () => localProfile },
+  { pattern: /^\/api\/profiles\/[^/]+\/proxies$/, response: () => [] },
+];
+
+function handleCommunityMemberRead(pathname, url, res) {
+  if (pathname !== "/api/community-members") {
+    return false;
   }
 
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/polls$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, emptyPage());
-    return true;
+  const query = url.searchParams.get("param") ?? "";
+  const members = query.trim().length >= 3 ? [dmRecipientCommunityMember] : [];
+  return writeJsonResponse(res, members);
+}
+
+function handleNotificationRead(pathname, url, res) {
+  if (pathname !== "/api/v2/notifications") {
+    return false;
   }
 
-  if (
-    /^\/api\/waves\/[^/]+\/subwaves$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, emptyPage());
-    return true;
+  return writeJsonResponse(res, notificationResponse(url.searchParams));
+}
+
+function handleExactMockApiRead(pathname, res) {
+  const response = mockApiExactReadRoutes.get(pathname);
+  if (!response) {
+    return false;
   }
 
-  if (
-    /^\/api\/v2\/waves\/[^/]+\/metadata$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, []);
-    return true;
+  return writeJsonResponse(res, response());
+}
+
+function handlePatternMockApiRead(pathname, res) {
+  const route = mockApiPatternReadRoutes.find(({ pattern }) =>
+    pattern.test(pathname)
+  );
+  if (!route) {
+    return false;
   }
 
-  if (pathname === "/api/v2/boosted-drops" && isSafeReadMethod(method)) {
-    writeJson(res, 200, emptyPage());
-    return true;
+  return writeJsonResponse(res, route.response());
+}
+
+function handleMockApiRead(method, pathname, url, res) {
+  if (!isSafeReadMethod(method)) {
+    return false;
   }
 
-  if (pathname === "/api/v2/drops" && isSafeReadMethod(method)) {
-    writeJson(res, 200, emptyPage());
-    return true;
+  return (
+    handleCommunityMemberRead(pathname, url, res) ||
+    handleNotificationRead(pathname, url, res) ||
+    handleExactMockApiRead(pathname, res) ||
+    handlePatternMockApiRead(pathname, res)
+  );
+}
+
+function isNotificationMutationPath(pathname) {
+  return (
+    pathname === "/api/notifications/read" ||
+    Boolean(notificationIdFromPath(pathname))
+  );
+}
+
+const mockApiKnownPostRoutes = [
+  {
+    matches: (pathname) => pathname === "/api/groups",
+    respond: (res) =>
+      writeJsonResponse(res, { ...sandboxAdminGroup, visible: false }),
+  },
+  {
+    matches: (pathname) =>
+      pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible`,
+    respond: (res) => writeJsonResponse(res, sandboxAdminGroup),
+  },
+  {
+    matches: (pathname) => pathname === "/api/waves",
+    respond: (res) => writeJsonResponse(res, createdWave),
+  },
+  {
+    matches: (pathname) => Boolean(notificationWaveIdFromPath(pathname)),
+    respond: (res) => writeEmptyResponse(res, 204),
+  },
+  {
+    matches: isNotificationMutationPath,
+    respond: (res) => writeEmptyResponse(res, 204),
+  },
+  {
+    matches: (pathname) => pathname === "/api/waves/direct-message/new",
+    respond: (res) => writeJsonResponse(res, dmWave),
+  },
+];
+
+function handleAllowedChatDropPost(method, pathname, requestKind, res) {
+  if (method !== "POST" || pathname !== "/api/drops") {
+    return false;
   }
 
-  if (
-    /^\/api\/v2\/drops\/[^/]+\/metadata$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, []);
-    return true;
+  if (requestKind !== "allowed-sandbox-mutation") {
+    return false;
   }
 
-  if (
-    /^\/api\/v2\/drops\/[^/]+\/reactions$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, []);
-    return true;
+  return writeJsonResponse(res, submittedChatDrop);
+}
+
+function handleKnownSandboxPost(method, pathname, url, body, res) {
+  if (method !== "POST") {
+    return false;
   }
 
-  if (/^\/api\/identities\/[^/]+$/.test(pathname) && isSafeReadMethod(method)) {
-    writeJson(res, 200, localProfile);
-    return true;
+  if (!isKnownSandboxMutation(method, pathname, url.searchParams, body)) {
+    return false;
   }
 
-  if (
-    /^\/api\/profiles\/[^/]+\/proxies$/.test(pathname) &&
-    isSafeReadMethod(method)
-  ) {
-    writeJson(res, 200, []);
-    return true;
+  const route = mockApiKnownPostRoutes.find(({ matches }) => matches(pathname));
+  if (!route) {
+    return false;
   }
 
-  if (pathname === "/api/v2/notifications" && isSafeReadMethod(method)) {
-    writeJson(res, 200, notificationResponse(url.searchParams));
-    return true;
-  }
+  return route.respond(res);
+}
 
-  if (pathname === "/api/feed" && isSafeReadMethod(method)) {
-    writeJson(res, 200, []);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === "/api/groups" &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeJson(res, 200, { ...sandboxAdminGroup, visible: false });
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible` &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeJson(res, 200, sandboxAdminGroup);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === "/api/waves" &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeJson(res, 200, createdWave);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    notificationWaveIdFromPath(pathname) &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeEmpty(res, 204);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    (pathname === "/api/notifications/read" ||
-      notificationIdFromPath(pathname)) &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeEmpty(res, 204);
-    return true;
-  }
-
-  if (
-    method === "POST" &&
-    pathname === "/api/waves/direct-message/new" &&
-    isKnownSandboxMutation(method, pathname, url.searchParams, body)
-  ) {
-    writeJson(res, 200, dmWave);
-    return true;
-  }
-
-  return false;
+function handleMockApi(method, pathname, url, body, res, requestKind) {
+  return (
+    handleMockApiRead(method, pathname, url, res) ||
+    handleAllowedChatDropPost(method, pathname, requestKind, res) ||
+    handleKnownSandboxPost(method, pathname, url, body, res)
+  );
 }
 
 function readRequestBody(req) {
@@ -1381,9 +1496,9 @@ async function handleRequest(req, res) {
     });
     return;
   }
-  recordRequest(method, url, requestBody);
+  const requestKind = recordRequest(method, url, requestBody);
 
-  if (handleMockApi(method, pathname, url, requestBody, res)) {
+  if (handleMockApi(method, pathname, url, requestBody, res, requestKind)) {
     return;
   }
 
