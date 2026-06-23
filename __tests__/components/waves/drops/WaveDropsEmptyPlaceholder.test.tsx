@@ -5,11 +5,11 @@ import WaveDropsEmptyPlaceholder from '@/components/waves/drops/WaveDropsEmptyPl
 describe('WaveDropsEmptyPlaceholder', () => {
   it('shows subtitle when drop id present', () => {
     render(<WaveDropsEmptyPlaceholder dropId="1" />);
-    expect(screen.getByText('Share your thoughts and join the discussion.')).toBeInTheDocument();
+    expect(screen.getByText('Share your thoughts and join the discussion')).toBeInTheDocument();
   });
 
   it('hides subtitle when drop id not provided', () => {
     render(<WaveDropsEmptyPlaceholder dropId={null} />);
-    expect(screen.queryByText('Share your thoughts and join the discussion.')).toBeNull();
+    expect(screen.queryByText('Share your thoughts and join the discussion')).toBeNull();
   });
 });

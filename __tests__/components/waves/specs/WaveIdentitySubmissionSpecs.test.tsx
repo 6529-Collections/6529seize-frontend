@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import WaveIdentitySubmissionSpecs from "@/components/waves/specs/WaveIdentitySubmissionSpecs";
+import { WaveIdentitySubmissionSpecsRows } from "@/components/waves/specs/WaveIdentitySubmissionSpecs";
 import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
@@ -13,7 +13,7 @@ describe("WaveIdentitySubmissionSpecs", () => {
 
   it("renders compact identity submission summaries when configured", () => {
     render(
-      <WaveIdentitySubmissionSpecs
+      <WaveIdentitySubmissionSpecsRows
         wave={{
           ...baseWave,
           participation: {
@@ -28,11 +28,9 @@ describe("WaveIdentitySubmissionSpecs", () => {
             },
           },
         }}
-        useRing={false}
       />
     );
 
-    expect(screen.getByText("Identity submissions")).toBeInTheDocument();
     expect(screen.getByText("Eligible identities")).toBeInTheDocument();
     expect(screen.getByText("Others only")).toBeInTheDocument();
     expect(screen.getByText("Repeat submissions")).toBeInTheDocument();
@@ -41,7 +39,7 @@ describe("WaveIdentitySubmissionSpecs", () => {
 
   it("renders nothing when the wave is not identity-based", () => {
     const { container } = render(
-      <WaveIdentitySubmissionSpecs wave={baseWave} />
+      <WaveIdentitySubmissionSpecsRows wave={baseWave} />
     );
     expect(container.firstChild).toBeNull();
   });

@@ -20,7 +20,11 @@ jest.mock(
   () =>
     function MockConnect(props: any) {
       return (
-        <button data-testid="connect" onClick={() => props.onMintFor("0xabc")}>
+        <button
+          data-testid="connect"
+          onClick={() =>
+            props.onMintFor("0x0000000000000000000000000000000000000abc")
+          }>
           connect
         </button>
       );
@@ -35,7 +39,7 @@ const reset = jest.fn();
   isPending: false,
 });
 (useWaitForTransactionReceipt as jest.Mock).mockReturnValue({});
-(useReadContract as jest.Mock).mockReturnValue({ data: 0 });
+(useReadContract as jest.Mock).mockReturnValue({ data: 0n });
 (useReadContracts as jest.Mock).mockReturnValue({ data: [{ result: false }] });
 
 const baseProps = {
@@ -48,6 +52,7 @@ const baseProps = {
     phase: ManifoldPhase.PUBLIC,
     instanceId: 1,
     cost: 1,
+    costWei: 1n,
     startDate: 0,
     isFinalized: false,
   } as any,

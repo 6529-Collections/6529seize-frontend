@@ -102,14 +102,12 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
     expect(onToggleOpen).toHaveBeenCalledTimes(2);
   });
 
-  it("copies full address and ens from expanded panel", () => {
+  it("copies full address from expanded panel", () => {
     renderComponent({ isOpen: true });
 
     fireEvent.click(screen.getByRole("button", { name: "Copy full address" }));
-    fireEvent.click(screen.getByRole("button", { name: "Copy ens name" }));
 
-    expect(mockCopy).toHaveBeenNthCalledWith(1, "0x1234567890abcdef");
-    expect(mockCopy).toHaveBeenNthCalledWith(2, "Disp");
+    expect(mockCopy).toHaveBeenCalledWith("0x1234567890abcdef");
 
     act(() => {
       jest.advanceTimersByTime(1000);

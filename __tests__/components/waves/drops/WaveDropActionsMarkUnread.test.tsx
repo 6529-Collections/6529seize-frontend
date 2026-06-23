@@ -105,7 +105,7 @@ describe('WaveDropActionsMarkUnread', () => {
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: 'Marked as unread',
+        message: 'Marked as unread.',
         type: 'success',
       });
     });
@@ -121,8 +121,10 @@ describe('WaveDropActionsMarkUnread', () => {
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: 'API Error',
         type: 'error',
+        title: "Couldn't mark this drop as unread.",
+        description: 'Please try again.',
+        details: 'API Error.',
       });
     });
   });
