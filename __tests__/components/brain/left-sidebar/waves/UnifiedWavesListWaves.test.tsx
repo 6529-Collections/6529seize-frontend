@@ -283,6 +283,52 @@ it("adds the active loaded all-wave to the highly rated preview source", () => {
   ]);
 });
 
+it("does not recover known active waves into the highly rated preview source", () => {
+  const highlyRatedWaves = [
+    createMockMinimalWave({
+      id: "h1",
+      sidebarSection: "highly-rated",
+    }),
+  ];
+  const activePinnedWave = createMockMinimalWave({
+    id: "active-pinned",
+    isPinned: true,
+  });
+  const activeFollowingWave = createMockMinimalWave({
+    id: "active-following",
+    isFollowing: true,
+  });
+  const activeFollowedSubwaveContainer = createMockMinimalWave({
+    id: "active-followed-subwave-container",
+    isFollowedSubwaveContainer: true,
+  });
+
+  expect(
+    getHighlyRatedPreviewWaves({
+      activeWaveLookupWaves: [activePinnedWave],
+      activeParentWaveId: null,
+      activeWaveId: activePinnedWave.id,
+      highlyRatedWaves,
+    }).map((wave) => wave.id)
+  ).toEqual(["h1"]);
+  expect(
+    getHighlyRatedPreviewWaves({
+      activeWaveLookupWaves: [activeFollowingWave],
+      activeParentWaveId: null,
+      activeWaveId: activeFollowingWave.id,
+      highlyRatedWaves,
+    }).map((wave) => wave.id)
+  ).toEqual(["h1"]);
+  expect(
+    getHighlyRatedPreviewWaves({
+      activeWaveLookupWaves: [activeFollowedSubwaveContainer],
+      activeParentWaveId: null,
+      activeWaveId: activeFollowedSubwaveContainer.id,
+      highlyRatedWaves,
+    }).map((wave) => wave.id)
+  ).toEqual(["h1"]);
+});
+
 it("prefers the active wave over its parent in the preview recovery pool", () => {
   const highlyRatedWaves = Array.from({ length: 10 }, (_, index) =>
     createMockMinimalWave({
