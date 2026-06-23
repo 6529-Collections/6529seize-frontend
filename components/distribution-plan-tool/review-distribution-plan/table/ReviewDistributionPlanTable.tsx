@@ -13,15 +13,6 @@ import {
   type ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable.types";
 
-export {
-  buildReviewDistributionPlanTableRows,
-  FetchResultsType,
-  ReviewDistributionPlanTableItemType,
-  type FullResultWallet,
-  type ReviewDistributionPlanTableItem,
-  type ReviewDistributionPlanTablePhase,
-} from "./ReviewDistributionPlanTable.types";
-
 export default function ReviewDistributionPlanTable() {
   const { phases } = useContext(DistributionPlanToolContext);
   const { connectedProfile } = useContext(AuthContext);
@@ -34,7 +25,8 @@ export default function ReviewDistributionPlanTable() {
       buildReviewDistributionPlanTableRows({
         phases,
         connectedProfile,
-        distributionAdminWallets: seizeSettings.distribution_admin_wallets ?? [],
+        distributionAdminWallets:
+          seizeSettings.distribution_admin_wallets ?? [],
       })
     );
   }, [phases, connectedProfile, seizeSettings.distribution_admin_wallets]);
