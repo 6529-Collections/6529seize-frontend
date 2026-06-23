@@ -22,15 +22,15 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const {
-    items,
-    totalCount,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    isLoading,
-    isError,
+    items = [],
+    totalCount = 0,
+    hasNextPage = false,
+    isFetchingNextPage = false,
+    fetchNextPage = () => undefined,
+    isLoading = false,
+    isError = false,
     errorMessage,
-  } = distribution;
+  } = distribution ?? {};
   const winnersCount = totalCount;
   const visibleItems = showAll
     ? items

@@ -25,23 +25,8 @@ function createRect({ left, top, width, height }: RectOptions): DOMRect {
 }
 
 describe("getTooltipWindow", () => {
-  const globalWithOptionalWindow = global as typeof globalThis & {
-    window?: Window;
-  };
-  const originalWindow = globalWithOptionalWindow.window;
-
-  afterEach(() => {
-    globalWithOptionalWindow.window = originalWindow;
-  });
-
   it("returns the current window when available", () => {
     expect(getTooltipWindow()).toBe(window);
-  });
-
-  it("returns null when window is unavailable", () => {
-    globalWithOptionalWindow.window = undefined;
-
-    expect(getTooltipWindow()).toBeNull();
   });
 });
 

@@ -19,13 +19,13 @@ const dropBase: any = {
 
 it('shows user vote when voting ended', () => {
   useDropInteractionRules.mockReturnValue({ isVotingEnded: true, isWinner: false });
-  render(<SingleWaveDropVotes drop={dropBase} />);
-  expect(screen.getByText('Your vote:')).toBeInTheDocument();
-  expect(screen.getByText('2')).toBeInTheDocument();
+  const { container } = render(<SingleWaveDropVotes drop={dropBase} />);
+  expect(container.textContent).toContain('Your votes:');
+  expect(container.textContent).toContain('-2');
 });
 
 it('hides user vote when voting ongoing', () => {
   useDropInteractionRules.mockReturnValue({ isVotingEnded: false, isWinner: false });
   render(<SingleWaveDropVotes drop={dropBase} />);
-  expect(screen.queryByText('Your vote:')).toBeNull();
+  expect(screen.queryByText(/Your votes/)).toBeNull();
 });

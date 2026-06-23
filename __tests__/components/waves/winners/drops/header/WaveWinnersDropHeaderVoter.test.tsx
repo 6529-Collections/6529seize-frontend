@@ -34,7 +34,7 @@ describe('WaveWinnersDropHeaderVoter', () => {
     const tooltip = screen.getByTestId('react-tooltip');
     expect(tooltip).toBeInTheDocument();
     expect(tooltip).toHaveAttribute('data-tooltip-id', 'winner-voter-1');
-    expect(tooltip.textContent).toContain('alice • 10 REP');
+    expect(tooltip.textContent).toContain('alice • 10 Rep');
   });
 
   it('shows placeholder when no pfp', () => {

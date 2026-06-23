@@ -15,6 +15,9 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: jest.fn(),
 }));
 jest.mock("@/helpers/waves/wave.helpers", () => ({
+  normalizeOptionalWaveId: jest.fn((waveId) =>
+    typeof waveId === "string" ? waveId.trim() || null : waveId ?? null
+  ),
   toApiWaveMin: jest.fn((wave) => ({ id: wave.id })),
 }));
 

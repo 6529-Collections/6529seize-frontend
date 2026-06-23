@@ -13,7 +13,7 @@ describe('UserPageIdentityHeader', () => {
     render(<UserPageIdentityHeader profile={profile} />);
     expect(screen.getByText('Network Identity Check (NIC)')).toBeInTheDocument();
     expect(screen.getByTestId('cic')).toBeInTheDocument();
-    expect(screen.getByTestId('cic-rate')).toBeInTheDocument();
-    expect(screen.getByTestId('rate-wrapper')).toBeInTheDocument();
+    expect(screen.queryByTestId('cic-rate')).toBeNull();
+    expect(screen.queryByTestId('rate-wrapper')).toBeNull();
   });
 });
