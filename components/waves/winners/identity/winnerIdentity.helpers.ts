@@ -1,10 +1,5 @@
 import { getDropVisibleMetadata } from "@/components/waves/drops/identityDisplay.helpers";
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
-import {
-  getDropIdentityFallbackValue,
-  getDropIdentityProfile,
-} from "@/components/waves/drops/identityDisplay.helpers";
-
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 
 interface WinnerIdentityArgs {
@@ -19,5 +14,7 @@ export const getWinnerVisibleMetadata = ({
   return getDropVisibleMetadata({ wave, metadata });
 };
 
-export const getWinnerIdentityProfile = getDropIdentityProfile;
-export const getWinnerIdentityFallbackValue = getDropIdentityFallbackValue;
+export {
+  getDropIdentityFallbackValue as getWinnerIdentityFallbackValue,
+  getDropIdentityProfile as getWinnerIdentityProfile,
+} from "@/components/waves/drops/identityDisplay.helpers";

@@ -72,20 +72,23 @@ const TimeStamp = ({
   createdAt,
   iconClassName,
   textClassName,
-}: TimeStampProps) => (
-  <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
-    <ClockIcon className={iconClassName} />
-    <span className={textClassName}>
-      {getTimeAgoShort(
-        typeof createdAt === "string"
-          ? new Date(createdAt).getTime()
-          : typeof createdAt === "number"
-            ? createdAt
-          : createdAt.getTime()
-      )}
-    </span>
-  </div>
-);
+}: TimeStampProps) => {
+  let timestamp: number;
+  if (typeof createdAt === "string") {
+    timestamp = new Date(createdAt).getTime();
+  } else if (typeof createdAt === "number") {
+    timestamp = createdAt;
+  } else {
+    timestamp = createdAt.getTime();
+  }
+
+  return (
+    <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+      <ClockIcon className={iconClassName} />
+      <span className={textClassName}>{getTimeAgoShort(timestamp)}</span>
+    </div>
+  );
+};
 
 export const SingleWaveDropLog = ({
   log,

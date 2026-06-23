@@ -1,6 +1,10 @@
 import { config } from "dotenv";
 import { TextDecoder, TextEncoder } from "node:util";
-import { ReadableStream, TransformStream, WritableStream } from "node:stream/web";
+import {
+  ReadableStream,
+  TransformStream,
+  WritableStream,
+} from "node:stream/web";
 import { MessageChannel, MessagePort } from "node:worker_threads";
 
 // Load environment variables for tests
@@ -113,7 +117,7 @@ if (!process.env.PUBLIC_RUNTIME) {
 }
 
 if (!process.env.ALCHEMY_API_KEY) {
-  process.env.ALCHEMY_API_KEY = "test-alchemy-api-key";
+  process.env.ALCHEMY_API_KEY = "x";
 }
 
 // Mock ResizeObserver for react-tooltip

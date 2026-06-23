@@ -20,7 +20,7 @@ describe('DropListItemContentNft', () => {
   const baseNft = { contract: '0x1', token: '5', name: 'Name' } as any;
 
   it('links to internal pages for known contracts', async () => {
-    const { MEMES_CONTRACT, GRADIENT_CONTRACT } = require('@/constants');
+    const { MEMES_CONTRACT, GRADIENT_CONTRACT } = require('@/constants/constants');
 
     const { rerender } = render(<DropListItemContentNft nft={{ ...baseNft, contract: MEMES_CONTRACT }} />);
     await waitFor(() => expect(screen.getByTestId('link')).toHaveAttribute('href', `/the-memes/${baseNft.token}`));
@@ -31,7 +31,7 @@ describe('DropListItemContentNft', () => {
   });
 
   it('defaults to external link for other contracts', async () => {
-    const { MEMES_CONTRACT } = require('@/constants');
+    const { MEMES_CONTRACT } = require('@/constants/constants');
     render(<DropListItemContentNft nft={{ ...baseNft, contract: '0xabc' }} />);
     await waitFor(() => expect(screen.getByTestId('link')).toHaveAttribute('href', `https://opensea.io/assets/ethereum/0xabc/${baseNft.token}`));
     expect(screen.getByTestId('link')).toHaveAttribute('target', '_blank');

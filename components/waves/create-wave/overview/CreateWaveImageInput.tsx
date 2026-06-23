@@ -22,7 +22,17 @@ const FILE_SIZE_LIMIT = 10485760;
 
 const getFirstFile = (
   files: FileList | readonly File[] | null | undefined
-): File | null => files?.item?.(0) ?? files?.[0] ?? null;
+): File | null => {
+  if (!files) {
+    return null;
+  }
+
+  if ("item" in files) {
+    return files.item(0);
+  }
+
+  return files[0] ?? null;
+};
 
 export default function CreateWaveImageInput({
   imageToShow,

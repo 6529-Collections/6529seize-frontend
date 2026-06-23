@@ -48,20 +48,20 @@ export function buildNextgenLandingPageJsonLd({
     }),
   ];
 
-  if (featuredCollectionName && featuredPath) {
+  if (featuredCollection && featuredCollectionName && featuredPath) {
     nodes.push(
       compactJsonLdObject({
-          "@type": "Collection",
-          "@id": nodeId(featuredPath, "collection"),
-          name: featuredCollectionName,
-          description: cleanText(featuredCollection?.description),
-          url: canonicalUrl(featuredPath),
-          image:
-            toAbsoluteHttpUrl(featuredCollection?.banner) ??
-            toAbsoluteHttpUrl(featuredCollection?.image),
-          license: CC0_LICENSE_URL,
-          creator: buildNextgenCreator(featuredCollection),
-        })
+        "@type": "Collection",
+        "@id": nodeId(featuredPath, "collection"),
+        name: featuredCollectionName,
+        description: cleanText(featuredCollection.description),
+        url: canonicalUrl(featuredPath),
+        image:
+          toAbsoluteHttpUrl(featuredCollection.banner) ??
+          toAbsoluteHttpUrl(featuredCollection.image),
+        license: CC0_LICENSE_URL,
+        creator: buildNextgenCreator(featuredCollection),
+      })
     );
   }
 
@@ -77,7 +77,7 @@ export function buildNextgenLandingPageJsonLd({
     buildBreadcrumbList([
       { name: "Home", path: "/" },
       { name: "NextGen", path },
-    ]),
+    ])
   );
 
   return graphJsonLd(nodes);
