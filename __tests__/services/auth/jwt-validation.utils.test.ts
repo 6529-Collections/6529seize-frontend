@@ -194,6 +194,33 @@ describe("jwt-validation.utils", () => {
     expect(syncWalletRoleWithServer).toHaveBeenCalledWith(null, "0x123");
   });
 
+  it("decodes the refreshed access token before persisting a rotated session", async () => {
+    const refreshedSession = {
+      client_type: "web" as const,
+      address: "0x123",
+      role: "fresh-role",
+      access_token: "fresh-access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    mockedJwtDecode
+      .mockReturnValueOnce(expiredPayload)
+      .mockReturnValueOnce({ ...expiredPayload, role: "fresh-role" });
+    mockedRefreshSessionV2.mockResolvedValue(refreshedSession);
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: true,
+      wasCancelled: false,
+    });
+
+    expect(mockedJwtDecode).toHaveBeenNthCalledWith(1, "jwt-token");
+    expect(mockedJwtDecode).toHaveBeenNthCalledWith(2, "fresh-access-token");
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(syncWalletRoleWithServer).toHaveBeenCalledWith(
+      "fresh-role",
+      "0x123"
+    );
+  });
+
   it("stores rotated native refresh tokens through session persistence", async () => {
     const refreshedSession = {
       client_type: "native" as const,
@@ -243,6 +270,8 @@ describe("jwt-validation.utils", () => {
     await expect(validateJwt(validParams)).rejects.toThrow(
       "Address mismatch in token response: expected 0x123, got 0x456"
     );
+    expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
+    expect(syncWalletRoleWithServer).not.toHaveBeenCalled();
   });
 
   it("validates requested proxy role against the refreshed JWT role", async () => {
@@ -308,6 +337,28 @@ describe("jwt-validation.utils", () => {
         activeProfileProxy: proxy,
       })
     ).rejects.toThrow(RoleValidationError);
+    expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
+    expect(syncWalletRoleWithServer).not.toHaveBeenCalled();
+  });
+
+  it("does not refresh or persist when validation starts with an aborted signal", async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+
+    await expect(
+      validateJwt({
+        ...validParams,
+        abortSignal: abortController.signal,
+      })
+    ).resolves.toEqual({
+      isValid: false,
+      wasCancelled: true,
+    });
+
+    expect(mockedJwtDecode).not.toHaveBeenCalled();
+    expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
+    expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
+    expect(syncWalletRoleWithServer).not.toHaveBeenCalled();
   });
 
   it("treats AbortError during persistence as cancelled", async () => {

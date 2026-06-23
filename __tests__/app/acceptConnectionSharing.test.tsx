@@ -206,6 +206,9 @@ describe("AcceptConnectionSharing page", () => {
       </TestProvider>
     );
 
+    expect(
+      screen.queryByText(/Open this connection link in the 6529 mobile app/)
+    ).not.toBeInTheDocument();
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
