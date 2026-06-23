@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveById } from "@/hooks/useWaveById";

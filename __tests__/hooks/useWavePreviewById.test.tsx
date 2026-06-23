@@ -1,6 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { useWavePreviewById } from "@/hooks/useWavePreviewById";
-import { resetWavePreviewFetchGateForTests } from "@/hooks/useWavePreviewById";
+import {
+  resetWavePreviewFetchGateForTests,
+  useWavePreviewById,
+} from "@/hooks/useWavePreviewById";
 import { useWaveById } from "@/hooks/useWaveById";
 
 jest.mock("@/hooks/useWaveById", () => ({ useWaveById: jest.fn() }));

@@ -1,3 +1,5 @@
+"use client";
+
 import { useWavePreviewById } from "@/hooks/useWavePreviewById";
 import ChatItemHrefButtons from "../ChatItemHrefButtons";
 import WaveItemWide from "./WaveItemWide";
