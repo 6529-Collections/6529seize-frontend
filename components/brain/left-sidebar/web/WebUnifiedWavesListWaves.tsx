@@ -103,16 +103,18 @@ function SidebarCategoryLabel({
   label,
   tooltipContent,
   tooltipId,
+  showTooltipTrigger = true,
 }: {
   readonly label: string;
   readonly tooltipContent?: string | undefined;
   readonly tooltipId?: string | undefined;
+  readonly showTooltipTrigger?: boolean;
 }) {
   return (
     <div className="tw-px-5 tw-pb-0.5 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
       <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
         <span>{label}</span>
-        {tooltipContent && tooltipId && (
+        {showTooltipTrigger && tooltipContent && tooltipId && (
           <button
             type="button"
             aria-label={tooltipContent}
@@ -634,6 +636,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
                     tooltipContent={highlyRatedInfoTooltip}
                     tooltipId={HIGHLY_RATED_INFO_TOOLTIP_ID}
+                    showTooltipTrigger={!isTouchDevice}
                   />
                   <HighlyRatedWavesToggle
                     paddingClassName="tw-px-5"
@@ -647,6 +650,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
                     tooltipContent={highlyRatedInfoTooltip}
                     tooltipId={HIGHLY_RATED_INFO_TOOLTIP_ID}
+                    showTooltipTrigger={!isTouchDevice}
                   />
                 )
               )}
