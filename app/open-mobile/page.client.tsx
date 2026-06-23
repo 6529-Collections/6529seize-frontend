@@ -24,14 +24,14 @@ export default function OpenMobilePage() {
     const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${decoded}`;
 
     setDecodedPath(decoded);
-    window.location.href = deepLink;
+    window.open(deepLink, "_self");
   }, [pathParam]);
 
   const handleBack = () => {
     if (decodedPath) {
-      window.location.href = `${window.location.origin}${decodedPath}`;
+      window.open(`${window.location.origin}${decodedPath}`, "_self");
     } else {
-      window.location.href = window.location.origin;
+      window.open(window.location.origin, "_self");
     }
   };
 

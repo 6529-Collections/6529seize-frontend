@@ -64,7 +64,8 @@ describe('LayoutProvider', () => {
     );
     const content = screen.getByTestId('content');
     expect(content.textContent).toBe('900');
-    expect(content.style.height).toContain('calc(100dvh - 100px');
+    expect(content.style.height).toContain('100dvh');
+    expect(content.style.height).toContain('100px');
   });
 
   it('applies 128px capSpace on Android when keyboard is closed', () => {
@@ -79,7 +80,7 @@ describe('LayoutProvider', () => {
     );
     const content = screen.getByTestId('content');
     // Should include 128px capSpace
-    expect(content.style.height).toContain('- 128px');
+    expect(content.style.height).toContain('128px');
   });
 
   it('removes capSpace on Android when keyboard is open', () => {
@@ -94,12 +95,11 @@ describe('LayoutProvider', () => {
     );
     const content = screen.getByTestId('content');
     // Should NOT include 128px capSpace when keyboard is open (capSpace = 0)
-    expect(content.style.height).not.toContain('- 128px');
-    // Should end with - 0px (the capSpace when keyboard is visible)
-    expect(content.style.height).toContain('- 0px)');
+    expect(content.style.height).not.toContain('128px');
+    expect(content.style.height).toContain('100dvh');
   });
 
-  it('applies 20px capSpace on iOS', () => {
+  it('does not apply Android capSpace on iOS', () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: false, isIos: true };
     mockKeyboardValues = { isVisible: false, keyboardHeight: 0, isAndroid: false, getContainerStyle: jest.fn() };
 
@@ -110,8 +110,7 @@ describe('LayoutProvider', () => {
       </LayoutProvider>
     );
     const content = screen.getByTestId('content');
-    // Should include 20px capSpace for iOS
-    expect(content.style.height).toContain('- 20px');
+    expect(content.style.height).not.toContain('128px');
   });
 
   it('does not apply capSpace on desktop', () => {

@@ -10,7 +10,7 @@ describe('GroupCreateCollections', () => {
     render(<GroupCreateCollections nfts={[]} setNfts={setNfts} />);
 
     const gradients = screen.getByRole('button', { name: 'Gradients' });
-    expect(gradients).toHaveClass('tw-bg-iron-950');
+    expect(gradients).toHaveClass('tw-bg-iron-900');
     await userEvent.click(gradients);
     expect(setNfts).toHaveBeenCalledWith([{ name: ApiGroupOwnsNftNameEnum.Gradients, tokens: [] }]);
   });
@@ -25,7 +25,7 @@ describe('GroupCreateCollections', () => {
     );
 
     const memes = screen.getByRole('button', { name: 'Memes' });
-    expect(memes).toHaveClass('tw-bg-iron-800');
+    expect(memes).toHaveClass('tw-bg-primary-500/10');
     await userEvent.click(memes);
     expect(setNfts).toHaveBeenCalledWith([]);
   });
