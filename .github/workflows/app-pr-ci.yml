@@ -259,7 +259,33 @@ jobs:
             exit 0
           fi
 
-          ./bin/6529 run test:no-coverage --findRelatedTests "${existing_files[@]}" --passWithNoTests
+          jest_test_files=()
+          related_source_files=()
+          for file in "${existing_files[@]}"; do
+            case "$file" in
+              tests/*.spec.ts|tests/*.spec.tsx)
+                echo "Skipping Playwright spec for related Jest coverage: $file"
+                ;;
+              *.test.ts|*.test.tsx|*.spec.ts|*.spec.tsx)
+                jest_test_files+=("$file")
+                ;;
+              *)
+                related_source_files+=("$file")
+                ;;
+            esac
+          done
+
+          if [ "${#jest_test_files[@]}" -gt 0 ]; then
+            ./bin/6529 run test:no-coverage -- "${jest_test_files[@]}" --passWithNoTests --forceExit
+          fi
+
+          if [ "${#related_source_files[@]}" -gt 0 ]; then
+            ./bin/6529 run test:no-coverage --findRelatedTests "${related_source_files[@]}" --passWithNoTests --forceExit
+          fi
+
+          if [ "${#jest_test_files[@]}" -eq 0 ] && [ "${#related_source_files[@]}" -eq 0 ]; then
+            echo "No Jest-related source or test files need coverage."
+          fi
 
       - name: Build app
         if: needs.plan.outputs.build_required == 'true'

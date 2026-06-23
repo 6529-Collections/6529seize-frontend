@@ -4043,3 +4043,27 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `seize run test:e2e:auth-sandbox`: 11 passed.
 - Next action: commit, push the final head, re-trigger the review loop, and
   merge after CI and material bot feedback are clear.
+
+## 2026-06-23T11:58Z PR #2853 Related-Jest CI Hang Fix
+
+- Final-head App PR CI exposed a real required-check hang in the `Run related
+  Jest tests` step. The workflow fed changed Jest test files into
+  `jest --findRelatedTests`, and `--findRelatedTests
+  __tests__/hooks/useSecureSign.test.ts` reproduced the hang locally.
+- Patched `.github/workflows/app-pr-ci.yml` so the related-Jest lane:
+  - skips Playwright specs under `tests/*.spec.ts(x)`;
+  - runs changed Jest test files directly;
+  - keeps `--findRelatedTests` for non-test source files;
+  - uses `--forceExit`, matching the repo's existing JSON Jest scripts, so
+    known open-handle leaks cannot hold the required app-check job forever.
+- Validation passed:
+  - `seize run test:no-coverage -- __tests__/hooks/useSecureSign.test.ts --passWithNoTests --forceExit`: 30 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi`: 43 passed.
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - workflow-security scan clean.
+  - changed-secret scan clean.
+  - risk floor recomputed.
+  - `codex-diff-check`.
+- Next action: commit and push the CI harness fix, which will cancel the hung
+  old app-check run and restart CI on the corrected head.
