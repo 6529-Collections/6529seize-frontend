@@ -66,7 +66,7 @@ const updateDropsQuery = (
   drop: ApiDrop
 ) => {
   const queryKey = getDropsQueryKey(queryParams);
-  void queryClient.cancelQueries({ queryKey });
+  queryClient.cancelQueries({ queryKey }).catch(() => undefined);
   queryClient.setQueryData<DropsQueryData | undefined>(
     queryKey,
     (oldData) => updateQueryData(oldData, drop),
