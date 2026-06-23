@@ -4121,3 +4121,24 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`.
 - Next action: commit, push, let concurrency cancel the still-running old app
   PR CI run, then verify the new CI head exits the related-Jest step.
+
+## 2026-06-23T13:00Z PR #2853 Direct-Jest CI Fix
+
+- GitHub app PR CI proved the previous bounded related-Jest step still failed:
+  `__tests__/hooks/useSecureSign.test.ts` passed in about 18s, then the process
+  stayed open until the 180s shell timeout killed the step with exit code 124.
+- Updated `.github/workflows/app-pr-ci.yml` so this CI step invokes Jest
+  directly through the repo wrapper:
+  - `./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests`.
+  - `--forceExit` and other Jest options now appear before direct test file
+    paths and before `--findRelatedTests` source paths.
+  - Added `run_jest_with_timeout` to emit a distinct GitHub error message if a
+    future related-Jest run times out.
+- Validation passed:
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests __tests__/hooks/useSecureSign.test.ts`:
+    30 passed and exited cleanly.
+  - `codex-diff-check -- .github/workflows/app-pr-ci.yml`.
+- Next action: commit and push, update PR #2853 notes, restart CodeRabbit and
+  6529bot lanes on the new head, then merge once CI and material bot feedback
+  are clear.

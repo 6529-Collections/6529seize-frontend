@@ -278,12 +278,28 @@ jobs:
             esac
           done
 
+          run_jest_with_timeout() {
+            local label="$1"
+            shift
+
+            set +e
+            timeout 180s ./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests "$@"
+            local status=$?
+            set -e
+
+            if [ "$status" -eq 124 ]; then
+              echo "::error::${label} timed out after 180s"
+            fi
+
+            return "$status"
+          }
+
           if [ "${#jest_test_files[@]}" -gt 0 ]; then
-            timeout 180s ./bin/6529 run test:no-coverage -- "${jest_test_files[@]}" --passWithNoTests --runInBand --forceExit
+            run_jest_with_timeout "Direct Jest tests" "${jest_test_files[@]}"
           fi
 
           if [ "${#related_source_files[@]}" -gt 0 ]; then
-            timeout 180s ./bin/6529 run test:no-coverage --findRelatedTests "${related_source_files[@]}" --passWithNoTests --runInBand --forceExit
+            run_jest_with_timeout "Related Jest tests" --findRelatedTests "${related_source_files[@]}"
           fi
 
           if [ "${#jest_test_files[@]}" -eq 0 ] && [ "${#related_source_files[@]}" -eq 0 ]; then

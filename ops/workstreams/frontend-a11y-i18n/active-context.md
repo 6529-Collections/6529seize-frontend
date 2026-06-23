@@ -9,7 +9,7 @@ Read this section first after compaction or handoff.
     `D:\repos\6529seize-frontend-wallet-signing-sandbox`.
   - Current active branch:
     `codex/e2e-wallet-signing-sandbox`, rebased onto current `origin/main`
-    `b5ec8a62805f261fa4f8c10bc5c30f1114412227` after PR #2852 merged.
+    `3682d3fb327a9775677cb14a4f4743075d173ece`.
   - PR #2853 is the active merge target:
     https://github.com/6529-Collections/6529seize-frontend/pull/2853
   - Active slice is test-only signed-drop sandbox hardening. It adds a
@@ -17,20 +17,22 @@ Read this section first after compaction or handoff.
     `test:e2e:signature-sandbox`, inclusion in `test:e2e:auth-sandbox`, and a
     negative assertion window proving no late unsigned `/api/drops` POST is
     recorded when no wallet signature is available.
-  - Current local validation passed on the rebased head:
+  - Current local validation passed on the rebased head and follow-up CI fix:
     `node --check` for the sandbox server, package JSON parse,
     `seize run lint:package-json`, focused ESLint on actual changed JS/TS
     files, `seize run typecheck:playwright`, `seize run typecheck:changed`,
     `codex-diff-check`, `test:e2e:signature-sandbox`, `test:e2e:reaction-sandbox`,
     `test:e2e:auth-sandbox`, `test:e2e:composer-sandbox`, the focused signing
-    Jest batch, risk floor, changed-secret scan, and workflow-security scan.
+    Jest batch, risk floor, changed-secret scan, workflow-security scan, app PR
+    CI YAML parse, and direct `seize exec jest ... --forceExit` validation for
+    `__tests__/hooks/useSecureSign.test.ts`.
   - Local `seize run lint:changed` overflows the Windows command line because
     it compares against stale local `main`; use the focused ESLint evidence
     against `origin/main...HEAD` for this PR.
-  - Next action: force-with-lease push PR #2853, trigger CodeRabbit plus all
-    existing 6529bot lanes including `general`, `wcag`, `i18n`, `security`,
-    `responsiveness`, and `glm-swarm`, then merge when CI and material bot
-    feedback are clear.
+  - Next action: push the direct-Jest CI fix for PR #2853, retrigger
+    CodeRabbit plus all existing 6529bot lanes including `general`, `wcag`,
+    `i18n`, `security`, `responsiveness`, and `glm-swarm`, then merge when CI
+    and material bot feedback are clear.
 
 - Latest testing-roadmap state, 2026-06-23T09:38Z:
   - Current rebase worktree:
