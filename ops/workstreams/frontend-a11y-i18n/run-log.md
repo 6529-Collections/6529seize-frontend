@@ -4021,3 +4021,25 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: force-with-lease push the rebased branch, trigger CodeRabbit and
   all existing 6529bot lanes including GLM-swarm/responsiveness on the exact
   pushed head, then merge when CI and material review feedback are clear.
+
+## 2026-06-23T11:40Z PR #2853 Final Reviewbot Hardening
+
+- Addressed the remaining useful advisory feedback from the latest #2853 bot
+  loop:
+  - the terms-copy assertion is now scoped to the Terms of Service dialog;
+  - the spec asserts the real signing-failure toast before the no-write ledger
+    check, proving the signing branch was reached rather than merely no-oping;
+  - the signature-wave fixture documents its intentional inherited open
+    visibility, eligibility, and period gates.
+- Kept the timed negative ledger loop instead of converting it to
+  `expect.poll`, because this check must stay green for the full assertion
+  window and should not pass on the first zero sample.
+- Focused validation passed:
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/social/wave-signature-sandbox.spec.ts tests/support/composerSandboxServer.cjs`
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run typecheck:playwright`
+  - `codex-diff-check`
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+- Next action: commit, push the final head, re-trigger the review loop, and
+  merge after CI and material bot feedback are clear.

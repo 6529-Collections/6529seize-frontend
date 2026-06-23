@@ -567,6 +567,9 @@ const signatureWaveDescriptionDrop = {
   ],
 };
 
+// This fixture intentionally inherits the local wave's open visibility,
+// eligibility, and period gates, then overrides only the Rank+signature fields
+// required to exercise the signed-drop branch without adding a write backdoor.
 const signatureWave = {
   ...localWave,
   id: SANDBOX_SIGNATURE_WAVE_ID,

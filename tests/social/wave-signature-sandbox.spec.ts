@@ -17,6 +17,8 @@ import {
 const SANDBOX_SIGNATURE_WAVE_ID = "00000000-0000-4000-8000-000000000540";
 const SANDBOX_SIGNATURE_TERMS =
   "Local-only signature sandbox terms. Unsigned drops must not be submitted.";
+const SIGNATURE_FAILED_MESSAGE_PATTERN =
+  /Signature failed\. Make sure your wallet is connected and unlocked/i;
 const NEGATIVE_ASSERTION_WINDOW_MS = 1500;
 const NEGATIVE_ASSERTION_INTERVAL_MS = 100;
 
@@ -50,19 +52,25 @@ test.describe("Waves signed drop local sandbox @auth @medium @local-only", () =>
       .getByRole("button", { name: "Drop", exact: true })
       .click();
 
-    await expect(
-      page.getByRole("dialog", { name: "Terms of Service" })
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await expect(page.getByText(SANDBOX_SIGNATURE_TERMS)).toBeVisible();
+    const termsDialog = page.getByRole("dialog", {
+      name: "Terms of Service",
+    });
+    await expect(termsDialog).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(termsDialog.getByText(SANDBOX_SIGNATURE_TERMS)).toBeVisible();
 
     await page
       .getByRole("checkbox", { name: "Agree to terms of service checkbox" })
       .click();
     await page.getByRole("button", { name: "Agree & Continue" }).click();
 
-    await expect(
-      page.getByRole("dialog", { name: "Terms of Service" })
-    ).toBeHidden({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(termsDialog).toBeHidden({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(page.getByText(SIGNATURE_FAILED_MESSAGE_PATTERN)).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
     await expect(submitDialog).toBeVisible();
     await expectNoUnsignedDropMutation(baseURL);
     await expectNoHorizontalOverflow(page);
