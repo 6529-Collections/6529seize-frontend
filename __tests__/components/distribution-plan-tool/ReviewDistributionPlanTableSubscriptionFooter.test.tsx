@@ -10,6 +10,7 @@ const mockUseDownloader = jest.fn();
 const mockGetStagingAuth = jest.fn();
 const mockGetAuthJwt = jest.fn();
 const mockFetchAllPages = jest.fn();
+const mockDistributionAdminWallets = ["0x1"];
 
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
@@ -105,7 +106,7 @@ jest.mock(
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
     seizeSettings: {
-      distribution_admin_wallets: ["0x1"],
+      distribution_admin_wallets: mockDistributionAdminWallets,
     },
   }),
 }));
