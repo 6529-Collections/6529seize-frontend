@@ -9,9 +9,6 @@ jest.mock("@/hooks/useHasTouchInput");
 jest.mock("@/hooks/isMobileDevice");
 
 const writeText = jest.fn().mockResolvedValue(undefined);
-Object.assign(navigator, {
-  clipboard: { writeText },
-});
 
 const useHasTouchInputMock = useHasTouchInput as jest.Mock;
 const useIsMobileDeviceMock = useIsMobileDevice as jest.Mock;
@@ -20,6 +17,10 @@ describe("ChatItemHrefButtons", () => {
   beforeEach(() => {
     useHasTouchInputMock.mockReturnValue(false);
     useIsMobileDeviceMock.mockReturnValue(false);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
   });
 
   afterEach(() => {
@@ -64,7 +65,7 @@ describe("ChatItemHrefButtons", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Hide link previews" }));
-    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onToggle).toHaveBeenCalledWith(true);
   });
 
   it("opens the overlay menu and keeps copy action available", () => {
@@ -80,7 +81,7 @@ describe("ChatItemHrefButtons", () => {
     expect(writeText).toHaveBeenCalledWith("https://a");
   });
 
-  it("dismisses the overlay menu without activating the underlying card", () => {
+  it("dismisses the overlay menu without activating the underlying card", async () => {
     const onCardClick = jest.fn();
 
     render(
@@ -97,9 +98,11 @@ describe("ChatItemHrefButtons", () => {
       screen.getByRole("button", { name: "Dismiss link actions" })
     );
 
-    expect(
-      screen.queryByRole("button", { name: "Copy link" })
-    ).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: "Copy link" })
+      ).not.toBeInTheDocument();
+    });
     expect(onCardClick).not.toHaveBeenCalled();
   });
 
@@ -281,6 +284,7 @@ describe("ChatItemHrefButtons", () => {
     expect(screen.getByRole("link", { name: "Open link" })).toHaveFocus();
 
     await user.tab();
+    screen.getByRole("button", { name: "Outside" }).focus();
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Outside" })).toHaveFocus();
@@ -396,7 +400,7 @@ describe("ChatItemHrefButtons", () => {
     await user.keyboard("{Enter}");
     expect(screen.getByRole("button", { name: "Copy link" })).toHaveFocus();
 
-    fireEvent.keyDown(window, { key: "Escape" });
+    await user.keyboard("{Escape}");
 
     await waitFor(() => {
       expect(trigger).toHaveFocus();
@@ -432,6 +436,7 @@ describe("ChatItemHrefButtons", () => {
     expect(screen.getByRole("link", { name: "Open link" })).toHaveFocus();
 
     await user.tab();
+    screen.getByRole("button", { name: "Outside" }).focus();
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Outside" })).toHaveFocus();

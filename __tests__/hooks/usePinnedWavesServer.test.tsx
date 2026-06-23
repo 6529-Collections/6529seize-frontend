@@ -45,8 +45,8 @@ const useQueryClientMock = useQueryClient as jest.Mock;
 const useSeizeConnectContextMock = useSeizeConnectContext as jest.Mock;
 const useSeizeSettingsOptionalMock = useSeizeSettingsOptional as jest.Mock;
 const fetchWavesV2PageMock = fetchWavesV2Page as jest.Mock;
-const useOfficialWavesMock =
-  require("@/hooks/useOfficialWaves").useOfficialWaves as jest.Mock;
+const useOfficialWavesMock = require("@/hooks/useOfficialWaves")
+  .useOfficialWaves as jest.Mock;
 
 const queryClientMock = {
   cancelQueries: jest.fn().mockResolvedValue(undefined),
@@ -157,7 +157,7 @@ test("keeps the pinned cache key at the logical limit but requests API pages of 
   expect(fetchWavesV2PageMock).toHaveBeenCalledWith({
     page: 1,
     pageSize: 20,
-    overviewType: ApiWavesOverviewType.MostSubscribed,
+    overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pinned: ApiWavesPinFilter.Pinned,
   });
 });

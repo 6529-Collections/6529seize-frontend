@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import UserPageStatsCollected from "@/components/user/stats/UserPageStatsCollected";
+import { formatInteger, formatPercent } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 const ownerBalance = {
   total_balance: 5,
@@ -35,16 +38,163 @@ const balanceMemes = [
   },
 ];
 
-const seasons = [{ id: 1, count: 2, start_index:1, end_index:2, name:"S1", display:"Season 1" }];
+const seasons = [
+  {
+    id: 1,
+    count: 2,
+    start_index: 1,
+    end_index: 2,
+    name: "S1",
+    display: "Season 1",
+  },
+];
 
 test("renders collected stats", () => {
   render(
-    <UserPageStatsCollected ownerBalance={ownerBalance} balanceMemes={balanceMemes} seasons={seasons} />
+    <UserPageStatsCollected
+      ownerBalance={ownerBalance}
+      balanceMemes={balanceMemes}
+      seasons={seasons}
+    />
   );
-  expect(screen.getByText("Collected")).toBeInTheDocument();
   expect(
-    screen.getByText((_, node) => node?.textContent?.replace(/\s+/g, " ").trim() === "1 / 2 (50%)")
+    screen.getByRole("heading", {
+      name: t(DEFAULT_LOCALE, "user.collected.stats.details.collected.title"),
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", {
+      name: t(DEFAULT_LOCALE, "user.collected.stats.details.overview"),
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", {
+      name: t(DEFAULT_LOCALE, "user.collected.stats.details.memesBySeason"),
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("table", {
+      name: t(
+        DEFAULT_LOCALE,
+        "user.collected.stats.details.tables.overviewCaption"
+      ),
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("table", {
+      name: t(
+        DEFAULT_LOCALE,
+        "user.collected.stats.details.tables.memesBySeasonCaption"
+      ),
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("rowheader", {
+      name: t(DEFAULT_LOCALE, "user.collected.stats.details.rows.cards"),
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getAllByRole("rowheader", {
+      name: t(DEFAULT_LOCALE, "user.collected.stats.details.rows.rank"),
+    }).length
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getByRole("rowheader", {
+      name: t(DEFAULT_LOCALE, "user.collected.stats.details.seasonLabel", {
+        seasonNumber: 1,
+      }),
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      (_, node) =>
+        node?.textContent?.replace(/\s+/g, " ").trim() === "1 / 2 (50%)"
+    )
   ).toBeInTheDocument();
   // check rank formatting
   expect(screen.getAllByText("#1").length).toBeGreaterThan(0);
+});
+
+test("renders placeholders for sparse collected stats without NaN", () => {
+  const sparseOwnerBalance = {
+    total_balance: 1,
+    total_balance_rank: 1,
+  } as any;
+  const sparseBalanceMemes = [
+    {
+      season: 1,
+      consolidation_key: "1",
+      balance: 1,
+      unique: 0,
+      sets: undefined,
+      rank: undefined,
+      boosted_tdh: undefined,
+      tdh_rank: undefined,
+    },
+  ] as any;
+
+  const { container } = render(
+    <UserPageStatsCollected
+      ownerBalance={sparseOwnerBalance}
+      balanceMemes={sparseBalanceMemes}
+      seasons={seasons}
+    />
+  );
+
+  expect(container).not.toHaveTextContent("NaN");
+  expect(screen.getAllByText("-").length).toBeGreaterThan(0);
+  expect(
+    screen.getByText(
+      (_, node) =>
+        node?.textContent?.replace(/\s+/g, " ").trim() === "0 / 2 (0%)"
+    )
+  ).toBeInTheDocument();
+});
+
+test("formats collected stats with the active locale", () => {
+  const locale = "de-DE";
+  const localizedOwnerBalance = {
+    ...ownerBalance,
+    total_balance: 1234,
+    total_balance_rank: 1234,
+  };
+  const localizedBalanceMemes = [
+    {
+      ...balanceMemes[0],
+      balance: 1234,
+      unique: 1,
+      sets: 1234,
+      rank: 1234,
+    },
+  ];
+  const expectedUniqueProgress = `${formatInteger(
+    locale,
+    1
+  )} / ${formatInteger(locale, 2)} (${formatPercent(locale, 0.5, 0).replace(
+    /\s+/g,
+    " "
+  )})`;
+
+  render(
+    <UserPageStatsCollected
+      ownerBalance={localizedOwnerBalance}
+      balanceMemes={localizedBalanceMemes}
+      seasons={seasons}
+      locale={locale}
+    />
+  );
+
+  expect(
+    screen.getAllByText(formatInteger(locale, 1234)).length
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getAllByText(`#${formatInteger(locale, 1234)}`).length
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getByText(
+      (_, node) =>
+        node?.textContent?.replace(/\s+/g, " ").trim() ===
+        expectedUniqueProgress
+    )
+  ).toBeInTheDocument();
 });

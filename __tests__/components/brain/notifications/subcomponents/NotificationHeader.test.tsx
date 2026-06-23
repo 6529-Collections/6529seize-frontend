@@ -48,12 +48,12 @@ jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
 jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
   getMediaGatewayFallbackUrls: (url: string) =>
     url === "ipfs://gelato"
-      ? ["https://ipfs.6529.io/ipfs/gelato", "https://ipfs.io/ipfs/gelato"]
+      ? ["https://media.6529.io/ipfs/gelato", "https://ipfs.io/ipfs/gelato"]
       : [url],
 }));
 
 describe("NotificationHeader", () => {
-  it("prefers the configured ipfs gateway and falls back to ipfs.io on failure", () => {
+  it("prefers the 6529 resolver and falls back to ipfs.io on failure", () => {
     render(
       <NotificationHeader
         author={
@@ -73,7 +73,7 @@ describe("NotificationHeader", () => {
     });
     expect(firstAttempt).toHaveAttribute(
       "src",
-      "https://ipfs.6529.io/ipfs/gelato"
+      "https://media.6529.io/ipfs/gelato"
     );
     expect(firstAttempt).toHaveAttribute("data-unoptimized", "false");
 
@@ -84,7 +84,7 @@ describe("NotificationHeader", () => {
     });
     expect(secondAttempt).toHaveAttribute(
       "src",
-      "https://ipfs.6529.io/ipfs/gelato"
+      "https://media.6529.io/ipfs/gelato"
     );
     expect(secondAttempt).toHaveAttribute("data-unoptimized", "true");
 

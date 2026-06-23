@@ -1,0 +1,311 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-wallet-gallery-v1",
+  "profile": {
+    "handle": "punk6529",
+    "profile_id": "profile-punk6529",
+    "primary_wallet": "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0"
+  },
+  "site": {
+    "title": "punk6529 Gallery",
+    "description": "A generated multi-wallet gallery fixture.",
+    "base_path": "/punk6529/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "dark",
+      "accent": "#00a86b"
+    },
+    "navigation_id": "nav-main",
+    "required_renderer_capabilities": ["static_blocks", "nft_media_profile"]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/punk6529/index.html",
+        "kind": "page",
+        "page_id": "page-gallery"
+      },
+      {
+        "path": "/punk6529/collections/the-memes/index.html",
+        "kind": "page",
+        "page_id": "page-collection"
+      },
+      {
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+        "kind": "page",
+        "page_id": "page-nft-1"
+      },
+      {
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2/index.html",
+        "kind": "page",
+        "page_id": "page-nft-2"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-gallery",
+        "type": "gallery",
+        "path": "/punk6529/index.html",
+        "metadata": {
+          "title": "punk6529 Gallery",
+          "description": "Generated gallery from profile wallets.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "Gallery",
+          "search": "include",
+          "robots": "index"
+        },
+        "source": {
+          "source_packet_id": "source-wallets"
+        },
+        "blocks": [
+          {
+            "id": "block-gallery-heading",
+            "block_type": "heading",
+            "level": 1,
+            "text": "Gallery"
+          },
+          {
+            "id": "block-wallet-gallery",
+            "block_type": "generated_wallet_gallery",
+            "wallets": [
+              "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+              "0xfDF8bcf56aF0584026f9DB963381db72C5cc8e3b"
+            ],
+            "snapshot": {
+              "block_number": 22000000,
+              "captured_at": "2026-06-17T00:00:00Z"
+            },
+            "display_mode": "editorial",
+            "featured_page_ids": ["page-collection", "page-nft-1", "page-nft-2"]
+          }
+        ]
+      },
+      {
+        "id": "page-collection",
+        "type": "collection",
+        "path": "/punk6529/collections/the-memes/index.html",
+        "metadata": {
+          "title": "The Memes by 6529",
+          "description": "Collection page generated from a wallet gallery snapshot.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/collections/the-memes/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-collection-ref",
+            "block_type": "collection_reference",
+            "chain_id": 1,
+            "contract": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+            "title": "The Memes by 6529"
+          }
+        ]
+      },
+      {
+        "id": "page-nft-1",
+        "type": "nft_detail",
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+        "metadata": {
+          "title": "The Memes #1",
+          "description": "NFT detail page generated from a wallet gallery snapshot.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes #1",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-nft-ref",
+            "block_type": "nft_reference",
+            "nft_media_profile_id": "nft-memes-1",
+            "collection_title": "The Memes by 6529"
+          }
+        ]
+      },
+      {
+        "id": "page-nft-2",
+        "type": "nft_detail",
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2/index.html",
+        "metadata": {
+          "title": "The Memes #2",
+          "description": "Second generated NFT detail page for multi-work gallery inspection.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes #2",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-nft-ref",
+            "block_type": "nft_reference",
+            "nft_media_profile_id": "nft-memes-2",
+            "collection_title": "The Memes by 6529"
+          }
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-og",
+        "kind": "social_image",
+        "uri": "ipfs://bafyfixturegallery/og.png",
+        "content_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 630,
+        "file_size_bytes": 50000,
+        "roles": ["social"],
+        "alt_text": "Social preview for generated wallet gallery"
+      },
+      {
+        "id": "asset-memes-1-original",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturegallery/memes-1.png",
+        "content_hash": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+        "mime_type": "image/png",
+        "width": 2400,
+        "height": 2400,
+        "file_size_bytes": 900000,
+        "roles": ["original", "detail", "fullscreen"],
+        "alt_text": "The Memes by 6529 card number 1"
+      },
+      {
+        "id": "asset-memes-2-grid",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturegallery/memes-2-grid.webp",
+        "content_hash": "sha256:3939393939393939393939393939393939393939393939393939393939393939",
+        "mime_type": "image/webp",
+        "width": 900,
+        "height": 1200,
+        "file_size_bytes": 160000,
+        "roles": ["grid", "thumbnail"],
+        "alt_text": "Grid derivative for The Memes by 6529 card number 2"
+      }
+    ],
+    "nft_media_profiles": [
+      {
+        "id": "nft-memes-1",
+        "chain_id": 1,
+        "contract": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+        "token_id": "1",
+        "metadata_uri": "ipfs://bafyfixturegallery/metadata/1.json",
+        "metadata_hash": "sha256:1313131313131313131313131313131313131313131313131313131313131313",
+        "original_asset_ids": ["asset-memes-1-original"],
+        "display_variants": [
+          {
+            "asset_id": "asset-memes-1-original",
+            "role": "detail",
+            "crop_mode": "preserve",
+            "source_asset_id": "asset-memes-1-original"
+          }
+        ],
+        "poster_asset_id": "asset-memes-1-original",
+        "snapshot": {
+          "owner": "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+          "block_number": 22000000,
+          "captured_at": "2026-06-17T00:00:00Z"
+        }
+      },
+      {
+        "id": "nft-memes-2",
+        "chain_id": 1,
+        "contract": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+        "token_id": "2",
+        "metadata_uri": "ipfs://bafyfixturegallery/metadata/2.json",
+        "metadata_hash": "sha256:4040404040404040404040404040404040404040404040404040404040404040",
+        "original_asset_ids": ["asset-memes-2-grid"],
+        "display_variants": [
+          {
+            "asset_id": "asset-memes-2-grid",
+            "role": "grid",
+            "crop_mode": "cover",
+            "source_asset_id": "asset-memes-2-grid"
+          }
+        ],
+        "poster_asset_id": "asset-memes-2-grid",
+        "snapshot": {
+          "owner": "0xfDF8bcf56aF0584026f9DB963381db72C5cc8e3b",
+          "block_number": 22000000,
+          "captured_at": "2026-06-17T00:00:00Z"
+        }
+      }
+    ],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Gallery",
+            "page_id": "page-gallery"
+          },
+          {
+            "label": "The Memes",
+            "page_id": "page-collection"
+          }
+        ]
+      }
+    ],
+    "source_packets": [
+      {
+        "id": "source-wallets",
+        "source_type": "wallet",
+        "captured_at": "2026-06-17T00:00:00Z",
+        "content_hash": "sha256:1414141414141414141414141414141414141414141414141414141414141414",
+        "wallets": [
+          "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+          "0xfDF8bcf56aF0584026f9DB963381db72C5cc8e3b"
+        ]
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-cms-static",
+      "renderer_version": "0.0.0-fixture",
+      "route_count": 4,
+      "asset_count": 3,
+      "warnings": []
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:1515151515151515151515151515151515151515151515151515151515151515",
+    "package_hash": "sha256:1616161616161616161616161616161616161616161616161616161616161616",
+    "note": "Fixture placeholder hash; replace with generated vector before Phase 2."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:punk6529",
+      "signature": "fixture-signature-gallery",
+      "signed_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://bafyfixturegallery",
+      "content_hash": "sha256:1616161616161616161616161616161616161616161616161616161616161616",
+      "provider_content_id": "bafyfixturegallery",
+      "pinned": true,
+      "canonical": true,
+      "recorded_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-fixture",
+    "builder_version": "0.0.0",
+    "created_at": "2026-06-17T00:00:00Z",
+    "notes": "Valid generated wallet gallery fixture."
+  }
+}

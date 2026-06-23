@@ -1,4 +1,5 @@
 "use client";
+
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import type {
   CreateDropConfig,
@@ -10,7 +11,6 @@ import type {
 } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
-import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -67,6 +67,7 @@ import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
+import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useWebSocket } from "@/services/websocket";
@@ -90,9 +91,14 @@ import {
   hasCurrentDropPartContent,
   shouldUseInitialDropConfig,
 } from "./utils/createDropContentSubmission";
+import {
+  hasPendingInlineImageUploadDrop,
+  hasPendingInlineImageUploadMarkdown,
+} from "@/helpers/waves/inline-image-upload.helpers";
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
+import { toApiCreateDropPart } from "./utils/createDropRequestPart";
 import { buildDropSubmissionMetadata } from "./utils/buildDropSubmissionMetadata";
 import { getIdentitySubmissionMetadataErrors } from "./utils/identitySubmissionMetadataValidation";
 import {
@@ -409,6 +415,7 @@ export interface UploadingFile {
   file: File;
   isUploading: boolean;
   progress: number;
+  phase: "uploading" | "processing";
 }
 
 const generateMediaForPart = async (
@@ -417,14 +424,21 @@ const generateMediaForPart = async (
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
-    { file: media, isUploading: true, progress: 0 },
+    { file: media, isUploading: true, progress: 0, phase: "uploading" },
   ]);
   return await multiPartUpload({
     file: media,
     path: "drop",
+    waitForReady: false,
     onProgress: (progress) =>
       setUploadingFiles((prev) =>
         prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
+      ),
+    onProcessing: () =>
+      setUploadingFiles((prev) =>
+        prev.map((uf) =>
+          uf.file === media ? { ...uf, progress: 100, phase: "processing" } : uf
+        )
       ),
   }).finally(() => {
     setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
@@ -437,7 +451,7 @@ const generateAttachmentForPart = async (
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
-    { file: attachment, isUploading: true, progress: 0 },
+    { file: attachment, isUploading: true, progress: 0, phase: "uploading" },
   ]);
   return await multiPartAttachmentUpload({
     file: attachment,
@@ -504,16 +518,9 @@ const generateParts = async (
   }
 };
 
-const stripUploadedAttachments = (
+const toApiCreateDropParts = (
   parts: CreateDropRequestPart[]
-): ApiCreateDropPart[] =>
-  parts.map(({ uploaded_attachments, attachments, ...part }) => {
-    const requestPart: ApiCreateDropPart = { ...part };
-    if (attachments?.length) {
-      requestPart.attachments = attachments;
-    }
-    return requestPart;
-  });
+): ApiCreateDropRequest["parts"] => parts.map(toApiCreateDropPart);
 
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
@@ -733,15 +740,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const getMarkdown = useMemo(
     () =>
       editorState
-        ? exportDropMarkdown(editorState, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-            HASHTAG_TRANSFORMER,
-            WAVE_MENTION_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ])
+        ? normalizeTypedEmojiShortcuts(
+            exportDropMarkdown(editorState, [
+              ...SAFE_MARKDOWN_TRANSFORMERS,
+              MENTION_TRANSFORMER,
+              ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
+              HASHTAG_TRANSFORMER,
+              WAVE_MENTION_TRANSFORMER,
+              IMAGE_TRANSFORMER,
+              EMOJI_TRANSFORMER,
+            ])
+          )
         : null,
     [canMentionAll, editorState]
   );
@@ -800,6 +809,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return true;
   };
 
+  const hasPendingInlineImageUpload = useMemo(
+    () =>
+      hasPendingInlineImageUploadMarkdown(getMarkdown) ||
+      (drop ? hasPendingInlineImageUploadDrop(drop) : false),
+    [drop, getMarkdown]
+  );
+
   const getCanSubmit = () => {
     const dropParts = drop?.parts ?? [];
 
@@ -811,6 +827,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         hasMetadata,
         hasPoll: hasValidPoll,
       }) &&
+      !hasPendingInlineImageUpload &&
       !hasMetadataValidationErrors &&
       !hasPollValidationError &&
       !!(dropParts.length ? getCanSubmitStorm() : true)
@@ -825,7 +842,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       getMarkdown?.length ?? 0
     ) ?? 0) >= 24000;
 
-  const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
+  const getCanAddPart = () =>
+    getHaveMarkdownOrFile() &&
+    !hasPendingInlineImageUpload &&
+    !getIsDropLimit();
   const isSlowModeSubmitBlocked = isChatBlockedBySlowMode && !isDropMode;
   const isChatLinksRestrictionActive = isChatLinkRestrictionApplicable({
     dropType: ApiDropType.Chat,
@@ -1334,7 +1354,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         setSubmitting(false);
         return;
       }
-      const parts = stripUploadedAttachments(generatedParts);
+      const parts = toApiCreateDropParts(generatedParts);
 
       const requestBody: ApiCreateDropRequest = {
         ...dropRequest,
@@ -1361,7 +1381,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       }
 
       const optimisticDrop = getOptimisticDrop(
-        updatedDropRequest,
+        {
+          ...updatedDropRequest,
+          parts: updatedDropRequest.parts.map((part, index) => ({
+            ...part,
+            media: generatedParts[index]?.media ?? part.media,
+          })),
+        },
         connectedProfile,
         wave,
         activeDrop,
@@ -1459,6 +1485,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (hasPendingInlineImageUpload) {
+      return;
+    }
+
     if (isSlowModeSubmitBlocked) {
       return;
     }
@@ -1508,6 +1538,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const onGifDrop = async (gif: string): Promise<void> => {
     if (submitting) {
+      return;
+    }
+    if (hasPendingInlineImageUpload) {
       return;
     }
     if (identityValidationMessage) {

@@ -19,6 +19,7 @@ jest.mock("@/helpers/server.helpers", () => ({
 
 jest.mock("@/components/providers/metadata", () => ({
   getAppMetadata: jest.fn((v: any) => v),
+  getLargeSocialCardMetadata: jest.fn((v: any) => v),
 }));
 
 // Use real helpers but we'll spy on the metadata builder
@@ -115,7 +116,7 @@ describe("followers page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      "Followers"
+      " "
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(

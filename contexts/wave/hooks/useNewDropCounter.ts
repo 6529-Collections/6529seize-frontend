@@ -52,6 +52,43 @@ const isPollResponseDropUpdate = (
 ): boolean =>
   getWebSocketMessageReason(message) === WS_DROP_UPDATE_REASON_POLL_RESPONSE;
 
+const updateLatestDropTimestamp = ({
+  createdAt,
+  firstUnreadSerialNo,
+  newDropsCounts,
+  unreadCount,
+  waveId,
+}: {
+  readonly createdAt: number;
+  readonly firstUnreadSerialNo?: number | null | undefined;
+  readonly newDropsCounts: Record<string, MinimalWaveNewDropsCount>;
+  readonly unreadCount?: number | undefined;
+  readonly waveId: string;
+}): Record<string, MinimalWaveNewDropsCount> => {
+  const current = newDropsCounts[waveId];
+  const next: MinimalWaveNewDropsCount = {
+    count: unreadCount ?? current?.count ?? 0,
+    latestDropTimestamp: Math.max(createdAt, current?.latestDropTimestamp ?? 0),
+    firstUnreadSerialNo:
+      firstUnreadSerialNo !== undefined
+        ? firstUnreadSerialNo
+        : (current?.firstUnreadSerialNo ?? null),
+  };
+
+  if (
+    current?.count === next.count &&
+    current.latestDropTimestamp === next.latestDropTimestamp &&
+    current.firstUnreadSerialNo === next.firstUnreadSerialNo
+  ) {
+    return newDropsCounts;
+  }
+
+  return {
+    ...newDropsCounts,
+    [waveId]: next,
+  };
+};
+
 /**
  * Hook to manage new drop counts via WebSockets
  *
@@ -204,46 +241,38 @@ function useNewDropCounter(
           return;
         }
 
-        if (wave.muted) return;
+        if (wave.muted) {
+          return setNewDropsCounts((prev) =>
+            updateLatestDropTimestamp({
+              createdAt: message.created_at,
+              firstUnreadSerialNo: null,
+              newDropsCounts: prev,
+              unreadCount: 0,
+              waveId,
+            })
+          );
+        }
 
         if (
           connectedProfile?.handle?.toLowerCase() ===
           message.author.handle?.toLowerCase()
         )
           return setNewDropsCounts((prev) => {
-            const currentCount = prev[waveId]?.count ?? 0;
-            const currentLatestDropTimestamp =
-              prev[waveId]?.latestDropTimestamp ?? null;
-            return {
-              ...prev,
-              [waveId]: {
-                count: currentCount,
-                latestDropTimestamp: Math.max(
-                  message.created_at,
-                  currentLatestDropTimestamp ?? 0
-                ),
-                firstUnreadSerialNo: prev[waveId]?.firstUnreadSerialNo ?? null,
-              },
-            };
+            return updateLatestDropTimestamp({
+              createdAt: message.created_at,
+              newDropsCounts: prev,
+              waveId,
+            });
           });
 
         // Skip incrementing if this is the active wave AND the document is visible
         if (waveId === activeWaveId && document.visibilityState === "visible") {
           return setNewDropsCounts((prev) => {
-            const currentCount = prev[waveId]?.count ?? 0;
-            const currentLatestDropTimestamp =
-              prev[waveId]?.latestDropTimestamp ?? null;
-            return {
-              ...prev,
-              [waveId]: {
-                count: currentCount,
-                latestDropTimestamp: Math.max(
-                  message.created_at,
-                  currentLatestDropTimestamp ?? 0
-                ),
-                firstUnreadSerialNo: prev[waveId]?.firstUnreadSerialNo ?? null,
-              },
-            };
+            return updateLatestDropTimestamp({
+              createdAt: message.created_at,
+              newDropsCounts: prev,
+              waveId,
+            });
           });
         }
 

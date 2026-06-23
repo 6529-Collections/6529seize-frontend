@@ -263,7 +263,9 @@ describe("getReactionErrorMessage", () => {
         ),
         "Error adding reaction"
       )
-    ).toBe("Error adding reaction");
+    ).toBe(
+      "Network request failed. Please check your connection and try again. (https://api.test.6529.io/api/drops/drop-1/reaction)"
+    );
   });
 
   it("does not use the raw error message when an unsafe body is present", () => {

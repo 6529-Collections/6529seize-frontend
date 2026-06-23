@@ -105,7 +105,7 @@ const handleJwtValidationResult = (
   } else {
     handleInvalidJwtWhenDisconnected(callbacks);
   }
-  
+
   return createValidationResult(true, false, isConnected);
 };
 

@@ -114,6 +114,11 @@ All project commands must go through the repo-local `6529` wrapper.
 - New and touched user-facing copy, accessible names, dates, numbers, and
   locale-sensitive sorting should follow
   `ops/standards/frontend-i18n-localization.md`.
+- New and touched user-facing UI should follow
+  `ops/standards/frontend-design-ui-ux.md` for repo-specific visual
+  consistency, Tailwind-first styling migration, responsive layout, interaction
+  states, media behavior, and browser evidence.
+- Use `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
 - Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
 - Use `ops/skills/i18n-localization/SKILL.md` for progressive localization
   work.
@@ -152,6 +157,12 @@ is available, use it; otherwise read the relevant files in
 - Check `next.config.ts`, `config/nextConfig.ts`, `config/env.schema.ts`,
   `config/env.ts`, and `config/runtimeConfig.ts` before changing env, runtime,
   build, image, asset prefix, Sentry, or security-header behavior.
+- Bootstrap Sass must be imported as `@use "bootstrap/scss/bootstrap"` through
+  `sassOptions.loadPaths` with `quietDeps: true`. Do not change it to a relative
+  `../node_modules/bootstrap/...` import; that makes Sass treat Bootstrap as
+  first-party source and re-enables Bootstrap's Dart Sass deprecation warnings.
+  If Bootstrap partial resolution conflicts with another package, fix that
+  resolver ambiguity without bypassing dependency classification.
 
 ## Architecture Boundaries
 
@@ -193,10 +204,14 @@ is available, use it; otherwise read the relevant files in
   - `ops/skills/write-prs/SKILL.md` for PR descriptions, bot iteration, merge
     gates, and deploy gates.
   - `ops/skills/commit-docs-updater/SKILL.md` for user-facing docs updates.
+  - `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
   - `ops/skills/react-doctor/SKILL.md` for React, Next.js, hook, routing, or UI
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
   - `ops/skills/write-skills/SKILL.md` for repo-local skill work.
+- For merge, staging, production, or release-lane work, read
+  `ops/docs/developer/deployment-bus-process.md` and
+  `ops/skills/deploy-6529/SKILL.md` before acting.
 - Operational plans, roadmaps, runbooks, workstream state, and agent process
   docs belong under `ops/`, not top-level `docs/`.
 - Operational scripts belong under `ops/scripts/`; app build/runtime scripts

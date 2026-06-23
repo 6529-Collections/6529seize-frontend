@@ -1,4 +1,6 @@
 import { ARWEAVE_GATEWAY_CSP_SOURCES } from "../lib/media/arweave-gateways";
+import { getMediaResolverSource } from "../lib/media/decentralized-media";
+import { IPFS_GATEWAY_CSP_SOURCES } from "../lib/media/ipfs-gateways";
 
 function isLocalhostHostname(hostname: string): boolean {
   return (
@@ -63,6 +65,7 @@ interface SecurityHeaderOptions {
 export function createSecurityHeaders(
   apiEndpoint: string | undefined = "",
   ipfsGatewayEndpoint: string | undefined = "",
+  mediaResolverEndpoint: string | undefined = "",
   options: SecurityHeaderOptions = {}
 ) {
   const arweaveGatewaySources = ARWEAVE_GATEWAY_CSP_SOURCES;
@@ -74,6 +77,8 @@ export function createSecurityHeaders(
     options.webSocketEndpoint,
     options.allowInsecureLocalhostConnectSrc
   );
+  const ipfsGatewaySources = IPFS_GATEWAY_CSP_SOURCES.join(" ");
+  const mediaResolverSource = getMediaResolverSource(mediaResolverEndpoint);
   const configuredIpfsGatewaySource =
     getConfiguredIpfsGatewaySource(ipfsGatewayEndpoint);
   const connectSrc = [
@@ -93,7 +98,9 @@ export function createSecurityHeaders(
     "https://www.googletagmanager.com",
     "https://*.google-analytics.com",
     "https://cloudflare-eth.com/",
+    mediaResolverSource,
     ...arweaveGatewaySources,
+    ipfsGatewaySources,
     "https://rpc.walletconnect.com/v1/",
     "https://sts.us-east-1.amazonaws.com",
     "https://sts.us-west-2.amazonaws.com",
@@ -114,20 +121,23 @@ export function createSecurityHeaders(
     "blob:",
     "https://*.cloudfront.net",
     "https://videos.files.wordpress.com",
+    mediaResolverSource,
     ...arweaveGatewaySources,
+    ipfsGatewaySources,
     configuredIpfsGatewaySource,
-    "https://cf-ipfs.com/ipfs/*",
     "https://*.twimg.com",
     "https://artblocks.io",
     "https://*.artblocks.io",
   ];
   const frameSrc = [
     "'self'",
+    mediaResolverSource,
     "https://ipfs.io",
     "https://ipfs.io/ipfs/",
     configuredIpfsGatewaySource,
     "https://cf-ipfs.com",
     "https://cf-ipfs.com/ipfs/",
+    ipfsGatewaySources,
     "https://media.generator.seize.io",
     "https://media.generator.6529.io",
     "https://generator.seize.io",

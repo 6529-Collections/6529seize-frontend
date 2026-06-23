@@ -2,6 +2,7 @@ import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { useXtdhCollectionsQuery } from "@/hooks/useXtdhCollectionsQuery";
 import { useMemo } from "react";
+import { getCollectedFilterMessage } from "./user-page-collected-filter-labels";
 
 export default function UserPageCollectedFiltersNetworkCollection({
   identity,
@@ -21,14 +22,18 @@ export default function UserPageCollectedFiltersNetworkCollection({
 
   const items: CommonSelectItem<string | null>[] = useMemo(() => {
     const allOption: CommonSelectItem<string | null> = {
-      label: "All",
-      mobileLabel: "All Collections",
+      label: getCollectedFilterMessage("user.collected.filters.collection.all"),
+      mobileLabel: getCollectedFilterMessage(
+        "user.collected.filters.collection.allCollections"
+      ),
       value: null,
       key: "all",
     };
 
     const collectionOptions = collections.map((c) => ({
-      label: c.collection_name ?? "Unknown Collection",
+      label:
+        c.collection_name ??
+        getCollectedFilterMessage("user.collected.filters.collection.unknown"),
       value: c.contract,
       key: c.contract,
     }));
@@ -40,7 +45,9 @@ export default function UserPageCollectedFiltersNetworkCollection({
     <CommonDropdown
       items={items}
       activeItem={selected}
-      filterLabel="Collection"
+      filterLabel={getCollectedFilterMessage(
+        "user.collected.filters.collection"
+      )}
       setSelected={setSelected}
       size="sm"
     />

@@ -15,14 +15,10 @@ import {
 } from "@/components/waves/drops/drop.types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import {
-  useCallback,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
+import { useCallback, type MouseEvent, type ReactNode } from "react";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
@@ -100,7 +96,7 @@ export default function MemeParticipationDrop({
     close: closeVotingModal,
   } = useVotingModalState(isVotingActionLocked);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
-  const isMobile = useIsMobileDevice();
+  const { canUseDesktopHoverActions } = useDropActionInteractionMode();
   const isMobileScreen = useIsMobileScreen();
 
   const firstPart = drop.parts.at(0);
@@ -129,7 +125,7 @@ export default function MemeParticipationDrop({
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
       <MemeDropHeader title={title} />
       {drop.is_additional_action_promised === true && (
-        <AdditionalActionPromiseBadge />
+        <AdditionalActionPromiseBadge focusable={!isContentInteractive} />
       )}
     </div>
   );
@@ -247,7 +243,7 @@ export default function MemeParticipationDrop({
             <div className="tw-absolute tw-right-4 tw-top-2">
               <MemeDropActions
                 drop={drop}
-                isMobile={isMobile}
+                canUseDesktopHoverActions={canUseDesktopHoverActions}
                 showReplyAndQuote={showReplyAndQuote}
                 onReply={handleOnReply}
               />

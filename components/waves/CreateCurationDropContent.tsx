@@ -416,6 +416,9 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
             onClicked={onDrop}
             loading={submitting}
             disabled={!canSubmit}
+            ariaLabel={
+              submitting ? "Submitting to curation" : "Submit to Curation"
+            }
             padding="tw-w-full tw-px-4 tw-py-2.5"
           >
             <span>Submit to Curation</span>

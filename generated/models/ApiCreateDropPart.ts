@@ -11,15 +11,15 @@
  * Do not edit the class manually.
  */
 
+import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
 import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference';
-import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiQuotedDrop } from '../models/ApiQuotedDrop';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateDropPart {
     'content'?: string | null;
     'quoted_drop'?: ApiQuotedDrop | null;
-    'media': Array<ApiDropMedia>;
+    'media': Array<ApiCreateDropMedia>;
     'attachments'?: Array<ApiDropAttachmentReference>;
 
     static readonly discriminator: string | undefined = undefined;
@@ -42,7 +42,7 @@ export class ApiCreateDropPart {
         {
             "name": "media",
             "baseName": "media",
-            "type": "Array<ApiDropMedia>",
+            "type": "Array<ApiCreateDropMedia>",
             "format": ""
         },
         {

@@ -1,4 +1,8 @@
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
@@ -24,7 +28,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { view } = await params;
   const nextgenView = getNextGenView(view?.[0] ?? "");
-  return getAppMetadata({ title: "NextGen " + (nextgenView ?? "") });
+  const title = nextgenView ? `NextGen ${nextgenView}` : "NextGen";
+
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title,
+      description: "NextGen",
+      ogImage: getCollectionSocialCardImagePath("nextgen", {
+        subtitle: "Generative art collections from 6529",
+        title,
+      }),
+      ogImageAlt: `${title} social card`,
+    })
+  );
 }
 
 export default async function NextGenPage({

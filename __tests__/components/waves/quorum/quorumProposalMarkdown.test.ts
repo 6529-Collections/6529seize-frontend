@@ -277,17 +277,17 @@ describe("quorumProposalMarkdown", () => {
 
     expect(parseQuorumProposalMarkdown(markdown)).toEqual({
       title: "Slow Mode",
-      summaryMarkdown: "Keep the feed readable.",
+      summaryMarkdown: [
+        "Keep the feed readable.",
+        "",
+        "## Problem Statement",
+        "",
+        "There are too many drops.",
+      ].join("\n"),
       sections: [
         {
           heading: "Problem Statement",
-          markdown: [
-            "There are too many drops.",
-            "",
-            "## Problem Statement",
-            "",
-            "This repeated heading is still part of the same section.",
-          ].join("\n"),
+          markdown: "This repeated heading is still part of the same section.",
         },
       ],
     });

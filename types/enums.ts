@@ -61,7 +61,6 @@ export enum AboutSection {
   GRADIENTS = "6529-gradient",
   FAQ = "faq",
   MISSION = "mission",
-  RELEASE_NOTES = "release-notes",
   TECH = "tech",
   CONTACT_US = "contact-us",
   TERMS_OF_SERVICE = "terms-of-service",
@@ -155,6 +154,7 @@ export enum RateMatter {
   NIC = "NIC",
   REP = "REP",
   DROP_REP = "DROP_REP",
+  WAVE_REP = "WAVE_REP",
 }
 
 export enum ProfileRatersParamsOrderBy {

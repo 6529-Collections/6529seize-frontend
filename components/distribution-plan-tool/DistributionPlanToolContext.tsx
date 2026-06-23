@@ -3,10 +3,7 @@
 import { createContext, useState } from "react";
 
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
-import {
-  showAppToast,
-  showAppToasts,
-} from "@/components/utils/toast/AppToast";
+import { showAppToast, showAppToasts } from "@/components/utils/toast/AppToast";
 import type { TypeOptions } from "react-toastify";
 import type {
   AllowlistCustomTokenPool,

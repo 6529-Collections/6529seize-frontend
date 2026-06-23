@@ -648,23 +648,23 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         ref={desktopTabsScrollerRef}
         className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
       >
-        <div className="tw-flex tw-w-auto tw-gap-x-1" role="tablist">
-          {standardOptions.map((option) => (
-            <DesktopTabOption
-              key={option.key}
-              option={option}
-              activeKey={activeKey}
-              onSelect={(key) => {
-                onSelectCuration(null);
-                setActiveTab(key as MyStreamWaveTab);
-              }}
-            />
-          ))}
-          <DndContext
-            sensors={sortableSensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleCurationDragEnd}
-          >
+        <DndContext
+          sensors={sortableSensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleCurationDragEnd}
+        >
+          <div className="tw-flex tw-w-auto tw-gap-x-1" role="tablist">
+            {standardOptions.map((option) => (
+              <DesktopTabOption
+                key={option.key}
+                option={option}
+                activeKey={activeKey}
+                onSelect={(key) => {
+                  onSelectCuration(null);
+                  setActiveTab(key as MyStreamWaveTab);
+                }}
+              />
+            ))}
             <SortableContext
               items={curationTabKeys}
               strategy={horizontalListSortingStrategy}
@@ -692,8 +692,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                 </React.Fragment>
               ))}
             </SortableContext>
-          </DndContext>
-        </div>
+          </div>
+        </DndContext>
       </div>
       {showCreateActionsMenu && (
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 sm:tw-ml-auto">

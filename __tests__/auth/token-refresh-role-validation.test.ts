@@ -1,6 +1,6 @@
 /**
  * Comprehensive tests for token refresh role validation
- * 
+ *
  * Tests the CRITICAL security fix for role validation to ensure:
  * 1. Role validation uses the FRESH token from server, not old JWT
  * 2. Role escalation attacks are prevented
@@ -34,12 +34,12 @@ jest.mock('@/helpers/Helpers', () => ({
 }));
 
 import { commonApiPost } from '@/services/api/common-api';
-import { 
-  getAuthJwt, 
-  getRefreshToken, 
-  getWalletAddress, 
+import {
+  getAuthJwt,
+  getRefreshToken,
+  getWalletAddress,
   getWalletRole,
-  setAuthJwt 
+  setAuthJwt
 } from '@/services/auth/auth.utils';
 import { jwtDecode } from 'jwt-decode';
 import { areEqualAddresses } from '@/helpers/Helpers';
@@ -87,19 +87,19 @@ async function validateJwtWithRoleCheck(
         role: role ?? undefined,
       },
     });
-    
+
     // Check if operation was cancelled
     if (abortSignal.aborted) {
       return { isValid: false, wasCancelled: true };
     }
-    
+
     // Address validation
     if (!areEqualAddresses(redeemResponse.address, wallet)) {
       throw new Error(
         `Address mismatch in token response: expected ${wallet}, got ${redeemResponse.address}`
       );
     }
-    
+
     const walletRole = getWalletRole();
     // CRITICAL FIX: Get role from the NEW token, not the old one
     const freshTokenRole = getRole({ jwt: redeemResponse.token });
@@ -127,7 +127,7 @@ async function validateJwtWithRoleCheck(
         `Server returned unexpected role: requested ${role}, received ${freshTokenRole}`
       );
     }
-    
+
     // Success - store the new JWT
     setAuthJwt(
       redeemResponse.address,
@@ -176,11 +176,11 @@ describe('Token Refresh Role Validation', () => {
 
       // Verify success
       expect(result).toEqual({ isValid: true, wasCancelled: false });
-      
+
       // CRITICAL: Verify that JWT decode was called with the FRESH token
       expect(mockJwtDecode).toHaveBeenCalledWith(freshJwt); // Should use fresh token
       expect(mockJwtDecode).not.toHaveBeenCalledWith(oldJwt); // Should NOT use old token
-      
+
       // Verify the JWT was stored
       expect(mockSetAuthJwt).toHaveBeenCalledWith(
         walletAddress,

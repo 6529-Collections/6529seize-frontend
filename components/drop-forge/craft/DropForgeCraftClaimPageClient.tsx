@@ -963,11 +963,11 @@ function AnimationSection({
       setLinkError("Enter a link");
       return;
     }
-    const url = raw.startsWith("http") ? raw : `https://${raw}`;
+    const url = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
     const canonical = canonicalizeInteractiveMediaUrl(url);
     if (!canonical) {
       setLinkError(
-        "Link must be a valid IPFS or Arweave URL (e.g. https://ipfs.io/ipfs/… or https://arweave.net/…)"
+        "Link must be a valid IPFS or Arweave URL (e.g. ipfs://..., ar://..., or https://media.6529.io/...)"
       );
       return;
     }
@@ -1067,7 +1067,7 @@ function AnimationSection({
           setLinkInput(e.target.value);
           setLinkError(null);
         }}
-        placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
+        placeholder="ipfs://... or ar://..."
         className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
       />
       {linkError && (
@@ -1157,6 +1157,7 @@ function AnimationSection({
                 <MediaDisplay
                   media_mime_type={animationPreviewMimeType}
                   media_url={animationDisplayUrl}
+                  fillVideoContainer
                 />
               </div>
             )}

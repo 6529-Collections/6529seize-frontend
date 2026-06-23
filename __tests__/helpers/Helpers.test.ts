@@ -17,6 +17,8 @@ import {
 } from "@/helpers/Helpers";
 import { DateIntervalsSelection } from "@/types/enums";
 
+const CID_V0 = "QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY";
+
 type FullscreenRequestKey =
   | "requestFullscreen"
   | "mozRequestFullScreen"
@@ -49,16 +51,26 @@ describe("Helpers utility functions", () => {
     expect(addProtocol("")).toBe("");
   });
 
-  test("parseIpfsUrl converts ipfs protocol to gateway url", () => {
-    expect(parseIpfsUrl("ipfs://hash")).toBe("https://ipfs.io/ipfs/hash");
+  test("parseIpfsUrl converts ipfs protocol to the 6529 resolver url", () => {
+    expect(parseIpfsUrl(`ipfs://${CID_V0}`)).toBe(
+      `https://media.6529.io/ipfs/${CID_V0}`
+    );
     expect(parseIpfsUrl("https://site")).toBe("https://site");
   });
 
   test("parseIpfsUrlToGateway converts ipfs protocol to cf-ipfs gateway", () => {
-    expect(parseIpfsUrlToGateway("ipfs://data")).toBe(
-      "https://cf-ipfs.com/ipfs/data"
+    expect(parseIpfsUrlToGateway(`ipfs://${CID_V0}`)).toBe(
+      `https://cf-ipfs.com/ipfs/${CID_V0}`
     );
     expect(parseIpfsUrlToGateway("https://foo")).toBe("https://foo");
+  });
+
+  test("parseIpfsUrlToGateway does not trust cf-ipfs host substrings", () => {
+    const spoofedGateway = `https://cf-ipfs.com.evil.tld/ipfs/${CID_V0}`;
+    const querySpoof = `https://example.com/?next=https://cf-ipfs.com/ipfs/${CID_V0}`;
+
+    expect(parseIpfsUrlToGateway(spoofedGateway)).toBe(spoofedGateway);
+    expect(parseIpfsUrlToGateway(querySpoof)).toBe(querySpoof);
   });
 
   test("numberWithCommas formats numbers correctly", () => {
@@ -89,6 +101,7 @@ describe("Helpers utility functions", () => {
     expect(metadata).toMatchObject({
       title: "phoebeum",
       description: "Identity",
+      ogImageAlt: "phoebeum profile social card",
       ogImageHeight: 630,
       ogImageWidth: 1200,
       twitterCard: "summary_large_image",

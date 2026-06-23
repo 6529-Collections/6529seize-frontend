@@ -189,11 +189,10 @@ const getPodiumIdentityDisplay = (drop: ExtendedDrop) => {
     pfp: identityProfile?.pfp ?? null,
     profileUser:
       identityProfile?.handle ?? identityProfile?.primary_address ?? null,
-    comparableIdentity:
-      identityProfile ?? {
-        handle: fallbackValue,
-        primary_address: fallbackValue,
-      },
+    comparableIdentity: identityProfile ?? {
+      handle: fallbackValue,
+      primary_address: fallbackValue,
+    },
   };
 };
 

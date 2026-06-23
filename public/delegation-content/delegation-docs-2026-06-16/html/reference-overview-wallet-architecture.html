@@ -1,0 +1,91 @@
+<div>
+  <h4>
+    <b>Three Address Protocol (TAP)</b>
+  </h4>
+  <br>
+  This page outlines <b>TAP</b>, a Three Address Protocol for organizing your Ethereum addresses and using the delegation, consolidation and delegation management features of The Memes/6529 ecosystem to enhance address security.
+  While personal circumstances may vary and no approach is fool-proof, the following guidelines should benefit most people in the 6529 ecosystem.
+  <br>
+  <br>
+  Your personal circumstances may vary, no approach is fool-proof and you still
+  have to get implement the below correctly, but the overall approach described
+  should be a good approach for most people in the 6529 ecosystem.
+  <br>
+  <br>
+    <b>Overview:</b>
+    It is crucial to implement safety measures to protect your Ether, ERC-20 tokens, and NFTs. Common ways to lose cryptocurrency assets include:<br>
+    <br>
+  <ul>
+    <li>
+      Phishing: Disclosing your seed phrase or granting access to your computer (e.g., via screen sharing) to someone.
+      The best way to mitigate this risk is by never revealing your seed phrase or computer access.
+    </li>
+    <li>
+      Malware: Malicious software on your computer can access the private key of a hot wallet such as Metamask. The most effective tactic is to use a hardware wallet.
+    </li>
+    <li>
+      Connecting to malicious websites: These sites can steal your NFTs
+      if you sign a malicious transaction, even when using a hardware wallet. To avoid this issue, use separate addresses for your "vault," "transaction wallet," and "minting wallet."
+    </li>
+  </ul>
+  By organizing your Ethereum activities to avoid these risks, you can reduce your risk of loss.
+  <br>
+  <br>
+    <b>Seize.io and NFTDelegation.com:</b>
+    The 6529 team has developed and launched NFTDelegation,
+    a trustless, open-source smart contract for advanced delegation and consolidation.   The contract is available to any site to integrate and it is now in use on Seize.io.
+  <br>
+  <br>
+  The combination of the "delegation" and "consolidation" features of NFTDelegation.com supports a multi-address architecture for convenient and secure NFT activities in the 6529 ecosystem.
+  <br>
+  <br>
+  <h4>
+    <b>Use TAP:</b><br>
+    <br>
+  </h4>
+  <ol>
+    <li>
+      Buy a hardware wallet ($60 to $200) from a reliable vendor, such as Trezor or Ledger. When setting it up, consider using Shamir's Secret Sharing Scheme (SSSS) to split your keys.
+    </li>
+    <br>
+    <li>
+      Create three Ethereum addresses on the hardware wallet:
+      <ol type="a">
+        <br>
+        <li>
+          Address A: The "vault" where you store NFTs for extended periods without connecting it to any services.
+          You only transfer NFTs in and out of this address.
+        </li>
+        <br>
+        <li>
+          Address B: The "transaction" address where you store NFTs you are
+          currently selling and is used for buying or selling NFTs on trusted marketplaces such as OpenSea.
+        </li>
+        <br>
+        <li>
+          Address C: The "minting" address for minting NFTs and connecting to unknown or untrusted services.
+          You have no NFTs held on this address and you can mint wherever you want. Once you mint, transfer to the Vault or Transaction address.
+        </li>
+      </ol>
+    </li>
+    <br>
+    <li>
+      Reasonable variations of the above approach could include:
+      <ol type="a">
+        <br>
+        <li>
+          Higher Security: Address A can be a SAFE (formerly Gnosis) multi-sig smart contract for enhanced security and resilience.
+        </li>
+        <br>
+        <li>
+          More Convenience: Address C can be a hot wallet or mobile wallet for easier minting.
+        </li>
+      </ol>
+    </li>
+    <br>
+    <li>
+      (Optional) Label addresses using ENS subdomains (e.g., mint.yourname.eth) for improved legibility and reduced risk of erroneous transactions.
+    </li>
+  </ol>
+  <br>
+</div>

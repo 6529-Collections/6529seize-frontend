@@ -29,13 +29,17 @@ export interface CreateProxyCreateDropToWaveAction
 export interface CreateProxyRateWaveDropAction
   extends CreateProxyActionBase<ApiProfileProxyActionType.RateWaveDrop> {}
 
+export interface CreateProxyPublishCmsAction
+  extends CreateProxyActionBase<ApiProfileProxyActionType.PublishCms> {}
+
 export type CreateProxyAction =
   | CreateProxyAllocateRepAction
   | CreateProxyAllocateCicAction
   | CreateProxyCreateWaveAction
   | CreateProxyReadWaveAction
   | CreateProxyCreateDropToWaveAction
-  | CreateProxyRateWaveDropAction;
+  | CreateProxyRateWaveDropAction
+  | CreateProxyPublishCmsAction;
 
 export const PROFILE_PROXY_ACTION_LABELS: Record<
   ApiProfileProxyActionType,
@@ -47,6 +51,7 @@ export const PROFILE_PROXY_ACTION_LABELS: Record<
   [ApiProfileProxyActionType.ReadWave]: "Read Wave",
   [ApiProfileProxyActionType.CreateDropToWave]: "Create Drop To Wave",
   [ApiProfileProxyActionType.RateWaveDrop]: "Rate Wave Drop",
+  [ApiProfileProxyActionType.PublishCms]: "Publish CMS",
 };
 
 export enum ProfileProxySide {
@@ -71,6 +76,7 @@ export const PROFILE_PROXY_ACTION_HAVE_CREDIT: Record<
   [ApiProfileProxyActionType.ReadWave]: false,
   [ApiProfileProxyActionType.CreateDropToWave]: false,
   [ApiProfileProxyActionType.RateWaveDrop]: false,
+  [ApiProfileProxyActionType.PublishCms]: false,
 };
 
 export const PROFILE_PROXY_AVAILABLE_ACTIONS: ApiProfileProxyActionType[] = [

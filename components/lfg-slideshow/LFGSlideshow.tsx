@@ -8,10 +8,10 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiNftMedia } from "@/generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
 import { createPortal } from "react-dom";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
 const DEFAULT_TIMEOUT = 10000;
 const SLIDESHOW_ID = "lfg-slideshow";
-const EMPTY_CAPTIONS_SRC = "data:text/vtt,WEBVTT%0A%0A";
 
 const getMediaField = (value: unknown) =>
   typeof value === "string" ? value : "";
@@ -193,23 +193,16 @@ const LFGSlideshow: React.FC<{
       </span>
       <div className={styles["slide"]} id={SLIDESHOW_ID}>
         {isVideo(currentAnimation) ? (
-          <video
-            ref={videoRef}
+          <SeizeVideoPlayer
+            videoRef={videoRef}
+            template="slideshow"
             autoPlay
-            controls
-            playsInline
             muted={isMuted}
             src={currentAnimation}
             poster={currentImage.length > 0 ? currentImage : undefined}
-          >
-            <track
-              kind="captions"
-              src={EMPTY_CAPTIONS_SRC}
-              srcLang="en"
-              label="No captions available"
-            />
-            Your browser does not support the video tag.
-          </video>
+            loop={false}
+            layout="fill"
+          />
         ) : (
           <img src={currentImage} alt={`LFG Slide ${currentIndex + 1}`} />
         )}

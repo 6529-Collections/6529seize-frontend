@@ -279,7 +279,7 @@ export default function SubscriptionsReportComponent() {
           {upcomingLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="pt-3" data-testid="subscriptions-report-upcoming-drops">
         <Col>
           {upcomingCounts?.length > 0 ? (
             <>
@@ -371,7 +371,7 @@ export default function SubscriptionsReportComponent() {
           {redeemedLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="pt-3" data-testid="subscriptions-report-past-drops">
         <Col>
           {redeemedCounts?.length > 0 ? (
             <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">

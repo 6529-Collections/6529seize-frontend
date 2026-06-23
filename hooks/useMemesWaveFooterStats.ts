@@ -63,7 +63,8 @@ export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
   const isAvailable =
     isEnabled &&
     waveId !== null &&
-    (!query.isSuccess || isMemesQuickVoteVoteableDrop(activeDrop));
+    query.isSuccess &&
+    isMemesQuickVoteVoteableDrop(activeDrop);
 
   if (
     !query.isSuccess ||

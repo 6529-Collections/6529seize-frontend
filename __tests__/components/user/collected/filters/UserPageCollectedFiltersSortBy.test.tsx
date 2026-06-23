@@ -1,20 +1,20 @@
-import { render } from '@testing-library/react';
-import UserPageCollectedFiltersSortBy from '@/components/user/collected/filters/UserPageCollectedFiltersSortBy';
-import { CollectedCollectionType, CollectionSort } from '@/entities/IProfile';
-import { SortDirection } from '@/entities/ISort';
+import { render } from "@testing-library/react";
+import UserPageCollectedFiltersSortBy from "@/components/user/collected/filters/UserPageCollectedFiltersSortBy";
+import { CollectedCollectionType, CollectionSort } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
 
 let capturedProps: any = null;
-jest.mock('@/components/utils/select/CommonSelect', () => (props: any) => {
+jest.mock("@/components/utils/select/CommonSelect", () => (props: any) => {
   capturedProps = props;
   return <div data-testid="select" />;
 });
 
-describe('UserPageCollectedFiltersSortBy', () => {
+describe("UserPageCollectedFiltersSortBy", () => {
   beforeEach(() => {
     capturedProps = null;
   });
 
-  it('filters sort items based on collection', () => {
+  it("filters sort items based on collection", () => {
     const { rerender } = render(
       <UserPageCollectedFiltersSortBy
         selected={CollectionSort.TOKEN_ID}
@@ -42,7 +42,7 @@ describe('UserPageCollectedFiltersSortBy', () => {
     ]);
   });
 
-  it('shows all sorts when collection is null', () => {
+  it("shows all sorts when collection is null", () => {
     render(
       <UserPageCollectedFiltersSortBy
         selected={CollectionSort.TOKEN_ID}
@@ -55,6 +55,26 @@ describe('UserPageCollectedFiltersSortBy', () => {
       CollectionSort.TOKEN_ID,
       CollectionSort.TDH,
       CollectionSort.RANK,
+    ]);
+  });
+
+  it("passes source-locale labels to the select", () => {
+    render(
+      <UserPageCollectedFiltersSortBy
+        selected={CollectionSort.XTDH_DAY}
+        direction={SortDirection.DESC}
+        collection={CollectedCollectionType.NETWORK}
+        setSelected={jest.fn()}
+      />
+    );
+
+    expect(capturedProps.filterLabel).toBe("Sort By");
+    expect(capturedProps.items).toEqual([
+      expect.objectContaining({ label: "xTDH", value: CollectionSort.XTDH }),
+      expect.objectContaining({
+        label: "xTDH/day",
+        value: CollectionSort.XTDH_DAY,
+      }),
     ]);
   });
 });

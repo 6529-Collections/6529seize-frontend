@@ -21,8 +21,8 @@ interface WebBrainLeftSidebarWaveProps {
   readonly collapsed?: boolean | undefined;
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
-  readonly reserveExpandControlSpace?: boolean | undefined;
   readonly isExpanded?: boolean | undefined;
+  readonly isLoadingSubwaves?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly isLastSubwave?: boolean | undefined;
   readonly onToggleExpand?: ((waveId: string) => void) | undefined;
@@ -39,8 +39,8 @@ const WebBrainLeftSidebarWave = ({
   collapsed = false,
   depth = 0,
   canExpand = false,
-  reserveExpandControlSpace = false,
   isExpanded = false,
+  isLoadingSubwaves = false,
   hasUnreadSubwaves = false,
   isLastSubwave = false,
   onToggleExpand,
@@ -126,8 +126,8 @@ const WebBrainLeftSidebarWave = ({
       isPinned={wave.isPinned}
       depth={depth}
       canExpand={canExpand}
-      reserveExpandControlSpace={reserveExpandControlSpace}
       isExpanded={isExpanded}
+      isLoadingSubwaves={isLoadingSubwaves}
       hasUnreadSubwaves={hasUnreadSubwaves}
       isLastSubwave={isLastSubwave}
       onToggleExpand={onToggleExpand}

@@ -139,9 +139,7 @@ export default function MemeSubscriptionRow(
       });
       const responseSubscribed = response.subscribed;
       setSubscribed(!!responseSubscribed);
-      const detail = responseSubscribed
-        ? "Subscribed."
-        : "Unsubscribed.";
+      const detail = responseSubscribed ? "Subscribed." : "Unsubscribed.";
       setToast({
         title: detail,
         description: `${props.title} #${response.token_id}`,
@@ -159,7 +157,10 @@ export default function MemeSubscriptionRow(
         type: "error",
         title: "Couldn't update this subscription.",
         description: "Please try again.",
-        details: getToastErrorDetails(e, "Could not change token subscription."),
+        details: getToastErrorDetails(
+          e,
+          "Could not change token subscription."
+        ),
       });
       return;
     } finally {
@@ -218,7 +219,10 @@ export default function MemeSubscriptionRow(
         type: "error",
         title: "Couldn't update subscription count.",
         description: "Please try again.",
-        details: getToastErrorDetails(e, "Could not update subscription count."),
+        details: getToastErrorDetails(
+          e,
+          "Could not update subscription count."
+        ),
       });
       return;
     } finally {

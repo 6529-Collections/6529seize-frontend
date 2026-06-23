@@ -2,12 +2,19 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
+import { getLargeSocialCardMetadata } from "@/components/providers/metadata";
 import {
   DEFAULT_USER_PAGE_TAB,
   type UserPageTabKey,
   getUserPageTabById,
 } from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
+import {
+  canonicalizeGatewayHostname,
+  normalizeDecentralizedMediaUrl,
+  parseDecentralizedMediaRef,
+  toExternalFallbackUrls,
+} from "@/lib/media/decentralized-media";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -322,20 +329,35 @@ export function parseIpfsUrl(url: string) {
   if (!url) {
     return url;
   }
-  if (url.startsWith("ipfs")) {
-    return `https://ipfs.io/ipfs/${url.split("://")[1]}`;
-  }
-  return url;
+  return (
+    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
+    url
+  );
 }
 
 export function parseIpfsUrlToGateway(url: string) {
   if (!url) {
     return url;
   }
-  if (url.startsWith("ipfs")) {
-    return `https://cf-ipfs.com/ipfs/${url.split("://")[1]}`;
+  const parsed = parseDecentralizedMediaRef(url);
+  if (!parsed) {
+    return url;
   }
-  return url;
+  const fallbacks = toExternalFallbackUrls(parsed);
+  return (
+    fallbacks.find((fallback) => {
+      try {
+        return (
+          canonicalizeGatewayHostname(new URL(fallback).hostname) ===
+          "cf-ipfs.com"
+        );
+      } catch {
+        return false;
+      }
+    }) ??
+    fallbacks[0] ??
+    parseIpfsUrl(url)
+  );
 }
 
 export function isEmptyObject(obj: any) {
@@ -395,6 +417,35 @@ export function getRandomColor() {
   const [r = 0, g = 0, b = 0] = values;
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function getRandomInteger(maxExclusive: number): number {
+  const values = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(values);
+  return (values[0] ?? 0) % maxExclusive;
+}
+
+export function getRandomUniqueNumbersBetween(
+  minInclusive: number,
+  maxExclusive: number
+): string[] {
+  if (!Number.isInteger(minInclusive) || !Number.isInteger(maxExclusive)) {
+    throw new TypeError("Both minInclusive and maxExclusive must be integers.");
+  }
+
+  if (maxExclusive <= minInclusive) {
+    throw new RangeError("maxExclusive must be greater than minInclusive.");
+  }
+
+  const rangeSize = maxExclusive - minInclusive;
+  const count = getRandomInteger(rangeSize) + 1;
+  const values = new Set<number>();
+
+  while (values.size < count) {
+    values.add(minInclusive + getRandomInteger(rangeSize));
+  }
+
+  return [...values].sort((a, b) => a - b).map(String);
 }
 
 export function capitalizeEveryWord(input: string): string {
@@ -924,16 +975,12 @@ export const getMetadataForUserPage = (
     profile.handle ??
     profile.primary_wallet ??
     profile.display;
-  return {
+  return getLargeSocialCardMetadata({
     title: pathTitle ? `${display} - ${pathTitle}` : display,
-    ogImage: `${publicEnv.BASE_ENDPOINT}/api/og-metadata/profiles/${encodeURIComponent(
-      imageIdentity
-    )}`,
-    ogImageHeight: 630,
-    ogImageWidth: 1200,
+    ogImage: `/api/og-metadata/profiles/${encodeURIComponent(imageIdentity)}`,
+    ogImageAlt: `${display} profile social card`,
     description: "Identity",
-    twitterCard: "summary_large_image",
-  };
+  });
 };
 
 export async function fetchFileContent(filePath: string): Promise<string> {

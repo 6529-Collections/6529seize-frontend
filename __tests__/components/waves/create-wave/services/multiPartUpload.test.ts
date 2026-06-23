@@ -3,6 +3,7 @@ import pLimit from "p-limit";
 import pRetry from "p-retry";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { commonApiPost } from "@/services/api/common-api";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 
 // Mock dependencies
 jest.mock("axios");
@@ -179,6 +180,31 @@ describe("multiPartUpload", () => {
           file_name: "test.png",
           content_type: "image/png",
         },
+      });
+    });
+
+    it("returns processing metadata immediately when waitForReady is disabled", async () => {
+      mockCommonApiPost.mockReset();
+      mockCommonApiPost
+        .mockResolvedValueOnce(mockStartResponse)
+        .mockResolvedValueOnce(mockPartResponse)
+        .mockResolvedValueOnce({
+          ...mockCompleteResponse,
+          media_upload_id: "media-upload-1",
+          media_status: ApiDropMediaStatus.Processing,
+        });
+
+      const result = await multiPartUpload({
+        file: mockFile,
+        path: "drop",
+        waitForReady: false,
+      });
+
+      expect(result).toEqual({
+        url: "https://cdn.example.com/final-url",
+        mime_type: "image/png",
+        media_upload_id: "media-upload-1",
+        media_status: ApiDropMediaStatus.Processing,
       });
     });
   });

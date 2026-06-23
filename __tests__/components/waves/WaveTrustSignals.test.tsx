@@ -1,0 +1,143 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { ApiWaveRepSummary } from "@/generated/models/ApiWaveRepSummary";
+import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
+import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
+
+const waveScore = {
+  visibility_score: 83,
+  quality_score: 78,
+  hotness_score: 92,
+  rep_sort_score: 41,
+} as ApiWaveScore;
+
+const waveRep = {
+  total_rep: 1250,
+} as ApiWaveRepSummary;
+
+describe("WaveTrustSignals", () => {
+  it("renders all trust badges in details mode", () => {
+    render(<WaveTrustSignals waveRep={waveRep} waveScore={waveScore} />);
+
+    expect(screen.getByText("Score")).toBeInTheDocument();
+    expect(screen.getByText("Hot")).toBeInTheDocument();
+    expect(screen.getByText("REP")).toBeInTheDocument();
+    expect(screen.getByText("83")).toBeInTheDocument();
+    expect(screen.getByText("92")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Wave REP positive/)).toBeInTheDocument();
+  });
+
+  it("renders one combined score badge in summary mode", () => {
+    render(
+      <WaveTrustSignals
+        waveRep={waveRep}
+        waveScore={waveScore}
+        variant="sidebar"
+        mode="summary"
+      />
+    );
+
+    const summaryBadge = screen.getByText("Score").closest("[aria-label]");
+
+    expect(summaryBadge).not.toBeNull();
+    expect(summaryBadge).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining(
+        "Wave score 83. Quality 78, 65% of visibility. Hotness 92, gated, 35% of visibility."
+      )
+    );
+    expect(summaryBadge?.getAttribute("aria-label")).toMatch(
+      /^Wave score 83\. Quality 78, 65% of visibility\. Hotness 92, gated, 35% of visibility\. REP: .+ raw, 41 score$/
+    );
+    expect(summaryBadge).not.toHaveAttribute("title");
+    expect(screen.getByText("Score")).toBeInTheDocument();
+    expect(screen.getByText("83")).toBeInTheDocument();
+    expect(screen.queryByText("Hot")).not.toBeInTheDocument();
+    expect(screen.queryByText("REP")).not.toBeInTheDocument();
+  });
+
+  it("renders a dark learn-more popover when requested", () => {
+    render(
+      <WaveTrustSignals
+        waveRep={waveRep}
+        waveScore={waveScore}
+        variant="header-inline"
+        mode="summary"
+        learnMoreHref="/network/wave-score"
+      />
+    );
+
+    const summaryBadge = screen.getByText("Score").closest("[aria-label]");
+
+    expect(summaryBadge).not.toBeNull();
+    expect(summaryBadge).not.toHaveAttribute("title");
+    expect(
+      screen.getByRole("button", { name: /^Wave score 83\./ })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^Wave score 83\./ }));
+    expect(screen.getByRole("link", { name: "Learn more" })).toHaveAttribute(
+      "href",
+      "/network/wave-score"
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Quality")).toBeInTheDocument();
+    expect(screen.getByText("Hotness")).toBeInTheDocument();
+    expect(screen.getByText("Wave REP")).toBeInTheDocument();
+    expect(screen.queryByText("REP")).not.toBeInTheDocument();
+  });
+
+  it("renders sidebar summary score as an accessible details trigger", () => {
+    render(
+      <WaveTrustSignals
+        waveRep={waveRep}
+        waveScore={waveScore}
+        variant="sidebar-inline"
+        mode="summary"
+        tooltipId="wave-score-tooltip"
+      />
+    );
+
+    const summaryBadge = screen.getByRole("button", {
+      name: /^Wave score 83\./,
+    });
+
+    expect(summaryBadge).not.toBeNull();
+    expect(screen.queryByText("Score")).not.toBeInTheDocument();
+    expect(summaryBadge).not.toHaveAttribute("data-tooltip-content");
+    expect(summaryBadge).not.toHaveAttribute("data-tooltip-id");
+    expect(summaryBadge).not.toHaveAttribute("title");
+    fireEvent.click(summaryBadge);
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Learn more" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders nothing in summary mode without a combined score", () => {
+    const { container } = render(
+      <WaveTrustSignals
+        waveScore={
+          {
+            hotness_score: 92,
+            rep_sort_score: 41,
+          } as ApiWaveScore
+        }
+        variant="sidebar"
+        mode="summary"
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders nothing in summary mode without score data", () => {
+    const { container } = render(
+      <WaveTrustSignals waveScore={null} variant="sidebar" mode="summary" />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+});

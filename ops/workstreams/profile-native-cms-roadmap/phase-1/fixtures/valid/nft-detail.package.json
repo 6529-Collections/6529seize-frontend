@@ -1,0 +1,276 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-nft-detail-v1",
+  "profile": {
+    "handle": "punk6529",
+    "profile_id": "profile-punk6529"
+  },
+  "site": {
+    "title": "NFT Detail Fixture",
+    "description": "NFT detail page fixture.",
+    "base_path": "/punk6529/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "system",
+      "accent": "#2f7df6"
+    },
+    "navigation_id": "nav-main",
+    "required_renderer_capabilities": ["nft_detail", "art_display"]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/punk6529/index.html",
+        "kind": "page",
+        "page_id": "page-home"
+      },
+      {
+        "path": "/punk6529/collections/the-memes/index.html",
+        "kind": "page",
+        "page_id": "page-collection"
+      },
+      {
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+        "kind": "page",
+        "page_id": "page-nft"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-home",
+        "type": "page",
+        "path": "/punk6529/index.html",
+        "metadata": {
+          "title": "NFT Detail Fixture Home",
+          "description": "Home route for NFT detail fixture.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "Home",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-home",
+            "block_type": "heading",
+            "level": 1,
+            "text": "NFT Detail Fixture"
+          }
+        ]
+      },
+      {
+        "id": "page-collection",
+        "type": "collection",
+        "path": "/punk6529/collections/the-memes/index.html",
+        "metadata": {
+          "title": "The Memes by 6529",
+          "description": "Collection context for the NFT detail fixture.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/collections/the-memes/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-collection-ref",
+            "block_type": "collection_reference",
+            "chain_id": 1,
+            "contract": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+            "title": "The Memes by 6529"
+          }
+        ]
+      },
+      {
+        "id": "page-nft",
+        "type": "nft_detail",
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+        "metadata": {
+          "title": "The Memes #1",
+          "description": "Art-first NFT detail page fixture with provenance.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "The Memes #1",
+          "search": "include",
+          "robots": "index"
+        },
+        "source": {
+          "source_packet_id": "source-nft-1"
+        },
+        "blocks": [
+          {
+            "id": "block-media",
+            "block_type": "image",
+            "asset_id": "asset-original",
+            "display_variant_role": "detail"
+          },
+          {
+            "id": "block-nft-ref",
+            "block_type": "nft_reference",
+            "nft_media_profile_id": "nft-profile",
+            "collection_title": "The Memes by 6529",
+            "collection_page_id": "page-collection",
+            "traits": [
+              {
+                "trait_type": "Season",
+                "value": "1"
+              },
+              {
+                "trait_type": "Theme",
+                "value": "Open Metaverse"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-original",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturenft/original.png",
+        "content_hash": "sha256:2121212121212121212121212121212121212121212121212121212121212121",
+        "mime_type": "image/png",
+        "width": 3000,
+        "height": 3000,
+        "file_size_bytes": 1200000,
+        "roles": ["original", "detail", "fullscreen"],
+        "alt_text": "The Memes by 6529 number 1 original artwork"
+      },
+      {
+        "id": "asset-grid",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturenft/grid.webp",
+        "content_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "mime_type": "image/webp",
+        "width": 800,
+        "height": 800,
+        "file_size_bytes": 120000,
+        "roles": ["grid", "thumbnail"],
+        "alt_text": "Grid derivative for The Memes number 1"
+      },
+      {
+        "id": "asset-og",
+        "kind": "social_image",
+        "uri": "ipfs://bafyfixturenft/og.png",
+        "content_hash": "sha256:2323232323232323232323232323232323232323232323232323232323232323",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 630,
+        "file_size_bytes": 45000,
+        "roles": ["social"],
+        "alt_text": "Social preview for The Memes number 1"
+      }
+    ],
+    "nft_media_profiles": [
+      {
+        "id": "nft-profile",
+        "chain_id": 1,
+        "contract": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+        "token_id": "1",
+        "metadata_uri": "ipfs://bafyfixturenft/metadata.json",
+        "metadata_hash": "sha256:2424242424242424242424242424242424242424242424242424242424242424",
+        "original_asset_ids": ["asset-original"],
+        "display_variants": [
+          {
+            "asset_id": "asset-grid",
+            "role": "grid",
+            "crop_mode": "cover",
+            "source_asset_id": "asset-original"
+          },
+          {
+            "asset_id": "asset-original",
+            "role": "detail",
+            "crop_mode": "preserve",
+            "source_asset_id": "asset-original"
+          }
+        ],
+        "poster_asset_id": "asset-grid",
+        "snapshot": {
+          "owner": "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+          "block_number": 22000000,
+          "captured_at": "2026-06-17T00:00:00Z"
+        }
+      }
+    ],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Home",
+            "page_id": "page-home"
+          },
+          {
+            "label": "Collection",
+            "page_id": "page-collection"
+          },
+          {
+            "label": "NFT",
+            "page_id": "page-nft"
+          }
+        ]
+      }
+    ],
+    "source_packets": [
+      {
+        "id": "source-nft-1",
+        "source_type": "nft_metadata",
+        "captured_at": "2026-06-17T00:00:00Z",
+        "content_hash": "sha256:3838383838383838383838383838383838383838383838383838383838383838",
+        "metadata_uri": "ipfs://bafyfixturenft/metadata.json",
+        "owner": "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+        "attributes": [
+          {
+            "trait_type": "Edition",
+            "value": "Meme Card"
+          }
+        ]
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-cms-static",
+      "renderer_version": "0.0.0-fixture",
+      "route_count": 3,
+      "asset_count": 3,
+      "warnings": []
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:2525252525252525252525252525252525252525252525252525252525252525",
+    "package_hash": "sha256:2626262626262626262626262626262626262626262626262626262626262626",
+    "note": "Fixture placeholder hash; replace with generated vector before Phase 2."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:punk6529",
+      "signature": "fixture-signature-nft-detail",
+      "signed_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://bafyfixturenft",
+      "content_hash": "sha256:2626262626262626262626262626262626262626262626262626262626262626",
+      "provider_content_id": "bafyfixturenft",
+      "pinned": true,
+      "canonical": true,
+      "recorded_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-fixture",
+    "builder_version": "0.0.0",
+    "created_at": "2026-06-17T00:00:00Z",
+    "notes": "Valid NFT detail fixture."
+  }
+}

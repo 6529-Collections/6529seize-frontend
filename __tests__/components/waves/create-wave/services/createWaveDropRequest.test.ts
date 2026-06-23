@@ -1,6 +1,7 @@
 import type { CreateDropConfig } from "@/entities/IDrop";
 import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
 import { generateDropPart } from "@/components/waves/create-wave/services/waveMediaService";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 
 jest.mock("@/components/waves/create-wave/services/waveMediaService", () => ({
   generateDropPart: jest.fn(),
@@ -54,6 +55,9 @@ describe("getCreateWaveDropRequest", () => {
         {
           url: "https://example.com/image.png",
           mime_type: "image/png",
+          media_upload_id: "media-upload-1",
+          media_status: ApiDropMediaStatus.Processing,
+          media_error: "still processing",
         },
       ],
       attachments: [{ attachment_id: "attachment-1" }],
@@ -68,6 +72,7 @@ describe("getCreateWaveDropRequest", () => {
         {
           url: "https://example.com/image.png",
           mime_type: "image/png",
+          media_upload_id: "media-upload-1",
         },
       ],
       attachments: [{ attachment_id: "attachment-1" }],

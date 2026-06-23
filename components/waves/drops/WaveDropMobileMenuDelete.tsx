@@ -64,7 +64,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
   };
 
   return (
-    <div className="tw-w-full tw-border-t tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-border-solid">
+    <div className="tw-w-full tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
       <AnimatePresence mode="wait">
         {!isDeleteMode ? (
           <motion.button
@@ -73,8 +73,9 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="tw-mt-4 tw-border-0 tw-w-full tw-flex tw-items-center tw-gap-x-4 tw-py-3 tw-px-4 tw-bg-iron-950 tw-rounded-xl tw-transition-colors tw-duration-200 tw-select-none"
-            onClick={() => setIsDeleteMode(true)}>
+            className="tw-mt-4 tw-flex tw-w-full tw-select-none tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200"
+            onClick={() => setIsDeleteMode(true)}
+          >
             <svg
               className="tw-size-5 tw-flex-shrink-0 tw-text-red"
               xmlns="http://www.w3.org/2000/svg"
@@ -82,14 +83,15 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor">
+              stroke="currentColor"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
               />
             </svg>
-            <span className="tw-text-red tw-font-semibold tw-text-base">
+            <span className="tw-text-base tw-font-semibold tw-text-red">
               Delete
             </span>
           </motion.button>
@@ -100,30 +102,35 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="tw-mt-4 tw-flex tw-gap-x-2">
+            className="tw-mt-4 tw-flex tw-gap-x-2"
+          >
             <button
-              className="tw-flex-1 tw-border-0 tw-flex tw-items-center tw-justify-center tw-py-3 tw-px-4 tw-bg-red/100 tw-rounded-xl active:tw-bg-red/90 tw-transition-colors tw-duration-200"
+              className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-red/100 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 active:tw-bg-red/90"
               onClick={onDelete}
-              disabled={mutating}>
-              <span className="tw-text-white tw-font-semibold tw-text-base tw-flex tw-items-center tw-gap-x-2">
+              disabled={mutating}
+            >
+              <span className="tw-flex tw-items-center tw-gap-x-2 tw-text-base tw-font-semibold tw-text-white">
                 {mutating ? (
                   <>
                     <svg
                       className="tw-size-4 tw-animate-spin"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
-                      viewBox="0 0 24 24">
+                      viewBox="0 0 24 24"
+                    >
                       <circle
                         className="tw-opacity-25"
                         cx="12"
                         cy="12"
                         r="10"
                         stroke="currentColor"
-                        strokeWidth="4"></circle>
+                        strokeWidth="4"
+                      ></circle>
                       <path
                         className="tw-opacity-75"
                         fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Deleting...
                   </>
@@ -133,9 +140,10 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
               </span>
             </button>
             <button
-              className="tw-flex-1 tw-border-0 tw-flex tw-items-center tw-justify-center tw-py-3 tw-px-4 tw-bg-iron-950 tw-rounded-xl active:tw-bg-iron-800 tw-transition-colors tw-duration-200"
-              onClick={() => setIsDeleteMode(false)}>
-              <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
+              className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
+              onClick={() => setIsDeleteMode(false)}
+            >
+              <span className="tw-text-base tw-font-semibold tw-text-iron-300">
                 Cancel
               </span>
             </button>
