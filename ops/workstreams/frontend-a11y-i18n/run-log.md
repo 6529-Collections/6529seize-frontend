@@ -3844,3 +3844,39 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: finish the rebase, rerun the native-surface evidence validation
   set, push the rebased head, and trigger the unchanged existing reviewbot
   lanes plus GLM-swarm.
+
+## 2026-06-23T09:38Z PR #2851 Rebase After PR #2854 Merge
+
+- Rebased PR #2851 onto `origin/main`
+  `daeac04bcb701786b5429a54ec832c0a24b42fd2` after PR #2854 merged.
+- First-commit conflict was in `ops/scripts/deployment-bus.cjs`, where the
+  merged `deployment:http-version` durable artifact pack overlapped the new
+  `native:surface-evidence` optional pack. Resolved by preserving both
+  registry entries and both artifact patterns.
+- Incorporated the worker's latest CodeRabbit cleanup commit
+  `e7d1f8e852958bcc9a347a9d77a19c1ab6f50eed`, rebased as current head
+  `4151a1bb8`.
+- Rebased validation passed:
+  - `node --check ops/scripts/native-surface-evidence.cjs`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+    60 passed.
+  - `seize run test:native-evidence`: passed; evidence tier is
+    `browser-simulation`, not real packaged runtime evidence.
+  - `seize run typecheck:playwright`: passed.
+  - `seize run typecheck:changed`: 39 changed TypeScript files passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 __tests__/scripts/deployment-bus.test.ts __tests__/scripts/native-surface-evidence.test.ts tests/support/surfaceSimulation.ts tests/surfaces/native-shell-readonly.spec.ts`:
+    passed.
+  - `seize run lint:package-json`: passed.
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --output test-results/app-pr-ci/native-evidence-risk-floor-rebased.json`:
+    Level 4 because deployment and test-control tooling changed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/native-evidence-secret-scan-rebased.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/native-evidence-workflow-security-rebased.json`:
+    clean, no changed workflow files.
+  - `codex-diff-check`
+  - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 expected skips
+    across Capacitor iOS/Android simulation and Electron shell simulation.
+- Next action: commit this memory update, force-push PR #2851, trigger all
+  existing 6529bot lanes plus GLM-swarm, and merge after checks and material
+  bot feedback are clear.

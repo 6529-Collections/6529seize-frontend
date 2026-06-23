@@ -4,25 +4,41 @@
 
 Read this section first after compaction or handoff.
 
-- Latest testing-roadmap state, 2026-06-23T09:16Z:
+- Latest testing-roadmap state, 2026-06-23T09:38Z:
   - Current rebase worktree:
     `D:\repos\6529seize-frontend-native-package-evidence`.
   - Current active branch:
-    `codex/native-package-evidence-e2e`, rebasing PR #2851 onto current
-    `origin/main` after PR #2850 merged as
-    `eec7dbecb1ff28ae357a3df707ba2051dea2b8e0`.
+    `codex/native-package-evidence-e2e`, PR #2851, rebased onto current
+    `origin/main` `daeac04bcb701786b5429a54ec832c0a24b42fd2` after PR #2850
+    and PR #2854 merged.
   - Active slice is test-only native surface evidence classification:
     add a read-only `native-surface-evidence.cjs` classifier, optional
     deployment-bus pack `native:surface-evidence`, package scripts, tests, and
     docs that distinguish browser simulation, package prerequisites, and real
     packaged native/Electron runtime evidence.
-  - Rebase conflict so far is limited to workstream memory files. Package,
-    tests, docs, and deployment-bus files auto-merged on the first commit.
-  - Before republishing PR #2851, rerun the native evidence unit pack, the
-    classifier scripts, native-shell Playwright validation, changed
-    lint/typecheck or focused equivalents, risk/secret/workflow scans, and
-    `codex-diff-check`; then trigger the unchanged existing reviewbot lanes
-    plus GLM-swarm.
+  - Rebase conflict was in `ops/scripts/deployment-bus.cjs`, where PR #2854
+    added `deployment:http-version` durable upload evidence and PR #2851 adds
+    `native:surface-evidence`; both validation packs are preserved.
+  - Latest CodeRabbit test feedback on
+    `__tests__/scripts/native-surface-evidence.test.ts` is fixed in head
+    `4151a1bb8`.
+  - Latest rebased validation passed:
+    - `node --check ops/scripts/native-surface-evidence.cjs`
+    - `node --check ops/scripts/deployment-bus.cjs`
+    - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+      60 passed.
+    - `seize run test:native-evidence`
+    - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 skipped.
+    - `seize run typecheck:playwright`
+    - `seize run typecheck:changed`: 39 changed TypeScript files passed.
+    - focused ESLint on native evidence, deployment bus, surface simulation,
+      and native-shell spec files.
+    - `seize run lint:package-json`
+    - risk floor Level 4, changed-secret scan clean, workflow-security scan
+      clean, and `codex-diff-check`.
+  - Next action: commit this memory update, force-push PR #2851, trigger all
+    reviewbot lanes including GLM-swarm, then merge after checks and material
+    bot feedback are clear.
 
 - Latest testing-roadmap state, 2026-06-23T05:00Z:
   - Current active worktree:
