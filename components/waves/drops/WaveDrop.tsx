@@ -432,7 +432,7 @@ const GroupedDropTimestamp = ({
   if (placement === "desktop") {
     return (
       <div
-        className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1 tw-z-20 tw-hidden tw-w-[3.25rem] tw-justify-end tw-pr-3 tw-opacity-0 tw-transition-opacity tw-duration-150 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 md:tw-flex"
+        className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3 tw-z-20 tw-hidden tw-w-[3.25rem] tw-justify-end tw-pr-3 tw-opacity-0 tw-transition-opacity tw-duration-150 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 md:tw-flex"
         data-testid="grouped-drop-hover-timestamp"
       >
         <WaveDropTime timestamp={timestamp} size="xs" />
