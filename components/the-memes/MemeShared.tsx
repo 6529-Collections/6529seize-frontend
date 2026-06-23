@@ -1,5 +1,6 @@
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
+import type { DBResponse } from "@/entities/IDBResponse";
 import type { BaseNFT } from "@/entities/INFT";
 import { areEqualAddresses, idStringToDisplay } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -94,21 +95,29 @@ async function getMetadataProps(
     name = `Meme Lab #${idDisplay}`;
   }
   const query = new URLSearchParams({ contract, id }).toString();
-  const response = await fetchUrl(
-    `${publicEnv.API_ENDPOINT}/api/${urlPath}?${query}`
-  );
   let artist: string | null = null;
   let image: string | null = null;
-  if (response?.data?.length > 0) {
-    const nft = response.data[0];
-    description = `${name} | ${description}`;
-    name = `${nft.name}`;
-    artist = nft.artist ?? null;
-    if (nft.thumbnail) {
-      image = nft.thumbnail;
-    } else if (nft.image) {
-      image = nft.image;
+  try {
+    const response = await fetchUrl<DBResponse<BaseNFT>>(
+      `${publicEnv.API_ENDPOINT}/api/${urlPath}?${query}`
+    );
+    const nft = Array.isArray(response.data) ? response.data[0] : undefined;
+    if (nft && typeof nft.name === "string" && nft.name.trim().length > 0) {
+      description = `${name} | ${description}`;
+      name = nft.name;
+      artist = nft.artist ?? null;
+      if (nft.thumbnail) {
+        image = nft.thumbnail;
+      } else if (nft.image) {
+        image = nft.image;
+      }
     }
+  } catch (error) {
+    console.warn("Failed to fetch NFT metadata for social card", {
+      contract,
+      id,
+      error,
+    });
   }
 
   if (focus && focus !== MEME_FOCUS.LIVE) {
