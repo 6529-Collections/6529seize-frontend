@@ -4,7 +4,7 @@ const YOUTUBE_DOMAINS = ["youtube.com", "youtube-nocookie.com"] as const;
 const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{6,}$/;
 const YOUTUBE_SAFE_PARAM_PATTERN = /^[A-Za-z0-9_-]{1,160}$/;
 
-export interface YoutubeLinkInfo {
+interface YoutubeLinkInfo {
   readonly videoId: string;
   readonly url: string;
   readonly playlistId?: string | undefined;

@@ -24,7 +24,6 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { getMemeLabCollectionHref } from "./memeLabRouteParams";
 import MemeLabNftCard from "./MemeLabNftCard";
 import MemeLabSortControls from "./MemeLabSortControls";
-export { printNftContent } from "./memeLabCardContent";
 
 const COLLECTION_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";

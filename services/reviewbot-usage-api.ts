@@ -41,11 +41,11 @@ export const usagePrGroupSchema = usageGroupSchema.extend({
   lastReviewAt: z.string().catch(""),
 });
 
-export const usageAnalysisGroupSchema = usageGroupSchema.extend({
+const usageAnalysisGroupSchema = usageGroupSchema.extend({
   costSharePercent: safeNumberSchema,
 });
 
-export const usageAnalysisPrGroupSchema = usagePrGroupSchema.extend({
+const usageAnalysisPrGroupSchema = usagePrGroupSchema.extend({
   costSharePercent: safeNumberSchema,
 });
 
