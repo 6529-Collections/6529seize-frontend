@@ -10,7 +10,7 @@ import {
 import { Toast, ToastContainer } from "react-bootstrap";
 import styles from "./Delegation.module.scss";
 
-export interface DelegationToastState {
+interface DelegationToastState {
   title: string;
   message?: ReactNode;
 }

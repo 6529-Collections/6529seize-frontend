@@ -134,7 +134,7 @@ const MONTH_INDEX_BY_NAME: Readonly<Record<string, number>> = {
   december: 11,
 };
 
-export type FirstPartyOpenGraphPreviewKind = "profile" | "drop" | "wave";
+type FirstPartyOpenGraphPreviewKind = "profile" | "drop" | "wave";
 
 const FIRST_PARTY_OG_KIND_LABELS: Record<
   FirstPartyOpenGraphPreviewKind,

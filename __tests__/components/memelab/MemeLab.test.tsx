@@ -1,8 +1,8 @@
 import {
   getInitialRouterValues,
-  printNftContent,
   sortChanged,
 } from "@/components/memelab/MemeLab";
+import { printNftContent } from "@/components/memelab/memeLabCardContent";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";

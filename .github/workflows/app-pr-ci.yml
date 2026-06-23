@@ -210,6 +210,9 @@ jobs:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
 
+      - name: Run Knip dead-code check
+        run: ./bin/6529 run deadcode:knip
+
       - name: Lint package.json versions
         if: needs.plan.outputs.dependency_governance_required == 'true'
         run: ./bin/6529 lint:package-json
