@@ -5,7 +5,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faInfoCircle, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useCallback, useMemo, useRef } from "react";
@@ -46,6 +46,7 @@ const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
 const SUBWAVE_ROW_HEIGHT = 54 as const;
 const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
 const PROFILE_FEED_LABEL = "Profile Waves Feed";
+const HIGHLY_RATED_INFO_TOOLTIP_ID = "web-waves-worth-checking-out-info";
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 const TOOLTIP_STYLE = {
   padding: "6px 10px",
@@ -98,10 +99,31 @@ function SidebarCategoryHeader({
   );
 }
 
-function SidebarCategoryLabel({ label }: { readonly label: string }) {
+function SidebarCategoryLabel({
+  label,
+  tooltipContent,
+  tooltipId,
+}: {
+  readonly label: string;
+  readonly tooltipContent?: string | undefined;
+  readonly tooltipId?: string | undefined;
+}) {
   return (
     <div className="tw-px-5 tw-pb-0.5 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-      {label}
+      <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
+        <span>{label}</span>
+        {tooltipContent && tooltipId && (
+          <button
+            type="button"
+            aria-label={tooltipContent}
+            data-tooltip-id={tooltipId}
+            data-tooltip-content={tooltipContent}
+            className="tw-inline-flex tw-size-3 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors focus:tw-text-iron-300 focus:tw-outline-none desktop-hover:hover:tw-text-iron-400"
+          >
+            <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3" />
+          </button>
+        )}
+      </span>
     </div>
   );
 }
@@ -447,6 +469,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     isJoinedFilterActive,
   });
   const bottomListLabel = getBottomListLabel(isJoinedFilterActive);
+  const highlyRatedInfoTooltip = t(
+    SIDEBAR_LOCALE,
+    "waves.sidebar.highlyRatedInfoTooltip"
+  );
   const shouldUseHighlyRatedToggle = !hideHeaders && !isCollapsed;
   const shouldShowHighlyRatedRows =
     hasHighlyRatedRows && !shouldUseHighlyRatedToggle;
@@ -606,6 +632,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                 <>
                   <SidebarCategoryLabel
                     label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                    tooltipContent={highlyRatedInfoTooltip}
+                    tooltipId={HIGHLY_RATED_INFO_TOOLTIP_ID}
                   />
                   <HighlyRatedWavesToggle
                     paddingClassName="tw-px-5"
@@ -617,6 +645,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                 !isCollapsed && (
                   <SidebarCategoryLabel
                     label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                    tooltipContent={highlyRatedInfoTooltip}
+                    tooltipId={HIGHLY_RATED_INFO_TOOLTIP_ID}
                   />
                 )
               )}
@@ -753,6 +783,14 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               border="1px solid #4C4C55"
             />
           )}
+          <ReactTooltip
+            id={HIGHLY_RATED_INFO_TOOLTIP_ID}
+            place="top"
+            offset={8}
+            opacity={1}
+            style={TOOLTIP_STYLE}
+            border="1px solid #4C4C55"
+          />
         </>
       )}
     </>

@@ -561,7 +561,9 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
 
     fireEvent.click(screen.getByTestId("toggle-highly-rated-parent"));
     expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
-    expect(screen.getByLabelText("Worth checking out waves")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Worth checking out waves")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("wave-highly-rated-child")).toBeInTheDocument();
 
     rerender(
@@ -575,7 +577,9 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
     );
 
     expect(screen.queryByTestId("wave-highly-rated-parent")).toBeNull();
-    expect(screen.getByLabelText("Worth checking out waves")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Worth checking out waves")
+    ).toBeInTheDocument();
     expect(
       screen.getByTestId("wave-highly-rated-child").parentElement
     ).toHaveAttribute("data-sidebar-subwave-row-state", "exiting");
