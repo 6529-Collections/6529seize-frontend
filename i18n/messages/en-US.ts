@@ -339,7 +339,8 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 } as const);
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
-  highlyRated: "Highly Rated",
+  highlyRated: "Worth Checking Out",
+  highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
   "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
   "highlyRatedPreviewOpenAriaLabel.one": "Open {waveName}, {count} new message",
   "highlyRatedPreviewOpenAriaLabel.other":
@@ -353,7 +354,7 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   filterJoined: "Joined",
   joinedEmptyMessage: "No joined waves to display",
   announcementWavesAriaLabel: "Announcement waves",
-  highlyRatedAriaLabel: "Highly rated waves",
+  highlyRatedAriaLabel: "Worth checking out waves",
   pinnedAriaLabel: "Pinned waves",
   followingListAriaLabel: "Following waves list",
   allRecentActivityAriaLabel: "All recent waves list",

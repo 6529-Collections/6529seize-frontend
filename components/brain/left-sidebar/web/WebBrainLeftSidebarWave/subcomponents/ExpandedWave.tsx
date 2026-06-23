@@ -187,7 +187,7 @@ export const ExpandedWave = ({
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
-            <div className="-tw-mt-1 tw-mb-1 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1.5">
+            <div className="-tw-mt-1 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1.5">
               <Link
                 href={href}
                 prefetch={false}
@@ -240,7 +240,7 @@ export const ExpandedWave = ({
             )}
           </div>
           {shouldShowDropTime && (
-            <div className="tw-mt-0.5 tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
+            <div className="tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
               <BrainLeftSidebarWaveDropTime time={presentLatestDropTimestamp} />
             </div>
           )}

@@ -16,6 +16,78 @@ type WaitAndRevealDrop = VirtualizedWaveDropsResult["waitAndRevealDrop"];
 
 const SCROLL_OPERATION_TIMEOUT = 10000;
 
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value));
+
+const getContainerScrollBounds = (
+  container: HTMLDivElement
+): { readonly max: number; readonly min: number } => {
+  const scrollRange = Math.max(
+    0,
+    container.scrollHeight - container.clientHeight
+  );
+  const flexDirection =
+    container.style.flexDirection ||
+    globalThis.getComputedStyle?.(container).flexDirection;
+
+  if (flexDirection === "column-reverse") {
+    return { min: -scrollRange, max: 0 };
+  }
+
+  return { min: 0, max: scrollRange };
+};
+
+const scrollElementIntoContainerCenter = ({
+  behavior,
+  container,
+  target,
+}: {
+  readonly behavior: ScrollBehavior;
+  readonly container: HTMLDivElement;
+  readonly target: HTMLDivElement;
+}) => {
+  const containerRect = container.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const containerCenter = containerRect.top + containerRect.height / 2;
+  const targetCenter = targetRect.top + targetRect.height / 2;
+  const bounds = getContainerScrollBounds(container);
+  const top = clamp(
+    container.scrollTop + targetCenter - containerCenter,
+    bounds.min,
+    bounds.max
+  );
+
+  if (typeof container.scrollTo === "function") {
+    container.scrollTo({ behavior, top });
+    return;
+  }
+
+  container.scrollTop = top;
+};
+
+const isElementVisibleInContainer = ({
+  container,
+  target,
+}: {
+  readonly container: HTMLDivElement;
+  readonly target: HTMLDivElement;
+}): boolean => {
+  const containerRect = container.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+
+  if (targetRect.height > containerRect.height) {
+    return (
+      targetRect.top <= containerRect.bottom &&
+      targetRect.bottom >= containerRect.top
+    );
+  }
+
+  return (
+    targetRect.top >= containerRect.top &&
+    targetRect.bottom <= containerRect.bottom
+  );
+};
+
 interface UseWaveDropsSerialScrollParams {
   readonly waveId: string;
   readonly dropId: string | null;
@@ -208,44 +280,63 @@ export const useWaveDropsSerialScroll = ({
     }
   }, [waveMessages, shouldPinToBottom, scrollToVisualBottom, init]);
 
-  const scrollToSerialNo = useCallback((behavior: ScrollBehavior) => {
-    if (targetDropRef.current && scrollContainerRef.current) {
-      targetDropRef.current.scrollIntoView({
-        behavior,
-        block: "center",
-      });
+  const scrollToSerialNo = useCallback(
+    (behavior: ScrollBehavior) => {
+      const target = targetDropRef.current;
+      const container = scrollContainerRef.current;
 
-      setTimeout(() => {
-        const rect = targetDropRef.current?.getBoundingClientRect();
-        const isInViewport =
-          rect && rect.top >= 0 && rect.bottom <= window.innerHeight;
+      if (target && container) {
+        scrollElementIntoContainerCenter({
+          behavior,
+          container,
+          target,
+        });
 
-        if (!isInViewport && targetDropRef.current) {
-          targetDropRef.current.scrollIntoView({
-            behavior,
-            block: "center",
-          });
+        setTimeout(() => {
+          const retryTarget = targetDropRef.current;
+          const retryContainer = scrollContainerRef.current;
+          const isInContainer =
+            retryTarget &&
+            retryContainer &&
+            isElementVisibleInContainer({
+              container: retryContainer,
+              target: retryTarget,
+            });
 
-          setTimeout(() => {
-            const retryRect = targetDropRef.current?.getBoundingClientRect();
-            const stillInViewport =
-              retryRect &&
-              retryRect.top >= 0 &&
-              retryRect.bottom <= window.innerHeight;
+          if (!isInContainer && retryTarget && retryContainer) {
+            scrollElementIntoContainerCenter({
+              behavior,
+              container: retryContainer,
+              target: retryTarget,
+            });
 
-            if (!stillInViewport && targetDropRef.current) {
-              targetDropRef.current.scrollIntoView({
-                behavior,
-                block: "center",
-              });
-            }
-          }, 300);
-        }
-      }, 150);
-      return true;
-    }
-    return false;
-  }, []);
+            setTimeout(() => {
+              const finalTarget = targetDropRef.current;
+              const finalContainer = scrollContainerRef.current;
+              const stillInContainer =
+                finalTarget &&
+                finalContainer &&
+                isElementVisibleInContainer({
+                  container: finalContainer,
+                  target: finalTarget,
+                });
+
+              if (!stillInContainer && finalTarget && finalContainer) {
+                scrollElementIntoContainerCenter({
+                  behavior,
+                  container: finalContainer,
+                  target: finalTarget,
+                });
+              }
+            }, 300);
+          }
+        }, 150);
+        return true;
+      }
+      return false;
+    },
+    [scrollContainerRef]
+  );
 
   const smoothScrollWithRetries = useCallback(
     async (maxWaitTimeMs: number = 3000, pollIntervalMs: number = 100) => {

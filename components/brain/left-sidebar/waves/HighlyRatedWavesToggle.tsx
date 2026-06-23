@@ -363,7 +363,7 @@ export function HighlyRatedWavesToggle({
     <div className={`${paddingClassName} tw-pb-1`}>
       <div
         ref={previewStripRef}
-        className="tw-flex tw-min-w-0 tw-items-center tw-justify-start tw-gap-x-1.5"
+        className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-1.5"
       >
         {visiblePreviewItems.map((item, index) => (
           <HighlyRatedWavePreviewLink

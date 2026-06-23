@@ -163,17 +163,17 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   );
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByText("Highly Rated")).toBeInTheDocument();
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
   expect(
     screen.queryByRole("button", {
-      name: "Expand Highly Rated, 1 wave",
+      name: "Expand Worth Checking Out, 1 wave",
     })
   ).toBeNull();
   expect(
     screen.getByRole("link", { name: "Open Highly Rated One" })
   ).toBeInTheDocument();
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.queryByLabelText("Following waves")).toBeNull();
@@ -214,7 +214,7 @@ it("caps highly rated previews at ten without rendering an overflow control", ()
       name: /more Highly Rated/,
     })
   ).toBeNull();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.queryByTestId("wave-h11")).toBeNull();
 });
 
@@ -280,7 +280,7 @@ it("keeps the active highly rated wave visible in the preview strip", () => {
   expect(
     screen.getByRole("link", { name: "Open Highly Rated One" })
   ).toBeInTheDocument();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.queryByTestId("wave-h1")).toBeNull();
 });
 
@@ -561,7 +561,9 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
 
     fireEvent.click(screen.getByTestId("toggle-highly-rated-parent"));
     expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
-    expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Worth checking out waves")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("wave-highly-rated-child")).toBeInTheDocument();
 
     rerender(
@@ -575,7 +577,9 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
     );
 
     expect(screen.queryByTestId("wave-highly-rated-parent")).toBeNull();
-    expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Worth checking out waves")
+    ).toBeInTheDocument();
     expect(
       screen.getByTestId("wave-highly-rated-child").parentElement
     ).toHaveAttribute("data-sidebar-subwave-row-state", "exiting");
@@ -585,7 +589,7 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
     });
 
     expect(screen.queryByTestId("wave-highly-rated-child")).toBeNull();
-    expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+    expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   } finally {
     jest.useRealTimers();
   }
