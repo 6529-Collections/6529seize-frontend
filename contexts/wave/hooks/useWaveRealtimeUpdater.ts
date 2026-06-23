@@ -119,17 +119,39 @@ const updateCachedDrop = ({
     return;
   }
 
-  updateDropInCachedDrops(queryClient, drop, { preferExistingPollVote });
+    updateDropInCachedDrops(queryClient, drop, { preferExistingPollVote });
 };
 
-const isHelpBotFinalReactionUpdate = (drop: ApiDrop): boolean =>
+const normalizeHandle = (handle: string | null | undefined): string =>
+  handle?.replace(/^@/, "").trim().toLowerCase() ?? "";
+
+const hasHelpBotReactionProfile = (drop: ApiDrop): boolean =>
   (drop.reactions ?? []).some(
     (reaction) =>
       HELP_BOT_FINAL_REACTIONS.has(reaction.reaction) &&
       reaction.profiles.some(
-        (profile) => profile.handle?.toLowerCase() === HELP_BOT_HANDLE
+        (profile) => normalizeHandle(profile.handle) === HELP_BOT_HANDLE
       )
   );
+
+const hasHelpBotMention = (drop: ApiDrop): boolean =>
+  (drop.mentioned_users ?? []).some((user) => {
+    const mention = user as {
+      readonly handle_in_content?: string | null | undefined;
+      readonly current_handle?: string | null | undefined;
+    };
+    return (
+      normalizeHandle(mention.handle_in_content) === HELP_BOT_HANDLE ||
+      normalizeHandle(mention.current_handle) === HELP_BOT_HANDLE
+    );
+  });
+
+const isHelpBotFinalReactionUpdate = (drop: ApiDrop): boolean =>
+  hasHelpBotReactionProfile(drop) ||
+  (hasHelpBotMention(drop) &&
+    (drop.reactions ?? []).some((reaction) =>
+      HELP_BOT_FINAL_REACTIONS.has(reaction.reaction)
+    ));
 
 const getNewestKnownSerialNo = (waveMessages: WaveMessages): number | null => {
   if (waveMessages.latestFetchedSerialNo !== null) {

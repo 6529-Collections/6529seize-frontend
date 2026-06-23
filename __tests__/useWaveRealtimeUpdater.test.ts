@@ -279,6 +279,63 @@ describe("useWaveRealtimeUpdater", () => {
     );
   });
 
+  it("syncs newest messages after helpbot final reactions without reaction profile handles", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "helpbot-target",
+            type: DropSize.FULL,
+            stableKey: "helpbot-target",
+            stableHash: "helpbot-target",
+            serial_no: 20,
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "helpbot-target",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "helpbot-target",
+      wave: { id: "wave1" },
+      author: {},
+      mentioned_users: [
+        {
+          handle_in_content: "help6529",
+          current_handle: "help6529",
+        },
+      ],
+      reactions: [
+        {
+          reaction: ":white_check_mark:",
+          profiles: [{}],
+        },
+      ],
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.syncNewestMessages).toHaveBeenCalledWith(
+      "wave1",
+      20,
+      expect.any(AbortSignal)
+    );
+  });
+
   it("marks active wave as read after visible reaction updates", async () => {
     const store = {
       wave1: {
