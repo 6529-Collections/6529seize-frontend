@@ -62,6 +62,7 @@ export type SentryClientEvent = {
       }
     | undefined;
   contexts?: Record<string, SentryContext | undefined> | undefined;
+  extra?: Record<string, unknown> | undefined;
   request?:
     | {
         url?: string | undefined;
@@ -125,6 +126,11 @@ const noisyThirdPartyTelemetryTargets = new Set([
   "cca-lite.coinbase.com/metrics",
   "region1.google-analytics.com/g/collect",
 ]);
+const objectCapturedPromiseRejectionMessage =
+  "Object captured as promise rejection with keys: code, message, stack";
+const providerDisconnectedCode = 4900;
+const providerDisconnectedMessage =
+  "The provider is disconnected from all chains.";
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
 const REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE =
@@ -150,6 +156,10 @@ const FILTERED_URL_TOKENS = new Set(["[filtered]", "[redacted]", "filtered"]);
 
 function getStringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function getBooleanValue(value: unknown): boolean | undefined {
@@ -1010,6 +1020,19 @@ function getHintException(hint?: SentryEventHint): unknown {
   return hint?.originalException ?? hint?.syntheticException;
 }
 
+function getSerializedObjectRejection(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): Record<string, unknown> | null {
+  const serialized = event.extra?.["__serialized__"];
+  if (isRecord(serialized)) {
+    return serialized;
+  }
+
+  const hintException = getHintException(hint);
+  return isRecord(hintException) ? hintException : null;
+}
+
 function getHintExceptionMessage(hint?: SentryEventHint): string {
   const exception = getHintException(hint);
   if (typeof exception === "string") {
@@ -1321,6 +1344,42 @@ function hasWalletCollisionSignature(
   );
 }
 
+function hasOnlyThirdPartyWalletExtensionFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!Array.isArray(frames) || frames.length === 0) {
+    return true;
+  }
+
+  return frames.every((frame) =>
+    isThirdPartyWalletExtensionStack(
+      [frame.filename, frame.abs_path].filter(Boolean).join("\n")
+    )
+  );
+}
+
+function isThirdPartyWalletExtensionStack(value: string | undefined): boolean {
+  const stack = value?.toLowerCase();
+  if (!stack) {
+    return false;
+  }
+
+  if (!stack.includes("chrome-extension://")) {
+    return false;
+  }
+
+  if (!stack.includes("/background.js")) {
+    return false;
+  }
+
+  return !(
+    stack.includes("app:///") ||
+    stack.includes("http://") ||
+    stack.includes("https://") ||
+    stack.includes("/_next/static/")
+  );
+}
+
 function hasCircularReactMetaElementMessage(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1458,6 +1517,35 @@ export function shouldFilterTwitterConfigReferenceError(
   }
 
   return hasOnlyAppUriFrames(value.stacktrace?.frames);
+}
+
+export function shouldFilterDisconnectedWalletProviderRejection(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  if (getEventMessage(event) !== objectCapturedPromiseRejectionMessage) {
+    return false;
+  }
+
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (!hasOnlyThirdPartyWalletExtensionFrames(frames)) {
+    return false;
+  }
+
+  const serialized = getSerializedObjectRejection(event, hint);
+  if (!serialized) {
+    return false;
+  }
+
+  const code = getNumericValue(serialized["code"]);
+  const message = getStringValue(serialized["message"])?.trim();
+  const stack = getStringValue(serialized["stack"]);
+
+  return (
+    code === providerDisconnectedCode &&
+    message === providerDisconnectedMessage &&
+    isThirdPartyWalletExtensionStack(stack)
+  );
 }
 
 export function shouldFilterReactDomInsertBeforeNotFoundError(
