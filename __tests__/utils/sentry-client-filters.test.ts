@@ -10,7 +10,14 @@ import {
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
+  type SentryClientEvent,
+  type SentryStackFrame,
+  type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
+
+type TestSentryClientEvent = SentryClientEvent;
+type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
+type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
 
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
@@ -25,7 +32,9 @@ describe("sentry-client-filters", () => {
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
 
-  const buildSpan = (overrides: Record<string, unknown> = {}) =>
+  const buildSpan = (
+    overrides: TestSentryTransactionSpanOverrides = {}
+  ): SentryTransactionSpan =>
     ({
       op: "http.client",
       data: {
@@ -34,9 +43,11 @@ describe("sentry-client-filters", () => {
         "url.same_origin": false,
       },
       ...overrides,
-    }) as any;
+    });
 
-  const createTwitterConfigEvent = (overrides: Record<string, unknown> = {}) =>
+  const createTwitterConfigEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
     ({
       exception: {
         values: [
@@ -62,11 +73,11 @@ describe("sentry-client-filters", () => {
         "browser.name": "Twitter",
       },
       ...overrides,
-    }) as any;
+    });
 
   const createInjectedWalletCollisionEvent = (
-    overrides: Record<string, unknown> = {}
-  ) =>
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
     ({
       exception: {
         values: [
@@ -101,11 +112,11 @@ describe("sentry-client-filters", () => {
         ],
       },
       ...overrides,
-    }) as any;
+    });
 
   const createCoinbaseWalletLinkWebSocketEvent = (
-    overrides: Record<string, unknown> = {}
-  ) =>
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
     ({
       exception: {
         values: [
@@ -126,11 +137,11 @@ describe("sentry-client-filters", () => {
         ],
       },
       ...overrides,
-    }) as any;
+    });
 
   const createMetaMaskUpdateUrlCircularEvent = (
-    overrides: Record<string, unknown> = {}
-  ) =>
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
     ({
       exception: {
         values: [
@@ -155,11 +166,11 @@ describe("sentry-client-filters", () => {
         ],
       },
       ...overrides,
-    }) as any;
+    });
 
   const createInjectedWasmCspUnsafeEvalEvent = (
-    overrides: Record<string, unknown> = {}
-  ) =>
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
     ({
       exception: {
         values: [
@@ -196,11 +207,11 @@ describe("sentry-client-filters", () => {
         ],
       },
       ...overrides,
-    }) as any;
+    });
 
   const createLowValueNetworkEvent = (
-    overrides: Record<string, unknown> = {}
-  ) =>
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
     ({
       event_id: "network-drop-event",
       exception: {
@@ -227,11 +238,13 @@ describe("sentry-client-filters", () => {
         },
       ],
       ...overrides,
-    }) as any;
+    });
 
   it("filters events when a stack frame matches a filename exception", () => {
     // Arrange
-    const frames = [{ filename: "app:///extensionServiceWorker.js" } as any];
+    const frames: SentryStackFrame[] = [
+      { filename: "app:///extensionServiceWorker.js" },
+    ];
 
     // Act
     const result = shouldFilterByFilenameExceptions(frames);
@@ -258,7 +271,9 @@ describe("sentry-client-filters", () => {
 
   it("filters events when a stack frame matches extensionPageScript.js", () => {
     // Arrange
-    const frames = [{ filename: "app:///extensionPageScript.js" } as any];
+    const frames: SentryStackFrame[] = [
+      { filename: "app:///extensionPageScript.js" },
+    ];
 
     // Act
     const result = shouldFilterByFilenameExceptions(frames);
@@ -285,12 +300,12 @@ describe("sentry-client-filters", () => {
 
   it("filters events when only abs_path matches a filename exception", () => {
     // Arrange
-    const frames = [
+    const frames: SentryStackFrame[] = [
       {
         filename: "https://example.com/main.js",
         abs_path: "chrome-extension://wallet/extensionServiceWorker.js",
       },
-    ] as any;
+    ];
 
     // Act
     const result = shouldFilterByFilenameExceptions(frames);
@@ -301,7 +316,7 @@ describe("sentry-client-filters", () => {
 
   it("does not filter when frames do not match any filename exception", () => {
     // Arrange
-    const frames = [{ filename: "app:///main.js" } as any];
+    const frames: SentryStackFrame[] = [{ filename: "app:///main.js" }];
 
     // Act
     const result = shouldFilterByFilenameExceptions(frames);
@@ -2546,7 +2561,10 @@ describe("sentry-client-filters", () => {
 
   it("detects app URI-only frame stacks in testing helpers", () => {
     // Arrange
-    const frames = [{ filename: "app:///" }, { abs_path: "app:///" }] as any;
+    const frames: SentryStackFrame[] = [
+      { filename: "app:///" },
+      { abs_path: "app:///" },
+    ];
 
     // Act
     const result = __testing.hasOnlyAppUriFrames(frames);
@@ -2557,7 +2575,7 @@ describe("sentry-client-filters", () => {
 
   it("detects app URI-only frame stacks when only abs_path has the app URI", () => {
     // Arrange
-    const frames = [
+    const frames: SentryStackFrame[] = [
       {
         filename: "https://example.com/main.js",
         abs_path: "app:///main.js",
@@ -2566,7 +2584,7 @@ describe("sentry-client-filters", () => {
         filename: "app:///bootstrap.js",
         abs_path: "https://example.com/bootstrap.js",
       },
-    ] as any;
+    ];
 
     // Act
     const result = __testing.hasOnlyAppUriFrames(frames);
