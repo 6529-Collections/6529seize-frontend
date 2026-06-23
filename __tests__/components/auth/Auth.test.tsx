@@ -407,6 +407,65 @@ describe("Auth component", () => {
       expect(toast).toHaveBeenCalled();
     });
 
+    it("allows valid legacy auth during the session-v2 grace window without forcing the upgrade modal", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      mockGetAuthJwt.mockReturnValue("legacy-jwt");
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+        requiresSessionUpgrade: true,
+      });
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+
+        return (
+          <>
+            <button
+              onClick={async () => {
+                const response = await requestAuth();
+                setResult(String(response.success));
+              }}
+              data-testid="legacy-action-auth"
+            >
+              auth
+            </button>
+            <span data-testid="legacy-action-auth-result">{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("legacy-action-auth"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("legacy-action-auth-result")
+        ).toHaveTextContent("true");
+      });
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(
+        screen.queryByText("Upgrade Authentication")
+      ).not.toBeInTheDocument();
+    });
+
     it("uses session nonce signable_message for web sign-in", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
