@@ -8,17 +8,10 @@ const ERROR_TOAST_AUTO_CLOSE_MS = 8000;
 export const getToastAutoClose = (type: TypeOptions): number =>
   type === "error" ? ERROR_TOAST_AUTO_CLOSE_MS : DEFAULT_TOAST_AUTO_CLOSE_MS;
 
-export type FriendlyToastContent = {
+type FriendlyToastContent = {
   readonly title: string;
   readonly description?: string | undefined;
   readonly details?: string | undefined;
-};
-
-export type FriendlyErrorToastInput = {
-  readonly title: string;
-  readonly description?: string | undefined;
-  readonly error?: unknown;
-  readonly fallbackDetails?: string | undefined;
 };
 
 const SENTENCE_ENDINGS = ".!?";
@@ -143,22 +136,6 @@ export const getToastErrorDetails = (
 
   return normalizeToastText(rawSanitized);
 };
-
-export const getFriendlyErrorToast = ({
-  title,
-  description = "Please try again.",
-  error,
-  fallbackDetails,
-}: FriendlyErrorToastInput): FriendlyToastContent => ({
-  title: normalizeToastText(title),
-  description,
-  details:
-    error === undefined
-      ? fallbackDetails
-        ? normalizeToastText(fallbackDetails)
-        : undefined
-      : getToastErrorDetails(error, fallbackDetails),
-});
 
 const getValidationToast = (message: string): FriendlyToastContent => ({
   title: "Check this value.",

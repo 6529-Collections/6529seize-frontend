@@ -1,13 +1,12 @@
 import { DelegationCenterSection } from "@/types/enums";
 import {
-  delegationArticleSlugs,
   getDelegationArticle,
   getDelegationArticleIndex,
   getDelegationArticleSlugAt,
   isDelegationFaqChildArticle,
 } from "./html/delegationContent";
 
-export interface DelegationPageMetadata {
+interface DelegationPageMetadata {
   readonly title: string;
   readonly navLabel: string;
   readonly description: string;
@@ -15,7 +14,7 @@ export interface DelegationPageMetadata {
   readonly isFaqChildArticle: boolean;
 }
 
-export interface DelegationArticleNavigation {
+interface DelegationArticleNavigation {
   readonly previous:
     | { readonly slug: string; readonly title: string; readonly href: string }
     | undefined;
@@ -191,8 +190,4 @@ export function getDelegationArticleNavigation(
     previous: toLink(previousSlug),
     next: toLink(nextSlug),
   };
-}
-
-export function getDelegationFaqChildArticleSlugs() {
-  return delegationArticleSlugs.filter(isDelegationFaqChildArticle);
 }
