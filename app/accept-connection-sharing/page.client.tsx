@@ -12,6 +12,9 @@ import type { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemR
 import type { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   canStoreAnotherWalletAccount,
@@ -24,6 +27,8 @@ import {
 } from "@/services/auth/session-v2.utils";
 import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
 import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
+
+const ACCEPT_CONNECTION_LOCALE = DEFAULT_LOCALE;
 
 interface AcceptConnectionSharingProps {
   connectionShareCode: string;
@@ -116,8 +121,20 @@ function IncomingConnectionCard({
             </div>
             {profile ? (
               <div className="tw-mt-1 tw-truncate tw-text-sm tw-text-neutral-400">
-                TDH: {(profile.tdh ?? 0).toLocaleString()} · Level:{" "}
-                {profile.level ?? 0}
+                {t(
+                  ACCEPT_CONNECTION_LOCALE,
+                  "acceptConnection.incoming.profileStats",
+                  {
+                    tdh: formatInteger(
+                      ACCEPT_CONNECTION_LOCALE,
+                      profile.tdh ?? 0
+                    ),
+                    level: formatInteger(
+                      ACCEPT_CONNECTION_LOCALE,
+                      profile.level ?? 0
+                    ),
+                  }
+                )}
               </div>
             ) : null}
             {address ? (
@@ -485,6 +502,7 @@ function AcceptConnectionSharing(
 }
 
 export default function AcceptConnectionSharingPage() {
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by app/accept-connection-sharing/page.tsx
   const searchParams = useSearchParams();
   const connectionShareCode = searchParams?.get("connection_share_code") || "";
   const token = searchParams?.get("token") || "";

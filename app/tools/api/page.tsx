@@ -1,8 +1,12 @@
 import CodeExample from "@/components/code-example/CodeExample";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 import { Col, Container, Row } from "react-bootstrap";
+
+const API_PAGE_LOCALE = DEFAULT_LOCALE;
 
 export default function AboutApi() {
   const nodeJsAuthExample = `import { Wallet } from 'ethers';
@@ -345,24 +349,33 @@ run().catch((err) => {
         </Row>
         <Row className="pt-2">
           <Col>
-            <p className="font-larger font-bolder">Authentication</p>
-            <p>Authentication is based on Ethereum signatures.</p>
+            <p className="font-larger font-bolder">
+              {t(API_PAGE_LOCALE, "tools.api.authentication.title")}
+            </p>
+            <p>
+              {t(API_PAGE_LOCALE, "tools.api.authentication.basedOnSignatures")}
+            </p>
 
-            <p>The flow works as follows:</p>
+            <p>{t(API_PAGE_LOCALE, "tools.api.authentication.flowIntro")}</p>
 
             <ol>
               <li>
-                Request a session-v2 signable message for the wallet you want
-                to authenticate.
+                {t(
+                  API_PAGE_LOCALE,
+                  "tools.api.authentication.requestSessionMessage"
+                )}
               </li>
-              <li>Sign the signable message exactly using your wallet.</li>
-              <li>Send the signature back to the server.</li>
               <li>
-                Receive a JWT bearer token, which you can include in headers of
-                subsequent requests.
+                {t(API_PAGE_LOCALE, "tools.api.authentication.signMessage")}
+              </li>
+              <li>
+                {t(API_PAGE_LOCALE, "tools.api.authentication.sendSignature")}
+              </li>
+              <li>
+                {t(API_PAGE_LOCALE, "tools.api.authentication.receiveToken")}
               </li>
             </ol>
-            <p>Here's a full example in Node.js using ethers and node-fetch:</p>
+            <p>{t(API_PAGE_LOCALE, "tools.api.authentication.nodeExample")}</p>
 
             <CodeExample code={nodeJsAuthExample} />
           </Col>

@@ -513,6 +513,38 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "report.repoSummary": "{focus}. {count} PRs, {stateSummary}.",
   "report.tocDescription":
     "This report is split by repository. Use this index to jump directly to the area you want, or read through from the frontend app work into backend, Stream contracts, Safe app hardening, and review bot updates.",
+  "walletAuth.metadata.title": "Wallet Authentication Update",
+  "walletAuth.metadata.description":
+    "A simple explanation of the new 6529 wallet authentication session.",
+  "walletAuth.backToTech": "Back to Tech",
+  "walletAuth.eyebrow": "Wallet Authentication",
+  "walletAuth.title": "Wallet Authentication Update",
+  "walletAuth.lead":
+    "6529 is moving wallet sign-in to a newer secure session. Most people only need to sign once when they are prompted.",
+  "walletAuth.whatIsChanging.title": "What is changing",
+  "walletAuth.whatIsChanging.identity":
+    "Your wallet is still your identity. The update changes the browser session that 6529 creates after you sign in.",
+  "walletAuth.whatIsChanging.session":
+    "The new session is easier to refresh, easier to revoke, and better for sharing a connection with your own devices.",
+  "walletAuth.whatToDo.title": "What you need to do",
+  "walletAuth.whatToDo.upgrade":
+    "If you see the {prompt} prompt, connect the same wallet and sign the message.",
+  "walletAuth.whatToDo.prompt": "Upgrade Authentication",
+  "walletAuth.whatToDo.noGas":
+    "The signature does not cost gas and does not send a transaction.",
+  "walletAuth.whatToDo.reminder":
+    "If you choose {action}, you can still upgrade from your profile menu.",
+  "walletAuth.whatToDo.reminderAction": "Remind me later",
+  "walletAuth.whyNow.title": "Why you may see this prompt",
+  "walletAuth.whyNow.deadline":
+    "Some older sessions can keep working until the upgrade deadline. During that time, 6529 may remind you to upgrade before the older session expires.",
+  "walletAuth.whyNow.features":
+    "Some newer features, including mobile connection sharing, need the new session before they can work.",
+  "walletAuth.same.title": "What stays the same",
+  "walletAuth.same.profile": "Your wallet address and profile do not change.",
+  "walletAuth.same.assets": "You do not need to move tokens or assets.",
+  "walletAuth.same.desktop":
+    "The 6529 Desktop app continues using the existing connection flow during this rollout.",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -526,6 +558,50 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 ] as const);
 
 export const EN_US_MESSAGES = {
+  "auth.sessionUpgrade.action": "Upgrade Authentication",
+  "auth.signModal.connectionUpdateRequired": "Connection Update Required",
+  "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
+  "auth.signModal.authenticationRequest": "Sign Authentication Request",
+  "auth.signModal.connectionShareLead":
+    "This shared connection uses the previous authentication flow. Reshare the connection from a device that is already signed in with the new authentication.",
+  "auth.signModal.sessionUpgradeLead":
+    "We have upgraded wallet authentication. Sign once to move this connected wallet to the new secure session.",
+  "auth.signModal.authLead":
+    "To connect your wallet, you will need to sign a message to confirm your identity.",
+  "auth.signModal.connectionSharePrimary":
+    "Use connection sharing from an active session-v2 web connection, then open the new shared connection on this device.",
+  "auth.signModal.disconnectedUpgradePrimary":
+    "Reconnect this wallet and sign once to upgrade this browser session.",
+  "auth.signModal.sessionUpgradePrimary":
+    "Your current connection will stay available while the new session is created.",
+  "auth.signModal.authPrimary":
+    "This signature will be used to generate a secure token (JWT) to authenticate your session.",
+  "auth.signModal.sharedConnection":
+    "If this is a shared connection, reshare the connection from a device that is already signed in with the new authentication.",
+  "auth.signModal.timeLeft": "Time left to upgrade: {timeLeft}.",
+  "auth.signModal.noGas":
+    "Your signature will not cost any gas and is purely for authentication purposes.",
+  "auth.signModal.connect": "Connect",
+  "auth.signModal.sign": "Sign",
+  "auth.signModal.learnMore": "Learn more about this update",
+  "auth.signModal.remindLater": "Remind me later",
+  "auth.signModal.cancel": "Cancel",
+  "auth.signModal.confirmInWallet": "Confirm in your wallet",
+  "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
+  "tools.api.authentication.title": "Authentication",
+  "tools.api.authentication.basedOnSignatures":
+    "Authentication is based on Ethereum signatures.",
+  "tools.api.authentication.flowIntro": "The flow works as follows:",
+  "tools.api.authentication.requestSessionMessage":
+    "Request a session-v2 signable message for the wallet you want to authenticate.",
+  "tools.api.authentication.signMessage":
+    "Sign the signable message exactly using your wallet.",
+  "tools.api.authentication.sendSignature":
+    "Send the signature back to the server.",
+  "tools.api.authentication.receiveToken":
+    "Receive a JWT bearer token, which you can include in headers of subsequent requests.",
+  "tools.api.authentication.nodeExample":
+    "Here's a full example in Node.js using ethers and node-fetch:",
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted post",
   "home.boostedDrop.boost": "Boost",
