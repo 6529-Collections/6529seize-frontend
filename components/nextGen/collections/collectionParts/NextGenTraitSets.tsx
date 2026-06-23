@@ -54,7 +54,7 @@ export default function NextGenTraitSets(
 
   const PAGE_SIZE = props.preview ? 10 : 25;
 
-  const availableTraits: string[] = TRAITS[props.collection.id]!;
+  const availableTraits: string[] = TRAITS[props.collection.id] ?? [];
 
   const [selectedTrait, setSelectedTrait] = useState<string>(
     availableTraits[0]!
@@ -100,8 +100,8 @@ export default function NextGenTraitSets(
     commonApiFetch<DBResponse>({
       endpoint: path,
     }).then((response) => {
-      setTotalResults(response.count);
-      setSets(response.data);
+      setTotalResults(response.count ?? 0);
+      setSets(response.data ?? []);
       setSetsLoaded(true);
     });
   }
@@ -120,7 +120,7 @@ export default function NextGenTraitSets(
   }, [selectedTrait, traitsLoaded, searchWallets]);
 
   useEffect(() => {
-    if (selectedTrait) {
+    if (selectedTrait && traitsLoaded) {
       fetchResults(page, selectedTrait);
     }
   }, [page]);

@@ -238,7 +238,7 @@ describe('CreateWaveOverview', () => {
     );
 
     const mainDiv = container.firstChild as HTMLElement;
-    expect(mainDiv).toHaveClass('tw-flex', 'tw-flex-col', 'tw-space-y-6');
+    expect(mainDiv).toHaveClass('tw-flex', 'tw-flex-col', 'tw-gap-y-6');
   });
 
   it('applies correct CSS classes for profile picture section', () => {
@@ -251,7 +251,7 @@ describe('CreateWaveOverview', () => {
     );
 
     const profilePictureSection = screen.getByText('Wave Profile Picture').parentElement;
-    expect(profilePictureSection).toHaveClass('tw-space-y-2');
+    expect(profilePictureSection).toHaveClass('tw-space-y-3');
   });
 
   it('handles edge case with null overview values', () => {

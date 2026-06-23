@@ -20,7 +20,7 @@ describe('CreateWavesMainStepConnectionLine', () => {
     
     const backgroundLine = container.querySelector('.tw-bg-iron-700');
     expect(backgroundLine).toBeInTheDocument();
-    expect(backgroundLine).toHaveClass('tw-absolute', 'tw-right-3', 'tw-top-10', 'tw-h-full', 'tw-rounded-sm', 'tw-w-0.5');
+    expect(backgroundLine).toHaveClass('tw-absolute', 'tw-right-[11px]', 'tw-top-9', 'tw-h-full', 'tw-rounded-sm', 'tw-w-0.5');
   });
 
   it('renders animated progress line when done is false', () => {
@@ -28,7 +28,7 @@ describe('CreateWavesMainStepConnectionLine', () => {
     
     const progressLine = container.querySelector('.tw-bg-primary-500');
     expect(progressLine).toBeInTheDocument();
-    expect(progressLine).toHaveClass('tw-absolute', 'tw-right-3', 'tw-top-10', 'tw-h-full', 'tw-rounded-sm', 'tw-w-0.5');
+    expect(progressLine).toHaveClass('tw-absolute', 'tw-right-[11px]', 'tw-top-9', 'tw-h-full', 'tw-rounded-sm', 'tw-w-0.5');
   });
 
   it('renders animated progress line when done is true', () => {
@@ -36,7 +36,7 @@ describe('CreateWavesMainStepConnectionLine', () => {
     
     const progressLine = container.querySelector('.tw-bg-primary-500');
     expect(progressLine).toBeInTheDocument();
-    expect(progressLine).toHaveClass('tw-absolute', 'tw-right-3', 'tw-top-10', 'tw-h-full', 'tw-rounded-sm', 'tw-w-0.5');
+    expect(progressLine).toHaveClass('tw-absolute', 'tw-right-[11px]', 'tw-top-9', 'tw-h-full', 'tw-rounded-sm', 'tw-w-0.5');
   });
 
   it('has proper aria-hidden attributes for accessibility', () => {

@@ -10,7 +10,7 @@ describe('AboutDataDecentral', () => {
   it('contains arweave link for team addresses', () => {
     render(<AboutDataDecentral />);
     const link = screen.getAllByRole('link', { name: 'here' })[0];
-    expect(link).toHaveAttribute('href', expect.stringContaining('arweave.net'));
+    expect(link).toHaveAttribute('href', expect.stringContaining('media.6529.io/arweave'));
   });
 
   it('links to open data page', () => {

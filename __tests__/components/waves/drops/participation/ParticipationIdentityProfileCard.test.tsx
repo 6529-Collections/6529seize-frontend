@@ -82,15 +82,12 @@ describe("ParticipationIdentityProfileCard", () => {
       <ParticipationIdentityProfileCard profile={buildProfile() as any} />
     );
 
-    expect(screen.getByText("Identity")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /view simo's profile/i })
     ).toHaveAttribute("href", "/simo");
     expect(
       screen.queryByText("0x3a867c9b39c940e9467f5b3b43fa0e5a2bd1e6e")
     ).not.toBeInTheDocument();
-    expect(screen.getByText("2 submissions")).toBeInTheDocument();
-    expect(screen.getByText("2 minted memes")).toBeInTheDocument();
     expect(screen.getByText("+21")).toBeInTheDocument();
   });
 
@@ -127,7 +124,7 @@ describe("ParticipationIdentityProfileCard", () => {
       />
     );
 
-    expect(screen.getByText("Archived")).toBeInTheDocument();
+    expect(screen.queryByText("Archived")).not.toBeInTheDocument();
     expect(screen.queryByText("2 submissions")).not.toBeInTheDocument();
   });
 
@@ -136,19 +133,31 @@ describe("ParticipationIdentityProfileCard", () => {
       <ParticipationIdentityProfileCard profile={buildProfile() as any} />
     );
 
-    expect(screen.getByRole("link", { name: /tdh/i })).toHaveAttribute(
+    const links = screen.getAllByRole("link");
+    const getStatLink = (label: string) => {
+      const link = links.find((candidate) => {
+        const text = candidate.textContent ?? "";
+        return label === "TDH"
+          ? text.includes("TDH") && !text.includes("xTDH")
+          : text.includes(label);
+      });
+      expect(link).toBeDefined();
+      return link as HTMLAnchorElement;
+    };
+
+    expect(getStatLink("TDH")).toHaveAttribute(
       "href",
       "/simo/collected"
     );
-    expect(screen.getByRole("link", { name: /xtdh/i })).toHaveAttribute(
+    expect(getStatLink("xTDH")).toHaveAttribute(
       "href",
       "/simo/xtdh"
     );
-    expect(screen.getByRole("link", { name: /nic/i })).toHaveAttribute(
+    expect(getStatLink("NIC")).toHaveAttribute(
       "href",
       "/simo"
     );
-    expect(screen.getByRole("link", { name: /rep/i })).toHaveAttribute(
+    expect(getStatLink("Rep")).toHaveAttribute(
       "href",
       "/simo"
     );

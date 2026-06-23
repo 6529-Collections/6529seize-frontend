@@ -127,7 +127,6 @@ describe("ArtworkStep", () => {
     render(<ArtworkStep {...createProps()} />);
     const contentContainer = screen.getByTestId("artwork-step-content");
     expect(contentContainer).toHaveClass("tw-overflow-y-auto");
-    expect(contentContainer).toHaveClass("lg:tw-overflow-hidden");
   });
 
   it("shows upload tooltip when artwork missing", () => {

@@ -19,6 +19,11 @@ jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
 
     return {
       closeQuickVote: () => setIsQuickVoteOpen(false),
+      dialogState: {
+        isOpen: isQuickVoteOpen,
+        onClose: () => setIsQuickVoteOpen(false),
+        sessionId: quickVoteSessionId,
+      },
       isQuickVoteOpen,
       openQuickVote: () => {
         const sessionId =

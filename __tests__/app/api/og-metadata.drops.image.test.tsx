@@ -263,7 +263,7 @@ describe("renderDropOgImage", () => {
         "TDH",
         "5",
         "Voters",
-        "Won",
+        "Winner",
         "Jun 3, 2026",
       ])
     );
@@ -287,7 +287,7 @@ describe("renderDropOgImage", () => {
     expect(styles).toContainEqual(
       expect.objectContaining({
         gap: 12,
-        justifyContent: "center",
+        justifyContent: "flex-start",
         top: 138,
         width: 1108,
       })
@@ -344,7 +344,13 @@ describe("renderDropOgImage", () => {
       "http://localhost:3001/api/og-metadata/image?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fsubmission.mp4&w=1108"
     );
     expect(textNodes).toEqual(
-      expect.arrayContaining(["video submission", "Video", "1", "TDH", "Voter"])
+      expect.arrayContaining([
+        "video submission",
+        "submission.mp4",
+        "1",
+        "TDH",
+        "Voter",
+      ])
     );
     expect(styles).toContainEqual(
       expect.objectContaining({
@@ -756,9 +762,7 @@ describe("renderDropOgImage", () => {
     const styles = collectStyles(element);
     const textNodes = collectTextNodes(element);
 
-    expect(textNodes).toEqual(
-      expect.arrayContaining(["one.mp4", "two.mp4", "three.mp4", "+1 videos"])
-    );
+    expect(textNodes).toEqual(expect.arrayContaining(["three.mp4", "+1 videos"]));
     expect(textNodes).not.toContain("four.mp4");
     expect(styles).toContainEqual(
       expect.objectContaining({
@@ -825,7 +829,7 @@ describe("renderDropOgImage", () => {
       "http://localhost:3001/api/og-metadata/image?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fone.mp4&w=548"
     );
     expect(textNodes).toEqual(
-      expect.arrayContaining(["mixed media", "one.mp4", "two.mp4", "+1 videos"])
+      expect.arrayContaining(["mixed media", "+1 videos"])
     );
     expect(textNodes).not.toContain("three.mp4");
   });

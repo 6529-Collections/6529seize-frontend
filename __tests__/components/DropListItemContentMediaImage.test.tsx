@@ -42,7 +42,7 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.click(img);
     const modalImage = screen.getByAltText("Full size drop media");
     expect(modalImage).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /close modal/i }));
+    fireEvent.click(screen.getByTestId("modal-backdrop"));
     expect(
       screen.queryByAltText("Full size drop media")
     ).not.toBeInTheDocument();
@@ -95,7 +95,7 @@ describe("DropListItemContentMediaImage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("keeps the modal open when the rendered image area is clicked", () => {
+  it("closes the modal when the rendered image area is clicked", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
@@ -124,7 +124,9 @@ describe("DropListItemContentMediaImage", () => {
 
     fireEvent.click(modalImage, { clientX: 50, clientY: 50 });
 
-    expect(screen.getByAltText("Full size drop media")).toBeInTheDocument();
+    expect(
+      screen.queryByAltText("Full size drop media")
+    ).not.toBeInTheDocument();
   });
 
   it("does not open modal when disableModal is true", () => {

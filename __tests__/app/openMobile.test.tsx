@@ -8,24 +8,27 @@ jest.mock("next/navigation", () => ({ useSearchParams: jest.fn() }));
 const useSearchParamsMock = useSearchParams as jest.Mock;
 
 describe("OpenMobilePage", () => {
+  let openSpy: jest.SpyInstance;
+
   beforeEach(() => {
-    delete (window as any).location;
-    (window as any).location = {
-      href: "https://example.com",
-      origin: "https://example.com",
-    } as any;
+    openSpy = jest.spyOn(window, "open").mockImplementation(() => null);
     useSearchParamsMock.mockReturnValue(new URLSearchParams("path=%2Ffoo-bar"));
+  });
+
+  afterEach(() => {
+    openSpy.mockRestore();
   });
 
   it("deep links and allows going back", async () => {
     render(<OpenMobilePage />);
     await waitFor(() => {
-      expect(globalThis.location.href).toBe(
-        "testmobile6529://navigate/foo-bar"
+      expect(openSpy).toHaveBeenCalledWith(
+        "testmobile6529://navigate/foo-bar",
+        "_self"
       );
     });
 
     await userEvent.click(screen.getByText("Back to 6529.io"));
-    expect(globalThis.location.href).toBe("https://example.com/foo-bar");
+    expect(openSpy).toHaveBeenCalledWith("http://localhost/foo-bar", "_self");
   });
 });
