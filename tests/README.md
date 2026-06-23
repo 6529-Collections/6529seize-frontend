@@ -124,8 +124,13 @@ Surface matrix:
   Capacitor runtime signals, iOS Open Data subscription hiding and US-visible
   subscription behavior, Android
   subscription visibility, the Capacitor app-wallet simulated empty state,
-  Electron app-wallet unsupported copy, and Electron share-modal desktop
-  handoff suppression.
+  Capacitor `/messages` native app chrome, Electron app-wallet unsupported
+  copy, and Electron share-modal desktop handoff suppression.
+- `test:native-evidence` runs the native surface evidence classifier. The
+  command must pass before native-adjacent PRs claim simulation-contract
+  coverage. `test:native-evidence:package-prereqs` is a stricter prerequisites
+  gate for checked-in Capacitor/Electron package structure and compatible host
+  tooling, but it still does not run package builds or runtime smoke tests.
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
@@ -220,6 +225,11 @@ Surface matrix:
 - Capacitor simulations expose both `CapacitorCustomPlatform` and a minimal
   `globalThis.Capacitor` shim so Playwright can catch hook-based and direct
   runtime-detection drift. This still does not prove native plugin behavior.
+- The native evidence classifier records that distinction in executable form:
+  current simulator projects are evidence tier `browser-simulation`, while
+  package-prerequisite readiness requires Capacitor/Electron package files to be
+  committed plus compatible host tooling such as Android build tools, macOS/Xcode
+  for iOS, or an Electron main process and package command.
 
 Large-pack ownership:
 
@@ -291,13 +301,21 @@ Large-pack ownership:
   read-only mutation guard behavior on search and wave surfaces.
 - `test:e2e:native-shell-readonly` is owned by PR or train owners changing
   Capacitor runtime detection, Electron detection, app-wallet support fallback,
-  native subscription visibility, header share/deep-link handoff behavior,
-  mobile-shell viewport setup, or read-only mutation guard behavior on
+  native subscription visibility, native messages shell routing, header
+  share/deep-link handoff behavior, mobile-shell viewport setup, or read-only
+  mutation guard behavior on
   native-adjacent shells. Treat failures as shell-branching signals, not as
   proof about real secure storage, real mobile plugins, or packaged Electron.
   The Capacitor browser simulation uses Capacitor's web plugin fallback for app
   wallets, so it covers the empty supported wallet shell and not real native
   secure storage.
+- `test:native-evidence` is owned by PR or train owners changing native
+  simulation config, Capacitor/Electron dependencies, native runtime detection,
+  or any PR description that discusses native package evidence. A passing run
+  proves the classifier and simulator contracts are present. It does not prove
+  real packages. A passing `test:native-evidence:package-prereqs` run proves only
+  checked-in package prerequisites; real packaged native/Electron claims still
+  require separate package-build and runtime-smoke evidence.
 - `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
   composer input, attachment preview/removal, link preview rendering, dev-auth
   composer eligibility, or local sandbox/mock API coverage. The pack may use

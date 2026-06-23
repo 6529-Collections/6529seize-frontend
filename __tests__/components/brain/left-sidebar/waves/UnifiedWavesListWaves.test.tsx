@@ -23,6 +23,8 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
+let mockDeviceInfo = { isApp: false, hasTouchScreen: false };
+
 jest.mock(
   "@/components/brain/left-sidebar/waves/WavesFilterToggle",
   () => () => <div data-testid="waves-filter-toggle" />
@@ -76,7 +78,15 @@ jest.mock("@/hooks/usePrefetchWaveData", () => ({
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({ isApp: false, hasTouchScreen: false }),
+  default: () => mockDeviceInfo,
+}));
+jest.mock("react-tooltip", () => ({
+  Tooltip: (props: any) => (
+    <div
+      data-testid={`tooltip-${props.id}`}
+      data-open-on-click={String(props.openOnClick)}
+    />
+  ),
 }));
 jest.mock("@/components/auth/Auth");
 jest.mock("@/hooks/useVirtualizedWaves");
@@ -130,6 +140,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   globalThis.localStorage.clear();
   globalThis.sessionStorage.clear();
+  mockDeviceInfo = { isApp: false, hasTouchScreen: false };
   mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   mockUseAuth.mockReturnValue({
     connectedProfile: { handle: "alice" },
@@ -305,6 +316,14 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toHaveClass("tw-size-6");
+  expect(
+    screen.getByTestId("tooltip-waves-worth-checking-out-info")
+  ).toHaveAttribute("data-open-on-click", "true");
   expect(
     screen.queryByRole("button", {
       name: "Expand Worth Checking Out, 1 wave",
@@ -488,6 +507,27 @@ it("renders followed waves in the same bottom list instead of a separate section
   expect(screen.queryByText("Following")).toBeNull();
   expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
+});
+
+it("keeps the worth checking out info tooltip available on touch devices", () => {
+  mockDeviceInfo = { isApp: false, hasTouchScreen: true };
+
+  render(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toHaveClass("tw-size-6");
+  expect(
+    screen.getByTestId("tooltip-waves-worth-checking-out-info")
+  ).toHaveAttribute("data-open-on-click", "true");
 });
 
 it("passes pin controls through for pinned announcement waves", () => {
