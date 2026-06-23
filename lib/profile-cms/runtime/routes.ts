@@ -7,7 +7,7 @@ import { isSafeCmsRelativeUri } from "@/lib/profile-cms/runtime/uri";
 
 type CmsRouteV1 = CmsPackageV1["payload"]["routes"][number];
 
-export type CmsRouteResolution =
+type CmsRouteResolution =
   | {
       readonly kind: "page";
       readonly route: CmsRouteV1;

@@ -356,7 +356,7 @@ export async function fetchWaveById({
   });
 }
 
-export async function searchWavesV2ByName({
+async function searchWavesV2ByName({
   name,
   pageSize = 5,
   headers,

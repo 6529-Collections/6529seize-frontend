@@ -1,4 +1,5 @@
-import Rememes, { RememeSort } from "@/components/rememes/Rememes";
+import Rememes from "@/components/rememes/Rememes";
+import { RememeSort } from "@/components/rememes/rememesTypes";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
 import { render, screen, waitFor, within } from "@testing-library/react";

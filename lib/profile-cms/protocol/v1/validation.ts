@@ -22,7 +22,7 @@ import {
   type CmsValidationResultV1,
 } from "./schemas";
 
-export interface CmsValidationOptions {
+interface CmsValidationOptions {
   checkedAt?: Date | string;
   validator?: string;
   validatorVersion?: string;

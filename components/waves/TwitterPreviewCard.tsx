@@ -27,9 +27,8 @@ import type {
 } from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
 import { useTwitterPreview } from "@/hooks/useTwitterPreview";
-import SeizeVideoPlayer, {
-  type SeizeVideoTemplate,
-} from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import type { SeizeVideoTemplate } from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 
 type PreviewState =
   | { readonly type: "loading" }

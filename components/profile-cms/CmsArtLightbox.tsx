@@ -19,8 +19,6 @@ import {
   type CmsArtGridMode,
 } from "@/components/profile-cms/cmsArtGalleryClasses";
 
-export type { CmsArtGridMode } from "@/components/profile-cms/cmsArtGalleryClasses";
-
 export type CmsArtInspectionMetadata = {
   readonly label: string;
   readonly value: string;

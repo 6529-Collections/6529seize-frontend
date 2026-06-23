@@ -1,6 +1,6 @@
 export type CmsRoomPreset = "wall" | "salon" | "white_cube" | "dark_room";
 
-export type CmsRoomPresetConfig = {
+type CmsRoomPresetConfig = {
   readonly key: CmsRoomPreset;
   readonly wallColor: string;
   readonly floorColor: string;
@@ -12,7 +12,7 @@ export type CmsRoomPresetConfig = {
   readonly wallHeight: number;
 };
 
-export type CmsArtworkFit = {
+type CmsArtworkFit = {
   readonly width: number;
   readonly height: number;
   readonly aspectRatio: number;
