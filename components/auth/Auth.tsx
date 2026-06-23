@@ -34,6 +34,7 @@ import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -338,7 +339,7 @@ const dismissSessionUpgradePrompt = (
 
 const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
   if (timeLeftMs <= 0) {
-    return "now";
+    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft.now");
   }
 
   const oneHourMs = 60 * 60 * 1000;
@@ -346,15 +347,27 @@ const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
   const wholeDays = Math.floor(timeLeftMs / oneDayMs);
 
   if (wholeDays > 3) {
-    return `${wholeDays} days`;
+    return t(
+      AUTH_MODAL_LOCALE,
+      wholeDays === 1
+        ? "auth.signModal.timeLeft.days.one"
+        : "auth.signModal.timeLeft.days.many",
+      { count: formatInteger(AUTH_MODAL_LOCALE, wholeDays) }
+    );
   }
 
   const wholeHours = Math.floor(timeLeftMs / oneHourMs);
   if (wholeHours < 1) {
-    return "less than 1 hour";
+    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft.lessThanOneHour");
   }
 
-  return `${wholeHours} ${wholeHours === 1 ? "hour" : "hours"}`;
+  return t(
+    AUTH_MODAL_LOCALE,
+    wholeHours === 1
+      ? "auth.signModal.timeLeft.hours.one"
+      : "auth.signModal.timeLeft.hours.many",
+    { count: formatInteger(AUTH_MODAL_LOCALE, wholeHours) }
+  );
 };
 
 const getSessionUpgradePromptMode = (

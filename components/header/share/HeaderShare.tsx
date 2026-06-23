@@ -15,6 +15,8 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useElectron } from "@/hooks/useElectron";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   getRefreshToken,
   getWalletAddress,
@@ -28,6 +30,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
+const HEADER_SHARE_LOCALE = DEFAULT_LOCALE;
 
 type NativeConnectionShare = Awaited<ReturnType<typeof createConnectionShare>>;
 
@@ -343,12 +346,12 @@ function getSubTabCount(activeTab: Mode, isElectron: boolean): number {
 
 function getSubTabLabel(activeTab: Mode): string {
   if (activeTab === Mode.APPS) {
-    return "Select Platform";
+    return t(HEADER_SHARE_LOCALE, "headerShare.menu.selectPlatform");
   }
   if (activeTab === Mode.SHARE) {
-    return "Open Link In";
+    return t(HEADER_SHARE_LOCALE, "headerShare.menu.openLinkIn");
   }
-  return "Open URL In";
+  return t(HEADER_SHARE_LOCALE, "headerShare.menu.openUrlIn");
 }
 
 function getFocusableElements(container: HTMLElement): HTMLElement[] {
@@ -385,8 +388,8 @@ export default function HeaderShare({
     <div className="tailwind-scope tw-relative tw-px-3">
       <button
         type="button"
-        aria-label="QR Code"
-        title="QR Code"
+        aria-label={t(HEADER_SHARE_LOCALE, "headerShare.trigger.ariaLabel")}
+        title={t(HEADER_SHARE_LOCALE, "headerShare.trigger.title")}
         onClick={() => setShowQRModal(true)}
         className={`tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
           isCollapsed
@@ -410,7 +413,7 @@ export default function HeaderShare({
               isCollapsed ? "tw-w-0 tw-opacity-0" : "tw-flex-1 tw-opacity-100"
             }`}
           >
-            Share
+            {t(HEADER_SHARE_LOCALE, "headerShare.trigger.text")}
           </span>
         </div>
       </button>
@@ -956,14 +959,16 @@ export function HeaderQRModal({
             priority
             loading="eager"
             src="/6529Core.png"
-            alt="6529 Desktop"
+            alt={t(HEADER_SHARE_LOCALE, "headerShare.core.alt")}
             width={150}
             height={150}
             className="unselectable"
           />
           <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-200 tw-px-4 tw-py-3 tw-text-iron-900">
             <FontAwesomeIcon icon={faExternalLink} />
-            <div className="no-wrap">Open in 6529 Desktop</div>
+            <div className="no-wrap">
+              {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
+            </div>
           </div>
         </a>
       </div>
@@ -975,7 +980,7 @@ export function HeaderQRModal({
       return {
         content: renderQRCodeImage(
           navigateBrowserSrc,
-          "Browser Link - QR Code"
+          t(HEADER_SHARE_LOCALE, "headerShare.qr.browserAlt")
         ),
         url: navigateBrowserUrl,
       };
@@ -989,7 +994,10 @@ export function HeaderQRModal({
     }
 
     return {
-      content: renderQRCodeImage(navigateAppSrc, "Mobile App Link - QR Code"),
+      content: renderQRCodeImage(
+        navigateAppSrc,
+        t(HEADER_SHARE_LOCALE, "headerShare.qr.mobileAlt")
+      ),
       url: navigateAppUrl,
     };
   };
@@ -1017,40 +1025,69 @@ export function HeaderQRModal({
       return {
         content: renderQRCodeImage(
           shareConnectionSrc,
-          "Share Connection - QR Code"
+          t(HEADER_SHARE_LOCALE, "headerShare.qr.shareConnectionAlt")
         ),
         url: shareConnectionAppUrl,
       };
     }
 
-    return { content: <span>Invalid submode for SHARE</span>, url: "" };
+    return {
+      content: (
+        <span>{t(HEADER_SHARE_LOCALE, "headerShare.invalidShareSubmode")}</span>
+      ),
+      url: "",
+    };
   };
 
   const renderConnectionShareNotice = (status: ConnectionShareStatus) => {
     const isLegacyAuth = status === "legacy-auth";
     const title = (() => {
       if (isLegacyAuth) {
-        return "Update Authentication";
+        return t(
+          HEADER_SHARE_LOCALE,
+          "headerShare.connectionNotice.legacyTitle"
+        );
       }
       if (status === "loading") {
-        return "Preparing Connection";
+        return t(
+          HEADER_SHARE_LOCALE,
+          "headerShare.connectionNotice.loadingTitle"
+        );
       }
       if (status === "error") {
-        return "Connection Sharing Unavailable";
+        return t(
+          HEADER_SHARE_LOCALE,
+          "headerShare.connectionNotice.errorTitle"
+        );
       }
-      return "Sign In Required";
+      return t(
+        HEADER_SHARE_LOCALE,
+        "headerShare.connectionNotice.unauthenticatedTitle"
+      );
     })();
     const message = (() => {
       if (isLegacyAuth) {
-        return "You can't share a connection from your current authentication. Update to the new secure session first.";
+        return t(
+          HEADER_SHARE_LOCALE,
+          "headerShare.connectionNotice.legacyMessage"
+        );
       }
       if (status === "loading") {
-        return "Creating a one-time connection code.";
+        return t(
+          HEADER_SHARE_LOCALE,
+          "headerShare.connectionNotice.loadingMessage"
+        );
       }
       if (status === "error") {
-        return "We couldn't create a connection share. Close this dialog and try again.";
+        return t(
+          HEADER_SHARE_LOCALE,
+          "headerShare.connectionNotice.errorMessage"
+        );
       }
-      return "Connect and authenticate your wallet before sharing a connection.";
+      return t(
+        HEADER_SHARE_LOCALE,
+        "headerShare.connectionNotice.unauthenticatedMessage"
+      );
     })();
 
     return (
@@ -1073,7 +1110,7 @@ export function HeaderQRModal({
               className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800"
               onClick={onClose}
             >
-              Cancel
+              {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.cancel")}
             </button>
             <button
               type="button"
@@ -1086,7 +1123,7 @@ export function HeaderQRModal({
                 });
               }}
             >
-              Update
+              {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.update")}
             </button>
           </div>
         )}
@@ -1145,7 +1182,7 @@ export function HeaderQRModal({
             </div>
             <button
               type="button"
-              aria-label="Copy URL"
+              aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
               className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-100"
               data-tooltip-id="copy-url-tooltip"
               onClick={async () => {
@@ -1172,7 +1209,11 @@ export function HeaderQRModal({
             <Tooltip
               id="copy-url-tooltip"
               place="top-end"
-              content={urlCopied ? "Copied!" : "Copy URL"}
+              content={
+                urlCopied
+                  ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied")
+                  : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
+              }
               openEvents={isMobile ? { click: true } : { mouseenter: true }}
               closeEvents={isMobile ? { click: true } : { mouseleave: true }}
               positionStrategy="fixed"
@@ -1204,7 +1245,7 @@ export function HeaderQRModal({
     >
       <button
         type="button"
-        aria-label="Close share modal"
+        aria-label={t(HEADER_SHARE_LOCALE, "headerShare.modal.closeAriaLabel")}
         className="tw-absolute tw-inset-0 tw-border-0 tw-bg-transparent"
         onClick={onClose}
       />
@@ -1223,7 +1264,7 @@ export function HeaderQRModal({
       >
         <div className="tw-flex tw-flex-col tw-gap-2">
           <h2 id="header-share-title" className="tw-sr-only">
-            Share
+            {t(HEADER_SHARE_LOCALE, "headerShare.modal.title")}
           </h2>
           <ModalMenu
             activeTab={activeTab}
@@ -1268,7 +1309,7 @@ function ModalMenu({
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-flex tw-flex-col tw-gap-1">
         <div className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
-          Share Type
+          {t(HEADER_SHARE_LOCALE, "headerShare.menu.shareType")}
         </div>
         <div
           className="tw-grid tw-gap-2"
@@ -1282,7 +1323,7 @@ function ModalMenu({
             className={getMenuButtonClass(activeTab === Mode.SHARE)}
             onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
           >
-            Connection
+            {t(HEADER_SHARE_LOCALE, "headerShare.menu.connection")}
           </button>
           <button
             type="button"
@@ -1290,7 +1331,7 @@ function ModalMenu({
             className={getMenuButtonClass(activeTab === Mode.NAVIGATE)}
             onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}
           >
-            Current URL
+            {t(HEADER_SHARE_LOCALE, "headerShare.menu.currentUrl")}
           </button>
           <button
             type="button"
@@ -1298,7 +1339,7 @@ function ModalMenu({
             className={getMenuButtonClass(activeTab === Mode.APPS)}
             onClick={() => onTabChange(Mode.APPS, SubMode.APP)}
           >
-            6529 Apps
+            {t(HEADER_SHARE_LOCALE, "headerShare.menu.apps")}
           </button>
         </div>
       </div>
@@ -1319,7 +1360,7 @@ function ModalMenu({
             className={getMenuButtonClass(activeSubTab === SubMode.APP)}
             onClick={() => onTabChange(activeTab, SubMode.APP)}
           >
-            <span>6529 Mobile</span>
+            <span>{t(HEADER_SHARE_LOCALE, "headerShare.menu.mobile")}</span>
           </button>
           {activeTab === Mode.NAVIGATE && (
             <button
@@ -1328,7 +1369,7 @@ function ModalMenu({
               className={getMenuButtonClass(activeSubTab === SubMode.BROWSER)}
               onClick={() => onTabChange(activeTab, SubMode.BROWSER)}
             >
-              <span>Browser</span>
+              <span>{t(HEADER_SHARE_LOCALE, "headerShare.menu.browser")}</span>
             </button>
           )}
           {!isElectron && (
@@ -1338,7 +1379,7 @@ function ModalMenu({
               className={getMenuButtonClass(activeSubTab === SubMode.CORE)}
               onClick={() => onTabChange(activeTab, SubMode.CORE)}
             >
-              <span>6529 Desktop</span>
+              <span>{t(HEADER_SHARE_LOCALE, "headerShare.menu.desktop")}</span>
             </button>
           )}
         </div>

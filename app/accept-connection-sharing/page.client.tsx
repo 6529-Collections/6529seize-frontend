@@ -50,7 +50,10 @@ function getSharedProfileName(profile: SharedProfile, address: string): string {
   if (address) {
     return `${address.slice(0, 6)}…${address.slice(-4)}`;
   }
-  return "Shared connection";
+  return t(
+    ACCEPT_CONNECTION_LOCALE,
+    "acceptConnection.sharedConnectionFallback"
+  );
 }
 
 function HomeLinkCard({ message }: Readonly<{ message: string }>) {
@@ -62,7 +65,7 @@ function HomeLinkCard({ message }: Readonly<{ message: string }>) {
           href="/"
           className="tw-text-sm tw-font-medium tw-text-emerald-400 hover:tw-underline"
         >
-          Take me home
+          {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.home")}
         </Link>
       </p>
     </div>
@@ -73,11 +76,15 @@ function ConnectionLimitCard() {
   return (
     <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
       <p className="tw-text-base tw-font-semibold tw-text-white">
-        Connected profile limit reached
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.limit.title")}
       </p>
       <p className="tw-mt-3 tw-text-sm tw-text-neutral-300">
-        You can keep up to {MAX_CONNECTED_PROFILES} connected profiles. Sign out
-        from one profile, then scan this connection link again.
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.limit.message", {
+          maxCount: formatInteger(
+            ACCEPT_CONNECTION_LOCALE,
+            MAX_CONNECTED_PROFILES
+          ),
+        })}
       </p>
     </div>
   );
@@ -97,7 +104,7 @@ function IncomingConnectionCard({
   return (
     <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-p-5">
       <h2 className="tw-mb-4 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-neutral-400">
-        Incoming connection from
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.incoming.title")}
       </h2>
       {profileLoading ? (
         <div className="tw-flex tw-items-center tw-gap-3 tw-py-2">
@@ -123,7 +130,7 @@ function IncomingConnectionCard({
               <div className="tw-mt-1 tw-truncate tw-text-sm tw-text-neutral-400">
                 {t(
                   ACCEPT_CONNECTION_LOCALE,
-                  "acceptConnection.incoming.profileStats",
+                  "acceptConnection.incoming.profileStatsLabel",
                   {
                     tdh: formatInteger(
                       ACCEPT_CONNECTION_LOCALE,
@@ -165,13 +172,19 @@ function CurrentProfileNotice({
   if (shouldShowNotice) {
     return (
       <p className="tw-text-center tw-text-sm tw-text-neutral-400">
-        Your current profile
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.currentProfile.prefix")}
         {connectedProfile?.handle ? (
           <> @{connectedProfile.handle}</>
         ) : null}{" "}
-        will stay available.
+        {t(
+          ACCEPT_CONNECTION_LOCALE,
+          "acceptConnection.currentProfile.willStayAvailable"
+        )}
         <br />
-        You can switch between both after accepting.
+        {t(
+          ACCEPT_CONNECTION_LOCALE,
+          "acceptConnection.currentProfile.switchAfterAccepting"
+        )}
       </p>
     );
   }
@@ -202,10 +215,11 @@ function AcceptConnectionButton({
       >
         {acceptingConnection ? (
           <>
-            Processing <Spinner dimension={18} />
+            {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.action.processing")}{" "}
+            <Spinner dimension={18} />
           </>
         ) : (
-          "Accept connection"
+          t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.action.accept")
         )}
       </button>
     </div>
@@ -237,7 +251,10 @@ async function acceptConnectionShare({
 }): Promise<boolean> {
   if (address && canStoreAnotherWalletAccount(address) === false) {
     setToast({
-      message: "Maximum connected profiles reached",
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.maxProfiles"
+      ),
       type: "error",
     });
     return false;
@@ -249,13 +266,22 @@ async function acceptConnectionShare({
     !!redeemResponse.access_token &&
     (!address || areEqualAddresses(redeemResponse.address, address));
   if (hasValidRedeemResponse === false) {
-    setToast({ message: "Invalid connection response", type: "error" });
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.invalidResponse"
+      ),
+      type: "error",
+    });
     return false;
   }
 
   if (canStoreAnotherWalletAccount(redeemResponse.address) === false) {
     setToast({
-      message: "Maximum connected profiles reached",
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.maxProfiles"
+      ),
       type: "error",
     });
     return false;
@@ -264,7 +290,10 @@ async function acceptConnectionShare({
   const didPersistJwt = await persistSessionResponse(redeemResponse);
   if (didPersistJwt === false) {
     setToast({
-      message: "Failed to store connected profile",
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.persistFailed"
+      ),
       type: "error",
     });
     return false;
@@ -306,13 +335,22 @@ async function acceptLegacyDesktopConnection({
     !!redeemResponse.token &&
     areEqualAddresses(redeemResponse.address, address);
   if (hasValidRedeemResponse === false) {
-    setToast({ message: "Invalid connection response", type: "error" });
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.invalidResponse"
+      ),
+      type: "error",
+    });
     return false;
   }
 
   if (canStoreAnotherWalletAccount(redeemResponse.address) === false) {
     setToast({
-      message: "Maximum connected profiles reached",
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.maxProfiles"
+      ),
       type: "error",
     });
     return false;
@@ -326,7 +364,10 @@ async function acceptLegacyDesktopConnection({
   );
   if (didPersistJwt === false) {
     setToast({
-      message: "Failed to store connected profile",
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.persistFailed"
+      ),
       type: "error",
     });
     return false;
@@ -366,7 +407,9 @@ function ConnectionSharingContent({
 }>) {
   if (hasUnsupportedWebConnectionShare) {
     return (
-      <HomeLinkCard message="Open this connection link in the 6529 mobile app." />
+      <HomeLinkCard
+        message={t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.unsupportedWeb")}
+      />
     );
   }
 
@@ -394,7 +437,14 @@ function ConnectionSharingContent({
     );
   }
 
-  return <HomeLinkCard message="Missing required parameters" />;
+  return (
+    <HomeLinkCard
+      message={t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.missingParameters"
+      )}
+    />
+  );
 }
 
 function AcceptConnectionSharing(
@@ -429,7 +479,7 @@ function AcceptConnectionSharing(
     initialProfile: null,
   });
 
-  useSetTitle("Accept Connection Sharing");
+  useSetTitle(t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.title"));
 
   const acceptConnection = async () => {
     try {
@@ -462,7 +512,10 @@ function AcceptConnectionSharing(
     } catch (error) {
       console.error(error);
       setToast({
-        message: "Couldn't accept this connection. Please try again.",
+        message: t(
+          ACCEPT_CONNECTION_LOCALE,
+          "acceptConnection.toast.acceptFailed"
+        ),
         type: "error",
       });
       setAcceptingConnection(false);
@@ -474,7 +527,7 @@ function AcceptConnectionSharing(
       <div className="tw-mx-auto tw-max-w-2xl tw-px-4 tw-pb-8 tw-pt-12 sm:tw-px-6">
         <header className="tw-mb-8">
           <h1 className="tw-text-2xl tw-font-bold tw-text-white">
-            Accept Connection Sharing
+            {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.title")}
           </h1>
         </header>
 

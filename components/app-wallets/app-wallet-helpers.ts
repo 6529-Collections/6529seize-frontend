@@ -1,4 +1,7 @@
 import crypto from "crypto";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 const ENCRYPTION_ALGORITHM = "aes-256-gcm";
 const LEGACY_KDF_ITERATIONS = 100000;
@@ -27,29 +30,46 @@ interface AppWalletEncryptedEnvelopeV2 {
 
 const HEX_PATTERN = /^[0-9a-f]+$/i;
 
-export function getAppWalletPassphraseError(password: string): string | null {
+export function getAppWalletNameError(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string {
+  return t(locale, "appWallet.validation.name.alphanumericSpaces");
+}
+
+export function getAppWalletPassphraseWhitespaceError(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string {
+  return t(locale, "appWallet.validation.password.noWhitespace");
+}
+
+export function getAppWalletPassphraseError(
+  password: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string | null {
   if (password.length < APP_WALLET_MIN_PASSPHRASE_LENGTH) {
-    return `Password must be at least ${APP_WALLET_MIN_PASSPHRASE_LENGTH} characters long`;
+    return t(locale, "appWallet.validation.password.minLength", {
+      count: formatInteger(locale, APP_WALLET_MIN_PASSPHRASE_LENGTH),
+    });
   }
 
   if (/\s/.test(password)) {
-    return "Password must not contain any whitespace characters";
+    return getAppWalletPassphraseWhitespaceError(locale);
   }
 
   if (!/[a-z]/.test(password)) {
-    return "Password must include a lowercase letter";
+    return t(locale, "appWallet.validation.password.lowercase");
   }
 
   if (!/[A-Z]/.test(password)) {
-    return "Password must include an uppercase letter";
+    return t(locale, "appWallet.validation.password.uppercase");
   }
 
   if (!/\d/.test(password)) {
-    return "Password must include a number";
+    return t(locale, "appWallet.validation.password.number");
   }
 
   if (!/[^A-Za-z0-9]/.test(password)) {
-    return "Password must include a symbol";
+    return t(locale, "appWallet.validation.password.symbol");
   }
 
   return null;

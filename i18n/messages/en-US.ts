@@ -579,6 +579,12 @@ export const EN_US_MESSAGES = {
   "auth.signModal.sharedConnection":
     "If this is a shared connection, reshare the connection from a device that is already signed in with the new authentication.",
   "auth.signModal.timeLeft": "Time left to upgrade: {timeLeft}.",
+  "auth.signModal.timeLeft.now": "now",
+  "auth.signModal.timeLeft.lessThanOneHour": "less than 1 hour",
+  "auth.signModal.timeLeft.days.one": "{count} day",
+  "auth.signModal.timeLeft.days.many": "{count} days",
+  "auth.signModal.timeLeft.hours.one": "{count} hour",
+  "auth.signModal.timeLeft.hours.many": "{count} hours",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",
@@ -587,6 +593,78 @@ export const EN_US_MESSAGES = {
   "auth.signModal.remindLater": "Remind me later",
   "auth.signModal.cancel": "Cancel",
   "auth.signModal.confirmInWallet": "Confirm in your wallet",
+  "acceptConnection.title": "Accept Connection Sharing",
+  "acceptConnection.sharedConnectionFallback": "Shared connection",
+  "acceptConnection.home": "Take me home",
+  "acceptConnection.limit.title": "Connected profile limit reached",
+  "acceptConnection.limit.message":
+    "You can keep up to {maxCount} connected profiles. Sign out from one profile, then scan this connection link again.",
+  "acceptConnection.incoming.title": "Incoming connection from",
+  "acceptConnection.incoming.profileStatsLabel": "TDH: {tdh} - Level: {level}",
+  "acceptConnection.currentProfile.prefix": "Your current profile",
+  "acceptConnection.currentProfile.willStayAvailable": "will stay available.",
+  "acceptConnection.currentProfile.switchAfterAccepting":
+    "You can switch between both after accepting.",
+  "acceptConnection.action.processing": "Processing",
+  "acceptConnection.action.accept": "Accept connection",
+  "acceptConnection.unsupportedWeb":
+    "Open this connection link in the 6529 mobile app.",
+  "acceptConnection.missingParameters": "Missing required parameters",
+  "acceptConnection.toast.maxProfiles": "Maximum connected profiles reached",
+  "acceptConnection.toast.invalidResponse": "Invalid connection response",
+  "acceptConnection.toast.persistFailed": "Failed to store connected profile",
+  "acceptConnection.toast.acceptFailed":
+    "Couldn't accept this connection. Please try again.",
+  "appWallet.validation.name.alphanumericSpaces":
+    "Name can only contain alphanumeric characters and spaces",
+  "appWallet.validation.password.minLength":
+    "Password must be at least {count} characters long",
+  "appWallet.validation.password.noWhitespace":
+    "Password must not contain any whitespace characters",
+  "appWallet.validation.password.lowercase":
+    "Password must include a lowercase letter",
+  "appWallet.validation.password.uppercase":
+    "Password must include an uppercase letter",
+  "appWallet.validation.password.number": "Password must include a number",
+  "appWallet.validation.password.symbol": "Password must include a symbol",
+  "headerShare.trigger.ariaLabel": "QR Code",
+  "headerShare.trigger.title": "QR Code",
+  "headerShare.trigger.text": "Share",
+  "headerShare.modal.title": "Share",
+  "headerShare.modal.closeAriaLabel": "Close share modal",
+  "headerShare.menu.shareType": "Share Type",
+  "headerShare.menu.selectPlatform": "Select Platform",
+  "headerShare.menu.openLinkIn": "Open Link In",
+  "headerShare.menu.openUrlIn": "Open URL In",
+  "headerShare.menu.connection": "Connection",
+  "headerShare.menu.currentUrl": "Current URL",
+  "headerShare.menu.apps": "6529 Apps",
+  "headerShare.menu.mobile": "6529 Mobile",
+  "headerShare.menu.browser": "Browser",
+  "headerShare.menu.desktop": "6529 Desktop",
+  "headerShare.qr.browserAlt": "Browser Link - QR Code",
+  "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
+  "headerShare.qr.shareConnectionAlt": "Share Connection - QR Code",
+  "headerShare.core.alt": "6529 Desktop",
+  "headerShare.core.open": "Open in 6529 Desktop",
+  "headerShare.connectionNotice.legacyTitle": "Update Authentication",
+  "headerShare.connectionNotice.loadingTitle": "Preparing Connection",
+  "headerShare.connectionNotice.errorTitle": "Connection Sharing Unavailable",
+  "headerShare.connectionNotice.unauthenticatedTitle": "Sign In Required",
+  "headerShare.connectionNotice.legacyMessage":
+    "You can't share a connection from your current authentication. Update to the new secure session first.",
+  "headerShare.connectionNotice.loadingMessage":
+    "Creating a one-time connection code.",
+  "headerShare.connectionNotice.errorMessage":
+    "We couldn't create a connection share. Close this dialog and try again.",
+  "headerShare.connectionNotice.unauthenticatedMessage":
+    "Connect and authenticate your wallet before sharing a connection.",
+  "headerShare.connectionNotice.cancel": "Cancel",
+  "headerShare.connectionNotice.update": "Update",
+  "headerShare.invalidShareSubmode": "Invalid submode for SHARE",
+  "headerShare.copy.ariaLabel": "Copy URL",
+  "headerShare.copy.default": "Copy URL",
+  "headerShare.copy.copied": "Copied!",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
   "tools.api.authentication.title": "Authentication",
   "tools.api.authentication.basedOnSignatures":
