@@ -8,6 +8,15 @@ import {
 type MintTimelineDetails = ReturnType<typeof getMintTimelineDetails>;
 type MintTimelineStatus = "past" | "live" | "upcoming";
 
+export const MEME_CALENDAR_API_CACHE_HEADERS = {
+  "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=60",
+} as const;
+
+export const MEME_CALENDAR_PATH = "/meme-calendar";
+
+export const getMemeCalendarMintPath = (mintNumber: number) =>
+  `/the-memes/${mintNumber}`;
+
 interface MemeCalendarMintResponse {
   readonly mint_number: number;
   readonly mint_date: string;
@@ -79,7 +88,7 @@ export function buildMemeCalendarMintResponse(
     period: timeline.periodNumber,
     era: timeline.eraNumber,
     eon: timeline.eonNumber,
-    calendar_path: "/meme-calendar",
-    mint_path: `/the-memes/${timeline.mintNumber}`,
+    calendar_path: MEME_CALENDAR_PATH,
+    mint_path: getMemeCalendarMintPath(timeline.mintNumber),
   };
 }

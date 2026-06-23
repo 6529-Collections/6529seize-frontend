@@ -1,7 +1,10 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveSales from "@/components/brain/my-stream/MyStreamWaveSales";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { MarketplacePreviewData } from "@/components/waves/marketplace/common";
 import { useWaveSalesDecisions } from "@/hooks/waves/useWaveSalesDecisions";
+import { renderWithQueryClient } from "../../../utils/reactQuery";
 
 const mockSalesViewStyle = { height: "240px", maxHeight: "240px" };
 const mockMarketplacePreview = jest.fn(({ href }: { href: string }) => (
@@ -62,6 +65,9 @@ const expectMockSalesViewStyle = () => {
   return scrollContainer;
 };
 
+const renderSales = () =>
+  renderWithQueryClient(<MyStreamWaveSales waveId="wave-1" />);
+
 describe("MyStreamWaveSales", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -73,7 +79,7 @@ describe("MyStreamWaveSales", () => {
       isFetching: true,
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     expectMockSalesViewStyle();
     expect(screen.getByText("Loading sales...")).toBeInTheDocument();
@@ -93,7 +99,7 @@ describe("MyStreamWaveSales", () => {
       error,
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     expect(screen.getByText(expectedText)).toBeInTheDocument();
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
@@ -102,7 +108,7 @@ describe("MyStreamWaveSales", () => {
   it("shows empty shell when there are no decision winners and no further pages", () => {
     mockWaveDecisions();
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     expectMockSalesViewStyle();
     expect(screen.getByText("No sales yet.")).toBeInTheDocument();
@@ -130,7 +136,7 @@ describe("MyStreamWaveSales", () => {
       ],
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     expectMockSalesViewStyle();
     expect(screen.getByText("No sales yet.")).toBeInTheDocument();
@@ -186,7 +192,7 @@ describe("MyStreamWaveSales", () => {
       ],
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     const scrollContainer = expectMockSalesViewStyle();
     expect(scrollContainer).toHaveClass("tw-overflow-y-auto");
@@ -204,6 +210,70 @@ describe("MyStreamWaveSales", () => {
       "https://market.example/old-1",
       "https://market.example/shared",
     ]);
+  });
+
+  it("seeds marketplace preview cache from loaded winner nft-links", () => {
+    const href =
+      "https://superrare.com/artwork/eth/0x0CbE7Cda5a256FD5f5C6d8f1aA36aFCF32DCd711/1";
+    mockWaveDecisions({
+      decisionPoints: [
+        {
+          decision_time: 1,
+          winners: [
+            {
+              place: 1,
+              drop: {
+                nft_links: [
+                  {
+                    url_in_text: `  ${href}  `,
+                    data: {
+                      canonical_id:
+                        "superrare:0x0cbe7cda5a256fd5f5c6d8f1aa36afcf32dcd711:1",
+                      platform: "superrare",
+                      chain: "ethereum",
+                      contract: "0x0CbE7Cda5a256FD5f5C6d8f1aA36aFCF32DCd711",
+                      token: "1",
+                      name: "Seeded SuperRare Sale",
+                      description: "Seeded from sales decisions",
+                      media_uri: "https://cdn.example.com/superrare-sale.png",
+                      last_error_message: null,
+                      price: "1.5 ETH",
+                      price_currency: "ETH",
+                      last_successfully_updated: 1735689600,
+                      failed_since: null,
+                      media_preview: null,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const { queryClient } = renderSales();
+
+    const seeded = queryClient.getQueryData<MarketplacePreviewData>([
+      QueryKey.MARKETPLACE_PREVIEW,
+      { href, mode: "default" },
+    ]);
+
+    expect(seeded).toEqual(
+      expect.objectContaining({
+        href,
+        canonicalId:
+          "superrare:0x0cbe7cda5a256fd5f5c6d8f1aa36afcf32dcd711:1",
+        platform: "superrare",
+        title: "Seeded SuperRare Sale",
+        price: "1.5 ETH",
+        priceCurrency: "ETH",
+        media: {
+          url: "https://cdn.example.com/superrare-sale.png",
+          mimeType: "image/png",
+        },
+      })
+    );
   });
 
   it("fetches the next page when the pagination sentinel intersects", () => {
@@ -224,7 +294,7 @@ describe("MyStreamWaveSales", () => {
       hasNextPage: true,
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     act(() => {
       intersectionCb?.(true);
@@ -251,7 +321,7 @@ describe("MyStreamWaveSales", () => {
       hasNextPage: true,
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     expect(screen.getByText("No sales yet.")).toBeInTheDocument();
 
@@ -267,7 +337,7 @@ describe("MyStreamWaveSales", () => {
       hasNextPage: false,
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     act(() => {
       intersectionCb?.(true);
@@ -296,7 +366,7 @@ describe("MyStreamWaveSales", () => {
       isFetchingNextPage: true,
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     act(() => {
       intersectionCb?.(true);
@@ -325,7 +395,7 @@ describe("MyStreamWaveSales", () => {
       isFetchingNextPage: true,
     });
 
-    render(<MyStreamWaveSales waveId="wave-1" />);
+    renderSales();
 
     expect(screen.getByTestId("wave-sales-grid")).toBeInTheDocument();
     expect(screen.getByTestId("wave-sales-loading-bar")).toBeInTheDocument();

@@ -205,10 +205,10 @@ function assertRouteMatchingInvariants(routePatterns) {
 
 function validateInternalPath(value, field, recordId, routePatterns) {
   if (value.startsWith("https://")) {
-    return;
+    fail(`${recordId}: ${field} must be an internal path`);
   }
   if (!value.startsWith("/")) {
-    fail(`${recordId}: ${field} must be an internal path or https URL`);
+    fail(`${recordId}: ${field} must be an internal path`);
   }
   const matchingRoutes = routePatterns.filter((routePattern) =>
     pathMatchesRoute(value, routePattern)
@@ -228,7 +228,16 @@ function validateSourceRefs(record) {
     if (sourceRef.startsWith("https://")) {
       continue;
     }
-    const sourcePath = path.join(repoRoot, sourceRef);
+    const sourcePath = path.resolve(repoRoot, sourceRef);
+    const sourceRelativePath = path.relative(repoRoot, sourcePath);
+    if (
+      sourceRelativePath.startsWith("..") ||
+      path.isAbsolute(sourceRelativePath)
+    ) {
+      fail(
+        `${record.id}: source_refs entry must stay within the repository: ${sourceRef}`
+      );
+    }
     if (!fs.existsSync(sourcePath)) {
       fail(`${record.id}: source_refs entry does not exist: ${sourceRef}`);
     }

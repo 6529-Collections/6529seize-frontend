@@ -3810,3 +3810,21 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   ESLint command above passed.
 - Next action: amend the follow-up commit with this evidence, force-push with
   lease, then trigger the full existing 6529reviewbot lane set plus GLM-swarm.
+
+## 2026-06-23T08:10Z PR #2850 Rebase Restart
+
+- PR #2855 was merged to `origin/main` as
+  `0ae8b27f6b1d1f1ec1061fe8180d2d87cb18c6e7`, so PR #2850
+  (`codex/e2e-upload-admin-guards`) needed a current-main rebase before it
+  could be merged.
+- Started the rebase in
+  `D:\repos\6529seize-frontend-native-shell-readonly`.
+- The first rebase conflict was limited to workstream memory files:
+  `ops/workstreams/frontend-a11y-i18n/active-context.md` and
+  `ops/workstreams/frontend-a11y-i18n/run-log.md`.
+- Resolved by keeping the newer main-side deployment/admin-guard timeline and
+  adding this current PR #2850 note instead of preserving stale "current
+  branch" text from before the later deployment train.
+- Next action: finish the rebase, run the focused chat-drop sandbox validation
+  set, push the rebased head, and re-trigger the unchanged existing
+  reviewbot lanes plus GLM-swarm.
