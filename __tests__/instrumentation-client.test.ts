@@ -12,6 +12,13 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const wasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
+    "WebAssembly module violates the following Content Security policy directive",
+    "because 'unsafe-eval' is not an allowed source of script in the following",
+    "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
   const sentryRouteParameterizationMessage =
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
@@ -103,6 +110,32 @@ describe("instrumentation-client", () => {
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it("drops injected WebAssembly CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
   });
 
   it("drops Coinbase WalletLink websocket 1006 unhandled rejections", () => {
