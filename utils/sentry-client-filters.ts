@@ -54,6 +54,7 @@ type SentryTags = Record<string, unknown>;
 
 export type SentryClientEvent = {
   event_id?: string | undefined;
+  transaction?: string | undefined;
   message?: string | undefined;
   exception?:
     | {
@@ -61,6 +62,11 @@ export type SentryClientEvent = {
       }
     | undefined;
   contexts?: Record<string, SentryContext | undefined> | undefined;
+  request?:
+    | {
+        url?: string | undefined;
+      }
+    | undefined;
   tags?: SentryTags | undefined;
   breadcrumbs?:
     | SentryBreadcrumb[]
@@ -121,6 +127,15 @@ const noisyThirdPartyTelemetryTargets = new Set([
 ]);
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
+const REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE =
+  "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+const REACT_DOM_RUNTIME_FRAME_PATTERNS = [
+  "next/dist/compiled/react-dom/",
+  "react-dom/cjs/react-dom-client.production.js",
+  "react-dom-client.production.js",
+];
+const WAVES_ROUTE_PATH = "/waves";
+
 const sentryRouteParameterizationMechanismType =
   "auto.browser.browserapierrors.setTimeout";
 const sentryRouteParameterizationMessage =
@@ -177,6 +192,66 @@ function getEventMessage(event: SentryClientEvent): string {
   }
 
   return typeof event.message === "string" ? event.message : "";
+}
+
+function getFramePaths(frame: SentryStackFrame): string[] {
+  return [frame.filename, frame.abs_path].filter(
+    (value): value is string => typeof value === "string" && value.length > 0
+  );
+}
+
+function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
+  const paths = getFramePaths(frame);
+  return paths.some((path) =>
+    REACT_DOM_RUNTIME_FRAME_PATTERNS.some((pattern) => path.includes(pattern))
+  );
+}
+
+function hasOnlyReactDomRuntimeFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.length > 0 &&
+    frames.every(isReactDomRuntimeFrame)
+  );
+}
+
+function getRoutePathFromString(value: string): string | null {
+  const candidate = value.trim();
+  if (!candidate) {
+    return null;
+  }
+
+  if (candidate.startsWith("/") && !candidate.startsWith("//")) {
+    return candidate.split(/[?#]/, 1)[0] ?? null;
+  }
+
+  try {
+    return new URL(candidate).pathname;
+  } catch {
+    return null;
+  }
+}
+
+function isWavesRoutePath(path: string | null): boolean {
+  return (
+    path !== null &&
+    (path === WAVES_ROUTE_PATH || path.startsWith(`${WAVES_ROUTE_PATH}/`))
+  );
+}
+
+function hasWavesRoute(event: SentryClientEvent): boolean {
+  const candidates = [
+    event.transaction,
+    getStringValue(event.tags?.["transaction"]),
+    getStringValue(event.tags?.["url"]),
+    event.request?.url,
+  ];
+
+  return candidates.some((candidate) =>
+    candidate ? isWavesRoutePath(getRoutePathFromString(candidate)) : false
+  );
 }
 
 function getUrlCandidatesFromText(value: string): string[] {
@@ -1385,6 +1460,25 @@ export function shouldFilterTwitterConfigReferenceError(
   return hasOnlyAppUriFrames(value.stacktrace?.frames);
 }
 
+export function shouldFilterReactDomInsertBeforeNotFoundError(
+  event: SentryClientEvent
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (value?.type !== "NotFoundError") {
+    return false;
+  }
+
+  if (value.value !== REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE) {
+    return false;
+  }
+
+  if (!hasWavesRoute(event)) {
+    return false;
+  }
+
+  return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
+}
+
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1475,6 +1569,7 @@ export const __testing = {
   isTwitterBrowser,
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
+  REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,
   isCoinbaseWalletLinkWebSocket1006Message,
