@@ -240,6 +240,8 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await gotoReady(page, "/messages");
 
     await expect(page.locator("body")).toHaveClass(/capacitor-native/);
+    // Native messages can render the authenticated page or its wallet/profile
+    // gate depending on available local auth, but it must stay inside native chrome.
     await expect(
       page.getByRole("heading", {
         level: 1,

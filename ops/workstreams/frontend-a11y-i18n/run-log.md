@@ -3910,3 +3910,7 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: commit this memory update, force-push PR #2851, post concise
   evidence, trigger reviewbot lanes in a plain command comment, and merge after
   CI and material bot feedback are clear.
+- CodeRabbit later flagged the native messages heading assertion as broad.
+  This is intentional because local auth can render the messages page or its
+  wallet/profile gate in the native simulation; added an inline comment and
+  validated with focused ESLint, Playwright typecheck, and `codex-diff-check`.
