@@ -15,7 +15,7 @@ import LruTtlCache from "@/lib/cache/lruTtl";
 import { UrlGuardError, fetchPublicUrl } from "@/lib/security/urlGuard";
 
 const TOKENSCAN_BASE = "https://tokenscan.io/api";
-const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
+export const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 const JSON_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
 const HTML_ACCEPT_HEADER =
   "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
