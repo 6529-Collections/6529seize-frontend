@@ -12,9 +12,9 @@ export const MEME_CALENDAR_API_CACHE_HEADERS = {
   "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=60",
 } as const;
 
-export const MEME_CALENDAR_PATH = "/meme-calendar";
+const MEME_CALENDAR_PATH = "/meme-calendar";
 
-export const getMemeCalendarMintPath = (mintNumber: number) =>
+const getMemeCalendarMintPath = (mintNumber: number) =>
   `/the-memes/${mintNumber}`;
 
 interface MemeCalendarMintResponse {

@@ -13,15 +13,6 @@ import {
   type ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable.types";
 
-export {
-  buildReviewDistributionPlanTableRows,
-  FetchResultsType,
-  ReviewDistributionPlanTableItemType,
-  type FullResultWallet,
-  type ReviewDistributionPlanTableItem,
-  type ReviewDistributionPlanTablePhase,
-} from "./ReviewDistributionPlanTable.types";
-
 export default function ReviewDistributionPlanTable() {
   const { phases } = useContext(DistributionPlanToolContext);
   const { connectedProfile } = useContext(AuthContext);

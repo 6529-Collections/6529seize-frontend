@@ -297,7 +297,9 @@ export default function HeaderUserMenuDropdown({
                       <button
                         onClick={() => {
                           void runMenuAction({
-                            action: requestSessionUpgrade,
+                            action: async () => {
+                              await requestSessionUpgrade();
+                            },
                             pendingKey: "upgrade-auth",
                             errorMessage:
                               "Failed to start authentication upgrade. Please try again.",

@@ -16,8 +16,6 @@ import {
 } from "./ReviewDistributionPlanTable.types";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
-export { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
-
 interface WalletResult {
   wallet: string;
   amount: number;

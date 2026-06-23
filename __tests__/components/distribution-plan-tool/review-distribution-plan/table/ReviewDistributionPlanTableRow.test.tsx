@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import ReviewDistributionPlanTableRow from '@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableRow';
 import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
-import { ReviewDistributionPlanTableItemType } from '@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable';
+import { ReviewDistributionPlanTableItemType } from '@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable.types';
 import { distributionPlanApiFetch } from '@/services/distribution-plan-api';
 
 jest.mock('services/distribution-plan-api', () => ({

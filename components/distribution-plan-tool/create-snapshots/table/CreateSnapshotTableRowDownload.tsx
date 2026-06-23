@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { FetchResultsType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
+import { FetchResultsType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable.types";
 import type { DistributionPlanSnapshotToken } from "@/components/allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
