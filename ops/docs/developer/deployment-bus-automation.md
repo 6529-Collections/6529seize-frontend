@@ -19,6 +19,8 @@ safe bus needs before queue automation can make decisions:
 - auto-hold evaluation for missing or failed required evidence
 - post-deploy watch evidence in the release report
 - explicit canary-readiness fields that say what rollout capability exists
+- deployed HTTP `/api/version` checks that prove the live app serves the
+  deployed SHA before the workflow marks a deployment verified
 - production workflow check that fails if `origin/main` advances during the
   build before Elastic Beanstalk is updated
 - deployed-staging Playwright mode through `PLAYWRIGHT_BASE_URL` and
@@ -90,20 +92,27 @@ packs in `validation.required_packs` and expands them in
 `validation.pack_plan`.
 
 `playwright:core-smoke` is the fast route smoke pack. `playwright:surface-matrix`
-is the broader route/navigation workflow pack.
+is the broader route/navigation workflow pack. `playwright:production-readonly`
+is a known production-only aggregate pack that release captains can opt into
+when recording full production-safe read-only evidence; it is not in the
+default required pack set until durable artifact upload and recording are
+automated.
 
-| Pack                        | Staging command                                                                                                        | Production command                                                                                             |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `playwright:core-smoke`     | `seize run test:e2e:staging:smoke`                                                                                     | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix`     |
-| `playwright:surface-matrix` | `seize run test:e2e:staging`                                                                                           | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix`           |
-| `playwright:wcag-i18n`      | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` |
+| Pack                             | Staging command                                                                                                        | Production command                                                                                             |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `playwright:core-smoke`          | `seize run test:e2e:staging:smoke`                                                                                     | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix`     |
+| `playwright:surface-matrix`      | `seize run test:e2e:staging`                                                                                           | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix`           |
+| `playwright:wcag-i18n`           | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` |
+| `playwright:production-readonly` | production-only                                                                                                        | `seize run test:e2e:production:readonly`                                                                       |
 
-The standard pack plan records `web:desktop-chromium` and
-`web:mobile-chromium` as the covered deployed web surfaces. Firefox, WebKit,
-Capacitor simulation, and Electron simulation remain optional train/nightly or
-targeted validation lanes until they are stable enough to make them required
-deployment evidence. Browser simulation must not be described as real native or
-real Electron shell coverage.
+The default required standard pack plan records `web:desktop-chromium` and
+`web:mobile-chromium` as the covered deployed web surfaces. The production
+read-only aggregate records `web:desktop-chromium` only because production
+scripts intentionally run production-safe public checks on desktop Chromium.
+Firefox, WebKit, Capacitor simulation, and Electron simulation remain optional
+train/nightly or targeted validation lanes until they are stable enough to make
+them required deployment evidence. Browser simulation must not be described as
+real native or real Electron shell coverage.
 
 For standard required packs, release readiness requires the latest passing
 check to record the pack-plan command and every required pack-plan surface.
@@ -185,12 +194,28 @@ Every manifest has `post_deploy_watch` and `canary_readiness` fields.
 - notes for the release captain or validation agents.
 
 The staging workflow records a staging deploy-verification checkpoint after SSM
-and deployed-SHA verification. The production workflow records an
-`eb-version-health` checkpoint after Elastic Beanstalk health/readiness and
-version-label validation. Production workflow evidence starts the watch but
-does not by itself complete the release-captain post-deploy watch; production
-validation agents should record the final `passed` watch after the deployed
-environment checks finish.
+and deployed-SHA verification. Both deploy workflows also run a GET-only
+`/api/version` check against the deployed environment and upload
+`deployment-version-evidence.json` with the workflow artifacts. The production
+workflow records an `eb-version-health` checkpoint after Elastic Beanstalk
+health/readiness and version-label validation. Production workflow evidence
+starts the watch but does not by itself complete the release-captain
+post-deploy watch; production validation agents should record the final
+`passed` watch after the deployed environment checks finish.
+
+Run the same HTTP version probe locally or from a release-captain shell with:
+
+```bash
+6529 run verify:deployment-version -- \
+  --base-url https://6529.io \
+  --expected-version <sha> \
+  --output deployment-version-evidence.json
+```
+
+For staging, provide the access code through `PLAYWRIGHT_STAGING_ACCESS_CODE` or
+`STAGING_AUTH` only as an environment value. The evidence file records the
+target origin, `/api/version` status, cache policy, expected version, and actual
+version, but never request headers or cookies.
 
 Production watch completion is intentionally a two-step handoff:
 
