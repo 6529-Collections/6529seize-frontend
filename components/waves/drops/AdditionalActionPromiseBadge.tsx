@@ -1,7 +1,7 @@
 "use client";
 
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
-import type { MouseEvent } from "react";
+import { useId, type MouseEvent } from "react";
 
 const ADDITIONAL_ACTION_PROMISE_TOOLTIP =
   "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.";
@@ -23,24 +23,33 @@ export function AdditionalActionPromiseBadge({
   focusable = true,
 }: AdditionalActionPromiseBadgeProps) {
   const badgeClassName = `${BADGE_CLASSES} ${className}`;
+  const descriptionId = useId();
 
   return (
-    <CustomTooltip
-      content={ADDITIONAL_ACTION_PROMISE_TOOLTIP}
-      placement="top"
-      delayShow={200}
-    >
-      {focusable ? (
-        <button
-          type="button"
-          onClick={stopBadgeClickPropagation}
-          className={`${badgeClassName} tw-border-0`}
-        >
-          Additional Action
-        </button>
-      ) : (
-        <span className={badgeClassName}>Additional Action</span>
-      )}
-    </CustomTooltip>
+    <>
+      <CustomTooltip
+        content={ADDITIONAL_ACTION_PROMISE_TOOLTIP}
+        placement="top"
+        delayShow={200}
+      >
+        {focusable ? (
+          <button
+            type="button"
+            aria-describedby={descriptionId}
+            onClick={stopBadgeClickPropagation}
+            className={`${badgeClassName} tw-border-0`}
+          >
+            Additional Action
+          </button>
+        ) : (
+          <span aria-describedby={descriptionId} className={badgeClassName}>
+            Additional Action
+          </span>
+        )}
+      </CustomTooltip>
+      <span id={descriptionId} className="tw-sr-only">
+        {ADDITIONAL_ACTION_PROMISE_TOOLTIP}
+      </span>
+    </>
   );
 }
