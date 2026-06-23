@@ -191,24 +191,24 @@ describe("sentry-client-filters", () => {
   const createReactDomInsertBeforeEvent = (
     overrides: Partial<SentryClientEvent> = {}
   ): SentryClientEvent => ({
-      transaction: "/waves",
-      exception: {
-        values: [
-          {
-            type: "NotFoundError",
-            value: reactDomInsertBeforeMessage,
-            stacktrace: {
-              frames: [reactDomFrame],
-            },
+    transaction: "/waves",
+    exception: {
+      values: [
+        {
+          type: "NotFoundError",
+          value: reactDomInsertBeforeMessage,
+          stacktrace: {
+            frames: [reactDomFrame],
           },
-        ],
-      },
-      tags: {
-        transaction: "/waves",
-        url: "/waves",
-      },
-      ...overrides,
-    });
+        },
+      ],
+    },
+    tags: {
+      transaction: "/waves",
+      url: "/waves",
+    },
+    ...overrides,
+  });
 
   it("filters events when a stack frame matches a filename exception", () => {
     // Arrange
