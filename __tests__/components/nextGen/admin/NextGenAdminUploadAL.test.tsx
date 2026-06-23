@@ -98,7 +98,7 @@ describe("NextGenAdminUploadAL", () => {
     signMessageState.data = "signed-message";
     rerender(<NextGenAdminUploadAL close={() => {}} />);
 
-    await waitFor(() => expect(postFormData).toHaveBeenCalled());
+    await waitFor(() => expect(postFormData).toHaveBeenCalledTimes(1));
     const formData = (postFormData as jest.Mock).mock.calls[0][1] as FormData;
     expect(JSON.parse(formData.get("nextgen") as string)).toMatchObject({
       wallet: "0x1",
