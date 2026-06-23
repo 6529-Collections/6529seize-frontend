@@ -47,8 +47,8 @@ importers:
         specifier: 7.1.2
         version: 7.1.2(@capacitor/core@7.4.1)
       '@capacitor/keyboard':
-        specifier: 7.0.1
-        version: 7.0.1(@capacitor/core@7.4.1)
+        specifier: 7.0.6
+        version: 7.0.6(@capacitor/core@7.4.1)
       '@capacitor/push-notifications':
         specifier: 7.0.1
         version: 7.0.1(@capacitor/core@7.4.1)
@@ -814,8 +814,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
-  '@capacitor/keyboard@7.0.1':
-    resolution: {integrity: sha512-Gi064vOARMac+x9/DmEFeywN9oAETMf3OYsMuYm9gA8SvdsDJ3QJqMoFnSEIORYXe21Jzt2SIEdLlpT65P/b2g==}
+  '@capacitor/keyboard@7.0.6':
+    resolution: {integrity: sha512-mH9EHo4EnBA9zJAi6domGVB/PdEkcm0h27nJDHG4Y3fd2oKsheCxDRXlYrbgj8hcyQPe0cGWqAfzfwKzkWQoFQ==}
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
@@ -8153,11 +8153,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  semver@7.8.5:
-    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
 
@@ -9664,7 +9659,7 @@ snapshots:
       '@capacitor/core': 7.4.1
       '@capacitor/synapse': 1.0.4
 
-  '@capacitor/keyboard@7.0.1(@capacitor/core@7.4.1)':
+  '@capacitor/keyboard@7.0.6(@capacitor/core@7.4.1)':
     dependencies:
       '@capacitor/core': 7.4.1
 
@@ -10884,7 +10879,7 @@ snapshots:
       '@ethereumjs/tx': 4.2.0
       '@types/debug': 4.1.13
       debug: 4.4.3(supports-color@5.5.0)
-      semver: 7.8.5
+      semver: 7.8.4
       superstruct: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -10912,7 +10907,7 @@ snapshots:
       '@types/debug': 4.1.13
       debug: 4.4.3(supports-color@5.5.0)
       pony-cause: 2.1.11
-      semver: 7.8.5
+      semver: 7.8.4
       uuid: 11.1.1
     transitivePeerDependencies:
       - supports-color
@@ -19352,8 +19347,6 @@ snapshots:
   semver@7.7.4: {}
 
   semver@7.8.4: {}
-
-  semver@7.8.5: {}
 
   set-blocking@2.0.0: {}
 
