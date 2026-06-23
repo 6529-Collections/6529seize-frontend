@@ -3943,3 +3943,23 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: commit this memory update, force-push the current #2852 head,
   trigger CodeRabbit plus the existing 6529bot lanes and GLM-swarm on the exact
   pushed commit, then merge if CI and material bot feedback remain clear.
+
+## 2026-06-23T10:42Z PR #2852 Bot Feedback Patch
+
+- Addressed remaining current-file review feedback before merge:
+  - CodeRabbit's Open Graph fixture concern was valid; `fulfillOpenGraphBatch`
+    now falls back to the deterministic preview URL when `postDataJSON()` sees
+    an empty or invalid request body.
+  - GLM-swarm's reaction-method concern was behaviorally safe already because
+    unsupported writes on `/api/drops/:id/reaction` classify as
+    `dangerous-composer-mutation` and return `409`; added an explicit negative
+    Playwright assertion to lock that invariant.
+- Focused validation passed after the patch:
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/social/wave-reaction-sandbox.spec.ts tests/support/composerSandboxServer.cjs`
+  - `seize run typecheck:playwright`
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `codex-diff-check`
+  - `seize run test:e2e:reaction-sandbox`: 2 passed, including the unsupported
+    reaction mutation rejection case.
+- Next action: commit, force-push, rerun exact-head reviewbot/CI signals, and
+  merge #2852 once no material feedback remains.

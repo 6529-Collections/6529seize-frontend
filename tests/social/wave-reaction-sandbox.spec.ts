@@ -10,6 +10,7 @@ import {
   dismissNextDevTools,
   expectNoUnsafeSandboxMutations,
   fetchSandboxRequests,
+  getSandboxApiOrigin,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
@@ -89,6 +90,27 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     ]);
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("rejects unsupported reaction mutation methods", async ({ baseURL }) => {
+    const response = await fetch(
+      `${getSandboxApiOrigin(baseURL)}${REACTION_PATH}`,
+      {
+        body: JSON.stringify({ reaction: ":+1:" }),
+        headers: { "Content-Type": "application/json" },
+        method: "PUT",
+      }
+    );
+
+    expect(response.status).toBe(409);
+    await expect
+      .poll(async () => await fetchSandboxRequests(baseURL))
+      .toContainEqual({
+        method: "PUT",
+        path: REACTION_PATH,
+        kind: "dangerous-composer-mutation",
+        body: { reaction: ":+1:" },
+      });
   });
 });
 
@@ -196,19 +218,32 @@ async function installOpenGraphFixture(page: Page) {
 }
 
 async function fulfillOpenGraphBatch(route: Route) {
-  const body = route.request().postDataJSON() as { urls?: unknown };
-  const urls = Array.isArray(body.urls)
-    ? body.urls.filter((url): url is string => typeof url === "string")
-    : [PREVIEW_URL];
+  const batchUrls = openGraphBatchUrls(route);
 
   await route.fulfill({
     contentType: "application/json",
     json: {
       errors: {},
-      results: Object.fromEntries(urls.map((url) => [url, previewFor(url)])),
+      results: Object.fromEntries(
+        batchUrls.map((url) => [url, previewFor(url)])
+      ),
     },
     status: 200,
   });
+}
+
+function openGraphBatchUrls(route: Route) {
+  let urls: unknown;
+
+  try {
+    urls = (route.request().postDataJSON() as { urls?: unknown }).urls;
+  } catch {
+    return [PREVIEW_URL];
+  }
+
+  return Array.isArray(urls)
+    ? urls.filter((url): url is string => typeof url === "string")
+    : [PREVIEW_URL];
 }
 
 function previewFor(url: string) {
