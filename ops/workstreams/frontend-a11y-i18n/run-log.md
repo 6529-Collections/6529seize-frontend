@@ -4142,3 +4142,17 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: commit and push, update PR #2853 notes, restart CodeRabbit and
   6529bot lanes on the new head, then merge once CI and material bot feedback
   are clear.
+
+## 2026-06-23T13:08Z PR #2853 GLM Follow-Up
+
+- Latest-head GLM swarm review was advisory-only and found no high-confidence
+  production regression, but flagged one useful CI fidelity point: direct Jest
+  invocation should preserve the package script's explicit `NODE_ENV=test`.
+- Verified `package.json` `test:no-coverage` only adds
+  `NODE_ENV=test jest --silent --verbose=false --coverage=false`; the direct CI
+  helper already carries the Jest flags, and now sets `NODE_ENV=test`.
+- Verified the signed-drop Playwright regex intentionally matches the prefix of
+  the current production signing failure string in
+  `hooks/drops/useDropSignature.ts`.
+- Next action: validate the exact direct-Jest command again, commit, push, and
+  rerun CI/reviewbot latest-head checks.

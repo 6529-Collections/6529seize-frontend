@@ -31,8 +31,9 @@ Read this section first after compaction or handoff.
     against `origin/main...HEAD` for this PR.
   - Next action: push the direct-Jest CI fix for PR #2853, retrigger
     CodeRabbit plus all existing 6529bot lanes including `general`, `wcag`,
-    `i18n`, `security`, `responsiveness`, and `glm-swarm`, then merge when CI
-    and material bot feedback are clear.
+    `i18n`, `security`, `responsiveness`, and `glm-swarm`; latest GLM follow-up
+    preserved the package script's explicit `NODE_ENV=test` in the direct Jest
+    helper. Merge when CI and material bot feedback are clear.
 
 - Latest testing-roadmap state, 2026-06-23T09:38Z:
   - Current rebase worktree:

@@ -283,7 +283,7 @@ jobs:
             shift
 
             set +e
-            timeout 180s ./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests "$@"
+            NODE_ENV=test timeout 180s ./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests "$@"
             local status=$?
             set -e
 
