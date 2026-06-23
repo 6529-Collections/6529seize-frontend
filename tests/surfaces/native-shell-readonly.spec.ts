@@ -10,7 +10,10 @@ import {
 type ShellRuntime = {
   readonly capacitorIsNative?: unknown;
   readonly capacitorPlatform?: unknown;
+  readonly appPluginAvailable?: unknown;
   readonly customPlatform?: unknown;
+  readonly devicePluginAvailable?: unknown;
+  readonly keyboardPluginAvailable?: unknown;
   readonly navigatorStandalone?: unknown;
   readonly surface?: unknown;
   readonly userAgentHasElectron: boolean;
@@ -58,6 +61,7 @@ async function readShellRuntime(page: Page): Promise<ShellRuntime> {
     const runtime = globalThis as typeof globalThis & {
       Capacitor?: {
         getPlatform?: () => unknown;
+        isPluginAvailable?: (pluginName: string) => unknown;
         isNativePlatform?: () => unknown;
       };
       CapacitorCustomPlatform?: { name?: unknown };
@@ -67,7 +71,11 @@ async function readShellRuntime(page: Page): Promise<ShellRuntime> {
     return {
       capacitorIsNative: runtime.Capacitor?.isNativePlatform?.(),
       capacitorPlatform: runtime.Capacitor?.getPlatform?.(),
+      appPluginAvailable: runtime.Capacitor?.isPluginAvailable?.("App"),
       customPlatform: runtime.CapacitorCustomPlatform?.name,
+      devicePluginAvailable: runtime.Capacitor?.isPluginAvailable?.("Device"),
+      keyboardPluginAvailable:
+        runtime.Capacitor?.isPluginAvailable?.("Keyboard"),
       navigatorStandalone: (
         globalThis.navigator as Navigator & {
           standalone?: unknown;
@@ -110,7 +118,10 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(await readShellRuntime(page)).toEqual({
       capacitorIsNative: true,
       capacitorPlatform: platform,
+      appPluginAvailable: true,
       customPlatform: platform,
+      devicePluginAvailable: true,
+      keyboardPluginAvailable: true,
       navigatorStandalone: true,
       surface: `capacitor-${platform}-sim`,
       userAgentHasElectron: false,
@@ -216,6 +227,30 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(
       page.getByRole("button", { name: "Import Wallet" })
     ).toBeVisible();
+  });
+
+  test("Capacitor messages shell renders native app chrome", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Capacitor messages shell is covered only on Capacitor simulation projects"
+    );
+
+    await gotoReady(page, "/messages");
+
+    await expect(page.locator("body")).toHaveClass(/capacitor-native/);
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: /connected wallets|profile to continue|messages/i,
+      })
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Messages" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Messages" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
   });
 
   test("Electron app-wallet shell remains unsupported without native storage", async ({

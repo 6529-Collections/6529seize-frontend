@@ -124,8 +124,8 @@ Surface matrix:
   Capacitor runtime signals, iOS Open Data subscription hiding and US-visible
   subscription behavior, Android
   subscription visibility, the Capacitor app-wallet simulated empty state,
-  Electron app-wallet unsupported copy, and Electron share-modal desktop
-  handoff suppression.
+  Capacitor `/messages` native app chrome, Electron app-wallet unsupported
+  copy, and Electron share-modal desktop handoff suppression.
 - `test:native-evidence` runs the native surface evidence classifier. The
   command must pass before native-adjacent PRs claim simulation-contract
   coverage. `test:native-evidence:package-prereqs` is a stricter prerequisites
@@ -301,8 +301,9 @@ Large-pack ownership:
   read-only mutation guard behavior on search and wave surfaces.
 - `test:e2e:native-shell-readonly` is owned by PR or train owners changing
   Capacitor runtime detection, Electron detection, app-wallet support fallback,
-  native subscription visibility, header share/deep-link handoff behavior,
-  mobile-shell viewport setup, or read-only mutation guard behavior on
+  native subscription visibility, native messages shell routing, header
+  share/deep-link handoff behavior, mobile-shell viewport setup, or read-only
+  mutation guard behavior on
   native-adjacent shells. Treat failures as shell-branching signals, not as
   proof about real secure storage, real mobile plugins, or packaged Electron.
   The Capacitor browser simulation uses Capacitor's web plugin fallback for app

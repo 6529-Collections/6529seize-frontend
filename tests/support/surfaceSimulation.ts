@@ -44,6 +44,61 @@ export async function installSurfaceSimulation(
   if (capacitorPlatform) {
     await context.addInitScript(
       ({ platform }) => {
+        const simulatedNativeResponses: Record<string, unknown> = {
+          "App.getState": { isActive: true },
+          "App.getLaunchUrl": { url: null },
+          "Device.getBatteryInfo": { isCharging: true, batteryLevel: 1 },
+          "Device.getId": { identifier: `playwright-${platform}-device` },
+          "Device.getInfo": {
+            isVirtual: true,
+            manufacturer: "Playwright",
+            model: platform === "ios" ? "iPhone Simulator" : "Android Emulator",
+            operatingSystem: platform,
+            osVersion: platform === "ios" ? "17.0" : "14",
+            platform,
+            webViewVersion: "Playwright",
+          },
+          "Device.getLanguageCode": { value: "en" },
+          "Device.getLanguageTag": { value: "en-US" },
+          "Keyboard.getResizeMode": { mode: "native" },
+        };
+        const simulatedHeaders = [
+          {
+            name: "App",
+            methods: [
+              { name: "addListener", rtype: "callback" },
+              { name: "getLaunchUrl", rtype: "promise" },
+              { name: "getState", rtype: "promise" },
+              { name: "removeAllListeners", rtype: "promise" },
+              { name: "removeListener", rtype: "promise" },
+            ],
+          },
+          {
+            name: "Device",
+            methods: [
+              { name: "getBatteryInfo", rtype: "promise" },
+              { name: "getId", rtype: "promise" },
+              { name: "getInfo", rtype: "promise" },
+              { name: "getLanguageCode", rtype: "promise" },
+              { name: "getLanguageTag", rtype: "promise" },
+            ],
+          },
+          {
+            name: "Keyboard",
+            methods: [
+              { name: "addListener", rtype: "callback" },
+              { name: "getResizeMode", rtype: "promise" },
+              { name: "hide", rtype: "promise" },
+              { name: "removeAllListeners", rtype: "promise" },
+              { name: "removeListener", rtype: "promise" },
+              { name: "setAccessoryBarVisible", rtype: "promise" },
+              { name: "setResizeMode", rtype: "promise" },
+              { name: "setScroll", rtype: "promise" },
+              { name: "setStyle", rtype: "promise" },
+              { name: "show", rtype: "promise" },
+            ],
+          },
+        ];
         Object.defineProperty(globalThis, "CapacitorCustomPlatform", {
           configurable: true,
           value: { name: platform },
@@ -52,6 +107,32 @@ export async function installSurfaceSimulation(
           Capacitor?: Record<string, unknown> | undefined;
         };
         const existingCapacitor = runtime.Capacitor ?? {};
+        const existingPluginHeaders = Array.isArray(
+          existingCapacitor["PluginHeaders"]
+        )
+          ? existingCapacitor["PluginHeaders"]
+          : [];
+        const simulatedHeaderNames = new Set(
+          simulatedHeaders.map((header) => header.name)
+        );
+        const pluginHeaders = [
+          ...existingPluginHeaders.filter((header) => {
+            if (!header || typeof header !== "object") {
+              return false;
+            }
+            const name = (header as { name?: unknown }).name;
+            return typeof name === "string" && !simulatedHeaderNames.has(name);
+          }),
+          ...simulatedHeaders,
+        ];
+        const existingNativePromise =
+          typeof existingCapacitor["nativePromise"] === "function"
+            ? existingCapacitor["nativePromise"]
+            : null;
+        const existingNativeCallback =
+          typeof existingCapacitor["nativeCallback"] === "function"
+            ? existingCapacitor["nativeCallback"]
+            : null;
         const convertFileSrc =
           typeof existingCapacitor["convertFileSrc"] === "function"
             ? existingCapacitor["convertFileSrc"]
@@ -70,10 +151,52 @@ export async function installSurfaceSimulation(
             convertFileSrc,
             getPlatform: () => platform,
             isNativePlatform: () => true,
-            isPluginAvailable:
-              typeof existingCapacitor["isPluginAvailable"] === "function"
-                ? existingCapacitor["isPluginAvailable"]
-                : () => false,
+            nativeCallback: (
+              pluginName: string,
+              methodName: string,
+              options: unknown,
+              callback: unknown
+            ) => {
+              const simulatedKey = `${pluginName}.${methodName}`;
+              if (
+                simulatedKey === "App.addListener" ||
+                simulatedKey === "Keyboard.addListener"
+              ) {
+                return Promise.resolve(
+                  `playwright-${platform}-${pluginName}-${Date.now()}`
+                );
+              }
+              return existingNativeCallback?.(
+                pluginName,
+                methodName,
+                options,
+                callback
+              );
+            },
+            nativePromise: (
+              pluginName: string,
+              methodName: string,
+              options: unknown
+            ) => {
+              const simulatedKey = `${pluginName}.${methodName}`;
+              if (Object.hasOwn(simulatedNativeResponses, simulatedKey)) {
+                return Promise.resolve(simulatedNativeResponses[simulatedKey]);
+              }
+              if (simulatedHeaderNames.has(pluginName)) {
+                return Promise.resolve(undefined);
+              }
+              return existingNativePromise?.(pluginName, methodName, options);
+            },
+            PluginHeaders: pluginHeaders,
+            isPluginAvailable: (pluginName: string) => {
+              const existingIsAvailable = existingCapacitor[
+                "isPluginAvailable"
+              ] as ((name: string) => boolean) | undefined;
+              return (
+                pluginHeaders.some((header) => header.name === pluginName) ||
+                Boolean(existingIsAvailable?.(pluginName))
+              );
+            },
           },
         });
         Object.defineProperty(globalThis.navigator, "standalone", {
