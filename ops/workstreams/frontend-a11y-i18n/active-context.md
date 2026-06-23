@@ -4,6 +4,34 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-23T11:28Z:
+  - Current active worktree:
+    `D:\repos\6529seize-frontend-wallet-signing-sandbox`.
+  - Current active branch:
+    `codex/e2e-wallet-signing-sandbox`, rebased onto current `origin/main`
+    `b5ec8a62805f261fa4f8c10bc5c30f1114412227` after PR #2852 merged.
+  - PR #2853 is the active merge target:
+    https://github.com/6529-Collections/6529seize-frontend/pull/2853
+  - Active slice is test-only signed-drop sandbox hardening. It adds a
+    deterministic signature-required Rank-wave fixture, local-only
+    `test:e2e:signature-sandbox`, inclusion in `test:e2e:auth-sandbox`, and a
+    negative assertion window proving no late unsigned `/api/drops` POST is
+    recorded when no wallet signature is available.
+  - Current local validation passed on the rebased head:
+    `node --check` for the sandbox server, package JSON parse,
+    `seize run lint:package-json`, focused ESLint on actual changed JS/TS
+    files, `seize run typecheck:playwright`, `seize run typecheck:changed`,
+    `codex-diff-check`, `test:e2e:signature-sandbox`, `test:e2e:reaction-sandbox`,
+    `test:e2e:auth-sandbox`, `test:e2e:composer-sandbox`, the focused signing
+    Jest batch, risk floor, changed-secret scan, and workflow-security scan.
+  - Local `seize run lint:changed` overflows the Windows command line because
+    it compares against stale local `main`; use the focused ESLint evidence
+    against `origin/main...HEAD` for this PR.
+  - Next action: force-with-lease push PR #2853, trigger CodeRabbit plus all
+    existing 6529bot lanes including `general`, `wcag`, `i18n`, `security`,
+    `responsiveness`, and `glm-swarm`, then merge when CI and material bot
+    feedback are clear.
+
 - Latest testing-roadmap state, 2026-06-23T09:38Z:
   - Current rebase worktree:
     `D:\repos\6529seize-frontend-native-package-evidence`.
@@ -664,7 +692,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-native-shell-readonly`
+`codex/e2e-wallet-signing-sandbox`
 
 ## Constraints
 
@@ -833,10 +861,10 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
    `8c1ec66ea31d6ef952586b17716f0f43030c1ec2`.
 2. PR #2852 (`codex/e2e-wallet-signing-guards`) merged into `origin/main` as
    `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
-3. PR #2853 (`codex/e2e-wallet-signing-sandbox`) is rebasing onto the merged
-   #2852 head. Preserve the newly merged reaction sandbox and layer the
-   signed-drop sandbox on top, then rerun focused local validation before
-   pushing.
+3. PR #2853 (`codex/e2e-wallet-signing-sandbox`) is rebased and locally
+   validated on current main. Force-with-lease push, re-trigger CodeRabbit and
+   all existing 6529bot lanes including GLM-swarm/responsiveness on the exact
+   pushed head, then merge after CI and material review feedback are clear.
 4. Deploy merged testing-roadmap slices through staging first, validate exact
    staged SHA, then production from current `origin/main` with exact-SHA
    validation and production-safe E2E evidence.

@@ -3991,3 +3991,33 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   instead of checking the ledger only once.
 - Next action: continue the rebase and run the full focused validation set on
   the rebased head.
+
+## 2026-06-23T11:28Z PR #2853 Rebased Validation Complete
+
+- Completed the PR #2853 rebase onto merged #2852/main
+  `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
+- Current branch delta is test/docs/tooling only: signed-drop sandbox E2E,
+  mock signature Rank-wave fixtures, the `test:e2e:signature-sandbox` script,
+  `test:e2e:auth-sandbox` inclusion, signing test harness updates, and
+  workstream/test docs.
+- Focused local validation passed on the rebased head:
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - package JSON parse plus `seize run lint:package-json`
+  - focused ESLint for the signed/reaction sandbox specs, sandbox server, and
+    `__tests__/hooks/useSecureSign.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run test:e2e:reaction-sandbox`: 2 passed.
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+  - `seize run test:e2e:composer-sandbox`: 10 passed across desktop/mobile.
+  - focused signing/composer Jest batch: 7 suites, 73 tests passed.
+  - risk floor Level 4, changed-secret scan clean, workflow-security scan
+    clean.
+- Local `seize run lint:changed` is still not useful in this worktree because
+  the branch comparison against local `main` creates a Windows command-line
+  length overflow; focused ESLint on the actual PR files passed.
+- Next action: force-with-lease push the rebased branch, trigger CodeRabbit and
+  all existing 6529bot lanes including GLM-swarm/responsiveness on the exact
+  pushed head, then merge when CI and material review feedback are clear.
