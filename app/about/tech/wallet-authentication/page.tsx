@@ -80,8 +80,9 @@ export default function WalletAuthenticationPage() {
                           </h2>
                           <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
                             <li>
-                              If you see <strong>Upgrade Authentication</strong>
-                              , connect the same wallet and sign the message.
+                              If you see the{" "}
+                              <strong>Upgrade Authentication</strong> prompt,
+                              connect the same wallet and sign the message.
                             </li>
                             <li>
                               The signature does not cost gas and does not send
