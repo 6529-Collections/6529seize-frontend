@@ -14,6 +14,8 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
+let mockIsTouchDevice = false;
+
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
   <button onClick={props.onClicked}>{props.children}</button>
 ));
@@ -23,7 +25,7 @@ jest.mock("@/hooks/useCreateModalState", () => ({
 }));
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
-  default: () => false,
+  default: () => mockIsTouchDevice,
 }));
 jest.mock("@/hooks/usePrefetchWaveData", () => ({
   usePrefetchWaveData: () => jest.fn(),
@@ -58,7 +60,12 @@ jest.mock(
   })
 );
 jest.mock("react-tooltip", () => ({
-  Tooltip: () => null,
+  Tooltip: (props: any) => (
+    <div
+      data-testid={`tooltip-${props.id}`}
+      data-open-on-click={String(props.openOnClick)}
+    />
+  ),
 }));
 jest.mock("@/hooks/useVirtualizedWaves");
 jest.mock("@/hooks/useShowFollowingWaves");
@@ -97,6 +104,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   globalThis.localStorage.clear();
   globalThis.sessionStorage.clear();
+  mockIsTouchDevice = false;
   mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   mockUseMyStream.mockReturnValue({
     activeWave: { id: null, set: jest.fn() },
@@ -163,17 +171,25 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   );
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByText("Highly Rated")).toBeInTheDocument();
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toHaveClass("tw-size-6");
+  expect(
+    screen.getByTestId("tooltip-web-waves-worth-checking-out-info")
+  ).toHaveAttribute("data-open-on-click", "true");
   expect(
     screen.queryByRole("button", {
-      name: "Expand Highly Rated, 1 wave",
+      name: "Expand Worth Checking Out, 1 wave",
     })
   ).toBeNull();
   expect(
     screen.getByRole("link", { name: "Open Highly Rated One" })
   ).toBeInTheDocument();
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.queryByLabelText("Following waves")).toBeNull();
@@ -186,6 +202,29 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
   ).toEqual(["wave-a1", "wave-p1", "wave-f1", "wave-r1"]);
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
+});
+
+it("keeps the worth checking out info tooltip available on touch devices", () => {
+  const sentinelRef = React.createRef<HTMLDivElement>();
+  mockIsTouchDevice = true;
+
+  render(
+    <WebUnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={sentinelRef}
+    />
+  );
+
+  expect(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toHaveClass("tw-size-6");
+  expect(
+    screen.getByTestId("tooltip-web-waves-worth-checking-out-info")
+  ).toHaveAttribute("data-open-on-click", "true");
 });
 
 it("caps highly rated previews at ten without rendering an overflow control", () => {
@@ -214,7 +253,7 @@ it("caps highly rated previews at ten without rendering an overflow control", ()
       name: /more Highly Rated/,
     })
   ).toBeNull();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.queryByTestId("wave-h11")).toBeNull();
 });
 
@@ -280,7 +319,7 @@ it("keeps the active highly rated wave visible in the preview strip", () => {
   expect(
     screen.getByRole("link", { name: "Open Highly Rated One" })
   ).toBeInTheDocument();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.queryByTestId("wave-h1")).toBeNull();
 });
 
@@ -561,7 +600,9 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
 
     fireEvent.click(screen.getByTestId("toggle-highly-rated-parent"));
     expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
-    expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Worth checking out waves")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("wave-highly-rated-child")).toBeInTheDocument();
 
     rerender(
@@ -575,7 +616,9 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
     );
 
     expect(screen.queryByTestId("wave-highly-rated-parent")).toBeNull();
-    expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Worth checking out waves")
+    ).toBeInTheDocument();
     expect(
       screen.getByTestId("wave-highly-rated-child").parentElement
     ).toHaveAttribute("data-sidebar-subwave-row-state", "exiting");
@@ -585,7 +628,7 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
     });
 
     expect(screen.queryByTestId("wave-highly-rated-child")).toBeNull();
-    expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+    expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   } finally {
     jest.useRealTimers();
   }
