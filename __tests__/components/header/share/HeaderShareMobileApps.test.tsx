@@ -33,11 +33,16 @@ describe("ShareMobileApp", () => {
   });
 
   it("redirects at top level when target is _self", () => {
-    const top = { location: { href: "" } };
-    Object.defineProperty(window, "top", { value: top });
     render(<ShareMobileApp platform="android" target="_self" />);
     const link = screen.getByTestId("link");
-    fireEvent.click(link);
-    expect(top.location.href).toBe(MOBILE_APP_ANDROID);
+    const clickEvent = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+    });
+    const wasNotPrevented = fireEvent(link, clickEvent);
+
+    expect(link).toHaveAttribute("href", MOBILE_APP_ANDROID);
+    expect(wasNotPrevented).toBe(false);
+    expect(clickEvent.defaultPrevented).toBe(true);
   });
 });

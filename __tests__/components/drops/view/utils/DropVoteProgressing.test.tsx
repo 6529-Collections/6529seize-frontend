@@ -35,14 +35,14 @@ describe("DropVoteProgressing", () => {
   it("shows projection with positive change", () => {
     render(<DropVoteProgressing current={1} projected={2} />);
     const span = screen.getByText("2");
-    expect(span.parentElement?.className).toContain("tw-text-emerald-400");
+    expect(span.className).toContain("tw-text-emerald-500");
     expect(screen.getByTestId("icon")).toBeInTheDocument();
   });
 
   it("uses subtle styling when subtle prop set", () => {
     render(<DropVoteProgressing current={2} projected={1} subtle />);
     const span = screen.getByText("1");
-    expect(span.parentElement?.className).toContain("tw-text-iron-400");
+    expect(span.className).toContain("tw-text-iron-600");
   });
 
   it("uses a custom tooltip label when provided", () => {

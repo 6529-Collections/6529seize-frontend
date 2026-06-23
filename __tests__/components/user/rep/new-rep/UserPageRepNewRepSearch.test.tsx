@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 
 jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn(), useMutation: jest.fn().mockReturnValue({ mutateAsync: jest.fn() }) }));
 
-jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepSearchHeader", () => () => <div data-testid="header" />);
 jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepSearchDropdown", () => (props: any) => (
   <div data-testid="dropdown">
     {props.categories.map((c: string) => (

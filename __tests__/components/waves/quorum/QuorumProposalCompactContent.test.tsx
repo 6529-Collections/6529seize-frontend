@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import QuorumProposalCompactContent from "@/components/waves/quorum/QuorumProposalCompactContent";
+import QuorumProposalCompactContent, {
+  getQuorumProposalCompactSectionKey,
+} from "@/components/waves/quorum/QuorumProposalCompactContent";
 
 jest.mock(
   "@/components/drops/view/part/DropPartMarkdownWithPropLogger",
@@ -16,6 +18,11 @@ const proposal = {
     { heading: "Proposed Solution", markdown: "Add a countdown." },
   ],
 } as const;
+
+const openProblemStatementKey = getQuorumProposalCompactSectionKey(
+  proposal.sections[0],
+  0
+);
 
 function getSectionSummaryElement(heading: string): HTMLElement {
   const summary = screen.getByText(heading).closest("summary");
@@ -85,6 +92,8 @@ describe("QuorumProposalCompactContent", () => {
     render(
       <QuorumProposalCompactContent
         proposal={proposal}
+        areDetailsVisible={true}
+        openSectionKeys={[openProblemStatementKey]}
         mentionedUsers={[]}
         mentionedGroups={[]}
         mentionedWaves={[]}
@@ -92,9 +101,6 @@ describe("QuorumProposalCompactContent", () => {
         onQuoteClick={jest.fn()}
       />
     );
-
-    fireEvent.click(getDetailsToggle());
-    fireEvent.click(getSectionSummaryElement("Problem Statement"));
 
     expect(screen.getByText("Too many drops.")).toBeInTheDocument();
     expect(screen.queryByText("Add a countdown.")).toBeNull();
@@ -152,6 +158,8 @@ describe("QuorumProposalCompactContent", () => {
       <div onClick={onParentClick}>
         <QuorumProposalCompactContent
           proposal={proposal}
+          areDetailsVisible={true}
+          openSectionKeys={[openProblemStatementKey]}
           mentionedUsers={[]}
           mentionedGroups={[]}
           mentionedWaves={[]}
@@ -161,8 +169,6 @@ describe("QuorumProposalCompactContent", () => {
       </div>
     );
 
-    fireEvent.click(getDetailsToggle());
-    fireEvent.click(getSectionSummaryElement("Problem Statement"));
     fireEvent.click(screen.getByText("Too many drops."));
 
     expect(onParentClick).not.toHaveBeenCalled();

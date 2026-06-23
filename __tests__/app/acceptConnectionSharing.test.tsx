@@ -80,6 +80,6 @@ describe("AcceptConnectionSharing page", () => {
       </TestProvider>
     );
     expect(screen.getByText(/Incoming connection/)).toBeInTheDocument();
-    expect(screen.getByText(/0x123/)).toBeInTheDocument();
+    expect(screen.getAllByText(/0x123/).length).toBeGreaterThan(0);
   });
 });

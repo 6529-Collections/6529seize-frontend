@@ -5,7 +5,10 @@ import { SubmissionStatus } from "@/hooks/useWave";
 import { WaveLeaderboardEmptyState } from "@/components/waves/leaderboard/drops/WaveLeaderboardEmptyState";
 import React from "react";
 
-jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
+jest.mock("@/hooks/useWave", () => {
+  const actual = jest.requireActual("@/hooks/useWave");
+  return { ...actual, useWave: jest.fn() };
+});
 jest.mock("@/components/utils/button/PrimaryButton", () => ({
   __esModule: true,
   default: ({ onClicked, children, disabled }: any) => (
@@ -108,7 +111,10 @@ describe("WaveLeaderboardEmptyState", () => {
       screen.queryByText("Be the first to create a curated drop in this wave")
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText("Curation wave submissions require at least Level 10.")
+      screen.getByText((_, element) =>
+        element?.textContent ===
+        "Curation wave submissions require at least Level 10."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Learn more about Network Levels" })

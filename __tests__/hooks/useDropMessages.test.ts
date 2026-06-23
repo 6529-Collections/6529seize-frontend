@@ -100,7 +100,7 @@ describe('useDropMessages', () => {
 
   it('websocket callback debounces refetch', () => {
     jest.useFakeTimers();
-    const refetch = jest.fn();
+    const refetch = jest.fn().mockResolvedValue(undefined);
     useInfiniteQueryMock.mockReturnValue({
       data: { pages: [] },
       fetchNextPage: jest.fn(),
@@ -113,7 +113,9 @@ describe('useDropMessages', () => {
     let wsCallback: any;
     const { useWebSocketMessage } = require('@/services/websocket/useWebSocketMessage');
     (useWebSocketMessage as jest.Mock).mockImplementation((type, cb) => {
-      wsCallback = cb;
+      if (type === 'DROP_UPDATE') {
+        wsCallback = cb;
+      }
       return { isConnected: true };
     });
 
