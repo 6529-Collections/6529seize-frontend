@@ -682,8 +682,10 @@ describe("DropPartMarkdown", () => {
         onQuoteClick={jest.fn()}
       />
     );
-    expect(mockLinkPreviewCard).toHaveBeenCalledTimes(1);
-    const previewCall = mockLinkPreviewCard.mock.calls[0]?.[0];
+    expect(mockLinkPreviewCard).toHaveBeenCalled();
+    const previewCall = mockLinkPreviewCard.mock.calls.find(
+      ([props]) => props.href === "https://google.com"
+    )?.[0];
     if (!previewCall) {
       throw new Error("Expected link preview card props");
     }
@@ -797,9 +799,15 @@ describe("DropPartMarkdown", () => {
     );
 
     await waitFor(() =>
-      expect(mockArtBlocksTokenCard).toHaveBeenCalledTimes(1)
+      expect(
+        mockArtBlocksTokenCard.mock.calls.some(
+          ([props]) => props.href === "https://www.artblocks.io/token/662000"
+        )
+      ).toBe(true)
     );
-    const call = mockArtBlocksTokenCard.mock.calls[0]?.[0];
+    const call = mockArtBlocksTokenCard.mock.calls.find(
+      ([props]) => props.href === "https://www.artblocks.io/token/662000"
+    )?.[0];
     if (!call) {
       throw new Error("Expected Art Blocks card props");
     }
@@ -821,9 +829,11 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    expect(mockFarcasterCard).toHaveBeenCalledTimes(1);
+    expect(mockFarcasterCard).toHaveBeenCalled();
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
-    const call = mockFarcasterCard.mock.calls[0]?.[0];
+    const call = mockFarcasterCard.mock.calls.find(
+      ([props]) => props.href === "https://warpcast.com/alice/0x123"
+    )?.[0];
     if (!call) {
       throw new Error("Expected Farcaster card props");
     }

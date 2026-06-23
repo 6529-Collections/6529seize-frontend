@@ -6,11 +6,14 @@ slices: durable manifests and GitHub Deployment records first, then queue
 materialization, labels, PR comments, dashboard helpers, and stricter
 production preflight gates.
 
-Implementation note: the first automation slice is documented in
-`ops/docs/developer/deployment-bus-automation.md`. It adds manifest validation,
-GitHub Deployment ledger records, workflow artifacts, deployed-staging smoke
-support, and long-running deployment heartbeats without automating queue
-movement or production promotion.
+Implementation note: the automation slices are documented in
+`ops/docs/developer/deployment-bus-automation.md`. They add manifest
+validation, GitHub Deployment ledger records, workflow artifacts, standard
+deployed-environment validation pack names, release report artifacts,
+deployed-staging smoke support, auto-hold evaluation for missing release
+evidence, post-deploy watch checkpoints, canary-readiness declarations, and
+long-running deployment heartbeats without automating queue movement or
+production promotion.
 
 ## Why This Exists
 
@@ -81,6 +84,42 @@ Known current gaps after the first automation slice:
 - The durable manifest artifact is authoritative for this slice; GitHub
   Deployment records are the status/history pointer, not the full manifest
   datastore.
+- Current rollout capability:
+  - auto-hold: supported by release-readiness evaluation;
+  - staged watch: supported through workflow checkpoints, Deployment statuses,
+    release-report fields, and release-captain validation updates;
+  - feature flags: app-specific only, not a generic release-lane capability;
+  - traffic-split canary rollout: not currently supported by the deployment bus;
+  - durable artifact storage: deployment HTTP version evidence attempts an
+    approved private S3 upload when deploy verification passes; upload failure
+    warns but does not block the already-verified deployment, and no durable
+    artifact pointer is recorded unless the upload succeeds. Full
+    required-pack artifact capture still needs validation-pack automation.
+- Release reports evaluate whether required packs and durable artifact pointers
+  are recorded, but the workflows still do not automatically run those
+  post-deploy Playwright packs. The release captain or validation agents must
+  run them and record results with `record-validation-check` until a later
+  automation slice wires pack execution into the lane.
+- The workflows record post-deploy deploy-verification checkpoints and run a
+  GET-only `/api/version` check against the deployed HTTP app. The redacted
+  version-evidence JSON is uploaded to approved S3 storage as
+  `deployment:http-version` evidence when the artifact IAM/storage path is
+  available. If that upload fails, the workflow emits a warning and leaves
+  release readiness incomplete instead of recording a fake durable pointer.
+  GitHub Actions run URLs and temporary artifacts remain useful context, but
+  only approved durable pointers satisfy durable artifact requirements.
+- The current standard pack plan requires desktop Chromium and mobile Chromium
+  evidence for `playwright:core-smoke`, `playwright:surface-matrix`, and
+  `playwright:wcag-i18n`. The deployment bus also knows the optional
+  production-only `playwright:production-readonly` aggregate, which records
+  desktop Chromium production evidence when a release captain explicitly opts
+  into it, plus optional `native:surface-evidence`, which records the native
+  evidence classifier output without running simulator specs. Firefox, WebKit,
+  Capacitor simulation, and Electron simulation remain optional train/nightly or
+  targeted validation lanes and must not be described as real native or real
+  Electron shell coverage. Package-prerequisite evidence also is not enough for
+  real native or packaged Electron claims; those claims require separate
+  package-build and runtime-smoke artifacts.
 - Backend coordination is still a cross-repo handoff, not a shared automated
   release train.
 
@@ -174,6 +213,13 @@ validation:
   core_smoke_owner:
   required_packs:
   exploratory_checks:
+post_deploy_watch:
+  required:
+  status:
+  checkpoints:
+canary_readiness:
+  current_capability:
+  traffic_splitting_supported:
 status: queued | deploying | validating | passed | failed | held | superseded
 ```
 
@@ -240,6 +286,8 @@ Production validation:
 
 - verify the production deploy run and deployed SHA/version label
 - run production-safe smoke checks for changed behavior
+- record post-deploy watch checkpoints and final watch status in the deployment
+  bus manifest before release notes
 - avoid public posts, purchases, transfers, signer changes, destructive data
   work, or other irreversible actions unless the user explicitly requested
   that live action

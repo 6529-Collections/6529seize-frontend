@@ -6,6 +6,7 @@ interface SidebarWaveRowsSectionProps {
   readonly ariaLabel: string;
   readonly className: string;
   readonly getRowHeight: (row: AnimatedSidebarWaveTreeRow) => number;
+  readonly id?: string | undefined;
   readonly isRowVisible: (row: AnimatedSidebarWaveTreeRow) => boolean;
   readonly renderRow: (row: AnimatedSidebarWaveTreeRow) => ReactNode;
   readonly rows: readonly AnimatedSidebarWaveTreeRow[];
@@ -16,6 +17,7 @@ export function SidebarWaveRowsSection({
   ariaLabel,
   className,
   getRowHeight,
+  id,
   isRowVisible,
   renderRow,
   rows,
@@ -26,7 +28,7 @@ export function SidebarWaveRowsSection({
   }
 
   return (
-    <section className={className} aria-label={ariaLabel}>
+    <section id={id} className={className} aria-label={ariaLabel}>
       {rows.filter(isRowVisible).map((row) => (
         <SidebarWaveTreeRowTransition
           key={row.key}

@@ -83,7 +83,7 @@ $env:PROFILE_CMS_NFT_DETAIL_PATH="/punk6529/nfts/ethereum/0x33fd426905f149f8376e
 $env:PROFILE_CMS_SOCIAL_PREVIEW_PATH="/punk6529/index.html"
 $env:PROFILE_CMS_ROOM_PATH="/punk6529/rooms/main/index.html"
 $env:PROFILE_CMS_AGENT_PATCH_PATH="/punk6529/cms/builder/patches"
-seize exec playwright test tests/profile-cms/phase5-8-smoke.spec.ts --project=chromium
+seize exec playwright test tests/profile-cms/phase5-8-smoke.spec.ts --project=web-desktop-chromium
 ```
 
 If a worker branch uses different hidden routes during review, set the env vars

@@ -21,9 +21,7 @@ describe("UserPageXtdhGrantedListContent", () => {
       />
     );
 
-    expect(
-      screen.getByText("No pending grants found. Try a different filter.")
-    ).toBeInTheDocument();
+    expect(screen.getByText("No grants found")).toBeInTheDocument();
   });
 
   it("falls back to the default empty state when no status filter is applied", () => {
@@ -34,11 +32,6 @@ describe("UserPageXtdhGrantedListContent", () => {
       />
     );
 
-    expect(
-      screen.getByText(
-        "This identity hasn't granted any xTDH yet.",
-        { exact: false }
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText("No grants yet")).toBeInTheDocument();
   });
 });

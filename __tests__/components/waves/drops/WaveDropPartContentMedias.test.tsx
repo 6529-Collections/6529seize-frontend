@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import WaveDropPartContentMedias from "@/components/waves/drops/WaveDropPartContentMedias";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 
 jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
   __esModule: true,
@@ -174,5 +175,45 @@ describe("WaveDropPartContentMedias", () => {
 
     expect(screen.getAllByTestId("media-display")).toHaveLength(2);
     expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
+  });
+
+  it("shows a processing placeholder for image media that is not ready", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            {
+              mime_type: "image/png",
+              url: "u1",
+              media_status: ApiDropMediaStatus.Processing,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Processing image")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-image-media")).toBeNull();
+  });
+
+  it("shows a failed placeholder for image media that failed processing", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            {
+              mime_type: "image/png",
+              url: "u1",
+              media_status: ApiDropMediaStatus.Failed,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Image unavailable")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-image-media")).toBeNull();
   });
 });

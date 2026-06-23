@@ -7,24 +7,19 @@ import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { formatFileSizeLabel } from "@/lib/link-preview/filePreviewI18n";
-import {
-  parseDecentralizedMediaRef,
-  toNativeUri,
-} from "@/lib/media/decentralized-media";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
-import JsonPreview from "@/components/drops/view/item/content/attachments/JsonPreview";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import { ApiAttachmentSafetyStatus } from "@/generated/models/ApiAttachmentSafetyStatus";
 import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowDownTrayIcon,
-  CodeBracketSquareIcon,
   DocumentIcon,
   EllipsisHorizontalIcon,
   EyeIcon,
   EyeSlashIcon,
   LinkIcon,
+  ShieldCheckIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -54,47 +49,6 @@ function getSafeAttachmentUrl(rawUrl: string): string | null {
 }
 
 type AttachmentRenderType = "csv" | "pdf" | "unknown";
-
-function getAttachmentMetadataUrl(rawUrl: string): string | null {
-  const trimmedUrl = rawUrl.trim();
-  if (!trimmedUrl) {
-    return null;
-  }
-
-  const parsedMedia = parseDecentralizedMediaRef(trimmedUrl);
-  if (parsedMedia?.protocol === "ipfs") {
-    return toNativeUri({
-      protocol: "ipfs",
-      id: parsedMedia.id,
-      path: "metadata.json",
-    });
-  }
-
-  try {
-    const base = globalThis.window?.location?.origin || "https://6529.io";
-    const parsed = new URL(trimmedUrl, base);
-    if (parsed.protocol === "ipfs:" && parsed.hostname) {
-      return `ipfs://${parsed.hostname}/metadata.json`;
-    }
-
-    const pathSegments = parsed.pathname.split("/");
-    const ipfsIndex = pathSegments.indexOf("ipfs");
-
-    if (ipfsIndex >= 0 && pathSegments[ipfsIndex + 1]) {
-      parsed.pathname = [
-        ...pathSegments.slice(0, ipfsIndex + 2),
-        "metadata.json",
-      ].join("/");
-      parsed.search = "";
-      parsed.hash = "";
-      return parsed.toString();
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
 
 const CSV_PREVIEW_MAX_ROWS = 51;
 const CSV_PREVIEW_MAX_COLUMNS = 12;
@@ -693,8 +647,10 @@ function AnimatedAttachmentPanel({
 
 function AttachmentMoreMenu({
   isOpen,
-  hasMetadata,
+  hasDetails,
   isDetailsOpen,
+  viewDetailsLabel,
+  hideDetailsLabel,
   copiedLink,
   isDownloading,
   buttonRef,
@@ -704,8 +660,10 @@ function AttachmentMoreMenu({
   onDownload,
 }: {
   readonly isOpen: boolean;
-  readonly hasMetadata: boolean;
+  readonly hasDetails: boolean;
   readonly isDetailsOpen: boolean;
+  readonly viewDetailsLabel: string;
+  readonly hideDetailsLabel: string;
   readonly copiedLink: boolean;
   readonly isDownloading: boolean;
   readonly buttonRef: RefObject<HTMLButtonElement | null>;
@@ -745,18 +703,18 @@ function AttachmentMoreMenu({
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-1">
-            {hasMetadata && (
+            {hasDetails && (
               <button
                 type="button"
                 onClick={onToggleDetails}
                 className={getMenuItemClassName()}
               >
-                <CodeBracketSquareIcon
+                <ShieldCheckIcon
                   className="tw-size-4 tw-flex-shrink-0"
                   aria-hidden="true"
                 />
                 <span className="tw-text-sm tw-font-medium">
-                  {isDetailsOpen ? "Hide metadata" : "View metadata"}
+                  {isDetailsOpen ? hideDetailsLabel : viewDetailsLabel}
                 </span>
               </button>
             )}
@@ -820,19 +778,23 @@ export default function DropAttachmentDisplay({
     () => getSafeAttachmentUrl(attachmentUrl),
     [attachmentUrl]
   );
-  const safeMetadataUrl = useMemo(() => {
-    const metadataUrl = getAttachmentMetadataUrl(attachmentUrl);
-    return metadataUrl ? getSafeAttachmentUrl(metadataUrl) : null;
-  }, [attachmentUrl]);
   const isScannedValidated = isScannedValidatedAttachment(safety);
   const safetySize = formatFileSizeLabel(
     safety?.size_bytes,
     ATTACHMENT_LOCALE
   );
   const hasSafetyMetadata = Boolean(safetySize || safety?.sha256);
-  const hasDetails = safeMetadataUrl !== null || hasSafetyMetadata;
+  const hasDetails = hasSafetyMetadata;
   const isRendered = isPreviewOpen;
   const safetyLabel = t(ATTACHMENT_LOCALE, "attachment.safety.badge");
+  const viewSafetyDetailsLabel = t(
+    ATTACHMENT_LOCALE,
+    "attachment.safety.viewDetails"
+  );
+  const hideSafetyDetailsLabel = t(
+    ATTACHMENT_LOCALE,
+    "attachment.safety.hideDetails"
+  );
   const { renderType, fileName, label, canRender, Icon } = useMemo(() => {
     const nextRenderType = getAttachmentRenderType(mimeType, attachmentUrl);
     const fileInfo = getFileInfoFromUrl(attachmentUrl);
@@ -1031,8 +993,10 @@ export default function DropAttachmentDisplay({
             {safeAttachmentUrl && (
               <AttachmentMoreMenu
                 isOpen={isMoreMenuOpen}
-                hasMetadata={hasDetails}
+                hasDetails={hasDetails}
                 isDetailsOpen={isDetailsOpen}
+                viewDetailsLabel={viewSafetyDetailsLabel}
+                hideDetailsLabel={hideSafetyDetailsLabel}
                 copiedLink={copiedLink}
                 isDownloading={isDownloading}
                 buttonRef={moreButtonRef}
@@ -1048,36 +1012,28 @@ export default function DropAttachmentDisplay({
       <AnimatedAttachmentPanel isOpen={isDetailsOpen && hasDetails}>
         {hasDetails && (
           <div className="tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950">
-            {hasSafetyMetadata && (
-              <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-p-4">
-                <div className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-                  {t(ATTACHMENT_LOCALE, "attachment.safety.heading")}
-                </div>
-                <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
-                  {safetySize && (
-                    <span className="tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200">
-                      {t(ATTACHMENT_LOCALE, "attachment.safety.size", {
-                        size: safetySize,
-                      })}
-                    </span>
-                  )}
-                  {safety?.sha256 && (
-                    <span className="tw-max-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-200">
-                      <span className="tw-text-iron-500">
-                        {t(ATTACHMENT_LOCALE, "attachment.safety.sha256")}{" "}
-                      </span>
-                      <span className="tw-break-all">{safety.sha256}</span>
-                    </span>
-                  )}
-                </div>
+            <div className="tw-p-4">
+              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+                {t(ATTACHMENT_LOCALE, "attachment.safety.heading")}
               </div>
-            )}
-            {safeMetadataUrl && (
-              <JsonPreview
-                link={safeMetadataUrl}
-                onClose={() => setIsDetailsOpen(false)}
-              />
-            )}
+              <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
+                {safetySize && (
+                  <span className="tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200">
+                    {t(ATTACHMENT_LOCALE, "attachment.safety.size", {
+                      size: safetySize,
+                    })}
+                  </span>
+                )}
+                {safety?.sha256 && (
+                  <span className="tw-max-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-200">
+                    <span className="tw-text-iron-500">
+                      {t(ATTACHMENT_LOCALE, "attachment.safety.sha256")}{" "}
+                    </span>
+                    <span className="tw-break-all">{safety.sha256}</span>
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </AnimatedAttachmentPanel>

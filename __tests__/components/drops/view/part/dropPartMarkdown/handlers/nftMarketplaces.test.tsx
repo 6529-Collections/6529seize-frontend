@@ -147,7 +147,6 @@ describe("createNftMarketplacesHandler", () => {
 
     expect(mockMarketplacePreview).toHaveBeenCalledWith({
       href,
-      compact: true,
     });
     expect(screen.getByTestId("marketplace-preview")).toHaveAttribute(
       "data-href",

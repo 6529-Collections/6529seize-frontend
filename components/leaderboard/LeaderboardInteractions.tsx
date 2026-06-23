@@ -16,6 +16,7 @@ import {
   useFetchLeaderboard,
 } from "./leaderboard_helpers";
 import LeaderboardFooter from "./LeaderboardDownload";
+import LeaderboardTableScrollShell from "./LeaderboardTableScrollShell";
 
 const TABLE_CLASS_NAME = "tw-mb-0 tw-w-full tw-border-collapse tw-text-white";
 const ROW_CLASS_NAME = "odd:tw-bg-[#1e1e1e] even:tw-bg-transparent";
@@ -88,8 +89,8 @@ export default function LeaderboardInteractionsComponent(
 
   return (
     <>
-      <div className={styles["leaderboardTableShell"]}>
-        <table className={TABLE_CLASS_NAME}>
+      <LeaderboardTableScrollShell>
+        <table className={clsx(TABLE_CLASS_NAME, styles["interactionsTable"])}>
           <thead>
             <tr>
               <th className={HEADER_CELL_CLASS_NAME} colSpan={2} />
@@ -384,7 +385,7 @@ export default function LeaderboardInteractionsComponent(
             })}
           </tbody>
         </table>
-      </div>
+      </LeaderboardTableScrollShell>
       <LeaderboardFooter
         url={myFetchUrl}
         totalResults={totalResults}

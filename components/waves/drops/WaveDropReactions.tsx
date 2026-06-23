@@ -229,17 +229,18 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
       ? detailedReactionsState.reactions
       : null;
   const detailsLoading = detailsLoadingDropId === drop.id;
+  const dropReactions = drop.reactions ?? [];
 
   const reactionsWithDetails = useMemo(() => {
     if (!detailedReactions) {
-      return drop.reactions;
+      return dropReactions;
     }
 
     const detailsByReaction = new Map(
       detailedReactions.map((reaction) => [reaction.reaction, reaction])
     );
 
-    return drop.reactions.map((reaction) => {
+    return dropReactions.map((reaction) => {
       const detailedReaction = detailsByReaction.get(reaction.reaction);
       if (!detailedReaction) {
         return reaction;
@@ -257,7 +258,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
         count: getReactionCount(reaction),
       };
     });
-  }, [detailedReactions, drop.reactions]);
+  }, [detailedReactions, dropReactions]);
 
   const loadReactionDetails = useCallback(() => {
     if (detailedReactions) {
@@ -422,6 +423,10 @@ function WaveDropReaction({
 
   useEffect(() => {
     const nextTotal = getReactionCount(reaction);
+    if (nextTotal === prevTotalRef.current) {
+      return;
+    }
+
     if (reaction.profiles === prevProfilesRef.current) {
       const timeoutId = setTimeout(() => {
         setTotal((current) => (current === nextTotal ? current : nextTotal));
@@ -480,6 +485,8 @@ function WaveDropReaction({
               src={customSrc}
               alt={emojiId}
               fill
+              sizes="16px"
+              unoptimized
               className="tw-object-contain"
             />
           </div>
@@ -490,6 +497,8 @@ function WaveDropReaction({
               src={customSrc}
               alt={emojiId}
               fill
+              sizes="32px"
+              unoptimized
               className="tw-rounded-sm tw-object-contain"
             />
           </div>

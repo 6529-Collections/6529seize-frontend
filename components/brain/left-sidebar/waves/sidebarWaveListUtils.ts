@@ -1,6 +1,6 @@
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
-export interface SidebarWaveGroups {
+interface SidebarWaveGroups {
   readonly announcementWaves: MinimalWave[];
   readonly highlyRatedWaves: MinimalWave[];
   readonly pinnedWaves: MinimalWave[];
@@ -72,12 +72,14 @@ export const groupSidebarWaves = ({
       announcementWaves.push(wave);
     } else if (wave.isPinned) {
       pinnedWaves.push(wave);
-    } else if (wave.isFollowing) {
-      followingWaves.push(wave);
     } else if (wave.sidebarSection === "highly-rated") {
       highlyRatedWaves.push(wave);
     } else {
       allWaves.push(wave);
+    }
+
+    if (wave.isFollowing || wave.isFollowedSubwaveContainer) {
+      followingWaves.push(wave);
     }
   }
 
@@ -89,3 +91,26 @@ export const groupSidebarWaves = ({
     allWaves,
   };
 };
+
+const groupDirectMessageSidebarWaves = (
+  waves: readonly MinimalWave[]
+): SidebarWaveGroups => ({
+  announcementWaves: [],
+  highlyRatedWaves: [],
+  pinnedWaves: [],
+  followingWaves: [],
+  allWaves: [...waves],
+});
+
+export const groupSidebarWavesForView = ({
+  isAnnouncementsWave,
+  isDirectMessage,
+  waves,
+}: {
+  readonly isAnnouncementsWave?: ((waveId: string) => boolean) | undefined;
+  readonly isDirectMessage: boolean;
+  readonly waves: readonly MinimalWave[];
+}): SidebarWaveGroups =>
+  isDirectMessage
+    ? groupDirectMessageSidebarWaves(waves)
+    : groupSidebarWaves({ isAnnouncementsWave, waves });

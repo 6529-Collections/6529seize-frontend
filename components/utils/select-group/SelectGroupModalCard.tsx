@@ -19,16 +19,15 @@ export default function SelectGroupModalCard({
   onSelect,
   onClear,
 }: SelectGroupModalCardProps) {
+  const creator =
+    group.created_by ?? ({} as NonNullable<ApiGroupFull["created_by"]>);
   const avatarAccentStart =
-    group.created_by.banner1_color ??
-    getRandomColorWithSeed(group.created_by.handle ?? "");
+    creator.banner1_color ?? getRandomColorWithSeed(creator.handle ?? "");
   const avatarAccentEnd =
-    group.created_by.banner2_color ??
-    getRandomColorWithSeed(group.created_by.handle ?? "");
-  const creatorIdentity =
-    group.created_by.handle ?? group.created_by.primary_address;
+    creator.banner2_color ?? getRandomColorWithSeed(creator.handle ?? "");
+  const creatorIdentity = creator.handle ?? creator.primary_address ?? "";
   const timeAgo = getTimeAgo(new Date(group.created_at).getTime());
-  const avatarFallbackLabel = creatorIdentity.charAt(0).toUpperCase();
+  const avatarFallbackLabel = (creatorIdentity.charAt(0) || "?").toUpperCase();
   const selectionIndicator =
     isSelected && onClear ? (
       <button
@@ -101,17 +100,17 @@ export default function SelectGroupModalCard({
               background: `linear-gradient(135deg, ${avatarAccentStart} 0%, ${avatarAccentEnd} 100%)`,
             }}
           >
-            {group.created_by.pfp ? (
+            {creator.pfp ? (
               <Image
                 src={getScaledImageUri(
-                  group.created_by.pfp,
+                  creator.pfp,
                   ImageScale.W_AUTO_H_50
                 )}
                 width={40}
                 height={40}
                 alt={
-                  group.created_by.handle
-                    ? `${group.created_by.handle} profile picture`
+                  creator.handle
+                    ? `${creator.handle} profile picture`
                     : "Group creator profile picture"
                 }
                 className="tw-h-full tw-w-full tw-object-cover"
@@ -149,9 +148,9 @@ export default function SelectGroupModalCard({
               {group.name}
             </p>
             <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-[11px]">
-              {group.created_by.handle ? (
+              {creator.handle ? (
                 <Link
-                  href={`/${group.created_by.handle}`}
+                  href={`/${creator.handle}`}
                   onClick={(event) => {
                     event.stopPropagation();
                   }}
@@ -161,7 +160,7 @@ export default function SelectGroupModalCard({
                       : "tw-text-iron-400 group-hover:tw-text-iron-300"
                   }`}
                 >
-                  {group.created_by.handle}
+                  {creator.handle}
                 </Link>
               ) : (
                 <span

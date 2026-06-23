@@ -7,23 +7,36 @@ import React, {
   useImperativeHandle,
   useRef,
 } from "react";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
+import {
+  buildHighlyRatedWavePreviewItems,
+  getHighlyRatedPreviewWaves,
+  HighlyRatedWavesToggle,
+} from "./HighlyRatedWavesToggle";
 import SectionHeader from "./SectionHeader";
-import JoinedToggle from "./JoinedToggle";
+import WavesFilterToggle from "./WavesFilterToggle";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useAuth } from "@/components/auth/Auth";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   useSidebarWaveTree,
   type SidebarWaveTreeRow,
 } from "@/hooks/useSidebarWaveTree";
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 import {
-  groupSidebarWaves,
+  groupSidebarWavesForView,
   isValidSidebarWave,
   validateSidebarWaveDetailed,
 } from "./sidebarWaveListUtils";
@@ -38,6 +51,17 @@ const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
 const SUBWAVE_ROW_HEIGHT = 54 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
+const HIGHLY_RATED_INFO_TOOLTIP_ID = "waves-worth-checking-out-info";
+const TOOLTIP_STYLE = {
+  padding: "6px 10px",
+  background: "#37373E",
+  color: "white",
+  fontSize: "12px",
+  fontWeight: 500,
+  borderRadius: "6px",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+  zIndex: 10000,
+} as const satisfies React.CSSProperties;
 
 // Common styles for positioned elements
 const listContainerStyle = {
@@ -53,10 +77,52 @@ const emptyPlaceholderStyle = {
   minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT,
 } as const satisfies React.CSSProperties;
 
-function SidebarCategoryLabel({ label }: { readonly label: string }) {
+function SidebarCategoryHeader({
+  label,
+  rightContent,
+}: {
+  readonly label: string;
+  readonly rightContent?: React.ReactNode | undefined;
+}) {
   return (
-    <div className="tw-px-4 tw-pb-1 tw-pt-2 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-      {label}
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-px-4 tw-pb-1 tw-pt-2">
+      <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+        {label}
+      </div>
+      {rightContent !== undefined && rightContent !== null && (
+        <div className="tw-flex tw-items-center">{rightContent}</div>
+      )}
+    </div>
+  );
+}
+
+function SidebarCategoryLabel({
+  label,
+  tooltipContent,
+  tooltipId,
+}: {
+  readonly label: string;
+  readonly tooltipContent?: string | undefined;
+  readonly tooltipId?: string | undefined;
+}) {
+  return (
+    <div className="tw-px-4 tw-pb-2 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-500">
+      <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
+        <span>{label}</span>
+        {tooltipContent && tooltipId && (
+          <span className="tw-relative tw-inline-flex tw-size-3 tw-items-center tw-justify-center">
+            <button
+              type="button"
+              aria-label={tooltipContent}
+              data-tooltip-id={tooltipId}
+              data-tooltip-content={tooltipContent}
+              className="tw-absolute tw-left-1/2 tw-top-1/2 tw-inline-flex tw-size-6 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors active:tw-text-iron-300 focus:tw-text-iron-300 focus:tw-outline-none desktop-hover:hover:tw-text-iron-400"
+            >
+              <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3" />
+            </button>
+          </span>
+        )}
+      </span>
     </div>
   );
 }
@@ -96,7 +162,7 @@ interface UnifiedWavesListWavesProps {
   readonly hideToggle?: boolean | undefined;
   /** Whether to hide the pin functionality for waves */
   readonly hidePin?: boolean | undefined;
-  /** Whether to hide section headers (All Waves, Pinned) */
+  /** Whether to hide section headers */
   readonly hideHeaders?: boolean | undefined;
   /** Reference to the scroll container for virtualization */
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -132,8 +198,19 @@ const UnifiedWavesListWaves = forwardRef<
     ref
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
+    const [following] = useShowFollowingWaves();
+    const { connectedProfile, activeProfileProxy } = useAuth();
     const seizeSettings = useSeizeSettingsOptional();
     const { activeWave, waves: streamWaves } = useMyStream();
+    const isJoinedFilterActive =
+      following && !!connectedProfile?.handle && !activeProfileProxy;
+    const {
+      id: activeWaveId,
+      parentWaveId: activeParentWaveId,
+      set: setActiveWave,
+    } = activeWave;
+    const { isApp, hasTouchScreen } = useDeviceInfo();
+    const prefetchWaveData = usePrefetchWaveData();
     const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
       waves,
       activeWaveId: activeWave.id,
@@ -142,23 +219,19 @@ const UnifiedWavesListWaves = forwardRef<
       onParentExpand: streamWaves.loadSubwavesForParent,
     });
 
-    const {
-      announcementWaves,
-      highlyRatedWaves,
-      pinnedWaves,
-      followingWaves,
-      allWaves,
-    } = useMemo(
-      () =>
-        groupSidebarWaves({
-          isAnnouncementsWave:
-            seizeSettings === null
-              ? undefined
-              : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
-          waves: topLevelWaves,
-        }),
-      [topLevelWaves, seizeSettings]
-    );
+    const { announcementWaves, highlyRatedWaves, pinnedWaves, allWaves } =
+      useMemo(
+        () =>
+          groupSidebarWavesForView({
+            isAnnouncementsWave:
+              seizeSettings === null
+                ? undefined
+                : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
+            isDirectMessage,
+            waves: topLevelWaves,
+          }),
+        [topLevelWaves, seizeSettings, isDirectMessage]
+      );
 
     const announcementRows = useMemo(
       () => getRows(announcementWaves),
@@ -172,27 +245,109 @@ const UnifiedWavesListWaves = forwardRef<
       () => getRows(pinnedWaves),
       [pinnedWaves, getRows]
     );
-    const followingRows = useMemo(
-      () => getRows(followingWaves),
-      [followingWaves, getRows]
-    );
     const allRows = useMemo(() => getRows(allWaves), [allWaves, getRows]);
     const animatedAnnouncementRows =
       useAnimatedSidebarWaveRows(announcementRows);
     const animatedHighlyRatedRows = useAnimatedSidebarWaveRows(highlyRatedRows);
     const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
-    const animatedFollowingRows = useAnimatedSidebarWaveRows(followingRows);
     const animatedAllRows = useAnimatedSidebarWaveRows(allRows);
-    const virtualizedRows =
-      animatedAllRows.length > 0 ? animatedAllRows : animatedFollowingRows;
-    const staticFollowingRows =
-      animatedAllRows.length > 0 ? animatedFollowingRows : [];
-    const hasVirtualizedFollowingRows =
-      animatedAllRows.length === 0 && animatedFollowingRows.length > 0;
-    const virtualizedAriaLabel =
-      animatedAllRows.length > 0
-        ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
-        : t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
+    const virtualizedRows = animatedAllRows;
+    let virtualizedAriaLabel = t(
+      SIDEBAR_LOCALE,
+      "waves.sidebar.allRecentActivityAriaLabel"
+    );
+    if (isJoinedFilterActive) {
+      virtualizedAriaLabel = t(
+        SIDEBAR_LOCALE,
+        "waves.sidebar.followingListAriaLabel"
+      );
+    }
+    if (isDirectMessage) {
+      virtualizedAriaLabel = t(
+        SIDEBAR_LOCALE,
+        "waves.sidebar.directMessagesAriaLabel"
+      );
+    }
+    const bottomListLabel = isJoinedFilterActive
+      ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
+      : t(SIDEBAR_LOCALE, "waves.sidebar.all");
+    const highlyRatedInfoTooltip = t(
+      SIDEBAR_LOCALE,
+      "waves.sidebar.highlyRatedInfoTooltip"
+    );
+    const shouldShowBottomHeader = !hideHeaders;
+    let virtualizedKey = "unified-waves-all";
+    if (isJoinedFilterActive) {
+      virtualizedKey = "unified-waves-joined";
+    }
+    if (isDirectMessage) {
+      virtualizedKey = "direct-message-conversations";
+    }
+    const shouldUseHighlyRatedToggle = !hideHeaders;
+    const shouldShowHighlyRatedRows =
+      highlyRatedRows.length > 0 && !shouldUseHighlyRatedToggle;
+    const handleHighlyRatedPreviewHover = useCallback(
+      (waveId: string) => {
+        if (waveId === activeWaveId) {
+          return;
+        }
+
+        onHover(waveId);
+        prefetchWaveData(waveId);
+      },
+      [activeWaveId, onHover, prefetchWaveData]
+    );
+    const getHighlyRatedPreviewHref = useCallback(
+      (wave: MinimalWave) => {
+        if (activeWaveId === wave.id) {
+          return getWaveHomeRoute({ isDirectMessage, isApp });
+        }
+
+        return getWaveRoute({
+          waveId: wave.id,
+          extraParams:
+            typeof wave.firstUnreadDropSerialNo === "number"
+              ? { divider: String(wave.firstUnreadDropSerialNo) }
+              : undefined,
+          isDirectMessage,
+          isApp,
+        });
+      },
+      [activeWaveId, isApp, isDirectMessage]
+    );
+    const highlyRatedPreviewWaves = useMemo(
+      () =>
+        getHighlyRatedPreviewWaves({
+          activeWaveLookupWaves: topLevelWaves,
+          activeParentWaveId,
+          activeWaveId,
+          highlyRatedWaves,
+        }),
+      [activeParentWaveId, activeWaveId, highlyRatedWaves, topLevelWaves]
+    );
+    const highlyRatedPreviewItems = useMemo(
+      () =>
+        buildHighlyRatedWavePreviewItems({
+          activeParentWaveId,
+          activeWaveId,
+          getHref: getHighlyRatedPreviewHref,
+          handleHover: handleHighlyRatedPreviewHover,
+          hasTouchScreen,
+          isDirectMessage,
+          setActiveWave,
+          waves: highlyRatedPreviewWaves,
+        }),
+      [
+        activeWaveId,
+        activeParentWaveId,
+        getHighlyRatedPreviewHref,
+        handleHighlyRatedPreviewHover,
+        hasTouchScreen,
+        highlyRatedPreviewWaves,
+        isDirectMessage,
+        setActiveWave,
+      ]
+    );
     const getSidebarRowHeight = useCallback(
       (row: SidebarWaveTreeRow) =>
         row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
@@ -201,10 +356,7 @@ const UnifiedWavesListWaves = forwardRef<
 
     const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
       items: virtualizedRows,
-      key:
-        animatedAllRows.length > 0
-          ? "unified-waves-all"
-          : "unified-waves-following",
+      key: virtualizedKey,
       scrollContainerRef,
       listContainerRef,
       rowHeight: getSidebarRowHeight,
@@ -235,12 +387,10 @@ const UnifiedWavesListWaves = forwardRef<
 
     return (
       <div className="tw-flex tw-flex-col">
-        {/* Always show "All Waves" header with toggle when not hidden */}
         {!hideHeaders && (
           <SectionHeader
-            label="All Waves"
+            label={t(SIDEBAR_LOCALE, "waves.sidebar.allWaves")}
             paddingClassName="tw-px-4"
-            rightContent={hideToggle ? undefined : <JoinedToggle />}
           />
         )}
 
@@ -270,50 +420,57 @@ const UnifiedWavesListWaves = forwardRef<
           announcementRows.length > 0 &&
           (highlyRatedRows.length > 0 ||
             pinnedRows.length > 0 ||
-            followingRows.length > 0 ||
-            allRows.length > 0) && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            shouldShowBottomHeader) && (
+            <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
         {highlyRatedRows.length > 0 && (
           <>
-            {!hideHeaders && (
-              <SidebarCategoryLabel
-                label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+            {shouldUseHighlyRatedToggle && (
+              <>
+                <SidebarCategoryLabel
+                  label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                  tooltipContent={highlyRatedInfoTooltip}
+                  tooltipId={HIGHLY_RATED_INFO_TOOLTIP_ID}
+                />
+                <HighlyRatedWavesToggle
+                  paddingClassName="tw-px-4"
+                  previewItems={highlyRatedPreviewItems}
+                />
+              </>
+            )}
+            {shouldShowHighlyRatedRows && (
+              <SidebarWaveRowsSection
+                ariaLabel={t(
+                  SIDEBAR_LOCALE,
+                  "waves.sidebar.highlyRatedAriaLabel"
+                )}
+                className="tw-flex tw-flex-col"
+                getRowHeight={getSidebarRowHeight}
+                isRowVisible={(row) =>
+                  isVisibleStaticRow({
+                    detailedLabel: "Highly rated",
+                    row,
+                    sectionName: "highly rated",
+                  })
+                }
+                renderRow={(row) => renderWaveRow(row, false)}
+                rows={animatedHighlyRatedRows}
               />
             )}
-            <SidebarWaveRowsSection
-              ariaLabel={t(
-                SIDEBAR_LOCALE,
-                "waves.sidebar.highlyRatedAriaLabel"
-              )}
-              className="tw-flex tw-flex-col"
-              getRowHeight={getSidebarRowHeight}
-              isRowVisible={(row) =>
-                isVisibleStaticRow({
-                  detailedLabel: "Highly rated",
-                  row,
-                  sectionName: "highly rated",
-                })
-              }
-              renderRow={(row) => renderWaveRow(row, false)}
-              rows={animatedHighlyRatedRows}
-            />
           </>
         )}
 
         {!hideHeaders &&
           highlyRatedRows.length > 0 &&
-          (pinnedRows.length > 0 ||
-            followingRows.length > 0 ||
-            allRows.length > 0) && (
+          (pinnedRows.length > 0 || shouldShowBottomHeader) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedRows.length > 0 && (
           <>
-            <SidebarCategoryLabel
+            <SidebarCategoryHeader
               label={t(SIDEBAR_LOCALE, "waves.sidebar.pinned")}
             />
             <SidebarWaveRowsSection
@@ -333,51 +490,14 @@ const UnifiedWavesListWaves = forwardRef<
           </>
         )}
 
-        {!hideHeaders &&
-          pinnedRows.length > 0 &&
-          (followingRows.length > 0 || allRows.length > 0) && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-          )}
-
-        {staticFollowingRows.length > 0 && (
-          <>
-            {!hideHeaders && (
-              <SidebarCategoryLabel
-                label={t(SIDEBAR_LOCALE, "waves.sidebar.following")}
-              />
-            )}
-            <SidebarWaveRowsSection
-              ariaLabel={t(SIDEBAR_LOCALE, "waves.sidebar.followingAriaLabel")}
-              className="tw-flex tw-flex-col"
-              getRowHeight={getSidebarRowHeight}
-              isRowVisible={(row) =>
-                isVisibleStaticRow({
-                  detailedLabel: "Following",
-                  row,
-                  sectionName: "following",
-                })
-              }
-              renderRow={(row) => renderWaveRow(row, !hidePin)}
-              rows={staticFollowingRows}
-            />
-          </>
+        {!hideHeaders && pinnedRows.length > 0 && shouldShowBottomHeader && (
+          <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
         )}
 
-        {!hideHeaders &&
-          staticFollowingRows.length > 0 &&
-          animatedAllRows.length > 0 && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-          )}
-
-        {!hideHeaders && animatedAllRows.length > 0 && (
-          <SidebarCategoryLabel
-            label={t(SIDEBAR_LOCALE, "waves.sidebar.all")}
-          />
-        )}
-
-        {!hideHeaders && hasVirtualizedFollowingRows && (
-          <SidebarCategoryLabel
-            label={t(SIDEBAR_LOCALE, "waves.sidebar.following")}
+        {shouldShowBottomHeader && (
+          <SidebarCategoryHeader
+            label={bottomListLabel}
+            rightContent={hideToggle ? undefined : <WavesFilterToggle />}
           />
         )}
 
@@ -436,6 +556,24 @@ const UnifiedWavesListWaves = forwardRef<
         ) : (
           <div ref={listContainerRef} style={emptyPlaceholderStyle} />
         )}
+        <ReactTooltip
+          id={HIGHLY_RATED_INFO_TOOLTIP_ID}
+          place="top"
+          offset={8}
+          opacity={1}
+          openOnClick
+          closeOnScroll
+          openEvents={{ mouseover: true, focus: true, click: true }}
+          closeEvents={{ mouseout: true, blur: true }}
+          globalCloseEvents={{
+            escape: true,
+            scroll: true,
+            resize: true,
+            clickOutsideAnchor: true,
+          }}
+          style={TOOLTIP_STYLE}
+          border="1px solid #4C4C55"
+        />
       </div>
     );
   }

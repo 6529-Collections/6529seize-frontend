@@ -67,6 +67,7 @@ export * from '../models/ApiConsolidatedTdhMetricsSort';
 export * from '../models/ApiConsolidatedTdhView';
 export * from '../models/ApiCreateAttachmentMultipartUploadRequest';
 export * from '../models/ApiCreateAttachmentMultipartUploadResponse';
+export * from '../models/ApiCreateDropMedia';
 export * from '../models/ApiCreateDropPart';
 export * from '../models/ApiCreateDropPollRequest';
 export * from '../models/ApiCreateDropRequest';
@@ -120,6 +121,7 @@ export * from '../models/ApiDropGroupMention';
 export * from '../models/ApiDropId';
 export * from '../models/ApiDropMainType';
 export * from '../models/ApiDropMedia';
+export * from '../models/ApiDropMediaStatus';
 export * from '../models/ApiDropMentionedUser';
 export * from '../models/ApiDropMetadata';
 export * from '../models/ApiDropMetadataResponse';
@@ -162,6 +164,20 @@ export * from '../models/ApiDropsLeaderboardPageV2';
 export * from '../models/ApiDropsPage';
 export * from '../models/ApiFeedItem';
 export * from '../models/ApiFeedItemType';
+export * from '../models/ApiGlobalRepCategoryGiver';
+export * from '../models/ApiGlobalRepCategoryGiversPage';
+export * from '../models/ApiGlobalRepCategoryOverview';
+export * from '../models/ApiGlobalRepCategoryRating';
+export * from '../models/ApiGlobalRepCategoryRatingsPage';
+export * from '../models/ApiGlobalRepCategoryRecipient';
+export * from '../models/ApiGlobalRepCategoryRecipientsPage';
+export * from '../models/ApiGlobalRepCategorySuggestedCategory';
+export * from '../models/ApiGlobalRepCategoryWave';
+export * from '../models/ApiGlobalRepCategoryWaveContributor';
+export * from '../models/ApiGlobalRepCategoryWaveContributorsPage';
+export * from '../models/ApiGlobalRepCategoryWaveOverview';
+export * from '../models/ApiGlobalRepCategoryWaveRef';
+export * from '../models/ApiGlobalRepCategoryWavesPage';
 export * from '../models/ApiGroup';
 export * from '../models/ApiGroupCicFilter';
 export * from '../models/ApiGroupDescription';
@@ -525,7 +541,7 @@ import { ApiCommunityMetricsSeries } from '../models/ApiCommunityMetricsSeries';
 import { ApiCompleteAttachmentMultipartUploadRequest } from '../models/ApiCompleteAttachmentMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
-import { ApiCompleteMultipartUploadResponse } from '../models/ApiCompleteMultipartUploadResponse';
+import { ApiCompleteMultipartUploadResponse     } from '../models/ApiCompleteMultipartUploadResponse';
 import { ApiConsolidatedTdh } from '../models/ApiConsolidatedTdh';
 import { ApiConsolidatedTdhMetrics                   } from '../models/ApiConsolidatedTdhMetrics';
 import { ApiConsolidatedTdhMetricsCollector } from '../models/ApiConsolidatedTdhMetricsCollector';
@@ -535,6 +551,7 @@ import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetri
 import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
+import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
 import { ApiCreateDropRequest                } from '../models/ApiCreateDropRequest';
@@ -587,7 +604,8 @@ import { ApiDropCurationRequest } from '../models/ApiDropCurationRequest';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMainType } from '../models/ApiDropMainType';
-import { ApiDropMedia } from '../models/ApiDropMedia';
+import { ApiDropMedia      } from '../models/ApiDropMedia';
+import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropMetadataResponse } from '../models/ApiDropMetadataResponse';
@@ -630,6 +648,20 @@ import { ApiDropsLeaderboardPageV2 } from '../models/ApiDropsLeaderboardPageV2';
 import { ApiDropsPage } from '../models/ApiDropsPage';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
 import { ApiFeedItemType } from '../models/ApiFeedItemType';
+import { ApiGlobalRepCategoryGiver } from '../models/ApiGlobalRepCategoryGiver';
+import { ApiGlobalRepCategoryGiversPage } from '../models/ApiGlobalRepCategoryGiversPage';
+import { ApiGlobalRepCategoryOverview } from '../models/ApiGlobalRepCategoryOverview';
+import { ApiGlobalRepCategoryRating } from '../models/ApiGlobalRepCategoryRating';
+import { ApiGlobalRepCategoryRatingsPage } from '../models/ApiGlobalRepCategoryRatingsPage';
+import { ApiGlobalRepCategoryRecipient } from '../models/ApiGlobalRepCategoryRecipient';
+import { ApiGlobalRepCategoryRecipientsPage } from '../models/ApiGlobalRepCategoryRecipientsPage';
+import { ApiGlobalRepCategorySuggestedCategory } from '../models/ApiGlobalRepCategorySuggestedCategory';
+import { ApiGlobalRepCategoryWave } from '../models/ApiGlobalRepCategoryWave';
+import { ApiGlobalRepCategoryWaveContributor } from '../models/ApiGlobalRepCategoryWaveContributor';
+import { ApiGlobalRepCategoryWaveContributorsPage } from '../models/ApiGlobalRepCategoryWaveContributorsPage';
+import { ApiGlobalRepCategoryWaveOverview } from '../models/ApiGlobalRepCategoryWaveOverview';
+import { ApiGlobalRepCategoryWaveRef } from '../models/ApiGlobalRepCategoryWaveRef';
+import { ApiGlobalRepCategoryWavesPage } from '../models/ApiGlobalRepCategoryWavesPage';
 import { ApiGroup } from '../models/ApiGroup';
 import { ApiGroupCicFilter     } from '../models/ApiGroupCicFilter';
 import { ApiGroupDescription } from '../models/ApiGroupDescription';
@@ -767,7 +799,7 @@ import { ApiSaveProfileCmsPackageDraftRequest } from '../models/ApiSaveProfileCm
 import { ApiSeizeSettings } from '../models/ApiSeizeSettings';
 import { ApiSetPinnedDropRequest } from '../models/ApiSetPinnedDropRequest';
 import { ApiSetProfileWaveRequest } from '../models/ApiSetProfileWaveRequest';
-import { ApiStartMultipartMediaUploadResponse } from '../models/ApiStartMultipartMediaUploadResponse';
+import { ApiStartMultipartMediaUploadResponse     } from '../models/ApiStartMultipartMediaUploadResponse';
 import { ApiSubmissionDropContext       } from '../models/ApiSubmissionDropContext';
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
@@ -969,6 +1001,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiDecentralizedMediaProtocol",
     "ApiDropGroupMention",
     "ApiDropMainType",
+    "ApiDropMediaStatus",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
     "ApiDropType",
@@ -1093,6 +1126,7 @@ let typeMap: {[index: string]: any} = {
     "ApiConsolidatedTdhMetricsPage": ApiConsolidatedTdhMetricsPage,
     "ApiCreateAttachmentMultipartUploadRequest": ApiCreateAttachmentMultipartUploadRequest,
     "ApiCreateAttachmentMultipartUploadResponse": ApiCreateAttachmentMultipartUploadResponse,
+    "ApiCreateDropMedia": ApiCreateDropMedia,
     "ApiCreateDropPart": ApiCreateDropPart,
     "ApiCreateDropPollRequest": ApiCreateDropPollRequest,
     "ApiCreateDropRequest": ApiCreateDropRequest,
@@ -1181,6 +1215,20 @@ let typeMap: {[index: string]: any} = {
     "ApiDropsLeaderboardPageV2": ApiDropsLeaderboardPageV2,
     "ApiDropsPage": ApiDropsPage,
     "ApiFeedItem": ApiFeedItem,
+    "ApiGlobalRepCategoryGiver": ApiGlobalRepCategoryGiver,
+    "ApiGlobalRepCategoryGiversPage": ApiGlobalRepCategoryGiversPage,
+    "ApiGlobalRepCategoryOverview": ApiGlobalRepCategoryOverview,
+    "ApiGlobalRepCategoryRating": ApiGlobalRepCategoryRating,
+    "ApiGlobalRepCategoryRatingsPage": ApiGlobalRepCategoryRatingsPage,
+    "ApiGlobalRepCategoryRecipient": ApiGlobalRepCategoryRecipient,
+    "ApiGlobalRepCategoryRecipientsPage": ApiGlobalRepCategoryRecipientsPage,
+    "ApiGlobalRepCategorySuggestedCategory": ApiGlobalRepCategorySuggestedCategory,
+    "ApiGlobalRepCategoryWave": ApiGlobalRepCategoryWave,
+    "ApiGlobalRepCategoryWaveContributor": ApiGlobalRepCategoryWaveContributor,
+    "ApiGlobalRepCategoryWaveContributorsPage": ApiGlobalRepCategoryWaveContributorsPage,
+    "ApiGlobalRepCategoryWaveOverview": ApiGlobalRepCategoryWaveOverview,
+    "ApiGlobalRepCategoryWaveRef": ApiGlobalRepCategoryWaveRef,
+    "ApiGlobalRepCategoryWavesPage": ApiGlobalRepCategoryWavesPage,
     "ApiGroup": ApiGroup,
     "ApiGroupCicFilter": ApiGroupCicFilter,
     "ApiGroupDescription": ApiGroupDescription,

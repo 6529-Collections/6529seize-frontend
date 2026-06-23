@@ -1,3 +1,5 @@
+/* eslint max-lines: "off" */
+
 import {
   DISTRIBUTION_MESSAGES,
   LINK_PREVIEW_MESSAGES,
@@ -152,6 +154,63 @@ const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
   } as const
 );
 
+const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
+  "loading.details": "Loading REP category details",
+  "pill.openGlobalAriaLabel": "Open global REP category {category}",
+  "pill.editAriaLabel": "Edit REP category {category}",
+  "sidebar.otherTools": "Other Tools",
+  "sidebar.repCategories": "REP Categories",
+  "sidebar.api": "API",
+  "search.minChars": "Type at least 3 characters to search.",
+  "search.loading": "Searching REP categories",
+  "search.error": "Could not search REP categories.",
+  "search.empty": "No matching categories found.",
+  "search.view": "View",
+  "search.label": "Search REP categories",
+  "search.placeholder": "Type a category name",
+  "search.resultsLabel": "REP category search results",
+  "suggested.loading": "Loading active REP categories",
+  "suggested.error": "Could not load active REP categories.",
+  "suggested.empty": "No active REP categories found yet.",
+  "suggested.rep": "REP",
+  "suggested.ratings": "Ratings",
+  "suggested.title": "Active REP categories",
+  "suggested.description": "Categories with the most profile REP activity.",
+  "wave.tabs.waves": "Waves",
+  "wave.tabs.contributors": "Contributors",
+  "wave.sort.repDesc": "REP impact high",
+  "wave.sort.repAsc": "REP impact low",
+  "wave.sort.recent": "Recent",
+  "wave.metrics.rep": "Wave REP",
+  "wave.metrics.waves": "Waves",
+  "wave.metrics.contributors": "Contributors",
+  "wave.preview.waves": "Waves preview",
+  "wave.preview.contributors": "Contributors preview",
+  "wave.table.wavesCaption": "Waves using REP category {category}",
+  "wave.table.contributorsCaption":
+    "Wave REP contributors for category {category}",
+  "wave.table.rank": "Rank",
+  "wave.table.wave": "Wave",
+  "wave.table.rep": "REP",
+  "wave.table.contributors": "Contributors",
+  "wave.table.leadingContributors": "Leading contributors",
+  "wave.table.lastModified": "Last modified",
+  "wave.table.contributor": "Contributor",
+  "wave.sort.label": "Sort Wave REP rows",
+  "wave.sections.label": "Wave REP category sections",
+  "wave.loading.overview": "Loading Wave REP category overview",
+  "wave.loading.rows": "Loading Wave REP {tab}",
+  "wave.error.overviewTitle": "Could not load Wave REP",
+  "wave.error.overviewMessage": "Wave REP for this category failed to load.",
+  "wave.error.rowsTitle": "Could not load Wave REP rows",
+  "wave.error.rowsMessage": "Wave REP rows failed to load.",
+  "wave.empty.title": "No Wave REP found",
+  "wave.empty.message": "This category has not been used for Wave REP yet.",
+  "wave.empty.contributors": "None yet",
+  "wave.loadMore": "Load more",
+  "wave.loadingMore": "Loading...",
+} as const);
+
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
   {
@@ -280,16 +339,27 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 } as const);
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
-  highlyRated: "Highly Rated",
+  highlyRated: "Worth Checking Out",
+  highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
+  "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
+  "highlyRatedPreviewOpenAriaLabel.one": "Open {waveName}, {count} new message",
+  "highlyRatedPreviewOpenAriaLabel.other":
+    "Open {waveName}, {count} new messages",
+  highlyRatedPreviewScore: "Score {score}",
   pinned: "Pinned",
-  following: "Following",
+  allWaves: "All Waves",
   all: "All",
+  filterAriaLabel: "Wave list filter",
+  filterAll: "All",
+  filterJoined: "Joined",
+  joinedEmptyMessage: "No joined waves to display",
   announcementWavesAriaLabel: "Announcement waves",
-  highlyRatedAriaLabel: "Highly rated waves",
+  highlyRatedAriaLabel: "Worth checking out waves",
   pinnedAriaLabel: "Pinned waves",
-  followingAriaLabel: "Following waves",
   followingListAriaLabel: "Following waves list",
+  allRecentActivityAriaLabel: "All recent waves list",
   allQualityRankedAriaLabel: "All quality-ranked waves list",
+  directMessagesAriaLabel: "Direct message conversations",
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",
   expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
   expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
@@ -299,6 +369,15 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
   "postsCount.one": "{count} Post",
   "postsCount.other": "{count} Posts",
+} as const);
+
+const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
+  coverAlt: "{waveName} cover",
+  "dropsCount.one": "{timeAgo} · {count} drop",
+  "dropsCount.other": "{timeAgo} · {count} drops",
+  noDropsYet: "No drops yet",
+  viewAriaLabel: "View wave {waveName}",
+  viewWithScoreAriaLabel: "View wave {waveName}. {scoreSummary}",
 } as const);
 
 const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
@@ -440,8 +519,10 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
   ["safety.ariaLabel", "Scanned and validated attachment"],
   ["safety.badge", "Scanned and validated"],
   ["safety.heading", "Attachment safety"],
+  ["safety.hideDetails", "Hide safety details"],
   ["safety.sha256", "SHA-256"],
   ["safety.size", "Size {size}"],
+  ["safety.viewDetails", "View safety details"],
 ] as const);
 
 export const EN_US_MESSAGES = {
@@ -918,10 +999,20 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
+  "drop.media.processing": "Processing image",
+  "drop.media.unavailable": "Image unavailable",
+  "drop.media.loadFailed": "Couldn’t load image.",
+  "drop.media.retry": "Retry",
+  "drop.media.processingFailed": "Image processing failed.",
+  "drop.media.processingTimedOut": "Image processing timed out.",
+  "drops.additionalActionBadge.label": "Additional Action",
+  "drops.additionalActionBadge.tooltip":
+    "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
   ...WAVE_REP_ACTION_MESSAGES,
@@ -931,6 +1022,7 @@ export const EN_US_MESSAGES = {
   ...USER_RATE_MESSAGES,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
+  ...REP_CATEGORY_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,

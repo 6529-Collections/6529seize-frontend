@@ -75,7 +75,7 @@ describe("DropListItemContentMediaVideo", () => {
 
     render(<DropListItemContentMediaVideo src="foo.mp4" align="center" />);
 
-    expect(screen.getByRole("group", { name: "Video player" })).toHaveClass(
+    expect(screen.getByLabelText("Video player").parentElement).toHaveClass(
       "tw-mx-auto"
     );
   });

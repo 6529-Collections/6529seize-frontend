@@ -12,12 +12,12 @@ beforeEach(() => {
 });
 
 describe('CreateDropWaveWrapper', () => {
-  it('adds ios margin class', () => {
+  it('uses ios height class', () => {
     mockIos = true;
     const { CreateDropWaveWrapper } = require('@/components/waves/CreateDropWaveWrapper');
     render(<CreateDropWaveWrapper context={CreateDropWaveWrapperContext.WAVE_CHAT}><div>child</div></CreateDropWaveWrapper>);
     const div = screen.getByText('child').parentElement as HTMLElement;
-    expect(div.className).toContain('tw-mb-[3.75rem]');
+    expect(div.className).toContain('tw-max-h-[calc(100vh-14.7rem)]');
   });
 
   it('uses default classes when not ios', () => {

@@ -8,6 +8,7 @@ import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { editSlice } from "@/store/editSlice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 
 const mockWaveDropActions = jest.fn();
 const mockWaveDropContent = jest.fn();
@@ -573,6 +574,123 @@ describe("WaveDrop", () => {
 
     expect(onDropContentClick).toHaveBeenCalledTimes(1);
     expect(onDropContentClick).toHaveBeenCalledWith(drop);
+  });
+
+  it("renders one swipe timestamp affordance for grouped messages without an author row", () => {
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const groupedDrop = {
+      ...drop,
+      id: "current-grouped",
+      created_at: 1_700_000_040_000,
+      stableHash: "current-grouped",
+    };
+
+    renderWithRedux(
+      <WaveDrop
+        drop={groupedDrop}
+        previousDrop={previousGroupedDrop}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("header")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("grouped-drop-hover-timestamp")
+    ).not.toBeInTheDocument();
+    const timestamp = screen.getByTestId("grouped-drop-swipe-timestamp");
+    expect(timestamp).toBeInTheDocument();
+    expect(timestamp).toHaveClass("tw-w-[9.25rem]");
+    expect(timestamp.querySelector("p")).toHaveClass("tw-whitespace-nowrap");
+  });
+
+  it("reveals a grouped message timestamp on left swipe without opening long press actions", () => {
+    jest.useFakeTimers();
+    isMobileMock.mockReturnValue(true);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(390);
+    const onDropContentClick = jest.fn();
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const groupedDrop = {
+      ...drop,
+      id: "current-grouped",
+      created_at: 1_700_000_040_000,
+      stableHash: "current-grouped",
+    };
+
+    renderWithRedux(
+      <WaveDrop
+        drop={groupedDrop}
+        previousDrop={previousGroupedDrop}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={onDropContentClick}
+      />
+    );
+
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: true })
+    );
+
+    const content = screen.getByTestId("content");
+    const dropRoot = screen.getByTestId(
+      "grouped-drop-swipeable-content"
+    ).parentElement!;
+    act(() => {
+      fireEvent.touchStart(dropRoot, {
+        changedTouches: [{ clientX: 220, clientY: 40 }],
+        targetTouches: [{ clientX: 220, clientY: 40 }],
+        touches: [{ clientX: 220, clientY: 40 }],
+      });
+      fireEvent.touchMove(dropRoot, {
+        changedTouches: [{ clientX: 48, clientY: 44 }],
+        targetTouches: [{ clientX: 48, clientY: 44 }],
+        touches: [{ clientX: 48, clientY: 44 }],
+      });
+    });
+
+    expect(
+      screen.getByTestId("grouped-drop-swipeable-content").style.transform
+    ).toBe("translateX(-148px)");
+    expect(
+      screen.getByTestId("grouped-drop-swipe-timestamp").style.opacity
+    ).toBe("1");
+
+    act(() => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(mobileMenuProps.isOpen).toBe(false);
+
+    fireEvent.touchEnd(dropRoot);
+    fireEvent.click(content);
+
+    expect(onDropContentClick).not.toHaveBeenCalled();
   });
 
   it("hides actions on mobile", () => {

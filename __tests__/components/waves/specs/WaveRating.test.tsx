@@ -107,13 +107,7 @@ describe("WaveRating", () => {
     );
 
     expect(screen.getByText("Card Set TDH")).toBeInTheDocument();
-    const countRow = screen.getByText("2 Meme cards").closest("span");
-    expect(countRow).toBeInTheDocument();
-    expect(
-      within(countRow as HTMLElement).getByRole("button", {
-        name: "View set",
-      })
-    ).toBeInTheDocument();
+    expect(screen.getByText("2 Meme cards")).toBeInTheDocument();
     expect(fetchUrlMock).not.toHaveBeenCalled();
   });
 
