@@ -15,7 +15,7 @@ import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
-import type { WaveDataStoreUpdater } from "./types";
+import type { WaveDataStoreUpdater, WaveMessages } from "./types";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
@@ -26,6 +26,12 @@ import {
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
 import { isWaveDropNearViewport } from "@/contexts/wave/drop-visibility";
+
+const HELP_BOT_HANDLE = "help6529";
+const HELP_BOT_FINAL_REACTIONS = new Set([
+  ":white_check_mark:",
+  ":warning:",
+]);
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -84,6 +90,57 @@ const getIncomingWaveId = (drop: ApiDrop): string | null => {
 const isCanonicalDropUpdate = (type: ProcessIncomingDropType): boolean =>
   type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
   type === ProcessIncomingDropType.DROP_REACTION_UPDATE;
+
+const shouldUpdateCachedDrop = (type: ProcessIncomingDropType): boolean =>
+  type !== ProcessIncomingDropType.DROP_REACTION_UPDATE;
+
+const updateCachedDrop = ({
+  drop,
+  options,
+  queryClient,
+  type,
+}: {
+  readonly drop: ApiDrop;
+  readonly options: ProcessIncomingDropOptions;
+  readonly queryClient: QueryClient;
+  readonly type: ProcessIncomingDropType;
+}): void => {
+  if (!shouldUpdateCachedDrop(type)) {
+    return;
+  }
+
+  if (type === ProcessIncomingDropType.DROP_INSERT) {
+    upsertDropIntoMatchingDropsQueries(queryClient, { drop });
+  }
+
+  const preferExistingPollVote = options.preferExistingPollVote;
+  if (preferExistingPollVote === undefined) {
+    updateDropInCachedDrops(queryClient, drop);
+    return;
+  }
+
+  updateDropInCachedDrops(queryClient, drop, { preferExistingPollVote });
+};
+
+const isHelpBotFinalReactionUpdate = (drop: ApiDrop): boolean =>
+  (drop.reactions ?? []).some(
+    (reaction) =>
+      HELP_BOT_FINAL_REACTIONS.has(reaction.reaction) &&
+      reaction.profiles.some(
+        (profile) => profile.handle?.toLowerCase() === HELP_BOT_HANDLE
+      )
+  );
+
+const getNewestKnownSerialNo = (waveMessages: WaveMessages): number | null => {
+  if (waveMessages.latestFetchedSerialNo !== null) {
+    return waveMessages.latestFetchedSerialNo;
+  }
+
+  const serials = waveMessages.drops
+    .map((drop) => drop.serial_no)
+    .filter((serialNo) => Number.isFinite(serialNo));
+  return serials.length ? Math.max(...serials) : null;
+};
 
 const reportBackgroundTaskError = (message: string, error: unknown): void => {
   console.error(message, error);
@@ -550,20 +607,7 @@ const useProcessIncomingDrop = ({
         return;
       }
 
-      if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-        if (type === ProcessIncomingDropType.DROP_INSERT) {
-          upsertDropIntoMatchingDropsQueries(queryClient, { drop });
-        }
-
-        const preferExistingPollVote = options.preferExistingPollVote;
-        if (preferExistingPollVote === undefined) {
-          updateDropInCachedDrops(queryClient, drop);
-        } else {
-          updateDropInCachedDrops(queryClient, drop, {
-            preferExistingPollVote,
-          });
-        }
-      }
+      updateCachedDrop({ drop, options, queryClient, type });
 
       if (isWaveMuted(waveId)) {
         return;
@@ -594,6 +638,16 @@ const useProcessIncomingDrop = ({
           type,
           options,
         });
+        if (
+          type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
+          isHelpBotFinalReactionUpdate(drop)
+        ) {
+          await syncNewestMessagesAfterDropUpdate(
+            waveId,
+            getNewestKnownSerialNo(currentData),
+            drop.id
+          );
+        }
         if (
           type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
           isWaveDropNearViewport(waveId, drop.id)

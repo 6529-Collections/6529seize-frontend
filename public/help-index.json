@@ -1974,6 +1974,7 @@
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",
+      "link_label": "REP Categories",
       "related_paths": ["/{user}/identity", "/rep/categories"],
       "tags": ["profiles", "identity"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-tab.md"]
