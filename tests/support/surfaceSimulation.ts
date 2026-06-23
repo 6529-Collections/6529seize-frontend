@@ -138,6 +138,7 @@ export async function installSurfaceSimulation(
             ? existingCapacitor["convertFileSrc"]
             : // Current surface simulations do not exercise native file URL conversion.
               (filePath: string) => filePath;
+        let listenerIdCounter = 0;
         Object.defineProperty(runtime, "Capacitor", {
           configurable: true,
           writable: true,
@@ -163,7 +164,7 @@ export async function installSurfaceSimulation(
                 simulatedKey === "Keyboard.addListener"
               ) {
                 return Promise.resolve(
-                  `playwright-${platform}-${pluginName}-${Date.now()}`
+                  `playwright-${platform}-${pluginName}-${++listenerIdCounter}`
                 );
               }
               return existingNativeCallback?.(
