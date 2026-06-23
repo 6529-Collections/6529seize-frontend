@@ -24,6 +24,7 @@ import {
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -549,6 +550,10 @@ const useProcessIncomingDrop = ({
       }
 
       if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+        if (type === ProcessIncomingDropType.DROP_INSERT) {
+          upsertDropIntoMatchingDropsQueries(queryClient, { drop });
+        }
+
         const preferExistingPollVote = options.preferExistingPollVote;
         if (preferExistingPollVote === undefined) {
           updateDropInCachedDrops(queryClient, drop);

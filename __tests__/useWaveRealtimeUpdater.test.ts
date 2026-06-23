@@ -6,6 +6,9 @@ import {
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
 const mockSetQueriesData = jest.fn();
+const mockSetQueryData = jest.fn();
+const mockCancelQueries = jest.fn().mockResolvedValue(undefined);
+const mockFindAll = jest.fn(() => []);
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: () => ({ isConnected: true }),
@@ -51,6 +54,11 @@ jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
+    cancelQueries: mockCancelQueries,
+    getQueryCache: () => ({
+      findAll: mockFindAll,
+    }),
+    setQueryData: mockSetQueryData,
     setQueriesData: mockSetQueriesData,
   })),
 }));
