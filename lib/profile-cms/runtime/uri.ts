@@ -23,7 +23,7 @@ export function isSafeCmsRelativeUri(value: string): boolean {
   );
 }
 
-export function isSafeCmsUri(
+function isSafeCmsUri(
   value: string | null | undefined,
   { allowRelative = false }: { readonly allowRelative?: boolean } = {}
 ): value is string {

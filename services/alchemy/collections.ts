@@ -18,7 +18,6 @@ import {
   resolveNetwork,
 } from "./utils";
 
-/** @api */
 export async function searchNftCollections(
   params: SearchContractsParams
 ): Promise<SearchContractsResult> {
@@ -52,7 +51,6 @@ export async function searchNftCollections(
   return processSearchResponse(payload, hideSpam);
 }
 
-/** @api */
 export async function getContractOverview(
   params: ContractOverviewParams
 ): Promise<ContractOverview | null> {

@@ -21,7 +21,7 @@ export type WalletGallerySource =
       readonly normalized: string;
     };
 
-export type WalletGalleryInputResult =
+type WalletGalleryInputResult =
   | {
       readonly ok: true;
       readonly sources: readonly WalletGallerySource[];
@@ -81,7 +81,7 @@ export type WalletGalleryBuilderState = {
   readonly orderedAssetIds: readonly string[];
 };
 
-export type WalletGalleryPackageOptions = {
+type WalletGalleryPackageOptions = {
   readonly handle: string;
   readonly siteTitle: string;
   readonly siteDescription: string;

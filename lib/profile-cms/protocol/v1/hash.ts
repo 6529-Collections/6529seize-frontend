@@ -3,7 +3,7 @@ import { sha256 } from "js-sha256";
 import { canonicalizeJson } from "./canonical-json";
 import type { CmsPackageV1, CmsPayloadV1 } from "./schemas";
 
-export function toCmsSha256Hash(input: string): string {
+function toCmsSha256Hash(input: string): string {
   return `sha256:${sha256(input)}`;
 }
 
@@ -39,7 +39,7 @@ export function withComputedCmsHashes(cmsPackage: CmsPackageV1): CmsPackageV1 {
   };
 }
 
-export function toPackageHashInput(cmsPackage: CmsPackageV1): unknown {
+function toPackageHashInput(cmsPackage: CmsPackageV1): unknown {
   const baseIntegrity = {
     canonicalization: cmsPackage.integrity.canonicalization,
     hash_algorithm: cmsPackage.integrity.hash_algorithm,

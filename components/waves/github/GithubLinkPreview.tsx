@@ -38,7 +38,7 @@ type GithubLinkKind =
   | "discussion"
   | "github";
 
-export interface ParsedGithubLink {
+interface ParsedGithubLink {
   readonly href: string;
   readonly owner: string;
   readonly repo: string;
