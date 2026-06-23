@@ -3714,3 +3714,20 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `seize run test:e2e:production:admin-guards-readonly`: 3/3 passed.
   - `seize run test:e2e:production:readonly`: 68/68 passed, proving aggregate
     release validation includes and survives the new pack.
+
+## 2026-06-23T05:39Z Admin/Destructive Guard Bot Nice-To-Haves
+
+- Opened PR #2855 and triggered:
+  `/6529bot review general wcag i18n security responsiveness glm-swarm`.
+- CodeRabbit reported no actionable comments.
+- 6529bot general/WCAG/i18n lanes on head `8541744c865f` were
+  good-to-merge/no-findings, with non-blocking brittleness suggestions.
+- Implemented useful low-cost suggestions before waiting for all checks:
+  - exact anchored accessible-name matching for NextGen and Groups denied
+    buttons.
+  - a combined 30s `expectAnyVisible` poll instead of sequential 1s checks.
+  - clearer `/api/groups` non-JSON parse error.
+  - an explicit comment for the intentionally weaker empty-groups readiness
+    path.
+- Next action: rerun focused local/staging/production validation, commit/push a
+  follow-up, and re-trigger reviewbot lanes on the new head.

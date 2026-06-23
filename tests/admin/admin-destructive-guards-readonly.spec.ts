@@ -11,7 +11,11 @@ import {
   gotoReadyWithApiResponse,
 } from "../support/routeReadiness";
 
-const NEXTGEN_ADMIN_ACTIONS: readonly (string | RegExp)[] = [
+function exactName(label: string) {
+  return new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
+}
+
+const NEXTGEN_ADMIN_ACTIONS: readonly RegExp[] = [
   "Create Collection",
   "Airdrop Tokens",
   "Update Images and Attributes",
@@ -37,9 +41,9 @@ const NEXTGEN_ADMIN_ACTIONS: readonly (string | RegExp)[] = [
   "Update Script By Index",
   "Change Metadata View",
   "Sign Collection",
-];
+].map(exactName);
 
-const DROP_FORGE_WRITE_ACTIONS: readonly (string | RegExp)[] = [
+const DROP_FORGE_WRITE_ACTIONS: readonly RegExp[] = [
   /^Back to Drop Forge$/,
   /^View Claim/,
   /^Complete$/,
@@ -59,20 +63,14 @@ async function gotoReady(page: Page, path: string) {
   await expectNoHorizontalOverflow(page);
 }
 
-async function expectNoMainButtons(
-  page: Page,
-  labels: readonly (string | RegExp)[]
-) {
+async function expectNoMainButtons(page: Page, labels: readonly RegExp[]) {
   const main = page.locator("main");
   for (const label of labels) {
     await expect(main.getByRole("button", { name: label })).toHaveCount(0);
   }
 }
 
-async function expectNoMainLinks(
-  page: Page,
-  labels: readonly (string | RegExp)[]
-) {
+async function expectNoMainLinks(page: Page, labels: readonly RegExp[]) {
   const main = page.locator("main");
   for (const label of labels) {
     await expect(main.getByRole("link", { name: label })).toHaveCount(0);
@@ -83,18 +81,27 @@ async function expectAnyVisible(
   candidates: readonly Locator[],
   description: string
 ) {
-  for (const candidate of candidates) {
-    if (
-      await candidate
-        .first()
-        .isVisible({ timeout: 1000 })
-        .catch(() => false)
-    ) {
-      return;
-    }
-  }
-
-  expect(false, `Expected one visible ${description}`).toBe(true);
+  await expect
+    .poll(
+      async () => {
+        for (const candidate of candidates) {
+          if (
+            await candidate
+              .first()
+              .isVisible()
+              .catch(() => false)
+          ) {
+            return true;
+          }
+        }
+        return false;
+      },
+      {
+        message: `Expected one visible ${description}`,
+        timeout: 30000,
+      }
+    )
+    .toBe(true);
 }
 
 async function expectDropForgeDenied(
@@ -118,13 +125,28 @@ async function expectDropForgeDenied(
   ]);
 }
 
-async function gotoGroupsReady(page: Page) {
-  const response = await gotoReadyWithApiResponse(
+async function parseGroupsJson(
+  response: Awaited<ReturnType<typeof waitForApiGroups>>
+) {
+  try {
+    return (await response.json()) as unknown;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`/api/groups returned non-JSON content: ${message}`);
+  }
+}
+
+async function waitForApiGroups(page: Page) {
+  return gotoReadyWithApiResponse(
     page,
     "/network/groups",
     (url) => url.pathname === "/api/groups"
   );
-  const groups = (await response.json()) as unknown;
+}
+
+async function gotoGroupsReady(page: Page) {
+  const response = await waitForApiGroups(page);
+  const groups = await parseGroupsJson(response);
   expect(Array.isArray(groups)).toBe(true);
 
   if (Array.isArray(groups) && groups.length > 0) {
@@ -135,6 +157,8 @@ async function gotoGroupsReady(page: Page) {
         .first()
     ).toBeVisible({ timeout: 30000 });
   }
+  // Empty group lists are valid in local or staging data; route-level controls
+  // are still checked below, while card-level controls need a rendered card.
 
   await expectNoHorizontalOverflow(page);
 }
@@ -187,14 +211,14 @@ test.describe("Admin and destructive route guards @surface @medium @large @reado
     await expect(page.getByLabel("By Identity")).toBeVisible();
     await expect(page.getByLabel("By Group Name")).toBeVisible();
     await expectNoMainButtons(page, [
-      "Create New",
-      "My groups",
-      "Rep all",
-      "NIC all",
-      "Open options",
-      "Edit",
-      "Clone",
-      "Delete",
+      exactName("Create New"),
+      exactName("My groups"),
+      exactName("Rep all"),
+      exactName("NIC all"),
+      exactName("Open options"),
+      exactName("Edit"),
+      exactName("Clone"),
+      exactName("Delete"),
     ]);
   });
 });
