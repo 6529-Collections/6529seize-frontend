@@ -24,4 +24,21 @@ describe("sidebarWaveListUtils", () => {
       "quality-wave",
     ]);
   });
+
+  it("keeps pinned highly rated waves out of worth checking out", () => {
+    const groups = groupSidebarWaves({
+      waves: [
+        createMockMinimalWave({
+          id: "pinned-quality-wave",
+          isPinned: true,
+          sidebarSection: "highly-rated",
+        }),
+      ],
+    });
+
+    expect(groups.pinnedWaves.map((wave) => wave.id)).toEqual([
+      "pinned-quality-wave",
+    ]);
+    expect(groups.highlyRatedWaves).toEqual([]);
+  });
 });
