@@ -243,11 +243,24 @@ const toError = (error: unknown): Error =>
 const clearGithubPreviewCacheOnError = (
   promise: Promise<GithubPreviewResponse>,
   cacheKey: string
-): Promise<GithubPreviewResponse> =>
-  promise.catch((error: unknown) => {
-    previewCache.delete(cacheKey);
-    throw error;
-  });
+): Promise<GithubPreviewResponse> => {
+  const cachedPromiseRef: {
+    current: Promise<GithubPreviewResponse> | undefined;
+  } = { current: undefined };
+  const cachedPromise = (async () => {
+    try {
+      return await promise;
+    } catch (error: unknown) {
+      if (previewCache.get(cacheKey) === cachedPromiseRef.current) {
+        previewCache.delete(cacheKey);
+      }
+      throw error;
+    }
+  })();
+  cachedPromiseRef.current = cachedPromise;
+
+  return cachedPromise;
+};
 
 const scheduleBatchFlush = (): void => {
   if (batchFlushScheduled) {

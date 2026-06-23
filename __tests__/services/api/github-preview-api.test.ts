@@ -152,6 +152,116 @@ describe("fetchGithubPreview", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("rejects individual URLs returned in batch errors", async () => {
+    const successfulUrl =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2604";
+    const failedUrl =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2601";
+    const preview: GithubPreviewResponse = {
+      type: "github.pull_request",
+      owner: "6529-Collections",
+      repo: "6529seize-frontend",
+      number: 2604,
+      title: "Successful PR",
+      state: "open",
+      reviewState: "none",
+      mergeableState: "clean",
+      merged: false,
+      draft: false,
+      url: successfulUrl,
+    };
+    fetchMock.mockResolvedValueOnce(
+      createResponse({
+        results: [{ url: successfulUrl, preview }],
+        errors: [{ url: failedUrl, error: "GitHub preview unavailable." }],
+      })
+    );
+
+    const { fetchGithubPreview } = await loadApi();
+    const successful = fetchGithubPreview(successfulUrl);
+    const failed = fetchGithubPreview(failedUrl);
+
+    await expect(successful).resolves.toEqual(preview);
+    await expect(failed).rejects.toThrow("GitHub preview unavailable.");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("removes failed non-OK batch requests from cache", async () => {
+    const url =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2601";
+    const preview: GithubPreviewResponse = {
+      type: "github.pull_request",
+      owner: "6529-Collections",
+      repo: "6529seize-frontend",
+      number: 2601,
+      title: "Recovered PR",
+      state: "open",
+      reviewState: "none",
+      mergeableState: "clean",
+      merged: false,
+      draft: false,
+      url,
+    };
+    fetchMock
+      .mockResolvedValueOnce(
+        createResponse({ error: "Batch request failed." }, { ok: false })
+      )
+      .mockResolvedValueOnce(
+        createResponse({
+          results: [{ url, preview }],
+          errors: [],
+        })
+      );
+
+    const { fetchGithubPreview } = await loadApi();
+
+    await expect(fetchGithubPreview(url)).rejects.toThrow(
+      "Batch request failed."
+    );
+    await expect(fetchGithubPreview(url)).resolves.toEqual(preview);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not let stale rejected batch promises delete newer cache entries", async () => {
+    const url =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2688";
+    const refreshedPreview: GithubPreviewResponse = {
+      type: "github.pull_request",
+      owner: "6529-Collections",
+      repo: "6529seize-frontend",
+      number: 2688,
+      title: "Refreshed PR",
+      state: "open",
+      reviewState: "approved",
+      mergeableState: "clean",
+      merged: false,
+      draft: false,
+      url,
+    };
+    let resolveBatch!: (response: Response) => void;
+    const batchResponse = new Promise<Response>((resolve) => {
+      resolveBatch = resolve;
+    });
+    fetchMock
+      .mockReturnValueOnce(batchResponse)
+      .mockResolvedValueOnce(createResponse(refreshedPreview));
+
+    const { fetchGithubPreview } = await loadApi();
+    const staleBatchRequest = fetchGithubPreview(url);
+    await Promise.resolve();
+
+    await expect(
+      fetchGithubPreview(url, { bypassCache: true })
+    ).resolves.toEqual(refreshedPreview);
+
+    resolveBatch(
+      createResponse({ error: "Stale batch failed." }, { ok: false })
+    );
+    await expect(staleBatchRequest).rejects.toThrow("Stale batch failed.");
+    await expect(fetchGithubPreview(url)).resolves.toEqual(refreshedPreview);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("keeps explicit refreshes as direct cache-busting GET requests", async () => {
     jest.spyOn(Date, "now").mockReturnValue(1782037797581);
     const url =
