@@ -68,39 +68,73 @@ const MIME_PREFIX_KIND: ReadonlyArray<readonly [string, ExternalFileKind]> = [
   ["text/", "text"],
 ];
 
-const MIME_KIND: Readonly<Record<string, ExternalFileKind>> = {
-  "application/gzip": "archive",
-  "application/javascript": "code",
-  "application/json": "code",
-  "application/msword": "document",
-  "application/octet-stream": "binary",
-  "application/pdf": "pdf",
-  "application/rtf": "document",
-  "application/vnd.apple.keynote": "presentation",
-  "application/vnd.ms-excel": "spreadsheet",
-  "application/vnd.ms-powerpoint": "presentation",
-  "application/vnd.oasis.opendocument.presentation": "presentation",
-  "application/vnd.oasis.opendocument.spreadsheet": "spreadsheet",
-  "application/vnd.oasis.opendocument.text": "document",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-    "presentation",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-    "spreadsheet",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+const MIME_TYPES_BY_KIND: ReadonlyArray<
+  readonly [ExternalFileKind, readonly string[]]
+> = [
+  [
+    "archive",
+    [
+      "application/gzip",
+      "application/x-7z-compressed",
+      "application/x-bzip2",
+      "application/x-rar-compressed",
+      "application/x-tar",
+      "application/zip",
+    ],
+  ],
+  [
+    "code",
+    [
+      "application/javascript",
+      "application/json",
+      "application/x-sh",
+      "application/xml",
+      "text/html",
+      "text/javascript",
+      "text/markdown",
+      "text/xml",
+    ],
+  ],
+  [
     "document",
-  "application/x-7z-compressed": "archive",
-  "application/x-bzip2": "archive",
-  "application/x-rar-compressed": "archive",
-  "application/x-sh": "code",
-  "application/x-tar": "archive",
-  "application/xml": "code",
-  "application/zip": "archive",
-  "text/csv": "csv",
-  "text/html": "code",
-  "text/javascript": "code",
-  "text/markdown": "code",
-  "text/xml": "code",
-};
+    [
+      "application/msword",
+      "application/rtf",
+      "application/vnd.oasis.opendocument.text",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+  ],
+  [
+    "presentation",
+    [
+      "application/vnd.apple.keynote",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.oasis.opendocument.presentation",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ],
+  ],
+  [
+    "spreadsheet",
+    [
+      "application/vnd.ms-excel",
+      "application/vnd.oasis.opendocument.spreadsheet",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ],
+  ],
+  ["binary", ["application/octet-stream"]],
+  ["csv", ["text/csv"]],
+  ["pdf", ["application/pdf"]],
+];
+
+const MIME_KIND = MIME_TYPES_BY_KIND.reduce<Record<string, ExternalFileKind>>(
+  (acc, [kind, mimeTypes]) => {
+    for (const mimeType of mimeTypes) {
+      acc[mimeType] = kind;
+    }
+    return acc;
+  },
+  {}
+);
 
 const DEFAULT_MIME_TYPE_BY_EXTENSION: Readonly<Record<string, string>> = {
   csv: "text/csv",
