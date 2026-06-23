@@ -10,14 +10,20 @@ This document records the current frontend wallet-auth structure after the sessi
 
 ## Final Decision
 
-The frontend auth flow uses backend session-v2 endpoints only:
+The frontend auth flow uses backend session-v2 endpoints for normal web and
+native auth:
 
 - `GET /api/auth/session-nonce`
 - `POST /api/auth/session-login`
 - `POST /api/auth/session-refresh`
 - `POST /api/auth/session-logout`
 
-The frontend auth flow does not use the legacy wallet-auth nonce, login, or refresh-token redemption endpoints.
+Normal frontend auth does not use the legacy wallet-auth nonce, login, or
+refresh-token redemption endpoints.
+
+The temporary exception is 6529 Desktop connection sharing. Desktop remains on
+legacy auth during this rollout, so the web frontend can create or reuse a
+legacy refresh-token handoff only for the Desktop connection target.
 
 The generated OpenAPI client may still contain legacy models or endpoints for backend compatibility, but they are not part of the frontend wallet-auth implementation.
 
@@ -98,7 +104,10 @@ Native logout sends the current native refresh token and `all_sessions`.
 
 ## Connection Sharing
 
-The feature is connection sharing, not transfer. It creates an additional native session and does not move or disconnect the original web session.
+The feature is connection sharing, not transfer. It creates an additional
+session and does not move or disconnect the original web session.
+
+Mobile/native connection sharing uses session-v2 one-time codes.
 
 Web creates a share with bearer auth:
 
@@ -133,6 +142,28 @@ POST /api/auth/connection-share/redeem
 
 The response is a native session response. The redeemed client stores the returned `native_refresh_token` in secure storage and uses native session-v2 refresh from that point forward.
 
+### 6529 Desktop Compatibility
+
+6529 Desktop remains on legacy auth during this rollout. The `6529 Desktop`
+connection target uses a legacy refresh-token link:
+
+```text
+core6529://navigate/accept-connection-sharing?token=...&address=...
+```
+
+If the active web account still has a stored legacy refresh token, the frontend
+uses it directly for the Desktop link. If the active account is v2-only, the
+frontend calls:
+
+```text
+POST /api/auth/connection-share/legacy-desktop
+```
+
+The backend requires bearer auth and the matching active session-v2 web cookie,
+then returns a legacy Desktop `deep_link_path`. Desktop accepts the link through
+its existing `/auth/redeem-refresh-token` path. This compatibility path should
+be removed only after Desktop ships a v2 auth receiver.
+
 ## Frontend Configuration
 
 The frontend no longer gates this implementation behind session-v2, legacy-refresh, or structured-signature rollout flags. Backend settings from `/api/settings.auth` decide when legacy v1 sessions should prompt for migration, and backend environment controls still decide which origins are allowed, whether connection sharing is explicitly disabled server-side, and when structured signatures become mandatory.
@@ -144,4 +175,8 @@ The frontend no longer gates this implementation behind session-v2, legacy-refre
 - Web refresh/logout requests include cookies and the active `client_address`.
 - Native refresh token rotation updates secure storage.
 - Connection sharing uses `/auth/connection-share`, `/auth/connection-share/redeem`, and `connection_share_code`.
-- Active frontend auth code has no legacy nonce/login/refresh-token redemption or obsolete connection sharing predecessor flow.
+- Desktop connection sharing remains on the legacy refresh-token handoff while
+  Desktop remains on legacy auth.
+- Active frontend auth code has no legacy nonce/login/refresh-token redemption
+  for normal web or native auth. Legacy refresh-token redemption is retained
+  only for accepting Desktop connection-sharing links.

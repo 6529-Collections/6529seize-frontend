@@ -72,6 +72,8 @@ export * from '../models/ApiCreateDropPollRequest';
 export * from '../models/ApiCreateDropRequest';
 export * from '../models/ApiCreateGroup';
 export * from '../models/ApiCreateGroupDescription';
+export * from '../models/ApiCreateLegacyDesktopConnectionShareRequest';
+export * from '../models/ApiCreateLegacyDesktopConnectionShareResponse';
 export * from '../models/ApiCreateMediaUploadUrlRequest';
 export * from '../models/ApiCreateMediaUrlResponse';
 export * from '../models/ApiCreateMentionedWave';
@@ -572,6 +574,8 @@ import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
 import { ApiCreateDropRequest                 } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
+import { ApiCreateLegacyDesktopConnectionShareRequest } from '../models/ApiCreateLegacyDesktopConnectionShareRequest';
+import { ApiCreateLegacyDesktopConnectionShareResponse } from '../models/ApiCreateLegacyDesktopConnectionShareResponse';
 import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
 import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
@@ -1176,6 +1180,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateDropRequest": ApiCreateDropRequest,
     "ApiCreateGroup": ApiCreateGroup,
     "ApiCreateGroupDescription": ApiCreateGroupDescription,
+    "ApiCreateLegacyDesktopConnectionShareRequest": ApiCreateLegacyDesktopConnectionShareRequest,
+    "ApiCreateLegacyDesktopConnectionShareResponse": ApiCreateLegacyDesktopConnectionShareResponse,
     "ApiCreateMediaUploadUrlRequest": ApiCreateMediaUploadUrlRequest,
     "ApiCreateMediaUrlResponse": ApiCreateMediaUrlResponse,
     "ApiCreateMentionedWave": ApiCreateMentionedWave,

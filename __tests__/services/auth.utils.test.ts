@@ -140,6 +140,28 @@ describe("auth.utils", () => {
     );
   });
 
+  it("setAuthJwt preserves an existing legacy refresh token during v2 web auth", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "legacy-jwt", "legacy-refresh", "role-a");
+    const didStore = setAuthJwt("0xAaA", "v2-jwt", null, "role-a", {
+      authSessionVersion: "v2",
+    });
+
+    expect(didStore).toBe(true);
+    expect(getConnectedWalletAccounts()[0]).toEqual(
+      expect.objectContaining({
+        address: "0xAaA",
+        refreshToken: "legacy-refresh",
+        jwt: "v2-jwt",
+        authSessionVersion: "v2",
+      })
+    );
+    expect(getRefreshToken()).toBe("legacy-refresh");
+  });
+
   it("syncWalletRoleWithServer stores server role", () => {
     syncWalletRoleWithServer("Admin", "0xABC");
     expect(safeLocalStorage.setItem).toHaveBeenCalledWith(

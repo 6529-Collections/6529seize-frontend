@@ -15,19 +15,26 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useElectron } from "@/hooks/useElectron";
-import { getWalletAddress } from "@/services/auth/auth.utils";
-import { createConnectionShare } from "@/services/auth/session-v2.utils";
+import {
+  getRefreshToken,
+  getWalletAddress,
+  getWalletRole,
+} from "@/services/auth/auth.utils";
+import {
+  createConnectionShare,
+  createLegacyDesktopConnectionShare,
+} from "@/services/auth/session-v2.utils";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
 
-type ConnectionShare = Awaited<ReturnType<typeof createConnectionShare>>;
+type NativeConnectionShare = Awaited<ReturnType<typeof createConnectionShare>>;
 
 type CachedConnectionShare = {
   readonly addressKey: string;
   readonly expiresAtMs: number;
-  readonly share: ConnectionShare;
+  readonly share: NativeConnectionShare;
 };
 
 type SetQrSource = (dataUrl: string) => void;
@@ -93,17 +100,19 @@ function buildRouterPath(
 function buildConnectionShareFailureKey({
   addressKey,
   routerPath,
+  target,
 }: {
   readonly addressKey: string;
   readonly routerPath: string;
+  readonly target: "mobile" | "desktop";
 }): string {
-  return `${addressKey}:${routerPath}`;
+  return `${target}:${addressKey}:${routerPath}`;
 }
 
 function getCachedConnectionShare(
   cachedShare: CachedConnectionShare | null,
   addressKey: string
-): ConnectionShare | null {
+): NativeConnectionShare | null {
   if (cachedShare?.addressKey === addressKey) {
     const isReusable = cachedShare.expiresAtMs > Date.now() + 30_000;
     if (isReusable) {
@@ -114,17 +123,14 @@ function getCachedConnectionShare(
   return null;
 }
 
-function buildConnectionShareUrls({
+function buildNativeConnectionShareUrls({
   share,
   appScheme,
-  coreScheme,
 }: {
-  readonly share: ConnectionShare;
+  readonly share: NativeConnectionShare;
   readonly appScheme: string;
-  readonly coreScheme: string;
 }): {
   readonly appUrl: string;
-  readonly coreUrl: string;
 } {
   const shareParams = new URLSearchParams({
     connection_share_code: share.connection_share_code,
@@ -133,8 +139,36 @@ function buildConnectionShareUrls({
 
   return {
     appUrl: `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?${shareParams.toString()}`,
-    coreUrl: `${coreScheme}://${DeepLinkScope.NAVIGATE}${share.deep_link_path}`,
   };
+}
+
+function buildLegacyDesktopConnectionSharePath({
+  token,
+  address,
+  role,
+}: {
+  readonly token: string;
+  readonly address: string;
+  readonly role: string | null;
+}): string {
+  const shareParams = new URLSearchParams({
+    token,
+    address,
+  });
+  if (role) {
+    shareParams.set("role", role);
+  }
+  return `/accept-connection-sharing?${shareParams.toString()}`;
+}
+
+function buildLegacyDesktopConnectionShareUrl({
+  coreScheme,
+  deepLinkPath,
+}: {
+  readonly coreScheme: string;
+  readonly deepLinkPath: string;
+}): string {
+  return `${coreScheme}://${DeepLinkScope.NAVIGATE}${deepLinkPath}`;
 }
 
 function generateQrCodeSource({
@@ -417,7 +451,11 @@ export function HeaderQRModal({
   const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
   const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
     useState<string>("");
-  const [connectionShareStatus, setConnectionShareStatus] =
+  const [mobileConnectionShareStatus, setMobileConnectionShareStatus] =
+    useState<ConnectionShareStatus>(
+      hasValidWalletAuth || hasWalletAddress ? "legacy-auth" : "unauthenticated"
+    );
+  const [desktopConnectionShareStatus, setDesktopConnectionShareStatus] =
     useState<ConnectionShareStatus>(
       hasValidWalletAuth || hasWalletAddress ? "legacy-auth" : "unauthenticated"
     );
@@ -538,8 +576,14 @@ export function HeaderQRModal({
     setNavigateAppUrl(appUrl);
     setNavigateCoreUrl(coreUrl);
 
-    const shareConnectionAppUrl = await generateConnectionShareUrls({
+    const shareConnectionAppUrl = await generateNativeConnectionShareUrl({
       appScheme,
+      isStaleGeneration,
+      signal,
+      walletAddress,
+      routerPath,
+    });
+    await generateLegacyDesktopConnectionShareUrl({
       coreScheme,
       isStaleGeneration,
       signal,
@@ -581,23 +625,21 @@ export function HeaderQRModal({
     }
   }
 
-  async function generateConnectionShareUrls({
+  async function generateNativeConnectionShareUrl({
     appScheme,
-    coreScheme,
     isStaleGeneration,
     routerPath,
     signal,
     walletAddress,
   }: {
     readonly appScheme: string;
-    readonly coreScheme: string;
     readonly isStaleGeneration: IsStaleGeneration;
     readonly signal?: AbortSignal | undefined;
     readonly walletAddress: string | null;
     readonly routerPath: string;
   }): Promise<string> {
     if (!walletAddress) {
-      setUnavailableConnectionShare("unauthenticated");
+      setUnavailableMobileConnectionShare("unauthenticated");
       return "";
     }
 
@@ -605,16 +647,17 @@ export function HeaderQRModal({
     const failureKey = buildConnectionShareFailureKey({
       addressKey,
       routerPath,
+      target: "mobile",
     });
     const terminalFailure =
       terminalConnectionShareFailuresRef.current.get(failureKey);
     if (terminalFailure) {
-      setUnavailableConnectionShare(terminalFailure);
+      setUnavailableMobileConnectionShare(terminalFailure);
       return "";
     }
 
     try {
-      setConnectionShareStatus("loading");
+      setMobileConnectionShareStatus("loading");
       const cachedShare = getCachedConnectionShare(
         cachedConnectionShareRef.current,
         addressKey
@@ -626,16 +669,14 @@ export function HeaderQRModal({
       }
 
       cacheConnectionShare(addressKey, share);
-      const shareUrls = buildConnectionShareUrls({
+      const shareUrls = buildNativeConnectionShareUrls({
         share,
         appScheme,
-        coreScheme,
       });
 
       terminalConnectionShareFailuresRef.current.delete(failureKey);
-      setConnectionShareStatus("ready");
+      setMobileConnectionShareStatus("ready");
       setShareConnectionAppUrl(shareUrls.appUrl);
-      setShareConnectionCoreUrl(shareUrls.coreUrl);
       return shareUrls.appUrl;
     } catch (error: unknown) {
       if (isStaleGeneration() || isAbortError(error, signal)) {
@@ -649,14 +690,95 @@ export function HeaderQRModal({
         failureKey,
         terminalStatus
       );
-      setUnavailableConnectionShare(terminalStatus);
+      setUnavailableMobileConnectionShare(terminalStatus);
+      return "";
+    }
+  }
+
+  async function generateLegacyDesktopConnectionShareUrl({
+    coreScheme,
+    isStaleGeneration,
+    routerPath,
+    signal,
+    walletAddress,
+  }: {
+    readonly coreScheme: string;
+    readonly isStaleGeneration: IsStaleGeneration;
+    readonly signal?: AbortSignal | undefined;
+    readonly walletAddress: string | null;
+    readonly routerPath: string;
+  }): Promise<string> {
+    if (!walletAddress) {
+      setUnavailableDesktopConnectionShare("unauthenticated");
+      return "";
+    }
+
+    const legacyRefreshToken = getRefreshToken();
+    if (legacyRefreshToken) {
+      const legacyPath = buildLegacyDesktopConnectionSharePath({
+        token: legacyRefreshToken,
+        address: walletAddress,
+        role: getWalletRole(),
+      });
+      const coreUrl = buildLegacyDesktopConnectionShareUrl({
+        coreScheme,
+        deepLinkPath: legacyPath,
+      });
+      setDesktopConnectionShareStatus("ready");
+      setShareConnectionCoreUrl(coreUrl);
+      return coreUrl;
+    }
+
+    const addressKey = walletAddress.toLowerCase();
+    const failureKey = buildConnectionShareFailureKey({
+      addressKey,
+      routerPath,
+      target: "desktop",
+    });
+    const terminalFailure =
+      terminalConnectionShareFailuresRef.current.get(failureKey);
+    if (terminalFailure) {
+      setUnavailableDesktopConnectionShare(terminalFailure);
+      return "";
+    }
+
+    try {
+      setDesktopConnectionShareStatus("loading");
+      const share = await createLegacyDesktopConnectionShare({ signal });
+
+      if (isStaleGeneration()) {
+        return "";
+      }
+
+      const coreUrl = buildLegacyDesktopConnectionShareUrl({
+        coreScheme,
+        deepLinkPath: share.deep_link_path,
+      });
+
+      terminalConnectionShareFailuresRef.current.delete(failureKey);
+      setDesktopConnectionShareStatus("ready");
+      setShareConnectionCoreUrl(coreUrl);
+      return coreUrl;
+    } catch (error: unknown) {
+      if (isStaleGeneration() || isAbortError(error, signal)) {
+        return "";
+      }
+
+      console.error("Failed to create legacy desktop connection share", error);
+      const terminalStatus: TerminalConnectionShareStatus =
+        isSessionUpgradeRequiredError(error) ? "legacy-auth" : "error";
+      terminalConnectionShareFailuresRef.current.set(
+        failureKey,
+        terminalStatus
+      );
+      setUnavailableDesktopConnectionShare(terminalStatus);
       return "";
     }
   }
 
   function cacheConnectionShare(
     addressKey: string,
-    share: ConnectionShare
+    share: NativeConnectionShare
   ): void {
     const expiresAtMs = Date.parse(share.expires_at);
     if (Number.isFinite(expiresAtMs)) {
@@ -668,11 +790,19 @@ export function HeaderQRModal({
     }
   }
 
-  function setUnavailableConnectionShare(status: ConnectionShareStatus): void {
-    setConnectionShareStatus(status);
+  function setUnavailableMobileConnectionShare(
+    status: ConnectionShareStatus
+  ): void {
+    setMobileConnectionShareStatus(status);
     setShareConnectionAppUrl("");
-    setShareConnectionCoreUrl("");
     setShareConnectionSrc("");
+  }
+
+  function setUnavailableDesktopConnectionShare(
+    status: ConnectionShareStatus
+  ): void {
+    setDesktopConnectionShareStatus(status);
+    setShareConnectionCoreUrl("");
   }
 
   useEffect(() => {
@@ -686,11 +816,12 @@ export function HeaderQRModal({
       terminalConnectionShareFailuresRef.current.clear();
       connectionShareAbortRef.current?.abort();
       connectionShareAbortRef.current = null;
-      setConnectionShareStatus(
+      const nextStatus: ConnectionShareStatus =
         hasValidWalletAuth || hasWalletAddress
           ? "legacy-auth"
-          : "unauthenticated"
-      );
+          : "unauthenticated";
+      setMobileConnectionShareStatus(nextStatus);
+      setDesktopConnectionShareStatus(nextStatus);
       setShareConnectionAppUrl("");
       setShareConnectionCoreUrl("");
       setShareConnectionSrc("");
@@ -864,9 +995,13 @@ export function HeaderQRModal({
   };
 
   const getShareContent = () => {
-    if (connectionShareStatus !== "ready") {
+    const activeConnectionShareStatus =
+      activeSubTab === SubMode.CORE
+        ? desktopConnectionShareStatus
+        : mobileConnectionShareStatus;
+    if (activeConnectionShareStatus !== "ready") {
       return {
-        content: renderConnectionShareNotice(connectionShareStatus),
+        content: renderConnectionShareNotice(activeConnectionShareStatus),
         url: "",
       };
     }

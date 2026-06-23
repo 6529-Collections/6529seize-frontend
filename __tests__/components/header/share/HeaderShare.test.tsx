@@ -36,6 +36,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/services/auth/auth.utils");
 jest.mock("@/services/auth/session-v2.utils", () => ({
   createConnectionShare: jest.fn(),
+  createLegacyDesktopConnectionShare: jest.fn(),
 }));
 
 // Mock Reown AppKit
@@ -196,6 +197,14 @@ describe("HeaderShare", () => {
       target_client_type: "native",
       deep_link_path:
         "/accept-connection-sharing?connection_share_code=mock-share-code",
+    });
+    sessionV2.createLegacyDesktopConnectionShare.mockReset();
+    sessionV2.createLegacyDesktopConnectionShare.mockResolvedValue({
+      refresh_token: "legacy-desktop-refresh-token",
+      address: "0x1234567890123456789012345678901234567890",
+      role: "user",
+      deep_link_path:
+        "/accept-connection-sharing?token=legacy-desktop-refresh-token&address=0x1234567890123456789012345678901234567890&role=user",
     });
   });
 
@@ -533,6 +542,62 @@ describe("HeaderShare", () => {
       );
       expect(
         screen.queryByText("Update Authentication")
+      ).not.toBeInTheDocument();
+    });
+
+    it("uses an existing legacy refresh token for 6529 Desktop connection sharing", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      mockAuthUtils.getRefreshToken.mockReturnValue(
+        "local-legacy-refresh-token"
+      );
+      mockAuthUtils.getWalletRole.mockReturnValue("role+admin&test");
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await screen.findByTestId("header-share-modal");
+      await userEvent.click(
+        screen.getByRole("button", { name: "6529 Desktop" })
+      );
+
+      expect(
+        await screen.findByTitle(/token=local-legacy-refresh-token/)
+      ).toBeInTheDocument();
+      expect(screen.getByTitle(/role=role%2Badmin%26test/)).toBeInTheDocument();
+      expect(
+        sessionV2.createLegacyDesktopConnectionShare
+      ).not.toHaveBeenCalled();
+    });
+
+    it("uses the backend legacy desktop bridge when no local refresh token exists", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.createLegacyDesktopConnectionShare.mockResolvedValue({
+        refresh_token: "bridged-legacy-refresh-token",
+        address: "0x1234567890123456789012345678901234567890",
+        role: null,
+        deep_link_path:
+          "/accept-connection-sharing?token=bridged-legacy-refresh-token&address=0x1234567890123456789012345678901234567890",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() =>
+        expect(
+          sessionV2.createLegacyDesktopConnectionShare
+        ).toHaveBeenCalledWith({
+          signal: expect.objectContaining({ aborted: false }),
+        })
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "6529 Desktop" })
+      );
+
+      expect(
+        await screen.findByTitle(/token=bridged-legacy-refresh-token/)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTitle(/connection_share_code=/)
       ).not.toBeInTheDocument();
     });
 

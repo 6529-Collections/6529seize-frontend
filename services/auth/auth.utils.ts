@@ -378,7 +378,7 @@ export const setAuthJwt = (
 
   const nextAccount: ConnectedWalletAccount = {
     address,
-    refreshToken: refreshToken ?? null,
+    refreshToken: refreshToken ?? existingAccount?.refreshToken ?? null,
     role: role ?? null,
     jwt,
     profileId: existingAccount?.profileId ?? null,

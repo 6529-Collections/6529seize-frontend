@@ -118,6 +118,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreateConnectionShareResponse"
+  /auth/connection-share/legacy-desktop:
+    post:
+      summary: Create a legacy desktop connection sharing link
+      description: >
+        Migration bridge for 6529 Desktop builds that still redeem legacy refresh
+        tokens. Requires bearer auth and a matching active session-v2 web cookie.
+        Removed when desktop moves to session-v2.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLegacyDesktopConnectionShareRequest"
+      responses:
+        "201":
+          description: Legacy desktop connection link created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateLegacyDesktopConnectionShareResponse"
   /auth/connection-share/redeem:
     post:
       summary: Redeem a one-time connection sharing code
@@ -284,6 +306,29 @@ components:
           type: string
           examples:
             - "/accept-connection-sharing?connection_share_code=abc&address=0x0000000000000000000000000000000000000000"
+    CreateLegacyDesktopConnectionShareRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        role:
+          type: string
+          nullable: true
+    CreateLegacyDesktopConnectionShareResponse:
+      type: object
+      required: [refresh_token, address, deep_link_path]
+      additionalProperties: false
+      properties:
+        refresh_token:
+          type: string
+        address:
+          $ref: "#/components/schemas/EthereumAddress"
+        role:
+          type: string
+          nullable: true
+        deep_link_path:
+          type: string
+          examples:
+            - "/accept-connection-sharing?token=legacy-refresh-token&address=0x0000000000000000000000000000000000000000"
     RedeemConnectionShareRequest:
       type: object
       required: [target_client_type, connection_share_code]

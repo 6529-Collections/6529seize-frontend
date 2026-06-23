@@ -46,8 +46,9 @@ app download targets.
      inside Electron
 7. In `Connection`, share the active authenticated session into supported 6529
    clients:
-   - `6529 Mobile`: QR code plus share-connection deep link
-   - `6529 Desktop`: desktop accept-connection deep link when not in Electron
+   - `6529 Mobile`: QR code plus session-v2 share-connection deep link
+   - `6529 Desktop`: legacy desktop accept-connection deep link when not in
+     Electron
 8. In `6529 Apps`, choose install/open targets:
    - `6529 Mobile`: iOS and Android app targets
    - `6529 Desktop`: Windows, macOS, and Linux download targets when not in
@@ -61,8 +62,8 @@ app download targets.
 
 - Copy a browser URL for the current page.
 - Open the current route in 6529 Mobile from a desktop QR code.
-- Share an authenticated connection from desktop web into 6529 Mobile or 6529
-  Desktop.
+- Share an authenticated connection from desktop web into 6529 Mobile or the
+  current legacy 6529 Desktop app.
 - Use the dialog as an install/open surface for 6529 apps.
 - Share routes with query state preserved; generated targets keep the current
   pathname plus search params.
@@ -70,10 +71,13 @@ app download targets.
 ## Edge Cases
 
 - Share entry is hidden entirely in Capacitor/native and mobile-device web.
-- `Connection` is always visible in the modal. It creates a backend
-  connection-share code when an active wallet address has a valid session-v2 web
-  session; otherwise it shows a sign-in, update-authentication, loading, or
-  unavailable state instead of a QR code.
+- `Connection` is always visible in the modal. For `6529 Mobile`, it creates a
+  backend session-v2 connection-share code when an active wallet address has a
+  valid session-v2 web session. For `6529 Desktop`, it uses a legacy
+  refresh-token desktop link while the Desktop app remains on legacy auth. If
+  neither target can be prepared, the panel shows a sign-in,
+  update-authentication, loading, or unavailable state instead of a QR code or
+  desktop link.
 - `6529 Desktop` subtabs are hidden when the modal is rendered inside Electron.
 - `Browser` exists only under `Current URL`; `Connection` and `6529 Apps` do
   not expose a browser target.
@@ -91,7 +95,9 @@ app download targets.
   expected entry point is the disconnected sidebar row or the connected account
   menu.
 - If `Connection` shows `Update Authentication`, sign again with the active
-  wallet to upgrade the browser session to session-v2.
+  wallet to upgrade the browser session to session-v2. Desktop connection
+  sharing may also need this update when the browser no longer has a local
+  legacy refresh token and must ask the backend for a legacy Desktop link.
 - If `Connection` shows `Sign In Required`, connect and authenticate a wallet
   before sharing a connection.
 - If `Connection Sharing Unavailable` appears, close and reopen the dialog or
@@ -109,8 +115,10 @@ app download targets.
   runtimes.
 - Generated current-route targets reuse the active pathname and query string;
   non-URL UI state is not serialized beyond what is already in the route.
-- Connection sharing depends on a valid session-v2 web session for the active
-  wallet and is not available as a disconnected onboarding flow.
+- Mobile connection sharing depends on a valid session-v2 web session for the
+  active wallet and is not available as a disconnected onboarding flow.
+- Desktop connection sharing remains on the legacy Desktop auth handoff until a
+  separate Desktop v2 auth receiver is released.
 - Desktop download metadata is fetched from release manifests at runtime.
 
 ## Related Pages

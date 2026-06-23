@@ -56,6 +56,13 @@ interface CreateConnectionShareResponse {
   readonly deep_link_path: string;
 }
 
+interface CreateLegacyDesktopConnectionShareResponse {
+  readonly refresh_token: string;
+  readonly address: string;
+  readonly role: string | null;
+  readonly deep_link_path: string;
+}
+
 interface RedeemConnectionShareResponse {
   readonly address: string;
   readonly role: string | null;
@@ -264,6 +271,22 @@ export async function createConnectionShare({
     body: {
       target_client_type: "native",
     },
+    credentials: getSessionCredentialsMode(),
+    signal,
+  });
+}
+
+export async function createLegacyDesktopConnectionShare({
+  signal,
+}: {
+  readonly signal?: AbortSignal | undefined;
+}): Promise<CreateLegacyDesktopConnectionShareResponse> {
+  return await commonApiPost<
+    Record<string, never>,
+    CreateLegacyDesktopConnectionShareResponse
+  >({
+    endpoint: "auth/connection-share/legacy-desktop",
+    body: {},
     credentials: getSessionCredentialsMode(),
     signal,
   });

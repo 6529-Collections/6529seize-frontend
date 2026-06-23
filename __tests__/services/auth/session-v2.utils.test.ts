@@ -9,6 +9,7 @@ import {
 } from "@/services/auth/native-refresh-token-storage";
 import {
   createConnectionShare,
+  createLegacyDesktopConnectionShare,
   getSessionNonce,
   loginWithSessionV2,
   logoutSessionV2,
@@ -390,6 +391,29 @@ describe("session-v2.utils", () => {
       },
       credentials: "include",
       signal: undefined,
+    });
+  });
+
+  it("creates a legacy desktop connection share with bearer auth and session credentials", async () => {
+    const shareResponse = {
+      refresh_token: "legacy-refresh-token",
+      address: "0xabc",
+      role: null,
+      deep_link_path:
+        "/accept-connection-sharing?token=legacy-refresh-token&address=0xabc",
+    };
+    const abortController = new AbortController();
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(shareResponse);
+
+    await expect(
+      createLegacyDesktopConnectionShare({ signal: abortController.signal })
+    ).resolves.toBe(shareResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/connection-share/legacy-desktop",
+      body: {},
+      credentials: "include",
+      signal: abortController.signal,
     });
   });
 

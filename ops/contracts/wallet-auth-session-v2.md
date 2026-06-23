@@ -13,6 +13,9 @@ Updated: 2026-06-17
   cookies for multi-account web sessions.
 - Keep native refresh state in secure storage and rotate it on every refresh.
 - Support connection sharing from an authenticated web session to a native client with a short-lived one-time code.
+- Support connection sharing from an authenticated web session to the current
+  6529 Desktop app through the legacy refresh-token handoff while Desktop
+  remains on legacy auth.
 - Keep access JWTs available for bearer-auth API calls.
 
 ## Web Session Flow
@@ -118,7 +121,9 @@ Native refresh tokens are stored only in secure OS-backed storage.
 
 ## Connection Sharing
 
-Connection sharing creates an additional native session from an authenticated web session. It does not transfer, move, or disconnect the original session.
+Connection sharing creates an additional session from an authenticated web session. It does not transfer, move, or disconnect the original session.
+
+Mobile/native connection sharing uses session-v2 one-time codes.
 
 ### POST `/api/auth/connection-share`
 
@@ -165,6 +170,35 @@ The response is a native session response. The native client persists the return
 
 Connection-share codes are short-lived, one-time use, and consumed atomically by the backend. Disabled-backend responses should be handled as a clean feature-unavailable state.
 
+### POST `/api/auth/connection-share/legacy-desktop`
+
+6529 Desktop remains on legacy auth during this rollout. The web frontend uses
+this endpoint only for the `6529 Desktop` connection target when it does not
+already have a local legacy refresh token for the active wallet.
+
+The caller must send bearer access-token auth and session-v2 web cookies. The
+request body is empty in normal frontend usage:
+
+```json
+{}
+```
+
+The response is:
+
+```json
+{
+  "refresh_token": "...",
+  "address": "...",
+  "role": null,
+  "deep_link_path": "/accept-connection-sharing?token=...&address=..."
+}
+```
+
+The frontend builds a `core6529://navigate/accept-connection-sharing?...` link
+from `deep_link_path`. Desktop redeems the legacy `token` with
+`/api/auth/redeem-refresh-token` and continues using the legacy refresh flow.
+This bridge must stay enabled until a separate Desktop v2 auth release is ready.
+
 ## Origin Behavior
 
 - Browser code must not manually set the `Origin` header.
@@ -198,4 +232,9 @@ Required rollout values:
 - Web refresh/logout include credentials and the active `client_address`.
 - Native refresh token rotation updates secure storage.
 - Connection sharing uses `/auth/connection-share`, `/auth/connection-share/redeem`, and `connection_share_code`.
-- Frontend contains no active obsolete connection sharing predecessor flow.
+- Desktop connection sharing uses either the locally stored legacy refresh token
+  or `/auth/connection-share/legacy-desktop`, and Desktop remains legacy until a
+  separate Desktop v2 auth release.
+- Frontend auth does not use legacy wallet nonce/login/refresh-token redemption
+  for normal web or native auth. The `/auth/redeem-refresh-token` exception is
+  limited to accepting legacy Desktop connection-sharing links.

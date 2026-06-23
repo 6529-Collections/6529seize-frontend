@@ -8,9 +8,15 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { useSetTitle } from "@/contexts/TitleContext";
+import type { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemRefreshTokenRequest";
+import type { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
-import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
+import { commonApiPost } from "@/services/api/common-api";
+import {
+  canStoreAnotherWalletAccount,
+  setAuthJwt,
+} from "@/services/auth/auth.utils";
 import {
   persistSessionResponse,
   redeemConnectionShare,
@@ -19,7 +25,9 @@ import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
 
 interface AcceptConnectionSharingProps {
   connectionShareCode: string;
+  token: string;
   address: string;
+  role: string | undefined;
 }
 
 type SharedProfile = ReturnType<typeof useIdentity>["profile"];
@@ -218,9 +226,72 @@ async function acceptConnectionShare({
   return true;
 }
 
+async function acceptLegacyDesktopConnection({
+  address,
+  token,
+  role,
+  setToast,
+  seizeAcceptConnection,
+  routerPush,
+}: {
+  readonly address: string;
+  readonly token: string;
+  readonly role: string | undefined;
+  readonly setToast: SetToast;
+  readonly seizeAcceptConnection: (address: string) => void;
+  readonly routerPush: (path: string) => void;
+}): Promise<boolean> {
+  const redeemResponse = await commonApiPost<
+    ApiRedeemRefreshTokenRequest,
+    ApiRedeemRefreshTokenResponse
+  >({
+    endpoint: "auth/redeem-refresh-token",
+    body: {
+      address,
+      token,
+      ...(role ? { role } : {}),
+    },
+  });
+  const hasValidRedeemResponse =
+    !!redeemResponse.address &&
+    !!redeemResponse.token &&
+    areEqualAddresses(redeemResponse.address, address);
+  if (hasValidRedeemResponse === false) {
+    setToast({ message: "Invalid connection response", type: "error" });
+    return false;
+  }
+
+  if (canStoreAnotherWalletAccount(redeemResponse.address) === false) {
+    setToast({
+      message: "Maximum connected profiles reached",
+      type: "error",
+    });
+    return false;
+  }
+
+  const didPersistJwt = setAuthJwt(
+    redeemResponse.address,
+    redeemResponse.token,
+    token,
+    role
+  );
+  if (didPersistJwt === false) {
+    setToast({
+      message: "Failed to store connected profile",
+      type: "error",
+    });
+    return false;
+  }
+
+  seizeAcceptConnection(redeemResponse.address);
+  routerPush("/");
+  return true;
+}
+
 function ConnectionSharingContent({
   hasUnsupportedWebConnectionShare,
   isConnectionShareFlow,
+  isLegacyDesktopConnectionFlow,
   profile,
   profileLoading,
   address,
@@ -231,6 +302,7 @@ function ConnectionSharingContent({
 }: Readonly<{
   hasUnsupportedWebConnectionShare: boolean;
   isConnectionShareFlow: boolean;
+  isLegacyDesktopConnectionFlow: boolean;
   profile: SharedProfile;
   profileLoading: boolean;
   address: string;
@@ -245,7 +317,7 @@ function ConnectionSharingContent({
     );
   }
 
-  if (isConnectionShareFlow) {
+  if (isConnectionShareFlow || isLegacyDesktopConnectionFlow) {
     return (
       <div className="tw-space-y-6">
         <IncomingConnectionCard
@@ -277,13 +349,18 @@ function AcceptConnectionSharing(
   const { seizeAcceptConnection, address: connectedAddress } =
     useSeizeConnectContext();
 
-  const { connectionShareCode, address } = props;
+  const { connectionShareCode, token, address, role } = props;
   const [acceptingConnection, setAcceptingConnection] = useState(false);
   const hasConnectionShareCode = connectionShareCode.trim().length > 0;
+  const hasLegacyDesktopToken = token.trim().length > 0;
   const hasUnsupportedWebConnectionShare =
-    hasConnectionShareCode && !Capacitor.isNativePlatform();
+    hasConnectionShareCode &&
+    !hasLegacyDesktopToken &&
+    !Capacitor.isNativePlatform();
   const isConnectionShareFlow =
     hasConnectionShareCode && Capacitor.isNativePlatform();
+  const isLegacyDesktopConnectionFlow =
+    hasLegacyDesktopToken && address.trim().length > 0;
 
   const { profile, isLoading: profileLoading } = useIdentity({
     handleOrWallet: address || null,
@@ -298,6 +375,20 @@ function AcceptConnectionSharing(
         const accepted = await acceptConnectionShare({
           address,
           connectionShareCode,
+          setToast,
+          seizeAcceptConnection,
+          routerPush: (path) => router.push(path),
+        });
+        if (!accepted) {
+          setAcceptingConnection(false);
+        }
+        return;
+      }
+      if (isLegacyDesktopConnectionFlow) {
+        const accepted = await acceptLegacyDesktopConnection({
+          address,
+          token,
+          role,
           setToast,
           seizeAcceptConnection,
           routerPush: (path) => router.push(path),
@@ -328,6 +419,7 @@ function AcceptConnectionSharing(
         <ConnectionSharingContent
           hasUnsupportedWebConnectionShare={hasUnsupportedWebConnectionShare}
           isConnectionShareFlow={isConnectionShareFlow}
+          isLegacyDesktopConnectionFlow={isLegacyDesktopConnectionFlow}
           profile={profile}
           profileLoading={profileLoading}
           address={address}
@@ -348,11 +440,15 @@ function AcceptConnectionSharing(
 export default function AcceptConnectionSharingPage() {
   const searchParams = useSearchParams();
   const connectionShareCode = searchParams?.get("connection_share_code") || "";
+  const token = searchParams?.get("token") || "";
   const address = searchParams?.get("address") || "";
+  const role = searchParams?.get("role") || undefined;
   return (
     <AcceptConnectionSharing
       connectionShareCode={connectionShareCode}
+      token={token}
       address={address}
+      role={role}
     />
   );
 }

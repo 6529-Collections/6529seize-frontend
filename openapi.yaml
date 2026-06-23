@@ -377,6 +377,34 @@ paths:
                 $ref: "#/components/schemas/ApiCreateConnectionShareResponse"
         "400":
           description: Invalid request
+  /auth/connection-share/legacy-desktop:
+    post:
+      tags:
+        - Authentication
+      summary: Create a legacy desktop connection share link
+      description: >
+        Compatibility bridge for 6529 Desktop builds that still redeem legacy
+        refresh tokens. The caller must have bearer auth and a matching active
+        session-v2 web cookie. This endpoint remains available only while legacy
+        refresh redemption is enabled.
+      operationId: createLegacyDesktopConnectionShare
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateLegacyDesktopConnectionShareRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCreateLegacyDesktopConnectionShareResponse"
+        "400":
+          description: Invalid request
   /auth/connection-share/redeem:
     post:
       tags:
@@ -11712,6 +11740,28 @@ components:
           type: string
           enum:
             - native
+        deep_link_path:
+          type: string
+    ApiCreateLegacyDesktopConnectionShareRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          nullable: true
+    ApiCreateLegacyDesktopConnectionShareResponse:
+      type: object
+      required:
+        - refresh_token
+        - address
+        - deep_link_path
+      properties:
+        refresh_token:
+          type: string
+        address:
+          type: string
+        role:
+          type: string
+          nullable: true
         deep_link_path:
           type: string
     ApiCreateDropPart:

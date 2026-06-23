@@ -10,7 +10,11 @@ import {
   persistSessionResponse,
   redeemConnectionShare,
 } from "@/services/auth/session-v2.utils";
-import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
+import { commonApiPost } from "@/services/api/common-api";
+import {
+  canStoreAnotherWalletAccount,
+  setAuthJwt,
+} from "@/services/auth/auth.utils";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -99,6 +103,9 @@ describe("AcceptConnectionSharing page", () => {
     (redeemConnectionShare as jest.Mock).mockReset();
     (persistSessionResponse as jest.Mock).mockReset();
     (persistSessionResponse as jest.Mock).mockResolvedValue(true);
+    (commonApiPost as jest.Mock).mockReset();
+    (setAuthJwt as jest.Mock).mockReset();
+    (setAuthJwt as jest.Mock).mockReturnValue(true);
     (canStoreAnotherWalletAccount as jest.Mock).mockReturnValue(true);
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: undefined,
@@ -210,6 +217,54 @@ describe("AcceptConnectionSharing page", () => {
         native_refresh_token: "native-refresh-token",
       })
     );
+    expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
+    expect(push).toHaveBeenCalledWith("/");
+  });
+
+  it("redeems a legacy desktop token connection share in web", async () => {
+    const push = jest.fn();
+    const seizeAcceptConnection = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push });
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("token=legacy-refresh&address=0x123&role=client-role")
+    );
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      address: undefined,
+      seizeDisconnectAndLogout: jest.fn(),
+      seizeAcceptConnection,
+    });
+    (commonApiPost as jest.Mock).mockResolvedValue({
+      address: "0x123",
+      token: "legacy-access-token",
+    });
+
+    render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    fireEvent.click(screen.getByText("Accept connection"));
+
+    await waitFor(() =>
+      expect(commonApiPost).toHaveBeenCalledWith({
+        endpoint: "auth/redeem-refresh-token",
+        body: {
+          address: "0x123",
+          token: "legacy-refresh",
+          role: "client-role",
+        },
+      })
+    );
+    expect(setAuthJwt).toHaveBeenCalledWith(
+      "0x123",
+      "legacy-access-token",
+      "legacy-refresh",
+      "client-role"
+    );
+    expect(redeemConnectionShare).not.toHaveBeenCalled();
+    expect(persistSessionResponse).not.toHaveBeenCalled();
     expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
     expect(push).toHaveBeenCalledWith("/");
   });
