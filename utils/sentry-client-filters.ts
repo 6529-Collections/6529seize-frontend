@@ -2,6 +2,7 @@ export type SentryStackFrame = {
   filename?: string | undefined;
   abs_path?: string | undefined;
   function?: string | undefined;
+  in_app?: boolean | undefined;
 };
 
 export type SentryTransactionSpan = {
@@ -125,6 +126,10 @@ const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
+const sentryRouteParameterizationMechanismType =
+  "auto.browser.browserapierrors.setTimeout";
+const sentryRouteParameterizationMessage =
+  "JSON.stringify cannot serialize cyclic structures.";
 const URL_IN_PARENS_PATTERN = /\(([^)]+)\)/g;
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
@@ -893,6 +898,29 @@ function hasInjectedAppUriFrame(
   return Array.isArray(frames) && frames.some(isInjectedAppUriFrame);
 }
 
+function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
+  if (frame.function !== "stringify") {
+    return false;
+  }
+
+  return [frame.filename, frame.abs_path].includes("[native code]");
+}
+
+function hasAppOwnedFrame(frames: SentryStackFrame[] | undefined): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some(
+      (frame) => frame.in_app === true && !isNativeJsonStringifyFrame(frame)
+    )
+  );
+}
+
+function hasNativeJsonStringifyFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
+}
+
 function getHintException(hint?: SentryEventHint): unknown {
   return hint?.originalException ?? hint?.syntheticException;
 }
@@ -1028,6 +1056,17 @@ function getBreadcrumbValues(event: SentryClientEvent): SentryBreadcrumb[] {
   }
 
   return [];
+}
+
+function hasNavigationBreadcrumb(event: SentryClientEvent): boolean {
+  return getBreadcrumbValues(event).some((breadcrumb) => {
+    const data = breadcrumb.data;
+    return (
+      breadcrumb.category === "navigation" &&
+      typeof data?.["from"] === "string" &&
+      typeof data?.["to"] === "string"
+    );
+  });
 }
 
 function getContextString(
@@ -1414,6 +1453,34 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   );
 }
 
+export function shouldFilterSentryRouteParameterizationError(
+  event: SentryClientEvent
+): boolean {
+  // Sentry SDK route parameterization noise; keep app-owned cyclic JSON errors.
+  const value = event.exception?.values?.[0];
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== sentryRouteParameterizationMessage
+  ) {
+    return false;
+  }
+
+  const mechanism = value.mechanism;
+  if (
+    mechanism?.type !== sentryRouteParameterizationMechanismType ||
+    mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  const frames = value.stacktrace?.frames;
+  if (hasAppOwnedFrame(frames) || !hasNativeJsonStringifyFrame(frames)) {
+    return false;
+  }
+
+  return hasNavigationBreadcrumb(event);
+}
+
 export function shouldFilterInjectedWalletCollision(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1437,6 +1504,8 @@ export const __testing = {
   isTwitterBrowser,
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
+  sentryRouteParameterizationMechanismType,
+  sentryRouteParameterizationMessage,
   isCoinbaseWalletLinkWebSocket1006Message,
   isCoinbaseWalletLinkWebSocketPath,
   hasCoinbaseWalletLinkWebSocketFrame,
