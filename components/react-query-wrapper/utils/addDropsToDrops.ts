@@ -1,8 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
-
-const DROPS_QUERY_KEY = "DROPS";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 type DropsQueryData = {
   pages?: ApiWaveDropsFeed[] | undefined;
@@ -15,7 +14,7 @@ type DropsQueryParams = {
 };
 
 const getDropsQueryKey = (params: DropsQueryParams) =>
-  [DROPS_QUERY_KEY, params] as const;
+  [QueryKey.DROPS, params] as const;
 
 type DropsFeedPage = {
   drops?: ApiDrop[] | undefined;
@@ -182,7 +181,7 @@ export function upsertDropIntoMatchingDropsQueries(
 ): void {
   const queries = queryClient
     .getQueryCache()
-    .findAll({ queryKey: [DROPS_QUERY_KEY] });
+    .findAll({ queryKey: [QueryKey.DROPS] });
 
   for (const query of queries) {
     const params = readDropsQueryParams(query.queryKey);
