@@ -4,25 +4,25 @@
 
 Read this section first after compaction or handoff.
 
-- Latest testing-roadmap state, 2026-06-23T08:10Z:
+- Latest testing-roadmap state, 2026-06-23T09:16Z:
   - Current rebase worktree:
-    `D:\repos\6529seize-frontend-native-shell-readonly`.
+    `D:\repos\6529seize-frontend-native-package-evidence`.
   - Current active branch:
-    `codex/e2e-upload-admin-guards`, rebasing PR #2850 onto current
-    `origin/main` after PR #2855 merged.
-  - Active slice is local-only guarded chat-drop sandbox E2E coverage:
-    the mock composer sandbox allows exactly one synthetic chat-drop POST with
-    the expected body and signature shape, then rejects duplicate or non-exact
-    drop bodies with 409 responses. All other dangerous composer/drop/media
-    mutation paths remain fail-closed.
-  - Rebase conflict was limited to workstream memory files
-    (`active-context.md`, `run-log.md`). Code conflicts have not appeared in
-    the sandbox server or Playwright spec so far.
-  - Before republishing PR #2850, rerun focused sandbox validation, Playwright
-    typecheck, changed typecheck/lint or focused ESLint as needed, risk/secret
-    scans, workflow-security scan, and `codex-diff-check`, then trigger the
-    unchanged existing reviewbot lanes plus GLM-swarm. Do not weaken any
-    existing reviewbot lane.
+    `codex/native-package-evidence-e2e`, rebasing PR #2851 onto current
+    `origin/main` after PR #2850 merged as
+    `eec7dbecb1ff28ae357a3df707ba2051dea2b8e0`.
+  - Active slice is test-only native surface evidence classification:
+    add a read-only `native-surface-evidence.cjs` classifier, optional
+    deployment-bus pack `native:surface-evidence`, package scripts, tests, and
+    docs that distinguish browser simulation, package prerequisites, and real
+    packaged native/Electron runtime evidence.
+  - Rebase conflict so far is limited to workstream memory files. Package,
+    tests, docs, and deployment-bus files auto-merged on the first commit.
+  - Before republishing PR #2851, rerun the native evidence unit pack, the
+    classifier scripts, native-shell Playwright validation, changed
+    lint/typecheck or focused equivalents, risk/secret/workflow scans, and
+    `codex-diff-check`; then trigger the unchanged existing reviewbot lanes
+    plus GLM-swarm.
 
 - Latest testing-roadmap state, 2026-06-23T05:00Z:
   - Current active worktree:

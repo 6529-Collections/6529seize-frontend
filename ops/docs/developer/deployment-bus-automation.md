@@ -101,9 +101,10 @@ packs in `validation.required_packs` and expands them in
 `playwright:core-smoke` is the fast route smoke pack. `playwright:surface-matrix`
 is the broader route/navigation workflow pack. `playwright:production-readonly`
 is a known production-only aggregate pack that release captains can opt into
-when recording full production-safe read-only evidence; it is not in the
-default required pack set until durable artifact upload and recording are
-automated.
+when recording full production-safe read-only evidence. `native:surface-evidence`
+is an optional native evidence classifier pack for trains that touch
+Capacitor/Electron-adjacent code. Neither optional pack is in the default
+required pack set.
 
 | Pack                             | Staging command                                                                                                        | Production command                                                                                             |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -111,6 +112,7 @@ automated.
 | `playwright:surface-matrix`      | `seize run test:e2e:staging`                                                                                           | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix`           |
 | `playwright:wcag-i18n`           | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` |
 | `playwright:production-readonly` | production-only                                                                                                        | `seize run test:e2e:production:readonly`                                                                       |
+| `native:surface-evidence`        | `seize run test:native-evidence`                                                                                       | `seize run test:native-evidence`                                                                               |
 
 The default required standard pack plan records `web:desktop-chromium` and
 `web:mobile-chromium` as the covered deployed web surfaces. The production
@@ -119,7 +121,9 @@ scripts intentionally run production-safe public checks on desktop Chromium.
 Firefox, WebKit, Capacitor simulation, and Electron simulation remain optional
 train/nightly or targeted validation lanes until they are stable enough to make
 them required deployment evidence. Browser simulation must not be described as
-real native or real Electron shell coverage.
+real native or real Electron shell coverage. A PR or train may claim real
+packaged native or Electron evidence only when `seize run test:native-evidence:real`
+passes and the resulting evidence is recorded separately from simulation output.
 
 For standard required packs, release readiness requires the latest passing
 check to record the pack-plan command and every required pack-plan surface.

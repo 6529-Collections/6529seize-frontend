@@ -113,9 +113,12 @@ Known current gaps after the first automation slice:
   `playwright:wcag-i18n`. The deployment bus also knows the optional
   production-only `playwright:production-readonly` aggregate, which records
   desktop Chromium production evidence when a release captain explicitly opts
-  into it. Firefox, WebKit, Capacitor simulation, and Electron simulation remain
-  optional train/nightly or targeted validation lanes and must not be described
-  as real native or real Electron shell coverage.
+  into it, plus optional `native:surface-evidence`, which records the native
+  evidence classifier output. Firefox, WebKit, Capacitor simulation, and
+  Electron simulation remain optional train/nightly or targeted validation
+  lanes and must not be described as real native or real Electron shell
+  coverage. Real native or packaged Electron claims require the stricter
+  `seize run test:native-evidence:real` command to pass.
 - Backend coordination is still a cross-repo handoff, not a shared automated
   release train.
 

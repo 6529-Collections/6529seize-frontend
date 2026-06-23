@@ -3828,3 +3828,19 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: finish the rebase, run the focused chat-drop sandbox validation
   set, push the rebased head, and re-trigger the unchanged existing
   reviewbot lanes plus GLM-swarm.
+
+## 2026-06-23T09:16Z PR #2851 Rebase After PR #2850 Merge
+
+- Started rebasing PR #2851 (`codex/native-package-evidence-e2e`) in
+  `D:\repos\6529seize-frontend-native-package-evidence` onto current
+  `origin/main` after PR #2850 merged as
+  `eec7dbecb1ff28ae357a3df707ba2051dea2b8e0`.
+- Conflict during the first commit was limited to workstream memory files:
+  `ops/workstreams/frontend-a11y-i18n/active-context.md` and
+  `ops/workstreams/frontend-a11y-i18n/run-log.md`.
+- Resolved by keeping the newer main-side #2850 timeline and adding this
+  current PR #2851 rebase note; package, tests, docs, and deployment-bus files
+  auto-merged on the first commit.
+- Next action: finish the rebase, rerun the native-surface evidence validation
+  set, push the rebased head, and trigger the unchanged existing reviewbot
+  lanes plus GLM-swarm.

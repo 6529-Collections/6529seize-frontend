@@ -1236,7 +1236,11 @@ Goals:
 - Keep Firefox, WebKit, Capacitor simulation, and Electron simulation
   train/nightly-only until desktop and mobile Chromium are stable. Done in
   package scripts and docs.
-- Identify what is needed for future real native shell smoke. Still open.
+- Identify what is needed for future real native shell smoke. Partially done
+  through `test:native-evidence`, which classifies current evidence as
+  simulation-only or real package-ready and records blockers. Real shell
+  execution remains open until committed native/Electron package projects,
+  host runners, and retained artifact paths exist.
 
 Exit criteria:
 
@@ -1400,7 +1404,9 @@ The sidequest is complete when:
 - WebKit and Firefox default to train/nightly gates until desktop/mobile
   Chromium is stable; decide when to promote them to PR gates.
 - Decide when real Capacitor/Electron smoke becomes mandatory instead of
-  simulated only.
+  simulated only. `test:native-evidence:real` is the executable gate for any
+  future PR or deployment train that claims real packaged native or Electron
+  evidence.
 - Decide whether coverage ratchets should apply only to critical helpers first
   or to broader directories.
 - Decide whether to add pseudo-locale support during this sidequest or after the
