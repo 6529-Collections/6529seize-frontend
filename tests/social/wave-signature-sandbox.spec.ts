@@ -17,6 +17,8 @@ import {
 const SANDBOX_SIGNATURE_WAVE_ID = "00000000-0000-4000-8000-000000000540";
 const SANDBOX_SIGNATURE_TERMS =
   "Local-only signature sandbox terms. Unsigned drops must not be submitted.";
+const NEGATIVE_ASSERTION_WINDOW_MS = 1500;
+const NEGATIVE_ASSERTION_INTERVAL_MS = 100;
 
 test.describe.configure({ mode: "serial" });
 
@@ -101,15 +103,23 @@ async function installExternalDataFixtures(page: Page) {
 }
 
 async function expectNoUnsignedDropMutation(baseURL: string | undefined) {
-  const requests = await fetchSandboxRequests(baseURL);
-  const dropMutations = requests.filter(
-    (request) => request.method === "POST" && request.path === "/api/drops"
-  );
+  const deadline = Date.now() + NEGATIVE_ASSERTION_WINDOW_MS;
 
-  expect(
-    dropMutations,
-    `Expected signing failure to happen before any /api/drops POST. Requests: ${JSON.stringify(
-      requests
-    )}`
-  ).toEqual([]);
+  while (Date.now() < deadline) {
+    const requests = await fetchSandboxRequests(baseURL);
+    const dropMutations = requests.filter(
+      (request) => request.method === "POST" && request.path === "/api/drops"
+    );
+
+    expect(
+      dropMutations,
+      `Expected signing failure to happen before any /api/drops POST. Requests: ${JSON.stringify(
+        requests
+      )}`
+    ).toEqual([]);
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, NEGATIVE_ASSERTION_INTERVAL_MS)
+    );
+  }
 }

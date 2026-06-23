@@ -3981,3 +3981,13 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: finish the rebase, run the signature/reaction/auth sandbox packs
   plus signing unit tests and static checks, then push and re-trigger the review
   loop for PR #2853.
+
+## 2026-06-23T11:22Z PR #2853 Negative Assertion Follow-Up Replayed
+
+- Replayed the PR #2853 follow-up that strengthens the signed-drop fail-closed
+  assertion.
+- The signature sandbox now samples the local request ledger for a short
+  negative assertion window and fails if any late `/api/drops` POST appears,
+  instead of checking the ledger only once.
+- Next action: continue the rebase and run the full focused validation set on
+  the rebased head.
