@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-import { render, screen } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 
@@ -29,27 +29,27 @@ jest.mock("@/components/utils/tooltip/CustomTooltip", () => ({
 
 describe("AdditionalActionPromiseBadge", () => {
   it("shows the badge with explanatory tooltip copy", () => {
-    render(<AdditionalActionPromiseBadge />);
+    const markup = renderToStaticMarkup(<AdditionalActionPromiseBadge />);
 
-    const tooltip = screen.getByTestId("custom-tooltip");
-    const badge = screen.getByRole("button", { name: "Additional Action" });
-
-    expect(tooltip).toHaveAttribute(
-      "data-content",
-      "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable."
+    expect(markup).toContain('data-testid="custom-tooltip"');
+    expect(markup).toContain(
+      'data-content="The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable."'
     );
-    expect(tooltip).toHaveAttribute("data-placement", "top");
-    expect(tooltip).toHaveAttribute("data-delay-show", "200");
-    expect(badge).toHaveAttribute("type", "button");
-    expect(badge).toHaveClass("tw-cursor-help");
+    expect(markup).toContain('data-placement="top"');
+    expect(markup).toContain('data-delay-show="200"');
+    expect(markup).toContain("<button");
+    expect(markup).toContain('type="button"');
+    expect(markup).toContain("tw-cursor-help");
+    expect(markup).toContain("Additional Action");
   });
 
   it("can disable keyboard focus when rendered inside another focus target", () => {
-    render(<AdditionalActionPromiseBadge focusable={false} />);
+    const markup = renderToStaticMarkup(
+      <AdditionalActionPromiseBadge focusable={false} />
+    );
 
-    const badge = screen.getByText("Additional Action");
-
-    expect(badge.tagName).toBe("SPAN");
-    expect(badge).not.toHaveAttribute("tabindex");
+    expect(markup).toContain('<span class="');
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("tabindex=");
   });
 });
