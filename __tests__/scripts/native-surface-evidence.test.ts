@@ -132,9 +132,10 @@ describe("native surface evidence", () => {
     return cwd;
   }
 
-  it("classifies the current repo as simulation-only unless real package projects exist", () => {
+  it("classifies a fixture repo as simulation-only unless real package projects exist", () => {
+    const cwd = fixture();
     const evidence = createNativeEvidence({
-      cwd: process.cwd(),
+      cwd,
       commandRunner: commandRunner([]),
       platform: "win32",
     });
@@ -157,7 +158,7 @@ describe("native surface evidence", () => {
       "capacitor-android-sim",
       "electron-shell-sim",
     ]);
-    expect(formatText(evidence)).not.toContain(process.cwd());
+    expect(formatText(evidence)).not.toContain(cwd);
   });
 
   it("requires Android native project files and host tools before claiming package prerequisites", () => {
@@ -455,9 +456,9 @@ describe("native surface evidence", () => {
         timeout: TEST_COMMAND_TIMEOUT_MS,
       }
     );
+    expect(result.status).toBe(0);
     const evidence = JSON.parse(fs.readFileSync(outputPath, "utf8"));
 
-    expect(result.status).toBe(0);
     expect(evidence.schema_version).toBe(NATIVE_EVIDENCE_SCHEMA_VERSION);
     expect(JSON.stringify(evidence)).not.toContain(process.cwd());
   });
