@@ -4,6 +4,42 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-23T05:00Z:
+  - Current active worktree:
+    `D:\repos\6529seize-frontend-admin-guards`.
+  - Current active branch:
+    `codex/e2e-admin-destructive-guards`, based on current `origin/main`
+    `fe4af27e79e1`.
+  - Active slice is test-only admin/destructive fail-closed E2E hardening:
+    add `tests/admin/admin-destructive-guards-readonly.spec.ts`, wire
+    `test:e2e:admin-guards-readonly`, add staging/production variants, and add
+    the pack to `test:e2e:production:readonly`.
+  - Scope is deliberately read-only and unauthenticated: NextGen manager must
+    show a disconnected or non-admin permission boundary and no admin action
+    buttons; Drop Forge landing, craft, and launch routes must show permission
+    fallback and no claim/action controls; public Groups must wait for the
+    groups API/card render and hide owner, edit/delete, and Rep/NIC bulk voting
+    controls without a connected profile.
+  - Validation target before PR: run the new local pack across desktop/mobile,
+    Playwright typecheck, package-json lint, changed lint/typecheck, risk and
+    secret/workflow scans where applicable, and `codex-diff-check`; then trigger
+    existing 6529bot lanes plus GLM swarm on the PR without removing any
+    existing reviewbot lane.
+  - Current validation evidence:
+    - `seize run test:e2e:admin-guards-readonly`: 6/6 passed locally across
+      desktop and mobile.
+    - `seize run test:e2e:staging:admin-guards-readonly` with local Credential
+      Manager target `STAGING_AUTH`: 6/6 passed across desktop and mobile.
+    - `seize run test:e2e:production:admin-guards-readonly`: 3/3 passed on
+      production desktop.
+    - `seize run test:e2e:production:readonly`: 68/68 passed on production
+      desktop with the new admin pack included.
+    - `seize run typecheck:playwright`, `seize run lint:package-json`,
+      targeted ESLint, `seize run typecheck:changed`, `seize run lint:changed`,
+      risk floor, secret scan, workflow-security validation, and
+      `codex-diff-check` passed. Risk floor is Level 4 because `package.json`
+      release-validation scripts changed.
+
 - Latest testing-roadmap state, 2026-06-22T21:07Z:
   - PR #2847 is merged and deployed. Production serves
     `0c55e0c628541fb2ac695d87f871568848e7c057`.

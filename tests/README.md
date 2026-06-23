@@ -90,6 +90,10 @@ Surface matrix:
   projects.
 - `test:e2e:public-groups-tools-readonly` runs the public Groups, Subscriptions
   Report, and Meme Calendar read-only pack on both baseline web projects.
+- `test:e2e:admin-guards-readonly` runs unauthenticated fail-closed coverage for
+  the NextGen manager boundary, Drop Forge gated route boundaries, and public
+  Groups owner/vote-all control absence on both baseline web projects, with the
+  mutation guard enabled even locally.
 - `test:e2e:public-content-readonly` runs the public legacy content pack on
   both baseline web projects, with the mutation guard enabled even locally.
 - `test:e2e:authenticated-shells-readonly` runs authenticated, read-only
@@ -166,6 +170,11 @@ Surface matrix:
 - `test:e2e:production:public-groups-tools-readonly` runs the same public
   Groups/Tools/Calendar pack against production desktop web only as a public,
   read-only smoke.
+- `test:e2e:staging:admin-guards-readonly` runs the admin/destructive guard
+  pack against staging with the remote mutation guard and staging access
+  unlock.
+- `test:e2e:production:admin-guards-readonly` runs the admin/destructive guard
+  pack against production desktop web only as a public, read-only smoke.
 - `test:e2e:staging:public-content-readonly` runs the public content pack
   against staging with the remote mutation guard and staging access unlock.
 - `test:e2e:production:public-content-readonly` runs the public content pack
@@ -227,6 +236,12 @@ Large-pack ownership:
   changing public Groups, profile Groups redirects, Subscriptions Report, Meme
   Calendar, subscription download affordances, calendar locale/timezone controls,
   or read-only mutation guard behavior.
+- `test:e2e:admin-guards-readonly` is owned by PR or train owners changing
+  NextGen admin/manager gates, Drop Forge access or claim routes, public Groups
+  owner controls, vote-all affordances, wallet/session gating, route protection,
+  or read-only mutation guard behavior. It is an unauthenticated fail-closed
+  pack: it verifies disconnected users see permission boundaries and do not see
+  admin, claim, owner, delete, edit, or bulk-voting controls.
 - `test:e2e:public-content-readonly` is owned by PR or train owners changing
   education, museum, OM, news, capital, blog, author, legacy content rendering,
   image/link rendering, route canonicalizing, or read-only mutation guard

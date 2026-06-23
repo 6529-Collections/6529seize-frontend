@@ -3642,3 +3642,75 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`
 - Next action: commit/push this follow-up, update PR #2848 evidence, re-trigger
   all reviewbot lanes on the new head, and iterate only on material findings.
+
+## 2026-06-23T05:00Z Admin/Destructive Guard Pack
+
+- Started branch `codex/e2e-admin-destructive-guards` in
+  `D:\repos\6529seize-frontend-admin-guards`, based on `origin/main`
+  `fe4af27e79e1`.
+- Local env bootstrapped with `seize-local-dev bootstrap`; assigned frontend
+  port is `3180`, pointing at the shared local API/WebSocket.
+- Target slice is test-only E2E hardening for fail-closed destructive/admin
+  surfaces:
+  - NextGen manager disconnected/non-admin permission boundary and hidden admin
+    action buttons.
+  - Drop Forge landing/craft/launch permission fallback and hidden claim/action
+    controls without wallet authority.
+  - public Groups API/card readiness plus hidden create/my-groups/edit/delete
+    and Rep/NIC bulk-vote controls without a connected profile.
+- Planned wiring:
+  - `test:e2e:admin-guards-readonly` for local desktop/mobile.
+  - staging and production read-only variants.
+  - inclusion in aggregate `test:e2e:production:readonly`.
+- Validation target before PR:
+  `seize run test:e2e:admin-guards-readonly`,
+  `seize run typecheck:playwright`, `seize run lint:package-json`,
+  `seize run lint:changed`, `seize run typecheck:changed`, focused
+  risk/security scans as applicable, and `codex-diff-check`.
+
+## 2026-06-23T05:32Z Admin/Destructive Guard Validation
+
+- Implemented:
+  - `tests/admin/admin-destructive-guards-readonly.spec.ts`.
+  - package scripts `test:e2e:admin-guards-readonly`,
+    `test:e2e:staging:admin-guards-readonly`, and
+    `test:e2e:production:admin-guards-readonly`.
+  - aggregate `test:e2e:production:readonly` now includes the admin guard pack.
+  - `tests/README.md` documents scope and ownership.
+- Local validation:
+  - First run failed before tests because fresh worktree lacked
+    `config/env.schema.runtime.cjs`; fixed with `seize run build:env-schema`.
+  - First real run found the NextGen manager disconnected state shows the
+    `Connect` boundary, not the non-admin text. Updated the assertion to accept
+    either the disconnected Connect boundary or the explicit non-admin
+    restriction while still requiring all admin actions to be absent.
+  - Independent verifier found missing NextGen button labels, a brittle Drop
+    Forge countdown assertion, and Groups controls that could be checked before
+    card render. Fixed by adding the exact `Upload Allowlist` and
+    `Update Script By Index` labels, removing the countdown assertion, and
+    waiting for `/api/groups` plus a rendered group card when the API returns
+    groups.
+  - `seize run test:e2e:admin-guards-readonly`: 6/6 passed.
+  - `seize run typecheck:playwright`: passed.
+  - `seize run lint:package-json`: passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/admin/admin-destructive-guards-readonly.spec.ts`:
+    passed.
+  - `seize run typecheck:changed`: no changed TypeScript files are included in
+    `tsconfig.typecheck.json`, expected for a Playwright-only spec.
+  - `seize run lint:changed`: passed.
+  - `compute-risk-floor --changed-from origin/main`: passed, Level 4 due
+    `package.json` release-validation script changes.
+  - `scan-changed-secrets --changed-from origin/main`: clean.
+  - First workflow-security scan used an obsolete subcommand name; reran current
+    `validate-workflow-security` command successfully.
+  - `codex-diff-check`: passed.
+- Remote read-only validation:
+  - First staging run failed before navigation because `STAGING_AUTH` was not in
+    the worktree shell env.
+  - Reran staging with `STAGING_AUTH` loaded only for the child process from
+    local Windows Credential Manager target `STAGING_AUTH`; no value was
+    printed or persisted.
+  - `seize run test:e2e:staging:admin-guards-readonly`: 6/6 passed.
+  - `seize run test:e2e:production:admin-guards-readonly`: 3/3 passed.
+  - `seize run test:e2e:production:readonly`: 68/68 passed, proving aggregate
+    release validation includes and survives the new pack.
