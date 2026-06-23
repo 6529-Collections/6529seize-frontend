@@ -144,7 +144,10 @@ Surface matrix:
   sandbox on desktop Chromium. It adds and removes the deterministic quick
   reaction on the synthetic sandbox drop, then verifies that only the exact
   queryless `POST` and `DELETE` reaction mutations for that drop were allowed.
-  All other drop, drop-media, and attachment writes remain unsafe.
+  The standalone script keeps both `PLAYWRIGHT_AUTH_SANDBOX=1` and
+  `PLAYWRIGHT_COMPOSER_SANDBOX=1` enabled so its mutation auditor matches the
+  aggregate authenticated sandbox pack. All other drop, drop-media, and
+  attachment writes remain unsafe.
 - `test:e2e:auth-sandbox` runs the local authenticated sandbox on desktop
   Chromium. It includes the composer checks plus positive `/notifications`
   `/messages/create`, `/waves/create` Chat-wave, and quick reaction add/remove
