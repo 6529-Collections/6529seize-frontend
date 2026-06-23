@@ -79,7 +79,7 @@ describe("PaymentConfig", () => {
         onPaymentInfoChange={jest.fn()}
       />
     );
-    expect(screen.getByText("Designated Payee Name *")).toBeInTheDocument();
+    expect(screen.getByText("Designated Payee Name")).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText(/enter designated payee name/i)
     ).toBeInTheDocument();

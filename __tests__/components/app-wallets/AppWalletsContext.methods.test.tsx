@@ -10,18 +10,20 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: jest.fn().mockReturnValue({ isCapacitor: true }),
 }));
 
-const setMock = jest.fn().mockResolvedValue({ value: true });
-const removeMock = jest.fn().mockResolvedValue({ value: true });
-const keysMock = jest.fn().mockResolvedValue({ value: [] });
-
 jest.mock("capacitor-secure-storage-plugin", () => ({
   SecureStoragePlugin: {
-    keys: keysMock,
-    set: setMock,
+    keys: jest.fn().mockResolvedValue({ value: [] }),
+    set: jest.fn().mockResolvedValue({ value: true }),
     get: jest.fn().mockResolvedValue({ value: "{}" }),
-    remove: removeMock,
+    remove: jest.fn().mockResolvedValue({ value: true }),
   },
 }));
+
+const secureStorageMock = jest.requireMock(
+  "capacitor-secure-storage-plugin"
+).SecureStoragePlugin;
+const setMock = secureStorageMock.set as jest.Mock;
+const removeMock = secureStorageMock.remove as jest.Mock;
 
 jest.mock("ethers", () => ({
   ethers: {
@@ -43,6 +45,12 @@ jest.mock("@/helpers/time", () => ({
   Time: { now: () => ({ toSeconds: () => 1 }) },
 }));
 
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  measureMobileLaunchAsync: jest.fn(
+    async (_stepName: string, task: () => unknown) => await task()
+  ),
+}));
+
 describe("AppWalletsContext methods", () => {
   it("creates and deletes wallet", async () => {
     const wrapper = ({ children }: any) => (
@@ -52,9 +60,9 @@ describe("AppWalletsContext methods", () => {
 
     // Wait for context to be defined
     await waitFor(() => expect(result.current.createAppWallet).toBeDefined());
+    await waitFor(() => expect(result.current.appWalletsSupported).toBe(true));
 
     // Test wallet creation - this will test whether the secure storage is called
-    // Even if appWalletsSupported is false, the method should exist and return false
     const createResult = await act(
       async () => await result.current.createAppWallet("n", "p")
     );
@@ -67,11 +75,7 @@ describe("AppWalletsContext methods", () => {
     // The methods should exist and return boolean values
     expect(typeof createResult).toBe("boolean");
     expect(typeof deleteResult).toBe("boolean");
-
-    // If supported, the mocks should have been called
-    if (result.current.appWalletsSupported) {
-      expect(setMock).toHaveBeenCalled();
-      expect(removeMock).toHaveBeenCalled();
-    }
+    expect(setMock).toHaveBeenCalled();
+    expect(removeMock).toHaveBeenCalled();
   });
 });

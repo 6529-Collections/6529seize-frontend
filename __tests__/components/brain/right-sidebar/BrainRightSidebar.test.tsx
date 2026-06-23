@@ -68,7 +68,6 @@ describe("BrainRightSidebar", () => {
         mode: Mode.CONTENT,
         activeTab: SidebarTab.ABOUT,
         setActiveTab,
-        onDropClick,
       })
     );
     expect(screen.getByTestId("content")).toBeInTheDocument();

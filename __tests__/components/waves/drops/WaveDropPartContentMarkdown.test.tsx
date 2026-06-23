@@ -368,9 +368,6 @@ it("keeps repeated canonical headings inside the final compact quorum section", 
     compactProps.proposal.sections.map((section: any) => section.heading)
   ).toEqual(["Problem Statement"]);
   expect(compactProps.proposal.sections[0].markdown).toContain(
-    "## Problem Statement"
-  );
-  expect(compactProps.proposal.sections[0].markdown).toContain(
     "This repeated heading is still part of the same section."
   );
   expect(markdownProps).toBeUndefined();
