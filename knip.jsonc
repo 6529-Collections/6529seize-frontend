@@ -5,7 +5,8 @@
     "project": [
       "**/*.{ts,tsx,js,jsx,cjs,mjs}",
       "!{node_modules,.next,coverage,public}/**",
-      "!{tmp_gen_outp}/**"
+      "!{tmp_gen_outp,tmp_gen_final}/**",
+      "!.generated-backup-*/**"
     ],
 
     // 2) Optionally add entries Knip can't infer from scripts/configs
@@ -99,6 +100,7 @@
       "istanbul-lib-coverage",
       "jest-environment-jsdom",
       "nodemon",
+      "@openapitools/openapi-generator-cli",
       "ts-jest",
       "ts-morph",
       "baseline-browser-mapping",
