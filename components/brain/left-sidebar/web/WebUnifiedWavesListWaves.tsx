@@ -109,7 +109,7 @@ function SidebarCategoryLabel({
   readonly tooltipId?: string | undefined;
 }) {
   return (
-    <div className="tw-px-5 tw-pb-1.5 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-500">
+    <div className="tw-px-5 tw-pb-2 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-500">
       <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
         <span>{label}</span>
         {tooltipContent && tooltipId && (
