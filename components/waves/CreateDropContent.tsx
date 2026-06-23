@@ -11,15 +11,15 @@ import type {
 } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
-import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { selectEditingDropId } from "@/store/editSlice";
+import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
@@ -35,7 +35,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
@@ -49,16 +49,25 @@ import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import type { CreateDropInputHandles } from "./CreateDropInput";
 import CreateDropInput from "./CreateDropInput";
 import CreateDropMetadata from "./CreateDropMetadata";
+import CreateDropPoll, {
+  createDefaultDropPollDraft,
+  validateCreateDropPollDraft,
+  type CreateDropPollDraft,
+} from "./CreateDropPoll";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
+import SlowModeChatNotice from "./SlowModeChatNotice";
 
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
+import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useWebSocket } from "@/services/websocket";
@@ -82,9 +91,14 @@ import {
   hasCurrentDropPartContent,
   shouldUseInitialDropConfig,
 } from "./utils/createDropContentSubmission";
+import {
+  hasPendingInlineImageUploadDrop,
+  hasPendingInlineImageUploadMarkdown,
+} from "@/helpers/waves/inline-image-upload.helpers";
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
+import { toApiCreateDropPart } from "./utils/createDropRequestPart";
 import { buildDropSubmissionMetadata } from "./utils/buildDropSubmissionMetadata";
 import { getIdentitySubmissionMetadataErrors } from "./utils/identitySubmissionMetadataValidation";
 import {
@@ -102,6 +116,12 @@ import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import type { IdentityPickerPlacement } from "./dropComposer.types";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  CHAT_LINK_RESTRICTION_MESSAGE,
+  areHandlesEqual,
+  isChatLinkRestrictionApplicable,
+} from "@/helpers/waves/chat-link-restriction.helpers";
+import { useLatestEditableChatDropTarget } from "./hooks/useLatestEditableChatDropTarget";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -151,9 +171,10 @@ interface CreateDropContentProps {
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly onSwitchToDropModeWithUrl: (url: string) => void;
-  readonly submitDrop: (dropRequest: DropMutationBody) => void;
+  readonly submitDrop: (dropRequest: DropMutationBody) => boolean;
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
+  readonly isChatBlockedBySlowMode: boolean;
   readonly submissionExperience: WaveSubmissionExperience;
   readonly canSubmitCurationUrl?: boolean | undefined;
   readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
@@ -248,11 +269,13 @@ const hasSubmissionContent = ({
   files,
   parts,
   hasMetadata,
+  hasPoll,
 }: {
   readonly markdown: string | null;
   readonly files: File[];
   readonly parts: CreateDropPart[];
   readonly hasMetadata: boolean;
+  readonly hasPoll: boolean;
 }): boolean => {
   if (markdown && markdown.trim().length > 0) {
     return true;
@@ -266,7 +289,11 @@ const hasSubmissionContent = ({
     return true;
   }
 
-  return hasMetadata;
+  if (hasMetadata) {
+    return true;
+  }
+
+  return hasPoll;
 };
 
 const ensurePartsWithFallback = (
@@ -388,6 +415,7 @@ export interface UploadingFile {
   file: File;
   isUploading: boolean;
   progress: number;
+  phase: "uploading" | "processing";
 }
 
 const generateMediaForPart = async (
@@ -396,14 +424,21 @@ const generateMediaForPart = async (
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
-    { file: media, isUploading: true, progress: 0 },
+    { file: media, isUploading: true, progress: 0, phase: "uploading" },
   ]);
   return await multiPartUpload({
     file: media,
     path: "drop",
+    waitForReady: false,
     onProgress: (progress) =>
       setUploadingFiles((prev) =>
         prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
+      ),
+    onProcessing: () =>
+      setUploadingFiles((prev) =>
+        prev.map((uf) =>
+          uf.file === media ? { ...uf, progress: 100, phase: "processing" } : uf
+        )
       ),
   }).finally(() => {
     setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
@@ -416,7 +451,7 @@ const generateAttachmentForPart = async (
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
-    { file: attachment, isUploading: true, progress: 0 },
+    { file: attachment, isUploading: true, progress: 0, phase: "uploading" },
   ]);
   return await multiPartAttachmentUpload({
     file: attachment,
@@ -483,16 +518,9 @@ const generateParts = async (
   }
 };
 
-const stripUploadedAttachments = (
+const toApiCreateDropParts = (
   parts: CreateDropRequestPart[]
-): ApiCreateDropPart[] =>
-  parts.map(({ uploaded_attachments, attachments, ...part }) => {
-    const requestPart: ApiCreateDropPart = { ...part };
-    if (attachments?.length) {
-      requestPart.attachments = attachments;
-    }
-    return requestPart;
-  });
+): ApiCreateDropRequest["parts"] => parts.map(toApiCreateDropPart);
 
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
@@ -509,6 +537,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   submitDrop,
   dropModeToggleExitLabel,
   canExitDropMode,
+  isChatBlockedBySlowMode,
   submissionExperience,
   canSubmitCurationUrl = true,
   curationUrlSubmitRestrictionMessage = null,
@@ -523,13 +552,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const actionsContainerRef = useRef<HTMLDivElement>(null);
   const [actionsContainerElement, setActionsContainerElement] =
     useState<HTMLDivElement | null>(null);
-  const hasUserToggledOptionsRef = useRef(false);
+  const shouldAnimateOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
   const [isWideContainer, setIsWideContainer] = useState(false);
+  const dispatch = useDispatch();
   const editingDropId = useSelector(selectEditingDropId);
-  const { requestAuth, setToast, connectedProfile } = useAuth();
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+    useAuth();
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
+  const waveChatScroll = useWaveChatScrollOptional();
   const { signDrop } = useDropSignature();
 
   const [submitting, setSubmitting] = useState(false);
@@ -538,6 +570,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [metadataOpenState, setMetadataOpenState] =
     useState<ScopedValueState<boolean> | null>(null);
+  const [pollDraftState, setPollDraftState] =
+    useState<ScopedValueState<CreateDropPollDraft> | null>(null);
   const [showOptionsState, setShowOptionsState] =
     useState<ScopedValueState<boolean> | null>(null);
   const [selectedIdentityState, setSelectedIdentityState] =
@@ -551,18 +585,21 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [identityPickerErrorMessageState, setIdentityPickerErrorMessageState] =
     useState<ScopedValueState<string | null> | null>(null);
   const closeOnNextInputRef = useRef(false);
+  const shouldCollapseOptionsAfterMarkdownSyncRef = useRef(false);
   const prevIsDropModeRef = useRef(isDropMode);
   const [dropModeSessionEpoch, setDropModeSessionEpoch] = useState(0);
   const isWaveChanged = prevWaveIdRef.current !== wave.id;
   if (isWaveChanged) {
     prevWaveIdRef.current = wave.id;
-    hasUserToggledOptionsRef.current = false;
+    shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
   }
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
   const showOptions =
-    isWideContainer ||
-    (showOptionsState?.scopeKey === wave.id ? showOptionsState.value : false);
+    showOptionsState?.scopeKey === wave.id
+      ? showOptionsState.value
+      : isWideContainer;
 
   const setActionsContainerRef = useCallback((node: HTMLDivElement | null) => {
     actionsContainerRef.current = node;
@@ -687,22 +724,58 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
   const canMentionAll = wave.wave.authenticated_user_eligible_for_admin;
+  const canCreatePoll = canMentionAll === true && !isDropMode;
+  const pollDraft =
+    canCreatePoll && pollDraftState?.scopeKey === wave.id
+      ? pollDraftState.value
+      : null;
+  const pollValidation = useMemo(
+    () => validateCreateDropPollDraft(pollDraft),
+    [pollDraft]
+  );
+  const hasPoll = pollDraft !== null;
+  const hasValidPoll = pollValidation.request !== null;
+  const hasPollValidationError = hasPoll && pollValidation.error !== null;
 
   const getMarkdown = useMemo(
     () =>
       editorState
-        ? exportDropMarkdown(editorState, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-            HASHTAG_TRANSFORMER,
-            WAVE_MENTION_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ])
+        ? normalizeTypedEmojiShortcuts(
+            exportDropMarkdown(editorState, [
+              ...SAFE_MARKDOWN_TRANSFORMERS,
+              MENTION_TRANSFORMER,
+              ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
+              HASHTAG_TRANSFORMER,
+              WAVE_MENTION_TRANSFORMER,
+              IMAGE_TRANSFORMER,
+              EMOJI_TRANSFORMER,
+            ])
+          )
         : null,
     [canMentionAll, editorState]
   );
+  const collapseOptions = useCallback(() => {
+    shouldAnimateOptionsRef.current = true;
+    setShowOptionsState((current) =>
+      current?.scopeKey === wave.id && current.value === false
+        ? current
+        : { scopeKey: wave.id, value: false }
+    );
+    closeOnNextInputRef.current = false;
+  }, [wave.id]);
+  useLayoutEffect(() => {
+    if (!shouldCollapseOptionsAfterMarkdownSyncRef.current) {
+      return;
+    }
+
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
+
+    if ((getMarkdown?.trim().length ?? 0) === 0) {
+      return;
+    }
+
+    collapseOptions();
+  }, [collapseOptions, getMarkdown]);
   const currentPartMentionedGroups = useMemo(
     () =>
       editorState
@@ -736,6 +809,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return true;
   };
 
+  const hasPendingInlineImageUpload = useMemo(
+    () =>
+      hasPendingInlineImageUploadMarkdown(getMarkdown) ||
+      (drop ? hasPendingInlineImageUploadDrop(drop) : false),
+    [drop, getMarkdown]
+  );
+
   const getCanSubmit = () => {
     const dropParts = drop?.parts ?? [];
 
@@ -745,8 +825,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         files,
         parts: dropParts,
         hasMetadata,
+        hasPoll: hasValidPoll,
       }) &&
+      !hasPendingInlineImageUpload &&
       !hasMetadataValidationErrors &&
+      !hasPollValidationError &&
       !!(dropParts.length ? getCanSubmitStorm() : true)
     );
   };
@@ -759,9 +842,69 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       getMarkdown?.length ?? 0
     ) ?? 0) >= 24000;
 
-  const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
-  const canSubmit = getCanSubmit();
+  const getCanAddPart = () =>
+    getHaveMarkdownOrFile() &&
+    !hasPendingInlineImageUpload &&
+    !getIsDropLimit();
+  const isSlowModeSubmitBlocked = isChatBlockedBySlowMode && !isDropMode;
+  const isChatLinksRestrictionActive = isChatLinkRestrictionApplicable({
+    dropType: ApiDropType.Chat,
+    linksDisabled: wave.chat.links_disabled === true,
+    isWaveAdmin: wave.wave.authenticated_user_eligible_for_admin === true,
+    isWaveCreator: areHandlesEqual(
+      connectedProfile?.handle,
+      wave.author.handle
+    ),
+  });
+  const hasChatContentWithLink = useMemo(() => {
+    if (!isChatLinksRestrictionActive || isDropMode) {
+      return false;
+    }
+
+    const contentParts = [
+      getMarkdown,
+      ...(drop?.parts.map((part) => part.content ?? null) ?? []),
+    ];
+
+    return contentParts.some(containsDisallowedLink);
+  }, [drop?.parts, getMarkdown, isChatLinksRestrictionActive, isDropMode]);
+  const isLinksSubmitBlocked = hasChatContentWithLink;
+  const canSubmit =
+    getCanSubmit() && !isSlowModeSubmitBlocked && !isLinksSubmitBlocked;
   const canAddPart = getCanAddPart();
+  const latestEditableChatDropTarget = useLatestEditableChatDropTarget({
+    waveId: wave.id,
+    connectedProfile,
+    isProxyMode: Boolean(activeProfileProxy),
+  });
+  const canEditLastDropWithArrow =
+    !isDropMode &&
+    !isStormModeActive &&
+    !submitting &&
+    editingDropId === null &&
+    activeDrop === null &&
+    (getMarkdown?.trim().length ?? 0) === 0 &&
+    files.length === 0 &&
+    (drop?.parts.length ?? 0) === 0 &&
+    latestEditableChatDropTarget !== null;
+  const handleRequestEditLastDrop = useCallback((): boolean => {
+    if (!canEditLastDropWithArrow || !latestEditableChatDropTarget) {
+      return false;
+    }
+
+    dispatch(setEditingDropId(latestEditableChatDropTarget.id));
+    waveChatScroll?.requestScrollToSerialNo({
+      waveId: wave.id,
+      serialNo: latestEditableChatDropTarget.serialNo,
+    });
+    return true;
+  }, [
+    canEditLastDropWithArrow,
+    dispatch,
+    latestEditableChatDropTarget,
+    wave.id,
+    waveChatScroll,
+  ]);
   const normalizedCurationDropUrl = useMemo(() => {
     if (!isCurationSubmissionExperience || isDropMode) {
       return null;
@@ -805,6 +948,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
+  const shouldRefocusAfterChatSubmitRef = useRef(false);
   const isInitialMountRef = useRef(true);
 
   const identityValidationMessage = useMemo(() => {
@@ -860,6 +1004,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   }, [isDropMode, isIdentitySubmissionExperience, metadata, selectedIdentity]);
 
+  const getPollRequest = () => {
+    if (!canCreatePoll) {
+      return null;
+    }
+
+    return pollValidation.request;
+  };
+
   const getReplyTo = () => {
     if (activeDrop?.action === ActiveDropAction.REPLY) {
       return {
@@ -876,10 +1028,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       const baseParts = drop?.parts.length ? drop.parts : [];
       const replyTo = getReplyTo();
       const replyToObj = replyTo ? { reply_to: replyTo } : {};
+      const pollRequest = getPollRequest();
+      const pollObj = pollRequest ? { poll: pollRequest } : {};
       return {
         title: null,
         ...replyToObj,
-        parts: ensurePartsWithFallback(baseParts, hasMetadata),
+        ...pollObj,
+        parts: ensurePartsWithFallback(baseParts, hasMetadata || hasValidPoll),
         mentioned_users: drop?.mentioned_users ?? [],
         mentioned_groups: getMentionedGroupsFromParts(baseParts, canMentionAll),
         mentioned_waves: drop?.mentioned_waves ?? [],
@@ -898,6 +1053,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const replyToObj = replyTo ? { reply_to: replyTo } : {};
 
   const createGifDrop = (gif: string): CreateDropConfig => {
+    const pollRequest = getPollRequest();
+    const pollObj = pollRequest ? { poll: pollRequest } : {};
     const parts: CreateDropPart[] = [
       ...(drop?.parts ?? []),
       {
@@ -918,6 +1075,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       title: null,
       drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       ...replyToObj,
+      ...pollObj,
       parts,
       mentioned_users: [],
       mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
@@ -964,13 +1122,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             },
           ];
 
-    const parts = ensurePartsWithFallback(nonCurationParts, hasMetadata);
+    const parts = ensurePartsWithFallback(
+      nonCurationParts,
+      hasMetadata || hasValidPoll
+    );
+    const pollRequest = getPollRequest();
+    const pollObj = pollRequest ? { poll: pollRequest } : {};
     const replyTo = getReplyTo();
     const replyToObj = replyTo ? { reply_to: replyTo } : {};
     return {
       title: null,
       drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       ...replyToObj,
+      ...pollObj,
       parts,
       mentioned_users: allMentions,
       mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
@@ -1015,6 +1179,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const updateDropStateAndClearInput = (newDrop: CreateDropConfig) => {
     setDrop(newDrop);
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     createDropInputRef.current?.clearEditorState();
     setFiles([]);
   };
@@ -1064,6 +1229,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     createDropInputRef.current?.clearEditorState();
     setEditorState(null);
     setMetadata(initialMetadata);
+    setPollDraftState(null);
     setMentionedUsers([]);
     setMentionedWaves([]);
     setReferencedNfts([]);
@@ -1074,9 +1240,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setIdentityPickerOpenState(null);
     setIdentityPickerErrorMessageState(null);
     setShowOptionsState(null);
+    shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     setDropEditorRefreshKey((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    if (!shouldRefocusAfterChatSubmitRef.current || submitting) {
+      return;
+    }
+
+    shouldRefocusAfterChatSubmitRef.current = false;
+    const frameId = requestAnimationFrame(() => {
+      createDropInputRef.current?.focus();
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [dropEditorRefreshKey, submitting]);
 
   const getUpdatedDropRequest = async (
     requestBody: ApiCreateDropRequest
@@ -1140,6 +1321,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (dropRequest.drop_type === ApiDropType.Chat && isChatBlockedBySlowMode) {
+      return;
+    }
+
+    if (
+      dropRequest.drop_type === ApiDropType.Chat &&
+      isChatLinksRestrictionActive &&
+      dropRequest.parts.some((part) => containsDisallowedLink(part.content))
+    ) {
+      return;
+    }
+
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -1161,7 +1354,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         setSubmitting(false);
         return;
       }
-      const parts = stripUploadedAttachments(generatedParts);
+      const parts = toApiCreateDropParts(generatedParts);
 
       const requestBody: ApiCreateDropRequest = {
         ...dropRequest,
@@ -1188,12 +1381,37 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       }
 
       const optimisticDrop = getOptimisticDrop(
-        updatedDropRequest,
+        {
+          ...updatedDropRequest,
+          parts: updatedDropRequest.parts.map((part, index) => ({
+            ...part,
+            media: generatedParts[index]?.media ?? part.media,
+          })),
+        },
         connectedProfile,
         wave,
         activeDrop,
         isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
       );
+
+      const submitAccepted = submitDrop({
+        drop: updatedDropRequest,
+        dropId: optimisticDrop?.id ?? null,
+        onSuccess:
+          isDropMode && canExitDropMode
+            ? () => handleDropModeChange(false)
+            : undefined,
+        onError:
+          isDropMode && canExitDropMode
+            ? handleDuplicateIdentitySubmissionError
+            : undefined,
+      });
+      if (!submitAccepted) {
+        return;
+      }
+
+      const shouldKeepChatFocused =
+        updatedDropRequest.drop_type === ApiDropType.Chat;
 
       if (optimisticDrop) {
         const optimisticDropWithAttachments = {
@@ -1213,13 +1431,20 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           0
         );
       }
-      !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
-      (document.activeElement as HTMLElement).blur();
-      if (isApp) {
-        import("@capacitor/core").then(({ Capacitor }) => {
+      if (getMarkdown?.length) {
+        shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
+        createDropInputRef.current?.clearEditorState();
+      }
+      if (shouldKeepChatFocused) {
+        shouldRefocusAfterChatSubmitRef.current = true;
+      } else if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      if (isApp && !shouldKeepChatFocused) {
+        void import("@capacitor/core").then(({ Capacitor }) => {
           if (Capacitor.getPlatform() === "android") {
-            import("@capacitor/keyboard").then(({ Keyboard }) => {
-              Keyboard.hide().catch(() => {});
+            void import("@capacitor/keyboard").then(({ Keyboard }) => {
+              void Keyboard.hide().catch(() => {});
             });
           }
         });
@@ -1232,23 +1457,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         });
       }
       refreshState();
-
-      submitDrop({
-        drop: updatedDropRequest,
-        dropId: optimisticDrop?.id ?? null,
-        onSuccess:
-          isDropMode && canExitDropMode
-            ? () => handleDropModeChange(false)
-            : undefined,
-        onError:
-          isDropMode && canExitDropMode
-            ? handleDuplicateIdentitySubmissionError
-            : undefined,
-      });
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't submit this drop.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setSubmitting(false);
@@ -1271,6 +1485,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (hasPendingInlineImageUpload) {
+      return;
+    }
+
+    if (isSlowModeSubmitBlocked) {
+      return;
+    }
+
+    if (isLinksSubmitBlocked) {
+      return;
+    }
+
     if (identityValidationMessage) {
       setHasAttemptedIdentitySubmitState({
         scopeKey: identitySubmissionSessionScopeKey,
@@ -1284,6 +1510,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         scopeKey: dropModeSessionScopeKey,
         value: true,
       });
+      return;
+    }
+
+    if (hasPollValidationError) {
       return;
     }
 
@@ -1310,6 +1540,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (submitting) {
       return;
     }
+    if (hasPendingInlineImageUpload) {
+      return;
+    }
     if (identityValidationMessage) {
       setHasAttemptedIdentitySubmitState({
         scopeKey: identitySubmissionSessionScopeKey,
@@ -1323,6 +1556,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         scopeKey: dropModeSessionScopeKey,
         value: true,
       });
+      return;
+    }
+
+    if (hasPollValidationError) {
       return;
     }
 
@@ -1384,8 +1621,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       });
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't add this file.",
+        description: "Check the file and try again.",
+        details: getToastErrorDetails(error),
       });
       return;
     }
@@ -1432,6 +1671,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     if (!isWideContainer) {
+      shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     }
@@ -1459,7 +1699,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const handleSetShowOptions = useCallback(
     (next: boolean) => {
-      hasUserToggledOptionsRef.current = true;
+      shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: next });
       if (isWideContainer) {
         closeOnNextInputRef.current = false;
@@ -1473,12 +1713,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const handleEditorStateChange = useCallback(
     (newEditorState: EditorState) => {
       setEditorState(newEditorState);
-      if (!isWideContainer && closeOnNextInputRef.current) {
-        setShowOptionsState({ scopeKey: wave.id, value: false });
-        closeOnNextInputRef.current = false;
+      shouldCollapseOptionsAfterMarkdownSyncRef.current = true;
+
+      if (isWideContainer) {
+        return;
+      }
+
+      if (closeOnNextInputRef.current) {
+        collapseOptions();
       }
     },
-    [isWideContainer, wave.id]
+    [collapseOptions, isWideContainer]
   );
 
   const handleEditorBlur = useCallback(
@@ -1490,6 +1735,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       if (nextTarget && actionsContainerRef.current?.contains(nextTarget)) {
         return;
       }
+      shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     },
@@ -1541,6 +1787,35 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       value: false,
     });
   }, [dropModeSessionScopeKey]);
+
+  const togglePoll = useCallback(() => {
+    if (!canCreatePoll) {
+      return;
+    }
+
+    setPollDraftState((current) =>
+      current?.scopeKey === wave.id
+        ? null
+        : {
+            scopeKey: wave.id,
+            value: createDefaultDropPollDraft(),
+          }
+    );
+  }, [canCreatePoll, wave.id]);
+
+  const updatePollDraft = useCallback(
+    (value: CreateDropPollDraft) => {
+      setPollDraftState({
+        scopeKey: wave.id,
+        value,
+      });
+    },
+    [wave.id]
+  );
+
+  const removePoll = useCallback(() => {
+    setPollDraftState(null);
+  }, []);
 
   const handleDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
@@ -1829,28 +2104,45 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           <div className="tw-flex tw-w-full tw-items-end">
             <div
               ref={setActionsContainerRef}
-              className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+              className="tw-grid tw-w-full tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
             >
-              <CreateDropActions
-                isStormMode={isStormModeActive}
-                isDropMode={isDropMode}
-                canAddPart={canAddPart}
-                submitting={submitting}
-                showOptions={showOptions}
-                animateOptions={
-                  !isWideContainer && hasUserToggledOptionsRef.current
-                }
-                isRequiredMetadataMissing={
-                  !!missingRequirements.metadata.length
-                }
-                isRequiredMediaMissing={!!missingRequirements.media.length}
-                handleFileChange={handleFileChange}
-                onAddMetadataClick={openMetadata}
-                breakIntoStorm={breakIntoStorm}
-                setShowOptions={handleSetShowOptions}
-                onGifDrop={onGifDrop}
-              />
-              <div className="tw-w-full tw-flex-grow">
+              <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
+                <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
+                {isLinksSubmitBlocked && (
+                  <p
+                    className="tw-mb-2 tw-mt-0 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400"
+                    aria-live="polite"
+                  >
+                    {CHAT_LINK_RESTRICTION_MESSAGE}
+                  </p>
+                )}
+              </div>
+              <div className="tw-col-start-1 tw-row-start-2 tw-mb-1 tw-self-end">
+                <CreateDropActions
+                  isStormMode={isStormModeActive}
+                  isDropMode={isDropMode}
+                  canAddPart={canAddPart}
+                  submitting={submitting}
+                  showOptions={showOptions}
+                  animateOptions={
+                    shouldAnimateOptionsRef.current &&
+                    showOptionsState?.scopeKey === wave.id
+                  }
+                  isRequiredMetadataMissing={
+                    !!missingRequirements.metadata.length
+                  }
+                  isRequiredMediaMissing={!!missingRequirements.media.length}
+                  canCreatePoll={canCreatePoll}
+                  isPollActive={hasPoll}
+                  handleFileChange={handleFileChange}
+                  onAddMetadataClick={openMetadata}
+                  onTogglePoll={togglePoll}
+                  breakIntoStorm={breakIntoStorm}
+                  setShowOptions={handleSetShowOptions}
+                  onGifDrop={onGifDrop}
+                />
+              </div>
+              <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
                 <CreateDropInput
                   waveId={wave.id}
                   key={dropEditorRefreshKey}
@@ -1868,8 +2160,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   onMentionedUser={onMentionedUser}
                   onMentionedWave={onMentionedWave}
                   onAttachmentFiles={handleFileChange}
+                  canEditLastDropWithArrow={canEditLastDropWithArrow}
+                  onRequestEditLastDrop={handleRequestEditLastDrop}
                   onDrop={onDrop}
                 />
+                {pollDraft && (
+                  <CreateDropPoll
+                    draft={pollDraft}
+                    disabled={submitting}
+                    validationError={pollValidation.error}
+                    onChange={updatePollDraft}
+                    onRemove={removePoll}
+                  />
+                )}
                 {showCurationDropModeWarning && (
                   <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
                     This looks like a curation URL.{" "}
@@ -1895,6 +2198,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   canSubmit={canSubmit}
                   onDrop={onDrop}
                   isDropMode={isDropMode}
+                  disabledTooltip={
+                    isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
+                  }
                 />
               </div>
             </div>

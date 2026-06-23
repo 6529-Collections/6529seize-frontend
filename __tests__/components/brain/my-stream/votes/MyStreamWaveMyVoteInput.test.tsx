@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVoteInput from "@/components/brain/my-stream/votes/MyStreamWaveMyVoteInput";
 import { AuthContext } from "@/components/auth/Auth";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
   QueryKey,
@@ -38,11 +39,11 @@ const drop: any = {
   context_profile_context: { rating: 0, min_rating: 0, max_rating: 10 },
 };
 
-const expectMaxVotes = (value: string) => {
+const expectMaxVotes = (value: string, label = "Max for wave") => {
   const maxLabel = screen.getByText((_, element) => {
     return (
       element?.tagName.toLowerCase() === "p" &&
-      element.textContent?.replace(/\s+/g, " ").trim() === `Max ${value}`
+      element.textContent?.replace(/\s+/g, " ").trim() === `${label} ${value}`
     );
   });
 
@@ -70,7 +71,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     }));
   });
 
-  it("shows max votes from context", () => {
+  it("shows max votes from context with default wave scope", () => {
     const dropWithRating = {
       ...drop,
       context_profile_context: { rating: 2, min_rating: 0, max_rating: 10 },
@@ -78,6 +79,24 @@ describe("MyStreamWaveMyVoteInput", () => {
     render(<MyStreamWaveMyVoteInput drop={dropWithRating} />, { wrapper });
     expectMaxVotes("10");
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
+  });
+
+  it("shows max per drop for drop-scoped voting", () => {
+    render(
+      <MyStreamWaveMyVoteInput
+        drop={{
+          ...drop,
+          wave: {
+            ...drop.wave,
+            voting_credit_scope: ApiWaveCreditScope.Drop,
+          },
+        }}
+      />,
+      { wrapper }
+    );
+
+    expectMaxVotes("10", "Max per drop");
+    expect(screen.queryByText("Max for wave 10")).not.toBeInTheDocument();
   });
 
   it("uses the wave voting credit label in the input", () => {
@@ -105,6 +124,129 @@ describe("MyStreamWaveMyVoteInput", () => {
     });
     expectMaxVotes("10");
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
+  });
+
+  it("keeps an unchanged legacy negative vote when negative votes are forbidden", () => {
+    const dropWithLegacyNegativeRating = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: -5, min_rating: -10, max_rating: 10 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithLegacyNegativeRating} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+
+    expect(input.value).toBe("-5");
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.blur(input);
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(input.value).toBe("-5");
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("keeps a dash draft for a legacy negative vote before submitting zero", async () => {
+    const dropWithLegacyNegativeRating = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: -5, min_rating: -10, max_rating: 10 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithLegacyNegativeRating} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+
+    fireEvent.change(input, { target: { value: "-" } });
+
+    expect(input.value).toBe("-");
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.click(submitButton);
+
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.change(input, { target: { value: "0" } });
+
+    expect(input.value).toBe("0");
+    expect(submitButton).not.toBeDisabled();
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 0 });
+  });
+
+  it("submits zero when a legacy negative vote is manually changed to zero", async () => {
+    const dropWithLegacyNegativeRating = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: -5, min_rating: -10, max_rating: 10 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithLegacyNegativeRating} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+
+    fireEvent.change(input, { target: { value: "0" } });
+
+    expect(input.value).toBe("0");
+    expect(submitButton).not.toBeDisabled();
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 0 });
+  });
+
+  it("clamps typed negative values to zero when negative votes are forbidden", () => {
+    const dropWithPositiveRating = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: 4, min_rating: -10, max_rating: 10 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithPositiveRating} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: "-3" } });
+
+    expect(input.value).toBe("0");
+  });
+
+  it("keeps a positive API minimum when negative votes are forbidden", async () => {
+    const dropWithPositiveMinimum = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: 20, min_rating: 10, max_rating: 100 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithPositiveMinimum} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+
+    fireEvent.change(input, { target: { value: "5" } });
+
+    expect(input.value).toBe("10");
+    expect(submitButton).not.toBeDisabled();
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 10 });
   });
 
   it("clamps vote value within limits and submits on click", async () => {
@@ -151,13 +293,16 @@ describe("MyStreamWaveMyVoteInput", () => {
     expectMaxVotes("10");
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: [QueryKey.DROPS_LEADERBOARD],
-    });
-    expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
     });
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_DECISIONS, { waveId: "wave-1" }],
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: "wave-1" }],
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
     });
   });
 

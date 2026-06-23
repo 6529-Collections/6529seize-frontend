@@ -1,12 +1,10 @@
-@use "sass:color";
 @use "../../styles/variables.scss" as variables;
 
 .slideshowContainer {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
   background-color: rgba(0, 0, 0, 0.95);
   display: flex;
   align-items: center;
@@ -40,30 +38,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 90%;
-  max-height: 90%;
+  width: 100vw;
+  height: 100dvh;
   position: relative;
 }
 
 .slide img,
 .slide video {
-  width: 100%;
+  display: block;
+  width: auto;
   height: auto;
   max-width: 85vw;
   max-height: 85vh;
   object-fit: contain;
   border-radius: 2px;
-}
-
-.lfgButton {
-  background-color: #39ff14 !important;
-  border-color: #39ff14 !important;
-  color: variables.$very-dark-grey !important;
-
-  &:hover,
-  &:focus,
-  &:active {
-    background-color: color.scale(#39ff14, $lightness: -10%) !important;
-    border-color: color.scale(#39ff14, $lightness: -10%) !important;
-  }
 }

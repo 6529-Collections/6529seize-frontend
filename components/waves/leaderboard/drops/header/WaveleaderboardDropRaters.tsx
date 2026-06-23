@@ -1,70 +1,54 @@
 import React from "react";
+import ApprovalDropVoteSummary from "@/components/waves/drops/ApprovalDropVoteSummary";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
 } from "@/helpers/waves/waves.constants";
-import { getApprovalDropStatus } from "@/helpers/waves/approve-wave.helpers";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
 }
 
 export const WaveLeaderboardDropRaters: React.FC<
   WaveLeaderboardDropRatersProps
-> = ({ drop, winningThreshold, isVotingClosed = false }) => {
-  const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
+> = ({
+  drop,
+  winningThreshold,
+  winningThresholdMinDurationMs,
+  isVotingClosed = false,
+}) => {
+  const displayWinningThreshold =
+    typeof winningThreshold === "number" &&
+    Number.isFinite(winningThreshold) &&
+    winningThreshold > 0
+      ? winningThreshold
+      : null;
+  const hasWinningThreshold = displayWinningThreshold !== null;
+
+  if (hasWinningThreshold) {
+    return (
+      <ApprovalDropVoteSummary
+        drop={drop}
+        winningThreshold={displayWinningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+        isVotingClosed={isVotingClosed}
+        variant="leaderboard"
+      />
+    );
+  }
+
   const totalVote = drop.rating;
   const userVote = drop.context_profile_context?.rating ?? 0;
   const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const totalVoteClass = totalVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
   const userVoteClass = userVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
-  const displayWinningThreshold =
-    typeof winningThreshold === "number" && winningThreshold > 0
-      ? winningThreshold
-      : null;
-  const hasWinningThreshold = displayWinningThreshold !== null;
-  const approvalStatus =
-    displayWinningThreshold !== null
-      ? getApprovalDropStatus({
-          drop,
-          isClosed: isVotingClosed,
-          winningThreshold: displayWinningThreshold,
-        })
-      : null;
-  let approvalStatusClass: string | undefined;
-  if (
-    approvalStatus?.kind === "approved" ||
-    approvalStatus?.kind === "reached_threshold"
-  ) {
-    approvalStatusClass = "tw-text-emerald-400";
-  } else if (approvalStatus?.kind === "closed") {
-    approvalStatusClass = "tw-text-amber-300";
-  }
-  const approvalStatusLabel = (() => {
-    if (approvalStatus === null) {
-      return null;
-    }
-
-    if (approvalStatus.kind === "approved") {
-      return "Approved";
-    }
-
-    if (approvalStatus.kind === "reached_threshold") {
-      return "Reached threshold";
-    }
-
-    if (approvalStatus.kind === "closed") {
-      return "Closed";
-    }
-
-    return `Needs ${formatNumberWithCommas(approvalStatus.remaining ?? 0)}`;
-  })();
-
   const hasUserVoted = userVote !== 0;
 
   return (
@@ -74,14 +58,6 @@ export const WaveLeaderboardDropRaters: React.FC<
           <span className={`tw-font-medium ${totalVoteClass}`}>
             {formatNumberWithCommas(totalVote)}
           </span>
-          {displayWinningThreshold !== null && (
-            <>
-              <span className="tw-font-medium tw-text-iron-500">/</span>
-              <span className="tw-font-medium tw-text-iron-50">
-                {formatNumberWithCommas(displayWinningThreshold)}
-              </span>
-            </>
-          )}
           <DropVoteProgressing
             current={drop.rating}
             projected={drop.rating_prediction}
@@ -89,20 +65,12 @@ export const WaveLeaderboardDropRaters: React.FC<
           />
         </div>
         <span className="tw-whitespace-nowrap tw-font-normal tw-text-iron-400">
-          {hasWinningThreshold && approvalStatusLabel !== null ? (
-            <span className={approvalStatusClass}>{approvalStatusLabel}</span>
-          ) : (
-            <>
-              {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}
-            </>
-          )}
+          {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}
         </span>
       </div>
 
       <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap tw-text-sm tw-leading-5">
-        <span className="tw-text-iron-400">
-          {formatNumberWithCommas(drop.raters_count)} {votersCountLabel}
-        </span>
+        <ParticipationDropVoteDetailsTrigger drop={drop} />
       </div>
 
       {hasUserVoted && (

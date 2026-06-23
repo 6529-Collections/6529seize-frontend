@@ -2,6 +2,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 import GithubPreviewStatusBadge from "@/components/waves/GithubPreviewStatusBadge";
+import type { GithubPreviewResponse } from "@/services/api/github-preview-api";
 
 jest.mock("@heroicons/react/24/outline", () => ({
   SignalSlashIcon: (props: any) => (
@@ -42,6 +43,18 @@ const createIntersectionEntry = (
   time: 0,
 });
 
+const createBatchResponse = (
+  href: string,
+  preview: GithubPreviewResponse
+): Response =>
+  ({
+    ok: true,
+    json: async () => ({
+      results: [{ url: href, preview }],
+      errors: [],
+    }),
+  }) as Response;
+
 describe("GithubPreviewStatusBadge", () => {
   const originalFetch = globalThis.fetch;
   const originalIntersectionObserver = globalThis.IntersectionObserver;
@@ -68,7 +81,7 @@ describe("GithubPreviewStatusBadge", () => {
     expect(screen.queryByTestId("github-preview-status-badge")).toBeNull();
   });
 
-  it("renders a loading badge while status metadata is pending", () => {
+  it("renders a loading badge while status metadata is pending", async () => {
     fetchMock.mockImplementationOnce(() => new Promise(() => undefined));
 
     render(
@@ -78,6 +91,9 @@ describe("GithubPreviewStatusBadge", () => {
     expect(screen.getByTestId("github-preview-status-badge")).toHaveTextContent(
       "Loading status"
     );
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("renders status immediately when OpenGraph metadata includes GitHub preview state", () => {
@@ -103,41 +119,183 @@ describe("GithubPreviewStatusBadge", () => {
     expect(screen.getByTestId("github-preview-status-badge")).toHaveTextContent(
       "Merged"
     );
+    expect(screen.getByTestId("github-preview-repo-label")).toHaveTextContent(
+      "Frontend"
+    );
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("renders a known 6529 repository label for easier scanning", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-backend/issues/1661"
+        initialPreview={{
+          type: "github.issue",
+          owner: "6529-Collections",
+          repo: "6529seize-backend",
+          number: 1661,
+          title: "Backend issue",
+          state: "closed_completed",
+          assignees: [],
+          url: "https://github.com/6529-Collections/6529seize-backend/issues/1661",
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("github-preview-repo-label")).toHaveTextContent(
+      "Backend"
+    );
+    expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
+      "aria-label",
+      "6529-Collections/6529seize-backend: Completed · Unassigned"
+    );
+  });
+
   it("renders issue completion state after the GitHub metadata request resolves", async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
+    const href =
+      "https://github.com/6529-Collections/6529seize-frontend/issues/2308";
+    fetchMock.mockResolvedValueOnce(
+      createBatchResponse(href, {
         type: "github.issue",
         owner: "6529-Collections",
         repo: "6529seize-frontend",
         number: 2308,
         title: "Remove tab",
         state: "closed_completed",
-        url: "https://github.com/6529-Collections/6529seize-frontend/issues/2308",
-      }),
-    });
-
-    render(
-      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/issues/2308" />
+        assignees: ["alice"],
+        url: href,
+      })
     );
 
+    render(<GithubPreviewStatusBadge href={href} />);
+
     await waitFor(() => {
-      expect(
-        screen.getByTestId("github-preview-status-badge")
-      ).toHaveTextContent("Completed");
+      expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
+        "aria-label",
+        "6529-Collections/6529seize-frontend: Completed · @alice"
+      );
     });
+    expect(
+      screen.getByTestId("github-preview-assignee-label")
+    ).toHaveTextContent("@alice");
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/github-preview?url=https%3A%2F%2Fgithub.com%2F6529-Collections%2F6529seize-frontend%2Fissues%2F2308",
+      "/api/github-preview",
       expect.objectContaining({
-        headers: { Accept: "application/json" },
+        method: "POST",
+        body: JSON.stringify({
+          urls: [href],
+        }),
       })
     );
   });
 
+  it("renders unassigned for issue previews without an assignee", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-frontend/issues/2308"
+        initialPreview={{
+          type: "github.issue",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2308,
+          title: "Remove tab",
+          state: "open",
+          assignees: [],
+          url: "https://github.com/6529-Collections/6529seize-frontend/issues/2308",
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
+      "aria-label",
+      "6529-Collections/6529seize-frontend: Open · Unassigned"
+    );
+    expect(
+      screen.getByTestId("github-preview-assignee-label")
+    ).toHaveTextContent("Unassigned");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("renders one mobile assignee and both desktop assignees for two assignees", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-frontend/issues/2314"
+        initialPreview={{
+          type: "github.issue",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2314,
+          title: "Multi owner",
+          state: "open",
+          assignees: ["alice", "bob"],
+          url: "https://github.com/6529-Collections/6529seize-frontend/issues/2314",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByTestId("github-preview-assignee-mobile-label")
+    ).toHaveTextContent("@alice +1");
+    expect(
+      screen.getByTestId("github-preview-assignee-desktop-label")
+    ).toHaveTextContent("@alice, @bob");
+    expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
+      "aria-label",
+      "6529-Collections/6529seize-frontend: Open · @alice, @bob"
+    );
+  });
+
+  it("renders a compact count for issue previews with more than two assignees", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-frontend/issues/2315"
+        initialPreview={{
+          type: "github.issue",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2315,
+          title: "Multi owner",
+          state: "open",
+          assignees: ["alice", "bob", "carol"],
+          url: "https://github.com/6529-Collections/6529seize-frontend/issues/2315",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByTestId("github-preview-assignee-label")
+    ).toHaveTextContent("@alice +2");
+  });
+
+  it("does not render an assignee badge for pull request previews", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-frontend/pull/2309"
+        initialPreview={{
+          type: "github.pull_request",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2309,
+          title: "Fix tab",
+          state: "open",
+          reviewState: "none",
+          mergeableState: "clean",
+          merged: false,
+          draft: false,
+          url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("github-preview-status-badge")).toHaveTextContent(
+      "Open"
+    );
+    expect(screen.queryByTestId("github-preview-assignee-label")).toBeNull();
+  });
+
   it("does not fetch status until the badge enters the viewport", async () => {
+    const href =
+      "https://github.com/6529-Collections/6529seize-frontend/issues/2312";
     let triggerIntersection = (_isIntersecting: boolean) => {};
     class TestIntersectionObserver implements IntersectionObserver {
       readonly root = null;
@@ -156,22 +314,20 @@ describe("GithubPreviewStatusBadge", () => {
       unobserve = jest.fn();
     }
     globalThis.IntersectionObserver = TestIntersectionObserver;
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
+    fetchMock.mockResolvedValueOnce(
+      createBatchResponse(href, {
         type: "github.issue",
         owner: "6529-Collections",
         repo: "6529seize-frontend",
-        number: 2308,
+        number: 2312,
         title: "Remove tab",
         state: "closed_completed",
-        url: "https://github.com/6529-Collections/6529seize-frontend/issues/2308",
-      }),
-    });
-
-    render(
-      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/issues/2308" />
+        assignees: [],
+        url: href,
+      })
     );
+
+    render(<GithubPreviewStatusBadge href={href} />);
 
     expect(fetchMock).not.toHaveBeenCalled();
 
@@ -188,26 +344,25 @@ describe("GithubPreviewStatusBadge", () => {
   });
 
   it("renders pull request state details", async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
+    const href =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2312";
+    fetchMock.mockResolvedValueOnce(
+      createBatchResponse(href, {
         type: "github.pull_request",
         owner: "6529-Collections",
         repo: "6529seize-frontend",
-        number: 2309,
+        number: 2312,
         title: "Fix tab",
         state: "open",
         reviewState: "none",
         mergeableState: "blocked",
         merged: false,
         draft: false,
-        url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
-      }),
-    });
-
-    render(
-      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/pull/2309" />
+        url: href,
+      })
     );
+
+    render(<GithubPreviewStatusBadge href={href} />);
 
     await waitFor(() => {
       const badge = screen.getByTestId("github-preview-status-badge");
@@ -218,43 +373,42 @@ describe("GithubPreviewStatusBadge", () => {
 
   it("refreshes visible badges every minute without client or server cache", async () => {
     jest.useFakeTimers();
+    const href =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2313";
     fetchMock
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
+      .mockResolvedValueOnce(
+        createBatchResponse(href, {
           type: "github.pull_request",
           owner: "6529-Collections",
           repo: "6529seize-frontend",
-          number: 2309,
+          number: 2313,
           title: "Fix tab",
           state: "open",
           reviewState: "none",
           mergeableState: "clean",
           merged: false,
           draft: false,
-          url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
-        }),
-      })
+          url: href,
+        })
+      )
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           type: "github.pull_request",
           owner: "6529-Collections",
           repo: "6529seize-frontend",
-          number: 2309,
+          number: 2313,
           title: "Fix tab",
           state: "open",
           reviewState: "approved",
           mergeableState: "clean",
           merged: false,
           draft: false,
-          url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
+          url: href,
         }),
       });
 
-    render(
-      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/pull/2309" />
-    );
+    render(<GithubPreviewStatusBadge href={href} />);
 
     await waitFor(() => {
       expect(
@@ -278,9 +432,10 @@ describe("GithubPreviewStatusBadge", () => {
   });
 
   it("prefers pull request review state over mergeability detail", async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
+    const href =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2310";
+    fetchMock.mockResolvedValueOnce(
+      createBatchResponse(href, {
         type: "github.pull_request",
         owner: "6529-Collections",
         repo: "6529seize-frontend",
@@ -291,13 +446,11 @@ describe("GithubPreviewStatusBadge", () => {
         mergeableState: "blocked",
         merged: false,
         draft: false,
-        url: "https://github.com/6529-Collections/6529seize-frontend/pull/2310",
-      }),
-    });
-
-    render(
-      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/pull/2310" />
+        url: href,
+      })
     );
+
+    render(<GithubPreviewStatusBadge href={href} />);
 
     await waitFor(() => {
       const badge = screen.getByTestId("github-preview-status-badge");
@@ -321,11 +474,11 @@ describe("GithubPreviewStatusBadge", () => {
     });
     expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
       "aria-label",
-      "Status unavailable"
+      "6529-Collections/6529seize-frontend: Status unavailable"
     );
-    expect(screen.getByTestId("github-preview-status-badge")).not.toHaveAttribute(
-      "title"
-    );
+    expect(
+      screen.getByTestId("github-preview-status-badge")
+    ).not.toHaveAttribute("title");
     expect(screen.getByTestId("custom-tooltip")).toHaveAttribute(
       "data-content",
       "Status unavailable"

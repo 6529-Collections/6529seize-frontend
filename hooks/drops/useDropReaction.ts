@@ -2,20 +2,30 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
+import {
+  useCanonicalNotificationDropUpdate,
+  useOptimisticNotificationDropReaction,
+} from "@/hooks/drops/useOptimisticNotificationDropReaction";
+import {
+  applyOptimisticReactionQueryCacheUpdate,
+  EMPTY_DROP_CONTEXT_PROFILE_CONTEXT,
+} from "@/hooks/drops/optimisticReactionQueryCache";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
-import type { InfiniteData } from "@tanstack/react-query";
+import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, type RefObject } from "react";
 import {
   applyProfileReactionToEntries,
   cloneReactionEntries,
@@ -45,6 +55,11 @@ interface UseDropReactionOptions {
 }
 
 type OptimisticRollback = (() => void) | null;
+type OwnedOptimisticRollback = {
+  readonly mutationId: string;
+  readonly rollback: () => void;
+} | null;
+type ReactionMutation = ReturnType<typeof beginReactionMutation>;
 
 type ReactionCacheDrop = {
   readonly id: string;
@@ -57,17 +72,6 @@ type ReactionCachePage = {
 };
 
 type ReactionCacheData = InfiniteData<ReactionCachePage>;
-
-const EMPTY_CONTEXT_PROFILE_CONTEXT: ApiDropContextProfileContext = {
-  rating: 0,
-  min_rating: 0,
-  max_rating: 0,
-  reaction: null,
-  boosted: false,
-  bookmarked: false,
-  curatable: false,
-  curated: false,
-};
 
 const combineRollbacks = (
   rollbacks: readonly OptimisticRollback[]
@@ -85,6 +89,34 @@ const combineRollbacks = (
       rollback();
     }
   };
+};
+
+const toOwnedRollback = (
+  mutationId: string,
+  rollback: OptimisticRollback
+): OwnedOptimisticRollback =>
+  rollback === null ? null : { mutationId, rollback };
+
+const clearRollbackForMutation = (
+  rollbackRef: RefObject<OwnedOptimisticRollback>,
+  mutationId: string
+): void => {
+  if (rollbackRef.current?.mutationId === mutationId) {
+    rollbackRef.current = null;
+  }
+};
+
+const runRollbackForMutation = (
+  rollbackRef: RefObject<OwnedOptimisticRollback>,
+  mutationId: string
+): boolean => {
+  if (rollbackRef.current?.mutationId !== mutationId) {
+    return false;
+  }
+
+  rollbackRef.current.rollback();
+  rollbackRef.current = null;
+  return true;
 };
 
 const isReactionCacheDrop = (value: unknown): value is ReactionCacheDrop => {
@@ -167,7 +199,7 @@ const applyReactionToCacheDrop = ({
     context_profile_context: {
       ...(drop.context_profile_context ??
         baseContext ??
-        EMPTY_CONTEXT_PROFILE_CONTEXT),
+        EMPTY_DROP_CONTEXT_PROFILE_CONTEXT),
       reaction: reactionCode,
     },
   };
@@ -262,7 +294,8 @@ const useOptimisticStreamDropReaction = ({
           });
           draft.reactions = [...nextDrop.reactions];
           draft.context_profile_context =
-            nextDrop.context_profile_context ?? EMPTY_CONTEXT_PROFILE_CONTEXT;
+            nextDrop.context_profile_context ??
+            EMPTY_DROP_CONTEXT_PROFILE_CONTEXT;
 
           return draft;
         },
@@ -306,52 +339,123 @@ const useOptimisticCurationDropReaction = ({
         return null;
       }
 
-      const matchingQueries = queryClient.getQueryCache().findAll({
-        predicate: (query) => isReactionCurationQueryKey(query.queryKey),
+      return applyOptimisticReactionQueryCacheUpdate({
+        isTargetQueryKey: isReactionCurationQueryKey,
+        queryClient,
+        updateData: (currentData) =>
+          updateReactionCacheData({
+            baseContext: contextProfileContext,
+            data: currentData,
+            dropId,
+            profileMin,
+            reactionCode,
+          }),
       });
-
-      if (matchingQueries.length === 0) {
-        return null;
-      }
-
-      const snapshots: Array<{
-        readonly queryKey: (typeof matchingQueries)[number]["queryKey"];
-        readonly data: unknown;
-      }> = [];
-
-      for (const query of matchingQueries) {
-        const currentData = query.state.data;
-        const nextData = updateReactionCacheData({
-          baseContext: contextProfileContext,
-          data: currentData,
-          dropId,
-          profileMin,
-          reactionCode,
-        });
-
-        if (nextData === currentData) {
-          continue;
-        }
-
-        snapshots.push({
-          queryKey: query.queryKey,
-          data: currentData,
-        });
-        queryClient.setQueryData(query.queryKey, nextData);
-      }
-
-      if (snapshots.length === 0) {
-        return null;
-      }
-
-      return () => {
-        for (const snapshot of snapshots) {
-          queryClient.setQueryData(snapshot.queryKey, snapshot.data);
-        }
-      };
     },
     [connectedProfile, contextProfileContext, dropId, enabled, queryClient]
   );
+};
+
+const useRefreshCanonicalDropAfterLatestFailure = ({
+  applyOptimisticDropUpdate,
+  dropId,
+  queryClient,
+  updateNotificationQueriesWithCanonicalDrop,
+  waveId,
+}: {
+  readonly applyOptimisticDropUpdate: ReturnType<
+    typeof useMyStream
+  >["applyOptimisticDropUpdate"];
+  readonly dropId: string;
+  readonly queryClient: QueryClient;
+  readonly updateNotificationQueriesWithCanonicalDrop: (drop: ApiDrop) => void;
+  readonly waveId: string;
+}) =>
+  useCallback(async () => {
+    try {
+      const apiDrop = (await fetchDropByIdBatched(dropId)) as ApiDrop | null;
+      if (apiDrop === null) {
+        return;
+      }
+
+      updateDropInCachedDrops(queryClient, apiDrop);
+      updateNotificationQueriesWithCanonicalDrop(apiDrop);
+      applyOptimisticDropUpdate({
+        waveId,
+        dropId,
+        update: (draft): Drop => {
+          if (draft.type !== DropSize.FULL) {
+            return draft;
+          }
+
+          return {
+            ...apiDrop,
+            type: DropSize.FULL,
+            stableKey: draft.stableKey,
+            stableHash: draft.stableHash,
+          };
+        },
+      });
+    } catch (error) {
+      console.error(
+        "Failed to refresh drop after failed reaction request:",
+        error
+      );
+    }
+  }, [
+    applyOptimisticDropUpdate,
+    dropId,
+    queryClient,
+    updateNotificationQueriesWithCanonicalDrop,
+    waveId,
+  ]);
+
+const sendReactionRequest = async ({
+  endpoint,
+  isRemoving,
+  mutation,
+  reactionCode,
+}: {
+  readonly endpoint: string;
+  readonly isRemoving: boolean;
+  readonly mutation: ReactionMutation;
+  readonly reactionCode: string;
+}): Promise<void> => {
+  if (isRemoving) {
+    recordReactionRequestSent(mutation, {
+      endpoint,
+      method: "DELETE",
+    });
+    await commonApiDelete({
+      endpoint,
+      errorMode: "structured",
+    });
+    return;
+  }
+
+  recordReactionRequestSent(mutation, {
+    endpoint,
+    method: "POST",
+  });
+  await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+    endpoint,
+    body: { reaction: reactionCode },
+    errorMode: "structured",
+  });
+};
+
+const runReactionSuccessCallback = (
+  onSuccess: (() => void) | undefined
+): void => {
+  if (!onSuccess) {
+    return;
+  }
+
+  try {
+    onSuccess();
+  } catch {
+    // Ignore consumer callback errors so a successful request stays successful.
+  }
 };
 
 export function useDropReaction(
@@ -360,8 +464,9 @@ export function useDropReaction(
 ): UseDropReactionResult {
   const { setToast, connectedProfile } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
+  const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
-  const rollbackRef = useRef<(() => void) | null>(null);
+  const rollbackRef = useRef<OwnedOptimisticRollback>(null);
   const source = options?.source ?? "picker";
   const onSuccess = options?.onSuccess;
   const updateCurationCache = options?.updateCurationCache ?? false;
@@ -385,6 +490,25 @@ export function useDropReaction(
       dropId,
       enabled: updateCurationCache,
     });
+  const applyOptimisticReactionToNotificationQueries =
+    useOptimisticNotificationDropReaction({
+      connectedProfile,
+      contextProfileContext,
+      dropId,
+    });
+  const updateNotificationQueriesWithCanonicalDrop =
+    useCanonicalNotificationDropUpdate({
+      connectedProfile,
+      dropId,
+    });
+  const refreshCanonicalDropAfterLatestFailure =
+    useRefreshCanonicalDropAfterLatestFailure({
+      applyOptimisticDropUpdate,
+      dropId,
+      queryClient,
+      updateNotificationQueriesWithCanonicalDrop,
+      waveId,
+    });
 
   const react = useCallback(
     async (reactionCode: string) => {
@@ -392,6 +516,7 @@ export function useDropReaction(
 
       const isRemoving = reactionCode === contextProfileContext?.reaction;
       const intendedReaction = isRemoving ? null : reactionCode;
+
       const mutation = beginReactionMutation({
         dropId,
         waveId,
@@ -407,11 +532,14 @@ export function useDropReaction(
         websocketStatus,
       });
 
-      rollbackRef.current?.();
-      rollbackRef.current = combineRollbacks([
-        applyOptimisticReaction(intendedReaction),
-        applyOptimisticReactionToCurationQueries(intendedReaction),
-      ]);
+      rollbackRef.current = toOwnedRollback(
+        mutation.mutationId,
+        combineRollbacks([
+          applyOptimisticReaction(intendedReaction),
+          applyOptimisticReactionToCurationQueries(intendedReaction),
+          applyOptimisticReactionToNotificationQueries(intendedReaction),
+        ])
+      );
       recordReactionOptimisticApplied(mutation);
 
       if (!isRemoving) {
@@ -422,59 +550,50 @@ export function useDropReaction(
 
       try {
         const endpoint = `drops/${drop.id}/reaction`;
-        if (isRemoving) {
-          recordReactionRequestSent(mutation, {
-            endpoint,
-            method: "DELETE",
-          });
-          await commonApiDelete({
-            endpoint,
-            errorMode: "structured",
-          });
-        } else {
-          recordReactionRequestSent(mutation, {
-            endpoint,
-            method: "POST",
-          });
-          await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-            endpoint,
-            body: { reaction: reactionCode },
-            errorMode: "structured",
-          });
+        await sendReactionRequest({
+          endpoint,
+          isRemoving,
+          mutation,
+          reactionCode,
+        });
+        const result = recordReactionRequestSucceeded(mutation);
+        if (result.isLatestMutation) {
+          clearRollbackForMutation(rollbackRef, mutation.mutationId);
+          succeeded = true;
         }
-        recordReactionRequestSucceeded(mutation);
-        rollbackRef.current = null;
-        succeeded = true;
       } catch (error) {
-        recordReactionRequestFailed(mutation, error);
+        const result = recordReactionRequestFailed(mutation, error);
+        if (!result.isLatestMutation) {
+          return;
+        }
+
         const errorMessage = getReactionErrorMessage(
           error,
           isRemoving ? "Error removing reaction" : "Error adding reaction"
         );
         setToast({ message: errorMessage, type: "error" });
-        rollbackRef.current?.();
-        recordReactionRollbackApplied(mutation);
-        rollbackRef.current = null;
+        if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
+          recordReactionRollbackApplied(mutation);
+        }
+        await refreshCanonicalDropAfterLatestFailure();
       }
 
       if (succeeded) {
-        try {
-          onSuccess?.();
-        } catch {
-          // Ignore consumer callback errors so a successful request stays successful.
-        }
+        runReactionSuccessCallback(onSuccess);
       }
     },
     [
       canReact,
       applyOptimisticReaction,
       applyOptimisticReactionToCurationQueries,
+      applyOptimisticReactionToNotificationQueries,
       connectedProfile?.id,
       contextProfileContext?.reaction,
       drop.id,
       dropId,
       setToast,
       onSuccess,
+      refreshCanonicalDropAfterLatestFailure,
       source,
       waveId,
       websocketStatus,

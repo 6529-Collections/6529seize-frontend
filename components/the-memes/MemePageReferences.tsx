@@ -3,27 +3,146 @@
 import RememeImage from "@/components/nft-image/RememeImage";
 import Pagination from "@/components/pagination/Pagination";
 import { printMemeReferences } from "@/components/rememes/RememePage";
-import { RememeSort } from "@/components/rememes/Rememes";
+import { RememeSort } from "@/components/rememes/rememesTypes";
 import { publicEnv } from "@/config/env";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT, Rememe } from "@/entities/INFT";
-import {
-  areEqualAddresses,
-  formatAddress,
-  numberWithCommas,
-} from "@/helpers/Helpers";
+import { areEqualAddresses, formatAddress } from "@/helpers/Helpers";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+import { getRememeSortLabel } from "../rememes/rememesI18n";
+import { getRememeDetailHref } from "../rememes/rememesRouteParams";
 import styles from "./TheMemes.module.scss";
 
 const REMEMES_PAGE_SIZE = 20;
+const REMEME_SORTING = [RememeSort.RANDOM, RememeSort.CREATED_ASC] as const;
+
+type MemeLabReferencesState = {
+  readonly loaded: boolean;
+  readonly nfts: NFT[];
+};
+
+type MemeLabReferencesAction =
+  | { readonly type: "loadSuccess"; readonly nfts: NFT[] }
+  | { readonly type: "loadError" };
+
+type RememesReferencesState = {
+  readonly totalResults: number;
+  readonly page: number;
+  readonly items: Rememe[];
+  readonly showSort: boolean;
+  readonly loaded: boolean;
+  readonly selectedSorting: RememeSort;
+};
+
+type RememesReferencesAction =
+  | {
+      readonly type: "loadSuccess";
+      readonly totalResults: number;
+      readonly items: Rememe[];
+    }
+  | { readonly type: "loadError" }
+  | { readonly type: "setPage"; readonly page: number }
+  | { readonly type: "setSorting"; readonly sorting: RememeSort };
+
+const INITIAL_MEME_LAB_REFERENCES_STATE: MemeLabReferencesState = {
+  loaded: false,
+  nfts: [],
+};
+
+const INITIAL_REMEMES_REFERENCES_STATE: RememesReferencesState = {
+  totalResults: 0,
+  page: 1,
+  items: [],
+  showSort: false,
+  loaded: false,
+  selectedSorting: RememeSort.RANDOM,
+};
+
+function memeLabReferencesReducer(
+  _state: MemeLabReferencesState,
+  action: MemeLabReferencesAction
+): MemeLabReferencesState {
+  switch (action.type) {
+    case "loadSuccess":
+      return {
+        loaded: true,
+        nfts: action.nfts,
+      };
+    case "loadError":
+      return {
+        loaded: true,
+        nfts: [],
+      };
+    default: {
+      const unhandled: never = action;
+      throw new Error(
+        `Unhandled MemeLabReferencesAction: ${String(unhandled)}`
+      );
+    }
+  }
+}
+
+function rememesReferencesReducer(
+  state: RememesReferencesState,
+  action: RememesReferencesAction
+): RememesReferencesState {
+  switch (action.type) {
+    case "loadSuccess":
+      return {
+        ...state,
+        totalResults: action.totalResults,
+        items: action.items,
+        showSort: action.totalResults > REMEMES_PAGE_SIZE,
+        loaded: true,
+      };
+    case "loadError":
+      return {
+        ...state,
+        totalResults: 0,
+        items: [],
+        showSort: false,
+        loaded: true,
+      };
+    case "setPage":
+      return {
+        ...state,
+        page: action.page,
+      };
+    case "setSorting":
+      return {
+        ...state,
+        page: 1,
+        totalResults: 0,
+        selectedSorting: action.sorting,
+      };
+    default: {
+      const unhandled: never = action;
+      throw new Error(
+        `Unhandled RememesReferencesAction: ${String(unhandled)}`
+      );
+    }
+  }
+}
+
+function buildRememesUrl(memeId: number, page: number, sorting: RememeSort) {
+  const sort =
+    sorting === RememeSort.CREATED_ASC
+      ? "&sort=created_at&sort_direction=desc"
+      : "";
+
+  return `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${memeId}&page_size=${REMEMES_PAGE_SIZE}&page=${page}${sort}`;
+}
 
 function getRememeName(rememe: Rememe) {
   const metadata = rememe.metadata as unknown;
@@ -42,46 +161,35 @@ function getRememeName(rememe: Rememe) {
 export function MemePageReferencesSubMenu(props: {
   show: boolean;
   nft: NFT | undefined;
+  locale?: SupportedLocale | undefined;
 }) {
-  const [memeLabNftsLoaded, setMemeLabNftsLoaded] = useState(false);
-  const [memeLabNfts, setMemeLabNfts] = useState<NFT[]>([]);
-
-  const [rememesTotalResults, setRememesTotalResults] = useState(0);
-  const [rememesPage, setRememesPage] = useState(1);
-  const [rememes, setRememes] = useState<Rememe[]>([]);
-  const [showRememesSort, setShowRememesSort] = useState(false);
-  const [rememesLoaded, setRememesLoaded] = useState(false);
+  const locale = props.locale ?? DEFAULT_LOCALE;
+  const [memeLabState, setMemeLabNfts] = useReducer(
+    memeLabReferencesReducer,
+    INITIAL_MEME_LAB_REFERENCES_STATE
+  );
+  const [rememesState, dispatchRememesState] = useReducer(
+    rememesReferencesReducer,
+    INITIAL_REMEMES_REFERENCES_STATE
+  );
 
   const rememesTarget = useRef<HTMLDivElement>(null);
 
-  const rememeSorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
-  const [selectedRememeSorting, setSelectedRememeSorting] =
-    useState<RememeSort>(RememeSort.RANDOM);
-
-  const fetchRememes = useCallback(
-    (meme_id: number) => {
-      let sort = "";
-      if (selectedRememeSorting === RememeSort.CREATED_ASC) {
-        sort = "&sort=created_at&sort_direction=desc";
-      }
-      void fetchUrl(
-        `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
-      )
-        .then((response: DBResponse) => {
-          setRememesTotalResults(response.count);
-          setRememes(response.data);
-          setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
-          setRememesLoaded(true);
-        })
-        .catch(() => {
-          setRememesTotalResults(0);
-          setRememes([]);
-          setShowRememesSort(false);
-          setRememesLoaded(true);
+  function refreshRememes(memeId: number) {
+    void fetchUrl(
+      buildRememesUrl(memeId, rememesState.page, rememesState.selectedSorting)
+    )
+      .then((response: DBResponse) => {
+        dispatchRememesState({
+          type: "loadSuccess",
+          totalResults: response.count,
+          items: response.data,
         });
-    },
-    [rememesPage, selectedRememeSorting]
-  );
+      })
+      .catch(() => {
+        dispatchRememesState({ type: "loadError" });
+      });
+  }
 
   useEffect(() => {
     if (props.show && props.nft) {
@@ -89,25 +197,47 @@ export function MemePageReferencesSubMenu(props: {
         `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
       )
         .then((response: DBResponse) => {
-          setMemeLabNfts(response.data);
-          setMemeLabNftsLoaded(true);
+          setMemeLabNfts({
+            type: "loadSuccess",
+            nfts: response.data,
+          });
         })
         .catch(() => {
-          setMemeLabNfts([]);
-          setMemeLabNftsLoaded(true);
+          setMemeLabNfts({ type: "loadError" });
         });
     }
   }, [props.show, props.nft]);
 
   useEffect(() => {
     if (props.show && props.nft) {
-      fetchRememes(props.nft.id);
+      void fetchUrl(
+        buildRememesUrl(
+          props.nft.id,
+          rememesState.page,
+          rememesState.selectedSorting
+        )
+      )
+        .then((response: DBResponse) => {
+          dispatchRememesState({
+            type: "loadSuccess",
+            totalResults: response.count,
+            items: response.data,
+          });
+        })
+        .catch(() => {
+          dispatchRememesState({ type: "loadError" });
+        });
     }
-  }, [props.show, props.nft, fetchRememes]);
+  }, [props.show, props.nft, rememesState.page, rememesState.selectedSorting]);
 
   if (!props.show) {
     return <></>;
   }
+
+  const selectedRememeSortingLabel = getRememeSortLabel(
+    rememesState.selectedSorting,
+    locale
+  );
 
   return (
     <>
@@ -119,17 +249,20 @@ export function MemePageReferencesSubMenu(props: {
             height="0"
             style={{ width: "250px", height: "auto" }}
             src="/memelab.png"
-            alt="memelab"
+            alt={t(locale, "theMemes.detail.references.memeLab.logoAlt")}
           />
         </Col>
       </Row>
       <Row className="pt-4 pb-2">
-        <Col>
-          The Meme Lab is the lab for Meme Artists to release work that is
-          related to The Meme Cards.
-        </Col>
+        <Col>{t(locale, "theMemes.detail.references.memeLab.description")}</Col>
       </Row>
-      {printMemeReferences(memeLabNfts, "meme-lab", memeLabNftsLoaded, true)}
+      {printMemeReferences(
+        memeLabState.nfts,
+        "meme-lab",
+        memeLabState.loaded,
+        true,
+        locale
+      )}
       <Row className="pt-3" ref={rememesTarget}>
         <Col className="d-flex flex-wrap align-items-center justify-content-between">
           <h1 className="mb-0 pt-2">
@@ -139,43 +272,54 @@ export function MemePageReferencesSubMenu(props: {
               height="0"
               style={{ width: "250px", height: "auto", float: "left" }}
               src="/re-memes.png"
-              alt="re-memes"
+              alt={t(locale, "theMemes.detail.references.rememes.logoAlt")}
             />
           </h1>
-          {showRememesSort && (
+          {rememesState.showSort && (
             <span className="d-flex align-items-center gap-2 pt-2">
               <Dropdown
                 className={styles["rememesSortDropdown"]}
                 drop={"down-centered"}
               >
-                <Dropdown.Toggle>Sort: {selectedRememeSorting}</Dropdown.Toggle>
+                <Dropdown.Toggle>
+                  {t(locale, "theMemes.detail.references.sort.trigger", {
+                    sort: selectedRememeSortingLabel,
+                  })}
+                </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  {rememeSorting.map((s) => (
+                  {REMEME_SORTING.map((s) => (
                     <Dropdown.Item
                       key={`sorting-${s}`}
                       onClick={() => {
-                        setRememesPage(1);
-                        setRememesTotalResults(0);
-                        setSelectedRememeSorting(s);
+                        dispatchRememesState({
+                          type: "setSorting",
+                          sorting: s,
+                        });
                       }}
                     >
-                      {s}
+                      {getRememeSortLabel(s, locale)}
                     </Dropdown.Item>
                   ))}
                 </Dropdown.Menu>
               </Dropdown>
-              {selectedRememeSorting === RememeSort.RANDOM && (
+              {rememesState.selectedSorting === RememeSort.RANDOM && (
                 <>
-                  <FontAwesomeIcon
-                    icon={faRefresh}
-                    className={styles["buttonIcon"]}
+                  <button
+                    type="button"
+                    aria-label={t(
+                      locale,
+                      "theMemes.detail.references.refresh.ariaLabel"
+                    )}
+                    className={`${styles["buttonIcon"]} tw-inline-flex tw-min-h-6 tw-min-w-6 tw-items-center tw-justify-center tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
                     onClick={() => {
                       if (props.nft) {
-                        fetchRememes(props.nft.id);
+                        refreshRememes(props.nft.id);
                       }
                     }}
                     data-tooltip-id="refresh-rememes"
-                  />
+                  >
+                    <FontAwesomeIcon icon={faRefresh} aria-hidden="true" />
+                  </button>
                   <Tooltip
                     id="refresh-rememes"
                     place="top"
@@ -186,7 +330,7 @@ export function MemePageReferencesSubMenu(props: {
                       padding: "4px 8px",
                     }}
                   >
-                    Refresh results
+                    {t(locale, "theMemes.detail.references.refresh.tooltip")}
                   </Tooltip>
                 </>
               )}
@@ -195,21 +339,17 @@ export function MemePageReferencesSubMenu(props: {
         </Col>
       </Row>
       <Row className="pt-4 pb-2">
-        <Col>
-          ReMemes are community-created and community-submitted NFTs inspired by
-          the Meme Cards. They are not created or &quot;authorized&quot; by 6529
-          Collections.
-        </Col>
+        <Col>{t(locale, "theMemes.detail.references.rememes.description")}</Col>
       </Row>
-      {rememesLoaded && rememes.length === 0 && (
+      {rememesState.loaded && rememesState.items.length === 0 && (
         <Row className="pt-2 pb-4">
-          <Col>ReMemes that reference this NFT will appear here.</Col>
+          <Col>{t(locale, "theMemes.detail.references.empty.rememes")}</Col>
         </Row>
       )}
-      {rememes.length > 0 && (
+      {rememesState.items.length > 0 && (
         <>
           <Row className="py-2">
-            {rememes.map((rememe) => {
+            {rememesState.items.map((rememe) => {
               return (
                 <Col
                   key={`${rememe.contract}-${rememe.id}`}
@@ -220,7 +360,15 @@ export function MemePageReferencesSubMenu(props: {
                   lg={{ span: 3 }}
                 >
                   <Link
-                    href={`/rememes/${rememe.contract}/${rememe.id}`}
+                    href={getRememeDetailHref({
+                      contract: rememe.contract,
+                      id: rememe.id,
+                      locale,
+                    })}
+                    aria-label={t(locale, "rememes.card.linkAriaLabel", {
+                      name: getRememeName(rememe),
+                      tokenId: rememe.id,
+                    })}
                     className="decoration-none scale-hover"
                   >
                     <Container fluid className="no-padding">
@@ -259,8 +407,13 @@ export function MemePageReferencesSubMenu(props: {
                                 )}
                                 {rememe.replicas.length > 1 && (
                                   <>
-                                    &nbsp;(x
-                                    {numberWithCommas(rememe.replicas.length)})
+                                    &nbsp;
+                                    {t(locale, "rememes.card.replicaCount", {
+                                      count: formatInteger(
+                                        locale,
+                                        rememe.replicas.length
+                                      ),
+                                    })}
                                   </>
                                 )}
                               </Col>
@@ -281,14 +434,17 @@ export function MemePageReferencesSubMenu(props: {
               );
             })}
           </Row>
-          {rememesTotalResults > REMEMES_PAGE_SIZE && (
+          {rememesState.totalResults > REMEMES_PAGE_SIZE && (
             <Row className="text-center pt-2 pb-3">
               <Pagination
-                page={rememesPage}
+                page={rememesState.page}
                 pageSize={REMEMES_PAGE_SIZE}
-                totalResults={rememesTotalResults}
+                totalResults={rememesState.totalResults}
                 setPage={function (newPage: number) {
-                  setRememesPage(newPage);
+                  dispatchRememesState({
+                    type: "setPage",
+                    page: newPage,
+                  });
                   if (rememesTarget.current) {
                     rememesTarget.current.scrollIntoView({
                       behavior: "smooth",

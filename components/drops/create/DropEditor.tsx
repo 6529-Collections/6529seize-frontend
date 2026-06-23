@@ -24,6 +24,7 @@ import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export interface DropEditorHandles {
   requestDrop: () => CreateDropConfig | null;
+  getDropSnapshot: () => CreateDropConfig | null;
 }
 
 interface DropEditorWaveProps {
@@ -43,6 +44,7 @@ interface DropEditorProps {
   readonly loading: boolean;
   readonly dropEditorRefreshKey: number;
   readonly showSubmit?: boolean | undefined;
+  readonly submitOnEnter?: boolean | undefined;
   readonly showDropError?: boolean | undefined;
   readonly wave: DropEditorWaveProps | null;
   readonly waveId: string | null;
@@ -63,6 +65,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       loading,
       dropEditorRefreshKey,
       showSubmit = true,
+      submitOnEnter = true,
       showDropError = false,
       wave,
       waveId,
@@ -114,12 +117,18 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
     const createDropWrapperRef = useRef<CreateDropWrapperHandles | null>(null);
     const requestDrop = (): CreateDropConfig | null =>
       createDropWrapperRef.current?.requestDrop() ?? null;
+    const getDropSnapshot = (): CreateDropConfig | null =>
+      createDropWrapperRef.current?.getDropSnapshot() ?? null;
 
     useImperativeHandle(ref, () => ({
+      getDropSnapshot,
       requestDrop,
     }));
 
     const onRemovePart = (index: number) => {
+      if (loading) {
+        return;
+      }
       if (!drop?.parts.length) {
         return;
       }
@@ -152,6 +161,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           drop={drop}
           viewType={viewType}
           showSubmit={showSubmit}
+          submitOnEnter={submitOnEnter}
           showDropError={showDropError}
           wave={wave}
           setIsStormMode={setIsStormMode}
@@ -166,11 +176,12 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           onCanSubmitChange={onCanSubmitChange}
           key={dropEditorRefreshKey}
         >
-          {!!drop?.parts.length && isStormMode && !loading ? (
+          {drop !== null && drop.parts.length > 0 && isStormMode ? (
             <CreateDropStormView
               drop={drop}
               profile={profile}
               wave={wave}
+              disabled={loading}
               removePart={onRemovePart}
             />
           ) : null}

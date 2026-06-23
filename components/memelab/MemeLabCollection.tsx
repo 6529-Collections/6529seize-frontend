@@ -1,42 +1,47 @@
 "use client";
 
-import styles from "./MemeLab.module.scss";
-
 import { AuthContext } from "@/components/auth/Auth";
-import NFTImage from "@/components/nft-image/NFTImage";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
-import { SortDirection } from "@/entities/ISort";
+import type { SortDirection } from "@/entities/ISort";
 import { addProtocol } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import {
-  getInitialRouterValues,
-  printNftContent,
-  printSortButtons,
-  sortChanged,
-} from "./MemeLab";
+import { getInitialRouterValues, sortChanged } from "./MemeLab";
+import MemeLabNftCard from "./MemeLabNftCard";
+import MemeLabSortControls from "./MemeLabSortControls";
+
+const MEME_LAB_COLLECTION_SORT_OPTIONS = Object.values(MemeLabSort).filter(
+  (sort) =>
+    sort !== MemeLabSort.VOLUME &&
+    sort !== MemeLabSort.ARTISTS &&
+    sort !== MemeLabSort.COLLECTIONS
+);
+
+const COLLECTION_GRID_CLASS =
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
+const COLLECTION_GRID_LIST_CLASS = `${COLLECTION_GRID_CLASS} tw-m-0 tw-list-none tw-px-0 tw-pb-0`;
 
 export default function LabCollection({
   collectionName,
+  initialSort = null,
+  initialSortDirection = null,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly collectionName: string;
+  readonly initialSort?: string | null | undefined;
+  readonly initialSortDirection?: string | null | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);
 
   const [website, setWebsite] = useState<string>();
@@ -48,18 +53,15 @@ export default function LabCollection({
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
-
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
-    const { initialSortDir, initialSort } = getInitialRouterValues(
-      searchParams?.get("sortDir") ?? null,
-      searchParams?.get("sort") ?? null
-    );
+    const { initialSortDir, initialSort: parsedInitialSort } =
+      getInitialRouterValues(initialSortDirection, initialSort);
     setSortDir(initialSortDir);
-    setSort(initialSort);
+    setSort(parsedInitialSort);
     setVolumeType(VolumeType.HOURS_24);
-  }, []);
+  }, [initialSort, initialSortDirection]);
 
   useEffect(() => {
     if (collectionName) {
@@ -69,16 +71,18 @@ export default function LabCollection({
       fetchAllPages<LabExtendedData>(nftsUrl).then((responseNftMetas) => {
         setNftMetas(responseNftMetas);
         if (responseNftMetas.length > 0) {
-          const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
+          const collectionTokenIds = responseNftMetas.map(
+            (n: LabExtendedData) => n.id
+          );
           fetchAllPages<LabNFT>(
-            `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
+            `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${collectionTokenIds.join(
               ","
             )}`
           ).then((responseNfts) => {
             setNfts(responseNfts);
             setNftsLoaded(true);
           });
-          let collectionSecondaryLink: string = "";
+          let collectionSecondaryLink = "";
           responseNftMetas.map((nftm) => {
             if (
               nftm.website &&
@@ -98,55 +102,66 @@ export default function LabCollection({
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      sortChanged(router, sort, sortDir, volumeType, nfts, nftMetas, setNfts);
+      sortChanged(
+        router,
+        sort,
+        sortDir,
+        volumeType,
+        nfts,
+        nftMetas,
+        setNfts,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        locale
+      );
     }
-  }, [sort, sortDir, nftsLoaded]);
+  }, [sort, sortDir, nftsLoaded, volumeType, locale]);
 
   function printNft(nft: LabNFT) {
     return (
-      <Col
-        key={`${nft.contract}-${nft.id}`}
-        className="pt-3 pb-3"
-        xs={{ span: 6 }}
-        sm={{ span: 4 }}
-        md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
-        <Link
-          href={`/meme-lab/${nft.id}`}
-          className="decoration-none scale-hover"
-        >
-          <Container fluid>
-            <Row className={connectedProfile ? styles["nftImagePadding"] : ""}>
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={300}
-                showBalance={true}
-                showThumbnail={true}
-              />
-            </Row>
-            <Row>
-              <Col className="text-center pt-2">
-                #{nft.id} - {nft.name}
-              </Col>
-            </Row>
-            <Row>
-              <Col className="text-center pt-2">Artists: {nft.artist}</Col>
-            </Row>
-            <Row>
-              <Col className="text-center pt-1">
-                {printNftContent(nft, sort, nftMetas, volumeType)}
-              </Col>
-            </Row>
-          </Container>
-        </Link>
-      </Col>
+      <li key={`${nft.contract}-${nft.id}`} className="tw-min-w-0">
+        <MemeLabNftCard
+          nft={nft}
+          sort={sort}
+          nftMetas={nftMetas}
+          volumeType={volumeType}
+          hasConnectedProfile={connectedProfile !== null}
+          locale={locale}
+          showArtistMetric={true}
+        />
+      </li>
     );
   }
 
   function printNfts() {
-    return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
+    return (
+      <ul
+        aria-label={t(locale, "memeLab.results.collectionGridLabel", {
+          collectionName,
+        })}
+        className={COLLECTION_GRID_LIST_CLASS}
+      >
+        {nfts.map(printNft)}
+      </ul>
+    );
+  }
+
+  function printNftsContent() {
+    if (!nftsLoaded) {
+      return null;
+    }
+
+    if (nfts.length === 0) {
+      return (
+        <div>
+          <NothingHereYetSummer />
+        </div>
+      );
+    }
+
+    return printNfts();
   }
 
   return (
@@ -156,80 +171,50 @@ export default function LabCollection({
       tokenIds={tokenIds}
       enabled={!!connectedProfile}
     >
-      <Container fluid className={styles["mainContainer"]}>
-        <Row>
-          <Col>
-            <Container className="pt-4 pb-4">
-              <Row>
-                <Col>
-                  <h1>Meme Lab Collections</h1>
-                </Col>
-              </Row>
-              <Row className="pt-3">
-                <Col>
-                  <h2 className="font-color">{collectionName}</h2>
-                </Col>
-              </Row>
-              {website && (
-                <Row className="pb-3">
-                  <Col>
-                    {website.split(" ").map((w) => (
-                      <>
-                        <a
-                          href={addProtocol(w)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {w}
-                        </a>
-                        &nbsp;&nbsp;
-                      </>
+      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+        <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+          <header className="tw-pb-5">
+            <div className="tw-flex tw-flex-col tw-gap-3">
+              <h1 className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl">
+                {t(locale, "memeLab.collections.title")}
+              </h1>
+              <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+                {collectionName}
+              </h2>
+              {website !== undefined && website.length > 0 && (
+                <div className="tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
+                  {website
+                    .split(" ")
+                    .filter((w) => w.length > 0)
+                    .map((w) => (
+                      <a
+                        key={w}
+                        href={addProtocol(w)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:tw-text-primary-200 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition"
+                      >
+                        {w}
+                      </a>
                     ))}
-                  </Col>
-                </Row>
+                </div>
               )}
-              <Row className="pt-2">
-                <Col>
-                  Sort by&nbsp;&nbsp;
-                  <FontAwesomeIcon
-                    icon={faChevronCircleUp}
-                    onClick={() => setSortDir(SortDirection.ASC)}
-                    className={`${styles["sortDirection"]} ${
-                      sortDir != SortDirection.ASC ? styles["disabled"] : ""
-                    }`}
-                  />{" "}
-                  <FontAwesomeIcon
-                    icon={faChevronCircleDown}
-                    onClick={() => setSortDir(SortDirection.DESC)}
-                    className={`${styles["sortDirection"]} ${
-                      sortDir != SortDirection.DESC ? styles["disabled"] : ""
-                    }`}
-                  />
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                  {printSortButtons(
-                    sort,
-                    volumeType,
-                    setSort,
-                    setVolumeType,
-                    true
-                  )}
-                </Col>
-              </Row>
-              {nftsLoaded &&
-                (nfts.length > 0 ? (
-                  printNfts()
-                ) : (
-                  <Col>
-                    <NothingHereYetSummer />
-                  </Col>
-                ))}
-            </Container>
-          </Col>
-        </Row>
-      </Container>
+            </div>
+          </header>
+          <MemeLabSortControls
+            ariaLabel={t(locale, "memeLab.sorting.collectionRegionLabel")}
+            sortDirection={sortDir}
+            setSortDirection={setSortDir}
+            currentSort={sort}
+            sortOptions={MEME_LAB_COLLECTION_SORT_OPTIONS}
+            setSort={setSort}
+            setVolumeType={setVolumeType}
+            volumeType={volumeType}
+            locale={locale}
+          />
+          {printNftsContent()}
+        </div>
+      </div>
     </NftBalancesProvider>
   );
 }

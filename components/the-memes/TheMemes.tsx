@@ -2,13 +2,13 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
-import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
-import NFTImage from "@/components/nft-image/NFTImage";
-import { VolumeTypeDropdown } from "@/components/the-memes/MemeShared";
-import styles from "@/components/the-memes/TheMemes.module.scss";
+import TheMemesCard from "@/components/the-memes/TheMemesCard";
+import { getMemesSortLabel } from "@/components/the-memes/theMemesI18n";
+import { getTheMemesBrowseHref } from "@/components/the-memes/theMemesRouteParams";
+import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
 import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -18,25 +18,26 @@ import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
-import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
-import { getNftMimeType } from "@/helpers/nft.helpers";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
-import type { MemeLabSort } from "@/types/enums";
 import { MEMES_EXTENDED_SORT, MemesSort } from "@/types/enums";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 interface Meme {
   meme: number;
   meme_name: string;
 }
+
+type SearchParamReader = Pick<URLSearchParams, "get">;
 
 const MEMES_SORT_TO_API: Record<MemesSort, string> = {
   [MemesSort.AGE]: MEMES_EXTENDED_SORT[0],
@@ -61,6 +62,8 @@ function getApiSort(sort: MemesSort, volumeType: VolumeType): string {
         return MEMES_EXTENDED_SORT[10];
       case VolumeType.DAYS_30:
         return MEMES_EXTENDED_SORT[11];
+      case VolumeType.ALL_TIME:
+        return MEMES_EXTENDED_SORT[12];
       default:
         return MEMES_EXTENDED_SORT[12];
     }
@@ -68,7 +71,89 @@ function getApiSort(sort: MemesSort, volumeType: VolumeType): string {
   return MEMES_SORT_TO_API[sort];
 }
 
-export default function TheMemesComponent() {
+function getInitialSortDirection(
+  searchParams: SearchParamReader
+): SortDirection {
+  const routerSortDir = searchParams.get("sort_dir");
+  if (routerSortDir === null || routerSortDir === "") {
+    return SortDirection.ASC;
+  }
+
+  const resolvedRouterSortDir = Object.values(SortDirection).find(
+    (sd) => sd.toLowerCase() === routerSortDir.toLowerCase()
+  );
+
+  return resolvedRouterSortDir ?? SortDirection.ASC;
+}
+
+function getInitialSortAndVolume(searchParams: SearchParamReader): {
+  readonly sort: MemesSort;
+  readonly volumeType: VolumeType;
+} {
+  const routerSort = searchParams.get("sort");
+  if (routerSort === null || routerSort === "") {
+    return { sort: MemesSort.AGE, volumeType: VolumeType.ALL_TIME };
+  }
+
+  const sortLower = routerSort.toLowerCase();
+
+  if (sortLower.startsWith("volume_")) {
+    const volKey = sortLower.replace("volume_", "").toUpperCase();
+    const volMatch = Object.keys(VolumeType).find(
+      (k) => k.toLowerCase() === volKey.toLowerCase()
+    );
+    return {
+      sort: MemesSort.VOLUME,
+      volumeType:
+        volMatch === undefined
+          ? VolumeType.ALL_TIME
+          : VolumeType[volMatch as keyof typeof VolumeType],
+    };
+  }
+
+  const resolvedKey = Object.keys(MemesSort).find(
+    (k) => k.toLowerCase() === sortLower
+  );
+
+  return {
+    sort:
+      resolvedKey === undefined
+        ? MemesSort.AGE
+        : MemesSort[resolvedKey as keyof typeof MemesSort],
+    volumeType: VolumeType.ALL_TIME,
+  };
+}
+
+function getInitialSeasonId(searchParams: SearchParamReader): number | null {
+  const routerSzn = searchParams.get("szn");
+  if (routerSzn === null || routerSzn === "") {
+    return null;
+  }
+
+  const parsed = Number.parseInt(routerSzn, 10);
+  return !Number.isNaN(parsed) && parsed > 0 ? parsed : null;
+}
+
+function getSortQueryParam(sort: MemesSort, volumeType: VolumeType): string {
+  if (sort === MemesSort.VOLUME) {
+    const volKey = Object.entries(VolumeType).find(
+      ([_, value]) => value === volumeType
+    )?.[0];
+
+    return volKey === undefined
+      ? "volume_all_time"
+      : `volume_${volKey.toLowerCase()}`;
+  }
+
+  const found = Object.entries(MemesSort).find(([_, value]) => value === sort);
+  return found === undefined ? sort.toLowerCase() : found[0].toLowerCase();
+}
+
+export default function TheMemesComponent({
+  locale = DEFAULT_LOCALE,
+}: Readonly<{
+  locale?: SupportedLocale;
+}> = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -83,55 +168,17 @@ export default function TheMemesComponent() {
   };
 
   const [routerLoaded, setRouterLoaded] = useState(false);
+  const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
+  const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
+  const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
 
-  useSetTitle("The Memes | Collections");
+  useSetTitle(t(locale, "theMemes.documentTitle"));
 
   useEffect(() => {
-    let initialSortDir = SortDirection.ASC;
-    let initialSort = MemesSort.AGE;
-    let initialVolume = VolumeType.ALL_TIME;
-    let initialSznId: number | null = null;
-
-    const routerSortDir = searchParams?.get("sort_dir");
-    if (routerSortDir) {
-      const resolvedRouterSortDir = Object.values(SortDirection).find(
-        (sd) => sd.toLowerCase() === routerSortDir.toLowerCase()
-      );
-      if (resolvedRouterSortDir) {
-        initialSortDir = resolvedRouterSortDir;
-      }
-    }
-
-    const routerSort = searchParams?.get("sort");
-    if (routerSort) {
-      const sortLower = routerSort.toLowerCase();
-
-      if (sortLower.startsWith("volume_")) {
-        initialSort = MemesSort.VOLUME;
-        const volKey = sortLower.replace("volume_", "").toUpperCase();
-        const volMatch = Object.keys(VolumeType).find(
-          (k) => k.toLowerCase() === volKey.toLowerCase()
-        );
-        if (volMatch) {
-          initialVolume = VolumeType[volMatch as keyof typeof VolumeType];
-        }
-      } else {
-        const resolvedKey = Object.keys(MemesSort).find(
-          (k) => k.toLowerCase() === sortLower
-        );
-        if (resolvedKey) {
-          initialSort = MemesSort[resolvedKey as keyof typeof MemesSort];
-        }
-      }
-    }
-
-    const routerSzn = searchParams?.get("szn");
-    if (routerSzn) {
-      const parsed = Number.parseInt(routerSzn);
-      if (!Number.isNaN(parsed) && parsed > 0) {
-        initialSznId = parsed;
-      }
-    }
+    const initialSortDir = getInitialSortDirection(searchParams);
+    const { sort: initialSort, volumeType: initialVolume } =
+      getInitialSortAndVolume(searchParams);
+    const initialSznId = getInitialSeasonId(searchParams);
 
     setSort(initialSort);
     setSortDir(initialSortDir);
@@ -140,18 +187,14 @@ export default function TheMemesComponent() {
     setRouterLoaded(true);
   }, [searchParams]);
 
-  const getNftsNextPage = () => {
+  const getNftsNextPage = useCallback(() => {
     const mySort = getApiSort(sort, volumeType);
     let seasonFilter = "";
-    if (seasonId) {
+    if (seasonId !== null) {
       seasonFilter = `&season=${seasonId}`;
     }
     return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
-  };
-
-  const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
-  const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
-  const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
+  }, [seasonId, sort, sortDir, volumeType]);
 
   const [fetching, setFetching] = useState(true);
 
@@ -167,31 +210,15 @@ export default function TheMemesComponent() {
   useEffect(() => {
     if (!routerLoaded) return;
 
-    let sortParam: string;
-
-    if (sort === MemesSort.VOLUME) {
-      const volKey = Object.entries(VolumeType).find(
-        ([_, value]) => value === volumeType
-      )?.[0];
-
-      if (volKey) {
-        sortParam = `volume_${volKey.toLowerCase()}`;
-      } else {
-        sortParam = "volume_all_time"; // fallback
-      }
-    } else {
-      const found = Object.entries(MemesSort).find(
-        ([_, value]) => value === sort
-      );
-      sortParam = found ? found[0].toLowerCase() : sort.toLowerCase();
-    }
-
-    let queryString = `sort=${sortParam}&sort_dir=${sortDir.toLowerCase()}`;
-    if (seasonId) {
-      queryString += `&szn=${seasonId}`;
-    }
-    router.push(`the-memes?${queryString}`);
-  }, [sort, sortDir, seasonId, volumeType, router, routerLoaded]);
+    router.push(
+      getTheMemesBrowseHref({
+        locale,
+        seasonId,
+        sort: getSortQueryParam(sort, volumeType),
+        sortDir: sortDir.toLowerCase(),
+      })
+    );
+  }, [locale, sort, sortDir, seasonId, volumeType, router, routerLoaded]);
 
   useEffect(() => {
     const memesMap = new Map<
@@ -201,13 +228,13 @@ export default function TheMemesComponent() {
 
     for (const nft of nfts) {
       const existing = memesMap.get(nft.meme);
-      if (existing) {
-        existing.items.push(nft);
-      } else {
+      if (existing === undefined) {
         memesMap.set(nft.meme, {
           meme: { meme: nft.meme, meme_name: nft.meme_name },
           items: [nft],
         });
+      } else {
+        existing.items.push(nft);
       }
     }
 
@@ -223,33 +250,35 @@ export default function TheMemesComponent() {
 
     setNftMemes(sortedMemes);
 
-    const nftsByMeme = new Map<number, NFTWithMemesExtendedData[]>();
+    const nextNftsByMeme = new Map<number, NFTWithMemesExtendedData[]>();
 
     for (const [key, { items }] of Array.from(memesMap.entries())) {
-      nftsByMeme.set(
+      nextNftsByMeme.set(
         key,
         items.toSorted((a, b) => a.id - b.id)
       );
     }
 
-    setNftsByMeme(nftsByMeme);
+    setNftsByMeme(nextNftsByMeme);
   }, [nfts, sortDir]);
 
-  function fetchNfts() {
-    if (!nftsNextPage) {
+  const fetchNfts = useCallback(() => {
+    if (nftsNextPage === undefined) {
       setFetching(false);
       return;
     }
     fetchUrl(nftsNextPage)
-      .then((responseNfts: DBResponse) => {
+      .then((responseNfts: Partial<DBResponse<NFTWithMemesExtendedData>>) => {
         setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
-        setNftsNextPage(responseNfts.next);
+        setNftsNextPage(
+          typeof responseNfts.next === "string" ? responseNfts.next : undefined
+        );
       })
       .catch(() => {
         // optionally surface a toast/log here
       })
       .finally(() => setFetching(false));
-  }
+  }, [nftsNextPage]);
 
   useEffect(() => {
     if (routerLoaded) {
@@ -257,23 +286,23 @@ export default function TheMemesComponent() {
       setNftsNextPage(getNftsNextPage());
       setFetching(true);
     }
-  }, [sort, sortDir, volumeType, seasonId, routerLoaded]);
+  }, [getNftsNextPage, sort, sortDir, volumeType, seasonId, routerLoaded]);
 
   useEffect(() => {
-    if (fetching && routerLoaded && nftsNextPage) {
+    if (fetching && routerLoaded && nftsNextPage !== undefined) {
       fetchNfts();
     }
-  }, [fetching, routerLoaded, nftsNextPage]);
+  }, [fetching, fetchNfts, routerLoaded, nftsNextPage]);
 
   useEffect(() => {
-    if (!nftsNextPage) {
+    if (nftsNextPage === undefined) {
       return;
     }
 
     let throttleTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const handleScroll = () => {
-      if (throttleTimeout) {
+      if (throttleTimeout !== null) {
         return;
       }
 
@@ -291,128 +320,80 @@ export default function TheMemesComponent() {
       }, 200);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      if (throttleTimeout) {
+      if (throttleTimeout !== null) {
         clearTimeout(throttleTimeout);
       }
       window.removeEventListener("scroll", handleScroll);
     };
   }, [routerLoaded, nftsNextPage]);
 
-  function getVolume(nft: NFTWithMemesExtendedData) {
-    let vol = 0;
-    switch (volumeType) {
-      case VolumeType.HOURS_24:
-        vol = nft.total_volume_last_24_hours;
-        break;
-      case VolumeType.DAYS_7:
-        vol = nft.total_volume_last_7_days;
-        break;
-      case VolumeType.DAYS_30:
-        vol = nft.total_volume_last_1_month;
-        break;
-      case VolumeType.ALL_TIME:
-        vol = nft.total_volume;
-        break;
-    }
+  function printSortDirectionButton(
+    direction: SortDirection,
+    icon: IconDefinition,
+    label: string
+  ) {
+    const isActive = sortDir === direction;
 
-    if (vol > 0) {
-      return `${numberWithCommas(Math.round(vol * 100) / 100)} ETH`;
-    }
-    return "-";
+    return (
+      <button
+        type="button"
+        aria-label={label}
+        aria-pressed={isActive}
+        onClick={() => setSortDir(direction)}
+        className={`tw-m-0 tw-inline-flex tw-h-7 tw-w-6 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
+          isActive
+            ? "tw-bg-white/[0.06] tw-text-white"
+            : "tw-text-iron-500 hover:tw-bg-white/[0.04] hover:tw-text-iron-200"
+        }`}
+      >
+        <FontAwesomeIcon aria-hidden="true" icon={icon} className="tw-size-4" />
+      </button>
+    );
   }
 
   function printNft(nft: NFTWithMemesExtendedData) {
-    const mediaMimeType = getNftMimeType(nft);
-
     return (
-      <Col
+      <TheMemesCard
         key={`${nft.contract}-${nft.id}`}
-        className="pt-3 pb-3"
-        xs={{ span: 6 }}
-        sm={{ span: 4 }}
-        md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
-        <Link
-          href={`/the-memes/${nft.id}`}
-          className="decoration-none scale-hover"
-        >
-          <Container fluid>
-            <Row className={connectedProfile ? styles["nftImagePadding"] : ""}>
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={300}
-                showThumbnail={true}
-                showBalance={true}
-              />
-            </Row>
-            <Row>
-              <Col className="text-center pt-2">
-                <span>
-                  {mediaMimeType && (
-                    <MediaTypeBadge
-                      mimeType={mediaMimeType}
-                      dropId={`${nft.contract}-${nft.id}`}
-                      size="sm"
-                      iconClassName="tw-size-5"
-                      className="tw-mr-1.5 tw-inline-flex tw-align-[0.02em]"
-                    />
-                  )}
-                  #{nft.id} - {nft.name}
-                </span>
-              </Col>
-            </Row>
-            <Row>
-              <Col className="text-center pt-1">
-                {sort &&
-                  (sort === MemesSort.AGE || sort === MemesSort.MEME) &&
-                  printMintDate(nft.mint_date)}
-                {sort === MemesSort.EDITION_SIZE &&
-                  `Edition Size: ${numberWithCommas(nft.supply)}`}
-                {sort === MemesSort.TDH &&
-                  `TDH: ${numberWithCommas(Math.round(nft.boosted_tdh))}`}
-                {sort === MemesSort.HODLERS &&
-                  `Collectors: ${numberWithCommas(nft.hodlers)}`}
-                {sort === MemesSort.UNIQUE_PERCENT &&
-                  `Unique: ${Math.round(nft.percent_unique * 100 * 10) / 10}%`}
-                {sort === MemesSort.UNIQUE_PERCENT_EX_MUSEUM &&
-                  `Unique Ex-Museum: ${
-                    Math.round(nft.percent_unique_cleaned * 100 * 10) / 10
-                  }%`}
-                {sort === MemesSort.FLOOR_PRICE &&
-                  (nft.floor_price > 0
-                    ? `Floor Price: ${numberWithCommas(
-                        Math.round(nft.floor_price * 1000) / 1000
-                      )} ETH`
-                    : `Floor Price: N/A`)}
-                {sort === MemesSort.HIGHEST_OFFER &&
-                  (nft.highest_offer > 0
-                    ? `Highest Offer: ${numberWithCommas(
-                        Math.round(nft.highest_offer * 1000) / 1000
-                      )} ETH`
-                    : `Highest Offer: N/A`)}
-                {sort === MemesSort.MARKET_CAP &&
-                  (nft.market_cap > 0
-                    ? `Market Cap: ${numberWithCommas(
-                        Math.round(nft.market_cap * 100) / 100
-                      )} ETH`
-                    : `Market Cap: N/A`)}
-                {sort === MemesSort.VOLUME &&
-                  `Volume (${volumeType}): ${getVolume(nft)}`}
-              </Col>
-            </Row>
-          </Container>
-        </Link>
-      </Col>
+        nft={nft}
+        sort={sort}
+        volumeType={volumeType}
+        hasConnectedProfile={connectedProfile !== null}
+        locale={locale}
+      />
     );
   }
 
   function printNfts() {
-    return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
+    if (nfts.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+        {nfts.map((nft) => printNft(nft))}
+      </div>
+    );
+  }
+
+  function printEmptyState() {
+    if (fetching || nfts.length > 0) {
+      return null;
+    }
+
+    return (
+      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-5 tw-text-center">
+        <p className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-100">
+          {t(locale, "theMemes.empty.title")}
+        </p>
+        <p className="tw-mb-0 tw-text-sm tw-leading-5 tw-text-iron-400">
+          {t(locale, "theMemes.empty.description")}
+        </p>
+      </div>
+    );
   }
 
   function getNftsForMeme(meme: Meme) {
@@ -423,16 +404,14 @@ export default function TheMemesComponent() {
     return nftMemes.map((meme) => {
       const memeNfts = getNftsForMeme(meme);
       return (
-        <Row key={`${meme.meme}-${meme.meme_name}`}>
-          <Col xs={12} className="pt-3">
-            <Col>
-              <h4 className="font-color">
-                {meme.meme} - {meme.meme_name}
-              </h4>
-            </Col>
-          </Col>
-          {memeNfts.map((nft) => printNft(nft))}
-        </Row>
+        <section key={`${meme.meme}-${meme.meme_name}`} className="tw-pt-6">
+          <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+            {formatInteger(locale, meme.meme)} - {meme.meme_name}
+          </h2>
+          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+            {memeNfts.map((nft) => printNft(nft))}
+          </div>
+        </section>
       );
     });
   }
@@ -442,129 +421,126 @@ export default function TheMemesComponent() {
       consolidationKey={connectedProfile?.consolidation_key ?? null}
       contract={MEMES_CONTRACT}
       tokenIds={tokenIds}
-      enabled={!!connectedProfile}
+      enabled={connectedProfile !== null}
     >
-      <Container fluid className={styles["mainContainer"]}>
-        <Row>
-          <Col>
-            <Container className="pt-4">
-              <>
-                {/* Page header - visible on all devices */}
-                <Row>
-                  <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                    <span className="d-flex align-items-center gap-3 flex-wrap">
-                      <h1 className="no-wrap mb-0">The Memes</h1>
-                      <LFGButton contract={MEMES_CONTRACT} />
-                    </span>
-                    <div className="d-none d-sm-block tw-w-40">
-                      <SeasonsGridDropdown
-                        selected={selectedSeason}
-                        setSelected={handleSeasonChange}
-                        initialSeasonId={seasonId}
-                      />
-                    </div>
-                  </Col>
-                </Row>
-
-                {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
-                <Row className="d-xl-none">
-                  <Col xs={12} className="mb-3">
-                    <Row>
-                      <Col xs={12} sm="auto">
-                        <CollectionsDropdown activePage="memes" />
-                      </Col>
-                    </Row>
-                  </Col>
-                  <Col xs={12} className="mb-3 d-flex d-sm-none">
-                    <div className="text-start tw-w-40">
-                      <SeasonsGridDropdown
-                        selected={selectedSeason}
-                        setSelected={handleSeasonChange}
-                        initialSeasonId={seasonId}
-                      />
-                    </div>
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col>
-                    Sort by&nbsp;&nbsp;
-                    <FontAwesomeIcon
-                      icon={faChevronCircleUp}
-                      onClick={() => setSortDir(SortDirection.ASC)}
-                      width={16}
-                      color={sortDir != SortDirection.ASC ? "#9a9a9a" : "#fff"}
-                      cursor={"pointer"}
-                      className={styles["sortDirection"]}
-                    />{" "}
-                    <FontAwesomeIcon
-                      icon={faChevronCircleDown}
-                      onClick={() => setSortDir(SortDirection.DESC)}
-                      width={16}
-                      color={sortDir != SortDirection.DESC ? "#9a9a9a" : "#fff"}
-                      cursor={"pointer"}
-                      className={styles["sortDirection"]}
+      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+        <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+          <header className="tw-pb-5">
+            <div className="tw-flex tw-flex-col tw-gap-4">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+                <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 sm:tw-w-auto sm:tw-justify-start">
+                  <div className="tw-min-w-0 min-[1200px]:tw-hidden">
+                    <CollectionsDropdown activePage="memes" variant="title" />
+                  </div>
+                  <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                    {t(locale, "theMemes.title")}
+                  </h1>
+                  <LFGButton contract={MEMES_CONTRACT} />
+                </div>
+                <div className="tw-w-full tw-shrink-0 sm:tw-w-40">
+                  <SeasonsGridDropdown
+                    selected={selectedSeason}
+                    setSelected={handleSeasonChange}
+                    initialSeasonId={seasonId}
+                  />
+                </div>
+              </div>
+            </div>
+          </header>
+          <section
+            aria-label={t(locale, "theMemes.sorting.regionLabel")}
+            className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4"
+          >
+            <div className="tw-flex tw-flex-col tw-gap-x-6 tw-gap-y-2 md:tw-flex-row md:tw-items-start">
+              <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-1">
+                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
+                  {t(locale, "theMemes.sorting.sortBy")}
+                </span>
+                <fieldset className="tw-m-0 tw-flex tw-shrink-0 tw-items-center tw-border-0 tw-p-0">
+                  <legend className="tw-sr-only">
+                    {t(locale, "theMemes.sorting.directionLegend")}
+                  </legend>
+                  {printSortDirectionButton(
+                    SortDirection.ASC,
+                    faChevronCircleUp,
+                    t(locale, "theMemes.sorting.ascendingLabel")
+                  )}
+                  {printSortDirectionButton(
+                    SortDirection.DESC,
+                    faChevronCircleDown,
+                    t(locale, "theMemes.sorting.descendingLabel")
+                  )}
+                </fieldset>
+              </div>
+              <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:tw-flex-wrap sm:tw-overflow-visible sm:tw-pb-0 [&::-webkit-scrollbar]:tw-hidden">
+                {Object.values(MemesSort)
+                  .filter((v) => v !== MemesSort.VOLUME)
+                  .map((v) => (
+                    <SortButton
+                      key={v}
+                      currentSort={sort}
+                      sort={v}
+                      locale={locale}
+                      select={() => setSort(v)}
                     />
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                    {Object.values(MemesSort)
-                      .filter((v) => v != MemesSort.VOLUME)
-                      .map((v) => (
-                        <SortButton
-                          key={v}
-                          currentSort={sort}
-                          sort={v}
-                          select={() => setSort(v)}
-                        />
-                      ))}
-                    {printVolumeTypeDropdown(
-                      sort === MemesSort.VOLUME,
-                      setVolumeType,
-                      () => setSort(MemesSort.VOLUME),
-                      volumeType
-                    )}
-                  </Col>
-                </Row>
-                {nfts.length > 0 && sort === MemesSort.MEME
-                  ? printMemes()
-                  : printNfts()}
-                {fetching && nftsNextPage && (
-                  <Row>
-                    <Col className="pt-3 pb-5">
-                      Fetching <DotLoader />
-                    </Col>
-                  </Row>
-                )}
-              </>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
+                  ))}
+                <div className="tw-shrink-0">
+                  <VolumeTypeDropdown
+                    isVolumeSort={sort === MemesSort.VOLUME}
+                    selectedVolumeSort={volumeType}
+                    setVolumeType={setVolumeType}
+                    setVolumeSort={() => setSort(MemesSort.VOLUME)}
+                    locale={locale}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+          {nfts.length > 0 && sort === MemesSort.MEME
+            ? printMemes()
+            : printNfts()}
+          {printEmptyState()}
+          {fetching && nftsNextPage && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300"
+            >
+              {t(locale, "theMemes.loading.fetching")} <DotLoader />
+            </div>
+          )}
+        </div>
+      </div>
     </NftBalancesProvider>
   );
 }
 
-export function SortButton(
+function SortButton(
   props: Readonly<{
-    currentSort: MemesSort | MemeLabSort;
-    sort: MemesSort | MemeLabSort;
+    currentSort: MemesSort;
+    sort: MemesSort;
+    locale: SupportedLocale;
     select: () => void;
   }>
 ) {
   const isActive = props.currentSort === props.sort;
+  const label = getMemesSortLabel(props.sort, props.locale);
 
   return (
     <button
       type="button"
+      aria-pressed={isActive}
+      aria-label={t(props.locale, "theMemes.sorting.sortButtonLabel", {
+        sort: label,
+      })}
       onClick={() => props.select()}
-      className={`tw-m-0 tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-no-underline tw-transition-colors tw-duration-200 ${
+      className={`tw-relative tw-m-0 tw-shrink-0 tw-cursor-pointer tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-sm tw-font-medium tw-leading-5 tw-no-underline tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-shrink ${
         isActive
-          ? "tw-font-semibold tw-text-white"
-          : "tw-text-gray-400 hover:tw-text-white"
+          ? "tw-text-white after:tw-scale-x-100 after:tw-bg-primary-400"
+          : "tw-text-iron-500 after:tw-scale-x-0 after:tw-bg-iron-700 hover:tw-text-iron-200 hover:after:tw-scale-x-100"
       }`}
     >
-      {props.sort}
+      {label}
     </button>
   );
 }
@@ -573,7 +549,8 @@ export function printVolumeTypeDropdown(
   isVolumeSort: boolean,
   setVolumeType: (volumeType: VolumeType) => void,
   setVolumeSort: () => void,
-  selectedVolumeSort: VolumeType = VolumeType.ALL_TIME
+  selectedVolumeSort: VolumeType = VolumeType.ALL_TIME,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
   return (
     <VolumeTypeDropdown
@@ -581,6 +558,7 @@ export function printVolumeTypeDropdown(
       selectedVolumeSort={selectedVolumeSort}
       setVolumeType={setVolumeType}
       setVolumeSort={setVolumeSort}
+      locale={locale}
     />
   );
 }

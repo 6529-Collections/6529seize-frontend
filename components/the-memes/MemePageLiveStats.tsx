@@ -6,12 +6,21 @@ import ProfileAvatar, {
 } from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
-import type { MemesExtendedData, NFT } from "@/entities/INFT";
-import { getDateDisplay, numberWithCommas } from "@/helpers/Helpers";
+import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
+import type { BaseNFT, MemesExtendedData, NFT } from "@/entities/INFT";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
+import {
+  formatDate,
+  formatInteger,
+  formatNumber,
+  formatPercent as formatLocalePercent,
+  roundTo,
+} from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { FireIcon } from "@heroicons/react/24/outline";
 import {
   ArrowUpRightIcon,
@@ -21,8 +30,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 
-const UNIQUE_PERCENT_TOOLTIP =
-  "Unique % represents collectors diversity. Higher percentage means more different collectors.";
 const SECTION_HEADER_TITLE_CLASS =
   "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
 const TOP_LABEL_CLASS =
@@ -30,16 +37,19 @@ const TOP_LABEL_CLASS =
 const CREATOR_NAME_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
 const INLINE_METRIC_LABEL_CLASS =
-  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
+  "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
 const MARKET_METRIC_LABEL_BASE_CLASS =
-  "tw-mb-1 md:tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5";
+  "tw-mb-1 md:tw-mb-2 tw-text-sm tw-font-medium tw-leading-5";
 const MARKET_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const COLLECTOR_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const INLINE_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
-const MEME_MINT_DATE_LOCALE = "en-US";
+const EDITION_STATS_ROW_CLASS =
+  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
+const MARKET_OVERVIEW_ROW_CLASS =
+  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
 const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   day: "numeric",
   month: "short",
@@ -49,49 +59,56 @@ const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
 
 export function MemeCollectorsStats({
   nftMeta,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly nftMeta: MemesExtendedData;
+  readonly locale?: SupportedLocale | undefined;
 }) {
-  const percentUniqueExMuseumLabel =
-    nftMeta.burnt > 0
-      ? "% Unique ex. burnt and 6529 museum"
-      : "% Unique ex. 6529 museum";
+  const percentUniqueExMuseumLabel = getPercentUniqueExMuseumLabel(
+    nftMeta,
+    locale
+  );
 
   return (
     <section>
       <div className={INLINE_STATS_ROW_CLASS}>
         <InlineStatsMetric
-          label="Collectors"
-          value={numberWithCommas(nftMeta.hodlers)}
+          label={t(locale, "theMemes.detail.live.collectors.collectors")}
+          value={formatInteger(locale, nftMeta.hodlers)}
           rank={nftMeta.hodlers_rank}
           total={nftMeta.collection_size}
+          locale={locale}
         />
         <InlineStatsMetric
-          label="6529 museum"
-          value={numberWithCommas(nftMeta.museum_holdings)}
+          label={t(locale, "theMemes.detail.live.collectors.museum")}
+          value={formatInteger(locale, nftMeta.museum_holdings)}
           rank={nftMeta.museum_holdings_rank}
           total={nftMeta.collection_size}
+          locale={locale}
         />
         <InlineStatsMetric
-          label="% Unique"
-          value={formatPercent(nftMeta.percent_unique)}
+          label={t(locale, "theMemes.detail.live.collectors.unique")}
+          value={formatLivePercent(locale, nftMeta.percent_unique)}
           rank={nftMeta.percent_unique_rank}
           total={nftMeta.collection_size}
-          infoTitle={UNIQUE_PERCENT_TOOLTIP}
+          locale={locale}
+          infoTitle={t(locale, "theMemes.detail.live.collectors.uniqueTooltip")}
         />
         {nftMeta.burnt > 0 && (
           <InlineStatsMetric
-            label="% Unique ex. burnt"
-            value={formatPercent(nftMeta.percent_unique_not_burnt)}
+            label={t(locale, "theMemes.detail.live.collectors.uniqueExBurnt")}
+            value={formatLivePercent(locale, nftMeta.percent_unique_not_burnt)}
             rank={nftMeta.percent_unique_not_burnt_rank}
             total={nftMeta.collection_size}
+            locale={locale}
           />
         )}
         <InlineStatsMetric
           label={percentUniqueExMuseumLabel}
-          value={formatPercent(nftMeta.percent_unique_cleaned)}
+          value={formatLivePercent(locale, nftMeta.percent_unique_cleaned)}
           rank={nftMeta.percent_unique_cleaned_rank}
           total={nftMeta.collection_size}
+          locale={locale}
         />
       </div>
     </section>
@@ -100,41 +117,53 @@ export function MemeCollectorsStats({
 
 export function MemeEditionSizeStats({
   nftMeta,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly nftMeta: MemesExtendedData;
+  readonly locale?: SupportedLocale | undefined;
 }) {
-  const editionSizeExMuseumLabel =
-    nftMeta.burnt > 0 ? "ex. burnt and 6529 museum" : "ex. 6529 museum";
+  const editionSizeExMuseumLabel = getEditionSizeExMuseumLabel(nftMeta, locale);
 
   return (
     <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8">
-      <div className={INLINE_STATS_ROW_CLASS}>
+      <div className={EDITION_STATS_ROW_CLASS}>
         <InlineStatsMetric
-          label="Edition size"
-          value={numberWithCommas(nftMeta.edition_size)}
+          label={t(locale, "theMemes.detail.live.edition.editionSize")}
+          value={formatInteger(locale, nftMeta.edition_size)}
           rank={nftMeta.edition_size_rank}
           total={nftMeta.collection_size}
+          locale={locale}
         />
         {nftMeta.burnt > 0 && (
           <>
             <InlineStatsMetric
-              label="burnt"
-              value={numberWithCommas(nftMeta.burnt)}
+              label={t(locale, "theMemes.detail.live.edition.burnt")}
+              value={formatInteger(locale, nftMeta.burnt)}
               icon={<FireIcon className="tw-h-4 tw-w-4 tw-text-red" />}
+              locale={locale}
             />
             <InlineStatsMetric
-              label="ex. burnt"
-              value={numberWithCommas(nftMeta.edition_size_not_burnt)}
+              label={t(locale, "theMemes.detail.live.edition.exBurnt")}
+              value={formatInteger(locale, nftMeta.edition_size_not_burnt)}
               rank={nftMeta.edition_size_not_burnt_rank}
               total={nftMeta.collection_size}
+              locale={locale}
             />
           </>
         )}
         <InlineStatsMetric
           label={editionSizeExMuseumLabel}
-          value={numberWithCommas(nftMeta.edition_size_cleaned)}
+          value={formatInteger(locale, nftMeta.edition_size_cleaned)}
           rank={nftMeta.edition_size_cleaned_rank}
           total={nftMeta.collection_size}
+          locale={locale}
+        />
+        <InlineStatsMetric
+          label={t(locale, "theMemes.detail.live.collectors.collectors")}
+          value={formatInteger(locale, nftMeta.hodlers)}
+          rank={nftMeta.hodlers_rank}
+          total={nftMeta.collection_size}
+          locale={locale}
         />
       </div>
     </section>
@@ -148,6 +177,7 @@ function InlineStatsMetric({
   total,
   icon,
   infoTitle,
+  locale,
 }: {
   readonly label: string;
   readonly value: string;
@@ -155,6 +185,7 @@ function InlineStatsMetric({
   readonly total?: number | undefined;
   readonly icon?: ReactNode;
   readonly infoTitle?: string | undefined;
+  readonly locale: SupportedLocale;
 }) {
   const tooltipId = infoTitle
     ? buildTooltipId("meme-collector-stat", label, infoTitle)
@@ -187,7 +218,7 @@ function InlineStatsMetric({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1.5">
         <span className={COLLECTOR_METRIC_VALUE_CLASS}>{value}</span>
         {rank !== undefined && total !== undefined && (
-          <CollectorRankBadge rank={rank} total={total} />
+          <CollectorRankBadge rank={rank} total={total} locale={locale} />
         )}
       </div>
     </div>
@@ -197,25 +228,60 @@ function InlineStatsMetric({
 function CollectorRankBadge({
   rank,
   total,
+  locale,
 }: {
   readonly rank: number;
   readonly total: number;
+  readonly locale: SupportedLocale;
 }) {
   return (
-    <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-400">
-      Rank {numberWithCommas(rank)}/{numberWithCommas(total)}
+    <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-[11px] md:tw-leading-4">
+      {t(locale, "theMemes.detail.live.rank", {
+        rank: formatInteger(locale, rank),
+        total: formatInteger(locale, total),
+      })}
     </span>
   );
 }
 
-function formatPercent(value: number) {
-  return `${Math.round(value * 100 * 10) / 10}%`;
+function getPercentUniqueExMuseumLabel(
+  nftMeta: MemesExtendedData,
+  locale: SupportedLocale
+) {
+  return nftMeta.burnt > 0
+    ? t(locale, "theMemes.detail.live.collectors.uniqueExBurntAndMuseum")
+    : t(locale, "theMemes.detail.live.collectors.uniqueExMuseum");
 }
 
-export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
-  const mintDate = getMintDateParts(nft.mint_date);
+function getEditionSizeExMuseumLabel(
+  nftMeta: MemesExtendedData,
+  locale: SupportedLocale
+) {
+  return nftMeta.burnt > 0
+    ? t(locale, "theMemes.detail.live.edition.exBurntAndMuseum")
+    : t(locale, "theMemes.detail.live.edition.exMuseum");
+}
+
+function formatLivePercent(locale: SupportedLocale, value: number) {
+  return formatLocalePercent(locale, value, 1);
+}
+
+export function MemeArtworkDetails({
+  nft,
+  layout = "default",
+  locale = DEFAULT_LOCALE,
+}: {
+  readonly nft: BaseNFT;
+  readonly layout?: "default" | "aligned";
+  readonly locale?: SupportedLocale | undefined;
+}) {
+  const mintDate = getMintDateParts(nft.mint_date, locale);
   const artistHandles = getArtistHandles(nft.artist_seize_handle);
   const artistNames = getArtistNames(nft.artist);
+  const unavailableLabel = t(
+    locale,
+    "theMemes.detail.live.artwork.notAvailable"
+  );
   const creatorCount = Math.max(artistNames.length, artistHandles.length);
   const creators =
     creatorCount > 0
@@ -223,16 +289,27 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
           const handle = artistHandles[index] ?? null;
           return {
             handle,
-            display: artistNames[index] ?? handle ?? "not available",
+            display: artistNames[index] ?? handle ?? unavailableLabel,
           };
         })
-      : [{ handle: null, display: "not available" }];
+      : [{ handle: null, display: unavailableLabel }];
+  const isAligned = layout === "aligned";
+  const rowClassName = isAligned
+    ? "tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-8 tw-gap-y-6 sm:tw-grid-cols-2"
+    : "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-6";
+  const itemClassName = isAligned
+    ? "tw-min-w-[8.5rem] sm:tw-justify-self-end sm:tw-text-right"
+    : "tw-min-w-fit";
+  const mintDateClassName =
+    "tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end";
 
   return (
-    <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 md:tw-pb-8">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-8 tw-gap-y-6">
+    <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-8 md:tw-pb-8 lg:tw-pt-0">
+      <div className={rowClassName}>
         <div className="tw-min-w-0">
-          <div className={TOP_LABEL_CLASS}>Created by</div>
+          <div className={TOP_LABEL_CLASS}>
+            {t(locale, "theMemes.detail.live.artwork.createdBy")}
+          </div>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2">
             {creators.map((creator, index) => {
               const nextCreator = creators[index + 1];
@@ -243,7 +320,11 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
 
               return (
                 <div
-                  key={`${creator.display}-${creator.handle ?? "plain"}-${index}`}
+                  key={
+                    creator.handle
+                      ? `handle:${creator.handle}`
+                      : `plain:${creator.display}`
+                  }
                   className={`tw-flex tw-items-center ${
                     hasNextCreator && !showComma ? "tw-mr-4" : ""
                   }`}
@@ -252,6 +333,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
                     <CreatorProfileIdentity
                       handle={creator.handle}
                       display={creator.display}
+                      locale={locale}
                     />
                   ) : (
                     <span className={CREATOR_NAME_CLASS}>
@@ -268,17 +350,14 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
             })}
           </div>
         </div>
-        <div className="tw-min-w-fit">
-          <div className={TOP_LABEL_CLASS}>Mint date</div>
-          <div className="tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end">
+        <div className={itemClassName}>
+          <div className={TOP_LABEL_CLASS}>
+            {t(locale, "theMemes.detail.live.artwork.mintDate")}
+          </div>
+          <div className={mintDateClassName}>
             <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg">
               {mintDate.date}
             </span>
-            {mintDate.relative && (
-              <span className="tw-ml-1.5 tw-mt-1 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500">
-                {mintDate.relative}
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -289,9 +368,11 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
 function CreatorProfileIdentity({
   handle,
   display,
+  locale,
 }: {
   readonly handle: string;
   readonly display: string;
+  readonly locale: SupportedLocale;
 }) {
   const { profile } = useIdentity({
     handleOrWallet: handle,
@@ -309,7 +390,9 @@ function CreatorProfileIdentity({
       <ProfileAvatar
         pfpUrl={profile?.pfp}
         size={ProfileBadgeSize.SMALL}
-        alt={`${avatarLabel} avatar`}
+        alt={t(locale, "theMemes.detail.live.artwork.artistAvatarAlt", {
+          artist: avatarLabel,
+        })}
         fallbackContent={avatarFallback}
       />
       <Link
@@ -322,23 +405,12 @@ function CreatorProfileIdentity({
   );
 }
 
-function getMintDateParts(date?: Date) {
-  if (!date) {
-    return { date: "-" };
-  }
-
-  const mintDate = new Date(date);
-
-  if (Number.isNaN(mintDate.getTime())) {
-    return { date: "-" };
-  }
-
+function getMintDateParts(
+  date: Date | string | number | null | undefined,
+  locale: SupportedLocale
+) {
   return {
-    date: mintDate.toLocaleString(
-      MEME_MINT_DATE_LOCALE,
-      MEME_MINT_DATE_FORMAT
-    ),
-    relative: `(${getDateDisplay(mintDate)})`,
+    date: formatDate(locale, date, MEME_MINT_DATE_FORMAT),
   };
 }
 
@@ -360,6 +432,8 @@ function getArtistNames(value: string | undefined) {
       .join(",")
       .split(" and ")
       .join(",")
+      .split(" & ")
+      .join(",")
       .split(",")
       .map((name) => name.trim())
       .filter((name) => name.length > 0) ?? []
@@ -380,8 +454,14 @@ function getInitials(value: string | undefined) {
     .toUpperCase();
 }
 
-function MemeDistributionPlanLink({ nft }: { readonly nft: NFT }) {
-  const distributionPlanLink = getDistributionPlanLink(nft);
+function MemeDistributionPlanLink({
+  nft,
+  locale,
+}: {
+  readonly nft: NFT;
+  readonly locale: SupportedLocale;
+}) {
+  const distributionPlanLink = getDistributionPlanLink(nft, locale);
 
   return (
     <section className="tw-pt-6">
@@ -391,7 +471,7 @@ function MemeDistributionPlanLink({ nft }: { readonly nft: NFT }) {
         rel={nft.has_distribution ? undefined : "noopener noreferrer"}
         className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white"
       >
-        <span>Distribution Plan</span>
+        <span>{t(locale, "distribution.planLink")}</span>
         <ArrowUpRightIcon className="-tw-mr-1 tw-h-4 tw-w-4 tw-text-iron-500" />
       </Link>
     </section>
@@ -437,41 +517,60 @@ function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
   }
 
   return (
-    <div className="tw-flex tw-items-end">
+    <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
     </div>
   );
 }
 
-export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
+export function MemeNftLivePanel({
+  nft,
+  locale = DEFAULT_LOCALE,
+}: {
+  readonly nft: NFT;
+  readonly locale?: SupportedLocale | undefined;
+}) {
   return (
     <section className="tw-pt-6 md:tw-pt-8">
       <h3 className={`${SECTION_HEADER_TITLE_CLASS} tw-mb-4`}>
-        Market Overview
+        {t(locale, "theMemes.detail.live.market.title")}
       </h3>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-5 sm:tw-gap-x-8">
+      <div className={MARKET_OVERVIEW_ROW_CLASS}>
         <MarketMetric
-          label="Mint price"
+          label={t(locale, "theMemes.detail.live.market.mintPrice")}
           value={nft.mint_price}
           decimals={100000}
-          unit="ETH"
+          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          locale={locale}
         />
-        <MarketMetric label="Floor price" value={nft.floor_price} unit="ETH" />
         <MarketMetric
-          label="Market cap"
+          label={t(locale, "theMemes.detail.live.market.floorPrice")}
+          value={nft.floor_price}
+          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          locale={locale}
+        />
+        <MarketMetric
+          label={t(locale, "theMemes.detail.live.market.marketCap")}
           value={nft.market_cap}
           decimals={100}
-          unit="ETH"
+          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          locale={locale}
         />
-        <MarketMetric label="TDH rate" value={nft.hodl_rate} decimals={100} />
         <MarketMetric
-          label="Highest offer"
+          label={t(locale, "theMemes.detail.live.market.tdhRate")}
+          value={nft.hodl_rate}
+          decimals={100}
+          locale={locale}
+        />
+        <MarketMetric
+          label={t(locale, "theMemes.detail.live.market.highestOffer")}
           value={nft.highest_offer}
-          unit="ETH"
+          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          locale={locale}
         />
         <MemeMarketplaceLinks nft={nft} />
       </div>
-      <MemeDistributionPlanLink nft={nft} />
+      <MemeDistributionPlanLink nft={nft} locale={locale} />
     </section>
   );
 }
@@ -481,25 +580,31 @@ function MarketMetric({
   value,
   decimals = 1000,
   unit,
+  locale,
 }: {
   readonly label: string;
   readonly value: number;
   readonly decimals?: number | undefined;
   readonly unit?: string | undefined;
+  readonly locale: SupportedLocale;
 }) {
+  const unavailableLabel = t(locale, "theMemes.detail.live.market.unavailable");
+  const fractionDigits = getFractionDigits(decimals);
   const formattedValue =
     value > 0
-      ? numberWithCommas(Math.round(value * decimals) / decimals)
-      : "N/A";
+      ? formatNumber(locale, roundTo(value, fractionDigits), {
+          maximumFractionDigits: fractionDigits,
+        })
+      : unavailableLabel;
 
   return (
-    <div>
+    <div className="tw-min-w-[8.5rem]">
       <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
         {label}
       </div>
       <div className="tw-flex tw-items-baseline">
         <span className={MARKET_METRIC_VALUE_CLASS}>{formattedValue}</span>
-        {unit && formattedValue !== "N/A" && (
+        {unit && formattedValue !== unavailableLabel && (
           <span className="tw-ml-1.5 tw-text-sm tw-font-medium tw-leading-none tw-text-iron-400">
             {unit}
           </span>
@@ -509,9 +614,21 @@ function MarketMetric({
   );
 }
 
-function getDistributionPlanLink(nft: NFT) {
+function getFractionDigits(decimals: number) {
+  if (!Number.isFinite(decimals) || decimals <= 1) {
+    return 0;
+  }
+
+  return Math.max(0, Math.round(Math.log10(decimals)));
+}
+
+function getDistributionPlanLink(nft: NFT, locale: SupportedLocale) {
   if (nft.has_distribution) {
-    return `/the-memes/${nft.id}/distribution`;
+    return getDistributionDetailHref({
+      basePath: "/the-memes",
+      id: nft.id,
+      locale,
+    });
   }
   if (nft.id > 3) {
     return `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`;

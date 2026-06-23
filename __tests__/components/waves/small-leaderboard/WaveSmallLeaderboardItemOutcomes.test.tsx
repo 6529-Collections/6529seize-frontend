@@ -1,53 +1,66 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { WaveSmallLeaderboardItemOutcomes } from '@/components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { WaveSmallLeaderboardItemOutcomes } from "@/components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes";
 
 const mockUseWaveRankReward = jest.fn();
 
-jest.mock('@/hooks/waves/useWaveRankReward', () => ({
+jest.mock("@/hooks/waves/useWaveRankReward", () => ({
   useWaveRankReward: (args: any) => mockUseWaveRankReward(args),
 }));
 
-describe('WaveSmallLeaderboardItemOutcomes', () => {
-  const drop: any = { rank: 1, wave: { id: 'w1' } };
+describe("WaveSmallLeaderboardItemOutcomes", () => {
+  const drop: any = { rank: 1, wave: { id: "w1" } };
 
   beforeEach(() => {
     mockUseWaveRankReward.mockReset();
   });
 
-  it('renders button when outcomes exist', () => {
+  it("renders button when outcomes exist", () => {
     mockUseWaveRankReward.mockReturnValue({
       nicTotal: 10,
       repTotal: 20,
-      manualOutcomes: ['Award'],
-      isLoading: false
+      manualOutcomes: ["Award"],
+      isLoading: false,
     });
 
     render(<WaveSmallLeaderboardItemOutcomes drop={drop} />);
-    expect(screen.getByRole('button')).toBeInTheDocument();
-    expect(screen.getByText('Outcome:')).toBeInTheDocument();
+    expect(screen.getByRole("button")).toBeInTheDocument();
+    expect(screen.getByText("Outcome")).toBeInTheDocument();
   });
 
-  it('hides when no outcomes and not loading', () => {
+  it("hides when no outcomes and not loading", () => {
     mockUseWaveRankReward.mockReturnValue({
       nicTotal: 0,
       repTotal: 0,
       manualOutcomes: [],
-      isLoading: false
+      isLoading: false,
     });
 
-    const { container } = render(<WaveSmallLeaderboardItemOutcomes drop={drop} />);
+    const { container } = render(
+      <WaveSmallLeaderboardItemOutcomes drop={drop} />
+    );
     expect(container.firstChild).toBeNull();
   });
 
-  it('shows loading state', () => {
+  it("shows loading state", () => {
     mockUseWaveRankReward.mockReturnValue({
       nicTotal: 0,
       repTotal: 0,
       manualOutcomes: [],
-      isLoading: true
+      isLoading: true,
     });
-    const { container } = render(<WaveSmallLeaderboardItemOutcomes drop={drop} />);
-    expect(container.querySelector('.tw-animate-pulse')).toBeInTheDocument();
+    const { container } = render(
+      <WaveSmallLeaderboardItemOutcomes drop={drop} />
+    );
+    expect(container.querySelector(".tw-animate-pulse")).toBeInTheDocument();
+  });
+
+  it("does not mount reward hook when outcomes are hidden", () => {
+    const { container } = render(
+      <WaveSmallLeaderboardItemOutcomes drop={drop} outcomesVisible={false} />
+    );
+
+    expect(container.firstChild).toBeNull();
+    expect(mockUseWaveRankReward).not.toHaveBeenCalled();
   });
 });

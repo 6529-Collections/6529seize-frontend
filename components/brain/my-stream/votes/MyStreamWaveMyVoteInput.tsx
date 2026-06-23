@@ -1,16 +1,19 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
 import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
-import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import {
+  getWaveVoteScopeMaxLabel,
+  WAVE_VOTING_LABELS,
+} from "@/helpers/waves/waves.constants";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
@@ -45,9 +48,13 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
     null
   );
-  const currentVoteValue = drop.context_profile_context?.rating ?? 0;
-  const minRating = drop.context_profile_context?.min_rating ?? 0;
+  const rawCurrentVoteValue = drop.context_profile_context?.rating ?? 0;
+  const rawMinRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
+  const minRating = drop.wave.forbid_negative_votes
+    ? Math.max(0, rawMinRating)
+    : rawMinRating;
+  const currentVoteValue = rawCurrentVoteValue;
   const hasMatchingOptimisticState =
     optimisticVoteState !== null &&
     optimisticVoteState.dropId === drop.id &&
@@ -60,7 +67,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     ? optimisticVoteState.nextMaxRating
     : maxRating;
   const liveCurrentVoteValueString = String(liveCurrentVoteValue);
-  const voteSourceKey = `${drop.id}:${liveCurrentVoteValue}:${liveMaxRating}`;
+  const voteSourceKey = `${drop.id}:${liveCurrentVoteValue}:${minRating}:${liveMaxRating}`;
   const voteValue =
     voteDraftState?.sourceKey === voteSourceKey
       ? voteDraftState.value
@@ -70,12 +77,19 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const isEditing =
     hasValidVoteValue && parsedVoteValue !== liveCurrentVoteValue;
   const voteLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
+  const maxRatingLabel = getWaveVoteScopeMaxLabel(
+    drop.wave.voting_credit_scope
+  );
 
   const setVoteDraftValue = (nextValue: string) => {
     setVoteDraftState({
       sourceKey: voteSourceKey,
       value: nextValue,
     });
+  };
+
+  const clampVoteValue = (value: number) => {
+    return Math.min(Math.max(value, minRating), liveMaxRating);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,8 +110,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
 
     const value = Number.parseInt(inputValue, 10);
     if (Number.isNaN(value)) return;
-    const clampedValue = Math.min(Math.max(value, minRating), liveMaxRating);
-    setVoteDraftValue(String(clampedValue));
+    setVoteDraftValue(String(clampVoteValue(value)));
   };
 
   const handleBlur = () => {
@@ -110,15 +123,12 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       return;
     }
 
-    const clampedValue = Math.min(
-      Math.max(parsedVoteValue, minRating),
-      liveMaxRating
-    );
-    if (clampedValue === liveCurrentVoteValue) {
+    if (parsedVoteValue === liveCurrentVoteValue) {
       setVoteDraftState(null);
       return;
     }
 
+    const clampedValue = clampVoteValue(parsedVoteValue);
     setVoteDraftValue(String(clampedValue));
   };
 
@@ -145,20 +155,18 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       });
       setVoteDraftState(null);
       setToast({
-        message: "Vote updated",
+        message: "Vote updated.",
         type: "success",
-      });
-      void queryClient.invalidateQueries({
-        queryKey: [QueryKey.DROPS_LEADERBOARD],
       });
       invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update your vote.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
-      throw error;
     },
   });
 
@@ -170,15 +178,13 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       return;
     }
 
-    const clampedValue = Math.min(
-      Math.max(parsedVoteValue, minRating),
-      liveMaxRating
-    );
-    if (clampedValue === liveCurrentVoteValue) {
+    if (parsedVoteValue === liveCurrentVoteValue) {
       setVoteDraftState(null);
-    } else {
-      setVoteDraftValue(String(clampedValue));
+      return;
     }
+
+    const clampedValue = clampVoteValue(parsedVoteValue);
+    setVoteDraftValue(String(clampedValue));
 
     setIsProcessing(true);
 
@@ -186,7 +192,8 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       const { success } = await requestAuth();
       if (!success) {
         setToast({
-          message: "Authentication failed",
+          message:
+            "Couldn't authenticate. Reconnect your wallet and try again.",
           type: "error",
         });
         setIsProcessing(false);
@@ -198,13 +205,6 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       });
     } catch (error) {
       console.error("Failed to submit vote:", error);
-
-      const errorMessage =
-        error instanceof Error ? error.message : "Something went wrong";
-      setToast({
-        message: errorMessage,
-        type: "error",
-      });
     } finally {
       setIsProcessing(false);
     }
@@ -218,7 +218,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-1.5">
       <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
-        Max{" "}
+        {maxRatingLabel}{" "}
         <span className="tw-tabular-nums tw-text-iron-300">
           {formatNumberWithCommas(liveMaxRating)}
         </span>
@@ -235,7 +235,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             disabled={isResetting || isVotingClosed}
-            pattern="-?[0-9]*"
+            pattern={minRating < 0 ? "-?[0-9]*" : "[0-9]*"}
             inputMode="numeric"
             className="tw-h-8 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all focus:tw-bg-iron-950/80 focus:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-950/60 desktop-hover:hover:tw-ring-primary-400"
           />

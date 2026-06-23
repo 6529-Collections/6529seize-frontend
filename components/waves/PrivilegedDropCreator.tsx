@@ -1,6 +1,11 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
 import { useAuth } from "../auth/Auth";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
@@ -17,6 +22,9 @@ interface PrivilegedDropCreatorProps {
   readonly onCancelReplyQuote: () => void;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
+  readonly onServerDropCreated?:
+    | ((drop: ApiDrop) => Promise<void> | void)
+    | undefined;
   readonly onExitFixedDropMode?: (() => void) | undefined;
   readonly wave: ApiWave;
   readonly dropId: string | null;
@@ -36,6 +44,7 @@ interface PrivilegedDropCreatorProps {
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
+  readonly forceStandardDropComposer?: boolean | undefined;
 }
 
 export default function PrivilegedDropCreator({
@@ -45,6 +54,7 @@ export default function PrivilegedDropCreator({
   dropId,
   fixedDropMode,
   onAllDropsAdded,
+  onServerDropCreated,
   onExitFixedDropMode,
   onDropAddedToQueue,
   curationComposerVariant = "default",
@@ -56,33 +66,57 @@ export default function PrivilegedDropCreator({
   onExternalAttachmentDropConsumed,
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
+  forceStandardDropComposer = false,
 }: PrivilegedDropCreatorProps) {
+  const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
+  const { updateEligibility } = useWaveEligibility();
+  const refreshWaveAfterSlowModeExpires = useCallback(() => {
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
+      })
+      .catch(() => undefined);
+  }, [queryClient, wave.id]);
+
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: !!connectedProfile?.handle,
     isProxy: !!activeProfileProxy,
     canChat: wave.chat.authenticated_user_eligible,
     canDrop: wave.participation.authenticated_user_eligible,
     chatDisabled: !wave.chat.enabled,
+    slowModeCooldownMs: wave.chat.slow_mode_cooldown_ms ?? null,
+    nextDropAllowed: wave.chat.next_drop_allowed ?? null,
     submissionStarts: wave.participation.period?.min ?? null,
     submissionEnds: wave.participation.period?.max ?? null,
     maxDropsCount:
       wave.participation.no_of_applications_allowed_per_participant ?? null,
     identityDropsCount: wave.metrics.your_participation_drops_count,
+    onSlowModeCooldownExpired: refreshWaveAfterSlowModeExpires,
   });
+  const blockingChatRestriction =
+    chatRestriction === ChatRestriction.SLOW_MODE ? null : chatRestriction;
 
-  if (submissionRestriction !== null && chatRestriction !== null) {
+  useEffect(() => {
+    updateEligibility(wave.id, {
+      authenticated_user_chat_restriction: chatRestriction,
+    });
+  }, [chatRestriction, updateEligibility, wave.id]);
+
+  if (submissionRestriction !== null && blockingChatRestriction !== null) {
     return (
       <DropPlaceholder
         type="both"
-        chatRestriction={chatRestriction}
+        chatRestriction={blockingChatRestriction}
         submissionRestriction={submissionRestriction}
       />
     );
   }
 
-  if (fixedDropMode === DropMode.CHAT && chatRestriction !== null) {
-    return <DropPlaceholder type="chat" chatRestriction={chatRestriction} />;
+  if (fixedDropMode === DropMode.CHAT && blockingChatRestriction !== null) {
+    return (
+      <DropPlaceholder type="chat" chatRestriction={blockingChatRestriction} />
+    );
   }
 
   if (
@@ -102,6 +136,7 @@ export default function PrivilegedDropCreator({
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
       onAllDropsAdded={onAllDropsAdded}
+      onServerDropCreated={onServerDropCreated}
       onExitFixedDropMode={onExitFixedDropMode}
       wave={wave}
       dropId={dropId}
@@ -120,6 +155,7 @@ export default function PrivilegedDropCreator({
       onExternalAttachmentDropConsumed={onExternalAttachmentDropConsumed}
       termsSignatureFlowEnabled={termsSignatureFlowEnabled}
       identityPickerPlacement={identityPickerPlacement}
+      forceStandardDropComposer={forceStandardDropComposer}
     />
   );
 }

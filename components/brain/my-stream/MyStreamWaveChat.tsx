@@ -6,7 +6,6 @@ import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops
 import { WaveGallery } from "@/components/waves/gallery";
 import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
-import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
@@ -19,13 +18,9 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import {
-  resolveWaveSubmissionExperience,
-  WaveSubmissionExperience,
-} from "@/helpers/waves/wave-submission-experience.helpers";
+import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
-import { useWave } from "@/hooks/useWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { selectEditingDropId } from "@/store/editSlice";
@@ -112,13 +107,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const dragCounterRef = useRef(0);
   const externalAttachmentDropTokenRef = useRef(0);
   const { connectedProfile, setToast } = useAuth();
-  const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
-  const submissionExperience = resolveWaveSubmissionExperience({
-    isMemesWave,
-    isCurationWave,
-    isQuorumWave,
-    submissionStrategy: wave.participation.submission_strategy ?? null,
-  });
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const [isDragDropActive, setIsDragDropActive] = useState(false);
@@ -242,10 +230,14 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = () => {
     setActiveDropForWave(null);
   };
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({
-      wave,
-    });
+  const {
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  } = useApprovalWaveStatus({
+    wave,
+  });
   const fixedDropMode = DropMode.CHAT;
   const activeChatSubmitDropExperience =
     chatSubmitDrop?.submissionExperience ?? null;
@@ -458,8 +450,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           dividerSerialNo={dividerTarget}
           unreadCount={wave.metrics.your_unread_drops_count}
           dropId={null}
+          onDropContentClick={onDropClick}
           isMuted={wave.metrics.muted}
           winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
         />
@@ -511,12 +505,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             wave={wave}
             initialUrl={chatSubmitDrop?.initialCurationUrl ?? null}
             onClose={closeChatSubmitDrop}
-          />
-        )}
-        {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (
-          <MobileMemesArtSubmissionBtn
-            wave={wave}
-            isSubmissionLocked={isVotingControlsLocked}
           />
         )}
       </section>

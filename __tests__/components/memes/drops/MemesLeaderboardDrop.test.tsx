@@ -26,6 +26,25 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
   default: (...args: any[]) => useLongPressInteraction(...args),
 }));
 
+const mockVoteSummary = jest.fn(() => <div data-testid="summary" />);
+const mockVoteDetailsTrigger = jest.fn((props: any) => (
+  <button
+    type="button"
+    data-testid="vote-details"
+    onClick={(event) => event.stopPropagation()}
+  >
+    View voters and vote log for {props.drop.raters_count}{" "}
+    {props.drop.raters_count === 1 ? "voter" : "voters"}
+  </button>
+));
+
+jest.mock(
+  "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger",
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockVoteDetailsTrigger(props),
+  })
+);
 jest.mock(
   "@/components/memes/drops/MemesLeaderboardDropCard",
   () => (props: any) => (
@@ -44,7 +63,7 @@ jest.mock(
 );
 jest.mock(
   "@/components/memes/drops/MemesLeaderboardDropVoteSummary",
-  () => () => <div data-testid="summary" />
+  () => (props: any) => mockVoteSummary(props)
 );
 jest.mock(
   "@/components/memes/drops/MemesLeaderboardDropArtistInfo",
@@ -137,6 +156,8 @@ const drop: any = {
 };
 
 beforeEach(() => {
+  mockVoteSummary.mockClear();
+  mockVoteDetailsTrigger.mockClear();
   mockMemesArtSubmissionModal.mockClear();
   useDropInteractionRules.mockReturnValue({ canDelete: true });
   useLongPressInteraction.mockReturnValue({
@@ -155,6 +176,25 @@ test("calls onDropClick when not touch screen", async () => {
   );
   await userEvent.click(container.firstElementChild as HTMLElement);
   expect(onClick).toHaveBeenCalledWith(drop);
+});
+
+test("passes the drop to vote summary and opens vote details without opening the card", async () => {
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+  const onClick = jest.fn();
+
+  render(<MemesLeaderboardDrop drop={drop} onDropClick={onClick} />);
+
+  expect(mockVoteSummary).toHaveBeenCalledWith(
+    expect.objectContaining({ drop })
+  );
+
+  await userEvent.click(screen.getByTestId("vote-details"));
+
+  expect(onClick).not.toHaveBeenCalled();
+  expect(mockVoteDetailsTrigger).toHaveBeenCalledWith(
+    expect.objectContaining({ drop, density: "compact" })
+  );
 });
 
 test("does not call onDropClick on touch devices", async () => {
@@ -207,6 +247,26 @@ test("uses v2 part one title and content before metadata fallbacks", () => {
 
   expect(screen.getByTestId("header")).toHaveTextContent("Part title");
   expect(screen.getByTestId("desc")).toHaveTextContent("Part description");
+});
+
+test("shows additional action badge only when promised", () => {
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+
+  const { rerender } = render(
+    <MemesLeaderboardDrop drop={drop} onDropClick={jest.fn()} />
+  );
+
+  expect(screen.queryByText("Additional Action")).not.toBeInTheDocument();
+
+  rerender(
+    <MemesLeaderboardDrop
+      drop={{ ...drop, is_additional_action_promised: true }}
+      onDropClick={jest.fn()}
+    />
+  );
+
+  expect(screen.getByText("Additional Action")).toBeInTheDocument();
 });
 
 test("opens mobile resubmit modal after the touch menu leaves", async () => {

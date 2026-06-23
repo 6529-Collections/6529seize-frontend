@@ -9,12 +9,14 @@ interface NotificationHeaderProps {
   readonly author: ApiProfileMin;
   readonly children: React.ReactNode; // Content AFTER the user link (e.g. "replied • 2h")
   readonly actions?: React.ReactNode | undefined; // Follow button(s)
+  readonly authorClassName?: string | undefined;
 }
 
 export default function NotificationHeader({
   author,
   children,
   actions,
+  authorClassName = "tw-text-sm",
 }: NotificationHeaderProps) {
   const { activeSrc, isPlaceholder, unoptimized, handleError } =
     useGatewayImageLoadState(author.pfp);
@@ -42,7 +44,7 @@ export default function NotificationHeader({
           <UserProfileTooltipWrapper user={author.handle ?? ""}>
             <Link
               href={`/${author.handle}`}
-              className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-no-underline"
+              className={`${authorClassName} tw-font-semibold tw-text-iron-50 tw-no-underline`}
             >
               {author.handle}
             </Link>

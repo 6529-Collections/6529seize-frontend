@@ -22,6 +22,7 @@ interface WaveLeaderboardGridItemProps {
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
@@ -50,6 +51,7 @@ export const WaveLeaderboardGridItem: React.FC<
   isVotingClosed = false,
   isVotingControlsLocked = false,
   winningThreshold,
+  winningThresholdMinDurationMs,
   onDropClick,
 }) => {
   const isCompactMode = mode === "compact";
@@ -164,6 +166,7 @@ export const WaveLeaderboardGridItem: React.FC<
         <WaveLeaderboardGridItemCompactFooter
           drop={drop}
           winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           canShowVotingAction={canShowVotingAction}
           onVoteButtonClick={handleVoteButtonClick}

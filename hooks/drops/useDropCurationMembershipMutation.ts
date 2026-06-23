@@ -42,7 +42,7 @@ const getDropCurationMembershipHeaders = (): Record<string, string> => {
 const getErrorMessageFromResponse = async (
   response: Response
 ): Promise<string> => {
-  const fallbackErrorMessage = response.statusText || "Something went wrong";
+  const fallbackErrorMessage = response.statusText || "Request failed.";
 
   try {
     const rawContent = await response.text();
@@ -68,7 +68,7 @@ const getErrorMessageFromResponse = async (
   }
 };
 
-const addDropToCuration = async ({
+export const addDropToCuration = async ({
   dropId,
   body,
 }: {
@@ -118,8 +118,8 @@ const getCurationMembershipErrorMessage = (
 ): string => {
   const fallbackErrorMessage =
     action === "add"
-      ? "Failed to add drop to curation."
-      : "Failed to remove drop from curation.";
+      ? "Couldn't add this drop to curation."
+      : "Couldn't remove this drop from curation.";
   const errorMessage = getErrorMessage(error, fallbackErrorMessage);
 
   if (isPermissionErrorMessage(errorMessage)) {

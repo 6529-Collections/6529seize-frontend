@@ -11,6 +11,7 @@ import MyStreamWaveLeaderboard from "../my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveSubmissions from "../my-stream/MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "../my-stream/MyStreamWaveOutcome";
 import MyStreamWaveSales from "../my-stream/MyStreamWaveSales";
+import MyStreamWavePolls from "../my-stream/MyStreamWavePolls";
 import MyStreamWaveMyVotes from "../my-stream/votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "../my-stream/MyStreamWaveFAQ";
 import BrainMobileWaves from "./BrainMobileWaves";
@@ -28,6 +29,8 @@ interface BrainMobileViewContentProps {
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
   readonly isApproveWave?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
+  readonly hasPolls?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
@@ -64,13 +67,16 @@ export default function BrainMobileViewContent({
   isMemesWave,
   isRankWave,
   isApproveWave = false,
+  outcomesVisible = true,
+  hasPolls = false,
   onDropClick,
   onOpenQuickVote,
   onPrefetchQuickVote,
   wave,
 }: BrainMobileViewContentProps) {
   const isCompetitionWave = isRankWave || isApproveWave;
-  const supportsOutcomeView = isCompetitionWave && !isCurationWave;
+  const supportsOutcomeView =
+    isCompetitionWave && !isCurationWave && outcomesVisible;
   const rankWave = isCompetitionWave ? (wave ?? null) : null;
   const outcomeWave = supportsOutcomeView ? (wave ?? null) : null;
   const curationWave = isCurationWave ? (wave ?? null) : null;
@@ -110,6 +116,11 @@ export default function BrainMobileViewContent({
     <MyStreamWaveMyVotes wave={rankWave} onDropClick={onDropClick} />
   ) : null;
 
+  const pollsContent =
+    wave && hasPolls ? (
+      <MyStreamWavePolls wave={wave} onDropClick={onDropClick} />
+    ) : null;
+
   const faqContent = faqWave ? <MyStreamWaveFAQ wave={faqWave} /> : null;
 
   const contentByView: Record<BrainView, ReactNode> = {
@@ -121,6 +132,7 @@ export default function BrainMobileViewContent({
     [BrainView.WINNERS]: winnersContent,
     [BrainView.OUTCOME]: outcomeContent,
     [BrainView.MY_VOTES]: myVotesContent,
+    [BrainView.POLLS]: pollsContent,
     [BrainView.FAQ]: faqContent,
     [BrainView.WAVES]: (
       <BrainMobileWaves

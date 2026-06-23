@@ -1,16 +1,17 @@
 "use client";
 
-import styles from "./Rememes.module.scss";
-
 import Address from "@/components/address/Address";
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import DotLoader from "@/components/dotLoader/DotLoader";
-import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
-import NFTImage from "@/components/nft-image/NFTImage";
 import RememeImage from "@/components/nft-image/RememeImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
-import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
+import { RememeReferencesGrid } from "@/components/rememes/RememeReferences";
+import {
+  AdditionalDetailsSection,
+  MetadataCard,
+} from "@/components/the-memes/MemePageAdditionalDetails";
 import { publicEnv } from "@/config/env";
 import {
   MEMES_CONTRACT,
@@ -18,119 +19,245 @@ import {
 } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
-import type { NFT, Rememe } from "@/entities/INFT";
+import type { IAttribute, NFT, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
   isIPFS,
   isUrl,
-  numberWithCommas,
   parseIpfsUrl,
   parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useIdentity } from "@/hooks/useIdentity";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
-import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowTopRightOnSquareIcon,
+  CodeBracketSquareIcon,
+  GlobeAltIcon,
+  LinkIcon,
+  SwatchIcon,
+} from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEnsName } from "wagmi";
+import {
+  getRememeDetailApiQuery,
+  getRememeDetailHref,
+  getRouteHrefWithLocale,
+} from "./rememesRouteParams";
+
+export { printMemeReferences } from "@/components/rememes/RememeReferences";
 
 interface Props {
   contract: string;
   id: string;
+  locale?: SupportedLocale | undefined;
 }
 
 enum Tabs {
-  LIVE = "Live",
-  METADATA = "Metadata",
-  REFERENCES = "References",
+  LIVE = "overview",
+  METADATA = "metadata",
+  REFERENCES = "references",
 }
 
-export function printMemeReferences(
-  memes: NFT[],
-  routerPath: string,
-  memesLoaded: boolean = true,
-  hideTitle: boolean = false
-) {
+function getRememeTitle(rememe: Rememe) {
+  const metadata = getRememeMetadataRecord(rememe);
+  const metadataName = metadata["name"];
+  if (typeof metadataName === "string" && metadataName.length > 0) {
+    return metadataName;
+  }
+
+  return `${formatAddress(rememe.contract)} #${rememe.id}`;
+}
+
+function getRememeCollectionName(rememe: Rememe) {
+  const collectionName = rememe.contract_opensea_data.collectionName;
+  return typeof collectionName === "string" && collectionName.length > 0
+    ? collectionName
+    : formatAddress(rememe.contract);
+}
+
+function getRememeMetadataRecord(rememe: Rememe): Record<string, unknown> {
+  if (
+    rememe.metadata !== null &&
+    rememe.metadata !== undefined &&
+    typeof rememe.metadata === "object" &&
+    !Array.isArray(rememe.metadata)
+  ) {
+    return rememe.metadata as Record<string, unknown>;
+  }
+
+  return {};
+}
+
+function getRememeTokenLabel(rememe: Rememe) {
+  if (areEqualAddresses(rememe.contract, OPENSEA_STORE_FRONT_CONTRACT)) {
+    return rememe.contract_opensea_data.collectionName;
+  }
+
+  return `${getRememeCollectionName(rememe)} #${rememe.id}`;
+}
+
+function RememeInfoMetric({
+  label,
+  children,
+  valueClassName = "",
+}: {
+  readonly label: string;
+  readonly children: ReactNode;
+  readonly valueClassName?: string | undefined;
+}) {
   return (
-    <Row className="pt-2">
-      {!hideTitle && (
-        <Col xs={12} className="pt-2">
-          <h1>The Memes References</h1>
-        </Col>
-      )}
-      {memesLoaded ? (
-        <>
-          {memes.length > 0 ? (
-            <>
-              {memes.map((nft) => {
-                return (
-                  <Col
-                    key={`${nft.contract}-${nft.id}`}
-                    className="pt-3 pb-3"
-                    xs={{ span: 6 }}
-                    sm={{ span: 4 }}
-                    md={{ span: 3 }}
-                    lg={{ span: 3 }}
-                  >
-                    <a
-                      href={`/${routerPath}/${nft.id}`}
-                      className="decoration-none scale-hover"
-                    >
-                      <Container fluid className="no-padding">
-                        <Row>
-                          <Col>
-                            <NFTImage
-                              nft={nft}
-                              animation={false}
-                              height={300}
-                              showBalance={false}
-                              showThumbnail={true}
-                            />
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col className="text-center pt-2">
-                            <b>
-                              #{nft.id} - {nft.name}
-                            </b>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col className="text-center pt-2">
-                            Artist Name: {nft.artist}
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col className="text-center pt-2">
-                            Artist Profile: <ArtistProfileHandle nft={nft} />
-                          </Col>
-                        </Row>
-                      </Container>
-                    </a>
-                  </Col>
-                );
-              })}
-            </>
-          ) : (
-            <Col>
-              <NothingHereYetSummer />
-            </Col>
-          )}
-        </>
-      ) : (
-        <Col>
-          Fetching references <DotLoader />
-        </Col>
-      )}
-    </Row>
+    <div className="tw-min-w-[8.5rem]">
+      <div className="tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-mb-2">
+        {label}
+      </div>
+      <div
+        className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1.5 tw-break-words tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6 ${valueClassName}`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function RememeAddressValue({
+  wallet,
+  display,
+}: {
+  readonly wallet: string;
+  readonly display?: string | undefined;
+}) {
+  const identity = display ?? wallet;
+  const { profile } = useIdentity({
+    handleOrWallet: identity,
+    initialProfile: null,
+  });
+
+  return (
+    <>
+      <ProfileAvatar
+        pfpUrl={profile?.pfp}
+        size={ProfileBadgeSize.SMALL}
+        alt={`${identity} avatar`}
+        fallbackContent={<RememeAvatarFallback value={identity} />}
+      />
+      <span className="tw-min-w-0 tw-whitespace-nowrap [&_*]:tw-whitespace-nowrap">
+        <Address wallets={[wallet as `0x${string}`]} display={display} />
+      </span>
+    </>
+  );
+}
+
+function RememeAvatarFallback({ value }: { readonly value: string }) {
+  return (
+    <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-400">
+      {getInitials(value)}
+    </span>
+  );
+}
+
+function getInitials(value: string) {
+  return value
+    .split(/[,\s]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function RememeExternalLink({
+  href,
+  children,
+  align = "center",
+  openInNewTab = true,
+  ariaLabel,
+}: {
+  readonly href: string;
+  readonly children: ReactNode;
+  readonly align?: "center" | "start" | undefined;
+  readonly openInNewTab?: boolean | undefined;
+  readonly ariaLabel?: string | undefined;
+}) {
+  const alignmentClass =
+    align === "start" ? "tw-items-start" : "tw-items-center";
+
+  return (
+    <a
+      href={href}
+      {...(openInNewTab
+        ? { target: "_blank", rel: "noopener noreferrer" }
+        : {})}
+      aria-label={ariaLabel}
+      className={`tw-inline-flex tw-min-w-0 ${alignmentClass} tw-gap-3 tw-break-all tw-rounded-sm tw-text-sm tw-font-semibold tw-leading-5 tw-text-white tw-no-underline hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 md:tw-text-lg md:tw-leading-6`}
+    >
+      {children}
+      <ArrowTopRightOnSquareIcon
+        aria-hidden="true"
+        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
+      />
+    </a>
+  );
+}
+
+function RememeMetadataLink({
+  href,
+  children,
+}: {
+  readonly href: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="tw-inline-flex tw-min-w-0 tw-items-start tw-gap-2 tw-break-all tw-rounded-sm tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300 tw-no-underline hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+    >
+      {children}
+      <ArrowTopRightOnSquareIcon
+        aria-hidden="true"
+        className="tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
+      />
+    </a>
+  );
+}
+
+function RememeTabButton({
+  title,
+  isActive,
+  onClick,
+}: {
+  readonly title: string;
+  readonly isActive: boolean;
+  readonly onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+        isActive
+          ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
+          : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
+      }`}
+      onClick={onClick}
+      aria-pressed={isActive}
+    >
+      {title}
+    </button>
   );
 }
 
 export default function RememePage(props: Readonly<Props>) {
+  const locale = props.locale ?? DEFAULT_LOCALE;
   const { setTitle } = useTitle();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -141,421 +268,534 @@ export default function RememePage(props: Readonly<Props>) {
   const [memes, setMemes] = useState<NFT[]>([]);
 
   useEffect(() => {
-    if (props.contract && props.id) {
-      fetchUrl(
-        `${publicEnv.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
-      ).then((response: DBResponse) => {
-        if (response.data.length === 1) {
-          setRememe(response.data[0]);
-          if (response.data[0].metadata?.name) {
-            const title = `${response.data[0].metadata.name} | ReMemes | 6529.io`;
-            setTitle(title);
-          }
-        }
-      });
-    }
-  }, [props.contract, props.id]);
+    async function fetchRememeAndReferences() {
+      if (!props.contract || !props.id) {
+        return;
+      }
 
-  useEffect(() => {
-    if (rememe) {
-      fetchAllPages<NFT>(
-        `${
-          publicEnv.API_ENDPOINT
-        }/api/nfts?contract=${MEMES_CONTRACT}&id=${rememe.meme_references.join(
-          ","
-        )}`
-      ).then((responseNfts) => {
+      try {
+        const query = getRememeDetailApiQuery({
+          contract: props.contract,
+          id: props.id,
+        });
+        const response = await fetchUrl<DBResponse<Rememe>>(
+          `${publicEnv.API_ENDPOINT}/api/rememes?${query}`
+        );
+        const fetchedRememe = response.data[0];
+        if (response.data.length !== 1 || fetchedRememe === undefined) {
+          return;
+        }
+
+        setRememe(fetchedRememe);
+        setTitle(
+          t(locale, "rememes.detail.browserTitle", {
+            name: getRememeTitle(fetchedRememe),
+          })
+        );
+
+        const responseNfts = await fetchAllPages<NFT>(
+          `${
+            publicEnv.API_ENDPOINT
+          }/api/nfts?contract=${MEMES_CONTRACT}&id=${fetchedRememe.meme_references.join(
+            ","
+          )}`
+        );
         setMemes(responseNfts.sort((a, b) => a.id - b.id));
-      });
+      } catch (error: unknown) {
+        console.error("Failed to fetch ReMeme", error);
+      }
     }
-  }, [rememe]);
+
+    void fetchRememeAndReferences();
+  }, [locale, props.contract, props.id, setTitle]);
 
   const ensResolutionDeployer = useEnsName({
     address: rememe ? (rememe.deployer as `0x${string}`) : undefined,
-    query: { enabled: rememe != undefined },
+    query: { enabled: rememe !== undefined },
     chainId: 1,
   });
 
   const ensResolutionAddedBy = useEnsName({
     address: rememe ? (rememe.added_by as `0x${string}`) : undefined,
-    query: { enabled: rememe != undefined },
+    query: { enabled: rememe !== undefined },
     chainId: 1,
   });
 
   function printContent() {
     switch (activeTab) {
       case Tabs.LIVE:
-        return printLive();
+        return printOverview();
       case Tabs.METADATA:
         return printMetadata();
       case Tabs.REFERENCES:
-        return printMemeReferences(memes, "the-memes");
+        return <RememeReferencesGrid memes={memes} locale={locale} />;
     }
   }
 
-  function printLive() {
-    if (rememe) {
-      return (
-        <>
-          <Row className="pt-4">
-            <Col sm={12} md={6}>
-              <RememeImage nft={rememe} animation={true} height={650} />
-            </Col>
-            <Col sm={12} md={6}>
-              <Container>
-                <Row>
-                  <Col className="font-color-h d-flex justify-content-start gap-2">
-                    {areEqualAddresses(
-                      rememe.contract,
-                      OPENSEA_STORE_FRONT_CONTRACT
-                    ) ? (
-                      <span>{rememe.contract_opensea_data.collectionName}</span>
-                    ) : (
-                      <>
-                        <span>
-                          {rememe.contract_opensea_data.collectionName
-                            ? rememe.contract_opensea_data.collectionName
-                            : formatAddress(rememe.contract)}{" "}
-                          #{rememe.id}
-                        </span>
-                      </>
-                    )}
-                  </Col>
-                </Row>
-                {!areEqualAddresses(
-                  rememe.contract,
-                  OPENSEA_STORE_FRONT_CONTRACT
-                ) && (
-                  <Row className="pt-3">
-                    <Col>
-                      created by{" "}
-                      <Address
-                        wallets={[rememe.deployer as `0x${string}`]}
-                        display={
-                          ensResolutionDeployer.data
-                            ? ensResolutionDeployer.data
-                            : undefined
-                        }
+  function getTabLabel(tab: Tabs) {
+    switch (tab) {
+      case Tabs.LIVE:
+        return t(locale, "rememes.detail.tabs.overview");
+      case Tabs.METADATA:
+        return t(locale, "rememes.detail.tabs.metadata");
+      case Tabs.REFERENCES:
+        return t(locale, "rememes.detail.tabs.references");
+    }
+  }
+
+  function printStaticCardHeader() {
+    if (!rememe) {
+      return null;
+    }
+
+    const isOpenSeaStorefront = areEqualAddresses(
+      rememe.contract,
+      OPENSEA_STORE_FRONT_CONTRACT
+    );
+    const addedByVisible =
+      typeof rememe.added_by === "string" &&
+      rememe.added_by.length > 0 &&
+      !areEqualAddresses(rememe.deployer, rememe.added_by);
+
+    return (
+      <div className="tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16">
+        <div className="tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-bg-iron-950 lg:tw-flex-1">
+            <RememeImage nft={rememe} animation={true} height={650} />
+          </div>
+        </div>
+        <div className="tw-pt-6 md:tw-pt-8 lg:tw-pt-2">
+          <section
+            aria-label={t(locale, "rememes.detail.sections.details")}
+            className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 md:tw-pb-8"
+          >
+            <div className="tw-space-y-5">
+              <RememeInfoMetric label={t(locale, "rememes.detail.collection")}>
+                {getRememeTokenLabel(rememe)}
+              </RememeInfoMetric>
+              {!isOpenSeaStorefront && (
+                <RememeInfoMetric
+                  label={t(locale, "rememes.detail.createdBy")}
+                  valueClassName="!tw-flex-nowrap [&_a]:tw-text-white [&_a:hover]:tw-text-iron-300"
+                >
+                  <RememeAddressValue
+                    wallet={rememe.deployer}
+                    display={ensResolutionDeployer.data ?? undefined}
+                  />
+                </RememeInfoMetric>
+              )}
+              {addedByVisible && (
+                <RememeInfoMetric
+                  label={t(locale, "rememes.detail.addedBy")}
+                  valueClassName="!tw-flex-nowrap [&_a]:tw-text-white [&_a:hover]:tw-text-iron-300"
+                >
+                  <RememeAddressValue
+                    wallet={rememe.added_by}
+                    display={ensResolutionAddedBy.data ?? undefined}
+                  />
+                </RememeInfoMetric>
+              )}
+            </div>
+          </section>
+          <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8">
+            <div className="tw-space-y-8">
+              <div className="tw-space-y-4">
+                <div className="tw-flex tw-min-w-0">
+                  <RememeExternalLink
+                    href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
+                    ariaLabel={t(locale, "rememes.detail.external.etherscan", {
+                      collectionName: getRememeCollectionName(rememe),
+                    })}
+                  >
+                    <Image
+                      unoptimized
+                      width={0}
+                      height={0}
+                      style={{ width: "20px", height: "auto" }}
+                      src="/etherscan_w.png"
+                      alt=""
+                      aria-hidden="true"
+                    />
+                    <span>{getRememeCollectionName(rememe)}</span>
+                  </RememeExternalLink>
+                </div>
+                {rememe.contract_opensea_data.externalUrl && (
+                  <div className="-tw-ml-0.5 tw-flex tw-min-w-0">
+                    <RememeExternalLink
+                      href={rememe.contract_opensea_data.externalUrl}
+                      openInNewTab={false}
+                      ariaLabel={t(locale, "rememes.detail.external.website", {
+                        url: rememe.contract_opensea_data.externalUrl,
+                      })}
+                    >
+                      <GlobeAltIcon
+                        aria-hidden="true"
+                        className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-400"
                       />
-                    </Col>
-                  </Row>
+                      <span>{rememe.contract_opensea_data.externalUrl}</span>
+                    </RememeExternalLink>
+                  </div>
                 )}
-                {rememe.added_by &&
-                  !areEqualAddresses(rememe.deployer, rememe.added_by) && (
-                    <Row className="pt-3">
-                      <Col>
-                        added by{" "}
-                        <Address
-                          wallets={[rememe.added_by as `0x${string}`]}
-                          display={
-                            ensResolutionAddedBy.data
-                              ? ensResolutionAddedBy.data
-                              : undefined
-                          }
-                        />
-                      </Col>
-                    </Row>
-                  )}
-                <Row className="pt-4">
-                  <Col>
-                    <a
-                      className={styles["userLink"]}
-                      href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                {rememe.contract_opensea_data.twitterUsername && (
+                  <div className="tw-flex tw-min-w-0">
+                    <RememeExternalLink
+                      href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
+                      ariaLabel={t(locale, "rememes.detail.external.twitter", {
+                        username: rememe.contract_opensea_data.twitterUsername,
+                      })}
                     >
                       <Image
                         unoptimized
-                        width="0"
-                        height="0"
-                        style={{ width: "30px", height: "auto" }}
-                        src="/etherscan_w.png"
-                        alt={`etherscan`}
+                        width={0}
+                        height={0}
+                        style={{ width: "20px", height: "auto" }}
+                        src="/twitter.png"
+                        alt=""
+                        aria-hidden="true"
                       />
-                      {rememe.contract_opensea_data.collectionName
-                        ? rememe.contract_opensea_data.collectionName
-                        : formatAddress(rememe.contract)}
-                    </a>
-                  </Col>
-                </Row>
-                {rememe.contract_opensea_data.externalUrl && (
-                  <Row className="pt-4">
-                    <Col>
-                      <a
-                        className={styles["userLink"]}
-                        href={rememe.contract_opensea_data.externalUrl}
-                      >
-                        <FontAwesomeIcon
-                          icon={faGlobe}
-                          className={styles["globeIcon"]}
-                        />
-                        {rememe.contract_opensea_data.externalUrl}
-                      </a>
-                    </Col>
-                  </Row>
-                )}
-                {rememe.contract_opensea_data.twitterUsername && (
-                  <Row className="pt-4">
-                    <Col>
-                      <a
-                        className={styles["userLink"]}
-                        href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Image
-                          unoptimized
-                          width="0"
-                          height="0"
-                          style={{ width: "30px", height: "auto" }}
-                          src="/twitter.png"
-                          alt={`${rememe.contract_opensea_data.twitterUsername} Twitter`}
-                        />
-                        &#64;
-                        {rememe.contract_opensea_data.twitterUsername}
-                      </a>
-                    </Col>
-                  </Row>
-                )}
-                {(!capacitor.isIos || country === "US") && (
-                  <Row className="pt-5">
-                    <Col>
-                      <NFTMarketplaceLinks
-                        contract={rememe.contract}
-                        id={rememe.id}
-                      />
-                    </Col>
-                  </Row>
-                )}
-              </Container>
-            </Col>
-          </Row>
-          {rememe.replicas.length > 1 && (
-            <>
-              <Row className="pt-3">
-                <Col sm={12} md={4} className="d-flex align-items-center gap-2">
-                  <h1 className="mb-0">Replicas</h1>
-                  <span className="font-color-h font-larger">
-                    &nbsp;(x{numberWithCommas(rememe.replicas.length)})
-                  </span>
-                </Col>
-              </Row>
-              <Row>
-                <Col className="font-color-h font-smaller">
-                  * Replicas are tokens with identical images
-                </Col>
-              </Row>
-              <Row className="pt-4 pb-4">
-                <Col className="d-flex align-items-center justify-content-start gap-3 flex-wrap">
-                  {rememe.replicas
-                    .filter((rep) => rep != parseInt(rememe.id))
-                    .map((rep) => (
-                      <span className={styles["replica"]} key={`replica-rep`}>
-                        <Link href={`/rememes/${rememe.contract}/${rep}`}>
-                          #{rep}
-                        </Link>
+                      <span>
+                        @{rememe.contract_opensea_data.twitterUsername}
                       </span>
-                    ))}
-                </Col>
-              </Row>
-            </>
-          )}
-        </>
-      );
-    }
-    return;
+                    </RememeExternalLink>
+                  </div>
+                )}
+              </div>
+              {(!capacitor.isIos || country === "US") && (
+                <div className="tw-w-fit tw-max-w-full">
+                  <NFTMarketplaceLinks
+                    contract={rememe.contract}
+                    id={rememe.id}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    );
   }
 
-  function getAttributes(): any[] {
-    if (rememe) {
-      if (Array.isArray(rememe.metadata.attributes)) {
-        return rememe.metadata.attributes;
-      } else if (typeof rememe.metadata.attributes === "object") {
-        const outputArray = Object.entries(rememe.metadata.attributes).map(
-          ([key, value]) => ({
-            trait_type: key,
-            value,
-          })
-        );
-        return outputArray;
-      }
+  function printOverview() {
+    if (!rememe) {
+      return null;
     }
+
+    const metadata = getRememeMetadataRecord(rememe);
+    const description =
+      typeof metadata["description"] === "string"
+        ? metadata["description"]
+        : "";
+
+    return (
+      <div className="tw-space-y-4 tw-pb-8">
+        <section className="tw-max-w-4xl tw-text-pretty tw-pb-3">
+          <div
+            className="tw-text-base tw-font-normal tw-text-iron-300"
+            dangerouslySetInnerHTML={{
+              __html: parseNftDescriptionToHtml(description),
+            }}
+          />
+        </section>
+        {printReplicas()}
+      </div>
+    );
+  }
+
+  function printReplicas() {
+    if (!rememe || rememe.replicas.length <= 1) {
+      return null;
+    }
+
+    return (
+      <section className="tw-pb-5 tw-pt-3">
+        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
+          <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+            {t(locale, "rememes.detail.replicas.title")}
+          </h2>
+          <span className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400">
+            {t(locale, "rememes.detail.replicas.count", {
+              count: formatInteger(locale, rememe.replicas.length),
+            })}
+          </span>
+        </div>
+        <div className="tw-mt-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500">
+          {t(locale, "rememes.detail.replicas.description")}
+        </div>
+        <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+          {rememe.replicas
+            .filter((rep) => Number(rep) !== Number.parseInt(rememe.id, 10))
+            .map((rep) => (
+              <Link
+                href={getRememeDetailHref({
+                  contract: rememe.contract,
+                  id: rep,
+                  locale,
+                })}
+                aria-label={t(locale, "rememes.detail.replicas.link", {
+                  tokenId: rep,
+                })}
+                className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                key={`${rememe.contract}-${rep}-replica`}
+              >
+                #{rep}
+              </Link>
+            ))}
+        </div>
+      </section>
+    );
+  }
+
+  function getAttributes(): IAttribute[] {
+    if (!rememe) {
+      return [];
+    }
+
+    const metadata = getRememeMetadataRecord(rememe);
+    const attributes = metadata["attributes"];
+    if (Array.isArray(attributes)) {
+      return attributes as IAttribute[];
+    }
+
+    if (
+      attributes !== null &&
+      attributes !== undefined &&
+      typeof attributes === "object"
+    ) {
+      return Object.entries(attributes as Record<string, string | number>).map(
+        ([key, value]) => ({
+          trait_type: key,
+          value,
+        })
+      );
+    }
+
     return [];
   }
 
-  function printValue(s: string) {
-    if (isUrl(s) || isIPFS(s)) {
+  function printValue(value: string) {
+    if (isUrl(value) || isIPFS(value)) {
       return (
-        <a
-          href={parseIpfsUrl(s)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`d-inline-flex align-items-center justify-content-start ${styles["userLink"]}`}
-        >
-          {s}
-          <FontAwesomeIcon
-            icon={faExternalLink}
-            className={styles["linkIcon"]}
-          />
-        </a>
+        <RememeMetadataLink href={parseIpfsUrl(value)}>
+          <span>{value}</span>
+        </RememeMetadataLink>
       );
     }
-    return s;
+
+    return value;
+  }
+
+  function getMetadataRows() {
+    if (!rememe) {
+      return [];
+    }
+
+    return Object.entries(getRememeMetadataRecord(rememe)).flatMap(
+      ([key, value]) => {
+        if (key === "name" || key === "description" || key === "attributes") {
+          return [];
+        }
+
+        if (typeof value === "string") {
+          return [{ key, label: key, value: printValue(value) }];
+        }
+
+        if (
+          value !== null &&
+          value !== undefined &&
+          typeof value === "object" &&
+          !Array.isArray(value)
+        ) {
+          return Object.entries(value as Record<string, unknown>).flatMap(
+            ([nestedKey, nestedValue]) => {
+              if (typeof nestedValue !== "string") {
+                return [];
+              }
+
+              return [
+                {
+                  key: `${key}-${nestedKey}`,
+                  label: `${key}::${nestedKey}`,
+                  value: nestedValue,
+                },
+              ];
+            }
+          );
+        }
+
+        return [];
+      }
+    );
   }
 
   function printMetadata() {
-    if (rememe) {
-      return (
-        <>
-          <Row className="pt-4">
-            <Col>
-              <Table className={styles["metadataTable"]}>
-                <tbody>
-                  <tr>
-                    <td className={styles["metadataTableNoBreak"]}>
-                      Token URI
-                    </td>
-                    <td className={styles["metadataTableBreak"]}>
-                      <a
-                        href={rememe.token_uri}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`d-inline-flex align-items-center justify-content-start ${styles["userLink"]}`}
-                      >
-                        {rememe.token_uri}
-                        <FontAwesomeIcon
-                          icon={faExternalLink}
-                          className={styles["linkIcon"]}
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className={styles["metadataTableNoBreak"]}>
-                      Token Type
-                    </td>
-                    <td className={styles["metadataTableBreak"]}>
-                      {rememe.token_type}
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Col>
-          </Row>
-          <Row className="pt-4">
-            <Col xs={12}>
-              <h1>Description</h1>
-            </Col>
-            <Col
-              xs={12}
-              dangerouslySetInnerHTML={{
-                __html: parseNftDescriptionToHtml(rememe.metadata.description),
-              }}
-            ></Col>
-          </Row>
-          <Row className="pt-4">
-            <Col xs={12}>
-              <h1>Metadata</h1>
-            </Col>
-            <Col xs={12}>
-              <Table className={styles["metadataTable"]}>
-                <tbody>
-                  {Object.keys(rememe.metadata).map((k) => {
-                    const value: any = rememe.metadata[k];
-                    if (typeof value === "string") {
-                      if (k != "name" && k != "description") {
-                        return (
-                          <tr key={k}>
-                            <td>{k}</td>
-                            <td>{printValue(value)}</td>
-                          </tr>
-                        );
-                      }
-                    } else if (k !== "attributes") {
-                      return Object.keys(value).map((j: any) => {
-                        if (typeof value[j] === "string") {
-                          return (
-                            <tr key={j}>
-                              <td>
-                                {k}::{j}
-                              </td>
-                              <td>{value[j]}</td>
-                            </tr>
-                          );
-                        }
-                        return;
-                      });
-                    }
-                    return;
-                  })}
-                </tbody>
-              </Table>
-            </Col>
-          </Row>
-          {rememe.metadata.attributes && (
-            <Row className="pt-4">
-              <Col xs={12}>
-                <h1>Attributes</h1>
-              </Col>
-              <NFTAttributes attributes={getAttributes()} />
-            </Row>
-          )}
-        </>
-      );
+    if (!rememe) {
+      return null;
     }
-    return;
+
+    const attributes = getAttributes();
+    const metadataRows = getMetadataRows();
+
+    return (
+      <div className="tw-space-y-14 tw-pb-8">
+        <section>
+          <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 md:tw-grid-cols-3 md:tw-gap-x-10">
+            <div className="tw-min-w-0 md:tw-col-span-2">
+              <RememeInfoMetric label={t(locale, "rememes.detail.tokenUri")}>
+                <RememeExternalLink href={rememe.token_uri} align="start">
+                  <LinkIcon
+                    aria-hidden="true"
+                    className="tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 md:tw-mt-1"
+                  />
+                  <span className="tw-min-w-0 tw-break-words">
+                    {rememe.token_uri}
+                  </span>
+                </RememeExternalLink>
+              </RememeInfoMetric>
+            </div>
+            <RememeInfoMetric label={t(locale, "rememes.detail.tokenType")}>
+              {rememe.token_type}
+            </RememeInfoMetric>
+          </div>
+        </section>
+
+        {metadataRows.length > 0 && (
+          <AdditionalDetailsSection
+            title={t(locale, "rememes.detail.metadata.title")}
+            icon={CodeBracketSquareIcon}
+          >
+            <div className="tw-overflow-x-auto tw-overflow-y-hidden tw-pb-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+              <table className="tw-w-full tw-min-w-[640px] tw-border-collapse">
+                <tbody>
+                  {metadataRows.map((row) => (
+                    <tr
+                      key={row.key}
+                      className="odd:tw-bg-iron-900/40 even:tw-bg-transparent"
+                    >
+                      <td className="tw-w-52 tw-whitespace-nowrap tw-border-0 tw-px-4 tw-py-3 tw-align-top tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500">
+                        {row.label}
+                      </td>
+                      <td className="tw-border-0 tw-px-4 tw-py-3 tw-align-top tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200">
+                        {row.value}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </AdditionalDetailsSection>
+        )}
+
+        {attributes.length > 0 && (
+          <AdditionalDetailsSection
+            title={t(locale, "rememes.detail.properties.title")}
+            icon={SwatchIcon}
+          >
+            <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
+              {attributes.map((attribute) => (
+                <MetadataCard
+                  key={`${attribute.trait_type}-${attribute.value}`}
+                  label={attribute.trait_type}
+                  value={attribute.value}
+                />
+              ))}
+            </div>
+          </AdditionalDetailsSection>
+        )}
+      </div>
+    );
+  }
+
+  function printTabs() {
+    if (!rememe) {
+      return null;
+    }
+
+    return (
+      <nav
+        aria-label={t(locale, "rememes.detail.sections.tabs")}
+        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
+      >
+        <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
+          <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
+            {Object.values(Tabs).map((tab) => (
+              <RememeTabButton
+                key={`${tab}-tab`}
+                title={getTabLabel(tab)}
+                isActive={activeTab === tab}
+                onClick={() => setActiveTab(tab)}
+              />
+            ))}
+          </div>
+        </div>
+      </nav>
+    );
   }
 
   return (
-    <Container fluid className={styles["mainContainer"]}>
-      <Row>
-        <Col>
-          <Container className="pt-4 pb-4">
-            <Row className="pt-2 pb-2">
-              <Col>
-                <Image
-                  unoptimized
-                  loading={"eager"}
-                  width="0"
-                  height="0"
-                  style={{ width: "250px", height: "auto" }}
-                  src="/re-memes.png"
-                  alt="re-memes"
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+      <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
+        <header className="tw-pb-8">
+          <div className="tw-flex tw-flex-col tw-gap-4">
+            <div className="tw-mb-0 tw-flex tw-items-center">
+              <Link
+                href={getRouteHrefWithLocale({ href: "/rememes", locale })}
+                aria-label={t(locale, "rememes.detail.backLink.ariaLabel")}
+                className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              >
+                <ArrowLeftIcon
+                  aria-hidden="true"
+                  className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
                 />
-              </Col>
-            </Row>
-            {rememe && (
-              <>
-                <Row className="pt-4">
-                  <Col>
-                    <h2>
-                      {rememe.metadata.name
-                        ? rememe.metadata.name
-                        : `${formatAddress(rememe.contract)} #${rememe.id}`}
-                    </h2>
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col>
-                    {Object.values(Tabs).map((k) => (
-                      <span
-                        className={`${styles["tabFocus"]} ${
-                          activeTab === k ? styles["tabActive"] : ""
-                        }`}
-                        key={`${k}-tab`}
-                        onClick={() => setActiveTab(k)}
-                      >
-                        {k}
-                      </span>
-                    ))}
-                  </Col>
-                </Row>
-                {printContent()}
-              </>
+                {t(locale, "rememes.title")}
+              </Link>
+            </div>
+            {rememe ? (
+              <h1
+                className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                aria-label={t(locale, "rememes.detail.heading.ariaLabel", {
+                  name: getRememeTitle(rememe),
+                })}
+              >
+                <span className="tw-shrink-0">
+                  <Image
+                    unoptimized
+                    loading="eager"
+                    width={0}
+                    height={0}
+                    style={{ width: "200px", height: "auto" }}
+                    src="/re-memes.png"
+                    alt={t(locale, "rememes.logoAlt")}
+                  />
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+                />
+                <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl">
+                  {getRememeTitle(rememe)}
+                </span>
+              </h1>
+            ) : (
+              <Image
+                unoptimized
+                loading="eager"
+                width={0}
+                height={0}
+                style={{ width: "200px", height: "auto" }}
+                src="/re-memes.png"
+                alt={t(locale, "rememes.logoAlt")}
+              />
             )}
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+          </div>
+        </header>
+        {rememe && (
+          <>
+            {printStaticCardHeader()}
+            {printTabs()}
+            {printContent()}
+          </>
+        )}
+      </div>
+    </div>
   );
 }

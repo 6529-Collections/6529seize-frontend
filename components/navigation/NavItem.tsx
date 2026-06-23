@@ -2,7 +2,9 @@
 
 import { LazyMotion, domMax, m } from "framer-motion";
 import Image from "next/image";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import type { MouseEvent } from "react";
 import { useEffect } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
@@ -18,6 +20,7 @@ import type { NavItem as NavItemData } from "./navTypes";
 interface Props {
   readonly item: NavItemData;
   readonly isCurrentWaveDm?: boolean;
+  readonly fullPrefetch?: boolean;
 }
 
 const iconSlotClass =
@@ -32,7 +35,67 @@ const ActiveNavIndicator = () => (
   </LazyMotion>
 );
 
-const NavItemContent = ({ item, isCurrentWaveDm = false }: Props) => {
+const NavItemLinkContent = ({
+  hasUnreadMessages,
+  haveUnreadNotifications,
+  icon,
+  iconSizeClass,
+  isActive,
+  item,
+}: {
+  readonly hasUnreadMessages: boolean;
+  readonly haveUnreadNotifications: boolean;
+  readonly icon: string;
+  readonly iconSizeClass: string;
+  readonly isActive: boolean;
+  readonly item: NavItemData;
+}) => {
+  const { pending } = useLinkStatus();
+  const isHighlighted = isActive || pending;
+
+  return (
+    <>
+      {isActive && <ActiveNavIndicator />}
+      {pending && !isActive && (
+        <div
+          aria-hidden="true"
+          data-testid="nav-item-pending-indicator"
+          className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white/60"
+        />
+      )}
+      <div className={`tw-relative ${iconSlotClass}`}>
+        {item.iconComponent ? (
+          <item.iconComponent
+            className={`${iconSizeClass} ${
+              isHighlighted ? "tw-text-white" : "tw-text-iron-500"
+            }`}
+          />
+        ) : (
+          <Image
+            src={icon}
+            alt={item.name}
+            width={24}
+            height={24}
+            unoptimized
+            className={iconSizeClass}
+          />
+        )}
+        {item.name === "Notifications" && haveUnreadNotifications && (
+          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
+        )}
+        {item.name === "Messages" && hasUnreadMessages && (
+          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
+        )}
+      </div>
+    </>
+  );
+};
+
+const NavItemContent = ({
+  item,
+  isCurrentWaveDm = false,
+  fullPrefetch = false,
+}: Props) => {
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -41,7 +104,7 @@ const NavItemContent = ({ item, isCurrentWaveDm = false }: Props) => {
     activeWaveId,
     searchParams,
   });
-  const { handleNavClick } = useViewContext();
+  const { getNavHref, recordNavClick } = useViewContext();
 
   const { name } = item;
   const { icon } = item;
@@ -139,57 +202,64 @@ const NavItemContent = ({ item, isCurrentWaveDm = false }: Props) => {
         isCurrentWaveDm
       );
 
-  const handleClick = () => {
-    if (item.kind === "route" && item.name === "Profile") {
-      if (!address) {
-        seizeConnect();
-        return;
-      }
+  const resolvedItem =
+    isProfileItem && profileHref !== null
+      ? {
+          ...item,
+          href: profileHref,
+        }
+      : item;
+  const href = getNavHref(resolvedItem);
 
-      handleNavClick({
-        ...item,
-        href: profileHref ?? item.href,
-      });
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (item.kind === "route" && item.name === "Profile" && !address) {
+      event.preventDefault();
+      seizeConnect();
       return;
     }
 
-    handleNavClick(item);
+    recordNavClick(resolvedItem);
   };
 
+  const linkContent = (
+    <NavItemLinkContent
+      hasUnreadMessages={hasUnreadMessages}
+      haveUnreadNotifications={haveUnreadNotifications}
+      icon={icon}
+      iconSizeClass={iconSizeClass}
+      isActive={isActive}
+      item={item}
+    />
+  );
+
+  const linkClassName =
+    "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none";
+
+  if (fullPrefetch) {
+    return (
+      <Link
+        href={href}
+        aria-label={name}
+        aria-current={isActive ? "page" : undefined}
+        onClick={handleClick}
+        prefetch={true}
+        className={linkClassName}
+      >
+        {linkContent}
+      </Link>
+    );
+  }
+
   return (
-    <button
-      type="button"
+    <Link
+      href={href}
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
       onClick={handleClick}
-      className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
+      className={linkClassName}
     >
-      {isActive && <ActiveNavIndicator />}
-      <div className={`tw-relative ${iconSlotClass}`}>
-        {item.iconComponent ? (
-          <item.iconComponent
-            className={`${iconSizeClass} ${
-              isActive ? "tw-text-white" : "tw-text-iron-500"
-            }`}
-          />
-        ) : (
-          <Image
-            src={icon}
-            alt={name}
-            width={24}
-            height={24}
-            unoptimized
-            className={iconSizeClass}
-          />
-        )}
-        {item.name === "Notifications" && haveUnreadNotifications && (
-          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
-        )}
-        {item.name === "Messages" && hasUnreadMessages && (
-          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
-        )}
-      </div>
-    </button>
+      {linkContent}
+    </Link>
   );
 };
 

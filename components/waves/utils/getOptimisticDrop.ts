@@ -2,14 +2,48 @@
 
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
 import type { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
+import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
+
+const getOptimisticPoll = (
+  dropRequest: ApiCreateDropRequest
+): ApiDropPoll | undefined => {
+  if (!dropRequest.poll) {
+    return undefined;
+  }
+
+  const rawOptions = (dropRequest.poll as { readonly options?: unknown })
+    .options;
+  const options = Array.isArray(rawOptions)
+    ? rawOptions.filter(
+        (option): option is string => typeof option === "string"
+      )
+    : [];
+
+  return {
+    id: `${getOptimisticDropId()}-poll`,
+    options: options.map((option, index) => ({
+      option_no: index + 1,
+      option_string: option,
+      votes: 0,
+    })),
+    voted: [],
+    multichoice: dropRequest.poll.multichoice,
+    anonymous: dropRequest.poll.anonymous ?? false,
+    only_droppers_can_respond:
+      dropRequest.poll.only_droppers_can_respond ?? false,
+    closing_time: dropRequest.poll.closing_time,
+    is_open: dropRequest.poll.closing_time > Date.now(),
+  };
+};
 
 export const getOptimisticDrop = (
   dropRequest: ApiCreateDropRequest,
@@ -36,6 +70,7 @@ export const getOptimisticDrop = (
 
   const replyTo = getReplyTo();
   const replyToObj = replyTo ? { reply_to: replyTo } : {};
+  const poll = getOptimisticPoll(dropRequest);
 
   return {
     id: getOptimisticDropId(),
@@ -55,6 +90,7 @@ export const getOptimisticDrop = (
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
       voting_credit_type: wave.voting.credit_type,
+      voting_credit_scope: wave.voting.credit_scope,
       voting_period_start: wave.voting.period?.min ?? null,
       voting_period_end: wave.voting.period?.max ?? null,
       visibility_group_id: null,
@@ -68,7 +104,9 @@ export const getOptimisticDrop = (
       submission_type: wave.participation.submission_strategy?.type ?? null,
       identity_wave: wave.identity_wave,
       voting_credit_nfts: wave.voting.credit_nfts,
-    },
+      links_disabled: wave.chat.links_disabled,
+      wave_author_handle: wave.author.handle ?? null,
+    } as ApiWaveMinWithChatLinkSettings,
     author: {
       id: connectedProfile.id,
       handle: connectedProfile.handle,
@@ -100,10 +138,7 @@ export const getOptimisticDrop = (
     parts: dropRequest.parts.map((part, i) => ({
       part_id: i + 1,
       content: part.content ?? null,
-      media: part.media.map((media) => ({
-        url: media.url,
-        mime_type: media.mime_type,
-      })),
+      media: part.media,
       attachments: [],
       quoted_drop: part.quoted_drop
         ? {
@@ -131,7 +166,10 @@ export const getOptimisticDrop = (
     rating_prediction: 0,
     reactions: [],
     boosts: 0,
+    is_additional_action_promised:
+      dropRequest.is_additional_action_promised ?? false,
     hide_link_preview: false,
     mentioned_groups: dropRequest.mentioned_groups ?? [],
+    ...(poll ? { poll } : {}),
   };
 };

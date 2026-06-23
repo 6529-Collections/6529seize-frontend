@@ -2,40 +2,34 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
-import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
-import styles from "@/components/memelab/MemeLab.module.scss";
-import NFTImage from "@/components/nft-image/NFTImage";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import {
-  SortButton,
-  printVolumeTypeDropdown,
-} from "@/components/the-memes/TheMemes";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
-import {
-  getValuesForVolumeType,
-  numberWithCommas,
-  printMintDate,
-} from "@/helpers/Helpers";
-import { getNftMimeType } from "@/helpers/nft.helpers";
+import { getValuesForVolumeType } from "@/helpers/Helpers";
+import { compareLocalized } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { getMemeLabCollectionHref } from "./memeLabRouteParams";
+import MemeLabNftCard from "./MemeLabNftCard";
+import MemeLabSortControls from "./MemeLabSortControls";
+
+const COLLECTION_GRID_CLASS =
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
+const COLLECTION_GRID_LIST_CLASS = `${COLLECTION_GRID_CLASS} tw-m-0 tw-list-none tw-px-0 tw-pb-0`;
+const GROUP_GRID_LIST_CLASS =
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-m-0 tw-list-none tw-p-0 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
 
 export function getInitialRouterValues(
   sortDir: string | null,
@@ -80,13 +74,7 @@ export function getInitialRouterValues(
   return { initialSortDir, initialSort };
 }
 
-export function printSortButtons(
-  sort: MemeLabSort,
-  volumeType: VolumeType,
-  setSort: (sort: MemeLabSort) => void,
-  setVolumeType: (volumeType: VolumeType) => void,
-  isCollection?: boolean
-) {
+function getMemeLabSortOptions(isCollection?: boolean) {
   let enumValues = Object.values(MemeLabSort).filter(
     (v) => v != MemeLabSort.VOLUME
   );
@@ -97,93 +85,7 @@ export function printSortButtons(
     );
   }
 
-  return (
-    <>
-      {enumValues.map((v) => (
-        <SortButton
-          key={v}
-          currentSort={sort}
-          sort={v}
-          select={() => setSort(v)}
-        />
-      ))}
-      {printVolumeTypeDropdown(
-        sort === MemeLabSort.VOLUME,
-        setVolumeType,
-        () => setSort(MemeLabSort.VOLUME),
-        volumeType
-      )}
-    </>
-  );
-}
-
-export function printNftContent(
-  nft: LabNFT,
-  sort: MemeLabSort,
-  nftMetas: LabExtendedData[],
-  volumeType: VolumeType
-) {
-  return (
-    <>
-      {sort &&
-        (sort === MemeLabSort.AGE || sort === MemeLabSort.ARTISTS) &&
-        printMintDate(nft.mint_date)}
-      {sort === MemeLabSort.COLLECTIONS && `Artists: ${nft.artist}`}
-      {sort === MemeLabSort.EDITION_SIZE &&
-        `Edition Size: ${numberWithCommas(nft.supply)}`}
-      {sort === MemeLabSort.HODLERS &&
-        `Collectors: ${numberWithCommas(
-          nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
-        )}`}
-      {sort === MemeLabSort.UNIQUE_PERCENT &&
-        `Unique: ${
-          Math.round(
-            nftMetas.find((nftm) => nftm.id === nft.id)?.percent_unique! *
-              100 *
-              10
-          ) / 10
-        }%`}
-      {sort === MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM &&
-        `Unique Ex-Museum: ${
-          Math.round(
-            nftMetas.find((nftm) => nftm.id === nft.id)
-              ?.percent_unique_cleaned! *
-              100 *
-              10
-          ) / 10
-        }%`}
-      {sort === MemeLabSort.FLOOR_PRICE &&
-        (nft.floor_price > 0
-          ? `Floor Price: ${numberWithCommas(
-              Math.round(nft.floor_price * 100) / 100
-            )} ETH`
-          : `Floor Price: N/A`)}
-      {sort === MemeLabSort.MARKET_CAP &&
-        (nft.market_cap > 0
-          ? `Market Cap: ${numberWithCommas(
-              Math.round(nft.market_cap * 100) / 100
-            )} ETH`
-          : `Market Cap: N/A`)}
-      {sort === MemeLabSort.HIGHEST_OFFER &&
-        (nft.highest_offer > 0
-          ? `Highest Offer: ${numberWithCommas(
-              Math.round(nft.highest_offer * 1000) / 1000
-            )} ETH`
-          : `Highest Offer: N/A`)}
-      {sort === MemeLabSort.VOLUME &&
-        `Volume (${volumeType}): ${numberWithCommas(
-          Math.round(
-            (volumeType === VolumeType.HOURS_24
-              ? nft.total_volume_last_24_hours
-              : volumeType === VolumeType.DAYS_7
-                ? nft.total_volume_last_7_days
-                : volumeType === VolumeType.DAYS_30
-                  ? nft.total_volume_last_1_month
-                  : nft.total_volume) * 100
-          ) / 100
-        )} ETH`}
-    </>
-  );
+  return enumValues;
 }
 
 export function sortChanged(
@@ -197,16 +99,20 @@ export function sortChanged(
   labArtists?: string[],
   labCollections?: string[],
   setLabArtists?: (artists: string[]) => void,
-  setLabCollections?: (collections: string[]) => void
+  setLabCollections?: (collections: string[]) => void,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
   const sortKey =
     Object.keys(MemeLabSort)
       .find((k) => MemeLabSort[k as keyof typeof MemeLabSort] === sort)
       ?.toLowerCase() ?? "";
-  const newQuery: any = {
+  const newQuery: Record<string, string> = {
     sort: sortKey,
     sort_dir: sortDir.toLowerCase(),
   };
+  if (locale !== DEFAULT_LOCALE) {
+    newQuery["locale"] = locale;
+  }
 
   router.replace(`?${new URLSearchParams(newQuery).toString()}`);
 
@@ -274,16 +180,24 @@ export function sortChanged(
   }
   if (sort === MemeLabSort.ARTISTS && labArtists && setLabArtists) {
     if (sortDir === SortDirection.ASC) {
-      setLabArtists([...labArtists].sort());
+      setLabArtists(
+        [...labArtists].sort((a, b) => compareLocalized(locale, a, b))
+      );
     } else {
-      setLabArtists([...labArtists].reverse());
+      setLabArtists(
+        [...labArtists].sort((a, b) => compareLocalized(locale, b, a))
+      );
     }
   }
   if (sort === MemeLabSort.COLLECTIONS && labCollections && setLabCollections) {
     if (sortDir === SortDirection.ASC) {
-      setLabCollections([...labCollections].sort());
+      setLabCollections(
+        [...labCollections].sort((a, b) => compareLocalized(locale, a, b))
+      );
     } else {
-      setLabCollections([...labCollections].reverse());
+      setLabCollections(
+        [...labCollections].sort((a, b) => compareLocalized(locale, b, a))
+      );
     }
   }
   if (sort === MemeLabSort.UNIQUE_PERCENT) {
@@ -443,22 +357,27 @@ export function sortChanged(
   }
 }
 
-export default function MemeLabComponent() {
+export default function MemeLabComponent({
+  initialSort = null,
+  initialSortDirection = null,
+  locale = DEFAULT_LOCALE,
+}: {
+  readonly initialSort?: string | null | undefined;
+  readonly initialSortDirection?: string | null | undefined;
+  readonly locale?: SupportedLocale | undefined;
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);
   const isConnected = !!connectedProfile;
 
-  useSetTitle("Meme Lab | Collections");
+  useSetTitle(t(locale, "memeLab.documentTitle"));
 
   useEffect(() => {
-    const { initialSortDir, initialSort } = getInitialRouterValues(
-      searchParams?.get("sort_dir") ?? null,
-      searchParams?.get("sort") ?? null
-    );
+    const { initialSortDir, initialSort: parsedInitialSort } =
+      getInitialRouterValues(initialSortDirection, initialSort);
     setSortDir(initialSortDir);
-    setSort(initialSort);
-  }, []);
+    setSort(parsedInitialSort);
+  }, [initialSort, initialSortDirection]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
@@ -534,80 +453,57 @@ export default function MemeLabComponent() {
         labArtists,
         labCollections,
         setLabArtists,
-        setLabCollections
+        setLabCollections,
+        locale
       );
     }
-  }, [sort, sortDir, nftsLoaded, volumeType]);
+  }, [sort, sortDir, nftsLoaded, volumeType, locale]);
 
   function printNft(nft: LabNFT) {
-    const mediaMimeType = getNftMimeType(nft);
-
     return (
-      <Col
-        key={`${nft.contract}-${nft.id}`}
-        className="pt-3 pb-3"
-        xs={{ span: 6 }}
-        sm={{ span: 4 }}
-        md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
-        <Link
-          href={`/meme-lab/${nft.id}`}
-          className="decoration-none scale-hover"
-        >
-          <Container fluid>
-            <Row className={isConnected ? styles["nftImagePadding"] : ""}>
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={300}
-                showBalance={true}
-                showThumbnail={true}
-              />
-            </Row>
-            <Row>
-              <Col className="text-center pt-2">
-                <span>
-                  {mediaMimeType && (
-                    <MediaTypeBadge
-                      mimeType={mediaMimeType}
-                      dropId={`${nft.contract}-${nft.id}`}
-                      size="sm"
-                      iconClassName="tw-size-5"
-                      className="tw-mr-1.5 tw-inline-flex tw-align-[0.02em]"
-                    />
-                  )}
-                  #{nft.id} - {nft.name}
-                </span>
-              </Col>
-            </Row>
-            <Row>
-              <Col className="text-center pt-1">
-                {printNftContent(nft, sort, nftMetas, volumeType)}
-              </Col>
-            </Row>
-          </Container>
-        </Link>
-      </Col>
+      <li key={`${nft.contract}-${nft.id}`} className="tw-min-w-0">
+        <MemeLabNftCard
+          nft={nft}
+          sort={sort}
+          nftMetas={nftMetas}
+          volumeType={volumeType}
+          hasConnectedProfile={isConnected}
+          locale={locale}
+        />
+      </li>
     );
   }
 
   function printNfts() {
-    return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
+    return (
+      <ul
+        aria-label={t(locale, "memeLab.results.gridLabel")}
+        className={COLLECTION_GRID_LIST_CLASS}
+      >
+        {nfts.map(printNft)}
+      </ul>
+    );
   }
 
   function printArtists() {
     return labArtists.map((artist) => {
       const artistNfts = [...nfts].filter((n) => n.artist === artist);
       return (
-        <Row key={`${artist}-row`}>
-          <Col xs={12} className="pt-3">
-            <h4>{artist}</h4>
-          </Col>
-          {[...artistNfts]
-            .sort((a, b) => a.id - b.id)
-            .map((nft: LabNFT) => printNft(nft))}
-        </Row>
+        <section key={`${artist}-row`} className="tw-pt-6">
+          <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+            {artist}
+          </h2>
+          <ul
+            aria-label={t(locale, "memeLab.results.artistGridLabel", {
+              artistName: artist,
+            })}
+            className={GROUP_GRID_LIST_CLASS}
+          >
+            {[...artistNfts]
+              .sort((a, b) => a.id - b.id)
+              .map((nft: LabNFT) => printNft(nft))}
+          </ul>
+        </section>
       );
     });
   }
@@ -621,24 +517,35 @@ export default function MemeLabComponent() {
         collectionNftsMetas.some((a) => a.id === n.id)
       );
       return (
-        <Row key={`${collection}-row`}>
-          <Col xs={12} className="pt-3">
-            <h4>
-              {collection}&nbsp;
-              <a
-                className={styles["collectionLink"]}
-                href={`/meme-lab/collection/${encodeURIComponent(
-                  collection.replace(" ", "-")
-                )}`}
-              >
-                view
-              </a>
-            </h4>
-          </Col>
-          {[...collectionNfts]
-            .sort((a, b) => a.id - b.id)
-            .map((nft: LabNFT) => printNft(nft))}
-        </Row>
+        <section key={`${collection}-row`} className="tw-pt-6">
+          <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
+            <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+              {collection}
+            </h2>
+            <Link
+              className="hover:tw-text-primary-200 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition"
+              href={getMemeLabCollectionHref({
+                collectionName: collection,
+                locale,
+              })}
+              aria-label={t(locale, "memeLab.collection.viewAriaLabel", {
+                collectionName: collection,
+              })}
+            >
+              {t(locale, "memeLab.collection.view")}
+            </Link>
+          </div>
+          <ul
+            aria-label={t(locale, "memeLab.results.collectionGridLabel", {
+              collectionName: collection,
+            })}
+            className={GROUP_GRID_LIST_CLASS}
+          >
+            {[...collectionNfts]
+              .sort((a, b) => a.id - b.id)
+              .map((nft: LabNFT) => printNft(nft))}
+          </ul>
+        </section>
       );
     });
   }
@@ -657,18 +564,16 @@ export default function MemeLabComponent() {
         }
       } else {
         content = (
-          <Col>
+          <div>
             <NothingHereYetSummer />
-          </Col>
+          </div>
         );
       }
     } else {
       content = (
-        <Row>
-          <Col className="pt-3">
-            Fetching <DotLoader />
-          </Col>
-        </Row>
+        <div className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300">
+          {t(locale, "memeLab.loading.fetching")} <DotLoader />
+        </div>
       );
     }
 
@@ -682,61 +587,35 @@ export default function MemeLabComponent() {
       tokenIds={tokenIds}
       enabled={isConnected}
     >
-      <Container fluid className={styles["mainContainer"]}>
-        <Row>
-          <Col>
-            <Container className="pt-4">
-              <>
-                {/* Page header - visible on all devices */}
-                <Row>
-                  <Col className="d-flex align-items-center justify-content-between mb-3">
-                    <span className="d-flex align-items-center gap-3 flex-wrap">
-                      <h1 className="mb-0">Meme Lab</h1>
-                      <LFGButton contract={MEMELAB_CONTRACT} />
-                    </span>
-                  </Col>
-                </Row>
-
-                {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
-                <Row className="d-xl-none">
-                  <Col xs={12} className="mb-3">
-                    <Row>
-                      <Col xs={12} sm="auto">
-                        <CollectionsDropdown activePage="memelab" />
-                      </Col>
-                    </Row>
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col>
-                    Sort by&nbsp;&nbsp;
-                    <FontAwesomeIcon
-                      icon={faChevronCircleUp}
-                      onClick={() => setSortDir(SortDirection.ASC)}
-                      className={`${styles["sortDirection"]} ${
-                        sortDir != SortDirection.ASC ? styles["disabled"] : ""
-                      }`}
-                    />{" "}
-                    <FontAwesomeIcon
-                      icon={faChevronCircleDown}
-                      onClick={() => setSortDir(SortDirection.DESC)}
-                      className={`${styles["sortDirection"]} ${
-                        sortDir != SortDirection.DESC ? styles["disabled"] : ""
-                      }`}
-                    />
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                    {printSortButtons(sort, volumeType, setSort, setVolumeType)}
-                  </Col>
-                </Row>
-                {printNftsContent()}
-              </>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
+      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+        <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+          <header className="tw-pb-5">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+              <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 sm:tw-w-auto sm:tw-justify-start">
+                <div className="tw-min-w-0 min-[1200px]:tw-hidden">
+                  <CollectionsDropdown activePage="memelab" variant="title" />
+                </div>
+                <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                  {t(locale, "memeLab.title")}
+                </h1>
+                <LFGButton contract={MEMELAB_CONTRACT} />
+              </div>
+            </div>
+          </header>
+          <MemeLabSortControls
+            ariaLabel={t(locale, "memeLab.sorting.regionLabel")}
+            sortDirection={sortDir}
+            setSortDirection={setSortDir}
+            currentSort={sort}
+            sortOptions={getMemeLabSortOptions()}
+            setSort={setSort}
+            setVolumeType={setVolumeType}
+            volumeType={volumeType}
+            locale={locale}
+          />
+          {printNftsContent()}
+        </div>
+      </div>
     </NftBalancesProvider>
   );
 }

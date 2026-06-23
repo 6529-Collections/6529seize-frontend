@@ -148,12 +148,14 @@ describe("SingleWaveDropChat", () => {
         wave={wave}
         drop={drop}
         winningThreshold={25}
+        winningThresholdMinDurationMs={120_000}
         isVotingClosed={false}
         isVotingControlsLocked={true}
       />
     );
 
     expect(capturedProps.winningThreshold).toBe(25);
+    expect(capturedProps.winningThresholdMinDurationMs).toBe(120_000);
     expect(capturedProps.isVotingClosed).toBe(false);
     expect(capturedProps.isVotingControlsLocked).toBe(true);
     expect(capturedCreatorProps.fixedDropMode).toBe("CHAT");

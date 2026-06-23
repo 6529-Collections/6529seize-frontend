@@ -1,17 +1,48 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./LFGSlideshow.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiNftMedia } from "@/generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
-import { Button } from "react-bootstrap";
+import { createPortal } from "react-dom";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
 const DEFAULT_TIMEOUT = 10000;
 const SLIDESHOW_ID = "lfg-slideshow";
-const VIDEO_ID = "lfg-slideshow-video";
+
+const getMediaField = (value: unknown) =>
+  typeof value === "string" ? value : "";
+
+const isVideo = (url: string | null | undefined) =>
+  getMediaField(url).toLowerCase().endsWith(".mp4");
+
+const preloadMedia = (mediaItem: ApiNftMedia) => {
+  const animation = getMediaField(mediaItem.animation);
+  const image = getMediaField(mediaItem.image);
+
+  if (isVideo(animation)) {
+    const video = document.createElement("video");
+    video.src = animation;
+    video.load();
+  } else if (image.length > 0) {
+    const img = new Image();
+    img.src = image;
+  }
+};
+
+const preloadNext = (mediaItems: ApiNftMedia[], index: number) => {
+  const nextIndex = (index + 1) % mediaItems.length;
+  const nextMedia = mediaItems[nextIndex];
+
+  if (!nextMedia) {
+    return;
+  }
+
+  preloadMedia(nextMedia);
+};
 
 const LFGSlideshow: React.FC<{
   isOpen: boolean;
@@ -19,58 +50,37 @@ const LFGSlideshow: React.FC<{
   setIsOpen: (isOpen: boolean) => void;
 }> = ({ isOpen, contract, setIsOpen }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [bodyOverflow, setBodyOverflow] = useState<string>();
   const [isMuted, setIsMuted] = useState(false);
+  const slideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const [media, setMedia] = useState<ApiNftMedia[]>([]);
 
-  let slideTimer: NodeJS.Timeout | null = null;
-
-  const isVideo = (url: string) => {
-    return url?.toLowerCase().endsWith(".mp4");
-  };
-
-  const preloadNext = (index: number) => {
-    const nextIndex = (index + 1) % media.length;
-    const nextMedia = media[nextIndex];
-
-    if (!nextMedia) {
-      return;
+  const clearSlideTimer = useCallback(() => {
+    if (slideTimer.current !== null) {
+      clearTimeout(slideTimer.current);
+      slideTimer.current = null;
     }
+  }, []);
 
-    preloadMedia(nextMedia);
-  };
+  const nextSlide = useCallback(() => {
+    clearSlideTimer();
+    setCurrentIndex((prevIndex) =>
+      media.length > 0 ? (prevIndex + 1) % media.length : prevIndex
+    );
+  }, [clearSlideTimer, media.length]);
 
-  const preloadMedia = (media: ApiNftMedia) => {
-    if (!media) return;
-    if (isVideo(media.animation)) {
-      const video = document.createElement("video");
-      video.src = media.animation;
-      video.load();
-    } else {
-      const img = new Image();
-      img.src = media.image;
-    }
-  };
-
-  const toggleSlideshow = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      setCurrentIndex(0);
-    }
-  };
-
-  const nextSlide = () => {
-    if (slideTimer) {
-      clearTimeout(slideTimer);
-    }
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % media.length);
-  };
+  const closeSlideshow = useCallback(() => {
+    clearSlideTimer();
+    setIsOpen(false);
+  }, [clearSlideTimer, setIsOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsOpen(false);
+        closeSlideshow();
       }
     };
 
@@ -78,44 +88,60 @@ const LFGSlideshow: React.FC<{
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      setBodyOverflow(document.body.style.overflow);
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = bodyOverflow ?? "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = bodyOverflow ?? "unset";
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    commonApiFetch<ApiNftMedia[]>({
-      endpoint: `nfts/${contract}/media`,
-    }).then((media) => {
-      setMedia(media);
-      setCurrentIndex(0);
-      if (media[0]) {
-        preloadMedia(media[0]);
-      }
-    });
-  }, []);
+  }, [closeSlideshow, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const currentMedia = media[currentIndex];
-    preloadNext(currentIndex);
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-    if (currentMedia?.animation && isVideo(currentMedia.animation)) {
-      const videoElement = document.getElementById(
-        VIDEO_ID
-      ) as HTMLVideoElement;
-      if (videoElement) {
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    let canceled = false;
+
+    void commonApiFetch<ApiNftMedia[]>({
+      endpoint: `nfts/${contract}/media`,
+    })
+      .then((loadedMedia) => {
+        if (canceled) {
+          return;
+        }
+
+        setMedia(loadedMedia);
+        setCurrentIndex(0);
+        const firstMedia = loadedMedia[0];
+        if (firstMedia) {
+          preloadMedia(firstMedia);
+        }
+      })
+      .catch(() => {
+        if (!canceled) {
+          setMedia([]);
+          setCurrentIndex(0);
+        }
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [contract]);
+
+  useEffect(() => {
+    if (!isOpen || media.length === 0) return;
+
+    const currentMedia = media[currentIndex];
+    if (!currentMedia) return;
+
+    preloadNext(media, currentIndex);
+
+    if (isVideo(currentMedia.animation)) {
+      const videoElement = videoRef.current;
+      if (videoElement !== null) {
         const handleEnded = () => {
           nextSlide();
         };
@@ -128,24 +154,28 @@ const LFGSlideshow: React.FC<{
         videoElement.addEventListener("volumechange", handleVolumeChange);
         return () => {
           videoElement.removeEventListener("ended", handleEnded);
+          videoElement.removeEventListener("volumechange", handleVolumeChange);
         };
       }
     } else {
-      slideTimer = setTimeout(nextSlide, DEFAULT_TIMEOUT);
+      slideTimer.current = setTimeout(nextSlide, DEFAULT_TIMEOUT);
     }
 
     return () => {
-      if (slideTimer) {
-        clearTimeout(slideTimer);
-      }
+      clearSlideTimer();
     };
-  }, [isOpen, currentIndex, media]);
+  }, [clearSlideTimer, currentIndex, isOpen, media, nextSlide]);
 
-  if (!isOpen || media.length === 0) {
+  const currentMedia = media[currentIndex];
+
+  if (!isOpen || !currentMedia) {
     return <></>;
   }
 
-  return (
+  const currentAnimation = getMediaField(currentMedia.animation);
+  const currentImage = getMediaField(currentMedia.image);
+
+  const slideshow = (
     <div className={styles["slideshowContainer"]}>
       <span className={styles["slideButtons"]}>
         {fullScreenSupported() && (
@@ -158,32 +188,33 @@ const LFGSlideshow: React.FC<{
         <FontAwesomeIcon
           icon={faXmarkCircle}
           className={styles["slideButton"]}
-          onClick={toggleSlideshow}
+          onClick={closeSlideshow}
         />
       </span>
       <div className={styles["slide"]} id={SLIDESHOW_ID}>
-        {media[currentIndex]?.animation &&
-        isVideo(media[currentIndex].animation) ? (
-          <video
-            id={VIDEO_ID}
+        {isVideo(currentAnimation) ? (
+          <SeizeVideoPlayer
+            videoRef={videoRef}
+            template="slideshow"
             autoPlay
-            controls
             muted={isMuted}
-            src={media[currentIndex]?.animation}
-            poster={media[currentIndex]?.image}
-          >
-            <track kind="captions" src="" srcLang="en" label="English" />
-            Your browser does not support the video tag.
-          </video>
-        ) : (
-          <img
-            src={media[currentIndex]?.image}
-            alt={`LFG Slide ${currentIndex + 1}`}
+            src={currentAnimation}
+            poster={currentImage.length > 0 ? currentImage : undefined}
+            loop={false}
+            layout="fill"
           />
+        ) : (
+          <img src={currentImage} alt={`LFG Slide ${currentIndex + 1}`} />
         )}
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return <></>;
+  }
+
+  return createPortal(slideshow, document.body);
 };
 
 export const LFGButton: React.FC<{
@@ -194,12 +225,13 @@ export const LFGButton: React.FC<{
   return (
     <>
       <LFGSlideshow contract={contract} isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Button
+      <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className={`${styles["lfgButton"]} no-wrap`}
+        className="hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/60 tw-bg-primary-500/10 tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-primary-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-400 hover:tw-bg-primary-500/15 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500"
       >
         LFG: Start the Show!
-      </Button>
+      </button>
     </>
   );
 };

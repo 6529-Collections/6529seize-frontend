@@ -5,13 +5,17 @@ import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressi
 
 interface MyStreamWaveMyVoteVotesProps {
   readonly drop: ExtendedDrop;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
   drop,
+  winningThreshold,
 }) => {
   const voteClass =
     drop.rating >= 0 ? "tw-text-emerald-500" : "tw-text-rose-500";
+  const hasWinningThreshold =
+    typeof winningThreshold === "number" && winningThreshold > 0;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1.5">
@@ -23,7 +27,10 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
 
       <DropVoteProgressing
         current={drop.rating}
-        projected={drop.rating_prediction}
+        projected={
+          hasWinningThreshold ? drop.realtime_rating : drop.rating_prediction
+        }
+        tooltipLabel={hasWinningThreshold ? "Votes given now" : undefined}
       />
     </div>
   );

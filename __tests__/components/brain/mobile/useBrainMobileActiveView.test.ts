@@ -113,6 +113,25 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
+  it("resets Outcome to default when outcome view is hidden", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isApproveWave: true,
+          isRankWave: false,
+          showOutcomeView: false,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    act(() => {
+      result.current.onViewChange(BrainView.OUTCOME);
+    });
+
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+  });
+
   it("resets Outcome to submissions for completed rank curation waves", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
@@ -145,6 +164,25 @@ describe("useBrainMobileActiveView", () => {
     });
 
     expect(result.current.activeView).toBe(BrainView.MY_VOTES);
+  });
+
+  it("keeps Polls for loaded waves", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isCompleted: false,
+          hasPolls: true,
+          isRankWave: false,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    act(() => {
+      result.current.onViewChange(BrainView.POLLS);
+    });
+
+    expect(result.current.activeView).toBe(BrainView.POLLS);
   });
 
   it("resets My Votes for guests on normal rank waves", () => {

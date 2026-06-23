@@ -29,7 +29,7 @@ describe("createLinkRenderer", () => {
   it("matches and renders seize handlers using raw href", () => {
     const rawHref =
       "https://site.com/waves/123e4567-e89b-12d3-a456-426614174000?drop=drop-1";
-    const stableHref = "https://site.com/messages?wave=current&drop=drop-1";
+    const stableHref = "https://site.com/messages/current?drop=drop-1";
     mockedEnsureStableSeizeLink.mockReturnValue(stableHref);
 
     const seizeMatch = jest.fn((href: string) => href === rawHref);

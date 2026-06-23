@@ -1,20 +1,19 @@
 "use client";
 
 import type {
-    AllowlistOperation,
-    CustomTokenPoolParamsToken,
-    ResolvedEns} from "@/components/allowlist-tool/allowlist-tool.types";
-import {
-    AllowlistOperationCode
+  AllowlistOperation,
+  CustomTokenPoolParamsToken,
+  ResolvedEns,
 } from "@/components/allowlist-tool/allowlist-tool.types";
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolCommonModalWrapper, {
-    AllowlistToolModalSize,
+  AllowlistToolModalSize,
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
-    getRandomObjectId,
-    isEthereumAddress,
+  getRandomObjectId,
+  isEthereumAddress,
 } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -67,16 +66,15 @@ export default function CreateCustomSnapshotForm() {
 
   const tokenCount = tokens.length;
   const chunkCount =
-    tokenCount > 0
-      ? Math.ceil(tokenCount / CUSTOM_SNAPSHOT_CHUNK_SIZE)
-      : 0;
+    tokenCount > 0 ? Math.ceil(tokenCount / CUSTOM_SNAPSHOT_CHUNK_SIZE) : 0;
 
   const snapshotSummary = useMemo(() => {
     if (!tokenCount) {
       return null;
     }
     const walletLabel = tokenCount === 1 ? "wallet" : "wallets";
-    const snapshotLabel = chunkCount === 1 ? "custom snapshot" : "custom snapshots";
+    const snapshotLabel =
+      chunkCount === 1 ? "custom snapshot" : "custom snapshots";
     return `We will split ${tokenCount.toLocaleString()} ${walletLabel} into ${chunkCount.toLocaleString()} ${snapshotLabel} (up to ${CUSTOM_SNAPSHOT_CHUNK_SIZE.toLocaleString()} wallets each).`;
   }, [tokenCount, chunkCount]);
 
@@ -112,7 +110,11 @@ export default function CreateCustomSnapshotForm() {
       distributionPlanId: string;
     }
   >({
-    mutationFn: async ({ tokens: originalTokens, trimmedName, distributionPlanId }) => {
+    mutationFn: async ({
+      tokens: originalTokens,
+      trimmedName,
+      distributionPlanId,
+    }) => {
       const ensTokens = originalTokens.filter((token) =>
         token.owner.endsWith(".eth")
       );
@@ -161,7 +163,7 @@ export default function CreateCustomSnapshotForm() {
       const tokenChunks = chunkTokens(tokensWithResolvedEns);
       if (!tokenChunks.length) {
         setToasts({
-          messages: ["No valid wallets found after resolving ENS"],
+          messages: ["No valid wallets were found after resolving ENS."],
           type: "error",
         });
         throw new Error("No valid wallets after resolving ENS");
@@ -191,7 +193,7 @@ export default function CreateCustomSnapshotForm() {
         if (!success) {
           setToasts({
             messages: [
-              `Failed to create snapshot "${snapshotName}". Please try again.`,
+              `Couldn't create snapshot "${snapshotName}". Please try again.`,
             ],
             type: "error",
           });
@@ -219,9 +221,7 @@ export default function CreateCustomSnapshotForm() {
       setFileName(null);
       setToasts({
         messages: [
-          `Created ${chunkCount} custom snapshot${
-            chunkCount > 1 ? "s" : ""
-          }.`,
+          `Created ${chunkCount} custom snapshot${chunkCount > 1 ? "s" : ""}.`,
         ],
         type: "success",
       });
@@ -237,7 +237,7 @@ export default function CreateCustomSnapshotForm() {
       return null;
     }
     if (!tokens.length) {
-      setToasts({ messages: ["No tokens provided"], type: "error" });
+      setToasts({ messages: ["Add at least one token."], type: "error" });
       return null;
     }
     if (tokens.length > MAX_CUSTOM_SNAPSHOT_ROWS) {
@@ -251,7 +251,7 @@ export default function CreateCustomSnapshotForm() {
     }
     const trimmedName = formValues.name.trim();
     if (!trimmedName) {
-      setToasts({ messages: ["Name is required"], type: "error" });
+      setToasts({ messages: ["Enter a name."], type: "error" });
       return null;
     }
 
@@ -292,7 +292,7 @@ export default function CreateCustomSnapshotForm() {
   const addManualWallet = () => {
     if (!manualWallet?.length || !isCorrectManualWallet) {
       setToasts({
-        messages: ["Invalid wallet address"],
+        messages: ["Enter a valid wallet address."],
         type: "error",
       });
       return;
@@ -324,7 +324,7 @@ export default function CreateCustomSnapshotForm() {
   ): boolean => {
     if (!uploadedTokens.length) {
       setToasts({
-        messages: ["No wallets found in the uploaded file"],
+        messages: ["No wallets were found in the uploaded file."],
         type: "error",
       });
       return false;
@@ -351,7 +351,7 @@ export default function CreateCustomSnapshotForm() {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <div className="tw-flex tw-gap-x-4 tw-items-end">
+        <div className="tw-flex tw-items-end tw-gap-x-4">
           <div className="tw-w-80">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
               Name
@@ -364,7 +364,7 @@ export default function CreateCustomSnapshotForm() {
                 autoComplete="off"
                 value={formValues.name}
                 onChange={handleChange}
-                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-700/40 tw-px-3 tw-py-3 tw-text-base tw-font-light tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
               />
             </div>
           </div>
@@ -373,10 +373,11 @@ export default function CreateCustomSnapshotForm() {
               <button
                 onClick={() => setIsAddWalletsOpen(true)}
                 type="button"
-                className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-iron-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out">
+                className="tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-2 tw-border-solid tw-border-iron-700 tw-border-transparent tw-bg-transparent tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-underline tw-transition tw-duration-300 tw-ease-out hover:tw-border-[#232323] hover:tw-bg-[#232323]"
+              >
                 <FontAwesomeIcon
                   icon={faPlus}
-                  className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
+                  className="-tw-ml-1 tw-mr-2 tw-h-5 tw-w-5"
                 />
                 <span>Add wallets</span>
               </button>
@@ -390,7 +391,9 @@ export default function CreateCustomSnapshotForm() {
             </DistributionPlanAddOperationBtn>
             <div className="tw-mt-3 tw-space-y-2">
               <p className="tw-text-xs tw-text-iron-300">
-                Snapshots are limited to {CUSTOM_SNAPSHOT_CHUNK_SIZE.toLocaleString()} wallets. We'll split larger uploads automatically.
+                Snapshots are limited to{" "}
+                {CUSTOM_SNAPSHOT_CHUNK_SIZE.toLocaleString()} wallets. We'll
+                split larger uploads automatically.
               </p>
               {snapshotSummary && (
                 <p className="tw-text-xs tw-text-iron-100">{snapshotSummary}</p>
@@ -430,7 +433,8 @@ export default function CreateCustomSnapshotForm() {
           onClose={() => setIsAddWalletsOpen(false)}
           title={`Add wallets`}
           modalSize={AllowlistToolModalSize.X_LARGE}
-          showTitle={false}>
+          showTitle={false}
+        >
           <CreateCustomSnapshotFormAddWalletsModal
             fileName={fileName}
             setFileName={setFileName}

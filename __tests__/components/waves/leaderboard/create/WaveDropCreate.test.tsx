@@ -37,6 +37,7 @@ describe("WaveDropCreate", () => {
     expect(creatorProps.curationComposerVariant).toBe("default");
     expect(creatorProps.onExitFixedDropMode).toBe(onCancel);
     expect(creatorProps.identityPickerPlacement).toBe("modal");
+    expect(creatorProps.fixedDropMode).toBe("PARTICIPATION");
   });
 
   it("renders lightweight curation leaderboard variant", () => {
@@ -74,5 +75,17 @@ describe("WaveDropCreate", () => {
     );
 
     expect(creatorProps.identityPickerPlacement).toBe("inline");
+  });
+
+  it("passes explicit fixed drop mode to the creator", () => {
+    render(
+      <WaveDropCreate
+        wave={wave}
+        onSuccess={jest.fn()}
+        fixedDropMode={"CHAT" as any}
+      />
+    );
+
+    expect(creatorProps.fixedDropMode).toBe("CHAT");
   });
 });

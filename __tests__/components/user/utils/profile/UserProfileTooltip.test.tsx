@@ -21,7 +21,6 @@ type CapturedDropAuthorBadgesProps = {
   } | null;
   readonly tooltipIdPrefix?: string;
   readonly onArtistPreviewOpen?: TooltipProps["onArtistPreviewOpen"];
-  readonly onWaveCreatorPreviewOpen?: TooltipProps["onWaveCreatorPreviewOpen"];
 };
 
 let capturedDropAuthorBadgesProps: CapturedDropAuthorBadgesProps | null = null;
@@ -245,6 +244,9 @@ describe("UserProfileTooltip", () => {
     renderTooltip();
 
     expect(screen.getByTestId("pfp")).toBeInTheDocument();
+    expect(screen.getByTestId("pfp").closest(".tailwind-scope")).toHaveClass(
+      "tw-rounded-xl"
+    );
     expect(screen.getByText("bob")).toBeInTheDocument();
     expect(screen.getByTestId("level")).toHaveTextContent("2");
     expect(screen.getByTestId("top-rep")).toBeInTheDocument();
@@ -267,10 +269,12 @@ describe("UserProfileTooltip", () => {
       "data-handle",
       "bob"
     );
-    expect(screen.getByTestId("stats-row")).toHaveAttribute(
-      "data-followers-count",
-      "5"
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("stats-row")).toHaveAttribute(
+        "data-followers-count",
+        "5"
+      );
+    });
     expect(screen.getByTestId("follow-btn")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Send direct message" })
@@ -335,22 +339,17 @@ describe("UserProfileTooltip", () => {
     expect(screen.queryByText("https://example.com")).not.toBeInTheDocument();
   });
 
-  it("passes preview-open callbacks to author badges when provided", () => {
+  it("passes artist preview-open callback to author badges when provided", () => {
     const onArtistPreviewOpen = jest.fn();
-    const onWaveCreatorPreviewOpen = jest.fn();
 
     renderTooltip({
       tooltipProps: {
         onArtistPreviewOpen,
-        onWaveCreatorPreviewOpen,
       },
     });
 
     expect(capturedDropAuthorBadgesProps?.onArtistPreviewOpen).toBe(
       onArtistPreviewOpen
-    );
-    expect(capturedDropAuthorBadgesProps?.onWaveCreatorPreviewOpen).toBe(
-      onWaveCreatorPreviewOpen
     );
   });
 

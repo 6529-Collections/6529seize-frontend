@@ -3,7 +3,6 @@
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import type { EditorState } from "lexical";
-import { RootNode } from "lexical";
 import { MentionNode } from "../lexical/nodes/MentionNode";
 import { HashtagNode } from "../lexical/nodes/HashtagNode";
 import { WaveMentionNode } from "../lexical/nodes/WaveMentionNode";
@@ -71,6 +70,8 @@ import CreateDropEmojiPicker from "@/components/waves/CreateDropEmojiPicker";
 import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
 import PlainTextPastePlugin from "../lexical/plugins/PlainTextPastePlugin";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import EditablePlugin from "../lexical/plugins/EditablePlugin";
+import RootBlockGuardPlugin from "../lexical/plugins/RootBlockGuardPlugin";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -84,12 +85,15 @@ const CreateDropContent = forwardRef<
     readonly editorState: EditorState | null;
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
+    readonly loading: boolean;
+    readonly submitOnEnter?: boolean | undefined;
     readonly canAddPart: boolean;
     readonly canSubmit: boolean;
     readonly missingMedia: ApiWaveParticipationRequirement[];
     readonly missingMetadata: ApiWaveRequiredMetadata[];
     readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
+    readonly onUploadEditorStateChange: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
       mentionedUser: Omit<MentionedUser, "current_handle">
@@ -107,12 +111,15 @@ const CreateDropContent = forwardRef<
       editorState,
       type,
       drop,
+      loading,
+      submitOnEnter = true,
       canAddPart,
       canSubmit,
       waveId,
       missingMedia,
       missingMetadata,
       onEditorState,
+      onUploadEditorStateChange,
       onReferencedNft,
       onMentionedUser,
       onMentionedWave,
@@ -130,7 +137,6 @@ const CreateDropContent = forwardRef<
         MentionNode,
         HashtagNode,
         WaveMentionNode,
-        RootNode,
         HeadingNode,
         ListNode,
         ListItemNode,
@@ -151,20 +157,36 @@ const CreateDropContent = forwardRef<
         throw error;
       },
       theme: ExampleTheme,
+      editable: !loading,
     };
 
-    const onEditorStateChange = (editorState: EditorState) =>
-      onEditorState(editorState);
+    const onEditorStateChange = (nextEditorState: EditorState) => {
+      if (loading) {
+        return;
+      }
+      onEditorState(nextEditorState);
+    };
 
     const onMentionedUserAdded = (
       user: Omit<MentionedUser, "current_handle">
     ) => {
+      if (loading) {
+        return;
+      }
       onMentionedUser(user);
     };
     const onMentionedWaveAdded = (wave: MentionedWave) => {
+      if (loading) {
+        return;
+      }
       onMentionedWave(wave);
     };
-    const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
+    const onHashtagAdded = (hashtag: ReferencedNft) => {
+      if (loading) {
+        return;
+      }
+      onReferencedNft(hashtag);
+    };
 
     const showToggleViewButton = viewType === CreateDropViewType.COMPACT;
 
@@ -216,6 +238,9 @@ const CreateDropContent = forwardRef<
 
     const [isStormMode, setIsStormMode] = useState(false);
     const breakIntoStorm = () => {
+      if (loading) {
+        return;
+      }
       onDropPart();
       setIsStormMode(true);
     };
@@ -233,10 +258,14 @@ const CreateDropContent = forwardRef<
       !!waveMentionsPluginRef.current?.isWaveMentionsOpen();
 
     const canSubmitWithEnter = () =>
-      !isMentionsOpen() && !isHashtagsOpen() && !isWaveMentionsOpen();
+      submitOnEnter &&
+      !isMentionsOpen() &&
+      !isHashtagsOpen() &&
+      !isWaveMentionsOpen();
 
     const canSubmitRef = useRef(canSubmit);
     const onDropRef = useRef(onDrop);
+    const loadingRef = useRef(loading);
 
     useEffect(() => {
       canSubmitRef.current = canSubmit;
@@ -246,8 +275,12 @@ const CreateDropContent = forwardRef<
       onDropRef.current = onDrop;
     }, [onDrop]);
 
+    useEffect(() => {
+      loadingRef.current = loading;
+    }, [loading]);
+
     const handleSubmit = useCallback(() => {
-      if (!canSubmitRef.current || !onDropRef.current) {
+      if (loadingRef.current || !canSubmitRef.current || !onDropRef.current) {
         return;
       }
       onDropRef.current();
@@ -256,7 +289,10 @@ const CreateDropContent = forwardRef<
     return (
       <div className="tailwind-scope">
         {showToggleViewButton && (
-          <ToggleViewButtonPlugin onViewClick={onViewClick} />
+          <ToggleViewButtonPlugin
+            disabled={loading}
+            onViewClick={onViewClick}
+          />
         )}
         <LexicalComposer initialConfig={editorConfig}>
           <div className="tw-flex tw-items-end tw-gap-x-3">
@@ -267,6 +303,7 @@ const CreateDropContent = forwardRef<
                     <ContentEditable
                       spellCheck={true}
                       autoCorrect="on"
+                      aria-disabled={loading}
                       className={`${
                         viewType === CreateDropViewType.COMPACT
                           ? "editor-input-one-liner tw-pr-12"
@@ -274,7 +311,7 @@ const CreateDropContent = forwardRef<
                       } tw-form-input tw-block tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-3 tw-pl-3 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400`}
                     />
                     <div className="tw-absolute tw-right-2 tw-top-0 tw-flex tw-h-full tw-items-start tw-justify-center tw-py-2">
-                      <CreateDropEmojiPicker />
+                      <CreateDropEmojiPicker disabled={loading} />
                     </div>
                   </div>
                 }
@@ -285,9 +322,11 @@ const CreateDropContent = forwardRef<
                 }
                 ErrorBoundary={LexicalErrorBoundary}
               />
+              <EditablePlugin editable={!loading} />
               <HistoryPlugin />
 
               <OnChangePlugin onChange={onEditorStateChange} />
+              <RootBlockGuardPlugin />
               <NewMentionsPlugin
                 waveId={waveId}
                 onSelect={onMentionedUserAdded}
@@ -302,9 +341,12 @@ const CreateDropContent = forwardRef<
                 ref={hashtagPluginRef}
               />
               <MaxLengthPlugin maxLength={25000} />
-              <DragDropPastePlugin />
+              <DragDropPastePlugin
+                disabled={loading}
+                onUploadEditorStateChange={onUploadEditorStateChange}
+              />
               <ListPlugin />
-              <PlainTextPastePlugin />
+              <PlainTextPastePlugin disabled={loading} />
               <MarkdownShortcutPlugin
                 transformers={SAFE_MARKDOWN_TRANSFORMERS}
               />
@@ -314,10 +356,10 @@ const CreateDropContent = forwardRef<
               <EnterKeyPlugin
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}
-                disabled={false}
+                disabled={loading}
               />
               <AutoFocusPlugin />
-              <EmojiPlugin />
+              <EmojiPlugin disabled={loading} />
             </div>
             {children && <div>{children}</div>}
           </div>
@@ -333,6 +375,7 @@ const CreateDropContent = forwardRef<
           isStormMode={isStormMode}
           setFiles={setFiles}
           breakIntoStorm={breakIntoStorm}
+          disabled={loading}
         />
         {(!!missingMedia.length || !!missingMetadata.length) && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">

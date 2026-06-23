@@ -36,13 +36,13 @@ jest.mock("@/components/nextGen/collections/NextGenArtists", () => () => (
 jest.mock("@/components/nextGen/collections/NextGenAbout", () => () => <div />);
 
 jest.mock("@/components/nextGen/collections/NextGenNavigationHeader", () => {
-  const { NextgenView } = jest.requireActual("@/enums"); // <-- get enum from the real source
+  const { NextgenView } = jest.requireActual("@/types/enums");
   return {
     __esModule: true,
     default: ({ view, setView }: any) => (
       <button
         data-testid="nav"
-        onClick={() => setView(NextgenView.ARTISTS)} // <-- now defined
+        onClick={() => setView(NextgenView.ARTISTS)}
       >
         {view}
       </button>

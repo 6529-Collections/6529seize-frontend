@@ -131,14 +131,8 @@ Object.assign(navigator, {
   },
 });
 
-// Mock window.location
-Object.defineProperty(window, "location", {
-  value: {
-    origin: "https://test.6529.io",
-    href: "https://test.6529.io/test-path",
-  },
-  writable: true,
-});
+// JSDOM owns window.location; this suite assumes no test mutates the origin.
+const TEST_ORIGIN = window.location.origin;
 
 describe("HeaderShare", () => {
   const mockSeizeConnect = require("@/components/auth/SeizeConnectContext");
@@ -164,6 +158,7 @@ describe("HeaderShare", () => {
     // Reset QRCode mock
     const qrcode = require("qrcode");
     qrcode.toDataURL.mockResolvedValue("data:image/png;base64,FAKE_QR_CODE");
+    window.history.pushState({}, "", "/test-path?something=value");
   });
 
   afterEach(() => {
@@ -361,7 +356,7 @@ describe("HeaderShare", () => {
 
       // Should call QRCode.toDataURL for browser and app URLs
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
-        "https://test.6529.io/mock-path?something=value",
+        `${TEST_ORIGIN}/mock-path?something=value`,
         { width: 500, margin: 0 }
       );
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
@@ -471,7 +466,7 @@ describe("HeaderShare", () => {
 
       // Verify multiple QR codes are generated (browser + app + possibly share)
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
-        expect.stringContaining("https://test.6529.io"),
+        expect.stringContaining(TEST_ORIGIN),
         expect.any(Object)
       );
       expect(qrcode.toDataURL).toHaveBeenCalledWith(

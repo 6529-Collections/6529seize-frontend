@@ -12,6 +12,7 @@ enum BrainView {
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
   MY_VOTES = "MY_VOTES",
+  POLLS = "POLLS",
   FAQ = "FAQ",
   WAVES = "WAVES",
   MESSAGES = "MESSAGES",
@@ -198,6 +199,23 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByText("FAQ")).toBeInTheDocument();
   });
 
+  it("does not render Polls in the compact active wave tabs", () => {
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={createWave()}
+      />
+    );
+
+    expect(screen.queryByRole("button", { name: /polls/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /chat/i })).toBeInTheDocument();
+  });
+
   it("renders My Votes for curation rank wave", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
@@ -247,6 +265,32 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
+  });
+
+  it("hides Outcome when outcomes are hidden for rank waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: true,
+      isApproveWave: false,
+    });
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={createWave()}
+        outcomesVisible={false}
+      />
+    );
+
+    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).toBeNull();
+    expect(screen.getByText("My Votes")).toBeInTheDocument();
   });
 
   it("hides My Votes for guests on normal rank waves", () => {

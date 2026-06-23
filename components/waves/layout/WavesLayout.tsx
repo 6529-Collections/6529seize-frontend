@@ -1,9 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import ConnectWallet from "../../common/ConnectWallet";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesDesktop from "../WavesDesktop";
 import WavesMobile from "../WavesMobile";
@@ -36,7 +35,7 @@ function getConnectPrompt(
   }
 }
 
-function getNotAuthenticatedContent({
+function getWavesContent({
   children,
   containerClassName,
   isApp,
@@ -45,15 +44,13 @@ function getNotAuthenticatedContent({
   readonly containerClassName: string;
   readonly isApp: boolean;
 }): ReactNode {
-  if (isApp) {
-    return <ConnectWallet />;
-  }
+  const Component = isApp ? WavesMobile : WavesDesktop;
 
   return (
     <div className="tw-flex-1" id="waves-content">
-      <WavesDesktop showLeftSidebar={true}>
+      <Component>
         <div className={containerClassName}>{children}</div>
-      </WavesDesktop>
+      </Component>
     </div>
   );
 }
@@ -63,23 +60,23 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
 
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, []);
+
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
   const connectPrompt = getConnectPrompt(contentState);
 
   let content: ReactNode = null;
 
-  if (contentState === "ready") {
-    const Component = isApp ? WavesMobile : WavesDesktop;
-    content = (
-      <div className="tw-flex-1" id="waves-content">
-        <Component>
-          <div className={containerClassName}>{children}</div>
-        </Component>
-      </div>
-    );
-  } else if (contentState === "not-authenticated") {
-    content = getNotAuthenticatedContent({
+  if (contentState === "ready" || contentState === "not-authenticated") {
+    content = getWavesContent({
       children,
       containerClassName,
       isApp,

@@ -6,6 +6,17 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 
+export const DROP_POLL_VOTED_NOTIFICATION_CAUSE = "DROP_POLL_VOTED" as const;
+
+export type NotificationCause =
+  | ApiNotificationCause
+  | typeof DROP_POLL_VOTED_NOTIFICATION_CAUSE;
+
+export type NotificationPollVoteOption = {
+  readonly option_no: number;
+  readonly option_string: string;
+};
+
 type NotificationWaveOverview = ApiWaveOverview & {
   readonly is_direct_message?: boolean;
 };
@@ -60,6 +71,7 @@ export type INotificationIdentityRep = NotificationBase & {
   readonly cause: ApiNotificationCause.IdentityRep;
   readonly additional_context: {
     readonly amount: number;
+    readonly rater_rating?: number | undefined;
     readonly total: number;
     readonly category: string;
   };
@@ -69,6 +81,7 @@ export type INotificationIdentityNic = NotificationBase & {
   readonly cause: ApiNotificationCause.IdentityNic;
   readonly additional_context: {
     readonly amount: number;
+    readonly rater_rating?: number | undefined;
     readonly total: number;
   };
 };
@@ -83,6 +96,16 @@ export type INotificationDropVoted = NotificationBase &
     readonly cause: ApiNotificationCause.DropVoted;
     readonly additional_context: {
       readonly vote: number;
+      readonly vote_change?: number | undefined;
+      readonly total_vote?: number | undefined;
+    };
+  };
+
+export type INotificationDropPollVoted = NotificationBase &
+  WithDrops & {
+    readonly cause: typeof DROP_POLL_VOTED_NOTIFICATION_CAUSE;
+    readonly additional_context: {
+      readonly poll_options: readonly NotificationPollVoteOption[];
     };
   };
 
@@ -149,6 +172,7 @@ export type TypedNotification =
   | INotificationIdentityRep
   | INotificationIdentityNic
   | INotificationDropVoted
+  | INotificationDropPollVoted
   | INotificationDropReacted
   | INotificationDropBoosted
   | INotificationDropQuoted

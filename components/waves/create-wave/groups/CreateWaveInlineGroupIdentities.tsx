@@ -4,16 +4,19 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useAuth } from "@/components/auth/Auth";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
 import GroupCreateIdentitiesSearch from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch";
+import type { GroupCreateIdentitiesSearchResultsLayout } from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems";
 import { areEqualAddresses } from "@/helpers/Helpers";
 
 export default function CreateWaveInlineGroupIdentities({
   identities,
   onIdentitySelect,
   onRemove,
+  resultsLayout = "popover",
 }: {
   readonly identities: readonly CommunityMemberMinimal[];
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
   readonly onRemove: (wallet: string) => void;
+  readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
 }) {
   const { connectedProfile } = useAuth();
   const selectedWallets = identities.map((identity) => identity.wallet);
@@ -70,6 +73,7 @@ export default function CreateWaveInlineGroupIdentities({
           hideLabel={true}
           inputClassName="tw-border-white/5 tw-bg-iron-950 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
           iconClassName="tw-top-3.5 tw-text-iron-500"
+          resultsLayout={resultsLayout}
         />
         {showHelperRow && (
           <div

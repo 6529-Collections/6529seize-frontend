@@ -11,7 +11,7 @@ import type {
   SubscriberMap,
   WebSocketMessage,
 } from "./WebSocketTypes";
-import { WebSocketStatus } from "./WebSocketTypes";
+import { setWebSocketMessageMetadata, WebSocketStatus } from "./WebSocketTypes";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { getAuthJwt } from "../auth/auth.utils";
 
@@ -23,9 +23,11 @@ const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving u
 type WebSocketMessagePayload = {
   readonly type?: unknown;
   readonly data?: unknown;
+  readonly reason?: unknown;
   readonly message?: {
     readonly type?: unknown;
     readonly data?: unknown;
+    readonly reason?: unknown;
   };
 };
 
@@ -41,7 +43,9 @@ const asWebSocketMessagePayload = (
 
 const normalizeIncomingMessage = (
   value: unknown
-): { readonly type: string; readonly data: unknown } | undefined => {
+):
+  | { readonly type: string; readonly data: unknown; readonly reason?: string }
+  | undefined => {
   const payload = asWebSocketMessagePayload(value);
   if (!payload) {
     return undefined;
@@ -55,9 +59,13 @@ const normalizeIncomingMessage = (
     return undefined;
   }
 
+  const reason =
+    asNonEmptyString(payload.reason) ?? asNonEmptyString(nestedPayload?.reason);
+
   return {
     type,
     data: payload.data ?? nestedPayload?.data,
+    ...(reason ? { reason } : {}),
   };
 };
 
@@ -126,6 +134,10 @@ export function WebSocketProvider({
     if (!subscribers) {
       return;
     }
+
+    setWebSocketMessageMetadata(message.data, {
+      reason: message.reason,
+    });
 
     for (const subscriber of subscribers) {
       try {

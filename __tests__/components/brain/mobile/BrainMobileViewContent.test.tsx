@@ -103,6 +103,12 @@ jest.mock("@/components/brain/my-stream/votes/MyStreamWaveMyVotes", () => ({
   default: (props: any) => mockMyStreamWaveMyVotes(props),
 }));
 
+const mockMyStreamWavePolls = jest.fn(() => <div data-testid="polls" />);
+jest.mock("@/components/brain/my-stream/MyStreamWavePolls", () => ({
+  __esModule: true,
+  default: (props: any) => mockMyStreamWavePolls(props),
+}));
+
 const mockMyStreamWaveFAQ = jest.fn(() => <div data-testid="faq" />);
 jest.mock("@/components/brain/my-stream/MyStreamWaveFAQ", () => ({
   __esModule: true,
@@ -483,6 +489,32 @@ describe("BrainMobileViewContent", () => {
     );
   });
 
+  it("renders polls for any active wave", () => {
+    const onDropClick = jest.fn();
+    const wave = { id: "wave-1" } as any;
+
+    render(
+      <BrainMobileViewContent
+        activeView={BrainView.POLLS}
+        activeWaveId="wave-1"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={false}
+        hasPolls={true}
+        onDropClick={onDropClick}
+        onOpenQuickVote={jest.fn()}
+        wave={wave}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("polls")).toBeInTheDocument();
+    expect(mockMyStreamWavePolls).toHaveBeenCalledWith(
+      expect.objectContaining({ onDropClick, wave })
+    );
+  });
+
   it.each([
     { isRankWave: true, isApproveWave: false },
     { isRankWave: false, isApproveWave: true },
@@ -509,6 +541,27 @@ describe("BrainMobileViewContent", () => {
       expect(mockMyStreamWaveOutcome).not.toHaveBeenCalled();
     }
   );
+
+  it("does not render outcome content when outcomes are hidden", () => {
+    const { container } = render(
+      <BrainMobileViewContent
+        activeView={BrainView.OUTCOME}
+        activeWaveId="1"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={true}
+        outcomesVisible={false}
+        onDropClick={jest.fn()}
+        onOpenQuickVote={jest.fn()}
+        wave={{ id: "wave-1" } as any}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(container.firstChild).toBeNull();
+    expect(mockMyStreamWaveOutcome).not.toHaveBeenCalled();
+  });
 
   it("renders faq for approve memes waves", () => {
     const wave = { id: "wave-1" } as any;
@@ -570,6 +623,13 @@ describe("BrainMobileViewContent", () => {
       isMemesWave: false,
       isRankWave: true,
       wave: { id: "wave-1" } as any,
+    },
+    {
+      activeView: BrainView.POLLS,
+      isCurationWave: false,
+      isMemesWave: false,
+      isRankWave: false,
+      wave: null,
     },
   ])(
     "returns null when $activeView is unavailable",

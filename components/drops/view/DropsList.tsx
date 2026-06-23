@@ -3,7 +3,6 @@
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import LightDrop from "@/components/waves/drops/LightDrop";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
-import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type {
   Drop as DropType,
@@ -49,6 +48,7 @@ interface DropsListProps {
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -74,9 +74,9 @@ const DropsList = memo(
     unreadDividerSerialNo,
     boostedDrops,
     onBoostedDropClick,
-    autoCollapseSerials,
     suspendLightDropHydration = false,
     winningThreshold,
+    winningThresholdMinDurationMs,
     isVotingClosed = false,
     isVotingControlsLocked = false,
   }: DropsListProps) => {
@@ -114,6 +114,7 @@ const DropsList = memo(
         onDropContentClick,
         scrollContainerRef,
         winningThreshold,
+        winningThresholdMinDurationMs,
         isVotingClosed,
         isVotingControlsLocked,
       };
@@ -131,6 +132,7 @@ const DropsList = memo(
       onDropContentClick,
       scrollContainerRef,
       winningThreshold,
+      winningThresholdMinDurationMs,
       isVotingClosed,
       isVotingControlsLocked,
     ]);
@@ -198,16 +200,14 @@ const DropsList = memo(
         return (
           <div
             key={`boost-card-${boostedIndex}-${boostedDrop.id}`}
-            className="tw-px-3 tw-py-4 sm:tw-px-4"
+            className="tw-px-3 tw-py-3 sm:tw-px-4"
           >
-            <div className="tw-rounded-2xl tw-bg-iron-900/50 tw-p-2 sm:tw-p-3">
-              <BoostedDropCardHome
-                drop={boostedDrop}
-                variant="chat"
-                rank={boostedIndex + 1}
-                onClick={() => onBoostedDropClick(boostedDrop.serial_no)}
-              />
-            </div>
+            <BoostedDropCardHome
+              drop={boostedDrop}
+              variant="chat"
+              rank={boostedIndex + 1}
+              onClick={() => onBoostedDropClick(boostedDrop.serial_no)}
+            />
           </div>
         );
       },
@@ -250,22 +250,14 @@ const DropsList = memo(
               parentContainerRef={getItemData.parentContainerRef}
               onDropContentClick={getItemData.onDropContentClick}
               winningThreshold={getItemData.winningThreshold}
+              winningThresholdMinDurationMs={
+                getItemData.winningThresholdMinDurationMs
+              }
               isVotingClosed={getItemData.isVotingClosed}
               isVotingControlsLocked={getItemData.isVotingControlsLocked}
             />
           ) : (
             <MemoizedLightDrop drop={drop} />
-          );
-
-        const dropContentWithPreviewMode =
-          drop.type === DropSize.FULL && autoCollapseSerials ? (
-            <TweetPreviewModeProvider
-              mode={autoCollapseSerials.has(drop.serial_no) ? "auto" : "never"}
-            >
-              {dropContent}
-            </TweetPreviewModeProvider>
-          ) : (
-            dropContent
           );
 
         const dropElement = (
@@ -288,12 +280,13 @@ const DropsList = memo(
           >
             <VirtualScrollWrapper
               scrollContainerRef={getItemData.scrollContainerRef}
+              dropId={drop.id}
               dropSerialNo={drop.serial_no}
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
               type={drop.type}
               suspendLightDropHydration={suspendLightDropHydration}
             >
-              {dropContentWithPreviewMode}
+              {dropContent}
             </VirtualScrollWrapper>
           </HighlightDropWrapper>
         );
@@ -306,7 +299,6 @@ const DropsList = memo(
       location,
       renderBoostCard,
       renderUnreadDivider,
-      autoCollapseSerials,
       suspendLightDropHydration,
     ]);
   }

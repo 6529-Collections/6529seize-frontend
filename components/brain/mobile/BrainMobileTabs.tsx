@@ -47,6 +47,8 @@ interface BrainMobileTabsProps {
   readonly onViewChange: (view: BrainView) => void;
   readonly wave?: ApiWave | undefined;
   readonly waveActive: boolean;
+  readonly hasPolls?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;
   readonly isApp?: boolean | undefined;
@@ -57,6 +59,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   onViewChange,
   wave,
   waveActive,
+  hasPolls = false,
+  outcomesVisible = true,
   showWavesTab,
   showStreamBack,
   isApp,
@@ -97,7 +101,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =
     useWave(wave);
   const isCompetitionWave = isRankWave || isApproveWave;
-  const supportsOutcomeView = isCompetitionWave && !isCurationWave;
+  const supportsOutcomeView =
+    isCompetitionWave && !isCurationWave && outcomesVisible;
   const canShowMyVotesTab = isCurationWave || hasAuthenticatedProfile;
 
   // Get unread indicator for messages
@@ -298,6 +303,21 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               })}
             >
               About
+            </span>
+          </button>
+        )}
+        {waveActive && wave && hasPolls && (
+          <button
+            ref={getActiveButtonRef(activeView === BrainView.POLLS)}
+            onClick={() => handleWaveViewChange(BrainView.POLLS)}
+            className={getTabButtonClassName(activeView === BrainView.POLLS)}
+          >
+            <span
+              className={getTabTextClassName({
+                isActive: activeView === BrainView.POLLS,
+              })}
+            >
+              Polls
             </span>
           </button>
         )}

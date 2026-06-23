@@ -2,7 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 
 describe("useSidebarSections", () => {
-  it("places xTDH under Network and removes it from Collections", () => {
+  it("places xTDH, Wave Score, and REP Categories under Network", () => {
     const { result } = renderHook(() => useSidebarSections(false, false, "US"));
 
     const networkSection = result.current.find(
@@ -21,11 +21,48 @@ describe("useSidebarSections", () => {
     ).toBe(true);
     expect(
       networkSection?.items.some(
+        (item) =>
+          item.name === "Wave Score" && item.href === "/network/wave-score"
+      )
+    ).toBe(true);
+    expect(
+      networkSection?.items.some(
+        (item) =>
+          item.name === "REP Categories" && item.href === "/rep/categories"
+      )
+    ).toBe(true);
+    const xtdhIndex =
+      networkSection?.items.findIndex((item) => item.name === "xTDH") ?? -1;
+    const waveScoreIndex =
+      networkSection?.items.findIndex((item) => item.name === "Wave Score") ??
+      -1;
+    const repCategoriesIndex =
+      networkSection?.items.findIndex(
+        (item) => item.name === "REP Categories"
+      ) ?? -1;
+    expect(waveScoreIndex).toBe(xtdhIndex + 1);
+    expect(repCategoriesIndex).toBe(waveScoreIndex + 1);
+    expect(
+      networkSection?.items.some(
         (item) => item.name === "xTDH" && item.href === "/network/xtdh"
       )
     ).toBe(false);
     expect(collectionsSection?.items.some((item) => item.name === "xTDH")).toBe(
       false
     );
+  });
+
+  it("does not include retired release notes links", () => {
+    const { result } = renderHook(() => useSidebarSections(false, false, "US"));
+
+    const allItems = result.current.flatMap((section) => [
+      ...section.items,
+      ...section.subsections.flatMap((subsection) => subsection.items),
+    ]);
+
+    expect(allItems.some((item) => item.name === "Release Notes")).toBe(false);
+    expect(
+      allItems.some((item) => item.href === "/about/release-notes")
+    ).toBe(false);
   });
 });

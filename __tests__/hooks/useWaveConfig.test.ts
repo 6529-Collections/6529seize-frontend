@@ -3,6 +3,14 @@ import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfi
 import { CreateWaveGroupConfigType, CreateWaveStep } from "@/types/waves.types";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 
+jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
+  useMemeCardCount: jest.fn(() => ({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+  })),
+}));
+
 describe("useWaveConfig", () => {
   it("prevents step change when validation fails", () => {
     const { result } = renderHook(() => useWaveConfig());

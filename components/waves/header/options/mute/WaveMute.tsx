@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
@@ -39,15 +40,28 @@ export default function WaveMute({
           queryKey: [QueryKey.WAVES_V2],
         })
         .catch(() => undefined);
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.OFFICIAL_WAVES],
+        })
+        .catch(() => undefined);
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.WAVE_SUBWAVES],
+        })
+        .catch(() => undefined);
       onSuccess?.();
     } catch (error) {
       const defaultMessage = isMuted
         ? "Unable to unmute wave"
         : "Unable to mute wave";
-      const errorMessage = typeof error === "string" ? error : defaultMessage;
       setToast({
-        message: errorMessage,
         type: "error",
+        title: isMuted
+          ? "Couldn't unmute this wave."
+          : "Couldn't mute this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, defaultMessage),
       });
     } finally {
       setLoading(false);
@@ -60,7 +74,7 @@ export default function WaveMute({
       disabled={loading}
       onClick={(e) => {
         e.stopPropagation();
-        handleToggleMute();
+        void handleToggleMute();
       }}
       className="tw-flex tw-w-full tw-items-center tw-gap-2 tw-border-none tw-bg-transparent tw-px-3 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
       role="menuitem"

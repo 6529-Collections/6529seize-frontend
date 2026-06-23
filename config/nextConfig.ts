@@ -1,27 +1,41 @@
 import { createSecurityHeaders } from "./securityHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
-import path from "node:path";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
+import { getMediaResolverHostname } from "../lib/media/decentralized-media";
+import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
+import path from "node:path";
+
+const HTML_LIMITED_METADATA_BOTS =
+  /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
+const REPO_ROOT = path.resolve(process.cwd());
+const NODE_MODULES_PATH = path.resolve(REPO_ROOT, "node_modules");
+const SASS_LOAD_PATHS = [
+  path.resolve(NODE_MODULES_PATH, "bootstrap", "scss"),
+  NODE_MODULES_PATH,
+];
+const BOOTSTRAP_PROGRESS_PARTIAL =
+  "./node_modules/bootstrap/scss/_progress.scss";
 
 export function sharedConfig(
   publicEnv: PublicEnv,
   assetPrefix: string
 ): NextConfig {
-  const sassLoadPaths = [
-    path.join(process.cwd(), "node_modules"),
-    path.join(process.cwd(), "node_modules", "bootstrap", "scss"),
-  ];
-
   return {
     assetPrefix,
     reactCompiler: true,
     reactStrictMode: false,
+    htmlLimitedBots: HTML_LIMITED_METADATA_BOTS,
     compress: true,
-    productionBrowserSourceMaps: true,
     sassOptions: {
+      loadPaths: SASS_LOAD_PATHS,
       quietDeps: true,
-      loadPaths: sassLoadPaths,
+      silenceDeprecations: [
+        "color-functions",
+        "global-builtin",
+        "if-function",
+        "import",
+      ],
     },
     allowedDevOrigins: ["172.20.10.3", "192.168.1.77"],
     images: {
@@ -29,7 +43,15 @@ export function sharedConfig(
       remotePatterns: [
         { protocol: "https", hostname: "6529.io" },
         { protocol: "https", hostname: "staging.6529.io" },
+        {
+          protocol: "https",
+          hostname: getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT),
+        },
         ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
+          protocol: "https" as const,
+          hostname,
+        })),
+        ...IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
           protocol: "https" as const,
           hostname,
         })),
@@ -49,7 +71,6 @@ export function sharedConfig(
       formats: ["image/avif", "image/webp"],
       qualities: [100, 75],
     },
-    transpilePackages: ["react-tweet"],
     poweredByHeader: false,
     logging: {
       incomingRequests: false,
@@ -60,7 +81,17 @@ export function sharedConfig(
           source: "/:path*",
           headers: createSecurityHeaders(
             publicEnv["API_ENDPOINT"],
-            publicEnv["IPFS_GATEWAY_ENDPOINT"]
+            publicEnv["IPFS_GATEWAY_ENDPOINT"],
+            publicEnv["MEDIA_RESOLVER_ENDPOINT"],
+            {
+              allowInsecureLocalhostConnectSrc:
+                publicEnv.NODE_ENV === "development" ||
+                publicEnv.NODE_ENV === "local",
+              allowUnsafeEval:
+                publicEnv.NODE_ENV === "development" ||
+                publicEnv.NODE_ENV === "local",
+              webSocketEndpoint: publicEnv["WS_ENDPOINT"],
+            }
           ),
         },
       ];
@@ -69,6 +100,7 @@ export function sharedConfig(
       resolveAlias: {
         canvas: "./stubs/empty.js",
         encoding: "./stubs/empty.js",
+        progress: BOOTSTRAP_PROGRESS_PARTIAL,
         "@react-native-async-storage/async-storage": "./stubs/empty.js",
         "react-native": "./stubs/empty.js",
         "idb-keyval": "./lib/storage/idb-keyval.ts",

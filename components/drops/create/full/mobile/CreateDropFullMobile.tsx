@@ -44,11 +44,13 @@ interface CreateDropFullMobileProps {
   readonly type: CreateDropType;
   readonly loading: boolean;
   readonly showSubmit: boolean;
+  readonly submitOnEnter?: boolean | undefined;
   readonly drop: CreateDropConfig | null;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
   readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onUploadEditorStateChange: (editorState: EditorState) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
   readonly onMentionedUser: (
@@ -80,11 +82,13 @@ const CreateDropFullMobile = forwardRef<
       type,
       loading,
       showSubmit,
+      submitOnEnter = true,
       drop,
       missingMedia,
       missingMetadata,
       children,
       onEditorState,
+      onUploadEditorStateChange,
       onMetadataEdit,
       onMetadataRemove,
       onMentionedUser,
@@ -99,10 +103,18 @@ const CreateDropFullMobile = forwardRef<
     },
     ref
   ) => {
-    const onViewClick = () => onViewChange(CreateDropViewType.COMPACT);
+    const onViewClick = () => {
+      if (!loading) {
+        onViewChange(CreateDropViewType.COMPACT);
+      }
+    };
     const [isOpen, setIsOpen] = useState(true);
 
-    const onClose = () => setIsOpen(false);
+    const onClose = () => {
+      if (!loading) {
+        setIsOpen(false);
+      }
+    };
 
     const [titleState, setTitleState] = useState<TITLE_STATE>(
       title?.length ? TITLE_STATE.INPUT : TITLE_STATE.BUTTON
@@ -139,8 +151,13 @@ const CreateDropFullMobile = forwardRef<
             <div className="-tw-mb-2 tw-flex tw-justify-end">
               {titleState === TITLE_STATE.BUTTON && (
                 <button
-                  onClick={() => setTitleState(TITLE_STATE.INPUT)}
+                  onClick={() => {
+                    if (!loading) {
+                      setTitleState(TITLE_STATE.INPUT);
+                    }
+                  }}
                   type="button"
+                  disabled={loading}
                   className="tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
                 >
                   <svg
@@ -167,7 +184,12 @@ const CreateDropFullMobile = forwardRef<
                 type="text"
                 placeholder="Drop title"
                 value={title ?? ""}
-                onChange={(e) => onTitle(e.target.value)}
+                onChange={(e) => {
+                  if (!loading) {
+                    onTitle(e.target.value);
+                  }
+                }}
+                disabled={loading}
                 maxLength={250}
                 className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-2.5 tw-pr-3 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-400 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
               />
@@ -179,11 +201,14 @@ const CreateDropFullMobile = forwardRef<
               type={type}
               waveId={waveId}
               drop={drop}
+              loading={loading}
+              submitOnEnter={submitOnEnter}
               canAddPart={canAddPart}
               canSubmit={canSubmit}
               missingMedia={missingMedia}
               missingMetadata={missingMetadata}
               onEditorState={onEditorState}
+              onUploadEditorStateChange={onUploadEditorStateChange}
               onDrop={onDrop}
               onMentionedUser={onMentionedUser}
               onMentionedWave={onMentionedWave}
@@ -203,9 +228,14 @@ const CreateDropFullMobile = forwardRef<
                       </p>
                     </div>
                     <button
-                      onClick={() => onFileRemove(file)}
+                      onClick={() => {
+                        if (!loading) {
+                          onFileRemove(file);
+                        }
+                      }}
                       type="button"
                       aria-label="Remove file"
+                      disabled={loading}
                       className="-tw-mb-0.5 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent hover:tw-bg-iron-800"
                     >
                       <svg
@@ -233,6 +263,7 @@ const CreateDropFullMobile = forwardRef<
               metadata={metadata}
               onMetadataEdit={onMetadataEdit}
               onMetadataRemove={onMetadataRemove}
+              disabled={loading}
             />
           </div>
           {showSubmit && (

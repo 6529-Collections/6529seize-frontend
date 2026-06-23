@@ -5,6 +5,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { AuthContext } from "@/components/auth/Auth";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 
 interface WaveDropActionsReplyProps {
   readonly drop: ApiDrop;
@@ -25,11 +26,15 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   const isEligibleToChat =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
+  const isSlowModeOnlyBlock =
+    isEligibleToChat === false &&
+    waveEligibility?.authenticated_user_chat_restriction ===
+      ChatRestriction.SLOW_MODE;
 
   const canReply = !isTemporaryDrop;
 
   const handleReplyClick = () => {
-    if (isEligibleToChat === false) {
+    if (isEligibleToChat === false && !isSlowModeOnlyBlock) {
       setToast({
         message: "You are not eligible to chat in this wave",
         type: "error",

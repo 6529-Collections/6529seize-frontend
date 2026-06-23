@@ -1,6 +1,7 @@
 "use client";
 
 import { FallbackImage } from "@/components/common/FallbackImage";
+import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -169,6 +170,7 @@ function DropListItemContentMediaImage({
   imageScale = ImageScale.AUTOx450,
   loadStrategy = "in-view",
   intrinsicHeight = false,
+  galleryItemId,
 }: {
   readonly src: string;
   readonly maxRetries?: number | undefined;
@@ -178,6 +180,7 @@ function DropListItemContentMediaImage({
   readonly imageScale?: ImageScale | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
   readonly intrinsicHeight?: boolean | undefined;
+  readonly galleryItemId?: string | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -186,6 +189,7 @@ function DropListItemContentMediaImage({
   const [retryTick, setRetryTick] = useState(0);
   const { isCapacitor } = useCapacitor();
   const { hasTouchScreen } = useDeviceInfo();
+  const imageGallery = useDropImageGallery();
 
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
@@ -221,8 +225,12 @@ function DropListItemContentMediaImage({
       return;
     }
 
+    if (galleryItemId && imageGallery?.openImage(galleryItemId)) {
+      return;
+    }
+
     setIsModalOpen(true);
-  }, [disableModal]);
+  }, [disableModal, galleryItemId, imageGallery]);
 
   const handleImageClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

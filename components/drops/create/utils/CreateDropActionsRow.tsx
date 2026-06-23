@@ -1,7 +1,6 @@
 "use client";
 
-import { useContext } from "react";
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 
 export default function CreateDropActionsRow({
@@ -9,13 +8,15 @@ export default function CreateDropActionsRow({
   isStormMode,
   setFiles,
   breakIntoStorm,
+  disabled = false,
 }: {
   readonly canAddPart: boolean;
   readonly isStormMode: boolean;
   readonly setFiles: (files: File[]) => void;
   readonly breakIntoStorm: () => void;
+  readonly disabled?: boolean | undefined;
 }) {
-  const { setToast } = useContext(AuthContext);
+  const { setToast } = useAuth();
   return (
     <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
       <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
@@ -23,7 +24,12 @@ export default function CreateDropActionsRow({
           <div
             role="button"
             aria-label="Select audio file"
-            className="tw-flex tw-cursor-pointer tw-items-center tw-gap-x-2 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
+            aria-disabled={disabled}
+            className={`tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 ${
+              disabled
+                ? "tw-cursor-not-allowed tw-opacity-50"
+                : "tw-cursor-pointer"
+            }`}
           >
             <svg
               className="tw-size-5 tw-flex-shrink-0"
@@ -45,12 +51,17 @@ export default function CreateDropActionsRow({
               className="tw-hidden"
               accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
               multiple
+              disabled={disabled}
               onChange={(e) => {
+                if (disabled) {
+                  e.target.value = "";
+                  return;
+                }
                 if (e.target.files) {
                   const files: File[] = Array.from(e.target.files);
                   if (files.length > MAX_DROP_UPLOAD_FILES) {
                     setToast({
-                      message: `You can only upload up to ${MAX_DROP_UPLOAD_FILES} files at a time`,
+                      message: `Upload ${MAX_DROP_UPLOAD_FILES} or fewer files at a time.`,
                       type: "error",
                     });
                     e.target.value = "";
@@ -67,8 +78,12 @@ export default function CreateDropActionsRow({
       </div>
       {canAddPart && (
         <button
-          onClick={breakIntoStorm}
-          disabled={!canAddPart}
+          onClick={() => {
+            if (!disabled) {
+              breakIntoStorm();
+            }
+          }}
+          disabled={disabled}
           type="button"
           className="tw-flex tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
         >

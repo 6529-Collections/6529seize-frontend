@@ -7,6 +7,7 @@ interface VotingModalButtonProps {
   readonly onClick: () => void;
   readonly variant?: "default" | "subtle" | undefined; // Add variant prop for styling flexibility
   readonly className?: string | undefined;
+  readonly children?: React.ReactNode;
 }
 
 const VotingModalButton: React.FC<VotingModalButtonProps> = ({
@@ -14,6 +15,7 @@ const VotingModalButton: React.FC<VotingModalButtonProps> = ({
   onClick,
   variant = "default",
   className,
+  children,
 }) => {
   const { canShowVote } = useDropInteractionRules(drop);
 
@@ -38,7 +40,7 @@ const VotingModalButton: React.FC<VotingModalButtonProps> = ({
 
   return (
     <button type="button" onClick={handleClick} className={buttonClasses}>
-      <span>Vote</span>
+      <span className="tw-truncate">{children ?? "Vote"}</span>
     </button>
   );
 };

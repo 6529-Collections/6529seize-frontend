@@ -1,266 +1,223 @@
-# 6529SEIZE-FRONTEND
+# 6529seize Frontend
 
-## Repo Helpers
+The open-source frontend for [6529.io](https://6529.io), a web3 social,
+collecting, governance, and open-data application for the 6529 ecosystem.
 
-This repo includes a `.envrc` for `direnv`.
+This repository contains the Next.js application that powers the public site,
+wallet-connected app surfaces, media and minting flows, Waves conversations,
+network scoring views, delegation tools, and supporting utility routes.
 
-It is only used for repo-local shell helpers. Right now it adds the repo `bin/` directory to your `PATH`, which makes commands like `ghruns` and `ghdeploy` available anywhere inside this repository.
+## What Is In This App
 
-It does not load `.env.local` and it does not set `NODE_ENV`.
+- **Home and discovery**: the 6529.io landing experience, latest drops, coming
+  up cards, and discovery sections.
+- **Waves and messages**: public wave discovery, wallet-gated threads,
+  direct-message routes, posting, voting, reactions, curation, link previews,
+  and leaderboard views.
+- **Profiles**: identity pages, profile tabs, collected media, subscriptions,
+  proxy/delegation views, and profile navigation.
+- **Media and minting**: The Memes, Meme Lab, Rememes, 6529 Gradient,
+  NFT-related actions, minting calendar, and media rendering behavior.
+- **Network, TDH, and xTDH**: leaderboards, activity feeds, health views,
+  TDH/xTDH reference pages, levels, stats, and group-scoped network views.
+- **Delegation and groups**: wallet delegation flows, primary address tooling,
+  group creation, filters, membership criteria, and network scope handoffs.
+- **NextGen, Drop Forge, and EMMA**: collection/token routes, mint/admin
+  surfaces, claim operations, and distribution-plan tools.
+- **Open data and tools**: downloadable datasets, API utilities, block finder,
+  subscription reports, and app-wallet routes.
 
-### Setup direnv
+For route-level user documentation, start at [ops/docs/README.md](ops/docs/README.md).
 
-1. Install `direnv` on your machine.
-2. Enable the `direnv` shell hook.
+## Tech Stack
 
-For `zsh`, add this to `~/.zshrc`:
+- [Next.js](https://nextjs.org/) 16 with the App Router
+- [React](https://react.dev/) 19 and TypeScript
+- pnpm 10.33.0, always invoked through the repo-local `6529` wrapper
+- Jest and Testing Library for unit/component tests
+- Playwright for end-to-end tests
+- OpenAPI Generator for TypeScript API models in `generated/`
+- Sentry, AWS RUM, Elastic Beanstalk, S3, and CloudFront integration paths
+- Wallet and web3 tooling through wagmi, viem, ethers, Reown AppKit, and
+  related libraries
 
-```bash
-eval "$(direnv hook zsh)"
-```
+The root package is marked `"private": true` to prevent accidental npm
+publication. The source code itself is licensed under Apache-2.0.
 
-For `bash`, add this to `~/.bashrc`:
+## Quick Start
 
-```bash
-eval "$(direnv hook bash)"
-```
+Prerequisites:
 
-Then reload your shell config, for example:
+- Git
+- Node.js with Corepack available
+- Bash-compatible shell for the repo wrapper scripts
 
-```bash
-source ~/.zshrc
-```
-
-### Allow this repo
-
-From the repo root, run:
-
-```bash
-direnv allow
-```
-
-If `.envrc` changes later, run:
-
-```bash
-direnv allow
-```
-
-again to approve the updated file.
-
-### Verify
-
-From the repo root, you should be able to run:
-
-```bash
-which 6529
-which ghruns
-6529 run dev --help
-ghruns
-```
-
-`ghruns` is a shortcut for:
-
-```bash
-gh run list -R "6529-Collections/6529seize-frontend"
-```
-
-In an interactive terminal, `ghruns` opens a live dashboard instead of printing a one-time snapshot. It refreshes automatically every 5 seconds, keeps the same repo scope, and still accepts the usual `gh run list` filters like `--branch`, `--workflow`, `--status`, and `-L`.
-
-`ghruns` controls:
-
-- `Up` / `Down` moves through the recent runs
-- `Enter` opens `gh run watch` for the highlighted run
-- `r` refreshes immediately
-- `q` quits
-
-The dashboard falls back to plain `gh run list` output in non-interactive shells and when you use output-formatting flags like `--json`, `--jq`, or `--template`.
-
-### Deploy Helper
-
-`ghdeploy` only works from the repo root.
-
-From the repo root, run:
-
-```bash
-ghdeploy
-```
-
-Before it triggers the production deploy workflow, it checks that:
-
-- the current branch is not detached
-- the working tree is fully clean, including no untracked files
-- the current branch has an upstream
-- the current branch is exactly in sync with its upstream after a fetch
-
-If those checks pass, it asks:
-
-```text
-Are you sure you want to deploy <branch-name> to production?
-```
-
-If you confirm, it triggers the production workflow from `.github/workflows/build-upload-deploy-prod.yml` against your current branch.
-
-Default app port: `3001`.
-
-### Documentation
-
-User-facing documentation lives in [`docs/README.md`](docs/README.md).
-Developer package-management guidance lives in [`docs/developer/pnpm-and-socket-firewall.md`](docs/developer/pnpm-and-socket-firewall.md).
-
-### Install
-
-Bootstrap the repo command shim, ensure Socket Firewall is installed, and
-activate the pinned pnpm version:
+From a fresh clone:
 
 ```bash
 ./bin/6529 bootstrap
 ```
 
-Then open a new shell, or activate the current shell immediately:
+Open a new shell, or activate the wrapper in the current shell:
 
 ```bash
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Then install project dependencies through the secure path:
+Install dependencies through the secure project path:
 
 ```bash
 6529 install
 ```
 
-To add a new package:
+Create a local `.env` file from [.env.sample](.env.sample), then start the app:
 
 ```bash
+6529 run dev
+```
+
+The default local app port is `3001`.
+
+## Environment
+
+The app expects environment variables for API endpoints, wallet/network
+settings, monitoring, IPFS gateways, and optional feature-specific integrations.
+Use [.env.sample](.env.sample) as the source of truth for variable names and
+safe placeholder values.
+
+Important notes:
+
+- Do not commit real secrets or local `.env` files.
+- Production API examples are documented in `.env.sample`.
+- Sentry Session Replay should remain disabled unless reviewed for PII risk.
+- GitHub link-preview tokens and server-side client secrets are server-side
+  only values.
+
+## Project Commands
+
+This repository intentionally routes project commands through `6529`.
+Do not use plain `pnpm install`, `pnpm dev`, or `npm run ...`; the scripts are
+guarded so dependency installs and package scripts use the expected secure path.
+
+Common commands:
+
+```bash
+6529 install
+6529 install:frozen
 6529 add <package>
 6529 add -D <package>
-```
-
-To apply audit fixes:
-
-```bash
-6529 update
-```
-
-`6529 install` and `6529 i` only reinstall the existing dependency set. They do
-not accept package names. To add a dependency, use `6529 add <package>`.
-`6529 add` and `6529 update` go through the same Socket Firewall-protected path
-as secure installs.
-For an intentional broader pnpm update, use `6529 update:all`.
-
-Plain `pnpm install`, `pnpm dev`, and `npm run ...` repo script execution are intentionally blocked. Use the `6529` wrapper only.
-
-After bootstrap, `6529` resolves only while you are inside this repository tree.
-Outside the repo, the default experience is still `command not found`.
-
-If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
-
-```bash
-6529 install
 6529 update
 6529 run dev
 6529 run build
+6529 run test
+6529 run test:e2e
+6529 run test:e2e:staging
+6529 run lint:changed
+6529 run typecheck:changed
+6529 run check:changed
+6529 run deployment-bus -- validate-manifest --file deployment-bus-manifest.json
+```
+
+If pnpm reports ignored install/build scripts, run:
+
+```bash
 6529 approve-builds
-6529 staging
 ```
 
-Otherwise, open a new shell after running `./bin/6529 bootstrap`.
+For deeper package-manager, Socket Firewall, and deployment-wrapper details,
+read [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
 
-### Build
+## Repository Map
+
+- `app/`: Next.js App Router routes. New routes should be created here.
+- `AGENTS.md`: repository instructions for agents and automated coding tools.
+- `components/`: shared and feature-specific UI components.
+- `ops/`: operational material, including docs, skills, scripts, roadmaps, and workstream state.
+- `ops/docs/`: user-facing documentation for routes, flows, feature behavior, and
+  troubleshooting.
+- `generated/`: TypeScript models generated from `openapi.yaml`.
+- `helpers/`, `hooks/`, `services/`, `contexts/`, `store/`, `utils/`: shared
+  application support code.
+- `scripts/`: repository automation, environment switching, code generation,
+  quality checks, and deployment helpers.
+- `standalone/`: standalone export/runtime support, including The Memes mint
+  page tooling.
+- `tests/`, `__tests__/`, `e2e/`: automated test suites and test support.
+
+All application routes now live under `app/`. Pages inside `app/` should define
+`generateMetadata` with `getAppMetadata` so metadata is consistent across the
+site.
+
+## Generated API Models
+
+The OpenAPI source is [openapi.yaml](openapi.yaml). Generated TypeScript models
+live under `generated/` and are produced by:
+
+```bash
+6529 run generate
+```
+
+Avoid editing generated files directly unless you are intentionally
+regenerating them from the OpenAPI source.
+
+## Testing And Quality
+
+Prefer focused checks for the files or behavior you changed:
+
+```bash
+6529 run lint:changed
+6529 run typecheck:changed
+6529 run check:changed
+6529 run test -- <pattern>
+```
+
+Use the full build when changes touch build-time behavior, generated API
+models, Next.js configuration, routing, deployment packaging, or other
+deployment-sensitive code:
 
 ```bash
 6529 run build
 ```
 
-### Environment
+## Documentation
 
-To run the project you need a .env file.
+- User-facing route and feature docs: [ops/docs/README.md](ops/docs/README.md)
+- Agent and automation instructions: [AGENTS.md](AGENTS.md)
+- Package-manager and deployment-wrapper guidance:
+  [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md)
+- Standalone Memes mint page notes:
+  [standalone/standalone-memes-mint/README.md](standalone/standalone-memes-mint/README.md)
 
-[Sample .env file](https://github.com/6529-Collections/6529seize-frontend/tree/main/.env.sample)
+When behavior changes are visible to users, update the relevant docs under
+`ops/docs/` in the same pull request.
 
-### Pepe.wtf previews
+## Deployment Notes
 
-The chat now renders cards for pepe.wtf assets, collections, artists and sets.
-Environment variables (with defaults) allow you to tune caching and IPFS
-gateway usage:
+Production deployment is managed by repository workflows and Elastic Beanstalk
+packaging. The production bundle is built as Next standalone output, static
+assets are uploaded to S3/CloudFront, and Elastic Beanstalk starts `server.js`
+through [Procfile](Procfile).
 
-- `PEPE_CACHE_TTL_MINUTES` (default `10`)
-- `PEPE_CACHE_MAX_ITEMS` (default `500`)
-- `IPFS_GATEWAY` (default `https://ipfs.io/ipfs/`)
+Repository and deployment helper details, including `ghruns`, `ghdeploy`,
+`6529 staging`, and PM2 launch examples, are documented in
+[ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
+The staging and production deployment-bus process for coordinating many
+agents, shared validation, backend dependencies, and production promotion is
+documented in
+[ops/docs/developer/deployment-bus-process.md](ops/docs/developer/deployment-bus-process.md).
 
-To test end-to-end:
+## Contributing
 
-1. Run `6529 run dev`.
-2. Paste any pepe.wtf link in chat, for example `https://pepe.wtf/asset/GOXPEPE`
-   or `https://pepe.wtf/artists/Easy-B`, and confirm the preview renders with
-   imagery and stats.
-3. Re-run the same link and confirm the network response for
-   `/api/pepe/resolve` includes the header `X-Cache: HIT`.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Agents
+and automated coding tools should also follow [AGENTS.md](AGENTS.md). This
+project requires Developer Certificate of Origin signoffs on contributor
+commits.
 
-### Run
+## Security
 
-- Locally
+Read [SECURITY.md](SECURITY.md) for vulnerability reporting, supported branch
+policy, and safe handling of secrets or security-sensitive configuration.
 
-```bash
-6529 run dev
-```
+## License
 
-- Staging update / rebuild
-
-```bash
-./bin/6529 staging
-```
-
-This rebuilds the app and restarts PM2 on the standalone runtime path
-(`6529 run start:standalone`).
-
-- One-time server bootstrap for repo-scoped `6529 ...`
-
-```bash
-./bin/6529 bootstrap
-```
-
-Then open a new shell, or source the rc file that matches your shell.
-The bootstrap step also removes the old managed global shim at
-`~/.local/bin/6529` when it finds one.
-
-- After `direnv allow`, the shorthand also works
-
-```bash
-6529 staging
-```
-
-- Production
-
-```bash
-6529 run start
-```
-
-This is the repo-local production-style start path.
-Elastic Beanstalk production deploys do not use `6529 run start`; they package
-Next standalone output and start `server.js` through [`Procfile`](./Procfile).
-
-### RUN USING PM2
-
-```bash
-pm2 start bash --name=6529seize -- -lc 'cd /path/to/repo && ./bin/6529 run start:standalone'
-```
-
-## Directory Structure
-
-All application routes now live under Next.js’s `app/` router.
-The legacy `pages/` directory has been fully migrated, so create any new routes
-inside `app/`.
-
-Pages inside `app/` must define a `generateMetadata` function that returns the
-result of `getAppMetadata`:
-
-```ts
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "My Page" });
-}
-```
-
-This ensures consistent SEO metadata across routes.
+This project is licensed under the [Apache License 2.0](LICENSE).

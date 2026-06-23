@@ -18,8 +18,14 @@ jest.mock("@/hooks/useCountdown", () => ({
 
 jest.mock("@/components/utils/button/PrimaryButton", () => ({
   __esModule: true,
-  default: ({ children, ...props }: any) => (
-    <button data-testid="primary" {...props}>
+  default: ({ children, loading, onClicked, size, ...props }: any) => (
+    <button
+      data-testid="primary"
+      data-loading={String(loading)}
+      data-size={size ?? ""}
+      onClick={onClicked}
+      {...props}
+    >
       {children}
     </button>
   ),
@@ -152,12 +158,14 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
         endTime: 0,
       },
     });
-    expect(screen.getByTestId("info")).toHaveAttribute(
-      "title",
-      expect.stringContaining("don't have permission")
-    );
-    expect(screen.getByText("Not Eligible")).toBeInTheDocument();
-    expect(screen.getByText("Not Eligible to Submit")).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "How to Submit" });
+    expect(button).toHaveAttribute("aria-haspopup", "dialog");
+    expect(button).not.toBeDisabled();
+    expect(screen.getByTestId("permission")).toBeInTheDocument();
+    expect(screen.queryByTestId("info")).not.toBeInTheDocument();
+    expect(screen.queryByText("Not Eligible")).not.toBeInTheDocument();
+    expect(screen.queryByText("Not Eligible to Submit")).not.toBeInTheDocument();
+    expect(screen.getByText("How to Submit")).toBeInTheDocument();
   });
 
   it("renders limit reached state", () => {
@@ -204,6 +212,7 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
       "title",
       expect.stringContaining("You have")
     );
+    expect(button).toHaveAttribute("data-size", "sm");
     expect(button).not.toBeDisabled();
     expect(screen.getByText("Submit Meme")).toBeInTheDocument();
     expect(screen.getByText("Closing 3h")).toHaveClass("tw-hidden");

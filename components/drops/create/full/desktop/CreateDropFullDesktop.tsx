@@ -43,6 +43,7 @@ interface CreateDropFullDesktopProps {
   readonly loading: boolean;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
+  readonly submitOnEnter?: boolean | undefined;
   readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
@@ -53,6 +54,7 @@ interface CreateDropFullDesktopProps {
   readonly onMetadataRemove: (data_key: string) => void;
   readonly onTitle: (newV: string | null) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onUploadEditorStateChange: (editorState: EditorState) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -80,6 +82,7 @@ const CreateDropFullDesktop = forwardRef<
       loading,
       drop,
       showSubmit,
+      submitOnEnter = true,
       showDropError = false,
       missingMedia,
       missingMetadata,
@@ -90,6 +93,7 @@ const CreateDropFullDesktop = forwardRef<
       onMetadataRemove,
       onTitle,
       onEditorState,
+      onUploadEditorStateChange,
       onMentionedUser,
       onMentionedWave,
       onReferencedNft,
@@ -127,8 +131,13 @@ const CreateDropFullDesktop = forwardRef<
     return (
       <div className={`${getWrapperClasses()} tw-relative tw-bg-iron-900`}>
         <button
-          onClick={() => onViewChange(CreateDropViewType.COMPACT)}
+          onClick={() => {
+            if (!loading) {
+              onViewChange(CreateDropViewType.COMPACT);
+            }
+          }}
           type="button"
+          disabled={loading}
           className="tw-relative tw-ml-auto tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-900 hover:tw-text-iron-400 focus:tw-outline-none"
         >
           <span className="tw-sr-only tw-text-sm">Cancel</span>
@@ -151,8 +160,13 @@ const CreateDropFullDesktop = forwardRef<
         <div className="tw-mb-2 tw-mt-2.5 tw-flex tw-justify-end">
           {titleState === TITLE_STATE.BUTTON && (
             <button
-              onClick={() => setTitleState(TITLE_STATE.INPUT)}
+              onClick={() => {
+                if (!loading) {
+                  setTitleState(TITLE_STATE.INPUT);
+                }
+              }}
               type="button"
+              disabled={loading}
               className="tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
             >
               <svg
@@ -184,7 +198,12 @@ const CreateDropFullDesktop = forwardRef<
                     type="text"
                     placeholder="Drop title"
                     value={title ?? ""}
-                    onChange={(e) => onTitle(e.target.value)}
+                    onChange={(e) => {
+                      if (!loading) {
+                        onTitle(e.target.value);
+                      }
+                    }}
+                    disabled={loading}
                     maxLength={250}
                     className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-2.5 tw-pr-3 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-400 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
                   />
@@ -197,16 +216,23 @@ const CreateDropFullDesktop = forwardRef<
                 type={type}
                 waveId={waveId}
                 drop={drop}
+                loading={loading}
+                submitOnEnter={submitOnEnter}
                 canAddPart={canAddPart}
                 missingMedia={missingMedia}
                 missingMetadata={missingMetadata}
                 canSubmit={canSubmit}
                 onDrop={onDrop}
                 onEditorState={onEditorState}
+                onUploadEditorStateChange={onUploadEditorStateChange}
                 onMentionedUser={onMentionedUser}
                 onMentionedWave={onMentionedWave}
                 onReferencedNft={onReferencedNft}
-                onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
+                onViewClick={() => {
+                  if (!loading) {
+                    onViewChange(CreateDropViewType.COMPACT);
+                  }
+                }}
                 setFiles={setFiles}
                 onDropPart={onDropPart}
               />
@@ -223,9 +249,14 @@ const CreateDropFullDesktop = forwardRef<
                       </p>
                     </div>
                     <button
-                      onClick={() => onFileRemove(file)}
+                      onClick={() => {
+                        if (!loading) {
+                          onFileRemove(file);
+                        }
+                      }}
                       type="button"
                       aria-label="Remove file"
+                      disabled={loading}
                       className="-tw-mr-1 tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent hover:tw-bg-iron-800"
                     >
                       <svg
@@ -254,11 +285,12 @@ const CreateDropFullDesktop = forwardRef<
                 metadata={metadata}
                 onMetadataEdit={onMetadataEdit}
                 onMetadataRemove={onMetadataRemove}
+                disabled={loading}
               />
             </div>
             {showSubmit && (
               <CreateDropDesktopFooter
-                disabled={!canSubmit}
+                disabled={!canSubmit || loading}
                 type={type}
                 loading={loading}
                 onDrop={onDrop}

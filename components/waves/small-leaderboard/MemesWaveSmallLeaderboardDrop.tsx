@@ -8,6 +8,7 @@ interface MemesWaveSmallLeaderboardDropProps {
   readonly isApproveWave?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
   readonly onDropClick: () => void;
 }
 
@@ -18,6 +19,7 @@ export const MemesWaveSmallLeaderboardDrop: React.FC<
   isApproveWave = false,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  outcomesVisible = true,
   onDropClick,
 }) => {
   return (
@@ -26,6 +28,7 @@ export const MemesWaveSmallLeaderboardDrop: React.FC<
         <WaveSmallLeaderboardTopThreeDrop
           drop={drop}
           onDropClick={onDropClick}
+          outcomesVisible={outcomesVisible}
         />
       ) : (
         <WaveSmallLeaderboardDefaultDrop
@@ -34,6 +37,7 @@ export const MemesWaveSmallLeaderboardDrop: React.FC<
           isVotingControlsLocked={isVotingControlsLocked}
           isApproveWave={isApproveWave}
           onDropClick={onDropClick}
+          outcomesVisible={outcomesVisible}
         />
       )}
     </div>

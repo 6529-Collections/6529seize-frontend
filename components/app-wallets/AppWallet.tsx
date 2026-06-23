@@ -13,7 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import type { ReactNode} from "react";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -130,8 +130,7 @@ export default function AppWalletComponent(
     async (name: string, address: string) => {
       if (areEqualAddresses(address, account.address)) {
         setToast({
-          message:
-            "You are currently connected with this wallet - Disconnect first!",
+          message: "Disconnect this wallet before deleting it.",
           type: "error",
         });
         return;
@@ -145,13 +144,14 @@ export default function AppWalletComponent(
       const success = await deleteAppWallet(address);
       if (!success) {
         setToast({
-          message: `Error deleting wallet`,
+          message: `Couldn't delete this wallet. Please try again.`,
           type: "error",
         });
       } else {
         router.push("/tools/app-wallets");
         setToast({
-          message: `Wallet '${name}' deleted successfully`,
+          title: "Wallet deleted.",
+          description: `${name} was removed from this app.`,
           type: "success",
         });
       }
@@ -219,7 +219,8 @@ export default function AppWalletComponent(
         <Col>
           <Link
             className="font-smaller d-flex align-items-center gap-2 decoration-none"
-            href="/tools/app-wallets">
+            href="/tools/app-wallets"
+          >
             <FontAwesomeIcon icon={faCircleArrowLeft} height={16} />
             Back to App Wallets
           </Link>
@@ -528,7 +529,8 @@ export default function AppWalletComponent(
         <Col className="d-flex align-items-center gap-2">
           <Button
             variant="danger"
-            onClick={() => doDelete(appWallet.name, appWallet.address)}>
+            onClick={() => doDelete(appWallet.name, appWallet.address)}
+          >
             Delete
           </Button>
         </Col>
@@ -550,14 +552,17 @@ function AppWalletPhraseWord(
       xs={props.full_width ? 12 : 6}
       sm={props.full_width ? 12 : 4}
       md={props.full_width ? 12 : 3}
-      className="pt-2 pb-2">
+      className="pt-2 pb-2"
+    >
       <Container className={styles["phrase"]}>
         <Row>
           <Col className="d-flex gap-2 unselectable">
             {props.index && (
               <span className="font-color-h font-lighter">{props.index}</span>
             )}
-            <span className={`text-break ${props.hidden ? styles["blurry"] : ""}`}>
+            <span
+              className={`text-break ${props.hidden ? styles["blurry"] : ""}`}
+            >
               {props.word}
             </span>
           </Col>

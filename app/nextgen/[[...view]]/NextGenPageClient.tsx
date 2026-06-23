@@ -47,8 +47,21 @@ export default function NextGenPageClient({
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
+  const mainClassName = [
+    "tailwind-scope",
+    styles["main"],
+    "tw-border",
+    "tw-border-y-0",
+    "tw-border-l-0",
+    "tw-border-solid",
+    "tw-border-iron-800",
+    "tw-bg-[#0D0D0F]",
+  ]
+    .filter((className): className is string => Boolean(className))
+    .join(" ");
+
   return (
-    <main className={styles["main"]}>
+    <main className={mainClassName}>
       {collection?.id ? (
         <>
           <NextGenNavigationHeader view={view} setView={updateView} />

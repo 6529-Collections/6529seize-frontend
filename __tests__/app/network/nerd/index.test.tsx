@@ -28,16 +28,22 @@ jest.mock("@/components/leaderboard/Leaderboard", () => {
   };
 });
 
+jest.mock("@/components/network/NetworkPageLayout", () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="network-page-layout">{children}</div>
+  ),
+}));
+
 // 🧪 Mock next/navigation
 const replaceMock = jest.fn();
-const useRouterMock = jest.fn(() => ({
-  replace: replaceMock,
-}));
 const usePathnameMock = jest.fn(() => "/network/nerd");
+const useSearchParamsMock = jest.fn();
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => useRouterMock(),
+  useRouter: () => ({ replace: replaceMock }),
   usePathname: () => usePathnameMock(),
+  useSearchParams: () => useSearchParamsMock(),
 }));
 
 // 🧪 Mock TitleContext
@@ -58,6 +64,9 @@ jest.mock("@/contexts/TitleContext", () => ({
 describe("ClientCommunityNerdPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    globalThis.history.pushState({}, "", "/network/nerd/cards-collected");
+    usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
   });
 
   const renderPage = (focus: LeaderboardFocus) => {
@@ -74,18 +83,22 @@ describe("ClientCommunityNerdPage", () => {
     renderPage(LeaderboardFocus.TDH);
     fireEvent.click(screen.getByTestId("set-focus"));
 
-    expect(replaceMock).toHaveBeenCalledWith("/network/nerd/interactions");
+    expect(replaceMock).not.toHaveBeenCalled();
+    expect(globalThis.location.pathname).toBe("/network/nerd/interactions");
   });
 });
 
 describe("generateMetadata", () => {
   it("returns Interactions metadata", async () => {
     const metadata = await generateMetadata({
-      params: Promise.resolve({ focus: "interactions" }),
+      params: Promise.resolve({ focus: ["interactions"] }),
     });
-    expect(metadata).toEqual({
+    expect(metadata).toMatchObject({
       title: "Network Nerd - Interactions",
-      description: "Network",
+      description: expect.stringContaining("Network"),
+      openGraph: expect.objectContaining({
+        title: "Network Nerd - Interactions",
+      }),
     });
   });
 
@@ -93,9 +106,12 @@ describe("generateMetadata", () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ focus: undefined }),
     });
-    expect(metadata).toEqual({
+    expect(metadata).toMatchObject({
       title: "Network Nerd - Cards Collected",
-      description: "Network",
+      description: expect.stringContaining("Network"),
+      openGraph: expect.objectContaining({
+        title: "Network Nerd - Cards Collected",
+      }),
     });
   });
 });

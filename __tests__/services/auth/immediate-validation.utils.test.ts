@@ -320,7 +320,7 @@ describe('validateAuthImmediate', () => {
     it('should not process errors when operation is aborted', async () => {
       const abortController = new AbortController();
       const error = new Error('test error');
-      
+
       mockValidateJwt.mockImplementation(() => {
         abortController.abort();
         throw error;
@@ -404,7 +404,7 @@ describe('validateAuthImmediate', () => {
       // after validation. Since our utility gets both addresses as static values,
       // this scenario would be handled by the component calling validateAuthImmediate
       // with different currentAddress and connectionAddress values.
-      
+
       const params = {
         ...baseParams,
         currentAddress: '0x123',

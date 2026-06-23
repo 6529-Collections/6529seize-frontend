@@ -18,6 +18,7 @@ jest.mock("@/helpers/server.helpers", () => ({
 
 jest.mock("@/components/providers/metadata", () => ({
   getAppMetadata: jest.fn((v: any) => v),
+  getLargeSocialCardMetadata: jest.fn((v: any) => v),
 }));
 
 import * as Helpers from "@/helpers/Helpers";
@@ -48,7 +49,6 @@ function DummyCollectedTab({ profile }: { readonly profile: any }) {
 const buildFactory = () =>
   createUserTabPage({
     subroute: "collected",
-    metaLabel: "Collected",
     Tab: DummyCollectedTab,
   });
 
@@ -93,7 +93,6 @@ describe("user tab page via createUserTabPage", () => {
 
     const { Page } = createUserTabPage({
       subroute: "collected",
-      metaLabel: "Collected",
       Tab: clientTab,
     });
 
@@ -127,7 +126,6 @@ describe("user tab page via createUserTabPage", () => {
     }
     const { Page } = createUserTabPage({
       subroute: "test",
-      metaLabel: "Test",
       Tab: TabWithExtra,
       getTabProps: async ({ profile }) => ({
         extra: `hello-${profile.handle}`,
@@ -153,7 +151,7 @@ describe("user tab page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      "Collected"
+      "collected"
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(

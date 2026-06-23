@@ -21,6 +21,7 @@ describe("Wave page", () => {
     expect(renderWavesPageContent).toHaveBeenCalledWith({
       waveId: "test-wave-123",
       searchParams: { serialNo: "42" },
+      routeContext: "waves",
     });
     expect(result).toBe("wave-content");
   });
@@ -31,9 +32,12 @@ describe("Wave page", () => {
 
     const result = await generateMetadata({
       params: Promise.resolve({ wave: "test-wave-123" }),
+      searchParams: Promise.resolve({ serialNo: "42" }),
     } as any);
 
-    expect(buildWavesMetadata).toHaveBeenCalledWith("test-wave-123");
+    expect(buildWavesMetadata).toHaveBeenCalledWith("test-wave-123", {
+      serialNo: "42",
+    });
     expect(result).toEqual(metadata);
   });
 });

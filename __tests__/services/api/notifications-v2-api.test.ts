@@ -241,6 +241,100 @@ describe("fetchNotificationsV2", () => {
     expect(notification?.additional_context).toEqual({});
   });
 
+  it("preserves identity rating rater totals in additional context", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 0,
+      notifications: [
+        {
+          id: 12,
+          cause: ApiNotificationCause.IdentityRep,
+          created_at: 6000,
+          read_at: null,
+          related_identity: identity("rater"),
+          related_drops: [],
+          additional_context: {
+            amount: 3,
+            rater_rating: 5004,
+            total: 5004,
+            category: "phoeb",
+          },
+        },
+        {
+          id: 13,
+          cause: ApiNotificationCause.IdentityNic,
+          created_at: 7000,
+          read_at: null,
+          related_identity: identity("rater"),
+          related_drops: [],
+          additional_context: {
+            amount: -2,
+            rater_rating: 98,
+            total: 120,
+          },
+        },
+      ],
+    });
+
+    const response = await fetchNotificationsV2({ limit: "30" });
+
+    expect(response.notifications).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          cause: ApiNotificationCause.IdentityRep,
+          additional_context: {
+            amount: 3,
+            rater_rating: 5004,
+            total: 5004,
+            category: "phoeb",
+          },
+        }),
+        expect.objectContaining({
+          cause: ApiNotificationCause.IdentityNic,
+          additional_context: {
+            amount: -2,
+            rater_rating: 98,
+            total: 120,
+          },
+        }),
+      ])
+    );
+  });
+
+  it("preserves drop voted rating change and total context", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 0,
+      notifications: [
+        {
+          id: 14,
+          cause: ApiNotificationCause.DropVoted,
+          created_at: 8000,
+          read_at: null,
+          related_identity: identity("voter"),
+          related_wave: wave,
+          related_drops: [drop],
+          additional_context: {
+            vote: 500,
+            vote_change: -500,
+            total_vote: 12345,
+          },
+        },
+      ],
+    });
+
+    const response = await fetchNotificationsV2({ limit: "30" });
+
+    expect(response.notifications[0]).toEqual(
+      expect.objectContaining({
+        cause: ApiNotificationCause.DropVoted,
+        additional_context: {
+          vote: 500,
+          vote_change: -500,
+          total_vote: 12345,
+        },
+      })
+    );
+  });
+
   it("drops unknown notification causes safely", async () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
@@ -30,11 +31,13 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
       enabled: !isResettingVotes,
     });
-  const { isVotingControlsLocked } = useApprovalWaveStatus({
+  const { isVotingControlsLocked, winningThreshold } = useApprovalWaveStatus({
     wave,
   });
 
   const { myVotesViewStyle } = useLayout();
+  const creditScope =
+    (wave as Partial<ApiWave>).voting?.credit_scope ?? ApiWaveCreditScope.Wave;
 
   const [checkedDrops, setCheckedDrops] = useState<Set<string>>(
     new Set<string>()
@@ -125,7 +128,11 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
             <MyStreamWaveMyVotesReset
               waveId={wave.id}
               haveDrops={!!drops.length}
-              availableVotes={sharedAvailableVotes}
+              availableVotes={
+                creditScope === ApiWaveCreditScope.Wave
+                  ? sharedAvailableVotes
+                  : null
+              }
               selected={checkedDrops}
               allItemsSelected={allItemsSelected}
               isVotingClosed={isVotingControlsLocked}
@@ -143,6 +150,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                 isChecked={!isVotingControlsLocked && checkedDrops.has(drop.id)}
                 isResetting={isResettingVotes}
                 isVotingClosed={isVotingControlsLocked}
+                winningThreshold={winningThreshold}
                 onToggleCheck={handleToggleCheck}
               />
             ))}

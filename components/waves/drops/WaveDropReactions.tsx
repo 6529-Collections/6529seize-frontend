@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
@@ -10,11 +11,18 @@ import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
+import type { Drop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import {
+  useCanonicalNotificationDropUpdate,
+  useOptimisticNotificationDropReaction,
+} from "@/hooks/drops/useOptimisticNotificationDropReaction";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
+import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -55,6 +63,58 @@ interface DetailedReactionsState {
   readonly dropId: string;
   readonly reactions: ApiDropReaction[];
 }
+
+type OptimisticRollback = (() => void) | null;
+type OwnedOptimisticRollback = {
+  readonly mutationId: string;
+  readonly rollback: () => void;
+} | null;
+
+const combineRollbacks = (
+  rollbacks: readonly OptimisticRollback[]
+): OptimisticRollback => {
+  const activeRollbacks = rollbacks.filter(
+    (rollback): rollback is () => void => rollback !== null
+  );
+
+  if (activeRollbacks.length === 0) {
+    return null;
+  }
+
+  return () => {
+    for (const rollback of activeRollbacks) {
+      rollback();
+    }
+  };
+};
+
+const toOwnedRollback = (
+  mutationId: string,
+  rollback: OptimisticRollback
+): OwnedOptimisticRollback =>
+  rollback === null ? null : { mutationId, rollback };
+
+const clearRollbackForMutation = (
+  rollbackRef: React.RefObject<OwnedOptimisticRollback>,
+  mutationId: string
+): void => {
+  if (rollbackRef.current?.mutationId === mutationId) {
+    rollbackRef.current = null;
+  }
+};
+
+const runRollbackForMutation = (
+  rollbackRef: React.RefObject<OwnedOptimisticRollback>,
+  mutationId: string
+): boolean => {
+  if (rollbackRef.current?.mutationId !== mutationId) {
+    return false;
+  }
+
+  rollbackRef.current.rollback();
+  rollbackRef.current = null;
+  return true;
+};
 
 const getReactionClassNames = ({
   animate,
@@ -169,17 +229,18 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
       ? detailedReactionsState.reactions
       : null;
   const detailsLoading = detailsLoadingDropId === drop.id;
+  const dropReactions = drop.reactions ?? [];
 
   const reactionsWithDetails = useMemo(() => {
     if (!detailedReactions) {
-      return drop.reactions;
+      return dropReactions;
     }
 
     const detailsByReaction = new Map(
       detailedReactions.map((reaction) => [reaction.reaction, reaction])
     );
 
-    return drop.reactions.map((reaction) => {
+    return dropReactions.map((reaction) => {
       const detailedReaction = detailsByReaction.get(reaction.reaction);
       if (!detailedReaction) {
         return reaction;
@@ -197,7 +258,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
         count: getReactionCount(reaction),
       };
     });
-  }, [detailedReactions, drop.reactions]);
+  }, [detailedReactions, dropReactions]);
 
   const loadReactionDetails = useCallback(() => {
     if (detailedReactions) {
@@ -282,9 +343,21 @@ function WaveDropReaction({
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
+  const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
-  const rollbackRef = useRef<(() => void) | null>(null);
+  const rollbackRef = useRef<OwnedOptimisticRollback>(null);
   const canReact = Boolean(connectedProfile?.handle);
+  const applyOptimisticReactionToNotificationQueries =
+    useOptimisticNotificationDropReaction({
+      connectedProfile,
+      contextProfileContext: drop.context_profile_context,
+      dropId: drop.id,
+    });
+  const updateNotificationQueriesWithCanonicalDrop =
+    useCanonicalNotificationDropUpdate({
+      connectedProfile,
+      dropId: drop.id,
+    });
 
   const handleLongPressStart = useCallback(() => {
     onOpenDetailDialog(reaction.reaction);
@@ -350,6 +423,10 @@ function WaveDropReaction({
 
   useEffect(() => {
     const nextTotal = getReactionCount(reaction);
+    if (nextTotal === prevTotalRef.current) {
+      return;
+    }
+
     if (reaction.profiles === prevProfilesRef.current) {
       const timeoutId = setTimeout(() => {
         setTotal((current) => (current === nextTotal ? current : nextTotal));
@@ -408,6 +485,8 @@ function WaveDropReaction({
               src={customSrc}
               alt={emojiId}
               fill
+              sizes="16px"
+              unoptimized
               className="tw-object-contain"
             />
           </div>
@@ -418,6 +497,8 @@ function WaveDropReaction({
               src={customSrc}
               alt={emojiId}
               fill
+              sizes="32px"
+              unoptimized
               className="tw-rounded-sm tw-object-contain"
             />
           </div>
@@ -445,14 +526,15 @@ function WaveDropReaction({
   }, [emojiId, emojiMap, findNativeEmoji]);
 
   const applyOptimisticReactionChange = useCallback(
-    (willSelect: boolean) => {
+    (willSelect: boolean): OptimisticRollback => {
       if (!waveId) {
-        return;
+        return null;
       }
 
+      const intendedReaction = willSelect ? reaction.reaction : null;
       const userProfileMin = toProfileMin(connectedProfile);
 
-      rollbackRef.current =
+      const streamRollback =
         applyOptimisticDropUpdate({
           waveId,
           dropId: drop.id,
@@ -466,9 +548,11 @@ function WaveDropReaction({
             draft.reactions = userProfileMin
               ? applyProfileReactionToEntries({
                   entries: reactions,
-                  nextReaction: willSelect ? reaction.reaction : null,
+                  nextReaction: intendedReaction,
                   previousReaction:
-                    drop.context_profile_context?.reaction ?? null,
+                    draft.context_profile_context?.reaction ??
+                    drop.context_profile_context?.reaction ??
+                    null,
                   profileMin: userProfileMin,
                 })
               : removeUserFromReactions(reactions, userId);
@@ -487,15 +571,20 @@ function WaveDropReaction({
 
             draft.context_profile_context = {
               ...existingContext,
-              reaction: willSelect ? reaction.reaction : null,
+              reaction: intendedReaction,
             };
 
             return draft;
           },
         })?.rollback ?? null;
+      const notificationRollback =
+        applyOptimisticReactionToNotificationQueries(intendedReaction);
+
+      return combineRollbacks([streamRollback, notificationRollback]);
     },
     [
       applyOptimisticDropUpdate,
+      applyOptimisticReactionToNotificationQueries,
       connectedProfile,
       drop.id,
       waveId,
@@ -504,12 +593,56 @@ function WaveDropReaction({
     ]
   );
 
+  const refreshCanonicalDropAfterLatestFailure = useCallback(async () => {
+    try {
+      // Keep the recovery path defensive if no canonical drop is available.
+      const apiDrop = (await fetchDropByIdBatched(drop.id)) as
+        | ApiDrop
+        | null
+        | undefined;
+      if (apiDrop === null || apiDrop === undefined) {
+        return;
+      }
+
+      updateDropInCachedDrops(queryClient, apiDrop);
+      updateNotificationQueriesWithCanonicalDrop(apiDrop);
+      applyOptimisticDropUpdate({
+        waveId,
+        dropId: drop.id,
+        update: (draft): Drop => {
+          if (draft.type !== DropSize.FULL) {
+            return draft;
+          }
+
+          return {
+            ...apiDrop,
+            type: DropSize.FULL,
+            stableKey: draft.stableKey,
+            stableHash: draft.stableHash,
+          };
+        },
+      });
+    } catch (error) {
+      console.error(
+        "Failed to refresh drop after failed reaction request:",
+        error
+      );
+    }
+  }, [
+    applyOptimisticDropUpdate,
+    drop.id,
+    queryClient,
+    updateNotificationQueriesWithCanonicalDrop,
+    waveId,
+  ]);
+
   const handleClick = useCallback(async () => {
     if (!canReact || longPressTriggered) {
       return;
     }
 
     const intendedReaction = selected ? null : reaction.reaction;
+
     const mutation = beginReactionMutation({
       dropId: drop.id,
       waveId,
@@ -528,7 +661,10 @@ function WaveDropReaction({
     setSelected((s) => !s);
     setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
 
-    applyOptimisticReactionChange(!selected);
+    rollbackRef.current = toOwnedRollback(
+      mutation.mutationId,
+      applyOptimisticReactionChange(!selected)
+    );
     recordReactionOptimisticApplied(mutation);
 
     if (!selected) {
@@ -558,9 +694,16 @@ function WaveDropReaction({
           errorMode: "structured",
         });
       }
-      recordReactionRequestSucceeded(mutation);
+      const result = recordReactionRequestSucceeded(mutation);
+      if (result.isLatestMutation) {
+        clearRollbackForMutation(rollbackRef, mutation.mutationId);
+      }
     } catch (error) {
-      recordReactionRequestFailed(mutation, error);
+      const result = recordReactionRequestFailed(mutation, error);
+      if (!result.isLatestMutation) {
+        return;
+      }
+
       const msg = getReactionErrorMessage(
         error,
         selected ? "Error removing reaction" : "Error adding reaction"
@@ -569,11 +712,11 @@ function WaveDropReaction({
 
       setSelected((s) => !s);
       setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
-      rollbackRef.current?.();
-      recordReactionRollbackApplied(mutation);
-      rollbackRef.current = null;
+      if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
+        recordReactionRollbackApplied(mutation);
+      }
+      await refreshCanonicalDropAfterLatestFailure();
     }
-    rollbackRef.current = null;
   }, [
     applyOptimisticReactionChange,
     canReact,
@@ -582,6 +725,7 @@ function WaveDropReaction({
     drop.context_profile_context?.reaction,
     longPressTriggered,
     reaction.reaction,
+    refreshCanonicalDropAfterLatestFailure,
     selected,
     setToast,
     waveId,

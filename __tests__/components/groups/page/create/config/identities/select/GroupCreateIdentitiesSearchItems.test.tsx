@@ -101,3 +101,24 @@ test('query disabled when searchCriteria too short', () => {
     onSelect: expect.any(Function),
   }, undefined);
 });
+
+test('inline layout renders results without absolute positioning', () => {
+  useQueryMock.mockReturnValue({ data: communityData, isFetching: false });
+  const { container } = render(
+    <GroupCreateIdentitiesSearchItems
+      open={true}
+      searchCriteria="alice"
+      selectedWallets={[]}
+      resultsLayout="inline"
+      onSelect={jest.fn()}
+    />
+  );
+
+  const wrapper = container.firstElementChild;
+  expect(wrapper).toHaveClass('tw-mt-1');
+  expect(wrapper).not.toHaveClass('tw-absolute');
+
+  const panel = wrapper?.firstElementChild;
+  expect(panel).toHaveClass('tw-w-full');
+  expect(panel).not.toHaveClass('tw-absolute');
+});

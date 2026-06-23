@@ -8,6 +8,7 @@ import ClockIcon from "@/components/utils/icons/ClockIcon";
 import CalendarClosedIcon from "@/components/utils/icons/CalendarClosedIcon";
 import LimitIcon from "@/components/utils/icons/LimitIcon";
 import PermissionIcon from "@/components/utils/icons/PermissionIcon";
+import MainStageNominationPopover from "./MainStageNominationPopover";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -18,8 +19,10 @@ interface MyStreamWaveTabsMemeSubmitProps {
 }
 
 const HEADER_ACTION_BUTTON_CLASS =
-  "tw-max-w-[11.5rem] tw-whitespace-nowrap lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
-const HEADER_ACTION_BUTTON_TEXT_CLASS = "tw-min-w-0 tw-truncate";
+  "tw-h-8 tw-min-w-8 tw-max-w-[2rem] tw-whitespace-nowrap tw-text-xs sm:tw-h-auto sm:tw-min-w-0 sm:tw-max-w-[11.5rem] lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
+const HEADER_ACTION_BUTTON_TEXT_CLASS =
+  "tw-sr-only tw-min-w-0 tw-truncate sm:tw-not-sr-only sm:tw-inline";
+const NOT_ELIGIBLE_BUTTON_CLASS = `tw-group tw-flex tw-w-auto tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-[#2a2c32] tw-bg-[#181a1d] tw-p-0 tw-text-xs tw-font-semibold tw-text-[#d6d8dd] tw-transition-colors tw-duration-[180ms] tw-ease-out hover:tw-border-[#3a3d45] hover:tw-bg-[#202329] hover:tw-text-[#f2f3f5] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 sm:tw-px-2.5 sm:tw-py-2 ${HEADER_ACTION_BUTTON_CLASS}`;
 const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
 
 const getActiveLabels = ({
@@ -74,7 +77,7 @@ const getActiveLabels = ({
  *   - With submission count indicator when limited submissions remaining
  *   - With urgency indicator when submission period is ending soon
  * - Maximum submissions reached (blue info button, disabled)
- * - Not eligible (blue info button, disabled, with permission icon)
+ * - Not eligible (interactive nomination progress popover)
  * - Closed (gray disabled button)
  *
  * Uses useWave hook to determine submission status, eligibility,
@@ -128,6 +131,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <ClosedButton
         title={tooltipText}
         fullWidth={false}
+        padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
         className={HEADER_ACTION_BUTTON_CLASS}
       >
         <CalendarClosedIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -151,6 +155,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         title={tooltipText}
         variant="info"
         fullWidth={false}
+        padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
         className={HEADER_ACTION_BUTTON_CLASS}
       >
         <ClockIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -166,22 +171,17 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
   // Not eligible state - user doesn't have permission to submit
   if (waveInfo.participation.isEligible === false) {
-    const tooltipText = "You don't have permission to submit to this wave";
-
     return (
-      <InfoButton
-        disabled={true}
-        title={tooltipText}
-        variant="muted"
-        fullWidth={false}
-        className={HEADER_ACTION_BUTTON_CLASS}
-      >
-        <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
-          <span className="xl:tw-hidden">Not Eligible</span>
-          <span className="tw-hidden xl:tw-inline">Not Eligible to Submit</span>
-        </span>
-      </InfoButton>
+      <MainStageNominationPopover>
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          className={NOT_ELIGIBLE_BUTTON_CLASS}
+        >
+          <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-opacity-70 tw-transition-opacity tw-duration-[180ms] tw-ease-out group-hover:tw-opacity-100" />
+          <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>How to Submit</span>
+        </button>
+      </MainStageNominationPopover>
     );
   }
 
@@ -199,6 +199,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         title={tooltipText}
         variant="muted"
         fullWidth={false}
+        padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
         className={HEADER_ACTION_BUTTON_CLASS}
       >
         <LimitIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -277,8 +278,10 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       loading={false}
       disabled={!canSubmit}
       onClicked={handleMemesSubmit}
-      padding="tw-px-2.5 tw-py-2"
+      size="sm"
+      padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
       title={tooltipText}
+      className={HEADER_ACTION_BUTTON_CLASS}
     >
       {isEndingVerySoon && canSubmit ? (
         <ClockIcon className="tw-text-red-500 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-animate-pulse" />
@@ -317,7 +320,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
           />
         </svg>
       )}
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap">
+      <div className="tw-sr-only tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap sm:tw-not-sr-only sm:tw-flex">
         {showSplitActiveLabels ? (
           <>
             <span className="xl:tw-hidden">{activeLabelCompact}</span>

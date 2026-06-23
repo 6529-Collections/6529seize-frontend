@@ -35,11 +35,13 @@ jest.mock(
       page: number;
       onActiveFilter: (filter: UserPageStatsActivityWalletFilterType) => void;
       setPage: (page: number) => void;
+      locale: string;
     }) => (
       <div
         data-testid="wrapper"
         data-filter={props.filter}
         data-page={props.page}
+        data-locale={props.locale}
       >
         <button
           data-testid="set-filter"
@@ -80,12 +82,13 @@ beforeEach(() => {
 describe("UserPageStatsActivityWallet", () => {
   it("hydrates filter and page state from the query string", async () => {
     search.set("wallet-activity", "mints");
-    search.set("page", "2");
+    search.set("wallet-activity-page", "2");
 
     render(
       <UserPageStatsActivityWallet
         profile={{ wallets: [] } as any}
         activeAddress={null}
+        locale="de-DE"
       />
     );
 
@@ -96,6 +99,38 @@ describe("UserPageStatsActivityWallet", () => {
       )
     );
     expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
+    expect(screen.getByTestId("wrapper")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+  });
+
+  it("preserves collected page query param without using it for wallet activity", async () => {
+    const user = userEvent.setup();
+    search.set("activity", "wallet-activity");
+    search.set("page", "4");
+
+    render(
+      <UserPageStatsActivityWallet
+        profile={{ wallets: [] } as any}
+        activeAddress={null}
+      />
+    );
+
+    await waitFor(() => {
+      const transactionsQuery = mockUseQuery.mock.calls
+        .map((call) => call[0] as { queryKey: unknown[] })
+        .find((config) => config.queryKey[0] === QueryKey.PROFILE_TRANSACTIONS);
+      expect(transactionsQuery?.queryKey[1]).toMatchObject({ page: "1" });
+    });
+
+    await user.click(screen.getByTestId("set-page"));
+    expect(replace).toHaveBeenCalledWith(
+      "/path?activity=wallet-activity&page=4&wallet-activity-page=3",
+      {
+        scroll: false,
+      }
+    );
   });
 
   it("updates the url when the filter or page changes", async () => {
@@ -109,13 +144,21 @@ describe("UserPageStatsActivityWallet", () => {
     );
 
     await user.click(screen.getByTestId("set-filter"));
-    expect(replace).toHaveBeenCalledWith("/path?wallet-activity=mints&page=1", {
-      scroll: false,
-    });
+    expect(replace).toHaveBeenCalledWith(
+      "/path?activity=wallet-activity&wallet-activity=mints&wallet-activity-page=1",
+      {
+        scroll: false,
+      }
+    );
 
     replace.mockClear();
 
     await user.click(screen.getByTestId("set-page"));
-    expect(replace).toHaveBeenCalledWith("/path?page=3", { scroll: false });
+    expect(replace).toHaveBeenCalledWith(
+      "/path?activity=wallet-activity&wallet-activity-page=3",
+      {
+        scroll: false,
+      }
+    );
   });
 });

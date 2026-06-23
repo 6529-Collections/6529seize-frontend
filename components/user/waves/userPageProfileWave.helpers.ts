@@ -18,6 +18,7 @@ type ApiErrorLike = {
 type WavePickerViewState =
   | { readonly kind: "not_own_profile" }
   | { readonly kind: "proxy_mode" }
+  | { readonly kind: "missing_profile" }
   | { readonly kind: "loading" }
   | { readonly kind: "error" }
   | { readonly kind: "no_public_waves"; readonly hasCreatedWaves: boolean }
@@ -126,8 +127,7 @@ const getMissingCurationConfig = (
   canManageOwnOfficialWave
     ? {
         title: "Nothing curated here yet",
-        message:
-          "Open the wave to create your first curation and choose the drops you want to show here.",
+        message: "Create a curation to start adding profile posts here.",
       }
     : {
         title: "No curations yet",
@@ -142,17 +142,19 @@ const getEmptyDropsConfig = (
     ? `Nothing in ${curationTitle} yet`
     : "No curated drops yet",
   message: canManageOwnOfficialWave
-    ? `Open the wave to add drops to "${curationTitle}".`
+    ? `Add a post to start "${curationTitle}".`
     : "This identity hasn't added any drops to this curation yet.",
 });
 
 export const resolveWavePickerViewState = ({
   createdWaves,
+  hasCreatedProfile,
   hasActiveProfileProxy,
   isOwnProfile,
   status,
 }: {
   readonly createdWaves: ApiWave[];
+  readonly hasCreatedProfile: boolean;
   readonly hasActiveProfileProxy: boolean;
   readonly isOwnProfile: boolean;
   readonly status: "pending" | "error" | "success";
@@ -163,6 +165,10 @@ export const resolveWavePickerViewState = ({
 
   if (hasActiveProfileProxy) {
     return { kind: "proxy_mode" };
+  }
+
+  if (!hasCreatedProfile) {
+    return { kind: "missing_profile" };
   }
 
   if (status === "pending") {

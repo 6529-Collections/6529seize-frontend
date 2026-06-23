@@ -1,12 +1,17 @@
-
 "use client";
 
-import { useRef, useId, useMemo, useEffect } from "react";
+import { useRef, useId, useMemo, useEffect, useState } from "react";
 import clsx from "clsx";
 
 import type { NftPickerProps, Suggestion, SupportedChain } from "./types";
 import { mapSuggestionToOverview } from "./utils/mappers";
-import { formatCanonical, parseTokenExpressionToRanges } from "./utils";
+import {
+  BIGINT_ONE,
+  formatCanonical,
+  MAX_SAFE,
+  mergeCanonicalRanges,
+  parseTokenExpressionToRanges,
+} from "./utils";
 import { useNftSearch, useNftSelection, useNftTokenInput } from "./hooks";
 import { useClickAway } from "react-use";
 import {
@@ -23,9 +28,37 @@ import {
 const DEFAULT_DEBOUNCE = 250;
 const DEFAULT_OVERSCAN = 8;
 const DEFAULT_CHAIN: SupportedChain = "ethereum";
+type MaxSelectedCountValidationSource = "add-input" | "text-editor";
 
 function ensureChain(value?: string): SupportedChain {
   return (value as any) ?? DEFAULT_CHAIN;
+}
+
+function countRanges(
+  canonicalRanges: readonly { start: bigint; end: bigint }[]
+): bigint {
+  return canonicalRanges.reduce(
+    (total, range) => total + (range.end - range.start + BIGINT_ONE),
+    BigInt(0)
+  );
+}
+
+function countUnsafeTokenIds(
+  canonicalRanges: readonly { start: bigint; end: bigint }[]
+): number {
+  let total = BigInt(0);
+  for (const range of canonicalRanges) {
+    if (range.end <= MAX_SAFE) {
+      continue;
+    }
+    const firstUnsafe =
+      range.start > MAX_SAFE ? range.start : MAX_SAFE + BIGINT_ONE;
+    total += range.end - firstUnsafe + BIGINT_ONE;
+    if (total > MAX_SAFE) {
+      return Number.MAX_SAFE_INTEGER;
+    }
+  }
+  return Number(total);
 }
 
 export function NftPicker(props: Readonly<NftPickerProps>) {
@@ -39,6 +72,9 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     hideSpam: hideSpamProp = true,
     allowAll = true,
     allowRanges = true,
+    fixedContract,
+    maxSelectedCount,
+    maxSelectedCountMessage,
     debounceMs = DEFAULT_DEBOUNCE,
     overscan = DEFAULT_OVERSCAN,
     placeholder = "Search by collection name or paste contract address…",
@@ -46,6 +82,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     renderTokenExtra,
     variant = "card",
   } = props;
+  const hasFixedContract = fixedContract !== undefined;
 
   const valueChain = value?.chain;
   const defaultChain = defaultValue?.chain;
@@ -79,7 +116,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     ranges,
     selectedContract,
     allSelected,
-    unsafeCount,
     emitContractChange,
     addTokenRanges,
     removeToken,
@@ -91,12 +127,12 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     setSelectedContract,
     setRanges,
     setAllSelected,
-    setUnsafeCount,
   } = useNftSelection({
     value,
     defaultValue,
     onChange,
     onContractChange,
+    fixedContract,
     outputMode,
   });
 
@@ -129,6 +165,76 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     allSelected,
     contractTotalSupply,
   });
+  const [addTokenInputError, setAddTokenInputError] = useState<string | null>(
+    null
+  );
+
+  const selectedCount = useMemo(() => countRanges(ranges), [ranges]);
+  const unsafeCount = useMemo(
+    () => (allSelected ? 0 : countUnsafeTokenIds(ranges)),
+    [allSelected, ranges]
+  );
+  const normalizedMaxSelectedCount =
+    typeof maxSelectedCount === "number" && Number.isFinite(maxSelectedCount)
+      ? Math.max(0, Math.trunc(maxSelectedCount))
+      : null;
+  const maxSelectedCountBigInt =
+    normalizedMaxSelectedCount === null
+      ? null
+      : BigInt(normalizedMaxSelectedCount);
+  const maxSelectionReached =
+    maxSelectedCountBigInt !== null && selectedCount >= maxSelectedCountBigInt;
+  const maxSelectionExceeded =
+    maxSelectedCountBigInt !== null && selectedCount > maxSelectedCountBigInt;
+
+  const maxSelectionMessage =
+    maxSelectedCountMessage ??
+    (normalizedMaxSelectedCount !== null
+      ? `Select fewer than ${new Intl.NumberFormat("en-US").format(
+          normalizedMaxSelectedCount + 1
+        )} tokens.`
+      : "Selection limit reached.");
+
+  const validateMaxSelectedCount = (
+    canonicalRanges: typeof ranges,
+    input: string,
+    source: MaxSelectedCountValidationSource
+  ): boolean => {
+    if (maxSelectedCountBigInt === null) {
+      return true;
+    }
+    const nextCount = countRanges(canonicalRanges);
+    if (nextCount <= maxSelectedCountBigInt) {
+      return true;
+    }
+    const error = {
+      input,
+      index: 0,
+      length: Math.max(input.length, 1),
+      message: maxSelectionMessage,
+    };
+    if (source === "text-editor") {
+      setParseErrors([error]);
+      setAddTokenInputError(null);
+    } else {
+      setAddTokenInputError(maxSelectionMessage);
+    }
+    return false;
+  };
+
+  let cappedHelperState = helperState;
+  if (addTokenInputError !== null) {
+    cappedHelperState = {
+      tone: "error" as const,
+      text: addTokenInputError,
+    } as const;
+  } else if (maxSelectionReached && !allSelected) {
+    const maxSelectionTone = maxSelectionExceeded ? "error" : "muted";
+    cappedHelperState = {
+      tone: maxSelectionTone,
+      text: maxSelectionMessage,
+    } as const;
+  }
 
   // Sync textValue with ranges whenever ranges change
   useEffect(() => {
@@ -144,23 +250,38 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     resetSearch();
     setRanges([]);
     setAllSelected(false);
-    setUnsafeCount(0);
 
     setTokenInput("");
+    setAddTokenInputError(null);
     setIsEditingText(false);
   };
 
   const handleClearContract = () => {
+    if (hasFixedContract) {
+      return;
+    }
     clearContract();
     setQuery("");
     setTokenInput("");
+    setAddTokenInputError(null);
     setParseErrors([]);
     setIsEditingText(false);
     inputRef.current?.focus();
   };
 
   const handleSelectAll = () => {
+    if (
+      maxSelectedCountBigInt !== null &&
+      (contractTotalSupply === null ||
+        contractTotalSupply < BigInt(0) ||
+        contractTotalSupply > maxSelectedCountBigInt)
+    ) {
+      setAddTokenInputError(maxSelectionMessage);
+      setParseErrors([]);
+      return;
+    }
     selectAll();
+    setAddTokenInputError(null);
     setIsEditingText(false);
     setTokenInput("");
     setTimeout(() => {
@@ -170,6 +291,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
   const handleDeselectAll = () => {
     deselectAll();
+    setAddTokenInputError(null);
     setIsEditingText(false);
     setTokenInput("");
     setTimeout(() => {
@@ -178,17 +300,33 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
   };
 
   const handleSubmitTokens = () => {
-    if (!canAddTokens) {
+    if (!canAddTokens || maxSelectionReached) {
       return;
     }
-    addTokenRanges(tokenPreview.ranges);
+    const nextRanges = mergeCanonicalRanges(ranges, tokenPreview.ranges);
+    if (!validateMaxSelectedCount(nextRanges, tokenInput.trim(), "add-input")) {
+      return;
+    }
+    const result = addTokenRanges(tokenPreview.ranges);
+    if (result && "error" in result) {
+      setAddTokenInputError(result.error.message);
+      setParseErrors([]);
+      return;
+    }
     setTokenInput("");
+    setAddTokenInputError(null);
     setParseErrors([]);
   };
 
   const handleApplyText = () => {
+    setAddTokenInputError(null);
     try {
       const canonical = parseTokenExpressionToRanges(textValue);
+      if (
+        !validateMaxSelectedCount(canonical, textValue.trim(), "text-editor")
+      ) {
+        return;
+      }
       setSelectionFromText(canonical);
       setParseErrors([]);
       setIsEditingText(false);
@@ -197,6 +335,25 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
         setParseErrors(error as any);
       }
     }
+  };
+
+  const handleTokenInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (addTokenInputError !== null) {
+      setAddTokenInputError(null);
+    }
+    setTokenInput(event.target.value);
+  };
+
+  const handleClearTokens = () => {
+    setAddTokenInputError(null);
+    clearTokens();
+  };
+
+  const handleRemoveToken = (tokenId: bigint) => {
+    setAddTokenInputError(null);
+    removeToken(tokenId);
   };
 
   // We need to handle input key down for search
@@ -223,14 +380,15 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     handleSubmitTokens();
   };
 
-  const activeSuggestionId = isOpen && suggestionList[activeIndex]
-    ? `nft - suggestion - ${activeIndex} `
-    : undefined;
+  const activeSuggestionId =
+    isOpen && suggestionList[activeIndex]
+      ? `nft-suggestion-${activeIndex}`
+      : undefined;
 
   const wrapperClassName = clsx(
     variant === "card"
-      ? "tw-@container tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4"
-      : "tw-@container tw-flex tw-flex-col tw-gap-4",
+      ? "tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-@container"
+      : "tw-flex tw-flex-col tw-gap-4 tw-@container",
     className
   );
 
@@ -241,7 +399,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
   return (
     <div className={wrapperClassName} ref={wrapperRef}>
-      {!selectedContract && (
+      {!selectedContract && !hasFixedContract && (
         <NftPickerSearch
           query={query}
           isOpen={isOpen}
@@ -272,12 +430,16 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
         <NftContractHeader
           contract={selectedContract}
           onClear={handleClearContract}
+          clearable={!hasFixedContract}
         />
       )}
 
       {selectedContract && (
         <div className="tw-flex tw-flex-col tw-gap-3">
-          <form className="tw-flex tw-flex-col tw-gap-3" onSubmit={handleTokenFormSubmit}>
+          <form
+            className="tw-flex tw-flex-col tw-gap-3"
+            onSubmit={handleTokenFormSubmit}
+          >
             {allSelected ? (
               <AllTokensSelectedCard
                 onDeselect={handleDeselectAll}
@@ -292,10 +454,10 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                       ? "Add more tokens or ranges..."
                       : "e.g., 1, 5, 30-55, 89, 98-100"
                   }
-                  tokenInputDisabled={allSelected || !selectedContract}
+                  tokenInputDisabled={maxSelectionReached}
                   helperMessageId={helperMessageId}
                   variant={variant}
-                  onTokenInputChange={(e) => setTokenInput(e.target.value)}
+                  onTokenInputChange={handleTokenInputChange}
                   onTokenInputKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -305,7 +467,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                 />
 
                 <NftPickerActions
-                  canAddTokens={canAddTokens}
+                  canAddTokens={canAddTokens && !maxSelectionReached}
                   allowAll={allowAll}
                   selectedContract={!!selectedContract}
                   selectAllLabel={
@@ -322,25 +484,31 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
           {allSelected ? null : (
             <>
-              <NftPickerStatus helperState={helperState} helperMessageId={helperMessageId} />
+              <NftPickerStatus
+                helperState={cappedHelperState}
+                helperMessageId={helperMessageId}
+              />
 
               <NftEditRanges
                 ranges={ranges}
                 isEditing={isEditingText}
                 textValue={textValue}
                 parseErrors={parseErrors}
+                allowAll={allowAll}
                 onToggle={() => setIsEditingText((prev) => !prev)}
                 onTextChange={(val) => {
                   if (parseErrors.length) setParseErrors([]);
+                  if (addTokenInputError !== null) setAddTokenInputError(null);
                   setTextValue(val);
                 }}
                 onApply={handleApplyText}
                 onCancel={() => {
                   setTextValue(formatCanonical(ranges));
                   setParseErrors([]);
+                  setAddTokenInputError(null);
                   setIsEditingText(false);
                 }}
-                onClear={clearTokens}
+                onClear={handleClearTokens}
               />
 
               {ranges.length > 0 ? (
@@ -350,13 +518,17 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                   ranges={ranges}
                   overscan={overscan}
                   renderTokenExtra={renderTokenExtra}
-                  onRemove={removeToken}
+                  onRemove={handleRemoveToken}
                 />
               ) : (
                 <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-950 tw-p-6 tw-text-center">
-                  <span className="tw-text-sm tw-font-semibold tw-text-iron-100">No tokens selected</span>
+                  <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+                    No tokens selected
+                  </span>
                   <span className="tw-max-w-xs tw-text-xs tw-text-iron-300">
-                    Add tokens using the input above or choose Select All to include the entire collection.
+                    {allowAll
+                      ? "Add tokens using the input above or choose Select All to include the entire collection."
+                      : "Add tokens using the input above."}
                   </span>
                 </div>
               )}
@@ -365,7 +537,8 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
           {unsafeCount > 0 && outputMode === "number" && (
             <div className="tw-text-xs tw-text-amber-300">
-              Some token IDs exceed Number.MAX_SAFE_INTEGER. Switch to bigint output or remove those IDs.
+              Some token IDs exceed Number.MAX_SAFE_INTEGER. Switch to bigint
+              output or remove those IDs.
             </div>
           )}
         </div>

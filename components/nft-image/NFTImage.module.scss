@@ -1,7 +1,6 @@
 @use "../../styles/variables.scss";
 
 .nftAnimation {
-  background-color: variables.$dark-grey;
   padding: 0;
   position: relative;
 
@@ -69,7 +68,6 @@
 }
 
 .imageWrapper {
-  background-color: variables.$dark-grey;
   padding: 0;
   position: relative;
 }

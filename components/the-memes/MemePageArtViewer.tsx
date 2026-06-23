@@ -7,8 +7,10 @@ import { useMediaActions } from "@/components/drops/view/item/content/media/useM
 import { useAuth } from "@/components/auth/Auth";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
-import type { NFT } from "@/entities/INFT";
+import type { BaseNFT } from "@/entities/INFT";
 import { enterArtFullScreen } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   getAnimationFileTypeFromMetadata,
   getAnimationMimeTypeFromMetadata,
@@ -16,11 +18,44 @@ import {
   getImageMimeTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Carousel, Col, Container, Row } from "react-bootstrap";
+import { flushSync } from "react-dom";
 import styles from "./TheMemes.module.scss";
 
 type InlineMediaVariant = "image" | "html";
+
+const FULLSCREEN_CHANGE_EVENTS = [
+  "fullscreenchange",
+  "webkitfullscreenchange",
+  "mozfullscreenchange",
+  "MSFullscreenChange",
+] as const;
+
+const FULLSCREEN_ERROR_EVENTS = [
+  "fullscreenerror",
+  "webkitfullscreenerror",
+  "mozfullscreenerror",
+  "MSFullscreenError",
+] as const;
+
+type FullscreenDocument = Document & {
+  readonly webkitFullscreenElement?: Element | null;
+  readonly mozFullScreenElement?: Element | null;
+  readonly msFullscreenElement?: Element | null;
+};
+
+function getCurrentFullscreenElement(doc: Document): Element | null {
+  const fullscreenDocument = doc as FullscreenDocument;
+
+  return (
+    fullscreenDocument.fullscreenElement ??
+    fullscreenDocument.webkitFullscreenElement ??
+    fullscreenDocument.mozFullScreenElement ??
+    fullscreenDocument.msFullscreenElement ??
+    null
+  );
+}
 
 function getInlineMediaVariant(
   mimeType: string | null | undefined
@@ -39,12 +74,17 @@ function getInlineMediaVariant(
 export function MemePageArtViewer({
   nft,
   showBalance = false,
+  locale = DEFAULT_LOCALE,
 }: {
-  readonly nft: NFT;
+  readonly nft: BaseNFT;
   readonly showBalance?: boolean;
+  readonly locale?: SupportedLocale;
 }) {
   const { connectedProfile } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [fullscreenOriginalTargetId, setFullscreenOriginalTargetId] = useState<
+    string | null
+  >(null);
 
   const animationHref = getResolvedAnimationSrc(nft);
   const hasAnimation = Boolean(animationHref);
@@ -61,7 +101,7 @@ export function MemePageArtViewer({
   const hasMultipleSlides = hasAnimation && hasImage;
   const activeMedia = isShowingAnimation
     ? {
-        dialogTitle: "Save animation",
+        dialogTitle: t(locale, "theMemes.detail.art.media.saveAnimation"),
         fallbackFileName: "animation",
         format: animationFormat,
         fullscreenElementId: "the-art-fullscreen-animation",
@@ -70,7 +110,7 @@ export function MemePageArtViewer({
         variant: getInlineMediaVariant(animationMimeType),
       }
     : {
-        dialogTitle: "Save image",
+        dialogTitle: t(locale, "theMemes.detail.art.media.saveImage"),
         fallbackFileName: "image",
         format: imageFormat,
         fullscreenElementId: hasImage ? "the-art-fullscreen-img" : "",
@@ -80,6 +120,13 @@ export function MemePageArtViewer({
       };
   const currentFormat = activeMedia.format ?? "";
   const activeMediaUrl = activeMedia.url ?? "";
+  const canUseBrowserMediaActions = activeMedia.variant !== "html";
+  const mediaActionLabels = {
+    close: t(locale, "theMemes.detail.art.media.close"),
+    download: t(locale, "theMemes.detail.art.media.download"),
+    downloading: t(locale, "theMemes.detail.art.media.downloading"),
+    fullscreen: t(locale, "theMemes.detail.art.media.fullscreen"),
+  };
   const showBalanceControl = showBalance && Boolean(connectedProfile);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
@@ -87,7 +134,41 @@ export function MemePageArtViewer({
       fallbackFileName: activeMedia.fallbackFileName,
       dialogTitle: activeMedia.dialogTitle,
       mimeType: activeMedia.mimeType ?? undefined,
+      labels: {
+        openInBrowser: t(locale, "theMemes.detail.art.media.openInBrowser"),
+        openInNewTab: t(locale, "theMemes.detail.art.media.openInNewTab"),
+      },
     });
+
+  useEffect(() => {
+    if (typeof globalThis.document === "undefined") {
+      return;
+    }
+
+    const doc = globalThis.document;
+
+    function clearOriginalAfterFullscreenExit() {
+      if (!getCurrentFullscreenElement(doc)) {
+        setFullscreenOriginalTargetId(null);
+      }
+    }
+
+    FULLSCREEN_CHANGE_EVENTS.forEach((eventName) => {
+      doc.addEventListener(eventName, clearOriginalAfterFullscreenExit);
+    });
+    FULLSCREEN_ERROR_EVENTS.forEach((eventName) => {
+      doc.addEventListener(eventName, clearOriginalAfterFullscreenExit);
+    });
+
+    return () => {
+      FULLSCREEN_CHANGE_EVENTS.forEach((eventName) => {
+        doc.removeEventListener(eventName, clearOriginalAfterFullscreenExit);
+      });
+      FULLSCREEN_ERROR_EVENTS.forEach((eventName) => {
+        doc.removeEventListener(eventName, clearOriginalAfterFullscreenExit);
+      });
+    };
+  }, []);
 
   function carouselHandlerSlide(event: number) {
     setCurrentSlide(event);
@@ -101,6 +182,32 @@ export function MemePageArtViewer({
     setCurrentSlide((slide) => Math.min(1, slide + 1));
   }
 
+  function enterActiveMediaFullScreen() {
+    const fullscreenElementId = activeMedia.fullscreenElementId;
+
+    if (!fullscreenElementId) {
+      return;
+    }
+
+    flushSync(() => {
+      setFullscreenOriginalTargetId(fullscreenElementId);
+    });
+
+    const clearAttemptedOriginalTarget = () => {
+      setFullscreenOriginalTargetId((currentTargetId) =>
+        currentTargetId === fullscreenElementId ? null : currentTargetId
+      );
+    };
+
+    void (async () => {
+      const didEnterFullscreen = await enterArtFullScreen(fullscreenElementId);
+
+      if (!didEnterFullscreen) {
+        clearAttemptedOriginalTarget();
+      }
+    })().catch(clearAttemptedOriginalTarget);
+  }
+
   function printMediaActions() {
     if (!activeMediaUrl) {
       return null;
@@ -109,16 +216,13 @@ export function MemePageArtViewer({
     return (
       <InlineMediaActions
         variant={activeMedia.variant}
-        onDownload={downloadMedia}
-        onOpen={openMedia}
-        openLabel={openLabel}
+        onDownload={canUseBrowserMediaActions ? downloadMedia : undefined}
+        onOpen={canUseBrowserMediaActions ? openMedia : undefined}
+        openLabel={canUseBrowserMediaActions ? openLabel : undefined}
         isDownloading={isDownloading}
-        onFullscreen={() => {
-          if (activeMedia.fullscreenElementId) {
-            void enterArtFullScreen(activeMedia.fullscreenElementId);
-          }
-        }}
+        onFullscreen={enterActiveMediaFullScreen}
         fullscreenTargetAvailable={Boolean(activeMedia.fullscreenElementId)}
+        labels={mediaActionLabels}
       />
     );
   }
@@ -132,14 +236,12 @@ export function MemePageArtViewer({
       <Col xs={12} className={styles["artControls"]}>
         <div className={styles["artControlsContent"]}>
           {showBalanceControl && (
-            <div
-              className={`${styles["artControlsBalance"] ?? ""} tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-transparent tw-text-iron-400`}
-            >
+            <div className={styles["artControlsBalance"] ?? ""}>
               <NFTImageBalance
                 contract={nft.contract}
                 tokenId={nft.id}
                 height={650}
-                inline
+                variant="compact"
               />
             </div>
           )}
@@ -153,7 +255,7 @@ export function MemePageArtViewer({
             >
               <button
                 type="button"
-                aria-label="Show previous artwork media"
+                aria-label={t(locale, "theMemes.detail.art.media.previous")}
                 disabled={currentSlide === 0}
                 className={styles["artSlideButton"]}
                 onClick={goToPreviousSlide}
@@ -168,7 +270,7 @@ export function MemePageArtViewer({
               </div>
               <button
                 type="button"
-                aria-label="Show next artwork media"
+                aria-label={t(locale, "theMemes.detail.art.media.next")}
                 disabled={currentSlide === 1}
                 className={styles["artSlideButton"]}
                 onClick={goToNextSlide}
@@ -207,6 +309,10 @@ export function MemePageArtViewer({
                     height={650}
                     transparentBG={true}
                     showBalance={false}
+                    showOriginal={
+                      fullscreenOriginalTargetId ===
+                      "the-art-fullscreen-animation"
+                    }
                     id="the-art-fullscreen-animation"
                   />
                 </Carousel.Item>
@@ -217,6 +323,9 @@ export function MemePageArtViewer({
                       animation={false}
                       height={650}
                       showBalance={false}
+                      showOriginal={
+                        fullscreenOriginalTargetId === "the-art-fullscreen-img"
+                      }
                       transparentBG={true}
                       id="the-art-fullscreen-img"
                     />
@@ -237,6 +346,9 @@ export function MemePageArtViewer({
                   height={650}
                   transparentBG={true}
                   showBalance={false}
+                  showOriginal={
+                    fullscreenOriginalTargetId === "the-art-fullscreen-img"
+                  }
                   id="the-art-fullscreen-img"
                 />
                 {printMediaActions()}

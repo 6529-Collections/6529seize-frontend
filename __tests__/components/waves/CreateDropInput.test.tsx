@@ -1,7 +1,11 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import { KEY_ARROW_UP_COMMAND } from "lexical";
 import CreateDropInput from "@/components/waves/CreateDropInput";
+import EditLastDropArrowUpPlugin from "@/components/waves/EditLastDropArrowUpPlugin";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
+
+const mockRegisterCommand = jest.fn(() => jest.fn());
 
 // Mock all lexical plugins and context
 jest.mock("@lexical/react/LexicalComposer", () => ({
@@ -10,7 +14,7 @@ jest.mock("@lexical/react/LexicalComposer", () => ({
 jest.mock("@lexical/react/LexicalComposerContext", () => ({
   useLexicalComposerContext: () => [
     {
-      registerCommand: jest.fn(() => jest.fn()),
+      registerCommand: mockRegisterCommand,
       update: jest.fn(),
     },
   ],
@@ -99,6 +103,29 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: () => ({ isCapacitor: false }),
 }));
 
+const getArrowUpHandler = () => {
+  const call = mockRegisterCommand.mock.calls.find(
+    ([command]) => command === KEY_ARROW_UP_COMMAND
+  );
+  return call?.[1] as ((event: KeyboardEvent) => boolean) | undefined;
+};
+
+const createKeyboardEvent = (
+  overrides: Partial<KeyboardEvent> = {}
+): KeyboardEvent =>
+  ({
+    ctrlKey: false,
+    metaKey: false,
+    altKey: false,
+    shiftKey: false,
+    preventDefault: jest.fn(),
+    ...overrides,
+  }) as unknown as KeyboardEvent;
+
+beforeEach(() => {
+  mockRegisterCommand.mockClear();
+});
+
 it("shows storm placeholder", () => {
   render(
     <CreateDropInput
@@ -183,4 +210,106 @@ it("renders validation helper text when provided", () => {
   expect(screen.getByRole("alert")).toHaveTextContent(
     "URL must be from superrare.com, manifold.xyz, opensea.io, transient.xyz, or foundation.app."
   );
+});
+
+describe("EditLastDropArrowUpPlugin", () => {
+  it("triggers the callback and prevents default when enabled", () => {
+    const onRequestEditLastDrop = jest.fn(() => true);
+    render(
+      <EditLastDropArrowUpPlugin
+        canEditLastDropWithArrow={true}
+        onRequestEditLastDrop={onRequestEditLastDrop}
+        canUseArrowUpShortcut={() => true}
+      />
+    );
+
+    const event = createKeyboardEvent();
+    const handled = getArrowUpHandler()?.(event);
+
+    expect(handled).toBe(true);
+    expect(onRequestEditLastDrop).toHaveBeenCalledTimes(1);
+    expect(event.preventDefault).toHaveBeenCalledTimes(1);
+  });
+
+  it("does nothing when disabled", () => {
+    const onRequestEditLastDrop = jest.fn(() => true);
+    render(
+      <EditLastDropArrowUpPlugin
+        canEditLastDropWithArrow={false}
+        onRequestEditLastDrop={onRequestEditLastDrop}
+        canUseArrowUpShortcut={() => true}
+      />
+    );
+
+    const event = createKeyboardEvent();
+    const handled = getArrowUpHandler()?.(event);
+
+    expect(handled).toBe(false);
+    expect(onRequestEditLastDrop).not.toHaveBeenCalled();
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("does nothing with modifier keys", () => {
+    const modifiers: Array<"ctrlKey" | "metaKey" | "altKey" | "shiftKey"> = [
+      "ctrlKey",
+      "metaKey",
+      "altKey",
+      "shiftKey",
+    ];
+
+    for (const modifier of modifiers) {
+      mockRegisterCommand.mockClear();
+      const onRequestEditLastDrop = jest.fn(() => true);
+      render(
+        <EditLastDropArrowUpPlugin
+          canEditLastDropWithArrow={true}
+          onRequestEditLastDrop={onRequestEditLastDrop}
+          canUseArrowUpShortcut={() => true}
+        />
+      );
+
+      const event = createKeyboardEvent({ [modifier]: true });
+      const handled = getArrowUpHandler()?.(event);
+
+      expect(handled).toBe(false);
+      expect(onRequestEditLastDrop).not.toHaveBeenCalled();
+      expect(event.preventDefault).not.toHaveBeenCalled();
+    }
+  });
+
+  it("does nothing while a suggestion menu is open", () => {
+    const onRequestEditLastDrop = jest.fn(() => true);
+    render(
+      <EditLastDropArrowUpPlugin
+        canEditLastDropWithArrow={true}
+        onRequestEditLastDrop={onRequestEditLastDrop}
+        canUseArrowUpShortcut={() => false}
+      />
+    );
+
+    const event = createKeyboardEvent();
+    const handled = getArrowUpHandler()?.(event);
+
+    expect(handled).toBe(false);
+    expect(onRequestEditLastDrop).not.toHaveBeenCalled();
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("does not prevent default when the callback returns false", () => {
+    const onRequestEditLastDrop = jest.fn(() => false);
+    render(
+      <EditLastDropArrowUpPlugin
+        canEditLastDropWithArrow={true}
+        onRequestEditLastDrop={onRequestEditLastDrop}
+        canUseArrowUpShortcut={() => true}
+      />
+    );
+
+    const event = createKeyboardEvent();
+    const handled = getArrowUpHandler()?.(event);
+
+    expect(handled).toBe(false);
+    expect(onRequestEditLastDrop).toHaveBeenCalledTimes(1);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
 });

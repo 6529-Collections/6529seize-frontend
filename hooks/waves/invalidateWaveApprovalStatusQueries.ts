@@ -16,4 +16,16 @@ export function invalidateWaveApprovalStatusQueries(
   void queryClient.invalidateQueries({
     queryKey: [QueryKey.WAVE_DECISIONS, { waveId }],
   });
+  void queryClient.invalidateQueries({
+    queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+  });
+  void queryClient.invalidateQueries({
+    queryKey: [QueryKey.DROPS, { waveId }],
+  });
+  void queryClient.invalidateQueries({
+    queryKey: [QueryKey.DROP_VOTERS],
+  });
+  void queryClient.invalidateQueries({
+    queryKey: [QueryKey.DROP_VOTE_LOGS],
+  });
 }

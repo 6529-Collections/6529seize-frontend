@@ -22,6 +22,8 @@ function getNetworkSection(): SidebarSection {
       { name: "Memes Calendar", href: "/meme-calendar" },
       { name: "TDH", href: "/network/tdh" },
       { name: "xTDH", href: "/xtdh" },
+      { name: "Wave Score", href: "/network/wave-score" },
+      { name: "REP Categories", href: "/rep/categories" },
     ],
     subsections: [
       {
@@ -71,7 +73,7 @@ function getToolsSection(
             name: "Wallet Architecture",
             href: "/delegation/wallet-architecture",
           },
-          { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
+          { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
           {
             name: "Consolidation Use Cases",
             href: "/delegation/consolidation-use-cases",
@@ -193,10 +195,6 @@ function getAboutSection(hideSubscriptions: boolean): SidebarSection {
           },
           { name: "ENS", href: `/about/${AboutSection.ENS}` },
           { name: "License", href: `/about/${AboutSection.LICENSE}` },
-          {
-            name: "Release Notes",
-            href: `/about/${AboutSection.RELEASE_NOTES}`,
-          },
         ],
       },
     ],

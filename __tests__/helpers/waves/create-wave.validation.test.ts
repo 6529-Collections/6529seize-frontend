@@ -6,6 +6,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CreateWaveStep } from "@/types/waves.types";
 import { Time } from "@/helpers/time";
+import { MEMES_CONTRACT } from "@/constants/constants";
 
 describe("create-wave.validation", () => {
   const HOUR_IN_MS = 60 * 60 * 1000;
@@ -51,6 +52,13 @@ describe("create-wave.validation", () => {
     },
     outcomes: [{ id: 1 }],
     approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
+    display: {
+      outcomesVisible: true,
+      approve: {
+        approvalsTabLabel: "",
+        approvedTabLabel: "",
+      },
+    },
   };
 
   afterEach(() => {
@@ -68,6 +76,107 @@ describe("create-wave.validation", () => {
     });
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
   });
+
+  it("allows approve display labels under the limit", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      display: {
+        ...baseConfig.display,
+        approve: {
+          approvalsTabLabel: "Candidates",
+          approvedTabLabel: "Selected",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
+    );
+  });
+
+  it("rejects approve display labels over the limit after trimming", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      display: {
+        ...baseConfig.display,
+        approve: {
+          approvalsTabLabel: "A".repeat(25),
+          approvedTabLabel: "",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
+    );
+  });
+
+  it("rejects duplicate effective approve display labels", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      display: {
+        ...baseConfig.display,
+        approve: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "Proposals",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
+    );
+  });
+
+  it.each(["Chat", " chat ", "MY VOTES"])(
+    "rejects reserved approve display label %s",
+    (label) => {
+      const config = {
+        ...baseConfig,
+        overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+        display: {
+          ...baseConfig.display,
+          approve: {
+            approvalsTabLabel: label,
+            approvedTabLabel: "Selected",
+          },
+        },
+      };
+
+      const errors = getCreateWaveValidationErrors({
+        step: CreateWaveStep.OVERVIEW,
+        config,
+      });
+
+      expect(errors).toContain(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
+      );
+    }
+  );
 
   it("allows recurring rank waves without an end date", () => {
     const now = 1_000;
@@ -397,6 +506,175 @@ describe("create-wave.validation", () => {
     });
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED
+    );
+  });
+
+  it("allows blank approve threshold hold time", () => {
+    const startDate = 1_000;
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      approval: { threshold: 1, thresholdTimeMs: null, maxWinners: null },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("allows positive whole approve threshold hold time", () => {
+    const startDate = 1_000;
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      approval: {
+        threshold: 1,
+        thresholdTimeMs: HOUR_IN_MS,
+        maxWinners: null,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("allows approve waves with threshold hold time and time weighted voting enabled", () => {
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 1_000,
+        votingStartDate: 1_000,
+        endDate: 1_000 + HOUR_IN_MS,
+      },
+      approval: {
+        threshold: 1,
+        thresholdTimeMs: HOUR_IN_MS,
+        maxWinners: null,
+      },
+      voting: {
+        ...baseConfig.voting,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).toEqual([]);
+  });
+
+  it("rejects invalid approve threshold hold time", () => {
+    for (const thresholdTimeMs of [0, -60_000, 1.5, HOUR_IN_MS + 1]) {
+      const approveConfig = {
+        ...baseConfig,
+        overview: { type: ApiWaveType.Approve, name: "n", image: null },
+        approval: {
+          threshold: 1,
+          thresholdTimeMs,
+          maxWinners: null,
+        },
+      };
+
+      const errors = getCreateWaveValidationErrors({
+        step: CreateWaveStep.VOTING,
+        config: approveConfig,
+      });
+
+      expect(errors).toContain(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID
+      );
+    }
+  });
+
+  it("rejects approve threshold hold time longer than the wave duration", () => {
+    const startDate = 1_000;
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      approval: {
+        threshold: 1,
+        thresholdTimeMs: HOUR_IN_MS * 2,
+        maxWinners: null,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("allows approve threshold hold time without an end date", () => {
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 1_000,
+        votingStartDate: 1_000,
+        endDate: null,
+      },
+      approval: {
+        threshold: 1,
+        thresholdTimeMs: HOUR_IN_MS * 48,
+        maxWinners: null,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
     );
   });
 
@@ -842,6 +1120,100 @@ describe("create-wave.validation", () => {
     );
     expect(errors).not.toContain(
       CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_CANNOT_BE_EMPTY
+    );
+  });
+
+  it("card set TDH requires at least one Meme card and loaded Meme count", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        type: ApiWaveCreditType.CardSetTdh,
+        category: null,
+        profileId: null,
+        creditNfts: [],
+        creditNftMemeCount: null,
+        maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_REQUIRED
+    );
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE
+    );
+  });
+
+  it("card set TDH rejects non-Meme contracts", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        type: ApiWaveCreditType.CardSetTdh,
+        category: null,
+        profileId: null,
+        creditNfts: [{ contract: "0xnotmemes", token_id: 1 }],
+        creditNftMemeCount: 100,
+        maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID
+    );
+  });
+
+  it("card set TDH rejects full Meme set selection", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        type: ApiWaveCreditType.CardSetTdh,
+        category: null,
+        profileId: null,
+        creditNfts: [
+          { contract: MEMES_CONTRACT, token_id: 1 },
+          { contract: MEMES_CONTRACT, token_id: 2 },
+          { contract: MEMES_CONTRACT, token_id: 3 },
+        ],
+        creditNftMemeCount: 3,
+        maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED
     );
   });
 

@@ -1,11 +1,20 @@
-"use client"
+"use client";
 
-import React, { createContext, useContext, useCallback, useState, useRef, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ChatRestriction } from "@/hooks/useDropPriviledges";
 
 interface WaveEligibility {
   authenticated_user_eligible_to_chat: boolean;
+  authenticated_user_chat_restriction?: ChatRestriction | null;
   authenticated_user_eligible_to_vote: boolean;
   authenticated_user_eligible_to_participate: boolean;
   authenticated_user_admin: boolean;
@@ -14,12 +23,17 @@ interface WaveEligibility {
 
 interface WaveEligibilityContextType {
   eligibility: Record<string, WaveEligibility>;
-  updateEligibility: (waveId: string, eligibility: Partial<WaveEligibility>) => void;
+  updateEligibility: (
+    waveId: string,
+    eligibility: Partial<WaveEligibility>
+  ) => void;
   refreshEligibility: (waveId: string) => Promise<void>;
   getEligibility: (waveId: string) => WaveEligibility | null;
 }
 
-const WaveEligibilityContext = createContext<WaveEligibilityContextType | null>(null);
+const WaveEligibilityContext = createContext<WaveEligibilityContextType | null>(
+  null
+);
 
 export const useWaveEligibility = () => {
   const context = useContext(WaveEligibilityContext);
@@ -40,66 +54,94 @@ interface WaveEligibilityProviderProps {
   children: React.ReactNode;
 }
 
-export const WaveEligibilityProvider: React.FC<WaveEligibilityProviderProps> = ({ children }) => {
-  const [eligibility, setEligibility] = useState<Record<string, WaveEligibility>>({});
+export const WaveEligibilityProvider: React.FC<
+  WaveEligibilityProviderProps
+> = ({ children }) => {
+  const [eligibility, setEligibility] = useState<
+    Record<string, WaveEligibility>
+  >({});
   const refreshingRef = useRef<Set<string>>(new Set());
 
-  const updateEligibility = useCallback((waveId: string, newEligibility: Partial<WaveEligibility>) => {
-    setEligibility(prev => ({
-      ...prev,
-      [waveId]: {
-        ...prev[waveId],
-        ...newEligibility,
-        lastUpdated: Date.now(),
-      } as WaveEligibility
-    }));
-  }, []);
+  const updateEligibility = useCallback(
+    (waveId: string, newEligibility: Partial<WaveEligibility>) => {
+      const updatesRawEligibility =
+        "authenticated_user_eligible_to_chat" in newEligibility ||
+        "authenticated_user_eligible_to_vote" in newEligibility ||
+        "authenticated_user_eligible_to_participate" in newEligibility ||
+        "authenticated_user_admin" in newEligibility;
 
-  const refreshEligibility = useCallback(async (waveId: string) => {
-    // Prevent multiple concurrent refreshes for the same wave
-    if (refreshingRef.current.has(waveId)) {
-      return;
-    }
+      setEligibility((prev) => ({
+        ...prev,
+        [waveId]: {
+          ...prev[waveId],
+          ...newEligibility,
+          lastUpdated: updatesRawEligibility
+            ? Date.now()
+            : (prev[waveId]?.lastUpdated ?? 0),
+        } as WaveEligibility,
+      }));
+    },
+    []
+  );
 
-    // Check if data is recent (less than 5 minutes old)
-    const existing = eligibility[waveId];
-    if (existing && (Date.now() - existing.lastUpdated) < 5 * 60 * 1000) {
-      return;
-    }
+  const refreshEligibility = useCallback(
+    async (waveId: string) => {
+      // Prevent multiple concurrent refreshes for the same wave
+      if (refreshingRef.current.has(waveId)) {
+        return;
+      }
 
-    refreshingRef.current.add(waveId);
+      // Check if data is recent (less than 5 minutes old)
+      const existing = eligibility[waveId];
+      if (existing && Date.now() - existing.lastUpdated < 5 * 60 * 1000) {
+        return;
+      }
 
-    try {
-      const wave = await commonApiFetch<ApiWave>({
-        endpoint: `waves/${waveId}`,
-      });
+      refreshingRef.current.add(waveId);
 
-      if (wave) {
+      try {
+        const wave = await commonApiFetch<ApiWave>({
+          endpoint: `waves/${waveId}`,
+        });
+
         updateEligibility(waveId, {
-          authenticated_user_eligible_to_chat: wave.chat.authenticated_user_eligible,
-          authenticated_user_eligible_to_vote: wave.participation.authenticated_user_eligible,
-          authenticated_user_eligible_to_participate: wave.participation.authenticated_user_eligible,
+          authenticated_user_eligible_to_chat:
+            wave.chat.authenticated_user_eligible,
+          authenticated_user_eligible_to_vote:
+            wave.voting.authenticated_user_eligible,
+          authenticated_user_eligible_to_participate:
+            wave.participation.authenticated_user_eligible,
           authenticated_user_admin: false, // This needs to be obtained from drops, not main wave object
         });
+      } catch (error) {
+        // Silently fail - keep existing eligibility data
+        console.warn(
+          `Failed to refresh eligibility for wave ${waveId}:`,
+          error
+        );
+      } finally {
+        refreshingRef.current.delete(waveId);
       }
-    } catch (error) {
-      // Silently fail - keep existing eligibility data
-      console.warn(`Failed to refresh eligibility for wave ${waveId}:`, error);
-    } finally {
-      refreshingRef.current.delete(waveId);
-    }
-  }, [eligibility, updateEligibility]);
+    },
+    [eligibility, updateEligibility]
+  );
 
-  const getEligibility = useCallback((waveId: string): WaveEligibility | null => {
-    return eligibility[waveId] ?? null;
-  }, [eligibility]);
+  const getEligibility = useCallback(
+    (waveId: string): WaveEligibility | null => {
+      return eligibility[waveId] ?? null;
+    },
+    [eligibility]
+  );
 
-  const value: WaveEligibilityContextType = useMemo(() => ({
-    eligibility,
-    updateEligibility,
-    refreshEligibility,
-    getEligibility,
-  }), [eligibility, updateEligibility, refreshEligibility, getEligibility]);
+  const value: WaveEligibilityContextType = useMemo(
+    () => ({
+      eligibility,
+      updateEligibility,
+      refreshEligibility,
+      getEligibility,
+    }),
+    [eligibility, updateEligibility, refreshEligibility, getEligibility]
+  );
 
   return (
     <WaveEligibilityContext.Provider value={value}>

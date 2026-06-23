@@ -46,13 +46,22 @@ const insertRangeSelectionText = (
   }
 };
 
-export default function PlainTextPastePlugin(): null {
+export default function PlainTextPastePlugin({
+  disabled = false,
+}: {
+  readonly disabled?: boolean | undefined;
+}): null {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
     return editor.registerCommand<ClipboardEvent>(
       PASTE_COMMAND,
       (event) => {
+        if (disabled) {
+          event.preventDefault();
+          return true;
+        }
+
         const clipboardData = event.clipboardData;
         if (!clipboardData) {
           return false;
@@ -87,7 +96,7 @@ export default function PlainTextPastePlugin(): null {
       },
       COMMAND_PRIORITY_LOW
     );
-  }, [editor]);
+  }, [disabled, editor]);
 
   return null;
 }

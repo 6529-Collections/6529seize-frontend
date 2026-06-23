@@ -5,6 +5,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   addRecentQuickVoteAmount,
+  getQuickVoteAbsoluteRemainingPower,
+  getQuickVoteRatingRange,
   normalizeQuickVoteAmount,
 } from "@/hooks/memesQuickVote.helpers";
 import { commonApiPost } from "@/services/api/common-api";
@@ -27,7 +29,7 @@ type QueuedRating = {
   readonly amount: number;
   readonly currentRating: number;
   readonly drop: ExtendedDrop;
-  readonly maxRating: number;
+  readonly remainingPower: number;
   readonly type: "skip" | "vote";
 };
 
@@ -79,10 +81,10 @@ const getQueuedRatingAppliedAmount = ({
   }
 
   if (typeof nextRating === "number") {
-    return Math.max(0, nextRating - queuedRating.currentRating);
+    return Math.abs(nextRating - queuedRating.currentRating);
   }
 
-  return queuedRating.amount;
+  return Math.abs(queuedRating.amount);
 };
 
 const getQueuedRatingErrorMessage = ({
@@ -162,7 +164,7 @@ const flushMemesQuickVoteRatings = async ({
         });
         const nextRemainingPower = Math.max(
           0,
-          queuedRating.maxRating - appliedAmount
+          queuedRating.remainingPower - appliedAmount
         );
 
         onRatingSuccess(
@@ -229,7 +231,9 @@ const queueMemesQuickVoteRating = ({
     amount,
     currentRating: drop.context_profile_context?.rating ?? 0,
     drop,
-    maxRating: drop.context_profile_context?.max_rating ?? 0,
+    remainingPower: getQuickVoteAbsoluteRemainingPower(
+      getQuickVoteRatingRange(drop)
+    ),
     type,
   });
   queuedDropIdsRef.current.add(drop.id);
@@ -336,8 +340,10 @@ export const useMemesQuickVoteSubmit = ({
 
   const submitVote = useCallback(
     (drop: ExtendedDrop, amount: number | string) => {
-      const maxRating = drop.context_profile_context?.max_rating ?? 0;
-      const normalizedAmount = normalizeQuickVoteAmount(amount, maxRating);
+      const normalizedAmount = normalizeQuickVoteAmount(
+        amount,
+        getQuickVoteRatingRange(drop)
+      );
 
       if (normalizedAmount === null) {
         return Promise.resolve(false);

@@ -25,41 +25,85 @@ type CompactMarkdownProps = Pick<
   | "maxEmbedDepth"
   | "linkPreviewToggleControl"
   | "onLinkCardActionsActiveChange"
+  | "fullWidthLinkPreviews"
+  | "bodyGalleryKeyPrefix"
 >;
 
 interface QuorumProposalCompactContentProps extends CompactMarkdownProps {
   readonly proposal: ParsedQuorumProposalMarkdown;
+  readonly areDetailsVisible?: boolean | undefined;
+  readonly onDetailsVisibleChange?:
+    | ((areDetailsVisible: boolean) => void)
+    | undefined;
+  readonly openSectionKeys?: readonly string[] | undefined;
+  readonly onSectionOpenChange?:
+    | ((sectionKey: string, isOpen: boolean) => void)
+    | undefined;
 }
 
 function stopPropagation(event: { stopPropagation: () => void }): void {
   event.stopPropagation();
 }
 
+export const QUORUM_PROPOSAL_COMPACT_SUMMARY_KEY = "summary";
+
+export const getQuorumProposalCompactSectionKey = (
+  section: ParsedQuorumProposalSection,
+  index: number
+): string => `section:${index}:${section.heading}`;
+
+export const getQuorumProposalCompactBodyGalleryKeyPrefix = (
+  blockKey: string
+): string => `quorum-compact:${blockKey}`;
+
+const getMarkdownBodyGalleryKeyPrefix = (
+  markdownProps: CompactMarkdownProps,
+  blockKey: string
+): string => {
+  const blockPrefix = getQuorumProposalCompactBodyGalleryKeyPrefix(blockKey);
+  return markdownProps.bodyGalleryKeyPrefix
+    ? `${markdownProps.bodyGalleryKeyPrefix}:${blockPrefix}`
+    : blockPrefix;
+};
+
 function ProposalMarkdownBlock({
+  bodyGalleryBlockKey,
   markdown,
   markdownProps,
 }: Readonly<{
+  bodyGalleryBlockKey: string;
   markdown: string;
   markdownProps: CompactMarkdownProps;
 }>) {
   return (
-    <DropPartMarkdownWithPropLogger {...markdownProps} partContent={markdown} />
+    <DropPartMarkdownWithPropLogger
+      {...markdownProps}
+      bodyGalleryKeyPrefix={getMarkdownBodyGalleryKeyPrefix(
+        markdownProps,
+        bodyGalleryBlockKey
+      )}
+      partContent={markdown}
+    />
   );
 }
 
 function ProposalSectionCard({
+  isOpen,
+  onOpenChange,
   section,
+  sectionKey,
   markdownProps,
 }: Readonly<{
+  isOpen: boolean;
+  onOpenChange: (sectionKey: string, isOpen: boolean) => void;
   section: ParsedQuorumProposalSection;
+  sectionKey: string;
   markdownProps: CompactMarkdownProps;
 }>) {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
     <details
       open={isOpen}
-      onToggle={(event) => setIsOpen(event.currentTarget.open)}
+      onToggle={(event) => onOpenChange(sectionKey, event.currentTarget.open)}
       className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70"
     >
       <summary
@@ -84,6 +128,7 @@ function ProposalSectionCard({
           className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-4 tw-pt-3"
         >
           <ProposalMarkdownBlock
+            bodyGalleryBlockKey={sectionKey}
             markdown={section.markdown}
             markdownProps={markdownProps}
           />
@@ -94,15 +139,58 @@ function ProposalSectionCard({
 }
 
 export default function QuorumProposalCompactContent({
+  areDetailsVisible,
+  onDetailsVisibleChange,
+  onSectionOpenChange,
+  openSectionKeys,
   proposal,
   ...markdownProps
 }: QuorumProposalCompactContentProps) {
-  const [areDetailsVisible, setAreDetailsVisible] = useState(false);
+  const [internalAreDetailsVisible, setInternalAreDetailsVisible] =
+    useState(false);
+  const [internalOpenSectionKeys, setInternalOpenSectionKeys] = useState<
+    readonly string[]
+  >([]);
+  const resolvedAreDetailsVisible =
+    areDetailsVisible ?? internalAreDetailsVisible;
+  const resolvedOpenSectionKeys = openSectionKeys ?? internalOpenSectionKeys;
   const detailsContainerId = useId();
   const sectionCount = proposal.sections.length;
-  const detailsToggleLabel = areDetailsVisible
+  const detailsToggleLabel = resolvedAreDetailsVisible
     ? "Hide details"
     : `Show details (${sectionCount})`;
+  const setDetailsVisible = (nextAreDetailsVisible: boolean) => {
+    if (onDetailsVisibleChange) {
+      onDetailsVisibleChange(nextAreDetailsVisible);
+    }
+
+    if (areDetailsVisible === undefined) {
+      setInternalAreDetailsVisible(nextAreDetailsVisible);
+    }
+
+    if (!nextAreDetailsVisible && openSectionKeys === undefined) {
+      setInternalOpenSectionKeys([]);
+    }
+  };
+  const setSectionOpen = (sectionKey: string, isOpen: boolean) => {
+    if (onSectionOpenChange) {
+      onSectionOpenChange(sectionKey, isOpen);
+    }
+
+    if (openSectionKeys !== undefined) {
+      return;
+    }
+
+    setInternalOpenSectionKeys((currentKeys) => {
+      if (isOpen) {
+        return currentKeys.includes(sectionKey)
+          ? currentKeys
+          : [...currentKeys, sectionKey];
+      }
+
+      return currentKeys.filter((key) => key !== sectionKey);
+    });
+  };
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-3">
@@ -118,6 +206,7 @@ export default function QuorumProposalCompactContent({
             Summary
           </p>
           <ProposalMarkdownBlock
+            bodyGalleryBlockKey={QUORUM_PROPOSAL_COMPACT_SUMMARY_KEY}
             markdown={proposal.summaryMarkdown}
             markdownProps={markdownProps}
           />
@@ -126,11 +215,11 @@ export default function QuorumProposalCompactContent({
           <div className="tw-mt-3 tw-flex tw-justify-start">
             <button
               type="button"
-              aria-expanded={areDetailsVisible}
+              aria-expanded={resolvedAreDetailsVisible}
               aria-controls={detailsContainerId}
               onClick={(event) => {
                 stopPropagation(event);
-                setAreDetailsVisible((previousValue) => !previousValue);
+                setDetailsVisible(!resolvedAreDetailsVisible);
               }}
               onKeyDown={stopPropagation}
               className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition-colors hover:tw-border-iron-700 hover:tw-text-iron-50"
@@ -138,7 +227,7 @@ export default function QuorumProposalCompactContent({
               <span>{detailsToggleLabel}</span>
               <ChevronRightIcon
                 className={`tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform ${
-                  areDetailsVisible ? "tw-rotate-90" : ""
+                  resolvedAreDetailsVisible ? "tw-rotate-90" : ""
                 }`}
               />
             </button>
@@ -146,15 +235,25 @@ export default function QuorumProposalCompactContent({
         )}
       </div>
 
-      {areDetailsVisible && (
+      {resolvedAreDetailsVisible && (
         <div id={detailsContainerId} className="tw-flex tw-flex-col tw-gap-y-2">
-          {proposal.sections.map((section) => (
-            <ProposalSectionCard
-              key={section.heading}
-              section={section}
-              markdownProps={markdownProps}
-            />
-          ))}
+          {proposal.sections.map((section, index) => {
+            const sectionKey = getQuorumProposalCompactSectionKey(
+              section,
+              index
+            );
+
+            return (
+              <ProposalSectionCard
+                key={sectionKey}
+                isOpen={resolvedOpenSectionKeys.includes(sectionKey)}
+                onOpenChange={setSectionOpen}
+                section={section}
+                sectionKey={sectionKey}
+                markdownProps={markdownProps}
+              />
+            );
+          })}
         </div>
       )}
     </div>

@@ -35,7 +35,7 @@ export default function SelectSnapshot({
   const onAddSnapshot = async () => {
     if (!selectedSnapshot) {
       setToasts({
-        messages: ["Please select a snapshot."],
+        messages: ["Select a snapshot."],
         type: "error",
       });
       return;
@@ -69,7 +69,8 @@ export default function SelectSnapshot({
         onSkip={() => undefined}
         onNext={onAddSnapshot}
         isDisabled={false}
-        isLoading={isLoading}>
+        isLoading={isLoading}
+      >
         <ComponentConfigMeta
           tags={[]}
           walletsCount={selectedSnapshot?.walletsCount ?? null}

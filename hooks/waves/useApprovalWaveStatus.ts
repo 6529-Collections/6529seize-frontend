@@ -31,6 +31,7 @@ interface UseApprovalWaveStatusParams {
 
 interface ApprovalWaveStatus {
   readonly winningThreshold: number | null;
+  readonly winningThresholdMinDurationMs: number | null;
   readonly approvedCount: number | null;
   readonly closeStatus: ApprovalWaveCloseStatus;
   readonly isApprovalStatusLoading: boolean;
@@ -43,6 +44,13 @@ interface ApprovalWaveStatus {
 const getValidThreshold = (threshold: number | null | undefined) =>
   typeof threshold === "number" && Number.isFinite(threshold) && threshold > 0
     ? threshold
+    : null;
+
+const getValidMinDurationMs = (durationMs: number | null | undefined) =>
+  typeof durationMs === "number" &&
+  Number.isFinite(durationMs) &&
+  durationMs >= 0
+    ? durationMs
     : null;
 
 const isValidApprovalCount = (
@@ -68,6 +76,13 @@ export function useApprovalWaveStatus({
     () =>
       approveWave && wave
         ? getValidThreshold(wave.wave.winning_threshold)
+        : null,
+    [approveWave, wave]
+  );
+  const winningThresholdMinDurationMs = useMemo(
+    () =>
+      approveWave && wave
+        ? getValidMinDurationMs(wave.wave.winning_threshold_min_duration_ms)
         : null,
     [approveWave, wave]
   );
@@ -239,6 +254,7 @@ export function useApprovalWaveStatus({
 
   return {
     winningThreshold,
+    winningThresholdMinDurationMs,
     approvedCount,
     closeStatus,
     isApprovalStatusLoading,

@@ -16,23 +16,28 @@ import {
   mapIdentityOverviewToProfileMin,
 } from "@/services/api/drop-v2-mappers";
 import { mapLeaderboardDropV2 } from "@/services/api/wave-drops-v2-api";
-import type {
-  INotificationDropReacted,
-  TypedNotification,
-  TypedNotificationsResponse,
+import {
+  DROP_POLL_VOTED_NOTIFICATION_CAUSE,
+  type INotificationDropPollVoted,
+  type INotificationDropReacted,
+  type NotificationCause,
+  type NotificationPollVoteOption,
+  type TypedNotification,
+  type TypedNotificationsResponse,
 } from "@/types/feed.types";
 
 type NotificationWaveMin = ApiWaveMin & {
   readonly is_direct_message?: boolean;
 };
 
-const knownNotificationCauses = new Set<string>(
-  Object.values(ApiNotificationCause)
-);
+const knownNotificationCauses = new Set<string>([
+  ...Object.values(ApiNotificationCause),
+  DROP_POLL_VOTED_NOTIFICATION_CAUSE,
+]);
 
 type FetchNotificationsV2Params = {
   readonly limit: string;
-  readonly cause?: ApiNotificationCause[] | null | undefined;
+  readonly cause?: NotificationCause[] | null | undefined;
   readonly pageParam?: number | null | undefined;
   readonly signal?: AbortSignal | undefined;
   readonly headers?: Record<string, string> | undefined;
@@ -40,6 +45,29 @@ type FetchNotificationsV2Params = {
 
 const toStringValue = (value: string | number | undefined): string =>
   value === undefined ? "" : String(value);
+
+const getPollOptionsValue = (
+  context: ApiNotificationAdditionalContextV2
+): unknown =>
+  (context as { readonly poll_options?: unknown }).poll_options;
+
+const isNotificationPollVoteOption = (
+  value: unknown
+): value is NotificationPollVoteOption => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const option = value as {
+    readonly option_no?: unknown;
+    readonly option_string?: unknown;
+  };
+
+  return (
+    typeof option.option_no === "number" &&
+    typeof option.option_string === "string"
+  );
+};
 
 const mapWaveOverviewToNotificationWaveMin = (
   wave: ApiWaveOverview
@@ -194,6 +222,18 @@ const mapDropReactedNotification = (
   }));
 };
 
+const mapPollVoteOptions = (
+  context: ApiNotificationAdditionalContextV2
+): NotificationPollVoteOption[] => {
+  const options = getPollOptionsValue(context);
+
+  if (!Array.isArray(options)) {
+    return [];
+  }
+
+  return options.filter(isNotificationPollVoteOption);
+};
+
 const handleUnknownNotificationCause = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
@@ -212,8 +252,9 @@ const mapNotificationV2 = (
   const relatedDrops = mapRelatedDrops(notification);
   const context: ApiNotificationAdditionalContextV2 =
     notification.additional_context;
+  const cause = notification.cause as NotificationCause;
 
-  switch (notification.cause) {
+  switch (cause) {
     case ApiNotificationCause.IdentitySubscribed:
       return [
         {
@@ -228,6 +269,9 @@ const mapNotificationV2 = (
           cause: ApiNotificationCause.IdentityRep,
           additional_context: {
             amount: context.amount ?? 0,
+            ...(typeof context.rater_rating === "number"
+              ? { rater_rating: context.rater_rating }
+              : {}),
             total: context.total ?? 0,
             category: context.category ?? "",
           },
@@ -240,6 +284,9 @@ const mapNotificationV2 = (
           cause: ApiNotificationCause.IdentityNic,
           additional_context: {
             amount: context.amount ?? 0,
+            ...(typeof context.rater_rating === "number"
+              ? { rater_rating: context.rater_rating }
+              : {}),
             total: context.total ?? 0,
           },
         },
@@ -260,8 +307,25 @@ const mapNotificationV2 = (
           related_drops: relatedDrops,
           additional_context: {
             vote: context.vote ?? 0,
+            ...(typeof context.vote_change === "number"
+              ? { vote_change: context.vote_change }
+              : {}),
+            ...(typeof context.total_vote === "number"
+              ? { total_vote: context.total_vote }
+              : {}),
           },
         },
+      ];
+    case DROP_POLL_VOTED_NOTIFICATION_CAUSE:
+      return [
+        {
+          ...base,
+          cause: DROP_POLL_VOTED_NOTIFICATION_CAUSE,
+          related_drops: relatedDrops,
+          additional_context: {
+            poll_options: mapPollVoteOptions(context),
+          },
+        } satisfies INotificationDropPollVoted,
       ];
     case ApiNotificationCause.DropReacted:
       return mapDropReactedNotification(notification, relatedDrops);

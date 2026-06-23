@@ -5,6 +5,7 @@ import {
   MemesSubmissionAdditionalInfoKey,
 } from "@/components/waves/memes/submission/types/OperationalData";
 import { FallbackImage } from "@/components/common/FallbackImage";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -161,20 +162,14 @@ export const WaveDropAdditionalInfo = ({
             Promo Video
           </h3>
           <div className="tw-flex tw-justify-center">
-            <div className="tw-relative tw-aspect-video tw-w-full tw-max-w-2xl tw-overflow-hidden tw-bg-white/[0.02]">
-              <video
+            <div className="tw-flex tw-w-full tw-max-w-2xl tw-justify-center">
+              <SeizeVideoPlayer
                 src={promoVideo}
-                className="tw-h-full tw-w-full tw-object-contain"
-                controls
+                template="watch-media"
                 preload="metadata"
-              >
-                <track
-                  kind="captions"
-                  src="data:text/vtt,WEBVTT"
-                  srcLang="en"
-                  label="Captions"
-                />
-              </video>
+                layout="prominent"
+                align="center"
+              />
             </div>
           </div>
         </div>
@@ -196,19 +191,12 @@ export const WaveDropAdditionalInfo = ({
                 }`}
               >
                 {item.isVideo ? (
-                  <video
+                  <SeizeVideoPlayer
                     src={item.url}
-                    className="tw-h-full tw-w-full tw-object-cover"
-                    controls
+                    template="watch-media"
                     preload="metadata"
-                  >
-                    <track
-                      kind="captions"
-                      src="data:text/vtt,WEBVTT"
-                      srcLang="en"
-                      label="Captions"
-                    />
-                  </video>
+                    layout="fill"
+                  />
                 ) : (
                   <FallbackImage
                     primarySrc={item.displayUrl}

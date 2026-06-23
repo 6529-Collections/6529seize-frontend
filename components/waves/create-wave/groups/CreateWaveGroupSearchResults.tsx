@@ -4,6 +4,8 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 
+export type CreateWaveGroupSearchResultsLayout = "popover" | "inline";
+
 type HighlightedTextPart = {
   readonly isMatch: boolean;
   readonly startIndex: number;
@@ -210,6 +212,7 @@ function CreateWaveGroupSearchResultsList({
 export default function CreateWaveGroupSearchResults({
   isOpen,
   disabled,
+  layout = "popover",
   listboxId,
   isFetching,
   suggestions,
@@ -223,6 +226,7 @@ export default function CreateWaveGroupSearchResults({
 }: {
   readonly isOpen: boolean;
   readonly disabled: boolean;
+  readonly layout?: CreateWaveGroupSearchResultsLayout;
   readonly listboxId: string;
   readonly isFetching: boolean;
   readonly suggestions: readonly ApiGroupFull[];
@@ -234,18 +238,27 @@ export default function CreateWaveGroupSearchResults({
   readonly onActiveIndexChange: (index: number) => void;
   readonly onOptionSelect: (group: ApiGroupFull) => void;
 }) {
+  const wrapperClasses =
+    layout === "inline"
+      ? "tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
+      : "tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5";
+  const panelClasses =
+    layout === "inline"
+      ? "tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10"
+      : "tw-absolute tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10";
+
   return (
     <LazyMotion features={domAnimation}>
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && !disabled && (
           <m.div
-            className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className={wrapperClasses}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="tw-absolute tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+            <div className={panelClasses}>
               <div className="tw-flow-root tw-max-h-64 tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
                 <ul
                   id={listboxId}

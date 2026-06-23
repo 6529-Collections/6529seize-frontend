@@ -2,6 +2,7 @@
 
 import Address from "@/components/address/Address";
 import { useAuth } from "@/components/auth/Auth";
+import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
@@ -13,22 +14,21 @@ import type { NFT } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
-import styles from "./6529Gradient.module.scss";
 
 enum Sort {
   ID = "id",
   TDH = "tdh",
 }
+
+const GRADIENT_SORT_OPTIONS = [Sort.ID, Sort.TDH] as const;
+const GRADIENT_SORT_LABELS: Record<Sort, string> = {
+  [Sort.ID]: "ID",
+  [Sort.TDH]: "TDH",
+};
 
 interface GradientNFT extends NFT {
   owner: `0x${string}`;
@@ -125,141 +125,99 @@ export default function GradientsComponent() {
   }, [nftsLoaded, nftsRaw, sort, sortDir]);
 
   function printNft(nft: GradientNFT) {
+    const owner = nft.owner;
+    const ownsNft =
+      owner !== undefined &&
+      owner !== null &&
+      wallets.some((wallet) => areEqualAddresses(wallet, owner));
+
     return (
-      <Col
+      <Link
         key={`${nft.contract}-${nft.id}`}
-        className="pt-3 pb-3"
-        xs={{ span: 6 }}
-        sm={{ span: 4 }}
-        md={{ span: 3 }}
-        lg={{ span: 3 }}
+        href={`/6529-gradient/${nft.id}`}
+        className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
-        <Link
-          href={`/6529-gradient/${nft.id}`}
-          className="decoration-none scale-hover"
-        >
-          <Container fluid className="no-padding">
-            <Row>
-              <Col>
-                <NFTImage
-                  nft={nft}
-                  animation={false}
-                  height={300}
-                  showBalance={false}
-                  showThumbnail={true}
-                />
-              </Col>
-            </Row>
-            <Row>
-              <Col className="text-center pt-2">{nft.name}</Col>
-            </Row>
-            <Row>
-              <Col className="tw-flex tw-items-center tw-justify-center tw-gap-1">
-                {nft.owner && (
-                  <Address
-                    wallets={[nft.owner]}
-                    display={nft.owner_display}
-                    hideCopy={true}
-                  />
-                )}
-                {wallets.some((w) => areEqualAddresses(w, nft.owner)) && (
-                  <YouOwnNftBadge />
-                )}
-              </Col>
-            </Row>
-            <Row>
-              <Col className="text-center pt-2">
-                TDH: <b>{numberWithCommas(Math.round(nft.boosted_tdh))}</b> |
-                Rank:{" "}
-                <b>
-                  {nft.tdh_rank}/{nfts.length}
-                </b>
-              </Col>
-            </Row>
-          </Container>
-        </Link>
-      </Col>
+        <div className="tw-bg-iron-900">
+          <NFTImage
+            nft={nft}
+            animation={false}
+            height={300}
+            showBalance={false}
+            showThumbnail={true}
+          />
+        </div>
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-md tw-font-semibold tw-leading-snug tw-text-iron-50">
+            {nft.name}
+          </div>
+          <div className="tw-mt-2 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
+            {owner !== undefined && owner !== null && owner.length > 0 && (
+              <Address
+                wallets={[owner]}
+                display={nft.owner_display}
+                hideCopy={true}
+                disableLink={true}
+              />
+            )}
+            {ownsNft && <YouOwnNftBadge />}
+          </div>
+          <div className="tw-mt-2 tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5">
+            <span className="tw-text-iron-500">TDH: </span>
+            <span className="tw-font-semibold tw-text-iron-200">
+              {numberWithCommas(Math.round(nft.boosted_tdh))}
+            </span>
+            <span className="tw-text-iron-600"> | </span>
+            <span className="tw-text-iron-500">Rank: </span>
+            <span className="tw-font-semibold tw-text-iron-200">
+              {nft.tdh_rank}/{nfts.length}
+            </span>
+          </div>
+        </div>
+      </Link>
     );
   }
 
   function printNfts() {
-    return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
+    return (
+      <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+        {nfts.map((nft) => printNft(nft))}
+      </div>
+    );
   }
 
   return (
-    <Container fluid className={styles["mainContainer"]}>
-      <Row>
-        <Col>
-          <Container className="pt-4">
-            <>
-              {/* Page header - visible on all devices */}
-              <Row>
-                <Col className="d-flex align-items-center justify-content-between mb-3">
-                  <span className="d-flex align-items-center gap-3 flex-wrap">
-                    <h1 className="mb-0">6529 Gradient</h1>
-                    <LFGButton contract={GRADIENT_CONTRACT} />
-                  </span>
-                </Col>
-              </Row>
-
-              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
-              <Row className="d-xl-none">
-                <Col xs={12} sm="auto" className="mb-3">
-                  <CollectionsDropdown activePage="gradient" />
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col>
-                  Sort&nbsp;&nbsp;
-                  <FontAwesomeIcon
-                    icon={faChevronCircleUp}
-                    onClick={() => setSortDir(SortDirection.ASC)}
-                    className={`${styles["sortDirection"]} ${
-                      sortDir != SortDirection.ASC ? styles["disabled"] : ""
-                    }`}
-                  />{" "}
-                  <FontAwesomeIcon
-                    icon={faChevronCircleDown}
-                    onClick={() => setSortDir(SortDirection.DESC)}
-                    className={`${styles["sortDirection"]} ${
-                      sortDir != SortDirection.DESC ? styles["disabled"] : ""
-                    }`}
-                  />
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col>
-                  <span
-                    onClick={() => setSort(Sort.ID)}
-                    className={`${styles["sort"]} ${
-                      sort != Sort.ID ? styles["disabled"] : ""
-                    }`}
-                  >
-                    ID
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.TDH)}
-                    className={`${styles["sort"]} ${
-                      sort != Sort.TDH ? styles["disabled"] : ""
-                    }`}
-                  >
-                    TDH
-                  </span>
-                </Col>
-              </Row>
-              {nftsLoaded ? (
-                printNfts()
-              ) : (
-                <Row>
-                  <Col className="pt-3">
-                    Fetching <DotLoader />
-                  </Col>
-                </Row>
-              )}
-            </>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+      <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+        <header className="tw-pb-5">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+            <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 sm:tw-w-auto sm:tw-justify-start">
+              <div className="tw-min-w-0 min-[1200px]:tw-hidden">
+                <CollectionsDropdown activePage="gradient" variant="title" />
+              </div>
+              <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                6529 Gradient
+              </h1>
+              <LFGButton contract={GRADIENT_CONTRACT} />
+            </div>
+          </div>
+        </header>
+        <CollectionSortControls
+          ariaLabel="Gradient sorting"
+          sortDirection={sortDir}
+          setSortDirection={setSortDir}
+          currentSort={sort}
+          sortOptions={GRADIENT_SORT_OPTIONS}
+          setSort={setSort}
+          getSortLabel={(sortOption) => GRADIENT_SORT_LABELS[sortOption]}
+        />
+        {nftsLoaded ? (
+          printNfts()
+        ) : (
+          <div className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300">
+            Fetching <DotLoader />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

@@ -18,6 +18,7 @@ import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadataV2 } from '../models/ApiDropMetadataV2';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
+import { ApiDropPoll } from '../models/ApiDropPoll';
 import { ApiDropReactionCounter } from '../models/ApiDropReactionCounter';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
@@ -53,6 +54,7 @@ export class ApiDropV2 {
     'reply_to_drop'?: ApiReplyToDropV2;
     'submission_context'?: ApiSubmissionDropContext;
     'context_profile_context'?: ApiDropV2ContextProfileContext;
+    'poll'?: ApiDropPoll;
     'wave'?: ApiWaveOverview;
 
     static readonly discriminator: string | undefined = undefined;
@@ -202,6 +204,12 @@ export class ApiDropV2 {
             "name": "context_profile_context",
             "baseName": "context_profile_context",
             "type": "ApiDropV2ContextProfileContext",
+            "format": ""
+        },
+        {
+            "name": "poll",
+            "baseName": "poll",
+            "type": "ApiDropPoll",
             "format": ""
         },
         {

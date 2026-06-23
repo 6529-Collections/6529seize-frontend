@@ -28,8 +28,8 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
     <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
       {hasCategory && (
         <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2">
-          <span className="tw-font-medium tw-text-iron-400">Category</span>
-          <span className="tw-break-words tw-text-right tw-font-semibold tw-text-iron-50">
+          <span className="tw-font-normal tw-text-iron-500">Category</span>
+          <span className="tw-break-words tw-text-right tw-font-medium tw-text-iron-50">
             {category}
           </span>
         </div>
@@ -40,7 +40,7 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
           className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2"
           aria-label={`Creditor ${creditor.handle ?? "unknown"}`}
         >
-          <span className="tw-font-medium tw-text-iron-400">Creditor</span>
+          <span className="tw-font-normal tw-text-iron-500">Creditor</span>
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             {creditor.pfp ? (
               <Image
@@ -51,21 +51,21 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
                 height={24}
               />
             ) : (
-              <div className="tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-800 tw-text-xs tw-font-semibold tw-text-iron-200">
+              <div className="tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-800 tw-text-xs tw-font-medium tw-text-iron-50">
                 {creditorInitial}
               </div>
             )}
             {creditor.handle ? (
               <Link
                 href={`/${creditor.handle}`}
-                className="tw-truncate tw-font-semibold tw-text-iron-50 tw-no-underline tw-transition-colors hover:tw-text-iron-200"
+                className="tw-truncate tw-font-medium tw-text-iron-50 tw-no-underline tw-transition-colors hover:tw-text-iron-200"
               >
                 <UserProfileTooltipWrapper user={creditor.handle}>
                   <span className="tw-truncate">{creditor.handle}</span>
                 </UserProfileTooltipWrapper>
               </Link>
             ) : (
-              <span className="tw-font-semibold tw-text-iron-200">Unknown</span>
+              <span className="tw-font-medium tw-text-iron-50">Unknown</span>
             )}
           </div>
         </div>

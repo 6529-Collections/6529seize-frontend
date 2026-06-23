@@ -12,6 +12,7 @@
  */
 
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
+import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
 import { HttpFile } from '../http/http';
 
 /**
@@ -19,11 +20,15 @@ import { HttpFile } from '../http/http';
 */
 export class ApiNotificationAdditionalContextV2 {
     'amount'?: number;
+    'rater_rating'?: number;
     'total'?: number;
     'category'?: string;
     'vote'?: number;
+    'vote_change'?: number;
+    'total_vote'?: number;
     'reaction'?: string;
     'reactors'?: Array<ApiNotificationDropReactedReactor>;
+    'poll_options'?: Array<ApiNotificationPollVoteOption>;
     'quote_drop_id'?: string;
     'quote_drop_part'?: number;
     'quoted_drop_id'?: string;
@@ -41,6 +46,12 @@ export class ApiNotificationAdditionalContextV2 {
         {
             "name": "amount",
             "baseName": "amount",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "rater_rating",
+            "baseName": "rater_rating",
             "type": "number",
             "format": "double"
         },
@@ -63,6 +74,18 @@ export class ApiNotificationAdditionalContextV2 {
             "format": "double"
         },
         {
+            "name": "vote_change",
+            "baseName": "vote_change",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "total_vote",
+            "baseName": "total_vote",
+            "type": "number",
+            "format": "double"
+        },
+        {
             "name": "reaction",
             "baseName": "reaction",
             "type": "string",
@@ -72,6 +95,12 @@ export class ApiNotificationAdditionalContextV2 {
             "name": "reactors",
             "baseName": "reactors",
             "type": "Array<ApiNotificationDropReactedReactor>",
+            "format": ""
+        },
+        {
+            "name": "poll_options",
+            "baseName": "poll_options",
+            "type": "Array<ApiNotificationPollVoteOption>",
             "format": ""
         },
         {

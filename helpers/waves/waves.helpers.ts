@@ -2,6 +2,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { commonApiPost } from "@/services/api/common-api";
 import { CreateWaveStepStatus } from "@/types/waves.types";
 
@@ -21,6 +22,17 @@ export const getCreateWaveStepStatus = ({
   return CreateWaveStepStatus.PENDING;
 };
 
+export const getParentWaveName = (
+  parentWave: ApiWave["parent_wave"]
+): string | undefined => {
+  if (!parentWave) {
+    return undefined;
+  }
+
+  const trimmedName = parentWave.name.trim();
+  return trimmedName.length > 0 ? trimmedName : parentWave.id;
+};
+
 const getPeriodUpdate = <T>(
   period: T | null | undefined
 ): Partial<{ readonly period: T }> => {
@@ -29,6 +41,36 @@ const getPeriodUpdate = <T>(
   }
 
   return { period };
+};
+
+const getSlowModeUpdate = (
+  slowModeCooldownMs: number | null | undefined
+): Partial<{ readonly slow_mode_cooldown_ms: number }> => {
+  if (slowModeCooldownMs === null || slowModeCooldownMs === undefined) {
+    return {};
+  }
+
+  return { slow_mode_cooldown_ms: slowModeCooldownMs };
+};
+
+const getWinningThresholdMinDurationUpdate = (
+  minDurationMs: number | null | undefined
+): Partial<{ readonly winning_threshold_min_duration_ms: number | null }> => {
+  if (minDurationMs === undefined) {
+    return {};
+  }
+
+  return { winning_threshold_min_duration_ms: minDurationMs };
+};
+
+const getCreditNftsUpdate = (
+  wave: ApiWave
+): Partial<{ readonly credit_nfts: ApiWave["voting"]["credit_nfts"] }> => {
+  if (wave.voting.credit_type !== ApiWaveCreditType.CardSetTdh) {
+    return {};
+  }
+
+  return { credit_nfts: wave.voting.credit_nfts ?? [] };
 };
 
 export const convertWaveToUpdateWave = (
@@ -41,10 +83,12 @@ export const convertWaveToUpdateWave = (
       group_id: wave.voting.scope.group?.id ?? null,
     },
     credit_type: wave.voting.credit_type,
+    credit_scope: wave.voting.credit_scope,
     credit_category: wave.voting.credit_category,
     creditor_id: wave.voting.creditor?.id ?? null,
     signature_required: !!wave.voting.signature_required,
     ...getPeriodUpdate(wave.voting.period),
+    ...getCreditNftsUpdate(wave),
     forbid_negative_votes: wave.voting.forbid_negative_votes,
   },
   visibility: {
@@ -57,6 +101,8 @@ export const convertWaveToUpdateWave = (
       group_id: wave.chat.scope.group?.id ?? null,
     },
     enabled: wave.chat.enabled,
+    links_disabled: wave.chat.links_disabled === true,
+    ...getSlowModeUpdate(wave.chat.slow_mode_cooldown_ms),
   },
   participation: {
     scope: {
@@ -74,6 +120,9 @@ export const convertWaveToUpdateWave = (
     admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
     type: wave.wave.type,
     winning_threshold: wave.wave.winning_threshold,
+    ...getWinningThresholdMinDurationUpdate(
+      wave.wave.winning_threshold_min_duration_ms
+    ),
     max_winners: wave.wave.max_winners,
     max_votes_per_identity_to_drop: wave.wave.max_votes_per_identity_to_drop,
     time_lock_ms: wave.wave.time_lock_ms,

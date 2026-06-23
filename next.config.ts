@@ -86,6 +86,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         CORE_SCHEME: publicEnv.CORE_SCHEME,
         IPFS_API_ENDPOINT: publicEnv.IPFS_API_ENDPOINT,
         IPFS_GATEWAY_ENDPOINT: publicEnv.IPFS_GATEWAY_ENDPOINT,
+        MEDIA_RESOLVER_ENDPOINT: publicEnv.MEDIA_RESOLVER_ENDPOINT,
         IPFS_MFS_PATH: publicEnv.IPFS_MFS_PATH,
         TENOR_API_KEY: publicEnv.TENOR_API_KEY,
         WS_ENDPOINT: publicEnv.WS_ENDPOINT,
@@ -151,6 +152,11 @@ const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
 
   // Upload a larger set of source maps for prettier stack traces (increases build time)
   widenClientFileUpload: true,
+
+  // Sentry needs build-time maps for symbolication; deployed browser assets do not.
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
 
   // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
   // This can increase your server load as well as your hosting bill.

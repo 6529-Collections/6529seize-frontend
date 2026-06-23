@@ -25,6 +25,7 @@ interface SingleWaveDropWrapperProps {
   readonly children: React.ReactNode;
   readonly onClose: () => void;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -35,6 +36,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   children,
   onClose,
   winningThreshold = null,
+  winningThresholdMinDurationMs = null,
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }) => {
@@ -135,6 +137,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
               wave={wave}
               drop={drop}
               winningThreshold={winningThreshold}
+              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
               isVotingClosed={isVotingClosed}
               isVotingControlsLocked={isVotingControlsLocked}
             />
@@ -185,6 +188,9 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
                     wave={wave}
                     drop={drop}
                     winningThreshold={winningThreshold}
+                    winningThresholdMinDurationMs={
+                      winningThresholdMinDurationMs
+                    }
                     isVotingClosed={isVotingClosed}
                     isVotingControlsLocked={isVotingControlsLocked}
                   />

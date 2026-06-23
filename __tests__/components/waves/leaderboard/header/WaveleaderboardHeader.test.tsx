@@ -223,7 +223,10 @@ it("uses approval sort labels for approve waves", async () => {
       }
     >
       <WaveLeaderboardHeader
-        wave={{ ...wave, wave: { type: ApiWaveType.Approve } }}
+        wave={{
+          ...wave,
+          wave: { type: ApiWaveType.Approve, time_lock_ms: 300_000 },
+        }}
         onCreateDrop={jest.fn()}
         viewMode="list"
         onViewModeChange={jest.fn()}
@@ -240,6 +243,10 @@ it("uses approval sort labels for approve waves", async () => {
           expect.objectContaining({
             label: "Closest to approval",
             value: WaveDropsLeaderboardSort.RANK,
+          }),
+          expect.objectContaining({
+            label: "Votes Given Now",
+            value: WaveDropsLeaderboardSort.REALTIME_VOTE,
           }),
         ]),
       })
@@ -303,7 +310,7 @@ it("shows projected vote when the wave has a time lock", () => {
   ]);
 });
 
-it("keeps approve labels but hides projected vote without a time lock", () => {
+it("keeps approve labels but hides realtime vote without a time lock", () => {
   useWave.mockReturnValue({
     isMemesWave: false,
     isCurationWave: false,

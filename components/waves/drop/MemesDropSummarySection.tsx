@@ -1,4 +1,5 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
@@ -60,6 +61,12 @@ export function MemesDropSummarySection({
           isWinner={isWinner}
           mimeType={artworkMimeType}
         >
+          {drop.is_additional_action_promised === true && (
+            <>
+              <span className="tw-text-white/40">·</span>
+              <AdditionalActionPromiseBadge />
+            </>
+          )}
           {manualOutcomes.length > 0 && (
             <>
               <span className="tw-text-white/40">·</span>

@@ -1,9 +1,5 @@
-import {
-  printVolumeTypeDropdown,
-  SortButton,
-} from "@/components/the-memes/TheMemes";
+import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
 import { VolumeType } from "@/entities/INFT";
-import { MemesSort } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -19,29 +15,12 @@ describe("TheMemes helpers", () => {
     expect(setSort).toHaveBeenCalled();
   });
 
-  it("SortButton calls select", async () => {
-    const user = userEvent.setup();
-    const select = jest.fn();
-    render(
-      <SortButton
-        currentSort={MemesSort.AGE}
-        sort={MemesSort.AGE}
-        select={select}
-      />
-    );
-    await user.click(screen.getByRole("button"));
-    expect(select).toHaveBeenCalled();
-  });
-
-  it("SortButton active state lacks disabled class", () => {
-    render(
-      <SortButton
-        currentSort={MemesSort.AGE}
-        sort={MemesSort.AGE}
-        select={jest.fn()}
-      />
-    );
-    const btn = screen.getByRole("button");
-    expect(btn.className).not.toContain("disabled");
+  it("printVolumeTypeDropdown uses collection filter trigger styling", () => {
+    render(printVolumeTypeDropdown(true, jest.fn(), jest.fn()));
+    const button = screen.getByRole("button", {
+      name: `Volume: ${VolumeType.ALL_TIME}`,
+    });
+    expect(screen.getByText("Volume:")).not.toHaveClass("tw-uppercase");
+    expect(button).not.toHaveClass("focus-visible:tw-outline-primary-400");
   });
 });

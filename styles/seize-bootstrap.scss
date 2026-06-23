@@ -6,58 +6,15 @@ $green: #208359;
 $blue: #267c93;
 $orange: #ffa500;
 $yellow: #ffff00;
-
 // Add any other Bootstrap variables you want to set globally BEFORE the import.
 
-// Import Bootstrap's full SCSS stack with explicit package paths. This avoids
-// Windows/Turbopack resolving Bootstrap's bare "progress" import to the npm
-// progress JavaScript package.
-/* stylelint-disable no-invalid-position-at-import-rule */
-@import "bootstrap/scss/mixins/banner";
-@import "bootstrap/scss/functions";
-@include bsBanner("");
-
-@import "bootstrap/scss/variables";
-@import "bootstrap/scss/variables-dark";
-@import "bootstrap/scss/maps";
-@import "bootstrap/scss/mixins";
-@import "bootstrap/scss/utilities";
-
-@import "bootstrap/scss/root";
-@import "bootstrap/scss/reboot";
-@import "bootstrap/scss/type";
-@import "bootstrap/scss/images";
-@import "bootstrap/scss/containers";
-@import "bootstrap/scss/grid";
-@import "bootstrap/scss/tables";
-@import "bootstrap/scss/forms";
-@import "bootstrap/scss/buttons";
-@import "bootstrap/scss/transitions";
-@import "bootstrap/scss/dropdown";
-@import "bootstrap/scss/button-group";
-@import "bootstrap/scss/nav";
-@import "bootstrap/scss/navbar";
-@import "bootstrap/scss/card";
-@import "bootstrap/scss/accordion";
-@import "bootstrap/scss/breadcrumb";
-@import "bootstrap/scss/pagination";
-@import "bootstrap/scss/badge";
-@import "bootstrap/scss/alert";
-@import "bootstrap/scss/progress";
-@import "bootstrap/scss/list-group";
-@import "bootstrap/scss/close";
-@import "bootstrap/scss/toasts";
-@import "bootstrap/scss/modal";
-@import "bootstrap/scss/tooltip";
-@import "bootstrap/scss/popover";
-@import "bootstrap/scss/carousel";
-@import "bootstrap/scss/spinners";
-@import "bootstrap/scss/offcanvas";
-@import "bootstrap/scss/placeholders";
-
-@import "bootstrap/scss/helpers";
-@import "bootstrap/scss/utilities/api";
-/* stylelint-enable no-invalid-position-at-import-rule */
+@use "bootstrap/scss/bootstrap" with (
+  $pink: $pink,
+  $green: $green,
+  $blue: $blue,
+  $orange: $orange,
+  $yellow: $yellow
+);
 
 // Your custom global overrides for Bootstrap components or new global utility classes
 // can go AFTER the main Bootstrap import and after @use "variables.scss".

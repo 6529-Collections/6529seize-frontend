@@ -1,11 +1,11 @@
 "use client";
 
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
+import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
 import styles from "@/components/nft-image/NFTImage.module.scss";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import { withArweaveFallback } from "@/components/nft-image/utils/gateway-fallback";
 import Image from "next/image";
-import { Col } from "react-bootstrap";
 
 function getSrc(
   nft: BaseRendererProps["nft"],
@@ -43,9 +43,9 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   const imageWrapperClassName = styles["imageWrapper"] ?? "";
 
   return (
-    <Col
-      xs={12}
-      className={`text-center d-flex align-items-center justify-content-center ${imageWrapperClassName} ${props.heightStyle} ${props.bgStyle}`.trim()}
+    <NFTMediaContainer
+      textCenter
+      className={`${imageWrapperClassName} ${props.heightStyle} ${props.bgStyle}`}
     >
       <Image
         loading={shouldLazyLoad ? "lazy" : "eager"}
@@ -86,6 +86,6 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
           height={props.height}
         />
       )}
-    </Col>
+    </NFTMediaContainer>
   );
 }

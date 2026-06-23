@@ -83,6 +83,68 @@ describe("ParticipationDropFooter", () => {
     );
   });
 
+  it("right-aligns approval vote actions on narrow footer rows", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop({ raters_count: 0 })}
+        winningThreshold={10}
+        voteAction={<button data-testid="vote-action" type="button" />}
+      />
+    );
+
+    const actionRow = screen.getByTestId("vote-action").parentElement;
+    expect(actionRow).toHaveClass("tw-justify-end");
+    expect(actionRow).toHaveClass("tw-border-t");
+    expect(actionRow).toHaveClass("@[700px]:tw-border-none");
+  });
+
+  it("keeps default vote actions centered on narrow footer rows", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop()}
+        voteAction={<button data-testid="vote-action" type="button" />}
+      />
+    );
+
+    expect(screen.getByTestId("vote-action").parentElement).toHaveClass(
+      "tw-justify-center"
+    );
+  });
+
+  it("keeps approval reactions above the approval footer controls", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop({
+          raters_count: 0,
+          reactions: [{ reaction: "like", profiles: [] }] as any,
+        })}
+        winningThreshold={10}
+        voteAction={<button data-testid="vote-action" type="button" />}
+      />
+    );
+
+    const order = screen
+      .getByTestId("reactions")
+      .compareDocumentPosition(screen.getByTestId("vote-action"));
+    expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("keeps default reactions below default footer controls", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop({
+          reactions: [{ reaction: "like", profiles: [] }] as any,
+        })}
+        voteAction={<button data-testid="vote-action" type="button" />}
+      />
+    );
+
+    const order = screen
+      .getByTestId("vote-action")
+      .compareDocumentPosition(screen.getByTestId("reactions"));
+    expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("locks voting actions without marking ratings closed", () => {
     render(
       <ParticipationDropFooter

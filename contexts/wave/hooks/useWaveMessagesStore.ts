@@ -64,6 +64,8 @@ const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
   return changes;
 };
 
+const cloneDrop = (drop: Drop): Drop => cloneValue(drop);
+
 export type Listener = (data: WaveMessages | undefined) => void;
 
 type Listeners = Set<Listener>; // Keep internal types non-exported
@@ -88,16 +90,13 @@ function useWaveMessagesStore() {
   }, []);
 
   // Stable function to subscribe a listener for a specific key
-  const subscribe = useCallback(
-    (key: string, callback: Listener) => {
-      const keyListeners = listenersRef.current[key] ?? new Set();
-      keyListeners.add(callback);
-      listenersRef.current[key] = keyListeners;
-      // Provide initial value immediately upon subscription
-      callback(waveMessages[key]);
-    },
-    [waveMessages]
-  ); // Include store dependency to give the latest value on subscribe
+  const subscribe = useCallback((key: string, callback: Listener) => {
+    const keyListeners = listenersRef.current[key] ?? new Set();
+    keyListeners.add(callback);
+    listenersRef.current[key] = keyListeners;
+    // Provide initial value immediately upon subscription
+    callback(waveMessagesRef.current[key]);
+  }, []);
 
   // Stable function to unsubscribe a listener
   const unsubscribe = useCallback((key: string, callback: Listener) => {
@@ -200,8 +199,6 @@ function useWaveMessagesStore() {
     [processQueue] // Dependency: processQueue
   );
 
-  const cloneDrop = (drop: Drop): Drop => cloneValue(drop);
-
   const optimisticUpdateDrop = useCallback(
     ({
       waveId,
@@ -212,7 +209,7 @@ function useWaveMessagesStore() {
       dropId: string;
       update: (draft: Drop) => Drop | void;
     }): { rollback: () => void } | null => {
-      const wave = waveMessages[waveId];
+      const wave = waveMessagesRef.current[waveId];
       if (!wave) {
         return null;
       }
@@ -290,52 +287,37 @@ function useWaveMessagesStore() {
 
       return { rollback };
     },
-    [waveMessages, updateData]
+    [updateData]
   );
 
-  const removeDrop = useCallback(
-    (waveId: string, dropId: string) => {
-      let notify: WaveMessages | undefined;
-      setWaveMessages((prevWaveMessages) => {
-        const newWaveMessages = { ...prevWaveMessages };
-        if (!newWaveMessages[waveId]) {
-          newWaveMessages[waveId] = {
-            id: waveId,
-            isLoading: false,
-            isLoadingNextPage: false,
-            hasNextPage: false,
-            drops: [],
-            latestFetchedSerialNo: null,
-          };
-        }
+  const removeDrop = useCallback((waveId: string, dropId: string) => {
+    const currentWaveMessages = waveMessagesRef.current;
+    const currentWave = currentWaveMessages[waveId] ?? {
+      id: waveId,
+      isLoading: false,
+      isLoadingNextPage: false,
+      hasNextPage: false,
+      drops: [],
+      latestFetchedSerialNo: null,
+    };
 
-        const updatedWaveMessages = {
-          ...newWaveMessages[waveId],
-          drops: newWaveMessages[waveId].drops.filter(
-            (drop) => drop.id !== dropId
-          ),
-        };
+    const updatedWaveMessages: WaveMessages = {
+      ...currentWave,
+      drops: currentWave.drops.filter((drop) => drop.id !== dropId),
+    };
+    const nextState = {
+      ...currentWaveMessages,
+      [waveId]: updatedWaveMessages,
+    };
 
-        notify = updatedWaveMessages;
-        const nextState = {
-          ...newWaveMessages,
-          [waveId]: updatedWaveMessages,
-        };
-        waveMessagesRef.current = nextState;
-        return nextState;
-      });
+    waveMessagesRef.current = nextState;
+    setWaveMessages(nextState);
 
-      // Notify listeners *after* state update is triggered
-      // Note: state updates might be async, listeners get the *new* state idea
-      const keyListeners = listenersRef.current[waveId];
-
-      if (keyListeners && notify) {
-        // Pass the new value directly
-        keyListeners.forEach((listener) => listener(notify));
-      }
-    },
-    [waveMessages]
-  );
+    const keyListeners = listenersRef.current[waveId];
+    if (keyListeners) {
+      keyListeners.forEach((listener) => listener(updatedWaveMessages));
+    }
+  }, []);
 
   return {
     getData,

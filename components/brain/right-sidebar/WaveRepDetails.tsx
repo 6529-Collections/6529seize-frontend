@@ -1,0 +1,710 @@
+"use client";
+
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveRepCategoriesPage } from "@/generated/models/ApiWaveRepCategoriesPage";
+import type { ApiWaveRepCategory } from "@/generated/models/ApiWaveRepCategory";
+import type { ApiWaveRepContributor } from "@/generated/models/ApiWaveRepContributor";
+import type { ApiWaveRepContributorsPage } from "@/generated/models/ApiWaveRepContributorsPage";
+import type { ApiWaveRepOverview } from "@/generated/models/ApiWaveRepOverview";
+import type { CountlessPage } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ProfileActivityLogType, RateMatter } from "@/types/enums";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import {
+  ALL_CATEGORY_OPTION_ID,
+  CategoryMenu,
+  CategoryRow,
+  ContributorRow,
+  LogRow,
+  SummaryStat,
+  detailText,
+  formatSignedRep,
+  getCategoryOptionId,
+  getContributorCountLabel,
+  getRepTextClass,
+  type WaveRepCategoryOption,
+} from "./WaveRepDetailsComponents";
+
+const CONTRIBUTOR_PAGE_SIZE = 50;
+const CATEGORY_PAGE_SIZE = 100;
+const LOG_PAGE_SIZE = 20;
+const INLINE_CATEGORY_LIMIT = 4;
+const STALE_TIME_MS = 60_000;
+const RETRY_ACTION_MESSAGE_KEY = "waves.rep.details.actions.retry";
+
+type RepDetailView = "contributors" | "activity";
+
+interface WaveRepContributorPage {
+  readonly data: ApiWaveRepContributor[];
+  readonly page: number;
+  readonly next: boolean;
+  readonly overview?: ApiWaveRepOverview | undefined;
+}
+
+interface WaveRepDetailsProps {
+  readonly wave: ApiWave;
+}
+
+function runQueryAction(action: () => Promise<unknown>): void {
+  action().catch(() => undefined);
+}
+
+function getSelectedCategoryOption({
+  selectedCategoryDetails,
+  allCategoryOption,
+}: {
+  readonly selectedCategoryDetails: ApiWaveRepCategory | null;
+  readonly allCategoryOption: WaveRepCategoryOption;
+}): WaveRepCategoryOption {
+  if (!selectedCategoryDetails) {
+    return allCategoryOption;
+  }
+
+  return {
+    id: getCategoryOptionId(selectedCategoryDetails.category),
+    label: selectedCategoryDetails.category,
+    category: selectedCategoryDetails.category,
+    totalRep: selectedCategoryDetails.total_rep,
+    contributorCount: selectedCategoryDetails.contributor_count,
+  };
+}
+
+async function fetchContributorPage({
+  waveId,
+  category,
+  pageParam,
+}: {
+  readonly waveId: string;
+  readonly category: string | null;
+  readonly pageParam: number;
+}): Promise<WaveRepContributorPage> {
+  if (category) {
+    const contributors = await commonApiFetch<ApiWaveRepContributorsPage>({
+      endpoint: `waves/${waveId}/rep/categories/${encodeURIComponent(
+        category
+      )}/contributors`,
+      params: {
+        page: pageParam.toString(),
+        page_size: CONTRIBUTOR_PAGE_SIZE.toString(),
+      },
+    });
+
+    return {
+      data: contributors.data,
+      page: contributors.page,
+      next: contributors.next,
+    };
+  }
+
+  const overview = await commonApiFetch<ApiWaveRepOverview>({
+    endpoint: `waves/${waveId}/rep/overview`,
+    params: {
+      page: pageParam.toString(),
+      page_size: CONTRIBUTOR_PAGE_SIZE.toString(),
+    },
+  });
+
+  return {
+    data: overview.contributors.data,
+    page: overview.contributors.page,
+    next: overview.contributors.next,
+    overview,
+  };
+}
+
+async function fetchCategoryPage({
+  waveId,
+  pageParam,
+}: {
+  readonly waveId: string;
+  readonly pageParam: number;
+}): Promise<ApiWaveRepCategoriesPage> {
+  return await commonApiFetch<ApiWaveRepCategoriesPage>({
+    endpoint: `waves/${waveId}/rep/categories`,
+    params: {
+      page: pageParam.toString(),
+      page_size: CATEGORY_PAGE_SIZE.toString(),
+    },
+  });
+}
+
+async function fetchLogPage({
+  waveId,
+  pageParam,
+}: {
+  readonly waveId: string;
+  readonly pageParam: number;
+}): Promise<CountlessPage<ProfileActivityLogRatingEdit>> {
+  return await commonApiFetch<CountlessPage<ProfileActivityLogRatingEdit>>({
+    endpoint: "profile-logs",
+    params: {
+      page: pageParam.toString(),
+      page_size: LOG_PAGE_SIZE.toString(),
+      target: waveId,
+      log_type: ProfileActivityLogType.RATING_EDIT,
+      rating_matter: RateMatter.WAVE_REP,
+    },
+  });
+}
+
+export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<RepDetailView>("contributors");
+
+  const categoriesQuery = useInfiniteQuery({
+    queryKey: [QueryKey.WAVE_REP_CATEGORIES, { waveId: wave.id }],
+    queryFn: async ({ pageParam }: { pageParam: number }) =>
+      await fetchCategoryPage({
+        waveId: wave.id,
+        pageParam,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: ApiWaveRepCategoriesPage | undefined) =>
+      lastPage?.next ? lastPage.page + 1 : undefined,
+    staleTime: STALE_TIME_MS,
+    ...getDefaultQueryRetry(),
+  });
+
+  const contributorsQuery = useInfiniteQuery({
+    queryKey: [
+      selectedCategory
+        ? QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS
+        : QueryKey.WAVE_REP_OVERVIEW,
+      { waveId: wave.id, category: selectedCategory },
+    ],
+    queryFn: async ({ pageParam }: { pageParam: number }) =>
+      await fetchContributorPage({
+        waveId: wave.id,
+        category: selectedCategory,
+        pageParam,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: WaveRepContributorPage | undefined) =>
+      lastPage?.next ? lastPage.page + 1 : undefined,
+    placeholderData: keepPreviousData,
+    staleTime: STALE_TIME_MS,
+    ...getDefaultQueryRetry(),
+  });
+
+  const logsQuery = useInfiniteQuery({
+    queryKey: [QueryKey.WAVE_REP_LOGS, { waveId: wave.id }],
+    queryFn: async ({ pageParam }: { pageParam: number }) =>
+      await fetchLogPage({
+        waveId: wave.id,
+        pageParam,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (
+      lastPage: CountlessPage<ProfileActivityLogRatingEdit> | undefined
+    ) => (lastPage?.next ? lastPage.page + 1 : undefined),
+    enabled: activeView === "activity",
+    staleTime: STALE_TIME_MS,
+    ...getDefaultQueryRetry(),
+  });
+
+  const categories = useMemo(
+    () => categoriesQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [categoriesQuery.data?.pages]
+  );
+  const visibleCategories = useMemo(
+    () => categories.slice(0, INLINE_CATEGORY_LIMIT),
+    [categories]
+  );
+  const contributors = useMemo(
+    () => contributorsQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [contributorsQuery.data?.pages]
+  );
+  const logs = useMemo(
+    () => logsQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [logsQuery.data?.pages]
+  );
+  const overview = contributorsQuery.data?.pages[0]?.overview;
+  const summary = {
+    totalRep: overview?.total_rep ?? wave.wave_rep?.total_rep ?? 0,
+    positiveRep: overview?.positive_rep ?? wave.wave_rep?.positive_rep ?? 0,
+    negativeRep: overview?.negative_rep ?? wave.wave_rep?.negative_rep ?? 0,
+    contributorCount:
+      overview?.contributor_count ?? wave.wave_rep?.contributor_count ?? 0,
+    authenticatedUserContribution:
+      overview?.authenticated_user_contribution ??
+      wave.wave_rep?.authenticated_user_contribution ??
+      null,
+  };
+  const allCategoryOption = useMemo<WaveRepCategoryOption>(
+    () => ({
+      id: ALL_CATEGORY_OPTION_ID,
+      label: detailText("waves.rep.details.categories.all"),
+      category: null,
+      totalRep: summary.totalRep,
+      contributorCount: summary.contributorCount,
+    }),
+    [summary.contributorCount, summary.totalRep]
+  );
+  const categoryOptions = useMemo<WaveRepCategoryOption[]>(
+    () => [
+      allCategoryOption,
+      ...categories.map((category) => ({
+        id: getCategoryOptionId(category.category),
+        label: category.category,
+        category: category.category,
+        totalRep: category.total_rep,
+        contributorCount: category.contributor_count,
+      })),
+    ],
+    [allCategoryOption, categories]
+  );
+  const selectedCategoryDetails =
+    categories.find((category) => category.category === selectedCategory) ??
+    null;
+  const selectedCategoryOption = getSelectedCategoryOption({
+    selectedCategoryDetails,
+    allCategoryOption,
+  });
+  const showCategoryBrowser =
+    categories.length > INLINE_CATEGORY_LIMIT || !!categoriesQuery.hasNextPage;
+
+  const retryContributors = () => {
+    runQueryAction(() => contributorsQuery.refetch());
+  };
+
+  const fetchNextContributorsPage = () => {
+    runQueryAction(() => contributorsQuery.fetchNextPage());
+  };
+
+  const fetchNextCategoriesPage = () => {
+    runQueryAction(() => categoriesQuery.fetchNextPage());
+  };
+
+  const retryCategories = () => {
+    runQueryAction(() => categoriesQuery.refetch());
+  };
+
+  const fetchNextLogsPage = () => {
+    runQueryAction(() => logsQuery.fetchNextPage());
+  };
+
+  const retryLogs = () => {
+    runQueryAction(() => logsQuery.refetch());
+  };
+
+  const clearSelectedCategory = () => {
+    setSelectedCategory(null);
+  };
+
+  const selectCategoryOption = (option: WaveRepCategoryOption) => {
+    if (option.category === null) {
+      clearSelectedCategory();
+      return;
+    }
+    setSelectedCategory(option.category);
+    setActiveView("contributors");
+  };
+
+  const selectCategory = (category: ApiWaveRepCategory) => {
+    setSelectedCategory(category.category);
+    setActiveView("contributors");
+  };
+
+  const showActivity = () => {
+    clearSelectedCategory();
+    setActiveView("activity");
+  };
+
+  const contributorHeading = selectedCategory
+    ? detailText("waves.rep.details.contributors.heading.category", {
+        category: selectedCategory,
+      })
+    : detailText("waves.rep.details.contributors.heading.all");
+  const contributorDescription = selectedCategoryDetails
+    ? detailText("waves.rep.details.contributors.description.category", {
+        contributors: getContributorCountLabel(
+          selectedCategoryDetails.contributor_count
+        ),
+        rep: formatSignedRep(selectedCategoryDetails.total_rep),
+      })
+    : detailText("waves.rep.details.contributors.description.all", {
+        contributors: getContributorCountLabel(summary.contributorCount),
+      });
+  const isShowingPreviousContributors = contributorsQuery.isPlaceholderData;
+
+  return (
+    <div className="tw-flex tw-h-full tw-flex-col tw-gap-5 tw-p-4">
+      <section aria-labelledby="wave-rep-summary-heading">
+        <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <h3
+            id="wave-rep-summary-heading"
+            className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
+          >
+            {detailText("waves.rep.details.summary.title")}
+          </h3>
+          <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+            {getContributorCountLabel(summary.contributorCount)}
+          </span>
+        </div>
+        <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+          <SummaryStat
+            label={detailText("waves.rep.details.summary.total")}
+            value={formatSignedRep(summary.totalRep)}
+            toneClassName={getRepTextClass(summary.totalRep)}
+          />
+          <SummaryStat
+            label={detailText("waves.rep.details.summary.yourRep")}
+            value={
+              summary.authenticatedUserContribution === null
+                ? "-"
+                : formatSignedRep(summary.authenticatedUserContribution)
+            }
+            toneClassName={getRepTextClass(
+              summary.authenticatedUserContribution ?? 0
+            )}
+          />
+          <SummaryStat
+            label={detailText("waves.rep.details.summary.positive")}
+            value={formatSignedRep(summary.positiveRep)}
+            toneClassName={getRepTextClass(summary.positiveRep)}
+          />
+          <SummaryStat
+            label={detailText("waves.rep.details.summary.negative")}
+            value={formatSignedRep(summary.negativeRep)}
+            toneClassName={getRepTextClass(summary.negativeRep)}
+          />
+        </div>
+      </section>
+
+      <section aria-labelledby="wave-rep-categories-heading">
+        <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <h3
+            id="wave-rep-categories-heading"
+            className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
+          >
+            {detailText("waves.rep.details.categories.title")}
+          </h3>
+          {categoriesQuery.isPending && (
+            <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+              {detailText("waves.rep.details.categories.loading")}
+            </span>
+          )}
+        </div>
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          <CategoryRow
+            label={detailText("waves.rep.details.categories.all")}
+            totalRep={summary.totalRep}
+            contributorCount={summary.contributorCount}
+            selected={selectedCategory === null}
+            ariaLabel={detailText("waves.rep.details.categories.allAriaLabel", {
+              rep: formatSignedRep(summary.totalRep),
+              contributors: getContributorCountLabel(summary.contributorCount),
+            })}
+            onClick={clearSelectedCategory}
+          />
+          {visibleCategories.map((category) => (
+            <CategoryRow
+              key={category.category}
+              label={category.category}
+              totalRep={category.total_rep}
+              contributorCount={category.contributor_count}
+              selected={selectedCategory === category.category}
+              ariaLabel={detailText(
+                "waves.rep.details.categories.categoryAriaLabel",
+                {
+                  category: category.category,
+                  rep: formatSignedRep(category.total_rep),
+                  contributors: getContributorCountLabel(
+                    category.contributor_count
+                  ),
+                }
+              )}
+              onClick={() => selectCategory(category)}
+            />
+          ))}
+          {showCategoryBrowser ? (
+            <CategoryMenu
+              options={categoryOptions}
+              selectedOption={selectedCategoryOption}
+              onSelect={selectCategoryOption}
+              variant="browse"
+            />
+          ) : null}
+        </div>
+
+        {categoriesQuery.status === "success" && categories.length === 0 && (
+          <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-text-iron-500">
+            {detailText("waves.rep.details.categories.empty")}
+          </p>
+        )}
+
+        {categoriesQuery.isLoadingError && (
+          <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/15 tw-bg-rose-400/[0.03] tw-px-3 tw-py-3">
+            <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+              {detailText("waves.rep.details.categories.error")}
+            </p>
+            <button
+              type="button"
+              onClick={retryCategories}
+              className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
+            >
+              {detailText(RETRY_ACTION_MESSAGE_KEY)}
+            </button>
+          </div>
+        )}
+
+        {(categoriesQuery.hasNextPage ||
+          categoriesQuery.isFetchingNextPage ||
+          categoriesQuery.isFetchNextPageError) && (
+          <div className="tw-mt-3">
+            {categoriesQuery.isFetchNextPageError && (
+              <p className="tw-mb-2 tw-text-xs tw-text-rose-300">
+                {detailText("waves.rep.details.categories.loadMoreError")}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={fetchNextCategoriesPage}
+              disabled={categoriesQuery.isFetchingNextPage}
+              className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
+            >
+              {categoriesQuery.isFetchingNextPage
+                ? detailText("waves.rep.details.categories.loadingMore")
+                : detailText("waves.rep.details.categories.loadMore")}
+            </button>
+          </div>
+        )}
+      </section>
+
+      <div className="tw-sticky tw-top-0 tw-z-20 tw--mx-4 tw-flex tw-flex-col tw-gap-2 tw-border-y tw-border-solid tw-border-white/5 tw-bg-iron-950/95 tw-px-4 tw-py-3 tw-backdrop-blur">
+        <CategoryMenu
+          options={categoryOptions}
+          selectedOption={selectedCategoryOption}
+          onSelect={selectCategoryOption}
+          variant="sticky"
+        />
+        <div
+          role="tablist"
+          aria-label={detailText("waves.rep.details.view.ariaLabel")}
+          className="tw-grid tw-grid-cols-2 tw-gap-1 tw-rounded-md tw-bg-white/[0.04] tw-p-1"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeView === "contributors"}
+            onClick={() => setActiveView("contributors")}
+            className={`tw-cursor-pointer tw-rounded tw-border-none tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
+              activeView === "contributors"
+                ? "tw-bg-white/10 tw-text-white"
+                : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
+            }`}
+          >
+            {detailText("waves.rep.details.view.contributors")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeView === "activity"}
+            onClick={showActivity}
+            className={`tw-cursor-pointer tw-rounded tw-border-none tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
+              activeView === "activity"
+                ? "tw-bg-white/10 tw-text-white"
+                : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
+            }`}
+          >
+            {detailText("waves.rep.details.view.activity")}
+          </button>
+        </div>
+      </div>
+
+      {activeView === "contributors" && (
+        <section aria-labelledby="wave-rep-contributors-heading">
+          <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+            <div className="tw-min-w-0">
+              <h3
+                id="wave-rep-contributors-heading"
+                className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
+              >
+                {contributorHeading}
+              </h3>
+              <p className="tw-mb-0 tw-mt-0.5 tw-truncate tw-text-xs tw-text-iron-500">
+                {contributorDescription}
+              </p>
+            </div>
+            {contributorsQuery.isPending && !isShowingPreviousContributors && (
+              <CircleLoader size={CircleLoaderSize.MEDIUM} />
+            )}
+          </div>
+
+          {contributorsQuery.isLoadingError && (
+            <div className="tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/20 tw-bg-rose-400/5 tw-p-3">
+              <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
+                {detailText("waves.rep.details.contributors.error")}
+              </p>
+              <button
+                type="button"
+                onClick={retryContributors}
+                className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
+              >
+                {detailText(RETRY_ACTION_MESSAGE_KEY)}
+              </button>
+            </div>
+          )}
+
+          {isShowingPreviousContributors && (
+            <div className="tw-flex tw-justify-center tw-py-6">
+              <CircleLoader size={CircleLoaderSize.MEDIUM} />
+            </div>
+          )}
+
+          {contributorsQuery.status === "success" &&
+            !isShowingPreviousContributors &&
+            contributors.length === 0 && (
+              <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-p-4">
+                <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+                  {selectedCategory
+                    ? detailText(
+                        "waves.rep.details.contributors.empty.category",
+                        { category: selectedCategory }
+                      )
+                    : detailText("waves.rep.details.contributors.empty.all")}
+                </p>
+              </div>
+            )}
+
+          {!isShowingPreviousContributors && contributors.length > 0 && (
+            <div className="tw-flex tw-flex-col tw-gap-2">
+              {contributors.map((contributor) => (
+                <ContributorRow
+                  key={`${contributor.profile.id}-${selectedCategory ?? "all"}`}
+                  contributor={contributor}
+                />
+              ))}
+
+              {contributorsQuery.isFetchingNextPage && (
+                <div className="tw-flex tw-justify-center tw-py-3">
+                  <CircleLoader size={CircleLoaderSize.MEDIUM} />
+                </div>
+              )}
+
+              {contributorsQuery.isFetchNextPageError && (
+                <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/15 tw-bg-rose-400/[0.03] tw-px-3 tw-py-3">
+                  <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+                    {detailText("waves.rep.details.contributors.loadMoreError")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={fetchNextContributorsPage}
+                    className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
+                  >
+                    {detailText(RETRY_ACTION_MESSAGE_KEY)}
+                  </button>
+                </div>
+              )}
+
+              {(contributorsQuery.hasNextPage ||
+                contributorsQuery.isFetchingNextPage) && (
+                <button
+                  type="button"
+                  onClick={fetchNextContributorsPage}
+                  disabled={contributorsQuery.isFetchingNextPage}
+                  className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
+                >
+                  {contributorsQuery.isFetchingNextPage
+                    ? detailText("waves.rep.details.contributors.loadingMore")
+                    : detailText("waves.rep.details.contributors.loadMore")}
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+
+      {activeView === "activity" && (
+        <section aria-labelledby="wave-rep-activity-heading">
+          <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+            <div>
+              <h3
+                id="wave-rep-activity-heading"
+                className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
+              >
+                {detailText("waves.rep.details.activity.title")}
+              </h3>
+              <p className="tw-mb-0 tw-mt-0.5 tw-text-xs tw-text-iron-500">
+                {detailText("waves.rep.details.activity.description")}
+              </p>
+            </div>
+            {logsQuery.isPending && (
+              <CircleLoader size={CircleLoaderSize.MEDIUM} />
+            )}
+          </div>
+
+          {logsQuery.isLoadingError && (
+            <div className="tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/20 tw-bg-rose-400/5 tw-p-3">
+              <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
+                {detailText("waves.rep.details.activity.error")}
+              </p>
+              <button
+                type="button"
+                onClick={retryLogs}
+                className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
+              >
+                {detailText(RETRY_ACTION_MESSAGE_KEY)}
+              </button>
+            </div>
+          )}
+
+          {logsQuery.status === "success" && logs.length === 0 && (
+            <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+              {detailText("waves.rep.details.activity.empty")}
+            </p>
+          )}
+
+          {logs.length > 0 && (
+            <div className="tw-flex tw-flex-col tw-gap-2">
+              {logs.map((log) => (
+                <LogRow key={log.id} log={log} />
+              ))}
+
+              {logsQuery.isFetchingNextPage && (
+                <div className="tw-flex tw-justify-center tw-py-3">
+                  <CircleLoader size={CircleLoaderSize.MEDIUM} />
+                </div>
+              )}
+
+              {logsQuery.isFetchNextPageError && (
+                <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/15 tw-bg-rose-400/[0.03] tw-px-3 tw-py-3">
+                  <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+                    {detailText("waves.rep.details.activity.loadMoreError")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={fetchNextLogsPage}
+                    className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
+                  >
+                    {detailText(RETRY_ACTION_MESSAGE_KEY)}
+                  </button>
+                </div>
+              )}
+
+              {(logsQuery.hasNextPage || logsQuery.isFetchingNextPage) && (
+                <button
+                  type="button"
+                  onClick={fetchNextLogsPage}
+                  disabled={logsQuery.isFetchingNextPage}
+                  className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
+                >
+                  {logsQuery.isFetchingNextPage
+                    ? detailText("waves.rep.details.activity.loadingMore")
+                    : detailText("waves.rep.details.activity.loadMore")}
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  );
+}

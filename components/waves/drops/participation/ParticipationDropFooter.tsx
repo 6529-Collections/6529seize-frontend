@@ -12,6 +12,7 @@ interface ParticipationDropFooterProps {
   readonly voteAction?: ReactNode;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -21,6 +22,7 @@ export default function ParticipationDropFooter({
   voteAction,
   showInteractions = true,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }: ParticipationDropFooterProps) {
@@ -36,11 +38,16 @@ export default function ParticipationDropFooter({
   const normalizedVoteAction = Children.toArray(voteAction);
   const hasVoteAction = normalizedVoteAction.length > 0;
   const hasPrimaryActions = canShowCuration || hasVoteAction;
+  const primaryActionsJustificationClass = hasWinningThreshold
+    ? "tw-justify-end"
+    : "tw-justify-center";
   const shouldShowVoteFooter =
     canShowVoting && (shouldShowRatings || hasPrimaryActions);
   const shouldShowRatingsOnlyFooter = !canShowVoting && shouldShowRatings;
   const shouldShowReactionsFooter =
     hasReactions || (!canShowVoting && canShowCuration);
+  const shouldShowReactionsBeforeVoteFooter =
+    hasWinningThreshold && shouldShowVoteFooter && shouldShowReactionsFooter;
 
   if (!showInteractions) {
     return <div className="tw-pb-4" />;
@@ -48,6 +55,12 @@ export default function ParticipationDropFooter({
 
   return (
     <>
+      {shouldShowReactionsBeforeVoteFooter && (
+        <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+          <WaveDropReactions drop={drop} />
+        </div>
+      )}
+
       {shouldShowVoteFooter && (
         <div
           className="tw-mt-4 tw-@container sm:tw-ml-[3.25rem]"
@@ -60,13 +73,18 @@ export default function ParticipationDropFooter({
                   drop={drop}
                   rank={drop.rank}
                   winningThreshold={winningThreshold}
+                  winningThresholdMinDurationMs={
+                    winningThresholdMinDurationMs
+                  }
                   isVotingClosed={isVotingClosed}
                 />
               </div>
             )}
 
             {hasPrimaryActions && (
-              <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0">
+              <div
+                className={`tw-flex tw-w-full tw-items-center ${primaryActionsJustificationClass} tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-justify-center @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0`}
+              >
                 <DropCurationButton
                   dropId={drop.id}
                   waveId={drop.wave.id}
@@ -87,12 +105,13 @@ export default function ParticipationDropFooter({
             drop={drop}
             rank={drop.rank}
             winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
             isVotingClosed={isVotingClosed}
           />
         </div>
       )}
 
-      {shouldShowReactionsFooter && (
+      {shouldShowReactionsFooter && !shouldShowReactionsBeforeVoteFooter && (
         <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
           {!canShowVoting && (
             <DropCurationButton

@@ -1,13 +1,13 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import type {
   DropIdentityMode,
   DropInteractionParams,
@@ -63,6 +63,11 @@ interface DefautWinnerDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly inlineAuthorOnDesktop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -84,6 +89,11 @@ const DefaultWinnerDrop = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  inlineAuthorOnDesktop = false,
+  mediaImageScale,
+  fullWidthMedia = false,
+  fullWidthLinkPreviews = false,
+  winningThreshold,
   embedPath,
   quotePath,
   embedDepth,
@@ -95,13 +105,14 @@ const DefaultWinnerDrop = ({
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
-  const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const { canUseDesktopHoverActions, canUseTouchActionSheet } =
+    useDropActionInteractionMode();
 
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
   const decisionTime = drop.winning_context?.decision_time;
   const showIdentity = identityMode !== "hidden";
+  const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
 
   const visibleMetadata = getWinnerVisibleMetadata({
     wave: drop.wave,
@@ -115,10 +126,19 @@ const DefaultWinnerDrop = ({
     : getBackgroundColorClass(location);
 
   const handleLongPress = useCallback(() => {
-    if (!showInteractions || !hasTouch) return;
+    if (!showInteractions || !canUseTouchActionSheet) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch, showInteractions]);
+  }, [canUseTouchActionSheet, showInteractions]);
+
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+  }, [canUseTouchActionSheet]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -128,6 +148,25 @@ const DefaultWinnerDrop = ({
   const handleOnAddReaction = useCallback(() => {
     setIsSlideUp(false);
   }, []);
+  const identityHeader =
+    identityMode === "minimal" ? (
+      <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
+    ) : (
+      <WaveDropHeader
+        drop={drop}
+        showWaveInfo={false}
+        isStorm={isStorm}
+        currentPartIndex={activePartIndex}
+        partsCount={drop.parts.length}
+        badge={
+          <WinnerDropBadge
+            rank={effectiveRank}
+            decisionTime={decisionTime ?? null}
+          />
+        }
+        timestampLayout={timestampLayout}
+      />
+    );
 
   return (
     <div
@@ -157,32 +196,22 @@ const DefaultWinnerDrop = ({
           />
         )}
 
-        <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-          {showIdentity && <WaveDropAuthorPfp drop={drop} />}
+        <div
+          className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left ${
+            inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
+          }`}
+        >
+          {inlineAuthorOnDesktop
+            ? showIdentity && (
+                <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+                  <WaveDropAuthorPfp drop={drop} />
+                  <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
+                </div>
+              )
+            : showIdentity && <WaveDropAuthorPfp drop={drop} />}
           <div className="tw-flex tw-w-full tw-flex-col">
             <div className="tw-flex tw-flex-col tw-items-start">
-              {showIdentity &&
-                (identityMode === "minimal" ? (
-                  <DropMinimalIdentityRow
-                    drop={drop}
-                    timestampLayout={timestampLayout}
-                  />
-                ) : (
-                  <WaveDropHeader
-                    drop={drop}
-                    showWaveInfo={false}
-                    isStorm={isStorm}
-                    currentPartIndex={activePartIndex}
-                    partsCount={drop.parts.length}
-                    badge={
-                      <WinnerDropBadge
-                        rank={effectiveRank}
-                        decisionTime={decisionTime ?? null}
-                      />
-                    }
-                    timestampLayout={timestampLayout}
-                  />
-                ))}
+              {showIdentity && !inlineAuthorOnDesktop && identityHeader}
               {identityMode === "default" &&
                 showWaveInfo &&
                 (() => {
@@ -229,7 +258,10 @@ const DefaultWinnerDrop = ({
                 onLongPress={handleLongPress}
                 setLongPressTriggered={setLongPressTriggered}
                 isCompetitionDrop={true}
-                hasTouch={hasTouch}
+                mediaImageScale={mediaImageScale}
+                fullWidthMedia={fullWidthMedia}
+                fullWidthLinkPreviews={fullWidthLinkPreviews}
+                hasTouch={showInteractions && canUseTouchActionSheet}
                 embedPath={embedPath}
                 quotePath={quotePath}
                 embedDepth={embedDepth}
@@ -238,7 +270,7 @@ const DefaultWinnerDrop = ({
             </div>
           </div>
         </div>
-        {!isMobile && showInteractions && showReplyAndQuote && (
+        {canUseDesktopHoverActions && showInteractions && showReplyAndQuote && (
           <div className="tw-absolute tw-right-0 tw-top-1">
             <WaveDropActions
               drop={drop}
@@ -248,7 +280,7 @@ const DefaultWinnerDrop = ({
           </div>
         )}
         <div
-          className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-flex tw-flex-col tw-gap-2`}
+          className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-flex tw-flex-col tw-gap-2`}
         >
           <WaveWinnerIdentity drop={drop} variant="full" cardVariant="chat" />
           {visibleMetadata.length > 0 && (
@@ -256,14 +288,19 @@ const DefaultWinnerDrop = ({
           )}
           {showInteractions && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-              {!!drop.raters_count && <WaveDropRatings drop={drop} />}
+              {!!drop.raters_count && (
+                <WaveDropRatings
+                  drop={drop}
+                  winningThreshold={winningThreshold}
+                />
+              )}
               <WaveDropReactions drop={drop} />
             </div>
           )}
         </div>
         {hasDropFooter(footer) && (
           <div
-            className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
+            className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
           >
             {footer}
           </div>
@@ -272,7 +309,7 @@ const DefaultWinnerDrop = ({
       {showInteractions && (
         <WaveDropMobileMenu
           drop={drop}
-          isOpen={isSlideUp}
+          isOpen={isSlideUp && canUseTouchActionSheet}
           longPressTriggered={longPressTriggered}
           showReplyAndQuote={showReplyAndQuote}
           setOpen={setIsSlideUp}

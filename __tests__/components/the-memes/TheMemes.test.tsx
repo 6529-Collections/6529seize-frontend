@@ -1,9 +1,5 @@
-import {
-  printVolumeTypeDropdown,
-  SortButton,
-} from "@/components/the-memes/TheMemes";
+import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
 import { VolumeType } from "@/entities/INFT";
-import { MemesSort } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -36,24 +32,9 @@ jest.mock("@/components/the-memes/TheMemes.module.scss", () => ({
 }));
 
 describe("TheMemes helpers", () => {
-  it("SortButton renders label and triggers select", () => {
-    const onSelect = jest.fn();
-    render(
-      <SortButton
-        currentSort={MemesSort.AGE}
-        sort={MemesSort.EDITION_SIZE}
-        select={onSelect}
-      />
-    );
-    const btn = screen.getByRole("button");
-    expect(btn.textContent).toBe("Edition Size");
-    fireEvent.click(btn);
-    expect(onSelect).toHaveBeenCalled();
-    expect(btn.className).not.toContain("disabled");
-  });
-
   it("renders volume type options", () => {
     render(printVolumeTypeDropdown(false, jest.fn(), jest.fn()));
+    fireEvent.click(screen.getByRole("button", { name: /Volume/ }));
     expect(screen.getByText(VolumeType.ALL_TIME)).toBeInTheDocument();
     expect(screen.getByText(VolumeType.DAYS_7)).toBeInTheDocument();
   });

@@ -1,4 +1,5 @@
 import React from "react";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import PrivilegedDropCreator from "@/components/waves/PrivilegedDropCreator";
 import {
@@ -11,6 +12,9 @@ interface WaveDropCreateProps {
   readonly wave: ApiWave;
   readonly onCancel?: (() => void) | undefined;
   readonly onSuccess: () => void;
+  readonly onServerDropCreated?:
+    | ((drop: ApiDrop) => Promise<void> | void)
+    | undefined;
   readonly isCurationLeaderboard?: boolean | undefined;
   readonly initialCurationUrl?: string | null | undefined;
   readonly title?: string | undefined;
@@ -18,12 +22,15 @@ interface WaveDropCreateProps {
   readonly onExitFixedDropMode?: (() => void) | undefined;
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
+  readonly forceStandardDropComposer?: boolean | undefined;
+  readonly fixedDropMode?: DropMode | undefined;
 }
 
 export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   wave,
   onCancel,
   onSuccess,
+  onServerDropCreated,
   isCurationLeaderboard = false,
   initialCurationUrl = null,
   title = "Create a New Drop",
@@ -31,6 +38,8 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   onExitFixedDropMode = onCancel,
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
+  forceStandardDropComposer = false,
+  fixedDropMode = DropMode.PARTICIPATION,
 }) => {
   const curationComposerVariant: CurationComposerVariant = isCurationLeaderboard
     ? "leaderboard"
@@ -83,14 +92,16 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
         onCancelReplyQuote={() => {}}
         onDropAddedToQueue={() => {}}
         onAllDropsAdded={onSuccess}
+        onServerDropCreated={onServerDropCreated}
         onExitFixedDropMode={onExitFixedDropMode}
         dropId={null}
         activeDrop={null}
-        fixedDropMode={DropMode.PARTICIPATION}
+        fixedDropMode={fixedDropMode}
         curationComposerVariant={curationComposerVariant}
         initialCurationUrl={initialCurationUrl}
         termsSignatureFlowEnabled={termsSignatureFlowEnabled}
         identityPickerPlacement={identityPickerPlacement}
+        forceStandardDropComposer={forceStandardDropComposer}
       />
     </div>
   );

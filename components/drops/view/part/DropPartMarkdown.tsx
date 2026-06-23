@@ -11,7 +11,11 @@ import {
   type ElementType,
   type ReactNode,
 } from "react";
-import Markdown, { type Components, type ExtraProps } from "react-markdown";
+import Markdown, {
+  defaultUrlTransform,
+  type Components,
+  type ExtraProps,
+} from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
@@ -27,7 +31,6 @@ import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { useTweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 import {
   LinkPreviewProvider,
   useLinkPreviewContext,
@@ -41,6 +44,7 @@ import {
   createLinkRenderer,
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
+import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
 
 const BreakComponent = () => <br />;
 
@@ -259,6 +263,8 @@ export interface DropPartMarkdownProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly bodyGalleryKeyPrefix?: string | undefined;
   readonly linkPreviewToggleControl?: LinkPreviewToggleControl | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -280,6 +286,8 @@ function DropPartMarkdown({
   quotePath,
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
+  fullWidthLinkPreviews = false,
+  bodyGalleryKeyPrefix,
   linkPreviewToggleControl,
   onLinkCardActionsActiveChange,
 }: DropPartMarkdownProps) {
@@ -287,7 +295,6 @@ function DropPartMarkdown({
   const isMobile = useIsMobileScreen();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const seizeSettings = useSeizeSettingsOptional();
-  const tweetPreviewMode = useTweetPreviewMode();
   const { variant: linkPreviewVariant } = useLinkPreviewContext();
 
   useLayoutEffect(() => {
@@ -327,25 +334,27 @@ function DropPartMarkdown({
         onQuoteClick,
         currentDropId,
         hideLinkPreviews,
-        tweetPreviewMode,
         isMemesWaveById: seizeSettings?.isMemesWave,
         isQuorumWaveById: seizeSettings?.isQuorumWave,
         embedPath: normalizedEmbedPath,
         quotePath: normalizedQuotePath,
         embedDepth,
         maxEmbedDepth,
+        fullWidthLinkPreviews,
+        bodyGalleryKeyPrefix,
       }),
     [
       onQuoteClick,
       currentDropId,
       hideLinkPreviews,
-      tweetPreviewMode,
       seizeSettings?.isMemesWave,
       seizeSettings?.isQuorumWave,
       normalizedEmbedPath,
       normalizedQuotePath,
       embedDepth,
       maxEmbedDepth,
+      fullWidthLinkPreviews,
+      bodyGalleryKeyPrefix,
     ]
   );
 
@@ -417,6 +426,12 @@ function DropPartMarkdown({
             code: ["className"],
             pre: ["className"],
           },
+          protocols: {
+            cite: ["http", "https"],
+            href: ["http", "https", "irc", "ircs", "mailto", "xmpp"],
+            longDesc: ["http", "https"],
+            src: ["http", "https", "data"],
+          },
         },
       ],
     ],
@@ -447,6 +462,17 @@ function DropPartMarkdown({
         remarkPlugins={remarkPlugins}
         className="tw-w-full"
         components={markdownComponents}
+        urlTransform={(url, key, node) => {
+          if (
+            key === "src" &&
+            node.tagName === "img" &&
+            isSafeMarkdownImageSrc(url)
+          ) {
+            return url;
+          }
+
+          return defaultUrlTransform(url);
+        }}
       >
         {processedContent}
       </Markdown>

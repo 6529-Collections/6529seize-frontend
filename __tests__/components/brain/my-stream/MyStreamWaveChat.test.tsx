@@ -68,7 +68,6 @@ const capturedCreatorPropsHolder = {
   current: {} as any,
   all: [] as any[],
 };
-const capturedMemesButtonPropsHolder = { current: {} as any };
 const PREFILL_URL =
   "https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/123";
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
@@ -123,22 +122,6 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   },
   DropMode: { BOTH: "BOTH", CHAT: "CHAT", PARTICIPATION: "PARTICIPATION" },
 }));
-
-jest.mock(
-  "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn",
-  () => ({
-    __esModule: true,
-    default: (props: any) => {
-      capturedMemesButtonPropsHolder.current = props;
-      return (
-        <div
-          data-testid="memes-btn"
-          data-locked={String(props.isSubmissionLocked)}
-        />
-      );
-    },
-  })
-);
 
 let mockIsApp = false;
 jest.mock("@/hooks/useDeviceInfo", () => ({
@@ -206,7 +189,6 @@ describe("MyStreamWaveChat", () => {
     capturedPropsHolder.current = {};
     capturedCreatorPropsHolder.current = {};
     capturedCreatorPropsHolder.all = [];
-    capturedMemesButtonPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
     searchParamsMock.toString.mockReset();
@@ -223,6 +205,7 @@ describe("MyStreamWaveChat", () => {
     mockApprovalStatus.mockReset();
     mockApprovalStatus.mockReturnValue({
       winningThreshold: null,
+      winningThresholdMinDurationMs: null,
       isVotingClosed: false,
       isVotingControlsLocked: false,
     });
@@ -262,7 +245,7 @@ describe("MyStreamWaveChat", () => {
     return props as any;
   };
 
-  it("handles serialNo param and shows memes button", async () => {
+  it("handles serialNo param without rendering a memes chat shortcut", async () => {
     searchParamsMock.get.mockReturnValueOnce("5").mockReturnValue(null);
     searchParamsMock.toString.mockReturnValue("serialNo=5");
     mockIsMemesWave = true;
@@ -278,7 +261,7 @@ describe("MyStreamWaveChat", () => {
     });
     expect(replaceMock).toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBe(5);
-    expect(screen.getByTestId("memes-btn")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /submit work/i })).toBeNull();
   });
 
   it("sets initialDrop null when no param", async () => {
@@ -297,7 +280,6 @@ describe("MyStreamWaveChat", () => {
     expect(replaceMock).not.toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBeNull();
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
-    expect(screen.queryByTestId("memes-btn")).toBeNull();
   });
 
   it("opens participation submit flow in a modal while keeping chat composer mounted", async () => {
@@ -649,6 +631,7 @@ describe("MyStreamWaveChat", () => {
     mockIsMemesWave = true;
     mockApprovalStatus.mockReturnValue({
       winningThreshold: 12,
+      winningThresholdMinDurationMs: 120_000,
       isVotingClosed: false,
       isVotingControlsLocked: true,
     });
@@ -665,12 +648,12 @@ describe("MyStreamWaveChat", () => {
     });
 
     expect(capturedPropsHolder.current.winningThreshold).toBe(12);
+    expect(capturedPropsHolder.current.winningThresholdMinDurationMs).toBe(
+      120_000
+    );
     expect(capturedPropsHolder.current.isVotingClosed).toBe(false);
     expect(capturedPropsHolder.current.isVotingControlsLocked).toBe(true);
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
-    expect(capturedMemesButtonPropsHolder.current.isSubmissionLocked).toBe(
-      true
-    );
   });
 
   it("keeps serialNo until chat view renders", async () => {

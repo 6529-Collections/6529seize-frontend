@@ -40,7 +40,7 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
   const tooltipUser = authorHandle ?? drop.author.id;
 
   const sizeClasses = compact ? "tw-h-8 tw-w-8" : "tw-h-10 tw-w-10";
-  const containerClasses = `tw-relative tw-flex-shrink-0 ${sizeClasses} tw-rounded-lg tw-bg-iron-900 tw-overflow-hidden`;
+  const containerClasses = `tw-relative tw-flex-shrink-0 ${sizeClasses} tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-bg-iron-950`;
 
   const handleImageError = () => {
     if (loadMode === "optimized") {
@@ -52,7 +52,7 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
 
   const avatarContent =
     resolvedPfp === null || loadMode === "placeholder" ? (
-      <div className="tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
+      <div className="tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-bg-iron-950" />
     ) : (
       <Image
         key={`${resolvedPfp}-${loadMode}`}

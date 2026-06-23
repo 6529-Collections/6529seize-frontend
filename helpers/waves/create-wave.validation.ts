@@ -1,12 +1,14 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { isReservedIdentitySubmissionMetadataKey } from "./identity-submission-metadata";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 import type {
   CreateWaveApprovalConfig,
   CreateWaveConfig,
   CreateWaveDatesConfig,
+  CreateWaveDisplayConfig,
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
   CreateWaveOutcomeConfig,
@@ -16,6 +18,12 @@ import type {
 } from "@/types/waves.types";
 import { CreateWaveStep } from "@/types/waves.types";
 import { Time } from "@/helpers/time";
+import {
+  APPROVE_WAVE_TAB_LABEL_MAX_LENGTH,
+  areApproveWaveTabLabelsDuplicate,
+  doApproveWaveTabLabelsUseReservedLabels,
+  normalizeWaveTabLabel,
+} from "./wave-metadata.helpers";
 
 export enum CREATE_WAVE_VALIDATION_ERROR {
   NAME_REQUIRED = "NAME_REQUIRED",
@@ -28,6 +36,8 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   DROPS_REQUIRED_METADATA_NON_UNIQUE = "DROPS_REQUIRED_METADATA_NON_UNIQUE",
   DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY = "DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY",
   APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
+  APPROVAL_THRESHOLD_TIME_INVALID = "APPROVAL_THRESHOLD_TIME_INVALID",
+  APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION = "APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION",
   OUTCOMES_REQUIRED = "OUTCOMES_REQUIRED",
   CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT = "CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT",
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES",
@@ -44,8 +54,15 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE",
   TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION = "TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION",
   MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID = "MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID",
+  CARD_SET_TDH_VOTING_NFTS_REQUIRED = "CARD_SET_TDH_VOTING_NFTS_REQUIRED",
+  CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID = "CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID",
+  CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE = "CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE",
+  CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED = "CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED",
   RANK_DECISION_TIME_MUST_BE_IN_FUTURE = "RANK_DECISION_TIME_MUST_BE_IN_FUTURE",
   RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE = "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE",
+  APPROVE_WAVE_TAB_LABEL_TOO_LONG = "APPROVE_WAVE_TAB_LABEL_TOO_LONG",
+  APPROVE_WAVE_TAB_LABELS_DUPLICATE = "APPROVE_WAVE_TAB_LABELS_DUPLICATE",
+  APPROVE_WAVE_TAB_LABEL_RESERVED = "APPROVE_WAVE_TAB_LABEL_RESERVED",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -54,8 +71,10 @@ const HOUR_IN_MS = 60 * MINUTE_IN_MS;
 
 const getOverviewValidationErrors = ({
   overview,
+  display,
 }: {
   readonly overview: WaveOverviewConfig;
+  readonly display?: CreateWaveDisplayConfig | undefined;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   if (!overview.name) {
@@ -63,6 +82,28 @@ const getOverviewValidationErrors = ({
   } else if (overview.name.length > MAX_NAME_LENGTH) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_TOO_LONG);
   }
+
+  if (overview.type === ApiWaveType.Approve) {
+    const approveDisplay = display?.approve;
+    const labels = [
+      normalizeWaveTabLabel(approveDisplay?.approvalsTabLabel),
+      normalizeWaveTabLabel(approveDisplay?.approvedTabLabel),
+    ];
+    if (
+      labels.some((label) => label.length > APPROVE_WAVE_TAB_LABEL_MAX_LENGTH)
+    ) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG);
+    }
+    if (areApproveWaveTabLabelsDuplicate(approveDisplay)) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
+      );
+    }
+    if (doApproveWaveTabLabelsUseReservedLabels(approveDisplay)) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED);
+    }
+  }
+
   return errors;
 };
 
@@ -192,6 +233,14 @@ const hasReservedIdentitySubmissionMetadataKey = ({
     isReservedIdentitySubmissionMetadataKey(item.key)
   );
 
+const getUniqueCreditNftIdsCount = (voting: CreateWaveVotingConfig): number => {
+  const uniqueIds = new Set<number>();
+  for (const nft of voting.creditNfts) {
+    uniqueIds.add(nft.token_id);
+  }
+  return uniqueIds.size;
+};
+
 const getDropsValidationErrors = ({
   waveType,
   drops,
@@ -294,6 +343,24 @@ const getVotingValidationErrors = ({
     errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
   }
 
+  if (waveType === ApiWaveType.Approve && approval.thresholdTimeMs !== null) {
+    if (
+      !Number.isInteger(approval.thresholdTimeMs) ||
+      approval.thresholdTimeMs <= 0 ||
+      approval.thresholdTimeMs % MINUTE_IN_MS !== 0
+    ) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID);
+    } else if (dates.endDate !== null) {
+      const waveDurationMs = dates.endDate - dates.submissionStartDate;
+
+      if (waveDurationMs >= 0 && approval.thresholdTimeMs > waveDurationMs) {
+        errors.push(
+          CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+        );
+      }
+    }
+  }
+
   // For Rank and Approve waves
   if (voting.type === null) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_TYPE_REQUIRED);
@@ -320,6 +387,41 @@ const getVotingValidationErrors = ({
     if (voting.profileId !== null) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID
+      );
+    }
+  }
+
+  if (voting.type === ApiWaveCreditType.CardSetTdh) {
+    const { creditNfts } = voting;
+    if (!creditNfts.length) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_REQUIRED
+      );
+    }
+
+    if (
+      creditNfts.some(
+        (nft) => nft.contract.toLowerCase() !== MEMES_CONTRACT.toLowerCase()
+      )
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID
+      );
+    }
+
+    if (
+      voting.creditNftMemeCount === null ||
+      !Number.isInteger(voting.creditNftMemeCount) ||
+      voting.creditNftMemeCount <= 0
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE
+      );
+    } else if (
+      getUniqueCreditNftIdsCount(voting) >= voting.creditNftMemeCount
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED
       );
     }
   }
@@ -453,7 +555,10 @@ export const getCreateWaveValidationErrors = ({
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       errors.push(
-        ...getOverviewValidationErrors({ overview: config.overview })
+        ...getOverviewValidationErrors({
+          overview: config.overview,
+          display: config.display,
+        })
       );
       break;
     case CreateWaveStep.GROUPS:

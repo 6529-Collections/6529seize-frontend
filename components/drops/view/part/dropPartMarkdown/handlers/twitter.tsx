@@ -1,12 +1,11 @@
 import { renderTweetEmbed } from "../renderers";
 import { isTwitterLink } from "../twitter";
 import type { LinkHandler } from "../linkTypes";
-import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 
 export const createTwitterHandler = (options?: {
-  readonly tweetPreviewMode?: TweetPreviewMode;
+  readonly fullWidth?: boolean | undefined;
 }): LinkHandler => ({
   match: isTwitterLink,
-  render: (href) => renderTweetEmbed(href, options),
+  render: (href) => renderTweetEmbed(href, { fullWidth: options?.fullWidth }),
   display: "block",
 });

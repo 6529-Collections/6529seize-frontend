@@ -5,6 +5,8 @@ import {
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
+const mockSetQueriesData = jest.fn();
+
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: () => ({ isConnected: true }),
 }));
@@ -39,9 +41,21 @@ jest.mock("@/services/api/drop-api", () => ({
   fetchDropByIdBatched: jest.fn(),
 }));
 
+jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
+  recordReactionRealtimeReconciliation: jest.fn(() => ({
+    shouldApplyCanonicalDrop: true,
+    expectedReaction: null,
+    serverReaction: null,
+  })),
+}));
+
+jest.mock("@/contexts/wave/drop-visibility", () => ({
+  isWaveDropNearViewport: jest.fn(() => true),
+}));
+
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
-    setQueriesData: jest.fn(),
+    setQueriesData: mockSetQueriesData,
   })),
 }));
 
@@ -49,6 +63,10 @@ const {
   commonApiPostWithoutBodyAndResponse,
 } = require("@/services/api/common-api");
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
+const {
+  recordReactionRealtimeReconciliation,
+} = require("@/utils/monitoring/dropReactionMonitoring");
+const { isWaveDropNearViewport } = require("@/contexts/wave/drop-visibility");
 const { getAuthJwt } = require("@/services/auth/auth.utils");
 const getAuthJwtMock = getAuthJwt as jest.Mock;
 
@@ -68,6 +86,12 @@ describe("useWaveRealtimeUpdater", () => {
   beforeEach(() => {
     setDocumentVisibilityState("visible");
     getAuthJwtMock.mockReturnValue("test-jwt");
+    (isWaveDropNearViewport as jest.Mock).mockReturnValue(true);
+    (recordReactionRealtimeReconciliation as jest.Mock).mockReturnValue({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: null,
+      serverReaction: null,
+    });
   });
 
   afterEach(() => {
@@ -184,7 +208,205 @@ describe("useWaveRealtimeUpdater", () => {
     );
     await flushPromises();
     expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4");
+    expect(recordReactionRealtimeReconciliation).toHaveBeenCalledWith({
+      drop: {
+        id: "d4",
+        wave: { id: "wave1" },
+        context_profile_context: null,
+      },
+      websocketStatus: "connected",
+    });
+    expect(mockSetQueriesData).toHaveBeenCalled();
     expect(props.updateData).toHaveBeenCalled();
+  });
+
+  it("marks active wave as read after visible reaction updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-active",
+            type: DropSize.FULL,
+            stableKey: "d4-active",
+            stableHash: "d4-active",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-active",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d4-active", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
+  it("does not mark active wave as read when reaction target is not near viewport", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-offscreen",
+            type: DropSize.FULL,
+            stableKey: "d4-offscreen",
+            stableHash: "d4-offscreen",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    (isWaveDropNearViewport as jest.Mock).mockReturnValue(false);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-offscreen",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d4-offscreen",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(isWaveDropNearViewport).toHaveBeenCalledWith(
+      "wave1",
+      "d4-offscreen"
+    );
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+  });
+
+  it("skips stale DROP_REACTION_UPDATE canonical drops", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-stale",
+            type: DropSize.FULL,
+            stableKey: "d4-stale",
+            stableHash: "d4-stale",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-stale",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: { reaction: ":old:" },
+    });
+    (recordReactionRealtimeReconciliation as jest.Mock).mockReturnValueOnce({
+      shouldApplyCanonicalDrop: false,
+      expectedReaction: ":new:",
+      serverReaction: ":old:",
+      supersededByMutationId: "mutation-2",
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d4-stale",
+      wave: { id: "wave1" },
+      author: {},
+    };
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4-stale");
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).not.toHaveBeenCalled();
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
+  it("does not mark background wave as read after reaction updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-background",
+            type: DropSize.FULL,
+            stableKey: "d4-background",
+            stableHash: "d4-background",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave2";
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-background",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d4-background",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 
   it("does not process when wave is missing", async () => {
@@ -230,6 +452,82 @@ describe("useWaveRealtimeUpdater", () => {
       )
     );
     expect(props.updateData).not.toHaveBeenCalled();
+  });
+
+  it("preserves authenticated poll votes on websocket drop updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "poll-drop",
+            type: DropSize.FULL,
+            stableKey: "poll-drop",
+            stableHash: "poll-drop",
+            serial_no: 10,
+            created_at: 1000,
+            author: { subscribed_actions: [] },
+            wave: { id: "wave1" },
+            poll: {
+              id: "poll-1",
+              options: [
+                { option_no: 1, option_string: "First", votes: 2 },
+                { option_no: 2, option_string: "Second", votes: 2 },
+              ],
+              voted: [2],
+              multichoice: false,
+              anonymous: false,
+              closing_time: 2000,
+              is_open: true,
+            },
+            context_profile_context: null,
+          },
+        ],
+        latestFetchedSerialNo: null,
+      },
+    };
+    const props = baseProps(store);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const websocketDrop: any = {
+      id: "poll-drop",
+      serial_no: 10,
+      created_at: 1000,
+      author: { subscribed_actions: [] },
+      wave: { id: "wave1" },
+      poll: {
+        id: "poll-1",
+        options: [
+          { option_no: 1, option_string: "First", votes: 3 },
+          { option_no: 2, option_string: "Second", votes: 2 },
+        ],
+        voted: [1],
+        multichoice: false,
+        anonymous: false,
+        closing_time: 2000,
+        is_open: true,
+      },
+      context_profile_context: null,
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        websocketDrop,
+        ProcessIncomingDropType.DROP_INSERT,
+        { preferExistingPollVote: true }
+      )
+    );
+
+    expect(props.updateData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drops: [
+          expect.objectContaining({
+            poll: expect.objectContaining({
+              options: websocketDrop.poll.options,
+              voted: [2],
+            }),
+          }),
+        ],
+      })
+    );
   });
 
   it("removes drop when processDropRemoved is called", async () => {

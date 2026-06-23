@@ -5,14 +5,15 @@ import { WaveWinnersDrop } from "@/components/waves/winners/drops/WaveWinnersDro
 const mockDefaultWaveWinnersDrop = jest.fn((p: any) => (
   <div data-testid="default">{p.winner.drop.id}</div>
 ));
+const mockMemesWaveWinnersDrop = jest.fn((p: any) => (
+  <div data-testid="memes">{p.winner.drop.id}</div>
+));
 
 jest.mock("@/components/waves/winners/drops/DefaultWaveWinnerDrop", () => ({
   DefaultWaveWinnersDrop: (p: any) => mockDefaultWaveWinnersDrop(p),
 }));
 jest.mock("@/components/waves/winners/drops/MemesWaveWinnerDrop", () => ({
-  MemesWaveWinnersDrop: (p: any) => (
-    <div data-testid="memes">{p.winner.drop.id}</div>
-  ),
+  MemesWaveWinnersDrop: (p: any) => mockMemesWaveWinnersDrop(p),
 }));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 
@@ -24,6 +25,7 @@ describe("WaveWinnersDrop", () => {
 
   beforeEach(() => {
     mockDefaultWaveWinnersDrop.mockClear();
+    mockMemesWaveWinnersDrop.mockClear();
   });
 
   it("renders memes winner when memes wave", () => {
@@ -56,6 +58,40 @@ describe("WaveWinnersDrop", () => {
     expect(mockDefaultWaveWinnersDrop).toHaveBeenCalledWith(
       expect.objectContaining({
         contentPresentation: "quorumCompact",
+      })
+    );
+  });
+
+  it("keeps approval wave state scoped to default winner renderer", () => {
+    useWave.mockReturnValue({ isMemesWave: true });
+    render(
+      <WaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+        isApprovalWave={true}
+      />
+    );
+
+    expect(mockMemesWaveWinnersDrop).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        isApprovalWave: true,
+      })
+    );
+
+    useWave.mockReturnValue({ isMemesWave: false });
+    render(
+      <WaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+        isApprovalWave={true}
+      />
+    );
+
+    expect(mockDefaultWaveWinnersDrop).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isApprovalWave: true,
       })
     );
   });

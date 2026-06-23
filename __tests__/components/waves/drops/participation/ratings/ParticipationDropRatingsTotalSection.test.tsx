@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import ParticipationDropRatingsTotalSection from "@/components/waves/drops/participation/ratings/ParticipationDropRatingsTotalSection";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
@@ -17,6 +17,7 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
       data-testid="progress"
       data-current={props.current}
       data-projected={props.projected}
+      data-tooltip-label={props.tooltipLabel}
     />
   ),
 }));
@@ -26,6 +27,7 @@ describe("ParticipationDropRatingsTotalSection", () => {
     id: "d1",
     wave: { voting_credit_type: ApiWaveCreditType.Tdh },
     rating: 5,
+    realtime_rating: 15,
     rating_prediction: 10,
   };
   const theme = { text: "t", ring: "r", indicator: "i" };
@@ -49,6 +51,7 @@ describe("ParticipationDropRatingsTotalSection", () => {
     const repDrop = {
       ...drop,
       rating: 42,
+      realtime_rating: 80,
       wave: { voting_credit_type: ApiWaveCreditType.Rep },
     };
     const repRatingsData = {
@@ -71,6 +74,13 @@ describe("ParticipationDropRatingsTotalSection", () => {
     expect(screen.getByText("/")).toBeInTheDocument();
     expect(screen.getByText("100")).toBeInTheDocument();
     expect(screen.getByText("Needs 58")).toBeInTheDocument();
+    const progress = screen.getByTestId("progress");
+    expect(progress).toHaveAttribute("data-current", "42");
+    expect(progress).toHaveAttribute("data-projected", "80");
+    expect(progress).toHaveAttribute(
+      "data-tooltip-label",
+      "Votes given now"
+    );
   });
 
   it("shows Reached threshold before the winner state refreshes", () => {
@@ -86,6 +96,52 @@ describe("ParticipationDropRatingsTotalSection", () => {
 
     expect(screen.getByText("Reached threshold")).toBeInTheDocument();
     expect(screen.queryByText("Approved")).not.toBeInTheDocument();
+  });
+
+  it("shows and updates the approval countdown while the min time is running", () => {
+    jest.useFakeTimers().setSystemTime(new Date(1_000_000));
+    const { unmount } = render(
+      <ParticipationDropRatingsTotalSection
+        drop={{
+          ...drop,
+          rating: 8,
+          over_threshold_since_ms: 1_000_000,
+        }}
+        theme={theme}
+        ratingsData={{ ...ratingsData, currentRating: 8 }}
+        rank={1}
+        winningThreshold={8}
+        winningThresholdMinDurationMs={480_000}
+      />
+    );
+
+    try {
+      expect(screen.getByText("Approving in 8m")).toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(screen.getByText("Approving in 7m")).toBeInTheDocument();
+    } finally {
+      unmount();
+      jest.useRealTimers();
+    }
+  });
+
+  it("keeps the fallback reached label when countdown timing is missing", () => {
+    render(
+      <ParticipationDropRatingsTotalSection
+        drop={{ ...drop, rating: 8 }}
+        theme={theme}
+        ratingsData={{ ...ratingsData, currentRating: 8 }}
+        rank={1}
+        winningThreshold={8}
+        winningThresholdMinDurationMs={480_000}
+      />
+    );
+
+    expect(screen.getByText("Reached threshold")).toBeInTheDocument();
   });
 
   it("shows Closed only when voting is really closed", () => {
@@ -157,10 +213,12 @@ describe("ParticipationDropRatingsTotalSection", () => {
         ratingsData={{ ...ratingsData, currentRating: 8 }}
         rank={1}
         winningThreshold={8}
+        winningThresholdMinDurationMs={480_000}
       />
     );
 
     expect(screen.getByText("Approved")).toBeInTheDocument();
+    expect(screen.queryByText(/Approving in/)).not.toBeInTheDocument();
     expect(screen.queryByText("Reached threshold")).not.toBeInTheDocument();
   });
 

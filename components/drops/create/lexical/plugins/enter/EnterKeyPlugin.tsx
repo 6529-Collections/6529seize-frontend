@@ -10,7 +10,7 @@ import {
   COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
 } from "lexical";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { $isListItemNode, $isListNode } from "@lexical/list";
 import { $isHeadingNode } from "@lexical/rich-text";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -27,6 +27,21 @@ export default function EnterKeyPlugin({
 }) {
   const isMobile = useIsMobileDevice();
   const { isCapacitor } = useCapacitor();
+  const disabledRef = useRef(disabled);
+  const handleSubmitRef = useRef(handleSubmit);
+  const canSubmitWithEnterRef = useRef(canSubmitWithEnter);
+
+  useEffect(() => {
+    disabledRef.current = disabled;
+  }, [disabled]);
+
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
+
+  useEffect(() => {
+    canSubmitWithEnterRef.current = canSubmitWithEnter;
+  }, [canSubmitWithEnter]);
 
   const [editor] = useLexicalComposerContext();
 
@@ -68,7 +83,7 @@ export default function EnterKeyPlugin({
     return editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
-        if (disabled || !canSubmitWithEnter()) {
+        if (disabledRef.current || !canSubmitWithEnterRef.current()) {
           // Let the mention plugin handle the Enter key
           return false; // Allows the mention plugin to process the Enter key
         }
@@ -103,7 +118,7 @@ export default function EnterKeyPlugin({
         } else {
           // Handle Enter (Submit)
           event?.preventDefault();
-          handleSubmit(); // Your submit function
+          handleSubmitRef.current(); // Your submit function
           return true; // Prevents the default behavior
         }
       },

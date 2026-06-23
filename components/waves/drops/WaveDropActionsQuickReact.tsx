@@ -101,6 +101,8 @@ const QuickReactButton: React.FC<{
             src={customSrc}
             alt={emojiId}
             fill
+            sizes={isMobile ? "28px" : "20px"}
+            unoptimized
             className="tw-object-contain"
           />
         </div>

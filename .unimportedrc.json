@@ -1,10 +1,15 @@
 {
     "entry": [
-      "src/app/**/page.{ts,tsx,js,jsx}",
-      "src/app/**/layout.{ts,tsx,js,jsx}",
-      "src/app/**/route.{ts,tsx,js,jsx}",
-      "src/pages/**/*.{ts,tsx,js,jsx}",
-      "src/middleware.ts",
+      "app/**/page.{ts,tsx,js,jsx}",
+      "app/**/layout.{ts,tsx,js,jsx}",
+      "app/**/route.{ts,tsx,js,jsx}",
+      "app/**/loading.{ts,tsx,js,jsx}",
+      "app/**/not-found.{ts,tsx,js,jsx}",
+      "app/**/error.{ts,tsx,js,jsx}",
+      "app/global-error.{ts,tsx,js,jsx}",
+      "proxy.ts",
+      "instrumentation.ts",
+      "instrumentation-client.ts",
       "scripts/**/*.{ts,js,cjs,mjs}"
     ],
     "extensions": [".ts", ".tsx", ".js", ".jsx"],
@@ -12,11 +17,12 @@
       "**/.next/**",
       "coverage/**",
       "generated/**",
-      "tmp_gen_outp/**"
+      "tmp_gen_outp/**",
+      "tmp_gen_final/**",
+      ".generated-backup-*/**"
     ],
-    "aliases": { "@/*": ["./src/*"] },
+    "aliases": { "@/*": ["./*"] },
     "rootDir": ".",
     "respectGitignore": true,
-    "scannedDirs": ["src", "app", "pages", "components", "lib", "hooks", "scripts"]
+    "scannedDirs": ["src", "app", "components", "lib", "hooks", "scripts"]
   }
-  

@@ -12,6 +12,15 @@ jest.mock("@/hooks/useWaveTimers", () => ({
   }),
 }));
 
+const mockApproveLabels = {
+  approvals: "Proposals",
+  approved: "Approved",
+};
+
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useApproveWaveCustomTabLabels: () => mockApproveLabels,
+}));
+
 let mockCompleted = false;
 let mockFirstDecision = false;
 
@@ -35,6 +44,8 @@ describe("MyStreamWaveTabsLeaderboard", () => {
   beforeEach(() => {
     mockCompleted = false;
     mockFirstDecision = false;
+    mockApproveLabels.approvals = "Proposals";
+    mockApproveLabels.approved = "Approved";
   });
 
   it("shows leaderboard tab when voting ongoing", () => {
@@ -95,7 +106,7 @@ describe("MyStreamWaveTabsLeaderboard", () => {
       { wave: { wave: { type: ApiWaveType.Approve } } }
     );
 
-    const approvalsButton = screen.getByText("Approvals");
+    const approvalsButton = screen.getByText("Proposals");
     const approvedButton = screen.getByText("Approved");
 
     expect(registerTabRef).toHaveBeenCalledWith(
@@ -109,5 +120,20 @@ describe("MyStreamWaveTabsLeaderboard", () => {
 
     await userEvent.click(approvedButton);
     expect(onViewChange).toHaveBeenCalledWith(BrainView.WINNERS);
+  });
+
+  it("uses custom approval labels for approve waves", () => {
+    mockApproveLabels.approvals = "Candidates";
+    mockApproveLabels.approved = "Selected";
+    mockCompleted = true;
+
+    renderComponent(BrainView.DEFAULT, {
+      wave: { wave: { type: ApiWaveType.Approve } },
+    });
+
+    expect(screen.getByText("Candidates")).toBeInTheDocument();
+    expect(screen.getByText("Selected")).toBeInTheDocument();
+    expect(screen.queryByText("Proposals")).toBeNull();
+    expect(screen.queryByText("Approved")).toBeNull();
   });
 });

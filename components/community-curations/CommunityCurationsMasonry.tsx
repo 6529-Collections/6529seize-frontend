@@ -3,10 +3,10 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import CurationDropFooter from "@/components/waves/drops/CurationDropFooter";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import { WaveDropQuoteDisplayProvider } from "@/components/waves/drops/WaveDropQuoteDisplayContext";
+import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
@@ -255,7 +255,7 @@ function CommunityCurationsMasonryItem({
           drop={drop}
           previousDrop={null}
           nextDrop={null}
-          showWaveInfo={false}
+          showWaveInfo={true}
           activeDrop={null}
           showReplyAndQuote={false}
           location={DropLocation.MY_STREAM}
@@ -265,8 +265,13 @@ function CommunityCurationsMasonryItem({
           onQuoteClick={navigateToDropWave}
           onDropContentClick={navigateToDropWave}
           footer={<CurationDropFooter drop={drop} />}
-          timestampLayout="stacked"
+          mediaImageScale={ImageScale.AUTOx1080}
+          timestampLayout="inline"
           showInteractions={false}
+          inlineAuthorOnDesktop={true}
+          fullWidthMedia={true}
+          fullWidthLinkPreviews={true}
+          showVideoFullscreen={false}
         />
       </WaveDropQuoteDisplayProvider>
       <div
@@ -346,27 +351,23 @@ export default function CommunityCurationsMasonry({
   );
 
   return (
-    <TweetPreviewModeProvider mode="never">
-      <div>
-        <CommunityCurationsVirtualMasonry
-          drops={drops}
-          scrollContainer={scrollContainer}
-        />
+    <div>
+      <CommunityCurationsVirtualMasonry
+        drops={drops}
+        scrollContainer={scrollContainer}
+      />
 
-        {shouldShowPaginationFooter && (
-          <div className="tw-flex tw-justify-center tw-py-6">
-            {!isFetchingNextPage && (
-              <CommunityCurationsInfiniteScrollTrigger
-                onIntersection={handleIntersection}
-                scrollContainer={scrollContainer}
-              />
-            )}
-            {shouldShowLoader && (
-              <CircleLoader size={CircleLoaderSize.MEDIUM} />
-            )}
-          </div>
-        )}
-      </div>
-    </TweetPreviewModeProvider>
+      {shouldShowPaginationFooter && (
+        <div className="tw-flex tw-justify-center tw-py-6">
+          {!isFetchingNextPage && (
+            <CommunityCurationsInfiniteScrollTrigger
+              onIntersection={handleIntersection}
+              scrollContainer={scrollContainer}
+            />
+          )}
+          {shouldShowLoader && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
+        </div>
+      )}
+    </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import WaveDelete from "./delete/WaveDelete";
 import WaveMute from "./mute/WaveMute";
@@ -9,8 +10,10 @@ import WaveProfileWaveAction from "./profile-wave/WaveProfileWaveAction";
 
 export default function WaveHeaderOptions({
   wave,
+  showOwnerActions = true,
 }: {
   readonly wave: ApiWave;
+  readonly showOwnerActions?: boolean | undefined;
 }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -20,7 +23,7 @@ export default function WaveHeaderOptions({
       <button
         ref={buttonRef}
         type="button"
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-inset desktop-hover:hover:tw-ring-iron-700"
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition-all tw-duration-200 active:tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-300"
         id="options-menu-0-button"
         aria-expanded={isOptionsOpen}
         aria-haspopup="true"
@@ -30,14 +33,10 @@ export default function WaveHeaderOptions({
         }}
       >
         <span className="tw-sr-only">Open options</span>
-        <svg
-          className="tw-size-5 tw-flex-shrink-0"
-          viewBox="0 0 20 20"
-          fill="currentColor"
+        <EllipsisVerticalIcon
+          className="tw-size-4 tw-flex-shrink-0"
           aria-hidden="true"
-        >
-          <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
-        </svg>
+        />
       </button>
       <CommonDropdownItemsDefaultWrapper
         isOpen={isOptionsOpen}
@@ -46,12 +45,14 @@ export default function WaveHeaderOptions({
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-0.5 tw-py-1">
-            <WaveProfileWaveAction
-              wave={wave}
-              onSuccess={() => setIsOptionsOpen(false)}
-            />
+            {showOwnerActions && (
+              <WaveProfileWaveAction
+                wave={wave}
+                onSuccess={() => setIsOptionsOpen(false)}
+              />
+            )}
             <WaveMute wave={wave} onSuccess={() => setIsOptionsOpen(false)} />
-            <WaveDelete wave={wave} />
+            {showOwnerActions && <WaveDelete wave={wave} />}
           </div>
         </li>
       </CommonDropdownItemsDefaultWrapper>

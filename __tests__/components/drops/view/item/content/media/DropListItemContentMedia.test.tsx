@@ -4,11 +4,21 @@ import DropListItemContentMedia from "@/components/drops/view/item/content/media
 
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMediaImage",
-  () => ({ __esModule: true, default: () => <div data-testid="image" /> })
+  () => ({
+    __esModule: true,
+    default: (props: { readonly galleryItemId?: string | undefined }) => (
+      <div data-testid="image" data-gallery-item-id={props.galleryItemId} />
+    ),
+  })
 );
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMediaVideo",
-  () => ({ __esModule: true, default: () => <div data-testid="video" /> })
+  () => ({
+    __esModule: true,
+    default: (props: { readonly align?: string | undefined }) => (
+      <div data-testid="video" data-align={props.align} />
+    ),
+  })
 );
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMediaAudio",
@@ -40,9 +50,17 @@ jest.mock("next/dynamic", () => (importer: any) => () => (
 describe("DropListItemContentMedia", () => {
   it("renders image component", () => {
     render(
-      <DropListItemContentMedia media_mime_type="image/png" media_url="img" />
+      <DropListItemContentMedia
+        media_mime_type="image/png"
+        media_url="img"
+        galleryItemId="drop-image-gallery:media:0:img"
+      />
     );
     expect(screen.getByTestId("image")).toBeInTheDocument();
+    expect(screen.getByTestId("image")).toHaveAttribute(
+      "data-gallery-item-id",
+      "drop-image-gallery:media:0:img"
+    );
   });
 
   it("renders video component", () => {
@@ -50,6 +68,17 @@ describe("DropListItemContentMedia", () => {
       <DropListItemContentMedia media_mime_type="video/mp4" media_url="vid" />
     );
     expect(screen.getByTestId("video")).toBeInTheDocument();
+  });
+
+  it("forwards video alignment", () => {
+    render(
+      <DropListItemContentMedia
+        media_mime_type="video/mp4"
+        media_url="vid"
+        videoAlign="center"
+      />
+    );
+    expect(screen.getByTestId("video")).toHaveAttribute("data-align", "center");
   });
 
   it("renders audio component", () => {

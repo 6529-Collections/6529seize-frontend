@@ -13,6 +13,14 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
 }));
 
+jest.mock(
+  "@heroicons/react/20/solid",
+  () => ({
+    ArrowLeftIcon: () => null,
+  }),
+  { virtual: true }
+);
+
 jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(),
   fetchAllPages: jest.fn(() => Promise.resolve([])),
@@ -54,7 +62,9 @@ jest.mock("@/components/the-memes/MemePageActivity", () => ({
 }));
 
 jest.mock("@/components/the-memes/MemePageArtViewer", () => ({
-  MemePageArtViewer: () => <div data-testid="art-viewer" />,
+  MemePageArtViewer: ({ locale }: { readonly locale?: string }) => (
+    <div data-locale={locale} data-testid="art-viewer" />
+  ),
 }));
 
 jest.mock("@/components/the-memes/MemePageArt", () => ({
@@ -97,12 +107,24 @@ const mockReplace = jest.fn(
   }
 );
 let currentFocus: string | null = null;
+let currentLocale: string | null = null;
 const mockSearchParams = {
-  get: jest.fn((key: string) => (key === "focus" ? currentFocus : null)),
+  get: jest.fn((key: string) => {
+    if (key === "focus") {
+      return currentFocus;
+    }
+    if (key === "locale") {
+      return currentLocale;
+    }
+    return null;
+  }),
   toString: jest.fn(() => {
     const params = new URLSearchParams();
     if (currentFocus) {
       params.set("focus", currentFocus);
+    }
+    if (currentLocale) {
+      params.set("locale", currentLocale);
     }
     return params.toString();
   }),
@@ -122,6 +144,7 @@ usePathnameMock.mockReturnValue("/the-memes/1");
 
 beforeEach(() => {
   currentFocus = null;
+  currentLocale = null;
   mockReplace.mockClear();
   mockSearchParams.get.mockClear();
   mockSearchParams.toString.mockClear();
@@ -262,11 +285,12 @@ jest.mock("@/contexts/TitleContext", () => ({
 describe("MemePage tab navigation", () => {
   beforeEach(() => {
     currentFocus = null;
+    currentLocale = null;
     mockReplace.mockClear();
   });
 
   it.each([
-    ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-right"],
+    ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-sub"],
     ["History", MEME_FOCUS.ACTIVITY, "activity"],
     ["References", MEME_FOCUS.REFERENCES, "references-sub"],
   ])(
@@ -336,6 +360,36 @@ describe("MemePage search params handling", () => {
     });
   });
 
+  it("keeps card navigation logic before the title while using mobile-first visual ordering", async () => {
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("nft-navigation")).toBeInTheDocument();
+    });
+
+    const navigation = screen.getByTestId("nft-navigation");
+    const title = screen.getByRole("heading", { name: "Card 1 - Meme" });
+    const nftName = within(title).getByText("Meme");
+
+    expect(
+      navigation.compareDocumentPosition(title) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(navigation.parentElement).toHaveClass("tw-order-2", "md:tw-order-1");
+    expect(navigation.parentElement?.parentElement).toHaveClass(
+      "tw-justify-between",
+      "md:tw-justify-start",
+      "tw-items-center"
+    );
+    expect(title).toHaveClass("tw-flex-wrap", "md:tw-flex-nowrap");
+    expect(nftName).toHaveClass(
+      "tw-whitespace-normal",
+      "tw-break-words",
+      "md:tw-truncate"
+    );
+    expect(nftName).not.toHaveClass("tw-truncate");
+  });
+
   it("uses mobile-first Tailwind ordering for the minting box and artwork", async () => {
     renderPage();
 
@@ -358,7 +412,19 @@ describe("MemePage search params handling", () => {
     expect(detailsColumn?.className).toContain("tw-contents");
     expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
     expect(artworkColumn).toHaveClass("tw-order-2");
-    expect(artworkColumn).toHaveClass("lg:tw-self-center");
+    expect(artworkColumn).toHaveClass("lg:tw-self-stretch");
+  });
+
+  it("passes active locale into the art viewer", async () => {
+    currentLocale = "de-DE";
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("art-viewer")).toHaveAttribute(
+        "data-locale",
+        "de-DE"
+      );
+    });
   });
 
   it("sets focus from valid search param", async () => {
@@ -391,6 +457,26 @@ describe("MemePage search params handling", () => {
       `/the-memes/1?focus=${MEME_FOCUS.REFERENCES}`,
       { scroll: false }
     );
+  });
+
+  it("does not replace the route when the active primary tab is activated", async () => {
+    renderPage();
+
+    await waitFor(() =>
+      expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
+    );
+
+    const overviewButton = screen.getByRole("button", { name: "Overview" });
+    expect(overviewButton).not.toBeDisabled();
+    expect(overviewButton).toHaveAttribute("aria-current", "page");
+
+    mockReplace.mockClear();
+    overviewButton.focus();
+    expect(overviewButton).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    await userEvent.click(overviewButton);
+
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 });
 
@@ -563,10 +649,14 @@ describe("MemePage loading states", () => {
     renderPage();
 
     // Should render basic navigation structure even while loading
-    expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
-      "href",
-      "/the-memes"
-    );
+    const backLink = screen.getByRole("link", { name: "Back to The Memes" });
+    expect(backLink).toHaveAttribute("href", "/the-memes");
+    expect(backLink).not.toHaveClass("tw-uppercase");
+    expect(backLink).not.toHaveClass("tw-border");
+    expect(backLink).not.toHaveClass("tw-border-solid");
+    expect(backLink).not.toHaveClass("hover:tw-bg-iron-900/70");
+    expect(backLink).toHaveClass("hover:tw-text-iron-400");
+    expect(backLink).toHaveClass("tw-text-xs", "tw-px-2", "tw-py-2");
   });
 
   it("shows content only after metadata and NFT load", async () => {
@@ -586,9 +676,11 @@ describe("MemePage loading states", () => {
     // Wait for data to load and content to render
     await waitFor(
       () => {
-        expect(
-          screen.getByRole("button", { name: "Overview" })
-        ).toBeInTheDocument();
+        const overviewButton = screen.getByRole("button", {
+          name: "Overview",
+        });
+        expect(overviewButton).not.toBeDisabled();
+        expect(overviewButton).toHaveAttribute("aria-current", "page");
       },
       { timeout: 3000 }
     );
@@ -608,20 +700,73 @@ describe("MemePage navigation integration", () => {
         expect(calendarPosition).toHaveClass("tw-hidden", "md:tw-flex");
         expect(within(calendarPosition).getByText("YEAR")).toBeInTheDocument();
         expect(within(calendarPosition).getByText("EPOCH")).toBeInTheDocument();
+        expect(within(calendarPosition).getAllByText("/")).toHaveLength(4);
         expect(screen.getByText(/Card 1/)).toBeInTheDocument();
         expect(
-          screen.getByRole("heading", { level: 1, name: "Card 1 — Meme" })
+          screen.getByRole("heading", { level: 1, name: "Card 1 - Meme" })
         ).toHaveTextContent("Meme");
         expect(screen.getByTestId("nft-navigation")).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
-          "href",
-          "/the-memes"
-        );
+        expect(
+          screen.getByRole("link", { name: "Back to The Memes" })
+        ).toHaveAttribute("href", "/the-memes");
         expect(
           screen.getByRole("link", { name: "View SZN 1 cards" })
         ).toHaveAttribute("href", "/the-memes?szn=1&sort=age&sort_dir=ASC");
       },
       { timeout: 5000 }
     );
+  });
+
+  it("preserves the active locale on the season link", async () => {
+    currentLocale = "de-DE";
+
+    renderPage();
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByRole("link", { name: "Back to The Memes" })
+        ).toHaveAttribute("href", "/the-memes?locale=de-DE");
+        expect(
+          screen.getByRole("link", { name: "View SZN 1 cards" })
+        ).toHaveAttribute(
+          "href",
+          "/the-memes?szn=1&sort=age&sort_dir=ASC&locale=de-DE"
+        );
+        expect(
+          screen.getByLabelText("Meme calendar position")
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
+  });
+});
+
+describe("MemePage accessibility labels", () => {
+  it("marks selected primary and history tabs for assistive technology", async () => {
+    const page = renderPage();
+
+    await waitFor(() => {
+      const overviewButton = screen.getByRole("button", { name: "Overview" });
+      expect(overviewButton).not.toBeDisabled();
+      expect(overviewButton).toHaveAttribute("aria-current", "page");
+    });
+
+    const collectorsButton = screen.getByRole("button", { name: "Collectors" });
+    expect(collectorsButton).not.toBeDisabled();
+    expect(collectorsButton).not.toHaveAttribute("aria-current");
+    expect(collectorsButton).toHaveClass("focus-visible:tw-outline");
+
+    await userEvent.click(screen.getByRole("button", { name: "History" }));
+    page.rerenderPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("tablist", { name: "Meme history sections" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: "Card Activity", selected: true })
+      ).toBeInTheDocument();
+    });
   });
 });

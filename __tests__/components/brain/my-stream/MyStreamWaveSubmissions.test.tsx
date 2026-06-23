@@ -36,6 +36,9 @@ jest.mock("@/components/waves/drops/participation/ParticipationDrop", () => ({
     <button
       data-testid="drop"
       data-winning-threshold={props.winningThreshold ?? ""}
+      data-winning-threshold-min-duration={
+        props.winningThresholdMinDurationMs ?? ""
+      }
       data-is-voting-closed={String(props.isVotingClosed)}
       data-is-voting-controls-locked={String(props.isVotingControlsLocked)}
       onClick={() => props.onQuoteClick(props.drop)}
@@ -132,6 +135,7 @@ describe("MyStreamWaveSubmissions", () => {
       wave: {
         type: ApiWaveType.Approve,
         winning_threshold: 7,
+        winning_threshold_min_duration_ms: 120_000,
         max_winners: 1,
         no_of_decisions_done: 1,
       },
@@ -153,6 +157,10 @@ describe("MyStreamWaveSubmissions", () => {
     expect(screen.getByTestId("drop")).toHaveAttribute(
       "data-winning-threshold",
       "7"
+    );
+    expect(screen.getByTestId("drop")).toHaveAttribute(
+      "data-winning-threshold-min-duration",
+      "120000"
     );
     expect(screen.getByTestId("drop")).toHaveAttribute(
       "data-is-voting-closed",

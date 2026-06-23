@@ -28,6 +28,7 @@ jest.mock("@/components/drops/view/DropsList", () => (props: any) => {
 
 describe("Drops", () => {
   const observerInstances: any[] = [];
+
   beforeEach(() => {
     dropsListSpy.mockClear();
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
@@ -105,4 +106,5 @@ describe("Drops", () => {
       expect.objectContaining({ drops: expect.any(Array) })
     );
   });
+
 });

@@ -1,17 +1,36 @@
 import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
-import type { WaveOverviewConfig } from "@/types/waves.types";
+import type {
+  CreateWaveDisplayConfig,
+  WaveOverviewConfig,
+} from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import CreateWaveDisplaySettings from "./CreateWaveDisplaySettings";
 import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";
 
+const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
+  outcomesVisible: true,
+  approve: {
+    approvalsTabLabel: "",
+    approvedTabLabel: "",
+  },
+};
+
 export default function CreateWaveOverview({
   overview,
+  display = DEFAULT_DISPLAY,
   errors,
   setOverview,
+  setDisplay = () => undefined,
 }: {
   readonly overview: WaveOverviewConfig;
+  readonly display?: CreateWaveDisplayConfig | undefined;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setOverview: (overview: WaveOverviewConfig) => void;
+  readonly setDisplay?:
+    | ((display: CreateWaveDisplayConfig) => void)
+    | undefined;
 }) {
   const onChange = <K extends keyof WaveOverviewConfig>({
     key,
@@ -55,6 +74,15 @@ export default function CreateWaveOverview({
           })
         }
       />
+      {overview.type === ApiWaveType.Rank ||
+      overview.type === ApiWaveType.Approve ? (
+        <CreateWaveDisplaySettings
+          display={display}
+          errors={errors}
+          onChange={setDisplay}
+          waveType={overview.type}
+        />
+      ) : null}
     </div>
   );
 }

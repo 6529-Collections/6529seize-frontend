@@ -33,6 +33,10 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
 }) => {
   const winningThreshold =
     wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
+  const winningThresholdMinDurationMs =
+    wave.wave.type === ApiWaveType.Approve
+      ? wave.wave.winning_threshold_min_duration_ms
+      : null;
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
@@ -79,7 +83,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
 
   return (
     <div className="tw-w-full tw-min-w-0 tw-@container">
-      <div className="tw-grid tw-w-full tw-min-w-0 tw-gap-x-4 tw-gap-y-8 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3">
+      <div className="tw-grid tw-w-full tw-min-w-0 tw-items-stretch tw-gap-x-4 tw-gap-y-8 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3">
         {dropsWithMedia.map((drop) => (
           <WaveLeaderboardGalleryItem
             key={drop.id}
@@ -90,6 +94,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
             isVotingClosed={isVotingClosed}
             isVotingControlsLocked={isVotingControlsLocked}
             winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           />
         ))}
 

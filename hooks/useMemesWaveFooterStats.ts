@@ -2,6 +2,8 @@
 
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import {
+  getQuickVoteAbsoluteRemainingPower,
+  getQuickVoteRatingRange,
   isMemesQuickVoteVoteableDrop,
   type MemesQuickVoteStats,
 } from "@/hooks/memesQuickVote.helpers";
@@ -55,11 +57,14 @@ export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
     ...getDefaultQueryRetry(),
   });
   const activeDrop = query.data?.drop ?? null;
-  const uncastPower = activeDrop?.context_profile_context?.max_rating ?? null;
+  const uncastPower = activeDrop
+    ? getQuickVoteAbsoluteRemainingPower(getQuickVoteRatingRange(activeDrop))
+    : null;
   const isAvailable =
     isEnabled &&
     waveId !== null &&
-    (!query.isSuccess || isMemesQuickVoteVoteableDrop(activeDrop));
+    query.isSuccess &&
+    isMemesQuickVoteVoteableDrop(activeDrop);
 
   if (
     !query.isSuccess ||

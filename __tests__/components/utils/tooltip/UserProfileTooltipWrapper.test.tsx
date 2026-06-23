@@ -66,11 +66,9 @@ jest.mock("@/components/user/utils/profile/UserProfileTooltip", () => {
   return function MockUserProfileTooltip({
     user,
     onArtistPreviewOpen,
-    onWaveCreatorPreviewOpen,
   }: {
     user: string;
     onArtistPreviewOpen?: ((params: any) => void) | undefined;
-    onWaveCreatorPreviewOpen?: ((user: any) => void) | undefined;
   }) {
     const artistUser = {
       id: "artist-1",
@@ -94,15 +92,6 @@ jest.mock("@/components/user/utils/profile/UserProfileTooltip", () => {
         >
           Open Artist Preview
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            document.dispatchEvent(new Event(CUSTOM_TOOLTIP_CLOSE_ALL_EVENT));
-            onWaveCreatorPreviewOpen?.(artistUser);
-          }}
-        >
-          Open Wave Creator Preview
-        </button>
       </div>
     );
   };
@@ -115,16 +104,6 @@ jest.mock("@/components/waves/drops/ArtistPreviewModal", () => ({
         data-testid="artist-preview-modal"
         data-user-handle={user.handle}
         data-active-tab={activeTab}
-      />
-    ) : null,
-}));
-
-jest.mock("@/components/waves/drops/WaveCreatorPreviewModal", () => ({
-  WaveCreatorPreviewModal: ({ isOpen, user }: any) =>
-    isOpen ? (
-      <div
-        data-testid="wave-creator-preview-modal"
-        data-user-handle={user.handle}
       />
     ) : null,
 }));
@@ -200,22 +179,6 @@ describe("UserProfileTooltipWrapper", () => {
     expect(screen.getByTestId("artist-preview-modal")).toHaveAttribute(
       "data-active-tab",
       "winners"
-    );
-  });
-
-  it("opens wave creator preview above the tooltip after the tooltip closes", () => {
-    render(
-      <UserProfileTooltipWrapper user="testuser">
-        <button>Test Button</button>
-      </UserProfileTooltipWrapper>
-    );
-
-    fireEvent.click(screen.getByText("Open Wave Creator Preview"));
-
-    expect(screen.queryByTestId("tooltip-content")).not.toBeInTheDocument();
-    expect(screen.getByTestId("wave-creator-preview-modal")).toHaveAttribute(
-      "data-user-handle",
-      "testuser"
     );
   });
 

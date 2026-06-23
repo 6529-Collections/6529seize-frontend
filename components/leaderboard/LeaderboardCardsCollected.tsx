@@ -2,9 +2,10 @@
 
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
+import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { numberWithCommas } from "@/helpers/Helpers";
+import clsx from "clsx";
 import { useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import type { Collector, Content } from "./Leaderboard";
 import styles from "./Leaderboard.module.scss";
 import type { LeaderboardMetrics } from "./leaderboard_helpers";
@@ -16,8 +17,36 @@ import {
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import LeaderboardFooter from "./LeaderboardDownload";
 import LeaderboardSort from "./LeaderboardSort";
+import LeaderboardTableScrollShell from "./LeaderboardTableScrollShell";
 
 const PAGE_SIZE = 50;
+const TABLE_CLASS_NAME = "tw-mb-0 tw-w-full tw-border-collapse tw-text-white";
+const ROW_CLASS_NAME = "odd:tw-bg-[#1e1e1e] even:tw-bg-transparent";
+const HEADER_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-font-semibold tw-leading-7 tw-text-white";
+const BODY_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-leading-10 tw-text-white";
+const HEADER_CONTENT_CLASS_NAME = "tw-flex tw-items-center tw-justify-center";
+const RANK_CELL_CLASS_NAME = "tw-w-[4%] tw-text-center";
+const COLLECTOR_CELL_CLASS_NAME = "tw-max-w-0 tw-w-[28%] tw-text-left";
+const METRIC_CELL_CLASS_NAME = "tw-w-[9.7143%] tw-text-center";
+
+function getLeaderboardRowKey(lead: LeaderboardMetrics) {
+  return (
+    lead.consolidation_key ??
+    lead.primary_wallet ??
+    lead.handle ??
+    lead.consolidation_display ??
+    [
+      lead.level,
+      lead.balance,
+      lead.unique_memes,
+      lead.memes_cards_sets,
+      lead.tdh,
+      lead.day_change,
+    ].join("-")
+  );
+}
 
 interface Props {
   block: number | undefined;
@@ -25,6 +54,7 @@ interface Props {
   collector: Collector;
   selectedSeason: number;
   searchWallets: string[];
+  tdhView: ApiConsolidatedTdhView;
   globalTdhRateChange?: number | undefined;
   seasons: MemeSeason[];
   isLoading: boolean;
@@ -39,7 +69,7 @@ export default function LeaderboardCardsCollectedComponent(
     sort: LeaderboardCardsCollectedSort;
     sort_direction: SortDirection;
   }>({
-    sort: LeaderboardCardsCollectedSort.level,
+    sort: LeaderboardCardsCollectedSort.Level,
     sort_direction: SortDirection.DESC,
   });
 
@@ -53,24 +83,26 @@ export default function LeaderboardCardsCollectedComponent(
         content: props.content,
         collector: props.collector,
         selectedSeason: props.selectedSeason,
+        tdhView: props.tdhView,
+        useGeneratedFilterValues: true,
       },
       props.setIsLoading
     );
 
   function getTDHChange(lead: LeaderboardMetrics) {
-    if (!lead.total_tdh) {
+    if (!lead.tdh) {
       return "";
     }
 
-    const tdhChange = (lead.day_change / lead.total_tdh) * 100;
+    const tdhChange = ((lead.day_change ?? 0) / lead.tdh) * 100;
     return ` (${tdhChange.toFixed(2)}%)`;
   }
 
   function calculateTdhVsCommunity(lead: LeaderboardMetrics) {
-    if (!props.globalTdhRateChange || !lead.day_change || !lead.total_tdh) {
+    if (!props.globalTdhRateChange || !lead.day_change || !lead.tdh) {
       return "-";
     }
-    const tdhChange = (lead.day_change / lead.total_tdh) * 100;
+    const tdhChange = (lead.day_change / lead.tdh) * 100;
     return `${Math.abs(tdhChange / props.globalTdhRateChange).toFixed(2)}x`;
   }
 
@@ -80,166 +112,227 @@ export default function LeaderboardCardsCollectedComponent(
 
   if (leaderboard.length === 0 && !props.isLoading) {
     return (
-      <Container>
-        <Row>
-          <Col>No results found. Change filters and try again.</Col>
-        </Row>
-      </Container>
+      <div className={styles["leaderboardEmpty"]}>
+        No results found. Change filters and try again.
+      </div>
     );
   }
 
   return (
     <>
-      <Container>
-        <Row>
-          <Col>
-            <Table bordered={false} className={styles["leaderboardTable"]}>
-              <thead>
-                <tr>
-                  <th className={styles["rank"]}>Rank</th>
-                  <th className={`${styles["hodlerContainer"]}`}>
-                    <span>Collector</span>
-                    <span className={styles["totalResults"]}>
-                      {props.isLoading
-                        ? "..."
-                        : `x${totalResults.toLocaleString()}`}
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Level&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.level}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Cards Collected&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.balance}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Unique Memes&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.unique_memes}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Sets&nbsp;
-                      <LeaderboardSort
-                        sort_option={
-                          LeaderboardCardsCollectedSort.memes_cards_sets
-                        }
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      TDH&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.boosted_tdh}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Daily Change&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.day_change}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      vs Network&nbsp;
-                    </span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((lead: LeaderboardMetrics, index) => {
-                  return (
-                    <tr key={lead.consolidation_key}>
-                      <td className={styles["rank"]}>
-                        {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
-                      </td>
-                      <td className="tw-max-w-[20px] tw-truncate">
-                        <LeaderboardCollector
-                          handle={lead.handle}
-                          consolidationKey={lead.consolidation_key}
-                          consolidationDisplay={lead.consolidation_display}
-                          pfp={lead.pfp_url}
-                          level={lead.level}
-                        />
-                      </td>
+      <LeaderboardTableScrollShell>
+        <table
+          className={clsx(TABLE_CLASS_NAME, styles["cardsCollectedTable"])}
+        >
+          <thead>
+            <tr>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, RANK_CELL_CLASS_NAME)}
+              >
+                Rank
+              </th>
+              <th
+                className={clsx(
+                  HEADER_CELL_CLASS_NAME,
+                  COLLECTOR_CELL_CLASS_NAME
+                )}
+              >
+                <span>Collector</span>
+                <span className={styles["totalResults"]}>
+                  {props.isLoading && totalResults === 0
+                    ? "..."
+                    : `x${totalResults.toLocaleString()}`}
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Level&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.Level}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Cards Collected&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.Balance}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Unique Memes&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.UniqueMemes}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Sets&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.MemesCardsSets}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  TDH&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.Tdh}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  Daily Change&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.DayChange}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th
+                className={clsx(HEADER_CELL_CLASS_NAME, METRIC_CELL_CLASS_NAME)}
+              >
+                <span className={HEADER_CONTENT_CLASS_NAME}>
+                  vs Network&nbsp;
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.map((lead: LeaderboardMetrics, index) => {
+              return (
+                <tr className={ROW_CLASS_NAME} key={getLeaderboardRowKey(lead)}>
+                  <td
+                    className={clsx(BODY_CELL_CLASS_NAME, RANK_CELL_CLASS_NAME)}
+                  >
+                    {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      COLLECTOR_CELL_CLASS_NAME
+                    )}
+                  >
+                    <LeaderboardCollector
+                      handle={lead.handle ?? ""}
+                      consolidationKey={lead.consolidation_key ?? ""}
+                      consolidationDisplay={lead.consolidation_display ?? ""}
+                      pfp={lead.pfp_url ?? ""}
+                      level={lead.level ?? 0}
+                    />
+                  </td>
 
-                      <td className={styles["tdhSub"]}>{lead.level}</td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.balance)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {lead.unique_memes
-                          ? numberWithCommas(lead.unique_memes)
-                          : 0}{" "}
-                        / {numberWithCommas(lead.unique_memes_total)} (
-                        {formatPercentageFromCounts(
-                          lead.unique_memes,
-                          lead.unique_memes_total
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {lead.level ?? 0}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.balance ?? 0)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {lead.unique_memes
+                      ? numberWithCommas(lead.unique_memes)
+                      : 0}{" "}
+                    / {numberWithCommas(lead.unique_memes_total ?? 0)} (
+                    {formatPercentageFromCounts(
+                      lead.unique_memes ?? 0,
+                      lead.unique_memes_total ?? 0
+                    )}
+                    )
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(lead.memes_cards_sets ?? 0)}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {numberWithCommas(Math.round(lead.tdh ?? 0))}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {!lead.day_change ? (
+                      "-"
+                    ) : (
+                      <>
+                        {lead.day_change > 0 ? `+` : ``}
+                        {numberWithCommas(lead.day_change)}
+                        {lead.day_change != 0 && (
+                          <span className={styles["tdhBoost"]}>
+                            {getTDHChange(lead)}
+                          </span>
                         )}
-                        )
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.memes_cards_sets)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(Math.round(lead.boosted_tdh))}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {!lead.day_change ? (
-                          "-"
-                        ) : (
-                          <>
-                            {lead.day_change > 0 ? `+` : ``}
-                            {numberWithCommas(lead.day_change)}
-                            {lead.day_change != 0 && (
-                              <span className={styles["tdhBoost"]}>
-                                {getTDHChange(lead)}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {!lead.day_change
-                          ? "-"
-                          : `${calculateTdhVsCommunity(lead)}`}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
+                      </>
+                    )}
+                  </td>
+                  <td
+                    className={clsx(
+                      BODY_CELL_CLASS_NAME,
+                      METRIC_CELL_CLASS_NAME
+                    )}
+                  >
+                    {!lead.day_change
+                      ? "-"
+                      : `${calculateTdhVsCommunity(lead)}`}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </LeaderboardTableScrollShell>
       <LeaderboardFooter
         url={myFetchUrl}
         totalResults={totalResults}

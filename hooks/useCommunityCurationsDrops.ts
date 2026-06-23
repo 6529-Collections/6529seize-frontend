@@ -52,7 +52,12 @@ const getUniqueDrops = (
 };
 
 const mapCommunityCurationDropV2 = (drop: ApiDropV2): ApiDrop => {
-  const wave = createFallbackWaveMin(drop.author.badges.profile_wave_id ?? "");
+  const authorBadges = drop.author.badges;
+  const wave = {
+    ...createFallbackWaveMin(authorBadges.profile_wave_id ?? ""),
+    name: authorBadges.profile_wave_name ?? authorBadges.profile_wave_id ?? "",
+    picture: authorBadges.profile_wave_pfp ?? null,
+  };
   const mappedDrop = mapLeaderboardDropV2({ drop, wave });
 
   return {

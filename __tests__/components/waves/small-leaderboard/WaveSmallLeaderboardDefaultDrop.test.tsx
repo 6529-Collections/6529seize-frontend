@@ -48,7 +48,14 @@ jest.mock("@/components/waves/approval/ApprovalStatusBadge", () => ({
 
 jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
   __esModule: true,
-  default: () => <div data-testid="progress" />,
+  default: (props: any) => (
+    <div
+      data-testid="progress"
+      data-current={props.current}
+      data-projected={props.projected}
+      data-tooltip-label={props.tooltipLabel}
+    />
+  ),
 }));
 
 jest.mock("@/helpers/Helpers", () => ({
@@ -62,6 +69,7 @@ describe("WaveSmallLeaderboardDefaultDrop", () => {
     id: "d",
     author: { handle: "h", level: 1, cic: 0 },
     rating: 1,
+    realtime_rating: 3,
     rating_prediction: 2,
   };
   const wave: any = { id: "w" };
@@ -179,5 +187,24 @@ describe("WaveSmallLeaderboardDefaultDrop", () => {
     expect(
       document.querySelector('[data-testid="rate"]')
     ).not.toBeInTheDocument();
+  });
+
+  it("uses realtime rating for approve wave progress", () => {
+    render(
+      <WaveSmallLeaderboardDefaultDrop
+        drop={drop}
+        wave={wave}
+        isApproveWave={true}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    const progress = document.querySelector('[data-testid="progress"]');
+    expect(progress).toHaveAttribute("data-current", "1");
+    expect(progress).toHaveAttribute("data-projected", "3");
+    expect(progress).toHaveAttribute(
+      "data-tooltip-label",
+      "Votes given now"
+    );
   });
 });

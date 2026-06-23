@@ -1,20 +1,16 @@
-import {
-  getInitialRouterValues,
-  printNftContent,
-  printSortButtons,
-} from "@/components/memelab/MemeLab";
+import { getInitialRouterValues } from "@/components/memelab/MemeLab";
+import { printNftContent } from "@/components/memelab/memeLabCardContent";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 // Mock helper functions
 jest.mock("@/helpers/Helpers", () => ({
   printMintDate: jest.fn((date: Date | string) => {
     if (!date) return "-";
-    return "Jan 1, 2023 (1 year ago)";
+    return "Jan 1, 2023";
   }),
   numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
   getValuesForVolumeType: jest.fn((volumeType: VolumeType, nft: any) => {
@@ -112,23 +108,6 @@ describe("MemeLab utilities", () => {
     expect(initialSortDir).toBe(SortDirection.ASC);
   });
 
-  it("renders sort buttons and triggers callbacks", async () => {
-    const setSort = jest.fn();
-    const setVolume = jest.fn();
-    render(
-      <div>
-        {printSortButtons(
-          MemeLabSort.AGE,
-          VolumeType.ALL_TIME,
-          setSort,
-          setVolume
-        )}
-      </div>
-    );
-    await userEvent.click(screen.getByRole("button", { name: "Edition Size" }));
-    expect(setSort).toHaveBeenCalled();
-  });
-
   it("prints nft content based on sort", () => {
     const nft = createNft();
     render(
@@ -152,5 +131,19 @@ describe("MemeLab utilities", () => {
       </div>
     );
     expect(container.textContent).toContain("Volume (7 Days):");
+  });
+
+  it("prints N/A when volume is unavailable", () => {
+    const nft = {
+      ...createNft(),
+      total_volume_last_7_days: Number.NaN,
+    };
+    const { container } = render(
+      <div>
+        {printNftContent(nft, MemeLabSort.VOLUME, [nftMeta], VolumeType.DAYS_7)}
+      </div>
+    );
+
+    expect(container.textContent).toContain("Volume (7 Days): N/A");
   });
 });

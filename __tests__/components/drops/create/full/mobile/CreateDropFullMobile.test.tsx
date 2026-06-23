@@ -1,15 +1,31 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
-import CreateDropFullMobile from '@/components/drops/create/full/mobile/CreateDropFullMobile';
-import { CreateDropType } from '@/components/drops/create/types';
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
+import CreateDropFullMobile from "@/components/drops/create/full/mobile/CreateDropFullMobile";
+import { CreateDropType } from "@/components/drops/create/types";
 
-jest.mock('@/components/drops/create/full/mobile/CreateDropFullMobileWrapper', () => (props: any) => <div data-testid="wrapper">{props.children}</div>);
-jest.mock('@/components/drops/create/utils/CreateDropContent', () => React.forwardRef(() => <div data-testid="content" />));
-jest.mock('@/components/drops/create/utils/file/CreateDropSelectedFileIcon', () => ({ file }: any) => <span data-testid="icon">{file.name}</span>);
-jest.mock('@/components/drops/create/utils/file/CreateDropSelectedFilePreview', () => ({ file }: any) => <div data-testid="preview">{file.name}</div>);
-jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
+jest.mock(
+  "@/components/drops/create/full/mobile/CreateDropFullMobileWrapper",
+  () => (props: any) => <div data-testid="wrapper">{props.children}</div>
+);
+jest.mock("@/components/drops/create/utils/CreateDropContent", () =>
+  React.forwardRef(() => <div data-testid="content" />)
+);
+jest.mock(
+  "@/components/drops/create/utils/file/CreateDropSelectedFileIcon",
+  () =>
+    ({ file }: any) => <span data-testid="icon">{file.name}</span>
+);
+jest.mock(
+  "@/components/drops/create/utils/file/CreateDropSelectedFilePreview",
+  () =>
+    ({ file }: any) => <div data-testid="preview">{file.name}</div>
+);
+jest.mock(
+  "@/components/distribution-plan-tool/common/CircleLoader",
+  () => () => <div data-testid="loader" />
+);
 
-describe('CreateDropFullMobile', () => {
+describe("CreateDropFullMobile", () => {
   const onDrop = jest.fn();
   const onFileRemove = jest.fn();
   const onViewChange = jest.fn();
@@ -19,13 +35,15 @@ describe('CreateDropFullMobile', () => {
     jest.clearAllMocks();
   });
 
-  function renderComponent(props: Partial<React.ComponentProps<typeof CreateDropFullMobile>> = {}) {
-    const file = new File(['a'], 'file.png', { type: 'image/png' });
+  function renderComponent(
+    props: Partial<React.ComponentProps<typeof CreateDropFullMobile>> = {}
+  ) {
+    const file = new File(["a"], "file.png", { type: "image/png" });
     return render(
       <CreateDropFullMobile
         ref={null}
         profile={{} as any}
-        title={null}
+        title={props.title ?? null}
         metadata={[]}
         editorState={null}
         files={props.files ?? []}
@@ -43,7 +61,9 @@ describe('CreateDropFullMobile', () => {
         onMetadataRemove={jest.fn()}
         onViewChange={onViewChange}
         onEditorState={jest.fn()}
+        onUploadEditorStateChange={jest.fn()}
         onMentionedUser={jest.fn()}
+        onMentionedWave={jest.fn()}
         onReferencedNft={jest.fn()}
         onFileRemove={onFileRemove}
         setFiles={jest.fn()}
@@ -55,22 +75,44 @@ describe('CreateDropFullMobile', () => {
     );
   }
 
-  it('shows title input after clicking add title', () => {
+  it("shows title input after clicking add title", () => {
     renderComponent();
-    fireEvent.click(screen.getByRole('button', { name: /add title/i }));
-    expect(screen.getByPlaceholderText('Drop title')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /add title/i }));
+    expect(screen.getByPlaceholderText("Drop title")).toBeInTheDocument();
   });
 
-  it('calls onFileRemove when remove button clicked', () => {
-    const file = new File(['a'], 'img.png', { type: 'image/png' });
+  it("calls onFileRemove when remove button clicked", () => {
+    const file = new File(["a"], "img.png", { type: "image/png" });
     renderComponent({ files: [file] });
-    fireEvent.click(screen.getByRole('button', { name: /remove file/i }));
+    fireEvent.click(screen.getByRole("button", { name: /remove file/i }));
     expect(onFileRemove).toHaveBeenCalledWith(file);
   });
 
-  it('submits drop when button clicked', () => {
+  it("submits drop when button clicked", () => {
     renderComponent({ canSubmit: true, showSubmit: true });
-    fireEvent.click(screen.getByRole('button', { name: 'Drop' }));
+    fireEvent.click(screen.getByRole("button", { name: "Drop" }));
     expect(onDrop).toHaveBeenCalled();
+  });
+
+  it("does not change title, remove files, or submit while loading", () => {
+    const file = new File(["a"], "img.png", { type: "image/png" });
+
+    renderComponent({
+      title: "Existing title",
+      files: [file],
+      canSubmit: true,
+      showSubmit: true,
+      loading: true,
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Drop title"), {
+      target: { value: "Changed" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /remove file/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Drop" }));
+
+    expect(onTitle).not.toHaveBeenCalled();
+    expect(onFileRemove).not.toHaveBeenCalled();
+    expect(onDrop).not.toHaveBeenCalled();
   });
 });

@@ -184,6 +184,7 @@ describe("WaveDropLinkPreview", () => {
     } as any);
     useApprovalWaveStatusMock.mockReturnValue({
       winningThreshold: 12,
+      winningThresholdMinDurationMs: 120_000,
       approvedCount: 3,
       closeStatus: null,
       isApprovalStatusLoading: false,
@@ -270,6 +271,7 @@ describe("WaveDropLinkPreview", () => {
       expect(mockDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           winningThreshold: 12,
+          winningThresholdMinDurationMs: 120_000,
           isVotingClosed: true,
           isVotingControlsLocked: true,
           embedPath: ["parent-drop"],
@@ -310,6 +312,46 @@ describe("WaveDropLinkPreview", () => {
         })
       );
     });
+    expect(mockDrop).not.toHaveBeenCalled();
+  });
+
+  it("passes hidden link preview setting from fetched chat drops into WaveDropQuote", async () => {
+    fetchDropByIdBatchedMock.mockResolvedValue(
+      buildDrop({
+        drop_type: ApiDropType.Chat,
+        hide_link_preview: true,
+      })
+    );
+
+    renderWithQueryClient(
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?drop=drop-1"
+        waveId="wave-1"
+        dropId="drop-1"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        mockWaveDropQuote.mock.calls.some(([props]) => {
+          return (
+            props.hideLinkPreviews === true &&
+            props.drop?.drop_type === ApiDropType.Chat &&
+            props.drop?.hide_link_preview === true
+          );
+        })
+      ).toBe(true);
+    });
+    expect(mockWaveDropQuote).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drop: expect.objectContaining({
+          drop_type: ApiDropType.Chat,
+          hide_link_preview: true,
+        }),
+        hideLinkPreviews: true,
+      })
+    );
     expect(mockDrop).not.toHaveBeenCalled();
   });
 

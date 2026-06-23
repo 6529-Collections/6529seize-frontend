@@ -3,23 +3,76 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-type ApprovalDropStatusKind =
+export type ApprovalDropStatusKind =
   | "approved"
+  | "approving"
   | "reached_threshold"
   | "needs"
   | "closed";
 
-interface ApprovalDropStatus {
+export interface ApprovalDropStatus {
   readonly kind: ApprovalDropStatusKind;
   readonly current: number;
   readonly threshold: number | null;
   readonly remaining: number | null;
+  readonly countdownMs: number | null;
 }
 
 export type ApprovalWaveCloseStatus = "max_reached" | "ended" | null;
 
+export type ApprovalDropStatusDrop = Pick<
+  ApiDrop,
+  "rating" | "rank" | "winning_context"
+> & {
+  readonly over_threshold_since_ms?: number | null | undefined;
+};
+
+const MINUTE_MS = 60_000;
+const HOUR_MINUTES = 60;
+
 const isValidCount = (value: number | null | undefined): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0;
+
+const getValidPositiveDuration = (
+  durationMs: number | null | undefined
+): number | null =>
+  typeof durationMs === "number" &&
+  Number.isFinite(durationMs) &&
+  durationMs > 0
+    ? durationMs
+    : null;
+
+const getValidTimestamp = (
+  timestampMs: number | null | undefined,
+  nowMs: number
+): number | null =>
+  typeof timestampMs === "number" &&
+  Number.isFinite(timestampMs) &&
+  timestampMs >= 0 &&
+  timestampMs <= nowMs
+    ? timestampMs
+    : null;
+
+const getApprovalCountdownMs = ({
+  minDurationMs,
+  nowMs,
+  overThresholdSinceMs,
+}: {
+  readonly minDurationMs: number | null | undefined;
+  readonly nowMs: number;
+  readonly overThresholdSinceMs: number | null | undefined;
+}): number | null => {
+  const validMinDurationMs = getValidPositiveDuration(minDurationMs);
+  const validSinceMs = getValidTimestamp(overThresholdSinceMs, nowMs);
+
+  if (validMinDurationMs === null || validSinceMs === null) {
+    return null;
+  }
+
+  const elapsedMs = nowMs - validSinceMs;
+  const remainingMs = validMinDurationMs - elapsedMs;
+  return remainingMs > 0 ? remainingMs : null;
+};
 
 const getWinnerDropId = (
   winner: ApiWaveDecision["winners"][number]
@@ -55,11 +108,15 @@ export const isOfficiallyApprovedDrop = (
 export const getApprovalDropStatus = ({
   drop,
   isClosed = false,
+  nowMs = Date.now(),
   winningThreshold,
+  winningThresholdMinDurationMs,
 }: {
-  readonly drop: Pick<ApiDrop, "rating" | "rank" | "winning_context">;
+  readonly drop: ApprovalDropStatusDrop;
   readonly isClosed?: boolean | undefined;
+  readonly nowMs?: number | undefined;
   readonly winningThreshold: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
 }): ApprovalDropStatus => {
   const current = Number.isFinite(drop.rating) ? drop.rating : 0;
   const threshold =
@@ -75,15 +132,33 @@ export const getApprovalDropStatus = ({
       current,
       threshold,
       remaining: null,
+      countdownMs: null,
     };
   }
 
   if (threshold !== null && current >= threshold) {
+    const countdownMs = getApprovalCountdownMs({
+      minDurationMs: winningThresholdMinDurationMs,
+      nowMs,
+      overThresholdSinceMs: drop.over_threshold_since_ms,
+    });
+
+    if (!isClosed && countdownMs !== null) {
+      return {
+        kind: "approving",
+        current,
+        threshold,
+        remaining: 0,
+        countdownMs,
+      };
+    }
+
     return {
       kind: "reached_threshold",
       current,
       threshold,
       remaining: 0,
+      countdownMs: null,
     };
   }
 
@@ -93,6 +168,7 @@ export const getApprovalDropStatus = ({
       current,
       threshold,
       remaining: null,
+      countdownMs: null,
     };
   }
 
@@ -101,7 +177,42 @@ export const getApprovalDropStatus = ({
     current,
     threshold,
     remaining: threshold === null ? null : Math.max(0, threshold - current),
+    countdownMs: null,
   };
+};
+
+export const formatApprovalCountdownTime = (timeLeftMs: number): string => {
+  if (!Number.isFinite(timeLeftMs) || timeLeftMs <= 0) {
+    return "<1m";
+  }
+
+  if (timeLeftMs < MINUTE_MS) {
+    return "<1m";
+  }
+
+  const totalMinutes = Math.ceil(timeLeftMs / MINUTE_MS);
+  if (totalMinutes < HOUR_MINUTES) {
+    return `${totalMinutes}m`;
+  }
+
+  const hours = Math.floor(totalMinutes / HOUR_MINUTES);
+  const minutes = totalMinutes % HOUR_MINUTES;
+  return `${hours}h ${minutes}m`;
+};
+
+export const getApprovalCountdownDelayMs = (
+  timeLeftMs: number
+): number | null => {
+  if (!Number.isFinite(timeLeftMs) || timeLeftMs <= 0) {
+    return null;
+  }
+
+  if (timeLeftMs <= MINUTE_MS) {
+    return timeLeftMs === MINUTE_MS ? 1 : timeLeftMs;
+  }
+
+  const remainderMs = timeLeftMs % MINUTE_MS;
+  return remainderMs === 0 ? MINUTE_MS : remainderMs;
 };
 
 export const getApprovedDropsCount = ({

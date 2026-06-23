@@ -7,6 +7,7 @@ import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -57,8 +58,10 @@ export default function UserPageHeaderEditClassification({
     },
     onError: (error: unknown) => {
       setToast({
-        message: error as string,
         type: "error",
+        title: "Couldn't update this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -75,7 +78,7 @@ export default function UserPageHeaderEditClassification({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in to save settings",
+        message: "Log in to save settings.",
         type: "error",
       });
       return;
@@ -110,13 +113,14 @@ export default function UserPageHeaderEditClassification({
       <button
         type="button"
         aria-label="Close edit classification modal"
-        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-sm tw-cursor-pointer tw-border-none tw-p-0"
+        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0 tw-backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-center tw-justify-center tw-p-2 lg:tw-p-4">
+      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
         <div
           ref={modalRef}
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 tw-p-6 lg:tw-p-8 md:tw-max-w-xl">
+          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 md:tw-max-w-xl lg:tw-p-8"
+        >
           <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-6">
             <UserSettingsClassification
               selected={classification}

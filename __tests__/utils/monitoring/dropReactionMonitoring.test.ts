@@ -142,7 +142,7 @@ describe("dropReactionMonitoring", () => {
     );
   });
 
-  it("captures an out-of-order anomaly when an older mutation resolves last", () => {
+  it("breadcrumbs an older success as superseded without capturing an issue", () => {
     const olderMutation = beginReactionMutation({
       dropId: "drop-3",
       waveId: "wave-1",
@@ -167,32 +167,187 @@ describe("dropReactionMonitoring", () => {
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
-    void newerMutation;
-
     recordReactionRequestSent(olderMutation, {
       endpoint: "drops/drop-3/reaction",
       method: "POST",
     });
 
     dateNowSpy.mockReturnValue(1_350);
-    recordReactionRequestSucceeded(olderMutation);
+    const result = recordReactionRequestSucceeded(olderMutation);
 
     expect(addBreadcrumbMock).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "reaction.response_superseded",
         data: expect.objectContaining({
+          superseded: true,
           superseded_by_mutation_id: expect.any(String),
         }),
       })
     );
-    expect(captureExceptionMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: "Reaction response superseded by newer mutation",
-      })
-    );
+    expect(result).toEqual({
+      isLatestMutation: false,
+      supersededByMutationId: newerMutation.mutationId,
+    });
+    expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
-  it("captures reconciliation mismatch after success when failure timestamp is null", () => {
+  it("breadcrumbs an older failure as superseded without capturing a request failure", () => {
+    const olderMutation = beginReactionMutation({
+      dropId: "drop-3b",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":wave:",
+      optimisticReaction: ":wave:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const newerMutation = beginReactionMutation({
+      dropId: "drop-3b",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(olderMutation, {
+      endpoint: "drops/drop-3b/reaction",
+      method: "POST",
+    });
+
+    const networkError = new TypeError("Failed to fetch");
+
+    dateNowSpy.mockReturnValue(1_350);
+    const result = recordReactionRequestFailed(olderMutation, networkError);
+
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.response_superseded",
+        data: expect.objectContaining({
+          superseded: true,
+          superseded_by_mutation_id: newerMutation.mutationId,
+        }),
+      })
+    );
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.request_failed",
+        data: expect.objectContaining({
+          error_kind: "network",
+        }),
+      })
+    );
+    expect(result).toEqual({
+      isLatestMutation: false,
+      supersededByMutationId: newerMutation.mutationId,
+    });
+    expect(withScopeMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps older HTTP success stale after the latest failure clears the realtime guard", () => {
+    const olderMutation = beginReactionMutation({
+      dropId: "drop-3c",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":wave:",
+      optimisticReaction: ":wave:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const newerMutation = beginReactionMutation({
+      dropId: "drop-3c",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestFailed(newerMutation, new TypeError("Failed"));
+    const result = recordReactionRequestSucceeded(olderMutation);
+
+    expect(result).toEqual({
+      isLatestMutation: false,
+      supersededByMutationId: newerMutation.mutationId,
+    });
+  });
+
+  it("skips a stale realtime reaction update when a newer intent is active", () => {
+    const olderMutation = beginReactionMutation({
+      dropId: "drop-4-stale",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":wave:",
+      optimisticReaction: ":wave:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(olderMutation, {
+      endpoint: "drops/drop-4-stale/reaction",
+      method: "POST",
+    });
+    recordReactionRequestSucceeded(olderMutation);
+
+    const newerMutation = beginReactionMutation({
+      dropId: "drop-4-stale",
+      waveId: "wave-1",
+      source: "chip",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_300);
+    const result = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-4-stale",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":wave:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(result).toEqual({
+      shouldApplyCanonicalDrop: false,
+      expectedReaction: ":smile:",
+      serverReaction: ":wave:",
+      supersededByMutationId: newerMutation.mutationId,
+    });
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.realtime_superseded",
+        data: expect.objectContaining({
+          expected_reaction: ":smile:",
+          server_reaction: ":wave:",
+          superseded_by_mutation_id: newerMutation.mutationId,
+        }),
+      })
+    );
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("captures reconciliation mismatch after the guard window", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-4",
       waveId: "wave-1",
@@ -214,8 +369,8 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestSucceeded(mutation);
     expect(mutation.apiFailedAt).toBeNull();
 
-    dateNowSpy.mockReturnValue(1_500);
-    recordReactionRealtimeReconciliation({
+    dateNowSpy.mockReturnValue(17_000);
+    const result = recordReactionRealtimeReconciliation({
       drop: {
         id: "drop-4",
         wave: { id: "wave-1" },
@@ -226,6 +381,11 @@ describe("dropReactionMonitoring", () => {
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
+    expect(result).toEqual({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: ":smile:",
+      serverReaction: ":wave:",
+    });
     expect(addBreadcrumbMock).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "reaction.optimistic_reverted",
@@ -263,7 +423,7 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestSucceeded(mutation);
 
     dateNowSpy.mockReturnValue(1_300);
-    recordReactionRealtimeReconciliation({
+    const result = recordReactionRealtimeReconciliation({
       drop: {
         id: "drop-5",
         wave: { id: "wave-1" },
@@ -274,6 +434,11 @@ describe("dropReactionMonitoring", () => {
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
+    expect(result).toEqual({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: ":smile:",
+      serverReaction: ":smile:",
+    });
     expect(addBreadcrumbMock).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "reaction.realtime_reconciled",
@@ -356,7 +521,7 @@ describe("dropReactionMonitoring", () => {
     expect(latestMutation.dropMutationSeq).toBe(3);
   });
 
-  it("dedupes repeated identical failure events within 60 seconds", () => {
+  it("does not let a stale failure consume the latest failure capture", () => {
     const firstMutation = beginReactionMutation({
       dropId: "drop-8",
       waveId: "wave-1",
@@ -396,12 +561,7 @@ describe("dropReactionMonitoring", () => {
     dateNowSpy.mockReturnValue(1_200);
     recordReactionRequestFailed(secondMutation, networkError);
 
-    expect(captureExceptionMock).toHaveBeenCalledTimes(2);
-    expect(captureExceptionMock.mock.calls[0]?.[0]).toEqual(
-      expect.objectContaining({
-        message: "Reaction response superseded by newer mutation",
-      })
-    );
-    expect(captureExceptionMock.mock.calls[1]?.[0]).toBe(networkError);
+    expect(captureExceptionMock).toHaveBeenCalledTimes(1);
+    expect(captureExceptionMock).toHaveBeenCalledWith(networkError);
   });
 });

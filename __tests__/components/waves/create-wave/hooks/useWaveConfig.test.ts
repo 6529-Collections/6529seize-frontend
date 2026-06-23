@@ -1,6 +1,8 @@
 import { renderHook, act } from "@testing-library/react";
 import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfig";
+import { useMemeCardCount } from "@/components/waves/create-wave/hooks/useMemeCardCount";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
   CreateWaveStep,
@@ -12,6 +14,9 @@ import * as createWaveValidation from "@/helpers/waves/create-wave.validation";
 
 // Mock dependencies
 jest.mock("@/helpers/waves/create-wave.validation");
+jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
+  useMemeCardCount: jest.fn(),
+}));
 jest.mock("@/helpers/time", () => ({
   Time: {
     currentMillis: jest.fn(() => 1000000),
@@ -22,10 +27,16 @@ const mockGetCreateWaveValidationErrors =
   createWaveValidation.getCreateWaveValidationErrors as jest.MockedFunction<
     typeof createWaveValidation.getCreateWaveValidationErrors
   >;
+const mockedUseMemeCardCount = useMemeCardCount as jest.Mock;
 
 describe("useWaveConfig", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseMemeCardCount.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    });
     mockGetCreateWaveValidationErrors.mockReturnValue([]);
   });
 
@@ -59,8 +70,14 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.type).toBe(
         ApiWaveCreditType.TdhPlusXtdh
       );
+      expect(result.current.config.voting.creditScope).toBe(
+        ApiWaveCreditScope.Wave
+      );
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
+      expect(result.current.config.voting.creditNfts).toEqual([]);
+      expect(result.current.config.voting.creditNftMemeCount).toBeNull();
+      expect(result.current.config.voting.allowNegativeVotes).toBe(true);
       expect(
         result.current.config.voting.maxVotesPerIdentityPerDrop
       ).toBeNull();
@@ -74,6 +91,13 @@ describe("useWaveConfig", () => {
         threshold: null,
         thresholdTimeMs: null,
         maxWinners: null,
+      });
+      expect(result.current.config.display).toEqual({
+        approve: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "",
+        },
+        outcomesVisible: true,
       });
     });
 
@@ -159,6 +183,98 @@ describe("useWaveConfig", () => {
       });
       expect(result.current.config.drops.adminCanDeleteDrops).toBe(true);
       expect(result.current.config.approval.maxWinners).toBeNull();
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "",
+        approvedTabLabel: "",
+      });
+    });
+
+    it("should preserve approve display labels when editing overview with the same type", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve Wave",
+          image: null,
+        });
+      });
+
+      act(() => {
+        result.current.setDisplay({
+          ...result.current.config.display,
+          approve: {
+            approvalsTabLabel: "Candidates",
+            approvedTabLabel: "Selected",
+          },
+        });
+      });
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          name: "Renamed Approve Wave",
+        });
+      });
+
+      expect(result.current.config.overview.name).toBe("Renamed Approve Wave");
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "Candidates",
+        approvedTabLabel: "Selected",
+      });
+    });
+
+    it("should preserve non-overview config when editing overview with the same type", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const image = new File([""], "updated-image.jpg", {
+        type: "image/jpeg",
+      });
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve Wave",
+          image: null,
+        });
+      });
+
+      act(() => {
+        result.current.setDates({
+          ...result.current.config.dates,
+          endDate: 2000000,
+        });
+        result.current.onApprovalMaxWinnersChange(4);
+        result.current.setDisplay({
+          ...result.current.config.display,
+          approve: {
+            approvalsTabLabel: "Candidates",
+            approvedTabLabel: "Selected",
+          },
+        });
+        result.current.setEndDateConfig({
+          time: 3600,
+          period: null,
+        });
+      });
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          image,
+        });
+      });
+
+      expect(result.current.config.overview.image).toEqual(image);
+      expect(result.current.config.dates.endDate).toBe(2000000);
+      expect(result.current.config.approval.maxWinners).toBe(4);
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "Candidates",
+        approvedTabLabel: "Selected",
+      });
+      expect(result.current.endDateConfig).toEqual({
+        time: 3600,
+        period: null,
+      });
     });
   });
 
@@ -240,6 +356,25 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.outcomes).toEqual(newOutcomes);
+    });
+
+    it("should update display section", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setDisplay({
+          ...result.current.config.display,
+          approve: {
+            approvalsTabLabel: "Candidates",
+            approvedTabLabel: "Selected",
+          },
+        });
+      });
+
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "Candidates",
+        approvedTabLabel: "Selected",
+      });
     });
   });
 
@@ -355,11 +490,18 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.onCategoryChange("test-category");
         result.current.onProfileIdChange("test-profile");
+        result.current.onCreditNftsChange([{ contract: "0xabc", token_id: 1 }]);
+        result.current.onCreditScopeChange(ApiWaveCreditScope.Drop);
+        result.current.onAllowNegativeVotesChange(false);
         result.current.onMaxVotesPerIdentityPerDropChange(1);
       });
 
       expect(result.current.config.voting.category).toBe("test-category");
       expect(result.current.config.voting.profileId).toBe("test-profile");
+      expect(result.current.config.voting.creditScope).toBe(
+        ApiWaveCreditScope.Drop
+      );
+      expect(result.current.config.voting.allowNegativeVotes).toBe(false);
       expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
 
       // Change voting type - should reset dependent fields
@@ -370,6 +512,12 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.type).toBe(ApiWaveCreditType.Rep);
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
+      expect(result.current.config.voting.creditNfts).toEqual([]);
+      expect(result.current.config.voting.creditNftMemeCount).toBeNull();
+      expect(result.current.config.voting.creditScope).toBe(
+        ApiWaveCreditScope.Drop
+      );
+      expect(result.current.config.voting.allowNegativeVotes).toBe(false);
       expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
       expect(result.current.config.voting.winningThreshold).toBeNull();
       expect(result.current.config.voting.timeWeighted).toEqual({
@@ -399,6 +547,81 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.profileId).toBe("profile-456");
     });
 
+    it("should update card-set TDH NFTs", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const creditNfts = [{ contract: "0xabc", token_id: 7 }];
+
+      act(() => {
+        result.current.onCreditNftsChange(creditNfts);
+      });
+
+      expect(result.current.config.voting.creditNfts).toEqual(creditNfts);
+      expect(result.current.config.voting.creditNftMemeCount).toBeNull();
+    });
+
+    it("should update credit scope", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onCreditScopeChange(ApiWaveCreditScope.Drop);
+      });
+
+      expect(result.current.config.voting.creditScope).toBe(
+        ApiWaveCreditScope.Drop
+      );
+    });
+
+    it("should derive card-set TDH Meme count from the count query", () => {
+      mockedUseMemeCardCount.mockReturnValue({
+        data: 101,
+        isLoading: false,
+        isError: false,
+      });
+      const { result } = renderHook(() => useWaveConfig());
+
+      expect(result.current.config.voting.creditNftMemeCount).toBeNull();
+
+      act(() => {
+        result.current.onVotingTypeChange(ApiWaveCreditType.CardSetTdh);
+      });
+
+      expect(result.current.config.voting.creditNftMemeCount).toBe(101);
+      expect(result.current.isMemeCountLoading).toBe(false);
+      expect(result.current.isMemeCountError).toBe(false);
+      expect(mockedUseMemeCardCount).toHaveBeenLastCalledWith({
+        enabled: true,
+      });
+    });
+
+    it("should expose card-set TDH Meme count query state", () => {
+      mockedUseMemeCardCount.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+      });
+      const { result, rerender } = renderHook(() => useWaveConfig());
+
+      expect(result.current.isMemeCountLoading).toBe(false);
+
+      act(() => {
+        result.current.onVotingTypeChange(ApiWaveCreditType.CardSetTdh);
+      });
+
+      expect(result.current.isMemeCountLoading).toBe(true);
+      expect(result.current.isMemeCountError).toBe(false);
+
+      mockedUseMemeCardCount.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+      });
+      rerender();
+
+      expect(result.current.config.voting.creditNftMemeCount).toBeNull();
+      expect(result.current.isMemeCountLoading).toBe(false);
+      expect(result.current.isMemeCountError).toBe(true);
+    });
+
     it("should update max votes per identity per drop", () => {
       const { result } = renderHook(() => useWaveConfig());
 
@@ -415,6 +638,22 @@ describe("useWaveConfig", () => {
       expect(
         result.current.config.voting.maxVotesPerIdentityPerDrop
       ).toBeNull();
+    });
+
+    it("should update allow negative votes", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onAllowNegativeVotesChange(false);
+      });
+
+      expect(result.current.config.voting.allowNegativeVotes).toBe(false);
+
+      act(() => {
+        result.current.onAllowNegativeVotesChange(true);
+      });
+
+      expect(result.current.config.voting.allowNegativeVotes).toBe(true);
     });
 
     it("should update time weighted voting settings", () => {
@@ -455,6 +694,62 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
+    });
+
+    it("should preserve threshold time when approve time weighted voting is enabled", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve",
+          image: null,
+        });
+        result.current.onThresholdTimeChange(60000);
+      });
+
+      act(() => {
+        result.current.onTimeWeightedVotingChange({
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        });
+      });
+
+      expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
+      expect(result.current.config.voting.timeWeighted).toEqual({
+        enabled: true,
+        averagingInterval: 1,
+        averagingIntervalUnit: "hours",
+      });
+    });
+
+    it("should preserve approve time weighted voting when threshold time is set", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve",
+          image: null,
+        });
+        result.current.onTimeWeightedVotingChange({
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        });
+      });
+
+      act(() => {
+        result.current.onThresholdTimeChange(60000);
+      });
+
+      expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
+      expect(result.current.config.voting.timeWeighted).toEqual({
+        enabled: true,
+        averagingInterval: 1,
+        averagingIntervalUnit: "hours",
+      });
     });
 
     it("should update approval max winners", () => {
@@ -522,6 +817,36 @@ describe("useWaveConfig", () => {
       expect(result.current.selectedOutcomeType).toBeNull();
       expect(mockGetCreateWaveValidationErrors).toHaveBeenCalledWith({
         config: result.current.config,
+        step: CreateWaveStep.OVERVIEW,
+      });
+    });
+
+    it("should validate with derived Meme count for card-set TDH", () => {
+      mockedUseMemeCardCount.mockReturnValue({
+        data: 123,
+        isLoading: false,
+        isError: false,
+      });
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onVotingTypeChange(ApiWaveCreditType.CardSetTdh);
+        result.current.onCreditNftsChange([{ contract: "0xabc", token_id: 7 }]);
+      });
+
+      act(() => {
+        result.current.onStep({
+          step: CreateWaveStep.GROUPS,
+          direction: "forward",
+        });
+      });
+
+      expect(mockGetCreateWaveValidationErrors).toHaveBeenCalledWith({
+        config: expect.objectContaining({
+          voting: expect.objectContaining({
+            creditNftMemeCount: 123,
+          }),
+        }),
         step: CreateWaveStep.OVERVIEW,
       });
     });

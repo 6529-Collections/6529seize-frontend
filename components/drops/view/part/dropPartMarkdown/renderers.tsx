@@ -1,14 +1,12 @@
 import type { ReactElement } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { SeizeQuoteLinkInfo } from "@/helpers/SeizeLinkParser";
 
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
+import TwitterPreviewCard from "@/components/waves/TwitterPreviewCard";
 import WaveDropQuoteWithDropId from "@/components/waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "@/components/waves/drops/WaveDropQuoteWithSerialNo";
-import ExpandableTweetPreview from "@/components/tweets/ExpandableTweetPreview";
-import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 import { ensureTwitterLink } from "./twitter";
 
 interface SeizeQuoteRenderOptions {
@@ -18,39 +16,26 @@ interface SeizeQuoteRenderOptions {
   readonly maxEmbedDepth?: number | undefined;
 }
 
-const TweetFallback = ({ href }: { href: string }) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-center tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-  >
-    <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-      Tweet unavailable
-    </span>
-    <span className="tw-text-xs tw-text-iron-400">Open on X</span>
-  </a>
-);
-
 const renderTweetEmbed = (
   href: string,
-  options?: { readonly tweetPreviewMode?: TweetPreviewMode }
+  options?: { readonly fullWidth?: boolean | undefined }
 ) => {
   const { tweetId, href: normalizedHref } = ensureTwitterLink(href);
-  const renderFallback = () => <TweetFallback href={normalizedHref} />;
+  const fullWidth = options?.fullWidth === true;
   return (
-    <LinkHandlerFrame href={normalizedHref} overlayAnchor="content">
-      <div className="tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[480px]">
-        <ErrorBoundary fallbackRender={() => renderFallback()}>
-          <ExpandableTweetPreview
-            href={normalizedHref}
-            tweetId={tweetId}
-            compactMode={options?.tweetPreviewMode}
-            renderFallback={(fallbackHref) => (
-              <TweetFallback href={fallbackHref} />
-            )}
-          />
-        </ErrorBoundary>
+    <LinkHandlerFrame
+      href={normalizedHref}
+      hideLink
+      overlayAnchor={fullWidth ? "frame" : "content"}
+    >
+      <div
+        className={
+          fullWidth
+            ? "tw-w-full tw-min-w-0"
+            : "tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[480px]"
+        }
+      >
+        <TwitterPreviewCard href={normalizedHref} tweetId={tweetId} />
       </div>
     </LinkHandlerFrame>
   );

@@ -38,6 +38,20 @@ describe('AveragingIntervalInput', () => {
     expect(onIntervalChange).not.toHaveBeenCalled();
   });
 
+  it('enforces minimum on blur when value is not only digits', () => {
+    render(
+      <AveragingIntervalInput
+        value="10abc"
+        unit="minutes"
+        onIntervalChange={onIntervalChange}
+        onUnitChange={onUnitChange}
+      />
+    );
+    const input = screen.getByTestId('averaging-interval-input');
+    fireEvent.blur(input);
+    expect(onIntervalChange).toHaveBeenCalledWith(String(MIN_MINUTES));
+  });
+
   it('handles Enter key by blurring and validating', () => {
     render(
       <AveragingIntervalInput

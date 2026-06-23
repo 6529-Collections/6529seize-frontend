@@ -119,8 +119,18 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
       expect(parseSeizeWaveLink(`/waves/${uuid}`)).toBe(uuid);
     });
 
+    it("parses canonical wave path when only divider query is present", () => {
+      expect(parseSeizeWaveLink(`/waves/${uuid}?divider=1009562`)).toBe(uuid);
+    });
+
     it("parses legacy wave query path", () => {
       expect(parseSeizeWaveLink(`/waves?wave=${uuid}`)).toBe(uuid);
+    });
+
+    it("parses legacy wave query path when divider query is present", () => {
+      expect(parseSeizeWaveLink(`/waves?wave=${uuid}&divider=1009562`)).toBe(
+        uuid
+      );
     });
 
     it("returns null when wave links include drop query", () => {
@@ -129,6 +139,10 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
 
     it("returns null when wave links include serial query", () => {
       expect(parseSeizeWaveLink(`/waves/${uuid}?serialNo=1`)).toBeNull();
+    });
+
+    it("returns null when wave links include unrelated query", () => {
+      expect(parseSeizeWaveLink(`/waves/${uuid}?foo=1`)).toBeNull();
     });
   });
 
@@ -177,21 +191,21 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
   describe("ensureStableSeizeLink", () => {
     it("returns original href for non-base URLs", () => {
       const incoming = "https://othersite.com/?drop=drop-id";
-      const current = "https://site.com/messages?wave=abc";
+      const current = "https://site.com/messages/abc";
       expect(ensureStableSeizeLink(incoming, current)).toBe(incoming);
     });
 
     it("returns original href when drop param missing", () => {
       const incoming = "https://site.com/";
-      const current = "https://site.com/messages?wave=abc";
+      const current = "https://site.com/messages/abc";
       expect(ensureStableSeizeLink(incoming, current)).toBe(incoming);
     });
 
     it("rewrites root drop link to current path with drop param", () => {
       const incoming = "https://site.com/?drop=drop-id";
-      const current = "https://site.com/messages?wave=abc";
+      const current = "https://site.com/messages/abc";
       expect(ensureStableSeizeLink(incoming, current)).toBe(
-        "https://site.com/messages?wave=abc&drop=drop-id"
+        "https://site.com/messages/abc?drop=drop-id"
       );
     });
 
@@ -205,17 +219,17 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
 
     it("preserves existing query params and replaces drop", () => {
       const incoming = "https://site.com/?drop=new-drop";
-      const current = "https://site.com/messages?wave=abc&drop=old-drop";
+      const current = "https://site.com/messages/abc?drop=old-drop";
       expect(ensureStableSeizeLink(incoming, current)).toBe(
-        "https://site.com/messages?wave=abc&drop=new-drop"
+        "https://site.com/messages/abc?drop=new-drop"
       );
     });
 
     it("rebases drop links from other paths onto current location", () => {
       const incoming = "https://site.com/waves/abc?drop=def";
-      const current = "https://site.com/messages?wave=xyz";
+      const current = "https://site.com/messages/xyz";
       expect(ensureStableSeizeLink(incoming, current)).toBe(
-        "https://site.com/messages?wave=xyz&drop=def"
+        "https://site.com/messages/xyz?drop=def"
       );
     });
 

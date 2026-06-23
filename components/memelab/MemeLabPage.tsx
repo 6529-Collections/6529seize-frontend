@@ -1,90 +1,139 @@
 "use client";
 
-import styles from "./MemeLab.module.scss";
-
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
-import { ArweaveLinksTable } from "@/components/nft-attributes/ArweaveLinksTable";
-import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
-import { NftPageStats } from "@/components/nft-attributes/NftStats";
-import NFTImage from "@/components/nft-image/NFTImage";
-import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
-import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
-import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import { MemeLabOverviewDetails } from "@/components/memelab/MemeLabAdditionalDetails";
+import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRouteParams";
+import {
+  MEME_LAB_STATS_ROW_CLASS,
+  MemeLabCardVolumes,
+  MemeLabStaticCardHeader,
+  MemeLabStatMetric,
+} from "@/components/memelab/MemeLabCardHeader";
+import {
+  MemeLabYourCardsPanel,
+  MemeLabYourTransactionsTable,
+} from "@/components/memelab/MemeLabYourCards";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
-import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
 import { printMemeReferences } from "@/components/rememes/RememePage";
-import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import {
-  getMemeTabTitle,
-  MEME_FOCUS,
-  MEME_TABS,
-  TabButton,
-} from "@/components/the-memes/MemeShared";
+  MemePageNavigationSkeleton,
+  MemePageSkeleton,
+  MemePageTitleSkeleton,
+} from "@/components/the-memes/MemePageSkeleton";
+import { MEME_FOCUS, MEME_TABS } from "@/components/the-memes/MemeShared";
 import Timeline from "@/components/timeline/Timeline";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { publicEnv } from "@/config/env";
-import {
-  MEMELAB_CONTRACT,
-  MEMES_CONTRACT,
-  NULL_ADDRESS,
-} from "@/constants/constants";
+import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
-import { CollectedCollectionType } from "@/entities/IProfile";
 import type { Transaction } from "@/entities/ITransaction";
-import {
-  addProtocol,
-  areEqualAddresses,
-  enterArtFullScreen,
-  fullScreenSupported,
-  numberWithCommas,
-  parseNftDescriptionToHtml,
-  printMintDate,
-} from "@/helpers/Helpers";
-import {
-  getAnimationMimeTypeFromMetadata,
-  getAnimationDimensionsFromMetadata,
-  getAnimationFileTypeFromMetadata,
-  getImageMimeTypeFromMetadata,
-  getImageDimensionsFromMetadata,
-  getImageFileTypeFromMetadata,
-  getMimeTypeFromFormat,
-} from "@/helpers/nft.helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
+import { formatInteger, formatPercent } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
-import { ContractType } from "@/types/enums";
-import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Fragment, useEffect, useMemo, useState } from "react";
-import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const ACTIVITY_PAGE_SIZE = 25;
 const MEME_LAB_TAB_FOCUSES = [
   MEME_FOCUS.LIVE,
-  MEME_FOCUS.YOUR_CARDS,
-  MEME_FOCUS.THE_ART,
   MEME_FOCUS.COLLECTORS,
-  MEME_FOCUS.ACTIVITY,
-  MEME_FOCUS.TIMELINE,
+  MEME_FOCUS.HISTORY,
+  MEME_FOCUS.REFERENCES,
 ] as const;
 const MEME_LAB_FOCUS_VALUES = new Set<MEME_FOCUS>(MEME_LAB_TAB_FOCUSES);
 const isMemeLabFocus = (focus: MEME_FOCUS): boolean =>
   MEME_LAB_FOCUS_VALUES.has(focus);
-const MEME_LAB_TABS = MEME_TABS.filter((tab) => isMemeLabFocus(tab.focus));
+const MEME_LAB_TABS = MEME_LAB_TAB_FOCUSES.map((focus) =>
+  MEME_TABS.find((tab) => tab.focus === focus)
+).filter((tab): tab is (typeof MEME_TABS)[number] => tab !== undefined);
+
+enum MEME_LAB_HISTORY_TAB {
+  ACTIVITY = "activity",
+  YOUR_TRANSACTIONS = "your-transactions",
+  TIMELINE = "timeline",
+}
+
+const MEME_LAB_HISTORY_TABS: {
+  readonly focus: MEME_LAB_HISTORY_TAB;
+}[] = [
+  { focus: MEME_LAB_HISTORY_TAB.ACTIVITY },
+  { focus: MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS },
+  { focus: MEME_LAB_HISTORY_TAB.TIMELINE },
+];
+
+function parseMemeLabFocus(focus: string | null): MEME_FOCUS | undefined {
+  if (focus === MEME_FOCUS.THE_ART) {
+    return MEME_FOCUS.LIVE;
+  }
+
+  if (
+    focus === MEME_FOCUS.ACTIVITY ||
+    focus === MEME_FOCUS.YOUR_TRANSACTIONS ||
+    focus === MEME_FOCUS.TIMELINE
+  ) {
+    return MEME_FOCUS.HISTORY;
+  }
+
+  const resolvedFocus = Object.values(MEME_FOCUS).find(
+    (candidate) => candidate === focus
+  );
+  if (resolvedFocus === undefined || !isMemeLabFocus(resolvedFocus)) {
+    return undefined;
+  }
+
+  return resolvedFocus;
+}
+
+function getMemeLabHistoryTabForFocus(
+  focus: string | null
+): MEME_LAB_HISTORY_TAB {
+  if (focus === MEME_FOCUS.TIMELINE) {
+    return MEME_LAB_HISTORY_TAB.TIMELINE;
+  }
+
+  if (focus === MEME_FOCUS.YOUR_TRANSACTIONS) {
+    return MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS;
+  }
+
+  return MEME_LAB_HISTORY_TAB.ACTIVITY;
+}
+
+function getMemeLabRouteFocus(
+  activeTab: MEME_FOCUS,
+  activeHistoryTab: MEME_LAB_HISTORY_TAB
+): MEME_FOCUS {
+  if (activeTab !== MEME_FOCUS.HISTORY) {
+    return activeTab;
+  }
+
+  if (activeHistoryTab === MEME_LAB_HISTORY_TAB.TIMELINE) {
+    return MEME_FOCUS.TIMELINE;
+  }
+
+  if (activeHistoryTab === MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS) {
+    return MEME_FOCUS.YOUR_TRANSACTIONS;
+  }
+
+  return MEME_FOCUS.ACTIVITY;
+}
 
 const isAbortError = (error: unknown): boolean => {
   if (error instanceof DOMException) {
@@ -93,38 +142,150 @@ const isAbortError = (error: unknown): boolean => {
   return error instanceof Error && error.name === "AbortError";
 };
 
-const trimToEmpty = (value: unknown): string =>
-  typeof value === "string" ? value.trim() : "";
+const MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME =
+  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+
+function getMemeLabTabButtonClassName(isActive: boolean) {
+  return `${MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME} ${
+    isActive
+      ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
+      : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
+  }`;
+}
+
+function MemeLabPageTabButton({
+  title,
+  isActive,
+  onClick,
+}: {
+  readonly title: string;
+  readonly isActive: boolean;
+  readonly onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={isActive}
+      className={getMemeLabTabButtonClassName(isActive)}
+      onClick={onClick}
+    >
+      {title}
+    </button>
+  );
+}
+
+function getMemeLabDetailTabLabel(
+  focus: MEME_FOCUS,
+  locale: SupportedLocale
+): string {
+  switch (focus) {
+    case MEME_FOCUS.LIVE:
+      return t(locale, "memeLab.detail.tabs.overview");
+    case MEME_FOCUS.REFERENCES:
+      return t(locale, "memeLab.detail.tabs.references");
+    case MEME_FOCUS.COLLECTORS:
+      return t(locale, "memeLab.detail.tabs.collectors");
+    case MEME_FOCUS.HISTORY:
+      return t(locale, "memeLab.detail.tabs.history");
+    default:
+      return t(locale, "memeLab.detail.tabs.overview");
+  }
+}
+
+function getMemeLabHistoryTabLabel(
+  focus: MEME_LAB_HISTORY_TAB,
+  locale: SupportedLocale
+): string {
+  switch (focus) {
+    case MEME_LAB_HISTORY_TAB.ACTIVITY:
+      return t(locale, "memeLab.detail.tabs.cardActivity");
+    case MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS:
+      return t(locale, "memeLab.detail.tabs.yourTransactions");
+    case MEME_LAB_HISTORY_TAB.TIMELINE:
+      return t(locale, "memeLab.detail.tabs.timeline");
+  }
+}
+
+function getMemeLabRouteFocusLabel(
+  focus: MEME_FOCUS,
+  locale: SupportedLocale
+): string {
+  if (focus === MEME_FOCUS.ACTIVITY) {
+    return t(locale, "memeLab.detail.tabs.cardActivity");
+  }
+
+  if (focus === MEME_FOCUS.YOUR_TRANSACTIONS) {
+    return t(locale, "memeLab.detail.tabs.yourTransactions");
+  }
+
+  if (focus === MEME_FOCUS.TIMELINE) {
+    return t(locale, "memeLab.detail.tabs.timeline");
+  }
+
+  return getMemeLabDetailTabLabel(parseMemeLabFocus(focus) ?? focus, locale);
+}
+
+function getMemeLabBrowserTitle({
+  nft,
+  nftId,
+  routeFocus,
+  locale,
+}: {
+  readonly nft: LabNFT | undefined;
+  readonly nftId: string;
+  readonly routeFocus: MEME_FOCUS;
+  readonly locale: SupportedLocale;
+}): string {
+  const title = nft
+    ? t(locale, "memeLab.detail.browserTitle", {
+        name: nft.name,
+        tokenId: nft.id,
+      })
+    : t(locale, "memeLab.detail.heading.card", { tokenId: nftId });
+
+  if (routeFocus === MEME_FOCUS.LIVE) {
+    return title;
+  }
+
+  return t(locale, "memeLab.detail.browserTitleWithTab", {
+    title,
+    tab: getMemeLabRouteFocusLabel(routeFocus, locale),
+  });
+}
+
+function formatMemeLabPercent(value: number, locale: SupportedLocale) {
+  return formatPercent(locale, value);
+}
 
 export default function MemeLabPageComponent({
   nftId,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly nftId: string;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const capacitor = useCapacitor();
 
   const { connectedProfile } = useAuth();
   const { country } = useCookieConsent();
   const { setTitle } = useTitle();
 
-  const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
-
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
+  const focusParam = searchParams.get("focus");
+  const defaultAdditionalDetailsOpen = focusParam === MEME_FOCUS.THE_ART;
+  const searchParamsString = useMemo(
+    () => searchParams.toString(),
+    [searchParams]
+  );
+  const routeTab = parseMemeLabFocus(focusParam) ?? MEME_FOCUS.LIVE;
+  const activitySectionRef = useRef<HTMLElement | null>(null);
 
   const [nft, setNft] = useState<LabNFT>();
-
-  const animationHref = getResolvedAnimationSrc(nft);
-  const hasAnimation = Boolean(animationHref);
-  const fullscreenElementId =
-    hasAnimation && currentSlide === 0
-      ? "the-art-fullscreen-animation"
-      : "the-art-fullscreen-img";
   const [originalMemes, setOriginalMemes] = useState<NFT[]>([]);
   const [nftMeta, setNftMeta] = useState<LabExtendedData>();
+  const [nftLoading, setNftLoading] = useState(true);
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activity, setActivity] = useState<Transaction[]>([]);
@@ -141,41 +302,68 @@ export default function MemeLabPageComponent({
     TypeFilter.ALL
   );
   const [activityLoading, setActivityLoading] = useState(false);
+  const hasUserCards = userLoaded && nftBalance > 0;
+  const hasOwnershipContext = hasUserCards;
+  const hasUserTransactions =
+    userLoaded &&
+    (connectedProfile?.wallets?.length ?? 0) > 0 &&
+    transactions.length > 0;
+  const activeTab = routeTab;
+  const requestedHistoryTab = getMemeLabHistoryTabForFocus(focusParam);
+  const activeHistoryTab =
+    requestedHistoryTab === MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS &&
+    !hasUserTransactions
+      ? MEME_LAB_HISTORY_TAB.ACTIVITY
+      : requestedHistoryTab;
+  const visibleMemeLabTabs = MEME_LAB_TABS;
+  const visibleHistoryTabItems = useMemo(
+    () =>
+      MEME_LAB_HISTORY_TABS.filter(
+        (tab) =>
+          tab.focus !== MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS ||
+          hasUserTransactions
+      ).map((tab) => ({
+        key: tab.focus,
+        label: getMemeLabHistoryTabLabel(tab.focus, locale),
+        value: tab.focus,
+      })),
+    [hasUserTransactions, locale]
+  );
+  const routeFocus = getMemeLabRouteFocus(activeTab, activeHistoryTab);
+  const isLoadingNft = nftLoading && (!nft || !nftMeta);
 
   useEffect(() => {
-    setTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab));
-  }, [nft, nftId, activeTab]);
+    setTitle(getMemeLabBrowserTitle({ nft, nftId, routeFocus, locale }));
+  }, [locale, nft, nftId, routeFocus, setTitle]);
 
-  useEffect(() => {
-    setCurrentSlide(0);
-  }, [nft]);
+  function replaceRouteFocus(nextFocus: MEME_FOCUS) {
+    const query = new URLSearchParams(searchParamsString);
+    query.set("focus", nextFocus);
+    const queryString = query.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false,
+    });
+  }
 
-  useEffect(() => {
-    setIsFullScreenSupported(fullScreenSupported());
-    let initialFocus = MEME_FOCUS.LIVE;
-
-    const routerFocus = searchParams?.get("focus");
-    if (routerFocus) {
-      const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
-        (sd) => sd === routerFocus
+  function setActiveMemeLabTab(nextTab: MEME_FOCUS) {
+    if (nextTab === MEME_FOCUS.HISTORY) {
+      replaceRouteFocus(
+        getMemeLabRouteFocus(MEME_FOCUS.HISTORY, activeHistoryTab)
       );
-      if (resolvedRouterFocus && isMemeLabFocus(resolvedRouterFocus)) {
-        initialFocus = resolvedRouterFocus;
-      }
+      return;
     }
-    setActiveTab(initialFocus);
-  }, []);
 
-  useEffect(() => {
-    if (activeTab) {
-      let query: any = { focus: activeTab };
-      router.replace(`?${new URLSearchParams(query).toString()}`);
-    }
-  }, [activeTab]);
+    replaceRouteFocus(nextTab);
+  }
+
+  function setActiveHistoryMemeLabTab(nextTab: MEME_LAB_HISTORY_TAB) {
+    replaceRouteFocus(getMemeLabRouteFocus(MEME_FOCUS.HISTORY, nextTab));
+  }
 
   useEffect(() => {
     setNft(undefined);
     setNftMeta(undefined);
+    setNftLoading(Boolean(nftId));
     setOriginalMemes([]);
     setOriginalMemesLoaded(false);
 
@@ -201,6 +389,7 @@ export default function MemeLabPageComponent({
       }
       setNftMeta(undefined);
       setNft(undefined);
+      setNftLoading(false);
       setOriginalMemesState([]);
     };
 
@@ -289,6 +478,7 @@ export default function MemeLabPageComponent({
         }
 
         setNft(fetchedNft);
+        setNftLoading(false);
 
         await loadOriginalMemes(fetchedNft);
       } catch (error) {
@@ -463,17 +653,21 @@ export default function MemeLabPageComponent({
   const activityContent = useMemo(() => {
     if (activity.length > 0) {
       return (
-        <Table bordered={false} className={styles["transactionsTable"]}>
-          <tbody>
-            {activity.map((tr) => (
-              <LatestActivityRow
-                tr={tr}
-                nft={nft}
-                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-              />
-            ))}
-          </tbody>
-        </Table>
+        <div className="tw-overflow-x-auto">
+          <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
+            <tbody>
+              {activity.map((tr) => (
+                <LatestActivityRow
+                  tr={tr}
+                  nft={nft}
+                  variant="tailwind"
+                  rowStyle="striped"
+                  key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       );
     }
 
@@ -495,857 +689,187 @@ export default function MemeLabPageComponent({
     return;
   }, [activity, activityLoading, nft]);
 
+  function handleActivityPageChange(newPage: number) {
+    setActivityPage(newPage);
+    activitySectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  function printHistoryTabs() {
+    if (!nft || activeTab !== MEME_FOCUS.HISTORY) {
+      return null;
+    }
+
+    return (
+      <nav
+        aria-label={t(locale, "memeLab.detail.sections.history")}
+        className="tw-pb-8"
+      >
+        <div className="tw-w-fit tw-max-w-full">
+          <CommonTabs<MEME_LAB_HISTORY_TAB>
+            items={visibleHistoryTabItems}
+            activeItem={activeHistoryTab}
+            filterLabel={t(locale, "memeLab.detail.sections.history")}
+            setSelected={setActiveHistoryMemeLabTab}
+            fill={false}
+          />
+        </div>
+      </nav>
+    );
+  }
+
   function printContent() {
-    if (activeTab === MEME_FOCUS.ACTIVITY) {
-      return printActivity();
-    }
-
-    if (activeTab === MEME_FOCUS.THE_ART) {
-      return printTheArt();
-    }
-
     if (activeTab === MEME_FOCUS.COLLECTORS) {
       return printHodlers();
     }
 
-    if (activeTab === MEME_FOCUS.TIMELINE) {
-      return printTimeline();
+    if (activeTab === MEME_FOCUS.REFERENCES) {
+      return printReferences();
+    }
+
+    if (activeTab === MEME_FOCUS.LIVE) {
+      return printOverview();
+    }
+
+    if (activeTab === MEME_FOCUS.HISTORY) {
+      if (activeHistoryTab === MEME_LAB_HISTORY_TAB.TIMELINE) {
+        return printTimeline();
+      }
+
+      if (activeHistoryTab === MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS) {
+        return <MemeLabYourTransactionsTable transactions={transactions} />;
+      }
+
+      return printActivity();
+    }
+
+    return null;
+  }
+
+  function printOverview() {
+    if (!nft) {
+      return null;
     }
 
     return (
-      <Container className="p-0">
-        <Row className={connectedProfile ? styles["nftImagePadding"] : ""}>
-          {(activeTab === MEME_FOCUS.LIVE ||
-            activeTab === MEME_FOCUS.YOUR_CARDS) &&
-            nft && (
-              <>
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                  className={`${styles["nftImageWrapper"]} pt-2 pb-5`}
-                >
-                  <NFTImage
-                    nft={nft}
-                    animation={true}
-                    height={650}
-                    showBalance={true}
-                  />
-                </Col>
-                {activeTab === MEME_FOCUS.LIVE && <>{printLive()}</>}
-                {activeTab === MEME_FOCUS.YOUR_CARDS && <>{printYourCards()}</>}
-              </>
-            )}
-        </Row>
-        <Row>
-          {activeTab === MEME_FOCUS.LIVE && (
-            <>
-              {printMemeReferences(
-                originalMemes,
-                "the-memes",
-                originalMemesLoaded
-              )}
-            </>
-          )}
-          {activeTab === MEME_FOCUS.YOUR_CARDS && <>{printYourCardsSub()}</>}
-        </Row>
-      </Container>
+      <MemeLabOverviewDetails
+        nft={nft}
+        defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
+      />
     );
   }
 
-  function printLive() {
-    if (nft && nftMeta) {
-      return (
-        <Col
-          xs={{ span: 12 }}
-          sm={{ span: 12 }}
-          md={{ span: 6 }}
-          lg={{ span: 6 }}
-          className="pt-2"
-        >
-          <Container className="p-0">
-            <Row className="pt-3">
-              <Col>
-                <h3>NFT</h3>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Table bordered={false}>
-                  <tbody>
-                    <tr>
-                      <td>Artist Name</td>
-                      <td>{nft.artist}</td>
-                    </tr>
-                    <tr>
-                      <td>Artist Profile</td>
-                      <td>
-                        <ArtistProfileHandle nft={nft} />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Collection</td>
-                      <td>
-                        <Link
-                          href={`/meme-lab/collection/${encodeURIComponent(
-                            nftMeta.metadata_collection.replaceAll(" ", "-")
-                          )}`}
-                        >
-                          {nftMeta.metadata_collection}
-                        </Link>
-                      </td>
-                    </tr>
-                    {nftMeta.website && (
-                      <tr>
-                        <td>Website</td>
-                        <td>
-                          {nftMeta.website.split(" ").map((w) => (
-                            <Fragment key={`meta-website-${w}`}>
-                              <Link
-                                href={addProtocol(w)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {w}
-                              </Link>
-                              &nbsp;&nbsp;
-                            </Fragment>
-                          ))}
-                        </td>
-                      </tr>
-                    )}
-                    <tr>
-                      <td>Mint Date</td>
-                      <td>{printMintDate(nft.mint_date)}</td>
-                    </tr>
-                    <NftPageStats nft={nft} />
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <h3>Meme Collectors</h3>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Table bordered={false} className={styles["hodlersTableLive"]}>
-                  <tbody>
-                    <tr>
-                      <td>Edition Size</td>
-                      <td className="text-right tw-font-medium">
-                        {numberWithCommas(nftMeta.edition_size)}
-                      </td>
-                      <td className="text-right tw-font-medium">
-                        {nftMeta.edition_size_rank}/{nftMeta.collection_size}
-                      </td>
-                    </tr>
-                    {nftMeta.burnt > 0 && (
-                      <>
-                        <tr>
-                          <td>
-                            <span className="d-flex align-items-center gap-2">
-                              <span>Burnt</span>
-                              <FontAwesomeIcon
-                                icon={faFire}
-                                style={{ height: "22px", color: "#c51d34" }}
-                              />
-                            </span>
-                          </td>
-                          <td className="text-right tw-font-medium">
-                            {numberWithCommas(nftMeta.burnt)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Edition Size ex. Burnt</td>
-                          <td className="text-right tw-font-medium">
-                            {numberWithCommas(nftMeta.edition_size_not_burnt)}
-                          </td>
-                          <td className="text-right tw-font-medium">
-                            {nftMeta.edition_size_not_burnt_rank}/
-                            {nftMeta.collection_size}
-                          </td>
-                        </tr>
-                      </>
-                    )}
-                    <tr>
-                      <td>6529 Museum</td>
-                      <td className="text-right tw-font-medium">
-                        {numberWithCommas(nftMeta.museum_holdings)}
-                      </td>
-                      <td className="text-right tw-font-medium">
-                        {nftMeta.museum_holdings_rank}/{nftMeta.collection_size}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        Edition Size ex.
-                        {nftMeta.burnt > 0 && " Burnt and"} 6529 Museum
-                      </td>
-                      <td className="text-right tw-font-medium">
-                        {numberWithCommas(nftMeta.edition_size_cleaned)}
-                      </td>
-                      <td className="text-right tw-font-medium">
-                        {nftMeta.edition_size_cleaned_rank}/
-                        {nftMeta.collection_size}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Collectors</td>
-                      <td className="text-right tw-font-medium">
-                        {numberWithCommas(nftMeta.hodlers)}
-                      </td>
-                      <td className="text-right tw-font-medium">
-                        {nftMeta.hodlers_rank}/{nftMeta.collection_size}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>% Unique</td>
-                      <td className="text-right tw-font-medium">
-                        {Math.round(nftMeta.percent_unique * 100 * 10) / 10}%
-                      </td>
-                      <td className="text-right tw-font-medium">
-                        {nftMeta.percent_unique_rank}/{nftMeta.collection_size}
-                      </td>
-                    </tr>
-                    {nftMeta.burnt > 0 && (
-                      <tr>
-                        <td>% Unique ex. Burnt</td>
-                        <td className="text-right tw-font-medium">
-                          {Math.round(
-                            nftMeta.percent_unique_not_burnt * 100 * 10
-                          ) / 10}
-                          %
-                        </td>
-                        <td className="text-right tw-font-medium">
-                          {nftMeta.percent_unique_not_burnt_rank}/
-                          {nftMeta.collection_size}
-                        </td>
-                      </tr>
-                    )}
-                    <tr>
-                      <td>
-                        % Unique ex.{nftMeta.burnt > 0 && " Burnt and"} 6529
-                        Museum
-                      </td>
-                      <td className="text-right tw-font-medium">
-                        {Math.round(nftMeta.percent_unique_cleaned * 100 * 10) /
-                          10}
-                        %
-                      </td>
-                      <td className="text-right tw-font-medium">
-                        {nftMeta.percent_unique_cleaned_rank}/
-                        {nftMeta.collection_size}
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-            {nft.has_distribution ? (
-              <Row className="pt-3 pb-3">
-                <Col>
-                  <Link href={`/meme-lab/${nft.id}/distribution`}>
-                    Distribution Plan
-                  </Link>
-                </Col>
-              </Row>
-            ) : (
-              ""
-            )}
-            {nftBalance > 0 && (
-              <Row className="pt-3">
-                <Col>
-                  <h3 className="font-color">
-                    You Own {nftBalance} edition{nftBalance > 1 && "s"}
-                  </h3>
-                </Col>
-              </Row>
-            )}
-            {(!capacitor.isIos || country === "US") && (
-              <Row className="pt-4">
-                <Col>
-                  <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
-                </Col>
-              </Row>
-            )}
-          </Container>
-        </Col>
-      );
-    }
-    return;
-  }
-
-  function getTokenCount(transactions: Transaction[]) {
-    return transactions.reduce((count, e) => count + e.token_count, 0);
-  }
-
-  function printYourCardsSub() {
+  function printReferences() {
     return (
-      <>
-        {transactions.length > 0 && (
-          <>
-            <Row className="pt-4">
-              <Col>
-                <h3>Your Transaction History</h3>
-              </Col>
-            </Row>
-            <Row className={`pt-4 ${styles["transactionsScrollContainer"]}`}>
-              <Col>
-                <Table bordered={false} className={styles["transactionsTable"]}>
-                  <tbody>
-                    {transactions.map((tr) => (
-                      <LatestActivityRow
-                        tr={tr}
-                        key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                      />
-                    ))}
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </>
-        )}
-      </>
-    );
-  }
-
-  function printYourCards() {
-    const firstAcquired =
-      transactions.length > 0
-        ? transactions.reduce((earliest, tx) =>
-            new Date(tx.transaction_date) < new Date(earliest.transaction_date)
-              ? tx
-              : earliest
-          )
-        : undefined;
-
-    const airdropped = transactions.filter(
-      (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
-    );
-
-    const walletObjects = connectedProfile?.wallets ?? [];
-    const wallets = walletObjects.map((w) => w.wallet);
-    const transferredIn =
-      wallets.length === 0
-        ? []
-        : transactions.filter(
-            (t) =>
-              !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
-              wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-              t.value === 0
-          );
-
-    const transferredOut =
-      wallets.length === 0
-        ? []
-        : transactions.filter(
-            (t) =>
-              wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-              t.value === 0
-          );
-
-    const bought =
-      wallets.length === 0
-        ? []
-        : transactions.filter(
-            (t) =>
-              wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-              t.value > 0
-          );
-
-    const boughtSum = bought.reduce((sum, b) => sum + b.value, 0);
-
-    const sold =
-      wallets.length === 0
-        ? []
-        : transactions.filter(
-            (t) =>
-              wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-              t.value > 0
-          );
-
-    const soldSum = sold.reduce((sum, b) => sum + b.value, 0);
-
-    return (
-      <Col
-        xs={{ span: 12 }}
-        sm={{ span: 12 }}
-        md={{ span: 6 }}
-        lg={{ span: 6 }}
+      <section
+        aria-labelledby="meme-lab-references-heading"
+        className="tw-pb-3"
       >
-        <Container className="p-0">
-          <Row>
-            {wallets.length === 0 && (
-              <Row className="pt-2">
-                <Col>
-                  <h4>Connect your wallet to view your cards.</h4>
-                </Col>
-              </Row>
-            )}
-            {nftBalance === 0 && wallets.length > 0 && nft && userLoaded && (
-              <Row className="pt-2">
-                <Col>
-                  <h3>You don&apos;t own any editions of Card {nft.id}</h3>
-                </Col>
-              </Row>
-            )}
-            {transactions.length > 0 &&
-              wallets.length > 0 &&
-              nftBalance > 0 &&
-              nft && (
-                <>
-                  <Row className="pt-2">
-                    <Col
-                      xs={{ span: 12 }}
-                      sm={{ span: 12 }}
-                      md={{ span: 12 }}
-                      lg={{ span: 8 }}
-                    >
-                      <Table bordered={false}>
-                        <tbody>
-                          <tr className={`${styles["overviewColumn"]}`}>
-                            <td>Cards</td>
-                            <td className="text-right">{`x${nftBalance}`}</td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                    </Col>
-                  </Row>
-                  <Row className="mb-2">
-                    <Col>
-                      <TransferSingle
-                        collectionType={CollectedCollectionType.MEMELAB}
-                        contractType={ContractType.ERC1155}
-                        contract={MEMELAB_CONTRACT}
-                        tokenId={nft.id}
-                        max={nftBalance}
-                        title={nft?.name ?? `Meme Lab #${nft?.id}`}
-                        thumbUrl={nft?.thumbnail}
-                      />
-                    </Col>
-                  </Row>
-                </>
-              )}
-            {transactions.length > 0 && (
-              <>
-                <Row className="pt-2 pb-2">
-                  <Col>
-                    <h3>Overview</h3>
-                  </Col>
-                </Row>
-                {firstAcquired && (
-                  <Row className={`pb-2 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      First acquired{" "}
-                      {printMintDate(new Date(firstAcquired.transaction_date))}
-                    </Col>
-                  </Row>
-                )}
-                {airdropped.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(airdropped)} card
-                      {getTokenCount(airdropped) > 1 && "s"} airdropped
-                    </Col>
-                  </Row>
-                )}
-                {bought.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(bought)} card
-                      {getTokenCount(bought) > 1 && "s"} bought for {boughtSum}{" "}
-                      ETH
-                    </Col>
-                  </Row>
-                )}
-                {transferredIn.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(transferredIn)} card
-                      {getTokenCount(transferredIn) > 1 && "s"} transferred in
-                    </Col>
-                  </Row>
-                )}
-                {sold.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(sold)} card
-                      {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
-                    </Col>
-                  </Row>
-                )}
-                {transferredOut.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(transferredOut)} card
-                      {getTokenCount(transferredOut) > 1 && "s"} transferred out
-                    </Col>
-                  </Row>
-                )}
-              </>
-            )}
-          </Row>
-        </Container>
-      </Col>
+        <h2
+          id="meme-lab-references-heading"
+          className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+        >
+          {t(locale, "memeLab.detail.references.title")}
+        </h2>
+        {printMemeReferences(
+          originalMemes,
+          "the-memes",
+          originalMemesLoaded,
+          true,
+          locale
+        )}
+      </section>
     );
   }
 
-  function carouselHandlerSlide(event: any) {
-    setCurrentSlide(event);
+  function printStaticCardHeader() {
+    if (!nft || !nftMeta) {
+      return null;
+    }
+
+    return (
+      <MemeLabStaticCardHeader
+        nft={nft}
+        nftMeta={nftMeta}
+        showMarketplaceLinks={!capacitor.isIos || country === "US"}
+        locale={locale}
+        artworkFooter={
+          hasOwnershipContext ? (
+            <MemeLabYourCardsPanel nft={nft} nftBalance={nftBalance} />
+          ) : undefined
+        }
+      />
+    );
   }
 
-  const imageFormat = getImageFileTypeFromMetadata(nft?.metadata);
-  const animationFormat = getAnimationFileTypeFromMetadata(nft?.metadata);
-  const imageDimensions = getImageDimensionsFromMetadata(nft?.metadata);
-  const animationDimensions = getAnimationDimensionsFromMetadata(nft?.metadata);
-  const imageHref = getResolvedImageSrc(nft);
-  const metadataHref = trimToEmpty(nft?.uri);
-  const metadata =
-    nft?.metadata !== null && typeof nft?.metadata === "object"
-      ? (nft.metadata as {
-          readonly image?: unknown;
-          readonly animation?: unknown;
-          readonly animation_url?: unknown;
-        })
-      : undefined;
-  const artImageHref =
-    trimToEmpty(metadata?.image) || trimToEmpty(nft?.image) || "";
-  const artAnimationHref =
-    trimToEmpty(metadata?.animation_url) ||
-    trimToEmpty(metadata?.animation) ||
-    trimToEmpty(nft?.animation) ||
-    "";
-  const hasImage = Boolean(imageHref);
-  const isShowingAnimation = hasAnimation && (currentSlide === 0 || !hasImage);
-  const fileType = isShowingAnimation ? animationFormat : imageFormat;
-  const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
-  const fileMimeType = isShowingAnimation
-    ? (getAnimationMimeTypeFromMetadata(nft?.metadata) ??
-      getMimeTypeFromFormat(animationFormat))
-    : (getImageMimeTypeFromMetadata(nft?.metadata) ??
-      getMimeTypeFromFormat(imageFormat));
-  const currentFormat = fileType ?? "";
-  const arweaveRows = [
-    metadataHref
-      ? {
-          label: "JSON",
-          url: metadataHref,
-          openLabel: "Open JSON in new tab",
-        }
-      : null,
-    artImageHref
-      ? {
-          label: imageFormat?.toUpperCase() || "IMAGE",
-          url: artImageHref,
-          openLabel: "Open image in new tab",
-          extension: imageFormat ?? "",
-          downloadName: nft?.name || `meme-lab-${nft?.id ?? "asset"}`,
-        }
-      : null,
-    artAnimationHref
-      ? {
-          label: animationFormat?.toUpperCase() || "ANIMATION",
-          url: artAnimationHref,
-          openLabel: "Open animation in new tab",
-          extension: animationFormat ?? "",
-          downloadName: nft?.name || `meme-lab-${nft?.id ?? "asset"}`,
-        }
-      : null,
-  ].filter(Boolean) as {
-    label: string;
-    url: string;
-    openLabel: string;
-    extension?: string | undefined;
-    downloadName?: string | undefined;
-  }[];
-
-  function printTheArt() {
-    if (nft && nftMeta) {
-      return (
-        <>
-          <Container className="p-0">
-            <Row className="position-relative">
-              {hasAnimation ? (
-                <>
-                  <Col xs={12} className={styles["artHeader"]}>
-                    <div className={styles["artHeaderContent"]}>
-                      <div className={styles["artFormatLabel"]}>
-                        {currentFormat}
-                      </div>
-                      {isFullScreenSupported && (
-                        <FontAwesomeIcon
-                          icon={faExpandAlt}
-                          className={styles["fullScreen"]}
-                          onClick={() =>
-                            fullscreenElementId &&
-                            enterArtFullScreen(fullscreenElementId)
-                          }
-                        />
-                      )}
-                    </div>
-                  </Col>
-                  <Carousel
-                    className={styles["memesCarousel"]}
-                    interval={null}
-                    indicators={false}
-                    wrap={false}
-                    onSlide={carouselHandlerSlide}
-                  >
-                    <Carousel.Item className="text-center">
-                      <NFTImage
-                        nft={nft}
-                        animation={true}
-                        height={650}
-                        transparentBG={true}
-                        showOriginal={true}
-                        showBalance={false}
-                        id="the-art-fullscreen-animation"
-                      />
-                    </Carousel.Item>
-                    <Carousel.Item className="text-center">
-                      <NFTImage
-                        nft={nft}
-                        animation={false}
-                        height={650}
-                        transparentBG={true}
-                        showOriginal={true}
-                        showBalance={false}
-                        id="the-art-fullscreen-img"
-                      />
-                    </Carousel.Item>
-                  </Carousel>
-                </>
-              ) : (
-                <>
-                  <Col xs={12} className={styles["artHeader"]}>
-                    <div className={styles["artHeaderContent"]}>
-                      <div className={styles["artFormatLabel"]}>
-                        {currentFormat}
-                      </div>
-                      {isFullScreenSupported && (
-                        <FontAwesomeIcon
-                          icon={faExpandAlt}
-                          className={styles["fullScreen"]}
-                          onClick={() =>
-                            fullscreenElementId &&
-                            enterArtFullScreen(fullscreenElementId)
-                          }
-                        />
-                      )}
-                    </div>
-                  </Col>
-                  <NFTImage
-                    nft={nft}
-                    animation={false}
-                    height={650}
-                    transparentBG={true}
-                    showOriginal={true}
-                    showBalance={false}
-                    id="the-art-fullscreen-img"
-                  />
-                </>
-              )}
-            </Row>
-          </Container>
-          <Container className="pt-5 pb-3">
-            <Row>
-              <Col>
-                <Container>
-                  <Row>
-                    <Col>
-                      <Row>
-                        <Col>
-                          <h3 className="tw-pb-2">Arweave Links</h3>
-                        </Col>
-                      </Row>
-                      <ArweaveLinksTable
-                        rows={arweaveRows}
-                        linkClassName={styles["arweaveLink"]}
-                      />
-                    </Col>
-                  </Row>
-                </Container>
-              </Col>
-            </Row>
-          </Container>
-          <Container className="pt-3 pb-3">
-            <Row>
-              <Col
-                xs={{ span: 12 }}
-                sm={{ span: 6 }}
-                md={{ span: 6 }}
-                lg={{ span: 6 }}
-              >
-                <Container>
-                  <Row>
-                    <Col>
-                      <h3>Card Details</h3>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <Table bordered={false}>
-                        <tbody>
-                          <tr>
-                            <td>Edition Size</td>
-                            <td className="tw-font-medium">{nft.supply}</td>
-                          </tr>
-                          <tr>
-                            <td>Collection</td>
-                            <td className="tw-font-medium">{nft.collection}</td>
-                          </tr>
-                          <tr>
-                            <td>Mint Date</td>
-                            <td className="tw-font-medium">
-                              {printMintDate(nft.mint_date)}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Artist Name</td>
-                            <td className="tw-font-medium">{nft.artist}</td>
-                          </tr>
-                          <tr>
-                            <td>Artist Profile</td>
-                            <td className="tw-font-medium">
-                              <ArtistProfileHandle nft={nft} />
-                            </td>
-                          </tr>
-                          {fileType && (
-                            <tr>
-                              <td>File Type</td>
-                              <td className="tw-font-medium">
-                                {fileMimeType ? (
-                                  <MediaTypeBadge
-                                    mimeType={fileMimeType}
-                                    dropId={`${nft.contract}-${nft.id}-art`}
-                                    showTooltip={false}
-                                    showLabel={true}
-                                    tone="color"
-                                    className="tw-inline-flex tw-items-center"
-                                    labelClassName="tw-text-inherit tw-font-medium"
-                                  />
-                                ) : (
-                                  fileType
-                                )}
-                              </td>
-                            </tr>
-                          )}
-                          {dimensions && (
-                            <tr>
-                              <td>Dimensions</td>
-                              <td className="tw-font-medium">{dimensions}</td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </Table>
-                    </Col>
-                  </Row>
-                </Container>
-              </Col>
-              {nft.metadata.attributes.some(
-                (a: any) =>
-                  a.trait_type.startsWith("Meme Card Reference") &&
-                  a.value != "None" &&
-                  a.value
-              ) && (
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 6 }}
-                  md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
-                  <Container>
-                    <Row>
-                      <Col>
-                        <h3>References</h3>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <Table>
-                          <tbody>
-                            {nft.metadata.attributes
-                              .filter(
-                                (a: any) =>
-                                  a.trait_type.startsWith(
-                                    "Meme Card Reference"
-                                  ) &&
-                                  a.value != "None" &&
-                                  a.value
-                              )
-                              .map((a: any) => (
-                                <tr key={`${a.trait_type}-${a.value}`}>
-                                  <td>{a.trait_type}</td>
-                                  <td className="tw-font-medium">{a.value}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </Table>
-                      </Col>
-                    </Row>
-                  </Container>
-                </Col>
-              )}
-            </Row>
-          </Container>
-          <Container className="pt-3 pb-3">
-            <Row>
-              <Col>
-                <Container>
-                  <Row>
-                    <Col>
-                      <h3>Card Description</h3>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col
-                      dangerouslySetInnerHTML={{
-                        __html: parseNftDescriptionToHtml(nft.description),
-                      }}
-                    ></Col>
-                  </Row>
-                </Container>
-              </Col>
-            </Row>
-          </Container>
-          <Container className="pt-3 pb-3">
-            <Row>
-              <Col>
-                <Container>
-                  <Row>
-                    <Col>
-                      <h3>Properties</h3>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <NFTAttributes attributes={nft.metadata.attributes} />
-                    </Col>
-                  </Row>
-                </Container>
-              </Col>
-            </Row>
-          </Container>
-        </>
-      );
+  function printCollectorsStatsMetrics() {
+    if (!nftMeta) {
+      return null;
     }
-    return;
+
+    return (
+      <div className={MEME_LAB_STATS_ROW_CLASS}>
+        <MemeLabStatMetric
+          label={t(locale, "memeLab.detail.collectors.collectors")}
+          value={formatInteger(locale, nftMeta.hodlers)}
+          rank={nftMeta.hodlers_rank}
+          total={nftMeta.collection_size}
+        />
+        <MemeLabStatMetric
+          label={t(locale, "memeLab.detail.collectors.museum")}
+          value={formatInteger(locale, nftMeta.museum_holdings)}
+          rank={nftMeta.museum_holdings_rank}
+          total={nftMeta.collection_size}
+        />
+        <MemeLabStatMetric
+          label={t(locale, "memeLab.detail.collectors.unique")}
+          value={formatMemeLabPercent(nftMeta.percent_unique, locale)}
+          rank={nftMeta.percent_unique_rank}
+          total={nftMeta.collection_size}
+        />
+        {nftMeta.burnt > 0 && (
+          <MemeLabStatMetric
+            label={t(locale, "memeLab.detail.collectors.uniqueExBurnt")}
+            value={formatMemeLabPercent(
+              nftMeta.percent_unique_not_burnt,
+              locale
+            )}
+            rank={nftMeta.percent_unique_not_burnt_rank}
+            total={nftMeta.collection_size}
+          />
+        )}
+        <MemeLabStatMetric
+          label={t(
+            locale,
+            nftMeta.burnt > 0
+              ? "memeLab.detail.collectors.uniqueExBurntAndMuseum"
+              : "memeLab.detail.collectors.uniqueExMuseum"
+          )}
+          value={formatMemeLabPercent(nftMeta.percent_unique_cleaned, locale)}
+          rank={nftMeta.percent_unique_cleaned_rank}
+          total={nftMeta.collection_size}
+        />
+      </div>
+    );
   }
 
   function printHodlers() {
     if (nft && nftId) {
       return (
-        <Row className="p-0">
-          <Col>
+        <section
+          aria-label={t(locale, "memeLab.detail.collectors.leaderboard")}
+          className="tw-py-2"
+        >
+          {printCollectorsStatsMetrics()}
+          <div className="tw-pt-3">
             <MemeLabLeaderboard
               contract={nft.contract}
               nftId={parseInt(nftId)}
             />
-          </Col>
-        </Row>
+          </div>
+        </section>
       );
     }
     return;
@@ -1353,164 +877,170 @@ export default function MemeLabPageComponent({
 
   function printTimeline() {
     return (
-      <Container className="pt-3 pb-5 no-padding">
-        <Row>
-          <Col xs={12} md={{ span: 10, offset: 1 }}>
-            {nft && <Timeline nft={nft} steps={nftHistory} />}
-          </Col>
-        </Row>
-      </Container>
+      <section
+        aria-label={t(locale, "memeLab.detail.timeline.region")}
+        className="tw-pb-5 tw-pt-3"
+      >
+        <div className="tw-mx-auto tw-w-full md:tw-w-10/12">
+          {nft && <Timeline nft={nft} steps={nftHistory} locale={locale} />}
+        </div>
+      </section>
     );
   }
 
   function printActivity() {
     return (
-      <Container className="p-0">
-        {nft && (
-          <>
-            <Row className="pt-2">
-              <Col>
-                <h3>Card Volumes</h3>
-              </Col>
-            </Row>
-            <Row className="pt-2">
-              <Col>
-                <Table className="text-center">
-                  <thead>
-                    <tr>
-                      <th>24 Hours</th>
-                      <th>7 Days</th>
-                      <th>30 Days</th>
-                      <th>All Time</th>
-                    </tr>
-                  </thead>
-                  <tbody className="pt-3">
-                    <tr>
-                      <td>
-                        {nft.total_volume_last_24_hours > 0
-                          ? `${numberWithCommas(
-                              Math.round(nft.total_volume_last_24_hours * 100) /
-                                100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                      <td>
-                        {nft.total_volume_last_7_days > 0
-                          ? `${numberWithCommas(
-                              Math.round(nft.total_volume_last_7_days * 100) /
-                                100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                      <td>
-                        {nft.total_volume_last_1_month > 0
-                          ? `${numberWithCommas(
-                              Math.round(nft.total_volume_last_1_month * 100) /
-                                100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                      <td>
-                        {nft.total_volume > 0
-                          ? `${numberWithCommas(
-                              Math.round(nft.total_volume * 100) / 100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </>
-        )}
-        <Row className="tw-py-3">
-          <Col>
-            <div className="tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
-              <h3 className="tw-mb-0 tw-shrink-0 tw-whitespace-nowrap">
-                Card Activity
-              </h3>
-              <div className="tw-w-full tw-shrink-0 md:tw-w-72">
-                <CommonDropdown
-                  items={ActivityTypeItems}
-                  activeItem={activityTypeFilter}
-                  filterLabel="Transaction Type"
-                  setSelected={(filter) => {
-                    setActivityPage(1);
-                    setActivityTypeFilter(filter);
-                  }}
-                />
-              </div>
+      <section
+        aria-label={t(locale, "memeLab.detail.activity.region")}
+        className="tw-space-y-8 tw-pb-5"
+      >
+        {nft && <MemeLabCardVolumes nft={nft} />}
+        <section
+          ref={activitySectionRef}
+          aria-labelledby="meme-lab-card-activity-heading"
+          className="tw-scroll-mt-24"
+        >
+          <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
+            <h3
+              id="meme-lab-card-activity-heading"
+              className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200"
+            >
+              {t(locale, "memeLab.detail.tabs.cardActivity")}
+            </h3>
+            <div className="tw-w-full tw-shrink-0 md:tw-w-72">
+              <CommonDropdown
+                items={ActivityTypeItems}
+                activeItem={activityTypeFilter}
+                filterLabel={t(
+                  locale,
+                  "memeLab.detail.activity.transactionType"
+                )}
+                setSelected={(filter) => {
+                  setActivityPage(1);
+                  setActivityTypeFilter(filter);
+                }}
+              />
             </div>
-          </Col>
-        </Row>
-        <Row className={`pt-2 ${styles["transactionsScrollContainer"]}`}>
-          <Col>{activityContent}</Col>
-        </Row>
+          </div>
+          {activityContent}
+        </section>
         {activity.length > 0 && !activityLoading && (
-          <Row className="text-center pt-2 pb-3">
+          <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4">
             <Pagination
               page={activityPage}
               pageSize={ACTIVITY_PAGE_SIZE}
               totalResults={activityTotalResults}
-              setPage={function (newPage: number) {
-                setActivityPage(newPage);
-                window.scrollTo(0, 0);
-              }}
+              setPage={handleActivityPageChange}
             />
-          </Row>
+          </div>
         )}
-      </Container>
+      </section>
     );
   }
 
   return (
-    <Container fluid className={styles["mainContainer"]}>
-      <Row>
-        <Col>
-          <Container className="pt-4 pb-4">
-            <Row>
-              <Col>
-                <h1>Meme Lab</h1>
-              </Col>
-            </Row>
-            {nftMeta && nft && (
-              <>
-                <Row className="pt-2">
-                  <Col className="d-flex">
-                    <NftNavigation
-                      nftId={nft.id}
-                      path="/meme-lab"
-                      startIndex={1}
-                      endIndex={nftMeta.collection_size}
-                      params={searchParams}
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+      <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
+        <header className="tw-pb-8">
+          <div className="tw-flex tw-flex-col tw-gap-4">
+            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
+              <div className="tw-mb-0 tw-flex tw-items-center">
+                <Link
+                  href={getMemeLabRouteHrefWithLocale({
+                    href: "/meme-lab",
+                    locale,
+                  })}
+                  aria-label={t(locale, "memeLab.detail.backLink.ariaLabel")}
+                  className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                >
+                  <ArrowLeftIcon
+                    aria-hidden="true"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                  />
+                  {t(locale, "memeLab.detail.backLink.label")}
+                </Link>
+              </div>
+            </div>
+            {nftMeta && nft ? (
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3 md:tw-flex-wrap md:tw-justify-start">
+                <div className="tw-order-2 tw-flex tw-shrink-0 tw-justify-end md:tw-order-1">
+                  <NftNavigation
+                    nftId={nft.id}
+                    path="/meme-lab"
+                    startIndex={1}
+                    endIndex={nftMeta.collection_size}
+                    params={searchParams}
+                  />
+                </div>
+                <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
+                  <h1
+                    className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                    aria-label={t(locale, "memeLab.detail.heading.ariaLabel", {
+                      tokenId: nft.id,
+                      name: nft.name,
+                    })}
+                  >
+                    <span className="tw-mb-0 tw-shrink-0 tw-text-lg tw-font-normal tw-leading-tight tw-text-iron-400 sm:tw-text-2xl">
+                      {t(locale, "memeLab.detail.heading.card", {
+                        tokenId: nft.id,
+                      })}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
                     />
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col>
-                    <h2 className="float-left">Card {nft.id} -&nbsp;</h2>
-                    <h2 className="float-left">{nft.name}</h2>
-                  </Col>
-                </Row>
-                <Row className="pt-3 pb-3">
-                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                    {MEME_LAB_TABS.map((tab) => (
-                      <TabButton
-                        key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                        tab={tab}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                      />
-                    ))}
-                  </Col>
-                </Row>
-                {printContent()}
+                    <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
+                      {nft.name}
+                    </span>
+                  </h1>
+                </div>
+              </div>
+            ) : (
+              <>
+                {isLoadingNft ? (
+                  <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3 md:tw-flex-wrap md:tw-justify-start">
+                    <div className="tw-order-2 tw-flex tw-shrink-0 tw-justify-end md:tw-order-1">
+                      <MemePageNavigationSkeleton />
+                    </div>
+                    <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
+                      <MemePageTitleSkeleton />
+                    </div>
+                  </div>
+                ) : (
+                  <h1 className="tw-mb-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-100">
+                    {t(locale, "memeLab.detail.heading.fallback")}
+                  </h1>
+                )}
               </>
             )}
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+          </div>
+        </header>
+        {isLoadingNft && <MemePageSkeleton />}
+        {nftMeta && nft && (
+          <>
+            {printStaticCardHeader()}
+            <nav
+              aria-label={t(locale, "memeLab.detail.sections.tabs")}
+              className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
+            >
+              <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
+                <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
+                  {visibleMemeLabTabs.map((tab) => (
+                    <MemeLabPageTabButton
+                      key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
+                      title={getMemeLabDetailTabLabel(tab.focus, locale)}
+                      isActive={activeTab === tab.focus}
+                      onClick={() => setActiveMemeLabTab(tab.focus)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </nav>
+            {printHistoryTabs()}
+            {printContent()}
+          </>
+        )}
+      </div>
+    </div>
   );
 }

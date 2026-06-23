@@ -5,14 +5,16 @@ import ArtworkStep from "@/components/waves/memes/submission/steps/ArtworkStep";
 import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 import type { InteractiveMediaMimeType } from "@/components/waves/memes/submission/constants/media";
 
+const mockArtworkDetails = jest.fn((props: any) => (
+  <div data-testid="details" onClick={() => props.onTitleChange("t")} />
+));
+
 jest.mock("@/components/waves/memes/MemesArtSubmissionFile", () => () => (
   <div data-testid="file" />
 ));
 jest.mock(
   "@/components/waves/memes/submission/details/ArtworkDetails",
-  () => (props: any) => (
-    <div data-testid="details" onClick={() => props.onTitleChange("t")} />
-  )
+  () => (props: any) => mockArtworkDetails(props)
 );
 jest.mock("@/components/waves/memes/MemesArtSubmissionTraits", () => () => (
   <div data-testid="traits" />
@@ -111,15 +113,20 @@ const createProps = (
   onSubmit: () => {},
   updateTraitField: () => {},
   setTraits: () => {},
+  isAdditionalActionPromised: false,
+  onAdditionalActionPromisedChange: () => {},
   ...override,
 });
 
 describe("ArtworkStep", () => {
+  beforeEach(() => {
+    mockArtworkDetails.mockClear();
+  });
+
   it("renders responsive content container with mobile scroll and desktop split behavior", () => {
     render(<ArtworkStep {...createProps()} />);
     const contentContainer = screen.getByTestId("artwork-step-content");
     expect(contentContainer).toHaveClass("tw-overflow-y-auto");
-    expect(contentContainer).toHaveClass("lg:tw-overflow-hidden");
   });
 
   it("shows upload tooltip when artwork missing", () => {
@@ -197,5 +204,28 @@ describe("ArtworkStep", () => {
     );
     const btn = screen.getByRole("button", { name: /cancel/i });
     expect(btn).toBeDisabled();
+  });
+
+  it("opts ArtworkDetails into the additional action promise checkbox", () => {
+    const onAdditionalActionPromisedChange = jest.fn();
+
+    render(
+      <ArtworkStep
+        {...createProps({
+          isAdditionalActionPromised: true,
+          onAdditionalActionPromisedChange,
+        })}
+      />
+    );
+
+    expect(mockArtworkDetails).toHaveBeenCalled();
+    const detailsProps = mockArtworkDetails.mock.calls[0]?.[0];
+    expect(detailsProps).toEqual(
+      expect.objectContaining({
+        showAdditionalActionPromised: true,
+        isAdditionalActionPromised: true,
+        onAdditionalActionPromisedChange,
+      })
+    );
   });
 });

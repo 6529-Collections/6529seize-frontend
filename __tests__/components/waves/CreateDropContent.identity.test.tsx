@@ -1,11 +1,12 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateDropContent from "@/components/waves/CreateDropContent";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 
 const mockViewerSelection = {
   value: "0xviewer",
@@ -23,9 +24,11 @@ const mockOtherSelection = {
   profileId: "other-id",
 };
 const mockSetToast = jest.fn();
+const mockRequestAuth = jest.fn(async () => ({ success: true }));
 const mockUploadFile = new File(["upload"], "duplicate.pdf", {
   type: "application/pdf",
 });
+let resizeObserverCallback: ResizeObserverCallback | null = null;
 
 jest.mock("next/dynamic", () => () => () => null);
 
@@ -70,6 +73,7 @@ jest.mock("framer-motion", () => {
 });
 
 jest.mock("react-redux", () => ({
+  useDispatch: jest.fn(() => jest.fn()),
   useSelector: jest.fn(() => null),
 }));
 
@@ -85,6 +89,7 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
   <div
     data-testid="actions"
     data-show-options={props.showOptions ? "true" : "false"}
+    data-animate-options={props.animateOptions ? "true" : "false"}
   >
     <button type="button" onClick={() => props.setShowOptions(true)}>
       open options
@@ -98,11 +103,77 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
     >
       add upload file
     </button>
+    <button
+      type="button"
+      onClick={() => {
+        void props.onGifDrop("https://example.com/test.gif");
+      }}
+    >
+      select gif
+    </button>
   </div>
 ));
-jest.mock("@/components/waves/CreateDropInput", () => () => (
-  <div data-testid="input" />
-));
+jest.mock("@/components/waves/CreateDropInput", () => {
+  const ReactLib = require("react");
+
+  return {
+    __esModule: true,
+    default: ReactLib.forwardRef((props: any, ref: any) => {
+      const typedContentCountRef = ReactLib.useRef(0);
+      ReactLib.useImperativeHandle(ref, () => ({
+        clearEditorState: () => undefined,
+        focus: () => undefined,
+      }));
+
+      return (
+        <div data-testid="input">
+          <button
+            type="button"
+            onClick={() => {
+              typedContentCountRef.current += 1;
+              props.onEditorState({
+                __markdown: `typed content ${typedContentCountRef.current}`,
+              });
+            }}
+          >
+            type content
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              props.onEditorState({
+                __markdown: "pending ![Seize](loading)",
+              })
+            }
+          >
+            type pending image
+          </button>
+          <button
+            type="button"
+            onClick={() => props.onEditorState({ __markdown: "" })}
+          >
+            emit empty content
+          </button>
+        </div>
+      );
+    }),
+  };
+});
+jest.mock("@/components/waves/drops/normalizeDropMarkdown", () => ({
+  exportDropMarkdown: jest.fn(
+    (editorState: { __markdown?: string } | null) =>
+      editorState?.__markdown ?? ""
+  ),
+}));
+const mockExportDropMarkdown = exportDropMarkdown as jest.MockedFunction<
+  typeof exportDropMarkdown
+>;
+jest.mock(
+  "@/components/drops/create/lexical/utils/groupMentionDetection",
+  () => ({
+    getMentionedGroupsFromEditorState: jest.fn(() => []),
+  })
+);
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
   <div data-testid="requirements" />
 ));
@@ -112,6 +183,9 @@ jest.mock("@/components/waves/CreateDropMetadata", () => () => (
 jest.mock("@/components/waves/CreateDropContentFiles", () => ({
   CreateDropContentFiles: () => <div data-testid="files" />,
 }));
+jest.mock("@/components/waves/SlowModeChatNotice", () => () => (
+  <div data-testid="slow-mode-notice" />
+));
 jest.mock("@/components/waves/CreateDropSubmit", () => ({
   CreateDropSubmit: (props: any) => (
     <button type="button" onClick={() => void props.onDrop()}>
@@ -187,7 +261,7 @@ jest.mock("@/components/waves/hooks/useDropMetadata", () => ({
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
-    requestAuth: jest.fn(async () => ({ success: true })),
+    requestAuth: mockRequestAuth,
     setToast: mockSetToast,
     connectedProfile: {
       id: mockViewerSelection.profileId,
@@ -203,6 +277,10 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
     processIncomingDrop: jest.fn(),
   })),
+}));
+
+jest.mock("@/components/waves/hooks/useLatestEditableChatDropTarget", () => ({
+  useLatestEditableChatDropTarget: jest.fn(() => null),
 }));
 
 jest.mock("@/hooks/drops/useDropSignature", () => ({
@@ -228,11 +306,18 @@ describe("CreateDropContent identity picker flow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSetToast.mockClear();
-    (global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
-      observe: jest.fn(),
-      unobserve: jest.fn(),
-      disconnect: jest.fn(),
-    }));
+    mockRequestAuth.mockClear();
+    resizeObserverCallback = null;
+    (global as any).ResizeObserver = jest
+      .fn()
+      .mockImplementation((callback: ResizeObserverCallback) => {
+        resizeObserverCallback = callback;
+        return {
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn(),
+        };
+      });
   });
 
   it("skips duplicate file uploads", async () => {
@@ -247,10 +332,33 @@ describe("CreateDropContent identity picker flow", () => {
     });
   });
 
+  it("does not submit while an inline image upload is unresolved", async () => {
+    const submitDrop = jest.fn(() => true);
+    renderSubject({ isDropMode: false, submitDrop });
+
+    await userEvent.click(screen.getByText("type pending image"));
+    await userEvent.click(screen.getByText("submit"));
+
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(submitDrop).not.toHaveBeenCalled();
+  });
+
+  it("does not submit a GIF while an inline image upload is unresolved", async () => {
+    const submitDrop = jest.fn(() => true);
+    renderSubject({ isDropMode: false, submitDrop });
+
+    await userEvent.click(screen.getByText("type pending image"));
+    await userEvent.click(screen.getByText("select gif"));
+
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(submitDrop).not.toHaveBeenCalled();
+  });
+
   const baseWave = {
     id: "wave-1",
+    author: { handle: "creator" },
     wave: { type: ApiWaveType.Rank },
-    chat: { enabled: true },
+    chat: { enabled: true, links_disabled: false },
     participation: {
       submission_strategy: {
         config: {
@@ -302,17 +410,49 @@ describe("CreateDropContent identity picker flow", () => {
       signature: null,
     }) as any;
 
+  const mockComposerWidth = (width: number) =>
+    jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      width,
+      height: 0,
+      top: 0,
+      right: width,
+      bottom: 0,
+      left: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+  const emitComposerResize = (width: number) => {
+    if (!resizeObserverCallback) {
+      throw new Error("ResizeObserver callback was not registered.");
+    }
+
+    act(() => {
+      resizeObserverCallback?.(
+        [
+          {
+            contentRect: { width } as DOMRectReadOnly,
+          } as ResizeObserverEntry,
+        ],
+        {} as ResizeObserver
+      );
+    });
+  };
+
   const renderSubject = ({
     isDropMode = true,
     wave = createWave(),
     drop = null,
-    submitDrop = jest.fn(),
+    submitDrop = jest.fn(() => true),
+    isChatBlockedBySlowMode = false,
     identityPickerPlacement = "modal",
   }: {
     readonly isDropMode?: boolean;
     readonly wave?: any;
     readonly drop?: any;
     readonly submitDrop?: jest.Mock;
+    readonly isChatBlockedBySlowMode?: boolean;
     readonly identityPickerPlacement?: "modal" | "inline";
   } = {}) => {
     const onDropModeChange = jest.fn();
@@ -335,6 +475,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={submitDrop}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={isChatBlockedBySlowMode}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
           identityPickerPlacement={identityPickerPlacement}
         />
@@ -347,6 +488,18 @@ describe("CreateDropContent identity picker flow", () => {
       submitDrop,
     };
   };
+
+  it("does not submit a GIF chat drop while slow mode is active", async () => {
+    const { submitDrop } = renderSubject({
+      isDropMode: false,
+      isChatBlockedBySlowMode: true,
+    });
+
+    await userEvent.click(screen.getByText("select gif"));
+
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(submitDrop).not.toHaveBeenCalled();
+  });
 
   it("auto-opens the picker and exits Drop mode when closed without a selection", async () => {
     const { onDropModeChange } = renderSubject();
@@ -442,6 +595,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -496,19 +650,7 @@ describe("CreateDropContent identity picker flow", () => {
   });
 
   it("measures the action width after the inline picker closes", async () => {
-    const rectSpy = jest
-      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-      .mockReturnValue({
-        x: 0,
-        y: 0,
-        width: 501,
-        height: 0,
-        top: 0,
-        right: 501,
-        bottom: 0,
-        left: 0,
-        toJSON: () => ({}),
-      } as DOMRect);
+    const rectSpy = mockComposerWidth(501);
 
     try {
       renderSubject({ identityPickerPlacement: "inline" });
@@ -523,6 +665,254 @@ describe("CreateDropContent identity picker flow", () => {
       expect(screen.getByTestId("actions")).toHaveAttribute(
         "data-show-options",
         "true"
+      );
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-animate-options",
+        "false"
+      );
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("shows options by default in a wide composer", () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-animate-options",
+        "false"
+      );
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("collapses wide composer options when content is typed", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+      expect(mockExportDropMarkdown).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-animate-options",
+          "true"
+        );
+      });
+      expect(mockExportDropMarkdown).toHaveBeenCalledTimes(1);
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("reopens wide composer options and collapses them on the next content change", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-animate-options",
+        "true"
+      );
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("keeps reopened wide options open after resizing narrow on empty editor changes", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
+      emitComposerResize(499);
+
+      await userEvent.click(screen.getByText("emit empty content"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("collapses reopened wide options after resizing narrow on content changes", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
+      emitComposerResize(499);
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("collapses narrow composer options on empty editor changes after opening options", async () => {
+    const rectSpy = mockComposerWidth(499);
+
+    try {
+      renderSubject();
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "false"
+      );
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
+      await userEvent.click(screen.getByText("emit empty content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("returns to wide composer defaults when the wave changes", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      const { rerender } = renderSubject();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      rerender(
+        <ReactQueryWrapperContext.Provider
+          value={{ addOptimisticDrop: jest.fn() } as any}
+        >
+          <CreateDropContent
+            activeDrop={null}
+            onCancelReplyQuote={jest.fn()}
+            wave={createWave({ id: "wave-2" })}
+            drop={null}
+            isStormMode={false}
+            isDropMode={true}
+            dropId={null}
+            setDrop={jest.fn()}
+            setIsStormMode={jest.fn()}
+            onDropModeChange={jest.fn()}
+            onSwitchToDropModeWithUrl={jest.fn()}
+            submitDrop={jest.fn()}
+            dropModeToggleExitLabel={null}
+            canExitDropMode={true}
+            isChatBlockedBySlowMode={false}
+            submissionExperience={WaveSubmissionExperience.IDENTITY}
+          />
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-animate-options",
+        "false"
       );
     } finally {
       rectSpy.mockRestore();
@@ -581,6 +971,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -605,6 +996,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -644,6 +1036,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -670,6 +1063,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -706,6 +1100,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -742,6 +1137,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -770,6 +1166,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -811,6 +1208,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -850,6 +1248,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -890,6 +1289,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>

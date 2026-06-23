@@ -48,9 +48,9 @@ const WAVE_LEADERBOARD_APPROVE_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLe
       value: WaveDropsLeaderboardSort.RANK,
     },
     {
-      key: WaveDropsLeaderboardSort.RATING_PREDICTION,
-      label: "Projected Vote",
-      value: WaveDropsLeaderboardSort.RATING_PREDICTION,
+      key: WaveDropsLeaderboardSort.REALTIME_VOTE,
+      label: "Votes Given Now",
+      value: WaveDropsLeaderboardSort.REALTIME_VOTE,
     },
     {
       key: WaveDropsLeaderboardSort.TREND,
@@ -93,7 +93,9 @@ const removeRatingPredictionSort = (
   items: readonly CommonSelectItem<WaveDropsLeaderboardSort>[]
 ): readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =>
   items.filter(
-    (item) => item.value !== WaveDropsLeaderboardSort.RATING_PREDICTION
+    (item) =>
+      item.value !== WaveDropsLeaderboardSort.RATING_PREDICTION &&
+      item.value !== WaveDropsLeaderboardSort.REALTIME_VOTE
   );
 
 export const getWaveLeaderboardSortItems = ({
@@ -125,14 +127,33 @@ export const getWaveLeaderboardSortItems = ({
 };
 
 export const normalizeWaveLeaderboardSort = ({
+  isApproveWave,
   sort,
   timeLockMs,
 }: {
+  readonly isApproveWave: boolean;
   readonly sort: WaveDropsLeaderboardSort;
   readonly timeLockMs: unknown;
 }): WaveDropsLeaderboardSort => {
   if (
+    isApproveWave &&
     sort === WaveDropsLeaderboardSort.RATING_PREDICTION &&
+    hasWaveLeaderboardTimeLock(timeLockMs)
+  ) {
+    return WaveDropsLeaderboardSort.REALTIME_VOTE;
+  }
+
+  if (
+    !isApproveWave &&
+    sort === WaveDropsLeaderboardSort.REALTIME_VOTE &&
+    hasWaveLeaderboardTimeLock(timeLockMs)
+  ) {
+    return WaveDropsLeaderboardSort.RATING_PREDICTION;
+  }
+
+  if (
+    (sort === WaveDropsLeaderboardSort.RATING_PREDICTION ||
+      sort === WaveDropsLeaderboardSort.REALTIME_VOTE) &&
     !hasWaveLeaderboardTimeLock(timeLockMs)
   ) {
     return WaveDropsLeaderboardSort.RANK;

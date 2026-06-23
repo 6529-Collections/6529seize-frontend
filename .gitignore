@@ -90,6 +90,11 @@ jest-results.json
 
 # generated env schema for Node runtime
 /config/env.schema.runtime.cjs
+
+# OpenAPI generator scratch directories
+/tmp_gen_outp/
+/tmp_gen_final/
+/.generated-backup-*/
 .githooks/
 scripts/lint-to-json.js
 
@@ -104,7 +109,6 @@ eslint-rule-summary.csv
 .cursorignore
 CLAUDE.md
 .claude
-AGENTS.md
 .codex
 .gemini
 .windsurfrules

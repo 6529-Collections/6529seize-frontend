@@ -1,7 +1,11 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  getQuickVoteAbsoluteRemainingPower,
+  getQuickVoteRatingRange,
+} from "@/hooks/memesQuickVote.helpers";
 
-export type KeyedOptimisticRemainingPowerState = {
+export type KeyedOptimisticRemainingVotePowerState = {
   readonly key: string;
   readonly value: number | null;
 };
@@ -18,21 +22,23 @@ export type MemesQuickVoteSessionState = {
   readonly unratedCount: number;
 };
 
-export const createInitialOptimisticRemainingPowerState = (
+export const createInitialOptimisticRemainingVotePowerState = (
   key: string
-): KeyedOptimisticRemainingPowerState => ({
+): KeyedOptimisticRemainingVotePowerState => ({
   key,
   value: null,
 });
 
-export const getCurrentOptimisticRemainingPowerState = ({
+export const getCurrentOptimisticRemainingVotePowerState = ({
   key,
   state,
 }: {
   readonly key: string;
-  readonly state: KeyedOptimisticRemainingPowerState;
-}): KeyedOptimisticRemainingPowerState =>
-  state.key === key ? state : createInitialOptimisticRemainingPowerState(key);
+  readonly state: KeyedOptimisticRemainingVotePowerState;
+}): KeyedOptimisticRemainingVotePowerState =>
+  state.key === key
+    ? state
+    : createInitialOptimisticRemainingVotePowerState(key);
 
 export const createInitialSessionState = (): MemesQuickVoteSessionState => ({
   currentDrop: null,
@@ -132,10 +138,10 @@ export const applyFetchedWindowState = ({
     safeFetchedDropsWithoutHandled.length === 0;
   const isExhausted =
     currentDrop === null &&
-      lookaheadDrops.length === 0 &&
-      hiddenDropIds.size === 0 &&
-      primaryDrop === null &&
-      rawUnratedCount === 0;
+    lookaheadDrops.length === 0 &&
+    hiddenDropIds.size === 0 &&
+    primaryDrop === null &&
+    rawUnratedCount === 0;
 
   return {
     currentDrop,
@@ -150,26 +156,26 @@ export const applyFetchedWindowState = ({
   };
 };
 
-export const reduceOptimisticRemainingPower = ({
+export const reduceOptimisticRemainingVotePower = ({
   amount,
   current,
-  maxRating,
+  remainingPower,
 }: {
   readonly amount: number;
-  readonly current: KeyedOptimisticRemainingPowerState;
-  readonly maxRating: number;
-}): KeyedOptimisticRemainingPowerState => ({
+  readonly current: KeyedOptimisticRemainingVotePowerState;
+  readonly remainingPower: number;
+}): KeyedOptimisticRemainingVotePowerState => ({
   ...current,
-  value: Math.max(0, (current.value ?? maxRating) - amount),
+  value: Math.max(0, (current.value ?? remainingPower) - Math.abs(amount)),
 });
 
-export const reconcileOptimisticRemainingPower = ({
+export const reconcileOptimisticRemainingVotePower = ({
   current,
   nextRemainingPower,
 }: {
-  readonly current: KeyedOptimisticRemainingPowerState;
+  readonly current: KeyedOptimisticRemainingVotePowerState;
   readonly nextRemainingPower: number;
-}): KeyedOptimisticRemainingPowerState => ({
+}): KeyedOptimisticRemainingVotePowerState => ({
   ...current,
   value:
     current.value === null
@@ -177,20 +183,20 @@ export const reconcileOptimisticRemainingPower = ({
       : Math.min(current.value, nextRemainingPower),
 });
 
-export const restoreOptimisticRemainingPower = ({
+export const restoreOptimisticRemainingVotePower = ({
   amount,
   current,
-  maxRating,
+  remainingPower,
 }: {
   readonly amount: number;
-  readonly current: KeyedOptimisticRemainingPowerState;
-  readonly maxRating: number;
-}): KeyedOptimisticRemainingPowerState => ({
+  readonly current: KeyedOptimisticRemainingVotePowerState;
+  readonly remainingPower: number;
+}): KeyedOptimisticRemainingVotePowerState => ({
   ...current,
   value:
     current.value === null
-      ? maxRating
-      : Math.min(maxRating, current.value + amount),
+      ? remainingPower
+      : Math.min(remainingPower, current.value + Math.abs(amount)),
 });
 
 export const applyOptimisticAdvanceState = ({
@@ -255,47 +261,49 @@ export const applyFailedDropRestoreState = ({
   };
 };
 
-export const getEffectiveOptimisticRemainingPower = ({
+export const getEffectiveOptimisticRemainingVotePower = ({
   activeApiDrop,
   state,
 }: {
   readonly activeApiDrop: ApiDrop | null;
-  readonly state: KeyedOptimisticRemainingPowerState;
+  readonly state: KeyedOptimisticRemainingVotePowerState;
 }): number | null => {
   if (state.value === null) {
     return null;
   }
 
-  const activeMaxRating = activeApiDrop?.context_profile_context?.max_rating;
+  const activeRemainingPower = getQuickVoteAbsoluteRemainingPower(
+    getQuickVoteRatingRange(activeApiDrop)
+  );
 
-  if (typeof activeMaxRating === "number" && activeMaxRating <= state.value) {
+  if (activeRemainingPower <= state.value) {
     return null;
   }
 
   return state.value;
 };
 
-export const clampDropMaxRating = (
+export const clampDropRatingRange = (
   drop: ExtendedDrop,
   optimisticRemainingPower: number | null
 ): ExtendedDrop => {
   const profileContext = drop.context_profile_context;
-  const maxRating = profileContext?.max_rating;
+  const range = getQuickVoteRatingRange(drop);
 
-  if (
-    optimisticRemainingPower === null ||
-    profileContext?.rating !== 0 ||
-    typeof maxRating !== "number"
-  ) {
+  if (optimisticRemainingPower === null || profileContext?.rating !== 0) {
     return drop;
   }
 
-  const nextMaxRating = Math.max(
-    0,
-    Math.min(maxRating, optimisticRemainingPower)
+  const nextMaxRating = Math.min(
+    range.maxRating,
+    Math.max(0, optimisticRemainingPower)
   );
+  const nextMinRating =
+    range.minRating < 0
+      ? Math.max(range.minRating, -optimisticRemainingPower)
+      : range.minRating;
 
-  if (nextMaxRating === maxRating) {
+  if (nextMaxRating === range.maxRating && nextMinRating === range.minRating) {
     return drop;
   }
 
@@ -304,6 +312,7 @@ export const clampDropMaxRating = (
     context_profile_context: {
       ...profileContext,
       max_rating: nextMaxRating,
+      min_rating: nextMinRating,
     },
   };
 };

@@ -18,11 +18,13 @@ import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater } from "./types";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import {
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import { isWaveDropNearViewport } from "@/contexts/wave/drop-visibility";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -44,14 +46,19 @@ export enum ProcessIncomingDropType {
 
 type ProcessIncomingDropFn = (
   dropData: ApiDrop,
-  type: ProcessIncomingDropType
-) => void;
+  type: ProcessIncomingDropType,
+  options?: ProcessIncomingDropOptions
+) => Promise<void>;
+
+interface ProcessIncomingDropOptions {
+  readonly preferExistingPollVote?: boolean;
+}
 
 function replaceAttachmentInPart(
   part: ApiDropPart,
   attachment: ApiAttachment
 ): ApiDropPart {
-  const attachments = part.attachments ?? [];
+  const attachments = part.attachments;
   const hasAttachment = attachments.some(
     (item) => item.attachment_id === attachment.attachment_id
   );
@@ -67,6 +74,144 @@ function replaceAttachmentInPart(
     ),
   };
 }
+
+const getIncomingWaveId = (drop: ApiDrop): string | null => {
+  const wave = (drop as { readonly wave?: { readonly id?: unknown } }).wave;
+  return typeof wave?.id === "string" && wave.id.length > 0 ? wave.id : null;
+};
+
+const isCanonicalDropUpdate = (type: ProcessIncomingDropType): boolean =>
+  type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
+  type === ProcessIncomingDropType.DROP_REACTION_UPDATE;
+
+const reportBackgroundTaskError = (message: string, error: unknown): void => {
+  console.error(message, error);
+};
+
+const shouldApplyCanonicalDrop = (
+  type: ProcessIncomingDropType,
+  drop: ApiDrop
+): boolean => {
+  if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+    return true;
+  }
+
+  return recordReactionRealtimeReconciliation({
+    drop: {
+      id: drop.id,
+      wave: { id: drop.wave.id },
+      context_profile_context: drop.context_profile_context,
+    },
+    websocketStatus: WebSocketStatus.CONNECTED,
+  }).shouldApplyCanonicalDrop;
+};
+
+interface CanonicalDropUpdateParams {
+  readonly dropId: string;
+  readonly existingDrop: ExtendedDrop;
+  readonly waveId: string;
+  readonly type: ProcessIncomingDropType;
+  readonly options: ProcessIncomingDropOptions;
+  readonly queryClient: QueryClient;
+  readonly updateData: WaveDataStoreUpdater["updateData"];
+}
+
+const applyCanonicalDropUpdate = async ({
+  dropId,
+  existingDrop,
+  waveId,
+  type,
+  options,
+  queryClient,
+  updateData,
+}: CanonicalDropUpdateParams): Promise<void> => {
+  const apiDrop = await fetchDropByIdBatched(dropId);
+  const preferExistingPollVote = options.preferExistingPollVote;
+  const reconciledApiDrop =
+    preferExistingPollVote === undefined
+      ? reconcileDropAuthenticatedPollVote(apiDrop, existingDrop)
+      : reconcileDropAuthenticatedPollVote(apiDrop, existingDrop, {
+          preferExistingVote: preferExistingPollVote,
+        });
+
+  if (!shouldApplyCanonicalDrop(type, reconciledApiDrop)) {
+    return;
+  }
+
+  if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+    updateDropInCachedDrops(queryClient, reconciledApiDrop);
+  }
+
+  updateData({
+    key: waveId,
+    drops: [
+      {
+        ...reconciledApiDrop,
+        type: DropSize.FULL,
+        stableHash: existingDrop.stableHash,
+        stableKey: existingDrop.stableKey,
+      },
+    ],
+  });
+};
+
+const buildOptimisticDrop = ({
+  drop,
+  existingDrop,
+  options,
+}: {
+  readonly drop: ApiDrop;
+  readonly existingDrop: ExtendedDrop | null;
+  readonly options: ProcessIncomingDropOptions;
+}): ExtendedDrop => {
+  const preferExistingPollVote = options.preferExistingPollVote;
+  let reconciledDrop = drop;
+  if (existingDrop !== null && preferExistingPollVote === undefined) {
+    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop);
+  }
+  if (existingDrop !== null && preferExistingPollVote !== undefined) {
+    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop, {
+      preferExistingVote: preferExistingPollVote,
+    });
+  }
+
+  return {
+    ...reconciledDrop,
+    type: DropSize.FULL,
+    author: {
+      ...reconciledDrop.author,
+      subscribed_actions:
+        existingDrop === null
+          ? reconciledDrop.author.subscribed_actions
+          : existingDrop.author.subscribed_actions,
+    },
+    wave: {
+      ...reconciledDrop.wave,
+      authenticated_user_eligible_to_participate:
+        existingDrop === null
+          ? reconciledDrop.wave.authenticated_user_eligible_to_participate
+          : existingDrop.wave.authenticated_user_eligible_to_participate,
+      authenticated_user_eligible_to_vote:
+        existingDrop === null
+          ? reconciledDrop.wave.authenticated_user_eligible_to_vote
+          : existingDrop.wave.authenticated_user_eligible_to_vote,
+      authenticated_user_eligible_to_chat:
+        existingDrop === null
+          ? reconciledDrop.wave.authenticated_user_eligible_to_chat
+          : existingDrop.wave.authenticated_user_eligible_to_chat,
+      authenticated_user_admin:
+        existingDrop === null
+          ? reconciledDrop.wave.authenticated_user_admin
+          : existingDrop.wave.authenticated_user_admin,
+    },
+    stableKey: reconciledDrop.id,
+    stableHash: reconciledDrop.id,
+    context_profile_context:
+      existingDrop === null
+        ? (reconciledDrop.context_profile_context ?? null)
+        : existingDrop.context_profile_context,
+  };
+};
 
 function replaceAttachmentInDrop(drop: Drop, attachment: ApiAttachment): Drop {
   if (drop.type !== DropSize.FULL) {
@@ -93,46 +238,29 @@ function replaceAttachmentInDrops(
   return { drops: updatedDrops, changed };
 }
 
-export function useWaveRealtimeUpdater({
-  activeWaveId,
+type InitiateFetchNewestCycleFn = (
+  waveId: string,
+  sinceSerialNo: number
+) => Promise<void>;
+
+const useNewestMessagesSync = ({
   getData,
   updateData,
-  registerWave,
   syncNewestMessages,
-  removeDrop,
-  removeWaveDeliveredNotifications,
-  isWaveMuted,
-}: UseWaveRealtimeUpdaterProps): {
-  processIncomingDrop: ProcessIncomingDropFn;
-  processDropRemoved: (waveId: string, dropId: string) => void;
-} {
+}: Pick<
+  UseWaveRealtimeUpdaterProps,
+  "getData" | "updateData" | "syncNewestMessages"
+>): InitiateFetchNewestCycleFn => {
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
-  const activeWaveIdRef = useRef(activeWaveId);
-  useLayoutEffect(() => {
-    activeWaveIdRef.current = activeWaveId;
-  }, [activeWaveId]);
-  const { refreshEligibility } = useWaveEligibility();
-  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
-  const queryClient = useQueryClient();
-  const tabJustBecameVisibleRef = useRef<boolean>(false);
 
-  const canSendReadForWave = useCallback((waveId: string): boolean => {
-    return (
-      activeWaveIdRef.current === waveId &&
-      document.visibilityState === "visible"
-    );
-  }, []);
-
-  // Function to cleanup abort controllers
   const cleanupController = useCallback((waveId: string) => {
     if (abortControllersRef.current[waveId]) {
       delete abortControllersRef.current[waveId];
     }
   }, []);
 
-  // Function to initiate the fetch newest cycle
   const initiateFetchNewestCycle = useCallback(
     async (waveId: string, sinceSerialNo: number) => {
       if (isFetchingNewestRef.current[waveId]) {
@@ -154,39 +282,32 @@ export function useWaveRealtimeUpdater({
             const newDrops: ExtendedDrop[] = fetchedDrops.map((drop) => ({
               ...drop,
               type: DropSize.FULL,
-              stableKey: drop.id, // Assuming ApiDrop has id
-              stableHash: drop.id, // Assuming ApiDrop has id
+              stableKey: drop.id,
+              stableHash: drop.id,
             }));
 
             updateData({
               key: waveId,
               drops: newDrops,
-              // Update latestFetchedSerialNo only if the fetch returned drops
-              latestFetchedSerialNo:
-                fetchedHighestSerial !== null ? fetchedHighestSerial : null,
-              // Optionally reset hasNextPage if needed, though fetchNewest shouldn't affect it
+              latestFetchedSerialNo: fetchedHighestSerial ?? null,
             });
           }
         }
       } catch (error) {
-        // Do not update latestFetchedSerialNo on error
         if (error instanceof DOMException && error.name === "AbortError") {
-          // Fetch was cancelled - this is expected behavior
-        } else {
-          console.error("Error fetching newest messages:", error);
+          return;
         }
+        console.error("Error fetching newest messages:", error);
       } finally {
         cleanupController(waveId);
         isFetchingNewestRef.current[waveId] = false;
 
         if (needsRefetchAfterCurrentRef.current[waveId]) {
           needsRefetchAfterCurrentRef.current[waveId] = false;
-          const latestData = getData(waveId);
-          if (latestData?.latestFetchedSerialNo) {
-            await initiateFetchNewestCycle(
-              waveId,
-              latestData.latestFetchedSerialNo
-            );
+          const latestFetchedSerialNo =
+            getData(waveId)?.latestFetchedSerialNo ?? null;
+          if (latestFetchedSerialNo !== null) {
+            await initiateFetchNewestCycle(waveId, latestFetchedSerialNo);
           }
         }
       }
@@ -194,169 +315,334 @@ export function useWaveRealtimeUpdater({
     [getData, updateData, syncNewestMessages, cleanupController]
   );
 
-  // WebSocket message handler
-  const processIncomingDrop: ProcessIncomingDropFn = useCallback(
-    async (drop: ApiDrop, type: ProcessIncomingDropType) => {
-      if (!drop?.wave?.id) {
+  useEffect(() => {
+    return () => {
+      Object.values(abortControllersRef.current).forEach((controller) =>
+        controller.abort()
+      );
+      abortControllersRef.current = {};
+      isFetchingNewestRef.current = {};
+      needsRefetchAfterCurrentRef.current = {};
+    };
+  }, []);
+
+  return initiateFetchNewestCycle;
+};
+
+const useActiveWaveReadMarker = ({
+  activeWaveId,
+  removeWaveDeliveredNotifications,
+}: Pick<
+  UseWaveRealtimeUpdaterProps,
+  "activeWaveId" | "removeWaveDeliveredNotifications"
+>): ((waveId: string) => void) => {
+  const activeWaveIdRef = useRef(activeWaveId);
+  const pendingDeliveredNotificationsRef = useRef<Promise<void> | null>(null);
+  const pendingReadNotificationsRef = useRef<Promise<void> | null>(null);
+  useLayoutEffect(() => {
+    activeWaveIdRef.current = activeWaveId;
+  }, [activeWaveId]);
+
+  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
+  const canSendReadForWave = useCallback((waveId: string): boolean => {
+    return (
+      activeWaveIdRef.current === waveId &&
+      document.visibilityState === "visible"
+    );
+  }, []);
+
+  const removeDeliveredNotifications = useCallback(
+    async (waveId: string) => {
+      try {
+        await removeWaveDeliveredNotifications(waveId);
+      } catch (error) {
+        reportBackgroundTaskError(
+          "Failed to remove wave delivered notifications:",
+          error
+        );
+      }
+    },
+    [removeWaveDeliveredNotifications]
+  );
+
+  const markNotificationsRead = useCallback(
+    async (waveId: string) => {
+      try {
+        await markWaveNotificationsRead(waveId, {
+          shouldSend: () => canSendReadForWave(waveId),
+        });
+      } catch (error) {
+        reportBackgroundTaskError("Failed to mark wave as read:", error);
+      }
+    },
+    [markWaveNotificationsRead, canSendReadForWave]
+  );
+
+  return useCallback(
+    (waveId: string) => {
+      if (activeWaveId !== waveId || document.visibilityState !== "visible") {
         return;
       }
 
-      updateDropInCachedDrops(queryClient, drop);
+      pendingDeliveredNotificationsRef.current =
+        removeDeliveredNotifications(waveId);
+      pendingReadNotificationsRef.current = markNotificationsRead(waveId);
+    },
+    [activeWaveId, removeDeliveredNotifications, markNotificationsRead]
+  );
+};
 
-      const waveId = drop.wave.id;
+const useVisibilityEligibilityRefresh = (): ((
+  waveId: string
+) => Promise<void>) => {
+  const { refreshEligibility } = useWaveEligibility();
+  const tabJustBecameVisibleRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        tabJustBecameVisibleRef.current = true;
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  return useCallback(
+    async (waveId: string) => {
+      if (!tabJustBecameVisibleRef.current) {
+        return;
+      }
+
+      tabJustBecameVisibleRef.current = false;
+      try {
+        await refreshEligibility(waveId);
+      } catch (error) {
+        reportBackgroundTaskError("Failed to refresh wave eligibility:", error);
+      }
+    },
+    [refreshEligibility]
+  );
+};
+
+interface ApplyCanonicalDropUpdateForExistingDropParams {
+  readonly dropId: string;
+  readonly existingDrop: ExtendedDrop;
+  readonly waveId: string;
+  readonly type: ProcessIncomingDropType;
+  readonly options: ProcessIncomingDropOptions;
+}
+
+const useCanonicalDropUpdateForExistingDrop = ({
+  queryClient,
+  updateData,
+}: Pick<UseProcessIncomingDropParams, "queryClient" | "updateData">): ((
+  params: ApplyCanonicalDropUpdateForExistingDropParams
+) => Promise<void>) =>
+  useCallback(
+    async ({
+      dropId,
+      existingDrop,
+      waveId,
+      type,
+      options,
+    }: ApplyCanonicalDropUpdateForExistingDropParams) => {
+      try {
+        await applyCanonicalDropUpdate({
+          dropId,
+          existingDrop,
+          waveId,
+          type,
+          options,
+          queryClient,
+          updateData,
+        });
+      } catch (error) {
+        reportBackgroundTaskError(
+          "Failed to apply canonical drop update:",
+          error
+        );
+      }
+    },
+    [queryClient, updateData]
+  );
+
+const useNewestMessagesAfterDropUpdate = (
+  initiateFetchNewestCycle: InitiateFetchNewestCycleFn
+): ((
+  waveId: string,
+  serialNoForFetch: number | null,
+  optimisticDropId: string
+) => Promise<void>) =>
+  useCallback(
+    async (
+      waveId: string,
+      serialNoForFetch: number | null,
+      optimisticDropId: string
+    ) => {
+      if (serialNoForFetch === null || optimisticDropId.startsWith("temp-")) {
+        return;
+      }
+
+      try {
+        await initiateFetchNewestCycle(waveId, serialNoForFetch);
+      } catch (error) {
+        reportBackgroundTaskError(
+          "Failed to sync newest wave messages:",
+          error
+        );
+      }
+    },
+    [initiateFetchNewestCycle]
+  );
+
+interface UseProcessIncomingDropParams extends Pick<
+  UseWaveRealtimeUpdaterProps,
+  | "activeWaveId"
+  | "getData"
+  | "updateData"
+  | "registerWave"
+  | "syncNewestMessages"
+  | "removeWaveDeliveredNotifications"
+  | "isWaveMuted"
+> {
+  readonly queryClient: QueryClient;
+}
+
+const useProcessIncomingDrop = ({
+  activeWaveId,
+  getData,
+  updateData,
+  registerWave,
+  syncNewestMessages,
+  removeWaveDeliveredNotifications,
+  isWaveMuted,
+  queryClient,
+}: UseProcessIncomingDropParams): ProcessIncomingDropFn => {
+  const initiateFetchNewestCycle = useNewestMessagesSync({
+    getData,
+    updateData,
+    syncNewestMessages,
+  });
+  const markActiveWaveAsRead = useActiveWaveReadMarker({
+    activeWaveId,
+    removeWaveDeliveredNotifications,
+  });
+  const refreshEligibilityAfterVisibilityChange =
+    useVisibilityEligibilityRefresh();
+  const applyCanonicalDropUpdateForExistingDrop =
+    useCanonicalDropUpdateForExistingDrop({ queryClient, updateData });
+  const syncNewestMessagesAfterDropUpdate = useNewestMessagesAfterDropUpdate(
+    initiateFetchNewestCycle
+  );
+
+  return useCallback(
+    async (
+      drop: ApiDrop,
+      type: ProcessIncomingDropType,
+      options: ProcessIncomingDropOptions = {}
+    ) => {
+      const waveId = getIncomingWaveId(drop);
+      if (waveId === null) {
+        return;
+      }
+
+      if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+        const preferExistingPollVote = options.preferExistingPollVote;
+        if (preferExistingPollVote === undefined) {
+          updateDropInCachedDrops(queryClient, drop);
+        } else {
+          updateDropInCachedDrops(queryClient, drop, {
+            preferExistingPollVote,
+          });
+        }
+      }
 
       if (isWaveMuted(waveId)) {
         return;
       }
 
-      // Check if tab just became visible and refresh eligibility
-      if (tabJustBecameVisibleRef.current) {
-        tabJustBecameVisibleRef.current = false;
-        refreshEligibility(waveId);
-      }
+      await refreshEligibilityAfterVisibilityChange(waveId);
 
       const currentData = getData(waveId);
-
       if (!currentData) {
-        // Wave not registered or data not loaded yet.
-        // Registering will trigger initial fetch which should get this message.
         registerWave(waveId);
         return;
       }
 
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
-
-      if (
-        (type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
-          !existingDrop) ||
-        (type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
-          !existingDrop) ||
-        existingDrop?.type === DropSize.LIGHT
-      ) {
+      if (existingDrop?.type === DropSize.LIGHT) {
         return;
       }
 
-      if (
-        (type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
-          type === ProcessIncomingDropType.DROP_REACTION_UPDATE) &&
-        existingDrop
-      ) {
-        const apiDrop = await fetchDropByIdBatched(drop.id);
-        if (apiDrop) {
-          if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-            recordReactionRealtimeReconciliation({
-              drop: {
-                id: apiDrop.id,
-                wave: { id: apiDrop.wave.id },
-                context_profile_context: apiDrop.context_profile_context,
-              },
-              websocketStatus: WebSocketStatus.CONNECTED,
-            });
-          }
-          updateData({
-            key: waveId,
-            drops: [
-              {
-                ...apiDrop,
-                type: DropSize.FULL,
-                stableHash: existingDrop.stableHash,
-                stableKey: existingDrop.stableKey,
-              },
-            ],
-          });
+      const existingFullDrop = existingDrop ?? null;
+      if (isCanonicalDropUpdate(type)) {
+        if (existingFullDrop === null) {
+          return;
+        }
+        await applyCanonicalDropUpdateForExistingDrop({
+          dropId: drop.id,
+          existingDrop: existingFullDrop,
+          waveId,
+          type,
+          options,
+        });
+        if (
+          type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
+          isWaveDropNearViewport(waveId, drop.id)
+        ) {
+          markActiveWaveAsRead(waveId);
         }
         return;
       }
 
-      const optimisticDrop: ExtendedDrop = {
-        ...drop,
-        type: DropSize.FULL,
-        author: {
-          ...drop.author,
-          subscribed_actions: existingDrop
-            ? existingDrop.author.subscribed_actions
-            : (drop.author.subscribed_actions ?? []),
-        },
-        wave: {
-          ...drop.wave,
-          authenticated_user_eligible_to_participate: existingDrop
-            ? existingDrop.wave.authenticated_user_eligible_to_participate
-            : (drop.wave.authenticated_user_eligible_to_participate ?? false),
-          authenticated_user_eligible_to_vote: existingDrop
-            ? existingDrop.wave.authenticated_user_eligible_to_vote
-            : (drop.wave.authenticated_user_eligible_to_vote ?? false),
-          authenticated_user_eligible_to_chat: existingDrop
-            ? existingDrop.wave.authenticated_user_eligible_to_chat
-            : (drop.wave.authenticated_user_eligible_to_chat ?? false),
-          authenticated_user_admin: existingDrop
-            ? existingDrop.wave.authenticated_user_admin
-            : (drop.wave.authenticated_user_admin ?? false),
-        }, // Assuming message structure matches ApiDrop + ApiWaveMin
-        stableKey: drop.id,
-        stableHash: drop.id, // Use ID for hash temporarily
-        context_profile_context: existingDrop
-          ? existingDrop.context_profile_context
-          : (drop.context_profile_context ?? null),
-      };
-
-      // Important: Identify the serial number *before* adding the optimistic drop
-      const serialNoForFetch = currentData.latestFetchedSerialNo;
+      const optimisticDrop = buildOptimisticDrop({
+        drop,
+        existingDrop: existingFullDrop,
+        options,
+      });
 
       updateData({
         key: waveId,
         drops: [optimisticDrop],
       });
 
-      if (serialNoForFetch && !optimisticDrop.id.startsWith("temp-")) {
-        // Initiate the background fetch for reconciliation
-        initiateFetchNewestCycle(waveId, serialNoForFetch);
-      }
+      await syncNewestMessagesAfterDropUpdate(
+        waveId,
+        currentData.latestFetchedSerialNo,
+        optimisticDrop.id
+      );
 
-      if (activeWaveId === waveId && document.visibilityState === "visible") {
-        void (async () => {
-          try {
-            await removeWaveDeliveredNotifications(waveId);
-          } catch (error) {
-            console.error(
-              "Failed to remove wave delivered notifications:",
-              error
-            );
-          }
-        })();
-        void (async () => {
-          try {
-            await markWaveNotificationsRead(waveId, {
-              shouldSend: () => canSendReadForWave(waveId),
-            });
-          } catch (error) {
-            console.error("Failed to mark wave as read:", error);
-          }
-        })();
-      }
+      markActiveWaveAsRead(waveId);
     },
     [
-      activeWaveId,
       getData,
       updateData,
       registerWave,
-      initiateFetchNewestCycle,
-      removeWaveDeliveredNotifications,
-      markWaveNotificationsRead,
-      canSendReadForWave,
-      refreshEligibility,
+      applyCanonicalDropUpdateForExistingDrop,
+      markActiveWaveAsRead,
+      refreshEligibilityAfterVisibilityChange,
       isWaveMuted,
       queryClient,
+      syncNewestMessagesAfterDropUpdate,
     ]
   );
+};
 
-  const processDropRemoved = useCallback(
-    (waveId: string, dropId: string) => {
-      removeDrop(waveId, dropId);
-    },
-    [removeDrop]
-  );
-
-  const processAttachmentStatusUpdate = useCallback(
+const useAttachmentStatusUpdate = ({
+  activeWaveId,
+  getData,
+  updateData,
+  queryClient,
+}: Pick<
+  UseWaveRealtimeUpdaterProps,
+  "activeWaveId" | "getData" | "updateData"
+> & {
+  readonly queryClient: QueryClient;
+}): ((attachment: ApiAttachment) => void) =>
+  useCallback(
     (attachment: ApiAttachment) => {
       updateAttachmentInCachedDrops(queryClient, attachment);
 
@@ -384,19 +670,31 @@ export function useWaveRealtimeUpdater({
     [activeWaveId, getData, queryClient, updateData]
   );
 
+const useDropUpdateMessages = (
+  processIncomingDrop: ProcessIncomingDropFn
+): void => {
+  const pendingDropUpdateRef = useRef<Promise<void> | null>(null);
+
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
     (messageData) => {
-      processIncomingDrop(messageData, ProcessIncomingDropType.DROP_INSERT);
+      pendingDropUpdateRef.current = processIncomingDrop(
+        messageData,
+        ProcessIncomingDropType.DROP_INSERT,
+        {
+          preferExistingPollVote: true,
+        }
+      );
     }
   );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_RATING_UPDATE,
     (messageData) => {
-      processIncomingDrop(
+      pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
-        ProcessIncomingDropType.DROP_RATING_UPDATE
+        ProcessIncomingDropType.DROP_RATING_UPDATE,
+        { preferExistingPollVote: true }
       );
     }
   );
@@ -404,45 +702,60 @@ export function useWaveRealtimeUpdater({
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_REACTION_UPDATE,
     (messageData) => {
-      processIncomingDrop(
+      pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
-        ProcessIncomingDropType.DROP_REACTION_UPDATE
+        ProcessIncomingDropType.DROP_REACTION_UPDATE,
+        { preferExistingPollVote: true }
       );
     }
   );
+};
+
+export function useWaveRealtimeUpdater({
+  activeWaveId,
+  getData,
+  updateData,
+  registerWave,
+  syncNewestMessages,
+  removeDrop,
+  removeWaveDeliveredNotifications,
+  isWaveMuted,
+}: UseWaveRealtimeUpdaterProps): {
+  processIncomingDrop: ProcessIncomingDropFn;
+  processDropRemoved: (waveId: string, dropId: string) => void;
+} {
+  const queryClient = useQueryClient();
+  const processIncomingDrop = useProcessIncomingDrop({
+    activeWaveId,
+    getData,
+    updateData,
+    registerWave,
+    syncNewestMessages,
+    removeWaveDeliveredNotifications,
+    isWaveMuted,
+    queryClient,
+  });
+
+  const processDropRemoved = useCallback(
+    (waveId: string, dropId: string) => {
+      removeDrop(waveId, dropId);
+    },
+    [removeDrop]
+  );
+
+  const processAttachmentStatusUpdate = useAttachmentStatusUpdate({
+    activeWaveId,
+    getData,
+    updateData,
+    queryClient,
+  });
+
+  useDropUpdateMessages(processIncomingDrop);
 
   useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(
     WsMessageType.ATTACHMENT_STATUS_UPDATE,
     processAttachmentStatusUpdate
   );
 
-  // Handle tab visibility changes - refresh eligibility when tab becomes visible
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        // Mark that tab just became visible, eligibility will be refreshed
-        // on the next WebSocket message for any wave
-        tabJustBecameVisibleRef.current = true;
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
-
-  // Cleanup: Cancel all ongoing fetches on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(abortControllersRef.current).forEach((controller) =>
-        controller.abort()
-      );
-      abortControllersRef.current = {}; // Clear refs
-      isFetchingNewestRef.current = {};
-      needsRefetchAfterCurrentRef.current = {};
-    };
-  }, []);
-
-  // No return value needed as this hook works in the background
   return { processIncomingDrop, processDropRemoved };
 }

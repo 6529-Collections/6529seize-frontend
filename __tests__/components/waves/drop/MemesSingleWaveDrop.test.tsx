@@ -34,6 +34,10 @@ jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
   useApprovalWaveStatus: (args: any) => mockApprovalStatus(args),
 }));
 
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveOutcomeVisibility: () => true,
+}));
+
 describe("MemesSingleWaveDrop", () => {
   beforeEach(() => {
     mockWrapperProps = undefined;
@@ -41,6 +45,7 @@ describe("MemesSingleWaveDrop", () => {
     mockApprovalStatus.mockReset();
     mockApprovalStatus.mockReturnValue({
       winningThreshold: null,
+      winningThresholdMinDurationMs: null,
       isVotingClosed: false,
       isVotingControlsLocked: false,
     });
@@ -68,6 +73,7 @@ describe("MemesSingleWaveDrop", () => {
   it("passes approval lock props into wrapper and info panel", () => {
     mockApprovalStatus.mockReturnValue({
       winningThreshold: 25,
+      winningThresholdMinDurationMs: 120_000,
       isVotingClosed: true,
       isVotingControlsLocked: true,
     });
@@ -90,6 +96,7 @@ describe("MemesSingleWaveDrop", () => {
     expect(mockWrapperProps).toEqual(
       expect.objectContaining({
         winningThreshold: 25,
+        winningThresholdMinDurationMs: 120_000,
         isVotingClosed: true,
         isVotingControlsLocked: true,
       })

@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveTabsDefault from "@/components/brain/my-stream/tabs/MyStreamWaveTabsDefault";
+import { AuthContext } from "@/components/auth/Auth";
 import { SidebarProvider } from "@/hooks/useSidebarState";
 
 const mockPush = jest.fn();
@@ -103,7 +104,7 @@ describe("MyStreamWaveTabsDefault", () => {
   };
   const createWave = (
     isDirectMessage = false,
-    overrides?: { id?: string; name?: string }
+    overrides: Record<string, any> = {}
   ) =>
     ({
       id: overrides?.id ?? "w1",
@@ -114,20 +115,22 @@ describe("MyStreamWaveTabsDefault", () => {
         parts: [{ content: "A chill place to discuss drops" }],
       },
       contributors_overview: [],
+      ...overrides,
       voting: {
         authenticated_user_eligible: true,
       },
       participation: {
         authenticated_user_eligible: true,
       },
-      chat: {
-        authenticated_user_eligible: true,
-        scope: {
-          group: {
-            is_direct_message: isDirectMessage,
+      chat:
+        overrides.chat ?? {
+          authenticated_user_eligible: true,
+          scope: {
+            group: {
+              is_direct_message: isDirectMessage,
+            },
           },
         },
-      },
     }) as any;
 
   beforeEach(() => {
@@ -235,6 +238,54 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
+    expect(
+      screen.queryByRole("button", { name: "Share wave" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show wave description" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("links 1:1 DM header to the other participant profile", () => {
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+    const wave = createWave(true, {
+      name: "prxt0",
+      contributors_overview: [
+        { contributor_identity: "id-0xabc", contributor_pfp: "/me.png" },
+      ],
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: {
+              handle: "me",
+              normalised_handle: "me",
+              primary_wallet: "0xabc",
+              query: "id-0xabc",
+              wallets: [{ wallet: "0xabc" }],
+            },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <SidebarProvider>
+          <MyStreamWaveTabsDefault
+            wave={wave}
+            viewMode="chat"
+            onToggleViewMode={mockToggleViewMode}
+            showGalleryToggle={false}
+          />
+        </SidebarProvider>
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByRole("link", { name: "View prxt0's profile" }))
+      .toHaveAttribute("href", "/prxt0");
     expect(
       screen.queryByRole("button", { name: "Share wave" })
     ).not.toBeInTheDocument();
@@ -464,15 +515,16 @@ describe("MyStreamWaveTabsDefault", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Share wave" })
-    ).toBeInTheDocument();
-    expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Switch to gallery view" })
-    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    expect(
+      screen.getByRole("menuitem", { name: "Share wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("menuitem", { name: "Switch to gallery view" })
+    ).toBeInTheDocument();
   });
 
   it("toggles chat/gallery in compact mode", () => {
@@ -492,8 +544,9 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     fireEvent.click(
-      screen.getByRole("button", { name: "Switch to gallery view" })
+      screen.getByRole("menuitem", { name: "Switch to gallery view" })
     );
 
     expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
@@ -524,7 +577,7 @@ describe("MyStreamWaveTabsDefault", () => {
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Go back" })
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
   });
 
   it("keeps compact subtitle trigger and search action", () => {
@@ -547,9 +600,9 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
-    const subtitle = screen.getByText("A chill place to discuss drops");
-    expect(subtitle).toHaveClass("tw-truncate");
-    expect(subtitle).not.toHaveClass("tw-line-clamp-1");
+    expect(
+      screen.queryByText("A chill place to discuss drops")
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Show wave description" })
     ).toBeInTheDocument();
@@ -662,13 +715,14 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy wave link" }));
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Copy wave link" }));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
       "http://localhost/waves/w1"
     );
     expect(
-      screen.getByRole("button", { name: "Link copied" })
+      screen.getByRole("menuitem", { name: "Link copied" })
     ).toBeInTheDocument();
   });
 });

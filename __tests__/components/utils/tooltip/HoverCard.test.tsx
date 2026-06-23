@@ -65,6 +65,10 @@ describe("HoverCard", () => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
       expect(screen.getByText("Card content")).toBeInTheDocument();
     });
+    expect(screen.getByText("Card content")).toHaveClass(
+      "tw-overflow-hidden",
+      "tw-rounded-xl"
+    );
   });
 
   it("opens when the trigger child is a link-like element", async () => {

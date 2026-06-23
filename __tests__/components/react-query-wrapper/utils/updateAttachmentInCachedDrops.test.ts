@@ -87,6 +87,69 @@ describe("cached drop websocket updates", () => {
     });
   });
 
+  it("preserves authenticated poll votes when websocket updates include stale votes", () => {
+    const queryClient = createQueryClient();
+    const queryKey = [QueryKey.DROPS, { waveId: "wave-1" }];
+    queryClient.setQueryData(queryKey, {
+      pages: [
+        [
+          {
+            id: "drop-1",
+            serial_no: 1,
+            poll: {
+              id: "poll-1",
+              options: [
+                { option_no: 1, option_string: "First", votes: 2 },
+                { option_no: 2, option_string: "Second", votes: 2 },
+              ],
+              voted: [2],
+              multichoice: false,
+              anonymous: false,
+              closing_time: 1000,
+              is_open: true,
+            },
+          },
+        ],
+      ],
+    });
+
+    updateDropInCachedDrops(
+      queryClient,
+      {
+        id: "drop-1",
+        serial_no: 1,
+        poll: {
+          id: "poll-1",
+          options: [
+            { option_no: 1, option_string: "First", votes: 3 },
+            { option_no: 2, option_string: "Second", votes: 2 },
+          ],
+          voted: [1],
+          multichoice: false,
+          anonymous: false,
+          closing_time: 1000,
+          is_open: true,
+        },
+      } as any,
+      {
+        preferExistingPollVote: true,
+      }
+    );
+
+    expect(queryClient.getQueryData<any>(queryKey).pages[0][0].poll).toEqual({
+      id: "poll-1",
+      options: [
+        { option_no: 1, option_string: "First", votes: 3 },
+        { option_no: 2, option_string: "Second", votes: 2 },
+      ],
+      voted: [2],
+      multichoice: false,
+      anonymous: false,
+      closing_time: 1000,
+      is_open: true,
+    });
+  });
+
   it("updates cached attachments by attachment id", () => {
     const queryClient = createQueryClient();
     const queryKey = [QueryKey.DROP, { drop_id: "drop-1" }];

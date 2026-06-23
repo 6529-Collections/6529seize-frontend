@@ -23,10 +23,12 @@ export enum WaveVotingState {
 type WaveTabParams = {
   waveId: string | null;
   isChatWave: boolean;
+  hasPolls?: boolean | undefined;
   hasAuthenticatedProfile: boolean;
   isMemesWave: boolean;
   isCurationWave: boolean;
   isApproveWave?: boolean | undefined;
+  showOutcomeTab?: boolean | undefined;
   votingState: WaveVotingState;
   hasFirstDecisionPassed: boolean;
   transientPreferredTab?: MyStreamWaveTab | null;
@@ -66,7 +68,9 @@ const isValidWaveTabMap = (
 const buildMemesTabs = (
   hasAuthenticatedProfile: boolean,
   votingState: WaveVotingState,
-  hasFirstDecisionPassed: boolean
+  hasFirstDecisionPassed: boolean,
+  hasPolls: boolean,
+  showOutcomeTab: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [];
   if (votingState === WaveVotingState.ENDED) {
@@ -81,7 +85,12 @@ const buildMemesTabs = (
   if (hasAuthenticatedProfile) {
     tabs.push(MyStreamWaveTab.MY_VOTES);
   }
-  tabs.push(MyStreamWaveTab.OUTCOME);
+  if (hasPolls) {
+    tabs.push(MyStreamWaveTab.POLLS);
+  }
+  if (showOutcomeTab) {
+    tabs.push(MyStreamWaveTab.OUTCOME);
+  }
   tabs.push(MyStreamWaveTab.FAQ);
   return tabs;
 };
@@ -90,7 +99,9 @@ const buildDefaultTabs = (
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean,
   isCurationWave: boolean,
-  hasAuthenticatedProfile: boolean
+  hasAuthenticatedProfile: boolean,
+  hasPolls: boolean,
+  showOutcomeTab: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState === WaveVotingState.ENDED) {
@@ -104,18 +115,23 @@ const buildDefaultTabs = (
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }
-  if (!isCurationWave) {
+  if (!isCurationWave && showOutcomeTab) {
     tabs.push(MyStreamWaveTab.OUTCOME);
   }
   if (isCurationWave || hasAuthenticatedProfile) {
     tabs.push(MyStreamWaveTab.MY_VOTES);
+  }
+  if (hasPolls) {
+    tabs.push(MyStreamWaveTab.POLLS);
   }
   return tabs;
 };
 
 const buildApproveTabs = (
   isCurationWave: boolean,
-  hasAuthenticatedProfile: boolean
+  hasAuthenticatedProfile: boolean,
+  hasPolls: boolean,
+  showOutcomeTab: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [
     MyStreamWaveTab.CHAT,
@@ -128,14 +144,20 @@ const buildApproveTabs = (
 
   tabs.push(MyStreamWaveTab.WINNERS);
 
-  if (!isCurationWave) {
+  if (!isCurationWave && showOutcomeTab) {
     tabs.push(MyStreamWaveTab.OUTCOME);
-  } else {
+  }
+
+  if (isCurationWave) {
     tabs.push(MyStreamWaveTab.MY_VOTES);
   }
 
   if (!isCurationWave && hasAuthenticatedProfile) {
     tabs.push(MyStreamWaveTab.MY_VOTES);
+  }
+
+  if (hasPolls) {
+    tabs.push(MyStreamWaveTab.POLLS);
   }
 
   return tabs;
@@ -191,10 +213,12 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       const {
         waveId,
         isChatWave,
+        hasPolls = false,
         hasAuthenticatedProfile,
         isMemesWave,
         isCurationWave,
         isApproveWave = false,
+        showOutcomeTab = true,
         votingState,
         hasFirstDecisionPassed,
         transientPreferredTab,
@@ -203,20 +227,32 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       let tabs: MyStreamWaveTab[];
       if (isChatWave) {
         tabs = [MyStreamWaveTab.CHAT];
+        if (hasPolls) {
+          tabs.push(MyStreamWaveTab.POLLS);
+        }
       } else if (isApproveWave) {
-        tabs = buildApproveTabs(isCurationWave, hasAuthenticatedProfile);
+        tabs = buildApproveTabs(
+          isCurationWave,
+          hasAuthenticatedProfile,
+          hasPolls,
+          showOutcomeTab
+        );
       } else if (isMemesWave) {
         tabs = buildMemesTabs(
           hasAuthenticatedProfile,
           votingState,
-          hasFirstDecisionPassed
+          hasFirstDecisionPassed,
+          hasPolls,
+          showOutcomeTab
         );
       } else {
         tabs = buildDefaultTabs(
           votingState,
           hasFirstDecisionPassed,
           isCurationWave,
-          hasAuthenticatedProfile
+          hasAuthenticatedProfile,
+          hasPolls,
+          showOutcomeTab
         );
       }
 

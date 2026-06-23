@@ -6,6 +6,10 @@ import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadata
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropPartV2 } from "@/generated/models/ApiDropPartV2";
+import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
+import type { ApiDropPollVoteRequest } from "@/generated/models/ApiDropPollVoteRequest";
+import type { ApiDropPollsPage } from "@/generated/models/ApiDropPollsPage";
+import type { ApiDropPollVotersPage } from "@/generated/models/ApiDropPollVotersPage";
 import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiDropReactionV2 } from "@/generated/models/ApiDropReactionV2";
@@ -21,10 +25,13 @@ import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWavePoll } from "@/generated/models/ApiWavePoll";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import type { ApiPageSortDirection } from "@/generated/models/ApiPageSortDirection";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
+  commonApiPost,
 } from "@/services/api/common-api";
 import {
   createBasePart,
@@ -38,6 +45,10 @@ import {
   mapReplyToDrop,
   normalizeWaveMin,
 } from "@/services/api/drop-v2-mappers";
+
+type DropApprovalTiming = {
+  readonly over_threshold_since_ms?: number | null;
+};
 
 const DEFAULT_RETRY_OPTIONS = {
   maxRetries: 2,
@@ -66,6 +77,15 @@ interface FetchBoostedDropsV2Props {
   readonly countOnlyBoostsAfter?: number | undefined;
 }
 
+interface FetchGlobalBoostedDropsV2Props {
+  readonly limit: number;
+  readonly sortDirection?: string | undefined;
+  readonly sort?: string | undefined;
+  readonly countOnlyBoostsAfter?: number | undefined;
+  readonly minBoosts?: number | undefined;
+  readonly signal?: AbortSignal | undefined;
+}
+
 interface FetchDropRepliesV2Props {
   readonly parentDropId: string;
   readonly page: number;
@@ -85,6 +105,25 @@ interface FetchWaveDropsSearchV2Props {
   readonly term: string;
   readonly page: number;
   readonly size: number;
+  readonly signal?: AbortSignal | undefined;
+}
+
+export type WavePollsState = "OPEN" | "CLOSED";
+export type WavePollsSort = "created_at" | "closing_time";
+export type ApiWavePollDropRow = Partial<ApiWavePoll> & {
+  readonly poll?: ApiDropPoll | undefined;
+};
+type ApiWavePollsPage = Omit<ApiDropPollsPage, "data"> & {
+  readonly data: ApiWavePollDropRow[];
+};
+
+interface FetchWavePollsV2Props {
+  readonly waveId: string;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly sortDirection: ApiPageSortDirection;
+  readonly sort: WavePollsSort;
+  readonly state?: WavePollsState | undefined;
   readonly signal?: AbortSignal | undefined;
 }
 
@@ -311,6 +350,14 @@ const getWinningContext = (drop: ApiDropV2) => {
   };
 };
 
+const getDropApprovalTiming = (drop: ApiDropV2): DropApprovalTiming => {
+  const overThresholdSinceMs = drop.submission_context?.over_threshold_since_ms;
+
+  return typeof overThresholdSinceMs === "number"
+    ? { over_threshold_since_ms: overThresholdSinceMs }
+    : {};
+};
+
 const hydrateDropV2 = async ({
   drop,
   wave,
@@ -340,6 +387,7 @@ const hydrateDropV2 = async ({
     drop_type: dropType,
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
+    ...getDropApprovalTiming(drop),
     wave,
     ...(replyTo ? { reply_to: replyTo } : {}),
     author: mapIdentityOverviewToProfileMin(drop.author),
@@ -354,7 +402,8 @@ const hydrateDropV2 = async ({
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata,
     rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating: voting?.current_calculated_vote ?? 0,
+    realtime_rating:
+      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
     rating_prediction: voting?.predicted_final_vote ?? 0,
     top_raters: topRaters,
     raters_count: voting?.voters_count ?? 0,
@@ -363,7 +412,10 @@ const hydrateDropV2 = async ({
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
+    is_additional_action_promised:
+      drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
+    ...(drop.poll ? { poll: drop.poll } : {}),
     nft_links: drop.nft_links ?? [],
   };
 };
@@ -386,6 +438,7 @@ export const mapLeaderboardDropV2 = ({
     drop_type: dropType,
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
+    ...getDropApprovalTiming(drop),
     ...(replyTo ? { reply_to: replyTo } : {}),
     author: mapIdentityOverviewToProfileMin(drop.author),
     created_at: drop.created_at,
@@ -399,7 +452,8 @@ export const mapLeaderboardDropV2 = ({
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata: mapPriorityMetadataV2ToDropMetadata(drop),
     rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating: voting?.current_calculated_vote ?? 0,
+    realtime_rating:
+      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
     rating_prediction: voting?.predicted_final_vote ?? 0,
     top_raters: [],
     raters_count: voting?.voters_count ?? 0,
@@ -408,7 +462,10 @@ export const mapLeaderboardDropV2 = ({
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
+    is_additional_action_promised:
+      drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
+    ...(drop.poll ? { poll: drop.poll } : {}),
     nft_links: drop.nft_links ?? [],
   };
 };
@@ -604,6 +661,33 @@ export async function fetchWaveDropsSearchV2({
   };
 }
 
+export async function fetchWavePollsV2({
+  waveId,
+  page,
+  pageSize,
+  sortDirection,
+  sort,
+  state,
+  signal,
+}: FetchWavePollsV2Props): Promise<ApiWavePollsPage> {
+  const params: Record<string, string> = {
+    page: page.toString(),
+    page_size: pageSize.toString(),
+    sort_direction: sortDirection,
+    sort,
+  };
+
+  if (state) {
+    params["state"] = state;
+  }
+
+  return commonApiFetch<ApiWavePollsPage>({
+    endpoint: `v2/waves/${waveId}/polls`,
+    params,
+    signal,
+  });
+}
+
 export async function fetchDropV2ById(
   dropId: string,
   signal?: AbortSignal,
@@ -620,6 +704,53 @@ export async function fetchDropV2ById(
     signal,
     includeFullMetadata: options?.includeFullMetadata ?? false,
     includeTopRaters: options?.includeTopRaters ?? false,
+  });
+}
+
+export async function voteDropPollV2({
+  drop,
+  options,
+}: {
+  readonly drop: ApiDrop;
+  readonly options: readonly number[];
+}): Promise<ApiDrop> {
+  const response = await commonApiPost<ApiDropPollVoteRequest, ApiDropV2>({
+    endpoint: `v2/drops/${getDropEndpointId(getNormalizedDropId(drop.id))}/poll/vote`,
+    body: {
+      options,
+    } as unknown as ApiDropPollVoteRequest,
+  });
+
+  return hydrateDropV2({
+    drop: response,
+    wave: normalizeWaveMin(drop.wave),
+    includeFullMetadata: false,
+    includeTopRaters: false,
+  });
+}
+
+export async function fetchDropPollOptionVotersV2({
+  dropId,
+  optionNo,
+  page,
+  pageSize,
+  signal,
+}: {
+  readonly dropId: string;
+  readonly optionNo: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<ApiDropPollVotersPage> {
+  return commonApiFetch<ApiDropPollVotersPage>({
+    endpoint: `v2/drops/${getDropEndpointId(
+      getNormalizedDropId(dropId)
+    )}/poll/${optionNo}/voters`,
+    params: {
+      page: page.toString(),
+      page_size: pageSize.toString(),
+    },
+    signal,
   });
 }
 
@@ -715,5 +846,39 @@ export async function fetchBoostedDropsV2({
   return hydrateDropsV2({
     drops: response.data,
     wave: normalizeWaveMin(wave),
+  });
+}
+
+export async function fetchGlobalBoostedDropsV2({
+  limit,
+  sortDirection = "DESC",
+  sort = "boosts",
+  countOnlyBoostsAfter,
+  minBoosts,
+  signal,
+}: FetchGlobalBoostedDropsV2Props): Promise<ApiDrop[]> {
+  const params: Record<string, string> = {
+    sort,
+    sort_direction: sortDirection,
+    page_size: limit.toString(),
+  };
+
+  if (countOnlyBoostsAfter !== undefined) {
+    params["count_only_boosts_after"] = countOnlyBoostsAfter.toString();
+  }
+
+  if (minBoosts !== undefined) {
+    params["min_boosts"] = minBoosts.toString();
+  }
+
+  const response = await commonApiFetch<ApiDropV2Page>({
+    endpoint: "v2/boosted-drops",
+    params,
+    signal,
+  });
+
+  return hydrateDropsWithEmbeddedWavesV2({
+    drops: response.data,
+    signal,
   });
 }

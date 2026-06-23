@@ -17,11 +17,15 @@ import {
 import BoostedDropLinkPreview from "./BoostedDropLinkPreview";
 import {
   extractFirstUrl,
+  extractStandaloneMarkdownImage,
   removePreviewUrlFromContent,
 } from "./extractStandaloneUrl";
 
 type BoostedDropPart = ApiDrop["parts"][number];
-type BoostedDropMediaItem = BoostedDropPart["media"][number];
+type BoostedDropMediaItem = Pick<
+  BoostedDropPart["media"][number],
+  "mime_type" | "url"
+>;
 type OverflowElements = {
   readonly container: HTMLDivElement;
   readonly preview: HTMLDivElement;
@@ -31,27 +35,79 @@ type OverflowElements = {
 
 const HOME_ASPECT_RATIO_CLASSES =
   "tw-aspect-[2/1] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5]";
-const CHAT_MAX_HEIGHT_CLASSES = "tw-max-h-[11rem] md:tw-max-h-[12rem]";
-const CHAT_PREVIEW_CONTAINER_CLASSES = `tw-relative tw-flex ${CHAT_MAX_HEIGHT_CLASSES} tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-rounded-xl`;
-const CHAT_TEXT_CONTAINER_CLASSES = `tw-relative tw-flex ${CHAT_MAX_HEIGHT_CLASSES} tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-4 sm:tw-px-6`;
+const CHAT_TEXT_MAX_HEIGHT_CLASSES = "tw-max-h-[11rem] md:tw-max-h-[12rem]";
+const CHAT_PREVIEW_MAX_HEIGHT_CLASSES = "tw-max-h-[15rem] md:tw-max-h-[16rem]";
+const CHAT_PREVIEW_CONTAINER_CLASSES = `tw-relative tw-flex ${CHAT_PREVIEW_MAX_HEIGHT_CLASSES} tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-bg-black/20 tw-p-3`;
+const CHAT_TEXT_CONTAINER_CLASSES = `tw-relative tw-flex ${CHAT_TEXT_MAX_HEIGHT_CLASSES} tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/20 tw-px-4 tw-py-5 sm:tw-px-6`;
 const HOME_PREVIEW_CONTAINER_CLASSES = `tw-relative tw-flex ${HOME_ASPECT_RATIO_CLASSES} tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-rounded-xl`;
 const HOME_TEXT_CONTAINER_CLASSES = `tw-relative tw-flex ${HOME_ASPECT_RATIO_CLASSES} tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12`;
 const CHAT_PREVIEW_WRAPPER_BASE_CLASSES =
-  "tw-relative tw-z-10 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto]";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto";
+const IMAGE_MIME_TYPES_BY_TOKEN: Readonly<Record<string, string>> = {
+  avif: "image/avif",
+  gif: "image/gif",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  png: "image/png",
+  svg: "image/svg+xml",
+  webp: "image/webp",
+};
+
+const getImageMimeTypeFromToken = (
+  token: string | null | undefined
+): string | null => {
+  if (!token) {
+    return null;
+  }
+
+  const normalizedToken = token.toLowerCase().replace(/^\./, "");
+  return IMAGE_MIME_TYPES_BY_TOKEN[normalizedToken] ?? null;
+};
+
+const getStandaloneMarkdownImageMimeType = (url: string): string => {
+  try {
+    const parsedUrl = new URL(url);
+    const outputMimeType = getImageMimeTypeFromToken(
+      parsedUrl.searchParams.get("output")
+    );
+
+    if (outputMimeType) {
+      return outputMimeType;
+    }
+
+    const extension = parsedUrl.pathname.split(".").pop();
+    const extensionMimeType = getImageMimeTypeFromToken(extension);
+
+    if (extensionMimeType) {
+      return extensionMimeType;
+    }
+  } catch {
+    const extension = url.split(/[?#]/)[0]?.split(".").pop();
+    const extensionMimeType = getImageMimeTypeFromToken(extension);
+
+    if (extensionMimeType) {
+      return extensionMimeType;
+    }
+  }
+
+  return "image/*";
+};
 const HOME_PREVIEW_WRAPPER_BASE_CLASSES =
-  "tw-relative tw-z-10 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto]";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto";
 const CHAT_TEXT_WRAPPER_CLASSES =
-  "tw-relative tw-z-10 tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto";
 const HOME_TEXT_WRAPPER_CLASSES =
-  "tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto";
 const WITH_PREVIEW_CONTENT_CLASS_NAME =
-  "tw-flex tw-w-full tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-px-3 tw-pb-3 sm:tw-px-4 sm:tw-pb-4 tw-tracking-[0.01em] tw-font-normal tw-text-iron-300";
+  "tw-flex tw-w-full tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-px-3 tw-pb-3 tw-text-left sm:tw-px-4 sm:tw-pb-4 tw-tracking-[0.01em] tw-font-normal tw-text-iron-300";
+const CHAT_WITH_PREVIEW_CONTENT_CLASS_NAME =
+  "tw-flex tw-w-full tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-px-3 tw-pb-3 tw-text-left tw-tracking-[0.01em] tw-font-normal tw-text-iron-400";
 const HOME_TEXT_CONTENT_CLASS_NAME =
   "tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-tracking-[0.01em] tw-font-normal tw-text-iron-300";
 const WITH_PREVIEW_TEXT_CLAMP_CLASS = "tw-line-clamp-2 sm:tw-line-clamp-3";
 const WITHOUT_PREVIEW_TEXT_CLAMP_CLASS = "tw-line-clamp-6";
 const CONTENT_TEXT_BASE_CLASSES =
-  "tw-max-w-full tw-break-words tw-tracking-[0.01em] tw-font-normal";
+  "tw-block tw-w-full tw-max-w-full tw-break-words tw-text-left tw-tracking-[0.01em] tw-font-normal";
 const MAX_OVERFLOW_MEASUREMENT_ATTEMPTS = 12;
 const OVERFLOW_MEASUREMENT_INTERVAL_MS = 200;
 
@@ -109,11 +165,15 @@ const getContentWrapperClasses = ({
 
 const getContentClassName = ({
   hasPreview,
+  isChatVariant,
 }: {
   readonly hasPreview: boolean;
+  readonly isChatVariant: boolean;
 }): string => {
   if (hasPreview) {
-    return WITH_PREVIEW_CONTENT_CLASS_NAME;
+    return isChatVariant
+      ? CHAT_WITH_PREVIEW_CONTENT_CLASS_NAME
+      : WITH_PREVIEW_CONTENT_CLASS_NAME;
   }
 
   return HOME_TEXT_CONTENT_CLASS_NAME;
@@ -371,7 +431,7 @@ const BoostedDropCardHomeMedia = memo(
   }) => (
     <div
       data-testid="boosted-drop-media-frame"
-      className={`tw-relative ${HOME_ASPECT_RATIO_CLASSES} ${isChatVariant ? CHAT_MAX_HEIGHT_CLASSES : ""} tw-w-full tw-overflow-hidden tw-rounded-xl`}
+      className={`tw-relative ${HOME_ASPECT_RATIO_CLASSES} ${isChatVariant ? CHAT_TEXT_MAX_HEIGHT_CLASSES : ""} tw-w-full tw-overflow-hidden tw-rounded-xl`}
     >
       <div className="tw-relative tw-h-full tw-w-full">
         <div className="tw-relative tw-z-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-transition-transform tw-duration-700 group-hover:tw-scale-[1.02]">
@@ -423,9 +483,14 @@ const BoostedDropCardTextSection = memo(
       hasTextContent,
       isChatVariant,
     });
-    const contentClassName = getContentClassName({ hasPreview });
+    const contentClassName = getContentClassName({
+      hasPreview,
+      isChatVariant,
+    });
     const contentTextClassName = getContentTextClassName(hasPreview);
-    const previewWrapperClassName = "tw-min-h-0 tw-overflow-hidden";
+    const previewWrapperClassName = isChatVariant
+      ? "tw-min-h-0 tw-overflow-hidden tw-rounded-lg"
+      : "tw-min-h-0 tw-overflow-hidden";
 
     return (
       <div
@@ -436,7 +501,10 @@ const BoostedDropCardTextSection = memo(
         <div className={contentWrapperClasses} ref={contentWrapperRef}>
           {previewUrl && (
             <div className={previewWrapperClassName} ref={previewRef}>
-              <BoostedDropLinkPreview href={previewUrl} variant="home" />
+              <BoostedDropLinkPreview
+                href={previewUrl}
+                variant={isChatVariant ? "chat" : "home"}
+              />
             </div>
           )}
           {shouldMeasureOverflow && previewUrl && hasTextContent && (
@@ -474,7 +542,24 @@ BoostedDropCardTextSection.displayName = "BoostedDropCardTextSection";
 
 const BoostedDropCardHomeContent = memo(
   ({ part, isChatVariant }: BoostedDropCardHomeContentProps) => {
-    const media = part?.media[0];
+    const standaloneMarkdownImage = useMemo(
+      () => extractStandaloneMarkdownImage(part?.content),
+      [part?.content]
+    );
+    const attachedMedia = part?.media[0];
+    const media = useMemo(
+      () =>
+        attachedMedia ??
+        (standaloneMarkdownImage
+          ? {
+              mime_type: getStandaloneMarkdownImageMimeType(
+                standaloneMarkdownImage.url
+              ),
+              url: standaloneMarkdownImage.url,
+            }
+          : undefined),
+      [attachedMedia, standaloneMarkdownImage]
+    );
 
     if (!media) {
       return (

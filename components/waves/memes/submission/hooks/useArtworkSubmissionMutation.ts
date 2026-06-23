@@ -6,6 +6,7 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
@@ -15,7 +16,6 @@ import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import {
   buildSubmissionMetadata,
-  METADATA_VALUE_MAX_LENGTH,
   getSubmissionMetadataLengthValidation,
 } from "../utils/submissionMetadata";
 
@@ -38,6 +38,7 @@ interface ArtworkSubmissionData {
     | undefined;
   traits: TraitsData;
   operationalData?: OperationalData;
+  isAdditionalActionPromised: boolean;
   waveId: string;
   termsOfService: string | null;
 }
@@ -49,6 +50,7 @@ const transformToApiRequest = (data: {
   waveId: string;
   traits: TraitsData;
   operationalData?: OperationalData | undefined;
+  isAdditionalActionPromised?: boolean | undefined;
   mediaUrl: string;
   mimeType: string;
   signerAddress: string;
@@ -58,6 +60,7 @@ const transformToApiRequest = (data: {
     waveId,
     traits,
     operationalData,
+    isAdditionalActionPromised = false,
     mediaUrl,
     mimeType,
     signerAddress,
@@ -73,6 +76,7 @@ const transformToApiRequest = (data: {
   const request: ApiCreateDropRequest = {
     wave_id: waveId,
     drop_type: ApiDropType.Participatory,
+    is_additional_action_promised: isAdditionalActionPromised,
     title: traits.title,
     parts: [
       {
@@ -197,20 +201,21 @@ export function useArtworkSubmissionMutation() {
 
       // Show success toast
       setToast({
-        message: "Artwork submitted successfully!",
+        message: "Artwork submitted.",
         type: "success",
       });
     },
     onError: (error, variables) => {
       console.error("Submission error:", error);
-      const errorMsg = `Submission failed: ${
-        error?.message || error?.toString() || "Unknown error"
-      }`;
+      const errorMsg =
+        getToastErrorDetails(error) ?? "Submission failed. Please try again.";
       updatePhase("error", variables.callbacks, errorMsg);
 
       setToast({
-        message: errorMsg,
         type: "error",
+        title: "Couldn't submit this artwork.",
+        description: "Please try again.",
+        details: errorMsg,
       });
     },
   });
@@ -244,7 +249,7 @@ export function useArtworkSubmissionMutation() {
 
       if (!hasFile && !hasExisting && !hasExternal) {
         setToast({
-          message: "Please upload a file or provide valid media",
+          message: "Upload a file or provide valid media.",
           type: "error",
         });
         return null;
@@ -252,7 +257,7 @@ export function useArtworkSubmissionMutation() {
 
       if (hasExisting && !data.existingMedia?.mimeType) {
         setToast({
-          message: "Current media is missing a media type",
+          message: "Select the media type for this media.",
           type: "error",
         });
         return null;
@@ -260,7 +265,7 @@ export function useArtworkSubmissionMutation() {
 
       if (hasExternal && !data.externalMedia?.mimeType) {
         setToast({
-          message: "Please select the media type for your URL",
+          message: "Select the media type for your URL.",
           type: "error",
         });
         return null;
@@ -268,7 +273,7 @@ export function useArtworkSubmissionMutation() {
 
       if (!data.traits.title) {
         setToast({
-          message: "Please provide a title for your artwork",
+          message: "Add a title for your artwork.",
           type: "error",
         });
         return null;
@@ -280,11 +285,11 @@ export function useArtworkSubmissionMutation() {
       });
       if (metadataLengthValidation.hasErrors) {
         const fields = metadataLengthValidation.errors
-          .map((item) => `${item.dataKey} (${item.length})`)
+          .map((item) => `${item.dataKey} (${item.length}/${item.maxLength})`)
           .join(", ");
 
         setToast({
-          message: `Metadata exceeds ${METADATA_VALUE_MAX_LENGTH} characters for: ${fields}`,
+          message: `Metadata exceeds character limits for: ${fields}`,
           type: "error",
         });
         return null;
@@ -320,6 +325,7 @@ export function useArtworkSubmissionMutation() {
         waveId: data.waveId,
         traits: data.traits,
         operationalData: data.operationalData,
+        isAdditionalActionPromised: data.isAdditionalActionPromised,
         mediaUrl: media.url,
         mimeType: media.mime_type,
         signerAddress,

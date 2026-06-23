@@ -5,7 +5,8 @@
     "project": [
       "**/*.{ts,tsx,js,jsx,cjs,mjs}",
       "!{node_modules,.next,coverage,public}/**",
-      "!{tmp_gen_outp}/**"
+      "!{tmp_gen_outp,tmp_gen_final}/**",
+      "!.generated-backup-*/**"
     ],
 
     // 2) Optionally add entries Knip can't infer from scripts/configs
@@ -23,10 +24,14 @@
       "eslint.config.tight.mjs",
       "eslint.config.diff.mjs",
       "eslint.config.single.mjs",
+      ".deepsec/deepsec.config.ts",
       "jest.config.js",
       "jest.setup.js",
+      "next-sitemap.build.cjs",
       "next-sitemap.config.ts",
+      "ops/scripts/build-delegation-docs-content.mjs",
       "playwright.config.ts",
+      "tests/support/composerSandboxServer.cjs",
       "services/**/index.{ts,tsx}"
     ],
 
@@ -42,10 +47,23 @@
 
     // 5) Generated code: keep analyzing, but avoid noisy "unused exports/files" here
     "ignoreIssues": {
+      "__mocks__/**": ["files", "exports", "types"],
+      "__tests__/**": ["files", "exports", "types"],
+      "tests/**": ["files", "exports", "types"],
+      ".deepsec/deepsec.config.ts": ["unlisted", "exports"],
       "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
+      "components/brain/left-sidebar/waves/HighlyRatedWavesToggle.tsx": [
+        "exports",
+        "types"
+      ],
+      "components/drops/create/lexical/utils/rootContent.ts": ["exports"],
+      "components/utils/toast/AppToast.tsx": ["exports"],
+      "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
+      "hooks/useWavePreviewById.ts": ["exports"],
       "services/**": ["files"],
       "lib/storage/idb-keyval.ts": ["files"],
       "playwright.config.ts": ["exports"],
+      "next-sitemap.build.cjs": ["exports"],
       "next-sitemap.config.ts": ["exports"],
       "jest.config.js": ["exports"],
       "eslint.config.single.mjs": ["exports"],
@@ -62,22 +80,23 @@
       "config/serverEnv.ts": ["exports"]
     },
     "ignoreFiles": [
+      "__mocks__/**",
+      "__tests__/**",
+      "**/*.test.{ts,tsx,js,jsx}",
+      "**/*.spec.{ts,tsx,js,jsx}",
       "generated/**",        // don't list generated files as "Unused files"
       "tmp_gen_outp/**",
-      "next-sitemap.config.js",
+      "tmp_gen_final/**",
+      ".generated-backup-*/**",
+      "tests/**",
       "stubs/empty.js"
     ],
     "ignoreBinaries": [
       "coderabbit"
     ],
     "ignoreDependencies": [
-      "eslint-plugin-diff",
-      "@openapitools/openapi-generator-cli",
       "bootstrap",
       "pino-pretty",
-      "@jest/globals",
-      "@testing-library/react",
-      "@testing-library/user-event",
       "babel-jest",
       "eslint-plugin-jsx-a11y",
       "identity-obj-proxy",
@@ -86,9 +105,7 @@
       "nodemon",
       "ts-jest",
       "ts-morph",
-      "tsx",
       "baseline-browser-mapping",
-      "yaml",
       "react-doctor"
     ],
 

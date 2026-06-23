@@ -20,7 +20,7 @@ export default function DropListItemContentWaveMention({
       <Link
         onClick={(e) => e.stopPropagation()}
         href={getWavePathRoute(wave.wave_id)}
-        className="tw-inline-flex tw-items-center tw-gap-1 tw-align-middle tw-font-medium tw-text-primary-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
+        className="tw-inline-flex tw-items-center tw-gap-1 tw-font-medium tw-text-primary-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
       >
         <span>#</span>
         {wavePicture && (

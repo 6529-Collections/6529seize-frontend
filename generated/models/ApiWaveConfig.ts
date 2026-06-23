@@ -23,6 +23,10 @@ export class ApiWaveConfig {
     */
     'winning_threshold': number | null;
     /**
+    * Milliseconds a drop must continuously stay at or above winning_threshold before winning an APPROVE wave. Null for non-APPROVE waves. When time_lock_ms is set, this duration is measured against the time-scaled weighted vote.
+    */
+    'winning_threshold_min_duration_ms': number | null;
+    /**
     * Total number of APPROVE decisions this wave may produce. Null means unlimited. Null for non-APPROVE waves
     */
     'max_winners': number | null;
@@ -31,7 +35,7 @@ export class ApiWaveConfig {
     */
     'max_votes_per_identity_to_drop': number | null;
     /**
-    * Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
+    * When set, vote totals use a trailing time-scaled weighted average over this duration, so new vote changes gradually gain or lose influence. If not set, votes are counted immediately.
     */
     'time_lock_ms': number | null;
     'admin_group': ApiWaveScope;
@@ -57,6 +61,12 @@ export class ApiWaveConfig {
         {
             "name": "winning_threshold",
             "baseName": "winning_threshold",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "winning_threshold_min_duration_ms",
+            "baseName": "winning_threshold_min_duration_ms",
             "type": "number",
             "format": "int64"
         },

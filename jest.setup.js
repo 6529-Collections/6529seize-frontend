@@ -1,11 +1,22 @@
 import { config } from "dotenv";
 import { TextDecoder, TextEncoder } from "node:util";
+import {
+  ReadableStream,
+  TransformStream,
+  WritableStream,
+} from "node:stream/web";
+import { MessageChannel, MessagePort } from "node:worker_threads";
 
 // Load environment variables for tests
 config({ path: ".env.development" });
 
 globalThis.TextEncoder = TextEncoder;
 globalThis.TextDecoder = TextDecoder;
+globalThis.ReadableStream = globalThis.ReadableStream ?? ReadableStream;
+globalThis.TransformStream = globalThis.TransformStream ?? TransformStream;
+globalThis.WritableStream = globalThis.WritableStream ?? WritableStream;
+globalThis.MessageChannel = globalThis.MessageChannel ?? MessageChannel;
+globalThis.MessagePort = globalThis.MessagePort ?? MessagePort;
 
 require("@testing-library/jest-dom");
 
@@ -54,8 +65,15 @@ if (globalThis.window !== undefined) {
     writable: true,
   });
 
+  Object.defineProperty(Element.prototype, "scrollIntoView", {
+    configurable: true,
+    value: () => {},
+    writable: true,
+  });
+
   // Mock matchMedia for device detection
   Object.defineProperty(window, "matchMedia", {
+    configurable: true,
     writable: true,
     value: jest.fn().mockImplementation((query) => ({
       matches: false,
@@ -68,6 +86,7 @@ if (globalThis.window !== undefined) {
       dispatchEvent: jest.fn(),
     })),
   });
+  globalThis.matchMedia = window.matchMedia;
 }
 
 /**
@@ -87,6 +106,7 @@ if (!process.env.PUBLIC_RUNTIME) {
     CORE_SCHEME: "testcore6529",
     IPFS_API_ENDPOINT: "https://api-ipfs.test.6529.io",
     IPFS_GATEWAY_ENDPOINT: "https://ipfs.test.6529.io",
+    MEDIA_RESOLVER_ENDPOINT: "https://media.6529.io",
     IPFS_MFS_PATH: "testfiles",
     TENOR_API_KEY: "test-tenor-api-key",
     WS_ENDPOINT: "wss://ws.test.6529.io",
@@ -97,7 +117,7 @@ if (!process.env.PUBLIC_RUNTIME) {
 }
 
 if (!process.env.ALCHEMY_API_KEY) {
-  process.env.ALCHEMY_API_KEY = "test-alchemy-api-key";
+  process.env.ALCHEMY_API_KEY = "x";
 }
 
 // Mock ResizeObserver for react-tooltip
@@ -122,29 +142,6 @@ if (globalThis.fetch === undefined) {
   );
 }
 
-// Mock AbortController for Node.js environment - ensure it's available everywhere
-class MockAbortController {
-  constructor() {
-    this.signal = {
-      aborted: false,
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      reason: undefined,
-      throwIfAborted: jest.fn(),
-    };
-  }
-  abort(reason) {
-    this.signal.aborted = true;
-    this.signal.reason = reason;
-  }
-}
-
-// Set on all global objects to ensure it's available during module loading
-globalThis.AbortController = MockAbortController;
-if (globalThis.window !== undefined) {
-  globalThis.window.AbortController = MockAbortController;
-}
-
 // Mock AbortSignal for Node.js environment
 if (globalThis.AbortSignal === undefined) {
   globalThis.AbortSignal = class MockAbortSignal {
@@ -164,6 +161,26 @@ if (globalThis.AbortSignal === undefined) {
       this.throwIfAborted.mockClear();
     }
   };
+}
+
+// Mock AbortController only when the runtime does not provide a real one.
+if (globalThis.AbortController === undefined) {
+  globalThis.AbortController = class MockAbortController {
+    constructor() {
+      this.signal = new globalThis.AbortSignal();
+    }
+    abort(reason) {
+      this.signal.aborted = true;
+      this.signal.reason = reason;
+    }
+  };
+}
+
+if (globalThis.window !== undefined) {
+  globalThis.window.AbortSignal =
+    globalThis.window.AbortSignal ?? globalThis.AbortSignal;
+  globalThis.window.AbortController =
+    globalThis.window.AbortController ?? globalThis.AbortController;
 }
 
 if (globalThis.Request === undefined) {
@@ -191,3 +208,88 @@ if (globalThis.Request === undefined) {
     globalThis.window.Request = TestRequest;
   }
 }
+
+if (globalThis.URL !== undefined) {
+  globalThis.URL.createObjectURL =
+    globalThis.URL.createObjectURL ?? jest.fn(() => "blob:mock-object-url");
+  globalThis.URL.revokeObjectURL = globalThis.URL.revokeObjectURL ?? jest.fn();
+}
+
+jest.mock("@testing-library/react", () => {
+  const React = require("react");
+  const actual = jest.requireActual("@testing-library/react");
+  const { QueryClient, QueryClientProvider } = jest.requireActual(
+    "@tanstack/react-query"
+  );
+  const { SeizeSettingsProvider } = jest.requireActual(
+    "@/contexts/SeizeSettingsContext"
+  );
+  const { SeizeSettingsMode } = jest.requireActual("@/types/enums");
+  const { WagmiProvider } = jest.requireActual("wagmi");
+  const { createConfig } = jest.requireActual("@wagmi/core");
+  const { http } = jest.requireActual("viem");
+  const { mainnet } = jest.requireActual("wagmi/chains");
+
+  const wagmiConfig = createConfig({
+    chains: [mainnet],
+    transports: {
+      [mainnet.id]: http("http://localhost:8545"),
+    },
+  });
+
+  const createQueryClient = () =>
+    new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          refetchOnWindowFocus: false,
+          refetchOnReconnect: false,
+        },
+        mutations: {
+          retry: false,
+        },
+      },
+    });
+
+  const createWrapper = (InnerWrapper) => {
+    const queryClient = createQueryClient();
+
+    return function TestProviders({ children }) {
+      const wrappedChildren = InnerWrapper
+        ? React.createElement(InnerWrapper, null, children)
+        : children;
+
+      return React.createElement(
+        WagmiProvider,
+        { config: wagmiConfig },
+        React.createElement(
+          QueryClientProvider,
+          { client: queryClient },
+          React.createElement(
+            SeizeSettingsProvider,
+            { mode: SeizeSettingsMode.LOCAL },
+            wrappedChildren
+          )
+        )
+      );
+    };
+  };
+
+  return {
+    ...actual,
+    render: (ui, options = {}) => {
+      const { wrapper, ...restOptions } = options;
+      return actual.render(ui, {
+        ...restOptions,
+        wrapper: createWrapper(wrapper),
+      });
+    },
+    renderHook: (callback, options = {}) => {
+      const { wrapper, ...restOptions } = options;
+      return actual.renderHook(callback, {
+        ...restOptions,
+        wrapper: createWrapper(wrapper),
+      });
+    },
+  };
+});

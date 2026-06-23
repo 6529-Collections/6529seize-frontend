@@ -1,8 +1,9 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
@@ -10,7 +11,7 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useContext, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface BoostMutationParams {
@@ -26,7 +27,7 @@ interface UseDropBoostMutationReturn {
 }
 
 export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
-  const { setToast, connectedProfile } = useContext(AuthContext);
+  const { setToast, connectedProfile } = useAuth();
   const myStreamContext = useMyStreamOptional();
   const queryClient = useQueryClient();
   const rollbackRef = useRef<(() => void) | null>(null);
@@ -117,15 +118,14 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
       rollbackRef.current = null;
       pendingDropIdRef.current = null;
 
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-
       setToast({
-        message:
-          action === "boost"
-            ? `Failed to boost drop: ${errorMessage}`
-            : `Failed to remove boost: ${errorMessage}`,
         type: "error",
+        title:
+          action === "boost"
+            ? "Couldn't boost this drop."
+            : "Couldn't remove this boost.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
   });
@@ -134,7 +134,7 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
     (drop: ExtendedDrop) => {
       if (!connectedProfile) {
         setToast({
-          message: "Please connect your wallet to boost drops",
+          message: "Connect your wallet to boost drops.",
           type: "warning",
         });
         return;

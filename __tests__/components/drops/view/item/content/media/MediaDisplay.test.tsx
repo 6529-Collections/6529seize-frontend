@@ -16,7 +16,7 @@ jest.mock(
       data-testid="video"
       data-src={props.src}
       data-controls={String(props.showControls)}
-      data-disable={String(props.disableClickHandler)}
+      data-fill-container={String(props.fillContainer)}
     />
   )
 );
@@ -82,7 +82,7 @@ jest.mock(
 );
 
 jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
-  getArweaveGatewayFallbackUrls: (...args: unknown[]) =>
+  getMediaGatewayFallbackUrls: (...args: unknown[]) =>
     mockGetArweaveGatewayFallbackUrls(...args),
   shouldUseIframeFallbackTimeout: (...args: unknown[]) =>
     mockShouldUseIframeFallbackTimeout(...args),
@@ -96,7 +96,7 @@ describe("MediaDisplay", () => {
     mockSandboxedExternalIframe.mockClear();
     mockGetArweaveGatewayFallbackUrls.mockImplementation((url: string) => {
       if (url === "ipfs://hash") {
-        return ["https://ipfs.io/ipfs/hash"];
+        return ["https://media.6529.io/ipfs/hash"];
       }
       return [url];
     });
@@ -113,6 +113,22 @@ describe("MediaDisplay", () => {
     const node = screen.getByTestId("video");
     expect(node).toHaveAttribute("data-src", "vid.mp4");
     expect(node).toHaveAttribute("data-controls", "true");
+    expect(node).toHaveAttribute("data-fill-container", "false");
+  });
+
+  it("forwards fill container sizing to video media", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="video/mp4"
+        media_url="vid.mp4"
+        fillVideoContainer
+      />
+    );
+
+    expect(screen.getByTestId("video")).toHaveAttribute(
+      "data-fill-container",
+      "true"
+    );
   });
 
   it("renders audio", () => {
@@ -140,7 +156,7 @@ describe("MediaDisplay", () => {
 
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-src",
-      "https://ipfs.io/ipfs/hash"
+      "https://media.6529.io/ipfs/hash"
     );
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-title",
@@ -199,7 +215,7 @@ describe("MediaDisplay", () => {
 
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-src",
-      "https://ipfs.io/ipfs/hash"
+      "https://media.6529.io/ipfs/hash"
     );
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-title",
@@ -226,7 +242,7 @@ describe("MediaDisplay", () => {
 
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-src",
-      "https://ipfs.io/ipfs/hash"
+      "https://media.6529.io/ipfs/hash"
     );
   });
 
@@ -255,7 +271,7 @@ describe("MediaDisplay", () => {
     jest.useFakeTimers();
     mockGetArweaveGatewayFallbackUrls.mockReturnValue([
       "https://ipfs.6529.io/ipfs/hash",
-      "https://ipfs.io/ipfs/hash",
+      "https://media.6529.io/ipfs/hash",
     ]);
     mockShouldUseIframeFallbackTimeout.mockReturnValue(false);
 

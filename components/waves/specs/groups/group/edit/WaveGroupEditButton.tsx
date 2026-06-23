@@ -1,13 +1,7 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useState,
-} from "react";
+import type { ReactNode } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import WaveGroupEdit from "./WaveGroupEdit";
@@ -24,9 +18,12 @@ interface WaveGroupEditButtonProps {
   readonly type: WaveGroupType;
   readonly onWaveUpdate: (
     body: ApiUpdateWaveRequest,
-    opts?: { readonly skipAuth?: boolean | undefined },
+    opts?: { readonly skipAuth?: boolean | undefined }
   ) => Promise<void>;
-  readonly renderTrigger?: ((options: { readonly open: () => void }) => ReactNode) | null | undefined;
+  readonly renderTrigger?:
+    | ((options: { readonly open: () => void }) => ReactNode)
+    | null
+    | undefined;
 }
 
 const WaveGroupEditButton = forwardRef<
@@ -34,7 +31,7 @@ const WaveGroupEditButton = forwardRef<
   WaveGroupEditButtonProps
 >(function WaveGroupEditButton(
   { wave, type, onWaveUpdate, renderTrigger },
-  ref,
+  ref
 ) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const handleOpen = useCallback(() => {
@@ -46,7 +43,7 @@ const WaveGroupEditButton = forwardRef<
     () => ({
       open: handleOpen,
     }),
-    [handleOpen],
+    [handleOpen]
   );
 
   let triggerContent: ReactNode | null;
@@ -62,7 +59,7 @@ const WaveGroupEditButton = forwardRef<
         aria-label="Edit group"
         title="Edit"
         onClick={handleOpen}
-        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-iron-300 hover:tw-text-iron-400 tw-duration-300 tw-ease-out tw-transition-all"
+        className="tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-text-iron-300"
       >
         <FontAwesomeIcon icon={faPen} className="tw-h-4 tw-w-4" />
       </button>

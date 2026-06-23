@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import type { WaveGroupType } from "../../../WaveGroup.types";
@@ -41,7 +40,7 @@ function WaveGroupEditMenuTrigger({ label }: WaveGroupEditMenuTriggerProps) {
   return (
     <>
       <span className="tw-sr-only">{label}</span>
-      <FontAwesomeIcon icon={faGear} className="tw-size-5 tw-flex-shrink-0" />
+      <Cog6ToothIcon className="tw-size-5 tw-flex-shrink-0" />
     </>
   );
 }
@@ -124,7 +123,7 @@ export default function WaveGroupEditMenu({
   return (
     <div className="tw-relative">
       <CompactMenu
-        triggerClassName="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+        triggerClassName="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
         trigger={<WaveGroupEditMenuTrigger label={GROUP_OPTIONS_LABEL} />}
         aria-label={GROUP_OPTIONS_LABEL}
         items={menuItems}

@@ -2,12 +2,23 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import {
+  BodyTooLargeError,
+  UnsupportedContentTypeError,
+  assertContentType,
+  isHtmlContentType,
+  isJsonContentType,
+  readLimitedJson,
+  readLimitedText,
+} from "@/lib/fetch/limitedBody";
+import { API_AUTH_COOKIE } from "@/constants/constants";
+import {
   UrlGuardError,
   assertPublicUrl,
   fetchPublicUrl,
   parsePublicUrl,
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import {
@@ -20,7 +31,10 @@ import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 import { createFoundationPlan } from "./foundation/service";
 import { createManifoldPlan } from "./manifold/service";
 import { createOpenSeaPlan } from "./opensea/service";
+import { createFirstParty6529Plan } from "./6529/service";
 import { createTransientPlan } from "./transient/service";
+import { createYoutubePlan } from "./youtube/service";
+import { buildFarcasterEmbedResponse } from "./farcaster/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -30,6 +44,8 @@ const USER_AGENT = LINK_PREVIEW_USER_AGENT;
 const MAX_REDIRECTS = 5;
 const BATCH_CONCURRENCY = 5;
 const MAX_BATCH_URLS = BATCH_CONCURRENCY;
+const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
+const BATCH_REQUEST_MAX_BYTES = 64 * 1024;
 
 const HTML_FETCH_HEADERS = {
   accept: HTML_ACCEPT_HEADER,
@@ -63,6 +79,10 @@ type HostOverrides = {
   readonly userAgent?: string | undefined;
 };
 
+type PreviewContext = {
+  readonly apiAuth?: string | null | undefined;
+};
+
 const HOST_OVERRIDES: readonly HostOverrides[] = [
   {
     domain: "facebook.com",
@@ -79,10 +99,8 @@ const HOST_OVERRIDES: readonly HostOverrides[] = [
 ];
 
 function findHostOverrides(hostname: string): HostOverrides | undefined {
-  const normalizedHost = hostname.toLowerCase();
-  return HOST_OVERRIDES.find(
-    ({ domain }) =>
-      normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
+  return HOST_OVERRIDES.find(({ domain }) =>
+    matchesDomainOrSubdomain(hostname, domain)
   );
 }
 
@@ -154,6 +172,42 @@ const isUrlGuardError = (error: unknown): error is UrlGuardError =>
 
 const isEnsPreviewError = (error: unknown): error is EnsPreviewError =>
   typeof EnsPreviewError === "function" && error instanceof EnsPreviewError;
+
+/**
+ * Detects bounded-body reader failures that should produce client responses.
+ */
+const isLimitedBodyError = (
+  error: unknown
+): error is BodyTooLargeError | UnsupportedContentTypeError =>
+  error instanceof BodyTooLargeError ||
+  error instanceof UnsupportedContentTypeError;
+
+/**
+ * Converts preview fetch body-limit failures into user-facing JSON errors.
+ */
+function previewLimitErrorResponse(
+  error: BodyTooLargeError | UnsupportedContentTypeError
+) {
+  const message =
+    error instanceof BodyTooLargeError
+      ? "Preview response is too large to process safely."
+      : "Preview URL did not return readable HTML metadata.";
+  return NextResponse.json({ error: message }, { status: error.statusCode });
+}
+
+/**
+ * Converts oversized or non-JSON batch request bodies into clear API errors.
+ */
+function batchBodyLimitErrorResponse(
+  error: BodyTooLargeError | UnsupportedContentTypeError
+) {
+  const message =
+    error instanceof BodyTooLargeError
+      ? "Open graph batch request body is too large."
+      : "Open graph batch request body must be JSON.";
+  return NextResponse.json({ error: message }, { status: error.statusCode });
+}
+
 type FetchInput = Parameters<typeof fetch>[0];
 
 const isRequestLike = (value: unknown): value is { url: string } => {
@@ -253,13 +307,21 @@ function ensureSuccessfulResponse(response: Response): void {
   }
 }
 
+/**
+ * Validates and reads an HTML response using the shared byte-limited reader.
+ */
 async function extractHtmlResponse(
   response: Response,
   fallbackUrl: URL
 ): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
   try {
-    const html = await response.text();
-    const contentType = response.headers.get("content-type");
+    const contentType = assertContentType(
+      response.headers,
+      isHtmlContentType,
+      "HTML",
+      { allowMissing: true }
+    );
+    const html = await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
     const finalUrl = response.url || fallbackUrl.toString();
 
     return {
@@ -268,7 +330,7 @@ async function extractHtmlResponse(
       finalUrl,
     };
   } catch (error) {
-    if (error instanceof UrlGuardError) {
+    if (error instanceof UrlGuardError || isLimitedBodyError(error)) {
       throw error;
     }
 
@@ -278,6 +340,9 @@ async function extractHtmlResponse(
   }
 }
 
+/**
+ * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
+ */
 async function fetchHtml(
   url: URL
 ): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
@@ -325,6 +390,10 @@ function handlePreviewError(error: unknown) {
     );
   }
 
+  if (isLimitedBodyError(error)) {
+    return previewLimitErrorResponse(error);
+  }
+
   if (isUrlGuardError(error)) {
     return handleGuardError(error, 502);
   }
@@ -346,16 +415,45 @@ function createGenericPlan(url: URL): PreviewPlan {
         html,
         url
       );
-      const data =
-        googleWorkspace ??
-        buildResponse(finalUrlInstance, html, contentType, finalUrl);
+      if (googleWorkspace) {
+        return { data: googleWorkspace, ttl: CACHE_TTL_MS };
+      }
+
+      const genericData = buildResponse(
+        finalUrlInstance,
+        html,
+        contentType,
+        finalUrl
+      );
+      const farcasterEmbed = await buildFarcasterEmbedResponse(
+        finalUrlInstance,
+        html,
+        genericData,
+        {
+          assertPublicUrl: (candidate) =>
+            assertPublicUrl(candidate, PUBLIC_URL_OPTIONS),
+        }
+      );
+      const data = farcasterEmbed ?? genericData;
       return { data, ttl: CACHE_TTL_MS };
     },
   };
 }
 
+function getRequestApiAuth(request: NextRequest): string | null {
+  const cookieStore = (
+    request as {
+      readonly cookies?: {
+        get: (name: string) => { readonly value?: string } | undefined;
+      };
+    }
+  ).cookies;
+  return cookieStore?.get(API_AUTH_COOKIE)?.value ?? null;
+}
+
 async function resolveLinkPreview(
-  rawUrl: string | null
+  rawUrl: string | null,
+  context?: PreviewContext
 ): Promise<LinkPreviewResponse> {
   const ensTarget = detectEnsTarget(rawUrl);
   if (ensTarget) {
@@ -363,49 +461,48 @@ async function resolveLinkPreview(
   }
 
   const targetUrl = parsePublicUrl(rawUrl);
-  await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
+  const firstParty6529Plan = createFirstParty6529Plan(targetUrl, context);
 
-  const manifoldPlan = createManifoldPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const foundationPlan = createFoundationPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const openSeaPlan = createOpenSeaPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const transientPlan = createTransientPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
+  if (!firstParty6529Plan) {
+    await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
+  }
+
   const plan =
-    manifoldPlan ??
-    foundationPlan ??
-    openSeaPlan ??
-    transientPlan ??
+    firstParty6529Plan ??
+    createYoutubePlan(targetUrl) ??
+    createManifoldPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createFoundationPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createOpenSeaPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createTransientPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
 
-  const cached = cache.get(plan.cacheKey);
-
-  if (cached) {
-    return cached;
+  if (firstParty6529Plan) {
+    return executeFirstParty6529Plan(firstParty6529Plan, targetUrl);
   }
 
-  const { data, ttl } = await plan.execute();
-  cache.set(plan.cacheKey, data, ttl);
-
-  return data;
+  return executePlan(plan);
 }
 
 export async function GET(request: NextRequest) {
   const rawUrl = request.nextUrl.searchParams.get("url");
 
   try {
-    const preview = await resolveLinkPreview(rawUrl);
+    const preview = await resolveLinkPreview(rawUrl, {
+      apiAuth: getRequestApiAuth(request),
+    });
     return NextResponse.json(preview);
   } catch (error) {
     return handlePreviewError(error);
@@ -459,12 +556,41 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
-async function resolveBatchUrl(url: string): Promise<BatchResult> {
+async function resolveBatchUrl(
+  url: string,
+  context?: PreviewContext
+): Promise<BatchResult> {
   try {
-    const data = await resolveLinkPreview(url);
+    const data = await resolveLinkPreview(url, context);
     return { url, data };
   } catch (error) {
     return { url, error: getErrorMessage(error) };
+  }
+}
+
+async function executePlan(plan: PreviewPlan): Promise<LinkPreviewResponse> {
+  const cached = cache.get(plan.cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  const { data, ttl } = await plan.execute();
+  cache.set(plan.cacheKey, data, ttl);
+
+  return data;
+}
+
+async function executeFirstParty6529Plan(
+  plan: PreviewPlan,
+  targetUrl: URL
+): Promise<LinkPreviewResponse> {
+  try {
+    return await executePlan(plan);
+  } catch {
+    await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
+    const fallbackPlan = createGenericPlan(targetUrl);
+    return executePlan(fallbackPlan);
   }
 }
 
@@ -472,8 +598,15 @@ export async function POST(request: NextRequest) {
   let body: unknown;
 
   try {
-    body = await request.json();
-  } catch {
+    assertContentType(request.headers, isJsonContentType, "JSON", {
+      allowMissing: true,
+    });
+    body = await readLimitedJson(request, BATCH_REQUEST_MAX_BYTES);
+  } catch (error) {
+    if (isLimitedBodyError(error)) {
+      return batchBodyLimitErrorResponse(error);
+    }
+
     return NextResponse.json(
       { error: "Invalid open graph batch request body." },
       { status: 400 }
@@ -495,10 +628,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const context: PreviewContext = {
+    apiAuth: getRequestApiAuth(request),
+  };
   const batchResults = await mapWithConcurrency(
     urls,
     BATCH_CONCURRENCY,
-    resolveBatchUrl
+    (url) => resolveBatchUrl(url, context)
   );
   const results: Record<string, LinkPreviewResponse> = {};
   const errors: Record<string, string> = {};

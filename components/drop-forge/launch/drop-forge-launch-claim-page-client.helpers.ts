@@ -1,4 +1,10 @@
 import type { ClaimPrimaryStatus } from "@/components/drop-forge/drop-forge-status.helpers";
+import {
+  getDropForgeAnimationMediaTypeLabel,
+  getDropForgeImageMediaTypeLabel,
+  getDropForgeUrlExtension,
+  isDropForgeVideoUrl,
+} from "@/components/drop-forge/drop-forge-media-type.helpers";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
 import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
@@ -21,7 +27,6 @@ type LaunchActionLookupKind = LaunchPhaseKey | LaunchAirdropActionKey;
 
 type ClaimTxModalStatus = "confirm_wallet" | "submitted" | "success" | "error";
 type LaunchMediaTab = "image" | "animation";
-type LaunchMediaKind = "image" | "video" | "glb" | "html" | "unknown";
 
 export function parseLocalDateTimeToUnixSeconds(value: string): number | null {
   if (!value) return null;
@@ -648,62 +653,6 @@ export function getClaimTxModalEmoji(status: ClaimTxModalStatus): string {
   return "/emojis/sgt_flushed.webp";
 }
 
-function isVideoUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  const lower = url.toLowerCase();
-  return (
-    lower.includes(".mp4") ||
-    lower.includes(".webm") ||
-    lower.includes(".mov") ||
-    lower.includes(".m4v") ||
-    lower.includes(".qt") ||
-    lower.includes(".ogv") ||
-    lower.includes(".ogg")
-  );
-}
-
-function normalizeFormat(format: string | null | undefined): string | null {
-  return format ? format.toUpperCase() : null;
-}
-
-function getUrlExtension(url: string | null | undefined): string | null {
-  if (!url) return null;
-  const clean = url.split("?")[0]?.split("#")[0] ?? "";
-  const parts = clean.split(".");
-  if (parts.length < 2) return null;
-  return parts.at(-1)?.toLowerCase() ?? null;
-}
-
-function getImageFormat(claim: MintingClaim): string | null {
-  const fromDetails = normalizeFormat(claim.image_details?.format);
-  if (fromDetails) return fromDetails === "JPG" ? "JPEG" : fromDetails;
-  const ext = getUrlExtension(claim.image_url);
-  if (!ext) return null;
-  if (ext === "jpg" || ext === "jpeg") return "JPEG";
-  if (ext === "png") return "PNG";
-  if (ext === "gif") return "GIF";
-  if (ext === "webp") return "WEBP";
-  return null;
-}
-
-function getAnimationInfo(
-  claim: MintingClaim
-): { kind: LaunchMediaKind; subtype?: string | null } | null {
-  if (!claim.animation_url) return null;
-  const format = normalizeFormat(
-    (claim.animation_details as { format?: string } | undefined)?.format
-  );
-  if (format === "HTML") return { kind: "html" };
-  if (format === "GLB") return { kind: "glb" };
-  if (format) return { kind: "video", subtype: format };
-  const ext = getUrlExtension(claim.animation_url);
-  if (ext === "html" || ext === "htm") return { kind: "html" };
-  if (ext === "glb") return { kind: "glb" };
-  if (ext === "mp4") return { kind: "video", subtype: "MP4" };
-  if (ext === "webm") return { kind: "video", subtype: "WEBM" };
-  return { kind: "video" };
-}
-
 const FORMAT_TO_MIME: Record<string, string> = {
   HTML: "text/html",
   GLB: "model/gltf-binary",
@@ -735,26 +684,15 @@ export function getMediaTypeLabel(
   tab: LaunchMediaTab
 ): string {
   if (tab === "animation") {
-    const animationInfo = getAnimationInfo(claim);
-    if (!animationInfo) return "—";
-    if (animationInfo.kind === "html" || animationInfo.kind === "glb") {
-      return animationInfo.kind.toUpperCase();
-    }
-    if (animationInfo.kind === "video") {
-      return animationInfo.subtype ? `VIDEO/${animationInfo.subtype}` : "VIDEO";
-    }
-    return "—";
+    return getDropForgeAnimationMediaTypeLabel(claim) ?? "—";
   }
-  const imageFormat = getImageFormat(claim);
-  if (imageFormat) return `IMAGE/${imageFormat}`;
-  if (claim.image_url || claim.image_details) return "IMAGE";
-  return "—";
+  return getDropForgeImageMediaTypeLabel(claim) ?? "—";
 }
 
 export function getAnimationMimeType(claim: MintingClaim): string | null {
   const animationUrl = claim.animation_url ?? null;
   if (!animationUrl) return null;
-  const extension = getUrlExtension(animationUrl);
+  const extension = getDropForgeUrlExtension(animationUrl);
   const normalizedFormat = (
     claim.animation_details as { format?: string } | null | undefined
   )?.format?.toUpperCase();
@@ -763,7 +701,7 @@ export function getAnimationMimeType(claim: MintingClaim): string | null {
     return FORMAT_TO_MIME[normalizedFormat] ?? "video/mp4";
   }
 
-  if (isVideoUrl(animationUrl)) {
+  if (isDropForgeVideoUrl(animationUrl)) {
     return extension
       ? (VIDEO_EXTENSION_TO_MIME[extension] ?? "video/*")
       : "video/*";

@@ -21,6 +21,7 @@ interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
   readonly drop: ApiDrop;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -29,6 +30,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   wave,
   drop,
   winningThreshold = null,
+  winningThresholdMinDurationMs = null,
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }) => {
@@ -73,12 +75,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   React.useEffect(() => {
     updateEligibility(wave.id, {
       authenticated_user_eligible_to_chat:
-        wave.chat.authenticated_user_eligible,
+        wave.chat?.authenticated_user_eligible ?? false,
       authenticated_user_eligible_to_vote:
-        wave.voting.authenticated_user_eligible,
+        wave.voting?.authenticated_user_eligible ?? false,
       authenticated_user_eligible_to_participate:
-        wave.participation.authenticated_user_eligible,
-      authenticated_user_admin: wave.wave.authenticated_user_eligible_for_admin,
+        wave.participation?.authenticated_user_eligible ?? false,
+      authenticated_user_admin:
+        wave.wave?.authenticated_user_eligible_for_admin ?? false,
     });
   }, [updateEligibility, wave]);
 
@@ -117,6 +120,9 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                     dropId={drop.id}
                     isMuted={wave.metrics.muted}
                     winningThreshold={winningThreshold}
+                    winningThresholdMinDurationMs={
+                      winningThresholdMinDurationMs
+                    }
                     isVotingClosed={isVotingClosed}
                     isVotingControlsLocked={isVotingControlsLocked}
                   />

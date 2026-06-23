@@ -24,6 +24,7 @@ interface WaveLeaderboardDropRendererProps {
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
 }
 
 interface WaveSmallLeaderboardDropRendererProps {
@@ -31,6 +32,7 @@ interface WaveSmallLeaderboardDropRendererProps {
   readonly isApproveWave?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
   readonly onDropClick: () => void;
 }
 
@@ -55,6 +57,7 @@ const DefaultLeaderboardDropRenderer: React.FC<
   isVotingClosed,
   isVotingControlsLocked,
   winningThreshold,
+  winningThresholdMinDurationMs,
 }) => {
   return (
     <DefaultWaveLeaderboardDrop
@@ -63,6 +66,7 @@ const DefaultLeaderboardDropRenderer: React.FC<
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
+      winningThresholdMinDurationMs={winningThresholdMinDurationMs}
       mediaContainerHeightClassName="tw-h-96"
     />
   );
@@ -76,6 +80,7 @@ const QuorumLeaderboardDropRenderer: React.FC<
   isVotingClosed,
   isVotingControlsLocked,
   winningThreshold,
+  winningThresholdMinDurationMs,
 }) => {
   return (
     <QuorumWaveLeaderboardDrop
@@ -84,6 +89,7 @@ const QuorumLeaderboardDropRenderer: React.FC<
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
+      winningThresholdMinDurationMs={winningThresholdMinDurationMs}
     />
   );
 };

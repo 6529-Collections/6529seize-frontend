@@ -6,19 +6,23 @@ import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import {
   ACTIVITY_PAGE_SIZE,
+  getActivityDetailsPageFilter,
   getActivityPaginationState,
   getActivityWalletsParam,
+  SEARCH_PARAM_ACTIVITY,
   WALLET_ACTIVITY_FILTER_PARAM,
   WALLET_ACTIVITY_PAGE_PARAM,
 } from "../activity.helpers";
 import { UserPageStatsActivityWalletFilterType } from "./UserPageStatsActivityWallet.types";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
+import { getWalletActivityMessage } from "./wallet-activity.messages";
 
 const ENUM_AND_PATH: {
   type: UserPageStatsActivityWalletFilterType;
@@ -46,9 +50,11 @@ const pathToEnum = (path: string): UserPageStatsActivityWalletFilterType => {
 export default function UserPageStatsActivityWallet({
   profile,
   activeAddress,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const FILTER_TO_PARAM: Record<UserPageStatsActivityWalletFilterType, string> =
     {
@@ -65,9 +71,11 @@ export default function UserPageStatsActivityWallet({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activity = searchParams.get(WALLET_ACTIVITY_FILTER_PARAM);
-  const page = searchParams.get(WALLET_ACTIVITY_PAGE_PARAM);
   const activeFilter = pathToEnum(activity ?? "");
-  const pageFilter = page && !Number.isNaN(+page) ? +page : 1;
+  const pageFilter = getActivityDetailsPageFilter({
+    pageParam: WALLET_ACTIVITY_PAGE_PARAM,
+    searchParams,
+  });
 
   const createQueryString = useCallback(
     (
@@ -92,6 +100,7 @@ export default function UserPageStatsActivityWallet({
         : filter;
     router.replace(
       `${pathname}?${createQueryString([
+        { name: SEARCH_PARAM_ACTIVITY, value: "wallet-activity" },
         { name: WALLET_ACTIVITY_FILTER_PARAM, value: enumToPath(targetFilter) },
         { name: WALLET_ACTIVITY_PAGE_PARAM, value: "1" },
       ])}`,
@@ -103,6 +112,7 @@ export default function UserPageStatsActivityWallet({
     (nextPage: number) => {
       router.replace(
         `${pathname}?${createQueryString([
+          { name: SEARCH_PARAM_ACTIVITY, value: "wallet-activity" },
           { name: WALLET_ACTIVITY_PAGE_PARAM, value: `${nextPage}` },
         ])}`,
         { scroll: false }
@@ -206,7 +216,11 @@ export default function UserPageStatsActivityWallet({
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          Wallet Activity
+          {getWalletActivityMessage(
+            "user.collected.stats.walletActivity.title",
+            undefined,
+            locale
+          )}
         </h3>
       </div>
       <UserPageStatsActivityWalletTableWrapper
@@ -224,6 +238,7 @@ export default function UserPageStatsActivityWallet({
         loading={isFetching}
         setPage={onPageFilter}
         onActiveFilter={onActiveFilter}
+        locale={locale}
       />
     </div>
   );

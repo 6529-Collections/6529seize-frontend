@@ -71,6 +71,9 @@ export type NftPickerProps = {
   readonly hideSpam?: boolean | undefined;
   readonly allowAll?: boolean | undefined;
   readonly allowRanges?: boolean | undefined;
+  readonly fixedContract?: ContractOverview | undefined;
+  readonly maxSelectedCount?: number | undefined;
+  readonly maxSelectedCountMessage?: string | undefined;
   readonly debounceMs?: number | undefined;
   readonly overscan?: number | undefined;
   readonly placeholder?: string | undefined;

@@ -1,27 +1,31 @@
 "use client";
 
-import Download from "@/components/download/Download";
+import {
+  AdditionalDetailsSection,
+  ArweaveLinkRow,
+  EmptyDetailsState,
+  MetadataCard,
+  MetricBlock,
+  type AdditionalDetailsMediaRow,
+} from "@/components/the-memes/MemePageAdditionalDetails";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import type { IAttribute, MemesExtendedData, NFT } from "@/entities/INFT";
-import { numberWithCommas } from "@/helpers/Helpers";
-import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import {
   getAnimationDimensionsFromMetadata,
   getAnimationFileTypeFromMetadata,
   getImageDimensionsFromMetadata,
   getImageFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
+import { formatInteger, formatNumber, roundTo } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
-  ArrowTopRightOnSquareIcon,
   BoltIcon,
   ChartBarIcon,
   ChartBarSquareIcon,
   LinkIcon,
   SwatchIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import type { ComponentType, ReactNode, SVGProps } from "react";
-import { Tooltip } from "react-tooltip";
 
 const PROPERTY_EXCLUDED_TRAITS = new Set([
   "Type - Season",
@@ -38,14 +42,7 @@ function shouldShowPropertyAttribute(attribute: IAttribute): boolean {
   );
 }
 
-type MediaRow = {
-  readonly label: string;
-  readonly title: string;
-  readonly url: string;
-  readonly openLabel: string;
-  readonly extension?: string | undefined;
-  readonly downloadName?: string | undefined;
-};
+type MediaRow = AdditionalDetailsMediaRow;
 
 type MediaMetadata = {
   readonly animation_details?: {
@@ -71,12 +68,32 @@ export function MemePageArt(props: {
   show: boolean;
   nft: NFT | undefined;
   nftMeta: MemesExtendedData | undefined;
+  locale?: SupportedLocale;
 }) {
   if (!props.show || !props.nft || !props.nftMeta) {
     return <></>;
   }
 
   const { nft, nftMeta } = props;
+  const locale = props.locale ?? DEFAULT_LOCALE;
+  const unavailableValue = t(locale, "theMemes.detail.art.values.notAvailable");
+  const downloadLabels = {
+    cancelDownload: t(locale, "theMemes.detail.art.download.cancelDownload"),
+    complete: t(locale, "theMemes.detail.art.download.complete"),
+    dismissComplete: t(locale, "theMemes.detail.art.download.dismissComplete"),
+    download: t(locale, "theMemes.detail.art.download.download"),
+    downloadComplete: t(
+      locale,
+      "theMemes.detail.art.download.downloadComplete"
+    ),
+    downloadFile: t(locale, "theMemes.detail.art.download.downloadFile"),
+    downloading: t(locale, "theMemes.detail.art.download.downloading"),
+    downloadingFile: t(locale, "theMemes.detail.art.download.downloadingFile"),
+    downloadingProgress: (percentage: number) =>
+      t(locale, "theMemes.detail.art.download.downloadingProgress", {
+        percentage: formatInteger(locale, percentage),
+      }),
+  };
   const animationHref = getResolvedAnimationSrc(nft);
   const hasAnimation = Boolean(animationHref);
   const rawMetadata: unknown = nft.metadata;
@@ -106,34 +123,43 @@ export function MemePageArt(props: {
     ...(metadataHref
       ? [
           {
-            label: "JSON",
-            title: "JSON Metadata",
+            label: t(locale, "theMemes.detail.art.links.jsonLabel"),
+            title: t(locale, "theMemes.detail.art.links.jsonTitle"),
             url: metadataHref,
-            openLabel: "Open raw metadata in new tab",
+            openLabel: t(locale, "theMemes.detail.art.links.openRawMetadata"),
+            openText: t(locale, "theMemes.detail.art.links.open"),
           },
         ]
       : []),
     ...(artImageHref
       ? [
           {
-            label: imageFormat?.toUpperCase() ?? "IMAGE",
-            title: "Image Asset",
+            label:
+              imageFormat?.toUpperCase() ??
+              t(locale, "theMemes.detail.art.links.imageFallbackLabel"),
+            title: t(locale, "theMemes.detail.art.links.imageTitle"),
             url: artImageHref,
-            openLabel: "Open image in new tab",
+            openLabel: t(locale, "theMemes.detail.art.links.openImage"),
+            openText: t(locale, "theMemes.detail.art.links.open"),
             extension: imageFormat ?? "",
             downloadName: nft.name,
+            downloadLabels,
           },
         ]
       : []),
     ...(artAnimationHref
       ? [
           {
-            label: animationFormat?.toUpperCase() ?? "ANIMATION",
-            title: "Animation Asset",
+            label:
+              animationFormat?.toUpperCase() ??
+              t(locale, "theMemes.detail.art.links.animationFallbackLabel"),
+            title: t(locale, "theMemes.detail.art.links.animationTitle"),
             url: artAnimationHref,
-            openLabel: "Open animation in new tab",
+            openLabel: t(locale, "theMemes.detail.art.links.openAnimation"),
+            openText: t(locale, "theMemes.detail.art.links.open"),
             extension: animationFormat ?? "",
             downloadName: nft.name,
+            downloadLabels,
           },
         ]
       : []),
@@ -142,18 +168,18 @@ export function MemePageArt(props: {
   const detailRows = [
     {
       key: "meme",
-      label: "Meme name",
+      label: t(locale, "theMemes.detail.art.fields.memeName"),
       value: nftMeta.meme_name,
     },
     {
       key: "collection",
-      label: "Collection",
+      label: t(locale, "theMemes.detail.art.fields.collection"),
       value: nft.collection,
     },
     {
       key: "dimensions",
-      label: "Dimensions",
-      value: dimensions ?? "N/A",
+      label: t(locale, "theMemes.detail.art.fields.dimensions"),
+      value: dimensions ?? unavailableValue,
     },
   ];
 
@@ -162,18 +188,18 @@ export function MemePageArt(props: {
     ...detailRows,
     {
       key: "season",
-      label: "Season",
-      value: getAttributeValue(attributes, "Type - Season"),
+      label: t(locale, "theMemes.detail.art.fields.season"),
+      value: getAttributeValue(attributes, "Type - Season", unavailableValue),
     },
     {
       key: "meme-number",
-      label: "Meme",
-      value: getAttributeValue(attributes, "Type - Meme"),
+      label: t(locale, "theMemes.detail.art.fields.meme"),
+      value: getAttributeValue(attributes, "Type - Meme", unavailableValue),
     },
     {
       key: "card-number",
-      label: "Card number",
-      value: getAttributeValue(attributes, "Type - Card"),
+      label: t(locale, "theMemes.detail.art.fields.cardNumber"),
+      value: getAttributeValue(attributes, "Type - Card", unavailableValue),
     },
   ];
   const boostRows = attributes.filter(
@@ -182,26 +208,37 @@ export function MemePageArt(props: {
   const tdhRows = [
     {
       key: "tdh",
-      label: "TDH",
-      value: numberWithCommas(Math.round(nft.boosted_tdh * 100) / 100),
+      label: t(locale, "theMemes.detail.art.fields.tdh"),
+      value: formatNumber(locale, roundTo(nft.boosted_tdh, 2), {
+        maximumFractionDigits: 2,
+      }),
       highlightedLabel: true,
     },
     {
       key: "unweighted-tdh",
-      label: "Unweighted TDH",
-      value: numberWithCommas(Math.round(nft.tdh__raw * 100) / 100),
+      label: t(locale, "theMemes.detail.art.fields.unweightedTdh"),
+      value: formatNumber(locale, roundTo(nft.tdh__raw, 2), {
+        maximumFractionDigits: 2,
+      }),
     },
     {
       key: "meme-rank",
-      label: "Meme Rank",
-      value: nft.tdh_rank ? `#${numberWithCommas(nft.tdh_rank)}` : "-",
+      label: t(locale, "theMemes.detail.art.fields.memeRank"),
+      value: nft.tdh_rank
+        ? t(locale, "theMemes.detail.art.values.rank", {
+            rank: formatInteger(locale, nft.tdh_rank),
+          })
+        : unavailableValue,
     },
   ];
 
   return (
     <div className="tw-space-y-14 tw-pb-8 tw-pt-8">
       {mediaRows.length > 0 && (
-        <AdditionalDetailsSection title="Arweave links" icon={LinkIcon}>
+        <AdditionalDetailsSection
+          title={t(locale, "theMemes.detail.art.sections.arweaveLinks")}
+          icon={LinkIcon}
+        >
           <div>
             {mediaRows.map((row) => (
               <ArweaveLinkRow row={row} key={`${row.label}-${row.url}`} />
@@ -210,7 +247,10 @@ export function MemePageArt(props: {
         </AdditionalDetailsSection>
       )}
 
-      <AdditionalDetailsSection title="Properties" icon={SwatchIcon}>
+      <AdditionalDetailsSection
+        title={t(locale, "theMemes.detail.art.sections.properties")}
+        icon={SwatchIcon}
+      >
         {propertyAttributes.length > 0 ? (
           <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
             {propertyAttributes.map((attribute) => (
@@ -222,15 +262,17 @@ export function MemePageArt(props: {
             ))}
           </div>
         ) : (
-          <EmptyDetailsState>No properties found.</EmptyDetailsState>
+          <EmptyDetailsState>
+            {t(locale, "theMemes.detail.art.empty.noProperties")}
+          </EmptyDetailsState>
         )}
       </AdditionalDetailsSection>
 
       <AdditionalDetailsSection
-        title="TDH breakdown"
+        title={t(locale, "theMemes.detail.art.sections.tdhBreakdown")}
         icon={ChartBarSquareIcon}
       >
-        <div className="tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-16">
+        <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-6 sm:tw-gap-x-16">
           {tdhRows.map((row) => (
             <MetricBlock
               key={row.key}
@@ -243,7 +285,10 @@ export function MemePageArt(props: {
       </AdditionalDetailsSection>
 
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-16 tw-gap-y-14 lg:tw-grid-cols-2">
-        <AdditionalDetailsSection title="Stats" icon={ChartBarIcon}>
+        <AdditionalDetailsSection
+          title={t(locale, "theMemes.detail.art.sections.stats")}
+          icon={ChartBarIcon}
+        >
           <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-12 sm:tw-gap-y-8">
             {statsRows.map((row) => (
               <MetricBlock key={row.key} label={row.label} value={row.value} />
@@ -251,22 +296,25 @@ export function MemePageArt(props: {
           </div>
         </AdditionalDetailsSection>
 
-        <AdditionalDetailsSection title="Boosts" icon={BoltIcon}>
+        <AdditionalDetailsSection
+          title={t(locale, "theMemes.detail.art.sections.boosts")}
+          icon={BoltIcon}
+        >
           {boostRows.length > 0 ? (
             <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-12 sm:tw-gap-y-8">
               {boostRows.map((attribute) => (
                 <MetricBlock
                   key={attribute.trait_type}
                   label={attribute.trait_type}
-                  value={`${Number(attribute.value) > 0 ? "+" : ""}${
-                    attribute.value
-                  }%`}
+                  value={formatBoostValue(locale, attribute.value)}
                   highlightedLabel={Number(attribute.value) > 0}
                 />
               ))}
             </div>
           ) : (
-            <EmptyDetailsState>No boosts found.</EmptyDetailsState>
+            <EmptyDetailsState>
+              {t(locale, "theMemes.detail.art.empty.noBoosts")}
+            </EmptyDetailsState>
           )}
         </AdditionalDetailsSection>
       </div>
@@ -274,151 +322,28 @@ export function MemePageArt(props: {
   );
 }
 
-function AdditionalDetailsSection({
-  title,
-  icon,
-  children,
-}: {
-  readonly title: string;
-  readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
-  readonly children: ReactNode;
-}) {
-  const Icon = icon;
-
-  return (
-    <section className="tw-space-y-6">
-      <div className="tw-mb-2 tw-flex tw-items-center tw-gap-3">
-        <Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
-        <h3 className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-          {title}
-        </h3>
-        <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function ArweaveLinkRow({ row }: { readonly row: MediaRow }) {
-  return (
-    <div className="tw-flex tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-3 last:tw-border-b-0 md:tw-flex-row md:tw-items-center md:tw-gap-6">
-      <div className="tw-w-16 tw-shrink-0 tw-text-sm tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500">
-        {row.label}
-      </div>
-      <div className="tw-w-64 tw-shrink-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
-        {row.title}
-      </div>
-      <Link
-        href={row.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="tw-min-w-0 tw-truncate tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-iron-100 md:tw-flex-1"
-      >
-        {row.url}
-      </Link>
-      <div className="tw-flex tw-w-full tw-items-center tw-justify-start tw-gap-4 md:tw-ml-auto md:tw-w-auto md:tw-shrink-0 md:tw-justify-end">
-        {row.downloadName && (
-          <Download
-            href={row.url}
-            name={row.downloadName}
-            extension={row.extension ?? ""}
-            variant="text"
-            alwaysShowText={true}
-          />
-        )}
-        <Link
-          href={row.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={row.openLabel}
-          className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"
-        >
-          Open
-          <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function MetadataCard({
-  label,
-  value,
-}: {
-  readonly label: string;
-  readonly value: string | number;
-}) {
-  const displayValue = String(value);
-  const tooltipId = buildTooltipId("meme-property", label, displayValue);
-
-  return (
-    <div className="tw-flex tw-min-w-24 tw-flex-1 tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2">
-      <span className="tw-mb-1 tw-block tw-truncate tw-text-xs tw-font-normal tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-500">
-        {label}
-      </span>
-      <span
-        className="tw-truncate tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-200"
-        data-tooltip-id={tooltipId}
-      >
-        {displayValue}
-      </span>
-      <Tooltip
-        id={tooltipId}
-        place="top"
-        offset={8}
-        opacity={1}
-        style={TOOLTIP_STYLES}
-      >
-        <span className="tw-text-xs">{displayValue}</span>
-      </Tooltip>
-    </div>
-  );
-}
-
-function MetricBlock({
-  label,
-  value,
-  highlightedLabel = false,
-}: {
-  readonly label: string;
-  readonly value: string | number;
-  readonly highlightedLabel?: boolean | undefined;
-}) {
-  return (
-    <div>
-      <div
-        className={`tw-mb-1 tw-text-sm tw-font-semibold tw-leading-5 md:tw-mb-2 ${
-          highlightedLabel ? "tw-text-primary-400" : "tw-text-iron-400"
-        }`}
-      >
-        {highlightedLabel && (
-          <span className="tw-mr-2 tw-inline-block tw-h-2 tw-w-2 tw-rounded-full tw-bg-primary-400" />
-        )}
-        {label}
-      </div>
-      <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6">
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function EmptyDetailsState({ children }: { readonly children: ReactNode }) {
-  return (
-    <div className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500">
-      {children}
-    </div>
-  );
-}
-
 function getAttributeValue(
   attributes: readonly IAttribute[],
-  traitType: string
+  traitType: string,
+  fallback: string
 ) {
   return (
     attributes.find((attribute) => attribute.trait_type === traitType)?.value ??
-    "N/A"
+    fallback
   );
+}
+
+function formatBoostValue(locale: SupportedLocale, value: string | number) {
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return String(value);
+  }
+
+  return t(locale, "theMemes.detail.art.values.boostPercent", {
+    sign: numericValue > 0 ? "+" : "",
+    value: formatNumber(locale, numericValue, { maximumFractionDigits: 2 }),
+  });
 }
 
 function isAttribute(value: unknown): value is IAttribute {

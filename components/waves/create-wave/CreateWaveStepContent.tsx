@@ -19,6 +19,7 @@ export default function CreateWaveStepContent({
   controller,
   profile,
   descriptionRef,
+  submitting,
   showDropError,
   onHaveDropToSubmitChange,
   onInlineGroupCreate,
@@ -26,6 +27,7 @@ export default function CreateWaveStepContent({
   readonly controller: WaveConfigController;
   readonly profile: ApiIdentity;
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
+  readonly submitting: boolean;
   readonly showDropError: boolean;
   readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
   readonly onInlineGroupCreate: (
@@ -38,19 +40,26 @@ export default function CreateWaveStepContent({
     selectedOutcomeType,
     errors,
     groupsCache,
+    isMemeCountLoading,
+    isMemeCountError,
     setOverview,
     setDates,
     setDrops,
     setOutcomes,
+    setDisplay,
     setDropsAdminCanDelete,
     onOutcomeTypeChange,
     onGroupSelect,
     onVotingTypeChange,
     onCategoryChange,
     onProfileIdChange,
+    onCreditNftsChange,
+    onCreditScopeChange,
     onMaxVotesPerIdentityPerDropChange,
+    onAllowNegativeVotesChange,
     onTimeWeightedVotingChange,
     onThresholdChange,
+    onThresholdTimeChange,
     onApprovalMaxWinnersChange,
     onChatEnabledChange,
   } = controller;
@@ -60,8 +69,10 @@ export default function CreateWaveStepContent({
       return (
         <CreateWaveOverview
           overview={config.overview}
+          display={config.display}
           errors={errors}
           setOverview={setOverview}
+          setDisplay={setDisplay}
         />
       );
     case CreateWaveStep.GROUPS:
@@ -104,14 +115,25 @@ export default function CreateWaveStepContent({
           selectedType={config.voting.type}
           category={config.voting.category}
           profileId={config.voting.profileId}
+          creditNfts={config.voting.creditNfts}
+          creditScope={config.voting.creditScope}
+          memeCount={config.voting.creditNftMemeCount}
+          isMemeCountLoading={isMemeCountLoading}
+          isMemeCountError={isMemeCountError}
+          allowNegativeVotes={config.voting.allowNegativeVotes}
           maxVotesPerIdentityPerDrop={config.voting.maxVotesPerIdentityPerDrop}
           approvalThreshold={config.approval.threshold}
+          approvalThresholdTimeMs={config.approval.thresholdTimeMs}
           errors={errors}
           onTypeChange={onVotingTypeChange}
           setCategory={onCategoryChange}
           setProfileId={onProfileIdChange}
+          setCreditNfts={onCreditNftsChange}
+          onCreditScopeChange={onCreditScopeChange}
+          onAllowNegativeVotesChange={onAllowNegativeVotesChange}
           setMaxVotesPerIdentityPerDrop={onMaxVotesPerIdentityPerDropChange}
           setApprovalThreshold={onThresholdChange}
+          setApprovalThresholdTimeMs={onThresholdTimeChange}
           timeWeighted={config.voting.timeWeighted}
           onTimeWeightedChange={onTimeWeightedVotingChange}
         />
@@ -137,6 +159,7 @@ export default function CreateWaveStepContent({
         <CreateWaveDescription
           ref={descriptionRef}
           profile={profile}
+          submitting={submitting}
           showDropError={showDropError}
           wave={{
             name: config.overview.name,

@@ -29,6 +29,10 @@ export class ApiCreateNewWave {
     * The picture of the wave
     */
     'picture': string | null;
+    /**
+    * Optional top-level parent wave id when creating a subwave.
+    */
+    'parent_wave_id'?: string | null;
     'description_drop': ApiCreateWaveDropRequest;
     'voting': ApiCreateNewWaveVotingConfig;
     'visibility': ApiCreateNewWaveVisibilityConfig;
@@ -51,6 +55,12 @@ export class ApiCreateNewWave {
         {
             "name": "picture",
             "baseName": "picture",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "parent_wave_id",
+            "baseName": "parent_wave_id",
             "type": "string",
             "format": ""
         },

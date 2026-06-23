@@ -9,6 +9,7 @@ type VoteFeedbackSource = "custom-submit" | "quick-amount";
 const CUSTOM_AMOUNT_CONTROL_LABEL = "Change vote amount";
 
 interface MemesQuickVoteCustomAmountRowProps {
+  readonly allowsNegativeVotes: boolean;
   readonly customAmountLabel: string | null;
   readonly customInputRef: RefObject<HTMLInputElement | null>;
   readonly customValue: string;
@@ -24,6 +25,7 @@ interface MemesQuickVoteCustomAmountRowProps {
 }
 
 export default function MemesQuickVoteCustomAmountRow({
+  allowsNegativeVotes,
   customAmountLabel,
   customInputRef,
   customValue,
@@ -55,7 +57,7 @@ export default function MemesQuickVoteCustomAmountRow({
             type="text"
             aria-label={CUSTOM_AMOUNT_CONTROL_LABEL}
             inputMode="numeric"
-            pattern="[0-9]*"
+            pattern={allowsNegativeVotes ? "-?[0-9]*" : "[0-9]*"}
             value={customValue}
             disabled={isSubmitting}
             tabIndex={isCustomRowVisible ? undefined : -1}

@@ -11,6 +11,7 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
@@ -44,7 +45,7 @@ export default function CreateDirectMessage({
       )
     ) {
       setToast({
-        message: "You are included by default in a Direct Message!",
+        message: "You are already included in this direct message.",
         type: "info",
       });
       return;
@@ -55,7 +56,7 @@ export default function CreateDirectMessage({
   const onRemove = (id: string) => {
     if (areEqualAddresses(id, profile?.primary_wallet)) {
       setToast({
-        message: "You cannot remove yourself from the DM",
+        message: "You can't remove yourself from this direct message.",
         type: "error",
       });
       return;
@@ -81,8 +82,10 @@ export default function CreateDirectMessage({
     } catch (error) {
       console.error(error);
       setToast({
-        message: `Failed to create Direct Message: ${error}`,
         type: "error",
+        title: "Couldn't create this direct message.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
       setIsCreating(false);
     }
@@ -103,12 +106,7 @@ export default function CreateDirectMessage({
           disabled={selectedIdentities.length === 0 || isCreating}
           onClick={onCreateDirectMessage}
           type="button"
-          className="tw-flex tw-gap-x-2 tw-items-center tw-whitespace-nowrap tw-rounded-lg tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm tw-transition tw-duration-300 tw-ease-out
-    tw-border tw-border-solid 
-    tw-bg-primary-500 tw-text-white tw-border-primary-500 
-    hover:tw-bg-primary-600 hover:tw-border-primary-600
-    focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600
-    disabled:tw-bg-gray-300 disabled:tw-text-gray-500 disabled:tw-border-gray-300 disabled:hover:tw-bg-gray-300 disabled:tw-cursor-not-allowed"
+          className="tw-flex tw-items-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 disabled:tw-cursor-not-allowed disabled:tw-border-gray-300 disabled:tw-bg-gray-300 disabled:tw-text-gray-500 disabled:hover:tw-bg-gray-300"
         >
           {isCreating ? (
             <CircleLoader size={CircleLoaderSize.MEDIUM} />

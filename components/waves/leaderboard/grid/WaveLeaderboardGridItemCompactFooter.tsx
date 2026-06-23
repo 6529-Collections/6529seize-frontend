@@ -17,6 +17,7 @@ import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 interface WaveLeaderboardGridItemCompactFooterProps {
   readonly drop: ExtendedDrop;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed: boolean;
   readonly canShowVotingAction: boolean;
   readonly onVoteButtonClick: () => void;
@@ -64,6 +65,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
 > = ({
   drop,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed,
   canShowVotingAction,
   onVoteButtonClick,
@@ -120,6 +122,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
           drop={drop}
           variant="subtle"
           winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
         />
         <div className="tw-ml-4 tw-flex tw-items-center tw-gap-1 tw-text-iron-500">

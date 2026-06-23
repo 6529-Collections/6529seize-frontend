@@ -13,11 +13,18 @@ import { useEmoji } from "@/contexts/EmojiContext";
 import { useCreateDropEmojiPickerLayer } from "./CreateDropEmojiPickerLayerContext";
 
 interface CreateDropEmojiPickerProps {
+  disabled?: boolean | undefined;
   top?: string | undefined;
 }
 
-const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
-  top = "tw-top-2",
+interface CreateDropEmojiPickerContentProps {
+  disabled: boolean;
+  top: string;
+}
+
+const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
+  disabled,
+  top,
 }) => {
   const isMobile = useIsMobileScreen();
   const { desktopZIndex, mobileZIndexClassName } =
@@ -33,6 +40,8 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
     top: number;
     left: number;
   }>({ top: 0, left: 0 });
+
+  const isPickerOpen = showPicker && !disabled;
 
   const getPickerPosition = () => {
     const button = buttonRef.current;
@@ -50,7 +59,11 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
   };
 
   const handleTogglePicker = () => {
-    if (showPicker) {
+    if (disabled) {
+      return;
+    }
+
+    if (isPickerOpen) {
       setShowPicker(false);
       return;
     }
@@ -68,6 +81,11 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
     native?: string | undefined;
     id?: string | undefined;
   }) => {
+    if (disabled) {
+      setShowPicker(false);
+      return;
+    }
+
     let emojiText = emoji.native;
     if (!emojiText && emoji.id) {
       emojiText = `:${emoji.id}:`;
@@ -102,14 +120,14 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
       }
     };
 
-    if (showPicker) {
+    if (isPickerOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
     }
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showPicker]);
+  }, [isPickerOpen]);
 
   return (
     <>
@@ -120,6 +138,10 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
           ref={buttonRef}
           className="tw-flex tw-items-center tw-justify-center tw-rounded tw-border-none tw-bg-transparent tw-p-[0.35rem] tw-opacity-50 tw-transition tw-duration-150 hover:tw-bg-[rgb(40,40,40)] hover:tw-text-[#FFCC22] hover:tw-opacity-100"
           onClick={handleTogglePicker}
+          disabled={disabled}
+          type="button"
+          aria-label={isPickerOpen ? "Close emoji picker" : "Open emoji picker"}
+          aria-expanded={isPickerOpen}
         >
           <svg
             className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out"
@@ -137,7 +159,7 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
         </button>
 
         {!isMobile &&
-          showPicker &&
+          isPickerOpen &&
           createPortal(
             <div
               ref={pickerRef}
@@ -164,7 +186,7 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
 
       {isMobile && (
         <MobileWrapperDialog
-          isOpen={showPicker}
+          isOpen={isPickerOpen}
           onClose={() => setShowPicker(false)}
           zIndexClassName={mobileZIndexClassName}
         >
@@ -186,5 +208,16 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
     </>
   );
 };
+
+const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
+  disabled = false,
+  top = "tw-top-2",
+}) => (
+  <CreateDropEmojiPickerContent
+    key={disabled ? "disabled" : "enabled"}
+    disabled={disabled}
+    top={top}
+  />
+);
 
 export default CreateDropEmojiPicker;

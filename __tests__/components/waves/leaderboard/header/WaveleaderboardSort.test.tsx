@@ -1,4 +1,8 @@
-import { WaveleaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
+import {
+  getWaveLeaderboardSortItems,
+  normalizeWaveLeaderboardSort,
+  WaveleaderboardSort,
+} from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -117,5 +121,41 @@ describe("WaveleaderboardSort", () => {
         items: customItems,
       })
     );
+  });
+
+  it("uses realtime vote for approve waves with a time lock", () => {
+    const items = getWaveLeaderboardSortItems({
+      isApproveWave: true,
+      isCurationWave: false,
+      timeLockMs: 300_000,
+    });
+
+    expect(items.map((i) => i.label)).toEqual([
+      "Closest to approval",
+      "Votes Given Now",
+      "Hot",
+      "Newest",
+    ]);
+    expect(items[1]?.value).toBe(WaveDropsLeaderboardSort.REALTIME_VOTE);
+  });
+
+  it("normalizes legacy approve projected vote sort to realtime vote", () => {
+    expect(
+      normalizeWaveLeaderboardSort({
+        isApproveWave: true,
+        sort: WaveDropsLeaderboardSort.RATING_PREDICTION,
+        timeLockMs: 300_000,
+      })
+    ).toBe(WaveDropsLeaderboardSort.REALTIME_VOTE);
+  });
+
+  it("normalizes realtime vote away from non-approve waves", () => {
+    expect(
+      normalizeWaveLeaderboardSort({
+        isApproveWave: false,
+        sort: WaveDropsLeaderboardSort.REALTIME_VOTE,
+        timeLockMs: 300_000,
+      })
+    ).toBe(WaveDropsLeaderboardSort.RATING_PREDICTION);
   });
 });

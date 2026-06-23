@@ -15,12 +15,15 @@ import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 
 interface WavePodiumItemProps {
   readonly winner?: ApiWaveDecisionWinner | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly position: "first" | "second" | "third";
   readonly customAnimationIndex?: number | undefined;
+  readonly showVoteDetails?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 interface PodiumAvatarProps {
@@ -186,11 +189,10 @@ const getPodiumIdentityDisplay = (drop: ExtendedDrop) => {
     pfp: identityProfile?.pfp ?? null,
     profileUser:
       identityProfile?.handle ?? identityProfile?.primary_address ?? null,
-    comparableIdentity:
-      identityProfile ?? {
-        handle: fallbackValue,
-        primary_address: fallbackValue,
-      },
+    comparableIdentity: identityProfile ?? {
+      handle: fallbackValue,
+      primary_address: fallbackValue,
+    },
   };
 };
 
@@ -235,6 +237,8 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   onDropClick,
   position,
   customAnimationIndex,
+  showVoteDetails = true,
+  outcomesVisible = true,
 }) => {
   const styles = positionStyles[position];
   const hoverTextColorClass = getHoverTextColorClass(position);
@@ -472,17 +476,27 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 </div>
 
                 <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
-                  <div className="tw-flex tw-items-center tw-gap-x-1">
-                    <span className="tw-text-xs tw-text-iron-200 sm:tw-text-sm">
-                      {formatNumberWithCommas(drop.raters_count)}
-                    </span>
-                    <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
-                      {drop.raters_count === 1 ? "voter" : "voters"}
-                    </span>
-                  </div>
+                  {showVoteDetails ? (
+                    <ParticipationDropVoteDetailsTrigger
+                      drop={drop}
+                      density="compact"
+                    />
+                  ) : (
+                    <div className="tw-flex tw-items-center tw-gap-x-1">
+                      <span className="tw-text-xs tw-text-iron-200 sm:tw-text-sm">
+                        {formatNumberWithCommas(drop.raters_count)}
+                      </span>
+                      <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
+                        {drop.raters_count === 1 ? "voter" : "voters"}
+                      </span>
+                    </div>
+                  )}
 
                   <div onClick={(e) => e.stopPropagation()}>
-                    <WavePodiumItemContentOutcomes winner={winner} />
+                    <WavePodiumItemContentOutcomes
+                      winner={winner}
+                      outcomesVisible={outcomesVisible}
+                    />
                   </div>
                 </div>
               </div>

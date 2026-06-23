@@ -117,6 +117,12 @@ describe("DropListItemRateGiveSubmit", () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_DECISIONS, { waveId: "wave-1" }],
     });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: "wave-1" }],
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
+    });
   });
 
   it("does not invalidate approval status when auth fails", async () => {

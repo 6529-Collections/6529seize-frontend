@@ -24,7 +24,12 @@ export const useWaveNameTruncation = ({
       return;
     }
 
-    setIsNameTruncated(element.scrollWidth > element.clientWidth);
+    const nextIsNameTruncated = element.scrollWidth > element.clientWidth;
+    setIsNameTruncated((previousIsNameTruncated) =>
+      previousIsNameTruncated === nextIsNameTruncated
+        ? previousIsNameTruncated
+        : nextIsNameTruncated
+    );
   });
 
   useEffect(() => {
@@ -54,7 +59,7 @@ export const useWaveNameTruncation = ({
       window.removeEventListener('resize', measureTruncation);
       resizeObserver?.disconnect();
     };
-  }, [collapsed, contentKey, measureTruncation]);
+  }, [collapsed, contentKey]);
 
   return {
     isNameTruncated,

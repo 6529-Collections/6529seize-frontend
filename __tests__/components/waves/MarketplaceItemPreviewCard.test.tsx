@@ -22,10 +22,19 @@ jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
   ),
 }));
 
+function getAnchorLink(name: string): HTMLAnchorElement {
+  const link = screen
+    .getAllByRole("link", { name })
+    .find((element) => element instanceof HTMLAnchorElement);
+  expect(link).toBeDefined();
+  return link as HTMLAnchorElement;
+}
+
 describe("MarketplaceItemPreviewCard", () => {
   beforeEach(() => {
     mockClipboardWriteText.mockReset();
     mockClipboardWriteText.mockResolvedValue(undefined);
+    jest.spyOn(globalThis, "open").mockImplementation(() => null);
 
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -33,6 +42,10 @@ describe("MarketplaceItemPreviewCard", () => {
         writeText: mockClipboardWriteText,
       },
     });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("renders full-mode footer layout with title, price, and actions", () => {
@@ -56,7 +69,11 @@ describe("MarketplaceItemPreviewCard", () => {
     const mediaLink = screen.getByTestId("marketplace-item-media-link");
     const ctaLink = screen.getByTestId("marketplace-item-cta-link");
 
-    expect(mediaLink).toHaveAttribute("href", href);
+    expect(mediaLink).not.toHaveAttribute("href");
+    expect(screen.getByTestId("manifold-item-card")).toHaveAttribute(
+      "role",
+      "link"
+    );
     expect(ctaLink).toHaveAttribute("href", href);
     expect(ctaLink).toHaveAttribute("target", "_blank");
     expect(ctaLink).toHaveAttribute("rel", "noopener noreferrer");
@@ -92,6 +109,96 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(ctaLink).not.toHaveClass("tw-absolute");
     expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
     expect(screen.queryByTestId("marketplace-item-title-row")).toBeNull();
+  });
+
+  it("opens the marketplace when clicking the card body", () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    fireEvent.click(screen.getByTestId("manifold-item-card"));
+
+    expect(globalThis.open).toHaveBeenCalledWith(
+      href,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  });
+
+  it("opens the marketplace when pressing Enter on the card", () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    fireEvent.keyDown(screen.getByTestId("manifold-item-card"), {
+      key: "Enter",
+    });
+
+    expect(globalThis.open).toHaveBeenCalledWith(
+      href,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  });
+
+  it("does not open the marketplace when pressing Space on the card", () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    fireEvent.keyDown(screen.getByTestId("manifold-item-card"), { key: " " });
+
+    expect(globalThis.open).not.toHaveBeenCalled();
+  });
+
+  it("does not hijack copy button clicks", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("marketplace-item-copy-button"));
+      await Promise.resolve();
+    });
+
+    expect(globalThis.open).not.toHaveBeenCalled();
+    expect(mockClipboardWriteText).toHaveBeenCalledWith(href);
   });
 
   it("renders Foundation logo and price in full mode CTA", () => {
@@ -235,9 +342,7 @@ describe("MarketplaceItemPreviewCard", () => {
       </LinkPreviewProvider>
     );
 
-    const ctaLink = screen.getByRole("link", {
-      name: "Open on Manifold",
-    });
+    const ctaLink = getAnchorLink("Open on Manifold");
     expect(ctaLink).toHaveAttribute("aria-label", "Open on Manifold");
     expect(ctaLink.className).toContain("tw-bg-[#E5E5E5]");
     expect(ctaLink.className).toContain("tw-text-[#0A0A0A]");
@@ -297,9 +402,7 @@ describe("MarketplaceItemPreviewCard", () => {
 
     expect(screen.queryByTestId("marketplace-item-footer")).toBeNull();
 
-    const ctaLink = screen.getByRole("link", {
-      name: "Open on Manifold - 1.25 ETH",
-    });
+    const ctaLink = getAnchorLink("Open on Manifold - 1.25 ETH");
     expect(ctaLink).toHaveClass("tw-absolute", "tw-right-3", "tw-top-[5.5rem]");
     expect(ctaLink).toHaveAttribute(
       "aria-label",
@@ -337,9 +440,7 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(
       screen.queryByTestId("marketplace-item-overlay-open-link")
     ).toBeNull();
-    expect(screen.getByRole("link", { name: "Open on Manifold" })).toHaveClass(
-      "tw-top-3"
-    );
+    expect(getAnchorLink("Open on Manifold")).toHaveClass("tw-top-3");
   });
 
   it("renders compact fallback icon CTA when marketplace cannot be resolved", () => {
@@ -359,9 +460,7 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(
       screen.getByTestId("marketplace-item-cta-fallback-icon")
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Open listing - 0.42 ETH" })
-    ).toBeInTheDocument();
+    expect(getAnchorLink("Open listing - 0.42 ETH")).toBeInTheDocument();
     expect(screen.getByText("0.42")).toBeInTheDocument();
     expect(
       screen.getByTestId("marketplace-item-price-currency")

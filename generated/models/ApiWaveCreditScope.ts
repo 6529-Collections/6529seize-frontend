@@ -13,9 +13,7 @@
 
 import { HttpFile } from '../http/http';
 
-/**
-* The scope of the credit.  * WAVE - Credit is spendable across all drops in wave. 
-*/
 export enum ApiWaveCreditScope {
-    Wave = 'WAVE'
+    Wave = 'WAVE',
+    Drop = 'DROP'
 }

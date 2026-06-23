@@ -2,6 +2,7 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDropAttachmentReference } from "@/generated/models/ApiDropAttachmentReference";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import type { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 
 export interface ReferencedNft {
   readonly contract: string;
@@ -28,6 +29,9 @@ export interface DropMetadata {
 interface DropMedia {
   readonly url: string;
   readonly mime_type: string;
+  readonly media_upload_id?: string | null;
+  readonly media_status?: ApiDropMediaStatus;
+  readonly media_error?: string | null;
 }
 
 interface QuotedDrop {
@@ -49,6 +53,8 @@ export interface CreateDropRequestPart {
 }
 
 export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
+  readonly clientId?: string;
+  readonly id?: string | number;
   readonly media: Array<File>;
   readonly mentioned_groups?: Array<ApiDropGroupMention>;
 }

@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import type { ViewKey, NavItem } from "./navTypes";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -25,6 +26,8 @@ import {
 interface ViewContextType {
   hardBack: (v: ViewKey) => void;
   handleNavClick: (item: NavItem) => void;
+  getNavHref: (item: NavItem) => string;
+  recordNavClick: (item: NavItem) => void;
   clearLastVisited: (type: "wave" | "dm") => void;
 }
 
@@ -67,26 +70,50 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const lastVisitedDmRef = useRef<string | null>(null);
   const lastFetchedWaveIdRef = useRef<string | null>(null);
   const currentIsDmRef = useRef(false);
+  const isMountedRef = useRef(false);
+  const [, setNavCacheRevision] = useState(0);
+  const lastVisitedWaveId = lastVisitedWaveRef.current;
+  const lastVisitedDmId = lastVisitedDmRef.current;
+  const currentIsDm = currentIsDmRef.current;
 
-  const fetchWaveDetails = useCallback(async (targetWaveId: string) => {
-    try {
-      const res = await commonApiFetch<ApiWave>({
-        endpoint: `waves/${targetWaveId}`,
-      });
-      const currentIsDm = Boolean(res.chat.scope.group?.is_direct_message);
-      currentIsDmRef.current = currentIsDm;
-
-      if (currentIsDm) {
-        lastVisitedDmRef.current = res.id;
-      } else {
-        lastVisitedWaveRef.current = res.id;
-      }
-    } catch (error: unknown) {
-      console.warn("Failed to fetch wave metadata", error);
-    } finally {
-      lastFetchedWaveIdRef.current = targetWaveId;
-    }
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
+
+  const bumpNavCacheRevision = useCallback(() => {
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    setNavCacheRevision((revision) => revision + 1);
+  }, []);
+
+  const fetchWaveDetails = useCallback(
+    async (targetWaveId: string) => {
+      try {
+        const res = await commonApiFetch<ApiWave>({
+          endpoint: `waves/${targetWaveId}`,
+        });
+        const fetchedIsDm = Boolean(res.chat.scope.group?.is_direct_message);
+        currentIsDmRef.current = fetchedIsDm;
+
+        if (fetchedIsDm) {
+          lastVisitedDmRef.current = res.id;
+        } else {
+          lastVisitedWaveRef.current = res.id;
+        }
+        bumpNavCacheRevision();
+      } catch (error: unknown) {
+        console.warn("Failed to fetch wave metadata", error);
+      } finally {
+        lastFetchedWaveIdRef.current = targetWaveId;
+      }
+    },
+    [bumpNavCacheRevision]
+  );
 
   // Effect for fetching wave details - only handles the external API call
   useEffect(() => {
@@ -98,46 +125,86 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     }
   }, [currentWaveId, fetchWaveDetails]);
 
-  const handleNavClick = useCallback(
+  useEffect(() => {
+    if (!isApp) {
+      return;
+    }
+
+    router.prefetch(getWavesBaseRoute(isApp));
+    router.prefetch(getMessagesBaseRoute(isApp));
+  }, [isApp, router]);
+
+  const getNavHref = useCallback(
     (item: NavItem) => {
       if (item.kind === "route") {
         if (item.name === "Home") {
-          router.push(getHomeRoute());
-        } else {
-          router.push(item.href);
+          return getHomeRoute();
         }
-      } else if (item.viewKey === "waves") {
-        if (currentWaveId && !currentIsDmRef.current) {
-          lastVisitedWaveRef.current = null;
-          router.push(getWavesBaseRoute(isApp));
-        } else if (lastVisitedWaveRef.current) {
-          router.push(
-            getWaveRoute({
-              waveId: lastVisitedWaveRef.current,
-              isDirectMessage: false,
-              isApp,
-            })
-          );
-        } else {
-          router.push(getWavesBaseRoute(isApp));
+
+        return item.href;
+      }
+
+      if (item.viewKey === "waves") {
+        if (currentWaveId && !currentIsDm) {
+          return getWavesBaseRoute(isApp);
         }
-      } else if (currentWaveId && currentIsDmRef.current) {
-        // item.viewKey === "messages" (only remaining case)
-        lastVisitedDmRef.current = null;
-        router.push(getMessagesBaseRoute(isApp));
-      } else if (lastVisitedDmRef.current) {
-        router.push(
-          getWaveRoute({
-            waveId: lastVisitedDmRef.current,
-            isDirectMessage: true,
+
+        if (lastVisitedWaveId) {
+          return getWaveRoute({
+            waveId: lastVisitedWaveId,
+            isDirectMessage: false,
             isApp,
-          })
-        );
-      } else {
-        router.push(getMessagesBaseRoute(isApp));
+          });
+        }
+
+        return getWavesBaseRoute(isApp);
+      }
+
+      if (currentWaveId && currentIsDm) {
+        // item.viewKey === "messages" (only remaining case)
+        return getMessagesBaseRoute(isApp);
+      }
+
+      if (lastVisitedDmId) {
+        return getWaveRoute({
+          waveId: lastVisitedDmId,
+          isDirectMessage: true,
+          isApp,
+        });
+      }
+
+      return getMessagesBaseRoute(isApp);
+    },
+    [currentIsDm, currentWaveId, isApp, lastVisitedDmId, lastVisitedWaveId]
+  );
+
+  const recordNavClick = useCallback(
+    (item: NavItem) => {
+      if (item.kind === "route") {
+        return;
+      }
+
+      if (item.viewKey === "waves") {
+        if (currentWaveId && !currentIsDm) {
+          lastVisitedWaveRef.current = null;
+        }
+        return;
+      }
+
+      if (currentWaveId && currentIsDm) {
+        lastVisitedDmRef.current = null;
       }
     },
-    [router, currentWaveId, isApp]
+    [currentIsDm, currentWaveId]
+  );
+
+  const handleNavClick = useCallback(
+    (item: NavItem) => {
+      const href = getNavHref(item);
+      recordNavClick(item);
+      router.push(href);
+    },
+    [getNavHref, recordNavClick, router]
   );
 
   const hardBack = useCallback(
@@ -165,10 +232,12 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const providerValue = useMemo(
     () => ({
       handleNavClick,
+      getNavHref,
+      recordNavClick,
       hardBack,
       clearLastVisited,
     }),
-    [handleNavClick, hardBack, clearLastVisited]
+    [handleNavClick, getNavHref, recordNavClick, hardBack, clearLastVisited]
   );
 
   return (

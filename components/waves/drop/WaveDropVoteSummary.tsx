@@ -15,6 +15,7 @@ interface WaveDropVoteSummaryProps {
   readonly isVotingEnded: boolean;
   readonly canShowVote: boolean;
   readonly onVoteClick: () => void;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 const PRIMARY_BUTTON_CLASSES =
@@ -26,6 +27,7 @@ export const WaveDropVoteSummary = ({
   isVotingEnded,
   canShowVote,
   onVoteClick,
+  winningThreshold,
 }: WaveDropVoteSummaryProps) => {
   const hasUserVoted =
     drop.context_profile_context?.rating !== undefined &&
@@ -33,28 +35,38 @@ export const WaveDropVoteSummary = ({
   const userVote = drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
   const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
+  const isApproveVoteSummary =
+    typeof winningThreshold === "number" &&
+    Number.isFinite(winningThreshold) &&
+    winningThreshold > 0;
+  const progressVote = isApproveVoteSummary
+    ? drop.realtime_rating
+    : drop.rating_prediction;
+  const progressTooltipLabel = isApproveVoteSummary
+    ? "Votes given now"
+    : "Projected vote count at decision time";
 
   return (
-    <div className="tw-inline-flex tw-items-center tw-gap-2 sm:tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-xl tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
-      <div className="tw-px-4 tw-flex tw-flex-wrap tw-items-baseline tw-gap-1.5 tw-cursor-default">
-        <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white tw-tabular-nums">
+    <div className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01] sm:tw-gap-3">
+      <div className="tw-flex tw-cursor-default tw-flex-wrap tw-items-baseline tw-gap-1.5 tw-px-4">
+        <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-white sm:tw-text-base">
           {formatNumberWithCommas(drop.rating)}
         </span>
-        {drop.rating !== drop.rating_prediction && (
+        {drop.rating !== progressVote && (
           <>
             <FontAwesomeIcon
               icon={faArrowRight}
-              className="tw-flex-shrink-0 tw-size-2.5 tw-text-iron-600"
+              className="tw-size-2.5 tw-flex-shrink-0 tw-text-iron-600"
             />
             <span
-              className={`tw-text-sm sm:tw-text-base tw-font-semibold tw-tabular-nums tw-cursor-help ${
-                drop.rating < drop.rating_prediction
+              className={`tw-cursor-help tw-text-sm tw-font-semibold tw-tabular-nums sm:tw-text-base ${
+                drop.rating < progressVote
                   ? "tw-text-emerald-400"
                   : "tw-text-rose-400"
               }`}
               data-tooltip-id={`drop-vote-progress-${drop.id}`}
             >
-              {formatNumberWithCommas(drop.rating_prediction)}
+              {formatNumberWithCommas(progressVote)}
             </span>
             <Tooltip
               id={`drop-vote-progress-${drop.id}`}
@@ -63,29 +75,29 @@ export const WaveDropVoteSummary = ({
               opacity={1}
               style={TOOLTIP_STYLES}
             >
-              Projected vote count at decision time
+              {progressTooltipLabel}: {formatNumberWithCommas(progressVote)}
             </Tooltip>
           </>
         )}
-        <span className="tw-text-sm sm:tw-text-base tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500 sm:tw-text-base">
           {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]} Total
         </span>
       </div>
 
       {shouldShowUserVote && (
-        <div className="tw-px-4 tw-flex tw-items-baseline tw-gap-1 tw-border-l tw-border-solid tw-border-white/5 tw-border-y-0 tw-border-r-0">
-          <span className="tw-text-sm sm:tw-text-base tw-font-normal tw-text-iron-500">
+        <div className="tw-flex tw-items-baseline tw-gap-1 tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/5 tw-px-4">
+          <span className="tw-text-sm tw-font-normal tw-text-iron-500 sm:tw-text-base">
             {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
           </span>
           <span
-            className={`tw-text-sm sm:tw-text-base tw-font-semibold ${
+            className={`tw-text-sm tw-font-semibold sm:tw-text-base ${
               isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
             }`}
           >
             {isUserVoteNegative && "-"}
             {formatNumberWithCommas(Math.abs(userVote))}
           </span>
-          <span className="tw-text-iron-500 tw-text-sm sm:tw-text-base tw-font-normal">
+          <span className="tw-text-sm tw-font-normal tw-text-iron-500 sm:tw-text-base">
             {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
           </span>
         </div>

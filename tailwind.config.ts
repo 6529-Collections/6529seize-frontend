@@ -172,6 +172,24 @@ const tailwindConfig: Config = {
             transform: "translateZ(0) rotateY(360deg)",
           },
         },
+        "poll-result-fill": {
+          "0%": {
+            transform: "scaleX(0)",
+          },
+          "100%": {
+            transform: "scaleX(var(--poll-result-fill-scale))",
+          },
+        },
+        "poll-result-stats-in": {
+          "0%": {
+            opacity: "0",
+            transform: "translateX(1rem)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateX(0)",
+          },
+        },
       },
       animation: {
         "loading-bar": "loading-bar 1.5s infinite",
@@ -188,6 +206,8 @@ const tailwindConfig: Config = {
         "fade-in-out": "fade-in-out 2s ease-in-out infinite alternate",
         "heart-beat-soft": "heart-beat-soft 2.8s ease-in-out infinite",
         "spin-y": "spin-y 4s linear infinite",
+        "poll-result-fill": "poll-result-fill 0.7s ease-out forwards",
+        "poll-result-stats-in": "poll-result-stats-in 0.5s ease-out forwards",
       },
       backgroundSize: {
         "gradient-pos": "200% 200%",
@@ -203,6 +223,10 @@ const tailwindConfig: Config = {
     containerQueries,
     plugin(({ addVariant }) => {
       addVariant("desktop-hover", "@media (any-hover: hover)");
+      addVariant(
+        "touch-only",
+        "@media (any-hover: none) and (any-pointer: coarse)"
+      );
     }),
   ],
 };

@@ -104,7 +104,7 @@ const replaceMarkdownLinks = (input: string): string => {
   return result;
 };
 
-const markdownToPlainText = (markdown: string): string => {
+export const markdownToPlainText = (markdown: string): string => {
   const withoutLinks = replaceMarkdownLinks(markdown);
 
   return withoutLinks

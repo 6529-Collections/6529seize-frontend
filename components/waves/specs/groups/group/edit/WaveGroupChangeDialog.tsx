@@ -1,12 +1,7 @@
 "use client";
 
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FocusTrap } from "focus-trap-react";
-import { useId, useMemo, useRef } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import CreateWaveGroupInlinePanel from "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel";
+import { useMemo } from "react";
+import GroupAssignmentDialog from "@/components/groups/assignment/GroupAssignmentDialog";
 import { buildInlineGroupName } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 import {
   CREATE_WAVE_NONE_GROUP_LABELS,
@@ -19,9 +14,9 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { WaveGroupType } from "../WaveGroup.types";
-import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 
 const WAVE_GROUP_TO_CREATE_GROUP_TYPE = {
   [WaveGroupType.VIEW]: CreateWaveGroupConfigType.CAN_VIEW,
@@ -119,9 +114,6 @@ export default function WaveGroupChangeDialog({
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
 }) {
-  const modalRef = useRef<HTMLDialogElement>(null);
-  const titleId = useId();
-  const descriptionId = useId();
   const selectedGroup = useMemo(
     () => getSelectedGroup(currentGroup),
     [currentGroup]
@@ -139,88 +131,17 @@ export default function WaveGroupChangeDialog({
     ? "Create a new group or choose a different existing group."
     : "Create a new group or choose an existing group.";
 
-  useClickAway(modalRef, onClose);
-  useKeyPressEvent("Escape", (event: KeyboardEvent) => {
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    const activeElement = document.activeElement as HTMLElement | null;
-    if (
-      activeElement &&
-      modalRef.current?.contains(activeElement) &&
-      (activeElement.tagName === "INPUT" ||
-        activeElement.tagName === "TEXTAREA" ||
-        activeElement.tagName === "SELECT" ||
-        activeElement.isContentEditable ||
-        activeElement.getAttribute("role") === "combobox")
-    ) {
-      return;
-    }
-
-    onClose();
-  });
-
-  return createPortal(
-    <FocusTrap
-      focusTrapOptions={{
-        allowOutsideClick: true,
-        fallbackFocus: () => modalRef.current ?? document.body,
-      }}
-    >
-      <div className="tw-relative tw-z-50 tw-cursor-default">
-        <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
-        <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
-          <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
-            <dialog
-              ref={modalRef}
-              aria-modal="true"
-              aria-labelledby={titleId}
-              aria-describedby={descriptionId}
-              tabIndex={-1}
-              open
-              className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-2xl"
-            >
-              <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
-                <div className="tw-flex tw-flex-col tw-gap-y-2">
-                  <p
-                    id={titleId}
-                    className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50"
-                  >
-                    {title}
-                  </p>
-                  <p
-                    id={descriptionId}
-                    className="tw-mb-0 tw-text-sm tw-text-iron-400"
-                  >
-                    {description}
-                  </p>
-                </div>
-                <button
-                  onClick={onClose}
-                  type="button"
-                  aria-label="Close dialog"
-                  className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-2 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
-                >
-                  <span className="tw-sr-only">Close</span>
-                  <FontAwesomeIcon icon={faXmark} className="tw-h-5 tw-w-5" />
-                </button>
-              </div>
-              <div className="tw-mt-6">
-                <CreateWaveGroupInlinePanel
-                  suggestedName={suggestedName}
-                  defaultLabel={defaultLabel}
-                  selectedGroup={selectedGroup}
-                  allowGroupClear={false}
-                  onChange={onGroupChange}
-                  onCreateGroup={onCreateGroup}
-                />
-              </div>
-            </dialog>
-          </div>
-        </div>
-      </div>
-    </FocusTrap>,
-    document.body
+  return (
+    <GroupAssignmentDialog
+      title={title}
+      description={description}
+      suggestedName={suggestedName}
+      defaultLabel={defaultLabel}
+      selectedGroup={selectedGroup}
+      allowGroupClear={false}
+      onClose={onClose}
+      onChange={onGroupChange}
+      onCreateGroup={onCreateGroup}
+    />
   );
 }

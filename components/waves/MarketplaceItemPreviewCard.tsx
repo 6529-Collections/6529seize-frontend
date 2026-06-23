@@ -1,5 +1,7 @@
 "use client";
 
+import type { KeyboardEvent, MouseEvent } from "react";
+
 import { useLinkPreviewVariant } from "./LinkPreviewContext";
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 import MarketplaceCompactCta from "./marketplace/MarketplaceCompactCta";
@@ -18,6 +20,26 @@ import { getMarketplaceContainerClass } from "./marketplace/previewLayout";
 
 const normalizeSpaceSeparatedText = (value: string): string =>
   value.trim().replace(/\s+/g, " ");
+
+const isInteractiveElement = (target: EventTarget | null): boolean =>
+  target instanceof Element &&
+  target.closest("a, button, input, textarea, select, [role='button']") !==
+    null;
+
+const openResolvedHref = (
+  resolvedPreviewHref: ReturnType<typeof resolvePreviewHref>
+): void => {
+  if (resolvedPreviewHref.target === "_blank") {
+    globalThis.window.open(
+      resolvedPreviewHref.href,
+      "_blank",
+      "noopener,noreferrer"
+    );
+    return;
+  }
+
+  globalThis.window.location.assign(resolvedPreviewHref.href);
+};
 
 const buildDisplayPriceParts = ({
   price,
@@ -98,11 +120,38 @@ export default function MarketplaceItemPreviewCard({
   });
   const shouldShowDataHealthIcon =
     dataHealth !== undefined && dataHealth.state !== "fresh";
+  const handleCardClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (isInteractiveElement(event.target)) {
+      return;
+    }
+
+    openResolvedHref(resolvedPreviewHref);
+  };
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (isInteractiveElement(event.target)) {
+      return;
+    }
+
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    openResolvedHref(resolvedPreviewHref);
+  };
+  const sharedCardProps = {
+    role: "link",
+    tabIndex: 0,
+    onClick: handleCardClick,
+    onKeyDown: handleCardKeyDown,
+    "aria-label": ctaAriaLabel,
+  } as const;
 
   if (compact) {
     return (
       <LinkPreviewCardLayout href={href} variant={variant} hideActions>
         <div
+          {...sharedCardProps}
           className={`${getMarketplaceContainerClass(variant, compact)} tw-relative`}
           data-testid="manifold-item-card"
         >
@@ -137,6 +186,7 @@ export default function MarketplaceItemPreviewCard({
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>
       <div
+        {...sharedCardProps}
         className={`${getMarketplaceContainerClass(variant, compact)} tw-relative`}
         data-testid="manifold-item-card"
       >

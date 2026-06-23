@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
+import ApprovalDropVoteSummary from "./ApprovalDropVoteSummary";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -14,6 +16,7 @@ import {
 
 interface WaveDropRatingsProps {
   readonly drop: ApiDrop;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 const getFallbackAvatarLabel = (label: string) => {
@@ -22,8 +25,26 @@ const getFallbackAvatarLabel = (label: string) => {
   return source.slice(0, 2).toUpperCase();
 };
 
-const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
+const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({
+  drop,
+  winningThreshold,
+}) => {
   const [activeRaterId, setActiveRaterId] = React.useState<string | null>(null);
+  const hasWinningThreshold =
+    typeof winningThreshold === "number" &&
+    Number.isFinite(winningThreshold) &&
+    winningThreshold > 0;
+
+  if (hasWinningThreshold) {
+    return (
+      <ApprovalDropVoteSummary
+        drop={drop}
+        winningThreshold={winningThreshold}
+        variant="final"
+      />
+    );
+  }
+
   const totalVote = drop.rating;
   const userVote = drop.context_profile_context?.rating ?? 0;
   const hasUserVoted = userVote !== 0;
@@ -116,12 +137,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
             })()
           )}
         </div>
-        <span className="tw-font-medium tw-text-iron-50">
-          {formatNumberWithCommas(drop.raters_count)}{" "}
-          <span className="tw-font-normal tw-text-iron-400">
-            {drop.raters_count === 1 ? "voter" : "voters"}
-          </span>
-        </span>
+        <ParticipationDropVoteDetailsTrigger drop={drop} />
       </div>
 
       {hasUserVoted && (

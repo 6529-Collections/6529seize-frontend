@@ -155,6 +155,8 @@ interface ArtworkStepProps {
     value: TraitsData[K]
   ) => void;
   readonly setTraits: (traits: Partial<TraitsData>) => void;
+  readonly isAdditionalActionPromised: boolean;
+  readonly onAdditionalActionPromisedChange: (value: boolean) => void;
   readonly isSubmitting?: boolean | undefined;
   readonly submissionPhase?: SubmissionPhase | undefined;
   readonly initialTraits?: TraitsData | undefined;
@@ -198,6 +200,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   onCancel,
   updateTraitField,
   setTraits,
+  isAdditionalActionPromised,
+  onAdditionalActionPromisedChange,
   isSubmitting = false,
   submissionPhase = "idle",
   initialTraits,
@@ -340,6 +344,9 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       onDescriptionBlur={() => handleFieldBlur("description")}
       showRequiredMarkers={true}
       size="sm"
+      showAdditionalActionPromised={true}
+      isAdditionalActionPromised={isAdditionalActionPromised}
+      onAdditionalActionPromisedChange={onAdditionalActionPromisedChange}
     />
   );
 
@@ -358,14 +365,14 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     <div className="tw-flex tw-h-full tw-flex-col">
       <div
         data-testid="artwork-step-content"
-        className="tw-min-h-0 tw-w-full tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-overflow-hidden"
+        className="tw-min-h-0 tw-w-full tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
       >
         <div className="tw-flex tw-min-h-full tw-w-full tw-flex-col lg:tw-h-full lg:tw-min-h-0 lg:tw-flex-row">
           <div className="tw-flex tw-w-full tw-flex-col tw-px-4 tw-pt-4 md:tw-pl-8 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-pr-4">
             {renderMediaSubmissionPanel()}
           </div>
 
-          <div className="tw-w-full tw-px-4 tw-pb-6 tw-pt-6 desktop-hover:hover:tw-scrollbar-thumb-iron-300 md:tw-pl-6 md:tw-pr-8 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500">
+          <div className="tw-w-full tw-px-4 tw-pb-6 tw-pt-6 md:tw-pl-6 md:tw-pr-8 lg:tw-min-h-0 lg:tw-w-1/2">
             <div className="tw-flex tw-flex-col tw-gap-y-6">
               {renderArtworkDetailsPanel()}
               {renderArtworkTraitsPanel()}

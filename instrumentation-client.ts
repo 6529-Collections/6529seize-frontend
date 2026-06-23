@@ -7,6 +7,7 @@ import {
   INDEXEDDB_ERROR_MESSAGE,
   isIndexedDBError,
 } from "@/utils/error-sanitizer";
+import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
 import {
   sanitizeSentryBreadcrumb,
   sanitizeSentryEvent,
@@ -17,13 +18,24 @@ import {
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
+  shouldFilterCoinbaseWalletLinkWebSocket1006,
+  shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedWalletCollision,
+  shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
+
+try {
+  startMobileLaunchTiming();
+} catch {
+  // Monitoring must not affect app startup.
+}
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
 const isProduction = publicEnv.NODE_ENV === "production";
@@ -107,7 +119,27 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterInjectedWasmCspUnsafeEval(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterTwitterConfigReferenceError(event)) {
+    return true;
+  }
+
+  if (shouldFilterReactDomInsertBeforeNotFoundError(event)) {
+    return true;
+  }
+
+  if (shouldFilterSentryRouteParameterizationError(event)) {
     return true;
   }
 

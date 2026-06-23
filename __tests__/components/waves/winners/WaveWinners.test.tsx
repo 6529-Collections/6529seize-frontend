@@ -11,6 +11,9 @@ jest.mock("@/hooks/waves/useWaveDecisions", () => ({
   useWaveDecisions: jest.fn(),
 }));
 jest.mock("@/hooks/useWave");
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveOutcomeVisibility: () => mockOutcomesVisible,
+}));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ winnersViewStyle: {} }),
 }));
@@ -30,10 +33,12 @@ jest.mock("@/components/waves/winners/drops/WaveWinnersDrops", () => ({
 }));
 
 const wave = { id: "w1", wave: { type: ApiWaveType.Rank } } as any;
+let mockOutcomesVisible = true;
 
 describe("WaveWinners", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOutcomesVisible = true;
   });
 
   it("renders timeline when multi decision", () => {
@@ -79,8 +84,32 @@ describe("WaveWinners", () => {
       isLoadingAllPages: false,
     });
     render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
-    expect(Podium).toHaveBeenCalled();
+    expect(Podium).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        showVoteDetails: expect.anything(),
+      })
+    );
     expect(Drops).toHaveBeenCalled();
+  });
+
+  it("does not gate podium vote details by memes waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: false },
+      isMemesWave: true,
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [{ winners: [] }],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+
+    render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
+
+    expect(Podium).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        showVoteDetails: expect.anything(),
+      })
+    );
   });
 
   it("renders approved drops for approve waves", () => {
@@ -123,6 +152,7 @@ describe("WaveWinners", () => {
     );
     expect(useWaveDecisions).toHaveBeenCalledWith({
       waveId: "w1",
+      wave: { ...wave, wave: { type: ApiWaveType.Approve } },
       enabled: true,
       loadAllPages: true,
       pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
@@ -180,6 +210,36 @@ describe("WaveWinners", () => {
     expect(Drops).toHaveBeenCalledWith(
       expect.objectContaining({
         contentPresentation: "quorumCompact",
+      })
+    );
+  });
+
+  it("passes hidden outcome visibility to podium and drops", () => {
+    mockOutcomesVisible = false;
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: false },
+      isQuorumWave: false,
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [
+        {
+          winners: [{ drop: { id: "d1" }, place: 1 }],
+        },
+      ],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+
+    render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
+
+    expect(Podium).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcomesVisible: false,
+      })
+    );
+    expect(Drops).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcomesVisible: false,
       })
     );
   });

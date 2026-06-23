@@ -18,7 +18,7 @@ describe('CreateWaveNameInput', () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
     render(<CreateWaveNameInput name="" errors={[]} onChange={onChange} />);
-    await user.type(screen.getByLabelText('Name'), 'Wave');
+    await user.type(screen.getByLabelText('Wave Name *'), 'Wave');
     expect(onChange).toHaveBeenCalled();
   });
 

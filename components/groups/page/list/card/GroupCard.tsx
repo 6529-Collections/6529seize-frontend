@@ -20,6 +20,8 @@ export enum CreditDirection {
   SUBTRACT = "SUBTRACT",
 }
 
+export type GroupCardRateMatter = ApiRateMatter.Rep | ApiRateMatter.Cic;
+
 export default function GroupCard({
   group,
   activeGroupIdVoteAll,
@@ -117,28 +119,28 @@ export default function GroupCard({
   };
 
   return (
-    <div className="tw-col-span-1 tw-relative">
+    <div className="tw-relative tw-col-span-1">
       {isIdle && cardHref && (
         <button
           type="button"
           onClick={() => router.push(cardHref)}
-          className="tw-absolute tw-inset-0 tw-z-0 tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500"
+          className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500"
           aria-label={`Open ${cardLabel}`}
         ></button>
       )}
       <div
-        className={`tw-relative tw-overflow-hidden tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none tw-no-underline ${
+        className={`tw-group tw-relative tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-translate-y-[-1px] desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 ${
           isIdle
-            ? "tw-group desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px]"
+            ? "tw-group desktop-hover:hover:tw-translate-y-[-1px] desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40"
             : ""
         }`}
       >
-        <div className="tw-absolute tw-inset-0 tw-rounded-t-xl tw-h-1">
+        <div className="tw-absolute tw-inset-0 tw-h-1 tw-rounded-t-xl">
           <div
             className="tw-absolute tw-inset-0 tw-opacity-80 tw-transition-opacity tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-opacity-95"
             style={gradientStyle}
           ></div>
-          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b from-black/25 via-black/10 to-transparent"></div>
+          <div className="from-black/25 via-black/10 to-transparent tw-absolute tw-inset-0 tw-bg-gradient-to-b"></div>
         </div>
         <div className="tw-flex tw-flex-1 tw-flex-col tw-rounded-b-xl tw-bg-iron-950">
           {components[state]}

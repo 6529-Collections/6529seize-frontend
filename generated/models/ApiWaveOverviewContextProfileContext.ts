@@ -17,8 +17,13 @@ export class ApiWaveOverviewContextProfileContext {
     'subscribed': boolean;
     'pinned': boolean;
     'can_chat': boolean;
+    'next_drop_allowed'?: number;
     'unread_drops': number;
     'first_unread_drop_serial_no'?: number;
+    'followed_subwaves_count'?: number;
+    'latest_followed_subwave_activity_timestamp'?: number;
+    'hidden_followed_subwave_unread_drops'?: number;
+    'first_hidden_followed_subwave_unread_drop_serial_no'?: number;
     'muted': boolean;
 
     static readonly discriminator: string | undefined = undefined;
@@ -45,6 +50,12 @@ export class ApiWaveOverviewContextProfileContext {
             "format": ""
         },
         {
+            "name": "next_drop_allowed",
+            "baseName": "next_drop_allowed",
+            "type": "number",
+            "format": "int64"
+        },
+        {
             "name": "unread_drops",
             "baseName": "unread_drops",
             "type": "number",
@@ -53,6 +64,30 @@ export class ApiWaveOverviewContextProfileContext {
         {
             "name": "first_unread_drop_serial_no",
             "baseName": "first_unread_drop_serial_no",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "followed_subwaves_count",
+            "baseName": "followed_subwaves_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "latest_followed_subwave_activity_timestamp",
+            "baseName": "latest_followed_subwave_activity_timestamp",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "hidden_followed_subwave_unread_drops",
+            "baseName": "hidden_followed_subwave_unread_drops",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "first_hidden_followed_subwave_unread_drop_serial_no",
+            "baseName": "first_hidden_followed_subwave_unread_drop_serial_no",
             "type": "number",
             "format": "int64"
         },

@@ -8,11 +8,13 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 // Create mocks that we can access
 const mockAddPinnedWave = jest.fn();
 const mockRemovePinnedWave = jest.fn();
+let mockWavesList: any[] = [];
 
 // Mock the MyStreamContext
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     waves: {
+      list: mockWavesList,
       addPinnedWave: mockAddPinnedWave,
       removePinnedWave: mockRemovePinnedWave,
     },
@@ -34,9 +36,19 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
 }));
 
 jest.mock("react-tooltip", () => ({
-  Tooltip: ({ children, id }: any) => (
-    <div data-testid={`tooltip-${id}`}>{children}</div>
-  ),
+  Tooltip: ({ children, id, content }: any) => {
+    const triggerContent =
+      typeof document === "undefined"
+        ? undefined
+        : document
+            .querySelector(`[data-tooltip-id="${id}"]`)
+            ?.getAttribute("data-tooltip-content");
+    return (
+      <div data-testid={`tooltip-${id}`}>
+        {children ?? content ?? triggerContent}
+      </div>
+    );
+  },
 }));
 
 const mockAuth = {
@@ -62,6 +74,7 @@ const mockUseSeizeSettings = useSeizeSettings as jest.Mock;
 describe("WaveHeaderPinButton", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockWavesList = [];
     mockUseSeizeSettings.mockReturnValue({
       isAnnouncementsWave: () => false,
       isLoaded: true,
@@ -130,6 +143,24 @@ describe("WaveHeaderPinButton", () => {
         "aria-label",
         "Unpin wave"
       );
+    });
+
+    it("does not render for an unpinned official wave", () => {
+      mockWavesList = [{ id: "wave-123", isOfficial: true }];
+      const { container } = renderComponent();
+      expect(container.firstChild).toBeNull();
+    });
+
+    it("does not render for a pinned official wave", () => {
+      mockWavesList = [{ id: "wave-123", isOfficial: true }];
+      mockUsePinnedWavesServer.mockReturnValue({
+        pinnedIds: ["wave-123"],
+        isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
+      });
+      const { container } = renderComponent();
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
     });
 
     it("renders when user is authenticated without proxy", () => {
@@ -249,7 +280,8 @@ describe("WaveHeaderPinButton", () => {
 
       expect(mockAuth.setToast).toHaveBeenCalledWith({
         type: "error",
-        message: "Maximum 3 pinned waves allowed",
+        title: "Maximum 3 pinned waves reached.",
+        description: "Unpin another wave first.",
       });
       expect(mockAddPinnedWave).not.toHaveBeenCalled();
     });
@@ -315,7 +347,9 @@ describe("WaveHeaderPinButton", () => {
 
       expect(mockAuth.setToast).toHaveBeenCalledWith({
         type: "error",
-        message: "Failed to pin wave: Network error",
+        title: "Couldn't pin this wave.",
+        description: "Please try again.",
+        details: "Network error. Please check your connection and try again.",
       });
     });
 
@@ -340,7 +374,9 @@ describe("WaveHeaderPinButton", () => {
 
       expect(mockAuth.setToast).toHaveBeenCalledWith({
         type: "error",
-        message: "Failed to unpin wave: Server error",
+        title: "Couldn't unpin this wave.",
+        description: "Please try again.",
+        details: "Server error.",
       });
     });
 
@@ -357,7 +393,9 @@ describe("WaveHeaderPinButton", () => {
 
       expect(mockAuth.setToast).toHaveBeenCalledWith({
         type: "error",
-        message: "Failed to pin wave: String error",
+        title: "Couldn't pin this wave.",
+        description: "Please try again.",
+        details: "String error.",
       });
     });
   });
@@ -365,8 +403,10 @@ describe("WaveHeaderPinButton", () => {
   describe("Tooltip Content", () => {
     it("shows correct tooltip for unpinned wave", () => {
       renderComponent();
-      const tooltip = screen.getByTestId("tooltip-wave-header-pin-wave-123");
-      expect(tooltip).toHaveTextContent("Pin wave");
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "data-tooltip-content",
+        "Pin wave"
+      );
     });
 
     it("shows correct tooltip for pinned wave", () => {
@@ -378,8 +418,10 @@ describe("WaveHeaderPinButton", () => {
       });
 
       renderComponent();
-      const tooltip = screen.getByTestId("tooltip-wave-header-pin-wave-123");
-      expect(tooltip).toHaveTextContent("Unpin wave");
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "data-tooltip-content",
+        "Unpin wave"
+      );
     });
 
     it("shows max limit tooltip when at capacity", () => {
@@ -392,8 +434,8 @@ describe("WaveHeaderPinButton", () => {
       mockCanPinWave.mockReturnValue(false);
 
       renderComponent();
-      const tooltip = screen.getByTestId("tooltip-wave-header-pin-wave-123");
-      expect(tooltip).toHaveTextContent(
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "data-tooltip-content",
         "Max 3 pinned waves. Unpin another wave first."
       );
     });
@@ -420,8 +462,11 @@ describe("WaveHeaderPinButton", () => {
       renderComponent();
       const button = screen.getByRole("button");
       const icon = button.querySelector("svg");
+      const tooltipId = button.getAttribute("data-tooltip-id");
 
-      expect(button).toHaveClass("tw-text-iron-200", "tw-bg-iron-700");
+      expect(button).toHaveClass("tw-bg-transparent", "tw-text-iron-300");
+      expect(button).toHaveAttribute("data-tooltip-content", "Unpin wave");
+      expect(screen.getByTestId(`tooltip-${tooltipId}`)).toBeInTheDocument();
       expect(icon).toHaveClass("tw-rotate-[-45deg]");
     });
   });

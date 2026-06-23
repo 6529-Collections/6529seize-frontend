@@ -107,7 +107,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     width={0}
                     height={0}
                     src={c.preview}
-                    alt={c.display}
+                    alt=""
+                    aria-hidden="true"
                   />
                   <span>{c.title}</span>
                 </span>
@@ -124,6 +125,10 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       <Row className="pb-2">
         <Col>
           <h1>Delegation Center</h1>
+          <p className={styles["delegationCenterIntro"]}>
+            Register wallet relationships for NFT utility and 6529 collection
+            metrics. These actions do not transfer NFTs.
+          </p>
         </Col>
       </Row>
       <Row>
@@ -151,9 +156,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     />
                     <ul className="mb-0">
                       <li>
-                        Mint with your hot wallet on behalf of your vault wallet
+                        Let a hot wallet use NFT utility held by a vault wallet
                       </li>
-                      <li>Eliminate manual wallet mapping</li>
+                      <li>Useful for minting, allowlists, and airdrops</li>
                     </ul>
                   </span>
                 </span>
@@ -173,7 +178,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     icon={faPlus}
                     className={styles["buttonIcon"]}
                   />
-                  Delegation
+                  Register Delegation
                 </button>
               </Col>
             </Row>
@@ -205,9 +210,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     />
                     <ul className="mb-0">
                       <li>
-                        Use up to 3 wallets to manage your 6529 Collections NFTs
+                        Link wallets you control for TDH and collection metrics
                       </li>
-                      <li>Transfer NFTs between wallets without losing TDH</li>
+                      <li>Requires reciprocal records between the wallets</li>
                     </ul>
                   </span>
                 </span>
@@ -227,7 +232,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     icon={faPlus}
                     className={styles["buttonIcon"]}
                   />
-                  Consolidation
+                  Register Consolidation
                 </button>
               </Col>
             </Row>
@@ -259,10 +264,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     />
                     <ul className="mb-0">
                       <li>
-                        Give another wallet permission to handle delegations and
-                        consolidations on your behalf
+                        Let one wallet maintain delegations for another wallet
                       </li>
-                      <li>Increase your wallet security</li>
+                      <li>Keep vault wallets cold after setup</li>
                     </ul>
                   </span>
                 </span>
@@ -282,7 +286,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     icon={faPlus}
                     className={styles["buttonIcon"]}
                   />
-                  Delegation Manager
+                  Register Delegation Manager
                 </button>
               </Col>
             </Row>
@@ -290,7 +294,13 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         </Col>
       </Row>
       <Row className="pt-4">
-        <Col>{printCollectionSelection()}</Col>
+        <Col>
+          <p className={styles["delegationCenterIntro"]}>
+            Manage existing records by collection scope, including locks that
+            block incoming delegations.
+          </p>
+          {printCollectionSelection()}
+        </Col>
       </Row>
     </Container>
   );

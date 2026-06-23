@@ -1,5 +1,5 @@
 import type { SortDirection } from "@/entities/ISort";
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { createBreakpoint } from "react-use";
 import CommonDropdown from "./dropdown/CommonDropdown";
 import CommonTabs from "./tabs/CommonTabs";
@@ -10,6 +10,7 @@ interface ChildComponentProps {
 
 export interface CommonSelectItem<T, U = unknown> {
   readonly label: string;
+  readonly icon?: ReactNode | undefined;
   readonly mobileLabel?: string | undefined;
   readonly value: T;
   readonly key: string;
@@ -26,6 +27,8 @@ interface CommonSelectDefaultProps<T, U> {
   readonly disabled?: boolean | undefined;
   readonly theme?: "dark" | "light" | undefined;
   readonly size?: "sm" | "md" | "tabs" | undefined;
+  readonly variant?: "default" | "editorial" | undefined;
+  readonly menuMinWidth?: number | undefined;
   readonly containerRef?: RefObject<HTMLDivElement | null> | undefined; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
   readonly setSelected: (item: T) => void;
   readonly renderItemChildren?: (
@@ -36,8 +39,10 @@ interface CommonSelectDefaultProps<T, U> {
   readonly showFilterLabel?: boolean | undefined;
 }
 
-interface CommonSelectsWithSortProps<T, U>
-  extends CommonSelectDefaultProps<T, U> {
+interface CommonSelectsWithSortProps<T, U> extends CommonSelectDefaultProps<
+  T,
+  U
+> {
   readonly sortDirection: SortDirection;
 }
 

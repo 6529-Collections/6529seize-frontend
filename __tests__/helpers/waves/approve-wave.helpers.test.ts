@@ -1,4 +1,5 @@
 import {
+  formatApprovalCountdownTime,
   getApprovalDropStatus,
   getApprovedDropsCount,
   hasApprovalDecisionCounts,
@@ -143,6 +144,85 @@ describe("approve-wave.helpers", () => {
   });
 
   describe("getApprovalDropStatus", () => {
+    it("shows pending countdown while the min threshold time is still running", () => {
+      expect(
+        getApprovalDropStatus({
+          drop: {
+            rating: 8,
+            rank: null,
+            over_threshold_since_ms: 1_000,
+          },
+          nowMs: 121_000,
+          winningThreshold: 8,
+          winningThresholdMinDurationMs: 600_000,
+        })
+      ).toMatchObject({
+        kind: "approving",
+        current: 8,
+        threshold: 8,
+        remaining: 0,
+        countdownMs: 480_000,
+      });
+    });
+
+    it("shows reached threshold when voting is closed and hold time is still running", () => {
+      expect(
+        getApprovalDropStatus({
+          drop: {
+            rating: 8,
+            rank: null,
+            over_threshold_since_ms: 1_000,
+          },
+          isClosed: true,
+          nowMs: 121_000,
+          winningThreshold: 8,
+          winningThresholdMinDurationMs: 600_000,
+        })
+      ).toMatchObject({
+        kind: "reached_threshold",
+        current: 8,
+        threshold: 8,
+        remaining: 0,
+        countdownMs: null,
+      });
+    });
+
+    it("falls back to reached threshold when countdown timing is missing", () => {
+      expect(
+        getApprovalDropStatus({
+          drop: { rating: 8, rank: null },
+          nowMs: 121_000,
+          winningThreshold: 8,
+          winningThresholdMinDurationMs: 600_000,
+        })
+      ).toMatchObject({
+        kind: "reached_threshold",
+        current: 8,
+        threshold: 8,
+        remaining: 0,
+      });
+    });
+
+    it("falls back to reached threshold when the hold time has elapsed", () => {
+      expect(
+        getApprovalDropStatus({
+          drop: {
+            rating: 8,
+            rank: null,
+            over_threshold_since_ms: 1_000,
+          },
+          nowMs: 601_000,
+          winningThreshold: 8,
+          winningThresholdMinDurationMs: 600_000,
+        })
+      ).toMatchObject({
+        kind: "reached_threshold",
+        current: 8,
+        threshold: 8,
+        remaining: 0,
+      });
+    });
+
     it("does not mark rank-only drops as approved", () => {
       expect(
         getApprovalDropStatus({
@@ -164,8 +244,11 @@ describe("approve-wave.helpers", () => {
             rating: 7,
             rank: 1,
             winning_context: winningContext,
+            over_threshold_since_ms: 1_000,
           },
+          nowMs: 121_000,
           winningThreshold: 10,
+          winningThresholdMinDurationMs: 600_000,
         })
       ).toMatchObject({
         kind: "approved",
@@ -217,6 +300,15 @@ describe("approve-wave.helpers", () => {
         threshold: 8,
         remaining: 3,
       });
+    });
+  });
+
+  describe("formatApprovalCountdownTime", () => {
+    it("formats the approval countdown label time", () => {
+      expect(formatApprovalCountdownTime(59_999)).toBe("<1m");
+      expect(formatApprovalCountdownTime(60_000)).toBe("1m");
+      expect(formatApprovalCountdownTime(60_001)).toBe("2m");
+      expect(formatApprovalCountdownTime(3_660_000)).toBe("1h 1m");
     });
   });
 });

@@ -204,7 +204,8 @@ export default function ChatItemHrefButtons({
         return;
       }
 
-      shouldRestoreTriggerFocusRef.current = true;
+      event.stopPropagation();
+      closeMenu({ restoreFocusToTrigger: true });
     };
 
     globalThis.window.addEventListener("keydown", handleKeyDown, true);
@@ -309,7 +310,7 @@ export default function ChatItemHrefButtons({
       return;
     }
 
-    previewToggle.onToggle();
+    previewToggle.onToggle(!previewToggle.isHidden);
     closeMenu({ restoreFocusToTrigger: event.detail === 0 });
   };
 

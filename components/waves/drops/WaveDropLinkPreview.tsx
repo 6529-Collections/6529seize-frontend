@@ -139,8 +139,12 @@ export default function WaveDropLinkPreview({
   const { wave } = useWaveById(waveId, {
     enabled: drop?.drop_type === ApiDropType.Participatory,
   });
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({ wave });
+  const {
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  } = useApprovalWaveStatus({ wave });
 
   const extendedDrop = useMemo<ExtendedDrop | null>(() => {
     if (drop?.drop_type !== ApiDropType.Participatory) {
@@ -180,6 +184,7 @@ export default function WaveDropLinkPreview({
           onDropContentClick={handleDropContentClick}
           showInteractions={false}
           winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
           embedPath={embedPath}
@@ -197,6 +202,7 @@ export default function WaveDropLinkPreview({
           quotePath={quotePath}
           embedDepth={embedDepth}
           maxEmbedDepth={maxEmbedDepth}
+          hideLinkPreviews={drop?.hide_link_preview === true}
         />
       )}
     </LinkHandlerFrame>

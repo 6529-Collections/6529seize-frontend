@@ -3,7 +3,9 @@
 import { useRef } from "react";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CreateWaveGroupSearchInput from "./CreateWaveGroupSearchInput";
-import CreateWaveGroupSearchResults from "./CreateWaveGroupSearchResults";
+import CreateWaveGroupSearchResults, {
+  type CreateWaveGroupSearchResultsLayout,
+} from "./CreateWaveGroupSearchResults";
 import { useCreateWaveGroupSearch } from "./useCreateWaveGroupSearch";
 
 export default function CreateWaveGroupSearchField({
@@ -12,6 +14,7 @@ export default function CreateWaveGroupSearchField({
   disabled,
   selectedGroup,
   allowClear = true,
+  resultsLayout = "popover",
   onSelect,
 }: {
   readonly label: string;
@@ -19,6 +22,7 @@ export default function CreateWaveGroupSearchField({
   readonly disabled: boolean;
   readonly selectedGroup: ApiGroupFull | null;
   readonly allowClear?: boolean;
+  readonly resultsLayout?: CreateWaveGroupSearchResultsLayout;
   readonly onSelect: (group: ApiGroupFull | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +60,7 @@ export default function CreateWaveGroupSearchField({
         <CreateWaveGroupSearchResults
           isOpen={search.isOpen}
           disabled={disabled}
+          layout={resultsLayout}
           listboxId={search.listboxId}
           isFetching={search.isFetching}
           suggestions={search.suggestions}

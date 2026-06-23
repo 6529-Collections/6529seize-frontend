@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-if [ -z "${BASH_VERSION:-}" ]; then
+BASH_BIN="${BASH:-}"
+BASH_BIN="${BASH_BIN##*/}"
+if [ -z "${BASH_VERSION:-}" ] || [ -n "${POSIXLY_CORRECT:-}" ] || [ "$BASH_BIN" = "sh" ]; then
+  unset POSIXLY_CORRECT
   exec bash "$0" "$@"
 fi
 
@@ -24,6 +27,7 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+ARG_COUNT=$#
 WORKTREE_NAME=$1
 WORKTREE_PATH="$PARENT_DIR/$WORKTREE_NAME"
 BASE_REF=${2:-$(git -C "$MAIN_REPO" rev-parse --abbrev-ref HEAD)}
@@ -72,12 +76,161 @@ strip_repo_bin_wrappers_from_path() {
   printf '%s' "$clean_path"
 }
 
-if git -C "$MAIN_REPO" show-ref --verify --quiet "refs/heads/$TARGET_BRANCH"; then
-  echo "Creating worktree '$WORKTREE_NAME' from existing branch '$TARGET_BRANCH'..."
-  git -C "$MAIN_REPO" worktree add "$WORKTREE_PATH" "$TARGET_BRANCH"
+branch_exists() {
+  local branch="$1"
+  git -C "$MAIN_REPO" show-ref --verify --quiet "refs/heads/$branch"
+}
+
+origin_branch_exists() {
+  local branch="$1"
+  git -C "$MAIN_REPO" show-ref --verify --quiet "refs/remotes/origin/$branch"
+}
+
+ref_sha() {
+  local ref="$1"
+  git -C "$MAIN_REPO" rev-parse --verify "$ref"
+}
+
+ensure_local_branch_matches_origin() {
+  local branch="$1"
+
+  if ! origin_branch_exists "$branch"; then
+    return 0
+  fi
+
+  local local_sha origin_sha
+  local_sha="$(ref_sha "refs/heads/$branch")"
+  origin_sha="$(ref_sha "refs/remotes/origin/$branch")"
+
+  if [[ "$local_sha" != "$origin_sha" ]]; then
+    echo "Local branch '$branch' and 'origin/$branch' point to different commits."
+    echo "  local:  ${local_sha:0:12}"
+    echo "  origin: ${origin_sha:0:12}"
+    echo "Refusing to guess which one you want."
+    echo "Update, rename, or delete the local branch, then retry."
+    exit 1
+  fi
+}
+
+checked_out_worktree_for_branch() {
+  local branch="$1"
+  local wt_path="" wt_branch=""
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    case "$line" in
+      worktree\ *)
+        wt_path="${line#worktree }"
+        ;;
+      branch\ refs/heads/*)
+        wt_branch="${line#branch refs/heads/}"
+        if [[ "$wt_branch" == "$branch" ]]; then
+          printf '%s\n' "$wt_path"
+          return 0
+        fi
+        ;;
+    esac
+  done < <(git -C "$MAIN_REPO" worktree list --porcelain)
+
+  return 1
+}
+
+ensure_branch_available_for_worktree() {
+  local branch="$1"
+  local existing_worktree
+
+  existing_worktree="$(checked_out_worktree_for_branch "$branch" || true)"
+  if [[ -n "$existing_worktree" ]]; then
+    echo "Branch '$branch' is already checked out at:"
+    echo "  $existing_worktree"
+    echo "Use that worktree, or remove it before creating another one."
+    exit 1
+  fi
+}
+
+ensure_worktree_path_available() {
+  if [[ -e "$WORKTREE_PATH" ]]; then
+    echo "Worktree path already exists:"
+    echo "  $WORKTREE_PATH"
+    echo "Choose another worktree name or remove that directory first."
+    exit 1
+  fi
+}
+
+ensure_worktree_parent_dir() {
+  local worktree_parent
+  worktree_parent="$(dirname "$WORKTREE_PATH")"
+
+  if [[ ! -d "$worktree_parent" ]]; then
+    mkdir -p "$worktree_parent"
+  fi
+}
+
+fetch_origin() {
+  if git -C "$MAIN_REPO" remote get-url origin >/dev/null 2>&1; then
+    echo "Fetching origin..."
+    git -C "$MAIN_REPO" fetch origin
+  else
+    echo "No origin remote found; checking local branches only."
+  fi
+}
+
+add_default_worktree() {
+  fetch_origin
+
+  local has_local=0
+  local has_origin=0
+
+  if branch_exists "$TARGET_BRANCH"; then
+    has_local=1
+  fi
+
+  if origin_branch_exists "$TARGET_BRANCH"; then
+    has_origin=1
+  fi
+
+  if [[ $has_local -eq 1 ]]; then
+    ensure_branch_available_for_worktree "$TARGET_BRANCH"
+    ensure_local_branch_matches_origin "$TARGET_BRANCH"
+  fi
+
+  ensure_worktree_path_available
+
+  if [[ $has_local -eq 1 ]]; then
+    ensure_worktree_parent_dir
+    echo "Creating worktree '$WORKTREE_NAME' from existing branch '$TARGET_BRANCH'..."
+    git -C "$MAIN_REPO" worktree add "$WORKTREE_PATH" "$TARGET_BRANCH"
+  elif [[ $has_origin -eq 1 ]]; then
+    ensure_worktree_parent_dir
+    echo "Creating worktree '$WORKTREE_NAME' from 'origin/$TARGET_BRANCH' on tracking branch '$TARGET_BRANCH'..."
+    git -C "$MAIN_REPO" worktree add --track -b "$TARGET_BRANCH" "$WORKTREE_PATH" "origin/$TARGET_BRANCH"
+  else
+    ensure_worktree_parent_dir
+    echo "Creating worktree '$WORKTREE_NAME' from '$BASE_REF' on new branch '$TARGET_BRANCH'..."
+    git -C "$MAIN_REPO" worktree add -b "$TARGET_BRANCH" "$WORKTREE_PATH" "$BASE_REF"
+  fi
+}
+
+add_advanced_worktree() {
+  ensure_worktree_path_available
+
+  if branch_exists "$TARGET_BRANCH"; then
+    fetch_origin
+    ensure_branch_available_for_worktree "$TARGET_BRANCH"
+    ensure_local_branch_matches_origin "$TARGET_BRANCH"
+    ensure_worktree_parent_dir
+    echo "Creating worktree '$WORKTREE_NAME' from existing branch '$TARGET_BRANCH'..."
+    git -C "$MAIN_REPO" worktree add "$WORKTREE_PATH" "$TARGET_BRANCH"
+  else
+    ensure_worktree_parent_dir
+    echo "Creating worktree '$WORKTREE_NAME' from '$BASE_REF' on new branch '$TARGET_BRANCH'..."
+    git -C "$MAIN_REPO" worktree add -b "$TARGET_BRANCH" "$WORKTREE_PATH" "$BASE_REF"
+  fi
+}
+
+if [[ $ARG_COUNT -eq 1 ]]; then
+  add_default_worktree
 else
-  echo "Creating worktree '$WORKTREE_NAME' from '$BASE_REF' on new branch '$TARGET_BRANCH'..."
-  git -C "$MAIN_REPO" worktree add -b "$TARGET_BRANCH" "$WORKTREE_PATH" "$BASE_REF"
+  add_advanced_worktree
 fi
 
 echo "✓ Branch '$TARGET_BRANCH' ready in worktree '$WORKTREE_NAME'."

@@ -24,6 +24,7 @@ jest.mock("@/components/drops/create/DropEditor", () =>
     const emojiPickerLayer = useCreateDropEmojiPickerLayer();
 
     React.useImperativeHandle(ref, () => ({
+      getDropSnapshot: () => ({ content: "snapshot drop" }),
       requestDrop: () => ({ content: "test drop" }),
     }));
 
@@ -34,6 +35,9 @@ jest.mock("@/components/drops/create/DropEditor", () =>
         <div data-testid="loading">{props.loading ? "true" : "false"}</div>
         <div data-testid="show-submit">
           {props.showSubmit ? "true" : "false"}
+        </div>
+        <div data-testid="submit-on-enter">
+          {props.submitOnEnter ? "true" : "false"}
         </div>
         <div data-testid="show-drop-error">
           {props.showDropError ? "true" : "false"}
@@ -83,6 +87,7 @@ describe("CreateWaveDescription", () => {
   const defaultProps = {
     profile: mockProfile,
     wave: mockWave,
+    submitting: false,
     showDropError: false,
     onHaveDropToSubmitChange: jest.fn(),
   };
@@ -121,6 +126,7 @@ describe("CreateWaveDescription", () => {
     expect(screen.getByTestId("type")).toHaveTextContent("DROP");
     expect(screen.getByTestId("loading")).toHaveTextContent("false");
     expect(screen.getByTestId("show-submit")).toHaveTextContent("false");
+    expect(screen.getByTestId("submit-on-enter")).toHaveTextContent("false");
     expect(screen.getByTestId("show-drop-error")).toHaveTextContent("false");
     expect(screen.getByTestId("wave-name")).toHaveTextContent("Test Wave");
     expect(screen.getByTestId("wave-image")).toHaveTextContent(
@@ -144,6 +150,12 @@ describe("CreateWaveDescription", () => {
     render(<CreateWaveDescription {...defaultProps} showDropError={true} />);
 
     expect(screen.getByTestId("show-drop-error")).toHaveTextContent("true");
+  });
+
+  it("passes submitting state to DropEditor loading", () => {
+    render(<CreateWaveDescription {...defaultProps} submitting={true} />);
+
+    expect(screen.getByTestId("loading")).toHaveTextContent("true");
   });
 
   it("handles wave with null image", () => {
@@ -176,6 +188,14 @@ describe("CreateWaveDescription", () => {
 
     const result = ref.current?.requestDrop();
     expect(result).toEqual({ content: "test drop" });
+  });
+
+  it("exposes getDropSnapshot through ref", () => {
+    const ref = React.createRef<CreateWaveDescriptionHandles>();
+    render(<CreateWaveDescription {...defaultProps} ref={ref} />);
+
+    const result = ref.current?.getDropSnapshot();
+    expect(result).toEqual({ content: "snapshot drop" });
   });
 
   it("handles onHaveDropToSubmitChange callback", () => {

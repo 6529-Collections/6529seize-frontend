@@ -9,6 +9,7 @@ import UserCICAndLevel, {
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
@@ -135,7 +136,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   const artworkMedia = winner.drop.parts.at(0)?.media.at(0);
 
   const rating = winner.drop.rating || 0;
-  const ratersCount = winner.drop.raters_count;
   const topVoters = winner.drop.top_raters.slice(0, 3);
   const creditType = WAVE_VOTING_LABELS[wave.voting.credit_type];
 
@@ -327,12 +327,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     ))}
                   </div>
                 )}
-                <span className="tw-font-medium tw-text-iron-50">
-                  {formatNumberWithCommas(ratersCount)}{" "}
-                  <span className="tw-font-normal tw-text-iron-400">
-                    {ratersCount === 1 ? "voter" : "voters"}
-                  </span>
-                </span>
+                <ParticipationDropVoteDetailsTrigger drop={winner.drop} />
               </div>
 
               {/* User's vote */}

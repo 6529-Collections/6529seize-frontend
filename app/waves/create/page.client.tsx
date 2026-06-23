@@ -1,5 +1,6 @@
 "use client";
 
+import ConnectWallet from "@/components/common/ConnectWallet";
 import WavesLayout from "@/components/waves/layout/WavesLayout";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
 import { useAuth } from "@/components/auth/Auth";
@@ -17,7 +18,9 @@ export default function WavesCreatePageClient() {
           profile={connectedProfile}
           onBack={() => router.replace(getWavesBaseRoute(true))}
         />
-      ) : null}
+      ) : (
+        <ConnectWallet />
+      )}
     </WavesLayout>
   );
 }

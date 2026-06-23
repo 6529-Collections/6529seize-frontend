@@ -11,25 +11,34 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiWaveOverviewContextProfileContext } from '../models/ApiWaveOverviewContextProfileContext';
 import { ApiWaveOverviewContributor } from '../models/ApiWaveOverviewContributor';
 import { ApiWaveOverviewDescriptionDrop } from '../models/ApiWaveOverviewDescriptionDrop';
+import { ApiWaveRepSummary } from '../models/ApiWaveRepSummary';
+import { ApiWaveScore } from '../models/ApiWaveScore';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveOverview {
     'id': string;
     'name': string;
     'pfp'?: string;
+    'creator': ApiProfileMin;
     'last_drop_time': number;
     'created_at': number;
     'subscribers_count': number;
     'has_competition': boolean;
     'is_dm_wave': boolean;
+    'links_disabled': boolean;
     'description_drop': ApiWaveOverviewDescriptionDrop;
     'total_drops_count': number;
     'is_private': boolean;
     'contributors'?: Array<ApiWaveOverviewContributor>;
     'context_profile_context'?: ApiWaveOverviewContextProfileContext;
+    'parent_wave'?: ApiWaveOverview;
+    'has_subwaves'?: boolean;
+    'wave_rep'?: ApiWaveRepSummary;
+    'wave_score'?: ApiWaveScore;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -52,6 +61,12 @@ export class ApiWaveOverview {
             "name": "pfp",
             "baseName": "pfp",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "creator",
+            "baseName": "creator",
+            "type": "ApiProfileMin",
             "format": ""
         },
         {
@@ -85,6 +100,12 @@ export class ApiWaveOverview {
             "format": ""
         },
         {
+            "name": "links_disabled",
+            "baseName": "links_disabled",
+            "type": "boolean",
+            "format": ""
+        },
+        {
             "name": "description_drop",
             "baseName": "description_drop",
             "type": "ApiWaveOverviewDescriptionDrop",
@@ -112,6 +133,30 @@ export class ApiWaveOverview {
             "name": "context_profile_context",
             "baseName": "context_profile_context",
             "type": "ApiWaveOverviewContextProfileContext",
+            "format": ""
+        },
+        {
+            "name": "parent_wave",
+            "baseName": "parent_wave",
+            "type": "ApiWaveOverview",
+            "format": ""
+        },
+        {
+            "name": "has_subwaves",
+            "baseName": "has_subwaves",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "wave_rep",
+            "baseName": "wave_rep",
+            "type": "ApiWaveRepSummary",
+            "format": ""
+        },
+        {
+            "name": "wave_score",
+            "baseName": "wave_score",
+            "type": "ApiWaveScore",
             "format": ""
         }    ];
 

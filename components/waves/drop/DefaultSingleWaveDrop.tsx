@@ -20,10 +20,14 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
     initialDrop,
     onClose
   );
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({
-      wave,
-    });
+  const {
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  } = useApprovalWaveStatus({
+    wave,
+  });
 
   if (!extendedDrop || !wave || !drop) {
     return null;
@@ -35,6 +39,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
       wave={wave}
       onClose={onClose}
       winningThreshold={winningThreshold}
+      winningThresholdMinDurationMs={winningThresholdMinDurationMs}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
     >
@@ -42,6 +47,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
         drop={extendedDrop}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
+        winningThreshold={winningThreshold}
       />
     </SingleWaveDropWrapper>
   );

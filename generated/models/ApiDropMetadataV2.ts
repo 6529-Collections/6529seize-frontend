@@ -14,6 +14,9 @@
 import { ApiDropResolvedIdentityProfileV2 } from '../models/ApiDropResolvedIdentityProfileV2';
 import { HttpFile } from '../http/http';
 
+/**
+* Drop metadata V2 response. data_value maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
+*/
 export class ApiDropMetadataV2 {
     'data_key': string;
     'data_value': string;

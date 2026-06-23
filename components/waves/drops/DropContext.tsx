@@ -7,6 +7,7 @@ import type { DropLocation } from "./drop.types";
 interface DropContextType {
   drop: ExtendedDrop | null;
   location: DropLocation;
+  showVideoFullscreen?: boolean | undefined;
 }
 
 const DropContext = createContext<DropContextType | undefined>(undefined);
@@ -17,6 +18,10 @@ export function useDropContext() {
     throw new Error("useDropContext must be used within a DropProvider");
   }
   return context;
+}
+
+export function useOptionalDropContext() {
+  return useContext(DropContext);
 }
 
 export default DropContext;

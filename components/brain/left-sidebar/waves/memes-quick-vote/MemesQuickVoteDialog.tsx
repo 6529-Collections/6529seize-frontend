@@ -4,6 +4,7 @@ import {
   formatMemesQuickVoteLeftThisRoundText,
   formatMemesQuickVoteUnratedText,
   getDefaultQuickVoteAmount,
+  getQuickVoteRatingRange,
   normalizeQuickVoteAmount,
 } from "@/hooks/memesQuickVote.helpers";
 import type { MemesQuickVoteDialogState } from "@/hooks/useMemesQuickVoteDialogController";
@@ -79,6 +80,7 @@ interface MemesQuickVoteControlsPaneProps {
   readonly leftThisRoundCount: number;
   readonly latestUsedAmount: number | null;
   readonly quickAmounts: readonly number[];
+  readonly allowsNegativeVotes: boolean;
   readonly uncastPower: number | null;
   readonly unratedCount: number;
   readonly votingLabel: string | null;
@@ -251,6 +253,7 @@ function MemesQuickVoteControlsPane({
   leftThisRoundCount,
   latestUsedAmount,
   quickAmounts,
+  allowsNegativeVotes,
   uncastPower,
   unratedCount,
   votingLabel,
@@ -273,6 +276,7 @@ function MemesQuickVoteControlsPane({
         leftThisRoundCount={leftThisRoundCount}
         latestUsedAmount={latestUsedAmount}
         quickAmounts={quickAmounts}
+        allowsNegativeVotes={allowsNegativeVotes}
         uncastPower={uncastPower}
         unratedCount={unratedCount}
         votingLabel={votingLabel}
@@ -301,10 +305,17 @@ function MemesQuickVoteDialogContent({
   unratedCount,
   votingLabel,
 }: MemesQuickVoteDialogContentProps) {
-  const maxRating = activeDrop.context_profile_context?.max_rating ?? 0;
+  const ratingRange = useMemo(
+    () => getQuickVoteRatingRange(activeDrop),
+    [activeDrop]
+  );
+  const allowsNegativeVotes = ratingRange.minRating < 0;
   const defaultAmount = useMemo(
-    () => (maxRating > 0 ? getDefaultQuickVoteAmount(maxRating) : 1),
-    [maxRating]
+    () =>
+      ratingRange.maxRating > 0
+        ? getDefaultQuickVoteAmount(ratingRange.maxRating)
+        : 1,
+    [ratingRange.maxRating]
   );
   const [customValue, setCustomValue] = useState(() => `${defaultAmount}`);
   const [isCustomOpen, setIsCustomOpen] = useState(
@@ -321,24 +332,24 @@ function MemesQuickVoteDialogContent({
   const normalizedLatestUsedAmount =
     latestUsedAmount === null
       ? null
-      : normalizeQuickVoteAmount(latestUsedAmount, maxRating);
+      : normalizeQuickVoteAmount(latestUsedAmount, ratingRange);
   const normalizedCustomAmount = normalizeQuickVoteAmount(
     customValue,
-    maxRating
+    ratingRange
   );
   const visibleQuickAmounts = useMemo(() => {
-    if (maxRating <= 0) {
+    if (ratingRange.maxRating <= 0 && ratingRange.minRating >= 0) {
       return [];
     }
 
     return Array.from(
       new Set(
         recentAmounts
-          .map((amount) => normalizeQuickVoteAmount(amount, maxRating))
+          .map((amount) => normalizeQuickVoteAmount(amount, ratingRange))
           .filter((amount): amount is number => amount !== null)
       )
     ).sort((left, right) => left - right);
-  }, [maxRating, recentAmounts]);
+  }, [ratingRange, recentAmounts]);
 
   const swipeVoteAmount = isCustomOpen
     ? normalizedCustomAmount
@@ -383,7 +394,7 @@ function MemesQuickVoteDialogContent({
         return;
       }
 
-      const normalizedAmount = normalizeQuickVoteAmount(amount, maxRating);
+      const normalizedAmount = normalizeQuickVoteAmount(amount, ratingRange);
 
       if (normalizedAmount === null) {
         return;
@@ -405,7 +416,7 @@ function MemesQuickVoteDialogContent({
       clearBarVoteTimeout,
       isAdvancing,
       isVoteFeedbackActive,
-      maxRating,
+      ratingRange,
       queueVoteAmount,
     ]
   );
@@ -445,14 +456,30 @@ function MemesQuickVoteDialogContent({
     queueVoteAmount(swipeVoteAmount);
   }, [queueVoteAmount, swipeVoteAmount]);
 
-  const handleCustomChange = useCallback((value: string) => {
-    if (value === "") {
-      setCustomValue("");
-      return;
-    }
+  const handleCustomChange = useCallback(
+    (value: string) => {
+      if (value === "") {
+        setCustomValue("");
+        return;
+      }
 
-    setCustomValue(value.replace(/[^\d]/g, ""));
-  }, []);
+      if (!allowsNegativeVotes) {
+        setCustomValue(value.replace(/[^\d]/g, ""));
+        return;
+      }
+
+      const isNegative = value.trim().startsWith("-");
+      const digits = value.replace(/[^\d]/g, "");
+
+      if (digits.length === 0) {
+        setCustomValue(isNegative ? "-" : "");
+        return;
+      }
+
+      setCustomValue(`${isNegative ? "-" : ""}${digits}`);
+    },
+    [allowsNegativeVotes]
+  );
 
   const handleCustomSubmit = useCallback(() => {
     handleBarVoteAmount(customValue, "custom-submit");
@@ -494,6 +521,7 @@ function MemesQuickVoteDialogContent({
     leftThisRoundCount,
     latestUsedAmount: normalizedLatestUsedAmount,
     quickAmounts: visibleQuickAmounts,
+    allowsNegativeVotes,
     uncastPower,
     unratedCount,
     votingLabel,

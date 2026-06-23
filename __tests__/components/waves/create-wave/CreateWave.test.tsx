@@ -1,10 +1,17 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { CreateWaveStep } from "@/types/waves.types";
 
 jest.mock("@/components/waves/create-wave/CreateWaveFlow", () => {
@@ -60,6 +67,10 @@ jest.mock("@/hooks/groups/useGroupMutations", () => ({
   useGroupMutations: jest.fn(),
 }));
 
+jest.mock("@/services/api/waves-v2-api", () => ({
+  createWaveMetadata: jest.fn(),
+}));
+
 // Mock step components
 jest.mock("@/components/waves/create-wave/overview/CreateWaveOverview", () => {
   return function MockCreateWaveOverview() {
@@ -87,26 +98,25 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveActions", () => {
   };
 });
 
+const mockGetDropSnapshot = jest.fn();
+const mockRequestDrop = jest.fn();
+
 jest.mock(
   "@/components/waves/create-wave/description/CreateWaveDescription",
   () => {
     return React.forwardRef(function MockCreateWaveDescription(
-      { showDropError, onHaveDropToSubmitChange }: any,
+      { submitting, showDropError, onHaveDropToSubmitChange }: any,
       ref: any
     ) {
       React.useImperativeHandle(ref, () => ({
-        requestDrop: () => ({
-          parts: [{ content: "Test content" }],
-          title: "Test Drop",
-          referenced_nfts: [],
-          mentioned_users: [],
-          metadata: [],
-        }),
+        getDropSnapshot: mockGetDropSnapshot,
+        requestDrop: mockRequestDrop,
       }));
 
       return (
         <div
           data-testid="create-wave-description"
+          data-submitting={submitting}
           data-show-drop-error={showDropError}
         >
           Description Step
@@ -124,6 +134,7 @@ import { getAdminGroupId } from "@/components/waves/create-wave/services/waveGro
 import { generateDropPart } from "@/components/waves/create-wave/services/waveMediaService";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
+import { createWaveMetadata } from "@/services/api/waves-v2-api";
 
 const mockedUseRouter = useRouter as jest.Mock;
 const mockedUseWaveConfig = useWaveConfig as jest.Mock;
@@ -133,6 +144,7 @@ const mockedGenerateDropPart = generateDropPart as jest.Mock;
 const mockedGetAdminGroupId = getAdminGroupId as jest.Mock;
 const mockedMultiPartUpload = multiPartUpload as jest.Mock;
 const mockedUseGroupMutations = useGroupMutations as jest.Mock;
+const mockedCreateWaveMetadata = createWaveMetadata as jest.Mock;
 
 describe("CreateWave", () => {
   const mockRouter = {
@@ -199,8 +211,12 @@ describe("CreateWave", () => {
       },
       voting: {
         type: "TDH",
+        creditScope: ApiWaveCreditScope.Wave,
         category: null,
         profileId: null,
+        creditNfts: [],
+        creditNftMemeCount: null,
+        allowNegativeVotes: true,
         maxVotesPerIdentityPerDrop: null,
         winningThreshold: null,
         timeWeighted: {
@@ -215,16 +231,26 @@ describe("CreateWave", () => {
         thresholdTimeMs: null,
         maxWinners: null,
       },
+      display: {
+        outcomesVisible: true,
+        approve: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "",
+        },
+      },
       chat: { enabled: true },
     },
     step: CreateWaveStep.OVERVIEW,
     selectedOutcomeType: null,
     errors: [],
     groupsCache: {},
+    isMemeCountLoading: false,
+    isMemeCountError: false,
     setOverview: jest.fn(),
     setDates: jest.fn(),
     setDrops: jest.fn(),
     setOutcomes: jest.fn(),
+    setDisplay: jest.fn(),
     setDropsAdminCanDelete: jest.fn(),
     onStep: jest.fn(),
     onOutcomeTypeChange: jest.fn(),
@@ -232,7 +258,10 @@ describe("CreateWave", () => {
     onVotingTypeChange: jest.fn(),
     onCategoryChange: jest.fn(),
     onProfileIdChange: jest.fn(),
+    onCreditNftsChange: jest.fn(),
+    onCreditScopeChange: jest.fn(),
     onMaxVotesPerIdentityPerDropChange: jest.fn(),
+    onAllowNegativeVotesChange: jest.fn(),
     onTimeWeightedVotingChange: jest.fn(),
     onWinningThresholdChange: jest.fn(),
     onThresholdChange: jest.fn(),
@@ -249,10 +278,29 @@ describe("CreateWave", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetDropSnapshot.mockReturnValue({
+      parts: [{ content: "Test content" }],
+      title: "Test Drop",
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+    });
+    mockRequestDrop.mockReturnValue({
+      parts: [{ content: "Saved content" }],
+      title: "Saved Drop",
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+    });
     mockedUseRouter.mockReturnValue(mockRouter);
     mockedUseWaveConfig.mockReturnValue(mockWaveConfig);
     mockedUseAddWaveMutation.mockReturnValue(mockAddWaveMutation);
     mockedGetAdminGroupId.mockResolvedValue("admin-group-id");
+    mockedCreateWaveMetadata.mockResolvedValue({
+      id: 1,
+      data_key: "key",
+      data_value: "value",
+    });
     mockedMultiPartUpload.mockResolvedValue({
       url: "https://example.com/image.jpg",
     });
@@ -265,15 +313,26 @@ describe("CreateWave", () => {
     global.URL.createObjectURL = jest.fn(() => "mocked-object-url");
   });
 
-  const renderCreateWave = () => {
-    return render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <ReactQueryWrapperContext.Provider value={mockQueryContext}>
-          <CreateWave profile={mockProfile} onBack={onBack} />
-        </ReactQueryWrapperContext.Provider>
-      </AuthContext.Provider>
-    );
+  type RenderCreateWaveOptions = {
+    readonly parentWaveId?: string | null | undefined;
   };
+
+  const createWaveElement = ({
+    parentWaveId,
+  }: RenderCreateWaveOptions = {}) => (
+    <AuthContext.Provider value={mockAuthContext}>
+      <ReactQueryWrapperContext.Provider value={mockQueryContext}>
+        <CreateWave
+          profile={mockProfile}
+          onBack={onBack}
+          parentWaveId={parentWaveId}
+        />
+      </ReactQueryWrapperContext.Provider>
+    </AuthContext.Provider>
+  );
+
+  const renderCreateWave = (options: RenderCreateWaveOptions = {}) =>
+    render(createWaveElement(options));
 
   it("renders the create wave form with main steps and current step content", () => {
     renderCreateWave();
@@ -282,6 +341,14 @@ describe("CreateWave", () => {
       'Create Wave "Test Wave"'
     );
     expect(screen.getByTestId("create-wave-overview")).toBeInTheDocument();
+  });
+
+  it("uses subwave title when creating under a parent wave", () => {
+    renderCreateWave({ parentWaveId: "parent-wave" });
+
+    expect(screen.getByTestId("create-wave-flow-title")).toHaveTextContent(
+      'Create subwave "Test Wave"'
+    );
   });
 
   it("calls onBack when back button is clicked", () => {
@@ -351,8 +418,73 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
         expect(mockedGetAdminGroupId).toHaveBeenCalled();
-        expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
+        expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalledWith({
+          body: {
+            name: "Test Wave",
+            description: "Test description",
+          },
+          displayMetadataRequests: [],
+        });
+      });
+    });
+
+    it("passes parent wave id into submitted subwave body", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave({ parentWaveId: "parent-wave" });
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedGetCreateNewWaveBody).toHaveBeenCalledWith(
+          expect.objectContaining({
+            parentWaveId: "parent-wave",
+          })
+        );
+      });
+    });
+
+    it("locks the description while submit work is pending", async () => {
+      let resolveAuth: ((value: { success: boolean }) => void) | undefined;
+      mockAuthContext.requestAuth.mockReturnValue(
+        new Promise((resolve) => {
+          resolveAuth = resolve;
+        })
+      );
+
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "true"
+        );
+      });
+
+      await act(async () => {
+        resolveAuth?.({ success: false });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "false"
+        );
       });
     });
 
@@ -377,29 +509,7 @@ describe("CreateWave", () => {
     });
 
     it("shows drop error when no drop content is provided", async () => {
-      // Create a mock for empty drop by updating the mocked component
-      jest.doMock(
-        "../../../../components/waves/create-wave/description/CreateWaveDescription",
-        () => {
-          return React.forwardRef(function MockCreateWaveDescriptionEmpty(
-            { showDropError }: any,
-            ref: any
-          ) {
-            React.useImperativeHandle(ref, () => ({
-              requestDrop: () => ({ parts: [] }),
-            }));
-
-            return (
-              <div
-                data-testid="create-wave-description"
-                data-show-drop-error={showDropError}
-              >
-                Description Step
-              </div>
-            );
-          });
-        }
-      );
+      mockGetDropSnapshot.mockReturnValue({ parts: [] });
 
       const configOnDescriptionStep = {
         ...mockWaveConfig,
@@ -414,7 +524,93 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-show-drop-error",
+          "true"
+        );
         expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+      });
+    });
+
+    it("blocks submission while inline image uploads are still pending", async () => {
+      mockGetDropSnapshot.mockReturnValue({
+        parts: [{ content: "Draft with ![Seize](loading)" }],
+        title: "Test Drop",
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      });
+
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            image: new File([""], "test.jpg", { type: "image/jpeg" }),
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave();
+
+      const completeButton = screen.getByRole("button", { name: /complete/i });
+      fireEvent.click(completeButton);
+
+      await waitFor(() => {
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          message: "Wait for image uploads to finish.",
+          type: "error",
+        });
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "false"
+        );
+      });
+
+      expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+      expect(mockGetDropSnapshot).toHaveBeenCalled();
+      expect(mockedGetAdminGroupId).not.toHaveBeenCalled();
+      expect(mockedGenerateDropPart).not.toHaveBeenCalled();
+      expect(mockedMultiPartUpload).not.toHaveBeenCalled();
+      expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+    });
+
+    it("allows submission once inline image uploads have finished", async () => {
+      mockGetDropSnapshot.mockReturnValue({
+        parts: [
+          { content: "Draft with ![Seize](https://cdn.example/image.png)" },
+        ],
+        title: "Test Drop",
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      });
+
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave();
+
+      const completeButton = screen.getByRole("button", { name: /complete/i });
+      fireEvent.click(completeButton);
+
+      await waitFor(() => {
+        expect(mockedGetAdminGroupId).toHaveBeenCalled();
+        expect(mockedGenerateDropPart).toHaveBeenCalled();
+        expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
+      });
+
+      expect(mockAuthContext.setToast).not.toHaveBeenCalledWith({
+        message: "Wait for image uploads to finish.",
+        type: "error",
       });
     });
 
@@ -477,9 +673,9 @@ describe("CreateWave", () => {
       // Mock the mutation to call onSuccess
       mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => {
         const mutation = {
-          mutateAsync: jest.fn().mockImplementation(async (data) => {
+          mutateAsync: jest.fn().mockImplementation(async (variables) => {
             const result = { id: "new-wave-id" };
-            onSuccess(result);
+            await onSuccess(result, variables);
             return result;
           }),
         };
@@ -495,6 +691,298 @@ describe("CreateWave", () => {
         expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
         expect(mockQueryContext.waitAndInvalidateDrops).toHaveBeenCalled();
         expect(mockQueryContext.onWaveCreated).toHaveBeenCalled();
+      });
+      expect(mockedCreateWaveMetadata).not.toHaveBeenCalled();
+    });
+
+    it("saves changed display metadata before redirecting", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "APPROVE",
+          },
+          display: {
+            ...mockWaveConfig.config.display,
+            approve: {
+              approvalsTabLabel: " Candidates ",
+              approvedTabLabel: "Selected",
+            },
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result, variables);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
+      });
+
+      expect(mockedCreateWaveMetadata).toHaveBeenNthCalledWith(1, {
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approvals_label",
+          data_value: "Candidates",
+        },
+      });
+      expect(mockedCreateWaveMetadata).toHaveBeenNthCalledWith(2, {
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approved_label",
+          data_value: "Selected",
+        },
+      });
+      expect(mockedCreateWaveMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRouter.push.mock.invocationCallOrder[0]
+      );
+    });
+
+    it("saves hidden outcome display metadata for rank waves", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "RANK",
+          },
+          display: {
+            outcomesVisible: false,
+            approve: {
+              approvalsTabLabel: "",
+              approvedTabLabel: "",
+            },
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result, variables);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
+          waveId: "new-wave-id",
+          body: {
+            data_key: "wave_display.outcomes.visible",
+            data_value: "false",
+          },
+        });
+      });
+    });
+
+    it("saves hidden outcome display metadata for approve waves", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "APPROVE",
+          },
+          display: {
+            ...mockWaveConfig.config.display,
+            outcomesVisible: false,
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result, variables);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
+          waveId: "new-wave-id",
+          body: {
+            data_key: "wave_display.outcomes.visible",
+            data_value: "false",
+          },
+        });
+      });
+    });
+
+    it("uses the display metadata snapshot from submit time", async () => {
+      const submittedConfig = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "APPROVE",
+          },
+          display: {
+            ...mockWaveConfig.config.display,
+            approve: {
+              approvalsTabLabel: "Candidates",
+              approvedTabLabel: "Selected",
+            },
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      const laterConfig = {
+        ...submittedConfig,
+        config: {
+          ...submittedConfig.config,
+          display: {
+            ...submittedConfig.config.display,
+            approve: {
+              approvalsTabLabel: "Apps",
+              approvedTabLabel: "Chosen",
+            },
+          },
+        },
+      };
+      let latestOnSuccess:
+        | ((
+            result: { readonly id: string },
+            variables: unknown
+          ) => Promise<void>)
+        | undefined;
+      let resolveMutation: (() => void) | undefined;
+      const mutateAsync = jest.fn().mockImplementation(async (variables) => {
+        await new Promise<void>((resolve) => {
+          resolveMutation = resolve;
+        });
+        const result = { id: "new-wave-id" };
+        await latestOnSuccess?.(result, variables);
+        return result;
+      });
+
+      mockedUseWaveConfig.mockReturnValue(submittedConfig);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => {
+        latestOnSuccess = onSuccess;
+        return { mutateAsync };
+      });
+
+      const renderResult = renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mutateAsync).toHaveBeenCalledWith({
+          body: {
+            name: "Test Wave",
+            description: "Test description",
+          },
+          displayMetadataRequests: [
+            {
+              data_key: "wave_display.approve.tabs.approvals_label",
+              data_value: "Candidates",
+            },
+            {
+              data_key: "wave_display.approve.tabs.approved_label",
+              data_value: "Selected",
+            },
+          ],
+        });
+      });
+
+      mockedUseWaveConfig.mockReturnValue(laterConfig);
+      renderResult.rerender(createWaveElement());
+
+      await act(async () => {
+        resolveMutation?.();
+      });
+
+      await waitFor(() => {
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
+      });
+
+      expect(mockedCreateWaveMetadata).toHaveBeenNthCalledWith(1, {
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approvals_label",
+          data_value: "Candidates",
+        },
+      });
+      expect(mockedCreateWaveMetadata).toHaveBeenNthCalledWith(2, {
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approved_label",
+          data_value: "Selected",
+        },
+      });
+      expect(mockedCreateWaveMetadata).not.toHaveBeenCalledWith({
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approvals_label",
+          data_value: "Apps",
+        },
+      });
+    });
+
+    it("warns and still redirects when display metadata save fails", async () => {
+      mockedCreateWaveMetadata.mockRejectedValue(new Error("metadata failed"));
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "APPROVE",
+          },
+          display: {
+            ...mockWaveConfig.config.display,
+            approve: {
+              approvalsTabLabel: "Candidates",
+              approvedTabLabel: "",
+            },
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result, variables);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          message: "Wave created, but custom display settings were not saved.",
+          type: "warning",
+        });
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
       });
     });
 
@@ -530,9 +1018,13 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-          message: errorMessage,
+          title: "Couldn't create this wave.",
+          description: "Please try again.",
+          details: `${errorMessage}.`,
           type: "error",
         });
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
       });
     });
   });

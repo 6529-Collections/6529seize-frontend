@@ -8,12 +8,13 @@ import type {
 } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ImageScale } from "@/helpers/image.helpers";
 import { useMemo } from "react";
 import DropContext from "./DropContext";
+import { DropLocation } from "./drop.types";
 import type {
   DropIdentityMode,
   DropInteractionParams,
-  DropLocation,
   DropTimestampLayout,
 } from "./drop.types";
 import ParticipationDrop from "./participation/ParticipationDrop";
@@ -41,7 +42,13 @@ interface DropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly inlineAuthorOnDesktop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly showVideoFullscreen?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;
@@ -69,7 +76,13 @@ export default function Drop({
   identityMode,
   timestampLayout,
   showInteractions = true,
+  inlineAuthorOnDesktop,
+  mediaImageScale,
+  fullWidthMedia,
+  fullWidthLinkPreviews,
+  showVideoFullscreen = true,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   embedPath,
@@ -77,6 +90,10 @@ export default function Drop({
   embedDepth,
   maxEmbedDepth,
 }: DropProps) {
+  const canOpenDrop =
+    drop.drop_type !== ApiDropType.Chat || location !== DropLocation.WAVE;
+  const openDropContentClick = canOpenDrop ? onDropContentClick : undefined;
+
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
       <ParticipationDrop
@@ -86,14 +103,19 @@ export default function Drop({
         location={location}
         onReply={onReply}
         onQuoteClick={onQuoteClick}
-        onDropContentClick={onDropContentClick}
+        onDropContentClick={openDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
         footer={footer}
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        inlineAuthorOnDesktop={inlineAuthorOnDesktop}
+        mediaImageScale={mediaImageScale}
+        fullWidthMedia={fullWidthMedia}
+        fullWidthLinkPreviews={fullWidthLinkPreviews}
         winningThreshold={winningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
         embedPath={embedPath}
@@ -114,13 +136,18 @@ export default function Drop({
         onReply={onReply}
         onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
-        onDropContentClick={onDropContentClick}
+        onDropContentClick={openDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
         footer={footer}
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        inlineAuthorOnDesktop={inlineAuthorOnDesktop}
+        mediaImageScale={mediaImageScale}
+        fullWidthMedia={fullWidthMedia}
+        fullWidthLinkPreviews={fullWidthLinkPreviews}
+        winningThreshold={winningThreshold}
         embedPath={embedPath}
         quotePath={quotePath}
         embedDepth={embedDepth}
@@ -141,13 +168,17 @@ export default function Drop({
         onReply={onReply}
         onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
-        onDropContentClick={onDropContentClick}
+        onDropContentClick={openDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         wrapContentOnly={wrapContentOnly}
         footer={footer}
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        inlineAuthorOnDesktop={inlineAuthorOnDesktop}
+        mediaImageScale={mediaImageScale}
+        fullWidthMedia={fullWidthMedia}
+        fullWidthLinkPreviews={fullWidthLinkPreviews}
         embedPath={embedPath}
         quotePath={quotePath}
         embedDepth={embedDepth}
@@ -156,7 +187,10 @@ export default function Drop({
     ),
   };
 
-  const memoizedValue = useMemo(() => ({ drop, location }), [drop, location]);
+  const memoizedValue = useMemo(
+    () => ({ drop, location, showVideoFullscreen }),
+    [drop, location, showVideoFullscreen]
+  );
 
   return (
     <DropContext.Provider value={memoizedValue}>

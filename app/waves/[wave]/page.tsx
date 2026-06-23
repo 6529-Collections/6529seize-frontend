@@ -19,14 +19,18 @@ export default async function WavePage({
   return await renderWavesPageContent({
     waveId: wave,
     searchParams: resolvedParams,
+    routeContext: "waves",
   });
 }
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ wave: string }>;
+  readonly searchParams: Promise<WavesSearchParams>;
 }): Promise<Metadata> {
   const { wave } = await params;
-  return await buildWavesMetadata(wave);
+  const resolvedParams = await searchParams;
+  return await buildWavesMetadata(wave, resolvedParams);
 }

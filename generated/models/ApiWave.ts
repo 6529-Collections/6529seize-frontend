@@ -18,7 +18,10 @@ import { ApiWaveConfig } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveDecisionPause } from '../models/ApiWaveDecisionPause';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
+import { ApiWaveOverview } from '../models/ApiWaveOverview';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
+import { ApiWaveRepSummary } from '../models/ApiWaveRepSummary';
+import { ApiWaveScore } from '../models/ApiWaveScore';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
 import { ApiWaveVotingConfig } from '../models/ApiWaveVotingConfig';
@@ -59,6 +62,10 @@ export class ApiWave {
     'pauses': Array<ApiWaveDecisionPause>;
     'pinned': boolean;
     'identity_wave': boolean;
+    'parent_wave'?: ApiWaveOverview;
+    'has_subwaves'?: boolean;
+    'wave_rep'?: ApiWaveRepSummary;
+    'wave_score'?: ApiWaveScore;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -177,6 +184,30 @@ export class ApiWave {
             "name": "identity_wave",
             "baseName": "identity_wave",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "parent_wave",
+            "baseName": "parent_wave",
+            "type": "ApiWaveOverview",
+            "format": ""
+        },
+        {
+            "name": "has_subwaves",
+            "baseName": "has_subwaves",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "wave_rep",
+            "baseName": "wave_rep",
+            "type": "ApiWaveRepSummary",
+            "format": ""
+        },
+        {
+            "name": "wave_score",
+            "baseName": "wave_score",
+            "type": "ApiWaveScore",
             "format": ""
         }    ];
 

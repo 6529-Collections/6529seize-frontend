@@ -18,6 +18,10 @@ import {
   sanitizeErrorForUser,
 } from "@/utils/error-sanitizer";
 import {
+  markMobileLaunchStep,
+  measureMobileLaunchAsync,
+} from "@/utils/monitoring/mobileLaunchTiming";
+import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
@@ -145,7 +149,11 @@ export default function WagmiSetup({
   const processedWallets = useRef<Set<string>>(new Set());
 
   // Memoize platform detection to avoid repeated calls
-  const isCapacitor = useMemo(() => Capacitor.isNativePlatform(), []);
+  const isCapacitor = useMemo(() => {
+    const isNative = Capacitor.isNativePlatform();
+    markMobileLaunchStep("wagmi_capacitor_detected");
+    return isNative;
+  }, []);
 
   // Use the same adapter manager for both mobile and web
   // AppKit will automatically handle the appropriate connectors
@@ -197,8 +205,12 @@ export default function WagmiSetup({
       setIsInitializing(true);
 
       try {
-        const result = initializeAppKitWithWallets(wallets);
-        await (result.ready ?? Promise.resolve());
+        const result = await measureMobileLaunchAsync("wagmi_appkit_init", () =>
+          initializeAppKitWithWallets(wallets)
+        );
+        await measureMobileLaunchAsync("wagmi_adapter_ready", async () => {
+          await (result.ready ?? Promise.resolve());
+        });
         setCurrentAdapter(result.adapter);
       } catch (error) {
         logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
@@ -224,6 +236,14 @@ export default function WagmiSetup({
       setupAppKitAdapter([]).catch(() => undefined);
     }
   }, [isMounted, currentAdapter, isInitializing]); // setupAppKitAdapter intentionally excluded to prevent loops
+
+  useEffect(() => {
+    if (!isMounted || !currentAdapter) {
+      return;
+    }
+
+    markMobileLaunchStep("wagmi_children_unblocked");
+  }, [isMounted, currentAdapter]);
 
   // Inject wallet connectors dynamically using hooks (simplified approach)
   useEffect(() => {

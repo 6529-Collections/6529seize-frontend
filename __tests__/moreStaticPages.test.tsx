@@ -175,7 +175,12 @@ describe("additional static pages", () => {
 
     // Check the first argument (props)
     const callArgs = mockMemeLabCollection.mock.calls[0];
-    expect(callArgs[0]).toEqual({ collectionName: "test collection" });
+    expect(callArgs[0]).toEqual({
+      collectionName: "test collection",
+      initialSort: null,
+      initialSortDirection: null,
+      locale: "en-US",
+    });
 
     // Verify the mocked component renders
     expect(screen.getByTestId("meme-lab-collection")).toBeInTheDocument();
@@ -199,6 +204,9 @@ describe("additional static pages", () => {
     const callArgs = mockMemeLabCollection.mock.calls[0];
     expect(callArgs[0]).toEqual({
       collectionName: "multi word collection name",
+      initialSort: null,
+      initialSortDirection: null,
+      locale: "en-US",
     });
   });
 });

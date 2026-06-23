@@ -129,6 +129,7 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.currentStep).toBe("agreement");
     expect(result.current.traits.artist).toBe("alice");
     expect(result.current.traits.seizeArtistProfile).toBe("alice");
+    expect(result.current.isAdditionalActionPromised).toBe(false);
     expect(result.current.operationalData.payment_info.payment_address).toBe(
       "0xalice"
     );
@@ -143,6 +144,10 @@ describe("useArtworkSubmissionForm", () => {
       result.current.updateTraitField("description", "d");
     });
     expect(result.current.traits.description).toBe("d");
+    act(() => {
+      result.current.setAdditionalActionPromised(true);
+    });
+    expect(result.current.isAdditionalActionPromised).toBe(true);
   });
 
   it("initializes from a draft without profile defaults or bio fetch", () => {
@@ -175,6 +180,7 @@ describe("useArtworkSubmissionForm", () => {
         url: "https://example.com/art.png",
         mimeType: "image/png",
       },
+      isAdditionalActionPromised: true,
     } as MemesSubmissionInitialDraft;
 
     const { result } = renderArtworkSubmissionForm(initialDraft);
@@ -185,6 +191,7 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.traits.artist).toBe("draft-artist");
     expect(result.current.traits.seizeArtistProfile).toBe("draft-profile");
     expect(result.current.operationalData).toBe(operationalData);
+    expect(result.current.isAdditionalActionPromised).toBe(true);
     expect(commonApiFetch).not.toHaveBeenCalled();
   });
 
@@ -220,7 +227,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm(initialDraft);
     const replacementFile = new File(["replacement"], "replacement.png", {
@@ -245,6 +252,50 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.artworkUploaded).toBe(true);
   });
 
+  it("clears stale preview media when replacing a video resubmission with a static image", () => {
+    const existingMedia = {
+      url: "https://example.com/original.mp4",
+      mimeType: "video/mp4",
+    };
+    const draftWithExistingMedia = createDraftWithExistingMedia(existingMedia);
+    const initialDraft = {
+      ...draftWithExistingMedia,
+      operationalData: {
+        ...draftWithExistingMedia.operationalData,
+        additional_media: {
+          artist_profile_media: [],
+          artwork_commentary_media: [],
+          preview_image: "https://example.com/stale-preview.png",
+          promo_video: "https://example.com/stale-promo.mp4",
+        },
+      },
+    };
+    class MockFileReader {
+      onloadend: (() => void) | null = null;
+      result = "data-replacement-image";
+      readAsDataURL() {
+        this.onloadend?.();
+      }
+    }
+    globalThis.FileReader = MockFileReader as any;
+
+    const { result } = renderArtworkSubmissionForm(initialDraft);
+
+    act(() => {
+      result.current.handleFileSelect(
+        new File(["replacement"], "replacement.png", { type: "image/png" })
+      );
+    });
+
+    expect(result.current.artworkUrl).toBe("data-replacement-image");
+    expect(result.current.operationalData.additional_media.preview_image).toBe(
+      ""
+    );
+    expect(result.current.operationalData.additional_media.promo_video).toBe(
+      ""
+    );
+  });
+
   it("preserves existing resubmission media after a replacement read error", () => {
     const existingMedia = {
       url: "https://example.com/original.png",
@@ -261,7 +312,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm(initialDraft);
 
@@ -324,7 +375,7 @@ describe("useArtworkSubmissionForm", () => {
       }
       result = "url";
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
     act(() => {
       result.current.handleFileSelect(new File(["x"], "a.png"));
     });
@@ -352,7 +403,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm();
     const firstFile = new File(["x"], "first.png", { type: "image/png" });
@@ -393,7 +444,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm();
 
@@ -490,9 +541,35 @@ describe("useArtworkSubmissionForm", () => {
     });
     expect(result.current.externalMediaError).toBeNull();
     expect(result.current.externalMediaPreviewUrl).toBe(
-      `https://ipfs.io/ipfs/${CID_V1}`
+      `https://media.6529.io/ipfs/${CID_V1}`
     );
     expect(result.current.externalMediaValidationStatus).toBe("valid");
+  });
+
+  it("normalizes parsed IPFS URLs with subpaths to the root CID", async () => {
+    const { result } = renderArtworkSubmissionForm();
+
+    act(() => {
+      result.current.setMediaSource("url");
+    });
+    act(() => {
+      result.current.setExternalMediaHash(`ipfs://${CID_V1}/index.html`);
+    });
+
+    await waitFor(() => {
+      expect(result.current.isExternalMediaValid).toBe(true);
+    });
+
+    expect(validateInteractivePreview).toHaveBeenCalledWith({
+      provider: "ipfs",
+      path: CID_V1,
+    });
+    expect(result.current.externalMediaHashInput).toBe(
+      `ipfs://${CID_V1}/index.html`
+    );
+    expect(result.current.externalMediaPreviewUrl).toBe(
+      `https://media.6529.io/ipfs/${CID_V1}`
+    );
   });
 
   it("surfaces gateway validation errors from server action", async () => {
@@ -528,7 +605,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     act(() => {
       result.current.handleFileSelect(new File(["x"], "a.png"));

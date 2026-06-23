@@ -10,7 +10,6 @@ const MUTATION_RETENTION_MS = 5 * 60_000;
 const REACTION_FEATURE = "drop-reaction";
 const REACTION_REQUEST_OPERATION = "reaction-request";
 const REACTION_ANOMALY_OPERATION = "reaction-anomaly";
-const ANOMALY_OUT_OF_ORDER = "out-of-order";
 const ANOMALY_OPTIMISTIC_REVERTED = "optimistic-reverted";
 
 export type ReactionSource = "quick-react" | "picker" | "chip";
@@ -43,11 +42,25 @@ interface ReactionMutationContext {
   requestSentAt: number | null;
   apiSucceededAt: number | null;
   apiFailedAt: number | null;
+  realtimeReconciledAt: number | null;
   failureCaptured?: boolean;
   supersededByMutationId?: string | null;
 }
 
+interface ReactionMutationResult {
+  readonly isLatestMutation: boolean;
+  readonly supersededByMutationId: string | null;
+}
+
+interface ReactionRealtimeReconciliationResult {
+  readonly shouldApplyCanonicalDrop: boolean;
+  readonly expectedReaction: string | null;
+  readonly serverReaction: string | null;
+  readonly supersededByMutationId?: string;
+}
+
 const latestMutationIdByDrop = new Map<string, string>();
+const activeIntentMutationIdByDrop = new Map<string, string>();
 const dropMutationSeqByDrop = new Map<string, number>();
 const mutationContextById = new Map<string, ReactionMutationContext>();
 const dedupeEventAtByKey = new Map<string, number>();
@@ -68,6 +81,9 @@ function pruneState(now: number): void {
     if (latestMutationIdByDrop.get(context.dropId) === mutationId) {
       latestMutationIdByDrop.delete(context.dropId);
       dropMutationSeqByDrop.delete(context.dropId);
+    }
+    if (activeIntentMutationIdByDrop.get(context.dropId) === mutationId) {
+      activeIntentMutationIdByDrop.delete(context.dropId);
     }
   }
 }
@@ -307,13 +323,16 @@ function captureReactionEvent({
   });
 }
 
-function maybeCaptureSupersededResponse(
+function recordSupersededResponse(
   context: ReactionMutationContext,
   now: number
-): void {
+): ReactionMutationResult {
   const latestMutationId = latestMutationIdByDrop.get(context.dropId);
   if (!latestMutationId || latestMutationId === context.mutationId) {
-    return;
+    return {
+      isLatestMutation: true,
+      supersededByMutationId: null,
+    };
   }
 
   context.supersededByMutationId = latestMutationId;
@@ -321,54 +340,23 @@ function maybeCaptureSupersededResponse(
     "reaction.response_superseded",
     context,
     {
+      superseded: true,
       superseded_by_mutation_id: latestMutationId,
       time_since_mutation_ms: now - context.startedAt,
     },
     "warning"
   );
 
-  const dedupeKey = [
-    ANOMALY_OUT_OF_ORDER,
-    context.dropId,
-    context.source,
-    context.action,
-    latestMutationId,
-  ].join(":");
-  if (!shouldCaptureEvent(dedupeKey, now)) {
-    return;
-  }
+  return {
+    isLatestMutation: false,
+    supersededByMutationId: latestMutationId,
+  };
+}
 
-  captureReactionEvent({
-    error: new Error("Reaction response superseded by newer mutation"),
-    level: "warning",
-    fingerprint: [REACTION_FEATURE, ANOMALY_OUT_OF_ORDER],
-    tags: {
-      feature: REACTION_FEATURE,
-      operation: REACTION_ANOMALY_OPERATION,
-      anomaly_kind: ANOMALY_OUT_OF_ORDER,
-      source: context.source,
-      action: context.action,
-    },
-    extra: {
-      mutation_id: context.mutationId,
-      drop_mutation_seq: context.dropMutationSeq,
-      drop_id: context.dropId,
-      wave_id: context.waveId,
-      previous_reaction: context.previousReaction,
-      intended_reaction: context.intendedReaction,
-      optimistic_reaction: context.optimisticReaction,
-      profile_id: context.profileId ?? undefined,
-      pathname: context.pathname ?? undefined,
-      visibility_state: context.visibilityState ?? undefined,
-      online: context.online ?? undefined,
-      websocket_status: context.websocketStatus ?? undefined,
-      endpoint: context.endpoint ?? undefined,
-      method: context.method ?? undefined,
-      superseded_by_mutation_id: latestMutationId,
-      time_since_mutation_ms: now - context.startedAt,
-      anomaly_kind: ANOMALY_OUT_OF_ORDER,
-    },
-  });
+function clearActiveIntentForContext(context: ReactionMutationContext): void {
+  if (activeIntentMutationIdByDrop.get(context.dropId) === context.mutationId) {
+    activeIntentMutationIdByDrop.delete(context.dropId);
+  }
 }
 
 export function deriveReactionAction(
@@ -425,9 +413,11 @@ export function beginReactionMutation(params: {
     requestSentAt: null,
     apiSucceededAt: null,
     apiFailedAt: null,
+    realtimeReconciledAt: null,
   };
 
   latestMutationIdByDrop.set(params.dropId, context.mutationId);
+  activeIntentMutationIdByDrop.set(params.dropId, context.mutationId);
   mutationContextById.set(context.mutationId, context);
 
   addReactionBreadcrumb("reaction.intent", context);
@@ -455,27 +445,36 @@ export function recordReactionRequestSent(
   addReactionBreadcrumb("reaction.request_sent", context);
 }
 
+export function isReactionMutationLatest(params: {
+  readonly dropId: string;
+  readonly mutationId: string;
+}): boolean {
+  return latestMutationIdByDrop.get(params.dropId) === params.mutationId;
+}
+
 export function recordReactionRequestSucceeded(
   context: ReactionMutationContext
-): void {
+): ReactionMutationResult {
   const now = Date.now();
   context.apiSucceededAt = now;
 
-  maybeCaptureSupersededResponse(context, now);
+  const result = recordSupersededResponse(context, now);
 
   addReactionBreadcrumb("reaction.request_succeeded", context, {
     latency_ms: now - (context.requestSentAt ?? context.startedAt),
   });
+
+  return result;
 }
 
 export function recordReactionRequestFailed(
   context: ReactionMutationContext,
   error: unknown
-): void {
+): ReactionMutationResult {
   const now = Date.now();
   context.apiFailedAt = now;
 
-  maybeCaptureSupersededResponse(context, now);
+  const result = recordSupersededResponse(context, now);
 
   const { statusCode, errorKind } = classifyReactionError(error);
   const latencyMs = now - (context.requestSentAt ?? context.startedAt);
@@ -493,6 +492,10 @@ export function recordReactionRequestFailed(
     "warning"
   );
 
+  if (!result.isLatestMutation) {
+    return result;
+  }
+
   const dedupeKey = [
     "failure",
     errorKind,
@@ -504,7 +507,8 @@ export function recordReactionRequestFailed(
 
   if (!shouldCaptureEvent(dedupeKey, now)) {
     context.failureCaptured = true;
-    return;
+    clearActiveIntentForContext(context);
+    return result;
   }
 
   captureReactionEvent({
@@ -541,6 +545,8 @@ export function recordReactionRequestFailed(
   });
 
   context.failureCaptured = true;
+  clearActiveIntentForContext(context);
+  return result;
 }
 
 export function recordReactionRollbackApplied(
@@ -555,34 +561,81 @@ export function recordReactionRealtimeReconciliation(params: {
     readonly context_profile_context: ApiDrop["context_profile_context"];
   };
   websocketStatus?: WebSocketStatus | string | null;
-}): void {
+}): ReactionRealtimeReconciliationResult {
   const now = Date.now();
   pruneState(now);
 
-  const latestMutationId = latestMutationIdByDrop.get(params.drop.id);
-  if (!latestMutationId) {
-    return;
+  const serverReaction = toNullableReaction(
+    params.drop.context_profile_context?.reaction
+  );
+  const defaultResult: ReactionRealtimeReconciliationResult = {
+    shouldApplyCanonicalDrop: true,
+    expectedReaction: null,
+    serverReaction,
+  };
+
+  const activeIntentMutationId = activeIntentMutationIdByDrop.get(
+    params.drop.id
+  );
+  if (!activeIntentMutationId) {
+    return defaultResult;
   }
 
-  const context = mutationContextById.get(latestMutationId);
-  if (!context || now - context.startedAt > RECONCILIATION_WINDOW_MS) {
-    return;
+  const context = mutationContextById.get(activeIntentMutationId);
+  if (!context) {
+    return defaultResult;
   }
 
-  const serverReaction = params.drop.context_profile_context?.reaction ?? null;
+  const expectedReaction = context.intendedReaction;
+  const timeSinceMutationMs = now - context.startedAt;
+  const websocketStatus =
+    toWebsocketStatus(params.websocketStatus) ?? undefined;
+  const resultBase = {
+    expectedReaction,
+    serverReaction,
+  };
 
-  if (serverReaction === context.intendedReaction) {
+  if (serverReaction === expectedReaction) {
+    context.realtimeReconciledAt = now;
     addReactionBreadcrumb("reaction.realtime_reconciled", context, {
       reconciled_from: "ws_refetch",
       server_reaction: serverReaction ?? undefined,
-      time_since_mutation_ms: now - context.startedAt,
-      websocket_status: toWebsocketStatus(params.websocketStatus) ?? undefined,
+      time_since_mutation_ms: timeSinceMutationMs,
+      websocket_status: websocketStatus,
     });
-    return;
+    return {
+      ...resultBase,
+      shouldApplyCanonicalDrop: true,
+    };
+  }
+
+  if (timeSinceMutationMs <= RECONCILIATION_WINDOW_MS) {
+    addReactionBreadcrumb(
+      "reaction.realtime_superseded",
+      context,
+      {
+        reconciled_from: "ws_refetch",
+        expected_reaction: expectedReaction ?? undefined,
+        server_reaction: serverReaction ?? undefined,
+        superseded_by_mutation_id: context.mutationId,
+        time_since_mutation_ms: timeSinceMutationMs,
+        websocket_status: websocketStatus,
+      },
+      "warning"
+    );
+
+    return {
+      ...resultBase,
+      shouldApplyCanonicalDrop: false,
+      supersededByMutationId: context.mutationId,
+    };
   }
 
   if (context.apiFailedAt !== null || context.apiSucceededAt === null) {
-    return;
+    return {
+      ...resultBase,
+      shouldApplyCanonicalDrop: true,
+    };
   }
 
   addReactionBreadcrumb(
@@ -591,8 +644,8 @@ export function recordReactionRealtimeReconciliation(params: {
     {
       reconciled_from: "ws_refetch",
       server_reaction: serverReaction ?? undefined,
-      time_since_mutation_ms: now - context.startedAt,
-      websocket_status: toWebsocketStatus(params.websocketStatus) ?? undefined,
+      time_since_mutation_ms: timeSinceMutationMs,
+      websocket_status: websocketStatus,
     },
     "warning"
   );
@@ -607,7 +660,11 @@ export function recordReactionRealtimeReconciliation(params: {
   ].join(":");
 
   if (!shouldCaptureEvent(dedupeKey, now)) {
-    return;
+    clearActiveIntentForContext(context);
+    return {
+      ...resultBase,
+      shouldApplyCanonicalDrop: true,
+    };
   }
 
   captureReactionEvent({
@@ -643,14 +700,22 @@ export function recordReactionRealtimeReconciliation(params: {
       endpoint: context.endpoint ?? undefined,
       method: context.method ?? undefined,
       reconciled_from: "ws_refetch",
-      time_since_mutation_ms: now - context.startedAt,
+      time_since_mutation_ms: timeSinceMutationMs,
       anomaly_kind: ANOMALY_OPTIMISTIC_REVERTED,
     },
   });
+
+  clearActiveIntentForContext(context);
+
+  return {
+    ...resultBase,
+    shouldApplyCanonicalDrop: true,
+  };
 }
 
 export function __resetDropReactionMonitoringForTests(): void {
   latestMutationIdByDrop.clear();
+  activeIntentMutationIdByDrop.clear();
   dropMutationSeqByDrop.clear();
   mutationContextById.clear();
   dedupeEventAtByKey.clear();

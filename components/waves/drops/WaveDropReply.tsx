@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import ContentDisplay from "./ContentDisplay";
 import DropLoading from "./DropLoading";
@@ -27,7 +28,9 @@ export default function WaveDropReply({
   maybeDrop,
   onReplyClick,
 }: WaveDropReplyProps) {
+  const compact = useCompactMode();
   const fixedReplyHeightClasses = "tw-h-[24px] tw-min-h-[24px] tw-max-h-[24px]";
+  const replyContentOffsetClass = compact ? "tw-ml-10" : "tw-ml-12";
   const { drop, content, isLoading } = useDropContent(dropId, 1, maybeDrop);
   const replyPreviewContent = useMemo(() => {
     if (content.apiMedia.length > 0 || content.segments.length !== 1) {
@@ -105,7 +108,9 @@ export default function WaveDropReply({
         className="tw-absolute tw-left-5 tw-top-2.5 tw-w-6 tw-cursor-pointer tw-rounded-tl-[12px] tw-border-0 tw-border-l-[1.5px] tw-border-t-[1.5px] tw-border-solid tw-border-iron-700"
         style={{ height: "calc(100% - 3px)" }}
       ></div>
-      <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">
+      <div
+        className={`${replyContentOffsetClass} tw-flex tw-items-center tw-gap-x-1.5`}
+      >
         <div
           data-testid="wave-drop-reply-fixed-container"
           className={`${fixedReplyHeightClasses} tw-flex tw-w-full tw-items-center tw-overflow-hidden`}

@@ -4,6 +4,10 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
 import {
+  DROP_POLL_VOTED_NOTIFICATION_CAUSE,
+  type NotificationCause,
+} from "@/types/feed.types";
+import {
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
@@ -18,7 +22,7 @@ import {
 } from "react";
 
 export interface NotificationFilter {
-  cause: ApiNotificationCause[];
+  cause: NotificationCause[];
   title: string;
 }
 
@@ -43,6 +47,7 @@ const NotificationFilters: NotificationFilter[] = [
   {
     cause: [
       ApiNotificationCause.DropVoted,
+      DROP_POLL_VOTED_NOTIFICATION_CAUSE,
       ApiNotificationCause.DropReacted,
       ApiNotificationCause.DropBoosted,
     ],

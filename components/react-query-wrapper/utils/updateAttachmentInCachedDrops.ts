@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { QueryKey } from "../ReactQueryWrapper";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -22,14 +23,8 @@ function isMatchingAttachment(
 
 function replaceAttachment(value: unknown, attachment: ApiAttachment): unknown {
   if (Array.isArray(value)) {
-    let changed = false;
-    const next = value.map((item) => {
-      const updated = replaceAttachment(item, attachment);
-      if (updated !== item) {
-        changed = true;
-      }
-      return updated;
-    });
+    const next = value.map((item) => replaceAttachment(item, attachment));
+    const changed = next.some((item, index) => item !== value[index]);
     return changed ? next : value;
   }
 
@@ -61,16 +56,18 @@ function isMatchingDrop(
   return value["id"] === dropId;
 }
 
-function replaceDrop(value: unknown, drop: ApiDrop): unknown {
+interface DropReplacementOptions {
+  readonly preferExistingPollVote?: boolean;
+}
+
+function replaceDrop(
+  value: unknown,
+  drop: ApiDrop,
+  options: DropReplacementOptions
+): unknown {
   if (Array.isArray(value)) {
-    let changed = false;
-    const next = value.map((item) => {
-      const updated = replaceDrop(item, drop);
-      if (updated !== item) {
-        changed = true;
-      }
-      return updated;
-    });
+    const next = value.map((item) => replaceDrop(item, drop, options));
+    const changed = next.some((item, index) => item !== value[index]);
     return changed ? next : value;
   }
 
@@ -79,8 +76,16 @@ function replaceDrop(value: unknown, drop: ApiDrop): unknown {
   }
 
   if (isMatchingDrop(value, drop.id)) {
+    const preferExistingPollVote = options.preferExistingPollVote;
+    const reconciledDrop =
+      preferExistingPollVote === undefined
+        ? reconcileDropAuthenticatedPollVote(drop, value)
+        : reconcileDropAuthenticatedPollVote(drop, value, {
+            preferExistingVote: preferExistingPollVote,
+          });
+
     return {
-      ...drop,
+      ...reconciledDrop,
       ...(value["type"] !== undefined && { type: value["type"] }),
       ...(value["stableKey"] !== undefined && {
         stableKey: value["stableKey"],
@@ -94,7 +99,7 @@ function replaceDrop(value: unknown, drop: ApiDrop): unknown {
   let changed = false;
   const next: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {
-    const updated = replaceDrop(item, drop);
+    const updated = replaceDrop(item, drop, options);
     next[key] = updated;
     if (updated !== item) {
       changed = true;
@@ -108,6 +113,7 @@ const CACHED_DROP_QUERY_KEYS = [
   QueryKey.DROPS,
   QueryKey.DROPS_LEADERBOARD,
   QueryKey.DROP,
+  QueryKey.WAVE_POLLS,
   QueryKey.PROFILE_DROPS,
   QueryKey.FEED_ITEMS,
 ] as const;
@@ -125,11 +131,12 @@ export function updateAttachmentInCachedDrops(
 
 export function updateDropInCachedDrops(
   queryClient: QueryClient,
-  drop: ApiDrop
+  drop: ApiDrop,
+  options: DropReplacementOptions = {}
 ): void {
   CACHED_DROP_QUERY_KEYS.forEach((queryKey) => {
     queryClient.setQueriesData({ queryKey: [queryKey] }, (oldData) =>
-      replaceDrop(oldData, drop)
+      replaceDrop(oldData, drop, options)
     );
   });
 }

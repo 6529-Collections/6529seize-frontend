@@ -5,9 +5,7 @@ import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 
 jest.mock("react-tooltip", () => ({
   Tooltip: ({ children, id }: any) => (
-    <div data-testid={`tooltip-${id}`}>
-      {children}
-    </div>
+    <div data-testid={`tooltip-${id}`}>{children}</div>
   ),
 }));
 
@@ -24,12 +22,29 @@ test("renders icons for all outcome types", () => {
 
   render(<WavePodiumItemContentOutcomes winner={winner} />);
 
-  // Three icons inside the button container
-  const button = screen.getByRole("button");
-  expect(button.querySelectorAll("svg").length).toBeGreaterThanOrEqual(3);
+  expect(screen.getByRole("button")).toHaveTextContent("Outcome");
+  expect(screen.getByTestId("tooltip-outcome-1-test-drop-id")).toHaveTextContent(
+    "NIC10Rep5Amanual"
+  );
 });
 
 test("returns null when no outcomes", () => {
-  const { container } = render(<WavePodiumItemContentOutcomes winner={{ awards: [] } as any} />);
+  const { container } = render(
+    <WavePodiumItemContentOutcomes winner={{ awards: [] } as any} />
+  );
+  expect(container.firstChild).toBeNull();
+});
+
+test("returns null when outcomes are hidden", () => {
+  const winner = {
+    place: 1,
+    drop: { id: "test-drop-id" },
+    awards: [{ credit: ApiWaveOutcomeCredit.Cic, amount: 10 }],
+  } as any;
+
+  const { container } = render(
+    <WavePodiumItemContentOutcomes winner={winner} outcomesVisible={false} />
+  );
+
   expect(container.firstChild).toBeNull();
 });

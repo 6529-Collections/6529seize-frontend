@@ -154,6 +154,7 @@ describe("NFTImageRenderer", () => {
       const wrapper = screen.getByRole("img").parentElement;
       expect(wrapper).toHaveClass("custom-height");
       expect(wrapper).toHaveClass("custom-bg");
+      expect(wrapper).toHaveClass("tw-bg-iron-900");
       expect(wrapper).not.toHaveClass("mb-2");
 
       const image = screen.getByRole("img");

@@ -5,7 +5,6 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import CurationDropFooter from "@/components/waves/drops/CurationDropFooter";
@@ -288,7 +287,7 @@ function UserPageProfileWaveMasonryCard({
     <article className={CURATION_CARD_CLASS_NAME}>
       {removeButton}
 
-      <div className="tw-overflow-hidden tw-rounded-xl tw-bg-black/70 tw-ring-1 tw-ring-inset tw-ring-white/10">
+      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
         {layout.shouldUseInlineMinimalLayout ? (
           <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pb-4 tw-pt-4">
             <WaveDropAuthorPfp drop={drop} />
@@ -418,42 +417,36 @@ export default function UserPageProfileWaveMasonry({
   );
 
   if (drops.length === 0) {
-    return (
-      <TweetPreviewModeProvider mode="never">
-        <CurationEmptyState curationTitle={curationTitle} />
-      </TweetPreviewModeProvider>
-    );
+    return <CurationEmptyState curationTitle={curationTitle} />;
   }
 
   return (
-    <TweetPreviewModeProvider mode="never">
-      <div className="tw-px-1 tw-pb-2">
-        <Masonry
-          key={masonryKey}
-          items={masonryItems}
-          render={UserPageProfileWaveMasonryRenderItem}
-          itemKey={(item) => item.drop.stableKey}
-          itemHeightEstimate={420}
-          columnWidth={MASONRY_COLUMN_WIDTH}
-          columnGutter={MASONRY_GUTTER}
-          rowGutter={MASONRY_GUTTER}
-          overscanBy={2}
-          ssrWidth={containerWidth}
-          ssrHeight={900}
-        />
+    <div className="tw-px-1 tw-pb-2">
+      <Masonry
+        key={masonryKey}
+        items={masonryItems}
+        render={UserPageProfileWaveMasonryRenderItem}
+        itemKey={(item) => item.drop.stableKey}
+        itemHeightEstimate={420}
+        columnWidth={MASONRY_COLUMN_WIDTH}
+        columnGutter={MASONRY_GUTTER}
+        rowGutter={MASONRY_GUTTER}
+        overscanBy={2}
+        ssrWidth={containerWidth}
+        ssrHeight={900}
+      />
 
-        {((hasNextPage ?? false) || isFetchingNextPage) && (
-          <div className="tw-flex tw-justify-center tw-py-6">
-            {isFetchingNextPage ? (
-              <CircleLoader size={CircleLoaderSize.MEDIUM} />
-            ) : (
-              <CommonIntersectionElement
-                onIntersection={handleBottomIntersection}
-              />
-            )}
-          </div>
-        )}
-      </div>
-    </TweetPreviewModeProvider>
+      {((hasNextPage ?? false) || isFetchingNextPage) && (
+        <div className="tw-flex tw-justify-center tw-py-6">
+          {isFetchingNextPage ? (
+            <CircleLoader size={CircleLoaderSize.MEDIUM} />
+          ) : (
+            <CommonIntersectionElement
+              onIntersection={handleBottomIntersection}
+            />
+          )}
+        </div>
+      )}
+    </div>
   );
 }

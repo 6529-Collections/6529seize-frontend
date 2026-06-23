@@ -14,6 +14,7 @@
 import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
+import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
@@ -21,6 +22,7 @@ import { HttpFile } from '../http/http';
 export class ApiWaveVotingConfig {
     'scope': ApiWaveScope;
     'credit_type': ApiWaveCreditType;
+    'credit_scope': ApiWaveCreditScope;
     /**
     * Only relevant when credit_type=REP. The REP category which is usable as credit. If not set then all categories will be usable as voting credits.
     */
@@ -50,6 +52,12 @@ export class ApiWaveVotingConfig {
             "name": "credit_type",
             "baseName": "credit_type",
             "type": "ApiWaveCreditType",
+            "format": ""
+        },
+        {
+            "name": "credit_scope",
+            "baseName": "credit_scope",
+            "type": "ApiWaveCreditScope",
             "format": ""
         },
         {

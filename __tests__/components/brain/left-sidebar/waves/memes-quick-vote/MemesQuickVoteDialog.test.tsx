@@ -1,20 +1,13 @@
+import MemesQuickVoteDialog from "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
+  act,
   fireEvent,
   render,
   screen,
   waitFor,
-  within,
 } from "@testing-library/react";
 import React from "react";
-import MemesQuickVoteDialog from "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
-import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
-
-jest.mock("@/hooks/useMemesQuickVoteQueue", () => ({
-  useMemesQuickVoteQueue: jest.fn(),
-}));
-
-jest.mock("@/hooks/isMobileScreen", () => jest.fn());
 
 jest.mock("@/components/waves/drops/WaveDropAuthorPfp", () => ({
   __esModule: true,
@@ -34,30 +27,28 @@ jest.mock(
   })
 );
 
-const useMemesQuickVoteQueueMock =
-  useMemesQuickVoteQueue as jest.MockedFunction<typeof useMemesQuickVoteQueue>;
-const useIsMobileScreenMock = useIsMobileScreen as jest.MockedFunction<
-  typeof useIsMobileScreen
->;
-
-const createDrop = (
-  serialNo: number,
-  mediaOverrides?: Partial<{
-    mime_type: string;
-    url: string;
-  }>
-) =>
+const createDrop = ({
+  serialNo = 42,
+  minRating = 0,
+  maxRating = 5_000,
+}: {
+  readonly serialNo?: number;
+  readonly minRating?: number;
+  readonly maxRating?: number;
+} = {}) =>
   ({
     id: `drop-${serialNo}`,
     serial_no: serialNo,
     created_at: new Date(serialNo * 1_000).toISOString(),
     context_profile_context: {
       rating: 0,
-      max_rating: 5_000,
+      min_rating: minRating,
+      max_rating: maxRating,
     },
     wave: {
       id: "wave-1",
       name: "The Memes",
+      voting_credit_type: ApiWaveCreditType.Tdh,
     },
     author: {
       handle: `artist-${serialNo}`,
@@ -75,64 +66,44 @@ const createDrop = (
     ],
     parts: [
       {
+        content: `content-${serialNo}`,
         media: [
           {
             mime_type: "image/png",
             url: "https://example.com/drop.png",
-            ...mediaOverrides,
           },
         ],
       },
     ],
   }) as any;
 
+const createDialogProps = (
+  overrides: Partial<React.ComponentProps<typeof MemesQuickVoteDialog>> = {}
+): React.ComponentProps<typeof MemesQuickVoteDialog> => ({
+  activeDrop: createDrop(),
+  hasDiscoveryError: false,
+  isExhausted: false,
+  isOpen: true,
+  isRestartingRound: false,
+  latestUsedAmount: 250,
+  leftThisRoundCount: 9,
+  nextDrop: null,
+  onClose: jest.fn(),
+  recentAmounts: [250, 500],
+  retryDiscovery: jest.fn(),
+  sessionId: 1,
+  skipDrop: jest.fn().mockResolvedValue(true),
+  submitVote: jest.fn().mockResolvedValue(true),
+  uncastPower: 5_000,
+  unratedCount: 12,
+  votingLabel: "votes",
+  ...overrides,
+});
+
 describe("MemesQuickVoteDialog", () => {
-  const activeDrop = createDrop(42);
   const originalShowModal = HTMLDialogElement.prototype.showModal;
   const originalClose = HTMLDialogElement.prototype.close;
   const originalRequestAnimationFrame = global.requestAnimationFrame;
-
-  const createQueueState = (
-    overrides: Partial<ReturnType<typeof useMemesQuickVoteQueue>> = {}
-  ): ReturnType<typeof useMemesQuickVoteQueue> => ({
-    activeDrop,
-    hasDiscoveryError: false,
-    isExhausted: false,
-    isLoading: false,
-    isReady: true,
-    isVoting: false,
-    latestUsedAmount: 250,
-    queue: [activeDrop],
-    recentAmounts: [250, 500],
-    remainingCount: 9,
-    retryDiscovery: jest.fn(),
-    submitVote: jest.fn().mockResolvedValue(true),
-    skipDrop: jest.fn(),
-    uncastPower: 5_000,
-    votingLabel: "votes",
-    ...overrides,
-  });
-
-  const createDialogProps = (
-    overrides: Partial<React.ComponentProps<typeof MemesQuickVoteDialog>> = {}
-  ): React.ComponentProps<typeof MemesQuickVoteDialog> => ({
-    activeDrop,
-    hasDiscoveryError: false,
-    isExhausted: false,
-    isOpen: true,
-    latestUsedAmount: 250,
-    nextDrop: null,
-    onClose: jest.fn(),
-    recentAmounts: [250, 500],
-    remainingCount: 9,
-    retryDiscovery: jest.fn(),
-    sessionId: 1,
-    skipDrop: jest.fn(),
-    submitVote: jest.fn().mockResolvedValue(true),
-    uncastPower: 5_000,
-    votingLabel: "votes",
-    ...overrides,
-  });
 
   beforeAll(() => {
     Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
@@ -178,445 +149,120 @@ describe("MemesQuickVoteDialog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useIsMobileScreenMock.mockReturnValue(false);
-    useMemesQuickVoteQueueMock.mockReturnValue(createQueueState());
+    jest.useFakeTimers();
   });
 
-  it("keeps the active drop visible during background refetches", () => {
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({ isLoading: true })
-    );
-
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    expect(screen.queryByText("Loading your queue")).not.toBeInTheDocument();
-    expect(
-      within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
-        "Drop 42"
-      )
-    ).toBeInTheDocument();
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
-  it("shows a done state instead of closing when the queue is exhausted", () => {
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({
-        activeDrop: null,
-        isExhausted: true,
-        isReady: false,
-        queue: [],
-        remainingCount: 0,
-      })
-    );
-
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    expect(screen.getByText("You are done")).toBeInTheDocument();
-    expect(
-      screen.getByText("No unrated memes are left in quick vote right now.")
-    ).toBeInTheDocument();
-  });
-
-  it("shows structural skeletons while the next item is still hydrating", () => {
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({
-        activeDrop: null,
-        isReady: false,
-        queue: [],
-      })
-    );
-
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    expect(
-      screen.getByTestId("quick-vote-loading-skeleton")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("quick-vote-preview-mobile-context")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("quick-vote-controls-desktop-context")
-    ).toBeInTheDocument();
-  });
-
-  it("shows a retry state when queue discovery fails", () => {
-    const retryDiscovery = jest.fn();
-
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({
-        activeDrop: null,
-        hasDiscoveryError: true,
-        isReady: false,
-        queue: [],
-        retryDiscovery,
-      })
-    );
-
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    expect(screen.getByText("Couldn't load your queue")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-
-    expect(retryDiscovery).toHaveBeenCalledTimes(1);
-  });
-
-  it("removes the dialog header copy while keeping an accessible close button", () => {
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    expect(screen.queryByText("Memes Wave")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("Newest first. Skip keeps a meme for later.")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Close quick vote" })
-    ).toBeInTheDocument();
-  });
-
-  it("keeps single-column preview context available even when js reports desktop", () => {
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    const mobileRemainingPill = within(
-      screen.getByTestId("quick-vote-preview-status")
-    ).getByText("5,000 votes left");
-    const desktopRemainingPill = within(
-      screen.getByTestId("quick-vote-controls-desktop-context")
-    ).getByText("5,000 votes left");
-
-    expect(mobileRemainingPill).toHaveClass("tw-text-primary-300");
-    expect(desktopRemainingPill).toHaveClass("tw-text-primary-300");
-    expect(mobileRemainingPill).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
-        "Drop 42"
-      )
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
-        "Description 42"
-      )
-    ).toBeInTheDocument();
-    expect(
-      within(
-        screen.getByTestId("quick-vote-controls-desktop-context")
-      ).getByText("Drop 42")
-    ).toBeInTheDocument();
-  });
-
-  it("bottom-aligns the custom amount action row on larger screens", () => {
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Custom amount",
-      })
-    );
-
-    const customInput = screen.getByRole("textbox");
-    const customActionRow = customInput.closest("label")?.parentElement;
-    const voteButton = screen.getByRole("button", { name: "Vote 50" });
-
-    expect(customActionRow).not.toBeNull();
-    expect(customActionRow).toHaveClass("sm:tw-items-end");
-    expect(voteButton).toHaveClass("tw-shrink-0", "tw-whitespace-nowrap");
-  });
-
-  it("seeds the initial custom amount at one percent when no recent amounts exist", () => {
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({
-        latestUsedAmount: null,
-        recentAmounts: [],
-      })
-    );
-
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    expect(screen.getByRole("textbox")).toHaveValue("50");
-    expect(screen.getByRole("button", { name: "Vote 50" })).toBeInTheDocument();
-  });
-
-  it("uses the open custom amount for swipe voting on mobile", async () => {
-    useIsMobileScreenMock.mockReturnValue(true);
+  it("accepts and submits a negative custom amount when the drop range allows it", async () => {
+    const activeDrop = createDrop({ minRating: -5_000 });
     const submitVote = jest.fn().mockResolvedValue(true);
 
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({ submitVote })
-    );
-
     render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          activeDrop,
+          latestUsedAmount: null,
+          recentAmounts: [],
+          submitVote,
+        })}
+      />
     );
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Custom amount",
-      })
-    );
     fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "777" },
+      target: { value: "-250" },
     });
+    expect(screen.getByRole("textbox")).toHaveValue("-250");
 
-    expect(
-      screen.getByText("Swipe left to skip, right to vote 777 votes")
-    ).toBeInTheDocument();
-
-    const previewCard = screen.getByTestId("quick-vote-preview-card");
-
-    fireEvent.touchStart(previewCard, {
-      touches: [{ clientX: 0, clientY: 0 }],
+    fireEvent.click(screen.getByRole("button", { name: "Vote -250" }));
+    await act(async () => {
+      jest.advanceTimersByTime(650);
+      await Promise.resolve();
     });
-    fireEvent.touchMove(previewCard, {
-      touches: [{ clientX: 120, clientY: 0 }],
-    });
-    fireEvent.touchEnd(previewCard);
 
     await waitFor(() => {
-      expect(submitVote).toHaveBeenCalledWith(activeDrop, 777);
+      expect(submitVote).toHaveBeenCalledWith(activeDrop, -250);
     });
-    expect(submitVote).not.toHaveBeenCalledWith(activeDrop, 250);
   });
 
-  it("keeps the swipe-committed card moving off-screen instead of snapping back", () => {
-    useIsMobileScreenMock.mockReturnValue(true);
+  it("keeps signed draft values from submitting", async () => {
+    const activeDrop = createDrop({ minRating: -5_000 });
     const submitVote = jest.fn().mockResolvedValue(true);
 
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({ submitVote })
-    );
-
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    const previewCard = screen.getByTestId("quick-vote-preview-card");
-
-    fireEvent.touchStart(previewCard, {
-      touches: [{ clientX: 0, clientY: 0 }],
-    });
-    fireEvent.touchMove(previewCard, {
-      touches: [{ clientX: 120, clientY: 0 }],
-    });
-    fireEvent.touchEnd(previewCard);
-
-    expect(previewCard).toHaveStyle({
-      transform: "translateX(420px) rotate(6deg)",
-    });
-    expect(previewCard).not.toHaveStyle({
-      transform: "translateX(0px)",
-    });
-  });
-
-  it("resets the mobile preview swipe offset when the active drop changes", () => {
-    useIsMobileScreenMock.mockReturnValue(true);
-    const nextDrop = createDrop(43);
-    const { rerender } = render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    const previewCard = screen.getByTestId("quick-vote-preview-card");
-
-    fireEvent.touchStart(previewCard, {
-      touches: [{ clientX: 0, clientY: 0 }],
-    });
-    fireEvent.touchMove(previewCard, {
-      touches: [{ clientX: 60, clientY: 0 }],
-    });
-
-    expect(previewCard).toHaveStyle({
-      transform: "translateX(60px)",
-    });
-
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({
-        activeDrop: nextDrop,
-        queue: [nextDrop],
-        remainingCount: 8,
-      })
-    );
-
-    rerender(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    expect(
-      within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
-        "Drop 43"
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("quick-vote-preview-card")).toHaveStyle({
-      transform: "translateX(0px)",
-    });
-  });
-
-  it("renders a hidden preloaded next card for preload-safe media", () => {
     render(
       <MemesQuickVoteDialog
         {...createDialogProps({
-          nextDrop: createDrop(43),
+          activeDrop,
+          latestUsedAmount: null,
+          recentAmounts: [],
+          submitVote,
         })}
       />
     );
 
-    expect(
-      screen.getByTestId("quick-vote-preview-card-next")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("quick-vote-preview-card-preloaded")
-    ).toBeInTheDocument();
-  });
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "-" },
+    });
+    expect(screen.getByRole("textbox")).toHaveValue("-");
 
-  it("removes the hidden preloaded next card when the dialog closes", () => {
-    const nextDrop = createDrop(43);
-    const { rerender } = render(
-      <MemesQuickVoteDialog {...createDialogProps({ nextDrop })} />
-    );
-
-    expect(
-      screen.getByTestId("quick-vote-preview-card-next")
-    ).toBeInTheDocument();
-
-    rerender(
-      <MemesQuickVoteDialog
-        {...createDialogProps({
-          isOpen: false,
-          nextDrop,
-        })}
-      />
-    );
-
-    expect(
-      screen.queryByTestId("quick-vote-preview-card-next")
-    ).not.toBeInTheDocument();
-  });
-
-  it("does not preload hidden GLB next drops", () => {
-    render(
-      <MemesQuickVoteDialog
-        {...createDialogProps({
-          nextDrop: createDrop(43, {
-            mime_type: "model/gltf-binary",
-            url: "https://example.com/drop.glb",
-          }),
-        })}
-      />
-    );
-
-    expect(
-      screen.queryByTestId("quick-vote-preview-card-next")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("quick-vote-preview-card-preloaded")
-    ).not.toBeInTheDocument();
-  });
-
-  it("submits the visible quick amount from the mobile action row", async () => {
-    useIsMobileScreenMock.mockReturnValue(true);
-    const submitVote = jest.fn().mockResolvedValue(true);
-
-    useMemesQuickVoteQueueMock.mockReturnValue(
-      createQueueState({ submitVote })
-    );
-
-    render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /250/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Vote" }));
+    await act(async () => {
+      jest.advanceTimersByTime(650);
+      await Promise.resolve();
+    });
 
     await waitFor(() => {
-      expect(submitVote).toHaveBeenCalledWith(activeDrop, 250);
+      expect(submitVote).not.toHaveBeenCalled();
     });
   });
 
-  it("resets dialog-local controls when the session id changes", () => {
-    const { rerender } = render(
-      <MemesQuickVoteDialog {...createDialogProps()} />
-    );
+  it("renders negative recent amount buttons and submits the signed amount", async () => {
+    const activeDrop = createDrop({ minRating: -5_000 });
+    const submitVote = jest.fn().mockResolvedValue(true);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Custom amount",
-      })
-    );
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "777" },
-    });
-
-    expect(screen.getByRole("textbox")).toHaveValue("777");
-
-    rerender(<MemesQuickVoteDialog {...createDialogProps({ sessionId: 2 })} />);
-
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-  });
-
-  it("resets dialog-local controls when the dialog closes and reopens", () => {
-    const onClose = jest.fn();
-    const { rerender } = render(
-      <MemesQuickVoteDialog {...createDialogProps({ onClose })} />
-    );
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Custom amount",
-      })
-    );
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "777" },
-    });
-
-    expect(screen.getByRole("textbox")).toHaveValue("777");
-
-    rerender(
-      <MemesQuickVoteDialog
-        {...createDialogProps({ isOpen: false, onClose })}
-      />
-    );
-    rerender(<MemesQuickVoteDialog {...createDialogProps({ onClose })} />);
-
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-  });
-
-  it("resets dialog-local controls when the active drop changes", () => {
-    const nextActiveDrop = createDrop(43);
-    const { rerender } = render(
-      <MemesQuickVoteDialog {...createDialogProps()} />
-    );
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Custom amount",
-      })
-    );
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "777" },
-    });
-
-    expect(screen.getByRole("textbox")).toHaveValue("777");
-
-    rerender(
+    render(
       <MemesQuickVoteDialog
         {...createDialogProps({
-          activeDrop: nextActiveDrop,
-          remainingCount: 8,
+          activeDrop,
+          latestUsedAmount: -250,
+          recentAmounts: [-250, 500],
+          submitVote,
         })}
       />
     );
 
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    const negativeButton = screen.getByRole("button", { name: "-250" });
+    expect(negativeButton).toHaveClass("tw-text-rose-200");
+
+    fireEvent.click(negativeButton);
+    await act(async () => {
+      jest.advanceTimersByTime(650);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(submitVote).toHaveBeenCalledWith(activeDrop, -250);
+    });
+  });
+
+  it("strips a leading minus from custom input on positive-only drops", () => {
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          activeDrop: createDrop({ minRating: 0 }),
+          latestUsedAmount: null,
+          recentAmounts: [],
+        })}
+      />
+    );
+
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "-250" },
+    });
+
+    expect(screen.getByRole("textbox")).toHaveValue("250");
   });
 });

@@ -100,6 +100,11 @@ jest.mock("@/hooks/useWaveTimers", () => ({
   }),
 }));
 
+let mockOutcomesVisible = true;
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveOutcomeVisibility: () => mockOutcomesVisible,
+}));
+
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
@@ -120,6 +125,14 @@ jest.mock("@/components/brain/mobile/BrainMobileTabs", () => ({
     latestTabsProps = props;
     return <div data-testid="tabs" />;
   },
+}));
+
+const mockMobileWaveSubwavesBar = jest.fn(() => (
+  <div data-testid="mobile-subwaves-bar" />
+));
+jest.mock("@/components/brain/mobile/MobileWaveSubwavesBar", () => ({
+  __esModule: true,
+  default: (props: any) => mockMobileWaveSubwavesBar(props),
 }));
 
 jest.mock("@/components/brain/mobile/BrainMobileAbout", () => ({
@@ -292,10 +305,12 @@ describe("BrainMobile", () => {
     isApp = true;
     mockIsCompleted = false;
     mockFirstDecisionDone = true;
+    mockOutcomesVisible = true;
     latestTabsProps = null;
     mockDialogMountCount = 0;
     mockCreateWaveModal.mockClear();
     mockCreateDirectMessageModal.mockClear();
+    mockMobileWaveSubwavesBar.mockClear();
     globalThis.history.replaceState(null, "", "/");
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "alice" },
@@ -372,6 +387,10 @@ describe("BrainMobile", () => {
     expect(screen.queryByTestId("waves")).toBeNull();
     expect(screen.queryByTestId("quick-vote-dialog")).toBeNull();
     expect(mockDialogMountCount).toBe(0);
+    expect(screen.getByTestId("mobile-subwaves-bar")).toBeInTheDocument();
+    expect(mockMobileWaveSubwavesBar).toHaveBeenCalledWith({
+      wave: waveData,
+    });
   });
 
   it("keeps My Votes unavailable for guests on memes waves", async () => {

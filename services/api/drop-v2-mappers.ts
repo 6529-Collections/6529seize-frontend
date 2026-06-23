@@ -18,10 +18,18 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
-import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
+import {
+  toApiWaveMin,
+  type ApiWaveMinWithChatLinkSettings,
+} from "@/helpers/waves/wave.helpers";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 
 type ApiProfileMinWithBadges = ApiProfileMin & {
   readonly badges?: ApiIdentityOverviewBadges;
+};
+
+type ApiWaveOverviewWithVoteRestrictions = ApiWaveOverview & {
+  readonly forbid_negative_votes?: boolean;
 };
 
 const getIdentitySubscribedActions = (
@@ -72,8 +80,8 @@ export const mapPriorityMetadataV2ToDropMetadata = (
   }));
 
 export const mapApiWaveOverviewToApiWaveMin = (
-  wave: ApiWaveOverview
-): ApiWaveMin => ({
+  wave: ApiWaveOverviewWithVoteRestrictions
+): ApiWaveMinWithChatLinkSettings => ({
   id: wave.id,
   name: wave.name,
   picture: wave.pfp ?? null,
@@ -95,9 +103,11 @@ export const mapApiWaveOverviewToApiWaveMin = (
   voting_credit_type: ApiWaveCreditType.Tdh,
   voting_credit_nfts: null,
   admin_drop_deletion_enabled: false,
-  forbid_negative_votes: false,
+  forbid_negative_votes: wave.forbid_negative_votes === true,
   pinned: wave.context_profile_context?.pinned ?? false,
   identity_wave: false,
+  links_disabled: wave.links_disabled,
+  voting_credit_scope: ApiWaveCreditScope.Wave,
 });
 
 export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
@@ -124,6 +134,7 @@ export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
   forbid_negative_votes: false,
   pinned: false,
   identity_wave: false,
+  voting_credit_scope: ApiWaveCreditScope.Wave,
 });
 
 export const normalizeWaveMin = (wave: ApiWave | ApiWaveMin): ApiWaveMin =>
@@ -241,6 +252,7 @@ const mapReplyToDropPreview = (
   is_signed: false,
   reactions: [],
   boosts: 0,
+  is_additional_action_promised: false,
   hide_link_preview: false,
   nft_links: [],
 });

@@ -11,6 +11,7 @@ import {
 } from "@/components/user/utils/UserFollowBtn";
 import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
@@ -63,8 +64,10 @@ export default function NotificationWaveFollowBtn({
     },
     onError: (error) => {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't follow this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -93,8 +96,10 @@ export default function NotificationWaveFollowBtn({
     },
     onError: (error) => {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't unfollow this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

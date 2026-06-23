@@ -17,8 +17,9 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
 
 // Mock react-tooltip
 jest.mock("react-tooltip", () => ({
-  Tooltip: ({ children, id }: any) => (
+  Tooltip: ({ children, content, id }: any) => (
     <div data-testid={`tooltip-${id}`} role="tooltip">
+      {content}
       {children}
     </div>
   ),
@@ -33,6 +34,28 @@ jest.mock("@/components/auth/Auth");
 const addPinnedWave = jest.fn();
 const removePinnedWave = jest.fn();
 const setToast = jest.fn();
+
+type AuthMock = {
+  readonly setToast: typeof setToast;
+  readonly connectedProfile: { readonly handle: string } | null;
+  readonly activeProfileProxy: { readonly id: string } | null;
+};
+
+const connectedAuth: AuthMock = {
+  setToast,
+  connectedProfile: { handle: "testuser" },
+  activeProfileProxy: null,
+};
+const loggedOutAuth: AuthMock = {
+  setToast,
+  connectedProfile: null,
+  activeProfileProxy: null,
+};
+const proxyAuth: AuthMock = {
+  setToast,
+  connectedProfile: { handle: "testuser" },
+  activeProfileProxy: { id: "proxy-1" },
+};
 const mockedUseMyStream = useMyStream as jest.Mock;
 const mockedUsePinnedWavesServer = usePinnedWavesServer as jest.Mock;
 const mockedUseAuth = useAuth as jest.Mock;
@@ -40,7 +63,8 @@ const mockedUseAuth = useAuth as jest.Mock;
 function setup(
   isPinned = false,
   storedPinned: string[] = [],
-  canPinWave = (waveId: string) => isPinned || !storedPinned.includes(waveId)
+  canPinWave = (waveId: string) => isPinned || !storedPinned.includes(waveId),
+  auth: AuthMock = connectedAuth
 ) {
   mockedUseMyStream.mockReturnValue({
     waves: { addPinnedWave, removePinnedWave },
@@ -50,10 +74,7 @@ function setup(
     isOperationInProgress: jest.fn().mockReturnValue(false),
     canPinWave: jest.fn().mockImplementation(canPinWave),
   });
-  mockedUseAuth.mockReturnValue({
-    setToast,
-  });
-  localStorage.setItem("pinnedWave", JSON.stringify(storedPinned));
+  mockedUseAuth.mockReturnValue(auth);
   return render(<BrainLeftSidebarWavePin waveId="1" isPinned={isPinned} />);
 }
 
@@ -61,6 +82,22 @@ describe("BrainLeftSidebarWavePin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+  });
+
+  it("does not render pin button for logged-out users", () => {
+    const { container } = setup(false, [], undefined, loggedOutAuth);
+    expect(container.firstChild).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /pin wave/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not render pin button for proxy users", () => {
+    const { container } = setup(false, [], undefined, proxyAuth);
+    expect(container.firstChild).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /pin wave/i })
+    ).not.toBeInTheDocument();
   });
 
   it("unpins wave when already pinned", async () => {
@@ -89,8 +126,8 @@ describe("BrainLeftSidebarWavePin", () => {
       type: "error",
       message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
     });
-    const tooltip = screen.getByTestId("tooltip-wave-pin-1");
-    expect(tooltip).toHaveTextContent(
+    expect(screen.getByRole("button", { name: /pin wave/i })).toHaveAttribute(
+      "data-tooltip-content",
       `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`
     );
   });

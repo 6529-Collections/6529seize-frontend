@@ -19,9 +19,8 @@ jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(),
 }));
 
-jest.mock("@/components/nft-image/NFTImage", () => ({
-  __esModule: true,
-  default: (props: any) => <div data-testid="image" />,
+jest.mock("@/components/the-memes/MemePageArtViewer", () => ({
+  MemePageArtViewer: () => <div data-testid="art-viewer" />,
 }));
 jest.mock("@/components/address/Address", () => ({
   __esModule: true,
@@ -35,16 +34,6 @@ jest.mock("@/components/you-own-nft-badge/YouOwnNftBadge", () => ({
   __esModule: true,
   default: () => <div data-testid="owner-badge" />,
 }));
-jest.mock("@/components/nft-attributes/NftStats", () => ({
-  NftPageStats: () => (
-    <>
-      <tr data-testid="stats-row">
-        <td>Test Stat</td>
-        <td>Test Value</td>
-      </tr>
-    </>
-  ),
-}));
 jest.mock("@/components/nft-navigation/NftNavigation", () => ({
   __esModule: true,
   default: () => <div data-testid="nav" />,
@@ -55,16 +44,29 @@ jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
 }));
 jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
   __esModule: true,
-  default: () => <tr data-testid="activity-row" />,
+  default: (props: any) => (
+    <tr
+      data-testid="activity-row"
+      data-variant={props.variant}
+      data-row-style={props.rowStyle}
+    />
+  ),
+}));
+jest.mock("@/components/nft-transfer/TransferSingle", () => ({
+  __esModule: true,
+  default: () => <div data-testid="transfer-action" />,
+  TransferSingleActions: () => <div data-testid="transfer-action" />,
 }));
 jest.mock("@/hooks/useCapacitor", () => () => ({ isIos: false }));
+
+let mockConnectedAddress: string | undefined;
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({
     isAuthenticated: false,
     seizeConnect: jest.fn(),
     seizeAcceptConnection: jest.fn(),
-    address: undefined,
+    address: mockConnectedAddress,
     hasInitializationError: false,
     initializationError: null,
   })),
@@ -87,18 +89,48 @@ const tx = {
   token_id: "1",
 };
 
+type MockGradientCollection = ReturnType<typeof mockGradientCollection>;
+type MockGradientTransaction = typeof tx;
+
+function mockGradientFetches({
+  collection = mockGradientCollection(3),
+  transactions = [tx],
+}: {
+  readonly collection?: MockGradientCollection;
+  readonly transactions?: MockGradientTransaction[];
+} = {}) {
+  (fetchUrl as jest.Mock).mockImplementation((url: string) => {
+    if (url.includes("/api/nfts/gradients")) {
+      return Promise.resolve({ data: collection });
+    }
+    if (url.includes("/api/transactions")) {
+      return Promise.resolve({ data: transactions });
+    }
+    return Promise.resolve({ data: [] });
+  });
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
+  mockConnectedAddress = undefined;
   const collection = mockGradientCollection(3);
-  collection[0]?.owner = "0x1";
-  collection[0]?.owner_display = "TestOwner";
-  collection[0]?.tdh__raw = 50;
-  (fetchUrl as jest.Mock)
-    .mockResolvedValueOnce({ data: collection }) // for all NFTs
-    .mockResolvedValueOnce({ data: [tx] }); // for transactions
+  if (collection[0]) {
+    collection[0].owner = "0x1";
+    collection[0].owner_display = "TestOwner";
+    collection[0].tdh__raw = 50;
+  }
+  mockGradientFetches({ collection });
 });
 
-function renderPage(wallet: string = "0x1") {
+function renderPage({
+  wallet = "0x1",
+  connectedAddress = wallet,
+}: {
+  readonly wallet?: string;
+  readonly connectedAddress?: string | undefined;
+} = {}) {
+  mockConnectedAddress = connectedAddress;
+
   return render(
     <TitleProvider>
       <AuthContext.Provider
@@ -119,27 +151,31 @@ describe("GradientPage", () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
     await waitFor(() =>
-      expect(screen.getByTestId("image")).toBeInTheDocument()
+      expect(screen.getByTestId("art-viewer")).toBeInTheDocument()
     );
     await waitFor(() =>
       expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
     );
+    expect(screen.getByTestId("transfer-action")).toBeInTheDocument();
   });
 
   it("hides owner badge for non-owner", async () => {
-    renderPage("0x2");
+    renderPage({ wallet: "0x2" });
     await waitFor(() =>
-      expect(screen.getByTestId("image")).toBeInTheDocument()
+      expect(screen.getByTestId("art-viewer")).toBeInTheDocument()
     );
     await waitFor(() =>
       expect(screen.queryByTestId("owner-badge")).not.toBeInTheDocument()
     );
+    expect(screen.queryByTestId("transfer-action")).not.toBeInTheDocument();
   });
 
   it("shows transaction history", async () => {
     renderPage();
     const row = await screen.findByTestId("activity-row");
     expect(row).toBeInTheDocument();
+    expect(row).toHaveAttribute("data-variant", "tailwind");
+    expect(row).toHaveAttribute("data-row-style", "striped");
   });
 
   it("renders navigation and rank", async () => {
@@ -154,10 +190,12 @@ describe("GradientPage", () => {
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
 
     expect(fetchUrl).toHaveBeenCalledWith(
-      "https://api.test.6529.io/api/nfts/gradients?&page_size=101"
+      "https://api.test.6529.io/api/nfts/gradients?&page_size=101",
+      expect.objectContaining({ signal: expect.any(Object) })
     );
     expect(fetchUrl).toHaveBeenCalledWith(
-      `https://api.test.6529.io/api/transactions?contract=${GRADIENT_CONTRACT}&id=1`
+      `https://api.test.6529.io/api/transactions?contract=${GRADIENT_CONTRACT}&id=1`,
+      expect.objectContaining({ signal: expect.any(Object) })
     );
   });
 
@@ -170,8 +208,12 @@ describe("GradientPage", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "6529 Gradient" })
+      screen.getByRole("heading", { name: "Gradient #1" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "6529 Gradient" })).toHaveAttribute(
+      "href",
+      "/6529-gradient"
+    );
   });
 
   it("displays owner information", async () => {
@@ -195,11 +237,16 @@ describe("GradientPage", () => {
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getByText("NFT")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Card Details" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Mint Date")).toBeInTheDocument();
     expect(screen.getByText("Artist")).toBeInTheDocument();
     expect(screen.getByTestId("artist")).toBeInTheDocument();
-    expect(screen.getByTestId("stats-row")).toBeInTheDocument();
+    expect(screen.getByText("Market Overview")).toBeInTheDocument();
+    expect(screen.getByText("Floor Price")).toBeInTheDocument();
+    expect(screen.getByText("Market Cap")).toBeInTheDocument();
+    expect(screen.getByText("Highest Offer")).toBeInTheDocument();
   });
 
   it("displays TDH information", async () => {
@@ -210,7 +257,7 @@ describe("GradientPage", () => {
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getAllByText("TDH")).toHaveLength(2); // h3 heading and table cell
+    expect(screen.getByText("TDH")).toBeInTheDocument();
     expect(screen.getByText("100")).toBeInTheDocument(); // boosted_tdh
     expect(screen.getByText("Unweighted TDH")).toBeInTheDocument();
     expect(screen.getByText("50")).toBeInTheDocument(); // tdh__raw
@@ -236,8 +283,17 @@ describe("GradientPage", () => {
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getByText("Transaction History")).toBeInTheDocument();
+    expect(screen.getByText("Card Activity")).toBeInTheDocument();
     expect(screen.getByTestId("activity-row")).toBeInTheDocument();
+  });
+
+  it("shows transfer action only for the connected owner address", async () => {
+    renderPage({ wallet: "0x1", connectedAddress: "0x2" });
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
+    );
+    expect(screen.queryByTestId("transfer-action")).not.toBeInTheDocument();
   });
 
   it("handles loading state correctly", () => {
@@ -250,16 +306,16 @@ describe("GradientPage", () => {
   it("handles empty transaction history", async () => {
     jest.clearAllMocks();
     const collection = mockGradientCollection(3);
-    collection[0]?.owner = "0x1";
-    (fetchUrl as jest.Mock)
-      .mockResolvedValueOnce({ data: collection })
-      .mockResolvedValueOnce({ data: [] }); // empty transactions
+    if (collection[0]) {
+      collection[0].owner = "0x1";
+    }
+    mockGradientFetches({ collection, transactions: [] });
 
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
 
     // Transaction History section should not be rendered when no transactions
-    expect(screen.queryByText("Transaction History")).not.toBeInTheDocument();
+    expect(screen.queryByText("Card Activity")).not.toBeInTheDocument();
     expect(screen.queryByTestId("activity-row")).not.toBeInTheDocument();
   });
 
@@ -278,7 +334,7 @@ describe("GradientPage", () => {
 
     // Should show as non-owner when no connected profile
     await waitFor(() =>
-      expect(screen.getByTestId("image")).toBeInTheDocument()
+      expect(screen.getByTestId("art-viewer")).toBeInTheDocument()
     );
     await waitFor(() =>
       expect(screen.queryByTestId("owner-badge")).not.toBeInTheDocument()
@@ -299,7 +355,7 @@ describe("GradientPage", () => {
 
     // Should now show as owner
     await waitFor(() =>
-      expect(screen.getByTestId("image")).toBeInTheDocument()
+      expect(screen.getByTestId("art-viewer")).toBeInTheDocument()
     );
     await waitFor(() =>
       expect(screen.getByTestId("owner-badge")).toBeInTheDocument()

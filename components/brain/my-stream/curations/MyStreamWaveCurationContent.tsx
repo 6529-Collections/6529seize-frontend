@@ -5,7 +5,6 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import CurationEmptyState from "@/components/brain/my-stream/curations/CurationEmptyState";
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -36,6 +35,7 @@ function MyStreamWaveCurationDropItem({
   canManageActiveCuration,
   onDropClick,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed,
   isVotingControlsLocked,
 }: {
@@ -46,6 +46,7 @@ function MyStreamWaveCurationDropItem({
   readonly canManageActiveCuration: boolean;
   readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }) {
@@ -103,6 +104,7 @@ function MyStreamWaveCurationDropItem({
         onQuoteClick={() => {}}
         onDropContentClick={onDropClick}
         winningThreshold={winningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
       />
@@ -158,8 +160,12 @@ export default function MyStreamWaveCurationContent({
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({ wave });
+  const {
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  } = useApprovalWaveStatus({ wave });
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
@@ -186,6 +192,7 @@ export default function MyStreamWaveCurationContent({
           canManageActiveCuration={canManageActiveCuration}
           onDropClick={onDropClick}
           winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
         />
@@ -198,6 +205,7 @@ export default function MyStreamWaveCurationContent({
       isVotingControlsLocked,
       onDropClick,
       winningThreshold,
+      winningThresholdMinDurationMs,
     ]
   );
 
@@ -242,17 +250,15 @@ export default function MyStreamWaveCurationContent({
   }
 
   return (
-    <TweetPreviewModeProvider mode="never">
-      <div
-        className={
-          constrainToViewport
-            ? "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-            : "tw-flex tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-col"
-        }
-        style={constrainToViewport ? leaderboardViewStyle : undefined}
-      >
-        {content}
-      </div>
-    </TweetPreviewModeProvider>
+    <div
+      className={
+        constrainToViewport
+          ? "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+          : "tw-flex tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-col"
+      }
+      style={constrainToViewport ? leaderboardViewStyle : undefined}
+    >
+      {content}
+    </div>
   );
 }

@@ -3,6 +3,7 @@ import { Col } from "react-bootstrap";
 import type { Rememe } from "@/entities/INFT";
 import Image from "next/image";
 import { parseIpfsUrl, parseIpfsUrlToGateway } from "@/helpers/Helpers";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
 interface Props {
   nft: Rememe;
@@ -10,60 +11,93 @@ interface Props {
   height: 300 | 650;
 }
 
+const TRANSPARENT_IMAGE_SRC =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
+function getText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function addFallbackUrl(urls: string[], value: unknown) {
+  const url = getText(value);
+  if (url) {
+    urls.push(url);
+  }
+}
+
+function addParsedFallbackUrls(
+  urls: string[],
+  value: unknown,
+  gatewayFirst = true
+) {
+  const url = getText(value);
+  if (!url) {
+    return;
+  }
+
+  const parsedUrl = parseIpfsUrl(url);
+  const gatewayUrl = parseIpfsUrlToGateway(url);
+  if (gatewayFirst) {
+    addFallbackUrl(urls, gatewayUrl);
+    addFallbackUrl(urls, parsedUrl);
+    return;
+  }
+
+  addFallbackUrl(urls, parsedUrl);
+  addFallbackUrl(urls, gatewayUrl);
+}
+
+function getImageAlt(nft: Rememe): string {
+  return getText(nft.metadata?.name) || `#${nft.id}`;
+}
+
 export default function RememeImage(props: Readonly<Props>) {
   const imageFallbackUrls = getImageFallbackUrls();
   const videoFallbackUrls = getVideoFallbackUrls();
+  const imageAlt = getImageAlt(props.nft);
 
   function getImageFallbackUrls() {
-    const urls = [];
-    if (props.height === 300 && props.nft.s3_image_thumbnail) {
-      urls.push(props.nft.s3_image_thumbnail);
+    const urls: string[] = [];
+    if (props.height === 300) {
+      addFallbackUrl(urls, props.nft.s3_image_thumbnail);
     }
-    if (props.nft.s3_image_scaled) {
-      urls.push(props.nft.s3_image_scaled);
-    }
-    if (props.nft.s3_image_original) {
-      urls.push(props.nft.s3_image_original);
-    }
-    if (!props.nft.image.toLowerCase().startsWith("data")) {
-      urls.push(parseIpfsUrlToGateway(props.nft.image));
-      urls.push(parseIpfsUrl(props.nft.image));
-      if (props.nft.metadata.image) {
-        urls.push(parseIpfsUrlToGateway(props.nft.metadata.image));
-        urls.push(parseIpfsUrl(props.nft.metadata.image));
-      }
-      urls.push(props.nft.contract_opensea_data.imageUrl);
+    addFallbackUrl(urls, props.nft.s3_image_scaled);
+    addFallbackUrl(urls, props.nft.s3_image_original);
+
+    const image = getText(props.nft.image);
+    if (image.toLowerCase().startsWith("data")) {
+      addFallbackUrl(urls, image);
+    } else {
+      addParsedFallbackUrls(urls, image);
+      addParsedFallbackUrls(urls, props.nft.metadata?.image);
+      addFallbackUrl(urls, props.nft.contract_opensea_data?.imageUrl);
     }
     return urls;
   }
 
   function getVideoFallbackUrls() {
-    const urls = [];
+    const urls: string[] = [];
+    const image = getText(props.nft.image);
 
-    if (props.nft.image.endsWith(".mp4")) {
-      urls.push(parseIpfsUrl(props.nft.image));
-      urls.push(parseIpfsUrlToGateway(props.nft.image));
+    if (image.toLowerCase().endsWith(".mp4")) {
+      addParsedFallbackUrls(urls, image, false);
     }
 
-    if (props.nft.metadata.animation) {
-      urls.push(parseIpfsUrl(props.nft.metadata.animation));
-      urls.push(parseIpfsUrlToGateway(props.nft.metadata.animation));
-    }
+    addParsedFallbackUrls(urls, props.nft.animation, false);
+    addParsedFallbackUrls(urls, props.nft.metadata?.animation, false);
 
     return urls;
   }
 
   function isMp4() {
     return (
-      props.nft.metadata.animation_details &&
-      props.nft.metadata.animation_details.format &&
-      props.nft.metadata.animation_details.format.toLowerCase() === "mp4"
+      props.nft.metadata?.animation_details?.format?.toLowerCase() === "mp4"
     );
   }
 
   if (
     (props.animation && props.nft.animation && isMp4()) ||
-    props.nft.image.endsWith(".mp4")
+    getText(props.nft.image).endsWith(".mp4")
   ) {
     return (
       <Col
@@ -71,21 +105,46 @@ export default function RememeImage(props: Readonly<Props>) {
           props.height === 650 ? styles["height650"] : styles["height300"]
         } d-flex justify-content-center align-items-center`}
       >
-        <video
+        <SeizeVideoPlayer
           id={`${props.nft.contract}-${props.nft.id}`}
+          template="ambient-media"
+          src={videoFallbackUrls[0]}
+          fallbackSources={videoFallbackUrls.slice(1)}
           autoPlay={props.animation}
           muted
-          controls
           loop
-          playsInline
-          src={videoFallbackUrls[0]}
-          onError={({ currentTarget }) => {
-            const nextFallback = videoFallbackUrls.shift();
-            if (nextFallback) {
-              currentTarget.src = nextFallback;
-            }
+          layout={props.height === 650 ? "prominent" : "natural"}
+          align="center"
+        />
+      </Col>
+    );
+  }
+
+  if (!imageFallbackUrls[0]) {
+    return (
+      <Col
+        xs={12}
+        className={`mb-2 text-center d-flex align-items-center justify-content-center ${
+          styles["imageWrapper"]
+        } ${props.height === 300 ? styles["height300"] : ""}`}
+      >
+        <Image
+          unoptimized
+          loading="eager"
+          priority
+          width="0"
+          height="0"
+          style={{
+            height: "auto",
+            width: "auto",
+            maxWidth: "100%",
+            maxHeight: "100%",
           }}
-        ></video>
+          id={`${props.nft.contract}-${props.nft.id}`}
+          src={TRANSPARENT_IMAGE_SRC}
+          alt={imageAlt}
+          className={props.height === 650 ? styles["height650"] : ""}
+        />
       </Col>
     );
   }
@@ -110,14 +169,14 @@ export default function RememeImage(props: Readonly<Props>) {
           maxHeight: "100%",
         }}
         id={`${props.nft.contract}-${props.nft.id}`}
-        src={imageFallbackUrls[0]!}
+        src={imageFallbackUrls[0]}
         onError={({ currentTarget }) => {
           const nextFallback = imageFallbackUrls.shift();
           if (nextFallback) {
             currentTarget.src = nextFallback;
           }
         }}
-        alt={props.nft.metadata.name}
+        alt={imageAlt}
         className={props.height === 650 ? styles["height650"] : ""}
       />
     </Col>

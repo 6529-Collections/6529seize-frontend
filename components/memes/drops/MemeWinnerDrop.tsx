@@ -6,17 +6,19 @@ import {
   getRankHoverBorderClass,
   getRankStaticBorderClass,
 } from "@/components/waves/drops/dropRankStyles";
+import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
 import {
   DropLocation,
   hasDropFooter,
 } from "@/components/waves/drops/drop.types";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
 import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
 import MemeDropTraits from "./MemeDropTraits";
+import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropContext } from "@/components/waves/drops/DropContext";
@@ -56,7 +58,7 @@ export default function MemeWinnerDrop({
   footer,
   showInteractions = true,
 }: MemeWinnerDropProps) {
-  const isMobile = useIsMobileDevice();
+  const { canUseDesktopHoverActions } = useDropActionInteractionMode();
   const { location } = useDropContext();
 
   // Extract metadata
@@ -71,6 +73,14 @@ export default function MemeWinnerDrop({
 
   // Get artwork media URL if available
   const artworkMedia = drop.parts.at(0)?.media.at(0);
+  const headerContent = (
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      <MemeWinnerHeader title={title} />
+      {drop.is_additional_action_promised === true && (
+        <AdditionalActionPromiseBadge />
+      )}
+    </div>
+  );
 
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[0]?.part_id! });
@@ -85,7 +95,7 @@ export default function MemeWinnerDrop({
 
       <div className="tw-px-4 tw-pb-4 tw-pt-4">
         <div className="tw-space-y-1">
-          <MemeWinnerHeader title={title} />
+          {headerContent}
           <MemeWinnerDescription description={description} />
         </div>
       </div>
@@ -139,18 +149,23 @@ export default function MemeWinnerDrop({
           ) : (
             content
           )}
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-px-4 tw-py-4">
+            <MemeDropVoteStats drop={drop} />
+          </div>
           {hasDropFooter(footer) && (
             <div className="tw-px-4 tw-pb-4 tw-pt-2">{footer}</div>
           )}
-          {!isMobile && showInteractions && showReplyAndQuote && (
-            <div className="tw-absolute tw-right-4 tw-top-2">
-              <WaveDropActions
-                drop={drop}
-                activePartIndex={0}
-                onReply={handleOnReply}
-              />
-            </div>
-          )}
+          {canUseDesktopHoverActions &&
+            showInteractions &&
+            showReplyAndQuote && (
+              <div className="tw-absolute tw-right-4 tw-top-2">
+                <WaveDropActions
+                  drop={drop}
+                  activePartIndex={0}
+                  onReply={handleOnReply}
+                />
+              </div>
+            )}
         </div>
       </div>
     </div>

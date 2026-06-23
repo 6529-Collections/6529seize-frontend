@@ -10,9 +10,7 @@ type UseEnsResolutionOptions = Readonly<{
   chainId?: number | undefined;
 }>;
 
-export function useEnsResolution(
-  options: UseEnsResolutionOptions = {}
-) {
+export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
   const { initialValue = "", chainId = 1 } = options;
   const [inputValue, setInputValue] = useState(initialValue);
   const [resolvedAddress, setResolvedAddress] = useState(initialValue);
@@ -23,18 +21,14 @@ export function useEnsResolution(
   }, [initialValue]);
 
   const ensNameQuery = useEnsName({
-    address:
-      inputValue?.startsWith("0x")
-        ? (inputValue as `0x${string}`)
-        : undefined,
+    address: inputValue?.toLowerCase().startsWith("0x")
+      ? (inputValue as `0x${string}`)
+      : undefined,
     chainId,
   });
 
   const ensAddressQuery = useEnsAddress({
-    name:
-      inputValue?.endsWith(".eth")
-        ? inputValue
-        : undefined,
+    name: inputValue?.toLowerCase().endsWith(".eth") ? inputValue : undefined,
     chainId,
   });
 

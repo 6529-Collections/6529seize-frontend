@@ -2,9 +2,9 @@
 
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
 import type {
+  NotificationCause,
   NotificationDisplayItem,
   TypedNotificationsResponse,
 } from "@/types/feed.types";
@@ -37,12 +37,12 @@ interface UseNotificationsQueryProps {
   /**
    * The cause of the notifications to fetch (include filter).
    */
-  readonly cause?: ApiNotificationCause[] | null | undefined;
+  readonly cause?: NotificationCause[] | null | undefined;
 }
 
 type NotificationsQueryParams = {
   limit: string;
-  cause: ApiNotificationCause[] | null;
+  cause: NotificationCause[] | null;
   pageParam?: number | null | undefined;
   signal?: AbortSignal | undefined;
 };
@@ -50,7 +50,7 @@ type NotificationsQueryParams = {
 const getIdentityNotificationsQueryKey = (
   identity: string | null | undefined,
   limit: string,
-  cause: ApiNotificationCause[] | null
+  cause: NotificationCause[] | null
 ) =>
   [
     QueryKey.IDENTITY_NOTIFICATIONS,
@@ -186,7 +186,7 @@ export function usePrefetchNotifications() {
       pages = 3,
     }: {
       identity: string | null;
-      cause?: ApiNotificationCause[] | null | undefined;
+      cause?: NotificationCause[] | null | undefined;
       limit?: string | undefined;
       pages?: number | undefined;
     }) => {

@@ -18,7 +18,7 @@ jest.mock("@/components/waves/WavesDesktop", () => ({
   __esModule: true,
   default: ({
     children,
-    showLeftSidebar,
+    showLeftSidebar = true,
   }: {
     readonly children: React.ReactNode;
     readonly showLeftSidebar?: boolean;
@@ -57,7 +57,7 @@ describe("WavesLayout", () => {
     mockUseDeviceInfo.mockReturnValue({ isApp: false, isMobileDevice: false });
   });
 
-  it("renders the selected wave content for logged-out users", () => {
+  it("renders WavesDesktop and children for logged-out web users", () => {
     render(
       <WavesLayout>
         <div data-testid="wave-content">Real wave content</div>
@@ -69,9 +69,12 @@ describe("WavesLayout", () => {
       "data-show-left-sidebar",
       "true"
     );
+    expect(screen.queryByTestId("waves-mobile")).not.toBeInTheDocument();
   });
 
-  it("renders the default waves content for logged-out web users when no wave is selected", () => {
+  it("renders WavesMobile and children for logged-out app users", () => {
+    mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
+
     render(
       <WavesLayout>
         <div data-testid="wave-content">Real wave content</div>
@@ -79,6 +82,48 @@ describe("WavesLayout", () => {
     );
 
     expect(screen.getByTestId("wave-content")).toBeInTheDocument();
+    expect(screen.getByTestId("waves-mobile")).toBeInTheDocument();
+    expect(screen.queryByTestId("waves-desktop")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
+  });
+
+  it("shows setup CTA instead of Waves content when profile setup is needed", () => {
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState: "needs-profile",
+    });
+    mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
+
+    render(
+      <WavesLayout>
+        <div data-testid="wave-content">Real wave content</div>
+      </WavesLayout>
+    );
+
+    expect(screen.getByTestId("setup-profile")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("waves-desktop")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("waves-mobile")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
+  });
+
+  it("shows unavailable message instead of Waves content when content is not available", () => {
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState: "not-available",
+    });
+    mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
+
+    render(
+      <WavesLayout>
+        <div data-testid="wave-content">Real wave content</div>
+      </WavesLayout>
+    );
+
+    expect(
+      screen.getByText("This content is not available.")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("waves-desktop")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("waves-mobile")).not.toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 });

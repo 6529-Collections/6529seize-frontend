@@ -14,15 +14,16 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
-enum WaveFollowBtnSize {
+export enum WaveFollowBtnSize {
   SMALL = "SMALL",
   MEDIUM = "MEDIUM",
 }
 
 const BUTTON_CLASSES: Record<WaveFollowBtnSize, string> = {
-  [WaveFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-2 tw-text-xs",
-  [WaveFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2 tw-text-sm",
+  [WaveFollowBtnSize.SMALL]: "tw-h-9 tw-gap-x-1.5 tw-px-4 tw-text-[13px]",
+  [WaveFollowBtnSize.MEDIUM]: "tw-h-10 tw-gap-x-2 tw-px-5 tw-text-[13px]",
 };
 
 const SVG_CLASSES: Record<WaveFollowBtnSize, string> = {
@@ -80,8 +81,10 @@ export default function WaveHeaderFollow({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't join this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -109,8 +112,10 @@ export default function WaveHeaderFollow({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't leave this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -134,12 +139,16 @@ export default function WaveHeaderFollow({
 
   const printIcon = () => {
     if (mutating) {
-      return <CircleLoader size={LOADER_SIZES[size]} />;
+      return (
+        <span className="-tw-ml-1.5 tw-flex tw-flex-shrink-0 tw-items-center">
+          <CircleLoader size={LOADER_SIZES[size]} />
+        </span>
+      );
     }
     if (following) {
       return (
         <svg
-          className="-tw-ml-1 tw-h-3 tw-w-3 tw-flex-shrink-0"
+          className="-tw-ml-1.5 tw-h-3 tw-w-3 tw-flex-shrink-0"
           viewBox="0 0 17 15"
           fill="none"
           aria-hidden="true"
@@ -156,7 +165,7 @@ export default function WaveHeaderFollow({
     }
     return (
       <svg
-        className={`${SVG_CLASSES[size]} -tw-ml-1 tw-flex-shrink-0`}
+        className={`${SVG_CLASSES[size]} -tw-ml-1.5 tw-flex-shrink-0`}
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
@@ -181,9 +190,9 @@ export default function WaveHeaderFollow({
         type="button"
         className={`${BUTTON_CLASSES[size]} ${
           following
-            ? "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
-            : "tw-bg-primary-500 tw-text-white tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600"
-        } ${fullWidth ? "tw-h-10 tw-w-full tw-justify-center lg:tw-h-9" : ""} tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+            ? "tw-bg-iron-900/90 tw-text-iron-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.18)] tw-ring-white/10 hover:tw-bg-iron-800 hover:tw-text-white hover:tw-ring-white/15"
+            : "hover:tw-ring-primary-200/45 tw-bg-primary-500/95 tw-text-white tw-shadow-[0_10px_24px_rgba(59,130,246,0.22)] tw-ring-primary-300/35 hover:tw-bg-primary-400"
+        } ${fullWidth ? "tw-h-10 tw-w-full tw-justify-center lg:tw-h-9" : ""} tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-200 tw-ease-out active:tw-scale-[0.98] disabled:tw-cursor-not-allowed disabled:tw-opacity-70`}
       >
         {printIcon()}
         <span>{label}</span>

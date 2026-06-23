@@ -19,6 +19,31 @@ function removePath(targetPath) {
   fs.rmSync(targetPath, { recursive: true, force: true });
 }
 
+function errorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function exitCodeFor(error) {
+  if (error && typeof error === "object" && "exitCode" in error) {
+    const exitCode = Number(error.exitCode);
+    if (Number.isInteger(exitCode) && exitCode > 0) {
+      return exitCode;
+    }
+  }
+
+  return 1;
+}
+
+function removePathBestEffort(targetPath, description) {
+  try {
+    removePath(targetPath);
+  } catch (error) {
+    console.warn(
+      `Warning: failed to remove ${description}: ${errorMessage(error)}`
+    );
+  }
+}
+
 function assertDirectory(targetPath, description) {
   let stats;
   try {
@@ -68,13 +93,22 @@ function replaceGeneratedDir() {
     fs.renameSync(tmpFinalDir, generatedDir);
   } catch (error) {
     if (hadGeneratedDir && !fs.existsSync(generatedDir)) {
-      fs.renameSync(backupDir, generatedDir);
+      try {
+        fs.renameSync(backupDir, generatedDir);
+      } catch (restoreError) {
+        throw new Error(
+          `Failed to restore previous generated directory: ${errorMessage(
+            restoreError
+          )}`,
+          { cause: error }
+        );
+      }
     }
     throw error;
   }
 
   if (hadGeneratedDir) {
-    removePath(backupDir);
+    removePathBestEffort(backupDir, "generated backup directory");
   }
 }
 
@@ -150,9 +184,12 @@ try {
 
   removePath(tmpGeneratorDir);
 } catch (error) {
-  console.error(error instanceof Error ? error.message : error);
-  process.exit(error?.exitCode ?? 1);
+  console.error(errorMessage(error));
+  process.exitCode = exitCodeFor(error);
 } finally {
-  removePath(tmpGeneratorDir);
-  removePath(tmpFinalDir);
+  removePathBestEffort(tmpGeneratorDir, "OpenAPI generator output directory");
+  removePathBestEffort(tmpFinalDir, "OpenAPI final staging directory");
+  if (fs.existsSync(generatedDir)) {
+    removePathBestEffort(backupDir, "generated backup directory");
+  }
 }

@@ -98,10 +98,10 @@ function PanelCandidateWaveRow({
 
   return (
     <div
-      className={`tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-px-3 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-4 sm:tw-px-4 sm:tw-py-4 ${
+      className={`tw-transition tw-duration-300 tw-ease-out tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-px-3 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-4 sm:tw-px-4 sm:tw-py-4 ${
         isSelected
           ? "tw-bg-emerald-500/5"
-          : "tw-bg-iron-950/60 desktop-hover:hover:tw-bg-iron-900/60"
+          : "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900"
       }`}
     >
       {isSelected && (

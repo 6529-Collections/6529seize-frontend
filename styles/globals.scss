@@ -76,6 +76,16 @@
   :root {
     --android-keyboard-height: 0px;
   }
+
+  #sticky-social-icons-container {
+    overflow: clip !important;
+  }
+
+  @supports not (overflow: clip) {
+    #sticky-social-icons-container {
+      overflow: hidden !important;
+    }
+  }
 }
 
 // add the code bellow
@@ -112,6 +122,18 @@
       -webkit-user-drag: none;
       -webkit-user-modify: read-only;
     }
+  }
+
+  /* Prevent native selection/callouts when JS has selected touch-sheet mode. */
+  .touch-action-sheet-select-none {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    -khtml-user-select: none;
+    -o-user-select: none;
   }
 
   /* Android keyboard adjustments */
@@ -771,30 +793,10 @@ pre code {
   }
 }
 
-/* X card */
-@media (max-width: 390px) {
-  a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq,
-  a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq * {
-    white-space: pre-wrap !important;
-    word-break: normal !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .tweet-body_root__ChzUj {
-    font-size: 1rem !important;
-  }
-
-  a.tw-no-underline .tweet-actions_actions__UDw7H,
-  a.tw-no-underline .tweet-actions_actions__UDw7H * {
-    white-space: nowrap !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-  }
-}
-
 .emoji-node {
   width: auto;
   height: 1.2em;
+  vertical-align: middle;
 }
 
 .emoji-node-big {

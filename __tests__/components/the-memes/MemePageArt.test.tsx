@@ -1,35 +1,7 @@
 import { MemePageArt } from "@/components/the-memes/MemePageArt";
-import { fireEvent, render, screen } from "@testing-library/react";
-
-const mockNFTAttributes = jest.fn();
-
-jest.mock("react-bootstrap", () => {
-  const actual = jest.requireActual("react-bootstrap");
-  const Carousel = ({ children, onSlide, ...props }: any) => (
-    <div data-testid="carousel" {...props}>
-      <button
-        type="button"
-        data-testid="carousel-slide-0"
-        onClick={() => onSlide?.(0)}
-      />
-      <button
-        type="button"
-        data-testid="carousel-slide-1"
-        onClick={() => onSlide?.(1)}
-      />
-      {children}
-    </div>
-  );
-
-  Carousel.Item = ({ children, ...props }: any) => (
-    <div {...props}>{children}</div>
-  );
-
-  return {
-    ...actual,
-    Carousel,
-  };
-});
+import { formatNumber, roundTo } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+import { render, screen } from "@testing-library/react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -39,72 +11,60 @@ jest.mock("next/link", () => ({
     </a>
   ),
 }));
-jest.mock("@fortawesome/react-fontawesome", () => ({
-  FontAwesomeIcon: (props: any) => (
-    <svg data-testid="fullscreen-icon" onClick={props.onClick} />
+
+jest.mock("@/components/download/Download", () => ({
+  __esModule: true,
+  default: ({
+    href,
+    labels,
+  }: {
+    href: string;
+    labels?: { downloadFile?: string; download?: string };
+  }) => (
+    <button
+      type="button"
+      data-testid="download"
+      data-href={href}
+      aria-label={labels?.downloadFile ?? "Download file"}
+    >
+      {labels?.download ?? "Download"}
+    </button>
   ),
 }));
 
-jest.mock("@/components/nft-image/NFTImage", () => ({
-  __esModule: true,
-  default: () => <div data-testid="nft" />,
-}));
-jest.mock("@/components/download/Download", () => ({
-  __esModule: true,
-  default: ({ href }: { href: string }) => (
-    <div data-testid="download" data-href={href} />
-  ),
-}));
-jest.mock("@/components/the-memes/ArtistProfileHandle", () => ({
-  __esModule: true,
-  default: () => <div data-testid="artist-handle" />,
-}));
 jest.mock("@/helpers/Helpers", () => ({
-  enterArtFullScreen: jest.fn(),
-  fullScreenSupported: () => true,
   numberWithCommas: (n: number) => String(n),
-  parseNftDescriptionToHtml: (d: string) => d,
-  printMintDate: (d: string) => d,
 }));
+
 jest.mock("@/helpers/nft.helpers", () => ({
   getAnimationDimensionsFromMetadata: jest.fn(),
   getAnimationFileTypeFromMetadata: jest.fn(),
-  getAnimationMimeTypeFromMetadata: jest.fn(),
   getImageDimensionsFromMetadata: jest.fn(),
   getImageFileTypeFromMetadata: jest.fn(),
-  getImageMimeTypeFromMetadata: jest.fn(),
-}));
-jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
-  __esModule: true,
-  default: (props: any) => {
-    mockNFTAttributes(props);
-    return <div data-testid="attrs" />;
-  },
 }));
 
-const mockHelpers = jest.requireMock("@/helpers/Helpers") as {
-  enterArtFullScreen: jest.Mock;
-};
+jest.mock("react-tooltip", () => ({
+  Tooltip: () => null,
+}));
+
 const mockNftHelpers = jest.requireMock("@/helpers/nft.helpers") as {
   getAnimationDimensionsFromMetadata: jest.Mock;
   getAnimationFileTypeFromMetadata: jest.Mock;
-  getAnimationMimeTypeFromMetadata: jest.Mock;
   getImageDimensionsFromMetadata: jest.Mock;
   getImageFileTypeFromMetadata: jest.Mock;
-  getImageMimeTypeFromMetadata: jest.Mock;
 };
 
 const nft = {
   id: 5,
+  name: "Test Meme",
   has_distribution: false,
-  mint_price: 1,
-  hodl_rate: 24.48,
-  supply: 10,
-  collection: "c",
-  artist: "a",
-  mint_date: "2023",
-  description: "desc",
+  boosted_tdh: 12.345,
+  tdh__raw: 4.56,
+  tdh_rank: 7,
+  collection: "The Memes",
   uri: "https://metadata.example/meme.json",
+  image: "",
+  animation: "",
   metadata: {
     image_details: { format: "png", width: 1, height: 2 },
     animation_details: { format: "gif", width: 1, height: 2 },
@@ -115,28 +75,15 @@ const nft = {
       { trait_type: "Other", value: "val" },
       { trait_type: "Boost", value: 10, display_type: "boost_percentage" },
     ],
-    image: "img",
+    image: "https://media.example/img.png",
   },
 };
 const nftMeta = { season: 1, meme_name: "meme" };
 
-const getCardDetailValue = (label: string): string => {
-  const labelCell = screen.getAllByText((_, element) => {
-    return element?.textContent?.toLowerCase() === label.toLowerCase();
-  })[0];
-  const row = labelCell.closest("tr");
-  const value = row?.querySelectorAll("td")[1]?.textContent;
-
-  expect(value).toBeTruthy();
-  return value ?? "";
-};
-
 beforeEach(() => {
   jest.clearAllMocks();
   mockNftHelpers.getAnimationFileTypeFromMetadata.mockReturnValue("gif");
-  mockNftHelpers.getAnimationMimeTypeFromMetadata.mockReturnValue("image/gif");
   mockNftHelpers.getImageFileTypeFromMetadata.mockReturnValue("png");
-  mockNftHelpers.getImageMimeTypeFromMetadata.mockReturnValue("image/png");
   mockNftHelpers.getAnimationDimensionsFromMetadata.mockReturnValue("200x300");
   mockNftHelpers.getImageDimensionsFromMetadata.mockReturnValue("100x100");
 });
@@ -146,37 +93,83 @@ describe("MemePageArt", () => {
     const { container } = render(
       <MemePageArt show={false} nft={undefined} nftMeta={undefined} />
     );
+
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders details when data present", () => {
+  it("renders current additional details sections when data is present", () => {
     render(
       <MemePageArt show={true} nft={nft as any} nftMeta={nftMeta as any} />
     );
-    expect(screen.getByText("Arweave Links")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("heading", { name: /Arweave links/i })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
         name: "https://metadata.example/meme.json",
       })
     ).toHaveAttribute("href", "https://metadata.example/meme.json");
     expect(
-      screen.getByRole("link", { name: "Open JSON in new tab" })
+      screen.getByRole("link", { name: "Open raw metadata in new tab" })
     ).toHaveAttribute("href", "https://metadata.example/meme.json");
     expect(
       screen.getByRole("link", { name: "Open image in new tab" })
-    ).toHaveAttribute("href", "img");
-    expect(screen.getByText("Card Details")).toBeInTheDocument();
-    expect(screen.getAllByText("Minting Approach").length).toBeGreaterThan(0);
-    expect(screen.getByText("Card Description")).toBeInTheDocument();
+    ).toHaveAttribute("href", "https://media.example/img.png");
+
     expect(screen.getByText("Properties")).toBeInTheDocument();
+    expect(screen.getByText("Other")).toBeInTheDocument();
+    expect(screen.getByText("val")).toBeInTheDocument();
+    expect(screen.getByText("TDH breakdown")).toBeInTheDocument();
+    expect(screen.getByText("12.35")).toBeInTheDocument();
+    expect(screen.getByText("Unweighted TDH")).toBeInTheDocument();
+    expect(screen.getByText("4.56")).toBeInTheDocument();
+    expect(screen.getByText("Meme Rank")).toBeInTheDocument();
+    expect(screen.getByText("#7")).toBeInTheDocument();
     expect(screen.getByText("Stats")).toBeInTheDocument();
+    expect(screen.getByText("100x100")).toBeInTheDocument();
+    expect(screen.getByText("S1")).toBeInTheDocument();
+    expect(screen.getByText("M1")).toBeInTheDocument();
+    expect(screen.getByText("C1")).toBeInTheDocument();
     expect(screen.getByText("Boosts")).toBeInTheDocument();
-    expect(getCardDetailValue("File type")).toBe("Image - PNG");
-    expect(getCardDetailValue("TDH Rate")).toBe("24.48");
-    expect(getCardDetailValue("Dimensions")).toBe("100x100");
+    expect(screen.getByText("+10%")).toBeInTheDocument();
   });
 
-  it("passes text display_type attributes to Properties", () => {
+  it("uses locale-backed labels and number formatting", () => {
+    render(
+      <MemePageArt
+        show={true}
+        nft={nft as any}
+        nftMeta={nftMeta as any}
+        locale="de-DE"
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        name: t("de-DE", "theMemes.detail.art.sections.arweaveLinks"),
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: t("de-DE", "theMemes.detail.art.links.openRawMetadata"),
+      })
+    ).toHaveAttribute("href", "https://metadata.example/meme.json");
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.art.download.downloadFile"),
+      })
+    ).toHaveTextContent(t("de-DE", "theMemes.detail.art.download.download"));
+    expect(
+      screen.getByText(
+        formatNumber("de-DE", roundTo(nft.boosted_tdh, 2), {
+          maximumFractionDigits: 2,
+        })
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("renders text display_type attributes in Properties", () => {
     const nftWithTextAttribute = {
       ...nft,
       metadata: {
@@ -200,27 +193,46 @@ describe("MemePageArt", () => {
       />
     );
 
-    const passedAttributes =
-      mockNFTAttributes.mock.calls.at(-1)?.[0]?.attributes ?? [];
+    expect(screen.getByText("Artist")).toBeInTheDocument();
+    expect(screen.getByText("RachelSTWood")).toBeInTheDocument();
+  });
 
-    expect(passedAttributes).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          trait_type: "Other",
-          value: "val",
-        }),
-        expect.objectContaining({
-          trait_type: "Artist",
-          value: "RachelSTWood",
-          display_type: "text",
-        }),
-      ])
+  it("constrains long Arweave URLs while preserving the full target", () => {
+    const longUrl = `https://arweave.net/${"a".repeat(180)}`;
+    const nftWithLongMetadataUrl = {
+      ...nft,
+      uri: longUrl,
+      image: "",
+      animation: "",
+      metadata: {
+        ...nft.metadata,
+        image: "",
+      },
+    };
+
+    render(
+      <MemePageArt
+        show={true}
+        nft={nftWithLongMetadataUrl as any}
+        nftMeta={nftMeta as any}
+      />
     );
-    expect(passedAttributes).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ trait_type: "Boost" }),
-        expect.objectContaining({ trait_type: "Type - Season" }),
-      ])
+
+    const link = screen.getByRole("link", { name: longUrl });
+    const row = link.closest("div");
+
+    expect(link).toHaveAttribute("href", longUrl);
+    expect(link).toHaveAttribute("title", longUrl);
+    expect(link).toHaveClass("tw-block");
+    expect(link).toHaveClass("tw-min-w-0");
+    expect(link).toHaveClass("tw-max-w-full");
+    expect(link).toHaveClass("tw-break-all");
+    expect(link).toHaveClass("md:tw-truncate");
+    expect(link).toHaveClass("md:tw-break-normal");
+    expect(row).toHaveClass("tw-grid");
+    expect(row).toHaveClass("tw-min-w-0");
+    expect(row).toHaveClass(
+      "md:tw-grid-cols-[4rem_minmax(10rem,16rem)_minmax(0,1fr)_auto]"
     );
   });
 
@@ -322,7 +334,7 @@ describe("MemePageArt", () => {
     );
   });
 
-  it("treats metadata.animation_url-only NFTs as animated", () => {
+  it("uses animation dimensions when metadata animation_url makes the card animated", () => {
     const nftWithAnimationUrlOnly = {
       ...nft,
       animation: "",
@@ -331,7 +343,7 @@ describe("MemePageArt", () => {
         animation_details: { format: "gif", width: 1, height: 2 },
         animation_url: "https://metadata.example/animation.gif",
         attributes: nft.metadata.attributes,
-        image: "img",
+        image: "https://media.example/img.png",
       },
     };
 
@@ -343,93 +355,16 @@ describe("MemePageArt", () => {
       />
     );
 
-    expect(screen.getAllByTestId("nft")).toHaveLength(2);
     expect(
       screen.getByRole("link", {
         name: "https://metadata.example/animation.gif",
       })
     ).toHaveAttribute("href", "https://metadata.example/animation.gif");
-    expect(
-      screen.getByRole("link", { name: "Open image in new tab" })
-    ).toHaveAttribute("href", "img");
-    expect(
-      screen.getByRole("link", { name: "Open animation in new tab" })
-    ).toHaveAttribute("href", "https://metadata.example/animation.gif");
-    expect(getCardDetailValue("File type")).toBe("Image - GIF");
-    expect(getCardDetailValue("Dimensions")).toBe("200x300");
-  });
-
-  it("switches card details to image metadata on the image slide", () => {
-    const nftWithAnimationUrlOnly = {
-      ...nft,
-      animation: "",
-      metadata: {
-        image_details: { format: "png", width: 1, height: 2 },
-        animation_details: { format: "gif", width: 1, height: 2 },
-        animation_url: "https://metadata.example/animation.gif",
-        attributes: nft.metadata.attributes,
-        image: "img",
-      },
-    };
-
-    render(
-      <MemePageArt
-        show={true}
-        nft={nftWithAnimationUrlOnly as any}
-        nftMeta={nftMeta as any}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId("carousel-slide-1"));
-
-    expect(getCardDetailValue("File type")).toBe("Image - PNG");
-    expect(getCardDetailValue("Dimensions")).toBe("100x100");
-  });
-
-  it("keeps animation active when the NFT has no image slide", () => {
-    const nftWithAnimationOnly = {
-      ...nft,
-      image: "",
-      animation: "",
-      metadata: {
-        image_details: undefined,
-        animation_details: { format: "gif", width: 1, height: 2 },
-        animation_url: "https://metadata.example/animation.gif",
-        attributes: nft.metadata.attributes,
-        image: "",
-      },
-    };
-
-    render(
-      <MemePageArt
-        show={true}
-        nft={nftWithAnimationOnly as any}
-        nftMeta={nftMeta as any}
-      />
-    );
-
-    expect(screen.getAllByTestId("nft")).toHaveLength(1);
-    expect(getCardDetailValue("File type")).toBe("Image - GIF");
-    expect(getCardDetailValue("Dimensions")).toBe("200x300");
-
-    fireEvent.click(screen.getByTestId("carousel-slide-1"));
-
-    expect(screen.getAllByTestId("nft")).toHaveLength(1);
-    expect(getCardDetailValue("File type")).toBe("Image - GIF");
-    expect(getCardDetailValue("Dimensions")).toBe("200x300");
-
-    fireEvent.click(screen.getAllByTestId("fullscreen-icon")[0]);
-
-    expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
-      "the-art-fullscreen-animation"
-    );
+    expect(screen.getByText("200x300")).toBeInTheDocument();
   });
 
   it("shows N/A dimensions for html art without dimension metadata", () => {
     mockNftHelpers.getAnimationFileTypeFromMetadata.mockReturnValue("html");
-    mockNftHelpers.getAnimationMimeTypeFromMetadata.mockReturnValue(
-      "text/html"
-    );
     mockNftHelpers.getAnimationDimensionsFromMetadata.mockReturnValue(
       undefined
     );
@@ -455,7 +390,11 @@ describe("MemePageArt", () => {
       />
     );
 
-    expect(getCardDetailValue("File type")).toBe("Interactive - HTML");
-    expect(getCardDetailValue("Dimensions")).toBe("N/A");
+    expect(
+      screen.getByRole("link", {
+        name: "https://metadata.example/animation.html",
+      })
+    ).toHaveAttribute("href", "https://metadata.example/animation.html");
+    expect(screen.getByText("N/A")).toBeInTheDocument();
   });
 });

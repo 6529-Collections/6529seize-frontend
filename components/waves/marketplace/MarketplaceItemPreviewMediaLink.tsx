@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import type { ResolvedPreviewHref } from "./MarketplaceItemPreviewCard.types";
 import { MARKETPLACE_MEDIA_FRAME_CLASS } from "./previewLayout";
 
@@ -33,7 +33,7 @@ export default function MarketplaceItemPreviewMediaLink({
   mediaMimeType,
   resolvedPreviewHref,
 }: MarketplaceItemPreviewMediaLinkProps) {
-  const { href, target, rel } = resolvedPreviewHref;
+  const href = resolvedPreviewHref.href;
   const isImage = isImageMimeType(mediaMimeType);
   const isVideo = isVideoMimeType(mediaMimeType);
   const useDirectImageRendering = isImage && isGammaioHref(href);
@@ -61,14 +61,13 @@ export default function MarketplaceItemPreviewMediaLink({
     );
   } else if (isVideo) {
     mediaContent = (
-      <video
+      <SeizeVideoPlayer
         src={mediaUrl}
-        className="tw-h-full tw-w-full tw-rounded-xl tw-object-contain"
-        muted
-        loop
-        playsInline
-        preload="auto"
+        template="card-preview"
+        className="tw-h-full tw-w-full"
         autoPlay
+        layout="fill"
+        showActions={false}
         data-testid="media-display"
         data-mime={mediaMimeType}
         data-url={mediaUrl}
@@ -86,12 +85,8 @@ export default function MarketplaceItemPreviewMediaLink({
   }
 
   return (
-    <Link
-      href={href}
-      target={target}
-      rel={rel}
-      prefetch={false}
-      className="tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-no-underline"
+    <div
+      className="tw-flex tw-w-full tw-flex-col tw-overflow-hidden"
       data-testid="marketplace-item-media-link"
     >
       <div
@@ -100,6 +95,6 @@ export default function MarketplaceItemPreviewMediaLink({
       >
         {mediaContent}
       </div>
-    </Link>
+    </div>
   );
 }

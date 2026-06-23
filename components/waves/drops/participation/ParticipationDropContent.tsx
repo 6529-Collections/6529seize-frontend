@@ -1,8 +1,8 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropContent from "../WaveDropContent";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { DropContentPresentation } from "../dropContentPresentation";
+import type { ImageScale } from "@/helpers/image.helpers";
 
 interface ParticipationDropContentProps {
   readonly drop: ExtendedDrop;
@@ -13,6 +13,10 @@ interface ParticipationDropContentProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
   readonly isCompetitionDrop?: boolean | undefined;
+  readonly hasTouch?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
@@ -29,14 +33,16 @@ export default function ParticipationDropContent({
   onQuoteClick,
   setLongPressTriggered,
   isCompetitionDrop = false,
+  hasTouch = false,
+  mediaImageScale,
+  fullWidthMedia = false,
+  fullWidthLinkPreviews = false,
   contentPresentation = "default",
   embedPath,
   quotePath,
   embedDepth,
   maxEmbedDepth,
 }: ParticipationDropContentProps) {
-  const hasTouch = useIsTouchDevice();
-
   return (
     <div>
       <WaveDropContent
@@ -48,7 +54,10 @@ export default function ParticipationDropContent({
         onQuoteClick={onQuoteClick}
         setLongPressTriggered={setLongPressTriggered}
         isCompetitionDrop={isCompetitionDrop}
+        mediaImageScale={mediaImageScale}
         mediaContainerHeightClassName="tw-h-96"
+        fullWidthMedia={fullWidthMedia}
+        fullWidthLinkPreviews={fullWidthLinkPreviews}
         hasTouch={hasTouch}
         contentPresentation={contentPresentation}
         embedPath={embedPath}

@@ -117,6 +117,7 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
       quotePath={quotePath}
       embedDepth={embedDepth}
       maxEmbedDepth={maxEmbedDepth}
+      hideLinkPreviews={resolvedDrop?.hide_link_preview === true}
       onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
     />
   );

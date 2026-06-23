@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { type ReactNode, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
@@ -39,6 +40,17 @@ import type { ApiProfileWaveResponse } from "@/services/api/profile-wave-api";
 import { CheckCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 type CurationPickerVariant = "dropdown" | "mobile-sheet";
+
+const MyStreamWaveCurationCreateDialog = dynamic(
+  () =>
+    import("@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog"),
+  { loading: () => null }
+);
+
+const UserPageProfileWaveQuickPostDialog = dynamic(
+  () => import("./UserPageProfileWaveQuickPostDialog"),
+  { loading: () => null }
+);
 
 type ProfileCurationPickerProps = {
   readonly curations: readonly ApiWaveCuration[];
@@ -220,6 +232,15 @@ const shouldRenderMobileCurationPicker = ({
   readonly isDesktopChangeWaveMenu: boolean;
 }): boolean => canSwitchOfficialCuration && !isDesktopChangeWaveMenu;
 
+const getProfileCurationAddPostHandler = ({
+  profileCuration,
+  onAddPost,
+}: {
+  readonly profileCuration: ApiWaveCuration | null;
+  readonly onAddPost: () => void;
+}): (() => void) | undefined =>
+  profileCuration === null ? undefined : onAddPost;
+
 export default function UserPageProfileWave({
   profile: initialProfile,
 }: {
@@ -240,6 +261,8 @@ export default function UserPageProfileWave({
   const changeCurationButtonRef = useRef<HTMLButtonElement | null>(null);
   const [isChangeWaveOpen, setIsChangeWaveOpen] = useState(false);
   const [isChangeCurationOpen, setIsChangeCurationOpen] = useState(false);
+  const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
+  const [isQuickPostOpen, setIsQuickPostOpen] = useState(false);
   const [submittingWaveId, setSubmittingWaveId] = useState<string | null>(null);
   const [submittingCurationId, setSubmittingCurationId] = useState<
     string | null
@@ -249,6 +272,7 @@ export default function UserPageProfileWave({
   const resolvedProfile = profile ?? initialProfile;
   const profileIdentityKey =
     getProfileIdentityKey(resolvedProfile) ?? handleOrWallet;
+  const hasCreatedProfile = Boolean(resolvedProfile.handle?.trim());
   const initialProfileWave = useMemo<ApiProfileWaveResponse>(
     () => ({
       profile_wave_id: resolvedProfile.profile_wave_id,
@@ -309,6 +333,11 @@ export default function UserPageProfileWave({
     canSwitchOfficialCuration,
     isDesktopChangeWaveMenu,
   });
+  const openQuickPost = () => setIsQuickPostOpen(true);
+  const addPostHandler = getProfileCurationAddPostHandler({
+    profileCuration,
+    onAddPost: openQuickPost,
+  });
 
   useClickAway(changeWaveDropdownRef, () => {
     if (isDesktopChangeWaveMenu && isChangeWaveOpen) {
@@ -347,6 +376,23 @@ export default function UserPageProfileWave({
     await refetchCurations();
   };
 
+  const selectOfficialCuration = async (curationId: string) => {
+    if (!profileWaveId) {
+      return;
+    }
+
+    setSubmittingCurationId(curationId);
+
+    try {
+      const updatedProfile = await updateProfileWave(profileWaveId, curationId);
+      if (updatedProfile) {
+        setIsChangeCurationOpen(false);
+      }
+    } finally {
+      setSubmittingCurationId(null);
+    }
+  };
+
   const handleRemoveOfficialWave = async () => {
     await removeOfficialWave();
   };
@@ -375,6 +421,7 @@ export default function UserPageProfileWave({
         title="Choose your featured wave"
         identity={profileIdentityKey}
         isOwnProfile={isOwnProfile}
+        hasCreatedProfile={hasCreatedProfile}
         hasActiveProfileProxy={Boolean(activeProfileProxy)}
         selectedWaveId={null}
         submittingWaveId={submittingWaveId}
@@ -427,19 +474,6 @@ export default function UserPageProfileWave({
     );
   }
 
-  const selectOfficialCuration = async (curationId: string) => {
-    setSubmittingCurationId(curationId);
-
-    try {
-      const updatedProfile = await updateProfileWave(profileWaveId, curationId);
-      if (updatedProfile) {
-        setIsChangeCurationOpen(false);
-      }
-    } finally {
-      setSubmittingCurationId(null);
-    }
-  };
-
   return (
     <div className="tw-space-y-5">
       <div className="tw-relative">
@@ -457,6 +491,7 @@ export default function UserPageProfileWave({
               <UserPageProfileWavePicker
                 identity={profileIdentityKey}
                 isOwnProfile={true}
+                hasCreatedProfile={hasCreatedProfile}
                 hasActiveProfileProxy={false}
                 selectedWaveId={profileWaveId}
                 submittingWaveId={submittingWaveId}
@@ -491,6 +526,7 @@ export default function UserPageProfileWave({
           isChangingCuration={submittingCurationId !== null}
           showChangeCuration={canSwitchOfficialCuration}
           onOpenWave={openWave}
+          onAddPost={addPostHandler}
           onOpenChangeWave={() => {
             setIsChangeCurationOpen(false);
             setIsChangeWaveOpen((open) => !open);
@@ -512,6 +548,7 @@ export default function UserPageProfileWave({
           <UserPageProfileWavePicker
             identity={profileIdentityKey}
             isOwnProfile={true}
+            hasCreatedProfile={hasCreatedProfile}
             hasActiveProfileProxy={false}
             selectedWaveId={profileWaveId}
             submittingWaveId={submittingWaveId}
@@ -535,11 +572,29 @@ export default function UserPageProfileWave({
         onSelectCuration={(curationId) => selectOfficialCuration(curationId)}
       />
 
+      {isCreateCurationOpen && canManageOwnOfficialWave && (
+        <MyStreamWaveCurationCreateDialog
+          wave={wave}
+          isOpen={isCreateCurationOpen}
+          onClose={() => setIsCreateCurationOpen(false)}
+          onSaved={(curation) => selectOfficialCuration(curation.id)}
+        />
+      )}
+
+      {isQuickPostOpen && canManageOwnOfficialWave && profileCuration && (
+        <UserPageProfileWaveQuickPostDialog
+          wave={wave}
+          curation={profileCuration}
+          isOpen={isQuickPostOpen}
+          onClose={() => setIsQuickPostOpen(false)}
+        />
+      )}
+
       <div ref={containerRef} className="tw-min-w-0 tw-flex-1">
         <UserPageProfileWaveContent
           canManageOwnOfficialWave={canManageOwnOfficialWave}
           containerWidth={containerWidth}
-          onOpenWave={openWave}
+          onCreateCuration={() => setIsCreateCurationOpen(true)}
           profileIdentity={profileIdentityForMasonry}
           areCurationsError={areCurationsError}
           areCurationsFetching={areCurationsFetching}

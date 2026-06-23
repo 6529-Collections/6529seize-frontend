@@ -24,6 +24,7 @@ interface MyStreamWaveMyVoteProps {
   readonly onToggleCheck?: ((dropId: string) => void) | undefined;
   readonly isResetting?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 type ResolvedPreviewMedia = {
@@ -136,6 +137,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   onToggleCheck,
   isResetting = false,
   isVotingClosed = false,
+  winningThreshold,
 }) => {
   const { isCurationWave } = useSeizeSettings();
   const artWork = drop.parts.at(0)?.media.at(0);
@@ -286,7 +288,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           <div className="tw-mt-3.5 tw-flex tw-flex-col tw-justify-between tw-gap-4 xl:tw-mt-3 xl:tw-flex-row">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-6 sm:tw-justify-start">
               <div onClick={(e) => e.stopPropagation()}>
-                <MyStreamWaveMyVoteVotes drop={drop} />
+                <MyStreamWaveMyVoteVotes
+                  drop={drop}
+                  winningThreshold={winningThreshold}
+                />
               </div>
               <div className="tw-flex tw-items-center tw-gap-2">
                 <div className="tw-hidden tw-items-center -tw-space-x-2 sm:tw-flex">

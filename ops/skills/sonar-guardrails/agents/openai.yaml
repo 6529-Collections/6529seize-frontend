@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonar Guardrails"
+  short_description: "Review TypeScript and JavaScript edits for predictable Sonar issues."
+  default_prompt: "Use $sonar-guardrails to review the touched TypeScript or JavaScript code for predictable Sonar issues."

@@ -20,6 +20,7 @@ import {
 
 interface SmartLinkPreviewProps {
   readonly href: string;
+  readonly hideActions?: boolean | undefined;
   readonly variant?: LinkPreviewVariant | undefined;
   readonly renderFallback?: (() => ReactElement) | undefined;
 }
@@ -77,6 +78,7 @@ const findMatch = (
 };
 
 export default function SmartLinkPreview({
+  hideActions = false,
   href,
   variant,
   renderFallback,
@@ -102,6 +104,7 @@ export default function SmartLinkPreview({
 
     return (
       <LinkPreviewCard
+        hideActions={hideActions}
         href={stableHref}
         variant={resolvedVariant}
         renderFallback={fallbackRenderer}

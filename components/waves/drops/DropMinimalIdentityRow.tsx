@@ -55,7 +55,7 @@ export default function DropMinimalIdentityRow({
         </UserProfileTooltipWrapper>
       </p>
       {!isStackedTimestamp && (
-        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600" />
+        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700" />
       )}
       <WaveDropTime timestamp={drop.created_at} />
     </div>

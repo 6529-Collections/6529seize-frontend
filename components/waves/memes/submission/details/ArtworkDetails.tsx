@@ -4,8 +4,15 @@ import React, { useRef, useCallback, useMemo } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import {
+  METADATA_VALUE_DESCRIPTION_MAX_LENGTH,
+  METADATA_VALUE_TITLE_MAX_LENGTH,
+} from "../utils/submissionMetadata";
 
-interface ArtworkDetailsProps {
+const TITLE_CHARACTER_DANGER_THRESHOLD = 245;
+const DESCRIPTION_CHARACTER_DANGER_THRESHOLD = 7600;
+
+interface ArtworkDetailsBaseProps {
   readonly title: string;
   readonly description: string;
   readonly onTitleChange: (title: string) => void;
@@ -17,6 +24,21 @@ interface ArtworkDetailsProps {
   readonly showRequiredMarkers?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
 }
+
+type ArtworkDetailsAdditionalActionProps =
+  | {
+      readonly showAdditionalActionPromised: true;
+      readonly isAdditionalActionPromised: boolean;
+      readonly onAdditionalActionPromisedChange: (value: boolean) => void;
+    }
+  | {
+      readonly showAdditionalActionPromised?: false | undefined;
+      readonly isAdditionalActionPromised?: boolean | undefined;
+      readonly onAdditionalActionPromisedChange?: undefined;
+    };
+
+type ArtworkDetailsProps = ArtworkDetailsBaseProps &
+  ArtworkDetailsAdditionalActionProps;
 
 const getFieldStateClass = (hasError: boolean, isFilled: boolean): string => {
   if (hasError) {
@@ -38,23 +60,107 @@ const getLabelStateClass = (hasError: boolean): string => {
   return "group-focus-visible-within:tw-text-primary-400 tw-text-iron-300";
 };
 
+const FieldCharacterCount = ({
+  length,
+  maxLength,
+  dangerThreshold,
+}: {
+  readonly length: number;
+  readonly maxLength: number;
+  readonly dangerThreshold: number;
+}) => {
+  const isAtLimit = length >= maxLength;
+  const isDanger = length >= dangerThreshold;
+  const isNearLimit = length >= Math.floor(maxLength * 0.9);
+  let colorClass = "tw-text-iron-500";
+
+  if (isNearLimit) {
+    colorClass = "tw-text-amber-400";
+  }
+
+  if (isDanger) {
+    colorClass = "tw-text-orange-400";
+  }
+
+  if (isAtLimit) {
+    colorClass = "tw-text-red";
+  }
+
+  return (
+    <div className="tw-mt-1.5 tw-flex tw-justify-end">
+      <span className={`tw-text-xs tw-font-medium ${colorClass}`}>
+        {length.toLocaleString()} / {maxLength.toLocaleString()}
+      </span>
+    </div>
+  );
+};
+
+const AdditionalActionPromiseCheckbox = ({
+  checked,
+  onChange,
+}: {
+  readonly checked: boolean;
+  readonly onChange: (value: boolean) => void;
+}) => {
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(event.currentTarget.checked);
+    },
+    [onChange]
+  );
+
+  return (
+    <label
+      htmlFor="field-additional-action-promised"
+      className="tw-mt-4 tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-bg-iron-900/70 tw-px-3 tw-py-3 tw-ring-1 tw-ring-iron-800 tw-transition-colors desktop-hover:hover:tw-ring-iron-700"
+    >
+      <input
+        id="field-additional-action-promised"
+        name="isAdditionalActionPromised"
+        type="checkbox"
+        checked={checked}
+        onChange={handleChange}
+        className="tw-mt-0.5 tw-h-4 tw-w-4 tw-rounded tw-border-iron-700 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-500"
+      />
+      <span className="tw-flex tw-flex-col tw-gap-1">
+        <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+          Additional Action
+        </span>
+        <span className="tw-text-xs tw-leading-5 tw-text-iron-400">
+          Check this if the submission includes a real-world commitment, such as
+          an event, donation, physical item, airdrop, or future deliverable.
+        </span>
+      </span>
+    </label>
+  );
+};
+
 /**
  * ArtworkDetails - Component for the artwork title and description fields
  *
  * Extreme simplification using uncontrolled inputs with refs for maximum performance
  */
-const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
-  title,
-  description,
-  onTitleChange,
-  onDescriptionChange,
-  titleError,
-  descriptionError,
-  onTitleBlur,
-  onDescriptionBlur,
-  showRequiredMarkers = false,
-  size = "default",
-}) => {
+const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
+  const {
+    title,
+    description,
+    onTitleChange,
+    onDescriptionChange,
+    titleError,
+    descriptionError,
+    onTitleBlur,
+    onDescriptionBlur,
+    showRequiredMarkers = false,
+    size = "default",
+  } = props;
+  const additionalActionPromiseProps =
+    props.showAdditionalActionPromised === true
+      ? {
+          checked: props.isAdditionalActionPromised,
+          onChange: props.onAdditionalActionPromisedChange,
+        }
+      : null;
+
   // Refs to track input elements directly
   const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -111,8 +217,18 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
 
   const handleDescriptionInput = useCallback(
     (event: React.FormEvent<HTMLTextAreaElement>) => {
-      onDescriptionChange(event.currentTarget.value);
-      resizeDescriptionTextarea(event.currentTarget);
+      const textarea = event.currentTarget;
+      const nextDescription = textarea.value.slice(
+        0,
+        METADATA_VALUE_DESCRIPTION_MAX_LENGTH
+      );
+
+      if (textarea.value !== nextDescription) {
+        textarea.value = nextDescription;
+      }
+
+      onDescriptionChange(nextDescription);
+      resizeDescriptionTextarea(textarea);
     },
     [onDescriptionChange, resizeDescriptionTextarea]
   );
@@ -135,6 +251,8 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   const descriptionLabelStateClass = getLabelStateClass(
     Boolean(descriptionError)
   );
+  const titleLength = title.length;
+  const descriptionLength = description.length;
 
   return (
     <FormSection
@@ -165,7 +283,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 id="field-title"
                 name="title"
                 type="text"
-                maxLength={500}
+                maxLength={METADATA_VALUE_TITLE_MAX_LENGTH}
                 defaultValue={title || ""}
                 onInput={handleTitleInput}
                 onBlur={handleTitleBlur}
@@ -194,6 +312,11 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 </div>
               )}
             </div>
+            <FieldCharacterCount
+              length={titleLength}
+              maxLength={METADATA_VALUE_TITLE_MAX_LENGTH}
+              dangerThreshold={TITLE_CHARACTER_DANGER_THRESHOLD}
+            />
           </div>
 
           <ValidationError error={titleError} id="title-error" />
@@ -225,13 +348,13 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 onInput={handleDescriptionInput}
                 onBlur={handleDescriptionBlur}
                 rows={4}
-                maxLength={500}
                 aria-invalid={!!descriptionError}
                 aria-describedby={
                   descriptionError ? "description-error" : undefined
                 }
                 data-field="description"
-                className={`tw-form-textarea tw-w-full tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${descriptionStateClass} ${
+                data-max-length={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
+                className={`tw-form-textarea tw-w-full tw-cursor-text tw-resize-none tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${descriptionStateClass} ${
                   isDescriptionFilled && !descriptionError ? "tw-pr-10" : ""
                 } `}
               />
@@ -255,9 +378,21 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 </div>
               )}
             </div>
+            <FieldCharacterCount
+              length={descriptionLength}
+              maxLength={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
+              dangerThreshold={DESCRIPTION_CHARACTER_DANGER_THRESHOLD}
+            />
           </div>
 
           <ValidationError error={descriptionError} id="description-error" />
+
+          {additionalActionPromiseProps ? (
+            <AdditionalActionPromiseCheckbox
+              checked={additionalActionPromiseProps.checked}
+              onChange={additionalActionPromiseProps.onChange}
+            />
+          ) : null}
         </div>
       </div>
     </FormSection>

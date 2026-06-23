@@ -1,3 +1,4 @@
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CreateWaveGroupConfigType, CreateWaveStep } from "@/types/waves.types";
@@ -12,6 +13,17 @@ export const WAVE_VOTE_STATS_LABELS = {
   YOUR_VOTES: "Your votes",
   TOTAL: "Total",
 };
+
+const WAVE_VOTE_SCOPE_MAX_LABELS: Record<ApiWaveCreditScope, string> = {
+  [ApiWaveCreditScope.Wave]: "Max for wave",
+  [ApiWaveCreditScope.Drop]: "Max per drop",
+};
+
+export const getWaveVoteScopeMaxLabel = (
+  scope?: ApiWaveCreditScope | null
+): string =>
+  WAVE_VOTE_SCOPE_MAX_LABELS[scope ?? ApiWaveCreditScope.Wave] ??
+  WAVE_VOTE_SCOPE_MAX_LABELS[ApiWaveCreditScope.Wave];
 
 export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.Tdh]: "TDH",

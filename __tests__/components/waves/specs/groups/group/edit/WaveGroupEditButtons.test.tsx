@@ -44,9 +44,9 @@ jest.mock("@/helpers/waves/waves.helpers", () => ({
 }));
 
 jest.mock(
-  "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel",
+  "@/components/groups/assignment/GroupAssignmentDialog",
   () =>
-    function MockCreateWaveGroupInlinePanel(props: any) {
+    function MockGroupAssignmentDialog(props: any) {
       mockInlinePanelProps = props;
       const selectedGroup = {
         id: "group-2",
@@ -349,7 +349,7 @@ describe("WaveGroupEditButtons", () => {
       expect.objectContaining({
         id: "group-without-author",
         name: "Group Without Author",
-        created_by: {
+        created_by: expect.objectContaining({
           id: "unknown",
           handle: null,
           pfp: null,
@@ -370,7 +370,7 @@ describe("WaveGroupEditButtons", () => {
           artist_of_prevote_cards: [],
           profile_wave_id: null,
           is_wave_creator: false,
-        },
+        }),
       })
     );
   });

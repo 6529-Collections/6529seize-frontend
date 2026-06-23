@@ -8,15 +8,22 @@ import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUs
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
+import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createBreakpoint } from "react-use";
 import type {
   DropIdentityMode,
   DropInteractionParams,
@@ -36,10 +43,56 @@ import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
+import WaveDropTime from "./time/WaveDropTime";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
+const TOUCH_MOVE_THRESHOLD_PX = 10;
+const GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX = 16;
+const GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX = 148;
+const GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO = 1.15;
+const PRIMARY_POINTER_BUTTON = 0;
 
-const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
+type TouchCoordinates = Pick<Touch, "clientX" | "clientY">;
+type TimestampSwipeStart = {
+  readonly x: number;
+  readonly y: number;
+  readonly pointerId?: number | undefined;
+};
+
+const getPrimaryTouch = (event: React.TouchEvent): TouchCoordinates | null =>
+  event.touches[0] ?? event.targetTouches[0] ?? event.changedTouches[0] ?? null;
+
+const getPointerType = (event: React.PointerEvent<HTMLDivElement>): string =>
+  event.pointerType || "mouse";
+
+const getPointerId = (event: React.PointerEvent<HTMLDivElement>): number =>
+  Number.isFinite(event.pointerId) ? event.pointerId : -1;
+
+const isPrimaryPointerButton = (
+  event: React.PointerEvent<HTMLDivElement>
+): boolean => {
+  const maybeButton = (event as React.PointerEvent<HTMLDivElement> & {
+    readonly button?: number | undefined;
+  }).button;
+
+  return (
+    maybeButton === undefined ||
+    maybeButton === PRIMARY_POINTER_BUTTON ||
+    event.buttons === 1
+  );
+};
+
+const isInteractiveSwipeTarget = (target: EventTarget | null): boolean => {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  return Boolean(
+    target.closest(
+      "a, button, input, textarea, select, summary, [role='button'], [contenteditable='true']"
+    )
+  );
+};
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -63,6 +116,22 @@ const shouldGroupWithDrop = (
     currentDrop.reply_to?.drop_id === otherDrop.reply_to?.drop_id;
 
   return bothNotReplies || repliesInSameThread;
+};
+
+const shouldGroupCurrentDrop = ({
+  isDrop,
+  drop,
+  otherDrop,
+}: {
+  readonly isDrop: boolean;
+  readonly drop: ExtendedDrop;
+  readonly otherDrop: ExtendedDrop | null;
+}): boolean => {
+  if (isDrop) {
+    return false;
+  }
+
+  return shouldGroupWithDrop(drop, otherDrop);
 };
 
 const RANK_STYLES = {
@@ -113,7 +182,7 @@ const getDropClasses = (
   isDrop: boolean
 ): string => {
   const baseClasses =
-    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
+    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-z-30 focus-within:tw-z-30";
 
   const streamClasses = "tw-rounded-xl";
 
@@ -131,10 +200,32 @@ const getDropClasses = (
 
 const getContentOffsetClass = (compact: boolean): string => {
   if (compact) {
-    return "tw-ml-11 tw-w-[calc(100%-2.5rem)]";
+    return "md:tw-ml-11 md:tw-w-[calc(100%-2.5rem)]";
   }
 
-  return "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]";
+  return "md:tw-ml-[3.25rem] md:tw-w-[calc(100%-3.25rem)]";
+};
+
+const getDropContentClass = ({
+  showAuthorInfo,
+  shouldGroupWithPreviousDrop,
+  isProfileView,
+}: {
+  readonly showAuthorInfo: boolean;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly isProfileView: boolean;
+}): string => {
+  const classes = ["tw-w-full"];
+
+  if (showAuthorInfo) {
+    classes.push("tw-mt-2");
+  }
+
+  if (shouldGroupWithPreviousDrop && !isProfileView) {
+    classes.push("md:tw-pl-[3.25rem]");
+  }
+
+  return classes.join(" ");
 };
 
 const shouldShowAuthorInfo = ({
@@ -148,6 +239,86 @@ const shouldShowAuthorInfo = ({
 }): boolean =>
   identityMode !== "hidden" &&
   (!shouldGroupWithPreviousDrop || isProfileView || identityMode === "minimal");
+
+const shouldShowTouchActionsButton = ({
+  showInteractions,
+  hasTouch,
+  showReplyAndQuote,
+  isEditing,
+  identityMode,
+}: {
+  readonly showInteractions: boolean;
+  readonly hasTouch: boolean;
+  readonly showReplyAndQuote: boolean;
+  readonly isEditing: boolean;
+  readonly identityMode: DropIdentityMode;
+}): boolean =>
+  showInteractions &&
+  hasTouch &&
+  showReplyAndQuote &&
+  !isEditing &&
+  identityMode === "default";
+
+const shouldDisplayReplyHeader = ({
+  replyTo,
+  dropViewDropId,
+  shouldGroupWithPreviousDrop,
+  previousDrop,
+}: {
+  readonly replyTo: ExtendedDrop["reply_to"];
+  readonly dropViewDropId: string | null;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly previousDrop: ExtendedDrop | null;
+}): boolean => {
+  if (!replyTo || replyTo.drop_id === dropViewDropId) {
+    return false;
+  }
+
+  return !(
+    shouldGroupWithPreviousDrop &&
+    replyTo.drop_id === previousDrop?.reply_to?.drop_id
+  );
+};
+
+const shouldOffsetFooterRow = ({
+  inlineAuthorOnDesktop,
+  showAuthorInfo,
+  shouldGroupWithPreviousDrop,
+  isProfileView,
+}: {
+  readonly inlineAuthorOnDesktop: boolean;
+  readonly showAuthorInfo: boolean;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly isProfileView: boolean;
+}): boolean => {
+  if (inlineAuthorOnDesktop) {
+    return false;
+  }
+
+  return showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView);
+};
+
+const getWaveDropOuterClass = ({
+  isDrop,
+  location,
+  isProfileView,
+}: {
+  readonly isDrop: boolean;
+  readonly location: DropLocation;
+  readonly isProfileView: boolean;
+}): string => {
+  const classes = ["tw-w-full"];
+
+  if (isDrop && location === DropLocation.WAVE) {
+    classes.push("tw-px-4 tw-py-0.5");
+  }
+
+  if (isProfileView) {
+    classes.push("tw-mb-3");
+  }
+
+  return classes.join(" ");
+};
 
 const getGroupingClass = ({
   isProfileView,
@@ -171,6 +342,7 @@ const clearLongPressTimeout = ({
 }) => {
   if (longPressTimeoutRef.current) {
     clearTimeout(longPressTimeoutRef.current);
+    longPressTimeoutRef.current = null;
   }
 };
 
@@ -196,8 +368,12 @@ const handleTouchStartInternal = ({
     return;
   }
 
-  const touch = event.touches[0];
-  touchStartPosition.current = { x: touch!.clientX, y: touch!.clientY };
+  const touch = getPrimaryTouch(event);
+  if (!touch) {
+    return;
+  }
+
+  touchStartPosition.current = { x: touch.clientX, y: touch.clientY };
   longPressTimeoutRef.current = setTimeout(onLongPress, 500);
 };
 
@@ -233,14 +409,115 @@ const handleTouchMoveInternal = ({
     return;
   }
 
-  const touch = event.touches[0];
-  const moveThreshold = 10;
-  const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
-  const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
+  const touch = getPrimaryTouch(event);
+  if (!touch) {
+    return;
+  }
 
-  if (deltaX > moveThreshold || deltaY > moveThreshold) {
+  const deltaX = Math.abs(touch.clientX - touchStartPosition.current.x);
+  const deltaY = Math.abs(touch.clientY - touchStartPosition.current.y);
+
+  if (deltaX > TOUCH_MOVE_THRESHOLD_PX || deltaY > TOUCH_MOVE_THRESHOLD_PX) {
     clearLongPressTimeout({ longPressTimeoutRef });
   }
+};
+
+const clampGroupedTimestampSwipeOffset = (offset: number): number =>
+  Math.min(GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX, Math.max(0, offset));
+
+const getGroupedTimestampContentStyle = (
+  offset: number
+): CSSProperties | undefined => {
+  if (offset <= 0) {
+    return undefined;
+  }
+
+  return { transform: `translateX(-${offset}px)` };
+};
+
+const getGroupedTimestampActionStyle = (
+  offset: number
+): CSSProperties | undefined => {
+  if (offset <= 0) {
+    return undefined;
+  }
+
+  return { transform: `translateX(${offset}px)` };
+};
+
+const getGroupedTimestampOpacityStyle = (offset: number): CSSProperties => ({
+  opacity: Math.min(1, offset / GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX),
+});
+
+const releasePointerCapture = (
+  event: React.PointerEvent<HTMLDivElement>,
+  pointerId: number | undefined
+) => {
+  if (pointerId === undefined) {
+    return;
+  }
+
+  if (
+    typeof event.currentTarget.hasPointerCapture !== "function" ||
+    typeof event.currentTarget.releasePointerCapture !== "function" ||
+    !event.currentTarget.hasPointerCapture(pointerId)
+  ) {
+    return;
+  }
+
+  event.currentTarget.releasePointerCapture(pointerId);
+};
+
+const setPointerCapture = (
+  event: React.PointerEvent<HTMLDivElement>,
+  pointerId: number
+) => {
+  if (
+    typeof event.currentTarget.hasPointerCapture !== "function" ||
+    typeof event.currentTarget.setPointerCapture !== "function" ||
+    event.currentTarget.hasPointerCapture(pointerId)
+  ) {
+    return;
+  }
+
+  event.currentTarget.setPointerCapture(pointerId);
+};
+
+const shouldShowGroupedDropTimestamp = ({
+  shouldGroupWithPreviousDrop,
+  showAuthorInfo,
+  identityMode,
+  isProfileView,
+  location,
+}: {
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly showAuthorInfo: boolean;
+  readonly identityMode: DropIdentityMode;
+  readonly isProfileView: boolean;
+  readonly location: DropLocation;
+}): boolean =>
+  location === DropLocation.WAVE &&
+  identityMode === "default" &&
+  shouldGroupWithPreviousDrop &&
+  !showAuthorInfo &&
+  !isProfileView;
+
+const GroupedDropTimestamp = ({
+  swipeOffset = 0,
+  timestamp,
+}: {
+  readonly swipeOffset?: number;
+  readonly timestamp: number;
+}) => {
+  return (
+    <div
+      className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 tw-flex tw-w-[9.25rem] -tw-translate-y-1/2 tw-justify-end tw-overflow-visible tw-text-right tw-transition-opacity tw-duration-150"
+      data-testid="grouped-drop-swipe-timestamp"
+      style={getGroupedTimestampOpacityStyle(swipeOffset)}
+    >
+      <WaveDropTime timestamp={timestamp} size="xs" variant="compactReveal" />
+    </div>
+  );
 };
 
 const getAuthorHeader = ({
@@ -290,6 +567,26 @@ const getAuthorHeader = ({
   );
 };
 
+const getDesktopAuthorHeader = ({
+  showAuthorInfo,
+  inlineAuthorOnDesktop,
+  authorHeader,
+}: {
+  readonly showAuthorInfo: boolean;
+  readonly inlineAuthorOnDesktop: boolean;
+  readonly authorHeader: React.ReactNode;
+}): React.ReactNode => {
+  if (showAuthorInfo && !inlineAuthorOnDesktop) {
+    return <div className="tw-hidden md:tw-block">{authorHeader}</div>;
+  }
+
+  if (showAuthorInfo) {
+    return null;
+  }
+
+  return authorHeader;
+};
+
 const getContentBlock = ({
   shouldShowReplyHeader,
   onReplyClick,
@@ -311,16 +608,21 @@ const getContentBlock = ({
   handleEditCancel,
   allowLongPress,
   handleLinkCardActionsActiveChange,
-  isMobile,
+  canUseDesktopHoverActions,
   showInteractions,
   showReplyAndQuote,
   handleOnReply,
   handleOnEdit,
   hasActiveLinkCardActions,
+  inlineAuthorOnDesktop,
+  mediaImageScale,
+  fullWidthMedia,
+  fullWidthLinkPreviews,
   embedPath,
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  groupedTimestampSwipeOffset,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -350,16 +652,21 @@ const getContentBlock = ({
     actionId: string,
     active: boolean
   ) => void;
-  readonly isMobile: boolean;
+  readonly canUseDesktopHoverActions: boolean;
   readonly showInteractions: boolean;
   readonly showReplyAndQuote: boolean;
   readonly handleOnReply: () => void;
   readonly handleOnEdit: () => void;
   readonly hasActiveLinkCardActions: boolean;
+  readonly inlineAuthorOnDesktop: boolean;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia: boolean;
+  readonly fullWidthLinkPreviews: boolean;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly groupedTimestampSwipeOffset: number;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -370,21 +677,47 @@ const getContentBlock = ({
         maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
       />
     )}
-    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-      {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
-      <div
-        className="tw-flex tw-w-full tw-flex-col"
-        style={{
-          maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
-        }}
-      >
-        {authorHeader}
+    <div
+      className={`tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-border-0 tw-bg-transparent tw-text-left ${
+        inlineAuthorOnDesktop ? "" : "md:tw-flex-row md:tw-gap-x-3"
+      }`}
+    >
+      {showAuthorInfo && (
         <div
-          className={`tw-w-full ${showAuthorInfo ? "tw-mt-2" : ""}${
-            shouldGroupWithPreviousDrop && !isProfileView
-              ? "tw-pl-[3.25rem]"
-              : ""
+          className={`tw-flex tw-w-full tw-items-center tw-gap-x-2 ${
+            inlineAuthorOnDesktop
+              ? ""
+              : "md:tw-block md:tw-w-auto md:tw-flex-shrink-0"
           }`}
+        >
+          <WaveDropAuthorPfp drop={drop} />
+          <div
+            className={`tw-min-w-0 tw-flex-1 ${
+              inlineAuthorOnDesktop ? "" : "md:tw-hidden"
+            }`}
+          >
+            {authorHeader}
+          </div>
+        </div>
+      )}
+      <div
+        className={`tw-flex tw-w-full tw-flex-col ${
+          showAuthorInfo && !inlineAuthorOnDesktop
+            ? "md:tw-max-w-[calc(100%-3.5rem)]"
+            : ""
+        }`}
+      >
+        {getDesktopAuthorHeader({
+          showAuthorInfo,
+          inlineAuthorOnDesktop,
+          authorHeader,
+        })}
+        <div
+          className={getDropContentClass({
+            showAuthorInfo,
+            shouldGroupWithPreviousDrop,
+            isProfileView,
+          })}
         >
           <WaveDropContent
             drop={drop}
@@ -400,6 +733,9 @@ const getContentBlock = ({
             onCancel={handleEditCancel}
             hasTouch={allowLongPress}
             onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
+            mediaImageScale={mediaImageScale}
+            fullWidthMedia={fullWidthMedia}
+            fullWidthLinkPreviews={fullWidthLinkPreviews}
             embedPath={embedPath}
             quotePath={quotePath}
             embedDepth={embedDepth}
@@ -408,15 +744,19 @@ const getContentBlock = ({
         </div>
       </div>
     </div>
-    {!isMobile && showInteractions && showReplyAndQuote && !isEditing && (
-      <WaveDropActions
-        drop={drop}
-        activePartIndex={activePartIndex}
-        onReply={handleOnReply}
-        onEdit={handleOnEdit}
-        suppressed={hasActiveLinkCardActions}
-      />
-    )}
+    {canUseDesktopHoverActions &&
+      showInteractions &&
+      showReplyAndQuote &&
+      !isEditing && (
+        <WaveDropActions
+          drop={drop}
+          activePartIndex={activePartIndex}
+          onReply={handleOnReply}
+          onEdit={handleOnEdit}
+          suppressed={hasActiveLinkCardActions}
+          style={getGroupedTimestampActionStyle(groupedTimestampSwipeOffset)}
+        />
+      )}
   </>
 );
 
@@ -440,6 +780,10 @@ interface WaveDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly inlineAuthorOnDesktop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -464,6 +808,10 @@ const WaveDrop = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  inlineAuthorOnDesktop = false,
+  mediaImageScale,
+  fullWidthMedia = false,
+  fullWidthLinkPreviews = false,
   embedPath,
   quotePath,
   embedDepth,
@@ -475,6 +823,9 @@ const WaveDrop = ({
   const [activeLinkCardActionIds, setActiveLinkCardActionIds] = useState<
     string[]
   >([]);
+  const [timestampSwipeOffset, setTimestampSwipeOffset] = useState(0);
+  const [isTimestampSwipeDragging, setIsTimestampSwipeDragging] =
+    useState(false);
   const [boostAnimation, setBoostAnimation] =
     useState<BoostAnimationState | null>(null);
   const dropRef = useRef<HTMLDivElement>(null);
@@ -483,22 +834,33 @@ const WaveDrop = ({
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
+  const timestampSwipeStartRef = useRef<TimestampSwipeStart | null>(null);
+  const {
+    markNextClickForSuppression,
+    releaseSuppressionAfterTouchEnd,
+    clearSuppression,
+    handleClickCapture,
+  } = useLongPressClickSuppression();
   const dropUpdateMutation = useDropUpdateMutation();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
 
-  const shouldGroupWithPreviousDrop =
-    !isDrop && shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithPreviousDrop = shouldGroupCurrentDrop({
+    isDrop,
+    drop,
+    otherDrop: previousDrop,
+  });
 
-  const shouldGroupWithNextDrop =
-    !isDrop && shouldGroupWithDrop(drop, nextDrop);
+  const shouldGroupWithNextDrop = shouldGroupCurrentDrop({
+    isDrop,
+    drop,
+    otherDrop: nextDrop,
+  });
 
-  const isMobile = useIsMobileDevice();
-  const hasTouch = useHasTouchInput() || isMobile;
-  const breakpoint = useBreakpoint();
-  const isMdUp = breakpoint === "MD";
-  const allowLongPress = showInteractions && hasTouch && !isMdUp;
+  const { canUseDesktopHoverActions, canUseTouchActionSheet } =
+    useDropActionInteractionMode();
+  const allowLongPress = showInteractions && canUseTouchActionSheet;
   const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
@@ -508,12 +870,20 @@ const WaveDrop = ({
     shouldGroupWithPreviousDrop,
     isProfileView,
   });
-  const showActionsButton =
-    showInteractions &&
-    hasTouch &&
-    showReplyAndQuote &&
-    !isEditing &&
-    identityMode === "default";
+  const showGroupedTimestamp = shouldShowGroupedDropTimestamp({
+    shouldGroupWithPreviousDrop,
+    showAuthorInfo,
+    identityMode,
+    isProfileView,
+    location,
+  });
+  const showActionsButton = shouldShowTouchActionsButton({
+    showInteractions,
+    hasTouch: canUseTouchActionSheet,
+    showReplyAndQuote,
+    isEditing,
+    identityMode,
+  });
   const groupingClass = getGroupingClass({
     isProfileView,
     shouldGroupWithPreviousDrop,
@@ -521,24 +891,29 @@ const WaveDrop = ({
   });
   const replyTo = drop.reply_to;
 
-  const isGroupedReplyWithPrevious =
-    shouldGroupWithPreviousDrop &&
-    replyTo?.drop_id === previousDrop?.reply_to?.drop_id;
+  const shouldShowReplyHeader = shouldDisplayReplyHeader({
+    replyTo,
+    dropViewDropId,
+    shouldGroupWithPreviousDrop,
+    previousDrop,
+  });
 
-  const shouldShowReplyHeader =
-    !!replyTo &&
-    replyTo.drop_id !== dropViewDropId &&
-    !isGroupedReplyWithPrevious;
+  const resetTimestampSwipe = useCallback(() => {
+    timestampSwipeStartRef.current = null;
+    setTimestampSwipeOffset(0);
+    setIsTimestampSwipeDragging(false);
+  }, []);
 
   const handleLongPress = useCallback(() => {
     if (!allowLongPress) return;
+    markNextClickForSuppression();
     // Cancel any active edit mode first
     if (editingDropId) {
       dispatch(setEditingDropId(null));
     }
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [allowLongPress, editingDropId, dispatch]);
+  }, [allowLongPress, editingDropId, dispatch, markNextClickForSuppression]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -550,8 +925,33 @@ const WaveDrop = ({
         longPressTimeoutRef,
         onLongPress: handleLongPress,
       });
+
+      if (showGroupedTimestamp && canUseTouchActionSheet && !isEditing) {
+        const touch = getPrimaryTouch(e);
+        if (!touch) {
+          resetTimestampSwipe();
+          return;
+        }
+
+        timestampSwipeStartRef.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
+        setTimestampSwipeOffset(0);
+        setIsTimestampSwipeDragging(false);
+        return;
+      }
+
+      resetTimestampSwipe();
     },
-    [allowLongPress, handleLongPress, isEditing]
+    [
+      allowLongPress,
+      canUseTouchActionSheet,
+      handleLongPress,
+      isEditing,
+      resetTimestampSwipe,
+      showGroupedTimestamp,
+    ]
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -559,7 +959,9 @@ const WaveDrop = ({
       longPressTimeoutRef,
       touchStartPosition,
     });
-  }, []);
+    resetTimestampSwipe();
+    releaseSuppressionAfterTouchEnd();
+  }, [releaseSuppressionAfterTouchEnd, resetTimestampSwipe]);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
@@ -569,8 +971,148 @@ const WaveDrop = ({
         touchStartPosition,
         longPressTimeoutRef,
       });
+
+      const swipeStart = timestampSwipeStartRef.current;
+      if (
+        !swipeStart ||
+        !showGroupedTimestamp ||
+        !canUseTouchActionSheet ||
+        isEditing
+      ) {
+        return;
+      }
+
+      const touch = getPrimaryTouch(e);
+      if (!touch) {
+        return;
+      }
+
+      const swipeDeltaX = swipeStart.x - touch.clientX;
+      const deltaY = Math.abs(touch.clientY - swipeStart.y);
+      const isActivatedSwipe =
+        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
+        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
+
+      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
+        return;
+      }
+
+      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
+        resetTimestampSwipe();
+        return;
+      }
+
+      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
+      if (nextOffset <= 0) {
+        return;
+      }
+
+      clearLongPressTimeout({ longPressTimeoutRef });
+      markNextClickForSuppression();
+      setLongPressTriggered(false);
+      setIsSlideUp(false);
+      setIsTimestampSwipeDragging(true);
+      setTimestampSwipeOffset(nextOffset);
+
+      if (e.cancelable) {
+        e.preventDefault();
+      }
     },
-    [allowLongPress]
+    [
+      allowLongPress,
+      canUseTouchActionSheet,
+      isEditing,
+      isTimestampSwipeDragging,
+      markNextClickForSuppression,
+      resetTimestampSwipe,
+      showGroupedTimestamp,
+    ]
+  );
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const pointerType = getPointerType(event);
+      if (
+        pointerType === "touch" ||
+        !isPrimaryPointerButton(event) ||
+        !showGroupedTimestamp ||
+        isEditing ||
+        isInteractiveSwipeTarget(event.target)
+      ) {
+        return;
+      }
+
+      timestampSwipeStartRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        pointerId: getPointerId(event),
+      };
+      setTimestampSwipeOffset(0);
+      setIsTimestampSwipeDragging(false);
+    },
+    [isEditing, showGroupedTimestamp]
+  );
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const swipeStart = timestampSwipeStartRef.current;
+      const pointerId = getPointerId(event);
+      if (
+        swipeStart?.pointerId !== pointerId ||
+        getPointerType(event) === "touch" ||
+        !showGroupedTimestamp ||
+        isEditing
+      ) {
+        return;
+      }
+
+      const swipeDeltaX = swipeStart.x - event.clientX;
+      const deltaY = Math.abs(event.clientY - swipeStart.y);
+      const isActivatedSwipe =
+        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
+        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
+
+      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
+        return;
+      }
+
+      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
+        resetTimestampSwipe();
+        releasePointerCapture(event, swipeStart.pointerId);
+        return;
+      }
+
+      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
+      if (nextOffset <= 0) {
+        return;
+      }
+
+      setPointerCapture(event, pointerId);
+
+      markNextClickForSuppression();
+      setIsTimestampSwipeDragging(true);
+      setTimestampSwipeOffset(nextOffset);
+
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+    },
+    [
+      isEditing,
+      isTimestampSwipeDragging,
+      markNextClickForSuppression,
+      resetTimestampSwipe,
+      showGroupedTimestamp,
+    ]
+  );
+
+  const handlePointerEnd = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const swipeStart = timestampSwipeStartRef.current;
+      releasePointerCapture(event, swipeStart?.pointerId);
+      resetTimestampSwipe();
+    },
+    [resetTimestampSwipe]
   );
 
   const handleOnReply = useCallback(() => {
@@ -727,8 +1269,29 @@ const WaveDrop = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    clearLongPressTimeout({ longPressTimeoutRef });
+    touchStartPosition.current = null;
+    resetTimestampSwipe();
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+    clearSuppression();
+  }, [canUseTouchActionSheet, clearSuppression, resetTimestampSwipe]);
+
+  useEffect(() => {
+    if (showGroupedTimestamp) {
+      return;
+    }
+
+    resetTimestampSwipe();
+  }, [resetTimestampSwipe, showGroupedTimestamp]);
+
   // Derive effective menu state - menu can't be open while editing
-  const effectiveIsSlideUp = isSlideUp && !isEditing;
+  const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
 
   const dropClasses = getDropClasses(
     isActiveDrop,
@@ -759,21 +1322,29 @@ const WaveDrop = ({
     handleEditCancel,
     allowLongPress,
     handleLinkCardActionsActiveChange,
-    isMobile,
+    canUseDesktopHoverActions,
     showInteractions,
     showReplyAndQuote,
     handleOnReply,
     handleOnEdit,
     hasActiveLinkCardActions,
+    inlineAuthorOnDesktop,
+    mediaImageScale,
+    fullWidthMedia,
+    fullWidthLinkPreviews,
     embedPath,
     quotePath,
     embedDepth,
     maxEmbedDepth,
+    groupedTimestampSwipeOffset: timestampSwipeOffset,
   });
 
+  const contentOffsetClass = inlineAuthorOnDesktop
+    ? ""
+    : getContentOffsetClass(compact);
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
     <div
-      className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${getContentOffsetClass(compact)}`}
+      className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-mx-2 ${contentOffsetClass}`}
     >
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
@@ -784,21 +1355,32 @@ const WaveDrop = ({
       {showInteractions && <WaveDropReactions drop={drop} />}
     </div>
   );
-  const shouldOffsetFooter =
-    showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView);
-  const footerOffsetClass = shouldOffsetFooter
-    ? getContentOffsetClass(compact)
-    : "";
+  const shouldOffsetFooter = shouldOffsetFooterRow({
+    inlineAuthorOnDesktop,
+    showAuthorInfo,
+    shouldGroupWithPreviousDrop,
+    isProfileView,
+  });
+  const footerOffsetClass = shouldOffsetFooter ? contentOffsetClass : "";
   const footerRow = hasDropFooter(footer) && (
-    <div className={`tw-mx-2 tw-mt-2 ${footerOffsetClass}`}>{footer}</div>
+    <div className={`tw-mt-2 md:tw-mx-2 ${footerOffsetClass}`}>{footer}</div>
   );
+  const outerClass = getWaveDropOuterClass({
+    isDrop,
+    location,
+    isProfileView,
+  });
+  const groupedTimestampTransitionClass = isTimestampSwipeDragging
+    ? "tw-will-change-transform"
+    : "tw-transition-transform tw-duration-150 tw-ease-out";
+  const swipeableContentClass = `tw-relative tw-z-10 ${
+    showGroupedTimestamp ? groupedTimestampTransitionClass : ""
+  }`;
+  const swipeableContentStyle =
+    getGroupedTimestampContentStyle(timestampSwipeOffset);
 
   return (
-    <div
-      className={`${
-        isDrop && location === DropLocation.WAVE ? "tw-px-4 tw-py-0.5" : ""
-      } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}
-    >
+    <div className={outerClass}>
       <div
         ref={dropRef}
         className={dropClasses}
@@ -806,11 +1388,31 @@ const WaveDrop = ({
         data-serial-no={drop.serial_no}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         onTouchMove={handleTouchMove}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        onClickCapture={handleClickCapture}
       >
-        {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
-        {reactionsRow}
-        {footerRow}
+        {showGroupedTimestamp && (
+          <GroupedDropTimestamp
+            swipeOffset={timestampSwipeOffset}
+            timestamp={drop.created_at}
+          />
+        )}
+        <div
+          className={swipeableContentClass}
+          data-testid={
+            showGroupedTimestamp ? "grouped-drop-swipeable-content" : undefined
+          }
+          style={swipeableContentStyle}
+        >
+          {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
+          {reactionsRow}
+          {footerRow}
+        </div>
         {showInteractions && (
           <WaveDropMobileMenu
             drop={drop}

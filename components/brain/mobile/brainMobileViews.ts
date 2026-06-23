@@ -9,6 +9,7 @@ export enum BrainView {
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
   MY_VOTES = "MY_VOTES",
+  POLLS = "POLLS",
   FAQ = "FAQ",
   WAVES = "WAVES",
   PROFILE_FEED = "PROFILE_FEED",

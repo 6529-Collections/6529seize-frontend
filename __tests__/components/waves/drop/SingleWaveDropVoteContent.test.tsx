@@ -2,8 +2,10 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { SingleWaveDropVoteContent } from "@/components/waves/drop/SingleWaveDropVoteContent";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { SingleWaveDropVoteSubmissionMode } from "@/components/waves/drop/SingleWaveDropVote.types";
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: ({ flip }: any) => (
@@ -14,9 +16,19 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
   return React.forwardRef(function MockSubmit(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({ handleClick: jest.fn() }));
     return (
-      <div data-testid="vote-submit">
+      <div
+        data-testid="vote-submit"
+        data-has-request-started={String(
+          typeof props.onVoteRequestStarted === "function"
+        )}
+        data-submission-mode={props.submissionMode}
+      >
         <button
           onClick={() => {
+            if (props.submitBlockReason) {
+              return;
+            }
+
             props.onVoteApplied?.({
               ...props.drop,
               context_profile_context: props.drop.context_profile_context
@@ -31,28 +43,40 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
         >
           Submit Vote
         </button>
-        <span data-testid="new-rating">{props.newRating}</span>
+        <span data-testid="new-rating">{String(props.newRating)}</span>
+        <span data-testid="submit-block-reason">
+          {props.submitBlockReason ?? ""}
+        </span>
       </div>
     );
   });
 });
 jest.mock("@/components/waves/drop/SingleWaveDropVoteSlider", () => ({
   __esModule: true,
-  default: (props: any) => (
-    <div data-testid="vote-slider">
-      <input
-        data-testid="slider-input"
-        type="range"
-        min={props.minValue}
-        max={props.maxValue}
-        value={props.voteValue}
-        onChange={(e) => props.setVoteValue(Number(e.target.value))}
-      />
-      <span data-testid="slider-value">{props.voteValue}</span>
-      <span data-testid="slider-credit-type">{props.label}</span>
-      <span data-testid="slider-rank">{props.rank}</span>
-    </div>
-  ),
+  default: (props: any) => {
+    const numericVoteValue = Number(props.voteValue);
+    const sliderValue = Number.isFinite(numericVoteValue)
+      ? Math.min(Math.max(numericVoteValue, props.minValue), props.maxValue)
+      : props.minValue;
+
+    return (
+      <div data-testid="vote-slider">
+        <input
+          data-testid="slider-input"
+          type="range"
+          min={props.minValue}
+          max={props.maxValue}
+          value={sliderValue}
+          onClick={(e) =>
+            props.onValueAccepted?.(Number(e.currentTarget.value))
+          }
+          onChange={(e) => props.setVoteValue(Number(e.target.value))}
+        />
+        <span data-testid="slider-value">{props.voteValue}</span>
+        <span data-testid="slider-credit-type">{props.label}</span>
+      </div>
+    );
+  },
 }));
 jest.mock("@/components/waves/drop/SingleWaveDropVoteInput", () => ({
   __esModule: true,
@@ -60,7 +84,7 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteInput", () => ({
     <div data-testid="vote-input">
       <input
         data-testid="numeric-input"
-        type="number"
+        type="text"
         min={props.minValue}
         max={props.maxValue}
         value={props.voteValue}
@@ -78,6 +102,7 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteStats", () => ({
       <span data-testid="current-rating">{props.currentRating}</span>
       <span data-testid="max-rating">{props.maxRating}</span>
       <span data-testid="stats-credit-type">{props.label}</span>
+      <span data-testid="stats-credit-scope">{props.creditScope}</span>
     </div>
   ),
 }));
@@ -130,9 +155,93 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("vote-submit")).toBeInTheDocument();
     expect(screen.getByTestId("vote-slider")).toBeInTheDocument();
     expect(screen.getByTestId("vote-stats")).toBeInTheDocument();
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Wave
+    );
     expect(
       screen.getByRole("button", { name: /numeric/i })
     ).toBeInTheDocument();
+  });
+
+  it("uses confirmed submission mode by default", () => {
+    const drop = createMockDrop();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submission-mode",
+      SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION
+    );
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-has-request-started",
+      "false"
+    );
+  });
+
+  it("passes background submission mode and request-start callback", () => {
+    const drop = createMockDrop();
+    const onVoteRequestStarted = jest.fn();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteRequestStarted={onVoteRequestStarted}
+        submissionMode={SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH}
+      />
+    );
+
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submission-mode",
+      SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+    );
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-has-request-started",
+      "true"
+    );
+  });
+
+  it("passes drop-scoped voting power to stats in normal and mini modes", () => {
+    const drop = createMockDrop({
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        voting_credit_scope: ApiWaveCreditScope.Drop,
+      } as any,
+    });
+
+    const { unmount } = render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Drop
+    );
+
+    unmount();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.MINI}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Drop
+    );
   });
 
   it("initializes with current vote value from drop context", () => {
@@ -154,6 +263,235 @@ describe("SingleWaveDropVoteContent", () => {
 
     expect(screen.getByTestId("slider-value")).toHaveTextContent("75");
     expect(screen.getByTestId("new-rating")).toHaveTextContent("75");
+  });
+
+  it("keeps a legacy negative vote while using zero as the effective minimum", () => {
+    const drop = createMockDrop({
+      context_profile_context: {
+        rating: -5,
+        min_rating: -10,
+        max_rating: 10,
+      },
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        forbid_negative_votes: true,
+      } as any,
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("slider-value")).toHaveTextContent("-5");
+    expect(screen.getByTestId("slider-input")).toHaveAttribute("min", "0");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("-5");
+    expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
+      "Change this vote before submitting."
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: /numeric/i }));
+
+    const numericInput = screen.getByTestId("numeric-input");
+    expect(numericInput).toHaveAttribute("min", "0");
+    expect((numericInput as HTMLInputElement).value).toBe("-5");
+
+    fireEvent.change(numericInput, { target: { value: "0" } });
+
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("0");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("current-rating")).toHaveTextContent("0");
+  });
+
+  it("keeps a positive API minimum when negative votes are forbidden", () => {
+    const drop = createMockDrop({
+      context_profile_context: {
+        rating: 5,
+        min_rating: 10,
+        max_rating: 100,
+      },
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        forbid_negative_votes: true,
+      } as any,
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("slider-value")).toHaveTextContent("5");
+    expect(screen.getByTestId("slider-input")).toHaveAttribute("min", "10");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("5");
+    expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
+      "Change this vote before submitting."
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: /numeric/i }));
+
+    const numericInput = screen.getByTestId("numeric-input");
+    expect(numericInput).toHaveAttribute("min", "10");
+    expect((numericInput as HTMLInputElement).value).toBe("5");
+
+    fireEvent.change(numericInput, { target: { value: "7" } });
+
+    expect((numericInput as HTMLInputElement).value).toBe("10");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("10");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("current-rating")).toHaveTextContent("10");
+  });
+
+  it("accepts the slider boundary for a legacy negative vote", () => {
+    const drop = createMockDrop({
+      context_profile_context: {
+        rating: -5,
+        min_rating: -10,
+        max_rating: 10,
+      },
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        forbid_negative_votes: true,
+      } as any,
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("slider-value")).toHaveTextContent("-5");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("-5");
+    expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
+      "Change this vote before submitting."
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).not.toHaveBeenCalled();
+
+    const sliderInput = screen.getByTestId("slider-input");
+    expect((sliderInput as HTMLInputElement).value).toBe("0");
+
+    fireEvent.click(sliderInput);
+
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("0");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("current-rating")).toHaveTextContent("0");
+  });
+
+  it("accepts the slider boundary for a loaded vote below a positive API minimum", () => {
+    const drop = createMockDrop({
+      context_profile_context: {
+        rating: 5,
+        min_rating: 10,
+        max_rating: 100,
+      },
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        forbid_negative_votes: true,
+      } as any,
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("slider-value")).toHaveTextContent("5");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("5");
+    expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
+      "Change this vote before submitting."
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).not.toHaveBeenCalled();
+
+    const sliderInput = screen.getByTestId("slider-input");
+    expect((sliderInput as HTMLInputElement).value).toBe("10");
+
+    fireEvent.click(sliderInput);
+
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("10");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("current-rating")).toHaveTextContent("10");
+  });
+
+  it("treats empty and lone minus drafts as invalid submit values", () => {
+    const drop = createMockDrop({
+      context_profile_context: {
+        rating: 1,
+        min_rating: -10,
+        max_rating: 10,
+      },
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /numeric/i }));
+
+    const numericInput = screen.getByTestId("numeric-input");
+
+    fireEvent.change(numericInput, { target: { value: "" } });
+
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("NaN");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
+
+    fireEvent.change(numericInput, { target: { value: "-" } });
+
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("NaN");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
   });
 
   it("starts in slider mode by default", () => {
@@ -244,14 +582,13 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("new-rating")).toHaveTextContent("85");
   });
 
-  it("passes correct props to slider component", () => {
+  it("passes correct vote bounds and label to slider component", () => {
     const drop = createMockDrop({
       context_profile_context: {
         rating: 30,
         min_rating: 10,
         max_rating: 90,
       },
-      rank: 3,
       wave: {
         id: "wave-123",
         name: "Test Wave",
@@ -271,7 +608,6 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("slider-input")).toHaveAttribute("max", "90");
     expect(screen.getByTestId("slider-input")).toHaveAttribute("value", "30");
     expect(screen.getByTestId("slider-credit-type")).toHaveTextContent("Rep");
-    expect(screen.getByTestId("slider-rank")).toHaveTextContent("3");
   });
 
   it("passes correct props to numeric input component", () => {
@@ -412,26 +748,20 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("current-rating")).toHaveTextContent("0");
   });
 
-  it("stops event propagation on container click", () => {
+  it("renders vote controls as a native group", () => {
     const drop = createMockDrop();
-    const parentClickHandler = jest.fn();
 
     render(
-      <div onClick={parentClickHandler}>
-        <SingleWaveDropVoteContent
-          drop={drop}
-          size={SingleWaveDropVoteSize.NORMAL}
-          onVoteSuccess={mockOnVoteSuccess}
-        />
-      </div>
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
     );
 
-    const container = screen
-      .getByTestId("vote-slider")
-      .closest(".tw-space-y-6");
-    fireEvent.click(container!);
-
-    expect(parentClickHandler).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("group", { name: "Vote controls" })
+    ).toBeInTheDocument();
   });
 
   it("shows correct icon flip based on mode", () => {

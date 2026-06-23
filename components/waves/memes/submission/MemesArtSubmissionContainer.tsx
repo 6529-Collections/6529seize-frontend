@@ -125,7 +125,12 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   }, []);
 
   const handleOpenPreview = useCallback(() => {
-    const { imageUrl, traits, operationalData } = form.getSubmissionData();
+    const {
+      imageUrl,
+      traits,
+      operationalData,
+      isAdditionalActionPromised,
+    } = form.getSubmissionData();
     const media = form.getMediaSelection();
 
     setPreviewDrop(
@@ -133,6 +138,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         wave,
         traits,
         operationalData,
+        isAdditionalActionPromised,
         mediaSelection: media,
         uploadArtworkUrl: imageUrl,
         connectedProfile,
@@ -161,7 +167,8 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   // Handle final submission
   const handleSubmit = useCallback(async () => {
     // Get submission data including all traits
-    const { traits, operationalData } = form.getSubmissionData();
+    const { traits, operationalData, isAdditionalActionPromised } =
+      form.getSubmissionData();
     const media = form.getMediaSelection();
     const onSubmitted = async (drop: ApiDrop | null) => {
       if (drop && isResubmission) {
@@ -184,6 +191,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
             : {}),
           traits,
           operationalData,
+          isAdditionalActionPromised,
           waveId: wave.id,
           termsOfService: wave.participation.terms,
         },
@@ -208,6 +216,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         },
         traits,
         operationalData,
+        isAdditionalActionPromised,
         waveId: wave.id,
         termsOfService: wave.participation.terms,
       },

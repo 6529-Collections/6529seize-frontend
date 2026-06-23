@@ -10,10 +10,6 @@ jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   CircleLoaderSize: { XXLARGE: 'xx' }
 }));
 
-jest.mock('@/components/groups/select/item/GroupItem', () => ({ __esModule: true, default: (props: any) => (
-  <div data-testid={`group-${props.group.id}`} onClick={() => props.onActiveGroupId()} />
-) }));
-
 describe('SelectGroupModalItems', () => {
   const groups: ApiGroupFull[] = [
     { id: '1', name: 'A' } as ApiGroupFull,
@@ -28,7 +24,7 @@ describe('SelectGroupModalItems', () => {
   it('renders group items and handles selection', async () => {
     const onSelect = jest.fn();
     render(<SelectGroupModalItems groups={groups} loading={false} onGroupSelect={onSelect} />);
-    await userEvent.click(screen.getByTestId('group-2'));
+    await userEvent.click(screen.getByRole('button', { name: 'Select B' }));
     expect(onSelect).toHaveBeenCalledWith(groups[1]);
   });
 });

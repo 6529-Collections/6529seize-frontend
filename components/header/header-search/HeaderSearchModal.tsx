@@ -1,6 +1,10 @@
 "use client";
 
-import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronLeftIcon,
+  ScaleIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { FocusTrap } from "focus-trap-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -15,6 +19,7 @@ import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
+import UsersIcon from "@/components/common/icons/UsersIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
@@ -116,10 +121,25 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
     icon: DiscoverIcon,
   },
   {
+    name: "Wave Score",
+    href: "/network/wave-score",
+    section: "Network",
+    icon: ScaleIcon,
+  },
+  {
     name: "Notifications",
     href: "/notifications",
     section: "Main",
     icon: BellIcon,
+  },
+];
+
+const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
+  {
+    name: "Network Nerd",
+    href: "/network/nerd",
+    section: "Network",
+    icon: UsersIcon,
   },
 ];
 
@@ -549,6 +569,22 @@ const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
   [DROP_FORGE_PATH]: [DROP_FORGE_TITLE],
   [DROP_FORGE_SECTIONS.CRAFT.path]: [`${DROP_FORGE_TITLE} Craft`],
   [DROP_FORGE_SECTIONS.LAUNCH.path]: [`${DROP_FORGE_TITLE} Launch`],
+  "/network/nerd": [
+    "Network leaderboard",
+    "Collector leaderboard",
+    "TDH leaderboard",
+    "Cards collected leaderboard",
+    "Interactions leaderboard",
+    "Purchases sales transfers",
+  ],
+  "/network/wave-score": [
+    "Wave scoring",
+    "Wave score formula",
+    "Wave score calculator",
+    "Visibility score",
+    "Hotness score",
+    "Wave REP formula",
+  ],
 };
 
 const singularizePageSearchToken = (token: string): string => {
@@ -868,8 +904,12 @@ export default function HeaderSearchModal({
     wave !== null &&
     searchMode === SEARCH_MODE.WAVE &&
     trimmedWaveSearchValue.length >= WAVE_SEARCH_MIN_LENGTH;
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({ wave });
+  const {
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  } = useApprovalWaveStatus({ wave });
 
   const {
     drops: waveDropResults,
@@ -937,6 +977,7 @@ export default function HeaderSearchModal({
     const seen = new Set<string>();
     return [
       ...PRIMARY_NAVIGATION_PAGES,
+      ...SEARCH_ONLY_PAGES,
       ...sidebarPages,
       ...dropForgePages,
     ].filter((entry) => {
@@ -1491,6 +1532,9 @@ export default function HeaderSearchModal({
                                         onReplyClick={() => {}}
                                         onQuoteClick={() => {}}
                                         winningThreshold={winningThreshold}
+                                        winningThresholdMinDurationMs={
+                                          winningThresholdMinDurationMs
+                                        }
                                         isVotingClosed={isVotingClosed}
                                         isVotingControlsLocked={
                                           isVotingControlsLocked

@@ -5,6 +5,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -56,20 +57,20 @@ export default function UserPageSubscriptionsEditionPreference(
       });
       const responseAllEditions = response.subscribe_all_editions;
       setIsAllEditions(responseAllEditions);
-      const message = `Edition Preference set to ${
-        responseAllEditions ? `All eligible editions` : `One edition`
-      }`;
       setToast({
-        message: message,
         type: "success",
+        title: "Edition preference updated.",
+        description: responseAllEditions
+          ? "All eligible editions are included."
+          : "One edition is included.",
       });
       props.refresh();
     } catch (e: any) {
-      const errorMessage =
-        e?.message || String(e) || "Failed to set edition preference";
       setToast({
-        message: errorMessage,
         type: "error",
+        title: "Couldn't update edition preference.",
+        description: "Please try again.",
+        details: getToastErrorDetails(e, "Could not set edition preference."),
       });
     } finally {
       setIsUpdatingAllEditions(false);
@@ -82,7 +83,7 @@ export default function UserPageSubscriptionsEditionPreference(
         <Col>
           <h5 className="tw-mb-0">
             Edition Preference{" "}
-            <span className="tw-text-iron-400 tw-text-sm tw-font-semibold tw-whitespace-nowrap">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-400">
               Eligibility x{subscriptionEligibilityCount}
             </span>
           </h5>
@@ -92,7 +93,8 @@ export default function UserPageSubscriptionsEditionPreference(
         <Col className="tw-flex tw-items-center tw-gap-2">
           <label
             htmlFor={"subscription-all-editions-mode"}
-            className="font-color">
+            className="font-color"
+          >
             <b>One edition</b>
           </label>
           <Toggle
@@ -104,7 +106,8 @@ export default function UserPageSubscriptionsEditionPreference(
           />
           <label
             htmlFor={"subscription-all-editions-mode"}
-            className="font-color">
+            className="font-color"
+          >
             <b>All eligible</b>
           </label>
           {isUpdatingAllEditions && (

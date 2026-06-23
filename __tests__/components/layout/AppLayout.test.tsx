@@ -9,6 +9,16 @@ const setHeaderRef = jest.fn();
 const usePathname = jest.fn();
 const getSearchParams = jest.fn();
 let mockDialogMountCount = 0;
+let mockLayoutSpaces = {
+  headerSpace: 0,
+  pinnedSpace: 0,
+  tabsSpace: 0,
+  spacerSpace: 0,
+  mobileTabsSpace: 0,
+  mobileNavSpace: 0,
+  contentSpace: 0,
+  measurementsComplete: false,
+};
 
 jest.mock("next/dynamic", () => () => {
   const MockDynamicComponent = () => <div data-testid="header" />;
@@ -47,7 +57,7 @@ jest.mock(
     }
 );
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
-  useLayout: () => ({ registerRef }),
+  useLayout: () => ({ registerRef, spaces: mockLayoutSpaces }),
 }));
 jest.mock("@/contexts/HeaderContext", () => ({
   useHeaderContext: () => ({ setHeaderRef }),
@@ -73,6 +83,11 @@ jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
 
     return {
       closeQuickVote: () => setIsQuickVoteOpen(false),
+      dialogState: {
+        isOpen: isQuickVoteOpen,
+        onClose: () => setIsQuickVoteOpen(false),
+        sessionId: quickVoteSessionId,
+      },
       isQuickVoteOpen,
       openQuickVote: () => {
         const sessionId =
@@ -126,6 +141,8 @@ const AppLayout = require("@/components/layout/AppLayout").default;
 
 describe("AppLayout", () => {
   let store: any;
+  const bottomReserveProperty = "--stream-route-loading-bottom-reserve";
+  const headerReserveProperty = "--stream-route-loading-header-reserve";
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -135,6 +152,16 @@ describe("AppLayout", () => {
     usePathname.mockReturnValue("/");
     getSearchParams.mockReturnValue(new URLSearchParams());
     mockDialogMountCount = 0;
+    mockLayoutSpaces = {
+      headerSpace: 0,
+      pinnedSpace: 0,
+      tabsSpace: 0,
+      spacerSpace: 0,
+      mobileTabsSpace: 0,
+      mobileNavSpace: 0,
+      contentSpace: 0,
+      measurementsComplete: false,
+    };
   });
 
   const renderWithProvider = (children: React.ReactElement) => {
@@ -146,6 +173,57 @@ describe("AppLayout", () => {
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.getByText("child")).toBeInTheDocument();
     expect(screen.getByTestId("bottom-nav")).toBeInTheDocument();
+  });
+
+  it("sets stream loading reserve when bottom nav is visible", () => {
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "85px"
+    );
+  });
+
+  it("clears stream loading reserve when a drop hides bottom nav", () => {
+    getSearchParams.mockReturnValue(new URLSearchParams("drop=drop-1"));
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(screen.queryByTestId("bottom-nav")).not.toBeInTheDocument();
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
+  });
+
+  it("uses measured header space for stream loading reserve", () => {
+    mockLayoutSpaces = {
+      ...mockLayoutSpaces,
+      headerSpace: 72,
+      measurementsComplete: true,
+    };
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(appWrapper.style.getPropertyValue(headerReserveProperty)).toBe(
+      "72px"
+    );
+  });
+
+  it("uses header fallback reserve before layout measurement completes", () => {
+    mockLayoutSpaces = {
+      ...mockLayoutSpaces,
+      headerSpace: 72,
+      measurementsComplete: false,
+    };
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(appWrapper.style.getPropertyValue(headerReserveProperty)).toBe(
+      "100px"
+    );
   });
 
   it("renders waves or messages view based on the view query param", () => {
@@ -160,6 +238,26 @@ describe("AppLayout", () => {
       </Provider>
     );
     expect(screen.getByTestId("messages")).toBeInTheDocument();
+  });
+
+  it("uses root view params for app shell content instead of route children", () => {
+    usePathname.mockReturnValue("/");
+    getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
+
+    const { rerender } = renderWithProvider(<AppLayout>child</AppLayout>);
+
+    expect(screen.getByTestId("waves")).toBeInTheDocument();
+    expect(screen.queryByText("child")).not.toBeInTheDocument();
+
+    getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
+    rerender(
+      <Provider store={store}>
+        <AppLayout>child</AppLayout>
+      </Provider>
+    );
+
+    expect(screen.getByTestId("messages")).toBeInTheDocument();
+    expect(screen.queryByText("child")).not.toBeInTheDocument();
   });
 
   it("owns a persistent quick-vote dialog for the waves view", () => {

@@ -1,15 +1,16 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
-import { AuthContext } from "@/components/auth/Auth";
-import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
-import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
+import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -18,21 +19,33 @@ import type { MemesExtendedData, NFT, NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { formatInteger } from "@/i18n/format";
+import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
-import {
-  MemePageCollectorsSubMenu,
-} from "./MemePageCollectors";
-import { MemePageArtViewer } from "./MemePageArtViewer";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
+import { MemePageArtViewer } from "./MemePageArtViewer";
+import { MemePageCollectorsSubMenu } from "./MemePageCollectors";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
 import { MemePageReferencesSubMenu } from "./MemePageReferences";
+import {
+  MemePageNavigationSkeleton,
+  MemePageSkeleton,
+  MemePageTitleSkeleton,
+} from "./MemePageSkeleton";
 import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
 } from "./MemePageYourCards";
-import { getMemeTabTitle, MEME_FOCUS, MEME_TABS } from "./MemeShared";
+import {
+  getMemeFocusLabel,
+  getMemeTabTitle,
+  isMemeFocus,
+  MEME_FOCUS,
+  MEME_TABS,
+} from "./MemeShared";
 import styles from "./TheMemes.module.scss";
 import UpcomingMemePage from "./UpcomingMemePage";
 
@@ -61,21 +74,37 @@ enum MEME_HISTORY_TAB {
 
 const MEME_HISTORY_TABS: {
   readonly focus: MEME_HISTORY_TAB;
-  readonly title: string;
 }[] = [
-  { focus: MEME_HISTORY_TAB.ACTIVITY, title: "Card Activity" },
-  { focus: MEME_HISTORY_TAB.YOUR_TRANSACTIONS, title: "Your Transactions" },
-  { focus: MEME_HISTORY_TAB.TIMELINE, title: "Timeline" },
+  { focus: MEME_HISTORY_TAB.ACTIVITY },
+  { focus: MEME_HISTORY_TAB.YOUR_TRANSACTIONS },
+  { focus: MEME_HISTORY_TAB.TIMELINE },
 ];
 
-const MEME_FOCUS_VALUES: readonly string[] = Object.values(MEME_FOCUS);
 const MEME_TAB_BUTTON_BASE_CLASS_NAME =
-  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out";
+  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+
+function getMemeHistoryTabLabel(
+  tab: MEME_HISTORY_TAB,
+  locale: SupportedLocale
+): string {
+  switch (tab) {
+    case MEME_HISTORY_TAB.ACTIVITY:
+      return t(locale, "theMemes.detail.tabs.cardActivity");
+    case MEME_HISTORY_TAB.YOUR_TRANSACTIONS:
+      return t(locale, "theMemes.detail.tabs.yourTransactions");
+    case MEME_HISTORY_TAB.TIMELINE:
+      return t(locale, "theMemes.detail.tabs.timeline");
+    default: {
+      const unhandled: never = tab;
+      throw new Error(`Unhandled MEME_HISTORY_TAB: ${String(unhandled)}`);
+    }
+  }
+}
 
 function getMemePageTabButtonClassName(isActive: boolean) {
   return `${MEME_TAB_BUTTON_BASE_CLASS_NAME} ${
     isActive
-      ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
+      ? "tw-cursor-default tw-border-primary-400 tw-text-iron-100"
       : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
   }`;
 }
@@ -93,6 +122,7 @@ function MemePageTabButton({
     <button
       type="button"
       className={getMemePageTabButtonClassName(isActive)}
+      aria-current={isActive ? "page" : undefined}
       onClick={onClick}
     >
       {title}
@@ -100,98 +130,12 @@ function MemePageTabButton({
   );
 }
 
-function MemePageSkeletonBlock({ className }: { readonly className: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`tw-animate-pulse tw-rounded tw-bg-iron-800/50 ${className}`}
-    />
-  );
-}
-
-function MemePageTitleSkeleton() {
-  return (
-    <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline">
-      <MemePageSkeletonBlock className="tw-h-8 tw-w-72 tw-max-w-full" />
-    </div>
-  );
-}
-
-function MemePageNavigationSkeleton() {
-  return (
-    <div
-      aria-hidden="true"
-      className="tw-flex tw-items-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-2 tw-py-1.5"
-    >
-      <MemePageSkeletonBlock className="tw-size-7 tw-rounded" />
-      <MemePageSkeletonBlock className="tw-h-4 tw-w-16" />
-      <MemePageSkeletonBlock className="tw-size-7 tw-rounded" />
-    </div>
-  );
-}
-
-function MemePageSkeleton() {
-  return (
-    <div aria-hidden="true">
-      <div className="tw-mb-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:tw-gap-x-10 xl:tw-gap-x-16">
-        <div>
-          <div className="tw-relative tw-w-full tw-overflow-hidden">
-            <div className="tw-relative tw-h-96 tw-w-full tw-animate-pulse tw-bg-iron-800/50 sm:tw-h-[520px] lg:tw-h-[650px]" />
-          </div>
-        </div>
-        <div className="tw-pt-6 md:tw-pt-8">
-          <div className="tw-flex tw-flex-col tw-gap-8">
-            <div>
-              <MemePageSkeletonBlock className="tw-mb-2 tw-h-4 tw-w-24" />
-              <div className="tw-flex tw-items-center tw-gap-2.5">
-                <MemePageSkeletonBlock className="tw-size-8 tw-rounded-full" />
-                <MemePageSkeletonBlock className="tw-h-5 tw-w-32" />
-              </div>
-            </div>
-            <div>
-              <MemePageSkeletonBlock className="tw-mb-2 tw-h-4 tw-w-20" />
-              <MemePageSkeletonBlock className="tw-h-5 tw-w-44" />
-            </div>
-            <div>
-              <MemePageSkeletonBlock className="tw-mb-4 tw-h-4 tw-w-28" />
-              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index}>
-                    <MemePageSkeletonBlock className="tw-mb-1.5 tw-h-4 tw-w-20" />
-                    <MemePageSkeletonBlock className="tw-h-6 tw-w-24" />
-                  </div>
-                ))}
-              </div>
-              <MemePageSkeletonBlock className="tw-mt-6 tw-h-10 tw-w-44 tw-rounded-md" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="tw-mb-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700">
-        <div className="-tw-mb-px tw-flex tw-gap-x-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <MemePageSkeletonBlock
-              key={index}
-              className="tw-my-4 tw-h-4 tw-w-20"
-            />
-          ))}
-        </div>
-      </div>
-      <div className="tw-space-y-3 tw-pb-3">
-        <MemePageSkeletonBlock className="tw-h-4 tw-w-full tw-max-w-3xl" />
-        <MemePageSkeletonBlock className="tw-h-4 tw-w-11/12 tw-max-w-2xl" />
-        <MemePageSkeletonBlock className="tw-h-4 tw-w-3/4 tw-max-w-xl" />
-      </div>
-    </div>
-  );
-}
-
 function parseMemeFocus(focus: string | null): MEME_FOCUS | undefined {
-  if (focus === null || !MEME_FOCUS_VALUES.includes(focus)) {
+  if (focus === null || !isMemeFocus(focus)) {
     return undefined;
   }
 
-  return focus as MEME_FOCUS;
+  return focus;
 }
 
 function getHistoryTabForFocus(
@@ -232,6 +176,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const locale = normalizeLocale(searchParams.get("locale"));
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
@@ -304,17 +249,25 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     () =>
       visibleHistoryTabs.map((tab) => ({
         key: tab.focus,
-        label: tab.title,
+        label: getMemeHistoryTabLabel(tab.focus, locale),
         value: tab.focus,
       })),
-    [visibleHistoryTabs]
+    [locale, visibleHistoryTabs]
   );
 
   const routeFocus = getRouteFocus(activeTab, activeHistoryTab);
 
   useEffect(() => {
-    setTitle(getMemeTabTitle(`The Memes`, nftId, nft, routeFocus));
-  }, [nft, nftId, routeFocus, setTitle]);
+    setTitle(
+      getMemeTabTitle(
+        t(locale, "theMemes.title"),
+        nftId,
+        nft,
+        routeFocus,
+        locale
+      )
+    );
+  }, [locale, nft, nftId, routeFocus, setTitle]);
 
   function replaceRouteFocus(nextFocus: MEME_FOCUS) {
     const params = new URLSearchParams(searchParamsString);
@@ -326,6 +279,10 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }
 
   function setActiveMemeTab(nextTab: MEME_FOCUS) {
+    if (nextTab === activeTab) {
+      return;
+    }
+
     if (nextTab === MEME_FOCUS.HISTORY) {
       replaceRouteFocus(getRouteFocus(MEME_FOCUS.HISTORY, activeHistoryTab));
       return;
@@ -469,6 +426,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               key={`${nft.contract}-${nft.id}`}
               nft={nft}
               showBalance={true}
+              locale={locale}
             />
           </div>
           {userLoaded && (
@@ -493,7 +451,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               fullWidth
             />
           )}
-          <MemePageLiveRightMenu show={true} nft={nft} nftMeta={nftMeta} />
+          <MemePageLiveRightMenu
+            show={true}
+            nft={nft}
+            nftMeta={nftMeta}
+            locale={locale}
+          />
         </div>
       </div>
     );
@@ -506,15 +469,15 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
     return (
       <nav
-        aria-label="Meme page sections"
-        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
+        aria-label={t(locale, "theMemes.detail.sections.ariaLabel")}
+        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
           <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
             {VISIBLE_MEME_TABS.map((tab) => (
               <MemePageTabButton
                 key={`${nft.id}-${tab.focus}-tab`}
-                title={tab.title}
+                title={getMemeFocusLabel(tab.focus, locale)}
                 isActive={activeTab === tab.focus}
                 onClick={() => setActiveMemeTab(tab.focus)}
               />
@@ -531,12 +494,15 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     }
 
     return (
-      <nav aria-label="Meme history sections" className="tw-pb-8">
+      <nav
+        aria-label={t(locale, "theMemes.detail.history.ariaLabel")}
+        className="tw-pb-8"
+      >
         <div className="tw-w-fit tw-max-w-full">
           <CommonTabs<MEME_HISTORY_TAB>
             items={visibleHistoryTabItems}
             activeItem={activeHistoryTab}
-            filterLabel="Meme history sections"
+            filterLabel={t(locale, "theMemes.detail.history.ariaLabel")}
             setSelected={setActiveHistoryMemeTab}
             fill={false}
           />
@@ -555,10 +521,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             nftMeta={nftMeta}
             nftBalance={nftBalance}
             defaultAdditionalDetailsOpen={focusParam === MEME_FOCUS.THE_ART}
+            locale={locale}
           />
           <MemePageReferencesSubMenu
             show={activeTab === MEME_FOCUS.REFERENCES}
             nft={nft}
+            locale={locale}
           />
           {userLoaded && (
             <MemePageYourCardsSubMenu
@@ -573,6 +541,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             show={activeTab === MEME_FOCUS.COLLECTORS}
             nft={nft}
             nftMeta={nftMeta}
+            locale={locale}
           />
         </div>
         {activeTab === MEME_FOCUS.HISTORY &&
@@ -581,11 +550,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               show={true}
               nft={nft}
               pageSize={ACTIVITY_PAGE_SIZE}
+              locale={locale}
             />
           )}
         {activeTab === MEME_FOCUS.HISTORY &&
           activeHistoryTab === MEME_HISTORY_TAB.TIMELINE && (
-            <MemePageTimeline show={true} nft={nft} />
+            <MemePageTimeline show={true} nft={nft} locale={locale} />
           )}
       </>
     );
@@ -595,27 +565,32 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const isLoadingNft = !nft && !nftNotFound;
 
   return (
-    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
-      <div className="tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+      <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
               <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
-                  href="/the-memes"
-                  className="tw-group tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-iron-600 hover:tw-text-white"
+                  href={getTheMemesRouteHrefWithLocale({
+                    href: "/the-memes",
+                    locale,
+                  })}
+                  aria-label={t(locale, "theMemes.detail.backLink.ariaLabel")}
+                  className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
-                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
                   />
-                  The Memes
+                  {t(locale, "theMemes.title")}
                 </Link>
               </div>
               {nftMeta && nft && (
-                <div className="tw-flex tw-min-w-0 tw-items-center">
+                <div className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center md:tw-ml-0">
                   <MemeCalendarPeriods
                     id={nft.id}
+                    locale={locale}
                     seasonHref={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
                     showOnlySeasonOnMobile
                   />
@@ -623,24 +598,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               )}
             </div>
             {nftMeta && nft ? (
-              <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 sm:tw-items-end">
-                <div className="tw-min-w-0 tw-flex-1">
-                  <h1
-                    className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline"
-                    aria-label={`Card ${nft.id} — ${nft.name}`}
-                  >
-                    <span className="tw-mb-1 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400 sm:tw-mb-0 sm:tw-text-2xl sm:tw-font-medium sm:tw-leading-tight">
-                      Card {nft.id}
-                    </span>
-                    <span className="tw-hidden tw-font-light tw-text-iron-400 sm:tw-mx-2 sm:tw-inline">
-                      —
-                    </span>
-                    <span className="tw-mb-0 tw-min-w-0 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl">
-                      {nft.name}
-                    </span>
-                  </h1>
-                </div>
-                <div className="tw-flex tw-shrink-0 tw-justify-end">
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3 md:tw-flex-wrap md:tw-justify-start">
+                <div className="tw-order-2 tw-flex tw-shrink-0 tw-justify-end md:tw-order-1">
                   <NftNavigation
                     nftId={nft.id}
                     path="/the-memes"
@@ -649,13 +608,37 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                     params={searchParams}
                   />
                 </div>
+                <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
+                  <h1
+                    className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                    aria-label={t(locale, "theMemes.detail.heading.ariaLabel", {
+                      tokenId: formatInteger(locale, nft.id),
+                      name: nft.name,
+                    })}
+                  >
+                    <span className="tw-mb-0 tw-shrink-0 tw-text-lg tw-font-normal tw-leading-tight tw-text-iron-400 sm:tw-text-2xl">
+                      {t(locale, "theMemes.detail.heading.card", {
+                        tokenId: formatInteger(locale, nft.id),
+                      })}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+                    />
+                    <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
+                      {nft.name}
+                    </span>
+                  </h1>
+                </div>
               </div>
             ) : (
               isLoadingNft && (
-                <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 sm:tw-items-end">
-                  <MemePageTitleSkeleton />
-                  <div className="tw-flex tw-shrink-0 tw-justify-end">
+                <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3 md:tw-flex-wrap md:tw-justify-start">
+                  <div className="tw-order-2 tw-flex tw-shrink-0 tw-justify-end md:tw-order-1">
                     <MemePageNavigationSkeleton />
+                  </div>
+                  <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
+                    <MemePageTitleSkeleton />
                   </div>
                 </div>
               )

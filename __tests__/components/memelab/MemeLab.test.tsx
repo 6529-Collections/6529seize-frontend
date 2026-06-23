@@ -1,20 +1,19 @@
 import {
   getInitialRouterValues,
-  printNftContent,
-  printSortButtons,
   sortChanged,
 } from "@/components/memelab/MemeLab";
+import { printNftContent } from "@/components/memelab/memeLabCardContent";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort } from "@/types/enums";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 
 // Mock helper functions
 jest.mock("@/helpers/Helpers", () => ({
   printMintDate: jest.fn((date: Date | string) => {
     if (!date) return "-";
-    return "Jan 1, 2023 (1 year ago)";
+    return "Jan 1, 2023";
   }),
   numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
   getValuesForVolumeType: jest.fn((volumeType: VolumeType, nft: any) => {
@@ -40,8 +39,6 @@ jest.mock("@/components/the-memes/TheMemes", () => ({
   printVolumeTypeDropdown: () => <div data-testid="volume" />,
 }));
 
-jest.mock("@/components/memelab/MemeLab.module.scss", () => ({}));
-
 describe("MemeLab utilities", () => {
   it("getInitialRouterValues parses router", () => {
     const { initialSortDir, initialSort } = getInitialRouterValues(
@@ -50,23 +47,6 @@ describe("MemeLab utilities", () => {
     );
     expect(initialSortDir).toBe(SortDirection.DESC);
     expect(initialSort).toBe(MemeLabSort.EDITION_SIZE);
-  });
-
-  it("printSortButtons filters options when collection", () => {
-    render(
-      <div>
-        {printSortButtons(
-          MemeLabSort.AGE,
-          VolumeType.ALL_TIME,
-          jest.fn(),
-          jest.fn(),
-          true
-        )}
-      </div>
-    );
-    const buttons = screen.getAllByTestId("sort").map((b) => b.textContent);
-    expect(buttons).not.toContain(MemeLabSort.ARTISTS);
-    expect(buttons).not.toContain(MemeLabSort.COLLECTIONS);
   });
 
   it("printNftContent shows different text", () => {
@@ -106,6 +86,27 @@ describe("MemeLab utilities", () => {
       </div>
     );
     expect(container.textContent).toContain("Collectors: 2");
+  });
+
+  it("printNftContent formats metrics with the requested locale", () => {
+    const nft: LabNFT = {
+      id: 1,
+      supply: 1234,
+    } as any;
+
+    const { container } = render(
+      <div>
+        {printNftContent(
+          nft,
+          MemeLabSort.EDITION_SIZE,
+          [],
+          VolumeType.ALL_TIME,
+          "de-DE"
+        )}
+      </div>
+    );
+
+    expect(container.textContent).toContain("Edition Size: 1.234");
   });
 
   it("sortChanged sorts and updates router", () => {

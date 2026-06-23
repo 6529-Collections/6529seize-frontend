@@ -9,7 +9,7 @@ import HomePageTextSection from "@/components/home/HomePageTextSection";
 
 export default function HomePageContent() {
   return (
-    <div className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900">
+    <div className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
       <HeroHeader />
       <LatestDropSection />
       <HomePageTextSection />

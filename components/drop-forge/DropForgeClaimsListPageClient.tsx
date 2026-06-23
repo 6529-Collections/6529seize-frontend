@@ -19,13 +19,16 @@ import {
   findBestMatchingLaunchActionName,
   getLaunchListStatus,
 } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
+import {
+  getDropForgeAnimationInfo,
+  getDropForgeMediaTypeLabel,
+} from "@/components/drop-forge/drop-forge-media-type.helpers";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import Pagination from "@/components/pagination/Pagination";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
-import { isVideoUrl } from "@/helpers/video.helpers";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import {
@@ -38,69 +41,10 @@ const CARD_CLASS =
 const CARD_STATUS_CONTAINER_CLASS =
   "tw-absolute tw-right-4 tw-top-4 tw-z-10 tw-flex tw-flex-col tw-items-end tw-gap-2";
 
-type MediaKind = "image" | "video" | "glb" | "html" | "unknown";
-
-function normalizeFormat(format: string | null | undefined): string | null {
-  return format ? format.toUpperCase() : null;
-}
-
-function getUrlExtension(url: string | null | undefined): string | null {
-  if (!url) return null;
-  const clean = url.split("?")[0]?.split("#")[0] ?? "";
-  const parts = clean.split(".");
-  if (parts.length < 2) return null;
-  return parts.at(-1)?.toLowerCase() ?? null;
-}
-
-function getImageFormat(claim: MintingClaim): string | null {
-  const fromDetails = normalizeFormat(claim.image_details?.format);
-  if (fromDetails) return fromDetails === "JPG" ? "JPEG" : fromDetails;
-  const ext = getUrlExtension(claim.image_url);
-  if (!ext) return null;
-  if (ext === "jpg" || ext === "jpeg") return "JPEG";
-  if (ext === "png") return "PNG";
-  if (ext === "gif") return "GIF";
-  if (ext === "webp") return "WEBP";
-  return null;
-}
-
-function getAnimationInfo(
-  claim: MintingClaim
-): { kind: MediaKind; subtype?: string | null } | null {
-  if (!claim.animation_url) return null;
-  const format = normalizeFormat(
-    (claim.animation_details as { format?: string } | undefined)?.format
-  );
-  if (format === "HTML") return { kind: "html" };
-  if (format === "GLB") return { kind: "glb" };
-  if (format) return { kind: "video", subtype: format };
-  const ext = getUrlExtension(claim.animation_url);
-  if (ext === "html" || ext === "htm") return { kind: "html" };
-  if (ext === "glb") return { kind: "glb" };
-  if (ext === "mp4") return { kind: "video", subtype: "MP4" };
-  if (ext === "webm") return { kind: "video", subtype: "WEBM" };
-  if (isVideoUrl(claim.animation_url)) return { kind: "video" };
-  return { kind: "video" };
-}
-
-function getMediaTypeLabel(claim: MintingClaim): string {
-  const animationInfo = getAnimationInfo(claim);
-  if (animationInfo) {
-    if (animationInfo.kind === "html" || animationInfo.kind === "glb") {
-      return animationInfo.kind.toUpperCase();
-    }
-    if (animationInfo.kind === "video") {
-      return animationInfo.subtype ? `VIDEO/${animationInfo.subtype}` : "VIDEO";
-    }
-  }
-  const imageFormat = getImageFormat(claim);
-  if (imageFormat) return `IMAGE/${imageFormat}`;
-  if (claim.image_url || claim.image_details) return "IMAGE";
-  return "—";
-}
-
 function ClaimCardThumbnail({ claim }: Readonly<{ claim: MintingClaim }>) {
-  const animationInfo = getAnimationInfo(claim);
+  const animationInfo = claim.animation_url
+    ? getDropForgeAnimationInfo(claim)
+    : null;
   const containerClass =
     "tw-relative tw-w-16 sm:tw-w-24 tw-flex-shrink-0 tw-self-stretch tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800";
 
@@ -199,7 +143,12 @@ export default function DropForgeClaimsListPageClient({
         const msg = e instanceof Error ? e.message : "Failed to load claims";
         setError(msg);
         if (msg.toLowerCase() !== "not authorized") {
-          setToast({ message: msg, type: "error" });
+          setToast({
+            type: "error",
+            title: "Couldn't load claims.",
+            description: "Please try again.",
+            details: msg,
+          });
         }
       } finally {
         if (requestId === latestRequestId.current) {
@@ -322,7 +271,7 @@ function ClaimCardContent({
   claim: MintingClaim;
   showLaunchFields?: boolean;
 }>) {
-  const mediaTypeLabel = getMediaTypeLabel(claim);
+  const mediaTypeLabel = getDropForgeMediaTypeLabel(claim);
   const imageMissing = !claim.image_url && !!claim.animation_url;
   const metadataLabel = showLaunchFields
     ? `#${claim.claim_id} | SZN ${getClaimSeason(claim) || "—"} | EDITION SIZE ${claim.edition_size ?? "—"}`

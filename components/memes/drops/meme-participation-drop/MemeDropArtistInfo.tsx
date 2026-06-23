@@ -49,7 +49,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
             profile={drop.author}
             tooltipIdPrefix={`meme-author-badges-${drop.id}`}
           />
-          <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+          <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
           <WaveDropTime timestamp={drop.created_at} />
           <div className="tw-ml-2">
             <WinnerDropBadge

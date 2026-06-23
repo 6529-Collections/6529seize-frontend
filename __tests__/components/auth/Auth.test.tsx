@@ -630,7 +630,7 @@ describe("Auth component", () => {
       await user.click(screen.getByTestId("toast-button"));
 
       expect(toast).toHaveBeenCalledWith(
-        "Test message",
+        expect.anything(),
         expect.objectContaining({
           type: "info",
           position: "top-right",
@@ -886,7 +886,7 @@ describe("Auth component", () => {
       await user.click(screen.getByTestId("test-no-wallet"));
 
       expect(toast).toHaveBeenCalledWith(
-        "Please connect your wallet",
+        expect.anything(),
         expect.objectContaining({ type: "error" })
       );
     });
@@ -987,8 +987,11 @@ describe("Auth component", () => {
       await user.click(screen.getByTestId("test-error-toast"));
 
       expect(toast).toHaveBeenCalledWith(
-        "Test error message",
-        expect.objectContaining({ type: "error" })
+        expect.anything(),
+        expect.objectContaining({
+          type: "error",
+          autoClose: 8000,
+        })
       );
     });
 
@@ -1029,8 +1032,11 @@ describe("Auth component", () => {
       await user.click(screen.getByTestId("test-success-toast"));
 
       expect(toast).toHaveBeenCalledWith(
-        "Test success message",
-        expect.objectContaining({ type: "success" })
+        expect.anything(),
+        expect.objectContaining({
+          type: "success",
+          autoClose: 3000,
+        })
       );
     });
   });

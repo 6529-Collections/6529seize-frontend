@@ -2,8 +2,10 @@ import type {
   AnchorHTMLAttributes,
   ClassAttributes,
   ImgHTMLAttributes,
+  ReactNode,
   ReactElement,
 } from "react";
+import { Children } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { ExtraProps } from "react-markdown";
 
@@ -12,12 +14,19 @@ import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 
 import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 import type { LinkPreviewInlineShowControl } from "@/components/waves/LinkPreviewContext";
-import DropPartMarkdownImage from "../DropPartMarkdownImage";
-import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
+import DropPartMarkdownImage, {
+  type DropPartMarkdownImageLayout,
+} from "../DropPartMarkdownImage";
+import {
+  getDropImageGalleryBodyItemKey,
+  getDropImageGalleryItemId,
+} from "../dropImageGallery";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
 import type { LinkHandler } from "./linkTypes";
 import {
+  isDirectImageUrl,
+  isSafeMarkdownImageSrc,
   isValidLink,
   parseUrl,
   renderExternalOrInternalLink,
@@ -28,7 +37,6 @@ interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
-  readonly tweetPreviewMode?: TweetPreviewMode | undefined;
   readonly isMemesWaveById?:
     | ((waveId: string | undefined | null) => boolean)
     | undefined;
@@ -39,7 +47,9 @@ interface LinkRendererConfig {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly inlineShowControl?: LinkPreviewInlineShowControl | undefined;
+  readonly bodyGalleryKeyPrefix?: string | undefined;
 }
 
 interface LinkRenderer {
@@ -71,18 +81,86 @@ const findMatch = (
   return null;
 };
 
+const getTextFromChildren = (children: ReactNode): string | null => {
+  const childNodes = Children.toArray(children);
+
+  if (childNodes.length === 0) {
+    return "";
+  }
+
+  return childNodes.reduce<string | null>((text, child) => {
+    if (text === null) {
+      return null;
+    }
+
+    if (typeof child === "string" || typeof child === "number") {
+      return `${text}${child}`;
+    }
+
+    return null;
+  }, "");
+};
+
+const isBareHrefLabel = (children: ReactNode, href: string): boolean =>
+  getTextFromChildren(children)?.trim() === href.trim();
+
+const getImageLayout = (
+  props: unknown
+): DropPartMarkdownImageLayout | undefined => {
+  if (typeof props !== "object" || props === null || !("layout" in props)) {
+    return undefined;
+  }
+
+  return props.layout === "grouped" ? "grouped" : undefined;
+};
+
+const getMarkdownNodeStartOffset = (node: unknown): number | null => {
+  if (typeof node !== "object" || node === null || !("position" in node)) {
+    return null;
+  }
+
+  const position = (
+    node as {
+      readonly position?: {
+        readonly start?: { readonly offset?: unknown } | undefined;
+      };
+    }
+  ).position;
+  const offset = position?.start?.offset;
+
+  return typeof offset === "number" && offset >= 0 ? offset : null;
+};
+
+const getBodyGalleryItemId = (
+  src: string,
+  node: unknown,
+  bodyGalleryKeyPrefix?: string | undefined
+): string | undefined => {
+  const startOffset = getMarkdownNodeStartOffset(node);
+  if (startOffset === null) {
+    return undefined;
+  }
+
+  return getDropImageGalleryItemId(
+    "body",
+    getDropImageGalleryBodyItemKey(startOffset, bodyGalleryKeyPrefix),
+    src
+  );
+};
+
 export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
   hideLinkPreviews = false,
-  tweetPreviewMode = "auto",
   isMemesWaveById,
   isQuorumWaveById,
   embedPath,
   quotePath,
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
+  fullWidthLinkPreviews = false,
   inlineShowControl,
+  bodyGalleryKeyPrefix,
 }: LinkRendererConfig): LinkRenderer => {
   const seizeHandlers = createSeizeHandlers({
     onQuoteClick,
@@ -95,17 +173,31 @@ export const createLinkRenderer = ({
     isQuorumWaveById,
   });
   const handlers = createLinkHandlers({
-    tweetPreviewMode,
     linkPreviewVariant: "chat",
+    fullWidthLinkPreviews,
   });
   let inlineShowControlRendered = false;
 
-  const renderImage: LinkRenderer["renderImage"] = ({ src }) => {
+  const renderImage: LinkRenderer["renderImage"] = ({ src, ...props }) => {
     if (typeof src !== "string") {
       return null;
     }
 
-    return <DropPartMarkdownImage src={src} />;
+    if (!isSafeMarkdownImageSrc(src)) {
+      return null;
+    }
+
+    return (
+      <DropPartMarkdownImage
+        src={src}
+        layout={getImageLayout(props)}
+        galleryItemId={getBodyGalleryItemId(
+          src,
+          props.node,
+          bodyGalleryKeyPrefix
+        )}
+      />
+    );
   };
 
   const renderAnchor: LinkRenderer["renderAnchor"] = (props) => {
@@ -121,6 +213,24 @@ export const createLinkRenderer = ({
     }
 
     const parsedUrl = parseUrl(stableHref);
+    if (
+      isDirectImageUrl(stableHref, parsedUrl) &&
+      (isBareHrefLabel(props.children, rawHref) ||
+        isBareHrefLabel(props.children, stableHref))
+    ) {
+      return (
+        <DropPartMarkdownImage
+          src={stableHref}
+          layout={getImageLayout(props)}
+          galleryItemId={getBodyGalleryItemId(
+            stableHref,
+            props.node,
+            bodyGalleryKeyPrefix
+          )}
+        />
+      );
+    }
+
     const anchorProps = { ...props, href: stableHref };
     const renderFallbackAnchor = () =>
       renderExternalOrInternalLink(stableHref, anchorProps);

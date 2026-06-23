@@ -52,6 +52,7 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: true,
         isCurationWave: false,
+        hasPolls: true,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -60,6 +61,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ]);
@@ -74,6 +76,7 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: false,
         isMemesWave: true,
         isCurationWave: false,
+        hasPolls: true,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -81,6 +84,7 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.POLLS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ]);
@@ -111,6 +115,7 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: false,
+        hasPolls: true,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -127,6 +132,7 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: false,
+        hasPolls: true,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -137,6 +143,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
     ]);
   });
 
@@ -149,6 +156,7 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: false,
         isMemesWave: false,
         isCurationWave: false,
+        hasPolls: true,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -158,7 +166,41 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.POLLS,
     ]);
+  });
+
+  it("omits Outcome and normalizes active tab when outcomes are hidden", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "rank-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: false,
+        isCurationWave: false,
+        hasPolls: true,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.OUTCOME));
+
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "rank-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: false,
+        isCurationWave: false,
+        showOutcomeTab: false,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.availableTabs).not.toContain(MyStreamWaveTab.OUTCOME);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
   it("forces CHAT for chat waves", () => {
@@ -183,12 +225,16 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: false,
+        hasPolls: true,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
     );
 
-    expect(result.current.availableTabs).toEqual([MyStreamWaveTab.CHAT]);
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.POLLS,
+    ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
@@ -201,6 +247,7 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: true,
+        hasPolls: true,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -211,6 +258,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.SALES,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
     ]);
   });
 
@@ -223,6 +271,7 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: false,
+        hasPolls: true,
         votingState: WaveVotingState.ENDED,
         hasFirstDecisionPassed: true,
       })
@@ -234,6 +283,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
     ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
   });
@@ -248,6 +298,7 @@ describe("ContentTabContext", () => {
         isMemesWave: false,
         isCurationWave: false,
         isApproveWave: true,
+        hasPolls: true,
         votingState: WaveVotingState.ENDED,
         hasFirstDecisionPassed: false,
       })
@@ -259,6 +310,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
     ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
@@ -273,6 +325,7 @@ describe("ContentTabContext", () => {
         isMemesWave: false,
         isCurationWave: false,
         isApproveWave: true,
+        hasPolls: true,
         votingState: WaveVotingState.ENDED,
         hasFirstDecisionPassed: false,
       })
@@ -283,7 +336,30 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.POLLS,
     ]);
+  });
+
+  it("does not add My Votes for guest approve waves when outcomes are hidden", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "approve-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: false,
+        isMemesWave: false,
+        isCurationWave: false,
+        isApproveWave: true,
+        showOutcomeTab: false,
+        votingState: WaveVotingState.ENDED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.availableTabs).not.toContain(MyStreamWaveTab.OUTCOME);
+    expect(result.current.availableTabs).not.toContain(
+      MyStreamWaveTab.MY_VOTES
+    );
   });
 
   it("normalizes stored LEADERBOARD to SUBMISSIONS once voting ends", () => {

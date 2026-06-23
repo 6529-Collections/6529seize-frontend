@@ -1,10 +1,10 @@
 "use client";
 
-import type { TypeOptions} from "react-toastify";
-import { Slide, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { createContext, useState } from "react";
 
+import type { AppToastInput } from "@/components/utils/toast/AppToast";
+import { showAppToast, showAppToasts } from "@/components/utils/toast/AppToast";
+import type { TypeOptions } from "react-toastify";
 import type {
   AllowlistCustomTokenPool,
   AllowlistDescription,
@@ -53,28 +53,12 @@ type DistributionPlanToolContextType = {
     messages: string[];
     type: TypeOptions;
   }) => void;
+  setToast: (toast: AppToastInput) => void;
   confirmedTokenId: string | null;
   setConfirmedTokenId: (tokenId: string | null) => void;
 };
 
-const setToast = ({
-  message,
-  type,
-}: {
-  message: string;
-  type: TypeOptions;
-}) => {
-  toast(message, {
-    position: "top-right",
-    autoClose: 3000,
-    hideProgressBar: false,
-    draggable: false,
-    closeOnClick: true,
-    transition: Slide,
-    theme: "dark",
-    type,
-  });
-};
+const setToast = (toast: AppToastInput) => showAppToast(toast);
 
 const setToasts = ({
   messages,
@@ -83,7 +67,7 @@ const setToasts = ({
   messages: string[];
   type: TypeOptions;
 }) => {
-  messages.forEach((message) => setToast({ message, type }));
+  showAppToasts({ messages, type });
 };
 
 export const DistributionPlanToolContext =
@@ -105,6 +89,7 @@ export const DistributionPlanToolContext =
     phases: [],
     setPhases: () => {},
     setToasts: () => {},
+    setToast: () => {},
     confirmedTokenId: null,
     setConfirmedTokenId: () => {},
   });
@@ -152,9 +137,8 @@ export default function DistributionPlanToolContextWrapper({
 
   const fetchTransferPools = async (distributionPlanId: string) => {
     const endpoint = `/allowlists/${distributionPlanId}/transfer-pools`;
-    const { success, data } = await distributionPlanApiFetch<
-      AllowlistTransferPool[]
-    >(endpoint);
+    const { success, data } =
+      await distributionPlanApiFetch<AllowlistTransferPool[]>(endpoint);
     if (success && data) {
       setTransferPools(data);
     }
@@ -162,9 +146,8 @@ export default function DistributionPlanToolContextWrapper({
 
   const fetchTokenPools = async (distributionPlanId: string) => {
     const endpoint = `/allowlists/${distributionPlanId}/token-pools`;
-    const { success, data } = await distributionPlanApiFetch<
-      AllowlistTokenPool[]
-    >(endpoint);
+    const { success, data } =
+      await distributionPlanApiFetch<AllowlistTokenPool[]>(endpoint);
     if (success && data) {
       setTokenPools(data);
     }
@@ -172,9 +155,8 @@ export default function DistributionPlanToolContextWrapper({
 
   const fetchCustomTokenPools = async (distributionPlanId: string) => {
     const endpoint = `/allowlists/${distributionPlanId}/custom-token-pools`;
-    const { success, data } = await distributionPlanApiFetch<
-      AllowlistCustomTokenPool[]
-    >(endpoint);
+    const { success, data } =
+      await distributionPlanApiFetch<AllowlistCustomTokenPool[]>(endpoint);
     if (success && data) {
       setCustomTokenPools(data);
     }
@@ -182,9 +164,8 @@ export default function DistributionPlanToolContextWrapper({
 
   const fetchOperations = async (distributionPlanId: string) => {
     const endpoint = `/allowlists/${distributionPlanId}/operations`;
-    const { success, data } = await distributionPlanApiFetch<
-      AllowlistOperation[]
-    >(endpoint);
+    const { success, data } =
+      await distributionPlanApiFetch<AllowlistOperation[]>(endpoint);
     if (success && data) {
       setOperations(data);
     }
@@ -192,9 +173,10 @@ export default function DistributionPlanToolContextWrapper({
 
   const fetchPhases = async (distributionPlanId: string) => {
     const endpoint = `/allowlists/${distributionPlanId}/phases?withComponentsAndItems=true`;
-    const { success, data } = await distributionPlanApiFetch<
-      AllowlistPhaseWithComponentAndItems[]
-    >(endpoint);
+    const { success, data } =
+      await distributionPlanApiFetch<AllowlistPhaseWithComponentAndItems[]>(
+        endpoint
+      );
     if (success && data) {
       setPhases(data);
     }
@@ -249,9 +231,11 @@ export default function DistributionPlanToolContextWrapper({
           phases,
           setPhases,
           setToasts,
+          setToast,
           confirmedTokenId,
           setConfirmedTokenId,
-        }}>
+        }}
+      >
         <div>{children}</div>
         <RunOperations />
       </DistributionPlanToolContext.Provider>

@@ -1,7 +1,7 @@
 import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useMemo } from "react";
@@ -41,29 +41,41 @@ export default function NftNavigation(
   }
 
   function printNavigation() {
-    const linkClass =
-      "tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-iron-100 tw-shadow-sm tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-700 hover:tw-text-white";
-    const disabledClass =
-      "tw-pointer-events-none tw-cursor-default tw-border-iron-800 tw-bg-iron-950 tw-text-iron-600 tw-shadow-none tw-opacity-100";
-    const iconClass = "tw-h-4 tw-w-4";
-
     return (
       <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
         <Link
           href={`${props.path}/${props.nftId - 1}${query}`}
           aria-label="Previous NFT"
           aria-disabled={isFirst}
-          className={`${linkClass} ${isFirst ? disabledClass : ""}`}
+          title="Previous Card"
+          className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-all tw-duration-300 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white ${
+            isFirst
+              ? "tw-pointer-events-none tw-cursor-default tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
+              : ""
+          }`}
         >
-          <ChevronLeftIcon data-testid="icon" className={iconClass} />
+          <ChevronLeftIcon
+            data-testid="icon"
+            strokeWidth={2}
+            className="tw-h-[18px] tw-w-[18px] tw-transition-transform tw-duration-300 group-hover:-tw-translate-x-0.5"
+          />
         </Link>
         <Link
           href={`${props.path}/${props.nftId + 1}${query}`}
           aria-label="Next NFT"
           aria-disabled={isLast}
-          className={`${linkClass} ${isLast ? disabledClass : ""}`}
+          title="Next Card"
+          className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-all tw-duration-300 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white ${
+            isLast
+              ? "tw-pointer-events-none tw-cursor-default tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
+              : ""
+          }`}
         >
-          <ChevronRightIcon data-testid="icon" className={iconClass} />
+          <ChevronRightIcon
+            data-testid="icon"
+            strokeWidth={2}
+            className="tw-h-[18px] tw-w-[18px] tw-transition-transform tw-duration-300 group-hover:tw-translate-x-0.5"
+          />
         </Link>
       </span>
     );

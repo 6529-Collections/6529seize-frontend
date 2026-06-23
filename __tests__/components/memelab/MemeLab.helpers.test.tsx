@@ -1,9 +1,8 @@
 import {
   getInitialRouterValues,
-  printNftContent,
-  printSortButtons,
   sortChanged,
 } from "@/components/memelab/MemeLab";
+import { printNftContent } from "@/components/memelab/memeLabCardContent";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
@@ -14,7 +13,7 @@ import { render, screen } from "@testing-library/react";
 jest.mock("@/helpers/Helpers", () => ({
   printMintDate: jest.fn((date: Date | string) => {
     if (!date) return "-";
-    return "Jan 1, 2023 (1 year ago)";
+    return "Jan 1, 2023";
   }),
   numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
   getValuesForVolumeType: jest.fn((volumeType: VolumeType, nft: any) => {
@@ -48,21 +47,6 @@ describe("MemeLab helpers", () => {
     );
     expect(initialSort).toBe(MemeLabSort.EDITION_SIZE);
     expect(initialSortDir).toBe(SortDirection.DESC);
-  });
-
-  test("printSortButtons renders buttons and dropdown", () => {
-    render(
-      <div>
-        {printSortButtons(
-          MemeLabSort.AGE,
-          VolumeType.ALL_TIME,
-          jest.fn(),
-          jest.fn()
-        )}
-      </div>
-    );
-    expect(screen.getByTestId("sort-Age")).toBeInTheDocument();
-    expect(screen.getByTestId("volume-dropdown")).toBeInTheDocument();
   });
 
   test("printNftContent shows floor price and highest offer", () => {

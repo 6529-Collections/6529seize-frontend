@@ -48,7 +48,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   compress: true,
   poweredByHeader: false,
-  transpilePackages: ["react-tweet"],
   experimental: {
     externalDir: true,
   },

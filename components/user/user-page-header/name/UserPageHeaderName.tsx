@@ -6,8 +6,8 @@ import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCI
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
+import ProfileCurationBadge from "./ProfileCurationBadge";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 
 export default function UserPageHeaderName({
@@ -64,15 +64,12 @@ export default function UserPageHeaderName({
             </ProfileNameWithAiMarker>
           </UserPageHeaderNameWrapper>
           {profile.handle && (
-            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center xl:tw-mt-1">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center xl:-tw-mt-1">
               <UserCICTypeIconWrapper profile={profile} />
             </div>
           )}
           <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
-          <DropAuthorBadges
-            profile={profile}
-            tooltipIdPrefix="profile-author-badges"
-          />
+          <ProfileCurationBadge profile={profile} />
         </div>
       )}
 

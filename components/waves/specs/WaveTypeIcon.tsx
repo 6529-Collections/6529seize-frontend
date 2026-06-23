@@ -8,7 +8,7 @@ export default function WaveTypeIcon({
 }) {
   return (
     <div className="tw-flex tw-items-center">
-      <span className="tw-font-medium tw-text-iron-200 tw-text-sm">
+      <span className="tw-text-sm tw-font-medium tw-text-iron-50">
         {WAVE_LABELS[waveType]}
       </span>
     </div>

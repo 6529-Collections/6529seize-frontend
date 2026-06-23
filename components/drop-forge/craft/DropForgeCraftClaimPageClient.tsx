@@ -24,6 +24,11 @@ import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
+import {
+  getDropForgeAnimationMediaTypeLabel,
+  getDropForgeImageMediaTypeLabel,
+  isDropForgeVideoUrl,
+} from "@/components/drop-forge/drop-forge-media-type.helpers";
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
@@ -108,19 +113,7 @@ function formatNullableEditionSize(value: number | null | undefined): string {
 }
 
 function isVideoUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  const raw = url.trim();
-  if (raw.length === 0) return false;
-  if (raw.toLowerCase().startsWith("data:video/")) return true;
-
-  const hasVideoExtension = (value: string) =>
-    /\.(mp4|webm)(?:$|[?#])/.test(value.toLowerCase());
-
-  try {
-    return hasVideoExtension(new URL(raw).pathname);
-  } catch {
-    return hasVideoExtension(raw);
-  }
+  return isDropForgeVideoUrl(url);
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -267,20 +260,6 @@ function getAnimationPreviewMimeType({
   }
 
   return null;
-}
-
-function getAnimationPreviewLabel(mimeType: string | null): string {
-  if (mimeType?.startsWith("video/")) {
-    return "Video";
-  }
-  if (mimeType?.startsWith("model/gltf")) {
-    return "GLB";
-  }
-  if (mimeType === "text/html") {
-    return "HTML";
-  }
-
-  return "Animation";
 }
 
 function getAnimationSourceCardProps({
@@ -469,7 +448,12 @@ export default function DropForgeCraftClaimPageClient({
       ) {
         setError("Claim not found");
       } else {
-        setToast({ message: msg, type: "error" });
+        setToast({
+          type: "error",
+          title: "Couldn't load this claim.",
+          description: "Please try again.",
+          details: msg,
+        });
       }
     } finally {
       setLoading(false);
@@ -529,6 +513,8 @@ export default function DropForgeCraftClaimPageClient({
   const hasPendingPageChanges =
     imageDirty || animationDirty || coreInfoDirty || metadataDirty;
   const hasAnimation = Boolean(claim.animation_url);
+  const imageMediaTypeLabel = getDropForgeImageMediaTypeLabel(claim);
+  const animationMediaTypeLabel = getDropForgeAnimationMediaTypeLabel(claim);
   const coreInformationHeaderPills = (
     <span className="tw-inline-flex tw-items-center tw-gap-2">
       <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
@@ -557,7 +543,17 @@ export default function DropForgeCraftClaimPageClient({
       />
 
       <div className="tw-flex tw-flex-col tw-gap-5">
-        <DropForgeAccordionSection title="Image" defaultOpen>
+        <DropForgeAccordionSection
+          title="Image"
+          defaultOpen
+          headerRight={
+            imageMediaTypeLabel ? (
+              <DropForgeMediaTypePill label={imageMediaTypeLabel} />
+            ) : null
+          }
+          showHeaderRightWhenOpen
+          showHeaderRightWhenClosed
+        >
           <ImageSection
             claim={claim}
             claimId={claimId}
@@ -566,7 +562,17 @@ export default function DropForgeCraftClaimPageClient({
           />
         </DropForgeAccordionSection>
 
-        <DropForgeAccordionSection title="Animation" defaultOpen={hasAnimation}>
+        <DropForgeAccordionSection
+          title="Animation"
+          defaultOpen={hasAnimation}
+          headerRight={
+            animationMediaTypeLabel ? (
+              <DropForgeMediaTypePill label={animationMediaTypeLabel} />
+            ) : null
+          }
+          showHeaderRightWhenOpen
+          showHeaderRightWhenClosed
+        >
           <AnimationSection
             claim={claim}
             claimId={claimId}
@@ -703,11 +709,16 @@ function ImageSection({
       const updated = await patchClaim(claimId, body);
       onUpdated(updated);
       clearPendingImageSelection();
-      setToast({ message: "Image updated", type: "success" });
+      setToast({ message: "Image updated.", type: "success" });
     } catch (err) {
       const msg = getErrorMessage(err, "Update failed");
       setFormError(msg);
-      setToast({ message: msg, type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't update this image.",
+        description: "Please try again.",
+        details: msg,
+      });
     } finally {
       setSaving(false);
     }
@@ -903,9 +914,6 @@ function AnimationSection({
     animationDisplayUrl,
     mediaType,
   });
-  const animationPreviewLabel = getAnimationPreviewLabel(
-    animationPreviewMimeType
-  );
   const animationSourceCardProps = getAnimationSourceCardProps({
     pendingAnimationFile,
     pendingAnimation,
@@ -955,11 +963,11 @@ function AnimationSection({
       setLinkError("Enter a link");
       return;
     }
-    const url = raw.startsWith("http") ? raw : `https://${raw}`;
+    const url = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
     const canonical = canonicalizeInteractiveMediaUrl(url);
     if (!canonical) {
       setLinkError(
-        "Link must be a valid IPFS or Arweave URL (e.g. https://ipfs.io/ipfs/… or https://arweave.net/…)"
+        "Link must be a valid IPFS or Arweave URL (e.g. ipfs://..., ar://..., or https://media.6529.io/...)"
       );
       return;
     }
@@ -968,7 +976,7 @@ function AnimationSection({
     setLinkError(null);
     setLinkInput("");
     setReplaceMode(null);
-    setToast({ message: "Link set; click Save to apply", type: "success" });
+    setToast({ message: "Link set. Save to apply it.", type: "success" });
   }
 
   function handleRemoveAnimation() {
@@ -1004,11 +1012,16 @@ function AnimationSection({
       setReplaceMode(null);
       setLinkInput("");
       setLinkError(null);
-      setToast({ message: "Animation updated", type: "success" });
+      setToast({ message: "Animation updated.", type: "success" });
     } catch (err) {
       const msg = getErrorMessage(err, "Update failed");
       setFormError(msg);
-      setToast({ message: msg, type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't update this animation.",
+        description: "Please try again.",
+        details: msg,
+      });
     } finally {
       setSaving(false);
     }
@@ -1054,7 +1067,7 @@ function AnimationSection({
           setLinkInput(e.target.value);
           setLinkError(null);
         }}
-        placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
+        placeholder="ipfs://... or ar://..."
         className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
       />
       {linkError && (
@@ -1139,12 +1152,12 @@ function AnimationSection({
         )}
         {showAnimationControls && (
           <>
-            <DropForgeMediaTypePill label={animationPreviewLabel} />
             {animationDisplayUrl && animationPreviewMimeType && (
-              <div className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
+              <div className="tw-relative tw-flex tw-aspect-video tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
                 <MediaDisplay
                   media_mime_type={animationPreviewMimeType}
                   media_url={animationDisplayUrl}
+                  fillVideoContainer
                 />
               </div>
             )}
@@ -1326,11 +1339,16 @@ function CoreInformationSection({
       if (editionSizeChanged) {
         onEditionSizeSaved();
       }
-      setToast({ message: "Core information updated", type: "success" });
+      setToast({ message: "Core information saved.", type: "success" });
     } catch (e) {
       const msg = getErrorMessage(e, "Update failed");
       setCoreError(msg);
-      setToast({ message: msg, type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't save core information.",
+        description: "Please try again.",
+        details: msg,
+      });
     } finally {
       setCoreSaving(false);
     }
@@ -1526,11 +1544,16 @@ function MetadataSection({
       setTraits(claimToTraitsData(nextClaim));
       setExternalUrl(nextClaim.external_url ?? "");
       onUpdated(nextClaim);
-      setToast({ message: "Metadata updated", type: "success" });
+      setToast({ message: "Metadata updated.", type: "success" });
     } catch (e) {
       const msg = getErrorMessage(e, "Update failed");
       setTraitsError(msg);
-      setToast({ message: msg, type: "error" });
+      setToast({
+        type: "error",
+        title: "Couldn't save metadata.",
+        description: "Please try again.",
+        details: msg,
+      });
     } finally {
       setTraitsSaving(false);
       if (
@@ -1688,13 +1711,18 @@ function ArweaveSection({
     setLoading(true);
     try {
       await postArweaveUpload(claimId);
-      setToast({ message: "Publishing to Arweave started", type: "success" });
+      setToast({ message: "Publishing to Arweave started.", type: "success" });
       await onStatusRefresh();
     } catch (e) {
       const msg = getErrorMessage(e, "Upload failed");
       setError(msg);
       if (msg !== "Already published" && msg !== "Not authorized") {
-        setToast({ message: msg, type: "error" });
+        setToast({
+          type: "error",
+          title: "Couldn't publish to Arweave.",
+          description: "Please try again.",
+          details: msg,
+        });
       }
     } finally {
       setLoading(false);

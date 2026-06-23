@@ -8,6 +8,8 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildProfilePageJsonLd } from "@/lib/structured-data/profile";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -94,13 +96,11 @@ export function createUserTabPage<
   TExtra extends Record<string, unknown> = Record<string, never>,
 >({
   subroute,
-  metaLabel,
   Tab,
   enableTransfer,
   getTabProps,
 }: {
   subroute: string;
-  metaLabel: string;
   Tab: (props: Readonly<TabProps & TExtra>) => React.JSX.Element;
   enableTransfer?: boolean | undefined;
   getTabProps?: (ctx: {
@@ -112,8 +112,8 @@ export function createUserTabPage<
     params,
     searchParams,
   }: {
-    readonly params?: Promise<UserRouteParams> | undefined;
-    readonly searchParams?: Promise<UserSearchParams> | undefined;
+    readonly params?: Promise<UserRouteParams>;
+    readonly searchParams?: Promise<UserSearchParams>;
   }) {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
@@ -153,10 +153,24 @@ export function createUserTabPage<
       ? await getTabProps({ profile, query })
       : ({} as TExtra);
 
+    const canonicalUser =
+      profile.handle ?? profile.primary_wallet ?? normalizedUser;
+    const profilePath = `/${encodeURIComponent(canonicalUser)}${
+      subroute ? `/${subroute}` : ""
+    }`;
+
     const TabComponent = (
-      <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
-        <Tab profile={profile} {...extraProps} />
-      </UserPageLayout>
+      <>
+        <JsonLdScript
+          data={buildProfilePageJsonLd({
+            profile,
+            path: profilePath,
+          })}
+        />
+        <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
+          <Tab profile={profile} {...extraProps} />
+        </UserPageLayout>
+      </>
     );
 
     if (enableTransfer) {
@@ -169,7 +183,7 @@ export function createUserTabPage<
   async function generateMetadata({
     params,
   }: {
-    readonly params?: Promise<UserRouteParams> | undefined;
+    readonly params?: Promise<UserRouteParams>;
   }): Promise<Metadata> {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
@@ -191,7 +205,7 @@ export function createUserTabPage<
       }
       throw error;
     });
-    return getAppMetadata(getMetadataForUserPage(profile, metaLabel));
+    return getAppMetadata(getMetadataForUserPage(profile, subroute));
   }
 
   return { Page, generateMetadata };

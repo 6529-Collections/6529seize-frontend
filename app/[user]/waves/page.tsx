@@ -43,8 +43,8 @@ export default async function LegacyWavesPage({
   params,
   searchParams,
 }: {
-  readonly params?: Promise<UserRouteParams> | undefined;
-  readonly searchParams?: Promise<UserSearchParams> | undefined;
+  readonly params?: Promise<UserRouteParams>;
+  readonly searchParams?: Promise<UserSearchParams>;
 }) {
   const resolvedParams = params ? await params : undefined;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;

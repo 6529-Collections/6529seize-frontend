@@ -1,0 +1,48 @@
+version: 1
+enabled: true
+
+reviewKinds:
+  allowed: [general, followup, wcag, i18n, security, glm-swarm, responsiveness]
+  initial: [general, wcag, i18n, security, responsiveness, glm-swarm]
+  followup: [followup]
+
+commands:
+  enabled: true
+
+lanes:
+  - provider: anthropic
+    model: claude-opus-4-8
+
+limits:
+  maxJobsPerDelivery: 6
+
+admission:
+  publicRepoMode: trusted
+  privateRepoMode: open
+  draftPrMode: allow
+  trustedPermission: write
+  trustedUsers: []
+  trustedTeams: []
+  trustedOrganizations: []
+  denyUsers: []
+
+budget:
+  mode: enforce
+  defaultEstimatedCostUsd: 1
+  caps:
+    repo:
+      dailyUsd: 450
+      weeklyUsd: 3150
+      monthlyUsd: 13500
+    requestor:
+      dailyUsd: 1000
+      weeklyUsd: 7000
+      monthlyUsd: 30000
+    pr:
+      dailyUsd: 100
+      weeklyUsd: 700
+      monthlyUsd: 3000
+    review_kind:
+      dailyUsd: 1000
+      weeklyUsd: 7000
+      monthlyUsd: 30000

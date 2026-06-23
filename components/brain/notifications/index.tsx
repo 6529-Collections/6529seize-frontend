@@ -2,6 +2,10 @@
 
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import {
+  DROP_POLL_VOTED_NOTIFICATION_CAUSE,
+  type NotificationCause,
+} from "@/types/feed.types";
 import { useMemo } from "react";
 import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import { useNotificationsController } from "./hooks/useNotificationsController";
@@ -14,7 +18,7 @@ interface NotificationsProps {
   readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
 }
 
-const NOTIFICATION_CAUSE_PRIORITY: Record<ApiNotificationCause, number> = {
+const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
   [ApiNotificationCause.IdentitySubscribed]: 0,
   [ApiNotificationCause.IdentityMentioned]: 1,
   [ApiNotificationCause.IdentityRep]: 2,
@@ -22,16 +26,17 @@ const NOTIFICATION_CAUSE_PRIORITY: Record<ApiNotificationCause, number> = {
   [ApiNotificationCause.DropQuoted]: 4,
   [ApiNotificationCause.DropReplied]: 5,
   [ApiNotificationCause.DropVoted]: 6,
-  [ApiNotificationCause.DropBoosted]: 7,
-  [ApiNotificationCause.DropReacted]: 8,
-  [ApiNotificationCause.WaveCreated]: 9,
-  [ApiNotificationCause.AllDrops]: 10,
-  [ApiNotificationCause.PriorityAlert]: 11,
+  [DROP_POLL_VOTED_NOTIFICATION_CAUSE]: 7,
+  [ApiNotificationCause.DropBoosted]: 8,
+  [ApiNotificationCause.DropReacted]: 9,
+  [ApiNotificationCause.WaveCreated]: 10,
+  [ApiNotificationCause.AllDrops]: 11,
+  [ApiNotificationCause.PriorityAlert]: 12,
 };
 
 const compareNotificationCause = (
-  firstCause: ApiNotificationCause,
-  secondCause: ApiNotificationCause
+  firstCause: NotificationCause,
+  secondCause: NotificationCause
 ): number =>
   NOTIFICATION_CAUSE_PRIORITY[firstCause] -
   NOTIFICATION_CAUSE_PRIORITY[secondCause];

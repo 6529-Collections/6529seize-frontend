@@ -2,12 +2,19 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
+import { getLargeSocialCardMetadata } from "@/components/providers/metadata";
 import {
   DEFAULT_USER_PAGE_TAB,
   type UserPageTabKey,
   getUserPageTabById,
 } from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
+import {
+  canonicalizeGatewayHostname,
+  normalizeDecentralizedMediaUrl,
+  parseDecentralizedMediaRef,
+  toExternalFallbackUrls,
+} from "@/lib/media/decentralized-media";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -211,28 +218,60 @@ export const fullScreenSupported = (): boolean => {
   return check;
 };
 
-export const enterArtFullScreen = async (elementId: string): Promise<void> => {
-  const element: any = document.getElementById(elementId);
+type FullscreenRequestElement = Omit<HTMLElement, "requestFullscreen"> & {
+  readonly requestFullscreen?: (() => Promise<void> | void) | undefined;
+  readonly mozRequestFullScreen?: (() => Promise<void> | void) | undefined;
+  readonly webkitRequestFullscreen?: (() => Promise<void> | void) | undefined;
+  readonly msRequestFullscreen?: (() => Promise<void> | void) | undefined;
+};
+
+export const enterArtFullScreen = async (
+  elementId: string
+): Promise<boolean> => {
+  if (typeof globalThis.document === "undefined") {
+    return false;
+  }
+
+  const element = globalThis.document.getElementById(
+    elementId
+  ) as FullscreenRequestElement | null;
 
   if (!element) {
     console.error(`Element with ID '${elementId}' not found.`);
-    return;
+    return false;
   }
 
-  const request =
-    element.requestFullscreen ||
-    element.mozRequestFullScreen ||
-    element.webkitRequestFullscreen ||
-    element.msRequestFullscreen;
-
-  if (request) {
-    try {
-      await request.call(element);
-    } catch (err) {
-      console.error(`Error attempting to enable fullscreen mode: ${err}`);
+  try {
+    if (element.requestFullscreen !== undefined) {
+      await element.requestFullscreen();
+      return true;
     }
-  } else {
+    if (element.mozRequestFullScreen !== undefined) {
+      await element.mozRequestFullScreen();
+      return true;
+    }
+    if (element.webkitRequestFullscreen !== undefined) {
+      await element.webkitRequestFullscreen();
+      return true;
+    }
+    if (element.msRequestFullscreen !== undefined) {
+      await element.msRequestFullscreen();
+      return true;
+    }
+
     console.warn("Fullscreen API is not supported by this browser.");
+    return false;
+  } catch (err) {
+    let errorMessage = "Unknown fullscreen error";
+    if (err instanceof Error) {
+      errorMessage = `${err.name}: ${err.message}`;
+    } else if (typeof err === "string") {
+      errorMessage = err;
+    }
+    console.error(
+      `Error attempting to enable fullscreen mode: ${errorMessage}`
+    );
+    return false;
   }
 };
 
@@ -290,20 +329,35 @@ export function parseIpfsUrl(url: string) {
   if (!url) {
     return url;
   }
-  if (url.startsWith("ipfs")) {
-    return `https://ipfs.io/ipfs/${url.split("://")[1]}`;
-  }
-  return url;
+  return (
+    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
+    url
+  );
 }
 
 export function parseIpfsUrlToGateway(url: string) {
   if (!url) {
     return url;
   }
-  if (url.startsWith("ipfs")) {
-    return `https://cf-ipfs.com/ipfs/${url.split("://")[1]}`;
+  const parsed = parseDecentralizedMediaRef(url);
+  if (!parsed) {
+    return url;
   }
-  return url;
+  const fallbacks = toExternalFallbackUrls(parsed);
+  return (
+    fallbacks.find((fallback) => {
+      try {
+        return (
+          canonicalizeGatewayHostname(new URL(fallback).hostname) ===
+          "cf-ipfs.com"
+        );
+      } catch {
+        return false;
+      }
+    }) ??
+    fallbacks[0] ??
+    parseIpfsUrl(url)
+  );
 }
 
 export function isEmptyObject(obj: any) {
@@ -349,14 +403,11 @@ export function printMintDate(date?: Date) {
     return "-";
   }
   const mintDate = new Date(date);
-  return `
-      ${mintDate.toLocaleString("default", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })}
-      (${getDateDisplay(mintDate)})
-    `;
+  return mintDate.toLocaleString("default", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export function getRandomColor() {
@@ -366,6 +417,35 @@ export function getRandomColor() {
   const [r = 0, g = 0, b = 0] = values;
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function getRandomInteger(maxExclusive: number): number {
+  const values = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(values);
+  return (values[0] ?? 0) % maxExclusive;
+}
+
+export function getRandomUniqueNumbersBetween(
+  minInclusive: number,
+  maxExclusive: number
+): string[] {
+  if (!Number.isInteger(minInclusive) || !Number.isInteger(maxExclusive)) {
+    throw new TypeError("Both minInclusive and maxExclusive must be integers.");
+  }
+
+  if (maxExclusive <= minInclusive) {
+    throw new RangeError("maxExclusive must be greater than minInclusive.");
+  }
+
+  const rangeSize = maxExclusive - minInclusive;
+  const count = getRandomInteger(rangeSize) + 1;
+  const values = new Set<number>();
+
+  while (values.size < count) {
+    values.add(minInclusive + getRandomInteger(rangeSize));
+  }
+
+  return [...values].sort((a, b) => a - b).map(String);
 }
 
 export function capitalizeEveryWord(input: string): string {
@@ -866,19 +946,41 @@ export const removeBaseEndpoint = (link: string) => {
   return link.replaceAll(baseEndpoint, "");
 };
 
+const formatUserPageMetadataPath = (path: string): string | null => {
+  const words = path
+    .split(/[/_-]+/)
+    .map((word) => word.trim())
+    .filter(Boolean);
+
+  if (words.length === 0) {
+    return null;
+  }
+
+  return words
+    .map((word) => {
+      const normalized = word.toLowerCase();
+      return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}`;
+    })
+    .join(" ");
+};
+
 export const getMetadataForUserPage = (
   profile: ApiIdentity,
   path?: string
 ): PageSSRMetadata => {
   const display = profile.handle ?? formatAddress(profile.display);
-  return {
-    title: display + (path ? ` | ${path}` : ""),
-    ogImage: profile.pfp ?? "",
-    description: `Level ${
-      profile.level
-    } / TDH: ${profile.tdh.toLocaleString()} / Rep: ${profile.rep.toLocaleString()}`,
-    twitterCard: "summary_large_image",
-  };
+  const pathTitle = path ? formatUserPageMetadataPath(path) : null;
+  const imageIdentity =
+    profile.normalised_handle ??
+    profile.handle ??
+    profile.primary_wallet ??
+    profile.display;
+  return getLargeSocialCardMetadata({
+    title: pathTitle ? `${display} - ${pathTitle}` : display,
+    ogImage: `/api/og-metadata/profiles/${encodeURIComponent(imageIdentity)}`,
+    ogImageAlt: `${display} profile social card`,
+    description: "Identity",
+  });
 };
 
 export async function fetchFileContent(filePath: string): Promise<string> {

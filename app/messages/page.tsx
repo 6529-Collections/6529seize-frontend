@@ -4,7 +4,12 @@ import {
   HydrationBoundary,
 } from "@tanstack/react-query";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getWaveRouteWithSearchParams,
+  type RouteSearchParams,
+} from "@/helpers/navigation.helpers";
 import MessagesPageClient from "./page.client";
 
 export const metadata = getAppMetadata({
@@ -12,14 +17,37 @@ export const metadata = getAppMetadata({
   description: "Direct Messages",
 });
 
-export default function MessagesPage({
-  searchParams: _searchParams,
+type MessageSearchParams = RouteSearchParams;
+
+const getFirstSearchParamValue = (
+  searchParams: MessageSearchParams,
+  key: string
+): string | null => {
+  const value = searchParams[key];
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+  return typeof value === "string" ? value : null;
+};
+
+export default async function MessagesPage({
+  searchParams,
 }: {
-  readonly searchParams: Promise<{
-    wave?: string | undefined;
-    drop?: string | undefined;
-  }>;
+  readonly searchParams: Promise<MessageSearchParams>;
 }) {
+  const resolvedParams = await searchParams;
+  const legacyWaveId = getFirstSearchParamValue(resolvedParams, "wave");
+
+  if (legacyWaveId) {
+    redirect(
+      getWaveRouteWithSearchParams({
+        waveId: legacyWaveId,
+        searchParams: resolvedParams,
+        isDirectMessage: true,
+      })
+    );
+  }
+
   const queryClient = new QueryClient();
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

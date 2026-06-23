@@ -4,6 +4,7 @@ describe("buildMemesSubmissionDraftFromDrop", () => {
   it("clones metadata, operational data, and existing media from a drop", () => {
     const drop = {
       title: "Fallback Title",
+      is_additional_action_promised: true,
       parts: [
         {
           content: "Fallback description",
@@ -80,5 +81,6 @@ describe("buildMemesSubmissionDraftFromDrop", () => {
       url: "https://example.com/art.png",
       mimeType: "image/png",
     });
+    expect(draft.isAdditionalActionPromised).toBe(true);
   });
 });

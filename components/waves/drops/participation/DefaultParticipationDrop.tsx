@@ -1,6 +1,7 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ImageScale } from "@/helpers/image.helpers";
 import React from "react";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import OngoingParticipationDrop from "./OngoingParticipationDrop";
@@ -26,7 +27,12 @@ interface DefaultParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly inlineAuthorOnDesktop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }

@@ -82,9 +82,14 @@ const MARKETPLACE_PREVIEW_MODES: readonly MarketplacePreviewMode[] = [
   "opensea-sanitized",
 ];
 
-const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
+const MIME_TYPE_BY_EXTENSION: Record<string, string> = {
   avif: "image/avif",
+  flac: "audio/flac",
   gif: "image/gif",
+  glb: "model/gltf-binary",
+  gltf: "model/gltf+json",
+  htm: "text/html",
+  html: "text/html",
   jpeg: "image/jpeg",
   jpg: "image/jpeg",
   m4v: "video/x-m4v",
@@ -93,15 +98,12 @@ const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
   mp4: "video/mp4",
   ogg: "audio/ogg",
   ogv: "video/ogg",
-  flac: "audio/flac",
   png: "image/png",
   svg: "image/svg+xml",
+  usdz: "model/vnd.usdz",
   wav: "audio/wav",
   webm: "video/webm",
   webp: "image/webp",
-  glb: "model/gltf-binary",
-  gltf: "model/gltf+json",
-  usdz: "model/vnd.usdz",
 };
 
 const asNullableString = (value: unknown): string | null =>
@@ -178,7 +180,7 @@ const inferMimeTypeFromUrl = (url: string): string | undefined => {
       return undefined;
     }
 
-    return IMAGE_MIME_BY_EXTENSION[extensionMatch[1]];
+    return MIME_TYPE_BY_EXTENSION[extensionMatch[1]];
   } catch {
     const path = url.split("?")[0]?.toLowerCase() ?? "";
     const extensionMatch = path.match(/\.([a-z0-9]+)$/);
@@ -186,7 +188,7 @@ const inferMimeTypeFromUrl = (url: string): string | undefined => {
       return undefined;
     }
 
-    return IMAGE_MIME_BY_EXTENSION[extensionMatch[1]];
+    return MIME_TYPE_BY_EXTENSION[extensionMatch[1]];
   }
 };
 

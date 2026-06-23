@@ -7,6 +7,7 @@ import { Time } from "@/helpers/time";
 const setActiveTab = jest.fn();
 const updateAvailableTabs = jest.fn();
 const searchParamsGet = jest.fn();
+let mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => ({
@@ -69,9 +70,24 @@ jest.mock("@/hooks/waves/useWaveCurationReorderMutation", () => ({
   }),
 }));
 
+const mockApproveLabels = {
+  approvals: "Proposals",
+  approved: "Approved",
+};
+
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useApproveWaveCustomTabLabels: () => mockApproveLabels,
+  useWaveOutcomeVisibility: () => mockOutcomesVisible,
+}));
+
 jest.mock("@/hooks/useProfileWave", () => ({
   getProfileWaveIdentity: () => "",
   useProfileWave: () => ({ data: null }),
+}));
+
+jest.mock("@/hooks/useWaveHasPolls", () => ({
+  useWaveHasPolls: () => mockWavePollSummary.hasPolls,
+  useWavePollSummary: () => mockWavePollSummary,
 }));
 
 jest.mock("@/components/waves/leaderboard/time/CompactTimeCountdown", () => ({
@@ -97,6 +113,7 @@ let mockWaveInfo: any = {
 };
 let mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
 let mockDecisions: { timestamp: number }[] = [];
+let mockOutcomesVisible = true;
 const { useAuth } = require("@/components/auth/Auth");
 
 function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
@@ -122,6 +139,8 @@ function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockApproveLabels.approvals = "Proposals";
+  mockApproveLabels.approved = "Approved";
   searchParamsGet.mockReturnValue(null);
   mockAvailableTabs = [MyStreamWaveTab.CHAT];
   mockWaveInfo = {
@@ -133,13 +152,15 @@ beforeEach(() => {
   };
   mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
   mockDecisions = [];
+  mockOutcomesVisible = true;
+  mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
   (useAuth as jest.Mock).mockReturnValue({
     connectedProfile: { handle: "alice" },
   });
 });
 
 describe("MyStreamWaveDesktopTabs", () => {
-  it("returns null for chat waves", () => {
+  it("renders Polls for chat waves when available", () => {
     mockWaveInfo = {
       isChatWave: true,
       isApproveWave: false,
@@ -147,8 +168,24 @@ describe("MyStreamWaveDesktopTabs", () => {
       isCurationWave: false,
       isRankWave: false,
     };
-    const { container } = renderComponent();
-    expect(container.firstChild).toBeNull();
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.POLLS];
+
+    renderComponent();
+
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Polls").length).toBeGreaterThan(0);
+  });
+
+  it("renders unanswered poll count on the Polls tab", () => {
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.POLLS];
+    mockWavePollSummary = { hasPolls: true, unansweredPolls: 7 };
+
+    renderComponent();
+
+    expect(
+      screen.getAllByRole("tab", { name: /polls/i }).length
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("7").length).toBeGreaterThan(0);
   });
 
   it("filters hidden My Votes without correcting the active tab", () => {
@@ -203,6 +240,16 @@ describe("MyStreamWaveDesktopTabs", () => {
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
     expect(screen.getAllByText("My Votes").length).toBeGreaterThan(0);
+  });
+
+  it("shows Polls when available and activates it", () => {
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.POLLS];
+
+    renderComponent(MyStreamWaveTab.CHAT);
+
+    fireEvent.click(screen.getAllByRole("tab", { name: "Polls" })[0]);
+
+    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.POLLS);
   });
 
   it("hides My Votes for guests on normal rank waves", () => {
@@ -301,7 +348,7 @@ describe("MyStreamWaveDesktopTabs", () => {
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
     expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Approvals").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Proposals").length).toBeGreaterThan(0);
     expect(screen.queryByText("My Votes")).toBeNull();
     expect(setActiveTab).not.toHaveBeenCalled();
   });
@@ -402,10 +449,34 @@ describe("MyStreamWaveDesktopTabs", () => {
     renderComponent(MyStreamWaveTab.LEADERBOARD);
 
     expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Approvals").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Proposals").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Approved").length).toBeGreaterThan(0);
     expect(screen.queryByText("Leaderboard")).toBeNull();
     expect(screen.queryByText("Winners")).toBeNull();
+  });
+
+  it("uses custom approve wave tab labels", () => {
+    mockApproveLabels.approvals = "Candidates";
+    mockApproveLabels.approved = "Selected";
+    mockWaveInfo = {
+      isChatWave: false,
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.WINNERS,
+    ];
+
+    renderComponent(MyStreamWaveTab.LEADERBOARD);
+
+    expect(screen.getAllByText("Candidates").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Selected").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Proposals")).toBeNull();
+    expect(screen.queryByText("Approved")).toBeNull();
   });
 
   it("forces a transient switch to Chat when serialNo is present", () => {

@@ -19,6 +19,7 @@ interface MemesQuickVoteActionBarProps {
   readonly isVoteFeedbackActive: boolean;
   readonly latestUsedAmount: number | null;
   readonly quickAmounts: readonly number[];
+  readonly allowsNegativeVotes: boolean;
   readonly uncastPower: number | null;
   readonly votingLabel: string | null;
   readonly onCustomChange: (value: string) => void;
@@ -37,6 +38,7 @@ export default function MemesQuickVoteActionBar({
   isVoteFeedbackActive,
   latestUsedAmount,
   quickAmounts,
+  allowsNegativeVotes,
   uncastPower,
   votingLabel,
   onCustomChange,
@@ -50,9 +52,12 @@ export default function MemesQuickVoteActionBar({
   const isCustomRowVisible = !hasQuickAmounts || isCustomOpen;
   const customInputRef = useRef<HTMLInputElement | null>(null);
   const previousCustomRowVisibleRef = useRef(isCustomRowVisible);
+  const parsedCustomValue = Number.parseInt(customValue, 10);
   const customAmountLabel =
-    customValue.trim().length > 0 && Number.parseInt(customValue, 10) > 0
-      ? formatNumberWithCommas(Number.parseInt(customValue, 10))
+    customValue.trim().length > 0 &&
+    Number.isFinite(parsedCustomValue) &&
+    parsedCustomValue !== 0
+      ? formatNumberWithCommas(parsedCustomValue)
       : null;
 
   useEffect(() => {
@@ -82,9 +87,9 @@ export default function MemesQuickVoteActionBar({
   };
 
   return (
-    <div className="tw-relative tw-bg-[linear-gradient(180deg,rgba(10,10,12,0.68),rgba(10,10,12,0.94))] tw-px-3 tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.375rem)] tw-pt-1.5 tw-backdrop-blur-[28px] sm:tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] sm:tw-pt-2 md:tw-relative md:tw-z-20 md:tw-shrink-0 md:tw-p-0 md:tw-px-8 md:tw-pb-6 md:tw-pt-0">
+    <div className="tw-relative tw-bg-[linear-gradient(180deg,rgba(10,10,12,0.78),rgba(10,10,12,0.96))] tw-px-3 tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.625rem)] tw-pt-5 tw-backdrop-blur-[28px] sm:tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] sm:tw-pt-4 md:tw-relative md:tw-z-20 md:tw-shrink-0 md:tw-p-0 md:tw-px-8 md:tw-pb-6 md:tw-pt-4">
       <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-gap-2 sm:tw-gap-3">
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-3 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_28px_rgba(0,0,0,0.22)] sm:tw-gap-3 sm:tw-p-4 md:tw-shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
+        <div className="tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-4 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_28px_rgba(0,0,0,0.22)] md:tw-shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-1.5 tw-px-0.5 sm:tw-gap-2 sm:tw-px-1 md:tw-flex-nowrap">
             <p className="tw-mb-0 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-iron-500">
               Quick Vote
@@ -103,7 +108,7 @@ export default function MemesQuickVoteActionBar({
             )}
           </div>
 
-          <div className="tw-relative tw-h-11 tw-overflow-hidden sm:tw-h-12 md:tw-h-12">
+          <div className="tw-relative tw-h-12 tw-overflow-hidden">
             {hasQuickAmounts && (
               <div
                 aria-hidden={isCustomOpen}
@@ -142,6 +147,7 @@ export default function MemesQuickVoteActionBar({
                 customInputRef={customInputRef}
                 customValue={customValue}
                 feedbackSource={feedbackSource}
+                allowsNegativeVotes={allowsNegativeVotes}
                 hasQuickAmounts={hasQuickAmounts}
                 isCustomRowVisible={isCustomRowVisible}
                 isSubmitting={isSubmitting}
@@ -159,7 +165,7 @@ export default function MemesQuickVoteActionBar({
           type="button"
           onClick={onSkip}
           disabled={isSubmitting}
-          className="tw-inline-flex tw-h-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-px-5 tw-text-sm tw-font-bold tw-text-iron-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.18)] tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-900 desktop-hover:hover:tw-bg-iron-900 sm:tw-h-12"
+          className="tw-inline-flex tw-h-12 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-white/[0.11] tw-px-5 tw-text-sm tw-font-bold tw-text-white tw-shadow-[0_10px_24px_rgba(0,0,0,0.22)] tw-transition-all tw-duration-200 active:tw-scale-[0.98] disabled:tw-cursor-not-allowed disabled:tw-border-white/5 disabled:tw-bg-white/[0.04] disabled:tw-text-iron-500 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/[0.16]"
         >
           Skip
         </button>

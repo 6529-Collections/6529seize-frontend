@@ -14,7 +14,7 @@ export default function WaveGroupTitle({
   };
   return (
     <div className="tw-flex tw-items-center">
-      <span className="tw-font-medium tw-text-iron-500">{LABELS[type]}</span>
+      <span className="tw-font-normal tw-text-iron-500">{LABELS[type]}</span>
     </div>
   );
 }

@@ -26,8 +26,8 @@ describe("CollectionsDropdown", () => {
   it("navigates to selected collection path", () => {
     render(<CollectionsDropdown activePage="gradient" />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Gradient" }));
-    fireEvent.click(screen.getByRole("button", { name: "Meme Lab" }));
+    fireEvent.click(screen.getByRole("button", { name: "6529 Gradient" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Meme Lab" }));
 
     expect(pushMock).toHaveBeenCalledWith("/meme-lab");
   });

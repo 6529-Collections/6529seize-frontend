@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  type JSX,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useAuth } from "@/components/auth/Auth";
@@ -25,17 +19,20 @@ import MyStreamWaveSubmissions from "./MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { WaveWinners } from "@/components/waves/winners/WaveWinners";
+import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import MyStreamWaveSales from "./MyStreamWaveSales";
+import MyStreamWavePolls from "./MyStreamWavePolls";
+import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
 import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
-import { useWave } from "@/hooks/useWave";
+import { SubmissionStatus, useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getDropQueryKey } from "@/services/api/drop-api";
@@ -77,6 +74,119 @@ const getChatSubmitDropRestrictionMessage = ({
   }
 
   return null;
+};
+
+type MemesHeaderDropActionState = Pick<
+  HeaderWaveDropAction,
+  "canOpen" | "label" | "compactLabel" | "restrictionMessage"
+>;
+
+interface MemesHeaderParticipationState {
+  readonly canSubmitNow: boolean;
+  readonly endTime: number;
+  readonly hasReachedLimit: boolean;
+  readonly isEligible: boolean;
+  readonly maxSubmissions: number | null;
+  readonly startTime: number;
+  readonly status: SubmissionStatus;
+}
+
+const getMemesSubmissionPeriodHeaderDropActionState = ({
+  endTime,
+  startTime,
+  status,
+}: Pick<
+  MemesHeaderParticipationState,
+  "endTime" | "startTime" | "status"
+>): MemesHeaderDropActionState | null => {
+  if (status === SubmissionStatus.ENDED) {
+    const closingTime = endTime ? new Date(endTime).toLocaleString() : null;
+
+    return {
+      canOpen: false,
+      label: "Submissions Closed",
+      compactLabel: "Closed",
+      restrictionMessage: closingTime
+        ? `Submissions closed on ${closingTime}`
+        : "Submissions are closed",
+    };
+  }
+
+  if (status === SubmissionStatus.NOT_STARTED) {
+    const openingTime = startTime ? new Date(startTime).toLocaleString() : null;
+
+    return {
+      canOpen: false,
+      label: "Submissions Open Soon",
+      compactLabel: "Opens",
+      restrictionMessage: openingTime
+        ? `Submissions open on ${openingTime}`
+        : "Submissions will open soon",
+    };
+  }
+
+  return null;
+};
+
+const getMemesHeaderDropActionState = ({
+  participationState,
+  isApprovalVotingControlsLocked,
+}: {
+  readonly participationState: MemesHeaderParticipationState;
+  readonly isApprovalVotingControlsLocked: boolean;
+}): MemesHeaderDropActionState => {
+  if (isApprovalVotingControlsLocked) {
+    return {
+      canOpen: false,
+      label: "Submit Work to The Memes",
+      compactLabel: "Submit",
+      restrictionMessage: "Approval controls are locked",
+    };
+  }
+
+  const periodActionState =
+    getMemesSubmissionPeriodHeaderDropActionState(participationState);
+  if (periodActionState) {
+    return periodActionState;
+  }
+
+  if (!participationState.isEligible) {
+    return {
+      canOpen: false,
+      label: "How to Submit",
+      compactLabel: "Submit",
+      restrictionMessage: "You are not eligible to submit to this wave",
+    };
+  }
+
+  if (participationState.hasReachedLimit) {
+    const maxSubmissions = participationState.maxSubmissions ?? "?";
+    const submissionText =
+      maxSubmissions === 1 ? "1 submission" : `${maxSubmissions} submissions`;
+
+    return {
+      canOpen: false,
+      label: "Submission Limit Reached",
+      compactLabel: "Limit",
+      restrictionMessage: `You have already submitted the maximum allowed (${submissionText})`,
+    };
+  }
+
+  if (!participationState.canSubmitNow) {
+    return {
+      canOpen: false,
+      label: "Submit Work to The Memes",
+      compactLabel: "Submit",
+      restrictionMessage: "You cannot submit at this time",
+    };
+  }
+
+  return {
+    canOpen: true,
+    label: "Submit Work to The Memes",
+    compactLabel: "Submit",
+    restrictionMessage: null,
+  };
 };
 
 const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
@@ -167,6 +277,15 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     isChatWave,
     participation,
   } = useWave(wave);
+  const {
+    canSubmitNow: participationCanSubmitNow,
+    endTime: participationEndTime,
+    hasReachedLimit: participationHasReachedLimit,
+    isEligible: participationIsEligible,
+    maxSubmissions: participationMaxSubmissions,
+    startTime: participationStartTime,
+    status: participationStatus,
+  } = participation;
   const { isVotingControlsLocked: isApprovalVotingControlsLocked } =
     useApprovalWaveStatus({ wave });
   const showGalleryToggle =
@@ -209,12 +328,18 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     !isMemesWave &&
     submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY;
   const chatSubmitDropLabels = getChatSubmitDropLabels(submissionExperience);
+  const isMemesLegacySubmission =
+    submissionExperience === WaveSubmissionExperience.MEMES_LEGACY;
+  const outcomesVisible = useWaveOutcomeVisibility(wave);
   const [chatSubmitDropState, setChatSubmitDropState] = useState<{
     readonly waveId: string;
     readonly submissionExperience: WaveSubmissionExperience;
     readonly initialCurationUrl: string | null;
     readonly isApprovalVotingControlsLocked: boolean;
   } | null>(null);
+  const [appMemesSubmitWaveId, setAppMemesSubmitWaveId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     if (
@@ -268,6 +393,45 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     setChatSubmitDropState(null);
   }, []);
 
+  const memesHeaderDropActionState = useMemo(
+    () =>
+      getMemesHeaderDropActionState({
+        participationState: {
+          canSubmitNow: participationCanSubmitNow,
+          endTime: participationEndTime,
+          hasReachedLimit: participationHasReachedLimit,
+          isEligible: participationIsEligible,
+          maxSubmissions: participationMaxSubmissions,
+          startTime: participationStartTime,
+          status: participationStatus,
+        },
+        isApprovalVotingControlsLocked,
+      }),
+    [
+      isApprovalVotingControlsLocked,
+      participationCanSubmitNow,
+      participationEndTime,
+      participationHasReachedLimit,
+      participationIsEligible,
+      participationMaxSubmissions,
+      participationStartTime,
+      participationStatus,
+    ]
+  );
+
+  const canOpenAppMemesSubmit = memesHeaderDropActionState.canOpen;
+  const openAppMemesSubmit = useCallback(() => {
+    if (!loadedWaveId || !isMemesLegacySubmission || !canOpenAppMemesSubmit) {
+      return;
+    }
+
+    setAppMemesSubmitWaveId(loadedWaveId);
+  }, [canOpenAppMemesSubmit, isMemesLegacySubmission, loadedWaveId]);
+
+  const closeAppMemesSubmit = useCallback(() => {
+    setAppMemesSubmitWaveId(null);
+  }, []);
+
   const chatSubmitDropAction = useMemo<ChatSubmitDropAction>(
     () => ({
       isVisible: showChatSubmitDropAction,
@@ -295,9 +459,20 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       editingDropId !== null ||
       activeContentTab !== MyStreamWaveTab.CHAT ||
       activeCurationId !== null ||
-      !chatSubmitDropAction.isVisible
+      (!isMemesLegacySubmission && !chatSubmitDropAction.isVisible)
     ) {
       return null;
+    }
+
+    if (isMemesLegacySubmission) {
+      return {
+        waveId: loadedWaveId,
+        canOpen: memesHeaderDropActionState.canOpen,
+        label: memesHeaderDropActionState.label,
+        compactLabel: memesHeaderDropActionState.compactLabel,
+        restrictionMessage: memesHeaderDropActionState.restrictionMessage,
+        onOpen: openAppMemesSubmit,
+      };
     }
 
     return {
@@ -314,7 +489,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     chatSubmitDropAction,
     editingDropId,
     isApp,
+    isMemesLegacySubmission,
     loadedWaveId,
+    memesHeaderDropActionState,
+    openAppMemesSubmit,
   ]);
 
   useEffect(() => {
@@ -357,8 +535,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
           initialCurationUrl: chatSubmitDropState.initialCurationUrl,
         }
       : null;
+  const isAppMemesSubmitModalOpen =
+    appMemesSubmitWaveId === wave.id &&
+    isMemesLegacySubmission &&
+    !isApprovalVotingControlsLocked;
   // Create component instances with wave-specific props and stable measurements
-  const components: Record<MyStreamWaveTab, JSX.Element> = {
+  const components: Record<MyStreamWaveTab, React.ReactNode> = {
     [MyStreamWaveTab.CHAT]: (
       <MyStreamWaveChat
         wave={wave}
@@ -384,9 +566,14 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     [MyStreamWaveTab.WINNERS]: (
       <WaveWinners wave={wave} onDropClick={onDropClick} />
     ),
-    [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
+    [MyStreamWaveTab.OUTCOME]: outcomesVisible ? (
+      <MyStreamWaveOutcome wave={wave} />
+    ) : null,
     [MyStreamWaveTab.MY_VOTES]: (
       <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
+    ),
+    [MyStreamWaveTab.POLLS]: (
+      <MyStreamWavePolls wave={wave} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.FAQ]: <MyStreamWaveFAQ wave={wave} />,
   };
@@ -427,6 +614,11 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
           components[activeContentTab]
         )}
       </div>
+      <MemesArtSubmissionModal
+        isOpen={isAppMemesSubmitModalOpen}
+        wave={wave}
+        onClose={closeAppMemesSubmit}
+      />
     </div>
   );
 };

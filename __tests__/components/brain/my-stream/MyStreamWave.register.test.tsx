@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
 import { editSlice } from "@/store/editSlice";
@@ -12,6 +12,9 @@ const mockSetViewMode = jest.fn();
 const mockToggleViewMode = jest.fn();
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockMemesArtSubmissionModal = jest.fn((props: any) =>
+  props.isOpen ? <div data-testid="memes-submit-modal" /> : null
+);
 const mockSearchParams = {
   get: jest.fn(),
   toString: jest.fn(),
@@ -29,8 +32,35 @@ const mockWave = {
   metrics: {},
 } as any;
 let mockIsApp = false;
+let mockWaveInfo: any;
+
+const getDefaultMockWaveInfo = () => ({
+  isRankWave: false,
+  isApproveWave: false,
+  isMemesWave: false,
+  isCurationWave: false,
+  isQuorumWave: false,
+  isDm: false,
+  isChatWave: false,
+  participation: {
+    canSubmitNow: true,
+    currentSubmissions: 0,
+    endTime: Date.now() + 60_000,
+    hasReachedLimit: false,
+    isEligible: true,
+    isWithinPeriod: true,
+    maxSubmissions: null,
+    remainingSubmissions: null,
+    startTime: Date.now() - 60_000,
+    status: "ACTIVE",
+  },
+});
 
 jest.mock("@tanstack/react-query", () => ({
+  useQuery: jest.fn(() => ({
+    data: [],
+    isLoading: false,
+  })),
   useQueryClient: () => ({
     setQueryData: mockSetQueryData,
   }),
@@ -100,16 +130,7 @@ jest.mock("@/hooks/useWave", () => ({
     ENDED: "ENDED",
     NOT_STARTED: "NOT_STARTED",
   },
-  useWave: () => ({
-    isRankWave: false,
-    isApproveWave: false,
-    isMemesWave: false,
-    isCurationWave: false,
-    isQuorumWave: false,
-    isDm: false,
-    isChatWave: false,
-    participation: { isEligible: true },
-  }),
+  useWave: () => mockWaveInfo,
 }));
 
 jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
@@ -159,6 +180,11 @@ jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
   MyStreamWaveTabs: () => <div data-testid="tabs" />,
 }));
 
+jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
+  __esModule: true,
+  default: (props: any) => mockMemesArtSubmissionModal(props),
+}));
+
 jest.mock("@/components/brain/my-stream/votes/MyStreamWaveMyVotes", () => ({
   __esModule: true,
   default: () => <div data-testid="my-votes" />,
@@ -177,7 +203,18 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveSales", () => ({
 const HeaderActionProbe = () => {
   const { waveDropAction } = useHeaderContext();
   return (
-    <div data-testid="header-action">{waveDropAction?.label ?? "none"}</div>
+    <div>
+      <div data-testid="header-action">{waveDropAction?.label ?? "none"}</div>
+      {waveDropAction && (
+        <button
+          type="button"
+          disabled={!waveDropAction.canOpen}
+          onClick={waveDropAction.onOpen}
+        >
+          Open header action
+        </button>
+      )}
+    </div>
   );
 };
 
@@ -204,6 +241,7 @@ describe("MyStreamWave registration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsApp = false;
+    mockWaveInfo = getDefaultMockWaveInfo();
     mockSearchParams.get.mockReturnValue(null);
     mockSearchParams.toString.mockReturnValue("");
   });
@@ -236,5 +274,25 @@ describe("MyStreamWave registration", () => {
     await waitFor(() => {
       expect(screen.getByTestId("header-action")).toHaveTextContent("none");
     });
+  });
+
+  it("exposes the app header memes submit action", async () => {
+    mockIsApp = true;
+    mockWaveInfo = {
+      ...getDefaultMockWaveInfo(),
+      isMemesWave: true,
+    };
+
+    renderWave();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("header-action")).toHaveTextContent(
+        "Submit Work to The Memes"
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open header action" }));
+
+    expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
   });
 });

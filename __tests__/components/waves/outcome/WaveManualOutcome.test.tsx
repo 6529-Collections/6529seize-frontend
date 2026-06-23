@@ -26,9 +26,9 @@ describe('WaveManualOutcome', () => {
     render(<WaveManualOutcome outcome={outcome} distribution={distribution} />);
     await user.click(screen.getByRole('button'));
     expect(screen.getByText('-')).toBeInTheDocument();
-    expect(screen.getByText('View more')).toBeInTheDocument();
-    await user.click(screen.getByText('View more'));
-    expect(screen.queryByText('View more')).toBeNull();
+    expect(screen.getByText('View 1 more')).toBeInTheDocument();
+    await user.click(screen.getByText('View 1 more'));
+    expect(screen.queryByText('View 1 more')).toBeNull();
     expect(screen.getByText('D')).toBeInTheDocument();
   });
 });

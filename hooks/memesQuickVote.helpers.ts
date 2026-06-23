@@ -14,11 +14,38 @@ type QuickVoteableDropLike =
   | {
       readonly context_profile_context?: {
         readonly max_rating?: number | null;
+        readonly min_rating?: number | null;
         readonly rating?: number | null;
       } | null;
     }
   | null
   | undefined;
+
+type QuickVoteRatingRange = {
+  readonly maxRating: number;
+  readonly minRating: number;
+};
+
+const normalizeMinRating = (value: number | null | undefined): number =>
+  typeof value === "number" && Number.isFinite(value) ? Math.ceil(value) : 0;
+
+const normalizeMaxRating = (value: number | null | undefined): number =>
+  typeof value === "number" && Number.isFinite(value) ? Math.floor(value) : 0;
+
+export const getQuickVoteRatingRange = (
+  drop: QuickVoteableDropLike
+): QuickVoteRatingRange => ({
+  maxRating: normalizeMaxRating(drop?.context_profile_context?.max_rating),
+  minRating: normalizeMinRating(drop?.context_profile_context?.min_rating),
+});
+
+export const getQuickVoteAbsoluteRemainingPower = (
+  range: QuickVoteRatingRange
+): number =>
+  Math.max(
+    Math.max(0, range.maxRating),
+    Math.abs(Math.min(0, range.minRating))
+  );
 
 export const sanitizeStoredAmounts = (value: unknown): number[] => {
   if (!Array.isArray(value)) {
@@ -33,7 +60,7 @@ export const sanitizeStoredAmounts = (value: unknown): number[] => {
       typeof entry !== "number" ||
       !Number.isFinite(entry) ||
       !Number.isInteger(entry) ||
-      entry <= 0 ||
+      entry === 0 ||
       seen.has(entry)
     ) {
       continue;
@@ -76,26 +103,48 @@ export const getDefaultQuickVoteAmount = (maxRating: number): number => {
 
 export const normalizeQuickVoteAmount = (
   rawValue: number | string,
-  maxRating: number
+  rangeOrMaxRating: QuickVoteRatingRange | number
 ): number | null => {
+  const range =
+    typeof rangeOrMaxRating === "number"
+      ? { maxRating: normalizeMaxRating(rangeOrMaxRating), minRating: 0 }
+      : {
+          maxRating: normalizeMaxRating(rangeOrMaxRating.maxRating),
+          minRating: normalizeMinRating(rangeOrMaxRating.minRating),
+        };
+  const allowsNegativeVotes = range.minRating < 0;
   const parsedValue =
     typeof rawValue === "number" ? rawValue : Number.parseInt(rawValue, 10);
 
-  if (!Number.isFinite(parsedValue) || maxRating <= 0) {
+  if (!Number.isFinite(parsedValue) || range.minRating > range.maxRating) {
     return null;
   }
 
-  return Math.max(1, Math.min(Math.round(parsedValue), Math.floor(maxRating)));
+  const roundedValue = Math.round(parsedValue);
+
+  if (!allowsNegativeVotes) {
+    if (range.maxRating <= 0) {
+      return null;
+    }
+
+    return Math.max(1, Math.min(roundedValue, range.maxRating));
+  }
+
+  const clampedValue = Math.max(
+    range.minRating,
+    Math.min(roundedValue, range.maxRating)
+  );
+
+  return clampedValue === 0 ? null : clampedValue;
 };
 
 export const isMemesQuickVoteVoteableDrop = (
   drop: QuickVoteableDropLike
 ): boolean => {
   const profileContext = drop?.context_profile_context;
+  const range = getQuickVoteRatingRange(drop);
 
   return (
-    profileContext?.rating === 0 &&
-    typeof profileContext.max_rating === "number" &&
-    profileContext.max_rating > 0
+    profileContext?.rating === 0 && (range.maxRating > 0 || range.minRating < 0)
   );
 };

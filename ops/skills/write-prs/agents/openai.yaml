@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write PRs"
+  short_description: "Create PR descriptions and iterate with review bots through merge or deployment gates."
+  default_prompt: "Use $write-prs to prepare this change for PR review, iterate on available bot feedback, and stop at the requested completion mode."

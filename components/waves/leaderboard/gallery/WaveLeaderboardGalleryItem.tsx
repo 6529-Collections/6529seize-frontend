@@ -6,6 +6,7 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -13,10 +14,7 @@ import {
   ExtendedDrop,
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
-import {
-  WAVE_VOTE_STATS_LABELS,
-  WAVE_VOTING_LABELS,
-} from "@/helpers/waves/waves.constants";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -29,6 +27,7 @@ import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
+import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -39,23 +38,8 @@ interface WaveLeaderboardGalleryItemProps {
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
 }
-
-const getVoteStyle = (
-  isNegative: boolean,
-  isZero: boolean,
-  artFocused: boolean
-) => {
-  if (isZero || (artFocused && isNegative)) {
-    return "tw-text-iron-400";
-  }
-
-  if (artFocused) {
-    return "tw-text-iron-300";
-  }
-
-  return isNegative ? "tw-text-rose-500" : "tw-text-emerald-500";
-};
 
 interface LeaderboardResultBadgeProps {
   readonly drop: ExtendedDrop;
@@ -92,6 +76,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     isVotingClosed = false,
     isVotingControlsLocked = false,
     winningThreshold,
+    winningThresholdMinDurationMs,
   }) => {
     const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
     const {
@@ -154,17 +139,20 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       };
     }, [activeSort, animationKey, hasTouchScreen]);
 
-    const hasUserVoted = drop.context_profile_context?.rating !== undefined;
-
     const userVote = drop.context_profile_context?.rating ?? 0;
+    const hasUserVoted = userVote !== 0;
     const isNegativeVote = userVote < 0;
-
-    const isZeroVote = userVote === 0;
-    const voteStyle = getVoteStyle(isNegativeVote, isZeroVote, artFocused);
 
     const votingCreditType = drop.wave.voting_credit_type;
     const votingCreditLabel =
       WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
+    const votePrefix = isNegativeVote ? "-" : "";
+    let voteButtonLabel: string | undefined;
+    if (hasUserVoted) {
+      voteButtonLabel = `You: ${votePrefix}${formatNumberWithCommas(
+        Math.abs(userVote)
+      )} ${votingCreditLabel}`;
+    }
     const isApproveDrop =
       typeof winningThreshold === "number" && winningThreshold > 0;
 
@@ -186,13 +174,13 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       ? ""
       : "tw-transition-all tw-duration-300 tw-ease-out";
     const groupClasses = artFocused ? `tw-group ${transitionClasses}` : "";
-    const containerClass = `${groupClasses} tw-relative tw-w-full tw-min-w-0 tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
+    const containerClass = `${groupClasses} tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
 
     const highlightAnimation =
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
     const baseImageClasses =
-      "tw-aspect-square tw-relative tw-cursor-pointer tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+      "tw-aspect-square tw-relative tw-flex-shrink-0 tw-cursor-pointer tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
     const imageScaleClasses = hasTouchScreen
       ? ""
@@ -219,36 +207,44 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             />
           </div>
         </button>
-        <div className="tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
-          <div className="tw-mb-3 tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
-            <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
-              <div className="tw-flex tw-items-center tw-gap-1.5">
+        <div className="tw-flex tw-flex-1 tw-flex-col tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
+          <div className="tw-mb-3 tw-min-w-0">
+            <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-1.5">
                 <MediaTypeBadge
                   mimeType={primaryMedia?.mime_type}
                   dropId={drop.id}
                   size="sm"
                 />
-                {drop.title && (
-                  <h3 className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
-                    {drop.title}
-                  </h3>
+                {drop.is_additional_action_promised === true && (
+                  <AdditionalActionPromiseBadge />
                 )}
               </div>
-              {drop.author?.handle && (
-                <UserProfileTooltipWrapper
-                  user={drop.author.handle ?? drop.author.id}
-                >
-                  <Link
-                    onClick={(e) => e.stopPropagation()}
-                    href={`/${drop.author?.handle}`}
-                    className="tw-mt-0.5 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
-                  >
-                    {drop.author?.handle}
-                  </Link>
-                </UserProfileTooltipWrapper>
-              )}
+              <div className="tw-flex-shrink-0">
+                <LeaderboardResultBadge
+                  drop={drop}
+                  isApproveDrop={isApproveDrop}
+                />
+              </div>
             </div>
-            <LeaderboardResultBadge drop={drop} isApproveDrop={isApproveDrop} />
+            {drop.title && (
+              <h3 className="tw-mb-0 tw-mt-2 tw-min-w-0 tw-whitespace-normal tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
+                {drop.title}
+              </h3>
+            )}
+            {drop.author?.handle && (
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}
+              >
+                <Link
+                  onClick={(e) => e.stopPropagation()}
+                  href={`/${drop.author?.handle}`}
+                  className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                >
+                  {drop.author?.handle}
+                </Link>
+              </UserProfileTooltipWrapper>
+            )}
           </div>
           <WaveLeaderboardIdentity
             drop={drop}
@@ -261,48 +257,28 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 drop={drop}
                 variant={artFocused ? "subtle" : "default"}
                 winningThreshold={winningThreshold}
+                winningThresholdMinDurationMs={winningThresholdMinDurationMs}
                 isVotingClosed={isVotingClosed}
               />
             </div>
-            <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-iron-500">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                aria-hidden="true"
-                className="tw-size-3 tw-flex-shrink-0"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-                />
-              </svg>
-              <span className="tw-font-medium">
-                {formatNumberWithCommas(drop.raters_count)}
-              </span>
-            </div>
           </div>
-          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
-            {hasUserVoted && (
-              <span className="tw-min-w-0 tw-break-words tw-font-mono tw-text-[11px] tw-text-iron-500">
-                {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
-                <span className={voteStyle}>
-                  {isNegativeVote && "-"}
-                  {formatNumberWithCommas(Math.abs(userVote))}{" "}
-                  {votingCreditLabel}
-                </span>
-              </span>
-            )}
+          <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
+            <div className="tw-flex tw-flex-shrink-0">
+              <ParticipationDropVoteDetailsTrigger
+                drop={drop}
+                density="gallery"
+              />
+            </div>
             {canShowVotingAction && (
               <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
                   variant={artFocused ? "subtle" : "default"}
-                />
+                  className="tw-box-border tw-h-8 tw-min-w-0 tw-max-w-full"
+                >
+                  {voteButtonLabel}
+                </VotingModalButton>
               </div>
             )}
           </div>

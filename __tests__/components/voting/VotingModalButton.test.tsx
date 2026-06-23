@@ -22,4 +22,15 @@ describe('VotingModalButton', () => {
     fireEvent.click(getByRole('button'));
     expect(onClick).toHaveBeenCalled();
   });
+
+  it('renders custom label content when provided', () => {
+    useRules.mockReturnValue({ canShowVote: true });
+    const { getByRole } = render(
+      <VotingModalButton drop={drop} onClick={jest.fn()}>
+        You: 1 TDH
+      </VotingModalButton>
+    );
+
+    expect(getByRole('button')).toHaveTextContent('You: 1 TDH');
+  });
 });

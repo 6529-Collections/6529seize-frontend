@@ -25,10 +25,12 @@ interface UseBrainMobileActiveViewParams {
   readonly isApp: boolean;
   readonly isCompleted: boolean;
   readonly hasAuthenticatedProfile: boolean;
+  readonly hasPolls?: boolean | undefined;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
   readonly isApproveWave?: boolean | undefined;
+  readonly showOutcomeView?: boolean | undefined;
   readonly pathname: string;
   readonly searchParams: ReadonlyURLSearchParams;
   readonly wave: ApiWave | null | undefined;
@@ -43,11 +45,13 @@ interface UseBrainMobileActiveViewResult {
 interface WaveViewState {
   readonly firstDecisionDone: boolean;
   readonly hasAuthenticatedProfile: boolean;
+  readonly hasPolls: boolean;
   readonly isApproveWave: boolean;
   readonly isCompleted: boolean;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
+  readonly showOutcomeView: boolean;
 }
 
 function getRouteDefaultView({
@@ -117,11 +121,13 @@ function getWaveDefaultView({
 function getWaveViewAvailability({
   firstDecisionDone,
   hasAuthenticatedProfile,
+  hasPolls = false,
   isApproveWave,
   isCompleted,
   isCurationWave,
   isMemesWave,
   isRankWave,
+  showOutcomeView,
 }: WaveViewState): Partial<Record<BrainView, boolean>> {
   const isCompetitionWave = isRankWave || isApproveWave;
 
@@ -131,9 +137,11 @@ function getWaveViewAvailability({
     [BrainView.SALES]: isCurationWave,
     [BrainView.WINNERS]:
       isCompetitionWave && (isApproveWave || firstDecisionDone),
-    [BrainView.OUTCOME]: isCompetitionWave && !isCurationWave,
+    [BrainView.OUTCOME]:
+      isCompetitionWave && !isCurationWave && showOutcomeView,
     [BrainView.MY_VOTES]:
       isCompetitionWave && (isCurationWave || hasAuthenticatedProfile),
+    [BrainView.POLLS]: hasPolls,
     [BrainView.FAQ]: isMemesWave,
   };
 }
@@ -144,10 +152,12 @@ function normalizeActiveView({
   hasWave,
   isCompleted,
   hasAuthenticatedProfile,
+  hasPolls,
   isCurationWave,
   isMemesWave,
   isRankWave,
   isApproveWave = false,
+  showOutcomeView = true,
   routeDefaultView,
   wave,
 }: {
@@ -156,10 +166,12 @@ function normalizeActiveView({
   readonly hasWave: boolean;
   readonly isCompleted: boolean;
   readonly hasAuthenticatedProfile: boolean;
+  readonly hasPolls: boolean;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
   readonly isApproveWave?: boolean | undefined;
+  readonly showOutcomeView?: boolean | undefined;
   readonly routeDefaultView: BrainView | null;
   readonly wave: ApiWave | null | undefined;
 }): BrainView {
@@ -167,11 +179,13 @@ function normalizeActiveView({
   const waveViewState: WaveViewState = {
     firstDecisionDone,
     hasAuthenticatedProfile,
+    hasPolls,
     isApproveWave,
     isCompleted,
     isCurationWave,
     isMemesWave,
     isRankWave,
+    showOutcomeView,
   };
   const waveDefaultView = getWaveDefaultView({
     hasLoadedWave,
@@ -219,10 +233,12 @@ export function useBrainMobileActiveView({
   isApp,
   isCompleted,
   hasAuthenticatedProfile,
+  hasPolls = false,
   isCurationWave,
   isMemesWave,
   isRankWave,
   isApproveWave = false,
+  showOutcomeView = true,
   pathname,
   searchParams,
   wave,
@@ -271,10 +287,12 @@ export function useBrainMobileActiveView({
     hasWave,
     isCompleted,
     hasAuthenticatedProfile,
+    hasPolls,
     isCurationWave,
     isMemesWave,
     isRankWave,
     isApproveWave,
+    showOutcomeView,
     routeDefaultView,
     wave,
   });

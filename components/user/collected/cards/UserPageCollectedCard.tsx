@@ -261,7 +261,7 @@ export default function UserPageCollectedCard({
         : {})}
       className={[
         "tw-group tw-relative",
-        "tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-shadow-xl tw-transition-all tw-duration-300 hover:tw-border-white/30",
+        "tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-xl tw-transition-all tw-duration-300 hover:tw-border-white/20",
         getRingClasses(),
         getCursorClasses(),
       ]
@@ -271,7 +271,7 @@ export default function UserPageCollectedCard({
       {OverlayControls}
 
       {/* Image container */}
-      <div className="tw-relative tw-flex tw-aspect-square tw-items-center tw-justify-center tw-overflow-hidden tw-bg-white/[0.02]">
+      <div className="tw-relative tw-flex tw-aspect-square tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
         {!isImageLoaded && (
           <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-bg-iron-800" />
         )}
@@ -293,20 +293,20 @@ export default function UserPageCollectedCard({
       {/* Content */}
       <div className="tw-flex tw-flex-col tw-gap-1.5 tw-p-4">
         <div className="tw-flex tw-items-center tw-justify-between">
-          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-white/40">
+          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
             {collectionMeta.label}
           </span>
-          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-white/50">
+          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-iron-500">
             #{card.token_id}
           </span>
         </div>
 
         <div className="tw-flex tw-justify-between tw-gap-x-2">
-          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
+          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
             {card.token_name}
           </h3>
           {showSeizedCount && (
-            <span className="tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-text-white/50">
+            <span className="tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-text-iron-500">
               {getSeizedCountDisplay()}x
               {hasBalanceMismatch && (
                 <>
@@ -340,14 +340,14 @@ export default function UserPageCollectedCard({
         {showDataRow && (
           <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
             <div className="tw-flex tw-items-baseline tw-gap-1.5">
-              <span className="tw-text-[13px] tw-font-semibold tw-text-white/80">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300">
                 {getTdhDisplay()}
               </span>
-              <span className="tw-text-[13px] tw-font-semibold tw-text-white/30">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-600">
                 TDH
               </span>
             </div>
-            <span className="tw-rounded-md tw-bg-white/[0.05] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-white/60">
+            <span className="tw-rounded-md tw-bg-white/[0.05] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-iron-400">
               Rank {getRankDisplay()}
             </span>
           </div>

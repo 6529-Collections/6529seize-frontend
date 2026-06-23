@@ -73,9 +73,11 @@ interface LeaderboardContentProps {
 
 const isWaveLeaderboardSortPreference = (
   value: unknown,
+  isApproveWave: boolean,
   isCurationWave: boolean
 ): value is WaveDropsLeaderboardSort =>
   value === WaveDropsLeaderboardSort.RANK ||
+  (isApproveWave && value === WaveDropsLeaderboardSort.REALTIME_VOTE) ||
   value === WaveDropsLeaderboardSort.RATING_PREDICTION ||
   value === WaveDropsLeaderboardSort.TREND ||
   value === WaveDropsLeaderboardSort.MY_REALTIME_VOTE ||
@@ -302,26 +304,28 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     sortPreferenceKey,
     WaveDropsLeaderboardSort.RANK,
     (value): value is WaveDropsLeaderboardSort =>
-      isWaveLeaderboardSortPreference(value, isCurationWave)
+      isWaveLeaderboardSortPreference(value, isApproveWave, isCurationWave)
   );
   const effectiveSort = useMemo(
     () =>
       normalizeWaveLeaderboardSort({
+        isApproveWave,
         sort,
         timeLockMs: wave.wave.time_lock_ms,
       }),
-    [sort, wave.wave.time_lock_ms]
+    [isApproveWave, sort, wave.wave.time_lock_ms]
   );
   const handleSortChange = useCallback(
     (nextSort: WaveDropsLeaderboardSort) => {
       setSort(
         normalizeWaveLeaderboardSort({
+          isApproveWave,
           sort: nextSort,
           timeLockMs: wave.wave.time_lock_ms,
         })
       );
     },
-    [setSort, wave.wave.time_lock_ms]
+    [isApproveWave, setSort, wave.wave.time_lock_ms]
   );
 
   const {

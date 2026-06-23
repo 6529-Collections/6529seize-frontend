@@ -22,14 +22,16 @@ import {
   type WavesV2OverviewQueryKeyParams,
 } from "@/services/api/waves-v2-api";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
+import { useOfficialWaves } from "./useOfficialWaves";
 
-export const MAX_PINNED_WAVES = 20;
+export const MAX_PINNED_WAVES = 100;
 
 // Cache time constants for React Query
 const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const PINNED_WAVES_GC_TIME = 10 * 60 * 1000; // 10 minutes
 const PINNED_WAVES_REFETCH_INTERVAL = 2 * 60 * 1000; // 2 minutes
-const PINNED_WAVES_PAGE_SIZE = MAX_PINNED_WAVES;
+const PINNED_WAVES_QUERY_LIMIT = MAX_PINNED_WAVES;
+const PINNED_WAVES_API_PAGE_SIZE = 20;
 
 type PinnedWavesQueryKey = readonly [
   QueryKey.WAVES_V2,
@@ -59,8 +61,8 @@ function createPinnedWavesQueryKey(
   return [
     QueryKey.WAVES_V2,
     getWavesV2OverviewQueryKeyParams({
-      overviewType: ApiWavesOverviewType.MostSubscribed,
-      pageSize: PINNED_WAVES_PAGE_SIZE,
+      overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+      pageSize: PINNED_WAVES_QUERY_LIMIT,
       pinned: ApiWavesPinFilter.Pinned,
       viewerIdentityKey,
     }),
@@ -76,6 +78,30 @@ function usePinnedWavesQueryKey(
   );
 }
 
+async function fetchPinnedWavesPages(): Promise<SidebarWave[]> {
+  const pinnedWaves: SidebarWave[] = [];
+  let pageNumber = 1;
+
+  while (pinnedWaves.length < MAX_PINNED_WAVES) {
+    const page = await fetchWavesV2Page({
+      page: pageNumber,
+      pageSize: PINNED_WAVES_API_PAGE_SIZE,
+      overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+      pinned: ApiWavesPinFilter.Pinned,
+    });
+
+    pinnedWaves.push(...page.waves);
+
+    if (!page.next || page.waves.length === 0) {
+      break;
+    }
+
+    pageNumber += 1;
+  }
+
+  return pinnedWaves.slice(0, MAX_PINNED_WAVES);
+}
+
 function usePinnedWavesQuery(
   queryClient: QueryClient,
   queryKey: PinnedWavesQueryKey,
@@ -83,16 +109,7 @@ function usePinnedWavesQuery(
 ) {
   const query = useQuery<SidebarWave[], Error>({
     queryKey,
-    queryFn: async () => {
-      const page = await fetchWavesV2Page({
-        page: 1,
-        pageSize: PINNED_WAVES_PAGE_SIZE,
-        overviewType: ApiWavesOverviewType.MostSubscribed,
-        pinned: ApiWavesPinFilter.Pinned,
-      });
-
-      return page.waves;
-    },
+    queryFn: fetchPinnedWavesPages,
     enabled: isAuthenticated,
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
@@ -111,7 +128,8 @@ function usePinnedWavesQuery(
 
 function usePinnedWavesBudget(
   pinnedWaves: SidebarWave[],
-  ongoingOperations: RefObject<Set<string>>
+  ongoingOperations: RefObject<Set<string>>,
+  officialWaveIds: ReadonlySet<string>
 ) {
   const seizeSettings = useSeizeSettingsOptional();
   const pinnedIds = useMemo(
@@ -119,8 +137,10 @@ function usePinnedWavesBudget(
     [pinnedWaves]
   );
   const countsTowardPinBudget = useCallback(
-    (waveId: string) => !seizeSettings?.isAnnouncementsWave(waveId),
-    [seizeSettings]
+    (waveId: string) =>
+      !seizeSettings?.isAnnouncementsWave(waveId) &&
+      !officialWaveIds.has(waveId),
+    [seizeSettings, officialWaveIds]
   );
   const pinnedBudgetCount = useMemo(
     () => pinnedIds.filter(countsTowardPinBudget).length,
@@ -194,6 +214,9 @@ function useInvalidateWavesQueries(
   return useCallback(() => {
     void queryClient.invalidateQueries({
       queryKey: pinnedWavesQueryKey,
+    });
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.OFFICIAL_WAVES],
     });
     void queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES_V2],
@@ -376,6 +399,11 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     return `${normalizedAddress}:primary`;
   }, [address, activeProfileProxyId]);
   const pinnedWavesQueryKey = usePinnedWavesQueryKey(viewerIdentityKey);
+  const { waves: officialWaves } = useOfficialWaves({ viewerIdentityKey });
+  const officialWaveIds = useMemo(
+    () => new Set(officialWaves.map((wave) => wave.id)),
+    [officialWaves]
+  );
   const { data, isLoading, isError, error, refetch } = usePinnedWavesQuery(
     queryClient,
     pinnedWavesQueryKey,
@@ -384,7 +412,8 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const pinnedWaves = data ?? [];
   const { pinnedIds, canPinWave } = usePinnedWavesBudget(
     pinnedWaves,
-    ongoingOperations
+    ongoingOperations,
+    officialWaveIds
   );
   const { pinMutation, unpinMutation } = usePinnedWaveMutations(
     queryClient,

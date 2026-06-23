@@ -11,7 +11,10 @@ import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generat
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
@@ -48,8 +51,10 @@ const createBaseConfig = (waveType: ApiWaveType) =>
     chat: { enabled: true },
     voting: {
       type: null,
+      creditScope: ApiWaveCreditScope.Wave,
       category: null,
       profileId: null,
+      allowNegativeVotes: true,
       timeWeighted: {
         enabled: false,
         averagingInterval: 5,
@@ -188,9 +193,85 @@ describe("create-wave.helpers", () => {
       expect(res.participation.required_metadata).toEqual([
         { name: "m", type: ApiWaveMetadataType.String },
       ]);
+      expect(res.voting.credit_scope).toBe(ApiWaveCreditScope.Wave);
       expect(res.voting.period.max).toBe(2 + 3 + 5);
+      expect(res.voting.forbid_negative_votes).toBe(false);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
       expect(res.wave.max_votes_per_identity_to_drop).toBeNull();
+    });
+
+    it("adds parent wave id only for subwave creation", () => {
+      const config = createBaseConfig(ApiWaveType.Chat);
+      const drop = createDrop();
+
+      expect(
+        getCreateNewWaveBody({
+          drop,
+          picture: null,
+          config,
+        })
+      ).not.toHaveProperty("parent_wave_id");
+
+      expect(
+        getCreateNewWaveBody({
+          drop,
+          picture: null,
+          config,
+          parentWaveId: "parent-wave",
+        })
+      ).toHaveProperty("parent_wave_id", "parent-wave");
+    });
+
+    it("maps allowed negative votes to the inverse backend flag", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.allowNegativeVotes = true;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.forbid_negative_votes).toBe(false);
+    });
+
+    it("maps blocked negative votes to the inverse backend flag", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.allowNegativeVotes = false;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.forbid_negative_votes).toBe(true);
+    });
+
+    it("maps configured voting credit scope", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.creditScope = ApiWaveCreditScope.Drop;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.credit_scope).toBe(ApiWaveCreditScope.Drop);
+    });
+
+    it("defaults omitted negative vote config to allowed", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      delete config.voting.allowNegativeVotes;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.forbid_negative_votes).toBe(false);
     });
 
     it("includes identity submission strategy when configured", () => {
@@ -322,6 +403,41 @@ describe("create-wave.helpers", () => {
       expect(res.wave.max_winners).toBeNull();
     });
 
+    it("includes credit_nfts only for Card Set TDH voting", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.type = ApiWaveCreditType.CardSetTdh;
+      config.voting.creditNfts = [
+        { contract: MEMES_CONTRACT, token_id: 1 },
+        { contract: "0xnotmemes", token_id: 2 },
+      ];
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.credit_type).toBe(ApiWaveCreditType.CardSetTdh);
+      expect(res.voting.credit_nfts).toEqual([
+        { contract: MEMES_CONTRACT, token_id: 1 },
+        { contract: MEMES_CONTRACT, token_id: 2 },
+      ]);
+    });
+
+    it("omits credit_nfts for non-card voting", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.type = ApiWaveCreditType.Tdh;
+      config.voting.creditNfts = [{ contract: MEMES_CONTRACT, token_id: 1 }];
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect("credit_nfts" in res.voting).toBe(false);
+    });
+
     it("does not send fractional approve max winners", () => {
       const config = createBaseConfig(ApiWaveType.Approve);
       config.approval.maxWinners = 1.5;
@@ -439,6 +555,67 @@ describe("create-wave.helpers", () => {
       });
 
       expect(res.wave.max_winners).toBe(3);
+    });
+
+    it("maps approve threshold hold time to the wave config", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.thresholdTimeMs = 120_000;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.winning_threshold_min_duration_ms).toBe(120_000);
+    });
+
+    it("sends immediate approve threshold hold time when blank", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.thresholdTimeMs = null;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.winning_threshold_min_duration_ms).toBe(0);
+    });
+
+    it("sends approve threshold hold time and time lock when both are set", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.dates.submissionStartDate = 1;
+      config.dates.votingStartDate = 1;
+      config.dates.endDate = 1 + 600_000;
+      config.approval.thresholdTimeMs = 120_000;
+      config.voting.timeWeighted = {
+        enabled: true,
+        averagingInterval: 5,
+        averagingIntervalUnit: "minutes",
+      };
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.winning_threshold_min_duration_ms).toBe(120_000);
+      expect(res.wave.time_lock_ms).toBe(300_000);
+    });
+
+    it("sends null threshold hold time for non-approve waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.approval.thresholdTimeMs = 120_000;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.winning_threshold_min_duration_ms).toBeNull();
     });
 
     it("filters rank outcomes with missing or non-positive total amounts", () => {

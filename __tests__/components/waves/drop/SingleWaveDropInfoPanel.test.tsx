@@ -46,6 +46,7 @@ const baseDrop: any = {
   drop_type: ApiDropType.Participatory,
   rank: 1,
   rating: 10,
+  realtime_rating: 25,
   rating_prediction: 10,
   context_profile_context: {
     rating: 5,
@@ -121,5 +122,14 @@ describe("SingleWaveDropInfoPanel", () => {
       screen.queryByRole("button", { name: "Vote" })
     ).not.toBeInTheDocument();
     expect(screen.getByText("Your votes:")).toBeInTheDocument();
+  });
+
+  it("uses realtime votes for approve detail progress", () => {
+    render(
+      <SingleWaveDropInfoPanel drop={baseDrop} winningThreshold={42_000_000} />
+    );
+
+    expect(screen.getByText("25")).toBeInTheDocument();
+    expect(screen.getByText("Votes given now: 25")).toBeInTheDocument();
   });
 });

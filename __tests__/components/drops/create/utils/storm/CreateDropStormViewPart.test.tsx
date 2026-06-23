@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import CreateDropStormViewPart from "@/components/drops/create/utils/storm/CreateDropStormViewPart";
 
@@ -14,8 +14,14 @@ const DropPartMock = require("@/components/drops/view/part/DropPart");
 const QuoteMock = require("@/components/drops/create/utils/storm/CreateDropStormViewPartQuote");
 
 describe("CreateDropStormViewPart", () => {
+  let createObjectURLMock: jest.Mock;
+  let revokeObjectURLMock: jest.Mock;
+
   beforeEach(() => {
-    (global as any).URL.createObjectURL = jest.fn(() => "blob:url");
+    createObjectURLMock = jest.fn(() => "blob:url");
+    revokeObjectURLMock = jest.fn();
+    (global as any).URL.createObjectURL = createObjectURLMock;
+    (global as any).URL.revokeObjectURL = revokeObjectURLMock;
     jest.clearAllMocks();
   });
 
@@ -37,12 +43,91 @@ describe("CreateDropStormViewPart", () => {
     removePart: jest.fn(),
   };
 
-  it("passes transformed media to DropPart", () => {
+  const getLastDropPartCall = (): any => {
+    const calls = (DropPartMock as jest.Mock).mock.calls;
+    const lastCall = calls[calls.length - 1];
+
+    if (!lastCall) {
+      throw new Error("DropPart was not called");
+    }
+
+    return lastCall[0];
+  };
+
+  it("passes transformed media to DropPart", async () => {
     render(<CreateDropStormViewPart {...baseProps} />);
-    const call = (DropPartMock as jest.Mock).mock.calls[0][0];
-    expect(call.partMedias).toEqual([
+
+    await waitFor(() => {
+      expect(getLastDropPartCall().partMedias).toEqual([
+        { mimeType: "image/png", mediaSrc: "blob:url" },
+      ]);
+    });
+  });
+
+  it("reuses transformed media URLs on rerender", async () => {
+    const { rerender } = render(
+      <CreateDropStormViewPart {...baseProps} dropTitle="first" />
+    );
+
+    await waitFor(() => {
+      expect(getLastDropPartCall().partMedias).toEqual([
+        { mimeType: "image/png", mediaSrc: "blob:url" },
+      ]);
+    });
+    expect(createObjectURLMock).toHaveBeenCalledTimes(1);
+
+    rerender(<CreateDropStormViewPart {...baseProps} dropTitle="second" />);
+
+    await waitFor(() => {
+      expect(createObjectURLMock).toHaveBeenCalledTimes(1);
+    });
+    expect(getLastDropPartCall().partMedias).toEqual([
       { mimeType: "image/png", mediaSrc: "blob:url" },
     ]);
+  });
+
+  it("revokes transformed media URLs on unmount", async () => {
+    const { unmount } = render(<CreateDropStormViewPart {...baseProps} />);
+
+    await waitFor(() => {
+      expect(getLastDropPartCall().partMedias).toEqual([
+        { mimeType: "image/png", mediaSrc: "blob:url" },
+      ]);
+    });
+
+    unmount();
+
+    expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:url");
+  });
+
+  it("revokes old transformed media URLs when media changes", async () => {
+    const nextFile = new File(["2"], "g.png", { type: "image/png" });
+    createObjectURLMock
+      .mockReturnValueOnce("blob:first")
+      .mockReturnValueOnce("blob:second");
+
+    const { rerender } = render(<CreateDropStormViewPart {...baseProps} />);
+
+    await waitFor(() => {
+      expect(getLastDropPartCall().partMedias).toEqual([
+        { mimeType: "image/png", mediaSrc: "blob:first" },
+      ]);
+    });
+
+    rerender(
+      <CreateDropStormViewPart
+        {...baseProps}
+        part={{ ...baseProps.part, media: [nextFile] }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getLastDropPartCall().partMedias).toEqual([
+        { mimeType: "image/png", mediaSrc: "blob:second" },
+      ]);
+    });
+    expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:first");
+    expect(createObjectURLMock).toHaveBeenCalledTimes(2);
   });
 
   it("renders quoted drop when provided", () => {
@@ -66,5 +151,19 @@ describe("CreateDropStormViewPart", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /remove part/i }));
     expect(removePart).toHaveBeenCalledWith(3);
+  });
+
+  it("does not remove part when disabled", () => {
+    const removePart = jest.fn();
+    render(
+      <CreateDropStormViewPart
+        {...baseProps}
+        disabled
+        removePart={removePart}
+        partIndex={3}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /remove part/i }));
+    expect(removePart).not.toHaveBeenCalled();
   });
 });

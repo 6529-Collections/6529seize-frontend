@@ -117,7 +117,10 @@ function setup(opts: any) {
     connectedAccounts: opts.connectedAccounts ?? [],
     seizeSwitchConnectedAccount: opts.seizeSwitchConnectedAccount ?? jest.fn(),
   });
-  (useAuth as jest.Mock).mockReturnValue({ activeProfileProxy: opts.proxy });
+  (useAuth as jest.Mock).mockReturnValue({
+    connectedProfile: opts.connectedProfile ?? null,
+    activeProfileProxy: opts.proxy ?? null,
+  });
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
   (useMyStreamOptional as jest.Mock).mockReturnValue(
     activeWaveId
@@ -272,9 +275,17 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    const shareButton = screen.getByRole("button", { name: "Share wave" });
-    expect(shareButton).toHaveAttribute("data-wave-link-action-mode", "share");
-    expect(shareButton).toHaveClass("tw-h-10", "tw-w-10");
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
+
+    const shareItem = screen.getByRole("menuitem", { name: "Share wave" });
+    fireEvent.click(shareItem);
+
+    expect(mockShare).toHaveBeenCalledWith({
+      title: "WaveOne",
+      url: "http://localhost/waves/w1",
+    });
   });
 
   it("shows matching wave drop action in app header", () => {
@@ -324,9 +335,13 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
+
     expect(
-      screen.getByRole("button", { name: "Copy wave link" })
-    ).toHaveAttribute("data-wave-link-action-mode", "copy");
+      screen.getByRole("menuitem", { name: "Copy wave link" })
+    ).toBeInTheDocument();
   });
 
   it("hides wave link action while active wave is still resolving", () => {
@@ -371,14 +386,14 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy wave link" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
+    fireEvent.click(screen.getByRole("menuitem", { name: "Copy wave link" }));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
       "http://localhost/waves/w2"
     );
-    expect(
-      screen.getByRole("button", { name: "Link copied" })
-    ).toBeInTheDocument();
   });
 
   it("hides wave link action in DM context", () => {
@@ -406,6 +421,44 @@ describe("AppHeader", () => {
       screen.queryByRole("button", { name: "Show wave description" })
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
+  });
+
+  it("links 1:1 DM active wave title to the other participant profile", () => {
+    const wave = {
+      id: "w-dm",
+      name: "prxt0",
+      picture: "/prxt0.png",
+      contributors_overview: [
+        { contributor_identity: "id-0xabc", contributor_pfp: "/me.png" },
+      ],
+      description_drop: {
+        id: "drop-1",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
+      chat: { scope: { group: { is_direct_message: true } } },
+    };
+
+    setup({
+      wave,
+      asPath: "/messages/w-dm",
+      connectedProfile: {
+        handle: "me",
+        normalised_handle: "me",
+        primary_wallet: "0xabc",
+        query: "id-0xabc",
+        wallets: [{ wallet: "0xabc" }],
+      },
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: true },
+    });
+
+    expect(screen.getByRole("link", { name: "View prxt0's profile" }))
+      .toHaveAttribute("href", "/prxt0");
+    expect(
+      screen.queryByRole("button", { name: /copy wave link|share wave/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show wave description" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders description subtitle trigger for non-DM active wave", () => {
@@ -452,17 +505,15 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    const galleryToggle = screen.getByRole("button", {
+    fireEvent.click(
+      screen.getByRole("button", { name: "More header actions" })
+    );
+
+    const galleryToggle = screen.getByRole("menuitem", {
       name: "Switch to gallery view",
     });
-    const actionRow = galleryToggle.parentElement;
-    if (!actionRow) {
-      throw new Error("Expected gallery toggle to be inside action row");
-    }
-    expect(actionRow).toHaveClass("tw-gap-x-1");
-    expect(galleryToggle).toHaveClass("tw-h-10", "tw-w-10");
     const galleryIcon = galleryToggle.querySelector("svg");
-    expect(galleryIcon).toHaveClass("tw-h-5", "tw-w-5");
+    expect(galleryIcon).toHaveClass("tw-h-4", "tw-w-4");
     fireEvent.click(galleryToggle);
 
     expect(toggleViewMode).toHaveBeenCalledTimes(1);

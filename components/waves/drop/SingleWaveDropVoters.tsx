@@ -80,9 +80,9 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
 
     setToast({
       type: "error",
-      message: `Download failed: ${sanitizeErrorForUser(
-        downloadError.errorMessage
-      )}`,
+      title: "Couldn't download voters.",
+      description: "Please try again.",
+      details: sanitizeErrorForUser(downloadError.errorMessage),
     });
   }, [downloadError, setToast]);
 

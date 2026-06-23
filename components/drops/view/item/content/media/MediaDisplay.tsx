@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import {
-  getArweaveGatewayFallbackUrls,
+  getMediaGatewayFallbackUrls,
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -52,7 +52,7 @@ function InteractiveHtmlMediaDisplay({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isActivated, setIsActivated] = useState(!requireInteractionToLoad);
   const urls = useMemo(
-    () => getArweaveGatewayFallbackUrls(media_url),
+    () => getMediaGatewayFallbackUrls(media_url),
     [media_url]
   );
   const [activeIndex, setActiveIndex] = useState(0);
@@ -170,6 +170,7 @@ export default function MediaDisplay({
   previewImageUrl,
   requireInteractionToLoad = false,
   iframeContainerClassName,
+  fillVideoContainer = false,
   loadStrategy = "in-view",
 }: {
   readonly media_mime_type: string;
@@ -179,6 +180,7 @@ export default function MediaDisplay({
   readonly previewImageUrl?: string | null | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
   readonly iframeContainerClassName?: string | undefined;
+  readonly fillVideoContainer?: boolean | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
 }) {
   const getMediaType = (): MediaType => {
@@ -265,6 +267,7 @@ export default function MediaDisplay({
           src={media_url}
           mimeType={media_mime_type}
           showControls={!disableMediaInteraction}
+          fillContainer={fillVideoContainer}
         />
       );
     case MediaType.AUDIO:

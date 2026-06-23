@@ -127,8 +127,10 @@ export default function WaveGroupEditButtons({
       if (!result.ok) {
         if (result.reason !== "auth") {
           setToast({
-            message: result.error,
             type: "error",
+            title: "Couldn't create this group.",
+            description: "Please check the group setup and try again.",
+            details: result.error,
           });
         }
         return null;

@@ -2,13 +2,12 @@
 
 import { useContext, useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getTimeAgo, numberWithCommas } from "@/helpers/Helpers";
-import WaveHeaderFollow from "./WaveHeaderFollow";
+import { getTimeAgo } from "@/helpers/Helpers";
+import WaveHeaderFollow, { WaveFollowBtnSize } from "./WaveHeaderFollow";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderOptions from "./options/WaveHeaderOptions";
 import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
-import WaveHeaderDescription from "./WaveHeaderDescription";
 import WaveHeaderPinButton from "./WaveHeaderPinButton";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "../WavePicture";
@@ -16,18 +15,26 @@ import { Time } from "@/helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
+import WaveRepButton from "./rep/WaveRepButton";
+import WaveHeaderTrustStats from "./WaveHeaderTrustStats";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { formatDate, formatInteger } from "@/i18n/format";
+import { t, type MessageKey } from "@/i18n/messages";
 
-export enum WaveHeaderPinnedSide {
-  LEFT = "LEFT",
-  RIGHT = "RIGHT",
-}
+const WAVE_HEADER_LOCALE = DEFAULT_LOCALE;
+
+const getPostsCountMessageKey = (count: number): MessageKey => {
+  const pluralCategory = new Intl.PluralRules(WAVE_HEADER_LOCALE).select(count);
+  return pluralCategory === "one"
+    ? "waves.header.postsCount.one"
+    : "waves.header.postsCount.other";
+};
 
 interface WaveHeaderProps {
   readonly wave: ApiWave;
   readonly onFollowersClick: () => void;
   readonly useRing?: boolean | undefined;
   readonly useRounded?: boolean | undefined;
-  readonly pinnedSide?: WaveHeaderPinnedSide | undefined;
 }
 
 export default function WaveHeader({
@@ -35,13 +42,13 @@ export default function WaveHeader({
   onFollowersClick,
   useRing = true,
   useRounded = true,
-  pinnedSide = WaveHeaderPinnedSide.RIGHT,
 }: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const created = getTimeAgo(wave.created_at);
   const firstXContributors = wave.contributors_overview.slice(0, 10);
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const isSubwave = Boolean(wave.parent_wave);
   const canEdit = useMemo(
     () =>
       !isDirectMessage &&
@@ -57,32 +64,73 @@ export default function WaveHeader({
     ringClasses = "tw-rounded-t-xl lg:tw-rounded-t-none";
   }
 
+  const connectedHandle = connectedProfile?.handle;
+  const normalizedConnectedHandle = connectedHandle?.toLowerCase() ?? null;
+  const waveAuthorHandle = wave.author?.handle ?? null;
+  const normalizedWaveAuthorHandle = waveAuthorHandle?.toLowerCase() ?? null;
+  const canUseWaveActions =
+    normalizedConnectedHandle !== null && !activeProfileProxy;
+  const showNotificationSettings =
+    canUseWaveActions && !!wave.subscribed_actions.length;
+  const showOwnerOptions =
+    canUseWaveActions &&
+    normalizedConnectedHandle === normalizedWaveAuthorHandle;
+  const showCreateSubwaveOption =
+    canUseWaveActions &&
+    !isDirectMessage &&
+    !isSubwave &&
+    wave.wave.authenticated_user_eligible_for_admin === true;
+  const showWaveRepAction =
+    canUseWaveActions &&
+    !isDirectMessage &&
+    normalizedWaveAuthorHandle !== null &&
+    normalizedConnectedHandle !== normalizedWaveAuthorHandle;
+  const showOptions = showOwnerOptions || showCreateSubwaveOption;
+  const showPinAction = !isSubwave;
+  const showTrustStats = !isDirectMessage;
+  const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
+  const createdDate = formatDate(
+    WAVE_HEADER_LOCALE,
+    Time.millis(wave.created_at).toDate()
+  );
+  const postsCount = formatInteger(
+    WAVE_HEADER_LOCALE,
+    wave.metrics.drops_count
+  );
+  const postsCountLabel = t(
+    WAVE_HEADER_LOCALE,
+    getPostsCountMessageKey(wave.metrics.drops_count),
+    { count: postsCount }
+  );
+
   return (
     <div
-      className={`tw-relative tw-overflow-auto tw-bg-iron-950 ${ringClasses}`}
+      className={`tw-relative tw-overflow-hidden tw-bg-iron-950 ${ringClasses}`}
     >
       <div
         className={`${
           useRounded
             ? "tw-rounded-t-xl tw-ring-1 tw-ring-inset tw-ring-iron-800/70"
             : ""
-        } tw-overflow-hidden`}
+        } tw-overflow-hidden tw-bg-iron-950`}
       >
         <div
-          className="tw-h-14 tw-w-full tw-object-cover"
+          className="tw-relative tw-h-16 tw-w-full tw-object-cover"
           style={{
-            background: `linear-gradient(60deg, ${wave.author.banner1_color ?? ""} 0%, ${wave.author.banner2_color ?? ""} 100%)`,
-            boxShadow: "inset 0 -4px 12px rgba(0,0,0,0.15)",
+            background: `linear-gradient(135deg, ${wave.author?.banner1_color ?? "#1f2937"} 0%, ${wave.author?.banner2_color ?? "#0f172a"} 58%, #050505 100%)`,
+            boxShadow: "inset 0 -22px 34px rgba(0,0,0,0.42)",
           }}
-        ></div>
+        >
+          <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-px tw-bg-white/10" />
+        </div>
       </div>
 
-      <div className="-tw-mt-6 tw-flex tw-space-x-5 tw-px-4">
-        <div className="tw-flex">
-          <div className="tw-group tw-relative tw-size-20">
+      <div className="-tw-mt-6 tw-px-4 tw-pb-6">
+        <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
+          <div className="tw-group tw-relative tw-h-16 tw-w-16 tw-shrink-0">
             <div
-              className={`tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-shadow-md ${
-                isDropWave ? "tw-ring-2 tw-ring-white/10" : ""
+              className={`tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-shadow-[0_18px_36px_rgba(0,0,0,0.35)] ${
+                isDropWave ? "tw-ring-2 tw-ring-white/15" : ""
               }`}
             >
               <WavePicture
@@ -92,6 +140,7 @@ export default function WaveHeader({
                   pfp: c.contributor_pfp,
                   identity: c.contributor_identity,
                 }))}
+                roundedClassName="tw-rounded-full"
               />
             </div>
             {canEdit && (
@@ -100,9 +149,9 @@ export default function WaveHeader({
               </div>
             )}
             {isDropWave && (
-              <div className="tw-absolute tw-bottom-0 tw-right-0 tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800/50 tw-bg-iron-950 tw-shadow-md">
+              <div className="tw-absolute -tw-bottom-1 -tw-right-1 tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800/70 tw-bg-iron-950 tw-shadow-md">
                 <svg
-                  className="tw-size-4 tw-flex-shrink-0 tw-text-[#E8D48A]"
+                  className="tw-size-3.5 tw-flex-shrink-0 tw-text-[#E8D48A]"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 576 512"
@@ -115,49 +164,53 @@ export default function WaveHeader({
               </div>
             )}
           </div>
-        </div>
 
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-gap-x-3 tw-pb-1">
-          <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-flex tw-flex-col tw-items-end">
-              {!!connectedProfile?.handle && !activeProfileProxy && (
-                <div className="tw-flex tw-w-48 tw-max-w-full tw-flex-col tw-items-stretch tw-gap-y-1.5">
-                  <WaveHeaderFollow wave={wave} fullWidth />
-                  <WaveNotificationSettings wave={wave} />
+          {canUseWaveActions && (
+            <div className="tw-mt-8 tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-1.5">
+              {showNotificationSettings && (
+                <div className="tw-shrink-0">
+                  <WaveNotificationSettings wave={wave} compact />
+                </div>
+              )}
+              <div className="tw-shrink-0">
+                <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
+              </div>
+              {showPinAction && (
+                <div className="tw-shrink-0">
+                  <WaveHeaderPinButton waveId={wave.id} />
                 </div>
               )}
             </div>
-          </div>
+          )}
         </div>
-      </div>
 
-      <div className="tw-mt-2 tw-min-w-0 tw-flex-1 tw-px-4 tw-pb-4">
-        <div className="tw-flex tw-w-full tw-justify-between tw-gap-x-4">
-          <div className="tw-flex-1">
+        <div className="tw-mt-5 tw-flex tw-min-w-0 tw-items-start tw-gap-x-3">
+          <div className="tw-min-w-0 tw-flex-1">
             <WaveHeaderName wave={wave} />
           </div>
-          <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2 tw-self-start">
-            {!!connectedProfile?.handle && !activeProfileProxy && (
-              <WaveHeaderPinButton waveId={wave.id} />
-            )}
-            {!!connectedProfile?.handle &&
-              !activeProfileProxy &&
-              connectedProfile.handle === wave.author.handle && (
-                <WaveHeaderOptions wave={wave} />
-              )}
-          </div>
+          {showOptions && (
+            <div
+              className={`tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-1.5 ${titleActionAlignmentClass}`}
+            >
+              <WaveHeaderOptions
+                wave={wave}
+                showOwnerActions={showOwnerOptions}
+              />
+            </div>
+          )}
         </div>
-        <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between">
-          <div className="tw-flex-1 tw-text-sm">
-            <span className="tw-font-normal tw-text-iron-400/90">
-              Created {created} ·{" "}
-              {Time.millis(wave.created_at).toDate().toLocaleDateString()}
-            </span>
-          </div>
-          <WaveHeaderDescription wave={wave} side={pinnedSide} />
+
+        <div className="tw-mt-1 tw-text-sm">
+          <span className="tw-font-normal tw-text-iron-500">
+            {t(WAVE_HEADER_LOCALE, "waves.header.createdLabel", {
+              relativeTime: created,
+              date: createdDate,
+            })}
+          </span>
         </div>
+
         <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3">
             <div className="tw-flex tw-items-center tw-gap-x-4">
               <WaveHeaderFollowers
                 wave={wave}
@@ -165,16 +218,22 @@ export default function WaveHeader({
               />
               {!!firstXContributors.length && (
                 <div className="tw-flex tw-items-center">
-                  <span className="tw-ml-2.5 tw-text-sm tw-font-normal tw-text-iron-400">
-                    <span className="tw-pr-0.5 tw-font-medium tw-text-iron-50">
-                      {numberWithCommas(wave.metrics.drops_count)}
-                    </span>
-                    {wave.metrics.drops_count === 1 ? "Post" : "Posts"}
+                  <span className="tw-ml-2.5 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
+                    <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
+                      {postsCount}
+                    </span>{" "}
+                    {postsCountLabel}
                   </span>
                 </div>
               )}
             </div>
           </div>
+          {showTrustStats && <WaveHeaderTrustStats wave={wave} />}
+          {showWaveRepAction && (
+            <div className="tw-flex">
+              <WaveRepButton wave={wave} />
+            </div>
+          )}
         </div>
       </div>
     </div>

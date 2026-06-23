@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState, type DependencyList, type ReactNode } from "react";
 import CreateWaveGroupSearchField from "@/components/waves/create-wave/groups/CreateWaveGroupSearchField";
+import type { CreateWaveGroupSearchResultsLayout } from "@/components/waves/create-wave/groups/CreateWaveGroupSearchResults";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -16,7 +17,10 @@ jest.mock("framer-motion", () => {
   return {
     AnimatePresence: ({ children }: { children: ReactNode }) =>
       React.createElement(React.Fragment, null, children),
-    motion: {
+    LazyMotion: ({ children }: { children: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    domAnimation: {},
+    m: {
       div: (props: any) => {
         const nextProps = { ...props };
         const { children } = nextProps;
@@ -68,12 +72,14 @@ function renderSearchField({
   disabled = false,
   selectedGroup = null,
   allowClear = true,
+  resultsLayout = "popover",
   onSelect = jest.fn(),
 }: {
   readonly defaultLabel?: string;
   readonly disabled?: boolean;
   readonly selectedGroup?: ApiGroupFull | null;
   readonly allowClear?: boolean;
+  readonly resultsLayout?: CreateWaveGroupSearchResultsLayout;
   readonly onSelect?: jest.Mock;
 } = {}) {
   const queryClient = new QueryClient({
@@ -92,6 +98,7 @@ function renderSearchField({
         disabled={disabled}
         selectedGroup={selectedGroup}
         allowClear={allowClear}
+        resultsLayout={resultsLayout}
         onSelect={onSelect}
       />
     </QueryClientProvider>
@@ -175,6 +182,26 @@ describe("CreateWaveGroupSearchField", () => {
     await waitFor(() => expect(onSelect).toHaveBeenCalledWith(groups[0]));
     expect(input).toHaveValue("Alpha Group");
     expect(input).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("renders inline results without absolute popover wrappers and keeps keyboard selection", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderSearchField({ resultsLayout: "inline" });
+
+    const input = screen.getByRole("combobox", { name: "Search groups..." });
+    await user.click(input);
+
+    const listbox = await screen.findByRole("listbox");
+    const panel = listbox.parentElement?.parentElement;
+    const wrapper = panel?.parentElement;
+
+    expect(wrapper).toHaveClass("tw-mt-1.5");
+    expect(wrapper).not.toHaveClass("tw-absolute");
+    expect(panel).not.toHaveClass("tw-absolute");
+
+    await user.keyboard("{ArrowDown}{Enter}");
+
+    await waitFor(() => expect(onSelect).toHaveBeenCalledWith(groups[0]));
   });
 
   it("uses the debounced search value for group queries", async () => {
@@ -350,6 +377,7 @@ describe("CreateWaveGroupSearchField", () => {
 
     const input = screen.getByRole("combobox", { name: "Search groups..." });
     await user.click(input);
+    await user.type(input, "a");
     expect(await screen.findByRole("listbox")).toBeInTheDocument();
 
     const stopPropagationSpy = jest.spyOn(Event.prototype, "stopPropagation");
@@ -362,6 +390,7 @@ describe("CreateWaveGroupSearchField", () => {
     }
 
     await user.click(input);
+    await user.type(input, "a");
     expect(await screen.findByRole("listbox")).toBeInTheDocument();
 
     await user.click(document.body);

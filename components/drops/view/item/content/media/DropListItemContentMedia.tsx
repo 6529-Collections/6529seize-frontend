@@ -10,6 +10,7 @@ import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
 import MediaDisplay from "./MediaDisplay";
 import UnsupportedMediaLink from "./UnsupportedMediaLink";
+import { useOptionalDropContext } from "@/components/waves/drops/DropContext";
 
 enum MediaType {
   IMAGE = "IMAGE",
@@ -34,11 +35,13 @@ export default function DropListItemContentMedia({
   disableModal = false,
   disableAutoPlay = false,
   fillVideoContainer = false,
+  videoAlign,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
   htmlIframeContainerClassName,
   htmlPreviewImageUrl,
   loadStrategy = "in-view",
+  galleryItemId,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -46,12 +49,17 @@ export default function DropListItemContentMedia({
   readonly disableModal?: boolean | undefined;
   readonly disableAutoPlay?: boolean | undefined;
   readonly fillVideoContainer?: boolean | undefined;
+  readonly videoAlign?: "left" | "center" | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly htmlIframeContainerClassName?: string | undefined;
   readonly htmlPreviewImageUrl?: string | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
+  readonly galleryItemId?: string | undefined;
 }) {
+  const dropContext = useOptionalDropContext();
+  const showVideoFullscreen = dropContext?.showVideoFullscreen ?? true;
+
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
       return MediaType.IMAGE;
@@ -88,6 +96,7 @@ export default function DropListItemContentMedia({
           imageObjectPosition={imageObjectPosition}
           imageScale={imageScale}
           loadStrategy={loadStrategy}
+          galleryItemId={galleryItemId}
         />
       );
     case MediaType.VIDEO:
@@ -97,6 +106,8 @@ export default function DropListItemContentMedia({
           mimeType={media_mime_type}
           disableAutoPlay={disableAutoPlay}
           fillContainer={fillVideoContainer}
+          align={videoAlign}
+          showFullscreen={showVideoFullscreen}
         />
       );
     case MediaType.AUDIO:

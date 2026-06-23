@@ -45,7 +45,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="d-flex flex-column align-items-center justify-content-center gap-2"
+      className="tailwind-scope d-flex flex-column align-items-center justify-content-center gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800"
       id="footer"
     >
       <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">

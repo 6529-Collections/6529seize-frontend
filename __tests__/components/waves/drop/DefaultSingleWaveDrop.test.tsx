@@ -41,6 +41,7 @@ describe("DefaultSingleWaveDrop", () => {
     mockApprovalStatus.mockReset();
     mockApprovalStatus.mockReturnValue({
       winningThreshold: null,
+      winningThresholdMinDurationMs: null,
       isVotingClosed: false,
       isVotingControlsLocked: false,
     });
@@ -68,6 +69,7 @@ describe("DefaultSingleWaveDrop", () => {
   it("passes approval lock props into wrapper and info panel", () => {
     mockApprovalStatus.mockReturnValue({
       winningThreshold: 25,
+      winningThresholdMinDurationMs: 120_000,
       isVotingClosed: true,
       isVotingControlsLocked: true,
     });
@@ -90,6 +92,7 @@ describe("DefaultSingleWaveDrop", () => {
     expect(mockWrapperProps).toEqual(
       expect.objectContaining({
         winningThreshold: 25,
+        winningThresholdMinDurationMs: 120_000,
         isVotingClosed: true,
         isVotingControlsLocked: true,
       })
