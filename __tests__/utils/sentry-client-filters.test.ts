@@ -11,6 +11,7 @@ import {
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
 } from "@/utils/sentry-client-filters";
+import type { SentryClientEvent } from "@/utils/sentry-client-filters";
 
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
@@ -188,9 +189,8 @@ describe("sentry-client-filters", () => {
     }) as any;
 
   const createReactDomInsertBeforeEvent = (
-    overrides: Record<string, unknown> = {}
-  ) =>
-    ({
+    overrides: Partial<SentryClientEvent> = {}
+  ): SentryClientEvent => ({
       transaction: "/waves",
       exception: {
         values: [
@@ -208,7 +208,7 @@ describe("sentry-client-filters", () => {
         url: "/waves",
       },
       ...overrides,
-    }) as any;
+    });
 
   it("filters events when a stack frame matches a filename exception", () => {
     // Arrange
