@@ -9,11 +9,13 @@ const {
   createNativeEvidence,
   formatText,
   parseArgs,
+  playwrightConfigDefinesProject,
 } = require("../../ops/scripts/native-surface-evidence.cjs") as {
   NATIVE_EVIDENCE_SCHEMA_VERSION: string;
   createNativeEvidence: (options?: {
     cwd?: string;
     platform?: NodeJS.Platform;
+    env?: Record<string, string | undefined>;
     commandRunner?: (
       command: string,
       args: string[]
@@ -30,19 +32,24 @@ const {
     surfaces: Array<{
       name: string;
       evidence_tier: string;
-      real_package_ready: boolean;
+      package_prerequisites_ready: boolean;
       simulation_project: string | null;
       status: string;
       blocker: string | null;
     }>;
     summary: {
       highest_available_tier: string;
-      real_package_ready: boolean;
+      package_prerequisites_ready: boolean;
       simulation_available: boolean;
+      actual_package_runtime_evidence: boolean;
     };
   };
   formatText: (evidence: ReturnType<typeof createNativeEvidence>) => string;
   parseArgs: (argv: string[]) => Record<string, unknown>;
+  playwrightConfigDefinesProject: (
+    playwrightConfigText: string,
+    projectName: string
+  ) => boolean;
 };
 
 function writeFixtureRepo(
@@ -119,8 +126,9 @@ describe("native surface evidence", () => {
     expect(evidence.schema_version).toBe(NATIVE_EVIDENCE_SCHEMA_VERSION);
     expect(evidence.summary).toMatchObject({
       highest_available_tier: "browser-simulation",
-      real_package_ready: false,
+      package_prerequisites_ready: false,
       simulation_available: true,
+      actual_package_runtime_evidence: false,
     });
     expect(evidence.repo.package).toMatchObject({
       has_capacitor_script: false,
@@ -136,7 +144,7 @@ describe("native surface evidence", () => {
     expect(formatText(evidence)).not.toContain(process.cwd());
   });
 
-  it("requires Android native project files and host tools before claiming real package readiness", () => {
+  it("requires Android native project files and host tools before claiming package prerequisites", () => {
     const cwd = fixture(
       {
         "android/app/build.gradle":
@@ -151,7 +159,7 @@ describe("native surface evidence", () => {
 
     const evidence = createNativeEvidence({
       cwd,
-      commandRunner: commandRunner(["java", "gradle"]),
+      commandRunner: commandRunner(["adb", "java", "gradle"]),
       platform: "linux",
     });
     const android = evidence.surfaces.find(
@@ -159,11 +167,41 @@ describe("native surface evidence", () => {
     );
 
     expect(android).toMatchObject({
-      evidence_tier: "real-package-ready",
-      real_package_ready: true,
+      evidence_tier: "package-prerequisites",
+      package_prerequisites_ready: true,
       status: "ready",
     });
-    expect(evidence.summary.highest_available_tier).toBe("real-package-ready");
+    expect(evidence.summary.highest_available_tier).toBe(
+      "package-prerequisites"
+    );
+  });
+
+  it("does not treat a Gradle wrapper alone as an Android native project", () => {
+    const cwd = fixture(
+      {
+        gradlew: "#!/bin/sh\n",
+        "capacitor.config.ts": "export default {};\n",
+      },
+      {
+        dependencies: { "@capacitor/core": "7.4.1" },
+        devDependencies: { "@capacitor/cli": "7.4.1" },
+      }
+    );
+
+    const evidence = createNativeEvidence({
+      cwd,
+      commandRunner: commandRunner(["adb", "java"]),
+      platform: "linux",
+    });
+    const android = evidence.surfaces.find(
+      (surface) => surface.name === "capacitor-android"
+    );
+
+    expect(android).toMatchObject({
+      evidence_tier: "browser-simulation",
+      package_prerequisites_ready: false,
+      blocker: "missing committed android/ native project",
+    });
   });
 
   it("keeps iOS package evidence blocked on non-macOS hosts", () => {
@@ -188,8 +226,8 @@ describe("native surface evidence", () => {
 
     expect(ios).toMatchObject({
       evidence_tier: "browser-simulation",
-      real_package_ready: false,
-      blocker: "iOS package/runtime evidence requires a macOS host",
+      package_prerequisites_ready: false,
+      blocker: "iOS package prerequisites require a macOS host",
     });
   });
 
@@ -214,10 +252,25 @@ describe("native surface evidence", () => {
     );
 
     expect(electron).toMatchObject({
-      evidence_tier: "real-package-ready",
-      real_package_ready: true,
+      evidence_tier: "package-prerequisites",
+      package_prerequisites_ready: true,
       status: "ready",
     });
+  });
+
+  it("detects actual Playwright project definitions instead of comments", () => {
+    expect(
+      playwrightConfigDefinesProject(
+        '// name: "capacitor-ios-sim"\nexport default { projects: [] };',
+        "capacitor-ios-sim"
+      )
+    ).toBe(false);
+    expect(
+      playwrightConfigDefinesProject(
+        'export default { projects: [{ name: "capacitor-ios-sim" }] };',
+        "capacitor-ios-sim"
+      )
+    ).toBe(true);
   });
 
   it("parses boolean and value CLI arguments", () => {
@@ -227,7 +280,27 @@ describe("native surface evidence", () => {
     });
   });
 
-  it("fails the CLI when real native evidence is required but absent", () => {
+  it("fails the CLI when package prerequisites are required but absent", () => {
+    const script = path.join(
+      process.cwd(),
+      "ops/scripts/native-surface-evidence.cjs"
+    );
+    const result = spawnSync(
+      process.execPath,
+      [script, "--require-package-prereqs"],
+      {
+        cwd: process.cwd(),
+        encoding: "utf8",
+      }
+    );
+
+    expect(result.status).toBe(1);
+    expect(`${result.stdout}${result.stderr}`).toContain(
+      "native/Electron package prerequisites are not available"
+    );
+  });
+
+  it("keeps the old --require-real flag as an explicit unsupported failure", () => {
     const script = path.join(
       process.cwd(),
       "ops/scripts/native-surface-evidence.cjs"
@@ -239,8 +312,29 @@ describe("native surface evidence", () => {
 
     expect(result.status).toBe(1);
     expect(`${result.stdout}${result.stderr}`).toContain(
-      "real packaged native/Electron evidence is not available"
+      "--require-real is intentionally unsupported"
     );
+  });
+
+  it("reports missing required repo inputs without a raw stack trace", () => {
+    const cwd = fs.mkdtempSync(
+      path.join(os.tmpdir(), "6529-native-surface-missing-input-")
+    );
+    tempDirs.push(cwd);
+    const script = path.join(
+      process.cwd(),
+      "ops/scripts/native-surface-evidence.cjs"
+    );
+    const result = spawnSync(process.execPath, [script, "--cwd", cwd], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(1);
+    expect(`${result.stdout}${result.stderr}`).toContain(
+      "native evidence input missing: package.json"
+    );
+    expect(`${result.stdout}${result.stderr}`).not.toContain("Error:");
   });
 
   it("writes redacted JSON evidence when an output path is provided", () => {

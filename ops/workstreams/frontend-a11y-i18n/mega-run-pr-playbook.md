@@ -285,5 +285,6 @@ the unavailable native capability with the evidence label used. Do not use
 `shell-smoke` or `real-device` when only `simulated` browser Playwright was run.
 Run `seize run test:native-evidence` for native-adjacent PRs, inspect the
 native-gated branch in code, and record the residual risk. Use
-`test:native-evidence:real` only when the PR or train is claiming real packaged
-native or Electron evidence.
+`test:native-evidence:package-prereqs` only as a package-prerequisite gate;
+real packaged native or Electron claims still need separate package-build and
+runtime-smoke artifacts.

@@ -292,11 +292,7 @@ describe("deployment bus manifest", () => {
         expect.objectContaining({
           id: "native:surface-evidence",
           command: "seize run test:native-evidence",
-          surfaces: [
-            "native:capacitor-ios-sim",
-            "native:capacitor-android-sim",
-            "desktop:electron-shell-sim",
-          ],
+          surfaces: ["native:surface-evidence-classifier"],
         }),
       ])
     );

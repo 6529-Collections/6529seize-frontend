@@ -74,14 +74,10 @@ const VALIDATION_PACKS = Object.freeze({
   "native:surface-evidence": createValidationPack({
     id: "native:surface-evidence",
     description:
-      "Classifies native coverage as browser simulation or real package-ready evidence.",
+      "Classifies native coverage as browser simulation or package-prerequisite evidence.",
     stagingCommand: "seize run test:native-evidence",
     productionCommand: "seize run test:native-evidence",
-    surfaces: [
-      "native:capacitor-ios-sim",
-      "native:capacitor-android-sim",
-      "desktop:electron-shell-sim",
-    ],
+    surfaces: ["native:surface-evidence-classifier"],
     artifacts: NATIVE_EVIDENCE_ARTIFACT_PATTERNS,
   }),
 });
@@ -234,7 +230,7 @@ function createValidationPack({
   stagingCommand,
   productionCommand,
   surfaces = REQUIRED_WEB_SURFACES,
-  artifacts,
+  artifacts = PLAYWRIGHT_ARTIFACT_PATTERNS,
 }) {
   const environments = [
     ...(stagingCommand ? ["staging"] : []),
@@ -243,7 +239,7 @@ function createValidationPack({
 
   return Object.freeze({
     id,
-    size: "large",
+    size,
     description,
     environments,
     surfaces,

@@ -43,6 +43,7 @@ function parseArgs(argv) {
 }
 
 function exists(cwd, relativePath) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI probes repo-relative native project candidates under --cwd.
   return fs.existsSync(path.join(cwd, relativePath));
 }
 
@@ -51,8 +52,31 @@ function existingFiles(cwd, candidates) {
 }
 
 function readPackageJson(cwd) {
-  const packageJsonPath = path.join(cwd, "package.json");
-  return JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  try {
+    return JSON.parse(readRepoTextFile(cwd, "package.json"));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(
+        "native evidence input invalid: package.json is not JSON"
+      );
+    }
+    throw error;
+  }
+}
+
+function readRepoTextFile(cwd, relativePath) {
+  try {
+    const target = path.join(cwd, relativePath);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI reads required repo-local files under --cwd.
+    return fs.readFileSync(target, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      throw new Error(`native evidence input missing: ${relativePath}`);
+    }
+    throw new Error(
+      `native evidence input unreadable: ${relativePath}: ${error.message}`
+    );
+  }
 }
 
 function dependencyVersion(packageJson, name) {
@@ -104,9 +128,11 @@ function defaultCommandRunner(command, args) {
 function collectHostCapabilities(options) {
   const commandRunner = options.commandRunner ?? defaultCommandRunner;
   const platform = options.platform ?? process.platform;
+  const env = options.env ?? process.env;
 
   return {
     platform,
+    android_sdk_configured: Boolean(env.ANDROID_HOME || env.ANDROID_SDK_ROOT),
     commands: {
       adb: commandAvailable(commandRunner, "adb", ["version"]),
       gradle: commandAvailable(commandRunner, "gradle", ["--version"]),
@@ -118,10 +144,7 @@ function collectHostCapabilities(options) {
 
 function collectRepoState(cwd) {
   const packageJson = readPackageJson(cwd);
-  const playwrightConfigText = fs.readFileSync(
-    path.join(cwd, "playwright.config.ts"),
-    "utf8"
-  );
+  const playwrightConfigText = readRepoTextFile(cwd, "playwright.config.ts");
 
   const capacitorConfigFiles = existingFiles(cwd, [
     "capacitor.config.ts",
@@ -135,6 +158,8 @@ function collectRepoState(cwd) {
     "android/app/build.gradle.kts",
     "android/settings.gradle",
     "android/settings.gradle.kts",
+  ]);
+  const androidGradleWrapperFiles = existingFiles(cwd, [
     "android/gradlew",
     "gradlew",
   ]);
@@ -174,6 +199,7 @@ function collectRepoState(cwd) {
     files: {
       capacitor_config: capacitorConfigFiles,
       android_project: androidProjectFiles,
+      android_gradle_wrapper: androidGradleWrapperFiles,
       ios_project: iosProjectFiles,
       electron_config: electronConfigFiles,
       electron_main: electronMainFiles,
@@ -182,9 +208,30 @@ function collectRepoState(cwd) {
       projects: [
         ...Object.values(CAPACITOR_SIM_PROJECTS),
         ELECTRON_SIM_PROJECT,
-      ].filter((projectName) => playwrightConfigText.includes(projectName)),
+      ].filter((projectName) =>
+        playwrightConfigDefinesProject(playwrightConfigText, projectName)
+      ),
     },
   };
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function playwrightConfigDefinesProject(playwrightConfigText, projectName) {
+  const configWithoutComments =
+    stripPlaywrightConfigComments(playwrightConfigText);
+  const quotedProjectName = escapeRegex(projectName);
+  return new RegExp(
+    String.raw`\bname\s*:\s*["'\`]${quotedProjectName}["'\`]`
+  ).test(configWithoutComments);
+}
+
+function stripPlaywrightConfigComments(playwrightConfigText) {
+  return playwrightConfigText
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
 }
 
 function simulationStatus(repoState, simulationProject) {
@@ -230,16 +277,19 @@ function capacitorAndroidReadiness(repoState, host) {
   if (!host.commands.java) {
     return blocked("missing Java runtime");
   }
+  if (!host.commands.adb && !host.android_sdk_configured) {
+    return blocked(
+      "missing Android SDK signal (adb, ANDROID_HOME, or ANDROID_SDK_ROOT)"
+    );
+  }
   if (
     !host.commands.gradle &&
-    !repoState.files.android_project.some((file) => file.endsWith("gradlew"))
+    repoState.files.android_gradle_wrapper.length === 0
   ) {
     return blocked("missing Gradle or committed Gradle wrapper");
   }
 
-  return ready(
-    "Capacitor Android project and build host prerequisites detected"
-  );
+  return ready("Capacitor Android project and build prerequisites detected");
 }
 
 function capacitorIosReadiness(repoState, host) {
@@ -253,13 +303,13 @@ function capacitorIosReadiness(repoState, host) {
     return blocked("missing committed ios/ native project");
   }
   if (host.platform !== "darwin") {
-    return blocked("iOS package/runtime evidence requires a macOS host");
+    return blocked("iOS package prerequisites require a macOS host");
   }
   if (!host.commands.xcodebuild) {
     return blocked("missing xcodebuild");
   }
 
-  return ready("Capacitor iOS project and Xcode host prerequisites detected");
+  return ready("Capacitor iOS project and Xcode prerequisites detected");
 }
 
 function electronReadiness(repoState) {
@@ -277,12 +327,12 @@ function electronReadiness(repoState) {
     return blocked("missing Electron run/package script or builder config");
   }
 
-  return ready("Electron main process and run/package controls detected");
+  return ready("Electron main process and package prerequisites detected");
 }
 
 function createSurfaceEvidence(name, simulation, readiness) {
   const evidenceTier = readiness.ready
-    ? "real-package-ready"
+    ? "package-prerequisites"
     : simulation.available
       ? simulation.tier
       : "none";
@@ -290,7 +340,7 @@ function createSurfaceEvidence(name, simulation, readiness) {
   return {
     name,
     evidence_tier: evidenceTier,
-    real_package_ready: readiness.ready,
+    package_prerequisites_ready: readiness.ready,
     simulation_project: simulation.available ? simulation.project : null,
     status: readiness.ready ? "ready" : "blocked",
     blocker: readiness.ready ? null : readiness.reason,
@@ -318,29 +368,44 @@ function createNativeEvidence(options = {}) {
       electronReadiness(repoState)
     ),
   ];
-  const realPackageReady = surfaces.some(
-    (surface) => surface.real_package_ready
+  const packagePrerequisitesReady = surfaces.some(
+    (surface) => surface.package_prerequisites_ready
   );
   const simulationAvailable = surfaces.some(
     (surface) => surface.evidence_tier === "browser-simulation"
   );
 
-  return {
+  const evidence = {
     schema_version: NATIVE_EVIDENCE_SCHEMA_VERSION,
     generated_at: new Date().toISOString(),
     host,
     repo: repoState,
     surfaces,
     summary: {
-      highest_available_tier: realPackageReady
-        ? "real-package-ready"
+      highest_available_tier: packagePrerequisitesReady
+        ? "package-prerequisites"
         : simulationAvailable
           ? "browser-simulation"
           : "none",
-      real_package_ready: realPackageReady,
+      package_prerequisites_ready: packagePrerequisitesReady,
       simulation_available: simulationAvailable,
+      actual_package_runtime_evidence: false,
     },
   };
+  assertNoLocalPathLeak(evidence, cwd);
+  return evidence;
+}
+
+function assertNoLocalPathLeak(evidence, cwd) {
+  const serialized = JSON.stringify(evidence);
+  const localPathMarkers = [
+    cwd,
+    cwd.replaceAll("\\", "/"),
+    cwd.replaceAll("/", "\\"),
+  ].filter(Boolean);
+  if (localPathMarkers.some((marker) => serialized.includes(marker))) {
+    throw new Error("native evidence output contains a local absolute path");
+  }
 }
 
 function formatText(evidence) {
@@ -353,7 +418,7 @@ function formatText(evidence) {
   for (const surface of evidence.surfaces) {
     const status =
       surface.status === "ready"
-        ? "real package/runtime prerequisites detected"
+        ? "package prerequisites detected"
         : `blocked: ${surface.blocker}`;
     const simulation = surface.simulation_project
       ? `; simulation project: ${surface.simulation_project}`
@@ -365,7 +430,8 @@ function formatText(evidence) {
 
   lines.push(
     "",
-    "Use --require-real only when a PR or release train claims real packaged native/Electron evidence."
+    "This classifier does not run native/Electron package builds or runtime smoke tests.",
+    "Use --require-package-prereqs as a prerequisites gate; real shell claims still need separate package/runtime evidence."
   );
 
   return lines.join("\n");
@@ -377,7 +443,9 @@ function writeJson(value) {
 
 function writeOutputFile(file, value) {
   const target = path.resolve(file);
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes evidence artifacts to supplied output paths.
   fs.mkdirSync(path.dirname(target), { recursive: true });
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes evidence artifacts to supplied output paths.
   fs.writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`);
 }
 
@@ -389,43 +457,60 @@ function usage() {
   return `Usage:
   node ops/scripts/native-surface-evidence.cjs [--json]
   node ops/scripts/native-surface-evidence.cjs --require-simulation
-  node ops/scripts/native-surface-evidence.cjs --require-real
+  node ops/scripts/native-surface-evidence.cjs --require-package-prereqs
   node ops/scripts/native-surface-evidence.cjs --json --output test-results/native-surface-evidence.json
 `;
 }
 
-async function main(argv = process.argv.slice(2)) {
-  const args = parseArgs(argv);
+function main(argv = process.argv.slice(2)) {
+  try {
+    const args = parseArgs(argv);
 
-  if (args.help) {
-    writeText(usage());
-    return;
-  }
+    if (args.help) {
+      writeText(usage());
+      return;
+    }
 
-  const evidence = createNativeEvidence({
-    cwd: args.cwd ? String(args.cwd) : process.cwd(),
-  });
+    const evidence = createNativeEvidence({
+      cwd: args.cwd ? String(args.cwd) : process.cwd(),
+    });
 
-  if (args.output) {
-    writeOutputFile(String(args.output), evidence);
-  }
+    if (args.output) {
+      writeOutputFile(String(args.output), evidence);
+    }
 
-  if (args.json || args.format === "json") {
-    writeJson(evidence);
-  } else {
-    writeText(formatText(evidence));
-  }
+    if (args.json || args.format === "json") {
+      writeJson(evidence);
+    } else {
+      writeText(formatText(evidence));
+    }
 
-  if (args["require-simulation"] && !evidence.summary.simulation_available) {
+    if (args["require-simulation"] && !evidence.summary.simulation_available) {
+      console.error(
+        "error: native surface simulation projects are not configured"
+      );
+      process.exitCode = 1;
+    }
+
+    if (
+      args["require-package-prereqs"] &&
+      !evidence.summary.package_prerequisites_ready
+    ) {
+      console.error(
+        "error: native/Electron package prerequisites are not available"
+      );
+      process.exitCode = 1;
+    }
+
+    if (args["require-real"]) {
+      console.error(
+        "error: --require-real is intentionally unsupported; this classifier only verifies package prerequisites, not real package/runtime execution"
+      );
+      process.exitCode = 1;
+    }
+  } catch (error) {
     console.error(
-      "error: native surface simulation projects are not configured"
-    );
-    process.exitCode = 1;
-  }
-
-  if (args["require-real"] && !evidence.summary.real_package_ready) {
-    console.error(
-      "error: real packaged native/Electron evidence is not available"
+      `error: ${error instanceof Error ? error.message : String(error)}`
     );
     process.exitCode = 1;
   }
@@ -440,4 +525,5 @@ module.exports = {
   createNativeEvidence,
   formatText,
   parseArgs,
+  playwrightConfigDefinesProject,
 };

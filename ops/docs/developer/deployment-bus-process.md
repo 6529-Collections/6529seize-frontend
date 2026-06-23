@@ -114,11 +114,12 @@ Known current gaps after the first automation slice:
   production-only `playwright:production-readonly` aggregate, which records
   desktop Chromium production evidence when a release captain explicitly opts
   into it, plus optional `native:surface-evidence`, which records the native
-  evidence classifier output. Firefox, WebKit, Capacitor simulation, and
-  Electron simulation remain optional train/nightly or targeted validation
-  lanes and must not be described as real native or real Electron shell
-  coverage. Real native or packaged Electron claims require the stricter
-  `seize run test:native-evidence:real` command to pass.
+  evidence classifier output without running simulator specs. Firefox, WebKit,
+  Capacitor simulation, and Electron simulation remain optional train/nightly or
+  targeted validation lanes and must not be described as real native or real
+  Electron shell coverage. Package-prerequisite evidence also is not enough for
+  real native or packaged Electron claims; those claims require separate
+  package-build and runtime-smoke artifacts.
 - Backend coordination is still a cross-repo handoff, not a shared automated
   release train.
 

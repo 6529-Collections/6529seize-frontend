@@ -120,10 +120,12 @@ read-only aggregate records `web:desktop-chromium` only because production
 scripts intentionally run production-safe public checks on desktop Chromium.
 Firefox, WebKit, Capacitor simulation, and Electron simulation remain optional
 train/nightly or targeted validation lanes until they are stable enough to make
-them required deployment evidence. Browser simulation must not be described as
-real native or real Electron shell coverage. A PR or train may claim real
-packaged native or Electron evidence only when `seize run test:native-evidence:real`
-passes and the resulting evidence is recorded separately from simulation output.
+them required deployment evidence. `native:surface-evidence` records the
+classifier JSON only; it does not run simulator specs. Browser simulation and
+package-prerequisite checks must not be described as real native or real
+Electron shell coverage. A PR or train may claim real packaged native or
+Electron evidence only when separate package-build and runtime-smoke artifacts
+are recorded.
 
 For standard required packs, release readiness requires the latest passing
 check to record the pack-plan command and every required pack-plan surface.

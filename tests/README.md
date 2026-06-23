@@ -127,9 +127,10 @@ Surface matrix:
   Electron app-wallet unsupported copy, and Electron share-modal desktop
   handoff suppression.
 - `test:native-evidence` runs the native surface evidence classifier. The
-  command must pass before native-adjacent PRs claim simulator coverage, and
-  `test:native-evidence:real` must pass before a PR or train claims real
-  packaged Capacitor or Electron evidence.
+  command must pass before native-adjacent PRs claim simulation-contract
+  coverage. `test:native-evidence:package-prereqs` is a stricter prerequisites
+  gate for checked-in Capacitor/Electron package structure and compatible host
+  tooling, but it still does not run package builds or runtime smoke tests.
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
@@ -225,10 +226,10 @@ Surface matrix:
   `globalThis.Capacitor` shim so Playwright can catch hook-based and direct
   runtime-detection drift. This still does not prove native plugin behavior.
 - The native evidence classifier records that distinction in executable form:
-  current simulator projects are evidence tier `browser-simulation`, while real
-  package readiness requires committed Capacitor/Electron package files plus
-  compatible host tooling such as Android build tools, macOS/Xcode for iOS, or
-  an Electron main process and package command.
+  current simulator projects are evidence tier `browser-simulation`, while
+  package-prerequisite readiness requires Capacitor/Electron package files to be
+  committed plus compatible host tooling such as Android build tools, macOS/Xcode
+  for iOS, or an Electron main process and package command.
 
 Large-pack ownership:
 
@@ -311,8 +312,9 @@ Large-pack ownership:
   simulation config, Capacitor/Electron dependencies, native runtime detection,
   or any PR description that discusses native package evidence. A passing run
   proves the classifier and simulator contracts are present. It does not prove
-  real packages unless the stricter `test:native-evidence:real` command also
-  passes.
+  real packages. A passing `test:native-evidence:package-prereqs` run proves only
+  checked-in package prerequisites; real packaged native/Electron claims still
+  require separate package-build and runtime-smoke evidence.
 - `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
   composer input, attachment preview/removal, link preview rendering, dev-auth
   composer eligibility, or local sandbox/mock API coverage. The pack may use
