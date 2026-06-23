@@ -13,29 +13,28 @@ import {
 
 export default function AboutTech() {
   const locale = DEFAULT_LOCALE;
-  const latestReportTotal = formatInteger(
-    locale,
-    getTechReportTotal(TECH_WEEKLY_PR_REPORT)
-  );
-  const reportCount = formatInteger(locale, TECH_PR_REPORTS.length);
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-12 tw-text-iron-200">
-      <section className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-10">
+    <div className="tw-flex tw-flex-col tw-gap-10 tw-px-4 tw-text-iron-200 sm:tw-px-6 lg:tw-px-8">
+      <section className="tw-pb-2">
         <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
           About / Tech
         </p>
-        <h1 className="tw-mb-5 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-5xl">
+        <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
           Tech Updates
         </h1>
-        <div className="tw-grid tw-gap-7 xl:tw-grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="tw-flex tw-max-w-4xl tw-flex-col tw-gap-4 tw-text-lg tw-leading-8 tw-text-iron-300">
-            <p className="tw-mb-0">
-              Long-form 6529 engineering context: release notes, repo analysis,
-              bot findings, and implementation reports that need more room than
-              a wave drop.
-            </p>
-            <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-400">
+        <div className="tw-flex tw-max-w-4xl tw-flex-col tw-gap-5 tw-text-base tw-leading-7 tw-text-iron-300">
+          <p className="tw-mb-0">
+            This is a current casual area for longer 6529 tech updates: repo
+            work, bot notes, release context, and build reports that are too
+            large for a single wave drop.
+          </p>
+          <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
+            <li>
+              Long updates, repo analysis, bot context, and links back into the
+              wave conversation.
+            </li>
+            <li>
               Shorter live repo activity still belongs in{" "}
               <a
                 href={FOLLOW_THE_REPO_WAVE_URL}
@@ -45,83 +44,35 @@ export default function AboutTech() {
               >
                 Follow The Repo
               </a>
-              . This page is the linkable shelf for the longer pieces.
-            </p>
-          </div>
-          <dl className="tw-mb-0 tw-grid tw-grid-cols-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/50">
-            <div className="tw-border-r tw-border-solid tw-border-white/10 tw-p-4">
-              <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                Latest
-              </dt>
-              <dd className="tw-mb-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-leading-none tw-text-iron-50">
-                {latestReportTotal}
-              </dd>
-            </div>
-            <div className="tw-border-r tw-border-solid tw-border-white/10 tw-p-4">
-              <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                Reports
-              </dt>
-              <dd className="tw-mb-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-leading-none tw-text-iron-50">
-                {reportCount}
-              </dd>
-            </div>
-            <div className="tw-p-4">
-              <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                Format
-              </dt>
-              <dd className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
-                Long reads
-              </dd>
-            </div>
-          </dl>
+              . This page is the linkable longer-form shelf beside it.
+            </li>
+          </ul>
         </div>
       </section>
 
-      <section className="tw-max-w-6xl" aria-labelledby="tech-guidance-heading">
-        <div className="tw-mb-5">
+      <section className="tw-max-w-6xl" aria-labelledby="tech-notes-heading">
+        <h2
+          id="tech-notes-heading"
+          className="tw-mb-5 tw-text-2xl tw-font-semibold tw-text-iron-50"
+        >
+          Active Technical Notes
+        </h2>
+        <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-5">
           <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-            Current Guidance
+            Auth changes
           </p>
-          <h2
-            id="tech-guidance-heading"
-            className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
-          >
-            Active Technical Notes
-          </h2>
-        </div>
-        <div className="tw-grid tw-gap-4 lg:tw-grid-cols-2">
-          <Link
-            href="/about/tech/wallet-authentication"
-            className="tw-group tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/10 tw-p-5 tw-no-underline tw-transition hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
-          >
-            <p className="tw-text-primary-200 tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4">
-              Wallet Authentication
-            </p>
-            <h3 className="group-hover:tw-text-primary-100 tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
-              What is changing with wallet auth
-            </h3>
-            <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-              A simple explanation of the new secure session, why users may be
-              asked to upgrade, and what to expect during rollout.
-            </p>
-          </Link>
-          <a
-            href={FOLLOW_THE_REPO_WAVE_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/50 tw-p-5 tw-no-underline tw-transition hover:tw-border-white/20 hover:tw-bg-iron-900/60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
-          >
-            <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-              Live Updates
-            </p>
-            <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
-              Follow The Repo
-            </h3>
-            <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-              The wave for shorter repo activity, live comments, and links back
-              into the daily engineering conversation.
-            </p>
-          </a>
+          <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug">
+            <Link
+              href="/about/tech/wallet-authentication"
+              className="hover:tw-text-primary-200 tw-text-iron-50 tw-no-underline"
+            >
+              Wallet authentication upgrade
+            </Link>
+          </h3>
+          <p className="tw-mb-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+            What is changing with the new secure session, why users may be asked
+            to upgrade, and what to expect during rollout.
+          </p>
         </div>
       </section>
 
@@ -148,12 +99,12 @@ export default function AboutTech() {
           </p>
         </div>
 
-        <article className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/50">
+        <article className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50">
           <ul className="tw-mb-0 tw-list-none tw-divide-y tw-divide-iron-800 tw-p-0">
             {TECH_PR_REPORTS.map((report) => (
               <li key={report.slug}>
-                <div className="tw-grid tw-gap-0 tw-transition hover:tw-bg-iron-900/35 md:tw-grid-cols-[minmax(0,1fr)_12rem]">
-                  <div className="tw-p-5 md:tw-p-6">
+                <div className="tw-grid tw-gap-0 md:tw-grid-cols-[minmax(0,1fr)_12rem]">
+                  <div className="tw-p-5">
                     <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
                       {report.dateLabel}
                     </p>
@@ -169,15 +120,13 @@ export default function AboutTech() {
                       {report.description}
                     </p>
                   </div>
-                  <div className="tw-flex tw-items-center tw-border-t tw-border-solid tw-border-iron-800 tw-p-5 md:tw-border-l md:tw-border-t-0 md:tw-p-6">
-                    <div>
-                      <p className="tw-mb-1 tw-text-3xl tw-font-semibold tw-leading-none tw-text-iron-50">
-                        {formatInteger(locale, getTechReportTotal(report))}
-                      </p>
-                      <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                        {t(locale, "about.tech.index.prsCovered")}
-                      </p>
-                    </div>
+                  <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-5 md:tw-border-l md:tw-border-t-0">
+                    <p className="tw-mb-1 tw-text-3xl tw-font-semibold tw-leading-none tw-text-iron-50">
+                      {formatInteger(locale, getTechReportTotal(report))}
+                    </p>
+                    <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+                      {t(locale, "about.tech.index.prsCovered")}
+                    </p>
                   </div>
                 </div>
               </li>
