@@ -20,7 +20,16 @@ import {
 } from "@/lib/security/urlGuard";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import LruTtlCache from "@/lib/cache/lruTtl";
-import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import {
+  detectExternalFileKind,
+  getFileExtension,
+  getNormalizedMimeType,
+  isClearlyFileLikeUrl,
+} from "@/lib/link-preview/fileKinds";
+import type {
+  ExternalFileLinkPreviewResponse,
+  LinkPreviewResponse,
+} from "@/services/api/link-preview-api";
 import {
   HTML_ACCEPT_HEADER,
   LINK_PREVIEW_USER_AGENT,
@@ -322,6 +331,9 @@ async function extractHtmlResponse(
       { allowMissing: true }
     );
     const html = await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
+    if (contentType === null && !looksLikeHtmlDocument(html)) {
+      throw new UnsupportedContentTypeError(null, "HTML");
+    }
     const finalUrl = response.url || fallbackUrl.toString();
 
     return {
@@ -340,12 +352,16 @@ async function extractHtmlResponse(
   }
 }
 
+function looksLikeHtmlDocument(value: string): boolean {
+  return /^\s*(?:<!doctype\s+html\b|<html\b|<head\b|<body\b|<meta\b|<title\b|<!--)/i.test(
+    value
+  );
+}
+
 /**
- * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
+ * Fetches remote generic preview content through the public URL guard.
  */
-async function fetchHtml(
-  url: URL
-): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
+async function fetchGenericResponse(url: URL): Promise<Response> {
   const response = await fetchPublicUrl(
     url,
     {},
@@ -359,7 +375,167 @@ async function fetchHtml(
 
   ensureSuccessfulResponse(response);
 
+  return response;
+}
+
+/**
+ * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
+ */
+async function fetchHtml(
+  url: URL
+): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
+  const response = await fetchGenericResponse(url);
   return extractHtmlResponse(response, url);
+}
+
+function isHtmlDocumentContentType(contentType: string | null): boolean {
+  if (!contentType) {
+    return false;
+  }
+
+  const mimeType = getNormalizedMimeType(contentType);
+  return (
+    mimeType === "text/html" ||
+    mimeType === "application/xhtml+xml" ||
+    mimeType === "application/xml" ||
+    mimeType === "text/xml" ||
+    Boolean(mimeType?.endsWith("+xml"))
+  );
+}
+
+function parseContentLength(headers: Headers): number | null {
+  const rawContentLength = headers.get("content-length")?.trim();
+  if (!rawContentLength || !/^\d+$/.test(rawContentLength)) {
+    return null;
+  }
+
+  const parsed = Number(rawContentLength);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+}
+
+async function cancelResponseBody(response: Response): Promise<void> {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Best effort: file previews intentionally do not consume response bodies.
+  }
+}
+
+function decodeHeaderValue(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function normalizeContentDispositionFilenameStar(value: string): string {
+  const trimmed = value.trim().replace(/^"|"$/g, "");
+  const parts = trimmed.split("'");
+  if (parts.length >= 3 && parts[0]) {
+    return parts.slice(2).join("'");
+  }
+  return trimmed;
+}
+
+function sanitizeFileName(value: string | null | undefined): string | null {
+  const normalized = value
+    ?.replace(/[\u0000-\u001f\u007f]/g, "")
+    .split(/[\\/]/)
+    .findLast((segment) => segment.length > 0)
+    ?.trim();
+
+  if (!normalized) {
+    return null;
+  }
+
+  return normalized.slice(0, 180);
+}
+
+function getContentDispositionFileName(headers: Headers): string | null {
+  const contentDisposition = headers.get("content-disposition");
+  if (!contentDisposition) {
+    return null;
+  }
+
+  const encodedMatch = /filename\*\s*=\s*([^;]+)/i.exec(contentDisposition);
+  if (encodedMatch?.[1]) {
+    return sanitizeFileName(
+      decodeHeaderValue(
+        normalizeContentDispositionFilenameStar(encodedMatch[1])
+      )
+    );
+  }
+
+  const quotedMatch = /filename\s*=\s*"([^"]+)"/i.exec(contentDisposition);
+  if (quotedMatch?.[1]) {
+    return sanitizeFileName(quotedMatch[1]);
+  }
+
+  const plainMatch = /filename\s*=\s*([^;]+)/i.exec(contentDisposition);
+  return sanitizeFileName(plainMatch?.[1]);
+}
+
+function getUrlFileName(url: URL): string | null {
+  return sanitizeFileName(
+    decodeHeaderValue(url.pathname.split("/").at(-1) ?? "")
+  );
+}
+
+function getSourceHost(url: URL): string {
+  return url.hostname.replace(/^www\./i, "");
+}
+
+function shouldUseExternalFilePreview(
+  response: Response,
+  finalUrl: URL
+): boolean {
+  if (isClearlyFileLikeUrl(finalUrl)) {
+    return true;
+  }
+
+  const contentType = response.headers.get("content-type");
+  // Explicit non-HTML payloads, including JSON, are metadata-only file
+  // previews; external bodies are not proxied or decoded here.
+  return Boolean(contentType) && !isHtmlDocumentContentType(contentType);
+}
+
+function buildExternalFileResponse(
+  response: Response,
+  finalUrl: URL
+): ExternalFileLinkPreviewResponse {
+  const contentType = response.headers.get("content-type")?.trim() ?? null;
+  const fileName =
+    getContentDispositionFileName(response.headers) ??
+    getUrlFileName(finalUrl) ??
+    getSourceHost(finalUrl);
+  const extension =
+    getFileExtension(fileName) ?? getFileExtension(finalUrl.pathname);
+  const fileKind = detectExternalFileKind({ extension, contentType });
+
+  return {
+    type: "external.file",
+    title: fileName,
+    fileName,
+    extension,
+    fileKind,
+    contentType,
+    sizeBytes: parseContentLength(response.headers),
+    sourceHost: getSourceHost(finalUrl),
+    trust: "external_unscanned",
+    links: {
+      open: finalUrl.toString(),
+    },
+  };
+}
+
+function getFetchedFinalUrl(response: Response, fallbackUrl: URL): URL {
+  const finalUrl = response.url || fallbackUrl.toString();
+  try {
+    return new URL(finalUrl);
+  } catch {
+    throw new UrlGuardError("Invalid redirect URL", "invalid-url", 502);
+  }
 }
 
 function handleGuardError(error: unknown, fallbackStatus = 400) {
@@ -407,9 +583,21 @@ function createGenericPlan(url: URL): PreviewPlan {
   return {
     cacheKey: `generic:${url.toString()}`,
     execute: async () => {
-      const { html, contentType, finalUrl } = await fetchHtml(url);
-      const finalUrlInstance = new URL(finalUrl);
+      const response = await fetchGenericResponse(url);
+      const finalUrlInstance = getFetchedFinalUrl(response, url);
       await assertPublicUrl(finalUrlInstance, PUBLIC_URL_OPTIONS);
+
+      if (shouldUseExternalFilePreview(response, finalUrlInstance)) {
+        const data = buildExternalFileResponse(response, finalUrlInstance);
+        await cancelResponseBody(response);
+        return { data, ttl: CACHE_TTL_MS };
+      }
+
+      const {
+        html,
+        contentType,
+        finalUrl: htmlFinalUrl,
+      } = await extractHtmlResponse(response, finalUrlInstance);
       const googleWorkspace = await buildGoogleWorkspaceResponse(
         finalUrlInstance,
         html,
@@ -423,7 +611,7 @@ function createGenericPlan(url: URL): PreviewPlan {
         finalUrlInstance,
         html,
         contentType,
-        finalUrl
+        htmlFinalUrl
       );
       const farcasterEmbed = await buildFarcasterEmbedResponse(
         finalUrlInstance,

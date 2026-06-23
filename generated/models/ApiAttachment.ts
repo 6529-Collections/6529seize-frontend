@@ -12,6 +12,7 @@
  */
 
 import { ApiAttachmentKind } from '../models/ApiAttachmentKind';
+import { ApiAttachmentSafety } from '../models/ApiAttachmentSafety';
 import { ApiAttachmentStatus } from '../models/ApiAttachmentStatus';
 import { ApiAttachmentUploadMimeType } from '../models/ApiAttachmentUploadMimeType';
 import { HttpFile } from '../http/http';
@@ -24,6 +25,7 @@ export class ApiAttachment {
     'status': ApiAttachmentStatus;
     'url'?: string | null;
     'error_reason'?: string | null;
+    'safety'?: ApiAttachmentSafety;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -70,6 +72,12 @@ export class ApiAttachment {
             "name": "error_reason",
             "baseName": "error_reason",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "safety",
+            "baseName": "safety",
+            "type": "ApiAttachmentSafety",
             "format": ""
         }    ];
 

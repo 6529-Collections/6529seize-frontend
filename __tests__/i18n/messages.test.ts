@@ -40,6 +40,22 @@ const NEW_VERSION_TOAST_LOCALE_MESSAGES = [
   },
 ] as const;
 
+const FILE_KIND_MESSAGE_KEYS = [
+  "linkPreview.file.kind.archive",
+  "linkPreview.file.kind.audio",
+  "linkPreview.file.kind.binary",
+  "linkPreview.file.kind.code",
+  "linkPreview.file.kind.csv",
+  "linkPreview.file.kind.document",
+  "linkPreview.file.kind.image",
+  "linkPreview.file.kind.pdf",
+  "linkPreview.file.kind.presentation",
+  "linkPreview.file.kind.spreadsheet",
+  "linkPreview.file.kind.text",
+  "linkPreview.file.kind.unknown",
+  "linkPreview.file.kind.video",
+] as const;
+
 describe("frontend i18n helpers", () => {
   it("defines the initial supported locale set", () => {
     expect(DEFAULT_LOCALE).toBe("en-US");
@@ -379,5 +395,14 @@ describe("frontend i18n helpers", () => {
     );
     expect(formatRelativeTime("en-US", -1, "day")).toBe("yesterday");
     expect(compareLocalized("en-US", "2", "10")).toBeLessThan(0);
+  });
+
+  it("keeps file-kind labels distinguishable within each locale", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const labels = FILE_KIND_MESSAGE_KEYS.map((key) =>
+        t(locale, key).toLocaleLowerCase(locale)
+      );
+      expect(new Set(labels).size).toBe(labels.length);
+    }
   });
 });

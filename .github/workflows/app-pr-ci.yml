@@ -264,6 +264,7 @@ jobs:
 
           jest_test_files=()
           related_source_files=()
+          i18n_messages_test_required=false
           for file in "${existing_files[@]}"; do
             case "$file" in
               tests/*.spec.ts|tests/*.spec.tsx|tests/**/*.spec.ts|tests/**/*.spec.tsx)
@@ -275,11 +276,18 @@ jobs:
               *.spec.ts|*.spec.tsx)
                 echo "Skipping non-Jest spec for related Jest coverage: $file"
                 ;;
+              i18n/messages.ts|i18n/messages/*.ts)
+                i18n_messages_test_required=true
+                ;;
               *)
                 related_source_files+=("$file")
                 ;;
             esac
           done
+
+          if [ "$i18n_messages_test_required" = true ] && [ -f "__tests__/i18n/messages.test.ts" ]; then
+            jest_test_files+=("__tests__/i18n/messages.test.ts")
+          fi
 
           run_jest_with_timeout() {
             local timeout_seconds="$1"

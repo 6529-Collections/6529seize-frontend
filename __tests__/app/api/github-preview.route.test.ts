@@ -400,6 +400,121 @@ describe("github-preview API route", () => {
     });
   });
 
+  it("keeps excerpts for extensionless GitHub text files", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "LICENSE",
+        path: "LICENSE",
+        size: 24,
+        encoding: "base64",
+        content: Buffer.from("Permission is hereby granted\n").toString(
+          "base64"
+        ),
+        html_url: "https://github.com/o/r/blob/main/LICENSE",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/LICENSE")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      title: "LICENSE",
+      extension: null,
+      fileKind: "unknown",
+      isBinary: false,
+      lineCount: 2,
+      excerpt: ["Permission is hereby granted", ""],
+    });
+  });
+
+  it("suppresses excerpts for extensionless GitHub binary files", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "ASSET",
+        path: "ASSET",
+        size: 4,
+        encoding: "base64",
+        content: Buffer.from([0, 1, 2, 3]).toString("base64"),
+        html_url: "https://github.com/o/r/blob/main/ASSET",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/ASSET")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      title: "ASSET",
+      extension: null,
+      fileKind: "unknown",
+      isBinary: true,
+      lineCount: null,
+      excerpt: null,
+    });
+  });
+
+  it("suppresses oversized decoded GitHub file excerpts", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "large.txt",
+        path: "large.txt",
+        encoding: "base64",
+        content: Buffer.from("a".repeat(64 * 1024 + 1)).toString("base64"),
+        html_url: "https://github.com/o/r/blob/main/large.txt",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/large.txt")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      title: "large.txt",
+      extension: "txt",
+      fileKind: "text",
+      isBinary: false,
+      lineCount: null,
+      excerpt: null,
+    });
+  });
+
+  it("maps GitHub PDF files as metadata-only previews", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "plan.pdf",
+        path: "docs/plan.pdf",
+        size: 4096,
+        encoding: "base64",
+        content: Buffer.from("%PDF-1.7\nbinary").toString("base64"),
+        html_url: "https://github.com/o/r/blob/main/docs/plan.pdf",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/docs/plan.pdf")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      title: "plan.pdf",
+      path: "docs/plan.pdf",
+      extension: "pdf",
+      fileKind: "pdf",
+      mimeType: "application/pdf",
+      isBinary: true,
+      lineCount: null,
+      excerpt: null,
+    });
+  });
+
   it("tries longer ref splits for file links on slash-named branches", async () => {
     fetchMock
       .mockResolvedValueOnce(

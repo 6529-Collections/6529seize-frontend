@@ -10349,11 +10349,54 @@ components:
         error_reason:
           type: string
           nullable: true
+        safety:
+          $ref: "#/components/schemas/ApiAttachmentSafety"
     ApiAttachmentKind:
       type: string
       enum:
         - pdf
         - csv
+    ApiAttachmentSafety:
+      type: object
+      required:
+        - status
+        - scanner
+        - validation
+        - size_bytes
+        - sha256
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiAttachmentSafetyStatus"
+        scanner:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiAttachmentSafetyScanner"
+        validation:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiAttachmentSafetyValidation"
+        size_bytes:
+          type: integer
+          format: int64
+          nullable: true
+        sha256:
+          type: string
+          nullable: true
+    ApiAttachmentSafetyScanner:
+      type: string
+      enum:
+        - guardduty
+    ApiAttachmentSafetyStatus:
+      type: string
+      enum:
+        - pending
+        - scanned_validated
+        - blocked
+        - failed
+    ApiAttachmentSafetyValidation:
+      type: string
+      enum:
+        - public_ipfs_validated
     ApiAttachmentStatus:
       type: string
       enum:
