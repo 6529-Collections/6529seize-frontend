@@ -15,6 +15,7 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   canStoreAnotherWalletAccount,
+  getConnectedWalletAccounts,
   setAuthJwt,
 } from "@/services/auth/auth.utils";
 import {
@@ -22,6 +23,7 @@ import {
   redeemConnectionShare,
 } from "@/services/auth/session-v2.utils";
 import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
+import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
 
 interface AcceptConnectionSharingProps {
   connectionShareCode: string;
@@ -57,6 +59,20 @@ function HomeLinkCard({ message }: Readonly<{ message: string }>) {
         >
           Take me home
         </Link>
+      </p>
+    </div>
+  );
+}
+
+function ConnectionLimitCard() {
+  return (
+    <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
+      <p className="tw-text-base tw-font-semibold tw-text-white">
+        Connected profile limit reached
+      </p>
+      <p className="tw-mt-3 tw-text-sm tw-text-neutral-300">
+        You can keep up to {MAX_CONNECTED_PROFILES} connected profiles. Sign out
+        from one profile, then scan this connection link again.
       </p>
     </div>
   );
@@ -120,13 +136,15 @@ function CurrentProfileNotice({
   connectedAddress,
   connectedProfile,
   acceptingConnection,
+  shouldShow,
 }: Readonly<{
   connectedAddress: string | undefined;
   connectedProfile: ReturnType<typeof useAuth>["connectedProfile"];
   acceptingConnection: boolean;
+  shouldShow: boolean;
 }>) {
   const shouldShowNotice =
-    Boolean(connectedAddress) && acceptingConnection === false;
+    shouldShow && Boolean(connectedAddress) && acceptingConnection === false;
   if (shouldShowNotice) {
     return (
       <p className="tw-text-center tw-text-sm tw-text-neutral-400">
@@ -146,17 +164,21 @@ function CurrentProfileNotice({
 
 function AcceptConnectionButton({
   acceptingConnection,
+  disabled = false,
   onAccept,
 }: Readonly<{
   acceptingConnection: boolean;
+  disabled?: boolean;
   onAccept: () => void;
 }>) {
+  const isDisabled = acceptingConnection || disabled;
+
   return (
     <div className="tw-flex tw-justify-center">
       <button
         type="button"
-        disabled={acceptingConnection}
-        aria-disabled={acceptingConnection}
+        disabled={isDisabled}
+        aria-disabled={isDisabled}
         aria-busy={acceptingConnection}
         onClick={onAccept}
         className="tw-flex tw-min-w-[200px] tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-6 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-none tw-outline-none tw-ring-0 tw-transition-colors hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-70"
@@ -170,6 +192,16 @@ function AcceptConnectionButton({
         )}
       </button>
     </div>
+  );
+}
+
+function isAddressInConnectedAccounts(address: string): boolean {
+  if (!address.trim()) {
+    return false;
+  }
+
+  return getConnectedWalletAccounts().some((account) =>
+    areEqualAddresses(account.address, address)
   );
 }
 
@@ -298,6 +330,8 @@ function ConnectionSharingContent({
   connectedAddress,
   connectedProfile,
   acceptingConnection,
+  isIncomingConnectionAlreadyStored,
+  isStorageLimitReached,
   onAccept,
 }: Readonly<{
   hasUnsupportedWebConnectionShare: boolean;
@@ -309,6 +343,8 @@ function ConnectionSharingContent({
   connectedAddress: string | undefined;
   connectedProfile: ReturnType<typeof useAuth>["connectedProfile"];
   acceptingConnection: boolean;
+  isIncomingConnectionAlreadyStored: boolean;
+  isStorageLimitReached: boolean;
   onAccept: () => void;
 }>) {
   if (hasUnsupportedWebConnectionShare) {
@@ -329,9 +365,12 @@ function ConnectionSharingContent({
           connectedAddress={connectedAddress}
           connectedProfile={connectedProfile}
           acceptingConnection={acceptingConnection}
+          shouldShow={isIncomingConnectionAlreadyStored === false}
         />
+        {isStorageLimitReached ? <ConnectionLimitCard /> : null}
         <AcceptConnectionButton
           acceptingConnection={acceptingConnection}
+          disabled={isStorageLimitReached}
           onAccept={onAccept}
         />
       </div>
@@ -361,6 +400,12 @@ function AcceptConnectionSharing(
     hasConnectionShareCode && Capacitor.isNativePlatform();
   const isLegacyDesktopConnectionFlow =
     hasLegacyDesktopToken && address.trim().length > 0;
+  const isIncomingConnectionAlreadyStored =
+    isAddressInConnectedAccounts(address);
+  const isStorageLimitReached =
+    address.trim().length > 0 &&
+    isIncomingConnectionAlreadyStored === false &&
+    canStoreAnotherWalletAccount(address) === false;
 
   const { profile, isLoading: profileLoading } = useIdentity({
     handleOrWallet: address || null,
@@ -426,8 +471,10 @@ function AcceptConnectionSharing(
           connectedAddress={connectedAddress}
           connectedProfile={connectedProfile}
           acceptingConnection={acceptingConnection}
+          isIncomingConnectionAlreadyStored={isIncomingConnectionAlreadyStored}
+          isStorageLimitReached={isStorageLimitReached}
           onAccept={() => {
-            if (acceptingConnection) return;
+            if (acceptingConnection || isStorageLimitReached) return;
             setAcceptingConnection(true);
             void acceptConnection();
           }}
