@@ -12,6 +12,16 @@ const queuedWavePreviewFetches: string[] = [];
 const wavePreviewSubscriptionCounts = new Map<string, number>();
 const wavePreviewStoreListeners = new Set<() => void>();
 
+type WavePreviewRefetch = () => Promise<unknown>;
+
+const ignoreWavePreviewRefetchError = (): void => {
+  // React Query stores the failed refetch in query state; preview retries do not need local error UI.
+};
+
+const retryWavePreviewFetch = (refetch: WavePreviewRefetch): void => {
+  refetch().catch(ignoreWavePreviewRefetchError);
+};
+
 const subscribeToWavePreviewStore = (listener: () => void): (() => void) => {
   wavePreviewStoreListeners.add(listener);
   return () => wavePreviewStoreListeners.delete(listener);
@@ -151,12 +161,13 @@ export function useWavePreviewById(waveId: string): {
 
     fetchCycleStartedRef.current = false;
 
-    if (!hasWave) {
-      if (emptyPreviewRetryCountRef.current < MAX_EMPTY_WAVE_PREVIEW_RETRIES) {
-        emptyPreviewRetryCountRef.current += 1;
-        void refetch();
-        return;
-      }
+    if (
+      !hasWave &&
+      emptyPreviewRetryCountRef.current < MAX_EMPTY_WAVE_PREVIEW_RETRIES
+    ) {
+      emptyPreviewRetryCountRef.current += 1;
+      retryWavePreviewFetch(refetch);
+      return;
     }
 
     releaseWavePreviewFetch(waveId);
