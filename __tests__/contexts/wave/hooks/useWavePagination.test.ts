@@ -1,7 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useWavePagination } from '@/contexts/wave/hooks/useWavePagination';
 import { DropSize } from '@/helpers/waves/drop.helpers';
-import { WAVE_DROPS_PARAMS } from '@/components/react-query-wrapper/utils/query-utils';
 
 // Mock abort controller utilities
 const cancelFetch = jest.fn();
@@ -131,7 +130,7 @@ describe('useWavePagination', () => {
     consoleSpy.mockRestore();
   });
 
-  it('processes only the latest around-serial request', async () => {
+  it('processes the latest uncovered around-serial request after the active fetch', async () => {
     const initial: Record<string, WaveState> = {
       wave1: {
         id: 'wave1',
@@ -151,7 +150,7 @@ describe('useWavePagination', () => {
 
     act(() => {
       result.current.fetchAroundSerialNo('wave1', 100);
-      result.current.fetchAroundSerialNo('wave1', 110);
+      result.current.fetchAroundSerialNo('wave1', 200);
     });
 
     // allow queue to resolve
@@ -169,8 +168,161 @@ describe('useWavePagination', () => {
     expect(fetchAroundSerialNoWaveMessages).toHaveBeenNthCalledWith(
       2,
       'wave1',
-      110 + (WAVE_DROPS_PARAMS.limit - 1),
+      200,
       expect.any(Object)
     );
+    expect(cancelFetch).not.toHaveBeenCalled();
+  });
+
+  it('coalesces duplicate around-serial requests while a fetch is active', async () => {
+    const initial: Record<string, WaveState> = {
+      wave1: {
+        id: 'wave1',
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: true,
+        drops: [],
+        latestFetchedSerialNo: null,
+      },
+    };
+
+    let resolveFetch:
+      | ((drops: Array<{ id: string; serial_no: number }>) => void)
+      | null = null;
+    fetchAroundSerialNoWaveMessages.mockImplementation(
+      () =>
+        new Promise<Array<{ id: string; serial_no: number }>>((resolve) => {
+          resolveFetch = resolve;
+        })
+    );
+
+    const { result } = setup(initial);
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(1);
+    expect(cancelFetch).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveFetch?.([{ id: 'd', serial_no: 100 }]);
+    });
+
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips around-serial requests covered by a currently hydrated drop', async () => {
+    const initial: Record<string, WaveState> = {
+      wave1: {
+        id: 'wave1',
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: true,
+        drops: [],
+        latestFetchedSerialNo: null,
+      },
+    };
+
+    fetchAroundSerialNoWaveMessages.mockResolvedValue([
+      { id: 'a', serial_no: 90 },
+      { id: 'b', serial_no: 100 },
+      { id: 'c', serial_no: 110 },
+    ]);
+
+    const { result } = setup(initial);
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches a covered serial when the current store only has a light drop', async () => {
+    const initial: Record<string, WaveState> = {
+      wave1: {
+        id: 'wave1',
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: true,
+        drops: [],
+        latestFetchedSerialNo: null,
+      },
+    };
+
+    fetchAroundSerialNoWaveMessages.mockResolvedValue([
+      { id: 'd', serial_no: 100 },
+    ]);
+
+    const { result, store } = setup(initial);
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    store.wave1!.drops = [{ id: 'd', serial_no: 100, type: DropSize.LIGHT }];
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(2);
+  });
+
+  it('refetches the same serial after an empty around-serial result', async () => {
+    const initial: Record<string, WaveState> = {
+      wave1: {
+        id: 'wave1',
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: true,
+        drops: [],
+        latestFetchedSerialNo: null,
+      },
+    };
+
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    fetchAroundSerialNoWaveMessages
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ id: 'd', serial_no: 100 }]);
+
+    const { result } = setup(initial);
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    act(() => {
+      result.current.fetchAroundSerialNo('wave1', 100);
+    });
+
+    await act(async () => {
+      // microtask queue flush
+    });
+
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(2);
+    warnSpy.mockRestore();
   });
 });
