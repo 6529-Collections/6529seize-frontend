@@ -1045,8 +1045,7 @@ const WaveDrop = ({
       const swipeStart = timestampSwipeStartRef.current;
       const pointerId = getPointerId(event);
       if (
-        !swipeStart ||
-        swipeStart.pointerId !== pointerId ||
+        swipeStart?.pointerId !== pointerId ||
         getPointerType(event) === "touch" ||
         !showGroupedTimestamp ||
         isEditing
@@ -1102,84 +1101,6 @@ const WaveDrop = ({
     },
     [resetTimestampSwipe]
   );
-
-  const handleMouseDown = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      if (
-        event.button !== PRIMARY_POINTER_BUTTON ||
-        !showGroupedTimestamp ||
-        isEditing ||
-        isInteractiveSwipeTarget(event.target)
-      ) {
-        return;
-      }
-
-      timestampSwipeStartRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-      setTimestampSwipeOffset(0);
-      setIsTimestampSwipeDragging(false);
-    },
-    [isEditing, showGroupedTimestamp]
-  );
-
-  const handleMouseMove = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      const swipeStart = timestampSwipeStartRef.current;
-      if (
-        !swipeStart ||
-        swipeStart.pointerId !== undefined ||
-        !showGroupedTimestamp ||
-        isEditing
-      ) {
-        return;
-      }
-
-      const swipeDeltaX = swipeStart.x - event.clientX;
-      const deltaY = Math.abs(event.clientY - swipeStart.y);
-      const isActivatedSwipe =
-        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
-        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
-
-      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
-        return;
-      }
-
-      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
-        resetTimestampSwipe();
-        return;
-      }
-
-      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
-      if (nextOffset <= 0) {
-        return;
-      }
-
-      markNextClickForSuppression();
-      setIsTimestampSwipeDragging(true);
-      setTimestampSwipeOffset(nextOffset);
-
-      if (event.cancelable) {
-        event.preventDefault();
-      }
-    },
-    [
-      isEditing,
-      isTimestampSwipeDragging,
-      markNextClickForSuppression,
-      resetTimestampSwipe,
-      showGroupedTimestamp,
-    ]
-  );
-
-  const handleMouseEnd = useCallback(() => {
-    if (timestampSwipeStartRef.current?.pointerId !== undefined) {
-      return;
-    }
-
-    resetTimestampSwipe();
-  }, [resetTimestampSwipe]);
 
   const handleOnReply = useCallback(() => {
     // Cancel any active edit mode first
@@ -1459,10 +1380,6 @@ const WaveDrop = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
         onPointerCancel={handlePointerEnd}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseEnd}
-        onMouseLeave={handleMouseEnd}
         onClickCapture={handleClickCapture}
       >
         {showGroupedTimestamp && (
