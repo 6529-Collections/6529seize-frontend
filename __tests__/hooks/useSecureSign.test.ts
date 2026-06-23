@@ -22,6 +22,7 @@ jest.mock('viem', () => {
     constructor(message?: string) {
       super(message);
       this.name = 'UserRejectedRequestError';
+      // Set the prototype explicitly for instanceof checks to work
       Object.setPrototypeOf(this, MockUserRejectedRequestError.prototype);
     }
   }
@@ -46,15 +47,15 @@ const renderHookWithWrapper = (hook: () => any) => {
 describe('useSecureSign', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Setup default mocks
     mockUseAppKitAccount.mockReturnValue({
       address: '0x1234567890123456789012345678901234567890',
       isConnected: true,
       caipAddress: '',
-      status: 'connected'
+      status: 'connected',
     });
-    
+
     // Setup default Wagmi mock
     mockUseSignMessage.mockReturnValue({
       signMessageAsync: jest.fn(),
@@ -76,7 +77,7 @@ describe('useSecureSign', () => {
         address: undefined,
         isConnected: false,
         caipAddress: '',
-        status: 'disconnected'
+        status: 'disconnected',
       });
 
       const { result } = renderHookWithWrapper(() => useSecureSign());
@@ -90,13 +91,12 @@ describe('useSecureSign', () => {
       });
     });
 
-
     it('throws MobileSigningError when address is missing', async () => {
       mockUseAppKitAccount.mockReturnValue({
         address: undefined,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const { result } = renderHookWithWrapper(() => useSecureSign());
@@ -115,7 +115,7 @@ describe('useSecureSign', () => {
         address: 'invalid-address-format',
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const { result } = renderHookWithWrapper(() => useSecureSign());
@@ -135,12 +135,12 @@ describe('useSecureSign', () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const testMessage = 'test message';
       const testSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const mockSignMessageAsync = jest.fn().mockResolvedValue(testSignature);
@@ -162,19 +162,21 @@ describe('useSecureSign', () => {
         expect(signResult.error).toBeUndefined();
       });
 
-      expect(mockSignMessageAsync).toHaveBeenCalledWith({ message: testMessage });
+      expect(mockSignMessageAsync).toHaveBeenCalledWith({
+        message: testMessage,
+      });
     });
 
     it('successfully signs with valid address format', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const testMessage = 'test message';
       const testSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const mockSignMessageAsync = jest.fn().mockResolvedValue(testSignature);
@@ -196,19 +198,21 @@ describe('useSecureSign', () => {
         expect(signResult.error).toBeUndefined();
       });
 
-      expect(mockSignMessageAsync).toHaveBeenCalledWith({ message: testMessage });
+      expect(mockSignMessageAsync).toHaveBeenCalledWith({
+        message: testMessage,
+      });
     });
   });
 
   describe('User rejection handling', () => {
     it('handles UserRejectedRequestError correctly', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const userRejectionError = new UserRejectedRequestError('User rejected the request');
@@ -234,12 +238,12 @@ describe('useSecureSign', () => {
 
     it('handles legacy code 4001 rejection correctly', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const legacyRejectionError = { code: 4001, message: 'User rejected' };
@@ -264,22 +268,19 @@ describe('useSecureSign', () => {
     });
   });
 
-
   describe('Hook state management', () => {
     it('manages signing pending state correctly', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
-      const mockSignMessageAsync = jest.fn().mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve(validSignature), 50))
-      );
+      const mockSignMessageAsync = jest.fn().mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(validSignature), 50)));
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
         isError: false,
@@ -318,7 +319,7 @@ describe('useSecureSign', () => {
         address: undefined,
         isConnected: false,
         caipAddress: '',
-        status: 'disconnected'
+        status: 'disconnected',
       });
 
       const { result } = renderHookWithWrapper(() => useSecureSign());
@@ -335,7 +336,7 @@ describe('useSecureSign', () => {
         address: 'invalid',
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const { result } = renderHookWithWrapper(() => useSecureSign());
@@ -353,7 +354,7 @@ describe('useSecureSign', () => {
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const wagmiError = new Error('Wagmi signing failed');
@@ -390,14 +391,14 @@ describe('useSecureSign', () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const testMessage = 'test message';
       const testSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const mockSignMessageAsync = jest.fn().mockResolvedValue(testSignature);
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
@@ -414,7 +415,9 @@ describe('useSecureSign', () => {
         await result.current.signMessage(testMessage);
       });
 
-      expect(mockSignMessageAsync).toHaveBeenCalledWith({ message: testMessage });
+      expect(mockSignMessageAsync).toHaveBeenCalledWith({
+        message: testMessage,
+      });
     });
   });
 
@@ -424,9 +427,9 @@ describe('useSecureSign', () => {
         address: '0x1234567890123456789012345678901234567890',
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       // Reset Wagmi mock to default success state
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: jest.fn(),
@@ -504,7 +507,7 @@ describe('useSecureSign', () => {
         address: 'invalid-address',
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const { result } = renderHookWithWrapper(() => useSecureSign());
@@ -519,18 +522,17 @@ describe('useSecureSign', () => {
     });
   });
 
-
   describe('Security Tests - Signature Validation', () => {
     it('throws ProviderValidationError for invalid signature format from Wagmi', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const mockSignMessageAsync = jest.fn().mockResolvedValue('invalid-signature');
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
@@ -555,14 +557,14 @@ describe('useSecureSign', () => {
     it('accepts valid signature format from Wagmi', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const mockSignMessageAsync = jest.fn().mockResolvedValue(validSignature);
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
@@ -585,14 +587,14 @@ describe('useSecureSign', () => {
 
     it('throws ProviderValidationError for non-string signature from Wagmi', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const mockSignMessageAsync = jest.fn().mockResolvedValue(123); // non-string
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
@@ -615,21 +617,18 @@ describe('useSecureSign', () => {
     });
   });
 
-
-
-
   describe('Security Tests - Type Safety Verification', () => {
     it('verifies no null signatures on successful signing', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const mockSignMessageAsync = jest.fn().mockResolvedValue(validSignature);
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
@@ -654,14 +653,14 @@ describe('useSecureSign', () => {
 
     it('handles Wagmi signMessage errors gracefully', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const wagmiError = new Error('Wagmi internal error');
       const mockSignMessageAsync = jest.fn().mockRejectedValue(wagmiError);
       mockUseSignMessage.mockReturnValue({
@@ -690,7 +689,7 @@ describe('useSecureSign', () => {
         address: '0x1234567890123456789012345678901234567890',
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
 
       const { result } = renderHookWithWrapper(() => useSecureSign());
@@ -704,14 +703,14 @@ describe('useSecureSign', () => {
 
     it('handles unknown error types from Wagmi safely', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const mockSignMessageAsync = jest.fn().mockRejectedValue('string error');
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
@@ -734,14 +733,14 @@ describe('useSecureSign', () => {
 
     it('handles errors with numeric codes safely', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const errorWithCode = { code: 1234, message: 'Custom error' };
       const mockSignMessageAsync = jest.fn().mockRejectedValue(errorWithCode);
       mockUseSignMessage.mockReturnValue({
@@ -765,15 +764,18 @@ describe('useSecureSign', () => {
 
     it('handles plain object errors correctly', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
-      const objectError = { error: 'plain object error', details: 'some details' };
+
+      const objectError = {
+        error: 'plain object error',
+        details: 'some details',
+      };
       const mockSignMessageAsync = jest.fn().mockRejectedValue(objectError);
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
@@ -797,14 +799,14 @@ describe('useSecureSign', () => {
     it('handles memory cleanup properly', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const testSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-      
+
       mockUseAppKitAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
-        status: 'connected'
+        status: 'connected',
       });
-      
+
       const mockSignMessageAsync = jest.fn().mockResolvedValue(testSignature);
       mockUseSignMessage.mockReturnValue({
         signMessageAsync: mockSignMessageAsync,
@@ -818,15 +820,17 @@ describe('useSecureSign', () => {
       const { result } = renderHookWithWrapper(() => useSecureSign());
 
       let originalMessage = 'sensitive message content';
-      
+
       await act(async () => {
         const signResult = await result.current.signMessage(originalMessage);
         expect(signResult.signature).toBe(testSignature);
         expect(signResult.error).toBeUndefined();
       });
-      
+
       // Verify message was passed correctly but implementation should clear it
-      expect(mockSignMessageAsync).toHaveBeenCalledWith({ message: originalMessage });
+      expect(mockSignMessageAsync).toHaveBeenCalledWith({
+        message: originalMessage,
+      });
     });
   });
 });

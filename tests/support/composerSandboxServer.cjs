@@ -37,10 +37,18 @@ const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
 const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
 const SANDBOX_SUBMITTED_CHAT_DROP_ID = "00000000-0000-4000-8000-000000000539";
+const SANDBOX_SIGNATURE_WAVE_ID = "00000000-0000-4000-8000-000000000540";
+const SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID =
+  "00000000-0000-4000-8000-000000000541";
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
 const SANDBOX_CREATED_WAVE_DESCRIPTION =
   "Local-only create-wave description for Playwright.";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_SIGNATURE_WAVE_NAME = "Local Signature Sandbox Wave";
+const SANDBOX_SIGNATURE_WAVE_DESCRIPTION =
+  "Local-only signed drop sandbox wave for Playwright.";
+const SANDBOX_SIGNATURE_TERMS =
+  "Local-only signature sandbox terms. Unsigned drops must not be submitted.";
 const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
@@ -524,6 +532,65 @@ const createdWaveDrop = {
   parts_count: 1,
 };
 
+const signatureWaveMin = {
+  ...localWaveMin,
+  id: SANDBOX_SIGNATURE_WAVE_ID,
+  name: SANDBOX_SIGNATURE_WAVE_NAME,
+  description_drop_id: SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID,
+  submission_type: "DROP",
+};
+
+const signatureWaveOverview = {
+  ...localWaveOverview,
+  id: SANDBOX_SIGNATURE_WAVE_ID,
+  name: SANDBOX_SIGNATURE_WAVE_NAME,
+  description_drop: {
+    id: SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID,
+    content: SANDBOX_SIGNATURE_WAVE_DESCRIPTION,
+  },
+  total_drops_count: 0,
+  has_competition: true,
+};
+
+const signatureWaveDescriptionDrop = {
+  ...localWave.description_drop,
+  id: SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID,
+  wave: signatureWaveMin,
+  content: SANDBOX_SIGNATURE_WAVE_DESCRIPTION,
+  parts: [
+    {
+      id: 1,
+      content: SANDBOX_SIGNATURE_WAVE_DESCRIPTION,
+      media: [],
+      quoted_drop: null,
+    },
+  ],
+};
+
+// This fixture intentionally inherits the local wave's open visibility,
+// eligibility, and period gates, then overrides only the Rank+signature fields
+// required to exercise the signed-drop branch without adding a write backdoor.
+const signatureWave = {
+  ...localWave,
+  id: SANDBOX_SIGNATURE_WAVE_ID,
+  name: SANDBOX_SIGNATURE_WAVE_NAME,
+  description_drop: signatureWaveDescriptionDrop,
+  participation: {
+    ...localWave.participation,
+    signature_required: true,
+    terms: SANDBOX_SIGNATURE_TERMS,
+  },
+  wave: {
+    ...localWave.wave,
+    type: "RANK",
+  },
+  metrics: {
+    ...localWave.metrics,
+    drops_count: 0,
+    your_participation_drops_count: 0,
+  },
+};
+
 const dmWaveOverview = {
   ...localWaveOverview,
   id: SANDBOX_DM_WAVE_ID,
@@ -653,6 +720,7 @@ const sandboxNotificationWaveIds = new Set([
   SANDBOX_DM_WAVE_ID,
   SANDBOX_NOTIFICATION_WAVE_ID,
   SANDBOX_CREATED_WAVE_ID,
+  SANDBOX_SIGNATURE_WAVE_ID,
 ]);
 
 function notificationResponse(searchParams) {
@@ -1360,6 +1428,21 @@ const mockApiExactReadRoutes = new Map([
   [
     `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/drops`,
     () => ({ wave: createdWaveOverview, drops: [createdWaveDrop] }),
+  ],
+  [`/api/waves/${SANDBOX_SIGNATURE_WAVE_ID}`, () => signatureWave],
+  [
+    `/api/v2/waves/${SANDBOX_SIGNATURE_WAVE_ID}/drops`,
+    () => ({ wave: signatureWaveOverview, drops: [] }),
+  ],
+  [
+    `/api/v2/waves/${SANDBOX_SIGNATURE_WAVE_ID}/leaderboard`,
+    () => ({
+      wave: signatureWaveMin,
+      drops: [],
+      count: 0,
+      page: 1,
+      next: false,
+    }),
   ],
   ["/api/v2/boosted-drops", () => emptyPage()],
   ["/api/v2/drops", () => emptyPage()],
