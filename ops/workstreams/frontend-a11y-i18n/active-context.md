@@ -818,14 +818,17 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Commit and push the GLM follow-up on `codex/e2e-native-shell-readonly`,
-   update the PR evidence, then re-trigger latest-head reviewbot lanes.
-2. For PR #2848, keep the established loop: strong local validation first,
-   then CI, CodeRabbit, Sonar, 6529bot Opus lanes, responsiveness, GLM swarm,
-   and any specialized reviewbot lanes until Codex judges the loop is no
-   longer adding material value.
-3. Deploy merged testing-roadmap slices through staging first, validate exact
+1. PR #2851 (`codex/native-package-evidence-e2e`) is rebased onto current
+   `origin/main` after PR #2787, with local native evidence, deployment-bus,
+   and native-shell validation green. Push the refreshed head, re-trigger the
+   existing reviewbot lanes plus GLM-swarm, and merge once CI and material bot
+   feedback are clear.
+2. PR #2852 (`codex/e2e-wallet-signing-guards`) is the reaction sandbox train
+   ahead of PR #2853 and is being monitored on its refreshed current-main head.
+3. PR #2853 (`codex/e2e-wallet-signing-sandbox`) remains conflict-blocked
+   behind #2852 and should be rebased after #2852 lands.
+4. Deploy merged testing-roadmap slices through staging first, validate exact
    staged SHA, then production from current `origin/main` with exact-SHA
    validation and production-safe E2E evidence.
-4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
+5. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.

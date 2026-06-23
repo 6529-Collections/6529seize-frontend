@@ -3880,3 +3880,33 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: commit this memory update, force-push PR #2851, trigger all
   existing 6529bot lanes plus GLM-swarm, and merge after checks and material
   bot feedback are clear.
+
+## 2026-06-23T10:05Z PR #2851 Current-Main Rebase
+
+- `origin/main` advanced to
+  `32fa30b4eecfa9b103f67c5499f981292d63d167` via PR #2787.
+- Rebased PR #2851 (`codex/native-package-evidence-e2e`) onto that current
+  main cleanly, without conflict.
+- Validation on the refreshed head passed:
+  - `node --check ops/scripts/native-surface-evidence.cjs`
+  - `node --check ops/scripts/deployment-bus.cjs`
+  - `seize run lint:package-json`
+  - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+    60 passed.
+  - `seize run test:native-evidence`: passed; evidence tier is
+    `browser-simulation`, not real packaged runtime evidence.
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`: 43 changed TypeScript files passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 __tests__/scripts/deployment-bus.test.ts __tests__/scripts/native-surface-evidence.test.ts tests/support/surfaceSimulation.ts tests/surfaces/native-shell-readonly.spec.ts`
+  - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --output test-results/app-pr-ci/native-evidence-risk-floor-main-32fa30.json`:
+    Level 4 because deployment and test-control tooling changed.
+  - `seize run testing-strategy -- scan-changed-secrets --changed-from origin/main --output test-results/app-pr-ci/native-evidence-secret-scan-main-32fa30.json`:
+    clean.
+  - `seize run testing-strategy -- validate-workflow-security --changed-from origin/main --output test-results/app-pr-ci/native-evidence-workflow-security-main-32fa30.json`:
+    clean, no changed workflow files.
+  - `codex-diff-check`
+  - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 expected skips
+    across Capacitor iOS/Android simulation and Electron shell simulation.
+- Next action: commit this memory update, force-push PR #2851, post concise
+  evidence, trigger reviewbot lanes in a plain command comment, and merge after
+  CI and material bot feedback are clear.
