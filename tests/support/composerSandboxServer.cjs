@@ -45,6 +45,7 @@ const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
 const requests = [];
+// Shared by the single-worker local sandbox runner and reset before each test.
 let sandboxDropReaction = null;
 const MAX_REQUEST_BODY_BYTES = 16 * 1024;
 
@@ -1186,6 +1187,8 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 }
 
 function classifyRequest(method, pathname, searchParams, body) {
+  // The sandbox allowlist intentionally wins over the broad drop-write guard,
+  // but only after exact path, empty-query, and body checks pass.
   if (isKnownSandboxMutation(method, pathname, searchParams, body)) {
     return "allowed-sandbox-mutation";
   }
@@ -1504,8 +1507,12 @@ function handleAllowedReactionMutation(method, pathname, url, body, res) {
     return writeJsonResponse(res, reactedLocalDrop());
   }
 
-  sandboxDropReaction = null;
-  return writeEmptyResponse(res, 204);
+  if (method === "DELETE") {
+    sandboxDropReaction = null;
+    return writeEmptyResponse(res, 204);
+  }
+
+  return false;
 }
 
 function handleKnownSandboxPost(method, pathname, url, body, res) {

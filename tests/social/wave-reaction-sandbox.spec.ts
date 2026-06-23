@@ -54,7 +54,9 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     await reloadSandboxWave(page);
 
     const reactedDrop = page.locator('[data-serial-no="1"]').first();
-    const reactionChip = reactedDrop.locator("button").filter({ hasText: "1" });
+    const reactionChip = reactedDrop
+      .locator("button")
+      .filter({ hasText: /^\D*1$/ });
     await expect(reactionChip).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
@@ -155,6 +157,7 @@ async function installWaveReadSideEffectFixture(page: Page) {
     async (route) => {
       const method = route.request().method().toUpperCase();
       if (method !== "OPTIONS" && method !== "POST") {
+        // This fixture only owns the local mark-read side effect.
         await route.continue();
         return;
       }
