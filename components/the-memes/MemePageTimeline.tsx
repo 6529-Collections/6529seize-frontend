@@ -3,6 +3,8 @@
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFT, NFTHistory } from "@/entities/INFT";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -11,8 +13,10 @@ import Timeline from "../timeline/Timeline";
 export function MemePageTimeline(props: {
   show: boolean;
   nft: NFT | undefined;
+  locale?: SupportedLocale;
 }) {
   const [nftHistory, setNftHistory] = useState<NFTHistory[]>([]);
+  const locale = props.locale ?? DEFAULT_LOCALE;
 
   useEffect(() => {
     async function fetchHistory(url: string) {
@@ -27,13 +31,17 @@ export function MemePageTimeline(props: {
 
   if (props.show && props.nft) {
     return (
-      <Container className="pt-3 pb-5 no-padding">
-        <Row>
-          <Col xs={12} md={{ span: 10, offset: 1 }}>
-            {props.nft && <Timeline nft={props.nft} steps={nftHistory} />}
-          </Col>
-        </Row>
-      </Container>
+      <section aria-label={t(locale, "theMemes.detail.timeline.region")}>
+        <Container className="pt-3 pb-5 no-padding">
+          <Row>
+            <Col xs={12} md={{ span: 10, offset: 1 }}>
+              {props.nft && (
+                <Timeline nft={props.nft} steps={nftHistory} locale={locale} />
+              )}
+            </Col>
+          </Row>
+        </Container>
+      </section>
     );
   } else {
     return <></>;

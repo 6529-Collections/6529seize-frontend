@@ -1,29 +1,57 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import MemeDropActions from '@/components/memes/drops/meme-participation-drop/MemeDropActions';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import MemeDropActions from "@/components/memes/drops/meme-participation-drop/MemeDropActions";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
-jest.mock('@/components/waves/drops/WaveDropActions', () => (props: any) => (
-  <div data-testid="wave-actions">{JSON.stringify(props)}</div>
-));
+type TestDrop = Pick<ExtendedDrop, "id">;
 
-describe('MemeDropActions', () => {
-  const drop = { id: 'd1' } as any;
+type MockWaveDropActionsProps = {
+  readonly drop: TestDrop;
+  readonly activePartIndex: number;
+  readonly onReply: () => void;
+};
+
+jest.mock(
+  "@/components/waves/drops/WaveDropActions",
+  () => (props: MockWaveDropActionsProps) => (
+    <div data-testid="wave-actions">{JSON.stringify(props)}</div>
+  )
+);
+
+describe("MemeDropActions", () => {
+  const drop: TestDrop = { id: "d1" };
+  const dropForComponent = drop as ExtendedDrop;
   const callbacks = { onReply: jest.fn(), onQuote: jest.fn() };
 
-  it('returns null on mobile or when hidden', () => {
+  it("returns null when desktop hover actions are unavailable or hidden", () => {
     const { rerender } = render(
-      <MemeDropActions drop={drop} isMobile showReplyAndQuote={true} {...callbacks} />
+      <MemeDropActions
+        drop={dropForComponent}
+        canUseDesktopHoverActions={false}
+        showReplyAndQuote={true}
+        {...callbacks}
+      />
     );
-    expect(screen.queryByTestId('wave-actions')).toBeNull();
+    expect(screen.queryByTestId("wave-actions")).toBeNull();
     rerender(
-      <MemeDropActions drop={drop} isMobile={false} showReplyAndQuote={false} {...callbacks} />
+      <MemeDropActions
+        drop={dropForComponent}
+        canUseDesktopHoverActions={true}
+        showReplyAndQuote={false}
+        {...callbacks}
+      />
     );
-    expect(screen.queryByTestId('wave-actions')).toBeNull();
+    expect(screen.queryByTestId("wave-actions")).toBeNull();
   });
 
-  it('renders WaveDropActions when allowed', () => {
+  it("renders WaveDropActions when allowed", () => {
     render(
-      <MemeDropActions drop={drop} isMobile={false} showReplyAndQuote {...callbacks} />
+      <MemeDropActions
+        drop={dropForComponent}
+        canUseDesktopHoverActions={true}
+        showReplyAndQuote
+        {...callbacks}
+      />
     );
     const element = screen.getByTestId("wave-actions");
     expect(element.textContent).toContain("d1");

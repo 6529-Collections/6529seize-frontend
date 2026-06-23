@@ -541,9 +541,35 @@ describe("useArtworkSubmissionForm", () => {
     });
     expect(result.current.externalMediaError).toBeNull();
     expect(result.current.externalMediaPreviewUrl).toBe(
-      `https://ipfs.io/ipfs/${CID_V1}`
+      `https://media.6529.io/ipfs/${CID_V1}`
     );
     expect(result.current.externalMediaValidationStatus).toBe("valid");
+  });
+
+  it("normalizes parsed IPFS URLs with subpaths to the root CID", async () => {
+    const { result } = renderArtworkSubmissionForm();
+
+    act(() => {
+      result.current.setMediaSource("url");
+    });
+    act(() => {
+      result.current.setExternalMediaHash(`ipfs://${CID_V1}/index.html`);
+    });
+
+    await waitFor(() => {
+      expect(result.current.isExternalMediaValid).toBe(true);
+    });
+
+    expect(validateInteractivePreview).toHaveBeenCalledWith({
+      provider: "ipfs",
+      path: CID_V1,
+    });
+    expect(result.current.externalMediaHashInput).toBe(
+      `ipfs://${CID_V1}/index.html`
+    );
+    expect(result.current.externalMediaPreviewUrl).toBe(
+      `https://media.6529.io/ipfs/${CID_V1}`
+    );
   });
 
   it("surfaces gateway validation errors from server action", async () => {

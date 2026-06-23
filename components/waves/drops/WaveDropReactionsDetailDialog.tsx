@@ -108,6 +108,8 @@ function ReactionButton({
             src={customSrc}
             alt={emojiId}
             fill
+            sizes="20px"
+            unoptimized
             className="tw-object-contain"
           />
         </div>

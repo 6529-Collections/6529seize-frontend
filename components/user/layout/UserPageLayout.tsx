@@ -1,9 +1,18 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import UserPageClientHydrator from "./UserPageClientHydrator";
 import UserPageDropModal from "./UserPageDropModal";
 import UserPageTabs from "./UserPageTabs";
+
+function UserPageTabsFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="tw-min-h-[3.5rem] tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
+    />
+  );
+}
 
 export default function UserPageLayout({
   profile: initialProfile,
@@ -32,7 +41,9 @@ export default function UserPageLayout({
           fallbackMainAddress={mainAddress}
         />
         <div className="tw-mx-auto tw-px-4 sm:tw-px-6 md:tw-px-8">
-          <UserPageTabs initialProfile={initialProfile} />
+          <Suspense fallback={<UserPageTabsFallback />}>
+            <UserPageTabs initialProfile={initialProfile} />
+          </Suspense>
           <div className="tw-mt-6 lg:tw-mt-8">{children}</div>
         </div>
       </div>

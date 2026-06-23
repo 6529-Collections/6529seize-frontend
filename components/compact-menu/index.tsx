@@ -18,6 +18,8 @@ export function CompactMenu({
   unstyledTrigger,
   menuClassName,
   unstyledMenu,
+  header,
+  headerClassName,
   itemsWrapperClassName,
   itemClassName,
   activeItemClassName,
@@ -42,6 +44,8 @@ export function CompactMenu({
           unstyledTrigger={unstyledTrigger}
           menuClassName={menuClassName}
           unstyledMenu={unstyledMenu}
+          header={header}
+          headerClassName={headerClassName}
           itemsWrapperClassName={itemsWrapperClassName}
           itemClassName={itemClassName}
           activeItemClassName={activeItemClassName}
@@ -62,11 +66,10 @@ export function CompactMenu({
   );
 }
 
-interface CompactMenuContentProps
-  extends Omit<
-    CompactMenuProps,
-    "className" | "menuWidthClassName" | "anchor" | "aria-label"
-  > {
+interface CompactMenuContentProps extends Omit<
+  CompactMenuProps,
+  "className" | "menuWidthClassName" | "anchor" | "aria-label"
+> {
   readonly anchor: CompactMenuProps["anchor"];
   readonly menuWidthClassName: CompactMenuProps["menuWidthClassName"];
   readonly ariaLabel: CompactMenuProps["aria-label"];
@@ -82,12 +85,14 @@ function CompactMenuContent({
   unstyledTrigger = false,
   menuClassName,
   unstyledMenu = false,
+  header,
+  headerClassName,
   itemsWrapperClassName,
   itemClassName,
   activeItemClassName,
   inactiveItemClassName,
   focusItemClassName,
-  anchor = DEFAULT_ANCHOR,
+  anchor,
   menuWidthClassName = "tw-w-40",
   disabled = false,
   activeItemId,
@@ -98,6 +103,7 @@ function CompactMenuContent({
   close,
 }: Readonly<CompactMenuContentProps>) {
   const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(isOpen);
+  const menuAnchor = anchor ?? DEFAULT_ANCHOR;
 
   return (
     <>
@@ -113,16 +119,16 @@ function CompactMenuContent({
       <Transition
         as={Fragment}
         enter="tw-transition tw-duration-150 tw-ease-out"
-        enterFrom="tw-opacity-0 tw-translate-y-1"
-        enterTo="tw-opacity-100 tw-translate-y-0"
+        enterFrom="tw-translate-y-1 tw-opacity-0"
+        enterTo="tw-translate-y-0 tw-opacity-100"
         leave="tw-transition tw-duration-100 tw-ease-in"
-        leaveFrom="tw-opacity-100 tw-translate-y-0"
-        leaveTo="tw-opacity-0 tw-translate-y-1"
+        leaveFrom="tw-translate-y-0 tw-opacity-100"
+        leaveTo="tw-translate-y-1 tw-opacity-0"
         afterEnter={focusInitialMenuItem}
       >
         <MenuItems
           ref={menuItemsRef}
-          {...(anchor && { anchor })}
+          anchor={menuAnchor}
           className={clsx(
             unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
             menuWidthClassName,
@@ -135,6 +141,8 @@ function CompactMenuContent({
             onItemSelect={onItemSelect}
             close={close}
             closeOnSelect={closeOnSelect}
+            header={header}
+            headerClassName={headerClassName}
             itemClassName={itemClassName}
             activeItemClassName={activeItemClassName}
             inactiveItemClassName={inactiveItemClassName}

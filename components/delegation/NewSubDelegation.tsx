@@ -9,6 +9,7 @@ import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUB_DELEGATION_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import styles from "./Delegation.module.scss";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
@@ -116,6 +117,10 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
       <Row>
         <Col xs={10} className="pt-3 pb-1">
           <h4>Register Delegation Manager (Sub-Delegation)</h4>
+          <p className={styles["actionIntro"]}>
+            Grant a manager wallet permission to maintain delegations and
+            consolidations for the managed wallet.
+          </p>
         </Col>
         <Col
           xs={2}
@@ -137,7 +142,9 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
             )}
             <Form.Group as={Row} className="pb-4">
               <DelegationFormLabel
-                title={props.subdelegation ? `Delegator` : `Delegation Manager`}
+                title={
+                  props.subdelegation ? "Manager Wallet" : "Managed Wallet"
+                }
                 tooltip={`Address ${
                   props.subdelegation ? `executing` : `registering`
                 } the sub-delegation`}
@@ -156,8 +163,8 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
             />
             <DelegationFormDelegateAddressFormGroup
               setAddress={setNewDelegationToAddress}
-              title="Delegate Manager"
-              tooltip="Delegation Manager Address"
+              title="Manager Address"
+              tooltip="Wallet that can manage delegations and consolidations for the selected collection"
             />
             <DelegationSubmitGroups
               title={"Registering Delegation Manager"}
@@ -167,6 +174,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
               validate={validate}
               onHide={props.onHide}
               onSetToast={props.onSetToast}
+              submitBtnLabel="Register Delegation Manager"
             />
           </Form>
         </Col>

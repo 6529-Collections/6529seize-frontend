@@ -142,7 +142,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         showBackButton={showBackButton}
         headerActionsTooltipId={headerActionsTooltipId}
         headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 sm:tw-gap-x-4 sm:tw-px-4"
-        actionsClassName="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch"
+        actionsClassName="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch tw-pl-3 sm:tw-pl-4"
         renderLeadingActions={renderHeaderLeadingActions}
         renderOverflowMenuItems={renderHeaderOverflowMenuItems}
       />

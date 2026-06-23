@@ -1,7 +1,10 @@
 "use client";
 
 import CommonDropdownItemsWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsWrapper";
+import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
 import { VolumeType } from "@/entities/INFT";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
@@ -17,15 +20,22 @@ export default function VolumeTypeDropdown({
   selectedVolumeSort,
   setVolumeType,
   setVolumeSort,
+  locale,
 }: {
   readonly isVolumeSort: boolean;
   readonly selectedVolumeSort: VolumeType;
   readonly setVolumeType: (volumeType: VolumeType) => void;
   readonly setVolumeSort: () => void;
+  readonly locale?: SupportedLocale;
 }) {
+  const resolvedLocale = locale ?? DEFAULT_LOCALE;
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const selectedVolumeLabel = getVolumeTypeLabel(
+    selectedVolumeSort,
+    resolvedLocale
+  );
 
   const handleSelect = (volumeType: VolumeType) => {
     setVolumeType(volumeType);
@@ -45,7 +55,9 @@ export default function VolumeTypeDropdown({
         type="button"
         aria-haspopup="true"
         aria-expanded={isOpen}
-        aria-label={`Volume: ${selectedVolumeSort}`}
+        aria-label={t(resolvedLocale, "theMemes.volume.triggerWithValue", {
+          volumeType: selectedVolumeLabel,
+        })}
         onClick={() => setIsOpen(!isOpen)}
         className={`tw-group tw-relative tw-m-0 tw-inline-flex tw-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-left tw-no-underline tw-shadow-none tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus:tw-outline-none focus-visible:tw-text-iron-100 focus-visible:tw-outline-none sm:tw-shrink ${
           isVolumeSort
@@ -55,11 +67,12 @@ export default function VolumeTypeDropdown({
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
           <span className={VOLUME_TRIGGER_LABEL_CLASS}>
-            Volume{isVolumeSort ? ":" : ""}
+            {t(resolvedLocale, "theMemes.volume.trigger")}
+            {isVolumeSort ? ":" : ""}
           </span>
           {isVolumeSort && (
             <span className={VOLUME_TRIGGER_VALUE_CLASS}>
-              {selectedVolumeSort}
+              {selectedVolumeLabel}
             </span>
           )}
         </span>
@@ -74,7 +87,7 @@ export default function VolumeTypeDropdown({
 
       <CommonDropdownItemsWrapper
         isOpen={isOpen}
-        filterLabel="Volume"
+        filterLabel={t(resolvedLocale, "theMemes.volume.trigger")}
         buttonRef={buttonRef}
         horizontalAlign="right"
         portalClassName="tailwind-scope tw-z-[999]"
@@ -102,7 +115,7 @@ export default function VolumeTypeDropdown({
                 }`}
               >
                 <span className="tw-min-w-0 tw-flex-1 tw-truncate">
-                  {volumeType}
+                  {getVolumeTypeLabel(volumeType, resolvedLocale)}
                 </span>
                 {isActive && (
                   <FontAwesomeIcon

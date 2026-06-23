@@ -1,0 +1,340 @@
+name: App PR CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-pr-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: Plan risk and security checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      risk_floor: ${{ steps.plan_outputs.outputs.risk_floor }}
+      install_required: ${{ steps.plan_outputs.outputs.install_required }}
+      lint_changed_required: ${{ steps.plan_outputs.outputs.lint_changed_required }}
+      typecheck_changed_required: ${{ steps.plan_outputs.outputs.typecheck_changed_required }}
+      test_typecheck_required: ${{ steps.plan_outputs.outputs.test_typecheck_required }}
+      jest_changed_required: ${{ steps.plan_outputs.outputs.jest_changed_required }}
+      build_required: ${{ steps.plan_outputs.outputs.build_required }}
+      playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
+      playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
+      dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
+      reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch base ref
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Create CI plan and security reports
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          UNTRUSTED_PR: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          set -euo pipefail
+
+          ./bin/6529 run testing-strategy -- ci-plan \
+            --changed-from "origin/${BASE_REF}" \
+            --untrusted-pr="${UNTRUSTED_PR}" \
+            --output test-results/app-pr-ci/ci-plan.json
+          ./bin/6529 run testing-strategy -- scan-changed-secrets \
+            --changed-from "origin/${BASE_REF}" \
+            --output test-results/app-pr-ci/secret-scan.json
+          ./bin/6529 run testing-strategy -- validate-workflow-security \
+            --changed-from "origin/${BASE_REF}" \
+            --output test-results/app-pr-ci/workflow-security.json
+
+      - name: Publish CI plan outputs
+        id: plan_outputs
+        run: |
+          set -euo pipefail
+
+          node <<'NODE'
+          const fs = require("node:fs");
+          const plan = JSON.parse(fs.readFileSync("test-results/app-pr-ci/ci-plan.json", "utf8"));
+          const output = process.env.GITHUB_OUTPUT;
+          const write = (key, value) => {
+            fs.appendFileSync(output, `${key}=${value}\n`);
+          };
+          write("risk_floor", plan.risk.computed_floor);
+          for (const [name, check] of Object.entries(plan.checks)) {
+            write(`${name}_required`, String(Boolean(check.required)));
+          }
+          NODE
+
+      - name: Summarize CI plan
+        if: always()
+        run: |
+          set -euo pipefail
+
+          node <<'NODE'
+          const fs = require("node:fs");
+          const requiredFiles = [
+            "test-results/app-pr-ci/ci-plan.json",
+            "test-results/app-pr-ci/secret-scan.json",
+            "test-results/app-pr-ci/workflow-security.json",
+          ];
+          const missing = requiredFiles.filter((file) => !fs.existsSync(file));
+          if (missing.length > 0) {
+            fs.appendFileSync(
+              process.env.GITHUB_STEP_SUMMARY,
+              `## App PR CI Plan\n\nPlan reports were not created:\n${missing
+                .map((file) => `- ${file}`)
+                .join("\n")}\n`
+            );
+            process.exit(0);
+          }
+          const plan = JSON.parse(fs.readFileSync(requiredFiles[0], "utf8"));
+          const secretScan = JSON.parse(fs.readFileSync(requiredFiles[1], "utf8"));
+          const workflowSecurity = JSON.parse(fs.readFileSync(requiredFiles[2], "utf8"));
+          const lines = [
+            "## App PR CI Plan",
+            "",
+            `Risk floor: level-${plan.risk.computed_floor}`,
+            `Changed files: ${plan.changed_files.length}`,
+            `Untrusted PR: ${plan.untrusted_pr ? "yes" : "no"}`,
+            "",
+            "### Required Checks",
+            ...Object.entries(plan.checks).map(
+              ([name, check]) => `- ${name}: ${check.required ? "required" : "skipped"}`
+            ),
+            "",
+            `Secret scan findings: ${secretScan.findings.length}`,
+            `Workflow security findings: ${workflowSecurity.findings.length}`,
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+          NODE
+
+      - name: Upload CI plan artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: app-pr-ci-plan-${{ github.event.pull_request.number || github.run_id }}
+          path: |
+            test-results/app-pr-ci/ci-plan.json
+            test-results/app-pr-ci/secret-scan.json
+            test-results/app-pr-ci/workflow-security.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  installed-checks:
+    name: Installed app checks
+    needs: plan
+    if: needs.plan.outputs.install_required == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+
+    env:
+      API_ENDPOINT: "https://api.6529.io"
+      WS_ENDPOINT: "wss://ws.6529.io"
+      ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
+      BASE_ENDPOINT: "http://localhost:3001"
+      PLAYWRIGHT_BASE_URL: "http://localhost:3001"
+      PLAYWRIGHT_WEB_SERVER_COMMAND: "./bin/6529 run dev"
+      PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3001"
+      NEXTGEN_CHAIN_ID: "1"
+      MOBILE_APP_SCHEME: "mobile6529"
+      CORE_SCHEME: "core6529"
+      IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
+      IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
+      ASSETS_FROM_S3: "false"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch base ref
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+          git branch --force main "origin/${BASE_REF}"
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Lint package.json versions
+        if: needs.plan.outputs.dependency_governance_required == 'true'
+        run: ./bin/6529 lint:package-json
+
+      - name: Classify dependency risk
+        if: needs.plan.outputs.dependency_governance_required == 'true'
+        env:
+          DEPENDENCY_RISK_BASE_REF: origin/${{ github.base_ref }}
+        run: ./bin/6529 run dependency:risk-gate
+
+      - name: Verify reviewbot contract
+        if: needs.plan.outputs.reviewbot_contract_required == 'true'
+        run: ./bin/6529 run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts
+
+      - name: Lint changed source
+        if: needs.plan.outputs.lint_changed_required == 'true'
+        run: ./bin/6529 run lint:changed
+
+      - name: Typecheck changed source
+        if: needs.plan.outputs.typecheck_changed_required == 'true'
+        run: ./bin/6529 run typecheck:changed
+
+      - name: Typecheck Playwright and test helpers
+        if: needs.plan.outputs.test_typecheck_required == 'true'
+        run: ./bin/6529 run typecheck:playwright
+
+      - name: Run related Jest tests
+        if: needs.plan.outputs.jest_changed_required == 'true'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+
+          mapfile -d '' changed_files < <(
+            git diff --name-only -z --diff-filter=ACMRD "origin/${BASE_REF}...HEAD" -- \
+              "*.js" "*.jsx" "*.ts" "*.tsx" ":(exclude)generated/**"
+          )
+          existing_files=()
+          for file in "${changed_files[@]}"; do
+            if [ -f "$file" ]; then
+              existing_files+=("$file")
+            fi
+          done
+
+          if [ "${#existing_files[@]}" -eq 0 ]; then
+            echo "No existing source or test files need related Jest coverage."
+            exit 0
+          fi
+
+          jest_test_files=()
+          related_source_files=()
+          for file in "${existing_files[@]}"; do
+            case "$file" in
+              tests/*.spec.ts|tests/*.spec.tsx|tests/**/*.spec.ts|tests/**/*.spec.tsx)
+                echo "Skipping Playwright spec for related Jest coverage: $file"
+                ;;
+              *.test.ts|*.test.tsx)
+                jest_test_files+=("$file")
+                ;;
+              *.spec.ts|*.spec.tsx)
+                echo "Skipping non-Jest spec for related Jest coverage: $file"
+                ;;
+              *)
+                related_source_files+=("$file")
+                ;;
+            esac
+          done
+
+          run_jest_with_timeout() {
+            local label="$1"
+            shift
+
+            set +e
+            NODE_ENV=test timeout 180s ./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests "$@"
+            local status=$?
+            set -e
+
+            if [ "$status" -eq 124 ]; then
+              echo "::error::${label} timed out after 180s"
+            fi
+
+            return "$status"
+          }
+
+          if [ "${#jest_test_files[@]}" -gt 0 ]; then
+            run_jest_with_timeout "Direct Jest tests" "${jest_test_files[@]}"
+          fi
+
+          if [ "${#related_source_files[@]}" -gt 0 ]; then
+            run_jest_with_timeout "Related Jest tests" --findRelatedTests "${related_source_files[@]}"
+          fi
+
+          if [ "${#jest_test_files[@]}" -eq 0 ] && [ "${#related_source_files[@]}" -eq 0 ]; then
+            echo "No Jest-related source or test files need coverage."
+          fi
+
+      - name: Build app
+        if: needs.plan.outputs.build_required == 'true'
+        env:
+          NODE_ENV: "production"
+        run: ./bin/6529 run build
+
+      - name: Install Playwright browser
+        if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true'
+        run: ./bin/6529 exec playwright install --with-deps chromium
+
+      - name: Run small Playwright smoke pack
+        if: needs.plan.outputs.playwright_smoke_required == 'true'
+        env:
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:smoke
+
+      - name: Run critical route-shell Playwright pack
+        if: needs.plan.outputs.playwright_critical_shell_required == 'true'
+        env:
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:critical-shell
+
+      - name: Upload app check artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: app-pr-ci-results-${{ github.event.pull_request.number || github.run_id }}
+          path: |
+            test-results/**
+            playwright-report/**
+          if-no-files-found: ignore
+          retention-days: 14

@@ -164,7 +164,7 @@ describe("HeaderSearchModalItem", () => {
     );
     const page: any = {
       type: "PAGE",
-      title: "Delegation FAQs",
+      title: "Delegation FAQ",
       href: "/delegation/delegation-faq",
       breadcrumbs: ["Tools", "NFT Delegation"],
       icon: PageIcon,
@@ -172,7 +172,7 @@ describe("HeaderSearchModalItem", () => {
     renderComponent(page, "delegation", false);
     const link = screen.getByTestId("link");
     expect(link).toHaveAttribute("href", "/delegation/delegation-faq");
-    expect(link.textContent).toContain("Delegation FAQs");
+    expect(link.textContent).toContain("Delegation FAQ");
     expect(link.textContent).toContain("Tools • NFT Delegation");
     expect(screen.getByTestId("page-icon")).toBeInTheDocument();
   });

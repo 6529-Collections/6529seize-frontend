@@ -3,6 +3,7 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
+import { compareSubwavesByLatestActivity } from "@/helpers/waves/subwave-activity.helpers";
 import {
   fetchWaveSubwavesPage,
   type WaveSubwavesQueryKeyParams,
@@ -88,7 +89,7 @@ export async function fetchAllWaveSubwaves({
     page += 1;
   }
 
-  return waves;
+  return [...waves].sort(compareSubwavesByLatestActivity);
 }
 
 export function useWaveSubwavesMap({

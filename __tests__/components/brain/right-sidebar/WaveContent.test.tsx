@@ -43,6 +43,10 @@ jest.mock("@/components/brain/right-sidebar/BrainRightSidebarSettings", () => ({
   __esModule: true,
   default: () => <div>settings</div>,
 }));
+jest.mock("@/components/brain/right-sidebar/WaveRepDetails", () => ({
+  __esModule: true,
+  default: () => <div>rep details</div>,
+}));
 jest.mock(
   "@/components/brain/right-sidebar/BrainRightSidebarFollowers",
   () => ({ __esModule: true, default: () => <div>followers</div> })
@@ -63,7 +67,7 @@ describe("WaveContent", () => {
     );
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Settings"
+      "ABOUT-About,REP,Settings"
     );
     expect(screen.getByText("content")).toBeInTheDocument();
   });
@@ -80,9 +84,27 @@ describe("WaveContent", () => {
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "SETTINGS-About,Settings"
+      "SETTINGS-About,REP,Settings"
     );
     expect(screen.getByText("settings")).toBeInTheDocument();
+    expect(screen.queryByTestId("header")).toBeNull();
+  });
+
+  it("renders REP tab content", () => {
+    render(
+      <WaveContent
+        wave={wave}
+        mode={Mode.CONTENT}
+        setMode={jest.fn()}
+        activeTab={SidebarTab.REP}
+        setActiveTab={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("tabs")).toHaveTextContent(
+      "REP-About,REP,Settings"
+    );
+    expect(screen.getByText("rep details")).toBeInTheDocument();
     expect(screen.queryByTestId("header")).toBeNull();
   });
 
@@ -98,7 +120,7 @@ describe("WaveContent", () => {
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Settings"
+      "ABOUT-About,REP,Settings"
     );
     expect(screen.getByText("content")).toBeInTheDocument();
   });
@@ -114,7 +136,7 @@ describe("WaveContent", () => {
       />
     );
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Settings,Voters,Activity"
+      "ABOUT-About,REP,Settings,Voters,Activity"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Leaderboard");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Winners");
@@ -132,7 +154,7 @@ describe("WaveContent", () => {
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Settings,Voters,Activity"
+      "ABOUT-About,REP,Settings,Voters,Activity"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Proposals");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approved");

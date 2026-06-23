@@ -67,8 +67,12 @@ export function SubscriptionLinks(
         title: downloadResponse.success
           ? "Download ready."
           : "Couldn't download subscriptions.",
-        description: downloadResponse.success ? downloadResponse.message : "Please try again.",
-        details: downloadResponse.success ? undefined : downloadResponse.message,
+        description: downloadResponse.success
+          ? downloadResponse.message
+          : "Please try again.",
+        details: downloadResponse.success
+          ? undefined
+          : downloadResponse.message,
       });
     } catch (error) {
       console.error("Download failed", error);

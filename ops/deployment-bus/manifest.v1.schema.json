@@ -1,0 +1,458 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/deployment-bus-manifest.v1.schema.json",
+  "title": "6529 Deployment Bus Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "release_id",
+    "repository",
+    "environment",
+    "status",
+    "created_at",
+    "updated_at",
+    "release_captain",
+    "complexity",
+    "production_eligible",
+    "shas",
+    "lane",
+    "included_prs",
+    "backend_dependencies",
+    "validation",
+    "post_deploy_watch",
+    "canary_readiness",
+    "deployment",
+    "long_running",
+    "plans",
+    "human_gates",
+    "progress"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "deployment-bus.v1"
+    },
+    "release_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "environment": {
+      "enum": ["staging", "production"]
+    },
+    "status": {
+      "enum": [
+        "collecting",
+        "queued",
+        "leased",
+        "dispatching",
+        "deploying",
+        "deploy_verified",
+        "validating",
+        "passed",
+        "failed",
+        "held",
+        "superseded",
+        "stale",
+        "promoting",
+        "released",
+        "rollback_required",
+        "rolled_back",
+        "fix_forward_required",
+        "cancelled"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "release_captain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "complexity": {
+      "enum": ["standard", "complex", "hotfix", "emergency"]
+    },
+    "production_eligible": {
+      "type": "boolean"
+    },
+    "staging_branch": {
+      "type": ["string", "null"]
+    },
+    "shas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["staging_deploy_sha", "production_candidate_sha"],
+      "properties": {
+        "staging_deploy_sha": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "production_candidate_sha": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-fA-F]{40}$"
+        }
+      }
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "acquired_at",
+        "heartbeat_at",
+        "heartbeat_interval_minutes",
+        "stale_after_minutes",
+        "expected_duration_minutes",
+        "expected_completion_at"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "acquired_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "heartbeat_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "heartbeat_interval_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "stale_after_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_duration_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_completion_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "included_prs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "number",
+          "title",
+          "merge_sha",
+          "risk",
+          "areas",
+          "validation_owner",
+          "status"
+        ],
+        "properties": {
+          "number": { "type": "integer" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "merge_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{40}$"
+          },
+          "risk": { "type": "string" },
+          "areas": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "validation_owner": { "type": "string" },
+          "required_checks": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "status": { "type": "string" }
+        }
+      }
+    },
+    "backend_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "core_smoke_owner",
+        "required_packs",
+        "exploratory_checks",
+        "checks"
+      ],
+      "properties": {
+        "core_smoke_owner": { "type": "string" },
+        "required_packs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "pack_plan": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "known",
+              "command",
+              "size",
+              "surfaces",
+              "artifact_paths",
+              "description"
+            ],
+            "properties": {
+              "id": { "type": "string" },
+              "known": { "type": "boolean" },
+              "command": { "type": ["string", "null"] },
+              "size": { "type": "string" },
+              "surfaces": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "artifact_paths": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "exploratory_checks": {
+          "type": "array",
+          "items": { "type": "object", "additionalProperties": true }
+        },
+        "checks": {
+          "type": "array",
+          "items": { "type": "object", "additionalProperties": true }
+        },
+        "durable_artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "accepted_prefixes",
+            "git_lfs_allowed",
+            "notes"
+          ],
+          "properties": {
+            "required": { "type": "boolean" },
+            "accepted_prefixes": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "s3://6529-artifacts/",
+                  "s3://6529reviewbot-prod-artifacts/frontend-deployment/",
+                  "https://artifacts.6529.io/",
+                  "ipfs://"
+                ]
+              }
+            },
+            "git_lfs_allowed": { "const": false },
+            "notes": { "type": "string" }
+          }
+        },
+        "auto_hold_criteria": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "hold_when", "recovery"],
+            "properties": {
+              "id": { "type": "string" },
+              "hold_when": { "type": "string" },
+              "recovery": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "post_deploy_watch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "status",
+        "min_duration_minutes",
+        "observed_duration_minutes",
+        "started_at",
+        "completed_at",
+        "checkpoints",
+        "notes"
+      ],
+      "properties": {
+        "required": { "type": "boolean" },
+        "status": {
+          "enum": [
+            "not_started",
+            "in_progress",
+            "passed",
+            "failed",
+            "blocked",
+            "skipped"
+          ]
+        },
+        "min_duration_minutes": { "type": "integer", "minimum": 0 },
+        "observed_duration_minutes": { "type": "integer", "minimum": 0 },
+        "started_at": { "type": ["string", "null"], "format": "date-time" },
+        "completed_at": { "type": ["string", "null"], "format": "date-time" },
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "recorded_at", "evidence"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "status": {
+                "enum": [
+                  "not_run",
+                  "in_progress",
+                  "passed",
+                  "failed",
+                  "blocked",
+                  "skipped"
+                ]
+              },
+              "recorded_at": {
+                "type": ["string", "null"],
+                "format": "date-time"
+              },
+              "evidence": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "canary_readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_capability",
+        "traffic_splitting_supported",
+        "feature_flag_strategy",
+        "candidate_control_metrics",
+        "prerequisites_for_traffic_split",
+        "notes"
+      ],
+      "properties": {
+        "current_capability": {
+          "enum": [
+            "auto-hold-only",
+            "feature-flag-only",
+            "traffic-split",
+            "not-applicable"
+          ]
+        },
+        "traffic_splitting_supported": { "type": "boolean" },
+        "feature_flag_strategy": { "type": "string" },
+        "candidate_control_metrics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "prerequisites_for_traffic_split": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "github_deployment_id",
+        "workflow_run_url",
+        "environment_url",
+        "ssm_command_id",
+        "elastic_beanstalk_version_label"
+      ],
+      "properties": {
+        "github_deployment_id": { "type": ["string", "integer", "null"] },
+        "workflow_run_url": { "type": ["string", "null"] },
+        "environment_url": { "type": ["string", "null"] },
+        "ssm_command_id": { "type": ["string", "null"] },
+        "elastic_beanstalk_version_label": { "type": ["string", "null"] }
+      }
+    },
+    "long_running": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "heartbeat_interval_minutes": { "type": "integer", "minimum": 1 },
+        "progress_update_channels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "escalation_after_minutes": { "type": "integer", "minimum": 1 },
+        "checkpoint_labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "plans": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rollback", "fix_forward"],
+      "properties": {
+        "rollback": { "type": "string" },
+        "fix_forward": { "type": "string" }
+      }
+    },
+    "human_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "production_approval_required",
+        "approvals",
+        "override_reason"
+      ],
+      "properties": {
+        "production_approval_required": { "type": "boolean" },
+        "approvals": {
+          "type": "array",
+          "items": { "type": "object", "additionalProperties": true }
+        },
+        "override_reason": { "type": ["string", "null"] }
+      }
+    },
+    "progress": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["at", "phase", "message"],
+        "properties": {
+          "at": { "type": "string", "format": "date-time" },
+          "phase": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}

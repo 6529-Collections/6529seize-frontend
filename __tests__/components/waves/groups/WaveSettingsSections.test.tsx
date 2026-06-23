@@ -609,7 +609,9 @@ describe("WaveSettingsSections", () => {
     await waitFor(() => {
       expect(setToast).toHaveBeenCalledWith({
         type: "error",
-        message: "metadata failed",
+        title: "Couldn't save these tab labels.",
+        description: "Please try again.",
+        details: "metadata failed.",
       });
     });
     expect(screen.getByLabelText("Approvals tab label")).toBeInTheDocument();

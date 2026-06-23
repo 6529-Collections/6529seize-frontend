@@ -111,9 +111,11 @@ Common commands:
 6529 run build
 6529 run test
 6529 run test:e2e
+6529 run test:e2e:staging
 6529 run lint:changed
 6529 run typecheck:changed
 6529 run check:changed
+6529 run deployment-bus -- validate-manifest --file deployment-bus-manifest.json
 ```
 
 If pnpm reports ignored install/build scripts, run:
@@ -199,6 +201,10 @@ through [Procfile](Procfile).
 Repository and deployment helper details, including `ghruns`, `ghdeploy`,
 `6529 staging`, and PM2 launch examples, are documented in
 [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
+The staging and production deployment-bus process for coordinating many
+agents, shared validation, backend dependencies, and production promotion is
+documented in
+[ops/docs/developer/deployment-bus-process.md](ops/docs/developer/deployment-bus-process.md).
 
 ## Contributing
 

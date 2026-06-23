@@ -11,7 +11,6 @@ import { createPepeHandler } from "./pepe";
 import { createTikTokHandler } from "./tiktok";
 import { createTwitterHandler } from "./twitter";
 import { createWikimediaHandler } from "./wikimedia";
-import { createYoutubeHandler } from "./youtube";
 import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
 
 export const createLinkHandlers = (options?: {
@@ -19,7 +18,6 @@ export const createLinkHandlers = (options?: {
   readonly fullWidthLinkPreviews?: boolean | undefined;
 }): LinkHandler[] => [
   createGithubHandler(),
-  createYoutubeHandler(),
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
   createNftMarketplacesHandler(),

@@ -24,9 +24,34 @@ const REACT_DOCTOR_ARGS = [
 const repoRoot = path.resolve(__dirname, "..");
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "react-doctor-diff-"));
 const tempIndexPath = path.join(tempDir, "index");
+
+const findWindowsGitCommand = () => {
+  const candidates = [
+    process.env.ProgramFiles &&
+      path.join(process.env.ProgramFiles, "Git", "cmd", "git.exe"),
+    process.env.ProgramFiles &&
+      path.join(process.env.ProgramFiles, "Git", "bin", "git.exe"),
+    process.env["ProgramFiles(x86)"] &&
+      path.join(process.env["ProgramFiles(x86)"], "Git", "cmd", "git.exe"),
+  ].filter(Boolean);
+
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? "git";
+};
+
+const gitCommand =
+  process.platform === "win32" ? findWindowsGitCommand() : "git";
+const pathKey =
+  process.platform === "win32"
+    ? (Object.keys(process.env).find((key) => key.toLowerCase() === "path") ??
+      "Path")
+    : "PATH";
+const gitDir = gitCommand === "git" ? null : path.dirname(gitCommand);
 const commandEnv = {
   ...process.env,
   GIT_INDEX_FILE: tempIndexPath,
+  [pathKey]: gitDir
+    ? `${gitDir}${path.delimiter}${process.env[pathKey] ?? ""}`
+    : process.env[pathKey],
 };
 const reactDoctorBin = path.join(
   repoRoot,
@@ -63,7 +88,7 @@ const runCommand = (command, args, options = {}) => {
 
 const getUntrackedSourceFiles = () => {
   const output = runCommand(
-    "git",
+    gitCommand,
     ["ls-files", "--others", "--exclude-standard", "-z", "--"].concat(
       SOURCE_PATTERNS
     )
@@ -78,7 +103,7 @@ const addIntentToAddEntries = (filePaths) => {
   }
 
   runCommand(
-    "git",
+    gitCommand,
     ["add", "--intent-to-add", "--pathspec-from-file=-", "--pathspec-file-nul"],
     { input: `${filePaths.join("\0")}\0` }
   );
@@ -89,10 +114,11 @@ const runReactDoctor = () =>
     cwd: repoRoot,
     env: commandEnv,
     stdio: "inherit",
+    shell: process.platform === "win32",
   });
 
 try {
-  runCommand("git", ["read-tree", "HEAD"]);
+  runCommand(gitCommand, ["read-tree", "HEAD"]);
   addIntentToAddEntries(getUntrackedSourceFiles());
 
   const result = runReactDoctor();

@@ -2,8 +2,6 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
-import type { AppToastInput } from "@/components/utils/toast/AppToast";
-import { showAppToast } from "@/components/utils/toast/AppToast";
 import { DelegationCenterSection } from "@/types/enums";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,6 +12,7 @@ import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
 import styles from "./Delegation.module.scss";
 import DelegationCenterComponent from "./DelegationCenter";
+import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
 import NewDelegationComponent from "./NewDelegation";
@@ -26,6 +25,32 @@ import {
 } from "./delegation-constants";
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
+
+const DELEGATION_MENU_ITEMS: ReadonlyArray<{
+  section: DelegationCenterSection;
+  label: string;
+}> = [
+  {
+    section: DelegationCenterSection.CENTER,
+    label: "Delegation Center",
+  },
+  {
+    section: DelegationCenterSection.WALLET_ARCHITECTURE,
+    label: "Wallet Architecture",
+  },
+  {
+    section: DelegationCenterSection.FAQ,
+    label: "Delegation FAQ",
+  },
+  {
+    section: DelegationCenterSection.CONSOLIDATION_USE_CASES,
+    label: "Consolidation Use Cases",
+  },
+  {
+    section: DelegationCenterSection.CHECKER,
+    label: "Wallet Checker",
+  },
+];
 
 interface Props {
   section: DelegationCenterSection;
@@ -42,14 +67,21 @@ interface Props {
 export default function DelegationCenterMenu(props: Readonly<Props>) {
   const pathname = usePathname();
   const accountResolution = useSeizeConnectContext();
+  const connectedAddress = accountResolution.address as string | undefined;
+  const hasConnectedWallet =
+    accountResolution.isConnected && !!connectedAddress;
   const ensResolution = useEnsName({
     address: accountResolution.address as `0x${string}`,
     chainId: 1,
   });
 
-  const onSetToast = (toast: AppToastInput) => {
-    showAppToast(toast);
-  };
+  const {
+    toastRef,
+    toast,
+    showToast,
+    showDelegationToast,
+    setToastVisibility,
+  } = useDelegationToast();
 
   function printContent() {
     switch (props.section) {
@@ -60,9 +92,18 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           />
         );
       case DelegationCenterSection.REGISTER_DELEGATION:
+        if (!hasConnectedWallet || !connectedAddress) {
+          return (
+            <DelegationConnectWalletState
+              title="Connect Wallet to Register a Delegation"
+              body="Connect the wallet that owns the NFTs or controls the delegation manager rights. No on-chain delegation can be registered while disconnected."
+              onConnect={accountResolution.seizeConnect}
+            />
+          );
+        }
         return (
           <NewDelegationComponent
-            address={accountResolution.address as string}
+            address={connectedAddress}
             ens={ensResolution.data}
             collection_query={props.collection_query}
             setCollectionQuery={props.setCollectionQuery}
@@ -71,40 +112,67 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
-            onSetToast={onSetToast}
+            onSetToast={showDelegationToast}
           />
         );
       case DelegationCenterSection.REGISTER_SUB_DELEGATION:
+        if (!hasConnectedWallet || !connectedAddress) {
+          return (
+            <DelegationConnectWalletState
+              title="Connect Wallet to Register a Delegation Manager"
+              body="Connect the wallet that should grant manager rights. No on-chain delegation manager record can be registered while disconnected."
+              onConnect={accountResolution.seizeConnect}
+            />
+          );
+        }
         return (
           <NewSubDelegationComponent
-            address={accountResolution.address as string}
+            address={connectedAddress}
             ens={ensResolution.data}
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
-            onSetToast={onSetToast}
+            onSetToast={showDelegationToast}
           />
         );
       case DelegationCenterSection.REGISTER_CONSOLIDATION:
+        if (!hasConnectedWallet || !connectedAddress) {
+          return (
+            <DelegationConnectWalletState
+              title="Connect Wallet to Register a Consolidation"
+              body="Connect one of the wallets you control. No on-chain consolidation can be registered while disconnected."
+              onConnect={accountResolution.seizeConnect}
+            />
+          );
+        }
         return (
           <NewConsolidationComponent
-            address={accountResolution.address as string}
+            address={connectedAddress}
             ens={ensResolution.data}
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
-            onSetToast={onSetToast}
+            onSetToast={showDelegationToast}
           />
         );
       case DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS:
+        if (!hasConnectedWallet || !connectedAddress) {
+          return (
+            <DelegationConnectWalletState
+              title="Connect Wallet to Assign a Primary Address"
+              body="Connect the wallet that should assign its primary address. No primary-address record can be registered while disconnected."
+              onConnect={accountResolution.seizeConnect}
+            />
+          );
+        }
         return (
           <NewAssignPrimaryAddress
-            address={accountResolution.address as string}
+            address={connectedAddress}
             ens={ensResolution.data}
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
-            onSetToast={onSetToast}
+            onSetToast={showDelegationToast}
             new_primary_address_query={props.address_query}
             setNewPrimaryAddressQuery={props.setAddressQuery}
           />
@@ -169,98 +237,65 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
     }
   }
 
+  function isMenuSectionActive(section: DelegationCenterSection) {
+    return (
+      props.section === section ||
+      (section === DelegationCenterSection.FAQ &&
+        props.section === DelegationCenterSection.HTML &&
+        pathname?.startsWith("/delegation/delegation-faq/"))
+    );
+  }
+
+  function printMenuButton(section: DelegationCenterSection, label: string) {
+    const active = isMenuSectionActive(section);
+
+    return (
+      <button
+        type="button"
+        onClick={() => props.setActiveSection(section)}
+        className={`${styles["menuLeftItem"]} ${
+          active ? styles["menuLeftItemActive"] : ""
+        }`}
+        aria-current={active ? "page" : undefined}
+      >
+        {label}
+      </button>
+    );
+  }
+
+  function printMenuRows() {
+    return DELEGATION_MENU_ITEMS.map((item, index) => (
+      <Row
+        className={index === 0 ? "pt-2 pb-2" : "pt-1 pb-2"}
+        key={item.section}
+      >
+        <Col>{printMenuButton(item.section, item.label)}</Col>
+      </Row>
+    ));
+  }
+
+  function printExternalLinkRows() {
+    return [
+      <Row className="pt-2 pb-2" key="etherscan">
+        <Col>
+          <EtherscanLink />
+        </Col>
+      </Row>,
+      <Row className="pt-2 pb-2" key="github">
+        <Col>
+          <GithubLink />
+        </Col>
+      </Row>,
+    ];
+  }
+
   return (
     <Container className="pt-4">
       <Row>
         <Col className={styles["menuLeft"]}>
           <Container>
-            <Row className="pt-2 pb-2">
-              <Col
-                onClick={() =>
-                  props.setActiveSection(DelegationCenterSection.CENTER)
-                }
-                className={`${styles["menuLeftItem"]} ${
-                  props.section === DelegationCenterSection.CENTER
-                    ? styles["menuLeftItemActive"]
-                    : ""
-                }`}
-              >
-                Delegation Center
-              </Col>
-            </Row>
-            <Row className="pt-1 pb-2">
-              <Col
-                onClick={() =>
-                  props.setActiveSection(
-                    DelegationCenterSection.WALLET_ARCHITECTURE
-                  )
-                }
-                className={`${styles["menuLeftItem"]} ${
-                  props.section === DelegationCenterSection.WALLET_ARCHITECTURE
-                    ? styles["menuLeftItemActive"]
-                    : ""
-                }`}
-              >
-                Wallet Architecture
-              </Col>
-            </Row>
-            <Row className="pt-1 pb-2">
-              <Col
-                onClick={() =>
-                  props.setActiveSection(DelegationCenterSection.FAQ)
-                }
-                className={`${styles["menuLeftItem"]} ${
-                  props.section === DelegationCenterSection.FAQ ||
-                  (props.section === DelegationCenterSection.HTML &&
-                    pathname?.startsWith("/delegation/delegation-faq/"))
-                    ? styles["menuLeftItemActive"]
-                    : ""
-                }`}
-              >
-                Delegation FAQs
-              </Col>
-            </Row>
-            <Row className="pt-1 pb-2">
-              <Col
-                onClick={() =>
-                  props.setActiveSection(
-                    DelegationCenterSection.CONSOLIDATION_USE_CASES
-                  )
-                }
-                className={`${styles["menuLeftItem"]} ${
-                  props.section ===
-                  DelegationCenterSection.CONSOLIDATION_USE_CASES
-                    ? styles["menuLeftItemActive"]
-                    : ""
-                }`}
-              >
-                Consolidation Use Cases
-              </Col>
-            </Row>
-            <Row className="pt-1 pb-2">
-              <Col
-                onClick={() =>
-                  props.setActiveSection(DelegationCenterSection.CHECKER)
-                }
-                className={`${styles["menuLeftItem"]} ${
-                  props.section === DelegationCenterSection.CHECKER
-                    ? styles["menuLeftItemActive"]
-                    : ""
-                }`}
-              >
-                Wallet Checker
-              </Col>
-            </Row>
-            <Row className="pt-2 pb-2">
-              <Col>
-                <EtherscanLink />
-              </Col>
-            </Row>
-            <Row className="pt-2 pb-2">
-              <Col>
-                <GithubLink />
-              </Col>
-            </Row>
+            {printMenuRows()}
+            {printExternalLinkRows()}
           </Container>
         </Col>
         {<Col className={styles["menuRight"]}>{printContent()}</Col>}
@@ -270,106 +305,29 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           <Container>
             <Row>
               <Col>
-                <Container className="no-padding">
-                  <Row className="pt-2 pb-2">
-                    <Col
-                      onClick={() =>
-                        props.setActiveSection(DelegationCenterSection.CENTER)
-                      }
-                      className={`${styles["menuLeftItem"]} ${
-                        props.section === DelegationCenterSection.CENTER
-                          ? styles["menuLeftItemActive"]
-                          : ""
-                      }`}
-                    >
-                      Delegation Center
-                    </Col>
-                  </Row>
-                  <Row className="pt-1 pb-2">
-                    <Col
-                      onClick={() =>
-                        props.setActiveSection(
-                          DelegationCenterSection.WALLET_ARCHITECTURE
-                        )
-                      }
-                      className={`${styles["menuLeftItem"]} ${
-                        props.section ==
-                        DelegationCenterSection.WALLET_ARCHITECTURE
-                          ? styles["menuLeftItemActive"]
-                          : ""
-                      }`}
-                    >
-                      Wallet Architecture
-                    </Col>
-                  </Row>
-                  <Row className="pt-1 pb-2">
-                    <Col
-                      onClick={() =>
-                        props.setActiveSection(DelegationCenterSection.FAQ)
-                      }
-                      className={`${styles["menuLeftItem"]} ${
-                        props.section === DelegationCenterSection.FAQ
-                          ? styles["menuLeftItemActive"]
-                          : ""
-                      }`}
-                    >
-                      Delegation FAQs
-                    </Col>
-                  </Row>
-                  <Row className="pt-1 pb-2">
-                    <Col
-                      onClick={() =>
-                        props.setActiveSection(
-                          DelegationCenterSection.CONSOLIDATION_USE_CASES
-                        )
-                      }
-                      className={`${styles["menuLeftItem"]} ${
-                        props.section ===
-                        DelegationCenterSection.CONSOLIDATION_USE_CASES
-                          ? styles["menuLeftItemActive"]
-                          : ""
-                      }`}
-                    >
-                      Consolidation Use Cases
-                    </Col>
-                  </Row>
-                  <Row className="pt-1 pb-2">
-                    <Col
-                      onClick={() =>
-                        props.setActiveSection(DelegationCenterSection.CHECKER)
-                      }
-                      className={`${styles["menuLeftItem"]} ${
-                        props.section === DelegationCenterSection.CHECKER
-                          ? styles["menuLeftItemActive"]
-                          : ""
-                      }`}
-                    >
-                      Wallet Checker
-                    </Col>
-                  </Row>
-                </Container>
+                <Container className="no-padding">{printMenuRows()}</Container>
               </Col>
               <Col>
                 <Container className="no-padding">
-                  <Row className="pt-2 pb-2">
-                    <Col>
-                      <EtherscanLink />
-                    </Col>
-                  </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col>
-                      <GithubLink />
-                    </Col>
-                  </Row>
+                  {printExternalLinkRows()}
                 </Container>
               </Col>
             </Row>
           </Container>
         </Col>
       </Row>
+      {toast && (
+        <DelegationToast
+          toastRef={toastRef}
+          toast={toast}
+          showToast={showToast}
+          setShowToast={setToastVisibility}
+        />
+      )}
     </Container>
   );
 }
+
 function EtherscanLink() {
   return (
     <Link
@@ -382,13 +340,7 @@ function EtherscanLink() {
       rel="noopener noreferrer"
       className={styles["delegationLink"]}
     >
-      <Image
-        unoptimized
-        src="/etherscan_w.png"
-        alt="etherscan"
-        width={30}
-        height={30}
-      />
+      <Image unoptimized src="/etherscan_w.png" alt="" width={30} height={30} />
       <span>Etherscan</span>
     </Link>
   );
@@ -402,14 +354,33 @@ function GithubLink() {
       rel="noopener noreferrer"
       className={styles["delegationLink"]}
     >
-      <Image
-        unoptimized
-        src="/github_w.png"
-        alt="github"
-        width={30}
-        height={30}
-      />
-      <span>Github</span>
+      <Image unoptimized src="/github_w.png" alt="" width={30} height={30} />
+      <span>GitHub</span>
     </Link>
+  );
+}
+
+function DelegationConnectWalletState(
+  props: Readonly<{
+    title: string;
+    body: string;
+    onConnect: () => void;
+  }>
+) {
+  return (
+    <section
+      className={styles["connectRequired"]}
+      aria-labelledby="connect-wallet-heading"
+    >
+      <h1 id="connect-wallet-heading">{props.title}</h1>
+      <p>{props.body}</p>
+      <button
+        type="button"
+        className={styles["connectRequiredButton"]}
+        onClick={props.onConnect}
+      >
+        Connect Wallet
+      </button>
+    </section>
   );
 }

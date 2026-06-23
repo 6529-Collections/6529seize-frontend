@@ -1,16 +1,32 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityDistributionsTableWrapper from '@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableWrapper';
+import { render, screen } from "@testing-library/react";
+import UserPageStatsActivityDistributionsTableWrapper from "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableWrapper";
+import { getDistributionsMessage } from "@/components/user/stats/activity/distributions/distributions.messages";
 
-jest.mock('@/components/utils/animation/CommonCardSkeleton', () => () => <div data-testid="skeleton" />);
-jest.mock('@/components/utils/table/paginator/CommonTablePagination', () => (props: any) => <div data-testid="pagination" data-page={props.currentPage} />);
-jest.mock('@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTable', () => (props: any) => <div data-testid="table" data-count={props.items.length} />);
+jest.mock("@/components/utils/animation/CommonCardSkeleton", () => () => (
+  <div data-testid="skeleton" />
+));
+jest.mock(
+  "@/components/utils/table/paginator/CommonTablePagination",
+  () => (props: any) => (
+    <div data-testid="pagination" data-page={props.currentPage} />
+  )
+);
+jest.mock(
+  "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTable",
+  () => (props: any) => (
+    <div
+      data-testid="table"
+      data-count={props.items.length}
+      data-locale={props.locale}
+    />
+  )
+);
 
-describe('UserPageStatsActivityDistributionsTableWrapper', () => {
-  const profile = { id: 'p' } as any;
+describe("UserPageStatsActivityDistributionsTableWrapper", () => {
+  const profile = { id: "p" } as any;
   const item = { amount: 1 } as any;
 
-  it('shows skeleton during initial loading', () => {
+  it("shows skeleton during initial loading", () => {
     render(
       <UserPageStatsActivityDistributionsTableWrapper
         data={[]}
@@ -22,10 +38,10 @@ describe('UserPageStatsActivityDistributionsTableWrapper', () => {
         setPage={jest.fn()}
       />
     );
-    expect(screen.getByTestId('skeleton')).toBeInTheDocument();
+    expect(screen.getByTestId("skeleton")).toBeInTheDocument();
   });
 
-  it('renders table and pagination when data exists', () => {
+  it("renders table and pagination when data exists", () => {
     render(
       <UserPageStatsActivityDistributionsTableWrapper
         data={[item]}
@@ -35,13 +51,15 @@ describe('UserPageStatsActivityDistributionsTableWrapper', () => {
         page={1}
         totalPages={2}
         setPage={jest.fn()}
+        locale="de-DE"
       />
     );
-    expect(screen.getByTestId('table')).toHaveAttribute('data-count', '1');
-    expect(screen.getByTestId('pagination')).toHaveAttribute('data-page', '1');
+    expect(screen.getByTestId("table")).toHaveAttribute("data-count", "1");
+    expect(screen.getByTestId("table")).toHaveAttribute("data-locale", "de-DE");
+    expect(screen.getByTestId("pagination")).toHaveAttribute("data-page", "1");
   });
 
-  it('shows empty message when list empty', () => {
+  it("shows empty message when list empty", () => {
     render(
       <UserPageStatsActivityDistributionsTableWrapper
         data={[]}
@@ -51,8 +69,15 @@ describe('UserPageStatsActivityDistributionsTableWrapper', () => {
         page={1}
         totalPages={1}
         setPage={jest.fn()}
+        locale="de-DE"
       />
     );
-    expect(screen.getByText('No distributions found')).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      getDistributionsMessage(
+        "user.collected.stats.distributions.empty",
+        undefined,
+        "de-DE"
+      )
+    );
   });
 });

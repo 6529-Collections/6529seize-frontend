@@ -1,4 +1,6 @@
 import { MemePageArt } from "@/components/the-memes/MemePageArt";
+import { formatNumber, roundTo } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("next/link", () => ({
@@ -12,8 +14,21 @@ jest.mock("next/link", () => ({
 
 jest.mock("@/components/download/Download", () => ({
   __esModule: true,
-  default: ({ href }: { href: string }) => (
-    <div data-testid="download" data-href={href} />
+  default: ({
+    href,
+    labels,
+  }: {
+    href: string;
+    labels?: { downloadFile?: string; download?: string };
+  }) => (
+    <button
+      type="button"
+      data-testid="download"
+      data-href={href}
+      aria-label={labels?.downloadFile ?? "Download file"}
+    >
+      {labels?.download ?? "Download"}
+    </button>
   ),
 }));
 
@@ -60,7 +75,7 @@ const nft = {
       { trait_type: "Other", value: "val" },
       { trait_type: "Boost", value: 10, display_type: "boost_percentage" },
     ],
-    image: "img",
+    image: "https://media.example/img.png",
   },
 };
 const nftMeta = { season: 1, meme_name: "meme" };
@@ -100,7 +115,7 @@ describe("MemePageArt", () => {
     ).toHaveAttribute("href", "https://metadata.example/meme.json");
     expect(
       screen.getByRole("link", { name: "Open image in new tab" })
-    ).toHaveAttribute("href", "img");
+    ).toHaveAttribute("href", "https://media.example/img.png");
 
     expect(screen.getByText("Properties")).toBeInTheDocument();
     expect(screen.getByText("Other")).toBeInTheDocument();
@@ -118,6 +133,40 @@ describe("MemePageArt", () => {
     expect(screen.getByText("C1")).toBeInTheDocument();
     expect(screen.getByText("Boosts")).toBeInTheDocument();
     expect(screen.getByText("+10%")).toBeInTheDocument();
+  });
+
+  it("uses locale-backed labels and number formatting", () => {
+    render(
+      <MemePageArt
+        show={true}
+        nft={nft as any}
+        nftMeta={nftMeta as any}
+        locale="de-DE"
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        name: t("de-DE", "theMemes.detail.art.sections.arweaveLinks"),
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: t("de-DE", "theMemes.detail.art.links.openRawMetadata"),
+      })
+    ).toHaveAttribute("href", "https://metadata.example/meme.json");
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.art.download.downloadFile"),
+      })
+    ).toHaveTextContent(t("de-DE", "theMemes.detail.art.download.download"));
+    expect(
+      screen.getByText(
+        formatNumber("de-DE", roundTo(nft.boosted_tdh, 2), {
+          maximumFractionDigits: 2,
+        })
+      )
+    ).toBeInTheDocument();
   });
 
   it("renders text display_type attributes in Properties", () => {
@@ -294,7 +343,7 @@ describe("MemePageArt", () => {
         animation_details: { format: "gif", width: 1, height: 2 },
         animation_url: "https://metadata.example/animation.gif",
         attributes: nft.metadata.attributes,
-        image: "img",
+        image: "https://media.example/img.png",
       },
     };
 

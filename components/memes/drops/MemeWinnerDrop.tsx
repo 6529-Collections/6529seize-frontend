@@ -12,7 +12,7 @@ import {
   DropLocation,
   hasDropFooter,
 } from "@/components/waves/drops/drop.types";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
@@ -58,7 +58,7 @@ export default function MemeWinnerDrop({
   footer,
   showInteractions = true,
 }: MemeWinnerDropProps) {
-  const isMobile = useIsMobileDevice();
+  const { canUseDesktopHoverActions } = useDropActionInteractionMode();
   const { location } = useDropContext();
 
   // Extract metadata
@@ -155,15 +155,17 @@ export default function MemeWinnerDrop({
           {hasDropFooter(footer) && (
             <div className="tw-px-4 tw-pb-4 tw-pt-2">{footer}</div>
           )}
-          {!isMobile && showInteractions && showReplyAndQuote && (
-            <div className="tw-absolute tw-right-4 tw-top-2">
-              <WaveDropActions
-                drop={drop}
-                activePartIndex={0}
-                onReply={handleOnReply}
-              />
-            </div>
-          )}
+          {canUseDesktopHoverActions &&
+            showInteractions &&
+            showReplyAndQuote && (
+              <div className="tw-absolute tw-right-4 tw-top-2">
+                <WaveDropActions
+                  drop={drop}
+                  activePartIndex={0}
+                  onReply={handleOnReply}
+                />
+              </div>
+            )}
         </div>
       </div>
     </div>

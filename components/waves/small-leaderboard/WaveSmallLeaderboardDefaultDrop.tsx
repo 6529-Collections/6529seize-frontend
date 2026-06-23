@@ -173,9 +173,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                       ? drop.realtime_rating
                       : drop.rating_prediction
                   }
-                  tooltipLabel={
-                    isApproveWave ? "Votes given now" : undefined
-                  }
+                  tooltipLabel={isApproveWave ? "Votes given now" : undefined}
                 />
               </div>
               <div className="tw-mt-3">

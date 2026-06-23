@@ -18,6 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchange } from "@fortawesome/free-solid-svg-icons";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useSingleWaveDropVoteState } from "./useSingleWaveDropVoteState";
+import styles from "./VoteButton.module.scss";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
@@ -323,7 +324,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
         )}
       </div>
 
-      <div className="wave-drop-vote-submit-full">
+      <div className={`wave-drop-vote-submit-full ${styles["voteSubmitFull"]}`}>
         <SingleWaveDropVoteSubmit
           drop={displayDrop}
           newRating={submitVoteValue}

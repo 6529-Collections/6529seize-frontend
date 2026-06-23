@@ -14,12 +14,14 @@ jest.mock("next/server", () => ({
 }));
 
 type GetHandler = typeof import("../../../app/api/github-preview/route").GET;
+type PostHandler = typeof import("../../../app/api/github-preview/route").POST;
 
 let GET: GetHandler;
+let POST: PostHandler;
 
 async function loadRoute(): Promise<void> {
   jest.resetModules();
-  ({ GET } = await import("../../../app/api/github-preview/route"));
+  ({ GET, POST } = await import("../../../app/api/github-preview/route"));
 }
 
 describe("github-preview API route", () => {
@@ -46,11 +48,116 @@ describe("github-preview API route", () => {
       ),
     }) as any;
 
+  const batchRequestFor = (urls: readonly unknown[]) =>
+    ({
+      json: async () => ({ urls }),
+    }) as unknown as Request;
+
   const jsonResponse = (body: unknown, init?: ResponseInit) =>
     new Response(JSON.stringify(body), {
       headers: { "content-type": "application/json" },
       ...init,
     });
+
+  it("maps batched GitHub preview requests", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: "https://github.com/o/r/issues/1",
+          title: "First issue",
+          state: "open",
+          state_reason: null,
+          assignees: [],
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: "https://github.com/o/r/issues/2",
+          title: "Second issue",
+          state: "closed",
+          state_reason: "completed",
+          assignees: [],
+        })
+      );
+
+    const response = await POST(
+      batchRequestFor([
+        "https://github.com/o/r/issues/1",
+        "https://github.com/o/r/issues/2",
+      ])
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      results: [
+        {
+          url: "https://github.com/o/r/issues/1",
+          preview: {
+            type: "github.issue",
+            title: "First issue",
+            state: "open",
+          },
+        },
+        {
+          url: "https://github.com/o/r/issues/2",
+          preview: {
+            type: "github.issue",
+            title: "Second issue",
+            state: "closed_completed",
+          },
+        },
+      ],
+      errors: [],
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps invalid GitHub preview batch entries isolated", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        html_url: "https://github.com/o/r/issues/1",
+        title: "First issue",
+        state: "open",
+        state_reason: null,
+        assignees: [],
+      })
+    );
+
+    const response = await POST(
+      batchRequestFor([
+        "https://github.com/o/r/issues/1",
+        "https://github.com/o/r/settings",
+      ])
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      results: [
+        {
+          url: "https://github.com/o/r/issues/1",
+          preview: {
+            type: "github.issue",
+            title: "First issue",
+          },
+        },
+      ],
+      errors: [
+        {
+          url: "https://github.com/o/r/settings",
+          error: "Only github.com repository URLs are supported.",
+        },
+      ],
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects empty GitHub preview batches", async () => {
+    const response = await POST(batchRequestFor([]));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "At least one GitHub URL is required.",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 
   it("maps open GitHub issues", async () => {
     fetchMock.mockResolvedValueOnce(
@@ -60,6 +167,13 @@ describe("github-preview API route", () => {
         title: "Remove tab",
         state: "open",
         state_reason: null,
+        user: { login: "alice" },
+        updated_at: "2026-06-16T12:00:00Z",
+        comments: 3,
+        labels: [
+          { name: "frontend", color: "0e8a16" },
+          { name: "cards", color: "fbca04" },
+        ],
         assignees: [{ login: "alice" }, { login: "bob" }],
       })
     );
@@ -74,6 +188,13 @@ describe("github-preview API route", () => {
       type: "github.issue",
       state: "open",
       number: 2308,
+      author: "alice",
+      updatedAt: "2026-06-16T12:00:00Z",
+      comments: 3,
+      labels: [
+        { name: "frontend", color: "0e8a16" },
+        { name: "cards", color: "fbca04" },
+      ],
       assignees: ["alice", "bob"],
     });
   });
@@ -176,6 +297,10 @@ describe("github-preview API route", () => {
         open_issues_count: 5,
         visibility: "public",
         archived: false,
+        updated_at: "2026-06-15T00:00:00Z",
+        pushed_at: "2026-06-16T00:00:00Z",
+        topics: ["nextjs", "6529"],
+        license: { spdx_id: "MIT" },
         html_url: "https://github.com/6529-Collections/6529seize-frontend",
       })
     );
@@ -191,16 +316,33 @@ describe("github-preview API route", () => {
       language: "TypeScript",
       stars: 42,
       forks: 7,
+      updatedAt: "2026-06-15T00:00:00Z",
+      pushedAt: "2026-06-16T00:00:00Z",
+      topics: ["nextjs", "6529"],
+      license: "MIT",
     });
   });
 
   it("maps GitHub file links", async () => {
+    const fileSource = [
+      "import React from 'react';",
+      "",
+      "export function GithubLinkPreview() {",
+      '  return <a href="https://github.com">GitHub</a>;',
+      "}",
+      "const one = 1;",
+      "const two = 2;",
+      "const three = 3;",
+    ].join("\n");
+
     fetchMock.mockResolvedValueOnce(
       jsonResponse({
         type: "file",
         name: "GithubLinkPreview.tsx",
         path: "components/waves/github/GithubLinkPreview.tsx",
         size: 12345,
+        encoding: "base64",
+        content: Buffer.from(fileSource).toString("base64"),
         html_url:
           "https://github.com/o/r/blob/main/components/waves/github/GithubLinkPreview.tsx",
       })
@@ -208,7 +350,7 @@ describe("github-preview API route", () => {
 
     const response = await GET(
       requestFor(
-        "https://github.com/o/r/blob/main/components/waves/github/GithubLinkPreview.tsx#L12"
+        "https://github.com/o/r/blob/main/components/waves/github/GithubLinkPreview.tsx#L3-L8"
       )
     );
 
@@ -218,6 +360,43 @@ describe("github-preview API route", () => {
       path: "components/waves/github/GithubLinkPreview.tsx",
       ref: "main",
       size: 12345,
+      language: "TypeScript",
+      lineCount: 8,
+      lineStart: 3,
+      lineEnd: 8,
+      excerpt: [
+        "export function GithubLinkPreview() {",
+        '  return <a href="https://github.com">GitHub</a>;',
+        "}",
+        "const one = 1;",
+        "const two = 2;",
+      ],
+    });
+  });
+
+  it("omits file excerpts when line anchors start past the file length", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "short.ts",
+        path: "short.ts",
+        size: 12,
+        encoding: "base64",
+        content: Buffer.from("const one = 1;\n").toString("base64"),
+        html_url: "https://github.com/o/r/blob/main/short.ts",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/short.ts#L300-L320")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      lineCount: 2,
+      lineStart: null,
+      lineEnd: null,
+      excerpt: null,
     });
   });
 
@@ -253,6 +432,7 @@ describe("github-preview API route", () => {
       jsonResponse([
         { type: "file", name: "a.ts", path: "src/a.ts" },
         { type: "file", name: "b.ts", path: "src/b.ts" },
+        { type: "dir", name: "components", path: "src/components" },
       ])
     );
 
@@ -265,7 +445,36 @@ describe("github-preview API route", () => {
       title: "src",
       path: "src",
       ref: "main",
-      itemCount: 2,
+      itemCount: 3,
+      entries: ["a.ts", "b.ts", "components"],
+      fileCount: 2,
+      directoryCount: 1,
+    });
+  });
+
+  it("maps single-object GitHub directory responses with null excerpt fields", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "dir",
+        name: "src",
+        path: "src",
+        html_url: "https://github.com/o/r/tree/main/src",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/tree/main/src")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.directory",
+      title: "src",
+      path: "src",
+      ref: "main",
+      lineCount: null,
+      lineStart: null,
+      lineEnd: null,
+      excerpt: null,
     });
   });
 
@@ -279,6 +488,8 @@ describe("github-preview API route", () => {
           author: { name: "Alice", date: "2026-06-15T00:00:00Z" },
         },
         author: { login: "alice" },
+        stats: { additions: 10, deletions: 2 },
+        files: [{ filename: "a.ts" }, { filename: "b.ts" }],
       })
     );
 
@@ -291,6 +502,9 @@ describe("github-preview API route", () => {
       title: "Ship richer GitHub previews",
       shortSha: "abc123456789",
       author: "alice",
+      additions: 10,
+      deletions: 2,
+      changedFiles: 2,
     });
   });
 
@@ -501,6 +715,155 @@ describe("github-preview API route", () => {
       merged: true,
       reviewState: "approved",
       mergeableState: "clean",
+    });
+  });
+
+  it("maps pull request people, labels, checks, and change stats", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: "https://github.com/o/r/pull/9",
+          title: "Richer cards",
+          state: "open",
+          merged: false,
+          draft: false,
+          mergeable_state: "clean",
+          issue_url: "https://api.github.com/repos/o/r/issues/9",
+          user: { login: "alice" },
+          created_at: "2026-06-15T00:00:00Z",
+          updated_at: "2026-06-16T00:00:00Z",
+          comments: 2,
+          review_comments: 5,
+          commits: 3,
+          additions: 120,
+          deletions: 15,
+          changed_files: 6,
+          base: { ref: "main" },
+          head: { ref: "codex/github-preview-cards", sha: "abc123" },
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse([
+          {
+            id: 1,
+            user: { login: "bob" },
+            state: "APPROVED",
+            submitted_at: "2026-06-16T01:00:00Z",
+          },
+        ])
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: "https://github.com/o/r/issues/9",
+          title: "Richer cards",
+          state: "open",
+          user: { login: "alice" },
+          comments: 4,
+          labels: [
+            { name: "frontend", color: "0e8a16" },
+            { name: "github", color: "5319e7" },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          total_count: 3,
+          check_runs: [
+            {
+              status: "completed",
+              conclusion: "success",
+              html_url: "https://github.com/o/r/actions/runs/1/job/1",
+            },
+            { status: "completed", conclusion: "success" },
+            { status: "completed", conclusion: "success" },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          state: "success",
+          total_count: 3,
+          target_url: "https://github.com/o/r/actions",
+        })
+      );
+
+    const response = await GET(requestFor("https://github.com/o/r/pull/9"));
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.pull_request",
+      state: "open",
+      reviewState: "approved",
+      mergeableState: "clean",
+      author: "alice",
+      createdAt: "2026-06-15T00:00:00Z",
+      updatedAt: "2026-06-16T00:00:00Z",
+      comments: 4,
+      reviewComments: 5,
+      commits: 3,
+      changedFiles: 6,
+      additions: 120,
+      deletions: 15,
+      baseRef: "main",
+      headRef: "codex/github-preview-cards",
+      headSha: "abc123",
+      labels: [
+        { name: "frontend", color: "0e8a16" },
+        { name: "github", color: "5319e7" },
+      ],
+      checks: {
+        state: "success",
+        total: 3,
+        successful: 3,
+        failed: 0,
+        pending: 0,
+        url: "https://github.com/o/r/actions/runs/1/job/1",
+      },
+    });
+  });
+
+  it("falls back to combined status when check-runs are truncated", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: "https://github.com/o/r/pull/10",
+          title: "Lots of checks",
+          state: "open",
+          merged: false,
+          draft: false,
+          mergeable_state: "clean",
+          head: { ref: "feature/checks", sha: "abc123" },
+        })
+      )
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          total_count: 51,
+          check_runs: Array.from({ length: 50 }, () => ({
+            status: "completed",
+            conclusion: "success",
+          })),
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          state: "failure",
+          total_count: 1,
+          target_url: "https://github.com/o/r/actions",
+        })
+      );
+
+    const response = await GET(requestFor("https://github.com/o/r/pull/10"));
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.pull_request",
+      checks: {
+        state: "failure",
+        total: 1,
+        successful: null,
+        failed: null,
+        pending: null,
+        url: "https://github.com/o/r/actions",
+      },
     });
   });
 

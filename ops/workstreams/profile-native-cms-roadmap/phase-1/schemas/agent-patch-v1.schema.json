@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/cms-agent-patch-v1.schema.json",
+  "title": "6529 CMS Agent Patch v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "patch_id", "target", "operations", "provenance"],
+  "properties": {
+    "schema": { "const": "6529.cms.agent_patch.v1" },
+    "patch_id": { "type": "string", "minLength": 1 },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["draft_id", "base_version"],
+      "properties": {
+        "draft_id": { "type": "string" },
+        "base_version": { "type": "integer", "minimum": 0 },
+        "base_package_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["op", "path"],
+        "properties": {
+          "op": {
+            "enum": [
+              "add_page",
+              "remove_page",
+              "update_page_metadata",
+              "add_block",
+              "update_block",
+              "remove_block",
+              "reorder_blocks",
+              "update_navigation",
+              "update_theme",
+              "update_share_metadata",
+              "attach_source_packet",
+              "set_taxonomy_terms"
+            ]
+          },
+          "path": { "type": "string", "minLength": 1 },
+          "value": true,
+          "reason": { "type": "string" },
+          "source_packet_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["created_at", "author_type"],
+      "properties": {
+        "created_at": { "type": "string", "format": "date-time" },
+        "author_type": { "enum": ["user_agent", "local_tool", "human"] },
+        "agent_name": { "type": "string" },
+        "agent_version": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,227 @@
+name: Dependency Governance
+
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".npmrc"
+      - ".github/dependabot.yml"
+      - ".github/workflows/dependency-governance.yml"
+      - "scripts/dependency-risk-gate.cjs"
+      - "__tests__/scripts/dependency-risk-gate.test.ts"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  dependency-governance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch base ref
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Classify dependency risk
+        id: risk
+        continue-on-error: true
+        env:
+          DEPENDENCY_RISK_BASE_REF: "origin/${{ github.base_ref }}"
+        run: ./bin/6529 run dependency:risk-gate
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        continue-on-error: true
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        id: guard_lock
+        continue-on-error: true
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install dependencies
+        id: install
+        continue-on-error: true
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Lint package.json versions
+        id: lint_package_json
+        continue-on-error: true
+        run: ./bin/6529 lint:package-json
+
+      - name: Typecheck
+        id: typecheck
+        continue-on-error: true
+        run: ./bin/6529 run typecheck:ci
+
+      - name: Dependency governance unit tests
+        id: tests
+        continue-on-error: true
+        run: ./bin/6529 run test:no-coverage -- __tests__/scripts/dependency-risk-gate.test.ts
+
+      - name: Build app
+        id: build
+        continue-on-error: true
+        env:
+          NODE_ENV: "production"
+          API_ENDPOINT: "https://api.6529.io"
+          WS_ENDPOINT: "wss://ws.6529.io"
+          ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
+          BASE_ENDPOINT: "https://6529.io"
+          NEXTGEN_CHAIN_ID: "1"
+          MOBILE_APP_SCHEME: "mobile6529"
+          CORE_SCHEME: "core6529"
+          IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
+          IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
+          ASSETS_FROM_S3: "false"
+        run: ./bin/6529 run build
+
+      - name: Sync dependency labels
+        # Dependabot PRs are same-repo; fork PRs intentionally skip label writes because GITHUB_TOKEN cannot safely mutate them.
+        if: always() && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RISK_LABELS: ${{ steps.risk.outputs.labels }}
+          RISK_OUTCOME: ${{ steps.risk.outcome }}
+          SOCKET_OUTCOME: ${{ steps.socket_firewall.outcome }}
+          GUARD_OUTCOME: ${{ steps.guard_lock.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          LINT_PACKAGE_JSON_OUTCOME: ${{ steps.lint_package_json.outcome }}
+          TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
+          TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+        run: |
+          set -euo pipefail
+
+          # Keep fallback labels in sync with MANAGED_LABELS in scripts/dependency-risk-gate.cjs.
+          labels="${RISK_LABELS:-risk:high,deps:mixed,auto-merge:blocked}"
+          checks_failed="0"
+          for outcome in \
+            "$RISK_OUTCOME" \
+            "$SOCKET_OUTCOME" \
+            "$GUARD_OUTCOME" \
+            "$INSTALL_OUTCOME" \
+            "$LINT_PACKAGE_JSON_OUTCOME" \
+            "$TYPECHECK_OUTCOME" \
+            "$TESTS_OUTCOME" \
+            "$BUILD_OUTCOME"; do
+            if [[ "$outcome" != "success" ]]; then
+              checks_failed="1"
+            fi
+          done
+
+          if [[ "$checks_failed" == "1" ]]; then
+            labels="${labels//auto-merge:candidate/auto-merge:blocked}"
+            if [[ "$labels" != *"auto-merge:blocked"* ]]; then
+              labels="${labels},auto-merge:blocked"
+            fi
+          fi
+
+          create_label() {
+            gh label create "$1" --color "$2" --description "$3" --force
+          }
+
+          create_label "risk:low" "0E8A16" "Dependency update is low risk under the dependency governance policy."
+          create_label "risk:medium" "FBCA04" "Dependency update needs human review before merge."
+          create_label "risk:high" "D93F0B" "Dependency update touches high-risk packages or behaviors."
+          create_label "deps:dev-only" "C5DEF5" "Only development dependencies changed."
+          create_label "deps:runtime" "B60205" "Runtime dependencies changed."
+          create_label "deps:patch" "BFE5BF" "Dependency update contains patch-level changes."
+          create_label "deps:minor" "F9D0C4" "Dependency update contains minor-level changes."
+          create_label "deps:major" "D4C5F9" "Dependency update contains major-level changes."
+          create_label "deps:mixed" "EDEDED" "Dependency update contains mixed or nonstandard changes."
+          create_label "deps:new-package" "FEF2C0" "Dependency update adds a direct or transitive package."
+          create_label "deps:install-script" "D93F0B" "Dependency update exposes install or build scripts."
+          create_label "auto-merge:candidate" "0E8A16" "Report-only candidate for future restricted auto-merge."
+          create_label "auto-merge:blocked" "B60205" "Dependency update is not eligible for auto-merge."
+
+          remove_issue_label() {
+            local encoded
+            encoded="$(jq -rn --arg label "$1" '$label|@uri')"
+            gh api --method DELETE "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels/${encoded}" >/dev/null || true
+          }
+
+          add_issue_label() {
+            local payload
+            payload="$(jq -cn --arg label "$1" '{labels: [$label]}')"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels" --input - <<< "$payload" >/dev/null
+          }
+
+          mapfile -t existing_labels < <(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels" --jq '.[].name')
+          for label in "${existing_labels[@]}"; do
+            case "$label" in
+              risk:*|deps:*|auto-merge:*)
+                remove_issue_label "$label"
+                ;;
+            esac
+          done
+
+          IFS=',' read -r -a label_array <<< "$labels"
+          for label in "${label_array[@]}"; do
+            trimmed="$(echo "$label" | xargs)"
+            if [[ -n "$trimmed" ]]; then
+              add_issue_label "$trimmed"
+            fi
+          done
+
+      - name: Fail when dependency checks fail
+        if: always()
+        env:
+          RISK_OUTCOME: ${{ steps.risk.outcome }}
+          SOCKET_OUTCOME: ${{ steps.socket_firewall.outcome }}
+          GUARD_OUTCOME: ${{ steps.guard_lock.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          LINT_PACKAGE_JSON_OUTCOME: ${{ steps.lint_package_json.outcome }}
+          TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
+          TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+        run: |
+          set -euo pipefail
+
+          failed="0"
+          check_outcome() {
+            local name="$1"
+            local outcome="$2"
+            if [[ "$outcome" != "success" ]]; then
+              echo "${name} did not pass: ${outcome}"
+              failed="1"
+            fi
+          }
+
+          check_outcome "Dependency risk classification" "$RISK_OUTCOME"
+          check_outcome "Socket Firewall install" "$SOCKET_OUTCOME"
+          check_outcome "No package-lock guard" "$GUARD_OUTCOME"
+          check_outcome "Frozen install" "$INSTALL_OUTCOME"
+          check_outcome "package.json pin lint" "$LINT_PACKAGE_JSON_OUTCOME"
+          check_outcome "Typecheck" "$TYPECHECK_OUTCOME"
+          check_outcome "Dependency governance unit tests" "$TESTS_OUTCOME"
+          check_outcome "Build" "$BUILD_OUTCOME"
+
+          exit "$failed"

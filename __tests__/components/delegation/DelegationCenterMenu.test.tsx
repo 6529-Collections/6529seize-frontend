@@ -1,9 +1,10 @@
 import { DelegationCenterSection } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { createRef, type ComponentProps } from "react";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} alt="test" />,
+  default: (props: ComponentProps<"img">) => <img {...props} />,
 }));
 
 jest.mock("@/components/delegation/DelegationCenter", () => () => (
@@ -52,7 +53,7 @@ describe("DelegationCenterMenu links", () => {
       .getAllByText("Etherscan")[0]
       ?.closest("a") as HTMLAnchorElement;
     expect(etherscan?.href).toContain("etherscan.io/address");
-    const github = screen.getAllByText("Github")[0]?.closest("a");
+    const github = screen.getAllByText("GitHub")[0]?.closest("a");
     expect(github).toHaveAttribute(
       "href",
       "https://github.com/6529-Collections/nftdelegation"
@@ -67,5 +68,88 @@ describe("DelegationCenterMenu links", () => {
     expect(props.setActiveSection).toHaveBeenCalledWith(
       DelegationCenterSection.CHECKER
     );
+  });
+
+  it("renders toast text without interpreting it as html", async () => {
+    const mod = await import("@/components/delegation/DelegationToast");
+    const { DelegationToast } = mod;
+
+    render(
+      <DelegationToast
+        toastRef={createRef<HTMLDivElement>()}
+        toast={{
+          title: "Wallet Error",
+          message: '<img src="x" onerror="alert(1)" />',
+        }}
+        showToast={true}
+        setShowToast={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText('<img src="x" onerror="alert(1)" />')
+    ).toBeInTheDocument();
+    expect(document.querySelector('img[src="x"]')).toBeNull();
+  });
+
+  it("reopens shared delegation toasts after a dismiss", async () => {
+    const mod = await import("@/components/delegation/DelegationToast");
+    const { DelegationToast, useDelegationToast } = mod;
+
+    function ToastHarness() {
+      const toastState = useDelegationToast();
+
+      return (
+        <div>
+          <button
+            type="button"
+            onClick={() =>
+              toastState.showDelegationToast({
+                title: "First Toast",
+                message: "First body",
+              })
+            }
+          >
+            Show first
+          </button>
+          <button
+            type="button"
+            onClick={() => toastState.setToastVisibility(false)}
+          >
+            Dismiss
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              toastState.showDelegationToast({
+                title: "Second Toast",
+                message: "Second body",
+              })
+            }
+          >
+            Show second
+          </button>
+          {toastState.toast && (
+            <DelegationToast
+              toastRef={toastState.toastRef}
+              toast={toastState.toast}
+              showToast={toastState.showToast}
+              setShowToast={toastState.setToastVisibility}
+            />
+          )}
+        </div>
+      );
+    }
+
+    render(<ToastHarness />);
+
+    fireEvent.click(screen.getByText("Show first"));
+    expect(screen.getByText("First Toast")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Dismiss"));
+    expect(screen.queryByText("First Toast")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Show second"));
+    expect(screen.getByText("Second Toast")).toBeInTheDocument();
   });
 });

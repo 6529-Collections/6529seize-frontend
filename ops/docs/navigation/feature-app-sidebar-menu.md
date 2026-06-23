@@ -75,8 +75,7 @@ When the connected wallet can access Drop Forge, the drawer adds a standalone
   `/about/6529-gradient`, `/about/gdrc1`, `/about/nft-delegation`,
   `/about/primary-address`, `/capital`, `/capital/company-portfolio`,
   `/capital/fund`, `/about/faq`, `/about/apply`, `/about/contact-us`,
-  `/about/data-decentralization`, `/about/ens`, `/about/license`,
-  `/about/release-notes`.
+  `/about/data-decentralization`, `/about/ens`, `/about/license`.
 - Open connected profile shortcut:
   tap either the drawer-header avatar or the direct `Profile` row; both
   resolve `/{normalized-handle}` first, then `/{walletAddress}` fallback.

@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/frontend-testing.validation-manifest.v1.json",
+  "title": "6529 Frontend Validation Manifest",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "risk",
+    "changed_files",
+    "hazards",
+    "commands",
+    "artifacts",
+    "review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "frontend-testing.validation-manifest.v1"
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["computed_floor", "declared", "final", "reasons"],
+      "properties": {
+        "computed_floor": {
+          "$ref": "#/$defs/riskLevel"
+        },
+        "declared": {
+          "$ref": "#/$defs/riskLevel"
+        },
+        "final": {
+          "$ref": "#/$defs/riskLevel"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "downgrade_approval": {
+          "type": ["object", "null"],
+          "additionalProperties": true,
+          "properties": {
+            "approver": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "expires_at": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["path"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "hazards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "hazard",
+          "severity",
+          "likelihood",
+          "detection",
+          "required_test",
+          "rollback_or_fix_forward"
+        ],
+        "properties": {
+          "hazard": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "type": "string",
+            "minLength": 1
+          },
+          "likelihood": {
+            "type": "string",
+            "minLength": 1
+          },
+          "detection": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required_test": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rollback_or_fix_forward": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["command", "status"],
+        "properties": {
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": ["passed", "failed", "skipped", "not-run"]
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifactPointer"
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "reviewbot": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "required_lanes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "allOf": [
+                {
+                  "contains": {
+                    "const": "general"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "wcag"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "i18n"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "security"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "responsiveness"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "riskLevel": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "artifactPointer": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "kind",
+        "uri",
+        "redaction_status",
+        "retention_class",
+        "producing_command"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uri": {
+          "type": "string",
+          "pattern": "^(s3://6529-artifacts/|https://artifacts\\.6529\\.io/|ipfs://|ipns://)"
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cid": {
+          "type": "string",
+          "minLength": 1
+        },
+        "etag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "redaction_status": {
+          "enum": ["verified-redacted", "not-sensitive", "public-redacted"]
+        },
+        "retention_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "producing_command": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "anyOf": [
+        {
+          "required": ["sha256"]
+        },
+        {
+          "required": ["cid"]
+        },
+        {
+          "required": ["etag"]
+        },
+        {
+          "required": ["version_id"]
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "uri": {
+                "pattern": "^(ipfs://|ipns://)"
+              }
+            },
+            "required": ["uri"]
+          },
+          "then": {
+            "properties": {
+              "redaction_status": {
+                "const": "public-redacted"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

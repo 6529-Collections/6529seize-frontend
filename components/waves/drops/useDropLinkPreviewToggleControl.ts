@@ -4,12 +4,14 @@ import { useAuth } from "@/components/auth/Auth";
 import type { LinkPreviewToggleControl } from "@/components/waves/LinkPreviewContext";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiToggleHideLinkPreviewRequest } from "@/generated/models/ApiToggleHideLinkPreviewRequest";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const URL_REGEX =
   /https?:\/\/(www\.)?[-a-z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9@:%_+.~#?&=/]*)/i;
+const pendingPreviewToggleDropIds = new Set<string>();
 
 function dropHasLinks(parts: ApiDrop["parts"] | undefined): boolean {
   const safeParts = Array.isArray(parts) ? parts : [];
@@ -30,9 +32,11 @@ export function useDropLinkPreviewToggleControl(
   const myStream = useMyStreamOptional();
   const applyOptimisticDropUpdate = myStream?.applyOptimisticDropUpdate;
   const [isLoading, setIsLoading] = useState(false);
+  const mountedRef = useRef(true);
+  const ownedPendingDropIdRef = useRef<string | null>(null);
   const dropId = drop?.id;
-  const dropWaveId = drop?.wave.id;
-  const dropAuthorHandle = drop?.author.handle;
+  const dropWaveId = drop?.wave?.id;
+  const dropAuthorHandle = drop?.author?.handle;
   const previewsHidden = drop?.hide_link_preview ?? false;
   const isTemporaryDrop = dropId?.startsWith("temp-") ?? false;
   const isAuthor =
@@ -43,26 +47,47 @@ export function useDropLinkPreviewToggleControl(
     dropId,
     dropWaveId,
     canToggle,
+    previewsHidden,
     applyOptimisticDropUpdate,
     setToast,
   });
-  const isToggleInFlightRef = useRef(false);
 
   useEffect(() => {
     toggleRuntimeRef.current = {
       dropId,
       dropWaveId,
       canToggle,
+      previewsHidden,
       applyOptimisticDropUpdate,
       setToast,
     };
-  }, [dropId, dropWaveId, canToggle, applyOptimisticDropUpdate, setToast]);
+  }, [
+    dropId,
+    dropWaveId,
+    canToggle,
+    previewsHidden,
+    applyOptimisticDropUpdate,
+    setToast,
+  ]);
 
-  const handleToggleLinkPreviews = useCallback(async () => {
+  useEffect(
+    () => () => {
+      mountedRef.current = false;
+      const ownedPendingDropId = ownedPendingDropIdRef.current;
+      if (ownedPendingDropId) {
+        pendingPreviewToggleDropIds.delete(ownedPendingDropId);
+        ownedPendingDropIdRef.current = null;
+      }
+    },
+    []
+  );
+
+  const handleToggleLinkPreviews = useCallback(async (nextHidden?: boolean) => {
     const {
       dropId: currentDropId,
       dropWaveId: currentDropWaveId,
       canToggle: currentCanToggle,
+      previewsHidden: currentPreviewsHidden,
       applyOptimisticDropUpdate: currentApplyOptimisticDropUpdate,
       setToast: currentSetToast,
     } = toggleRuntimeRef.current;
@@ -71,12 +96,18 @@ export function useDropLinkPreviewToggleControl(
       !currentDropId ||
       !currentDropWaveId ||
       !currentCanToggle ||
-      isToggleInFlightRef.current
+      pendingPreviewToggleDropIds.has(currentDropId)
     ) {
       return;
     }
 
-    isToggleInFlightRef.current = true;
+    const desiredHidden = nextHidden ?? !currentPreviewsHidden;
+    if (desiredHidden === currentPreviewsHidden) {
+      return;
+    }
+
+    pendingPreviewToggleDropIds.add(currentDropId);
+    ownedPendingDropIdRef.current = currentDropId;
     setIsLoading(true);
 
     const rollbackHandle = currentApplyOptimisticDropUpdate?.({
@@ -87,15 +118,30 @@ export function useDropLinkPreviewToggleControl(
           return draft;
         }
 
-        draft.hide_link_preview = !draft.hide_link_preview;
+        draft.hide_link_preview = desiredHidden;
         return draft;
       },
     });
 
     try {
-      await commonApiPost<Record<string, never>, ApiDrop>({
+      const updatedDrop = await commonApiPost<
+        ApiToggleHideLinkPreviewRequest,
+        ApiDrop
+      >({
         endpoint: `drops/${currentDropId}/toggle-hide-link-preview`,
-        body: {},
+        body: { hide_link_preview: desiredHidden },
+      });
+      currentApplyOptimisticDropUpdate?.({
+        waveId: currentDropWaveId,
+        dropId: currentDropId,
+        update: (draft) => {
+          if (draft.type !== DropSize.FULL) {
+            return draft;
+          }
+
+          draft.hide_link_preview = updatedDrop.hide_link_preview;
+          return draft;
+        },
       });
     } catch (error) {
       rollbackHandle?.rollback();
@@ -105,8 +151,13 @@ export function useDropLinkPreviewToggleControl(
         type: "error",
       });
     } finally {
-      isToggleInFlightRef.current = false;
-      setIsLoading(false);
+      pendingPreviewToggleDropIds.delete(currentDropId);
+      if (ownedPendingDropIdRef.current === currentDropId) {
+        ownedPendingDropIdRef.current = null;
+      }
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
 

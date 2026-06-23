@@ -8,11 +8,8 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import GroupCreateTest from "./GroupCreateTest";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import type {
-  SubmitArgs} from "@/hooks/groups/useGroupMutations";
-import {
-  useGroupMutations,
-} from "@/hooks/groups/useGroupMutations";
+import type { SubmitArgs } from "@/hooks/groups/useGroupMutations";
+import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 
 export default function GroupCreateActions({
   originalGroup,
@@ -32,6 +29,9 @@ export default function GroupCreateActions({
 
   const validation = validate(groupConfig);
   const isActionsDisabled = !validation.valid || isSubmitting;
+  const isEditMode = !!originalGroup;
+  const submitLabel = isEditMode ? "Save" : "Create";
+  const successMessage = isEditMode ? "Group saved." : "Group created.";
 
   const onSave = async (): Promise<void> => {
     if (isSubmitting) {
@@ -45,7 +45,7 @@ export default function GroupCreateActions({
     const result = await submit(submitArgs);
     if (result.ok) {
       setToast({
-        message: "Group created.",
+        message: successMessage,
         type: "success",
       });
       onCompleted();
@@ -80,19 +80,21 @@ export default function GroupCreateActions({
           <div
             className={`${
               isActionsDisabled ? "" : "tw-from-primary-400 tw-to-primary-500"
-            }  tw-bg-gradient-to-b tw-p-[1px] tw-flex tw-rounded-lg`}>
+            } tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-p-[1px]`}
+          >
             <button
               onClick={onSave}
               disabled={isActionsDisabled}
               type="button"
               className={`${
                 isActionsDisabled
-                  ? "tw-opacity-50 tw-text-iron-300"
-                  : "tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600"
-              } tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out`}>
+                  ? "tw-text-iron-300 tw-opacity-50"
+                  : "tw-text-white hover:tw-border-primary-600 hover:tw-bg-primary-600"
+              } tw-flex tw-items-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600`}
+            >
               <div className="tw-flex tw-items-center tw-justify-center tw-gap-x-2">
                 {isSubmitting && <CircleLoader />}
-                <span>Create</span>
+                <span>{submitLabel}</span>
               </div>
             </button>
           </div>

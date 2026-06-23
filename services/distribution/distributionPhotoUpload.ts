@@ -80,7 +80,7 @@ async function uploadLargeFile({
 }: SingleFileUploadParams): Promise<string> {
   const baseEndpoint = `distribution_photos/${contract}/${tokenId}`;
 
-  return multipartUploadCore({
+  const completion = await multipartUploadCore({
     file,
     endpoints: {
       start: `${baseEndpoint}/multipart-upload`,
@@ -89,6 +89,8 @@ async function uploadLargeFile({
     },
     ...(onProgress && { onProgress }),
   });
+
+  return completion.media_url;
 }
 
 export async function uploadDistributionPhotos({

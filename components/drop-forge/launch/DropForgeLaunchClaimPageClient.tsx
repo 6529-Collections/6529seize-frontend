@@ -1503,7 +1503,10 @@ export default function DropForgeLaunchClaimPageClient({
       return;
     }
     if (!isInitialized || !manifoldClaim) {
-      setToast({ message: "Initialize the on-chain claim before continuing.", type: "error" });
+      setToast({
+        message: "Initialize the on-chain claim before continuing.",
+        type: "error",
+      });
       return;
     }
     if (
@@ -1761,7 +1764,10 @@ export default function DropForgeLaunchClaimPageClient({
       forceAction?: "initialize" | "update";
     }) => {
       if (!claim) {
-        setToast({ message: "Claim details are not loaded yet.", type: "error" });
+        setToast({
+          message: "Claim details are not loaded yet.",
+          type: "error",
+        });
         return;
       }
       if (claim.edition_size == null || claim.edition_size <= 0) {
@@ -1772,13 +1778,19 @@ export default function DropForgeLaunchClaimPageClient({
         return;
       }
       if (!claim.metadata_location) {
-        setToast({ message: "Add a metadata location before continuing.", type: "error" });
+        setToast({
+          message: "Add a metadata location before continuing.",
+          type: "error",
+        });
         return;
       }
 
       const phase = phaseData.find((item) => item.key === phaseKey);
       if (!phase) {
-        setToast({ message: "Phase configuration was not found.", type: "error" });
+        setToast({
+          message: "Phase configuration was not found.",
+          type: "error",
+        });
         return;
       }
 

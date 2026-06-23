@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-import type {
-  UserPageTabConfig,
-  UserPageTabKey,
-} from "./userTabs.config";
+import type { UserPageTabConfig, UserPageTabKey } from "./userTabs.config";
 
 interface UserPageTabProps {
   readonly tab: UserPageTabConfig;
@@ -35,6 +32,17 @@ export default function UserPageTab({
   const classes = isActive ? activeClasses : inActiveClasses;
 
   const ref = useRef<HTMLAnchorElement>(null);
+  const linkLabel = tab.badge ? `${tab.title} ${tab.badge}` : tab.title;
+  const tabQuery: Record<string, string> = {};
+  const addressParam = searchParams?.get("address");
+  const localeParam = searchParams?.get("locale");
+
+  if (addressParam) {
+    tabQuery["address"] = addressParam;
+  }
+  if (localeParam) {
+    tabQuery["locale"] = localeParam;
+  }
 
   const isVisibleInViewportSide = () => {
     if (!parentRef.current || !ref.current) {
@@ -64,17 +72,18 @@ export default function UserPageTab({
       ref={ref}
       href={{
         pathname: path,
-        query: searchParams?.get("address")
-          ? { address: searchParams.get("address")! }
-          : {},
+        query: tabQuery,
       }}
       className={`${
         isActive ? "tw-pointer-events-none" : ""
-      }  tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold`}>
+      } tw-p-0 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline`}
+      aria-current={isActive ? "page" : undefined}
+      aria-label={linkLabel}
+    >
       <div className={classes}>
         {tab.title}
         {tab.badge && (
-          <span className="tw-ml-1 tw-rounded-full tw-bg-primary-300/20 tw-px-1.5 tw-py-0.5 tw-text-[0.625rem] tw-font-bold tw-uppercase tw-leading-none tw-text-primary-400 tw-tracking-wider">
+          <span className="tw-ml-1 tw-rounded-full tw-bg-primary-300/20 tw-px-1.5 tw-py-0.5 tw-text-[0.625rem] tw-font-bold tw-uppercase tw-leading-none tw-tracking-wider tw-text-primary-400">
             {tab.badge}
           </span>
         )}
