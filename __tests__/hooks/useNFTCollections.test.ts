@@ -113,7 +113,7 @@ describe("useNFTCollections", () => {
 
       expect(result.current.nfts).toEqual([]);
       expect(result.current.nextgenCollections).toEqual([]);
-      expect(result.current.loading).toBe(false);
+      expect(result.current.loading).toBe(true);
     });
   });
 

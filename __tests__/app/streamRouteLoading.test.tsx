@@ -36,8 +36,8 @@ describe("stream route loading fallbacks", () => {
     const shellBody = shell.firstElementChild?.nextElementSibling;
 
     expect(shell).not.toHaveClass("tw-min-h-[calc(100dvh-85px)]");
-    expect(shell).toHaveStyle({ minHeight: expectedMinHeight });
+    expect(shell.getAttribute("style")).toContain(expectedMinHeight);
     expect(shellBody).not.toHaveClass("tw-min-h-[calc(100dvh-85px)]");
-    expect(shellBody).toHaveStyle({ minHeight: expectedMinHeight });
+    expect(shellBody?.getAttribute("style")).toContain(expectedMinHeight);
   });
 });

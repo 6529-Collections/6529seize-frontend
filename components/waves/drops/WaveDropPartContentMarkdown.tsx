@@ -124,7 +124,7 @@ const WaveDropPartContentMarkdown: React.FC<
   const editLinkRestrictionApplies = isChatLinkRestrictionApplicable({
     dropType: drop?.drop_type ?? ApiDropType.Chat,
     linksDisabled: waveWithLinkSettings?.links_disabled === true,
-    isWaveAdmin: drop?.wave.authenticated_user_admin === true,
+    isWaveAdmin: drop?.wave?.authenticated_user_admin === true,
     isWaveCreator: areHandlesEqual(
       connectedProfile?.handle,
       waveWithLinkSettings?.wave_author_handle
@@ -138,7 +138,7 @@ const WaveDropPartContentMarkdown: React.FC<
         initialMentions={mentionedUsers}
         initialGroupMentions={mentionedGroups}
         initialWaveMentions={mentionedWaves}
-        canMentionAll={drop?.wave.authenticated_user_admin === true}
+        canMentionAll={drop?.wave?.authenticated_user_admin === true}
         waveId={wave.id}
         isSaving={isSaving}
         linkRestrictionMessage={

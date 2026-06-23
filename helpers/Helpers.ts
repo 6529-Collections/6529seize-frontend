@@ -419,6 +419,35 @@ export function getRandomColor() {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+function getRandomInteger(maxExclusive: number): number {
+  const values = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(values);
+  return (values[0] ?? 0) % maxExclusive;
+}
+
+export function getRandomUniqueNumbersBetween(
+  minInclusive: number,
+  maxExclusive: number
+): string[] {
+  if (!Number.isInteger(minInclusive) || !Number.isInteger(maxExclusive)) {
+    throw new TypeError("Both minInclusive and maxExclusive must be integers.");
+  }
+
+  if (maxExclusive <= minInclusive) {
+    throw new RangeError("maxExclusive must be greater than minInclusive.");
+  }
+
+  const rangeSize = maxExclusive - minInclusive;
+  const count = getRandomInteger(rangeSize) + 1;
+  const values = new Set<number>();
+
+  while (values.size < count) {
+    values.add(minInclusive + getRandomInteger(rangeSize));
+  }
+
+  return [...values].sort((a, b) => a - b).map(String);
+}
+
 export function capitalizeEveryWord(input: string): string {
   return input
     .toLocaleLowerCase()

@@ -35,8 +35,8 @@ export function useDropLinkPreviewToggleControl(
   const mountedRef = useRef(true);
   const ownedPendingDropIdRef = useRef<string | null>(null);
   const dropId = drop?.id;
-  const dropWaveId = drop?.wave.id;
-  const dropAuthorHandle = drop?.author.handle;
+  const dropWaveId = drop?.wave?.id;
+  const dropAuthorHandle = drop?.author?.handle;
   const previewsHidden = drop?.hide_link_preview ?? false;
   const isTemporaryDrop = dropId?.startsWith("temp-") ?? false;
   const isAuthor =

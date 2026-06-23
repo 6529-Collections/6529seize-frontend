@@ -14,17 +14,25 @@ jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <spa
 
 describe('WaveNICOutcome', () => {
   const outcome = {
-    distribution: [
-      { amount: 10 },
-      { amount: 20 },
-      { amount: 30 },
-      { amount: 40 },
-    ],
     amount: 100,
+  } as any;
+  const distribution = {
+    items: [
+      { index: 0, amount: 10 },
+      { index: 1, amount: 20 },
+      { index: 2, amount: 30 },
+      { index: 3, amount: 40 },
+    ],
+    totalCount: 4,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+    isLoading: false,
+    isError: false,
   } as any;
 
   it('toggles list visibility and shows more items', () => {
-    render(<WaveNICOutcome outcome={outcome} />);
+    render(<WaveNICOutcome outcome={outcome} distribution={distribution} />);
 
     // collapsed initially
     expect(screen.queryByText('10 NIC')).toBeNull();
@@ -35,7 +43,7 @@ describe('WaveNICOutcome', () => {
     expect(screen.queryByText('40 NIC')).toBeNull();
 
     // click view more
-    fireEvent.click(screen.getByText(/View more/i));
+    fireEvent.click(screen.getByText(/View \d+ more/i));
     expect(screen.getByText('40 NIC')).toBeInTheDocument();
   });
 });
