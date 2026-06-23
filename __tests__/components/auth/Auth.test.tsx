@@ -407,7 +407,7 @@ describe("Auth component", () => {
       expect(toast).toHaveBeenCalled();
     });
 
-    it("allows valid legacy auth during the session-v2 grace window without forcing the upgrade modal", async () => {
+    it("allows valid legacy auth before the session-v2 deadline without forcing the upgrade modal", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       enableAuthMigrationDeadline();
@@ -1577,7 +1577,7 @@ describe("Auth component", () => {
       });
     });
 
-    it("caps displayed temporary access time by the configured migration deadline", async () => {
+    it("displays the backend migration deadline in hours", async () => {
       const now = Date.UTC(2026, 5, 17, 12, 0, 0);
       jest.spyOn(Date, "now").mockReturnValue(now);
       enableAuthMigrationDeadline(new Date(now + 60 * 60 * 1000).toISOString());
@@ -1605,16 +1605,16 @@ describe("Auth component", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("Temporary access time remaining: 60 minutes.")
+          screen.getByText("Time left to upgrade: 1 hour.")
         ).toBeInTheDocument();
       });
     });
 
-    it("displays multi-day temporary access time in hours", async () => {
+    it("displays backend migration deadlines over three days as whole days", async () => {
       const now = Date.UTC(2026, 5, 17, 12, 0, 0);
       jest.spyOn(Date, "now").mockReturnValue(now);
       enableAuthMigrationDeadline(
-        new Date(now + 7 * 24 * 60 * 60 * 1000).toISOString()
+        new Date(now + (5 * 24 + 20) * 60 * 60 * 1000).toISOString()
       );
       walletAddress = "0x1111111111111111111111111111111111111111";
       const mockValidateAuthImmediate =
@@ -1640,7 +1640,42 @@ describe("Auth component", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("Temporary access time remaining: 72 hours.")
+          screen.getByText("Time left to upgrade: 5 days.")
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("displays backend migration deadlines at three days or less as whole hours", async () => {
+      const now = Date.UTC(2026, 5, 17, 12, 0, 0);
+      jest.spyOn(Date, "now").mockReturnValue(now);
+      enableAuthMigrationDeadline(
+        new Date(now + (3 * 24 + 20) * 60 * 60 * 1000).toISOString()
+      );
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Time left to upgrade: 92 hours.")
         ).toBeInTheDocument();
       });
     });
