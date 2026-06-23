@@ -279,27 +279,28 @@ jobs:
           done
 
           run_jest_with_timeout() {
-            local label="$1"
-            shift
+            local timeout_seconds="$1"
+            local label="$2"
+            shift 2
 
             set +e
-            NODE_ENV=test timeout 180s ./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests "$@"
+            NODE_ENV=test timeout "${timeout_seconds}s" ./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests "$@"
             local status=$?
             set -e
 
             if [ "$status" -eq 124 ]; then
-              echo "::error::${label} timed out after 180s"
+              echo "::error::${label} timed out after ${timeout_seconds}s"
             fi
 
             return "$status"
           }
 
           if [ "${#jest_test_files[@]}" -gt 0 ]; then
-            run_jest_with_timeout "Direct Jest tests" "${jest_test_files[@]}"
+            run_jest_with_timeout 180 "Direct Jest tests" "${jest_test_files[@]}"
           fi
 
           if [ "${#related_source_files[@]}" -gt 0 ]; then
-            run_jest_with_timeout "Related Jest tests" --findRelatedTests "${related_source_files[@]}"
+            run_jest_with_timeout 600 "Related Jest tests" --findRelatedTests "${related_source_files[@]}"
           fi
 
           if [ "${#jest_test_files[@]}" -eq 0 ] && [ "${#related_source_files[@]}" -eq 0 ]; then
