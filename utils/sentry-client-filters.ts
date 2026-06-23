@@ -2,6 +2,7 @@ export type SentryStackFrame = {
   filename?: string | undefined;
   abs_path?: string | undefined;
   function?: string | undefined;
+  in_app?: boolean | undefined;
 };
 
 export type SentryTransactionSpan = {
@@ -86,6 +87,7 @@ const filenameExceptions = [
   "injectLeap.js",
   "inject.chrome",
 ];
+const injectedWasmCspAppUriPath = "app:///inject.js";
 const injectedAppUriPath = "app:///injected/injected.js";
 const walletCollisionPatterns = [
   "tronlinkparams",
@@ -119,6 +121,10 @@ const noisyThirdPartyTelemetryTargets = new Set([
 ]);
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
+const sentryRouteParameterizationMechanismType =
+  "auto.browser.browserapierrors.setTimeout";
+const sentryRouteParameterizationMessage =
+  "JSON.stringify cannot serialize cyclic structures.";
 const URL_IN_PARENS_PATTERN = /\(([^)]+)\)/g;
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
@@ -871,7 +877,16 @@ function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
   );
 }
 
-function hasOnlyAppUriFrames(frames: SentryStackFrame[] | undefined): boolean {
+function isInjectedWasmCspAppUriFrame(frame: SentryStackFrame): boolean {
+  return [frame.filename, frame.abs_path].some(
+    (path) =>
+      typeof path === "string" && path.includes(injectedWasmCspAppUriPath)
+  );
+}
+
+function hasOnlyAppUriFrames(
+  frames: SentryStackFrame[] | undefined
+): frames is SentryStackFrame[] {
   return (
     Array.isArray(frames) && frames.length > 0 && frames.every(isAppUriFrame)
   );
@@ -881,6 +896,39 @@ function hasInjectedAppUriFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return Array.isArray(frames) && frames.some(isInjectedAppUriFrame);
+}
+
+function hasInjectedWasmCspAppUriSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!hasOnlyAppUriFrames(frames)) {
+    return false;
+  }
+
+  return frames.some(isInjectedWasmCspAppUriFrame);
+}
+
+function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
+  if (frame.function !== "stringify") {
+    return false;
+  }
+
+  return [frame.filename, frame.abs_path].includes("[native code]");
+}
+
+function hasAppOwnedFrame(frames: SentryStackFrame[] | undefined): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some(
+      (frame) => frame.in_app === true && !isNativeJsonStringifyFrame(frame)
+    )
+  );
+}
+
+function hasNativeJsonStringifyFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
 }
 
 function getHintException(hint?: SentryEventHint): unknown {
@@ -1005,6 +1053,17 @@ function getBreadcrumbValues(event: SentryClientEvent): SentryBreadcrumb[] {
   }
 
   return [];
+}
+
+function hasNavigationBreadcrumb(event: SentryClientEvent): boolean {
+  return getBreadcrumbValues(event).some((breadcrumb) => {
+    const data = breadcrumb.data;
+    return (
+      breadcrumb.category === "navigation" &&
+      typeof data?.["from"] === "string" &&
+      typeof data?.["to"] === "string"
+    );
+  });
 }
 
 function getContextString(
@@ -1256,6 +1315,33 @@ function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
   );
 }
 
+function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  return (
+    normalizedValue.includes("webassembly.instantiate") &&
+    normalizedValue.includes("content security") &&
+    normalizedValue.includes("unsafe-eval")
+  );
+}
+
+function hasWasmCspUnsafeEvalMessage(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const candidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      matchesWasmCspUnsafeEvalMessage(candidate)
+  );
+}
+
 function isTwitterBrowser(event: SentryClientEvent): boolean {
   const contextBrowserName = getContextString(event, "browser", "name");
   if (contextBrowserName === "Twitter") {
@@ -1326,6 +1412,34 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   );
 }
 
+export function shouldFilterSentryRouteParameterizationError(
+  event: SentryClientEvent
+): boolean {
+  // Sentry SDK route parameterization noise; keep app-owned cyclic JSON errors.
+  const value = event.exception?.values?.[0];
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== sentryRouteParameterizationMessage
+  ) {
+    return false;
+  }
+
+  const mechanism = value.mechanism;
+  if (
+    mechanism?.type !== sentryRouteParameterizationMechanismType ||
+    mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  const frames = value.stacktrace?.frames;
+  if (hasAppOwnedFrame(frames) || !hasNativeJsonStringifyFrame(frames)) {
+    return false;
+  }
+
+  return hasNavigationBreadcrumb(event);
+}
+
 export function shouldFilterInjectedWalletCollision(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1342,6 +1456,18 @@ export function shouldFilterInjectedWalletCollision(
   return hasWalletCollisionSignature(event, hint);
 }
 
+export function shouldFilterInjectedWasmCspUnsafeEval(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (!hasInjectedWasmCspAppUriSignature(frames)) {
+    return false;
+  }
+
+  return hasWasmCspUnsafeEvalMessage(event, hint);
+}
+
 export const __testing = {
   filenameExceptions,
   hasOnlyAppUriFrames,
@@ -1349,6 +1475,8 @@ export const __testing = {
   isTwitterBrowser,
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
+  sentryRouteParameterizationMechanismType,
+  sentryRouteParameterizationMessage,
   isCoinbaseWalletLinkWebSocket1006Message,
   isCoinbaseWalletLinkWebSocketPath,
   hasCoinbaseWalletLinkWebSocketFrame,
