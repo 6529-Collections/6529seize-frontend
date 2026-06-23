@@ -4,6 +4,7 @@ import {
   getLowValueNetworkErrorTargetUrl,
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
+  shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterInjectedWalletCollision,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -14,6 +15,8 @@ import {
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const metaMaskCircularMetaElementMessage =
+    "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
 
   const buildSpan = (overrides: Record<string, unknown> = {}) =>
     ({
@@ -85,6 +88,60 @@ describe("sentry-client-filters", () => {
               arguments: [
                 "[WagmiSetup] Failed to install safe ethereum proxy Error:",
                 "Cannot set property ethereum of #<Window> which has only a getter",
+              ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    }) as any;
+
+  const createCoinbaseWalletLinkWebSocketEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    ({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                  abs_path:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    }) as any;
+
+  const createMetaMaskUpdateUrlCircularEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    ({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: metaMaskCircularMetaElementMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "JSON.stringify",
+                },
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "__mm__updateUrl",
+                },
               ],
             },
           },
@@ -1915,6 +1972,282 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters Coinbase WalletLink websocket 1006 close errors", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent();
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Coinbase WalletLink websocket 1006 close errors from pnpm virtual-store paths", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Coinbase WalletLink websocket 1006 close errors before source-map symbolication", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "webSocket.onclose",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters pre-symbolication Coinbase WalletLink websocket 1006 close errors from the original exception stack", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+          },
+        ],
+      },
+    });
+    const error = new Error("websocket error 1006:");
+    error.stack =
+      "Error: websocket error 1006:\n    at webSocket.onclose (https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js:1:1)";
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Coinbase WalletLink websocket 1006 close errors from the original exception stack", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+          },
+        ],
+      },
+    });
+    const error = new Error("websocket error 1006:");
+    error.stack =
+      "Error: websocket error 1006:\n    at webSocket.onclose (node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js:52:28)";
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter app-owned websocket 1006 errors", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "services/websocket/WebSocketProvider.tsx",
+                  abs_path: "services/websocket/WebSocketProvider.tsx",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter handled websocket 1006 errors from raw browser frames", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: true,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "webSocket.onclose",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw browser websocket 1006 errors without the WalletLink close function", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "onclose",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter other Coinbase WalletLink websocket close codes", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1001: Going Away",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter broader Coinbase SDK websocket errors", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/SomeOtherWebSocket.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters injected wallet collisions when stack frames are empty", () => {
     // Arrange
     const event = createInjectedWalletCollisionEvent({
@@ -1974,6 +2307,111 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters MetaMask mobile update-url circular React meta element errors", () => {
+    // Arrange
+    const event = createMetaMaskUpdateUrlCircularEvent();
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters MetaMask mobile update-url circular errors from the original exception stack", () => {
+    // Arrange
+    const event = createMetaMaskUpdateUrlCircularEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: metaMaskCircularMetaElementMessage,
+          },
+        ],
+      },
+    });
+    const error = new TypeError(metaMaskCircularMetaElementMessage);
+    error.stack =
+      "TypeError: Converting circular structure to JSON\n    at JSON.stringify (<anonymous>:12:77)\n    at __mm__updateUrl (<anonymous>:36:7)";
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter generic app circular JSON errors without MetaMask update-url frames", () => {
+    // Arrange
+    const event = createMetaMaskUpdateUrlCircularEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: metaMaskCircularMetaElementMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "https://6529.io/_next/static/chunks/app.js",
+                  abs_path: "https://6529.io/_next/static/chunks/app.js",
+                  function: "JSON.stringify",
+                },
+                {
+                  filename: "https://6529.io/_next/static/chunks/app.js",
+                  abs_path: "https://6529.io/_next/static/chunks/app.js",
+                  function: "serializeMetadata",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter MetaMask update-url errors without the React meta element circular path", () => {
+    // Arrange
+    const event = createMetaMaskUpdateUrlCircularEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Converting circular structure to JSON --> starting at object with constructor 'Object'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "JSON.stringify",
+                },
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "__mm__updateUrl",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("does not filter injected wallet collisions when a web frame is present", () => {
