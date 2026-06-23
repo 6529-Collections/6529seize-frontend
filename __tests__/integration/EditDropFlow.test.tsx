@@ -46,6 +46,16 @@ jest.mock("@/hooks/isMobileDevice", () => ({
   default: jest.fn(() => false),
 }));
 
+jest.mock("@/hooks/useDropActionInteractionMode", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    hasTouchActionInput: false,
+    hasHoverActionInput: true,
+    canUseDesktopHoverActions: true,
+    canUseTouchActionSheet: false,
+  })),
+}));
+
 // The actual drop update mutation hook will be used with mocked API
 
 // Mock the EmojiContext

@@ -12,15 +12,13 @@ describe("Footer", () => {
       "href",
       "https://x.com/6529Collections"
     );
-    const discord = screen.getByRole("link", { name: /OM Discord/i });
-    expect(discord).toHaveAttribute("href", "https://discord.gg/join-om");
     const github = screen.getByRole("link", { name: /6529-Collections/i });
     expect(github).toHaveAttribute(
       "href",
       "https://github.com/6529-Collections"
     );
     const images = screen.getAllByRole("img");
-    expect(images).toHaveLength(4);
+    expect(images).toHaveLength(3);
   });
 
   it("renders policy and contact links", () => {

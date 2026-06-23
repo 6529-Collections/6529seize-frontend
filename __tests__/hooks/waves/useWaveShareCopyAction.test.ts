@@ -72,8 +72,9 @@ describe("useWaveShareCopyAction", () => {
 
     const { result } = renderUseWaveShareCopyAction();
 
-    act(() => {
+    await act(async () => {
       result.current.onClick();
+      await Promise.resolve();
     });
 
     await waitFor(() =>
@@ -92,8 +93,9 @@ describe("useWaveShareCopyAction", () => {
 
     const { result } = renderUseWaveShareCopyAction();
 
-    act(() => {
+    await act(async () => {
       result.current.onClick();
+      await Promise.resolve();
     });
 
     await waitFor(() =>

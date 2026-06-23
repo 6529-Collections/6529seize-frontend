@@ -113,11 +113,11 @@ describe("ManifoldMintingConnect", () => {
     expect(screen.getByTestId("header-connect")).toBeInTheDocument();
   });
 
-  it("hides connect prompt in standalone when not connected", () => {
+  it("hides connect prompt when requested", () => {
     (mockedConnect as jest.Mock).mockReturnValue({ isConnected: false });
     render(
       <CookieConsentProvider>
-        <ManifoldMintingConnect onMintFor={jest.fn()} standalone />
+        <ManifoldMintingConnect onMintFor={jest.fn()} hideConnect />
       </CookieConsentProvider>
     );
     expect(screen.queryByTestId("header-connect")).not.toBeInTheDocument();

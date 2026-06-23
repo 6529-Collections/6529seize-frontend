@@ -75,12 +75,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   React.useEffect(() => {
     updateEligibility(wave.id, {
       authenticated_user_eligible_to_chat:
-        wave.chat.authenticated_user_eligible,
+        wave.chat?.authenticated_user_eligible ?? false,
       authenticated_user_eligible_to_vote:
-        wave.voting.authenticated_user_eligible,
+        wave.voting?.authenticated_user_eligible ?? false,
       authenticated_user_eligible_to_participate:
-        wave.participation.authenticated_user_eligible,
-      authenticated_user_admin: wave.wave.authenticated_user_eligible_for_admin,
+        wave.participation?.authenticated_user_eligible ?? false,
+      authenticated_user_admin:
+        wave.wave?.authenticated_user_eligible_for_admin ?? false,
     });
   }, [updateEligibility, wave]);
 

@@ -496,10 +496,11 @@ describe("BrainMobileViewContent", () => {
     render(
       <BrainMobileViewContent
         activeView={BrainView.POLLS}
-        activeWaveId="1"
+        activeWaveId="wave-1"
         isCurationWave={false}
         isMemesWave={false}
         isRankWave={false}
+        hasPolls={true}
         onDropClick={onDropClick}
         onOpenQuickVote={jest.fn()}
         wave={wave}

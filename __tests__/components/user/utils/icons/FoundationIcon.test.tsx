@@ -6,7 +6,7 @@ describe('FoundationIcon', () => {
   it('renders img with alt text', () => {
     render(<FoundationIcon />);
     const img = screen.getByRole('img');
-    expect(img).toHaveAttribute('src', '/foundation-icon.jpg');
+    expect(img).toHaveAttribute('src', '/foundation.png');
     expect(img).toHaveAttribute('alt', 'Foundation App');
   });
 });
