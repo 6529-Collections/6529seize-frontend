@@ -106,19 +106,21 @@ function SidebarCategoryLabel({
   readonly tooltipId?: string | undefined;
 }) {
   return (
-    <div className="tw-px-4 tw-pb-2 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+    <div className="tw-px-4 tw-pb-1.5 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-500">
       <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
         <span>{label}</span>
         {tooltipContent && tooltipId && (
-          <button
-            type="button"
-            aria-label={tooltipContent}
-            data-tooltip-id={tooltipId}
-            data-tooltip-content={tooltipContent}
-            className="-tw-my-1.5 tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors active:tw-text-iron-300 focus:tw-text-iron-300 focus:tw-outline-none desktop-hover:hover:tw-text-iron-400"
-          >
-            <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3" />
-          </button>
+          <span className="tw-relative tw-inline-flex tw-size-3 tw-items-center tw-justify-center">
+            <button
+              type="button"
+              aria-label={tooltipContent}
+              data-tooltip-id={tooltipId}
+              data-tooltip-content={tooltipContent}
+              className="tw-absolute tw-left-1/2 tw-top-1/2 tw-inline-flex tw-size-6 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors active:tw-text-iron-300 focus:tw-text-iron-300 focus:tw-outline-none desktop-hover:hover:tw-text-iron-400"
+            >
+              <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3" />
+            </button>
+          </span>
         )}
       </span>
     </div>

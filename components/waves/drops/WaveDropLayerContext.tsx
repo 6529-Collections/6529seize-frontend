@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useMemo } from "react";
 
 type WaveDropLayerContextValue = {
+  // Override values must be Tailwind classes emitted by the build, either as
+  // static literals like these defaults or through the Tailwind safelist.
   readonly desktopActionsZIndexClassName: string;
   readonly mobileMenuZIndexClassName: string;
   readonly mobileDialogZIndexClassName: string;
