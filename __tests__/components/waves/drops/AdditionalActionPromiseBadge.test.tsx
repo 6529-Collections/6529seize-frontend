@@ -32,7 +32,7 @@ describe("AdditionalActionPromiseBadge", () => {
     render(<AdditionalActionPromiseBadge />);
 
     const tooltip = screen.getByTestId("custom-tooltip");
-    const badge = screen.getByText("Additional Action");
+    const badge = screen.getByRole("button", { name: "Additional Action" });
 
     expect(tooltip).toHaveAttribute(
       "data-content",
@@ -40,15 +40,16 @@ describe("AdditionalActionPromiseBadge", () => {
     );
     expect(tooltip).toHaveAttribute("data-placement", "top");
     expect(tooltip).toHaveAttribute("data-delay-show", "200");
-    expect(badge).toHaveAttribute("tabindex", "0");
+    expect(badge).toHaveAttribute("type", "button");
     expect(badge).toHaveClass("tw-cursor-help");
   });
 
   it("can disable keyboard focus when rendered inside another focus target", () => {
     render(<AdditionalActionPromiseBadge focusable={false} />);
 
-    expect(screen.getByText("Additional Action")).not.toHaveAttribute(
-      "tabindex"
-    );
+    const badge = screen.getByText("Additional Action");
+
+    expect(badge.tagName).toBe("SPAN");
+    expect(badge).not.toHaveAttribute("tabindex");
   });
 });
