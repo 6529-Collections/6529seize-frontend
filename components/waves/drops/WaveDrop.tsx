@@ -71,9 +71,11 @@ const getPointerId = (event: React.PointerEvent<HTMLDivElement>): number =>
 const isPrimaryPointerButton = (
   event: React.PointerEvent<HTMLDivElement>
 ): boolean => {
-  const maybeButton = (event as React.PointerEvent<HTMLDivElement> & {
-    readonly button?: number | undefined;
-  }).button;
+  const maybeButton = (
+    event as React.PointerEvent<HTMLDivElement> & {
+      readonly button?: number | undefined;
+    }
+  ).button;
 
   return (
     maybeButton === undefined ||
@@ -182,7 +184,7 @@ const getDropClasses = (
   isDrop: boolean
 ): string => {
   const baseClasses =
-    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
+    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-z-30 focus-within:tw-z-30";
 
   const streamClasses = "tw-rounded-xl";
 
