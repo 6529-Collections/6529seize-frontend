@@ -1,5 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,
@@ -103,6 +104,7 @@ type AuthContextType = {
   readonly receivedProfileProxies: ApiProfileProxy[];
   readonly activeProfileProxy: ApiProfileProxy | null;
   readonly showWaves: boolean;
+  readonly sessionUpgradeRequired: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade?: () => Promise<{ success: boolean }>;
   readonly setToast: (toast: AppToastInput) => void;
@@ -155,6 +157,7 @@ interface RunImmediateAuthValidationParams {
   ) => void;
   readonly setSessionUpgradeTimeLeftMs: (timeLeftMs: number) => void;
   readonly setSessionUpgradeCanDismiss: (canDismiss: boolean) => void;
+  readonly setSessionUpgradeRequired: (required: boolean) => void;
   readonly setShowSignModal: (show: boolean) => void;
   readonly invalidateAll: () => void;
   readonly reset: () => void;
@@ -393,6 +396,7 @@ const runImmediateAuthValidation = async ({
   setSessionUpgradePromptMode,
   setSessionUpgradeTimeLeftMs,
   setSessionUpgradeCanDismiss,
+  setSessionUpgradeRequired,
   setShowSignModal,
   invalidateAll,
   reset,
@@ -434,6 +438,7 @@ const runImmediateAuthValidation = async ({
                 return;
               }
 
+              setSessionUpgradeRequired(true);
               const status = getOrCreateSessionUpgradePromptStatus(
                 currentAddress,
                 authRolloutSettings
@@ -485,6 +490,7 @@ export const AuthContext = createContext<AuthContextType>({
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),
+  sessionUpgradeRequired: false,
   requestSessionUpgrade: async () => ({ success: false }),
   setToast: () => {},
   setActiveProfileProxy: async () => {},
@@ -535,6 +541,7 @@ export default function Auth({
   const [sessionUpgradeTimeLeftMs, setSessionUpgradeTimeLeftMs] = useState(0);
   const [sessionUpgradeCanDismiss, setSessionUpgradeCanDismiss] =
     useState(true);
+  const [sessionUpgradeRequired, setSessionUpgradeRequired] = useState(false);
   const signModalReasonRef = useRef<SignModalReason>(signModalReason);
 
   const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity(
@@ -675,6 +682,7 @@ export default function Auth({
       abortCurrentAuthOperation();
       setShowSignModal(false);
       setAuthLoadingState("idle");
+      setSessionUpgradeRequired(false);
       return;
     }
 
@@ -688,10 +696,12 @@ export default function Auth({
 
     if (!address || connectionState !== "connected") {
       setShowSignModal(false);
+      setSessionUpgradeRequired(false);
       return;
     }
 
     if (!isAddressAuthorized) {
+      setSessionUpgradeRequired(false);
       if (isConnected) {
         setSignModalReason("auth");
         setShowSignModal(true);
@@ -716,6 +726,7 @@ export default function Auth({
 
     // Capture current address at validation time to prevent race conditions
     const currentAddress = address;
+    setSessionUpgradeRequired(false);
 
     // Generate unique operation ID for this validation attempt
     const operationId = `auth-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -736,6 +747,7 @@ export default function Auth({
       setSessionUpgradePromptMode,
       setSessionUpgradeTimeLeftMs,
       setSessionUpgradeCanDismiss,
+      setSessionUpgradeRequired,
       setShowSignModal,
       invalidateAll,
       reset,
@@ -1031,6 +1043,7 @@ export default function Auth({
       clearSessionUpgradeReminder(walletAddress);
       setShowSignModal(false);
       setSignModalReason("auth");
+      setSessionUpgradeRequired(false);
       await removeAuthJwt();
       invalidateAll();
     },
@@ -1141,10 +1154,12 @@ export default function Auth({
   }): Promise<boolean> => {
     if (!validationResult.requiresSessionUpgrade) {
       setSignModalReason("auth");
+      setSessionUpgradeRequired(false);
       await removeAuthJwt();
       return true;
     }
 
+    setSessionUpgradeRequired(true);
     const promptStatus = showSessionUpgradePrompt(walletAddress, {
       forceShow: true,
     });
@@ -1185,11 +1200,15 @@ export default function Auth({
       walletAddress,
       role,
     });
+    if (!validationResult.requiresSessionUpgrade) {
+      setSessionUpgradeRequired(false);
+    }
 
     if (
       validationResult.requiresSessionUpgrade &&
       signModalReason !== "session-upgrade"
     ) {
+      setSessionUpgradeRequired(true);
       const promptStatus = getOrCreateSessionUpgradePromptStatus(
         walletAddress,
         authRolloutSettings
@@ -1224,6 +1243,7 @@ export default function Auth({
       invalidateAll();
       if (validationResult.requiresSessionUpgrade) {
         clearSessionUpgradeReminder(walletAddress);
+        setSessionUpgradeRequired(false);
       }
     }
 
@@ -1293,6 +1313,7 @@ export default function Auth({
 
       invalidateAll();
       clearSessionUpgradeReminder(connectedAddress);
+      setSessionUpgradeRequired(false);
       return { success: finishAuthorizedWalletAuthentication() };
     } finally {
       setAuthLoadingState("idle");
@@ -1530,6 +1551,7 @@ export default function Auth({
         receivedProfileProxies,
         activeProfileProxy,
         showWaves,
+        sessionUpgradeRequired,
         connectionStatus: getProfileConnectedStatus({
           profile: connectedProfile ?? null,
           isProxy: !!activeProfileProxy,
@@ -1573,6 +1595,13 @@ export default function Auth({
               )}
               <li>{signModalSecondaryListItem}</li>
             </ul>
+            {isSessionUpgradePrompt && (
+              <p className={styles["signModalLearnMore"]}>
+                <Link href="/about/tech/wallet-authentication">
+                  Learn more about this update
+                </Link>
+              </p>
+            )}
           </Modal.Body>
           <Modal.Footer className={styles["signModalFooter"]}>
             {!isSignRequestInProgress &&

@@ -217,12 +217,18 @@ it("sets initial waves overview page only once", () => {
     pages: [waves],
     pageParams: [undefined],
   });
+  expect(client.getQueryData([QueryKey.WAVE, { wave_id: "w1" }])).toEqual(
+    waves[0]
+  );
   const other = [{ id: "w2" }] as any;
   act(() => ctx.setWavesOverviewPage(other));
   expect(client.getQueryData(key)).toEqual({
     pages: [waves],
     pageParams: [undefined],
   });
+  expect(client.getQueryData([QueryKey.WAVE, { wave_id: "w2" }])).toEqual(
+    other[0]
+  );
 });
 
 test("wave follow change toggles and invalidates", () => {
@@ -245,7 +251,11 @@ test("wave follow change toggles and invalidates", () => {
 
 it("invalidateAll calls queryClient.invalidateQueries with no args", () => {
   const { client, ctx } = createTestSetup();
+  jest.spyOn(client, "removeQueries");
   act(() => ctx.invalidateAll());
+  expect(client.removeQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.WAVE],
+  });
   expect(client.invalidateQueries).toHaveBeenCalledWith();
 });
 
