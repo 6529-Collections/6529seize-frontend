@@ -6,6 +6,7 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterInjectedWalletCollision,
+  shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -15,6 +16,7 @@ import {
   type SentryStackFrame,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
+import type { SentryClientEvent } from "@/utils/sentry-client-filters";
 
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
@@ -23,6 +25,12 @@ type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const reactDomInsertBeforeMessage =
+    __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
+  const reactDomFrame = {
+    filename:
+      "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+  };
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
   const wasmCspUnsafeEvalMessage = [
@@ -278,6 +286,28 @@ describe("sentry-client-filters", () => {
       ...overrides,
     });
 
+  const createReactDomInsertBeforeEvent = (
+    overrides: Partial<SentryClientEvent> = {}
+  ): SentryClientEvent => ({
+    transaction: "/waves",
+    exception: {
+      values: [
+        {
+          type: "NotFoundError",
+          value: reactDomInsertBeforeMessage,
+          stacktrace: {
+            frames: [reactDomFrame],
+          },
+        },
+      ],
+    },
+    tags: {
+      transaction: "/waves",
+      url: "/waves",
+    },
+    ...overrides,
+  });
+
   it("filters events when a stack frame matches a filename exception", () => {
     // Arrange
     const frames: SentryStackFrame[] = [
@@ -350,6 +380,93 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters exact React DOM insertBefore NotFoundError events on waves routes with only runtime frames", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        tags: {
+          transaction: "/waves",
+          url: "/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters React DOM insertBefore NotFoundError events when request URL identifies a waves route", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        transaction: undefined,
+        tags: {},
+        request: {
+          url: "https://6529.io/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099?view=full",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps React DOM insertBefore NotFoundError events when an app frame is present", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames: [
+                  reactDomFrame,
+                  {
+                    filename:
+                      "webpack-internal:///(app-pages-browser)/./components/waves/drops/WaveDrop.tsx",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps React DOM insertBefore NotFoundError events outside waves routes", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        transaction: "/about",
+        tags: {
+          transaction: "/about",
+          url: "/about",
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps different NotFoundError messages from React DOM runtime frames", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: "The requested node was not found.",
+              stacktrace: {
+                frames: [reactDomFrame],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
   });
 
   it("does not filter when frames do not match any filename exception", () => {
