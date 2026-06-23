@@ -16,6 +16,13 @@ describe("instrumentation-client", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const wasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
+    "WebAssembly module violates the following Content Security policy directive",
+    "because 'unsafe-eval' is not an allowed source of script in the following",
+    "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
   const sentryRouteParameterizationMessage =
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
@@ -130,6 +137,32 @@ describe("instrumentation-client", () => {
       },
       tags: {
         mechanism: "auto.browser.global_handlers.onunhandledrejection",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops injected WebAssembly CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
       },
     };
 
