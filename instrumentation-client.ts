@@ -21,6 +21,7 @@ import {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
@@ -114,6 +115,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterInjectedWalletCollision(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterInjectedWasmCspUnsafeEval(event, hint)) {
     return true;
   }
 

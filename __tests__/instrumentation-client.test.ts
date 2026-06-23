@@ -18,6 +18,13 @@ describe("instrumentation-client", () => {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
   };
+  const wasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
+    "WebAssembly module violates the following Content Security policy directive",
+    "because 'unsafe-eval' is not an allowed source of script in the following",
+    "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
   const sentryRouteParameterizationMessage =
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
@@ -130,6 +137,32 @@ describe("instrumentation-client", () => {
       tags: {
         transaction: "/waves",
         url: "/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops injected WebAssembly CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
       },
     };
 
