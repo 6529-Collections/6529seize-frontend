@@ -3731,3 +3731,82 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
     path.
 - Next action: rerun focused local/staging/production validation, commit/push a
   follow-up, and re-trigger reviewbot lanes on the new head.
+
+## 2026-06-23T06:57Z Admin/Destructive Guard Latest-Head GLM Follow-Up
+
+- Fixed reviewbot GLM-swarm empty internal reviewer handling in
+  `6529reviewbot` first, then reran `/6529bot review glm-swarm` on PR #2855.
+- Latest GLM-swarm run reviewed head `2612d7a07483` and succeeded with one
+  partial reviewer slice (`correctness-regression: empty_output`), confirming
+  the bot-infra failure is no longer blocking advisory feedback.
+- Accepted useful latest-head GLM feedback:
+  - `expectAnyVisible` now uses labeled candidates, an explicit poll interval,
+    and a short per-candidate visibility timeout so permission-boundary
+    failures are clearer and less CPU-noisy.
+  - `tests/README.md` now states that production read-only aggregate evidence
+    is desktop Chromium only, while mobile-web admin guard evidence remains in
+    local and staging targeted commands.
+- Deferred remaining GLM suggestions as already covered or non-blocking:
+  - empty Groups data is intentionally route-level only; destructive
+    route-level controls are still asserted absent and the no-card limitation is
+    documented in the spec.
+  - local readonly packs consistently omit `PLAYWRIGHT_ENV=local`; the admin
+    guard spec does not branch on that variable.
+
+## 2026-06-23T07:21Z Admin/Destructive Guard Follow-Up Validation
+
+- Revalidated the latest GLM follow-up edits before push:
+  - `seize run typecheck:playwright`: passed.
+  - focused ESLint on `tests/admin/admin-destructive-guards-readonly.spec.ts`:
+    passed.
+  - `seize run lint:package-json`: passed.
+  - `seize run lint:changed`: passed.
+  - `seize run typecheck:changed`: no changed TypeScript files are included in
+    `tsconfig.typecheck.json`, expected for Playwright-only spec changes.
+  - `compute-risk-floor --changed-from origin/main`: passed.
+  - `scan-changed-secrets --changed-from origin/main`: clean.
+  - `validate-workflow-security --changed-from origin/main`: passed.
+  - `codex-diff-check`: passed.
+  - `seize run test:e2e:admin-guards-readonly`: 6/6 passed across desktop and
+    mobile Chromium locally.
+  - `seize run test:e2e:staging:admin-guards-readonly`: 6/6 passed across
+    desktop and mobile Chromium after loading `STAGING_AUTH` only into the
+    child process from Windows Credential Manager; no credential value was
+    printed or persisted.
+  - `seize run test:e2e:production:readonly`: 68/68 passed on production
+    desktop Chromium with the admin guard pack included.
+- One staging retry used an incorrect UTF-8 decode of the Windows credential
+  blob and failed at the access gate before route assertions. Reran with the
+  correct UTF-16 decode and passed.
+- Next action: commit and push the follow-up, then re-trigger the full
+  6529reviewbot lane set on PR #2855.
+
+## 2026-06-23T07:34Z Admin/Destructive Guard Rebase Validation
+
+- Rebasing PR #2855 onto current `origin/main` completed cleanly after main
+  advanced to `d0bf12f52`.
+- Rebased validation:
+  - `seize run typecheck:playwright`: passed.
+  - `seize run lint:package-json`: passed.
+  - `codex-diff-check`: passed.
+  - `seize run typecheck:changed`: passed for 29 changed TypeScript files.
+  - `compute-risk-floor --changed-from origin/main`: passed.
+  - `scan-changed-secrets --changed-from origin/main`: clean.
+  - `validate-workflow-security --changed-from origin/main`: passed.
+  - `seize exec eslint --no-warn-ignored --max-warnings=0
+    tests/admin/admin-destructive-guards-readonly.spec.ts`: passed.
+  - `seize run test:e2e:admin-guards-readonly`: 6/6 passed across desktop and
+    mobile Chromium locally.
+  - `seize run test:e2e:staging:admin-guards-readonly`: 6/6 passed across
+    desktop and mobile Chromium with `STAGING_AUTH` loaded only into the child
+    process from Windows Credential Manager.
+  - `seize run test:e2e:production:admin-guards-readonly`: 3/3 passed on
+    production desktop Chromium.
+- `seize run lint:changed` failed after the rebase because that script compares
+  against local `main`, which lagged behind `origin/main` in this worktree and
+  expanded to an over-long Windows command line. The actual
+  `origin/main...HEAD` JS/TS changed-file set is only
+  `tests/admin/admin-destructive-guards-readonly.spec.ts`, and the direct
+  ESLint command above passed.
+- Next action: amend the follow-up commit with this evidence, force-push with
+  lease, then trigger the full existing 6529reviewbot lane set plus GLM-swarm.

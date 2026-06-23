@@ -9,7 +9,7 @@ Read this section first after compaction or handoff.
     `D:\repos\6529seize-frontend-admin-guards`.
   - Current active branch:
     `codex/e2e-admin-destructive-guards`, based on current `origin/main`
-    `fe4af27e79e1`.
+    `d0bf12f52`.
   - Active slice is test-only admin/destructive fail-closed E2E hardening:
     add `tests/admin/admin-destructive-guards-readonly.spec.ts`, wire
     `test:e2e:admin-guards-readonly`, add staging/production variants, and add
@@ -27,18 +27,31 @@ Read this section first after compaction or handoff.
     existing reviewbot lane.
   - Current validation evidence:
     - `seize run test:e2e:admin-guards-readonly`: 6/6 passed locally across
-      desktop and mobile.
+      desktop and mobile. Latest follow-up rerun after GLM feedback also passed
+      6/6.
     - `seize run test:e2e:staging:admin-guards-readonly` with local Credential
       Manager target `STAGING_AUTH`: 6/6 passed across desktop and mobile.
+      Latest follow-up rerun also passed 6/6 after loading the target only into
+      the child process; no credential value was printed or persisted.
     - `seize run test:e2e:production:admin-guards-readonly`: 3/3 passed on
-      production desktop.
+      production desktop. Latest rebased rerun also passed 3/3.
     - `seize run test:e2e:production:readonly`: 68/68 passed on production
-      desktop with the new admin pack included.
+      desktop with the new admin pack included. Latest follow-up rerun also
+      passed 68/68.
     - `seize run typecheck:playwright`, `seize run lint:package-json`,
       targeted ESLint, `seize run typecheck:changed`, `seize run lint:changed`,
       risk floor, secret scan, workflow-security validation, and
-      `codex-diff-check` passed. Risk floor is Level 4 because `package.json`
+      `codex-diff-check` passed before PR publication and after latest-head GLM
+      follow-up edits. Risk floor is Level 4 because `package.json`
       release-validation scripts changed.
+  - Latest bot loop:
+    - Reviewbot PR #411 fixed GLM-swarm empty internal reviewer handling and was
+      merged into `6529reviewbot` main.
+    - Latest PR #2855 GLM-swarm review succeeded with one degraded internal
+      reviewer slice and produced actionable helper/docs feedback, now fixed.
+    - PR #2855 was rebased cleanly onto `origin/main` `d0bf12f52`; focused
+      local, staging, and production admin guard validation passed again before
+      force-push.
 
 - Latest testing-roadmap state, 2026-06-22T21:07Z:
   - PR #2847 is merged and deployed. Production serves

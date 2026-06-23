@@ -174,7 +174,9 @@ Surface matrix:
   pack against staging with the remote mutation guard and staging access
   unlock.
 - `test:e2e:production:admin-guards-readonly` runs the admin/destructive guard
-  pack against production desktop web only as a public, read-only smoke.
+  pack against production desktop web only as a public, read-only smoke. Mobile
+  web coverage for this pack remains in the local and staging commands, where
+  route timing and access-gate retries are less expensive to diagnose.
 - `test:e2e:staging:public-content-readonly` runs the public content pack
   against staging with the remote mutation guard and staging access unlock.
 - `test:e2e:production:public-content-readonly` runs the public content pack
@@ -196,7 +198,8 @@ Surface matrix:
   returns one aggregate status. Deployment-bus manifests know this as the
   optional production-only `playwright:production-readonly` pack; record that
   pack only with redacted durable evidence and desktop Chromium surface
-  metadata.
+  metadata. Use the targeted staging or local readonly scripts when a release
+  train needs paired mobile-web evidence for one of the aggregate packs.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -294,10 +297,11 @@ Large-pack ownership:
   endpoint is isolated.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
-  individual public read-only packs and is the command behind the optional
-  deployment-bus pack `playwright:production-readonly`. Do not make it a
-  staging requirement unless a real staging aggregate command and evidence path
-  exist.
+  individual public read-only packs on desktop Chromium and is the command
+  behind the optional deployment-bus pack `playwright:production-readonly`. Do
+  not make it a staging requirement unless a real staging aggregate command and
+  evidence path exist; use targeted staging/local commands for mobile-web
+  follow-up evidence.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.

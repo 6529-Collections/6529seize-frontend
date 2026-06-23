@@ -57,6 +57,11 @@ const DROP_FORGE_WRITE_ACTIONS: readonly RegExp[] = [
   /^Update$/,
 ];
 
+type VisibleCandidate = {
+  readonly label: string;
+  readonly locator: Locator;
+};
+
 async function gotoReady(page: Page, path: string) {
   await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page, { readySelector: "main" });
@@ -78,17 +83,17 @@ async function expectNoMainLinks(page: Page, labels: readonly RegExp[]) {
 }
 
 async function expectAnyVisible(
-  candidates: readonly Locator[],
+  candidates: readonly VisibleCandidate[],
   description: string
 ) {
   await expect
     .poll(
       async () => {
-        for (const candidate of candidates) {
+        for (const { locator } of candidates) {
           if (
-            await candidate
+            await locator
               .first()
-              .isVisible()
+              .isVisible({ timeout: 250 })
               .catch(() => false)
           ) {
             return true;
@@ -97,7 +102,10 @@ async function expectAnyVisible(
         return false;
       },
       {
-        message: `Expected one visible ${description}`,
+        intervals: [250, 500, 1000],
+        message: `Expected one visible ${description}: ${candidates
+          .map(({ label }) => label)
+          .join(", ")}`,
         timeout: 30000,
       }
     )
@@ -176,11 +184,17 @@ test.describe("Admin and destructive route guards @surface @medium @large @reado
     ).toBeVisible();
     await expectAnyVisible(
       [
-        page.getByRole("button", { name: "Connect" }),
-        page.getByRole("heading", {
-          level: 4,
-          name: "ONLY ADMIN WALLETS CAN USE THIS dAPP.",
-        }),
+        {
+          label: "Connect wallet button",
+          locator: page.getByRole("button", { name: "Connect" }),
+        },
+        {
+          label: "admin-wallet-only heading",
+          locator: page.getByRole("heading", {
+            level: 4,
+            name: "ONLY ADMIN WALLETS CAN USE THIS dAPP.",
+          }),
+        },
       ],
       "NextGen admin permission boundary"
     );
