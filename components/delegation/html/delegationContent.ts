@@ -18,7 +18,7 @@ interface DelegationContentAsset {
   readonly bytes: number;
 }
 
-export interface DelegationContentManifest {
+interface DelegationContentManifest {
   readonly version: string;
   readonly generatedAt: string;
   readonly canonicalStorage: {
@@ -46,7 +46,7 @@ type DelegationArticleFetch = (
 
 export const MAX_DELEGATION_ARTICLE_BYTES = 512 * 1024;
 
-export interface DelegationArticleHtmlResult {
+interface DelegationArticleHtmlResult {
   readonly article: DelegationContentArticle;
   readonly html: string;
   readonly url: string;
@@ -55,9 +55,7 @@ export interface DelegationArticleHtmlResult {
 export const delegationContentManifest =
   manifestJson as DelegationContentManifest;
 
-export const delegationArticleSlugs = Object.keys(
-  delegationContentManifest.articles
-);
+const delegationArticleSlugs = Object.keys(delegationContentManifest.articles);
 
 export const DELEGATION_TOP_LEVEL_ARTICLE_SLUGS = [
   "reference-overview-wallet-architecture",

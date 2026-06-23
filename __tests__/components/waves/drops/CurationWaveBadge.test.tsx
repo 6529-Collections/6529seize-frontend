@@ -55,7 +55,10 @@ describe("CurationWaveBadge", () => {
       "src",
       "scaled:https://example.com/wave.png"
     );
-    expect(screen.getByTestId("tooltip")).toHaveTextContent("Profile Wave");
+    expect(screen.getByRole("button")).toHaveAttribute(
+      "data-tooltip-id",
+      "wave-creator-badge"
+    );
 
     fireEvent.click(screen.getByRole("button"));
 
@@ -69,7 +72,6 @@ describe("CurationWaveBadge", () => {
       "aria-label",
       "Open featured wave"
     );
-    expect(screen.getByTestId("tooltip")).toHaveTextContent("Featured wave");
     expect(screen.queryByTestId("wave-image")).toBeNull();
     expect(screen.getByTestId("wave-fallback-icon")).toBeInTheDocument();
   });
@@ -87,6 +89,9 @@ describe("CurationWaveBadge", () => {
 
     expect(screen.queryByTestId("wave-image")).toBeNull();
     expect(screen.getByTestId("wave-fallback-icon")).toBeInTheDocument();
-    expect(screen.getByTestId("tooltip")).toHaveTextContent("Profile Wave");
+    expect(screen.getByRole("button")).toHaveAttribute(
+      "aria-label",
+      "Open Profile Wave"
+    );
   });
 });

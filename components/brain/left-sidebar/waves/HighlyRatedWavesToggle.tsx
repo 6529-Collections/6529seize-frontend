@@ -41,6 +41,9 @@ type SetActiveWaveForPreview = (
   }
 ) => void;
 
+const isDiscoverablePreviewWave = (wave: MinimalWave) =>
+  !wave.isPinned && !wave.isFollowing && !wave.isFollowedSubwaveContainer;
+
 export function getHighlyRatedPreviewWaves({
   activeWaveLookupWaves,
   activeParentWaveId,
@@ -52,23 +55,34 @@ export function getHighlyRatedPreviewWaves({
   readonly activeWaveId: string | null | undefined;
   readonly highlyRatedWaves: readonly MinimalWave[];
 }): MinimalWave[] {
-  const highlyRatedWaveIds = new Set(highlyRatedWaves.map((wave) => wave.id));
+  const discoverableHighlyRatedWaves = highlyRatedWaves.filter(
+    isDiscoverablePreviewWave
+  );
+  const highlyRatedWaveIds = new Set(
+    discoverableHighlyRatedWaves.map((wave) => wave.id)
+  );
   const findRecoverableWave = (waveId: string | null | undefined) => {
     if (typeof waveId !== "string" || highlyRatedWaveIds.has(waveId)) {
       return undefined;
     }
 
-    return activeWaveLookupWaves.find((wave) => wave.id === waveId);
+    const activeWave = activeWaveLookupWaves.find((wave) => wave.id === waveId);
+
+    if (activeWave === undefined || !isDiscoverablePreviewWave(activeWave)) {
+      return undefined;
+    }
+
+    return activeWave;
   };
   const activeWave =
     findRecoverableWave(activeWaveId) ??
     findRecoverableWave(activeParentWaveId);
 
   if (activeWave === undefined) {
-    return [...highlyRatedWaves];
+    return discoverableHighlyRatedWaves;
   }
 
-  return [...highlyRatedWaves, activeWave];
+  return [...discoverableHighlyRatedWaves, activeWave];
 }
 
 const isModifiedAnchorClick = (event: MouseEvent<HTMLAnchorElement>) =>
@@ -363,7 +377,7 @@ export function HighlyRatedWavesToggle({
     <div className={`${paddingClassName} tw-pb-1`}>
       <div
         ref={previewStripRef}
-        className="tw-flex tw-min-w-0 tw-items-center tw-justify-start tw-gap-x-1.5"
+        className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-1.5"
       >
         {visiblePreviewItems.map((item, index) => (
           <HighlyRatedWavePreviewLink

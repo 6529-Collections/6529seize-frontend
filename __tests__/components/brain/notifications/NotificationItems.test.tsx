@@ -31,7 +31,6 @@ describe('NotificationItems', () => {
         notification: items[0],
         activeDrop: active,
         onReply,
-        onQuote,
         onDropContentClick: onClick,
       })
     );

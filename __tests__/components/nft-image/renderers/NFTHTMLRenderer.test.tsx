@@ -203,9 +203,7 @@ describe("NFTHTMLRenderer", () => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      const iframe = screen.getByTitle("test-iframe");
-      // When both are undefined, src becomes undefined and React removes the attribute
-      expect(iframe).not.toHaveAttribute("src");
+      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
     });
 
     it("handles null animation sources gracefully", () => {
@@ -222,9 +220,7 @@ describe("NFTHTMLRenderer", () => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      const iframe = screen.getByTitle("test-iframe");
-      // When both are null, src becomes null and React removes the attribute
-      expect(iframe).not.toHaveAttribute("src");
+      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
     });
   });
 
@@ -310,18 +306,20 @@ describe("NFTHTMLRenderer", () => {
   });
 
   describe("Edge Cases and Error Handling", () => {
-    it("crashes when metadata is undefined (IMPLEMENTATION BUG)", () => {
+    it("uses the top-level animation when metadata is undefined", () => {
       const nft = createMockNFT({
-        ...(undefined !== undefined ? { metadata: undefined } : {}),
+        metadata: undefined as any,
       });
       const props = createDefaultProps({ nft, id: "test-iframe" });
 
-      // The getSrc function has a bug - it checks "metadata" in nft but doesn't check if metadata is null/undefined
-      // Line 10: const hasAnimation = hasMetadata && nft.metadata.animation;
-      // This will crash when nft.metadata is undefined despite hasMetadata being true
       expect(() => {
         render(<NFTHTMLRenderer {...props} />);
-      }).toThrow("Cannot read properties of undefined (reading 'animation')");
+      }).not.toThrow();
+
+      expect(screen.getByTitle("test-iframe")).toHaveAttribute(
+        "src",
+        "https://example.com/animation.html"
+      );
     });
 
     it("handles empty metadata object gracefully", () => {
@@ -334,8 +332,7 @@ describe("NFTHTMLRenderer", () => {
 
       const iframe = screen.getByTitle("test-iframe");
       expect(iframe).toBeInTheDocument();
-      // Empty metadata means animation_url is undefined, so no src attribute
-      expect(iframe).not.toHaveAttribute("src");
+      expect(iframe).toHaveAttribute("src", "https://example.com/animation.html");
     });
 
     it("handles minimal NFT properties", () => {
@@ -398,6 +395,7 @@ describe("NFTHTMLRenderer", () => {
       // Note: In a real application, iframe src should be validated/sanitized
       // This test documents current behavior
       const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation: "https://untrusted-domain.com/content.html",
         },
@@ -425,6 +423,7 @@ describe("NFTHTMLRenderer", () => {
       // Test safe URLs that don't crash JSDOM
       safeUrls.forEach((url, index) => {
         const nft = createMockNFT({
+          animation: "",
           metadata: {
             animation: url,
           },
@@ -446,6 +445,7 @@ describe("NFTHTMLRenderer", () => {
       // React itself doesn't block these at render time, but JSDOM throws an error
       // when the iframe tries to load the javascript: URL
       const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation: 'javascript:alert("xss")',
         },
@@ -469,6 +469,7 @@ describe("NFTHTMLRenderer", () => {
       const baseNft = createMockNFT();
       const nft = {
         ...baseNft,
+        animation: "",
         metadata: {
           ...baseNft.metadata,
           animation: "", // Empty string is falsy, so will use animation_url
@@ -481,9 +482,7 @@ describe("NFTHTMLRenderer", () => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      const iframe = screen.getByTitle("test-iframe");
-      // React/DOM removes empty src attributes for security
-      expect(iframe).not.toHaveAttribute("src");
+      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
     });
   });
 
@@ -542,6 +541,7 @@ describe("NFTHTMLRenderer", () => {
   describe("Animation Source Priority Logic", () => {
     it("prioritizes metadata.animation over animation_url when both exist", () => {
       const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation: "https://priority.com/animation.html",
           animation_url: "https://fallback.com/animation.html",
@@ -562,6 +562,7 @@ describe("NFTHTMLRenderer", () => {
 
       falsyValues.forEach((falsyValue, index) => {
         const nft = createMockNFT({
+          animation: "",
           metadata: {
             animation: falsyValue,
             animation_url: "https://fallback.com/animation.html",
@@ -581,6 +582,7 @@ describe("NFTHTMLRenderer", () => {
 
     it("handles NFTLite type correctly (no metadata property check)", () => {
       const nftLite = createMockNFTLite({
+        animation: "",
         metadata: {
           animation_url: "https://nftlite.com/animation.html",
         },

@@ -57,6 +57,10 @@ const getDefaultMockWaveInfo = () => ({
 });
 
 jest.mock("@tanstack/react-query", () => ({
+  useQuery: jest.fn(() => ({
+    data: [],
+    isLoading: false,
+  })),
   useQueryClient: () => ({
     setQueryData: mockSetQueryData,
   }),

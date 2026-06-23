@@ -14,8 +14,6 @@ const dedupe = (values: readonly string[]): string[] =>
 export const canonicalizeArweaveGatewayHostname = (hostname: string): string =>
   canonicalizeGatewayHostname(hostname);
 
-export const ARWEAVE_FALLBACK_HOSTS = [...ARWEAVE_GATEWAY_HOSTS];
-
 const ARWEAVE_GATEWAY_EXACT_HOSTS = dedupe(ARWEAVE_GATEWAY_HOSTS);
 
 const ARWEAVE_GATEWAY_WILDCARD_BASE_HOSTS = dedupe([

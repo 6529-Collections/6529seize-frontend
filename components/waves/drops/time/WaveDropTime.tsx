@@ -5,10 +5,12 @@ import { Time } from "@/helpers/time";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 
 type WaveDropTimeSize = "xs" | "sm";
+type WaveDropTimestamp = Date | number | string | null | undefined;
 
 interface WaveDropTimeProps {
-  readonly timestamp: number;
+  readonly timestamp: WaveDropTimestamp;
   readonly size?: WaveDropTimeSize | undefined;
+  readonly variant?: "default" | "compactReveal" | undefined;
 }
 
 /**
@@ -20,7 +22,52 @@ const SIZE_CLASSES: Record<WaveDropTimeSize, string> = {
   sm: "tw-text-sm",
 };
 
-const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp, size = "xs" }) => {
+const getValidTimestampDate = (timestamp: WaveDropTimestamp): Date | null => {
+  if (timestamp === null || timestamp === undefined || timestamp === "") {
+    return null;
+  }
+
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  return Number.isFinite(date.getTime()) ? date : null;
+};
+
+const getTimeLabel = (date: Date): string =>
+  date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const getCompactRevealTimestamp = (date: Date): string => {
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+
+  if (isToday) {
+    return getTimeLabel(date);
+  }
+
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+  const timeLabel = getTimeLabel(date);
+
+  if (isYesterday) {
+    return `Yesterday, ${timeLabel}`;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    ...(date.getFullYear() === now.getFullYear() ? {} : { year: "2-digit" }),
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+};
+
+const WaveDropTime: React.FC<WaveDropTimeProps> = ({
+  timestamp,
+  size = "xs",
+  variant = "default",
+}) => {
   // Hooks must be called at the top level
   const [isMobile, setIsMobile] = useState(false);
   const compact = useCompactMode();
@@ -43,21 +90,22 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp, size = "xs" }) =
   }, []);
 
   // Don't render if no timestamp
-  if (!timestamp) return null;
+  const date = getValidTimestampDate(timestamp);
+  if (!date) return null;
 
   // Updated time formatting logic to just show time for today
   const formatTime = () => {
-    const timeObj = Time.millis(timestamp);
-    const date = new Date(timestamp);
+    if (variant === "compactReveal") {
+      return getCompactRevealTimestamp(date);
+    }
+
+    const timeObj = Time.millis(date.getTime());
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
 
     // For today, just show time on both mobile and desktop
     if (isToday) {
-      return date.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return getTimeLabel(date);
     }
 
     // Otherwise follow the original behavior
@@ -71,10 +119,7 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp, size = "xs" }) =
       yesterday.setDate(now.getDate() - 1);
       const isYesterday = date.toDateString() === yesterday.toDateString();
 
-      const timeStr = date.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      const timeStr = getTimeLabel(date);
 
       if (isYesterday) {
         return `Yesterday - ${timeStr}`;

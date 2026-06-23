@@ -5,7 +5,7 @@ import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsBoost from "./WaveDropActionsBoost";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
@@ -14,6 +14,7 @@ import WaveDropActionsMore from "./WaveDropActionsMore";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropActionsReply from "./WaveDropActionsReply";
+import { useWaveDropLayers } from "./WaveDropLayerContext";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
@@ -22,6 +23,7 @@ interface WaveDropActionsProps {
   readonly onReply: () => void;
   readonly onEdit?: (() => void) | undefined;
   readonly suppressed?: boolean | undefined;
+  readonly style?: CSSProperties | undefined;
 }
 
 export default function WaveDropActions({
@@ -31,10 +33,12 @@ export default function WaveDropActions({
   onReply,
   onEdit,
   suppressed = false,
+  style,
 }: WaveDropActionsProps) {
   const { isMemesWave } = useSeizeSettings();
   const { connectedProfile } = useAuth();
   const compact = useCompactMode();
+  const { desktopActionsZIndexClassName } = useWaveDropLayers();
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const showGuestCopyOnly = !connectedProfile?.handle;
 
@@ -55,7 +59,8 @@ export default function WaveDropActions({
 
   return (
     <div
-      className={`tw-absolute tw-right-2 tw-z-20 ${
+      style={style}
+      className={`tw-absolute tw-right-2 ${desktopActionsZIndexClassName} ${
         compact ? "-tw-top-4" : "-tw-top-9"
       } tw-transition-opacity tw-duration-200 tw-ease-in-out ${visibilityClasses}`}
     >

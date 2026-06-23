@@ -16,8 +16,9 @@ describe('ParticipationDropRatingsUserSection', () => {
     render(
       <ParticipationDropRatingsUserSection drop={drop} userTheme={{ indicator: 'i', text: 't' }} ratingsData={{ userRating: 5 }} />
     );
-    expect(screen.getByText('Your votes')).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('TDH')).toBeInTheDocument();
+    expect(screen.getByText(/Your votes:/)).toBeInTheDocument();
+    expect(
+      screen.getByText((_, element) => element?.textContent === '5 TDH')
+    ).toBeInTheDocument();
   });
 });

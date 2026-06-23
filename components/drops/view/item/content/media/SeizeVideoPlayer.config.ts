@@ -14,7 +14,7 @@ export type SeizeVideoTemplate =
   | "poster-gated"
   | "slideshow";
 
-export interface ResolvedVideoTemplate {
+interface ResolvedVideoTemplate {
   readonly mode: SeizeVideoMode;
   readonly controls: SeizeVideoControls;
   readonly autoPlay: boolean;

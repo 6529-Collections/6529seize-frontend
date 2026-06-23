@@ -26,10 +26,11 @@ const WaveDropMobileMenuOpen: React.FC<WaveDropMobileMenuOpenProps> = ({
 
   const onDropClick = () => {
     const params = new URLSearchParams(searchParams.toString());
+    const waveId = drop.wave?.id ?? "";
     params.set("drop", drop.id);
     startDropOpen({
       dropId: drop.id,
-      waveId: drop.wave.id,
+      waveId,
       source: "leaderboard_mobile_menu",
       isMobile: true,
     });

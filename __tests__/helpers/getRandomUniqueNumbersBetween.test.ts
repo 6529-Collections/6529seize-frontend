@@ -5,6 +5,19 @@ describe("getRandomUniqueNumbersBetween", () => {
     jest.restoreAllMocks();
   });
 
+  const mockRandomIntegers = (values: readonly number[]) => {
+    let callIndex = 0;
+    jest.spyOn(globalThis.crypto, "getRandomValues").mockImplementation((array) => {
+      const typedArray = array as Uint32Array;
+      const nextValue = values[callIndex++];
+      if (nextValue === undefined) {
+        throw new Error("getRandomValues called unexpectedly");
+      }
+      typedArray[0] = nextValue;
+      return array;
+    });
+  };
+
   it("throws when the bounds are invalid", () => {
     expect(() => getRandomUniqueNumbersBetween(5, 5)).toThrow(
       "maxExclusive must be greater than minInclusive."
@@ -14,15 +27,8 @@ describe("getRandomUniqueNumbersBetween", () => {
     );
   });
 
-  it("returns deterministic unique strings within range when Math.random is mocked", () => {
-    const randomSequence = [0.9, 0.1, 0.7];
-    let callIndex = 0;
-    jest.spyOn(Math, "random").mockImplementation(() => {
-      if (callIndex >= randomSequence.length) {
-        throw new Error("Math.random called unexpectedly");
-      }
-      return randomSequence[callIndex++];
-    });
+  it("returns deterministic unique strings within range when crypto is mocked", () => {
+    mockRandomIntegers([1, 0, 1]);
 
     const result = getRandomUniqueNumbersBetween(3, 5);
 
@@ -30,14 +36,7 @@ describe("getRandomUniqueNumbersBetween", () => {
   });
 
   it("always returns at least one value", () => {
-    const randomSequence = [0, 0.2];
-    let callIndex = 0;
-    jest.spyOn(Math, "random").mockImplementation(() => {
-      if (callIndex >= randomSequence.length) {
-        throw new Error("Math.random called unexpectedly");
-      }
-      return randomSequence[callIndex++];
-    });
+    mockRandomIntegers([0, 0]);
 
     const result = getRandomUniqueNumbersBetween(10, 13);
     expect(result.length).toBe(1);

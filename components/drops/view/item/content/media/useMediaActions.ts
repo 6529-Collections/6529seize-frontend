@@ -11,7 +11,7 @@ import { useCallback, useState } from "react";
 const DIRECT_OPEN_UNSUPPORTED_EXTENSIONS = new Set(["mov", "qt"]);
 const DIRECT_OPEN_UNSUPPORTED_MIME_TYPES = new Set(["video/quicktime"]);
 
-export type MediaOpenLabels = {
+type MediaOpenLabels = {
   readonly openInBrowser?: string | undefined;
   readonly openInNewTab?: string | undefined;
 };

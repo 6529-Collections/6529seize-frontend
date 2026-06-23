@@ -8,5 +8,3 @@ export type JsonLdValue =
 export interface JsonLdObject {
   readonly [key: string]: JsonLdValue | undefined;
 }
-
-export type JsonLdGraph = JsonLdObject;

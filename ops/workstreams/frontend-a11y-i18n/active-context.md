@@ -4,7 +4,134 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-23T11:28Z:
+  - Current active worktree:
+    `D:\repos\6529seize-frontend-wallet-signing-sandbox`.
+  - Current active branch:
+    `codex/e2e-wallet-signing-sandbox`, rebased onto current `origin/main`
+    `3682d3fb327a9775677cb14a4f4743075d173ece`.
+  - PR #2853 is the active merge target:
+    https://github.com/6529-Collections/6529seize-frontend/pull/2853
+  - Active slice is test-only signed-drop sandbox hardening. It adds a
+    deterministic signature-required Rank-wave fixture, local-only
+    `test:e2e:signature-sandbox`, inclusion in `test:e2e:auth-sandbox`, and a
+    negative assertion window proving no late unsigned `/api/drops` POST is
+    recorded when no wallet signature is available.
+  - Current local validation passed on the rebased head and follow-up CI fix:
+    `node --check` for the sandbox server, package JSON parse,
+    `seize run lint:package-json`, focused ESLint on actual changed JS/TS
+    files, `seize run typecheck:playwright`, `seize run typecheck:changed`,
+    `codex-diff-check`, `test:e2e:signature-sandbox`, `test:e2e:reaction-sandbox`,
+    `test:e2e:auth-sandbox`, `test:e2e:composer-sandbox`, the focused signing
+    Jest batch, risk floor, changed-secret scan, workflow-security scan, app PR
+    CI YAML parse, and direct `seize exec jest ... --forceExit` validation for
+    `__tests__/hooks/useSecureSign.test.ts`.
+  - Local `seize run lint:changed` overflows the Windows command line because
+    it compares against stale local `main`; use the focused ESLint evidence
+    against `origin/main...HEAD` for this PR.
+  - Next action: push the direct-Jest CI fix for PR #2853, retrigger
+    CodeRabbit plus all existing 6529bot lanes including `general`, `wcag`,
+    `i18n`, `security`, `responsiveness`, and `glm-swarm`; latest GLM follow-up
+    preserved the package script's explicit `NODE_ENV=test` in the direct Jest
+    helper. Merge when CI and material bot feedback are clear.
+
+- Latest testing-roadmap state, 2026-06-23T09:38Z:
+  - Current rebase worktree:
+    `D:\repos\6529seize-frontend-native-package-evidence`.
+  - Current active branch:
+    `codex/native-package-evidence-e2e`, PR #2851, rebased onto current
+    `origin/main` `daeac04bcb701786b5429a54ec832c0a24b42fd2` after PR #2850
+    and PR #2854 merged.
+  - Active slice is test-only native surface evidence classification:
+    add a read-only `native-surface-evidence.cjs` classifier, optional
+    deployment-bus pack `native:surface-evidence`, package scripts, tests, and
+    docs that distinguish browser simulation, package prerequisites, and real
+    packaged native/Electron runtime evidence.
+  - Rebase conflict was in `ops/scripts/deployment-bus.cjs`, where PR #2854
+    added `deployment:http-version` durable upload evidence and PR #2851 adds
+    `native:surface-evidence`; both validation packs are preserved.
+  - Latest CodeRabbit test feedback on
+    `__tests__/scripts/native-surface-evidence.test.ts` is fixed in head
+    `4151a1bb8`.
+  - Latest rebased validation passed:
+    - `node --check ops/scripts/native-surface-evidence.cjs`
+    - `node --check ops/scripts/deployment-bus.cjs`
+    - `seize run test:no-coverage -- __tests__/scripts/native-surface-evidence.test.ts __tests__/scripts/deployment-bus.test.ts`:
+      60 passed.
+    - `seize run test:native-evidence`
+    - `seize run test:e2e:native-shell-readonly`: 11 passed, 13 skipped.
+    - `seize run typecheck:playwright`
+    - `seize run typecheck:changed`: 39 changed TypeScript files passed.
+    - focused ESLint on native evidence, deployment bus, surface simulation,
+      and native-shell spec files.
+    - `seize run lint:package-json`
+    - risk floor Level 4, changed-secret scan clean, workflow-security scan
+      clean, and `codex-diff-check`.
+  - Next action: commit this memory update, force-push PR #2851, trigger all
+    reviewbot lanes including GLM-swarm, then merge after checks and material
+    bot feedback are clear.
+
+- Latest testing-roadmap state, 2026-06-23T05:00Z:
+  - Current active worktree:
+    `D:\repos\6529seize-frontend-admin-guards`.
+  - Current active branch:
+    `codex/e2e-admin-destructive-guards`, based on current `origin/main`
+    `d0bf12f52`.
+  - Active slice is test-only admin/destructive fail-closed E2E hardening:
+    add `tests/admin/admin-destructive-guards-readonly.spec.ts`, wire
+    `test:e2e:admin-guards-readonly`, add staging/production variants, and add
+    the pack to `test:e2e:production:readonly`.
+  - Scope is deliberately read-only and unauthenticated: NextGen manager must
+    show a disconnected or non-admin permission boundary and no admin action
+    buttons; Drop Forge landing, craft, and launch routes must show permission
+    fallback and no claim/action controls; public Groups must wait for the
+    groups API/card render and hide owner, edit/delete, and Rep/NIC bulk voting
+    controls without a connected profile.
+  - Validation target before PR: run the new local pack across desktop/mobile,
+    Playwright typecheck, package-json lint, changed lint/typecheck, risk and
+    secret/workflow scans where applicable, and `codex-diff-check`; then trigger
+    existing 6529bot lanes plus GLM swarm on the PR without removing any
+    existing reviewbot lane.
+  - Current validation evidence:
+    - `seize run test:e2e:admin-guards-readonly`: 6/6 passed locally across
+      desktop and mobile. Latest follow-up rerun after GLM feedback also passed
+      6/6.
+    - `seize run test:e2e:staging:admin-guards-readonly` with local Credential
+      Manager target `STAGING_AUTH`: 6/6 passed across desktop and mobile.
+      Latest follow-up rerun also passed 6/6 after loading the target only into
+      the child process; no credential value was printed or persisted.
+    - `seize run test:e2e:production:admin-guards-readonly`: 3/3 passed on
+      production desktop. Latest rebased rerun also passed 3/3.
+    - `seize run test:e2e:production:readonly`: 68/68 passed on production
+      desktop with the new admin pack included. Latest follow-up rerun also
+      passed 68/68.
+    - `seize run typecheck:playwright`, `seize run lint:package-json`,
+      targeted ESLint, `seize run typecheck:changed`, `seize run lint:changed`,
+      risk floor, secret scan, workflow-security validation, and
+      `codex-diff-check` passed before PR publication and after latest-head GLM
+      follow-up edits. Risk floor is Level 4 because `package.json`
+      release-validation scripts changed.
+  - Latest bot loop:
+    - Reviewbot PR #411 fixed GLM-swarm empty internal reviewer handling and was
+      merged into `6529reviewbot` main.
+    - Latest PR #2855 GLM-swarm review succeeded with one degraded internal
+      reviewer slice and produced actionable helper/docs feedback, now fixed.
+    - PR #2855 was rebased cleanly onto `origin/main` `d0bf12f52`; focused
+      local, staging, and production admin guard validation passed again before
+      force-push.
+
 - Latest testing-roadmap state, 2026-06-22T21:07Z:
+  - Current active branch:
+    `codex/e2e-wallet-signing-sandbox`, based on current `origin/main`
+    `fe4af27e7 Add native shell read-only E2E coverage`.
+  - Active slice is local-only wallet/signing sandbox hardening. It must not
+    add a signing backdoor to app code. The intended coverage is a deterministic
+    non-chat Rank wave with `participation.signature_required` and terms that
+    drives the real Submit drop modal plus terms dialog, then proves an unsigned
+    `/api/drops` POST is not attempted when no wallet signature is available.
+  - Existing open reviewbot PRs remain intact: #2850, #2851, and #2852 are
+    watched for CI/reviewbot state but must not be overwritten from this
+    worktree.
   - PR #2847 is merged and deployed. Production serves
     `0c55e0c628541fb2ac695d87f871568848e7c057`.
   - PR #2847 shipped test-only production-readonly hardening:
@@ -568,7 +695,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-native-shell-readonly`
+`codex/e2e-wallet-signing-sandbox`
 
 ## Constraints
 
@@ -733,14 +860,16 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Commit and push the GLM follow-up on `codex/e2e-native-shell-readonly`,
-   update the PR evidence, then re-trigger latest-head reviewbot lanes.
-2. For PR #2848, keep the established loop: strong local validation first,
-   then CI, CodeRabbit, Sonar, 6529bot Opus lanes, responsiveness, GLM swarm,
-   and any specialized reviewbot lanes until Codex judges the loop is no
-   longer adding material value.
-3. Deploy merged testing-roadmap slices through staging first, validate exact
+1. PR #2851 (`codex/native-package-evidence-e2e`) merged into `origin/main` as
+   `8c1ec66ea31d6ef952586b17716f0f43030c1ec2`.
+2. PR #2852 (`codex/e2e-wallet-signing-guards`) merged into `origin/main` as
+   `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
+3. PR #2853 (`codex/e2e-wallet-signing-sandbox`) is rebased and locally
+   validated on current main. Force-with-lease push, re-trigger CodeRabbit and
+   all existing 6529bot lanes including GLM-swarm/responsiveness on the exact
+   pushed head, then merge after CI and material review feedback are clear.
+4. Deploy merged testing-roadmap slices through staging first, validate exact
    staged SHA, then production from current `origin/main` with exact-SHA
    validation and production-safe E2E evidence.
-4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
+5. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.

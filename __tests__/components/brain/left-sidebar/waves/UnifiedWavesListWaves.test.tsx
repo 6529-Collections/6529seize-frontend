@@ -23,6 +23,8 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
+let mockDeviceInfo = { isApp: false, hasTouchScreen: false };
+
 jest.mock(
   "@/components/brain/left-sidebar/waves/WavesFilterToggle",
   () => () => <div data-testid="waves-filter-toggle" />
@@ -76,7 +78,15 @@ jest.mock("@/hooks/usePrefetchWaveData", () => ({
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({ isApp: false, hasTouchScreen: false }),
+  default: () => mockDeviceInfo,
+}));
+jest.mock("react-tooltip", () => ({
+  Tooltip: (props: any) => (
+    <div
+      data-testid={`tooltip-${props.id}`}
+      data-open-on-click={String(props.openOnClick)}
+    />
+  ),
 }));
 jest.mock("@/components/auth/Auth");
 jest.mock("@/hooks/useVirtualizedWaves");
@@ -130,6 +140,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   globalThis.localStorage.clear();
   globalThis.sessionStorage.clear();
+  mockDeviceInfo = { isApp: false, hasTouchScreen: false };
   mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   mockUseAuth.mockReturnValue({
     connectedProfile: { handle: "alice" },
@@ -272,6 +283,52 @@ it("adds the active loaded all-wave to the highly rated preview source", () => {
   ]);
 });
 
+it("does not recover known active waves into the highly rated preview source", () => {
+  const highlyRatedWaves = [
+    createMockMinimalWave({
+      id: "h1",
+      sidebarSection: "highly-rated",
+    }),
+  ];
+  const activePinnedWave = createMockMinimalWave({
+    id: "active-pinned",
+    isPinned: true,
+  });
+  const activeFollowingWave = createMockMinimalWave({
+    id: "active-following",
+    isFollowing: true,
+  });
+  const activeFollowedSubwaveContainer = createMockMinimalWave({
+    id: "active-followed-subwave-container",
+    isFollowedSubwaveContainer: true,
+  });
+
+  expect(
+    getHighlyRatedPreviewWaves({
+      activeWaveLookupWaves: [activePinnedWave],
+      activeParentWaveId: null,
+      activeWaveId: activePinnedWave.id,
+      highlyRatedWaves,
+    }).map((wave) => wave.id)
+  ).toEqual(["h1"]);
+  expect(
+    getHighlyRatedPreviewWaves({
+      activeWaveLookupWaves: [activeFollowingWave],
+      activeParentWaveId: null,
+      activeWaveId: activeFollowingWave.id,
+      highlyRatedWaves,
+    }).map((wave) => wave.id)
+  ).toEqual(["h1"]);
+  expect(
+    getHighlyRatedPreviewWaves({
+      activeWaveLookupWaves: [activeFollowedSubwaveContainer],
+      activeParentWaveId: null,
+      activeWaveId: activeFollowedSubwaveContainer.id,
+      highlyRatedWaves,
+    }).map((wave) => wave.id)
+  ).toEqual(["h1"]);
+});
+
 it("prefers the active wave over its parent in the preview recovery pool", () => {
   const highlyRatedWaves = Array.from({ length: 10 }, (_, index) =>
     createMockMinimalWave({
@@ -304,17 +361,25 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   );
   expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByText("Highly Rated")).toBeInTheDocument();
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toHaveClass("tw-size-6");
+  expect(
+    screen.getByTestId("tooltip-waves-worth-checking-out-info")
+  ).toHaveAttribute("data-open-on-click", "true");
   expect(
     screen.queryByRole("button", {
-      name: "Expand Highly Rated, 1 wave",
+      name: "Expand Worth Checking Out, 1 wave",
     })
   ).toBeNull();
   expect(
     screen.getByRole("link", { name: "Open Highly Rated One" })
   ).toBeInTheDocument();
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.queryByLabelText("Following waves")).toBeNull();
@@ -356,7 +421,7 @@ it("caps highly rated previews at ten without rendering an overflow control", ()
       name: /more Highly Rated/,
     })
   ).toBeNull();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.queryByTestId("wave-h11")).toBeNull();
 });
 
@@ -420,7 +485,7 @@ it("keeps the active highly rated wave visible in the preview strip", () => {
   expect(
     screen.getByRole("link", { name: "Open Highly Rated One" })
   ).toBeInTheDocument();
-  expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
+  expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   expect(screen.queryByTestId("wave-h1")).toBeNull();
 });
 
@@ -488,6 +553,27 @@ it("renders followed waves in the same bottom list instead of a separate section
   expect(screen.queryByText("Following")).toBeNull();
   expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
+});
+
+it("keeps the worth checking out info tooltip available on touch devices", () => {
+  mockDeviceInfo = { isApp: false, hasTouchScreen: true };
+
+  render(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toHaveClass("tw-size-6");
+  expect(
+    screen.getByTestId("tooltip-waves-worth-checking-out-info")
+  ).toHaveAttribute("data-open-on-click", "true");
 });
 
 it("passes pin controls through for pinned announcement waves", () => {
