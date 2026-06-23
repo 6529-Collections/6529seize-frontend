@@ -29,9 +29,31 @@ const PROFILE_TAB_PATHS = [
 async function getFirstWaveId(page: Page) {
   await gotoReady(page, "/waves");
 
-  const firstWaveLink = page.getByRole("link", { name: /^Open / }).first();
-  await expect(firstWaveLink).toBeVisible({ timeout: 15000 });
-  const href = await firstWaveLink.getAttribute("href");
+  const waveList = page.getByRole("region", {
+    name: /All recent waves list|Regular waves list/,
+  });
+  await expect(waveList).toBeVisible({ timeout: 15000 });
+  let href: string | null = null;
+  await expect
+    .poll(
+      async () => {
+        href = await waveList.locator('a[href^="/waves/"]').evaluateAll(
+          (links, baseUrl) =>
+            links
+              .map((link) => link.getAttribute("href"))
+              .filter((candidate): candidate is string => Boolean(candidate))
+              .find((candidate) =>
+                /^\/waves\/[0-9a-f-]{36}$/i.test(
+                  new URL(candidate, baseUrl).pathname
+                )
+              ) ?? null,
+          page.url()
+        );
+        return href !== null;
+      },
+      { message: "Expected wave list to contain a wave detail link" }
+    )
+    .toBe(true);
   const pathname = href ? new URL(href, page.url()).pathname : "";
   const match = pathname.match(/^\/waves\/([^/]+)$/);
 
