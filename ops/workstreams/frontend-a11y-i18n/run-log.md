@@ -4096,3 +4096,28 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
 - Next action: commit this validation note, force-with-lease push the rebased
   branch, restart CodeRabbit and all 6529bot review lanes on the pushed head,
   then merge when CI and material review feedback are clear.
+
+## 2026-06-23T12:45Z PR #2853 Related-Jest Hardening Follow-Up
+
+- The first current-main CI retry still sat in `Run related Jest tests` longer
+  than expected. Before waiting for the full job timeout, hardened the workflow
+  again so the required check is bounded and its intent is explicit.
+- Updated `.github/workflows/app-pr-ci.yml` related-Jest classification:
+  - Playwright specs under `tests/**/*.spec.ts(x)` are skipped for Jest.
+  - Only `*.test.ts(x)` files are treated as direct Jest tests.
+  - Any remaining `*.spec.ts(x)` files are skipped as non-Jest specs instead
+    of being guessed into Jest.
+  - Direct-Jest and related-source Jest invocations now run with
+    `timeout 180s`, `--runInBand`, and `--forceExit` so open handles cannot
+    hang the app PR CI job indefinitely.
+- Validation passed:
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize run test:no-coverage -- __tests__/hooks/useSecureSign.test.ts --passWithNoTests --runInBand --forceExit`: 30 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi` with `--runInBand --forceExit`: 43 passed.
+  - risk floor recomputed.
+  - changed-secret scan clean.
+  - workflow-security scan clean.
+  - `codex-diff-check`.
+- Next action: commit, push, let concurrency cancel the still-running old app
+  PR CI run, then verify the new CI head exits the related-Jest step.

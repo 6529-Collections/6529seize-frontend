@@ -263,11 +263,14 @@ jobs:
           related_source_files=()
           for file in "${existing_files[@]}"; do
             case "$file" in
-              tests/*.spec.ts|tests/*.spec.tsx)
+              tests/*.spec.ts|tests/*.spec.tsx|tests/**/*.spec.ts|tests/**/*.spec.tsx)
                 echo "Skipping Playwright spec for related Jest coverage: $file"
                 ;;
-              *.test.ts|*.test.tsx|*.spec.ts|*.spec.tsx)
+              *.test.ts|*.test.tsx)
                 jest_test_files+=("$file")
+                ;;
+              *.spec.ts|*.spec.tsx)
+                echo "Skipping non-Jest spec for related Jest coverage: $file"
                 ;;
               *)
                 related_source_files+=("$file")
@@ -276,11 +279,11 @@ jobs:
           done
 
           if [ "${#jest_test_files[@]}" -gt 0 ]; then
-            ./bin/6529 run test:no-coverage -- "${jest_test_files[@]}" --passWithNoTests --forceExit
+            timeout 180s ./bin/6529 run test:no-coverage -- "${jest_test_files[@]}" --passWithNoTests --runInBand --forceExit
           fi
 
           if [ "${#related_source_files[@]}" -gt 0 ]; then
-            ./bin/6529 run test:no-coverage --findRelatedTests "${related_source_files[@]}" --passWithNoTests --forceExit
+            timeout 180s ./bin/6529 run test:no-coverage --findRelatedTests "${related_source_files[@]}" --passWithNoTests --runInBand --forceExit
           fi
 
           if [ "${#jest_test_files[@]}" -eq 0 ] && [ "${#related_source_files[@]}" -eq 0 ]; then
