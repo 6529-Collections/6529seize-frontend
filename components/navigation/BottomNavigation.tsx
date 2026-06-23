@@ -271,6 +271,7 @@ const BottomNavigationResolvedContent: React.FC<
     <nav
       ref={setMobileNavRef}
       aria-label={t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.ariaLabel")}
+      aria-hidden={hidden ? "true" : undefined}
       className={getNavClassName({ hidden, variant })}
       inert={hidden}
     >
