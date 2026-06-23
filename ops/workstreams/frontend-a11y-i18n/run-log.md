@@ -4067,3 +4067,32 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
   - `codex-diff-check`.
 - Next action: commit and push the CI harness fix, which will cancel the hung
   old app-check run and restart CI on the corrected head.
+
+## 2026-06-23T12:35Z PR #2853 Current-Main Validation
+
+- Rebased PR #2853 onto current `origin/main`
+  `3682d3fb3 Polish wave sidebar spacing and grouped message timestamps
+  (#2845)`.
+- A first post-rebase signed-sandbox run saw a transient app 404 from the local
+  dev server; rerunning from a clean sandbox port state passed and the broader
+  auth sandbox also passed, confirming the branch did not need a route or
+  fixture change.
+- Focused validation on the current-main head passed:
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi`: 43 passed.
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize run typecheck:changed`: passed for 57 changed TypeScript files.
+  - focused ESLint for `__tests__/hooks/useSecureSign.test.ts`,
+    `tests/social/wave-signature-sandbox.spec.ts`, and
+    `tests/support/composerSandboxServer.cjs`.
+  - `codex-diff-check`.
+  - risk floor Level 4, changed-secret scan clean, workflow-security scan
+    clean.
+- Local `seize run lint:changed` still hit the Windows command-line length
+  issue caused by the script's local-`main` comparison in this worktree; the
+  focused ESLint command over the actual PR lintable files passed.
+- Next action: commit this validation note, force-with-lease push the rebased
+  branch, restart CodeRabbit and all 6529bot review lanes on the pushed head,
+  then merge when CI and material review feedback are clear.
