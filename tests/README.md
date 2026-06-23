@@ -148,20 +148,28 @@ Surface matrix:
   `PLAYWRIGHT_COMPOSER_SANDBOX=1` enabled so its mutation auditor matches the
   aggregate authenticated sandbox pack. All other drop, drop-media, and
   attachment writes remain unsafe.
+- `test:e2e:signature-sandbox` runs a local-only authenticated Waves signed
+  participation sandbox on desktop Chromium. It starts the same mock API
+  runtime, renders a deterministic non-chat Rank wave with required terms and
+  `participation.signature_required`, opens the real Submit drop modal, accepts
+  the real terms dialog, and fails closed if an unsigned `/api/drops` POST is
+  attempted without a wallet signature. It is intentionally not a signing
+  backdoor and must never run against staging or production.
 - `test:e2e:auth-sandbox` runs the local authenticated sandbox on desktop
   Chromium. It includes the composer checks plus positive `/notifications`
-  `/messages/create`, `/waves/create` Chat-wave, and quick reaction add/remove
-  flows with deterministic mock API data. It allows only explicit local sandbox
-  mutations such as notification mark-read, synthetic direct-message creation,
-  synthetic create-wave group/wave creation, exact synthetic chat-drop submit,
-  and exact synthetic drop reaction add/remove with sandbox IDs, queryless
-  paths, and request bodies. The chat-drop signer is bounded to the configured
-  sandbox wallet or the empty unsigned direct-contract form. Unknown mock API
-  writes fail the sandbox request audit, and unexpected same-origin Next.js API
-  writes or unknown unsafe external browser writes are blocked by a browser
-  route guard. Known wallet and analytics SDK background writes are still
-  blocked in-browser, but they do not fail the test. This pack must never run
-  against staging or production.
+  `/messages/create`, `/waves/create` Chat-wave, quick reaction add/remove, and
+  signed terms fail-closed flows with deterministic mock API data. It allows
+  only explicit local sandbox mutations such as notification mark-read,
+  synthetic direct-message creation, synthetic create-wave group/wave creation,
+  exact synthetic chat-drop submit, and exact synthetic drop reaction
+  add/remove with sandbox IDs, queryless paths, and request bodies. The
+  chat-drop signer is bounded to the configured sandbox wallet or the empty
+  unsigned direct-contract form, and the signed-drop path must not submit an
+  unsigned `/api/drops` POST. Unknown mock API writes fail the sandbox request
+  audit, and unexpected same-origin Next.js API writes or unknown unsafe
+  external browser writes are blocked by a browser route guard. Known wallet and
+  analytics SDK background writes are still blocked in-browser, but they do not
+  fail the test. This pack must never run against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
