@@ -71,11 +71,9 @@ const getPointerId = (event: React.PointerEvent<HTMLDivElement>): number =>
 const isPrimaryPointerButton = (
   event: React.PointerEvent<HTMLDivElement>
 ): boolean => {
-  const maybeButton = (
-    event as React.PointerEvent<HTMLDivElement> & {
-      readonly button?: number | undefined;
-    }
-  ).button;
+  const maybeButton = (event as React.PointerEvent<HTMLDivElement> & {
+    readonly button?: number | undefined;
+  }).button;
 
   return (
     maybeButton === undefined ||
