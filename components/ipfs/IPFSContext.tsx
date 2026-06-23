@@ -2,7 +2,6 @@
 
 import { publicEnv } from "@/config/env";
 import {
-  normalizeDecentralizedMediaUrl,
   parseDecentralizedMediaRef,
   to6529ResolverUrl,
 } from "@/lib/media/decentralized-media";
@@ -90,6 +89,3 @@ export const resolveIpfsUrlSync = (url: string) => {
 export const resolveIpfsUrl = (url: string) => {
   return resolveIpfsUrlSync(url);
 };
-
-export const resolveDecentralizedMediaUrlSync = (url: string) =>
-  normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ?? url;

@@ -16,7 +16,7 @@ import {
 export const FOLLOW_THE_REPO_WAVE_URL =
   "https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4";
 
-export type TechReportRepoKey =
+type TechReportRepoKey =
   | "frontend"
   | "backend"
   | "stream"
@@ -184,5 +184,3 @@ export function getTechReportBySlug(
 export function getTechReportTotal(report: TechWeeklyPrReport): number {
   return report.repos.reduce((total, repo) => total + repo.prCount, 0);
 }
-
-export const TECH_WEEKLY_PR_TOTAL = getTechReportTotal(TECH_WEEKLY_PR_REPORT);

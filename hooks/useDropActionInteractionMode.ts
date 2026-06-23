@@ -11,7 +11,7 @@ const HOVER_INPUT_MEDIA_QUERIES = [
   "(hover: hover)",
 ] as const;
 
-export interface DropActionInteractionMode {
+interface DropActionInteractionMode {
   readonly hasTouchActionInput: boolean;
   readonly hasHoverActionInput: boolean;
   readonly canUseDesktopHoverActions: boolean;

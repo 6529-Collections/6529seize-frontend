@@ -50,7 +50,7 @@ type ProcessIncomingDropFn = (
   options?: ProcessIncomingDropOptions
 ) => Promise<void>;
 
-export interface ProcessIncomingDropOptions {
+interface ProcessIncomingDropOptions {
   readonly preferExistingPollVote?: boolean;
 }
 

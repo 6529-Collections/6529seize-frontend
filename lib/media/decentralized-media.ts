@@ -8,7 +8,7 @@ export type DecentralizedMediaRef = {
   readonly path: string;
 };
 
-export type DecentralizedMediaResolution = {
+type DecentralizedMediaResolution = {
   readonly input: string;
   readonly recognized: boolean;
   readonly protocol?: DecentralizedMediaProtocol;
@@ -20,7 +20,7 @@ export type DecentralizedMediaResolution = {
   readonly warnings: string[];
 };
 
-export type ResolveDecentralizedMediaOptions = {
+type ResolveDecentralizedMediaOptions = {
   readonly includeExternalFallbacks?: boolean;
   readonly resolverEndpoint?: string;
 };
@@ -186,10 +186,6 @@ export function getMediaResolverHostname(
   } catch {
     return MEDIA_RESOLVER_HOST;
   }
-}
-
-export function isRecognizedDecentralizedMediaUrl(input: string): boolean {
-  return parseDecentralizedMediaRef(input) !== null;
 }
 
 function resolveDecentralizedMediaInput(

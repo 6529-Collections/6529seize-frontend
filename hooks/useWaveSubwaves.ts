@@ -12,9 +12,9 @@ import type { SidebarWave } from "@/types/waves.types";
 import { useQueries } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
-export const WAVE_SUBWAVES_PAGE_SIZE = 100;
+const WAVE_SUBWAVES_PAGE_SIZE = 100;
 
-export function getWaveSubwavesQueryKeyParams(
+function getWaveSubwavesQueryKeyParams(
   parentWaveId: string,
   viewerIdentityKey?: string | null | undefined
 ): WaveSubwavesQueryKeyParams {
