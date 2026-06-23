@@ -1,4 +1,5 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
+import type { ExternalFileKind } from "@/lib/link-preview/fileKinds";
 
 export type GithubPreviewIssueState =
   | "open"
@@ -101,6 +102,10 @@ export interface GithubContentPreviewResponse {
   readonly ref: string | null;
   readonly size: number | null;
   readonly itemCount: number | null;
+  readonly extension?: string | null | undefined;
+  readonly fileKind?: ExternalFileKind | null | undefined;
+  readonly mimeType?: string | null | undefined;
+  readonly isBinary?: boolean | null | undefined;
   readonly language?: string | null | undefined;
   readonly lineCount?: number | null | undefined;
   readonly lineStart?: number | null | undefined;

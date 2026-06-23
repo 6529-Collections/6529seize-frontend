@@ -515,6 +515,16 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
     "This report is split by repository. Use this index to jump directly to the area you want, or read through from the frontend app work into backend, Stream contracts, Safe app hardening, and review bot updates.",
 } as const);
 
+const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
+  ["safety.ariaLabel", "Scanned and validated attachment"],
+  ["safety.badge", "Scanned and validated"],
+  ["safety.heading", "Attachment safety"],
+  ["safety.hideDetails", "Hide safety details"],
+  ["safety.sha256", "SHA-256"],
+  ["safety.size", "Size {size}"],
+  ["safety.viewDetails", "View safety details"],
+] as const);
+
 export const EN_US_MESSAGES = {
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted post",
@@ -1014,6 +1024,7 @@ export const EN_US_MESSAGES = {
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
+  ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
 } as const;

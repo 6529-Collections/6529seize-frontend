@@ -17,7 +17,9 @@
       "**/.next/**",
       "coverage/**",
       "generated/**",
-      "tmp_gen_outp/**"
+      "tmp_gen_outp/**",
+      "tmp_gen_final/**",
+      ".generated-backup-*/**"
     ],
     "aliases": { "@/*": ["./*"] },
     "rootDir": ".",
