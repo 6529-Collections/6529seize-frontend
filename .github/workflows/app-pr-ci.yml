@@ -259,7 +259,52 @@ jobs:
             exit 0
           fi
 
-          ./bin/6529 run test:no-coverage --findRelatedTests "${existing_files[@]}" --passWithNoTests
+          jest_test_files=()
+          related_source_files=()
+          for file in "${existing_files[@]}"; do
+            case "$file" in
+              tests/*.spec.ts|tests/*.spec.tsx|tests/**/*.spec.ts|tests/**/*.spec.tsx)
+                echo "Skipping Playwright spec for related Jest coverage: $file"
+                ;;
+              *.test.ts|*.test.tsx)
+                jest_test_files+=("$file")
+                ;;
+              *.spec.ts|*.spec.tsx)
+                echo "Skipping non-Jest spec for related Jest coverage: $file"
+                ;;
+              *)
+                related_source_files+=("$file")
+                ;;
+            esac
+          done
+
+          run_jest_with_timeout() {
+            local label="$1"
+            shift
+
+            set +e
+            NODE_ENV=test timeout 180s ./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests "$@"
+            local status=$?
+            set -e
+
+            if [ "$status" -eq 124 ]; then
+              echo "::error::${label} timed out after 180s"
+            fi
+
+            return "$status"
+          }
+
+          if [ "${#jest_test_files[@]}" -gt 0 ]; then
+            run_jest_with_timeout "Direct Jest tests" "${jest_test_files[@]}"
+          fi
+
+          if [ "${#related_source_files[@]}" -gt 0 ]; then
+            run_jest_with_timeout "Related Jest tests" --findRelatedTests "${related_source_files[@]}"
+          fi
+
+          if [ "${#jest_test_files[@]}" -eq 0 ] && [ "${#related_source_files[@]}" -eq 0 ]; then
+            echo "No Jest-related source or test files need coverage."
+          fi
 
       - name: Build app
         if: needs.plan.outputs.build_required == 'true'

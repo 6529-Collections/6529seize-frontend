@@ -3963,3 +3963,196 @@ test-results/app-pr-ci/public-groups-tools-secret-scan.json`: clean.
     reaction mutation rejection case.
 - Next action: commit, force-push, rerun exact-head reviewbot/CI signals, and
   merge #2852 once no material feedback remains.
+
+## 2026-06-23T11:15Z PR #2853 Rebase After #2852 Merge
+
+- PR #2852 merged into `origin/main` as
+  `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
+- Started rebasing PR #2853 (`codex/e2e-wallet-signing-sandbox`) onto that
+  current main. The first commit conflicted where the signed-drop sandbox
+  overlapped the newly merged reaction sandbox.
+- Resolution strategy:
+  - keep the current main/reaction-sandbox refactor as the base;
+  - preserve the signed-drop E2E spec and add the signature sandbox script;
+  - include both reaction and signature specs in `test:e2e:auth-sandbox`;
+  - add signed Rank-wave mock fixtures and exact read routes without reusing
+    the `...0539` chat-drop ID from #2852;
+  - keep newer main-side workstream history and record this fresh rebase note.
+- Next action: finish the rebase, run the signature/reaction/auth sandbox packs
+  plus signing unit tests and static checks, then push and re-trigger the review
+  loop for PR #2853.
+
+## 2026-06-23T11:22Z PR #2853 Negative Assertion Follow-Up Replayed
+
+- Replayed the PR #2853 follow-up that strengthens the signed-drop fail-closed
+  assertion.
+- The signature sandbox now samples the local request ledger for a short
+  negative assertion window and fails if any late `/api/drops` POST appears,
+  instead of checking the ledger only once.
+- Next action: continue the rebase and run the full focused validation set on
+  the rebased head.
+
+## 2026-06-23T11:28Z PR #2853 Rebased Validation Complete
+
+- Completed the PR #2853 rebase onto merged #2852/main
+  `b5ec8a62805f261fa4f8c10bc5c30f1114412227`.
+- Current branch delta is test/docs/tooling only: signed-drop sandbox E2E,
+  mock signature Rank-wave fixtures, the `test:e2e:signature-sandbox` script,
+  `test:e2e:auth-sandbox` inclusion, signing test harness updates, and
+  workstream/test docs.
+- Focused local validation passed on the rebased head:
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - package JSON parse plus `seize run lint:package-json`
+  - focused ESLint for the signed/reaction sandbox specs, sandbox server, and
+    `__tests__/hooks/useSecureSign.test.ts`
+  - `seize run typecheck:playwright`
+  - `seize run typecheck:changed`
+  - `codex-diff-check`
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run test:e2e:reaction-sandbox`: 2 passed.
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+  - `seize run test:e2e:composer-sandbox`: 10 passed across desktop/mobile.
+  - focused signing/composer Jest batch: 7 suites, 73 tests passed.
+  - risk floor Level 4, changed-secret scan clean, workflow-security scan
+    clean.
+- Local `seize run lint:changed` is still not useful in this worktree because
+  the branch comparison against local `main` creates a Windows command-line
+  length overflow; focused ESLint on the actual PR files passed.
+- Next action: force-with-lease push the rebased branch, trigger CodeRabbit and
+  all existing 6529bot lanes including GLM-swarm/responsiveness on the exact
+  pushed head, then merge when CI and material review feedback are clear.
+
+## 2026-06-23T11:40Z PR #2853 Final Reviewbot Hardening
+
+- Addressed the remaining useful advisory feedback from the latest #2853 bot
+  loop:
+  - the terms-copy assertion is now scoped to the Terms of Service dialog;
+  - the spec asserts the real signing-failure toast before the no-write ledger
+    check, proving the signing branch was reached rather than merely no-oping;
+  - the signature-wave fixture documents its intentional inherited open
+    visibility, eligibility, and period gates.
+- Kept the timed negative ledger loop instead of converting it to
+  `expect.poll`, because this check must stay green for the full assertion
+  window and should not pass on the first zero sample.
+- Focused validation passed:
+  - `seize exec eslint --no-warn-ignored --max-warnings=0 tests/social/wave-signature-sandbox.spec.ts tests/support/composerSandboxServer.cjs`
+  - `node --check tests\support\composerSandboxServer.cjs`
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run typecheck:playwright`
+  - `codex-diff-check`
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+- Next action: commit, push the final head, re-trigger the review loop, and
+  merge after CI and material bot feedback are clear.
+
+## 2026-06-23T11:58Z PR #2853 Related-Jest CI Hang Fix
+
+- Final-head App PR CI exposed a real required-check hang in the `Run related
+  Jest tests` step. The workflow fed changed Jest test files into
+  `jest --findRelatedTests`, and `--findRelatedTests
+  __tests__/hooks/useSecureSign.test.ts` reproduced the hang locally.
+- Patched `.github/workflows/app-pr-ci.yml` so the related-Jest lane:
+  - skips Playwright specs under `tests/*.spec.ts(x)`;
+  - runs changed Jest test files directly;
+  - keeps `--findRelatedTests` for non-test source files;
+  - uses `--forceExit`, matching the repo's existing JSON Jest scripts, so
+    known open-handle leaks cannot hold the required app-check job forever.
+- Validation passed:
+  - `seize run test:no-coverage -- __tests__/hooks/useSecureSign.test.ts --passWithNoTests --forceExit`: 30 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi`: 43 passed.
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - workflow-security scan clean.
+  - changed-secret scan clean.
+  - risk floor recomputed.
+  - `codex-diff-check`.
+- Next action: commit and push the CI harness fix, which will cancel the hung
+  old app-check run and restart CI on the corrected head.
+
+## 2026-06-23T12:35Z PR #2853 Current-Main Validation
+
+- Rebased PR #2853 onto current `origin/main`
+  `3682d3fb3 Polish wave sidebar spacing and grouped message timestamps
+  (#2845)`.
+- A first post-rebase signed-sandbox run saw a transient app 404 from the local
+  dev server; rerunning from a clean sandbox port state passed and the broader
+  auth sandbox also passed, confirming the branch did not need a route or
+  fixture change.
+- Focused validation on the current-main head passed:
+  - `seize run test:e2e:signature-sandbox`: 1 passed.
+  - `seize run test:e2e:auth-sandbox`: 11 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi`: 43 passed.
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize run typecheck:changed`: passed for 57 changed TypeScript files.
+  - focused ESLint for `__tests__/hooks/useSecureSign.test.ts`,
+    `tests/social/wave-signature-sandbox.spec.ts`, and
+    `tests/support/composerSandboxServer.cjs`.
+  - `codex-diff-check`.
+  - risk floor Level 4, changed-secret scan clean, workflow-security scan
+    clean.
+- Local `seize run lint:changed` still hit the Windows command-line length
+  issue caused by the script's local-`main` comparison in this worktree; the
+  focused ESLint command over the actual PR lintable files passed.
+- Next action: commit this validation note, force-with-lease push the rebased
+  branch, restart CodeRabbit and all 6529bot review lanes on the pushed head,
+  then merge when CI and material review feedback are clear.
+
+## 2026-06-23T12:45Z PR #2853 Related-Jest Hardening Follow-Up
+
+- The first current-main CI retry still sat in `Run related Jest tests` longer
+  than expected. Before waiting for the full job timeout, hardened the workflow
+  again so the required check is bounded and its intent is explicit.
+- Updated `.github/workflows/app-pr-ci.yml` related-Jest classification:
+  - Playwright specs under `tests/**/*.spec.ts(x)` are skipped for Jest.
+  - Only `*.test.ts(x)` files are treated as direct Jest tests.
+  - Any remaining `*.spec.ts(x)` files are skipped as non-Jest specs instead
+    of being guessed into Jest.
+  - Direct-Jest and related-source Jest invocations now run with
+    `timeout 180s`, `--runInBand`, and `--forceExit` so open handles cannot
+    hang the app PR CI job indefinitely.
+- Validation passed:
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize run test:no-coverage -- __tests__/hooks/useSecureSign.test.ts --passWithNoTests --runInBand --forceExit`: 30 passed.
+  - signing Jest batch for `useDropSignature`, `useSecureSign`, and
+    `useSecureSign-wagmi` with `--runInBand --forceExit`: 43 passed.
+  - risk floor recomputed.
+  - changed-secret scan clean.
+  - workflow-security scan clean.
+  - `codex-diff-check`.
+- Next action: commit, push, let concurrency cancel the still-running old app
+  PR CI run, then verify the new CI head exits the related-Jest step.
+
+## 2026-06-23T13:00Z PR #2853 Direct-Jest CI Fix
+
+- GitHub app PR CI proved the previous bounded related-Jest step still failed:
+  `__tests__/hooks/useSecureSign.test.ts` passed in about 18s, then the process
+  stayed open until the 180s shell timeout killed the step with exit code 124.
+- Updated `.github/workflows/app-pr-ci.yml` so this CI step invokes Jest
+  directly through the repo wrapper:
+  - `./bin/6529 exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests`.
+  - `--forceExit` and other Jest options now appear before direct test file
+    paths and before `--findRelatedTests` source paths.
+  - Added `run_jest_with_timeout` to emit a distinct GitHub error message if a
+    future related-Jest run times out.
+- Validation passed:
+  - app PR CI YAML parsed with the repo's `yaml` package.
+  - `seize exec jest --silent --verbose=false --coverage=false --runInBand --forceExit --passWithNoTests __tests__/hooks/useSecureSign.test.ts`:
+    30 passed and exited cleanly.
+  - `codex-diff-check -- .github/workflows/app-pr-ci.yml`.
+- Next action: commit and push, update PR #2853 notes, restart CodeRabbit and
+  6529bot lanes on the new head, then merge once CI and material bot feedback
+  are clear.
+
+## 2026-06-23T13:08Z PR #2853 GLM Follow-Up
+
+- Latest-head GLM swarm review was advisory-only and found no high-confidence
+  production regression, but flagged one useful CI fidelity point: direct Jest
+  invocation should preserve the package script's explicit `NODE_ENV=test`.
+- Verified `package.json` `test:no-coverage` only adds
+  `NODE_ENV=test jest --silent --verbose=false --coverage=false`; the direct CI
+  helper already carries the Jest flags, and now sets `NODE_ENV=test`.
+- Verified the signed-drop Playwright regex intentionally matches the prefix of
+  the current production signing failure string in
+  `hooks/drops/useDropSignature.ts`.
+- Next action: validate the exact direct-Jest command again, commit, push, and
+  rerun CI/reviewbot latest-head checks.
