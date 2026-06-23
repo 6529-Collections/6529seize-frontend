@@ -19,11 +19,20 @@ jest.mock("capacitor-secure-storage-plugin", () => ({
   },
 }));
 
-const secureStorageMock = jest.requireMock(
+const mockSecureStorage = jest.requireMock(
   "capacitor-secure-storage-plugin"
-).SecureStoragePlugin;
-const setMock = secureStorageMock.set as jest.Mock;
-const removeMock = secureStorageMock.remove as jest.Mock;
+) as {
+  SecureStoragePlugin: {
+    keys: jest.Mock;
+    set: jest.Mock;
+    get: jest.Mock;
+    remove: jest.Mock;
+  };
+};
+const mockSet = mockSecureStorage.SecureStoragePlugin.set;
+const mockRemove = mockSecureStorage.SecureStoragePlugin.remove;
+const mockKeys = mockSecureStorage.SecureStoragePlugin.keys;
+const mockGet = mockSecureStorage.SecureStoragePlugin.get;
 
 jest.mock("ethers", () => ({
   ethers: {
@@ -34,11 +43,20 @@ jest.mock("ethers", () => ({
         privateKey: "k",
       }),
     },
+    isAddress: () => true,
   },
 }));
 
 jest.mock("@/components/app-wallets/app-wallet-helpers", () => ({
-  encryptData: jest.fn(async (_a, _b, v) => v),
+  decryptData: jest.fn(async (_salt, value) =>
+    typeof value === "string" && value.startsWith("legacy:")
+      ? value.slice("legacy:".length)
+      : value
+  ),
+  encryptData: jest.fn(async (_salt, value) => `v2:${value}`),
+  isAppWalletEncryptedEnvelope: jest.fn(
+    (value) => typeof value === "string" && value.startsWith("v2:")
+  ),
 }));
 
 jest.mock("@/helpers/time", () => ({
@@ -52,6 +70,13 @@ jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
 }));
 
 describe("AppWalletsContext methods", () => {
+  beforeEach(() => {
+    mockSet.mockClear();
+    mockRemove.mockClear();
+    mockGet.mockResolvedValue({ value: "{}" });
+    mockKeys.mockResolvedValue({ value: [] });
+  });
+
   it("creates and deletes wallet", async () => {
     const wrapper = ({ children }: any) => (
       <AppWalletsProvider>{children}</AppWalletsProvider>
@@ -63,19 +88,61 @@ describe("AppWalletsContext methods", () => {
     await waitFor(() => expect(result.current.appWalletsSupported).toBe(true));
 
     // Test wallet creation - this will test whether the secure storage is called
-    const createResult = await act(
-      async () => await result.current.createAppWallet("n", "p")
-    );
+    let createResult = false;
+    await act(async () => {
+      createResult = await result.current.createAppWallet("n", "p");
+    });
 
     // Test wallet deletion
-    const deleteResult = await act(
-      async () => await result.current.deleteAppWallet("0x1")
-    );
+    let deleteResult = false;
+    await act(async () => {
+      deleteResult = await result.current.deleteAppWallet("0x1");
+    });
 
     // The methods should exist and return boolean values
     expect(typeof createResult).toBe("boolean");
     expect(typeof deleteResult).toBe("boolean");
-    expect(setMock).toHaveBeenCalled();
-    expect(removeMock).toHaveBeenCalled();
+
+    // If supported, the mocks should have been called
+    if (result.current.appWalletsSupported) {
+      expect(mockSet).toHaveBeenCalled();
+      expect(mockRemove).toHaveBeenCalled();
+    }
+  });
+
+  it("migrates a legacy wallet after verified unlock", async () => {
+    const address = "0x0000000000000000000000000000000000000001";
+    const legacyWallet = {
+      name: "Legacy",
+      created_at: 1,
+      address,
+      address_hashed: `legacy:${address}`,
+      mnemonic: "legacy:N/A",
+      private_key: "legacy:0xprivate",
+      imported: true,
+      has_mnemonic: false,
+    };
+    mockGet.mockResolvedValue({ value: JSON.stringify(legacyWallet) });
+
+    const wrapper = ({ children }: any) => (
+      <AppWalletsProvider>{children}</AppWalletsProvider>
+    );
+    const { result } = renderHook(() => useAppWallets(), { wrapper });
+
+    await waitFor(() => expect(result.current.migrateAppWallet).toBeDefined());
+    await waitFor(() => expect(result.current.appWalletsSupported).toBe(true));
+
+    let migrationResult = false;
+    await act(async () => {
+      migrationResult = await result.current.migrateAppWallet(address, "pass");
+    });
+
+    expect(migrationResult).toBe(true);
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: `app-wallet_${address}`,
+        value: expect.stringContaining('"encryption_version":2'),
+      })
+    );
   });
 });

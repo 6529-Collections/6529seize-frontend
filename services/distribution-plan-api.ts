@@ -10,7 +10,9 @@ const handleResponse = async <T>(
   readonly data: T | null;
 }> => {
   if (res.status === 401) {
-    removeAuthJwt();
+    await Promise.resolve(removeAuthJwt()).catch((error: unknown) => {
+      console.error("Failed to remove auth JWT after 401", error);
+    });
     makeErrorToast("Please reconnect your wallet.");
     return {
       success: false,

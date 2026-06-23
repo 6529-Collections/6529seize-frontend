@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -11,17 +12,439 @@ import type { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemR
 import type { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   canStoreAnotherWalletAccount,
+  getConnectedWalletAccounts,
   setAuthJwt,
 } from "@/services/auth/auth.utils";
+import {
+  persistSessionResponse,
+  redeemConnectionShare,
+} from "@/services/auth/session-v2.utils";
 import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
+import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
+
+const ACCEPT_CONNECTION_LOCALE = DEFAULT_LOCALE;
 
 interface AcceptConnectionSharingProps {
+  connectionShareCode: string;
   token: string;
   address: string;
-  role?: string | undefined;
+  role: string | undefined;
+}
+
+type SharedProfile = ReturnType<typeof useIdentity>["profile"];
+type SetToast = ReturnType<typeof useAuth>["setToast"];
+
+function getSharedProfileName(profile: SharedProfile, address: string): string {
+  if (profile?.handle) {
+    return profile.handle;
+  }
+  if (profile?.display) {
+    return profile.display;
+  }
+  if (address) {
+    return `${address.slice(0, 6)}…${address.slice(-4)}`;
+  }
+  return t(
+    ACCEPT_CONNECTION_LOCALE,
+    "acceptConnection.sharedConnectionFallback"
+  );
+}
+
+function HomeLinkCard({ message }: Readonly<{ message: string }>) {
+  return (
+    <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
+      <p className="tw-text-base tw-text-neutral-300">{message}</p>
+      <p className="tw-mt-4">
+        <Link
+          href="/"
+          className="tw-text-sm tw-font-medium tw-text-emerald-400 hover:tw-underline"
+        >
+          {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.home")}
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+function ConnectionLimitCard() {
+  return (
+    <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
+      <p className="tw-text-base tw-font-semibold tw-text-white">
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.limit.title")}
+      </p>
+      <p className="tw-mt-3 tw-text-sm tw-text-neutral-300">
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.limit.message", {
+          maxCount: formatInteger(
+            ACCEPT_CONNECTION_LOCALE,
+            MAX_CONNECTED_PROFILES
+          ),
+        })}
+      </p>
+    </div>
+  );
+}
+
+function IncomingConnectionCard({
+  profile,
+  profileLoading,
+  address,
+}: Readonly<{
+  profile: SharedProfile;
+  profileLoading: boolean;
+  address: string;
+}>) {
+  const profileName = getSharedProfileName(profile, address);
+
+  return (
+    <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-p-5">
+      <h2 className="tw-mb-4 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-neutral-400">
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.incoming.title")}
+      </h2>
+      {profileLoading ? (
+        <div className="tw-flex tw-items-center tw-gap-3 tw-py-2">
+          <div className="tw-h-14 tw-w-14 tw-animate-pulse tw-rounded-full tw-bg-white/10" />
+          <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-2">
+            <div className="tw-h-4 tw-w-32 tw-animate-pulse tw-rounded tw-bg-white/10" />
+            <div className="tw-h-3 tw-w-24 tw-animate-pulse tw-rounded tw-bg-white/10" />
+          </div>
+        </div>
+      ) : (
+        <div className="tw-flex tw-items-center tw-gap-4">
+          <TransferModalPfp
+            src={profile?.pfp ?? null}
+            alt={profileName}
+            level={profile?.level ?? 0}
+            size={56}
+          />
+          <div className="tw-min-w-0 tw-flex-1">
+            <div className="tw-truncate tw-text-base tw-font-medium tw-text-white">
+              {profileName}
+            </div>
+            {profile ? (
+              <div className="tw-mt-1 tw-truncate tw-text-sm tw-text-neutral-400">
+                {t(
+                  ACCEPT_CONNECTION_LOCALE,
+                  "acceptConnection.incoming.profileStatsLabel",
+                  {
+                    tdh: formatInteger(
+                      ACCEPT_CONNECTION_LOCALE,
+                      profile.tdh ?? 0
+                    ),
+                    level: formatInteger(
+                      ACCEPT_CONNECTION_LOCALE,
+                      profile.level ?? 0
+                    ),
+                  }
+                )}
+              </div>
+            ) : null}
+            {address ? (
+              <div className="tw-mt-0.5 tw-truncate tw-font-mono tw-text-[11px] tw-text-neutral-500">
+                {address}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function CurrentProfileNotice({
+  connectedAddress,
+  connectedProfile,
+  acceptingConnection,
+  shouldShow,
+}: Readonly<{
+  connectedAddress: string | undefined;
+  connectedProfile: ReturnType<typeof useAuth>["connectedProfile"];
+  acceptingConnection: boolean;
+  shouldShow: boolean;
+}>) {
+  const shouldShowNotice =
+    shouldShow && Boolean(connectedAddress) && acceptingConnection === false;
+  if (shouldShowNotice) {
+    return (
+      <p className="tw-text-center tw-text-sm tw-text-neutral-400">
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.currentProfile.prefix")}
+        {connectedProfile?.handle ? (
+          <> @{connectedProfile.handle}</>
+        ) : null}{" "}
+        {t(
+          ACCEPT_CONNECTION_LOCALE,
+          "acceptConnection.currentProfile.willStayAvailable"
+        )}
+        <br />
+        {t(
+          ACCEPT_CONNECTION_LOCALE,
+          "acceptConnection.currentProfile.switchAfterAccepting"
+        )}
+      </p>
+    );
+  }
+
+  return null;
+}
+
+function AcceptConnectionButton({
+  acceptingConnection,
+  disabled = false,
+  onAccept,
+}: Readonly<{
+  acceptingConnection: boolean;
+  disabled?: boolean;
+  onAccept: () => void;
+}>) {
+  const isDisabled = acceptingConnection || disabled;
+
+  return (
+    <div className="tw-flex tw-justify-center">
+      <button
+        type="button"
+        disabled={isDisabled}
+        aria-disabled={isDisabled}
+        aria-busy={acceptingConnection}
+        onClick={onAccept}
+        className="tw-flex tw-min-w-[200px] tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-6 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-none tw-outline-none tw-ring-0 tw-transition-colors hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-70"
+      >
+        {acceptingConnection ? (
+          <>
+            {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.action.processing")}{" "}
+            <Spinner dimension={18} />
+          </>
+        ) : (
+          t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.action.accept")
+        )}
+      </button>
+    </div>
+  );
+}
+
+function isAddressInConnectedAccounts(address: string): boolean {
+  if (!address.trim()) {
+    return false;
+  }
+
+  return getConnectedWalletAccounts().some((account) =>
+    areEqualAddresses(account.address, address)
+  );
+}
+
+async function acceptConnectionShare({
+  address,
+  connectionShareCode,
+  setToast,
+  seizeAcceptConnection,
+  routerPush,
+}: {
+  readonly address: string;
+  readonly connectionShareCode: string;
+  readonly setToast: SetToast;
+  readonly seizeAcceptConnection: (address: string) => void;
+  readonly routerPush: (path: string) => void;
+}): Promise<boolean> {
+  if (address && canStoreAnotherWalletAccount(address) === false) {
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.maxProfiles"
+      ),
+      type: "error",
+    });
+    return false;
+  }
+
+  const redeemResponse = await redeemConnectionShare(connectionShareCode);
+  const hasValidRedeemResponse =
+    !!redeemResponse.address &&
+    !!redeemResponse.access_token &&
+    (!address || areEqualAddresses(redeemResponse.address, address));
+  if (hasValidRedeemResponse === false) {
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.invalidResponse"
+      ),
+      type: "error",
+    });
+    return false;
+  }
+
+  if (canStoreAnotherWalletAccount(redeemResponse.address) === false) {
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.maxProfiles"
+      ),
+      type: "error",
+    });
+    return false;
+  }
+
+  const didPersistJwt = await persistSessionResponse(redeemResponse);
+  if (didPersistJwt === false) {
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.persistFailed"
+      ),
+      type: "error",
+    });
+    return false;
+  }
+
+  seizeAcceptConnection(redeemResponse.address);
+  routerPush("/");
+  return true;
+}
+
+async function acceptLegacyDesktopConnection({
+  address,
+  token,
+  role,
+  setToast,
+  seizeAcceptConnection,
+  routerPush,
+}: {
+  readonly address: string;
+  readonly token: string;
+  readonly role: string | undefined;
+  readonly setToast: SetToast;
+  readonly seizeAcceptConnection: (address: string) => void;
+  readonly routerPush: (path: string) => void;
+}): Promise<boolean> {
+  const redeemResponse = await commonApiPost<
+    ApiRedeemRefreshTokenRequest,
+    ApiRedeemRefreshTokenResponse
+  >({
+    endpoint: "auth/redeem-refresh-token",
+    body: {
+      address,
+      token,
+      ...(role ? { role } : {}),
+    },
+  });
+  const hasValidRedeemResponse =
+    !!redeemResponse.address &&
+    !!redeemResponse.token &&
+    areEqualAddresses(redeemResponse.address, address);
+  if (hasValidRedeemResponse === false) {
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.invalidResponse"
+      ),
+      type: "error",
+    });
+    return false;
+  }
+
+  if (canStoreAnotherWalletAccount(redeemResponse.address) === false) {
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.maxProfiles"
+      ),
+      type: "error",
+    });
+    return false;
+  }
+
+  const didPersistJwt = setAuthJwt(
+    redeemResponse.address,
+    redeemResponse.token,
+    token,
+    role
+  );
+  if (didPersistJwt === false) {
+    setToast({
+      message: t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.toast.persistFailed"
+      ),
+      type: "error",
+    });
+    return false;
+  }
+
+  seizeAcceptConnection(redeemResponse.address);
+  routerPush("/");
+  return true;
+}
+
+function ConnectionSharingContent({
+  hasUnsupportedWebConnectionShare,
+  isConnectionShareFlow,
+  isLegacyDesktopConnectionFlow,
+  profile,
+  profileLoading,
+  address,
+  connectedAddress,
+  connectedProfile,
+  acceptingConnection,
+  isIncomingConnectionAlreadyStored,
+  isStorageLimitReached,
+  onAccept,
+}: Readonly<{
+  hasUnsupportedWebConnectionShare: boolean;
+  isConnectionShareFlow: boolean;
+  isLegacyDesktopConnectionFlow: boolean;
+  profile: SharedProfile;
+  profileLoading: boolean;
+  address: string;
+  connectedAddress: string | undefined;
+  connectedProfile: ReturnType<typeof useAuth>["connectedProfile"];
+  acceptingConnection: boolean;
+  isIncomingConnectionAlreadyStored: boolean;
+  isStorageLimitReached: boolean;
+  onAccept: () => void;
+}>) {
+  if (hasUnsupportedWebConnectionShare) {
+    return (
+      <HomeLinkCard
+        message={t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.unsupportedWeb")}
+      />
+    );
+  }
+
+  if (isConnectionShareFlow || isLegacyDesktopConnectionFlow) {
+    return (
+      <div className="tw-space-y-6">
+        <IncomingConnectionCard
+          profile={profile}
+          profileLoading={profileLoading}
+          address={address}
+        />
+        <CurrentProfileNotice
+          connectedAddress={connectedAddress}
+          connectedProfile={connectedProfile}
+          acceptingConnection={acceptingConnection}
+          shouldShow={isIncomingConnectionAlreadyStored === false}
+        />
+        {isStorageLimitReached ? <ConnectionLimitCard /> : null}
+        <AcceptConnectionButton
+          acceptingConnection={acceptingConnection}
+          disabled={isStorageLimitReached}
+          onAccept={onAccept}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <HomeLinkCard
+      message={t(
+        ACCEPT_CONNECTION_LOCALE,
+        "acceptConnection.missingParameters"
+      )}
+    />
+  );
 }
 
 function AcceptConnectionSharing(
@@ -32,71 +455,67 @@ function AcceptConnectionSharing(
   const { seizeAcceptConnection, address: connectedAddress } =
     useSeizeConnectContext();
 
-  const { token, address, role } = props;
+  const { connectionShareCode, token, address, role } = props;
   const [acceptingConnection, setAcceptingConnection] = useState(false);
+  const hasConnectionShareCode = connectionShareCode.trim().length > 0;
+  const hasLegacyDesktopToken = token.trim().length > 0;
+  const hasUnsupportedWebConnectionShare =
+    hasConnectionShareCode &&
+    !hasLegacyDesktopToken &&
+    !Capacitor.isNativePlatform();
+  const isConnectionShareFlow =
+    hasConnectionShareCode && Capacitor.isNativePlatform();
+  const isLegacyDesktopConnectionFlow =
+    hasLegacyDesktopToken && address.trim().length > 0;
+  const isIncomingConnectionAlreadyStored =
+    isAddressInConnectedAccounts(address);
+  const isStorageLimitReached =
+    address.trim().length > 0 &&
+    isIncomingConnectionAlreadyStored === false &&
+    canStoreAnotherWalletAccount(address) === false;
 
   const { profile, isLoading: profileLoading } = useIdentity({
     handleOrWallet: address || null,
     initialProfile: null,
   });
 
-  useSetTitle("Accept Connection Sharing");
+  useSetTitle(t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.title"));
 
   const acceptConnection = async () => {
     try {
-      const redeemResponse = await commonApiPost<
-        ApiRedeemRefreshTokenRequest,
-        ApiRedeemRefreshTokenResponse
-      >({
-        endpoint: "auth/redeem-refresh-token",
-        body: {
+      if (isConnectionShareFlow) {
+        const accepted = await acceptConnectionShare({
+          address,
+          connectionShareCode,
+          setToast,
+          seizeAcceptConnection,
+          routerPush: (path) => router.push(path),
+        });
+        if (!accepted) {
+          setAcceptingConnection(false);
+        }
+        return;
+      }
+      if (isLegacyDesktopConnectionFlow) {
+        const accepted = await acceptLegacyDesktopConnection({
           address,
           token,
-        },
-      });
-      const hasValidRedeemResponse =
-        !!redeemResponse.address &&
-        !!redeemResponse.token &&
-        areEqualAddresses(redeemResponse.address, address);
-      if (!hasValidRedeemResponse) {
-        setToast({
-          message: "This connection response is not valid.",
-          type: "error",
+          role,
+          setToast,
+          seizeAcceptConnection,
+          routerPush: (path) => router.push(path),
         });
-        setAcceptingConnection(false);
-        return;
+        if (!accepted) {
+          setAcceptingConnection(false);
+        }
       }
-
-      if (!canStoreAnotherWalletAccount(redeemResponse.address)) {
-        setToast({
-          message: "You've reached the connected profile limit.",
-          type: "error",
-        });
-        setAcceptingConnection(false);
-        return;
-      }
-
-      const didPersistJwt = setAuthJwt(
-        redeemResponse.address,
-        redeemResponse.token,
-        token,
-        role ?? undefined
-      );
-      if (!didPersistJwt) {
-        setToast({
-          message: "Couldn't save this connected profile. Please try again.",
-          type: "error",
-        });
-        setAcceptingConnection(false);
-        return;
-      }
-
-      seizeAcceptConnection(redeemResponse.address);
-      router.push("/");
     } catch (error) {
       console.error(error);
       setToast({
-        message: "Couldn't accept this connection. Please try again.",
+        message: t(
+          ACCEPT_CONNECTION_LOCALE,
+          "acceptConnection.toast.acceptFailed"
+        ),
         type: "error",
       });
       setAcceptingConnection(false);
@@ -108,113 +527,46 @@ function AcceptConnectionSharing(
       <div className="tw-mx-auto tw-max-w-2xl tw-px-4 tw-pb-8 tw-pt-12 sm:tw-px-6">
         <header className="tw-mb-8">
           <h1 className="tw-text-2xl tw-font-bold tw-text-white">
-            Accept Connection Sharing
+            {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.title")}
           </h1>
         </header>
 
-        {!token || !address ? (
-          <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
-            <p className="tw-text-base tw-text-neutral-300">
-              Missing required parameters
-            </p>
-            <p className="tw-mt-4">
-              <Link
-                href="/"
-                className="tw-text-sm tw-font-medium tw-text-emerald-400 hover:tw-underline"
-              >
-                Take me home
-              </Link>
-            </p>
-          </div>
-        ) : (
-          <div className="tw-space-y-6">
-            <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-p-5">
-              <h2 className="tw-mb-4 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-neutral-400">
-                Incoming connection from
-              </h2>
-              {profileLoading ? (
-                <div className="tw-flex tw-items-center tw-gap-3 tw-py-2">
-                  <div className="tw-h-14 tw-w-14 tw-animate-pulse tw-rounded-full tw-bg-white/10" />
-                  <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-2">
-                    <div className="tw-h-4 tw-w-32 tw-animate-pulse tw-rounded tw-bg-white/10" />
-                    <div className="tw-h-3 tw-w-24 tw-animate-pulse tw-rounded tw-bg-white/10" />
-                  </div>
-                </div>
-              ) : (
-                <div className="tw-flex tw-items-center tw-gap-4">
-                  <TransferModalPfp
-                    src={profile?.pfp ?? null}
-                    alt={profile?.handle ?? profile?.display ?? address}
-                    level={profile?.level ?? 0}
-                    size={56}
-                  />
-                  <div className="tw-min-w-0 tw-flex-1">
-                    <div className="tw-truncate tw-text-base tw-font-medium tw-text-white">
-                      {profile?.handle ??
-                        profile?.display ??
-                        address.slice(0, 6) + "…" + address.slice(-4)}
-                    </div>
-                    {profile ? (
-                      <div className="tw-mt-1 tw-truncate tw-text-sm tw-text-neutral-400">
-                        TDH: {(profile.tdh ?? 0).toLocaleString()} · Level:{" "}
-                        {profile.level ?? 0}
-                      </div>
-                    ) : null}
-                    <div className="tw-mt-0.5 tw-truncate tw-font-mono tw-text-[11px] tw-text-neutral-500">
-                      {address}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {connectedAddress && !acceptingConnection && (
-              <p className="tw-text-center tw-text-sm tw-text-neutral-400">
-                Your current profile
-                {connectedProfile?.handle ? (
-                  <> @{connectedProfile.handle}</>
-                ) : null}{" "}
-                will stay available.
-                <br />
-                You can switch between both after accepting.
-              </p>
-            )}
-
-            <div className="tw-flex tw-justify-center">
-              <button
-                type="button"
-                disabled={acceptingConnection}
-                aria-disabled={acceptingConnection}
-                aria-busy={acceptingConnection}
-                onClick={() => {
-                  if (acceptingConnection) return;
-                  setAcceptingConnection(true);
-                  void acceptConnection();
-                }}
-                className="tw-flex tw-min-w-[200px] tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-6 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-none tw-outline-none tw-ring-0 tw-transition-colors hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-70"
-              >
-                {acceptingConnection ? (
-                  <>
-                    Processing <Spinner dimension={18} />
-                  </>
-                ) : (
-                  "Accept connection"
-                )}
-              </button>
-            </div>
-          </div>
-        )}
+        <ConnectionSharingContent
+          hasUnsupportedWebConnectionShare={hasUnsupportedWebConnectionShare}
+          isConnectionShareFlow={isConnectionShareFlow}
+          isLegacyDesktopConnectionFlow={isLegacyDesktopConnectionFlow}
+          profile={profile}
+          profileLoading={profileLoading}
+          address={address}
+          connectedAddress={connectedAddress}
+          connectedProfile={connectedProfile}
+          acceptingConnection={acceptingConnection}
+          isIncomingConnectionAlreadyStored={isIncomingConnectionAlreadyStored}
+          isStorageLimitReached={isStorageLimitReached}
+          onAccept={() => {
+            if (acceptingConnection || isStorageLimitReached) return;
+            setAcceptingConnection(true);
+            void acceptConnection();
+          }}
+        />
       </div>
     </main>
   );
 }
 
 export default function AcceptConnectionSharingPage() {
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by app/accept-connection-sharing/page.tsx
   const searchParams = useSearchParams();
+  const connectionShareCode = searchParams?.get("connection_share_code") || "";
   const token = searchParams?.get("token") || "";
   const address = searchParams?.get("address") || "";
   const role = searchParams?.get("role") || undefined;
   return (
-    <AcceptConnectionSharing token={token} address={address} role={role} />
+    <AcceptConnectionSharing
+      connectionShareCode={connectionShareCode}
+      token={token}
+      address={address}
+      role={role}
+    />
   );
 }

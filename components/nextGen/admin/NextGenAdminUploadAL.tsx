@@ -7,7 +7,11 @@ import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";
 import { postFormData } from "@/services/6529api";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { FunctionSelectors } from "../nextgen_contracts";
+import {
+  buildNextgenAdminSignatureMessage,
+  isStructuredSignaturesEnabled,
+} from "@/services/wallet-signatures/structured-wallet-signatures";
+import { FunctionSelectors, NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
 import {
   getCollectionIdsForAddress,
   useCollectionAdmin,
@@ -35,6 +39,11 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const account = useSeizeConnectContext();
   const signMessage = useSignMessage();
   const uuid = useRef(uuidv4()).current;
+  const signatureMessageRef = useRef<string | null>(null);
+  const signedPayloadRef = useRef<ReturnType<
+    typeof buildNextgenAllowlistPayload
+  > | null>(null);
+  const signerAddressRef = useRef<string | null>(null);
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -76,14 +85,37 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     setAllowlistStartTime("");
     setAllowlistEndTime("");
     setErrors([]);
+    signatureMessageRef.current = null;
+    signedPayloadRef.current = null;
+    signerAddressRef.current = null;
   }
 
   function uploadFile() {
     setUploadError(undefined);
     signMessage.reset();
     setUploading(true);
+    signatureMessageRef.current = null;
+    signedPayloadRef.current = null;
+    signerAddressRef.current = null;
+    const signerAddress = account.address;
+    if (!signerAddress) {
+      setUploading(false);
+      setUploadError("Error: Connect a wallet before signing");
+      return;
+    }
+    const payload = buildNextgenAllowlistPayload();
+    signedPayloadRef.current = payload;
+    signerAddressRef.current = signerAddress;
+    const signatureMessage = isStructuredSignaturesEnabled()
+      ? buildNextgenAdminSignatureMessage({
+          address: signerAddress,
+          chainId: NEXTGEN_CHAIN_ID,
+          payload,
+        }).message
+      : null;
+    signatureMessageRef.current = signatureMessage;
     signMessage.signMessage({
-      message: uuid,
+      message: signatureMessage ?? uuid,
     });
   }
 
@@ -96,20 +128,23 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {
+      const signerAddress = signerAddressRef.current;
+      if (!signerAddress) {
+        setUploading(false);
+        setUploadError("Error: Connect a wallet before signing");
+        return;
+      }
       const formData = new FormData();
       formData.append("allowlist", allowlistFile);
       formData.append(
         "nextgen",
         JSON.stringify({
-          collection_id: collectionID,
-          wallet: account.address as string,
+          wallet: signerAddress,
           signature: signMessage.data,
-          uuid: uuid,
-          al_type: type,
-          phase: phaseName,
-          start_time: Number(allowlistStartTime),
-          end_time: Number(allowlistEndTime),
-          mint_price: Number(mintPrice),
+          ...(signatureMessageRef.current
+            ? { signature_message: signatureMessageRef.current }
+            : {}),
+          ...(signedPayloadRef.current ?? buildNextgenAllowlistPayload()),
         })
       );
 
@@ -132,6 +167,18 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
       });
     }
   }, [signMessage.data]);
+
+  function buildNextgenAllowlistPayload() {
+    return {
+      collection_id: Number(collectionID),
+      uuid,
+      al_type: type,
+      phase: phaseName,
+      start_time: Number(allowlistStartTime),
+      end_time: Number(allowlistEndTime),
+      mint_price: Number(mintPrice),
+    };
+  }
 
   return (
     <Container className="no-padding">

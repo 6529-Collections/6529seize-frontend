@@ -30,6 +30,12 @@ jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription",
   () => ({
     download: jest.fn(async () => ({ success: true, message: "ok" })),
+  })
+);
+
+jest.mock(
+  "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription.utils",
+  () => ({
     isSubscriptionsAdmin: jest.fn(),
   })
 );
@@ -113,7 +119,7 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
 
 const {
   isSubscriptionsAdmin,
-} = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
+} = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription.utils");
 
 const authCtx = {
   connectedProfile: { wallets: [{ wallet: "0x1" }] },

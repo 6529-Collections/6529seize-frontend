@@ -42,7 +42,6 @@ const mockUseQuery = useQuery as jest.Mock;
 describe("BrainRightSidebar", () => {
   const wave = { id: "1", wave: { type: "RANK" } } as any;
   const setActiveTab = jest.fn();
-  const onDropClick = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +56,6 @@ describe("BrainRightSidebar", () => {
     renderSidebar(
       <BrainRightSidebar
         waveId="1"
-        onDropClick={onDropClick}
         activeTab={SidebarTab.ABOUT}
         setActiveTab={setActiveTab}
       />
@@ -78,7 +76,6 @@ describe("BrainRightSidebar", () => {
     renderSidebar(
       <BrainRightSidebar
         waveId="1"
-        onDropClick={onDropClick}
         activeTab={SidebarTab.ABOUT}
         setActiveTab={setActiveTab}
       />
@@ -92,7 +89,6 @@ describe("BrainRightSidebar", () => {
     const { container } = renderSidebar(
       <BrainRightSidebar
         waveId="1"
-        onDropClick={onDropClick}
         activeTab={SidebarTab.ABOUT}
         setActiveTab={setActiveTab}
       />

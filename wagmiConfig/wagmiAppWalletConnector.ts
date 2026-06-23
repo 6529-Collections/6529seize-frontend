@@ -6,7 +6,7 @@ import {
   PrivateKeyDecryptionError,
   WalletAuthenticationError,
 } from "@/src/errors/wallet-auth";
-import type { Address, Chain, Hex , WalletClient } from "viem";
+import type { Address, Chain, Hex, WalletClient } from "viem";
 import { createWalletClient, fallback, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { createConnector } from "wagmi";
@@ -92,8 +92,7 @@ export function createAppWalletConnector(
 
       try {
         // Check if we're in Capacitor for more lenient validation
-        const isCapacitor =
-          !!globalThis.window.Capacitor?.isNativePlatform?.();
+        const isCapacitor = !!globalThis.window.Capacitor?.isNativePlatform?.();
 
         // Validate password by decrypting address hash
         const decryptedAddress = await decryptData(
@@ -137,6 +136,27 @@ export function createAppWalletConnector(
           );
         }
 
+        let decryptedAccount;
+        try {
+          decryptedAccount = privateKeyToAccount(ensureHexPrefix(privateKey));
+        } catch (error) {
+          throw new PrivateKeyDecryptionError(
+            "Private key format is invalid",
+            error
+          );
+        }
+
+        if (
+          !areEqualAddresses(
+            decryptedAccount.address,
+            options.appWallet.address
+          )
+        ) {
+          throw new WalletAuthenticationError(
+            "Decrypted private key does not match wallet address"
+          );
+        }
+
         // Only set after all validations pass
         decryptedPrivateKey = privateKey;
       } catch (error) {
@@ -177,8 +197,8 @@ export function createAppWalletConnector(
       const chainId = maybeChainId ?? chains[0]?.id;
 
       // Validate chainId
-      const validChain = chains.find((c) => c.id === chainId);
-      if (!validChain) {
+      const isValidChain = chains.some((c) => c.id === chainId);
+      if (!isValidChain) {
         throw new Error(
           `Chain ID ${chainId} is not supported. Supported chains: ${chains
             .map((c) => c.id)
@@ -298,7 +318,11 @@ export function createAppWalletConnector(
       emitter.emit("change", { accounts: accounts as Address[] });
     },
     onChainChanged(hexChainId) {
-      const numericId = parseInt(hexChainId, 16);
+      const normalizedHexChainId = hexChainId.trim();
+      if (!/^0x[0-9a-f]+$/i.test(normalizedHexChainId)) {
+        return;
+      }
+      const numericId = Number.parseInt(normalizedHexChainId, 16);
       emitter.emit("change", { chainId: numericId });
     },
     onConnect() {

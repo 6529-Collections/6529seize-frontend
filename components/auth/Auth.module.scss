@@ -58,6 +58,24 @@
   line-height: 1.5;
 }
 
+.signModalLearnMore {
+  margin: 0.85rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.signModalLearnMore a {
+  color: #9bb2ff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.signModalLearnMore a:hover,
+.signModalLearnMore a:focus-visible {
+  color: #c5d0ff;
+  text-decoration: underline;
+}
+
 .signModalFooter {
   display: flex;
   justify-content: flex-end !important;
