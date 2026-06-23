@@ -4,6 +4,267 @@
 
 Read this section first after compaction or handoff.
 
+- Latest testing-roadmap state, 2026-06-22T21:07Z:
+  - PR #2847 is merged and deployed. Production serves
+    `0c55e0c628541fb2ac695d87f871568848e7c057`.
+  - PR #2847 shipped test-only production-readonly hardening:
+    `gotoDocumentWithTransientRetry` retries one explicit 502/503/504 document
+    response, production-readonly packs share that helper, ReMemes browse uses
+    API-readiness plus breakpoint-aware collection identity checks, ReMemes
+    detail accepts the current live title contract, the mutation guard aborts
+    only exact `csp.withgoogle.com/csp/script-inclusions/<32-hex>` reports, and
+    unit tests now cover route readiness plus Google CSP report boundaries.
+  - PR review/CI state before merge:
+    - required PR CI passed: CodeQL, DCO, Installed app checks, Plan risk and
+      security checks, SonarCloud, Snyk, and CodeRabbit status.
+    - 6529bot final-head Opus lanes were clean: general Good to merge, WCAG no
+      findings, i18n no findings, security no findings.
+    - 6529bot responsiveness rerun passed on final head across web desktop,
+      web mobile, native simulation, and Electron simulation.
+    - GLM swarm found useful feedback on the previous head and it was fixed in
+      the final head. Two final-head GLM reruns failed inside the reviewbot
+      worker with the same empty-output error before producing review text; this
+      was recorded as bot-infra noise, not an unresolved frontend finding.
+  - Staging deployment passed:
+    - `1a-staging` deploy SHA:
+      `0fdc39ecddebc8f6730da82ff9838284924e9492`
+    - workflow:
+      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27976114194
+    - local staging `/api/version` matched the staging deploy SHA.
+    - `seize run test:e2e:staging`: 24 passed / 6 skipped.
+    - broad staging read-only aggregate: 127 passed / 2 skipped / 1 transient
+      mobile NextGen staging API network miss; the exact failed case passed on
+      focused rerun.
+  - Production deployment passed:
+    - workflow:
+      https://github.com/6529-Collections/6529seize-frontend/actions/runs/27977449591
+    - local production `/api/version` matched
+      `0c55e0c628541fb2ac695d87f871568848e7c057`.
+    - `seize run test:e2e:production:readonly`: 65/65 passed.
+  - Release notes posted:
+    - 6529 Releases drop #1123251:
+      https://6529.io/waves/05b14183-e153-4e47-bc66-42a0f49102d4?drop=62b11757-72d5-4cbe-83b2-95a550710648
+    - Follow The Repo drop #1123253:
+      https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4?drop=d18e6cc7-eb53-473c-a94c-d1edcb4be808
+  - Current active branch:
+    `codex/e2e-native-shell-readonly`, based on current `origin/main`
+    `0c55e0c628541fb2ac695d87f871568848e7c057`.
+  - Active slice is test-only native/Electron simulated shell hardening:
+    Capacitor simulation exposes both package and global runtime signals,
+    Open Data native subscription visibility gets iOS hide, iOS US-visible, and
+    Android visible coverage,
+    Capacitor app-wallet empty-state behavior and Electron app-wallet
+    unsupported behavior are checked separately, and the Electron share modal is
+    checked for desktop handoff suppression. This is simulation evidence only;
+    it must not be claimed as real packaged native or Electron verification.
+  - PR #2848 is open:
+    https://github.com/6529-Collections/6529seize-frontend/pull/2848
+    - 6529bot Opus lanes on head `28b3866587b6` were clean: general Good to
+      merge, WCAG no findings, i18n no findings, security no findings, and
+      responsiveness passed on final-head rerun.
+    - GLM swarm on head `28b3866587b6` found useful advisory feedback. Valid
+      items were fixed locally: `test:e2e:native-sim` now uses an explicit
+      native-surface allowlist, iOS US and Android subscription checks assert
+      visibility before href, the country-check listener documents its
+      pre-navigation usage, the Capacitor `convertFileSrc` passthrough is
+      documented and currently has no app callers, `HeaderShare.test.tsx`
+      documents the JSDOM origin assumption, and the Electron app-wallet case
+      asserts the actual Capacitor web runtime plus Electron user-agent signal.
+    - Independent local subagent reviewer found no P0/P1/P2 blockers and
+      recommended future iOS US-visible coverage. That coverage is now added.
+    - Review-response follow-up also gives country-check waits a clearer
+      timeout failure message.
+    - CodeRabbit status on head `28b3866587b6` was green; its docstring
+      coverage note was non-blocking for this test/docs slice.
+  - The slice also repairs two existing relevant unit-test harness breaks so
+    share and app-wallet connector coverage runs again: `HeaderShare.test.tsx`
+    no longer redefines JSDOM `window.location`, and
+    `wagmiAppWalletConnector.test.ts` uses hoist-safe viem mocks.
+  - Local validation passed for this active slice:
+    - `seize run typecheck:playwright`
+    - `seize run test:e2e:native-shell-readonly`: latest 9 passed / 12
+      skipped.
+    - `seize run test:e2e:native-sim`: initial run hit a transient iOS
+      simulation mobile-search miss; focused rerun of the failed case passed,
+      and the latest full rerun passed 25 passed / 23 skipped.
+    - `seize run test:e2e:surface-matrix`: latest 24 passed / 20 skipped.
+    - targeted share/wallet/Capacitor/AppKit Jest batch: 60 passed before the
+      GLM follow-up; targeted share/wallet rerun after the GLM follow-up passed
+      57 tests across 2 suites.
+    - `seize run lint:changed`, `seize run typecheck:changed`,
+      risk floor Level 4, changed-secret scan clean, workflow-security scan
+      clean, and `codex-diff-check`.
+  - GLM reviewbot remains live and additive. Do not remove, downgrade, or make
+    optional any existing reviewbot lanes.
+- Latest testing-roadmap state, 2026-06-22T15:20Z:
+  - PR #2844 is merged and deployed. Current production is serving
+    `d26393b40d2fec0e9a2bf557f911324b27bc7686`.
+  - Staging deploy for #2844 used branch `1a-staging` SHA
+    `a803ae9d61e396112153418fb8b03f4a11cce562`; staging version verification,
+    smoke, surface matrix, and WCAG/i18n validation passed before production.
+  - Production deploy run #27956752856 succeeded from exact merge SHA
+    `d26393b40d2fec0e9a2bf557f911324b27bc7686`; local production
+    `/api/version` matched and `seize run test:e2e:production:readonly`
+    passed 65/65.
+  - Current branch:
+    `codex/e2e-wave-create-sandbox`, based on current `origin/main`
+    `d26393b40d2fec0e9a2bf557f911324b27bc7686`.
+  - Active slice adds positive local-only authenticated sandbox E2E coverage
+    for `/waves/create` Chat-wave creation. It extends the existing mock API
+    runner and mutation auditor so create-wave may only create the exact
+    synthetic "Only playwright" admin group, publish that group, and create the
+    exact synthetic Chat wave body before routing to the deterministic created
+    wave detail page.
+  - Local validation passed for this active slice:
+    - `node --check tests/support/composerSandboxServer.cjs`
+    - focused ESLint on changed sandbox support/spec files
+    - `seize exec prettier --check ...` for changed docs/spec/support/package
+      files
+    - `seize run typecheck:playwright`
+    - `seize run typecheck:changed`
+    - `seize run lint:changed`
+    - focused `tests/social/create-wave-sandbox.spec.ts`: 1 passed
+    - `seize run test:e2e:auth-sandbox`: 5 passed
+    - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and
+      mobile Chromium
+    - `seize run testing-strategy -- compute-risk-floor --changed-from origin/main --json`:
+      Level 4
+    - changed-secret scan and workflow-security scan passed
+    - `codex-diff-check`
+  - Independent verifier `Hubble` initially found that the create-wave
+    mutation validators checked expected values but still allowed arbitrary
+    extra nested fields. Fixed by adding recursive exact-key checks for the
+    synthetic admin group and wave body, then Hubble re-reviewed and found no
+    remaining publication blockers.
+  - Next action: commit/push/open PR and iterate CI plus all reviewbot lanes.
+  - GLM reviewbot remains live and additive. Do not remove, downgrade, or make
+    optional any existing reviewbot lanes.
+- Latest testing-roadmap state, 2026-06-22T12:15Z:
+  - PR #2838 is merged and deployed. Current production is serving
+    `a07a205a35282ef1d9697549ee9a167369b465c3`.
+  - Staging validation for current main passed before production:
+    version verifier matched staging SHA
+    `64bc9e277a125c7f38ea37cd11fb92957a42a31b`,
+    `test:e2e:staging:smoke` 12 passed,
+    `test:e2e:staging` 24 passed / 6 skipped, and
+    staging WCAG/i18n surface matrix 6 passed.
+  - Production deploy run #27949660165 succeeded from exact
+    `origin/main` SHA `a07a205a35282ef1d9697549ee9a167369b465c3`.
+    Local production `/api/version` matched that SHA, and
+    `seize run test:e2e:production:readonly` passed 65/65.
+  - Current branch:
+    `codex/auth-sandbox-e2e`, based on current `origin/main`
+    `a07a205a35282ef1d9697549ee9a167369b465c3`.
+  - Active slice adds positive local-only authenticated sandbox E2E coverage
+    for `/notifications` and `/messages/create`, while preserving the existing
+    composer/upload/link-preview sandbox. It reuses the local mock API/dev-auth
+    runner, refuses non-loopback base URLs, explicitly binds Next dev to a
+    loopback hostname, audits request logs so only exact sandbox IDs/bodies are
+    allowed for local mock API mutations on queryless paths, blocks oversized
+    mutation bodies as unsafe audit entries, and blocks unexpected same-origin
+    Next.js API writes or unknown unsafe external browser writes in the browser.
+    Known wallet and analytics SDK background writes are blocked in-browser but
+    do not fail the sandbox pack.
+  - Local validation passed for this active slice:
+    - `node --check tests/support/composerSandboxServer.cjs`
+    - focused ESLint on changed sandbox support/spec files
+    - `seize exec prettier --check ...` for changed docs/spec/support files
+    - `seize run typecheck:changed`
+    - `seize run test:e2e:auth-sandbox`: 4 passed
+    - `seize run test:e2e:composer-sandbox`: 4 passed across desktop and mobile
+      Chromium
+    - `codex-diff-check`
+  - Independent verifier `Parfit` found that the first draft still bound Next
+    dev too broadly and classified allowed mutations by path only. Those
+    findings were fixed before PR publication.
+  - Independent verifier `Volta` found one more pre-publication hardening pass:
+    unknown external browser writes needed blocking, oversized mock mutation
+    bodies needed unsafe audit evidence, and allowed mock mutations needed empty
+    query strings. Those findings were fixed before PR publication.
+  - Local `seize run lint:changed` is not a useful signal in this worktree
+    because local branch `main` is stale (`7693d1138`) while this branch is
+    based on `origin/main` (`a07a205a3`), causing the script's Windows command
+    line to exceed the shell limit. Focused ESLint on the actual PR files is
+    clean.
+  - Next action: commit, push, open PR, trigger/iterate all reviewbot lanes
+    including GLM, then merge/deploy if CI and bots stop adding material value.
+- Previous testing-roadmap state, 2026-06-22T08:32Z:
+  - PR #2823 is merged and deployed. Production is serving
+    `02382bc81f1d945083b28bf78641ab2469e2212e`.
+  - Staging deploy run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27943628946
+    - staging SHA: `43d6f711a7f3856c62b5544736d001319f285bef`
+    - workflow HTTP version evidence matched the staging SHA.
+    - local staging validation passed:
+      `test:e2e:staging:smoke` 12 passed,
+      `test:e2e:staging` 24 passed / 6 skipped,
+      `test:e2e:wcag-i18n:surface-matrix` 6 passed.
+  - Production deploy run:
+    https://github.com/6529-Collections/6529seize-frontend/actions/runs/27944602623
+    - workflow HTTP version evidence matched the production SHA.
+    - local production `/api/version` probe matched the production SHA.
+  - Current branch:
+    `codex/e2e-production-readonly-hardening`, based on current `origin/main`.
+  - Active follow-up fixes the production-readonly aggregate after live
+    validation found a real test-harness gap:
+    - current production mint card can render dynamic interactive art inside an
+      iframe, while the test only accepted direct `img[id^="image-"]` media.
+    - the read-only mutation guard blocked safe read-only Ethereum JSON-RPC
+      POSTs to known public RPC hosts used by the mint page.
+    - the app was not rolled back: production app runtime is healthy and this
+      branch changes test harness behavior only.
+  - Validation passed for this follow-up:
+    - `seize run test:no-coverage -- __tests__/playwright/readonlyMutationGuard.test.ts`
+    - focused ESLint on the changed E2E/guard files
+    - failing production mint test rerun: 1 passed
+    - full `seize run test:e2e:production:readonly`: 65 passed
+    - `seize run lint:changed`
+    - `seize run typecheck:changed`
+    - `codex-diff-check`
+    - clean risk floor: Level 3
+    - changed secret scan passed.
+  - Next action: commit, open PR, iterate all reviewbot lanes including the
+    now-live GLM reviewer, then merge/deploy if CI and bots add no further
+    value.
+- Previous testing-roadmap state, 2026-06-22T08:32Z:
+  - PR #2822 is merged and deployed. Production is serving
+    `7693d1138987175e0ccd6c54841d7547d99ce322`, and the full production-safe
+    read-only aggregate passed again: `seize run test:e2e:production:readonly`
+    reported 65/65 passed.
+  - Current branch: `codex/deployment-evidence-verification`, based on current
+    `origin/main`.
+  - Active slice closes a deployment evidence gap:
+    - adds `ops/scripts/verify-deployment-version.cjs` and
+      `seize run verify:deployment-version` to GET `/api/version`, require
+      HTTP 200, `Cache-Control: no-store`, and exact expected SHA match, with
+      bounded retry and redacted `deployment-version-evidence.json` output.
+    - wires staging and production workflows to run the HTTP version check
+      before marking deploys verified and upload the evidence JSON beside the
+      deployment-bus manifest/report.
+    - records an `http-version-match` post-deploy-watch checkpoint when the
+      workflow probe passes.
+    - adds optional deployment-bus pack `playwright:production-readonly` for
+      the existing production aggregate. It is production-only,
+      desktop-Chromium only, and intentionally not in `DEFAULT_REQUIRED_PACKS`
+      until durable artifact upload/recording is automated.
+    - rejects known standard packs when required in an unsupported environment,
+      so `playwright:production-readonly` cannot silently become a null-command
+      staging requirement.
+  - Validation passed for this slice:
+    `node --check ops/scripts/verify-deployment-version.cjs`; focused ESLint on
+    deployment-bus/verifier files; `seize run test:no-coverage --
+__tests__/scripts/verify-deployment-version.test.ts
+__tests__/scripts/deployment-bus.test.ts
+__tests__/app/api/version/route.test.ts
+__tests__/hooks/useVersion.test.tsx` (51 tests); `lint:changed`;
+    `typecheck:changed`; risk-floor computed Level 5; changed secret scan;
+    workflow-security scan; live production version probe; live staging version
+    probe; `codex-diff-check`; and production aggregate E2E 65/65.
+  - Reviewer subagent `Kepler` is inspecting the final uncommitted diff. Wait
+    for it before committing/publishing.
+  - GLM reviewbot is live and remains additive. Do not remove, downgrade, or
+    replace existing Opus/general/WCAG/i18n/security/responsiveness reviewbot
+    lanes.
 - Latest testing-roadmap state, 2026-06-22T05:45Z:
   - PR #2819 is merged into `origin/main` as
     `174b2d054 Add search and wave read-only E2E coverage (#2819)`.
@@ -307,7 +568,7 @@ generated artifacts as the durable evidence store.
 
 ## Current Branch
 
-`codex/e2e-composer-sandbox`
+`codex/e2e-native-shell-readonly`
 
 ## Constraints
 
@@ -472,14 +733,14 @@ Re-audit each PR against current `origin/main` before merging or deploying it.
 
 ## Current Next Actions
 
-1. Publish the production read-only aggregate follow-up PR from
-   `codex/fix-production-collections-readonly`, iterate CI/reviewbots, merge,
-   and deploy because it updates release-validation controls.
-2. Keep `/notifications` out of staging/production read-only smoke until a
-   disposable sandbox account/backend or product-safe non-mutating test path
-   exists.
-3. Start the next high-value E2E pack after this PR: wallet/native/Electron
-   shell coverage, deployment evidence/version verification, or the next
-   guarded authenticated sandbox pack.
+1. Commit and push the GLM follow-up on `codex/e2e-native-shell-readonly`,
+   update the PR evidence, then re-trigger latest-head reviewbot lanes.
+2. For PR #2848, keep the established loop: strong local validation first,
+   then CI, CodeRabbit, Sonar, 6529bot Opus lanes, responsiveness, GLM swarm,
+   and any specialized reviewbot lanes until Codex judges the loop is no
+   longer adding material value.
+3. Deploy merged testing-roadmap slices through staging first, validate exact
+   staged SHA, then production from current `origin/main` with exact-SHA
+   validation and production-safe E2E evidence.
 4. Keep durable artifact storage as an infra follow-up; do not fake S3/IPFS
    artifact pointers or weaken release holds.

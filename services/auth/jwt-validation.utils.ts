@@ -197,7 +197,7 @@ const handleTokenRefresh = async ({
     }
 
     const walletRole = getWalletRole();
-    // CRITICAL FIX: Get role from the NEW token, not the old one  
+    // CRITICAL FIX: Get role from the NEW token, not the old one
     const freshTokenRole = getRole(redeemResponse.token);
 
     // Role validation: Only validate when doing role-based authentication (proxy users)
