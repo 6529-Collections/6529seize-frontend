@@ -239,7 +239,7 @@ describe("WaveDropReactions", () => {
 
     // Check that buttons render (should match emojiList length)
     const buttons = screen.getAllByRole("button");
-    expect(buttons.length).toBe(2);
+    expect(buttons).toHaveLength(2);
   });
 
   it("renders with emoji image when emoji found", () => {

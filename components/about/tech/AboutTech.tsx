@@ -15,7 +15,7 @@ export default function AboutTech() {
   const locale = DEFAULT_LOCALE;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-10 tw-text-iron-200">
+    <div className="tw-flex tw-flex-col tw-gap-10 tw-px-4 tw-text-iron-200 sm:tw-px-6 lg:tw-px-8">
       <section className="tw-pb-2">
         <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
           About / Tech
@@ -23,14 +23,18 @@ export default function AboutTech() {
         <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
           Tech Updates
         </h1>
-        <div className="tw-grid tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_18rem]">
-          <div className="tw-flex tw-max-w-4xl tw-flex-col tw-gap-4 tw-text-base tw-leading-7 tw-text-iron-300">
-            <p>
-              This is a current casual area for longer 6529 tech updates: repo
-              work, bot notes, release context, and build reports that are too
-              large for a single wave drop.
-            </p>
-            <p>
+        <div className="tw-flex tw-max-w-4xl tw-flex-col tw-gap-5 tw-text-base tw-leading-7 tw-text-iron-300">
+          <p className="tw-mb-0">
+            This is a current casual area for longer 6529 tech updates: repo
+            work, bot notes, release context, and build reports that are too
+            large for a single wave drop.
+          </p>
+          <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
+            <li>
+              Long updates, repo analysis, bot context, and links back into the
+              wave conversation.
+            </li>
+            <li>
               Shorter live repo activity still belongs in{" "}
               <a
                 href={FOLLOW_THE_REPO_WAVE_URL}
@@ -40,18 +44,35 @@ export default function AboutTech() {
               >
                 Follow The Repo
               </a>
-              {"."} This page is the linkable longer-form shelf beside it.
-            </p>
-          </div>
-          <div className="tw-border-l-0 tw-border-solid tw-border-iron-800 tw-pt-1 lg:tw-border-l lg:tw-pl-6">
-            <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-              Current Use
-            </p>
-            <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-              Long updates, repo analysis, bot context, and links back into the
-              wave conversation.
-            </p>
-          </div>
+              . This page is the linkable longer-form shelf beside it.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="tw-max-w-6xl" aria-labelledby="tech-notes-heading">
+        <h2
+          id="tech-notes-heading"
+          className="tw-mb-5 tw-text-2xl tw-font-semibold tw-text-iron-50"
+        >
+          Active Technical Notes
+        </h2>
+        <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-5">
+          <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+            Auth changes
+          </p>
+          <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug">
+            <Link
+              href="/about/tech/wallet-authentication"
+              className="hover:tw-text-primary-200 tw-text-iron-50 tw-no-underline"
+            >
+              Wallet authentication upgrade
+            </Link>
+          </h3>
+          <p className="tw-mb-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+            What is changing with the new secure session, why users may be asked
+            to upgrade, and what to expect during rollout.
+          </p>
         </div>
       </section>
 

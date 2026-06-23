@@ -151,12 +151,13 @@ const CreateDropWrapper = forwardRef<
     },
     ref
   ) => {
-    const { isSafeWallet, address, isAuthenticated } = useSeizeConnectContext();
+    const { isSafeWallet, address, hasValidWalletAuth } =
+      useSeizeConnectContext();
     const breakpoint = useBreakpoint();
 
     // SECURITY: Fail-fast if wallet is not properly authenticated
     useEffect(() => {
-      if (!isAuthenticated) {
+      if (!hasValidWalletAuth) {
         throw new WalletValidationError(
           "Authentication required for drop creation. Please connect and authenticate your wallet."
         );
@@ -167,7 +168,7 @@ const CreateDropWrapper = forwardRef<
           "Authenticated wallet address is missing. Please reconnect your wallet."
         );
       }
-    }, [isAuthenticated, address]);
+    }, [hasValidWalletAuth, address]);
     const [screenType, setScreenType] = useState<CreateDropScreenType>(
       CreateDropScreenType.DESKTOP
     );
@@ -320,7 +321,7 @@ const CreateDropWrapper = forwardRef<
         }
         if (
           i.type === ApiWaveMetadataType.Number &&
-          isNaN(Number(item.data_value))
+          Number.isNaN(Number(item.data_value))
         ) {
           return true;
         }
@@ -362,13 +363,9 @@ const CreateDropWrapper = forwardRef<
         return wave.participation.required_media;
       }
       const medias = getMedias();
-      return wave.participation.required_media.filter((i) => {
-        const file = medias.find((j) => getRequirementFromFileType(j) === i);
-        if (!file) {
-          return true;
-        }
-        return false;
-      });
+      return wave.participation.required_media.filter(
+        (i) => !medias.some((j) => getRequirementFromFileType(j) === i)
+      );
     };
 
     const [missingMedia, setMissingMedia] = useState<

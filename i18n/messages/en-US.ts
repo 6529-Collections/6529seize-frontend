@@ -513,6 +513,38 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "report.repoSummary": "{focus}. {count} PRs, {stateSummary}.",
   "report.tocDescription":
     "This report is split by repository. Use this index to jump directly to the area you want, or read through from the frontend app work into backend, Stream contracts, Safe app hardening, and review bot updates.",
+  "walletAuth.metadata.title": "Wallet Authentication Update",
+  "walletAuth.metadata.description":
+    "A simple explanation of the new 6529 wallet authentication session.",
+  "walletAuth.backToTech": "Back to Tech",
+  "walletAuth.eyebrow": "Wallet Authentication",
+  "walletAuth.title": "Wallet Authentication Update",
+  "walletAuth.lead":
+    "6529 is moving wallet sign-in to a newer secure session. Most people only need to sign once when they are prompted.",
+  "walletAuth.whatIsChanging.title": "What is changing",
+  "walletAuth.whatIsChanging.identity":
+    "Your wallet is still your identity. The update changes the browser session that 6529 creates after you sign in.",
+  "walletAuth.whatIsChanging.session":
+    "The new session is easier to refresh, easier to revoke, and better for sharing a connection with your own devices.",
+  "walletAuth.whatToDo.title": "What you need to do",
+  "walletAuth.whatToDo.upgrade":
+    "If you see the {prompt} prompt, connect the same wallet and sign the message.",
+  "walletAuth.whatToDo.prompt": "Upgrade Authentication",
+  "walletAuth.whatToDo.noGas":
+    "The signature does not cost gas and does not send a transaction.",
+  "walletAuth.whatToDo.reminder":
+    "If you choose {action}, you can still upgrade from your profile menu.",
+  "walletAuth.whatToDo.reminderAction": "Remind me later",
+  "walletAuth.whyNow.title": "Why you may see this prompt",
+  "walletAuth.whyNow.deadline":
+    "Some older sessions can keep working until the upgrade deadline. During that time, 6529 may remind you to upgrade before the older session expires.",
+  "walletAuth.whyNow.features":
+    "Some newer features, including mobile connection sharing, need the new session before they can work.",
+  "walletAuth.same.title": "What stays the same",
+  "walletAuth.same.profile": "Your wallet address and profile do not change.",
+  "walletAuth.same.assets": "You do not need to move tokens or assets.",
+  "walletAuth.same.desktop":
+    "The 6529 Desktop app continues using the existing connection flow during this rollout.",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -526,6 +558,128 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 ] as const);
 
 export const EN_US_MESSAGES = {
+  "auth.sessionUpgrade.action": "Upgrade Authentication",
+  "auth.signModal.connectionUpdateRequired": "Connection Update Required",
+  "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
+  "auth.signModal.authenticationRequest": "Sign Authentication Request",
+  "auth.signModal.connectionShareLead":
+    "This shared connection uses the previous authentication flow. Reshare the connection from a device that is already signed in with the new authentication.",
+  "auth.signModal.sessionUpgradeLead":
+    "We have upgraded wallet authentication. Sign once to move this connected wallet to the new secure session.",
+  "auth.signModal.authLead":
+    "To connect your wallet, you will need to sign a message to confirm your identity.",
+  "auth.signModal.connectionSharePrimary":
+    "Use connection sharing from an active session-v2 web connection, then open the new shared connection on this device.",
+  "auth.signModal.disconnectedUpgradePrimary":
+    "Reconnect this wallet and sign once to upgrade this browser session.",
+  "auth.signModal.sessionUpgradePrimary":
+    "Your current connection will stay available while the new session is created.",
+  "auth.signModal.authPrimary":
+    "This signature will be used to generate a secure token (JWT) to authenticate your session.",
+  "auth.signModal.sharedConnection":
+    "If this is a shared connection, reshare the connection from a device that is already signed in with the new authentication.",
+  "auth.signModal.timeLeft": "Time left to upgrade: {timeLeft}.",
+  "auth.signModal.timeLeft.now": "now",
+  "auth.signModal.timeLeft.lessThanOneHour": "less than 1 hour",
+  "auth.signModal.timeLeft.days.one": "{count} day",
+  "auth.signModal.timeLeft.days.many": "{count} days",
+  "auth.signModal.timeLeft.hours.one": "{count} hour",
+  "auth.signModal.timeLeft.hours.many": "{count} hours",
+  "auth.signModal.noGas":
+    "Your signature will not cost any gas and is purely for authentication purposes.",
+  "auth.signModal.connect": "Connect",
+  "auth.signModal.sign": "Sign",
+  "auth.signModal.learnMore": "Learn more about this update",
+  "auth.signModal.remindLater": "Remind me later",
+  "auth.signModal.cancel": "Cancel",
+  "auth.signModal.confirmInWallet": "Confirm in your wallet",
+  "acceptConnection.title": "Accept Connection Sharing",
+  "acceptConnection.sharedConnectionFallback": "Shared connection",
+  "acceptConnection.home": "Take me home",
+  "acceptConnection.limit.title": "Connected profile limit reached",
+  "acceptConnection.limit.message":
+    "You can keep up to {maxCount} connected profiles. Sign out from one profile, then scan this connection link again.",
+  "acceptConnection.incoming.title": "Incoming connection from",
+  "acceptConnection.incoming.profileStatsLabel": "TDH: {tdh} - Level: {level}",
+  "acceptConnection.currentProfile.prefix": "Your current profile",
+  "acceptConnection.currentProfile.willStayAvailable": "will stay available.",
+  "acceptConnection.currentProfile.switchAfterAccepting":
+    "You can switch between both after accepting.",
+  "acceptConnection.action.processing": "Processing",
+  "acceptConnection.action.accept": "Accept connection",
+  "acceptConnection.unsupportedWeb":
+    "Open this connection link in the 6529 mobile app.",
+  "acceptConnection.missingParameters": "Missing required parameters",
+  "acceptConnection.toast.maxProfiles": "Maximum connected profiles reached",
+  "acceptConnection.toast.invalidResponse": "Invalid connection response",
+  "acceptConnection.toast.persistFailed": "Failed to store connected profile",
+  "acceptConnection.toast.acceptFailed":
+    "Couldn't accept this connection. Please try again.",
+  "appWallet.validation.name.alphanumericSpaces":
+    "Name can only contain alphanumeric characters and spaces",
+  "appWallet.validation.password.minLength":
+    "Password must be at least {count} characters long",
+  "appWallet.validation.password.noWhitespace":
+    "Password must not contain any whitespace characters",
+  "appWallet.validation.password.lowercase":
+    "Password must include a lowercase letter",
+  "appWallet.validation.password.uppercase":
+    "Password must include an uppercase letter",
+  "appWallet.validation.password.number": "Password must include a number",
+  "appWallet.validation.password.symbol": "Password must include a symbol",
+  "headerShare.trigger.ariaLabel": "QR Code",
+  "headerShare.trigger.title": "QR Code",
+  "headerShare.trigger.text": "Share",
+  "headerShare.modal.title": "Share",
+  "headerShare.modal.closeAriaLabel": "Close share modal",
+  "headerShare.menu.shareType": "Share Type",
+  "headerShare.menu.selectPlatform": "Select Platform",
+  "headerShare.menu.openLinkIn": "Open Link In",
+  "headerShare.menu.openUrlIn": "Open URL In",
+  "headerShare.menu.connection": "Connection",
+  "headerShare.menu.currentUrl": "Current URL",
+  "headerShare.menu.apps": "6529 Apps",
+  "headerShare.menu.mobile": "6529 Mobile",
+  "headerShare.menu.browser": "Browser",
+  "headerShare.menu.desktop": "6529 Desktop",
+  "headerShare.qr.browserAlt": "Browser Link - QR Code",
+  "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
+  "headerShare.qr.shareConnectionAlt": "Share Connection - QR Code",
+  "headerShare.core.alt": "6529 Desktop",
+  "headerShare.core.open": "Open in 6529 Desktop",
+  "headerShare.connectionNotice.legacyTitle": "Update Authentication",
+  "headerShare.connectionNotice.loadingTitle": "Preparing Connection",
+  "headerShare.connectionNotice.errorTitle": "Connection Sharing Unavailable",
+  "headerShare.connectionNotice.unauthenticatedTitle": "Sign In Required",
+  "headerShare.connectionNotice.legacyMessage":
+    "You can't share a connection from your current authentication. Update to the new secure session first.",
+  "headerShare.connectionNotice.loadingMessage":
+    "Creating a one-time connection code.",
+  "headerShare.connectionNotice.errorMessage":
+    "We couldn't create a connection share. Close this dialog and try again.",
+  "headerShare.connectionNotice.unauthenticatedMessage":
+    "Connect and authenticate your wallet before sharing a connection.",
+  "headerShare.connectionNotice.cancel": "Cancel",
+  "headerShare.connectionNotice.update": "Update",
+  "headerShare.invalidShareSubmode": "Invalid submode for SHARE",
+  "headerShare.copy.ariaLabel": "Copy URL",
+  "headerShare.copy.default": "Copy URL",
+  "headerShare.copy.copied": "Copied!",
+  "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
+  "tools.api.authentication.title": "Authentication",
+  "tools.api.authentication.basedOnSignatures":
+    "Authentication is based on Ethereum signatures.",
+  "tools.api.authentication.flowIntro": "The flow works as follows:",
+  "tools.api.authentication.requestSessionMessage":
+    "Request a session-v2 signable message for the wallet you want to authenticate.",
+  "tools.api.authentication.signMessage":
+    "Sign the signable message exactly using your wallet.",
+  "tools.api.authentication.sendSignature":
+    "Send the signature back to the server.",
+  "tools.api.authentication.receiveToken":
+    "Receive a JWT bearer token, which you can include in headers of subsequent requests.",
+  "tools.api.authentication.nodeExample":
+    "Here's a full example in Node.js using ethers and node-fetch:",
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted post",
   "home.boostedDrop.boost": "Boost",

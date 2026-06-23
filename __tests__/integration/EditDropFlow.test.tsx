@@ -193,6 +193,7 @@ const createMockDrop = (overrides = {}) => ({
   context_profile_context: null,
   subscribed_actions: [],
   is_signed: false,
+  reactions: [],
   reply_to: null,
   rank: null,
   drop_type: ApiDropType.Chat,

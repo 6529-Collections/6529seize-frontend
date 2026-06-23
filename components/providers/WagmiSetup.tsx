@@ -21,6 +21,7 @@ import {
   markMobileLaunchStep,
   measureMobileLaunchAsync,
 } from "@/utils/monitoring/mobileLaunchTiming";
+import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
@@ -136,9 +137,9 @@ export default function WagmiSetup({
 }) {
   const enableTestnet = publicEnv.DROP_FORGE_TESTNET === true;
 
-  const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
-  const { appWallets } = useAppWallets();
+  const { appWallets, migrateAppWallet } = useAppWallets();
+  const appWalletPasswordModal = useAppWalletPasswordModal(migrateAppWallet);
 
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(
     null
@@ -262,19 +263,28 @@ export default function WagmiSetup({
     try {
       // Create connectors for current wallets
       const connectors = appWallets
-        .map((wallet) => {
-          const connector = createAppWalletConnector(
-            Array.from(currentAdapter.wagmiConfig.chains),
-            { appWallet: wallet },
-            () =>
-              appWalletPasswordModal.requestPassword(
-                wallet.address,
-                wallet.address_hashed
-              )
-          );
-          return currentAdapter.wagmiConfig._internal.connectors.setup(
-            connector
-          );
+        .flatMap((wallet) => {
+          try {
+            validateWalletSafely(wallet);
+            const connector = createAppWalletConnector(
+              Array.from(currentAdapter.wagmiConfig.chains),
+              { appWallet: wallet },
+              () =>
+                appWalletPasswordModal.requestPassword(
+                  wallet.address,
+                  wallet.address_hashed
+                )
+            );
+            const setupConnector =
+              currentAdapter.wagmiConfig._internal.connectors.setup(connector);
+            return setupConnector ? [setupConnector] : [];
+          } catch (error) {
+            logErrorSecurely(
+              `[WagmiSetup] Skipping invalid app-wallet connector ${wallet.address}`,
+              error
+            );
+            return [];
+          }
         })
         .filter((connector) => connector !== null);
 

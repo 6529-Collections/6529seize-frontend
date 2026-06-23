@@ -43,7 +43,7 @@ const nftMeta = {
 } as any;
 
 describe("MemePageCollectorsSubMenu", () => {
-  it("passes contract and id to leaderboard", () => {
+  it("renders collector stats and passes contract and id to leaderboard", () => {
     render(<MemePageCollectorsSubMenu show nft={nft} nftMeta={nftMeta} />);
     expect(
       screen.getByLabelText(
@@ -58,6 +58,13 @@ describe("MemePageCollectorsSubMenu", () => {
   it("returns null when nft missing", () => {
     const { container } = render(
       <MemePageCollectorsSubMenu show nft={undefined} />
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("returns null when not shown", () => {
+    const { container } = render(
+      <MemePageCollectorsSubMenu show={false} nft={nft} nftMeta={nftMeta} />
     );
     expect(container).toBeEmptyDOMElement();
   });

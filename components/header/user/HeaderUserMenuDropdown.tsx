@@ -7,6 +7,7 @@ import {
   faRightFromBracket,
   faShuffle,
   faShareNodes,
+  faShieldHalved,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
@@ -16,8 +17,12 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useChainSwitcher } from "@/components/header/useChainSwitcher";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+
+const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
 export default function HeaderUserMenuDropdown({
   isOpen,
@@ -49,6 +54,8 @@ export default function HeaderUserMenuDropdown({
     activeProfileProxy,
     setActiveProfileProxy,
     receivedProfileProxies,
+    requestSessionUpgrade,
+    sessionUpgradeRequired,
     setToast,
   } = useContext(AuthContext);
   const hasProxySection =
@@ -56,6 +63,10 @@ export default function HeaderUserMenuDropdown({
 
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
+  const upgradeAuthenticationLabel = t(
+    HEADER_USER_MENU_LOCALE,
+    "auth.sessionUpgrade.action"
+  );
 
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
@@ -288,6 +299,32 @@ export default function HeaderUserMenuDropdown({
                           width={20}
                         />
                         <span>Connect Wallet</span>
+                      </button>
+                    )}
+                    {sessionUpgradeRequired && requestSessionUpgrade && (
+                      <button
+                        onClick={() => {
+                          void runMenuAction({
+                            action: async () => {
+                              await requestSessionUpgrade();
+                            },
+                            pendingKey: "upgrade-auth",
+                            errorMessage:
+                              "Failed to start authentication upgrade. Please try again.",
+                          });
+                        }}
+                        disabled={pendingAction !== null}
+                        type="button"
+                        aria-label={upgradeAuthenticationLabel}
+                        title={upgradeAuthenticationLabel}
+                        className="tw-relative tw-mt-2 tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <FontAwesomeIcon
+                          icon={faShieldHalved}
+                          height={20}
+                          width={20}
+                        />
+                        <span>{upgradeAuthenticationLabel}</span>
                       </button>
                     )}
                   </li>

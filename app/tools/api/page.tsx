@@ -1,8 +1,12 @@
 import CodeExample from "@/components/code-example/CodeExample";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 import { Col, Container, Row } from "react-bootstrap";
+
+const API_PAGE_LOCALE = DEFAULT_LOCALE;
 
 export default function AboutApi() {
   const nodeJsAuthExample = `import { Wallet } from 'ethers';
@@ -15,26 +19,23 @@ export async function loginAndFetchFeed() {
   // Rebuild wallet from private key
   const wallet = new Wallet(clientPrivateKey);
 
-  // 1. Get nonce from server
+  // 1. Get the session-v2 signable message from the server
   const nonceResp = await fetch(
-    \`https://api.6529.io/api/auth/nonce?signer_address=\${clientAddress}&short_nonce=true\`,
+    \`https://api.6529.io/api/auth/session-nonce?signer_address=\${clientAddress}&client_type=native&chain_id=1\`,
     {
       headers: { accept: 'application/json' },
       method: 'GET'
     }
   );
 
-  // short_nonce=true → nonce is a UUID (easier for programmatic use).
-  // short_nonce=false → nonce is a long, multiline welcome message (better for GUIs, but may cause encoding issues).
+  const { signable_message, server_signature } = await nonceResp.json();
 
-  const { nonce, server_signature } = await nonceResp.json();
+  // 2. Sign signable_message exactly as returned
+  const clientSignature = await wallet.signMessage(signable_message);
 
-  // 2. Sign the nonce locally
-  const signedNonce = await wallet.signMessage(nonce);
-
-  // 3. Send signed nonce back to login endpoint
+  // 3. Send the signed message back to the session-v2 login endpoint
   const loginResp = await fetch(
-    \`https://api.6529.io/api/auth/login?signer_address=\${clientAddress}\`,
+    'https://api.6529.io/api/auth/session-login',
     {
       headers: {
         accept: 'application/json',
@@ -42,20 +43,21 @@ export async function loginAndFetchFeed() {
       },
       method: 'POST',
       body: JSON.stringify({
+        client_type: 'native',
         client_address: clientAddress,
-        client_signature: signedNonce,
+        client_signature: clientSignature,
         server_signature
       })
     }
   );
 
-  const { token } = await loginResp.json();
+  const { access_token } = await loginResp.json();
 
   // 4. Fetch feed with the received authorization token
   const feedResp = await fetch('https://api.6529.io/api/feed', {
     headers: {
       accept: 'application/json',
-      authorization: \`Bearer \${token}\`
+      authorization: \`Bearer \${access_token}\`
     },
     method: 'GET'
   });
@@ -63,7 +65,6 @@ export async function loginAndFetchFeed() {
   const feed = await feedResp.json();
   console.log('Feed:', feed);
 }`;
-
 
   const nodeJsMediaDropExample = `import fetch from "node-fetch";
 import {readFile} from "fs/promises";
@@ -243,9 +244,7 @@ run().catch((err) => {
       <Container className="pt-4 pb-4">
         <Row>
           <Col>
-            <h1>
-              6529.io API
-            </h1>
+            <h1>6529.io API</h1>
           </Col>
         </Row>
         <Row className="pt-2">
@@ -261,8 +260,10 @@ run().catch((err) => {
               can find the full reference here:{" "}
               <a
                 href={"https://api.6529.io/docs/"}
-                target="_blank" rel="noopener noreferrer"
-                className="tw-text-blue-500 tw-font-semibold">
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tw-font-semibold tw-text-blue-500"
+              >
                 https://api.6529.io/docs
               </a>
             </p>
@@ -278,7 +279,8 @@ run().catch((err) => {
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
-              }}>
+              }}
+            >
               ℹ️ Some routes are still undocumented. We plan to expand the
               documentation over time.
             </div>
@@ -347,28 +349,42 @@ run().catch((err) => {
         </Row>
         <Row className="pt-2">
           <Col>
-            <p className="font-larger font-bolder">Authentication</p>
-            <p>Authentication is based on Ethereum signatures.</p>
+            <p className="font-larger font-bolder">
+              {t(API_PAGE_LOCALE, "tools.api.authentication.title")}
+            </p>
+            <p>
+              {t(API_PAGE_LOCALE, "tools.api.authentication.basedOnSignatures")}
+            </p>
 
-            <p>The flow works as follows:</p>
+            <p>{t(API_PAGE_LOCALE, "tools.api.authentication.flowIntro")}</p>
 
             <ol>
-              <li>Request a nonce for the wallet you want to authenticate.</li>
-              <li>Sign the nonce locally using your wallet.</li>
-              <li>Send the signature back to the server.</li>
               <li>
-                Receive a JWT bearer token, which you can include in headers of
-                subsequent requests.
+                {t(
+                  API_PAGE_LOCALE,
+                  "tools.api.authentication.requestSessionMessage"
+                )}
+              </li>
+              <li>
+                {t(API_PAGE_LOCALE, "tools.api.authentication.signMessage")}
+              </li>
+              <li>
+                {t(API_PAGE_LOCALE, "tools.api.authentication.sendSignature")}
+              </li>
+              <li>
+                {t(API_PAGE_LOCALE, "tools.api.authentication.receiveToken")}
               </li>
             </ol>
-            <p>Here's a full example in Node.js using ethers and node-fetch:</p>
+            <p>{t(API_PAGE_LOCALE, "tools.api.authentication.nodeExample")}</p>
 
             <CodeExample code={nodeJsAuthExample} />
           </Col>
         </Row>
         <Row className="pt-2">
           <Col>
-            <p className="font-larger font-bolder">Creating drops with embedded media</p>
+            <p className="font-larger font-bolder">
+              Creating drops with embedded media
+            </p>
 
             <p>Current API supports multipart upload</p>
 
@@ -376,13 +392,24 @@ run().catch((err) => {
 
             <ol>
               <li>Read the file</li>
-              <li>Send the file name and mime type (not the file itself) to our API</li>
+              <li>
+                Send the file name and mime type (not the file itself) to our
+                API
+              </li>
               <li>Get back upload ID and temporary S3 key</li>
               <li>Optional: Split the file to chunks/parts.</li>
               <li>Get S3 upload URL for each part from our API</li>
-              <li>Upload each part to S3 using the signed urls gotten from previous steps and keep the ETags from responses</li>
-              <li>When all parts have finished uploading, complete the upload bt supplying the ETags to our API</li>
-              <li>Use the media URL from completion API response to create a drop</li>
+              <li>
+                Upload each part to S3 using the signed urls gotten from
+                previous steps and keep the ETags from responses
+              </li>
+              <li>
+                When all parts have finished uploading, complete the upload bt
+                supplying the ETags to our API
+              </li>
+              <li>
+                Use the media URL from completion API response to create a drop
+              </li>
             </ol>
 
             <p>Here's a full example in Node.js:</p>
