@@ -29,9 +29,9 @@ app download targets.
    moves into the dialog; on close, focus returns to the previously active
    element.
 3. Review the `Share Type` row:
-   - authenticated session with shareable auth context: `Connection`,
-     `Current URL`, `6529 Apps`
-   - otherwise: `Current URL`, `6529 Apps`
+   - `Connection`
+   - `Current URL`
+   - `6529 Apps`
 4. Default selection is state-driven:
    - authenticated sessions open on `Connection` -> `6529 Mobile`
    - unauthenticated sessions open on `Current URL` -> `6529 Mobile`
@@ -70,8 +70,10 @@ app download targets.
 ## Edge Cases
 
 - Share entry is hidden entirely in Capacitor/native and mobile-device web.
-- `Connection` appears only when refresh-token and wallet state are available
-  for the current authenticated session.
+- `Connection` is always visible in the modal. It creates a backend
+  connection-share code when an active wallet address has a valid session-v2 web
+  session; otherwise it shows a sign-in, update-authentication, loading, or
+  unavailable state instead of a QR code.
 - `6529 Desktop` subtabs are hidden when the modal is rendered inside Electron.
 - `Browser` exists only under `Current URL`; `Connection` and `6529 Apps` do
   not expose a browser target.
@@ -88,8 +90,12 @@ app download targets.
 - If `Share` is missing, verify you are on desktop web and check whether the
   expected entry point is the disconnected sidebar row or the connected account
   menu.
-- If `Connection` is missing or empty, reconnect so refresh-token and wallet
-  state are available, then reopen the dialog.
+- If `Connection` shows `Update Authentication`, sign again with the active
+  wallet to upgrade the browser session to session-v2.
+- If `Connection` shows `Sign In Required`, connect and authenticate a wallet
+  before sharing a connection.
+- If `Connection Sharing Unavailable` appears, close and reopen the dialog or
+  try again after confirming the backend is reachable.
 - If a QR panel stays blank, switch tabs or reopen the dialog; the visible URL
   row still shows the target being shared.
 - If 6529 Desktop download entries do not load, retry from `6529 Apps`, or use
@@ -103,8 +109,8 @@ app download targets.
   runtimes.
 - Generated current-route targets reuse the active pathname and query string;
   non-URL UI state is not serialized beyond what is already in the route.
-- Connection sharing depends on existing auth/session state and is not
-  available as a disconnected onboarding flow.
+- Connection sharing depends on a valid session-v2 web session for the active
+  wallet and is not available as a disconnected onboarding flow.
 - Desktop download metadata is fetched from release manifests at runtime.
 
 ## Related Pages

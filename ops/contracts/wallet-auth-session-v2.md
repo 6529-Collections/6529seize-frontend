@@ -130,6 +130,10 @@ The caller must send bearer access-token auth. The request body is:
 }
 ```
 
+The optional `role` field is accepted only when it matches the authenticated
+session role. The web frontend normally omits it and lets the backend bind the
+share to the authenticated role.
+
 The response is:
 
 ```json
@@ -139,11 +143,12 @@ The response is:
   "address": "...",
   "role": null,
   "target_client_type": "native",
-  "deep_link_path": "/accept-connection-sharing?connection_share_code=..."
+  "deep_link_path": "/accept-connection-sharing?connection_share_code=...&address=..."
 }
 ```
 
-The frontend uses `connection_share_code` from `deep_link_path` or the query string. It must not use the obsolete transfer-code query name.
+The frontend uses `connection_share_code` and `address` from `deep_link_path` or
+the query string. It must not use the obsolete transfer-code query name.
 
 ### POST `/api/auth/connection-share/redeem`
 

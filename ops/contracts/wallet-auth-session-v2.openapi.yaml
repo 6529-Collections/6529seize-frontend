@@ -254,6 +254,9 @@ components:
         target_client_type:
           type: string
           enum: [native]
+        role:
+          type: string
+          nullable: true
     CreateConnectionShareResponse:
       type: object
       required:
@@ -280,7 +283,7 @@ components:
         deep_link_path:
           type: string
           examples:
-            - "/accept-connection-sharing?connection_share_code=abc"
+            - "/accept-connection-sharing?connection_share_code=abc&address=0x0000000000000000000000000000000000000000"
     RedeemConnectionShareRequest:
       type: object
       required: [target_client_type, connection_share_code]

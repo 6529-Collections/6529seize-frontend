@@ -351,8 +351,11 @@ run().catch((err) => {
             <p>The flow works as follows:</p>
 
             <ol>
-              <li>Request a nonce for the wallet you want to authenticate.</li>
-              <li>Sign the nonce locally using your wallet.</li>
+              <li>
+                Request a session-v2 signable message for the wallet you want
+                to authenticate.
+              </li>
+              <li>Sign the signable message exactly using your wallet.</li>
               <li>Send the signature back to the server.</li>
               <li>
                 Receive a JWT bearer token, which you can include in headers of
