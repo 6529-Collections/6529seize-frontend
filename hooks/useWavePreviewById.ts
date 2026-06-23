@@ -11,6 +11,8 @@ const activeWavePreviewFetches = new Set<string>();
 const queuedWavePreviewFetches: string[] = [];
 const wavePreviewSubscriptionCounts = new Map<string, number>();
 const wavePreviewStoreListeners = new Set<() => void>();
+const emptyWavePreviewRetryCounts = new Map<string, number>();
+const emptyWavePreviewRetriesInFlight = new Set<string>();
 
 type WavePreviewRefetch = () => Promise<unknown>;
 
@@ -18,8 +20,21 @@ const ignoreWavePreviewRefetchError = (): void => {
   // React Query stores the failed refetch in query state; preview retries do not need local error UI.
 };
 
-const retryWavePreviewFetch = (refetch: WavePreviewRefetch): void => {
-  refetch().catch(ignoreWavePreviewRefetchError);
+const clearEmptyWavePreviewRetry = (waveId: string): void => {
+  emptyWavePreviewRetryCounts.delete(waveId);
+  emptyWavePreviewRetriesInFlight.delete(waveId);
+};
+
+const retryWavePreviewFetch = (
+  waveId: string,
+  refetch: WavePreviewRefetch
+): void => {
+  emptyWavePreviewRetriesInFlight.add(waveId);
+  refetch()
+    .finally(() => {
+      emptyWavePreviewRetriesInFlight.delete(waveId);
+    })
+    .catch(ignoreWavePreviewRefetchError);
 };
 
 const subscribeToWavePreviewStore = (listener: () => void): (() => void) => {
@@ -91,6 +106,7 @@ const registerWavePreviewFetch = (waveId: string): (() => void) => {
     }
 
     wavePreviewSubscriptionCounts.delete(waveId);
+    clearEmptyWavePreviewRetry(waveId);
     removeQueuedWave(waveId);
     const removedActiveFetch = activeWavePreviewFetches.delete(waveId);
     const queueChanged = pumpWavePreviewQueue();
@@ -113,28 +129,32 @@ const releaseWavePreviewFetch = (waveId: string): void => {
 export function useWavePreviewById(waveId: string): {
   readonly wave: ApiWave | undefined;
 } {
-  const emptyPreviewRetryCountRef = useRef(0);
   const fetchCycleStartedRef = useRef(false);
   const fetchEnabled = useSyncExternalStore(
     subscribeToWavePreviewStore,
     () => activeWavePreviewFetches.has(waveId),
     () => false
   );
-  const { wave, isFetching, isLoading, refetch } = useWaveById(waveId, {
+  const {
+    wave: queryWave,
+    isFetching,
+    isLoading,
+    refetch,
+  } = useWaveById(waveId, {
     enabled: fetchEnabled,
   });
+  const wave = queryWave?.id === waveId ? queryWave : undefined;
   const hasWave = Boolean(wave);
 
   useEffect(() => {
     fetchCycleStartedRef.current = false;
-    emptyPreviewRetryCountRef.current = 0;
   }, [waveId]);
 
   useEffect(() => {
     if (hasWave) {
-      emptyPreviewRetryCountRef.current = 0;
+      clearEmptyWavePreviewRetry(waveId);
     }
-  }, [hasWave]);
+  }, [hasWave, waveId]);
 
   useEffect(() => {
     if (!waveId || hasWave) {
@@ -161,13 +181,18 @@ export function useWavePreviewById(waveId: string): {
 
     fetchCycleStartedRef.current = false;
 
-    if (
-      !hasWave &&
-      emptyPreviewRetryCountRef.current < MAX_EMPTY_WAVE_PREVIEW_RETRIES
-    ) {
-      emptyPreviewRetryCountRef.current += 1;
-      retryWavePreviewFetch(refetch);
-      return;
+    if (!hasWave) {
+      const emptyPreviewRetryCount =
+        emptyWavePreviewRetryCounts.get(waveId) ?? 0;
+      if (emptyWavePreviewRetriesInFlight.has(waveId)) {
+        return;
+      }
+
+      if (emptyPreviewRetryCount < MAX_EMPTY_WAVE_PREVIEW_RETRIES) {
+        emptyWavePreviewRetryCounts.set(waveId, emptyPreviewRetryCount + 1);
+        retryWavePreviewFetch(waveId, refetch);
+        return;
+      }
     }
 
     releaseWavePreviewFetch(waveId);
@@ -181,4 +206,6 @@ export function resetWavePreviewFetchGateForTests(): void {
   queuedWavePreviewFetches.splice(0);
   wavePreviewSubscriptionCounts.clear();
   wavePreviewStoreListeners.clear();
+  emptyWavePreviewRetryCounts.clear();
+  emptyWavePreviewRetriesInFlight.clear();
 }
