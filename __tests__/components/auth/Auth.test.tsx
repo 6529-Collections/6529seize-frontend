@@ -1586,7 +1586,7 @@ describe("Auth component", () => {
         expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
       });
       expect(screen.getByTestId("session-upgrade-result")).toHaveTextContent(
-        "true"
+        "false"
       );
       expect(
         screen.getByText(

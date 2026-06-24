@@ -1452,7 +1452,8 @@ export default function Auth({
       }
 
       if (!canSignActiveWallet) {
-        return { success: true };
+        // The prompt is visible, but no upgraded JWT exists until the user reconnects and signs.
+        return { success: false };
       }
 
       const role = activeProfileProxy
