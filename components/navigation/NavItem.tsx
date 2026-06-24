@@ -96,20 +96,6 @@ const getHomeIconSizeClass = ({
 const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
   isHighlighted ? "tw-text-white" : "tw-text-iron-300";
 
-const getHomeIconToneClass = ({
-  isHighlighted,
-  variant,
-}: {
-  readonly isHighlighted: boolean;
-  readonly variant: "floating" | "fixed";
-}) => {
-  if (variant === "fixed" && !isHighlighted) {
-    return "tw-opacity-55";
-  }
-
-  return "";
-};
-
 const getIconTextColorClass = ({
   isActive,
   isHighlighted,
@@ -222,10 +208,6 @@ const NavItemLinkContent = ({
     item.name === "Home"
       ? getHomeIconSizeClass({ compact, variant })
       : iconSizeClass;
-  const homeIconToneClass = getHomeIconToneClass({
-    isHighlighted,
-    variant,
-  });
 
   return (
     <div className={getIconSlotClass({ compact, variant })}>
@@ -239,7 +221,7 @@ const NavItemLinkContent = ({
       )}
       {IconComponent ? (
         <IconComponent
-          className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass} ${homeIconToneClass}`}
+          className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}
           color={activeIconColor}
         />
       ) : (
@@ -249,7 +231,7 @@ const NavItemLinkContent = ({
           width={24}
           height={24}
           unoptimized
-          className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${homeIconToneClass}`}
+          className={`tw-relative tw-z-10 ${resolvedIconSizeClass}`}
         />
       )}
       {item.name === "Notifications" && haveUnreadNotifications && (
@@ -389,7 +371,7 @@ const NavItemContent = ({
 
   const linkClassName =
     variant === "fixed"
-      ? "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-white/35"
+      ? "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400"
       : "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400";
 
   if (fullPrefetch) {
