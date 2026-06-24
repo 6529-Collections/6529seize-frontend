@@ -144,18 +144,18 @@ const getWaveScoreLabel = (wave: MinimalWave): string | null => {
 
 const getScoreBadgeFontSize = (scoreLabel: string) => {
   if (scoreLabel.length >= 5) {
-    return 5.1;
+    return 5.6;
   }
 
   if (scoreLabel.length === 4) {
-    return 5.9;
+    return 6.4;
   }
 
   if (scoreLabel.length === 3) {
-    return 6.9;
+    return 7.4;
   }
 
-  return 8.5;
+  return 9.2;
 };
 
 export const getFittingPreviewCount = ({
@@ -265,7 +265,7 @@ function HighlyRatedWavePreviewScoreBadge({
     <svg
       aria-hidden="true"
       viewBox="0 0 32 26"
-      className="tw-pointer-events-none tw-absolute -tw-bottom-0.5 -tw-right-1 tw-z-10 tw-h-[18px] tw-w-[22px] tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]"
+      className="tw-pointer-events-none tw-absolute -tw-bottom-1 -tw-right-1.5 tw-z-10 tw-h-5 tw-w-6 tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]"
     >
       <path
         d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
