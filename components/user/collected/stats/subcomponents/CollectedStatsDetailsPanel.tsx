@@ -41,7 +41,7 @@ export function CollectedStatsDetailsPanel({
     <CommonAnimationHeight>
       <div id={detailsId}>
         {isOpen && (
-          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/90 tw-bg-gradient-to-b tw-from-iron-900/30 tw-to-transparent tw-px-4 tw-pb-5 sm:tw-px-6 sm:tw-pb-6">
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/90 tw-bg-gradient-to-b tw-from-iron-900/50 tw-via-iron-950/40 tw-to-black tw-px-4 tw-pb-5 tw-pt-4 tw-ring-1 tw-ring-inset tw-ring-white/[0.04] sm:tw-px-6 sm:tw-pb-6 sm:tw-pt-5">
             {statsPath === null ? (
               <div className="tw-py-2 tw-text-sm tw-text-iron-400">
                 {unavailableMessage}
