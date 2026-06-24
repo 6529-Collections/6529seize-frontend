@@ -40,6 +40,9 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   expect(receivedRef).toBeDefined();
   expect(receivedRef.current).not.toBe(container.firstChild);
   expect(receivedRef.current).toContainElement(screen.getByTestId("waves"));
+  expect(receivedRef.current).toHaveClass(
+    "tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]"
+  );
 
   fireEvent.click(screen.getByTestId("footer"));
 

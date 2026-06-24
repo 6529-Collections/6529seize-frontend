@@ -477,7 +477,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
     if (!navAdjustedSpaces.measurementsComplete) return {};
-    return calculateHeightStyle(navAdjustedSpaces, 0);
+    return calculateHeightStyle({ ...navAdjustedSpaces, mobileNavSpace: 0 }, 0);
   }, [navAdjustedSpaces]);
 
   const mobileAboutViewStyle = useMemo<React.CSSProperties>(() => {
