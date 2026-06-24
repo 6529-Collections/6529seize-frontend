@@ -506,6 +506,8 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "metadata.title": "Tech",
   "metadata.description": "About",
   "index.prsCovered": "PRs Covered",
+  "notes.walletAuthentication.ariaLabel":
+    "Wallet authentication upgrade: what is changing with the new secure session",
   "report.total": "Total",
   "report.repos": "Repos",
   "report.daily": "Daily",
@@ -587,6 +589,7 @@ export const EN_US_MESSAGES = {
   "auth.signModal.timeLeft.hours.many": "{count} hours",
   "auth.signModal.manualUpgrade":
     "Connection sharing and some newer features need the new secure session.",
+  "auth.signModal.connectWalletPrompt": "Connect your wallet to continue.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",

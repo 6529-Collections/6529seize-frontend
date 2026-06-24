@@ -54,7 +54,9 @@ jest.mock("@/services/auth/auth.utils", () => ({
   syncConnectedWalletProfile: jest.fn(),
   getAuthJwt: jest.fn(() => null),
   hasActiveSessionV2Auth: jest.fn(() => false),
+  AUTH_TOKEN_CHANGED_EVENT: "6529-auth-token-changed",
   PROFILE_SWITCHED_EVENT: "6529-profile-switched",
+  WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
 }));
 
 jest.mock("@/services/auth/session-v2.utils", () => ({
@@ -269,14 +271,20 @@ function RequestAuthButton() {
 
 function SessionUpgradeProbe() {
   const { requestSessionUpgrade, sessionUpgradeRequired } = useAuth();
+  const [result, setResult] = React.useState("none");
   return (
     <div>
       <span data-testid="session-upgrade-required">
         {String(sessionUpgradeRequired)}
       </span>
+      <span data-testid="session-upgrade-result">{result}</span>
       <button
         type="button"
-        onClick={() => void requestSessionUpgrade?.()}
+        onClick={() =>
+          void requestSessionUpgrade?.().then(({ success }) => {
+            setResult(String(success));
+          })
+        }
         data-testid="request-session-upgrade"
       >
         upgrade
@@ -1577,6 +1585,9 @@ describe("Auth component", () => {
       await waitFor(() => {
         expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
       });
+      expect(screen.getByTestId("session-upgrade-result")).toHaveTextContent(
+        "true"
+      );
       expect(
         screen.getByText(
           "Connection sharing and some newer features need the new secure session."
@@ -1591,6 +1602,44 @@ describe("Auth component", () => {
         expect(mockSeizeDisconnect).toHaveBeenCalled();
       });
       expect(mockSeizeConnect).toHaveBeenCalled();
+    });
+
+    it("rechecks disconnected legacy upgrade state when stored auth changes", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = null;
+      connectionState = "disconnected";
+      canSignActiveWallet = false;
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("legacy-jwt");
+      mockGetWalletAddress.mockReturnValue(validAddress);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("session-upgrade-required")
+        ).toHaveTextContent("true");
+      });
+
+      mockGetAuthJwt.mockReturnValue(null);
+      window.dispatchEvent(new Event("6529-wallet-accounts-updated"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("session-upgrade-required")
+        ).toHaveTextContent("false");
+      });
     });
 
     it("closes the upgrade modal after successful session-v2 sign-in", async () => {

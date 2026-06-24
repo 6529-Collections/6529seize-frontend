@@ -60,7 +60,10 @@ export default function AboutTech() {
         <Link
           href="/about/tech/wallet-authentication"
           className="tw-block tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-5 tw-text-current tw-no-underline tw-transition-colors hover:tw-border-primary-500 hover:tw-bg-iron-900/60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 focus:tw-ring-offset-2 focus:tw-ring-offset-black"
-          aria-label="Wallet authentication upgrade: what is changing with the new secure session"
+          aria-label={t(
+            locale,
+            "about.tech.notes.walletAuthentication.ariaLabel"
+          )}
         >
           <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
             Auth changes

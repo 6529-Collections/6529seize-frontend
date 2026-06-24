@@ -47,6 +47,7 @@ import {
 import { commonApiFetch } from "@/services/api/common-api";
 import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
 import {
+  AUTH_TOKEN_CHANGED_EVENT,
   canStoreAnotherWalletAccount,
   getAuthJwt,
   getWalletAddress,
@@ -55,6 +56,7 @@ import {
   removeAuthJwt,
   setActiveWalletAccount,
   syncConnectedWalletProfile,
+  WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import { getRole, validateJwt } from "@/services/auth/jwt-validation.utils";
@@ -618,6 +620,7 @@ export default function Auth({
   const [sessionUpgradeHasDeadline, setSessionUpgradeHasDeadline] =
     useState(false);
   const [sessionUpgradeRequired, setSessionUpgradeRequired] = useState(false);
+  const [authStorageRevision, setAuthStorageRevision] = useState(0);
   const signModalReasonRef = useRef<SignModalReason>(signModalReason);
 
   const { profile: loadedProfile, isLoading: fetchingProfile } = useIdentity({
@@ -668,6 +671,38 @@ export default function Auth({
     }
     activeValidationOperationIdRef.current = null;
     setAuthLoadingState("idle");
+  }, []);
+
+  useEffect(() => {
+    if (globalThis.window === undefined) {
+      return;
+    }
+
+    const recheckStoredAuth = () => {
+      setAuthStorageRevision((revision) => revision + 1);
+    };
+
+    globalThis.window.addEventListener("storage", recheckStoredAuth);
+    globalThis.window.addEventListener(
+      WALLET_ACCOUNTS_UPDATED_EVENT,
+      recheckStoredAuth
+    );
+    globalThis.window.addEventListener(
+      AUTH_TOKEN_CHANGED_EVENT,
+      recheckStoredAuth
+    );
+
+    return () => {
+      globalThis.window.removeEventListener("storage", recheckStoredAuth);
+      globalThis.window.removeEventListener(
+        WALLET_ACCOUNTS_UPDATED_EVENT,
+        recheckStoredAuth
+      );
+      globalThis.window.removeEventListener(
+        AUTH_TOKEN_CHANGED_EVENT,
+        recheckStoredAuth
+      );
+    };
   }, []);
 
   const { data: profileProxies } = useQuery<ApiProfileProxy[]>({
@@ -862,6 +897,7 @@ export default function Auth({
     invalidateAll,
     reset,
     authRolloutSettings,
+    authStorageRevision,
   ]);
 
   const getNonce = async ({
@@ -1097,7 +1133,7 @@ export default function Auth({
     }
 
     setToast({
-      message: "Connect your wallet to continue.",
+      message: t(AUTH_MODAL_LOCALE, "auth.signModal.connectWalletPrompt"),
       type: "error",
     });
     return null;
@@ -1389,7 +1425,7 @@ export default function Auth({
     const upgradeAddress = address ?? getStoredLegacySessionUpgradeAddress();
     if (!upgradeAddress) {
       setToast({
-        message: "Connect your wallet to continue.",
+        message: t(AUTH_MODAL_LOCALE, "auth.signModal.connectWalletPrompt"),
         type: "error",
       });
       return { success: false };
@@ -1416,7 +1452,7 @@ export default function Auth({
       }
 
       if (!canSignActiveWallet) {
-        return { success: false };
+        return { success: true };
       }
 
       const role = activeProfileProxy
