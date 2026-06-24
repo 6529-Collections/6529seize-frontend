@@ -54,6 +54,24 @@ const streamRouteLoadingReserveVisibleStyle: StreamRouteLoadingReserveStyle = {
     STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE,
 };
 
+const contentOwnsBottomNavClearance = ({
+  activeView,
+  pathname,
+}: {
+  readonly activeView: string | null;
+  readonly pathname: string | null | undefined;
+}): boolean => {
+  if (activeView === "waves" || activeView === "messages") {
+    return true;
+  }
+
+  return (
+    pathname === "/waves" ||
+    pathname === "/messages" ||
+    pathname === "/notifications"
+  );
+};
+
 function WavesQuickVoteView() {
   const quickVote = useMemesQuickVoteDialogController();
 
@@ -116,18 +134,23 @@ function AppLayoutContent({ children }: Props) {
   const isNavVisible =
     !isSingleDropOpen && !isEditingOnMobile && !shouldHideBottomNav;
   const shouldRenderBottomNav = !isSingleDropOpen && !isEditingOnMobile;
+  const shouldUseContentBottomClearance = contentOwnsBottomNavClearance({
+    activeView,
+    pathname,
+  });
   const routeLoadingHeaderReserve = spaces.measurementsComplete
     ? `${spaces.headerSpace}px`
     : STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE;
   const streamRouteLoadingReserveStyle =
     useMemo<StreamRouteLoadingReserveStyle>(
       () => ({
-        [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: isNavVisible
-          ? BOTTOM_NAV_RESERVE
-          : "0px",
+        [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]:
+          isNavVisible && !shouldUseContentBottomClearance
+            ? BOTTOM_NAV_RESERVE
+            : "0px",
         [STREAM_ROUTE_LOADING_HEADER_RESERVE]: routeLoadingHeaderReserve,
       }),
-      [isNavVisible, routeLoadingHeaderReserve]
+      [isNavVisible, routeLoadingHeaderReserve, shouldUseContentBottomClearance]
     );
   const safeAreaClass =
     !isNavVisible && !isKeyboardVisible
@@ -154,7 +177,9 @@ function AppLayoutContent({ children }: Props) {
         <TouchDeviceHeader />
       </div>
       {activeContent}
-      {isNavVisible && <div className="tw-h-[104px] tw-w-full" />}
+      {isNavVisible && !shouldUseContentBottomClearance && (
+        <div className="tw-h-[104px] tw-w-full" />
+      )}
       {shouldRenderBottomNav && (
         <BottomNavigation hidden={shouldHideBottomNav} />
       )}

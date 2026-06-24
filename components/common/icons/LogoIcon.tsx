@@ -12,8 +12,7 @@ const LogoIcon = ({
   const wrapperClassName = className
     ? `tw-relative tw-inline-block tw-align-middle ${className}`
     : "tw-relative tw-inline-block tw-size-6 tw-align-middle";
-  const imageClassName =
-    "tw-absolute tw-inset-0 tw-h-full tw-w-full tw-transition-opacity tw-duration-75 motion-reduce:tw-transition-none";
+  const imageClassName = "tw-absolute tw-inset-0 tw-h-full tw-w-full";
 
   return (
     <span aria-hidden="true" className={wrapperClassName}>
