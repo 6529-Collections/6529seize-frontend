@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link, { useLinkStatus } from "next/link";
+import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useEffect } from "react";
@@ -42,26 +42,7 @@ const getIconSlotClass = ({
   return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
 };
 
-const ActiveNavIndicator = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) =>
-  variant === "fixed" ? (
-    <div className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white" />
-  ) : (
-    <div
-      className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-        compact
-          ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
-          : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]"
-      }`}
-    />
-  );
-
-const getPendingIndicatorClassName = ({
+const getActiveNavIndicatorClassName = ({
   compact,
   variant,
 }: {
@@ -69,15 +50,23 @@ const getPendingIndicatorClassName = ({
   readonly variant: "floating" | "fixed";
 }) => {
   if (variant === "fixed") {
-    return "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white/60";
+    return "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white";
   }
 
-  const compactClassName = compact
-    ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
-    : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]";
+  const sizeClassName = compact
+    ? "tw-h-11 tw-w-[3.75rem] sm:tw-h-12 sm:tw-w-[4.25rem]"
+    : "tw-h-12 tw-w-[4.05rem] sm:tw-h-[3.15rem] sm:tw-w-[4.45rem]";
 
-  return `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
+  return `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${sizeClassName}`;
 };
+
+const ActiveNavIndicator = ({
+  compact,
+  variant,
+}: {
+  readonly compact: boolean;
+  readonly variant: "floating" | "fixed";
+}) => <div className={getActiveNavIndicatorClassName({ compact, variant })} />;
 
 const getHomeIconSizeClass = ({
   compact,
@@ -193,8 +182,7 @@ const NavItemLinkContent = ({
   readonly compact: boolean;
   readonly variant: "floating" | "fixed";
 }) => {
-  const { pending } = useLinkStatus();
-  const isHighlighted = isActive || pending;
+  const isHighlighted = isActive;
   const IconComponent = item.iconComponent;
   const activeIconColor: NavIconColor =
     isActive && variant === "floating" ? "black" : "white";
@@ -212,13 +200,6 @@ const NavItemLinkContent = ({
   return (
     <div className={getIconSlotClass({ compact, variant })}>
       {isActive && <ActiveNavIndicator compact={compact} variant={variant} />}
-      {pending && !isActive && (
-        <div
-          aria-hidden="true"
-          data-testid="nav-item-pending-indicator"
-          className={getPendingIndicatorClassName({ compact, variant })}
-        />
-      )}
       {IconComponent ? (
         <IconComponent
           className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}
@@ -252,6 +233,7 @@ const NavItemContent = ({
   fullPrefetch = false,
 }: Props) => {
   const pathname = usePathname();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
   const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({

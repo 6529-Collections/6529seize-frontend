@@ -276,20 +276,20 @@ function HighlyRatedWavePreviewLink({
       ? wave.newDropsCount.latestDropTimestamp
       : null;
   const linkLabel =
-    scoreLabel !== null
+    scoreLabel === null
       ? t(
+          SIDEBAR_LOCALE,
+          "waves.sidebar.highlyRatedPreviewOpenAriaLabel.none",
+          {
+            waveName: wave.name,
+          }
+        )
+      : t(
           SIDEBAR_LOCALE,
           "waves.sidebar.highlyRatedPreviewOpenAriaLabel.withScore",
           {
             waveName: wave.name,
             score: scoreLabel,
-          }
-        )
-      : t(
-          SIDEBAR_LOCALE,
-          "waves.sidebar.highlyRatedPreviewOpenAriaLabel.none",
-          {
-            waveName: wave.name,
           }
         );
 

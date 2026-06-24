@@ -5,8 +5,10 @@ import {
   getWaveIdFromPathname,
   getWaveRoute,
   getWaveRouteWithSearchParams,
+  hidesMobileBottomNavigation,
   mainSegment,
   sameMainPath,
+  usesReverseMobileBottomNavigationScroll,
 } from "@/helpers/navigation.helpers";
 
 describe("navigation.helpers", () => {
@@ -190,6 +192,46 @@ describe("navigation.helpers", () => {
 
     it("returns null for messages create route", () => {
       expect(getMessageIdFromPathname("/messages/create")).toBeNull();
+    });
+  });
+
+  describe("hidesMobileBottomNavigation", () => {
+    it("hides on canonical wave and message detail routes", () => {
+      expect(hidesMobileBottomNavigation({ pathname: "/waves/wave-123" })).toBe(
+        true
+      );
+      expect(
+        hidesMobileBottomNavigation({ pathname: "/messages/dm-123" })
+      ).toBe(true);
+    });
+
+    it("keeps the dock on list and create routes", () => {
+      expect(hidesMobileBottomNavigation({ pathname: "/waves" })).toBe(false);
+      expect(hidesMobileBottomNavigation({ pathname: "/waves/create" })).toBe(
+        false
+      );
+      expect(hidesMobileBottomNavigation({ pathname: "/messages" })).toBe(
+        false
+      );
+      expect(
+        hidesMobileBottomNavigation({ pathname: "/messages/create" })
+      ).toBe(false);
+    });
+  });
+
+  describe("usesReverseMobileBottomNavigationScroll", () => {
+    it("uses reversed scroll behavior on notifications routes", () => {
+      expect(
+        usesReverseMobileBottomNavigationScroll({ pathname: "/notifications" })
+      ).toBe(true);
+      expect(
+        usesReverseMobileBottomNavigationScroll({
+          pathname: "/notifications/settings",
+        })
+      ).toBe(true);
+      expect(
+        usesReverseMobileBottomNavigationScroll({ pathname: "/waves" })
+      ).toBe(false);
     });
   });
 
