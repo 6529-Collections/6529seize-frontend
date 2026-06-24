@@ -12,6 +12,8 @@ import { useNotificationsController } from "./hooks/useNotificationsController";
 import { useNotificationsScroll } from "./hooks/useNotificationsScroll";
 import NotificationsContent from "./subcomponents/NotificationsContent";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { floatingDockClearanceClassName } from "./notifications.constants";
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
@@ -45,6 +47,7 @@ export default function Notifications({
   activeDrop,
   setActiveDrop,
 }: NotificationsProps) {
+  const { isApp } = useDeviceInfo();
   const {
     activeFilter,
     setActiveFilter,
@@ -96,7 +99,9 @@ export default function Notifications({
           onTopIntersection={handleTopIntersection}
           isFetchingNextPage={isFetchingNextPage}
           hasNextPage={pagination.hasNextPage}
-          bottomPaddingClassName="tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]"
+          bottomPaddingClassName={
+            isApp ? floatingDockClearanceClassName : undefined
+          }
           containerClassName="tw-bg-transparent"
         >
           <NotificationsContent
