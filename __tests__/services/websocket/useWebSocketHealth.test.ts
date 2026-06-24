@@ -2,10 +2,15 @@ import { act, renderHook } from "@testing-library/react";
 import { useWebSocketHealth } from "@/services/websocket/useWebSocketHealth";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebSocket } from "@/services/websocket/useWebSocket";
-import { getAuthJwt, WALLET_AUTH_COOKIE } from "@/services/auth/auth.utils";
+import {
+  AUTH_TOKEN_CHANGED_EVENT,
+  getAuthJwt,
+  WALLET_AUTH_COOKIE,
+} from "@/services/auth/auth.utils";
 
 jest.mock("@/services/websocket/useWebSocket");
 jest.mock("@/services/auth/auth.utils", () => ({
+  AUTH_TOKEN_CHANGED_EVENT: "6529-auth-token-changed",
   getAuthJwt: jest.fn(),
   WALLET_AUTH_COOKIE: "wallet-auth",
 }));
@@ -342,6 +347,26 @@ describe("useWebSocketHealth", () => {
     );
     expect(channel.close).toHaveBeenCalledTimes(1);
   });
+  it("responds to same-tab auth token change events", () => {
+    mockGetAuthJwt.mockReturnValue("token-a");
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
+
+    renderHook(() => useWebSocketHealth());
+
+    mockConnect.mockClear();
+    mockGetAuthJwt.mockReturnValue("token-b");
+
+    act(() => {
+      window.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT));
+    });
+
+    expect(mockConnect).toHaveBeenCalledWith("token-b");
+  });
+
   it("broadcasts token changes to other listeners when detected", () => {
     (window as any).BroadcastChannel =
       MockBroadcastChannel as unknown as typeof BroadcastChannel;

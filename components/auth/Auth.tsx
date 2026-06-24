@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -28,6 +28,7 @@ import {
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
@@ -103,6 +104,7 @@ class NonceResponseValidationError extends Error {
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
+  readonly isAuthenticated?: boolean;
   readonly fetchingProfile: boolean;
   readonly connectionStatus: ProfileConnectedStatus;
   readonly receivedProfileProxies: ApiProfileProxy[];
@@ -188,6 +190,41 @@ const normalizeSessionV2MigrationDeadline = (
 
 const normalizeReminderAddress = (address: string): string =>
   address.toLowerCase();
+
+const normalizeWalletAddress = (walletAddress: string): string =>
+  walletAddress.trim().toLowerCase();
+
+const isProfileForAddress = ({
+  profile,
+  address,
+}: {
+  readonly profile: ApiIdentity | null;
+  readonly address: string | null | undefined;
+}): boolean => {
+  if (!profile || !address) {
+    return false;
+  }
+
+  const normalizedAddress = normalizeWalletAddress(address);
+  const walletAddresses = [
+    profile.primary_wallet,
+    ...(profile.wallets?.map((wallet) => wallet.wallet) ?? []),
+  ].filter(
+    (walletAddress): walletAddress is string =>
+      typeof walletAddress === "string" && walletAddress.trim().length > 0
+  );
+
+  if (walletAddresses.length === 0) {
+    return true;
+  }
+
+  return walletAddresses.some(
+    (walletAddress) =>
+      normalizeWalletAddress(walletAddress) === normalizedAddress
+  );
+};
+
+const isPublicWave = (wave: ApiWave): boolean => !wave.visibility?.scope?.group;
 
 const parseSessionUpgradeReminders = (): Record<
   string,
@@ -495,6 +532,7 @@ const runImmediateAuthValidation = async ({
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
+  isAuthenticated: false,
   fetchingProfile: false,
   receivedProfileProxies: [],
   activeProfileProxy: null,
@@ -518,7 +556,10 @@ export default function Auth({
   readonly children: React.ReactNode;
   readonly enableWalletAuthentication?: boolean;
 }) {
-  const { invalidateAll } = useContext(ReactQueryWrapperContext);
+  const { invalidateAll, invalidateAuthSensitiveQueries } = useContext(
+    ReactQueryWrapperContext
+  );
+  const queryClient = useQueryClient();
   const pathname = usePathname();
   const router = useRouter();
   const seizeSettingsContext = useSeizeSettingsOptional();
@@ -554,18 +595,29 @@ export default function Auth({
   const [sessionUpgradeRequired, setSessionUpgradeRequired] = useState(false);
   const signModalReasonRef = useRef<SignModalReason>(signModalReason);
 
-  const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity(
-    {
-      handleOrWallet: address,
-      initialProfile: null,
-    }
+  const { profile: loadedProfile, isLoading: fetchingProfile } = useIdentity({
+    handleOrWallet: address,
+    initialProfile: null,
+  });
+  const isConnectedProfileForAddress = isProfileForAddress({
+    profile: loadedProfile,
+    address,
+  });
+  const connectedProfile = isConnectedProfileForAddress ? loadedProfile : null;
+  const isConnectedProfileSettling = Boolean(
+    address && loadedProfile && !isConnectedProfileForAddress
   );
+  const isFetchingConnectedProfile =
+    fetchingProfile || isConnectedProfileSettling;
 
   // Race condition prevention: AbortController and operation tracking
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestAddressRef = useRef<string | undefined>(address);
   const activeValidationOperationIdRef = useRef<string | null>(null);
   const expiredSessionUpgradeAddressRef = useRef<string | null>(null);
+  const [pendingProfileSwitch, setPendingProfileSwitch] = useState<{
+    readonly targetAddress: string | null;
+  } | null>(null);
   const [authLoadingState, setAuthLoadingState] =
     useState<AuthLoadingState>("idle");
   const settingsAuth = seizeSettingsContext?.seizeSettings.auth;
@@ -1403,6 +1455,14 @@ export default function Auth({
       return;
     }
 
+    const cachedWave = queryClient.getQueryData<ApiWave>([
+      QueryKey.WAVE,
+      { wave_id: activeWaveId },
+    ]);
+    if (cachedWave && isPublicWave(cachedWave)) {
+      return;
+    }
+
     const isMessagesRoute =
       pathname === "/messages" || pathname.startsWith("/messages/");
     if (isMessagesRoute) {
@@ -1415,12 +1475,13 @@ export default function Auth({
     if (isWavesRoute || pathname === "/") {
       router.replace("/waves");
     }
-  }, [pathname, router]);
+  }, [pathname, queryClient, router]);
 
   useEffect(() => {
     const onProfileSwitched = () => {
-      invalidateAll();
-      navigateAfterProfileSwitch();
+      setPendingProfileSwitch({
+        targetAddress: getWalletAddress()?.toLowerCase() ?? null,
+      });
     };
 
     if (globalThis.window === undefined) {
@@ -1437,11 +1498,53 @@ export default function Auth({
         onProfileSwitched
       );
     };
-  }, [invalidateAll, navigateAfterProfileSwitch]);
+  }, []);
+
+  useEffect(() => {
+    if (!pendingProfileSwitch) {
+      return;
+    }
+
+    const targetAddress = pendingProfileSwitch.targetAddress;
+    const currentAddress = address?.toLowerCase() ?? null;
+    if (targetAddress && targetAddress !== currentAddress) {
+      return;
+    }
+
+    if (isFetchingConnectedProfile) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      invalidateAuthSensitiveQueries();
+      navigateAfterProfileSwitch();
+      setPendingProfileSwitch(null);
+    }, 0);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [
+    address,
+    invalidateAuthSensitiveQueries,
+    isFetchingConnectedProfile,
+    navigateAfterProfileSwitch,
+    pendingProfileSwitch,
+  ]);
 
   const showWaves = useMemo(() => {
-    return !!connectedProfile?.handle && !activeProfileProxy && !!address;
-  }, [connectedProfile?.handle, activeProfileProxy, address]);
+    return (
+      !!connectedProfile?.handle &&
+      !activeProfileProxy &&
+      !!address &&
+      isAddressAuthorized
+    );
+  }, [
+    connectedProfile?.handle,
+    activeProfileProxy,
+    address,
+    isAddressAuthorized,
+  ]);
 
   const onCancelSignRequest = useCallback(() => {
     if (signModalReason === "session-upgrade") {
@@ -1570,7 +1673,10 @@ export default function Auth({
         requestAuth,
         setToast,
         connectedProfile: connectedProfile ?? null,
-        fetchingProfile,
+        isAuthenticated: Boolean(
+          connectedProfile?.handle && isAddressAuthorized
+        ),
+        fetchingProfile: isFetchingConnectedProfile,
         receivedProfileProxies,
         activeProfileProxy,
         showWaves,

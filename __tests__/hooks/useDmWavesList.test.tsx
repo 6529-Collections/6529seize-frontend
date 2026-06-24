@@ -25,7 +25,10 @@ describe("useDmWavesList", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useAuthMock.mockReturnValue({ activeProfileProxy: null });
-    useSeizeConnectContextMock.mockReturnValue({ address: "0xABC" });
+    useSeizeConnectContextMock.mockReturnValue({
+      address: "0xABC",
+      hasValidWalletAuth: true,
+    });
     useWavesV2Mock.mockReturnValue({
       waves: [
         { id: "older", latestDropTimestamp: 100 },
@@ -53,8 +56,26 @@ describe("useDmWavesList", () => {
         pageSize: 20,
         directMessage: true,
         viewerIdentityKey: "0xabc:primary",
+        enabled: true,
         refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
         refetchIntervalInBackground: false,
+      })
+    );
+  });
+
+  it("disables the DM query while wallet auth is invalid", () => {
+    useSeizeConnectContextMock.mockReturnValue({
+      address: "0xABC",
+      hasValidWalletAuth: false,
+    });
+
+    renderHook(() => useDmWavesList());
+
+    expect(useWavesV2Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        directMessage: true,
+        viewerIdentityKey: null,
+        enabled: false,
       })
     );
   });

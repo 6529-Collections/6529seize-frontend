@@ -13,10 +13,16 @@ import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 const noopWaveAction = () => {};
 
 const useDmWavesList = () => {
-  const { address } = useSeizeConnectContext();
-  const { activeProfileProxy } = useAuth();
+  const { address, hasValidWalletAuth } = useSeizeConnectContext();
+  const { activeProfileProxy, fetchingProfile, isAuthenticated } = useAuth();
+  const hasValidWalletAuthorization = hasValidWalletAuth !== false;
+  const hasAuthenticatedProfile =
+    isAuthenticated ?? hasValidWalletAuthorization;
+  const isPendingAuthSwitch = Boolean(
+    address && (!hasValidWalletAuthorization || fetchingProfile)
+  );
   const viewerIdentityKey = useMemo(() => {
-    if (!address) {
+    if (!address || !hasValidWalletAuthorization) {
       return null;
     }
 
@@ -26,7 +32,7 @@ const useDmWavesList = () => {
     }
 
     return `${normalizedAddress}:primary`;
-  }, [address, activeProfileProxy?.id]);
+  }, [address, activeProfileProxy?.id, hasValidWalletAuthorization]);
 
   const {
     waves: mainWaves,
@@ -41,6 +47,9 @@ const useDmWavesList = () => {
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     directMessage: true,
     viewerIdentityKey,
+    enabled: Boolean(
+      address && hasAuthenticatedProfile && !isPendingAuthSwitch
+    ),
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
   });

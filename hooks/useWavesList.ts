@@ -85,8 +85,13 @@ const isKnownWaveForCurrentViewer = (wave: SidebarWave) =>
  */
 const useWavesList = () => {
   const queryClient = useQueryClient();
-  const { connectedProfile, activeProfileProxy } = useAuth();
-  const { address } = useSeizeConnectContext();
+  const {
+    connectedProfile,
+    activeProfileProxy,
+    fetchingProfile,
+    isAuthenticated,
+  } = useAuth();
+  const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
   const {
     pinnedIds,
@@ -101,14 +106,25 @@ const useWavesList = () => {
   const announcementsWaveId = normalizeOptionalWaveId(
     seizeSettings.announcements_wave_id
   );
+  const hasValidWalletAuthorization = hasValidWalletAuth !== false;
+  const hasAuthenticatedProfile =
+    isAuthenticated ??
+    (!!connectedProfile?.handle && hasValidWalletAuthorization);
 
   // Track connected identity state - memoize to prevent re-renders
   const isConnectedIdentity = useMemo(() => {
-    return !!connectedProfile?.handle && !activeProfileProxy;
-  }, [connectedProfile?.handle, activeProfileProxy]);
+    return (
+      !!connectedProfile?.handle &&
+      !activeProfileProxy &&
+      hasAuthenticatedProfile
+    );
+  }, [connectedProfile?.handle, activeProfileProxy, hasAuthenticatedProfile]);
   const isJoinedMode = following && isConnectedIdentity;
+  const isPendingAuthSwitch = Boolean(
+    address && (!hasValidWalletAuthorization || fetchingProfile)
+  );
   const viewerIdentityKey = useMemo(() => {
-    if (!address) {
+    if (!address || !hasValidWalletAuthorization) {
       return null;
     }
 
@@ -119,7 +135,7 @@ const useWavesList = () => {
     }
 
     return `${normalizedAddress}:primary`;
-  }, [address, activeProfileProxy?.id]);
+  }, [address, activeProfileProxy?.id, hasValidWalletAuthorization]);
 
   const nonPinnedFilter = isConnectedIdentity
     ? ApiWavesPinFilter.NotPinned
@@ -141,7 +157,7 @@ const useWavesList = () => {
     viewerIdentityKey,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
-    enabled: true,
+    enabled: !isPendingAuthSwitch,
   });
   // Fetch recent activity for the broad bottom section and pagination.
   const {
@@ -163,7 +179,7 @@ const useWavesList = () => {
       ? false
       : SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
-    enabled: !isJoinedMode,
+    enabled: !isJoinedMode && !isPendingAuthSwitch,
   });
   // Fetch followed waves by latest post activity for the known-wave sidebar.
   const {
@@ -184,7 +200,7 @@ const useWavesList = () => {
       ? SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS
       : false,
     refetchIntervalInBackground: false,
-    enabled: isJoinedMode,
+    enabled: isJoinedMode && !isPendingAuthSwitch,
   });
   const mainWaves = useMemo<SidebarWaveWithDiscoverySection[]>(() => {
     return [

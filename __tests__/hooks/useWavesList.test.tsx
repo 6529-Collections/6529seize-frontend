@@ -235,6 +235,29 @@ beforeEach(() => {
   });
 });
 
+test("pauses viewer-scoped wave sources while wallet auth is invalid", () => {
+  useSeizeConnectContextMock.mockReturnValue({
+    address: "0xABC",
+    hasValidWalletAuth: false,
+  });
+
+  renderHook(() => useWavesList(), { wrapper });
+
+  expect(useWavesV2Mock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      enabled: false,
+      viewerIdentityKey: null,
+      following: false,
+    })
+  );
+  expect(
+    useWavesV2Mock.mock.calls.every(([args]) => args.enabled === false)
+  ).toBe(true);
+  expect(
+    useWavesV2Mock.mock.calls.every(([args]) => args.viewerIdentityKey === null)
+  ).toBe(true);
+});
+
 test("combines main and pinned waves, filtering DMs and flagging pinned", () => {
   const { result } = renderHook(() => useWavesList(), { wrapper });
   const waves = result.current.waves;
