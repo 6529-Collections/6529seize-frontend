@@ -27,7 +27,11 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
       className="tw-flex tw-h-full tw-min-h-0 tw-flex-col"
       style={mobileWavesViewStyle}
     >
-      <div className={scrollContainerClassName} ref={scrollContainerRef}>
+      <div
+        data-mobile-bottom-nav-scroll-target="true"
+        className={scrollContainerClassName}
+        ref={scrollContainerRef}
+      >
         <Link
           href="/waves?view=profile-feed"
           prefetch={false}
