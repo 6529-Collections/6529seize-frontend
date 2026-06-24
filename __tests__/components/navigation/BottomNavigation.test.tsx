@@ -5,7 +5,10 @@ import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
-import { getNotificationsRoute } from "@/helpers/navigation.helpers";
+import {
+  getNotificationsRoute,
+  MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
+} from "@/helpers/navigation.helpers";
 
 jest.mock("@/components/navigation/NavItem", () => ({
   __esModule: true,
@@ -37,8 +40,18 @@ const { usePathname, useSearchParams } = require("next/navigation");
 
 let originalScrollYDescriptor: PropertyDescriptor | undefined;
 
+const getMobileBottomNavScrollTargetAttribute = () => {
+  const match = /^\[([^=\]]+)="true"\]$/.exec(
+    MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR
+  );
+  if (!match?.[1]) {
+    throw new Error("Unexpected mobile bottom nav scroll target selector");
+  }
+  return match[1];
+};
+
 const MOBILE_BOTTOM_NAV_SCROLL_TARGET_ATTRIBUTE =
-  "data-mobile-bottom-nav-scroll-target";
+  getMobileBottomNavScrollTargetAttribute();
 
 const flushAnimationFrame = async () => {
   await act(async () => {
