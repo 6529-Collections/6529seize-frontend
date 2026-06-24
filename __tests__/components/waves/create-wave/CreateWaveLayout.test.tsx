@@ -6,6 +6,9 @@ jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
+jest.mock("@/hooks/useNativeKeyboard", () => ({
+  useNativeKeyboard: jest.fn(),
+}));
 jest.mock(
   "@/components/waves/create-wave/main-steps/CreateWavesMainSteps",
   () => ({
@@ -19,6 +22,9 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveActions", () => ({
 }));
 
 const useCapacitor = require("@/hooks/useCapacitor").default as jest.Mock;
+const { useNativeKeyboard } = require("@/hooks/useNativeKeyboard") as {
+  useNativeKeyboard: jest.Mock;
+};
 
 const config = {
   overview: { type: "CHAT" },
@@ -27,7 +33,8 @@ const config = {
 describe("CreateWaveLayout", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useCapacitor.mockReturnValue({ isIos: false, keyboardVisible: false });
+    useCapacitor.mockReturnValue({ isIos: false });
+    useNativeKeyboard.mockReturnValue({ isVisible: false });
   });
 
   it("adds bottom safe-area padding to the action footer", () => {

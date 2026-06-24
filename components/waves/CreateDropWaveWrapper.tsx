@@ -82,7 +82,7 @@ export function CreateDropWaveWrapper({
     }
 
     return "tw-max-h-[calc(100vh-8.5rem)] lg:tw-max-h-[calc(100vh-7.5rem)] tw-z-30";
-  }, [capacitor.isIos, capacitor.keyboardVisible, context]);
+  }, [capacitor.isIos]);
   return (
     <div
       ref={containerRef}

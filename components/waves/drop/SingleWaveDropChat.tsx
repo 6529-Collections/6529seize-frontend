@@ -12,7 +12,7 @@ import {
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import PrivilegedDropCreator from "../PrivilegedDropCreator";
-import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import { DropMode } from "../dropComposer.types";
 import { WaveDropLayerProvider } from "../drops/WaveDropLayerContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
@@ -35,10 +35,10 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   isVotingControlsLocked = false,
 }) => {
   const { isApp } = useDeviceInfo();
-  const { isVisible: isKeyboardVisible } = useAndroidKeyboard();
+  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const { updateEligibility } = useWaveEligibility();
 
-  // Apply Android keyboard adjustments to the fixed input area
+  // Drop safe-area padding as soon as the native keyboard starts moving.
   const inputContainerStyle = useMemo(() => {
     return {
       paddingBottom: isKeyboardVisible
