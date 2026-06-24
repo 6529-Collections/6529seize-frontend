@@ -19,6 +19,8 @@ import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
@@ -27,8 +29,8 @@ import LogoIcon from "../common/icons/LogoIcon";
 import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
-import { isNavItemActive } from "./isNavItemActive";
 import NavItem from "./NavItem";
+import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import type { NavItem as NavItemData } from "./navTypes";
 import { getActiveViewFromUrl } from "./ViewContext";
 
@@ -287,6 +289,8 @@ const BottomNavigationResolvedContent: React.FC<
 > = ({ hidden = false, pathname, routeStateKey }) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
+  const { connectedProfile } = useAuth();
+  const { address } = useSeizeConnectContext();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
 
@@ -334,8 +338,20 @@ const BottomNavigationResolvedContent: React.FC<
       ),
     [isApp]
   );
+  const profileHref = getProfileHref({
+    address,
+    handle: connectedProfile?.handle,
+    normalisedHandle: connectedProfile?.normalised_handle,
+  });
   const activeItemIndex = navItems.findIndex((item) =>
-    isNavItemActive(item, pathname, searchParams, activeView, isCurrentWaveDm)
+    getResolvedNavItemState({
+      activeView,
+      isCurrentWaveDm,
+      item,
+      pathname,
+      profileHref,
+      searchParams,
+    }).isActive
   );
   const hasActiveItem = activeItemIndex >= 0;
 
