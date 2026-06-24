@@ -27,6 +27,10 @@ export function useAuthenticatedContent() {
       return "not-authenticated";
     }
 
+    if (!hasValidWalletAuthorization && !fetchingProfile) {
+      return "not-authenticated";
+    }
+
     if (fetchingProfile) {
       return "loading";
     }

@@ -124,6 +124,20 @@ describe("auth.utils", () => {
     globalThis.removeEventListener(AUTH_TOKEN_CHANGED_EVENT, listener);
   });
 
+  it("does not emit an auth token changed event when the wallet auth cookie value is unchanged", () => {
+    setupStorageMocks();
+    const listener = jest.fn();
+    globalThis.addEventListener(AUTH_TOKEN_CHANGED_EVENT, listener);
+    (Cookies.get as jest.Mock).mockReturnValue("jwt");
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("addr", "jwt", "refresh", "role");
+
+    expect(listener).not.toHaveBeenCalled();
+    globalThis.removeEventListener(AUTH_TOKEN_CHANGED_EVENT, listener);
+  });
+
   it("setAuthJwt clears role storage when role is missing", () => {
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);

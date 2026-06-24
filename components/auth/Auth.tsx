@@ -1516,8 +1516,8 @@ export default function Auth({
     }
 
     const timeoutId = globalThis.setTimeout(() => {
-      invalidateAuthSensitiveQueries();
       navigateAfterProfileSwitch();
+      invalidateAuthSensitiveQueries();
       setPendingProfileSwitch(null);
     }, 0);
 

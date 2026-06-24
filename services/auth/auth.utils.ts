@@ -99,10 +99,21 @@ const emitAuthTokenChanged = (): void => {
   }
 };
 
+const emitAuthTokenChangedIfChanged = (
+  previousJwt: string | null,
+  nextJwt: string | null
+): void => {
+  if (previousJwt !== nextJwt) {
+    emitAuthTokenChanged();
+  }
+};
+
 const setWalletAuthCookie = (jwt: string | null): void => {
+  const previousJwt = Cookies.get(WALLET_AUTH_COOKIE) ?? null;
+
   if (!jwt) {
     Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-    emitAuthTokenChanged();
+    emitAuthTokenChangedIfChanged(previousJwt, null);
     return;
   }
 
@@ -112,7 +123,7 @@ const setWalletAuthCookie = (jwt: string | null): void => {
     const expiresInSeconds = jwtExpiration - now;
     if (expiresInSeconds <= 0) {
       Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-      emitAuthTokenChanged();
+      emitAuthTokenChangedIfChanged(previousJwt, null);
       return;
     }
     const expiresInDays = expiresInSeconds / 86400;
@@ -121,10 +132,10 @@ const setWalletAuthCookie = (jwt: string | null): void => {
       ...COOKIE_OPTIONS,
       expires: expiresInDays,
     });
-    emitAuthTokenChanged();
+    emitAuthTokenChangedIfChanged(previousJwt, jwt);
   } catch {
     Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-    emitAuthTokenChanged();
+    emitAuthTokenChangedIfChanged(previousJwt, null);
   }
 };
 

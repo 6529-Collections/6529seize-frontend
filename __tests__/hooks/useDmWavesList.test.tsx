@@ -79,4 +79,35 @@ describe("useDmWavesList", () => {
       })
     );
   });
+
+  it("re-enables the DM query after profile loading settles", () => {
+    let fetchingProfile = true;
+    useAuthMock.mockImplementation(() => ({
+      activeProfileProxy: null,
+      fetchingProfile,
+      isAuthenticated: true,
+    }));
+
+    const { rerender } = renderHook(() => useDmWavesList());
+
+    expect(useWavesV2Mock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        directMessage: true,
+        viewerIdentityKey: "0xabc:primary",
+        enabled: false,
+      })
+    );
+
+    useWavesV2Mock.mockClear();
+    fetchingProfile = false;
+    rerender();
+
+    expect(useWavesV2Mock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        directMessage: true,
+        viewerIdentityKey: "0xabc:primary",
+        enabled: true,
+      })
+    );
+  });
 });

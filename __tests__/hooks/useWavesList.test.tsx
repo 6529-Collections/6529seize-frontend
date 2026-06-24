@@ -97,6 +97,16 @@ const wrapperWithoutConnectedIdentity: React.FC<{
   </QueryClientProvider>
 );
 
+const createWrapperWithAuth =
+  (getAuthContext: () => unknown): React.FC<{ children: React.ReactNode }> =>
+  ({ children }) => (
+    <QueryClientProvider client={queryClient}>
+      <AuthContext.Provider value={getAuthContext() as any}>
+        {children}
+      </AuthContext.Provider>
+    </QueryClientProvider>
+  );
+
 const createSidebarWave = ({
   id,
   latestDropTimestamp,
@@ -255,6 +265,41 @@ test("pauses viewer-scoped wave sources while wallet auth is invalid", () => {
   ).toBe(true);
   expect(
     useWavesV2Mock.mock.calls.every(([args]) => args.viewerIdentityKey === null)
+  ).toBe(true);
+});
+
+test("re-enables viewer-scoped wave sources after profile loading settles", () => {
+  useSeizeConnectContextMock.mockReturnValue({
+    address: "0xABC",
+    hasValidWalletAuth: true,
+  });
+  let fetchingProfile = true;
+  const authWrapper = createWrapperWithAuth(() => ({
+    connectedProfile: { handle: "me" },
+    activeProfileProxy: null,
+    fetchingProfile,
+    isAuthenticated: true,
+  }));
+
+  const { rerender } = renderHook(() => useWavesList(), {
+    wrapper: authWrapper,
+  });
+
+  expect(
+    useWavesV2Mock.mock.calls.every(([args]) => args.enabled === false)
+  ).toBe(true);
+
+  useWavesV2Mock.mockClear();
+  fetchingProfile = false;
+  rerender();
+
+  expect(
+    useWavesV2Mock.mock.calls.some(([args]) => args.enabled === true)
+  ).toBe(true);
+  expect(
+    useWavesV2Mock.mock.calls.some(
+      ([args]) => args.viewerIdentityKey === "0xabc:primary"
+    )
   ).toBe(true);
 });
 

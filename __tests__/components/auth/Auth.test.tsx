@@ -1295,7 +1295,65 @@ describe("Auth component", () => {
         expect.anything(),
         { wave_id: "private-wave" },
       ]);
+      expect(
+        mockQueryClient.getQueryData.mock.invocationCallOrder[0]
+      ).toBeLessThan(
+        invalidateAuthSensitiveQueries.mock.invocationCallOrder[0]
+      );
       expect(mockRouterReplace).toHaveBeenCalledWith("/messages");
+
+      window.dispatchEvent(new Event(authUtils.PROFILE_SWITCHED_EVENT));
+
+      await waitFor(() => {
+        expect(invalidateAuthSensitiveQueries).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it("uses the conservative waves fallback when profile switching from an uncached wave route", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      mockUsePathname.mockReturnValue("/waves/uncached-wave");
+      mockQueryClient.getQueryData.mockReturnValue(undefined);
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-1",
+          handle: "profile",
+          query: "profile",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const invalidateAuthSensitiveQueries = jest.fn();
+      mockGetWalletAddress.mockReturnValue(walletAddress);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={
+            {
+              invalidateAll: jest.fn(),
+              invalidateAuthSensitiveQueries,
+            } as any
+          }
+        >
+          <Auth>
+            <ShowAuthState />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("authenticated")).toHaveTextContent("true");
+      });
+
+      window.dispatchEvent(new Event(authUtils.PROFILE_SWITCHED_EVENT));
+
+      await waitFor(() => {
+        expect(mockRouterReplace).toHaveBeenCalledWith("/waves");
+      });
+      expect(invalidateAuthSensitiveQueries).toHaveBeenCalledTimes(1);
     });
   });
 
