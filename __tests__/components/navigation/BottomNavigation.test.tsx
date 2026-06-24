@@ -236,4 +236,35 @@ describe("BottomNavigation", () => {
       ).toBe(true);
     });
   });
+
+  it("reschedules compacting after hidden cleanup cancels a pending frame", async () => {
+    Object.defineProperty(globalThis, "scrollY", {
+      configurable: true,
+      value: 0,
+      writable: true,
+    });
+
+    const { rerender } = render(<BottomNavigation />);
+
+    act(() => {
+      globalThis.scrollY = 24;
+      fireEvent.scroll(globalThis);
+    });
+
+    rerender(<BottomNavigation hidden />);
+    rerender(<BottomNavigation />);
+
+    act(() => {
+      globalThis.scrollY = 48;
+      fireEvent.scroll(globalThis);
+    });
+
+    await waitFor(() => {
+      expect(
+        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+          return props.variant === "floating" && props.compact === true;
+        })
+      ).toBe(true);
+    });
+  });
 });

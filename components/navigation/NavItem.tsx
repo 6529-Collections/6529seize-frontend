@@ -55,8 +55,8 @@ const ActiveNavIndicator = ({
         ? "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
         : `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
             compact
-              ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
-              : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]"
+              ? "tw-h-11 tw-w-[3.75rem] sm:tw-h-12 sm:tw-w-[4.25rem]"
+              : "tw-h-12 tw-w-[4.05rem] sm:tw-h-[3.15rem] sm:tw-w-[4.45rem]"
           }`
     }
   />

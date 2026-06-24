@@ -96,7 +96,7 @@ export default function Notifications({
           onTopIntersection={handleTopIntersection}
           isFetchingNextPage={isFetchingNextPage}
           hasNextPage={pagination.hasNextPage}
-          bottomPaddingClassName="tw-pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))]"
+          bottomPaddingClassName="tw-pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))]"
           containerClassName="tw-bg-transparent"
         >
           <NotificationsContent
