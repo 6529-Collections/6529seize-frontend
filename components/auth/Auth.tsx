@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { MouseEvent } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { isAddress } from "viem";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
@@ -780,14 +781,40 @@ export default function Auth({
     );
   }, [address, connectedProfile?.id, connectedProfile?.handle]);
 
+  const verifyActiveWebSessionForAddress = useCallback(
+    async (
+      walletAddress: string,
+      abortSignal?: AbortSignal
+    ): Promise<boolean> => {
+      if (!hasActiveSessionV2Auth({ address: walletAddress })) {
+        return false;
+      }
+
+      try {
+        return await verifyActiveSessionV2WebSession({
+          address: walletAddress,
+          abortSignal,
+        });
+      } catch (error) {
+        if (!abortSignal?.aborted) {
+          logErrorSecurely("session_v2_web_session_verification", error);
+        }
+        return false;
+      }
+    },
+    []
+  );
+
   const ensureActiveWebSessionForAddress = useCallback(
     async (
       walletAddress: string,
       abortSignal?: AbortSignal
     ): Promise<boolean> => {
       if (!hasActiveSessionV2Auth({ address: walletAddress })) {
-        setSessionUpgradeRequired(true);
-        setSessionUpgradeHasDeadline(false);
+        if (!abortSignal?.aborted) {
+          setSessionUpgradeRequired(true);
+          setSessionUpgradeHasDeadline(false);
+        }
         return false;
       }
 
@@ -796,6 +823,10 @@ export default function Auth({
           address: walletAddress,
           abortSignal,
         });
+
+        if (abortSignal?.aborted) {
+          return true;
+        }
 
         if (!hasActiveWebSession) {
           setSessionUpgradeRequired(true);
@@ -819,14 +850,12 @@ export default function Auth({
     async (abortSignal?: AbortSignal): Promise<boolean> => {
       const walletAddress = address ?? getWalletAddress();
       if (!walletAddress || !getAuthJwt()) {
-        setSessionUpgradeRequired(false);
-        setSessionUpgradeHasDeadline(false);
         return false;
       }
 
-      return await ensureActiveWebSessionForAddress(walletAddress, abortSignal);
+      return await verifyActiveWebSessionForAddress(walletAddress, abortSignal);
     },
-    [address, ensureActiveWebSessionForAddress]
+    [address, verifyActiveWebSessionForAddress]
   );
 
   // Immediate authentication effect with race condition prevention
@@ -1771,6 +1800,13 @@ export default function Auth({
     }
     void requestAuth();
   };
+  const onSessionUpgradeLearnMore = (
+    event: MouseEvent<HTMLAnchorElement>
+  ) => {
+    event.preventDefault();
+    onCancelSignRequest();
+    router.push("/about/tech/wallet-authentication");
+  };
 
   return (
     <AuthContext.Provider
@@ -1836,7 +1872,10 @@ export default function Auth({
             </ul>
             {isSessionUpgradePrompt && (
               <p className={styles["signModalLearnMore"]}>
-                <Link href="/about/tech/wallet-authentication">
+                <Link
+                  href="/about/tech/wallet-authentication"
+                  onClick={onSessionUpgradeLearnMore}
+                >
                   {t(AUTH_MODAL_LOCALE, "auth.signModal.learnMore")}
                 </Link>
               </p>
