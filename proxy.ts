@@ -82,6 +82,7 @@ const STATIC_PATH_PREFIXES = [
   "/robots.txt",
   "/error",
 ] as const;
+const STATIC_PATHS = new Set<string>(["/help-index.json"]);
 const STATIC_PATH_SUFFIXES = [
   "favicon.ico",
   ".jpg",
@@ -315,6 +316,7 @@ export default async function proxy(req: NextRequest) {
     }
 
     if (
+      STATIC_PATHS.has(normalizedPathname) ||
       STATIC_PATH_PREFIXES.some((prefix) =>
         normalizedPathname.startsWith(prefix)
       ) ||
