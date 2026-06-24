@@ -1,46 +1,31 @@
-import Image from "next/image";
+import type { CSSProperties } from "react";
 
-type LogoIconColor = "white" | "black";
+const logoMaskStyle = {
+  WebkitMaskImage: "url('/6529.svg')",
+  maskImage: "url('/6529.svg')",
+  WebkitMaskPosition: "center",
+  maskPosition: "center",
+  WebkitMaskRepeat: "no-repeat",
+  maskRepeat: "no-repeat",
+  WebkitMaskSize: "contain",
+  maskSize: "contain",
+} satisfies CSSProperties;
 
 const LogoIcon = ({
   className,
-  color = "white",
 }: {
   readonly className?: string | undefined;
-  readonly color?: LogoIconColor | undefined;
 }) => {
   const wrapperClassName = className
-    ? `tw-relative tw-inline-block tw-align-middle ${className}`
-    : "tw-relative tw-inline-block tw-size-6 tw-align-middle";
-  const imageClassName = "tw-absolute tw-inset-0 tw-h-full tw-w-full";
+    ? `tw-inline-block tw-bg-current tw-align-middle ${className}`
+    : "tw-inline-block tw-size-6 tw-bg-current tw-align-middle";
 
   return (
-    <span aria-hidden="true" className={wrapperClassName}>
-      <Image
-        alt=""
-        aria-hidden="true"
-        className={`${imageClassName} ${
-          color === "black" ? "tw-opacity-0" : "tw-opacity-100"
-        }`}
-        draggable={false}
-        height={192}
-        unoptimized
-        width={192}
-        src="/6529.svg"
-      />
-      <Image
-        alt=""
-        aria-hidden="true"
-        className={`${imageClassName} ${
-          color === "black" ? "tw-opacity-100" : "tw-opacity-0"
-        }`}
-        draggable={false}
-        height={192}
-        unoptimized
-        width={192}
-        src="/6529-black.svg"
-      />
-    </span>
+    <span
+      aria-hidden="true"
+      className={wrapperClassName}
+      style={logoMaskStyle}
+    />
   );
 };
 
