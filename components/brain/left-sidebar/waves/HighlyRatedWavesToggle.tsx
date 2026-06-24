@@ -10,7 +10,6 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 10 as const;
@@ -143,6 +142,22 @@ const getWaveScoreLabel = (wave: MinimalWave): string | null => {
   return formatInteger(SIDEBAR_LOCALE, Math.round(score));
 };
 
+const getScoreBadgeFontSize = (scoreLabel: string) => {
+  if (scoreLabel.length >= 5) {
+    return 5;
+  }
+
+  if (scoreLabel.length === 4) {
+    return 5.8;
+  }
+
+  if (scoreLabel.length === 3) {
+    return 7;
+  }
+
+  return 8.8;
+};
+
 export const getFittingPreviewCount = ({
   itemCount,
   width,
@@ -247,15 +262,35 @@ function HighlyRatedWavePreviewScoreBadge({
   }
 
   return (
-    <span
+    <svg
       aria-hidden="true"
-      className="tw-pointer-events-none tw-absolute -tw-bottom-0.5 -tw-left-0.5 tw-z-10 tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-800/95 tw-text-iron-100 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.10),0_6px_14px_rgba(0,0,0,0.36)]"
+      viewBox="0 0 24 28"
+      className="tw-pointer-events-none tw-absolute -tw-bottom-1.5 -tw-left-1.5 tw-z-10 tw-h-6 tw-w-5 tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]"
     >
-      <ShieldCheckIcon
-        className="tw-size-3 tw-flex-shrink-0 tw-text-iron-200"
-        strokeWidth={1.8}
+      <path
+        d="M12 1.8 21.4 5.45v7.35c0 6.1-3.7 11.05-9.4 13.4-5.7-2.35-9.4-7.3-9.4-13.4V5.45L12 1.8Z"
+        className="tw-fill-iron-800 tw-stroke-iron-950"
+        strokeWidth="2.8"
+        strokeLinejoin="round"
       />
-    </span>
+      <path
+        d="M12 3.9 19.1 6.65v6.1c0 4.95-2.65 8.95-7.1 11-4.45-2.05-7.1-6.05-7.1-11v-6.1L12 3.9Z"
+        className="tw-fill-none tw-stroke-white/20"
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+      <text
+        x="12"
+        y="14.2"
+        dominantBaseline="middle"
+        textAnchor="middle"
+        fontSize={getScoreBadgeFontSize(scoreLabel)}
+        fontWeight="800"
+        className="tw-fill-iron-50"
+      >
+        {scoreLabel}
+      </text>
+    </svg>
   );
 }
 
@@ -324,11 +359,19 @@ function HighlyRatedWavePreviewLink({
           )}
           {scoreLabel !== null && (
             <span className="tw-ml-auto tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
-              <ShieldCheckIcon
+              <svg
                 className="tw-size-3 tw-flex-shrink-0 tw-text-iron-400"
-                strokeWidth={1.8}
+                viewBox="0 0 24 28"
                 aria-hidden="true"
-              />
+              >
+                <path
+                  d="M12 2.2 21 5.7v7.1c0 5.9-3.55 10.6-9 12.9-5.45-2.3-9-7-9-12.9V5.7L12 2.2Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinejoin="round"
+                />
+              </svg>
               {t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedPreviewScore", {
                 score: scoreLabel,
               })}
