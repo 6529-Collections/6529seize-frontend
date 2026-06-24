@@ -46,7 +46,6 @@ import {
 import { commonApiFetch } from "@/services/api/common-api";
 import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
 import {
-  AUTH_TOKEN_CHANGED_EVENT,
   canStoreAnotherWalletAccount,
   getAuthJwt,
   getWalletAddress,
@@ -174,6 +173,7 @@ interface RunImmediateAuthValidationParams {
 const SESSION_UPGRADE_REMINDER_STORAGE_KEY =
   "6529-session-v2-upgrade-reminders";
 const AUTH_MODAL_LOCALE = DEFAULT_LOCALE;
+const AUTH_TOKEN_CHANGED_EVENT_NAME = "6529-auth-token-changed";
 const SESSION_UPGRADE_REMINDER_MS = 2 * 60 * 60 * 1000;
 const DEFAULT_AUTH_ROLLOUT_SETTINGS: AuthRolloutSettings = {
   structuredSignaturesRequired: false,
@@ -636,7 +636,7 @@ export default function Auth({
       recheckStoredAuth
     );
     globalThis.window.addEventListener(
-      AUTH_TOKEN_CHANGED_EVENT,
+      AUTH_TOKEN_CHANGED_EVENT_NAME,
       recheckStoredAuth
     );
 
@@ -647,7 +647,7 @@ export default function Auth({
         recheckStoredAuth
       );
       globalThis.window.removeEventListener(
-        AUTH_TOKEN_CHANGED_EVENT,
+        AUTH_TOKEN_CHANGED_EVENT_NAME,
         recheckStoredAuth
       );
     };
