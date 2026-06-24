@@ -1,28 +1,28 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import { render, screen, waitFor } from "@testing-library/react";
+import React from "react";
 
 const mutateAsyncMock = jest.fn();
 const requestAuthMock = jest.fn().mockResolvedValue({ success: true });
 const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
 const setToastMock = jest.fn();
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock("@tanstack/react-query", () => ({
   useMutation: () => ({ mutateAsync: mutateAsyncMock }),
 }));
 
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
-  usePathname: () => '/notifications',
+  usePathname: () => "/notifications",
 }));
 
 const setTitleMock = jest.fn();
 
-jest.mock('@/components/auth/Auth', () => {
-  const React = require('react');
+jest.mock("@/components/auth/Auth", () => {
+  const React = require("react");
   return {
     AuthContext: React.createContext({
-      connectedProfile: { handle: 'bob', id: '1' },
+      connectedProfile: { handle: "bob", id: "1" },
       activeProfileProxy: null,
       fetchingProfile: false,
       requestAuth: requestAuthMock,
@@ -39,48 +39,52 @@ jest.mock('@/components/auth/Auth', () => {
 });
 
 const invalidateNotifications = jest.fn();
-jest.mock('@/components/react-query-wrapper/ReactQueryWrapper', () => {
-  const React = require('react');
-  return { ReactQueryWrapperContext: React.createContext({ invalidateNotifications }) };
+jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => {
+  const React = require("react");
+  return {
+    ReactQueryWrapperContext: React.createContext({ invalidateNotifications }),
+  };
 });
 
-jest.mock('@/components/brain/notifications/NotificationsWrapper', () => ({
+jest.mock("@/components/brain/notifications/NotificationsWrapper", () => ({
   __esModule: true,
   default: () => <div data-testid="wrapper" />,
 }));
 
-jest.mock('@/components/brain/notifications/NotificationsCauseFilter', () => ({
+jest.mock("@/components/brain/notifications/NotificationsCauseFilter", () => ({
   __esModule: true,
   default: () => <div data-testid="filter" />,
 }));
 
-jest.mock('@/components/brain/content/input/BrainContentInput', () => ({
+jest.mock("@/components/brain/content/input/BrainContentInput", () => ({
   __esModule: true,
   default: () => <div data-testid="input" />,
 }));
 
-jest.mock('@/components/brain/my-stream/layout/MyStreamNoItems', () => ({
+jest.mock("@/components/brain/my-stream/layout/MyStreamNoItems", () => ({
   __esModule: true,
   default: () => <div data-testid="no-items" />,
 }));
 
 const useNotificationsQueryMock = jest.fn();
-jest.mock('@/hooks/useNotificationsQuery', () => ({
+jest.mock("@/hooks/useNotificationsQuery", () => ({
   useNotificationsQuery: () => useNotificationsQueryMock(),
 }));
 
-jest.mock('@/components/notifications/NotificationsContext', () => ({
-  useNotificationsContext: () => ({ removeAllDeliveredNotifications: jest.fn() }),
+jest.mock("@/components/notifications/NotificationsContext", () => ({
+  useNotificationsContext: () => ({
+    removeAllDeliveredNotifications: jest.fn(),
+  }),
 }));
 
-jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
-  useLayout: () => ({ notificationsViewStyle: { height: '10px' } }),
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ notificationsViewStyle: { height: "10px" } }),
 }));
 
 // Mock TitleContext
-jest.mock('@/contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -92,9 +96,9 @@ jest.mock('@/contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import Notifications from '@/components/brain/notifications';
+import Notifications from "@/components/brain/notifications";
 
-describe('Notifications component', () => {
+describe("Notifications component", () => {
   beforeEach(() => {
     mutateAsyncMock.mockClear();
     mutateAsyncMock.mockResolvedValue(undefined);
@@ -107,7 +111,7 @@ describe('Notifications component', () => {
     setToastMock.mockClear();
   });
 
-  it('shows loader when fetching and no items', async () => {
+  it("shows loader when fetching and no items", async () => {
     useNotificationsQueryMock.mockReturnValue({
       items: [],
       isFetching: true,
@@ -122,16 +126,18 @@ describe('Notifications component', () => {
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
-    expect(screen.getByText('Loading notifications...', { selector: 'div' })).toBeInTheDocument();
+    expect(
+      screen.getByText("Loading notifications...", { selector: "div" })
+    ).toBeInTheDocument();
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
     // Title is set via TitleContext hooks
   });
 
-  it('renders wrapper with items', async () => {
+  it("renders wrapper with items", async () => {
     useNotificationsQueryMock.mockReturnValue({
-      items: ['a'],
+      items: ["a"],
       isFetching: false,
       isFetchingNextPage: false,
       hasNextPage: false,
@@ -144,13 +150,16 @@ describe('Notifications component', () => {
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
-    expect(screen.getByTestId('wrapper')).toBeInTheDocument();
+    expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
+    ).toHaveClass("tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]");
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
   });
 
-  it('shows no items component when query done but empty', async () => {
+  it("shows no items component when query done but empty", async () => {
     useNotificationsQueryMock.mockReturnValue({
       items: [],
       isFetching: false,
@@ -165,7 +174,7 @@ describe('Notifications component', () => {
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
-    expect(screen.getByTestId('no-items')).toBeInTheDocument();
+    expect(screen.getByTestId("no-items")).toBeInTheDocument();
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
