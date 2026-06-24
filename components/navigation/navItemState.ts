@@ -11,9 +11,7 @@ export const getProfileHref = ({
   readonly handle?: string | null | undefined;
   readonly normalisedHandle?: string | null | undefined;
 }): string | null => {
-  const normalizedConnectedHandle = (
-    normalisedHandle ?? handle
-  )?.toLowerCase();
+  const normalizedConnectedHandle = (normalisedHandle ?? handle)?.toLowerCase();
   const normalizedConnectedAddress = address?.toLowerCase();
   const profileSlug = normalizedConnectedHandle ?? normalizedConnectedAddress;
 

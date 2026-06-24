@@ -343,15 +343,16 @@ const BottomNavigationResolvedContent: React.FC<
     handle: connectedProfile?.handle,
     normalisedHandle: connectedProfile?.normalised_handle,
   });
-  const activeItemIndex = navItems.findIndex((item) =>
-    getResolvedNavItemState({
-      activeView,
-      isCurrentWaveDm,
-      item,
-      pathname,
-      profileHref,
-      searchParams,
-    }).isActive
+  const activeItemIndex = navItems.findIndex(
+    (item) =>
+      getResolvedNavItemState({
+        activeView,
+        isCurrentWaveDm,
+        item,
+        pathname,
+        profileHref,
+        searchParams,
+      }).isActive
   );
   const hasActiveItem = activeItemIndex >= 0;
 
