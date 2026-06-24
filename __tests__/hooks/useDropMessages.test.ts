@@ -1,6 +1,7 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { UseInfiniteQueryResult } from '@tanstack/react-query';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 // Setup mock for useInfiniteQuery so tests can control its behaviour
 const useInfiniteQueryMock = jest.fn();
@@ -26,8 +27,8 @@ jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn().mockResolvedValue({ drops: [], wave: null }),
 }));
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
+const createQueryClient = () =>
+  new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
@@ -35,6 +36,8 @@ const createWrapper = () => {
       },
     },
   });
+
+const createWrapper = (queryClient = createQueryClient()) => {
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 };
@@ -129,6 +132,55 @@ describe('useDropMessages', () => {
     unmount();
     jest.useRealTimers();
   });
+});
+
+it('upserts websocket replies into the matching reply cache', () => {
+  const refetch = jest.fn().mockResolvedValue(undefined);
+  useInfiniteQueryMock.mockReturnValue({
+    data: { pages: [] },
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isFetching: false,
+    isFetchingNextPage: false,
+    refetch,
+  } as Partial<UseInfiniteQueryResult>);
+
+  let wsCallback: any;
+  const {
+    useWebSocketMessage,
+  } = require('@/services/websocket/useWebSocketMessage');
+  (useWebSocketMessage as jest.Mock).mockImplementation((type, cb) => {
+    if (type === 'DROP_UPDATE') {
+      wsCallback = cb;
+    }
+    return { isConnected: true };
+  });
+
+  const queryClient = createQueryClient();
+  const replyQueryKey = [
+    QueryKey.DROPS,
+    { waveId: 'wave-x', limit: 50, dropId: 'drop-y' },
+  ];
+  queryClient.setQueryData(replyQueryKey, {
+    pages: [{ drops: [{ id: 'old-reply' }] }],
+  });
+
+  renderHook(() => useDropMessages('wave-x', 'drop-y'), {
+    wrapper: createWrapper(queryClient),
+  });
+
+  act(() => {
+    wsCallback({
+      id: 'bot-reply',
+      wave: { id: 'wave-x' },
+      reply_to: { drop_id: 'drop-y' },
+      parts: [],
+    });
+  });
+
+  expect(
+    (queryClient.getQueryData(replyQueryKey) as any).pages[0].drops[0].id
+  ).toBe('bot-reply');
 });
 it('ignores websocket messages when dropId is null', () => {
   const refetch = jest.fn();

@@ -20,7 +20,11 @@ const fetchWaveDropsFeedV2Mock = fetchWaveDropsFeedV2 as jest.Mock;
 describe("useWaveDrops", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useQueryClientMock.mockReturnValue({ setQueriesData: jest.fn() });
+    useQueryClientMock.mockReturnValue({
+      getQueryCache: jest.fn(() => ({ findAll: jest.fn(() => []) })),
+      setQueriesData: jest.fn(),
+      setQueryData: jest.fn(),
+    });
     useInfiniteQueryMock.mockReturnValue({
       data: { pages: [] },
       fetchNextPage: jest.fn(),
