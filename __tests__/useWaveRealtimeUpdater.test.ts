@@ -6,6 +6,9 @@ import {
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
 const mockSetQueriesData = jest.fn();
+const mockSetQueryData = jest.fn();
+const mockCancelQueries = jest.fn().mockResolvedValue(undefined);
+const mockFindAll = jest.fn(() => []);
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: () => ({ isConnected: true }),
@@ -55,6 +58,11 @@ jest.mock("@/contexts/wave/drop-visibility", () => ({
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
+    cancelQueries: mockCancelQueries,
+    getQueryCache: () => ({
+      findAll: mockFindAll,
+    }),
+    setQueryData: mockSetQueryData,
     setQueriesData: mockSetQueriesData,
   })),
 }));
@@ -218,6 +226,220 @@ describe("useWaveRealtimeUpdater", () => {
     });
     expect(mockSetQueriesData).toHaveBeenCalled();
     expect(props.updateData).toHaveBeenCalled();
+  });
+
+  it("syncs newest messages after helpbot final reaction updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "helpbot-target",
+            type: DropSize.FULL,
+            stableKey: "helpbot-target",
+            stableHash: "helpbot-target",
+            serial_no: 20,
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "helpbot-target",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "helpbot-target",
+      wave: { id: "wave1" },
+      author: {},
+      reactions: [
+        {
+          reaction: ":white_check_mark:",
+          profiles: [{ handle: "help6529" }],
+        },
+      ],
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.syncNewestMessages).toHaveBeenCalledWith(
+      "wave1",
+      20,
+      expect.any(AbortSignal)
+    );
+  });
+
+  it("syncs newest messages after helpbot final reactions without reaction profile handles", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "helpbot-target",
+            type: DropSize.FULL,
+            stableKey: "helpbot-target",
+            stableHash: "helpbot-target",
+            serial_no: 20,
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "helpbot-target",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "helpbot-target",
+      wave: { id: "wave1" },
+      author: {},
+      mentioned_users: [
+        {
+          handle_in_content: "help6529",
+          current_handle: "help6529",
+        },
+      ],
+      reactions: [
+        {
+          reaction: ":white_check_mark:",
+          profiles: [{}],
+        },
+      ],
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.syncNewestMessages).toHaveBeenCalledWith(
+      "wave1",
+      20,
+      expect.any(AbortSignal)
+    );
+  });
+
+  it("does not sync newest messages after helpbot reactions without a known serial", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "helpbot-no-serial",
+            type: DropSize.FULL,
+            stableKey: "helpbot-no-serial",
+            stableHash: "helpbot-no-serial",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: null,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "helpbot-no-serial",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "helpbot-no-serial",
+      wave: { id: "wave1" },
+      author: {},
+      reactions: [
+        {
+          reaction: ":white_check_mark:",
+          profiles: [{ handle: "help6529" }],
+        },
+      ],
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("helpbot-no-serial");
+    expect(props.syncNewestMessages).not.toHaveBeenCalled();
+  });
+
+  it("syncs newest messages after helpbot final reactions even when canonical reaction is stale", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "helpbot-stale-target",
+            type: DropSize.FULL,
+            stableKey: "helpbot-stale-target",
+            stableHash: "helpbot-stale-target",
+            serial_no: 20,
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "helpbot-stale-target",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: { reaction: ":old:" },
+    });
+    (recordReactionRealtimeReconciliation as jest.Mock).mockReturnValueOnce({
+      shouldApplyCanonicalDrop: false,
+      expectedReaction: ":new:",
+      serverReaction: ":old:",
+      supersededByMutationId: "mutation-2",
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "helpbot-stale-target",
+      wave: { id: "wave1" },
+      author: {},
+      reactions: [
+        {
+          reaction: ":white_check_mark:",
+          profiles: [{ handle: "help6529" }],
+        },
+      ],
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).not.toHaveBeenCalled();
+    expect(props.syncNewestMessages).toHaveBeenCalledWith(
+      "wave1",
+      20,
+      expect.any(AbortSignal)
+    );
   });
 
   it("marks active wave as read after visible reaction updates", async () => {

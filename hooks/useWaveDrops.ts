@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
 import {
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
@@ -178,6 +179,7 @@ export function useWaveDrops({
           return;
         }
 
+        upsertDropIntoMatchingDropsQueries(queryClient, { drop: message });
         updateDropInCachedDrops(queryClient, message, {
           preferExistingPollVote: true,
         });

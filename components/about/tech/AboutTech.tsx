@@ -57,23 +57,25 @@ export default function AboutTech() {
         >
           Active Technical Notes
         </h2>
-        <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-5">
+        <Link
+          href="/about/tech/wallet-authentication"
+          className="tw-block tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-5 tw-text-current tw-no-underline tw-transition-colors hover:tw-border-primary-500 hover:tw-bg-iron-900/60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 focus:tw-ring-offset-2 focus:tw-ring-offset-black"
+          aria-label={t(
+            locale,
+            "about.tech.notes.walletAuthentication.ariaLabel"
+          )}
+        >
           <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
             Auth changes
           </p>
-          <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug">
-            <Link
-              href="/about/tech/wallet-authentication"
-              className="hover:tw-text-primary-200 tw-text-iron-50 tw-no-underline"
-            >
-              Wallet authentication upgrade
-            </Link>
+          <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
+            Wallet authentication upgrade
           </h3>
           <p className="tw-mb-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
             What is changing with the new secure session, why users may be asked
             to upgrade, and what to expect during rollout.
           </p>
-        </div>
+        </Link>
       </section>
 
       <section className="tw-max-w-6xl" aria-labelledby="tech-reports-heading">
