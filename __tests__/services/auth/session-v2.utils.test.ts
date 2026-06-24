@@ -16,6 +16,7 @@ import {
   persistSessionResponse,
   redeemConnectionShare,
   refreshSessionV2,
+  verifyActiveSessionV2WebSession,
 } from "@/services/auth/session-v2.utils";
 
 jest.mock("@capacitor/core", () => ({
@@ -290,6 +291,45 @@ describe("session-v2.utils", () => {
       credentials: "include",
       errorMode: "structured",
     });
+  });
+
+  it("verifies an active web session without rewriting local auth", async () => {
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(
+      verifyActiveSessionV2WebSession({ address: "0xabc" })
+    ).resolves.toBe(true);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-refresh",
+      body: {
+        client_type: "web",
+        client_address: "0xabc",
+      },
+      signal: undefined,
+      credentials: "include",
+      errorMode: "structured",
+    });
+    expect(setAuthJwt).not.toHaveBeenCalled();
+  });
+
+  it("returns false when the active web session cannot be refreshed", async () => {
+    const unauthorizedError = Object.assign(new Error("Unauthorized"), {
+      status: 401,
+      response: { status: 401 },
+    });
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(unauthorizedError);
+
+    await expect(
+      verifyActiveSessionV2WebSession({ address: "0xabc" })
+    ).resolves.toBe(false);
   });
 
   it("treats unauthorized native refresh as an invalid session", async () => {

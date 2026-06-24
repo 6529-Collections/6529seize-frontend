@@ -64,6 +64,7 @@ jest.mock("@/services/auth/session-v2.utils", () => ({
   getSessionNonce: jest.fn(),
   loginWithSessionV2: jest.fn(),
   persistSessionResponse: jest.fn(),
+  verifyActiveSessionV2WebSession: jest.fn(async () => true),
 }));
 
 // Using jwt-validation.utils instead of direct jwt-decode
@@ -270,14 +271,20 @@ function RequestAuthButton() {
 }
 
 function SessionUpgradeProbe() {
-  const { requestSessionUpgrade, sessionUpgradeRequired } = useAuth();
+  const {
+    ensureActiveSessionV2WebSession,
+    requestSessionUpgrade,
+    sessionUpgradeRequired,
+  } = useAuth();
   const [result, setResult] = React.useState("none");
+  const [verifyResult, setVerifyResult] = React.useState("none");
   return (
     <div>
       <span data-testid="session-upgrade-required">
         {String(sessionUpgradeRequired)}
       </span>
       <span data-testid="session-upgrade-result">{result}</span>
+      <span data-testid="session-verify-result">{verifyResult}</span>
       <button
         type="button"
         onClick={() =>
@@ -288,6 +295,17 @@ function SessionUpgradeProbe() {
         data-testid="request-session-upgrade"
       >
         upgrade
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          void ensureActiveSessionV2WebSession?.().then((success) => {
+            setVerifyResult(String(success));
+          })
+        }
+        data-testid="verify-session"
+      >
+        verify
       </button>
     </div>
   );
@@ -386,6 +404,8 @@ describe("Auth component", () => {
     sessionV2.loginWithSessionV2.mockReset();
     sessionV2.persistSessionResponse.mockReset();
     sessionV2.persistSessionResponse.mockResolvedValue(true);
+    sessionV2.verifyActiveSessionV2WebSession.mockReset();
+    sessionV2.verifyActiveSessionV2WebSession.mockResolvedValue(true);
 
     // Reset useIdentity mock
     mockUseIdentity.mockReturnValue({ profile: null, isLoading: false });
@@ -1551,6 +1571,145 @@ describe("Auth component", () => {
       expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
     });
 
+    it("marks a connected local v2 session as needing upgrade when the web session is missing", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils = require("@/services/auth/auth.utils");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const mockHasActiveSessionV2Auth =
+        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("v2-jwt");
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      mockHasActiveSessionV2Auth.mockReturnValue(true);
+      sessionV2.verifyActiveSessionV2WebSession.mockResolvedValue(false);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledWith({
+          address: validAddress,
+          abortSignal: expect.objectContaining({ aborted: false }),
+        });
+      });
+      expect(screen.getByTestId("session-upgrade-required")).toHaveTextContent(
+        "true"
+      );
+      expect(
+        screen.queryByText("Upgrade Authentication")
+      ).not.toBeInTheDocument();
+      expect(mockValidateAuthImmediate).not.toHaveBeenCalled();
+    });
+
+    it("fails closed when context web-session verification errors without changing upgrade state", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils = require("@/services/auth/auth.utils");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const mockHasActiveSessionV2Auth =
+        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("v2-jwt");
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      mockHasActiveSessionV2Auth.mockReturnValue(true);
+      sessionV2.verifyActiveSessionV2WebSession
+        .mockResolvedValueOnce(true)
+        .mockRejectedValueOnce(new Error("verification failed"));
+      mockValidateAuthImmediate.mockResolvedValue({
+        validationCompleted: true,
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledTimes(
+          1
+        );
+      });
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("verify-session"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-verify-result")).toHaveTextContent(
+          "false"
+        );
+      });
+      expect(screen.getByTestId("session-upgrade-required")).toHaveTextContent(
+        "false"
+      );
+      expect(
+        screen.queryByText("Upgrade Authentication")
+      ).not.toBeInTheDocument();
+    });
+
+    it("marks a disconnected stored v2 session as needing upgrade when the web session is missing", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = null;
+      connectionState = "disconnected";
+      canSignActiveWallet = false;
+      const authUtils = require("@/services/auth/auth.utils");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const mockHasActiveSessionV2Auth =
+        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("v2-jwt");
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      mockHasActiveSessionV2Auth.mockReturnValue(true);
+      sessionV2.verifyActiveSessionV2WebSession.mockResolvedValue(false);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("session-upgrade-required")
+        ).toHaveTextContent("true");
+      });
+      expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledWith({
+        address: validAddress,
+        abortSignal: expect.objectContaining({ aborted: false }),
+      });
+      expect(
+        screen.queryByText("Upgrade Authentication")
+      ).not.toBeInTheDocument();
+    });
+
     it("allows a disconnected legacy web session to start manual upgrade without a rollout deadline", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = null;
@@ -1948,6 +2107,48 @@ describe("Auth component", () => {
       expect(
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();
+    });
+
+    it("dismisses the session upgrade prompt when opening the learn more page", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+
+      const user = userEvent.setup();
+      await user.click(screen.getByText("Learn more about this update"));
+
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        "/about/tech/wallet-authentication"
+      );
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Upgrade Authentication")
+        ).not.toBeInTheDocument();
+      });
     });
 
     it("keeps session upgrade dismiss reminders scoped to each connected account", async () => {

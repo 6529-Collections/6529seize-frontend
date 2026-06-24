@@ -256,6 +256,28 @@ export async function persistSessionResponse(
   return didPersistAuth;
 }
 
+export async function verifyActiveSessionV2WebSession({
+  address,
+  abortSignal,
+}: {
+  readonly address: string;
+  readonly abortSignal?: AbortSignal | undefined;
+}): Promise<boolean> {
+  if (getSessionClientType() !== "web") {
+    return true;
+  }
+
+  const refreshedSession = await refreshSessionV2({
+    address,
+    abortSignal,
+  });
+  if (!refreshedSession || refreshedSession.client_type !== "web") {
+    return false;
+  }
+
+  return true;
+}
+
 export async function createConnectionShare({
   signal,
 }: {
