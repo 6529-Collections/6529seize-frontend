@@ -40,11 +40,11 @@ function parseFilter(value: string | null): XtdhViewFilter {
   return normalized === "received" ? "received" : DEFAULT_FILTER;
 }
 
-export default function UserPageXtdh({
-  profile,
-}: {
+type UserPageXtdhProps = {
   readonly profile: ApiIdentity;
-}) {
+};
+
+export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -101,11 +101,8 @@ export default function UserPageXtdh({
       router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
         scroll: false,
       });
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-        scroll: false,
-      });
     },
-    [activeFilter, pathname, router]
+    [activeFilter, pathname, router, searchParams]
   );
 
   const handleOutboundClick = useCallback(() => {
@@ -138,8 +135,8 @@ export default function UserPageXtdh({
       />
 
       <div className="tw-mt-4">
-        <div className="tw-border-b-0 tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-between tw-rounded-t-lg tw-overflow-hidden">
-          <div className="tw-flex tw-w-full md:tw-w-auto">
+        <div className="tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950/80 tw-p-1 md:tw-flex-row md:tw-items-center">
+          <div className="tw-grid tw-w-full tw-grid-cols-2 tw-gap-1 md:tw-flex md:tw-w-auto">
             {XTDH_TAB_CONFIG.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeFilter === tab.key;
@@ -147,13 +144,13 @@ export default function UserPageXtdh({
                 <button
                   key={tab.key}
                   onClick={() => handleFilterChange(tab.key)}
-                  className={`tw-relative tw-border-t-0 tw-border-x-0 tw-px-8 tw-py-5 tw-text-sm tw-font-medium tw-transition-all tw-duration-300 tw-flex tw-items-center tw-gap-2 tw-border-b-2 ${
+                  className={`tw-relative tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-t-0 tw-border-x-0 tw-border-b-2 tw-px-3 tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 sm:tw-px-8 md:tw-w-auto ${
                     isActive
                       ? "tw-text-white tw-bg-iron-900 tw-border-b-primary-400"
-                      : "tw-text-iron-400 hover:tw-text-white hover:tw-bg-iron-800/50 tw-border-b-transparent tw-bg-transparent"
+                      : "tw-text-iron-400 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-800/50 tw-border-b-transparent tw-bg-transparent"
                   }`}
                 >
-                  <Icon className="tw-size-4" />
+                  <Icon className="tw-size-4 tw-shrink-0" />
                   {tab.label}
                 </button>
               );
