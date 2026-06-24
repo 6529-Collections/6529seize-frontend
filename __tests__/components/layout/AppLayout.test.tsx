@@ -28,8 +28,10 @@ jest.mock("next/dynamic", () => () => {
 jest.mock(
   "@/components/navigation/BottomNavigation",
   () =>
-    function BottomNavigation() {
-      return <div data-testid="bottom-nav" />;
+    function BottomNavigation({ hidden }: { readonly hidden?: boolean }) {
+      return (
+        <div data-testid="bottom-nav" data-hidden={`${Boolean(hidden)}`} />
+      );
     }
 );
 jest.mock(
@@ -191,6 +193,51 @@ describe("AppLayout", () => {
     const appWrapper = container.firstElementChild as HTMLElement;
 
     expect(screen.queryByTestId("bottom-nav")).not.toBeInTheDocument();
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
+  });
+
+  it("uses visible floating bottom nav spacing on stream list routes", () => {
+    usePathname.mockReturnValue("/notifications");
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(screen.getByTestId("bottom-nav")).toHaveAttribute(
+      "data-hidden",
+      "false"
+    );
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "104px"
+    );
+  });
+
+  it("slides the bottom nav away and clears spacing on wave detail routes", () => {
+    usePathname.mockReturnValue("/waves/wave-1");
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(screen.getByTestId("bottom-nav")).toHaveAttribute(
+      "data-hidden",
+      "true"
+    );
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
+  });
+
+  it("slides the bottom nav away and clears spacing on message detail routes", () => {
+    usePathname.mockReturnValue("/messages/dm-1");
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(screen.getByTestId("bottom-nav")).toHaveAttribute(
+      "data-hidden",
+      "true"
+    );
     expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
       "0px"
     );
