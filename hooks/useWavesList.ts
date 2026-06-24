@@ -584,7 +584,6 @@ const useWavesList = () => {
   // Function to refetch all waves (main, pinned, announcements, subwaves)
   const refetchAllWaves = useCallback(() => {
     if (isPendingAuthSwitch) {
-      void noopAsyncWaveAction();
       return;
     }
 
