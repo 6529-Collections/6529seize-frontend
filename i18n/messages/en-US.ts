@@ -615,7 +615,6 @@ export const EN_US_MESSAGES = {
   "acceptConnection.toast.persistFailed": "Failed to store connected profile",
   "acceptConnection.toast.acceptFailed":
     "Couldn't accept this connection. Please try again.",
-  "navigation.primary.ariaLabel": "Primary",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":

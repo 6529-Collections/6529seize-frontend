@@ -102,9 +102,6 @@ describe("frontend i18n helpers", () => {
       );
     }
     expect(t("en-GB", "theMemes.sorting.sortBy")).toBe("Sort by");
-    expect(t("fr-FR", "navigation.primary.ariaLabel")).toBe(
-      t("en-US", "navigation.primary.ariaLabel")
-    );
     expect(t("fr-FR", "theMemes.detail.tabs.collectors")).toBe("Collectors");
     expect(t("es-ES", "theMemes.detail.heading.card", { tokenId: 1 })).toBe(
       "Card 1"

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import BottomNavigation from "@/components/navigation/BottomNavigation";
 import NavItem from "@/components/navigation/NavItem";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
@@ -35,52 +35,14 @@ const { usePathname, useSearchParams } = require("next/navigation");
 (usePathname as jest.Mock).mockReturnValue("/");
 (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 
-let originalScrollYDescriptor: PropertyDescriptor | undefined;
-
 beforeEach(() => {
   jest.clearAllMocks();
-  originalScrollYDescriptor = Object.getOwnPropertyDescriptor(
-    globalThis,
-    "scrollY"
-  );
-  let animationFrameId = 0;
-  const animationFrameTimeouts = new Map<
-    number,
-    ReturnType<typeof setTimeout>
-  >();
-  jest
-    .spyOn(globalThis, "requestAnimationFrame")
-    .mockImplementation((callback: FrameRequestCallback) => {
-      const frameId = ++animationFrameId;
-      const timeoutId = setTimeout(() => {
-        animationFrameTimeouts.delete(frameId);
-        callback(0);
-      }, 0);
-      animationFrameTimeouts.set(frameId, timeoutId);
-      return frameId;
-    });
-  jest
-    .spyOn(globalThis, "cancelAnimationFrame")
-    .mockImplementation((frameId: number) => {
-      const timeoutId = animationFrameTimeouts.get(frameId);
-      if (timeoutId !== undefined) {
-        clearTimeout(timeoutId);
-        animationFrameTimeouts.delete(frameId);
-      }
-    });
   (useLayout as jest.Mock).mockReturnValue({ registerRef });
   (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
   (useWaveData as jest.Mock).mockReturnValue({ data: null });
   (useWave as jest.Mock).mockReturnValue({ isDm: false });
   (usePathname as jest.Mock).mockReturnValue("/");
   (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
-});
-
-afterEach(() => {
-  if (originalScrollYDescriptor) {
-    Object.defineProperty(globalThis, "scrollY", originalScrollYDescriptor);
-  }
-  jest.restoreAllMocks();
 });
 
 describe("BottomNavigation", () => {
@@ -113,9 +75,6 @@ describe("BottomNavigation", () => {
       (item: { name: string }) => item.name === "Notifications"
     );
     expect(notificationsItem?.href).toBe(getNotificationsRoute(false));
-    expect(navItemCalls.every((call) => call[0].variant === "floating")).toBe(
-      true
-    );
   });
 
   it("renders a stable nav fallback when search params suspend", () => {
@@ -134,79 +93,5 @@ describe("BottomNavigation", () => {
     );
     expect(container.querySelector("ul")).toBeInTheDocument();
     expect(NavItem).not.toHaveBeenCalled();
-  });
-
-  it("uses the original fixed dock on brain routes", () => {
-    (usePathname as jest.Mock).mockReturnValue("/notifications");
-
-    const { container } = render(<BottomNavigation />);
-
-    expect(container.querySelector("nav")).toHaveClass("tw-h-[85px]");
-    expect(
-      (NavItem as jest.Mock).mock.calls.every(([props]) => {
-        return props.variant === "fixed" && props.compact === undefined;
-      })
-    ).toBe(true);
-  });
-
-  it("compacts the floating dock from window scroll", async () => {
-    Object.defineProperty(globalThis, "scrollY", {
-      configurable: true,
-      value: 0,
-      writable: true,
-    });
-
-    render(<BottomNavigation />);
-
-    act(() => {
-      globalThis.scrollY = 24;
-      fireEvent.scroll(globalThis);
-    });
-
-    await waitFor(() => {
-      expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
-          return props.variant === "floating" && props.compact === true;
-        })
-      ).toBe(true);
-    });
-  });
-
-  it("resets floating dock compact state when the route view changes", async () => {
-    Object.defineProperty(globalThis, "scrollY", {
-      configurable: true,
-      value: 0,
-      writable: true,
-    });
-
-    const { rerender } = render(<BottomNavigation />);
-
-    act(() => {
-      globalThis.scrollY = 24;
-      fireEvent.scroll(globalThis);
-    });
-
-    await waitFor(() => {
-      expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
-          return props.variant === "floating" && props.compact === true;
-        })
-      ).toBe(true);
-    });
-
-    (usePathname as jest.Mock).mockReturnValue("/discover");
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("view=network")
-    );
-
-    rerender(<BottomNavigation />);
-
-    await waitFor(() => {
-      expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
-          return props.variant === "floating" && props.compact === false;
-        })
-      ).toBe(true);
-    });
   });
 });

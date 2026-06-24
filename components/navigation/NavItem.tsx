@@ -1,5 +1,6 @@
 "use client";
 
+import { LazyMotion, domMax, m } from "framer-motion";
 import Image from "next/image";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -14,165 +15,25 @@ import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { isNavItemActive } from "./isNavItemActive";
 import { getActiveViewFromUrl, useViewContext } from "./ViewContext";
-import type { NavIconColor, NavItem as NavItemData, ViewKey } from "./navTypes";
+import type { NavItem as NavItemData } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
-  readonly variant?: "floating" | "fixed";
-  readonly compact?: boolean | undefined;
   readonly isCurrentWaveDm?: boolean;
   readonly fullPrefetch?: boolean;
 }
 
-const getIconSlotClass = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) => {
-  if (variant === "fixed") {
-    return "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
-  }
+const iconSlotClass =
+  "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
 
-  const compactClassName = compact
-    ? "tw-h-8 tw-scale-[0.82] sm:tw-h-9 sm:tw-scale-[0.88]"
-    : "tw-h-8 tw-scale-[0.9]";
-
-  return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
-};
-
-const ActiveNavIndicator = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) =>
-  variant === "fixed" ? (
-    <div className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white" />
-  ) : (
-    <div
-      className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-        compact
-          ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
-          : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]"
-      }`}
+const ActiveNavIndicator = () => (
+  <LazyMotion features={domMax}>
+    <m.div
+      layoutId="nav-indicator"
+      className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
     />
-  );
-
-const getPendingIndicatorClassName = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) => {
-  if (variant === "fixed") {
-    return "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white/60";
-  }
-
-  const compactClassName = compact
-    ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
-    : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]";
-
-  return `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
-};
-
-const getHomeIconSizeClass = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) => {
-  if (variant === "fixed") {
-    return "tw-size-9";
-  }
-
-  return compact ? "tw-size-8 sm:tw-size-[2.1rem]" : "tw-size-8";
-};
-
-const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
-  isHighlighted ? "tw-text-white" : "tw-text-iron-300";
-
-const getIconTextColorClass = ({
-  isActive,
-  isHighlighted,
-  item,
-  variant,
-}: {
-  readonly isActive: boolean;
-  readonly isHighlighted: boolean;
-  readonly item: NavItemData;
-  readonly variant: "floating" | "fixed";
-}) => {
-  if (item.name === "Home") {
-    return "";
-  }
-
-  if (variant === "fixed") {
-    return isHighlighted ? "tw-text-white" : "tw-text-iron-500";
-  }
-
-  return isActive
-    ? "tw-text-black"
-    : getInactiveIconTextColorClass(isHighlighted);
-};
-
-const getDisabledButtonClassName = (variant: "floating" | "fixed") => {
-  const layoutClassName =
-    variant === "fixed"
-      ? "tw-justify-start"
-      : "tw-justify-center tw-rounded-full";
-
-  return `tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none ${layoutClassName}`;
-};
-
-const getResolvedProfileState = ({
-  activeView,
-  isCurrentWaveDm,
-  item,
-  pathname,
-  profileHref,
-  searchParams,
-}: {
-  readonly activeView: ViewKey | null;
-  readonly isCurrentWaveDm: boolean;
-  readonly item: NavItemData;
-  readonly pathname: string;
-  readonly profileHref: string | null;
-  readonly searchParams: ReturnType<typeof useSearchParams>;
-}) => {
-  const isProfileItem = item.kind === "route" && item.name === "Profile";
-  const normalizedPathname = pathname.toLowerCase();
-
-  if (isProfileItem && profileHref !== null) {
-    const isProfileActive =
-      activeView === null &&
-      (normalizedPathname === profileHref ||
-        normalizedPathname.startsWith(`${profileHref}/`));
-
-    return {
-      isActive: isProfileActive,
-      resolvedItem: {
-        ...item,
-        href: profileHref,
-      },
-    };
-  }
-
-  return {
-    isActive: isNavItemActive(
-      item,
-      pathname,
-      searchParams,
-      activeView,
-      isCurrentWaveDm
-    ),
-    resolvedItem: item,
-  };
-};
+  </LazyMotion>
+);
 
 const NavItemLinkContent = ({
   hasUnreadMessages,
@@ -181,8 +42,6 @@ const NavItemLinkContent = ({
   iconSizeClass,
   isActive,
   item,
-  compact,
-  variant,
 }: {
   readonly hasUnreadMessages: boolean;
   readonly haveUnreadNotifications: boolean;
@@ -190,68 +49,55 @@ const NavItemLinkContent = ({
   readonly iconSizeClass: string;
   readonly isActive: boolean;
   readonly item: NavItemData;
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
 }) => {
   const { pending } = useLinkStatus();
   const isHighlighted = isActive || pending;
-  const IconComponent = item.iconComponent;
-  const activeIconColor: NavIconColor =
-    isActive && variant === "floating" ? "black" : "white";
-  const iconTextColorClass = getIconTextColorClass({
-    isActive,
-    isHighlighted,
-    item,
-    variant,
-  });
-  const resolvedIconSizeClass =
-    item.name === "Home"
-      ? getHomeIconSizeClass({ compact, variant })
-      : iconSizeClass;
 
   return (
-    <div className={getIconSlotClass({ compact, variant })}>
-      {isActive && <ActiveNavIndicator compact={compact} variant={variant} />}
+    <>
+      {isActive && <ActiveNavIndicator />}
       {pending && !isActive && (
         <div
           aria-hidden="true"
           data-testid="nav-item-pending-indicator"
-          className={getPendingIndicatorClassName({ compact, variant })}
+          className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white/60"
         />
       )}
-      {IconComponent ? (
-        <IconComponent
-          className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}
-          color={activeIconColor}
-        />
-      ) : (
-        <Image
-          src={icon}
-          alt={item.name}
-          width={24}
-          height={24}
-          unoptimized
-          className={`tw-relative tw-z-10 ${resolvedIconSizeClass}`}
-        />
-      )}
-      {item.name === "Notifications" && haveUnreadNotifications && (
-        <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
-      )}
-      {item.name === "Messages" && hasUnreadMessages && (
-        <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
-      )}
-    </div>
+      <div className={`tw-relative ${iconSlotClass}`}>
+        {item.iconComponent ? (
+          <item.iconComponent
+            className={`${iconSizeClass} ${
+              isHighlighted ? "tw-text-white" : "tw-text-iron-500"
+            }`}
+          />
+        ) : (
+          <Image
+            src={icon}
+            alt={item.name}
+            width={24}
+            height={24}
+            unoptimized
+            className={iconSizeClass}
+          />
+        )}
+        {item.name === "Notifications" && haveUnreadNotifications && (
+          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
+        )}
+        {item.name === "Messages" && hasUnreadMessages && (
+          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
+        )}
+      </div>
+    </>
   );
 };
 
 const NavItemContent = ({
   item,
-  variant = "floating",
-  compact = false,
   isCurrentWaveDm = false,
   fullPrefetch = false,
 }: Props) => {
   const pathname = usePathname();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
   const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -311,9 +157,9 @@ const NavItemContent = ({
         aria-label={name}
         aria-disabled="true"
         disabled
-        className={getDisabledButtonClassName(variant)}
+        className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
       >
-        <div className={getIconSlotClass({ compact, variant })}>
+        <div className={iconSlotClass}>
           {item.iconComponent ? (
             <item.iconComponent
               className={`${
@@ -336,14 +182,33 @@ const NavItemContent = ({
   }
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
-  const { isActive, resolvedItem } = getResolvedProfileState({
-    activeView,
-    isCurrentWaveDm,
-    item,
-    pathname,
-    profileHref,
-    searchParams,
-  });
+
+  const isProfileItem = item.kind === "route" && item.name === "Profile";
+  const normalizedPathname = pathname.toLowerCase();
+  const isProfileActive =
+    isProfileItem &&
+    activeView === null &&
+    profileHref !== null &&
+    (normalizedPathname === profileHref ||
+      normalizedPathname.startsWith(`${profileHref}/`));
+
+  const isActive = isProfileItem
+    ? isProfileActive
+    : isNavItemActive(
+        item,
+        pathname,
+        searchParams,
+        activeView,
+        isCurrentWaveDm
+      );
+
+  const resolvedItem =
+    isProfileItem && profileHref !== null
+      ? {
+          ...item,
+          href: profileHref,
+        }
+      : item;
   const href = getNavHref(resolvedItem);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -358,21 +223,17 @@ const NavItemContent = ({
 
   const linkContent = (
     <NavItemLinkContent
-      compact={compact}
       hasUnreadMessages={hasUnreadMessages}
       haveUnreadNotifications={haveUnreadNotifications}
       icon={icon}
       iconSizeClass={iconSizeClass}
       isActive={isActive}
       item={item}
-      variant={variant}
     />
   );
 
   const linkClassName =
-    variant === "fixed"
-      ? "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400"
-      : "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400";
+    "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none";
 
   if (fullPrefetch) {
     return (

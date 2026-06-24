@@ -18,10 +18,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useCapacitor from "@/hooks/useCapacitor";
 import PullToRefresh from "../providers/PullToRefresh";
-import {
-  getActiveWaveIdFromUrl,
-  usesFixedMobileBottomNavigation,
-} from "@/helpers/navigation.helpers";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 
@@ -38,19 +35,16 @@ const STREAM_ROUTE_LOADING_BOTTOM_RESERVE =
   "--stream-route-loading-bottom-reserve";
 const STREAM_ROUTE_LOADING_HEADER_RESERVE =
   "--stream-route-loading-header-reserve";
-const BOTTOM_NAV_RESERVE = "104px";
 // Matches HeaderPlaceholder's default shell before LayoutContext measures it.
 const STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE = "100px";
 
 type StreamRouteLoadingReserveStyle = CSSProperties & {
-  readonly [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]:
-    | "0px"
-    | typeof BOTTOM_NAV_RESERVE;
+  readonly [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: "0px" | "85px";
   readonly [STREAM_ROUTE_LOADING_HEADER_RESERVE]: string;
 };
 
 const streamRouteLoadingReserveVisibleStyle: StreamRouteLoadingReserveStyle = {
-  [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: BOTTOM_NAV_RESERVE,
+  [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: "85px",
   [STREAM_ROUTE_LOADING_HEADER_RESERVE]:
     STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE,
 };
@@ -73,11 +67,10 @@ function AppLayoutFallback({ children }: Props) {
   return (
     <div
       className="tw-overflow-auto"
-      style={streamRouteLoadingReserveVisibleStyle}
-    >
+      style={streamRouteLoadingReserveVisibleStyle}>
       <HeaderPlaceholder />
       <main>{children}</main>
-      <div className="tw-h-[104px] tw-w-full" />
+      <div className="tw-h-[85px] tw-w-full" />
     </div>
   );
 }
@@ -96,13 +89,18 @@ function AppLayoutContent({ children }: Props) {
     activeWaveId: waveParam,
     searchParams,
   });
+  const viewParam = searchParams.get("view");
   const hasWaveParam = Boolean(waveParam);
-  const usesFixedBottomNavigation = usesFixedMobileBottomNavigation({
-    pathname,
-    activeView,
-  });
+  const isViewingWavesOrMessages =
+    viewParam === "waves" || viewParam === "messages";
+  const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
+  const isMessagesRoute =
+    pathname === "/messages" || pathname.startsWith("/messages/");
   const isStreamRoute =
-    usesFixedBottomNavigation || (pathname === "/" && hasWaveParam);
+    isWavesRoute ||
+    isMessagesRoute ||
+    pathname === "/notifications" ||
+    (pathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const { isVisible: isAndroidKeyboardVisible, isAndroid } =
@@ -127,16 +125,13 @@ function AppLayoutContent({ children }: Props) {
   const routeLoadingHeaderReserve = spaces.measurementsComplete
     ? `${spaces.headerSpace}px`
     : STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE;
-  const streamRouteLoadingReserveStyle =
-    useMemo<StreamRouteLoadingReserveStyle>(
-      () => ({
-        [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: isNavVisible
-          ? BOTTOM_NAV_RESERVE
-          : "0px",
-        [STREAM_ROUTE_LOADING_HEADER_RESERVE]: routeLoadingHeaderReserve,
-      }),
-      [isNavVisible, routeLoadingHeaderReserve]
-    );
+  const streamRouteLoadingReserveStyle = useMemo<StreamRouteLoadingReserveStyle>(
+    () => ({
+      [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: isNavVisible ? "85px" : "0px",
+      [STREAM_ROUTE_LOADING_HEADER_RESERVE]: routeLoadingHeaderReserve,
+    }),
+    [isNavVisible, routeLoadingHeaderReserve]
+  );
   const safeAreaClass =
     !isNavVisible && !isKeyboardVisible
       ? "tw-pb-[env(safe-area-inset-bottom,0px)]"
@@ -154,15 +149,14 @@ function AppLayoutContent({ children }: Props) {
   return (
     <div
       className={`${safeAreaClass} ${"tw-overflow-auto"}`}
-      style={streamRouteLoadingReserveStyle}
-    >
+      style={streamRouteLoadingReserveStyle}>
       <PullToRefresh triggerZoneRef={headerRef} />
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />
       </div>
       {activeContent}
       {!isSingleDropOpen && !isStreamRoute && (
-        <div className="tw-h-[104px] tw-w-full" />
+        <div className="tw-h-[85px] tw-w-full" />
       )}
       {!isSingleDropOpen && !isEditingOnMobile && (
         <BottomNavigation hidden={shouldHideBottomNav} />

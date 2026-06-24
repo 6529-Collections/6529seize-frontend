@@ -9,24 +9,11 @@ jest.mock("@capacitor/core", () => ({
   Capacitor: {
     isNativePlatform: () => mockCapacitorIsNativePlatform(),
   },
-  registerPlugin: jest.fn(() => ({
-    get: jest.fn(),
-    remove: jest.fn(),
-    set: jest.fn(),
-  })),
 }));
 
 jest.mock("@capacitor/share", () => ({
   Share: {
     share: (...args: unknown[]) => mockCapacitorShare(...args),
-  },
-}));
-
-jest.mock("capacitor-secure-storage-plugin", () => ({
-  SecureStoragePlugin: {
-    get: jest.fn(),
-    remove: jest.fn(),
-    set: jest.fn(),
   },
 }));
 
