@@ -28,15 +28,18 @@ The deployment bus turns staging and production into an explicit queue:
 - exact SHAs and included PRs recorded before deploy
 - no overlapping deploys to the same environment
 - shared validation assignments for all included PR owners
-- production only from the same `origin/main` SHA or release set that passed
-  staging
+- staging normally validates feature or release branches on `1a-staging`
+  before those branches merge to `main`
+- production only from `origin/main` after the same release set or equivalent
+  resulting patch set passed staging
+- no promotion path ever merges `1a-staging` into `main`
 - human-owned production approval
 
 ## Current Deployment Facts
 
 Frontend staging:
 
-- Staging uses the `1a-staging` branch.
+- Staging uses the `1a-staging` branch as the integration branch.
 - `.github/workflows/deploy-staging.yml` runs on pushes to `1a-staging` and
   manual dispatch.
 - The workflow uses `concurrency.group: staging-deploy` with
@@ -47,6 +50,11 @@ Frontend staging:
   checkout still matches the expected SHA.
 - `scripts/staging.sh` installs dependencies, builds, restarts the PM2
   `6529seize` process, and saves PM2 state.
+- Normal staging branch movement is feature or release branch to `1a-staging`.
+  This intentionally lets staging test work before it is on production
+  `main`.
+- When `main` changes, merge `main` back into `1a-staging` so staging stays at
+  least as current as production. Do not merge `1a-staging` into `main`.
 
 Frontend production:
 
@@ -65,6 +73,8 @@ Frontend production:
 Backend coordination:
 
 - Backend deploys use `6529seize-backend` and its own `deploy-6529` skill.
+- Backend staging also uses the `1a-staging` branch. Backend production also
+  uses `main`.
 - Backend `.github/workflows/deploy.yml` dispatches one service at a time for
   `environment=staging` or `environment=prod`.
 - Backend releases must identify services and order before deploy.
@@ -177,8 +187,12 @@ Departure policy:
 
 Eligible release set:
 
-- merged to `origin/main`, unless staging is intentionally testing a PR before
-  merge under a documented exception
+- approved for staging by the PR owner, release captain, or human release
+  approver
+- not Draft, unless the PR owner or a human release approver explicitly named
+  the PR and requested staging
+- feature or release source branches are known and branch owners have not asked
+  agents to stop touching them
 - required CI and review bots terminal or explicitly deferred
 - risk and area understood
 - backend dependencies listed with required deploy order
@@ -190,12 +204,21 @@ Staging manifest:
 ```text
 environment: staging
 staging_branch: 1a-staging
+staging_source_ref: <feature branch, release branch, or main sync source>
 staging_deploy_sha: <actual SHA deployed from 1a-staging>
-production_candidate_sha: <origin/main SHA contained in the staging deploy>
+production_target_branch: main
+production_candidate_sha: <origin/main SHA after production merge, when known>
+validated_release_set: <named PRs/branches intended to ship together>
+release_equivalence: <same SHA | same patch set | requires rerun>
 included_prs:
   - number:
     title:
-    merge_sha:
+    source_ref:
+    target_branch:
+    draft_status:
+    owner_clearance:
+    staging_merge_sha:
+    production_merge_sha:
     risk:
     areas:
     validation_owner:
@@ -227,10 +250,14 @@ Until automation exists, the release captain can keep this manifest in the PR
 description, a deployment wave update, or a workstream note. The automation PR
 should make it a durable artifact linked from GitHub Deployment status history.
 
-For production gating, `production_candidate_sha` is the important SHA. If the
-staging branch contains a tree that is not the current `origin/main` production
-candidate, staging can still be useful for exploratory validation, but it does
-not satisfy the production "same SHA passed staging" gate.
+For production gating, `validated_release_set` and `release_equivalence` are
+the important fields. A staging deployment that contains a feature branch before
+it is on `main` can satisfy production only for that same named release set
+after the feature PR merges to `main` and no unrelated unvalidated changes are
+included. Exact SHAs may differ between `1a-staging` and `main`; the release
+captain must verify the resulting patch set, included PRs, and backend ordering
+match what passed staging. If `main` includes additional unvalidated work, rerun
+staging for the new production candidate or hold production.
 
 ## Multi-Agent Staging Validation
 
@@ -267,20 +294,32 @@ That hard gate is intentional for this process proposal.
 
 Before production:
 
-- staging passed for the same ordered frontend/backend release set
-- the production candidate is exactly the current `origin/main` SHA
+- staging passed for the same ordered frontend/backend release set or the same
+  resulting patch set after merge to `main`
+- the production candidate is the current `origin/main` SHA
 - no newer unvalidated commit has landed on `origin/main` after staging passed
 - no production deploy is already active
 - backend production dependencies are deployed and validated first
 - the human release approver accepted the manifest
 
-If `origin/main` advances after staging passed, do not deploy production from
-the older validated SHA. Either:
+If `origin/main` advances after staging passed, do not deploy unvalidated work.
+Either:
 
-- rerun the staging bus for the new `origin/main` SHA, including the additional
+- prove the new head contains only the staging-passed release set plus
+  explicitly approved already-validated work, or
+- rerun the staging bus for the new `origin/main` SHA, including any additional
   PRs in the manifest, or
 - pause merging briefly before final staging validation and production
   promotion.
+
+Promotion path:
+
+1. Merge the approved feature or release PRs to `main`.
+2. Deploy production from `main`.
+3. Merge `main` back into `1a-staging`.
+
+Never merge `1a-staging` into `main`. `1a-staging` may contain work that is
+valid for staging but not approved for production.
 
 Production validation:
 
@@ -303,15 +342,21 @@ Use this order when a release spans frontend and backend:
    changed.
 3. Regenerate or verify the frontend client against the intended backend
    contract before using new API behavior.
-4. Merge and deploy additive backend changes to staging.
+4. Merge the backend feature or release branch to backend `1a-staging`, then
+   deploy the required backend staging services from `1a-staging`.
 5. Validate backend staging, including API or service smoke.
-6. Deploy frontend staging for the candidate that uses the backend behavior.
+6. Merge the frontend feature or release branch to frontend `1a-staging`, then
+   deploy frontend staging for the candidate that uses the backend behavior.
 7. Validate frontend staging and cross-repo behavior together.
-8. Deploy backend production first when frontend production depends on new
+8. When the release set is ready, merge the same backend and frontend PRs to
+   `main` in their repos.
+9. Deploy backend production first when frontend production depends on new
    backend behavior.
-9. Validate backend production.
-10. Deploy frontend production from `origin/main`.
-11. Validate frontend production and the user-visible integrated behavior.
+10. Validate backend production.
+11. Deploy frontend production from `origin/main`.
+12. Validate frontend production and the user-visible integrated behavior.
+13. Merge `main` back into `1a-staging` in both repos so staging tracks
+    production plus any intentionally staged ahead-of-main work.
 
 Prefer compatibility windows:
 
