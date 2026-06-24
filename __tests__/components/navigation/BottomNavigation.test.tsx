@@ -200,6 +200,23 @@ describe("BottomNavigation", () => {
     ).toBe(true);
   });
 
+  it("keeps one active pill mounted while moving it between active items", () => {
+    const { getByTestId, rerender } = render(<BottomNavigation />);
+    const activePill = getByTestId("mobile-dock-active-pill");
+
+    expect(activePill.getAttribute("style")).toContain("left: 50%");
+    expect(activePill).toHaveClass("tw-transition-[left,width,height,opacity]");
+
+    (usePathname as jest.Mock).mockReturnValue("/notifications");
+    rerender(<BottomNavigation />);
+
+    const movedActivePill = getByTestId("mobile-dock-active-pill");
+    expect(movedActivePill).toBe(activePill);
+    expect(movedActivePill.getAttribute("style")).toContain(
+      "left: 92.85714285714286%"
+    );
+  });
+
   it("compacts the floating dock from window scroll", async () => {
     Object.defineProperty(globalThis, "scrollY", {
       configurable: true,
