@@ -257,7 +257,7 @@ describe("NavItem notifications", () => {
     expect(link).toHaveAttribute("data-prefetch", "true");
   });
 
-  it("shows immediate pending feedback while a link navigation is pending", () => {
+  it("keeps pending navigations from drawing a second active highlight", () => {
     mockUseLinkStatus.mockReturnValue({ pending: true });
     const item = {
       kind: "view",
@@ -266,9 +266,9 @@ describe("NavItem notifications", () => {
       icon: "messages",
     } as any;
 
-    const { getByTestId } = render(<NavItem item={item} />);
+    const { queryByTestId } = render(<NavItem item={item} />);
 
-    expect(getByTestId("nav-item-pending-indicator")).toBeInTheDocument();
+    expect(queryByTestId("nav-item-pending-indicator")).not.toBeInTheDocument();
   });
 
   it("renders disabled item when disabled flag set", () => {
