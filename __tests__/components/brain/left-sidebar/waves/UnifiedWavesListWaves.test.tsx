@@ -54,8 +54,13 @@ jest.mock(
 jest.mock(
   "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar",
   () => ({
-    WaveAvatar: (props: { readonly wave: { readonly id: string } }) => (
-      <div data-testid={`preview-avatar-${props.wave.id}`} />
+    WaveAvatar: (props: any) => (
+      <div
+        data-testid={`preview-avatar-${props.wave.id}`}
+        data-is-drop-wave={String(props.isDropWave)}
+        data-show-new-drops-badge={String(props.showNewDropsBadge)}
+        data-show-unread-drops-badge={String(props.showUnreadDropsBadge)}
+      />
     ),
   })
 );
@@ -394,6 +399,49 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   ).toEqual(["wave-a1", "wave-p1", "wave-f1", "wave-r1"]);
   expect(ref.current?.containerRef.current).toBe(container);
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
+});
+
+it("shows highly rated preview score shields instead of unread badges", () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "h-score",
+          name: "Scored Discovery",
+          sidebarSection: "highly-rated",
+          unreadDropsCount: 24,
+          newDropsCount: {
+            count: 99,
+            latestDropTimestamp: 123,
+            firstUnreadSerialNo: 42,
+          },
+          waveScore: {
+            visibility_score: 93,
+            quality_score: 91,
+            hotness_score: 97,
+            rep_sort_score: 73,
+          } as any,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(
+    screen.getByRole("link", { name: "Open Scored Discovery, score 93" })
+  ).toBeInTheDocument();
+  expect(screen.getByText("93")).toBeInTheDocument();
+  expect(screen.getByText("Score 93")).toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: /new messages/ })).toBeNull();
+  expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
+    "data-show-new-drops-badge",
+    "false"
+  );
+  expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
+    "data-show-unread-drops-badge",
+    "false"
+  );
 });
 
 it("caps highly rated previews at ten without rendering an overflow control", () => {

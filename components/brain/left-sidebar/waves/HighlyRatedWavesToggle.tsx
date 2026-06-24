@@ -10,6 +10,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 10 as const;
@@ -133,11 +134,6 @@ export function buildHighlyRatedWavePreviewItems({
   }));
 }
 
-const getPluralKey = (count: number) => (count === 1 ? "one" : "other");
-
-const getUnreadCount = (wave: MinimalWave) =>
-  Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
-
 const getWaveScoreLabel = (wave: MinimalWave): string | null => {
   const score = wave.waveScore?.visibility_score;
   if (typeof score !== "number" || !Number.isFinite(score)) {
@@ -241,6 +237,29 @@ export const getHighlyRatedPreviewTooltipAlignment = ({
   return "center";
 };
 
+function HighlyRatedWavePreviewScoreBadge({
+  scoreLabel,
+}: {
+  readonly scoreLabel: string | null;
+}) {
+  if (scoreLabel === null) {
+    return null;
+  }
+
+  return (
+    <span
+      aria-hidden="true"
+      className="tw-pointer-events-none tw-absolute -tw-bottom-1 -tw-right-1 tw-z-10 tw-flex tw-h-4 tw-min-w-[1.75rem] tw-items-center tw-justify-center tw-gap-0.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-800/95 tw-px-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-100 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.10),0_6px_14px_rgba(0,0,0,0.36)]"
+    >
+      <ShieldCheckIcon
+        className="tw-size-2.5 tw-flex-shrink-0 tw-text-iron-300"
+        strokeWidth={1.8}
+      />
+      <span>{scoreLabel}</span>
+    </span>
+  );
+}
+
 function HighlyRatedWavePreviewLink({
   item,
   tooltipAlignment,
@@ -249,8 +268,6 @@ function HighlyRatedWavePreviewLink({
   readonly tooltipAlignment: PreviewTooltipAlignment;
 }) {
   const { wave } = item;
-  const unreadCount = getUnreadCount(wave);
-  const countKey = getPluralKey(unreadCount);
   const isDropWave = wave.type !== ApiWaveType.Chat;
   const scoreLabel = getWaveScoreLabel(wave);
   const latestDropTimestamp =
@@ -260,13 +277,13 @@ function HighlyRatedWavePreviewLink({
       ? wave.newDropsCount.latestDropTimestamp
       : null;
   const linkLabel =
-    unreadCount > 0
+    scoreLabel !== null
       ? t(
           SIDEBAR_LOCALE,
-          `waves.sidebar.highlyRatedPreviewOpenAriaLabel.${countKey}`,
+          "waves.sidebar.highlyRatedPreviewOpenAriaLabel.withScore",
           {
             waveName: wave.name,
-            count: formatInteger(SIDEBAR_LOCALE, unreadCount),
+            score: scoreLabel,
           }
         )
       : t(
@@ -288,10 +305,12 @@ function HighlyRatedWavePreviewLink({
     >
       <WaveAvatar
         isActive={item.isActive}
-        isDropWave={isDropWave}
-        showNewDropsBadge={!item.isActive && unreadCount > 0}
+        isDropWave={isDropWave && scoreLabel === null}
+        showNewDropsBadge={false}
+        showUnreadDropsBadge={false}
         wave={wave}
       />
+      <HighlyRatedWavePreviewScoreBadge scoreLabel={scoreLabel} />
       <span
         className={`tw-pointer-events-none tw-absolute tw-top-10 tw-z-30 tw-hidden tw-w-48 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-shadow-xl group-hover/preview:tw-block group-focus-visible/preview:tw-block ${PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES[tooltipAlignment]}`}
       >
@@ -305,7 +324,12 @@ function HighlyRatedWavePreviewLink({
             </span>
           )}
           {scoreLabel !== null && (
-            <span className="tw-ml-auto tw-whitespace-nowrap">
+            <span className="tw-ml-auto tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+              <ShieldCheckIcon
+                className="tw-size-3 tw-flex-shrink-0 tw-text-iron-400"
+                strokeWidth={1.8}
+                aria-hidden="true"
+              />
               {t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedPreviewScore", {
                 score: scoreLabel,
               })}

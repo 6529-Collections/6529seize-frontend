@@ -7,6 +7,7 @@ interface WaveAvatarProps {
   readonly isActive: boolean;
   readonly isDropWave: boolean;
   readonly showNewDropsBadge: boolean;
+  readonly showUnreadDropsBadge?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly size?: "default" | "sm" | undefined;
 }
@@ -37,11 +38,14 @@ export const WaveAvatar = ({
   isActive,
   isDropWave,
   showNewDropsBadge,
+  showUnreadDropsBadge = true,
   wave,
   size = "default",
 }: WaveAvatarProps) => {
   const showBadge =
-    !wave.isMuted && (wave.unreadDropsCount > 0 || showNewDropsBadge);
+    showUnreadDropsBadge &&
+    !wave.isMuted &&
+    (wave.unreadDropsCount > 0 || showNewDropsBadge);
   const rawCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
   const displayCount =
     rawCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : rawCount;
