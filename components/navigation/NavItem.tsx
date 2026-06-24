@@ -12,9 +12,9 @@ import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
-import { isNavItemActive } from "./isNavItemActive";
+import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import { getActiveViewFromUrl, useViewContext } from "./ViewContext";
-import type { NavItem as NavItemData, ViewKey } from "./navTypes";
+import type { NavItem as NavItemData } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
@@ -104,51 +104,6 @@ const getDisabledButtonClassName = (variant: "floating" | "fixed") => {
   return `tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none ${layoutClassName}`;
 };
 
-const getResolvedProfileState = ({
-  activeView,
-  isCurrentWaveDm,
-  item,
-  pathname,
-  profileHref,
-  searchParams,
-}: {
-  readonly activeView: ViewKey | null;
-  readonly isCurrentWaveDm: boolean;
-  readonly item: NavItemData;
-  readonly pathname: string;
-  readonly profileHref: string | null;
-  readonly searchParams: ReturnType<typeof useSearchParams>;
-}) => {
-  const isProfileItem = item.kind === "route" && item.name === "Profile";
-  const normalizedPathname = pathname.toLowerCase();
-
-  if (isProfileItem && profileHref !== null) {
-    const isProfileActive =
-      activeView === null &&
-      (normalizedPathname === profileHref ||
-        normalizedPathname.startsWith(`${profileHref}/`));
-
-    return {
-      isActive: isProfileActive,
-      resolvedItem: {
-        ...item,
-        href: profileHref,
-      },
-    };
-  }
-
-  return {
-    isActive: isNavItemActive(
-      item,
-      pathname,
-      searchParams,
-      activeView,
-      isCurrentWaveDm
-    ),
-    resolvedItem: item,
-  };
-};
-
 const NavItemLinkContent = ({
   hasUnreadMessages,
   haveUnreadNotifications,
@@ -231,12 +186,11 @@ const NavItemContent = ({
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
-  const normalizedConnectedHandle = (
-    connectedProfile?.normalised_handle ?? connectedProfile?.handle
-  )?.toLowerCase();
-  const normalizedConnectedAddress = address?.toLowerCase();
-  const profileSlug = normalizedConnectedHandle ?? normalizedConnectedAddress;
-  const profileHref = profileSlug ? `/${profileSlug}` : null;
+  const profileHref = getProfileHref({
+    address,
+    handle: connectedProfile?.handle,
+    normalisedHandle: connectedProfile?.normalised_handle,
+  });
   const { setTitle } = useTitle();
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
     item.name === "Notifications" ? (connectedProfile?.handle ?? null) : null
@@ -301,7 +255,7 @@ const NavItemContent = ({
   }
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
-  const { isActive, resolvedItem } = getResolvedProfileState({
+  const { isActive, resolvedItem } = getResolvedNavItemState({
     activeView,
     isCurrentWaveDm,
     item,
