@@ -15,8 +15,7 @@ import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
 import { useSelector } from "react-redux";
 import { selectEditingDropId } from "@/store/editSlice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
-import useCapacitor from "@/hooks/useCapacitor";
+import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import PullToRefresh from "../providers/PullToRefresh";
 import {
   getActiveWaveIdFromUrl,
@@ -105,12 +104,8 @@ function AppLayoutContent({ children }: Props) {
     usesFixedBottomNavigation || (pathname === "/" && hasWaveParam);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
-  const { isVisible: isAndroidKeyboardVisible, isAndroid } =
-    useAndroidKeyboard();
-  const { isIos, keyboardVisible: isIosKeyboardVisible } = useCapacitor();
+  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const isEditingOnMobile = isApp && editingDropId !== null;
-  const isKeyboardVisible =
-    (isAndroid && isAndroidKeyboardVisible) || (isIos && isIosKeyboardVisible);
   const shouldHideBottomNav = isKeyboardVisible;
 
   const headerWrapperRef = useCallback(

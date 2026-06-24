@@ -6,6 +6,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { useRouter } from "next/navigation";
+import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -36,7 +37,11 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: jest.fn(() => ({ isIos: false, keyboardVisible: false })),
+  default: jest.fn(() => ({ isIos: false })),
+}));
+
+jest.mock("@/hooks/useNativeKeyboard", () => ({
+  useNativeKeyboard: jest.fn(() => ({ isVisible: false })),
 }));
 
 jest.mock("@/components/waves/create-wave/hooks/useWaveConfig", () => ({
@@ -1055,7 +1060,8 @@ describe("CreateWave", () => {
 
   it("applies iOS specific styling when on iOS with keyboard not visible", () => {
     const useCapacitor = require("@/hooks/useCapacitor").default;
-    useCapacitor.mockReturnValue({ isIos: true, keyboardVisible: false });
+    useCapacitor.mockReturnValue({ isIos: true });
+    (useNativeKeyboard as jest.Mock).mockReturnValue({ isVisible: false });
 
     renderCreateWave();
 
@@ -1066,7 +1072,8 @@ describe("CreateWave", () => {
 
   it("does not apply iOS styling when keyboard is visible", () => {
     const useCapacitor = require("@/hooks/useCapacitor").default;
-    useCapacitor.mockReturnValue({ isIos: true, keyboardVisible: true });
+    useCapacitor.mockReturnValue({ isIos: true });
+    (useNativeKeyboard as jest.Mock).mockReturnValue({ isVisible: true });
 
     renderCreateWave();
 
