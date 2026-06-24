@@ -240,7 +240,7 @@ const floatingNavInnerClassName = "tw-relative tw-h-full";
 
 const getFloatingNavListClassName = (compact: boolean) =>
   `tw-flex tw-h-full tw-items-center ${
-    compact ? "tw-gap-0 tw-px-1.5" : "tw-gap-0.5 tw-px-2"
+    compact ? "tw-gap-0 tw-px-2.5" : "tw-gap-0.5 tw-px-4"
   }`;
 
 const getFloatingActivePillClassName = ({
@@ -251,8 +251,8 @@ const getFloatingActivePillClassName = ({
   readonly visible: boolean;
 }) => {
   const sizeClassName = compact
-    ? "tw-h-11 tw-w-[3.75rem] sm:tw-h-12 sm:tw-w-[4.25rem]"
-    : "tw-h-12 tw-w-[4.05rem] sm:tw-h-[3.15rem] sm:tw-w-[4.45rem]";
+    ? "tw-h-11 tw-w-[3.5rem] sm:tw-h-12 sm:tw-w-16"
+    : "tw-h-12 tw-w-[3.65rem] sm:tw-h-[3.15rem] sm:tw-w-[4.05rem]";
   const visibilityClassName = visible ? "tw-opacity-100" : "tw-opacity-0";
 
   return `tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[left,width,height,opacity] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${sizeClassName} ${visibilityClassName}`;
@@ -288,7 +288,7 @@ const getFloatingActivePillFallbackLeft = ({
   readonly compact: boolean;
   readonly itemCount: number;
 }) => {
-  const paddingX = compact ? "0.375rem" : "0.5rem";
+  const paddingX = compact ? "0.625rem" : "1rem";
   const gap = compact ? "0rem" : "0.125rem";
   const gapCount = Math.max(0, itemCount - 1);
 
