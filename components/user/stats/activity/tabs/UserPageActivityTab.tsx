@@ -34,7 +34,7 @@ export default function UserPageActivityTab({
 }) {
   const isActive = tab === activeTab;
   const className = [
-    "tw-border tw-border-solid tw-border-iron-700 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out",
+    "tw-min-w-0 tw-flex-1 tw-border tw-border-solid tw-border-iron-700 tw-px-1.5 tw-py-2 tw-text-[11px] tw-font-semibold tw-leading-4 tw-transition tw-duration-300 tw-ease-out sm:tw-flex-none sm:tw-px-4 sm:tw-text-sm",
     isActive
       ? "tw-bg-iron-800 tw-text-iron-100"
       : "tw-bg-iron-950 tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-text-iron-100",
