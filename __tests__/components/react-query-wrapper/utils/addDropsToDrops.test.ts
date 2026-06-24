@@ -59,6 +59,28 @@ test("upserts websocket drops into active wave feed caches", () => {
   );
 });
 
+test("skips media-filtered caches when websocket drop omits parts", () => {
+  const qc = new QueryClient();
+  const activeWaveKey = [
+    QueryKey.DROPS,
+    {
+      waveId: "w",
+      limit: 20,
+      dropType: null,
+      containsMedia: true,
+      curationId: null,
+      context: "wave-drops",
+    },
+  ];
+  qc.setQueryData(activeWaveKey, { pages: [{ drops: [{ id: "old" }] }] });
+
+  const drop: any = { id: "new", wave: { id: "w" } };
+  expect(() => upsertDropIntoMatchingDropsQueries(qc, { drop })).not.toThrow();
+  expect((qc.getQueryData(activeWaveKey) as any).pages[0].drops[0].id).toBe(
+    "old"
+  );
+});
+
 test("upserts websocket reply drops into matching reply caches", () => {
   const qc = new QueryClient();
   const baseKey = [QueryKey.DROPS, { limit: 50, waveId: "w", dropId: null }];

@@ -85,7 +85,7 @@ describe("/api/meme-calendar/[id]", () => {
     }
   );
 
-  it("returns 400 for values above max safe integer", async () => {
+  it("returns 400 for oversized numeric ids", async () => {
     const response = await GET({} as any, {
       params: Promise.resolve({ id: "9007199254740992" }),
     });

@@ -62,6 +62,8 @@ export function getCurrentMintTimelineDetails(
   const candidates = [nextTimeline, currentOrPreviousTimeline];
   const previousMintNumber = currentOrPreviousTimeline.mintNumber - 1;
   if (previousMintNumber > 0) {
+    // Meme mint windows are shorter than the regular mint cadence, so the
+    // live window can only be the date-derived mint or its immediate neighbor.
     candidates.push(getMintTimelineDetails(previousMintNumber));
   }
 
