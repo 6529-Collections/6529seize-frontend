@@ -72,12 +72,17 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
   const connectPrompt = getConnectPrompt(contentState);
+  const shouldRenderWavesContent =
+    contentState === "ready" ||
+    contentState === "not-authenticated" ||
+    contentState === "loading" ||
+    contentState === "measuring";
 
   let content: ReactNode = null;
 
-  if (contentState === "ready" || contentState === "not-authenticated") {
+  if (shouldRenderWavesContent) {
     content = getWavesContent({
-      children,
+      children: contentState === "loading" ? null : children,
       containerClassName,
       isApp,
     });

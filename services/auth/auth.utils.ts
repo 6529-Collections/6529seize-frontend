@@ -8,6 +8,7 @@ import { removeNativeRefreshToken } from "./native-refresh-token-storage";
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const WALLET_ACCOUNTS_UPDATED_EVENT = "6529-wallet-accounts-updated";
 export const PROFILE_SWITCHED_EVENT = "6529-profile-switched";
+export const AUTH_TOKEN_CHANGED_EVENT = "6529-auth-token-changed";
 export type AuthSessionVersion = "v2";
 
 const WALLET_ADDRESS_STORAGE_KEY = "6529-wallet-address";
@@ -92,9 +93,27 @@ const emitProfileSwitched = (): void => {
   }
 };
 
+const emitAuthTokenChanged = (): void => {
+  if (globalThis.window !== undefined) {
+    globalThis.dispatchEvent(new CustomEvent(AUTH_TOKEN_CHANGED_EVENT));
+  }
+};
+
+const emitAuthTokenChangedIfChanged = (
+  previousJwt: string | null,
+  nextJwt: string | null
+): void => {
+  if (previousJwt !== nextJwt) {
+    emitAuthTokenChanged();
+  }
+};
+
 const setWalletAuthCookie = (jwt: string | null): void => {
+  const previousJwt = Cookies.get(WALLET_AUTH_COOKIE) ?? null;
+
   if (!jwt) {
     Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+    emitAuthTokenChangedIfChanged(previousJwt, null);
     return;
   }
 
@@ -104,6 +123,7 @@ const setWalletAuthCookie = (jwt: string | null): void => {
     const expiresInSeconds = jwtExpiration - now;
     if (expiresInSeconds <= 0) {
       Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+      emitAuthTokenChangedIfChanged(previousJwt, null);
       return;
     }
     const expiresInDays = expiresInSeconds / 86400;
@@ -112,8 +132,10 @@ const setWalletAuthCookie = (jwt: string | null): void => {
       ...COOKIE_OPTIONS,
       expires: expiresInDays,
     });
+    emitAuthTokenChangedIfChanged(previousJwt, jwt);
   } catch {
     Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+    emitAuthTokenChangedIfChanged(previousJwt, null);
   }
 };
 
@@ -249,6 +271,22 @@ const getActiveAccountFromAccounts = (
   return active ?? accounts[0] ?? null;
 };
 
+const hasActiveAddressChanged = (
+  previousActiveAddress: string | null,
+  nextActiveAddress: string | null
+): boolean => {
+  if (!previousActiveAddress) {
+    return false;
+  }
+  if (!nextActiveAddress) {
+    return true;
+  }
+  return (
+    normalizeAddress(previousActiveAddress) !==
+    normalizeAddress(nextActiveAddress)
+  );
+};
+
 const migrateLegacyStorageIfNeeded = (): void => {
   const hasAccountsStorage =
     safeLocalStorage.getItem(WALLET_ACCOUNTS_STORAGE_KEY) !== null;
@@ -370,6 +408,7 @@ export const setAuthJwt = (
   } = {}
 ): boolean => {
   const storedAccounts = getStoredAccounts();
+  const previousActiveAddress = getActiveAddressFromStorage();
   const existingAccount =
     storedAccounts.find(
       (account) =>
@@ -409,6 +448,9 @@ export const setAuthJwt = (
   }
 
   emitWalletAccountsUpdated();
+  if (hasActiveAddressChanged(previousActiveAddress, address)) {
+    emitProfileSwitched();
+  }
   return true;
 };
 
@@ -483,6 +525,7 @@ const getNativeRefreshTokenCleanupAddresses = (
 
 export const clearAllWalletAuth = async (): Promise<void> => {
   const accounts = getStoredAccounts();
+  const previousActiveAddress = getActiveAddressFromStorage();
   await Promise.all(
     getNativeRefreshTokenCleanupAddresses(accounts).map((address) =>
       removeNativeRefreshToken(address)
@@ -490,11 +533,18 @@ export const clearAllWalletAuth = async (): Promise<void> => {
   );
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
+  if (previousActiveAddress) {
+    emitProfileSwitched();
+  }
 };
 
 export const removeAuthJwt = async (): Promise<void> => {
   const accounts = getStoredAccounts();
   const activeAccount = getActiveAccountFromAccounts(accounts);
+  const previousActiveAddress =
+    activeAccount?.address ??
+    getActiveAddressFromStorage() ??
+    safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY);
 
   if (!activeAccount) {
     const legacyAddress = safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY);
@@ -504,6 +554,9 @@ export const removeAuthJwt = async (): Promise<void> => {
     }
     persistAccountsWithActive([], null);
     emitWalletAccountsUpdated();
+    if (previousActiveAddress) {
+      emitProfileSwitched();
+    }
     return;
   }
 
@@ -520,6 +573,9 @@ export const removeAuthJwt = async (): Promise<void> => {
   const nextActiveAddress = remainingAccounts[0]?.address ?? null;
   persistAccountsWithActive(remainingAccounts, nextActiveAddress);
   emitWalletAccountsUpdated();
+  if (hasActiveAddressChanged(previousActiveAddress, nextActiveAddress)) {
+    emitProfileSwitched();
+  }
 };
 
 /**

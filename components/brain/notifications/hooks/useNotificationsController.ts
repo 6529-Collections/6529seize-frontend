@@ -67,6 +67,7 @@ export const useNotificationsController =
   (): UseNotificationsControllerResult => {
     const {
       connectedProfile,
+      isAuthenticated: isAuthContextAuthenticated,
       activeProfileProxy,
       fetchingProfile,
       requestAuth,
@@ -93,7 +94,9 @@ export const useNotificationsController =
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const reload = searchParams?.get("reload") ?? undefined;
-    const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
+    const isAuthenticated =
+      (isAuthContextAuthenticated ?? !!connectedProfile?.handle) &&
+      !activeProfileProxy;
     const isLoadingProfile = fetchingProfile && !connectedProfile;
     const hasConnectedProfile = !!connectedProfile;
     const hasProfileHandle = !!connectedProfile?.handle;

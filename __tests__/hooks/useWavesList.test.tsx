@@ -97,6 +97,16 @@ const wrapperWithoutConnectedIdentity: React.FC<{
   </QueryClientProvider>
 );
 
+const createWrapperWithAuth =
+  (getAuthContext: () => unknown): React.FC<{ children: React.ReactNode }> =>
+  ({ children }) => (
+    <QueryClientProvider client={queryClient}>
+      <AuthContext.Provider value={getAuthContext() as any}>
+        {children}
+      </AuthContext.Provider>
+    </QueryClientProvider>
+  );
+
 const createSidebarWave = ({
   id,
   latestDropTimestamp,
@@ -233,6 +243,111 @@ beforeEach(() => {
     isFetching: false,
     refetch: jest.fn(),
   });
+});
+
+test("pauses viewer-scoped wave sources while wallet auth is invalid", () => {
+  const fetchNextPage = jest.fn();
+  const refetch = jest.fn();
+  const pinnedRefetch = jest.fn();
+  const pinWave = jest.fn();
+  const unpinWave = jest.fn();
+  const prefetchSpy = jest.spyOn(queryClient, "prefetchQuery");
+  useSeizeConnectContextMock.mockReturnValue({
+    address: "0xABC",
+    hasValidWalletAuth: false,
+  });
+  useWavesV2Mock.mockReturnValue({
+    waves: [mainWave],
+    isFetching: true,
+    isFetchingNextPage: true,
+    hasNextPage: true,
+    fetchNextPage,
+    status: "success",
+    refetch,
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: ["2", "3"],
+    pinnedWaves: [pinnedExtra],
+    pinWave,
+    unpinWave,
+    isLoading: false,
+    isError: false,
+    refetch: pinnedRefetch,
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(useWavesV2Mock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      enabled: false,
+      viewerIdentityKey: null,
+      following: false,
+    })
+  );
+  expect(
+    useWavesV2Mock.mock.calls.every(([args]) => args.enabled === false)
+  ).toBe(true);
+  expect(
+    useWavesV2Mock.mock.calls.every(([args]) => args.viewerIdentityKey === null)
+  ).toBe(true);
+  expect(result.current.waves).toEqual([]);
+  expect(result.current.mainWaves).toEqual([]);
+  expect(result.current.pinnedWaves).toEqual([]);
+  expect(result.current.isFetching).toBe(false);
+  expect(result.current.isFetchingNextPage).toBe(false);
+  expect(result.current.hasNextPage).toBe(false);
+
+  act(() => {
+    result.current.fetchNextPage();
+    result.current.mainWavesRefetch();
+    result.current.refetchAllWaves();
+    result.current.addPinnedWave("2");
+    result.current.removePinnedWave("2");
+    result.current.loadSubwavesForParent("2");
+    result.current.prefetchSubwavesForParent("2");
+  });
+
+  expect(fetchNextPage).not.toHaveBeenCalled();
+  expect(refetch).not.toHaveBeenCalled();
+  expect(pinnedRefetch).not.toHaveBeenCalled();
+  expect(pinWave).not.toHaveBeenCalled();
+  expect(unpinWave).not.toHaveBeenCalled();
+  expect(prefetchSpy).not.toHaveBeenCalled();
+});
+
+test("re-enables viewer-scoped wave sources after profile loading settles", () => {
+  useSeizeConnectContextMock.mockReturnValue({
+    address: "0xABC",
+    hasValidWalletAuth: true,
+  });
+  let fetchingProfile = true;
+  const authWrapper = createWrapperWithAuth(() => ({
+    connectedProfile: { handle: "me" },
+    activeProfileProxy: null,
+    fetchingProfile,
+    isAuthenticated: true,
+  }));
+
+  const { rerender } = renderHook(() => useWavesList(), {
+    wrapper: authWrapper,
+  });
+
+  expect(
+    useWavesV2Mock.mock.calls.every(([args]) => args.enabled === false)
+  ).toBe(true);
+
+  useWavesV2Mock.mockClear();
+  fetchingProfile = false;
+  rerender();
+
+  expect(
+    useWavesV2Mock.mock.calls.some(([args]) => args.enabled === true)
+  ).toBe(true);
+  expect(
+    useWavesV2Mock.mock.calls.some(
+      ([args]) => args.viewerIdentityKey === "0xabc:primary"
+    )
+  ).toBe(true);
 });
 
 test("combines main and pinned waves, filtering DMs and flagging pinned", () => {

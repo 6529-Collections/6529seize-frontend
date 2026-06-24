@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
+import type { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
 import {
   getActivityTabId,
   getNextActivityTab,
@@ -47,7 +47,7 @@ export default function UserPageActivityTabs({
     };
     const nextTab = keyToTab[event.key];
 
-    if (!nextTab) {
+    if (nextTab === undefined) {
       return;
     }
 
@@ -60,7 +60,7 @@ export default function UserPageActivityTabs({
     <div
       role="tablist"
       aria-label={t(locale, "user.collected.stats.activityTabs.listLabel")}
-      className="tw-inline-flex tw-overflow-hidden tw-rounded-lg"
+      className="tw-flex tw-w-full tw-overflow-hidden tw-rounded-lg sm:tw-inline-flex sm:tw-w-auto"
     >
       {USER_PAGE_ACTIVITY_TABS.map((tab) => (
         <UserPageActivityTab
