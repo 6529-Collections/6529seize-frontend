@@ -27,6 +27,7 @@ const mockRemoveAllDeliveredNotifications = jest
 const invalidateNotificationsMock = jest.fn();
 const mockUseAuth = jest.fn();
 const mockApprovalStatus = jest.fn();
+const mockFetchAroundSerialNo = jest.fn();
 
 let documentVisibilityState: DocumentVisibilityState = "visible";
 
@@ -136,6 +137,12 @@ jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
   }),
 }));
 
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStream: () => ({
+    fetchAroundSerialNo: mockFetchAroundSerialNo,
+  }),
+}));
+
 jest.mock("@/components/waves/gallery", () => ({
   WaveGallery: () => <div data-testid="gallery" />,
 }));
@@ -202,6 +209,7 @@ describe("MyStreamWaveChat", () => {
     mockRemoveWaveDeliveredNotifications.mockClear();
     mockRemoveAllDeliveredNotifications.mockClear();
     invalidateNotificationsMock.mockClear();
+    mockFetchAroundSerialNo.mockClear();
     mockApprovalStatus.mockReset();
     mockApprovalStatus.mockReturnValue({
       winningThreshold: null,
@@ -673,6 +681,7 @@ describe("MyStreamWaveChat", () => {
 
     expect(screen.getByTestId("gallery")).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
+    expect(mockFetchAroundSerialNo).not.toHaveBeenCalled();
 
     rerender(
       <ReactQueryWrapperContext.Provider
@@ -692,6 +701,27 @@ describe("MyStreamWaveChat", () => {
     await waitFor(() => {
       expect(replaceMock).toHaveBeenCalledTimes(1);
       expect(capturedPropsHolder.current.initialDrop).toBe(5);
+      expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 5);
+    });
+  });
+
+  it("hydrates the serial target when opening a wave from a route param", async () => {
+    searchParamsMock.get.mockImplementation((key: string) =>
+      key === "serialNo" ? "6679" : null
+    );
+    searchParamsMock.toString.mockReturnValue("serialNo=6679");
+
+    renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 6679);
     });
   });
 
