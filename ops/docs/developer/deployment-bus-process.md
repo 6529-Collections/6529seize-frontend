@@ -356,7 +356,7 @@ Use this order when a release spans frontend and backend:
 11. Deploy frontend production from `origin/main`.
 12. Validate frontend production and the user-visible integrated behavior.
 13. Merge `main` back into `1a-staging` in both repos so staging tracks
-   production plus any intentionally staged ahead-of-main work.
+    production plus any intentionally staged ahead-of-main work.
 
 Prefer compatibility windows:
 

@@ -47,10 +47,10 @@ shared lane.
 - Use the staging departure cadence in
   `ops/docs/developer/deployment-bus-process.md`; keep that process doc as the
   source of truth when the team tunes the batching window.
-- Record a staging manifest before deployment: staging source ref, staging
+- Record a staging manifest summary before deployment: staging source ref, staging
   SHA, intended production target, included PRs, risk/area notes, backend
   dependencies, validation owners, required checks, and rollback or fix-forward
-  notes.
+  notes. Use the process doc for the full manifest schema.
 - Use the deployment bus automation primitives when present:
   `ops/scripts/deployment-bus.cjs`,
   `ops/deployment-bus/manifest.v1.schema.json`, workflow manifest artifacts,
