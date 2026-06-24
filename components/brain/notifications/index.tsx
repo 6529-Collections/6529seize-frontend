@@ -13,6 +13,7 @@ import { useNotificationsScroll } from "./hooks/useNotificationsScroll";
 import NotificationsContent from "./subcomponents/NotificationsContent";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { floatingDockClearanceClassName } from "./notifications.constants";
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
@@ -41,9 +42,6 @@ const compareNotificationCause = (
 ): number =>
   NOTIFICATION_CAUSE_PRIORITY[firstCause] -
   NOTIFICATION_CAUSE_PRIORITY[secondCause];
-
-export const floatingDockClearanceClassName =
-  "tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]";
 
 export default function Notifications({
   activeDrop,

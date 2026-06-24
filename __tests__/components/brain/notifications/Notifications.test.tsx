@@ -106,9 +106,8 @@ jest.mock("@/contexts/TitleContext", () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import Notifications, {
-  floatingDockClearanceClassName,
-} from "@/components/brain/notifications";
+import Notifications from "@/components/brain/notifications";
+import { floatingDockClearanceClassName } from "@/components/brain/notifications/notifications.constants";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
