@@ -45,8 +45,82 @@ const { usePathname, useSearchParams } = require("next/navigation");
 
 let originalScrollYDescriptor: PropertyDescriptor | undefined;
 
-const getExpectedActivePillLeft = (index: number, itemCount = 7) =>
-  `left: ${((index + 0.5) / itemCount) * 100}%`;
+const flushAnimationFrame = async () => {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+};
+
+const createRect = ({
+  left,
+  width,
+}: {
+  readonly left: number;
+  readonly width: number;
+}): DOMRect =>
+  ({
+    bottom: 64,
+    height: 64,
+    left,
+    right: left + width,
+    top: 0,
+    width,
+    x: left,
+    y: 0,
+    toJSON: () => ({}),
+  }) as DOMRect;
+
+const mockFloatingDockGeometry = () => {
+  const innerLeft = 40;
+  const itemWidth = 88;
+  const itemLefts = Array.from(
+    { length: 7 },
+    (_unused, index) => 52 + index * 96
+  );
+
+  jest
+    .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+    .mockImplementation(function getBoundingClientRect() {
+      const element = this as HTMLElement;
+      if (element.getAttribute("data-testid") === "mobile-dock-inner") {
+        return createRect({ left: innerLeft, width: 704 });
+      }
+
+      const itemIndex = element.getAttribute("data-mobile-dock-item-index");
+      if (itemIndex !== null) {
+        return createRect({
+          left: itemLefts[Number(itemIndex)] ?? 0,
+          width: itemWidth,
+        });
+      }
+
+      return createRect({ left: 0, width: 0 });
+    });
+
+  return {
+    getExpectedMeasuredLeft: (index: number) =>
+      itemLefts[index]! - innerLeft + itemWidth / 2,
+  };
+};
+
+const createScrollableElement = () => {
+  const element = document.createElement("div");
+  Object.defineProperty(element, "clientHeight", {
+    configurable: true,
+    value: 120,
+  });
+  Object.defineProperty(element, "scrollHeight", {
+    configurable: true,
+    value: 240,
+  });
+  Object.defineProperty(element, "scrollTop", {
+    configurable: true,
+    value: 0,
+    writable: true,
+  });
+  document.body.appendChild(element);
+  return element;
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -168,11 +242,12 @@ describe("BottomNavigation", () => {
   });
 
   it("keeps one active pill mounted while moving it between active items", () => {
+    const { getExpectedMeasuredLeft } = mockFloatingDockGeometry();
     const { getByTestId, rerender } = render(<BottomNavigation />);
     const activePill = getByTestId("mobile-dock-active-pill");
 
     expect(activePill.getAttribute("style")).toContain(
-      getExpectedActivePillLeft(3)
+      `left: ${getExpectedMeasuredLeft(3)}px`
     );
     expect(activePill).toHaveClass("tw-transition-[left,width,height,opacity]");
 
@@ -182,7 +257,7 @@ describe("BottomNavigation", () => {
     const movedActivePill = getByTestId("mobile-dock-active-pill");
     expect(movedActivePill).toBe(activePill);
     expect(movedActivePill.getAttribute("style")).toContain(
-      getExpectedActivePillLeft(6)
+      `left: ${getExpectedMeasuredLeft(6)}px`
     );
   });
 
@@ -242,6 +317,32 @@ describe("BottomNavigation", () => {
         })
       ).toBe(true);
     });
+  });
+
+  it("compacts from nested scroll containers", async () => {
+    const scroller = createScrollableElement();
+    render(<BottomNavigation />);
+
+    act(() => {
+      scroller.scrollTop = 0;
+      fireEvent.scroll(scroller);
+    });
+    await flushAnimationFrame();
+
+    act(() => {
+      scroller.scrollTop = 24;
+      fireEvent.scroll(scroller);
+    });
+
+    await waitFor(() => {
+      expect(
+        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+          return props.variant === "floating" && props.compact === true;
+        })
+      ).toBe(true);
+    });
+
+    scroller.remove();
   });
 
   it("resets floating dock compact state when the route view changes", async () => {
