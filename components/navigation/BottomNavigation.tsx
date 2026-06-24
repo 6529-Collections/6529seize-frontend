@@ -242,6 +242,7 @@ const useCompactDock = ({
       });
       if (frameRef.current !== null) {
         globalThis.cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
       }
       pendingScrollTargetsRef.current.clear();
     };
