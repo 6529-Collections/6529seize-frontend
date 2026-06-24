@@ -438,7 +438,7 @@ export function HeaderQRModal({
   const [isVisible, setIsVisible] = useState(show);
 
   const { hasValidWalletAuth } = useSeizeConnectContext();
-  const { requestSessionUpgrade } = useAuth();
+  const { ensureActiveSessionV2WebSession, requestSessionUpgrade } = useAuth();
   const activeWalletAddress = getWalletAddress();
   const hasWalletAddress = Boolean(activeWalletAddress);
 
@@ -661,6 +661,32 @@ export function HeaderQRModal({
 
     try {
       setMobileConnectionShareStatus("loading");
+      let hasActiveSession = false;
+      try {
+        if (ensureActiveSessionV2WebSession) {
+          hasActiveSession = await ensureActiveSessionV2WebSession(signal);
+        }
+      } catch (error: unknown) {
+        if (isStaleGeneration() || isAbortError(error, signal)) {
+          return "";
+        }
+
+        console.error("Failed to verify active web session", error);
+      }
+
+      if (isStaleGeneration() || signal?.aborted) {
+        return "";
+      }
+
+      if (!hasActiveSession) {
+        terminalConnectionShareFailuresRef.current.set(
+          failureKey,
+          "legacy-auth"
+        );
+        setUnavailableMobileConnectionShare("legacy-auth");
+        return "";
+      }
+
       const cachedShare = getCachedConnectionShare(
         cachedConnectionShareRef.current,
         addressKey
