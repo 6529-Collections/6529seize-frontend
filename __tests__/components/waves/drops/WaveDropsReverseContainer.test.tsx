@@ -64,6 +64,13 @@ describe("WaveDropsReverseContainer", () => {
     expect(() => fireEvent.scroll(scrollDiv)).not.toThrow();
   });
 
+  it("contains edge overscroll inside the reverse message list", () => {
+    const { container } = setup();
+    const scrollDiv = container.firstChild as HTMLElement;
+
+    expect(scrollDiv).toHaveClass("tw-overscroll-y-contain");
+  });
+
   it("keeps callback ref stable across rerenders and only detaches on unmount", () => {
     const onTopIntersection = jest.fn();
     const callbackRef = jest.fn();
