@@ -7,7 +7,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
-import { getNotificationsRoute } from "@/helpers/navigation.helpers";
+import {
+  getNotificationsRoute,
+  MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
+} from "@/helpers/navigation.helpers";
 
 jest.mock("@/components/navigation/NavItem", () => ({
   __esModule: true,
@@ -44,6 +47,19 @@ const { usePathname, useSearchParams } = require("next/navigation");
 (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 
 let originalScrollYDescriptor: PropertyDescriptor | undefined;
+
+const getMobileBottomNavScrollTargetAttribute = () => {
+  const match = /^\[([^=\]]+)="true"\]$/.exec(
+    MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR
+  );
+  if (!match?.[1]) {
+    throw new Error("Unexpected mobile bottom nav scroll target selector");
+  }
+  return match[1];
+};
+
+const MOBILE_BOTTOM_NAV_SCROLL_TARGET_ATTRIBUTE =
+  getMobileBottomNavScrollTargetAttribute();
 
 const flushAnimationFrame = async () => {
   await act(async () => {
@@ -103,8 +119,15 @@ const mockFloatingDockGeometry = () => {
   };
 };
 
-const createScrollableElement = () => {
+const createScrollableElement = ({
+  tracked,
+}: {
+  readonly tracked: boolean;
+}) => {
   const element = document.createElement("div");
+  if (tracked) {
+    element.setAttribute(MOBILE_BOTTOM_NAV_SCROLL_TARGET_ATTRIBUTE, "true");
+  }
   Object.defineProperty(element, "clientHeight", {
     configurable: true,
     value: 120,
@@ -319,8 +342,8 @@ describe("BottomNavigation", () => {
     });
   });
 
-  it("compacts from nested scroll containers", async () => {
-    const scroller = createScrollableElement();
+  it("compacts from marked element scroll containers", async () => {
+    const scroller = createScrollableElement({ tracked: true });
     render(<BottomNavigation />);
 
     act(() => {
@@ -341,6 +364,31 @@ describe("BottomNavigation", () => {
         })
       ).toBe(true);
     });
+
+    scroller.remove();
+  });
+
+  it("ignores unmarked nested scroll containers", async () => {
+    const scroller = createScrollableElement({ tracked: false });
+    render(<BottomNavigation />);
+
+    act(() => {
+      scroller.scrollTop = 0;
+      fireEvent.scroll(scroller);
+    });
+    await flushAnimationFrame();
+
+    act(() => {
+      scroller.scrollTop = 24;
+      fireEvent.scroll(scroller);
+    });
+    await flushAnimationFrame();
+
+    expect(
+      (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+        return props.variant === "floating" && props.compact === false;
+      })
+    ).toBe(true);
 
     scroller.remove();
   });
