@@ -133,11 +133,6 @@ export function buildHighlyRatedWavePreviewItems({
   }));
 }
 
-const getPluralKey = (count: number) => (count === 1 ? "one" : "other");
-
-const getUnreadCount = (wave: MinimalWave) =>
-  Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
-
 const getWaveScoreLabel = (wave: MinimalWave): string | null => {
   const score = wave.waveScore?.visibility_score;
   if (typeof score !== "number" || !Number.isFinite(score)) {
@@ -145,6 +140,22 @@ const getWaveScoreLabel = (wave: MinimalWave): string | null => {
   }
 
   return formatInteger(SIDEBAR_LOCALE, Math.round(score));
+};
+
+const getScoreBadgeFontSize = (scoreLabel: string) => {
+  if (scoreLabel.length >= 5) {
+    return 5;
+  }
+
+  if (scoreLabel.length === 4) {
+    return 5.8;
+  }
+
+  if (scoreLabel.length === 3) {
+    return 7;
+  }
+
+  return 8.8;
 };
 
 export const getFittingPreviewCount = ({
@@ -241,6 +252,48 @@ export const getHighlyRatedPreviewTooltipAlignment = ({
   return "center";
 };
 
+function HighlyRatedWavePreviewScoreBadge({
+  scoreLabel,
+}: {
+  readonly scoreLabel: string | null;
+}) {
+  if (scoreLabel === null) {
+    return null;
+  }
+
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 28"
+      className="tw-pointer-events-none tw-absolute -tw-bottom-1.5 -tw-left-1.5 tw-z-10 tw-h-6 tw-w-5 tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]"
+    >
+      <path
+        d="M12 1.8 21.4 5.45v7.35c0 6.1-3.7 11.05-9.4 13.4-5.7-2.35-9.4-7.3-9.4-13.4V5.45L12 1.8Z"
+        className="tw-fill-iron-800 tw-stroke-iron-950"
+        strokeWidth="2.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 3.9 19.1 6.65v6.1c0 4.95-2.65 8.95-7.1 11-4.45-2.05-7.1-6.05-7.1-11v-6.1L12 3.9Z"
+        className="tw-fill-none tw-stroke-white/20"
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+      <text
+        x="12"
+        y="14.2"
+        dominantBaseline="middle"
+        textAnchor="middle"
+        fontSize={getScoreBadgeFontSize(scoreLabel)}
+        fontWeight="800"
+        className="tw-fill-iron-50"
+      >
+        {scoreLabel}
+      </text>
+    </svg>
+  );
+}
+
 function HighlyRatedWavePreviewLink({
   item,
   tooltipAlignment,
@@ -249,8 +302,6 @@ function HighlyRatedWavePreviewLink({
   readonly tooltipAlignment: PreviewTooltipAlignment;
 }) {
   const { wave } = item;
-  const unreadCount = getUnreadCount(wave);
-  const countKey = getPluralKey(unreadCount);
   const isDropWave = wave.type !== ApiWaveType.Chat;
   const scoreLabel = getWaveScoreLabel(wave);
   const latestDropTimestamp =
@@ -260,20 +311,20 @@ function HighlyRatedWavePreviewLink({
       ? wave.newDropsCount.latestDropTimestamp
       : null;
   const linkLabel =
-    unreadCount > 0
+    scoreLabel === null
       ? t(
-          SIDEBAR_LOCALE,
-          `waves.sidebar.highlyRatedPreviewOpenAriaLabel.${countKey}`,
-          {
-            waveName: wave.name,
-            count: formatInteger(SIDEBAR_LOCALE, unreadCount),
-          }
-        )
-      : t(
           SIDEBAR_LOCALE,
           "waves.sidebar.highlyRatedPreviewOpenAriaLabel.none",
           {
             waveName: wave.name,
+          }
+        )
+      : t(
+          SIDEBAR_LOCALE,
+          "waves.sidebar.highlyRatedPreviewOpenAriaLabel.withScore",
+          {
+            waveName: wave.name,
+            score: scoreLabel,
           }
         );
 
@@ -289,9 +340,11 @@ function HighlyRatedWavePreviewLink({
       <WaveAvatar
         isActive={item.isActive}
         isDropWave={isDropWave}
-        showNewDropsBadge={!item.isActive && unreadCount > 0}
+        showNewDropsBadge={false}
+        showUnreadDropsBadge={false}
         wave={wave}
       />
+      <HighlyRatedWavePreviewScoreBadge scoreLabel={scoreLabel} />
       <span
         className={`tw-pointer-events-none tw-absolute tw-top-10 tw-z-30 tw-hidden tw-w-48 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-shadow-xl group-hover/preview:tw-block group-focus-visible/preview:tw-block ${PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES[tooltipAlignment]}`}
       >
@@ -305,7 +358,20 @@ function HighlyRatedWavePreviewLink({
             </span>
           )}
           {scoreLabel !== null && (
-            <span className="tw-ml-auto tw-whitespace-nowrap">
+            <span className="tw-ml-auto tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+              <svg
+                className="tw-size-3 tw-flex-shrink-0 tw-text-iron-400"
+                viewBox="0 0 24 28"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 2.2 21 5.7v7.1c0 5.9-3.55 10.6-9 12.9-5.45-2.3-9-7-9-12.9V5.7L12 2.2Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinejoin="round"
+                />
+              </svg>
               {t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedPreviewScore", {
                 score: scoreLabel,
               })}
