@@ -1712,13 +1712,19 @@ export default function Auth({
     AUTH_MODAL_LOCALE,
     "auth.signModal.sharedConnection"
   );
-  const signModalSecondaryListItem = isSessionUpgradePrompt
-    ? sessionUpgradeHasDeadline
-      ? t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft", {
-          timeLeft: sessionUpgradeTimeLeftText,
-        })
-      : t(AUTH_MODAL_LOCALE, "auth.signModal.manualUpgrade")
-    : t(AUTH_MODAL_LOCALE, "auth.signModal.noGas");
+  const signModalSecondaryListItem = (() => {
+    if (!isSessionUpgradePrompt) {
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.noGas");
+    }
+
+    if (!sessionUpgradeHasDeadline) {
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.manualUpgrade");
+    }
+
+    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft", {
+      timeLeft: sessionUpgradeTimeLeftText,
+    });
+  })();
   const signModalConfirmText = isDisconnectedWebSessionUpgradePrompt
     ? t(AUTH_MODAL_LOCALE, "auth.signModal.connect")
     : t(AUTH_MODAL_LOCALE, "auth.signModal.sign");
