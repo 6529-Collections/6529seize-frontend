@@ -152,6 +152,23 @@ describe("HeaderUserMenuDropdown", () => {
     });
   });
 
+  it("keeps manual authentication upgrade available while wallet is disconnected", () => {
+    renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: false,
+      sessionUpgradeRequired: true,
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Connect" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Connect Wallet")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Upgrade Authentication" })
+    ).toBeInTheDocument();
+  });
+
   it("shows switch chain control when wallet is connected and multiple chains exist", () => {
     const switchToNextChain = jest.fn(() => true);
     const { onClose } = renderDropdown({
