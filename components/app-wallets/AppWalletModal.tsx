@@ -5,7 +5,12 @@ import { useCallback, useRef, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { decryptData, getAppWalletPassphraseError } from "./app-wallet-helpers";
+import {
+  decryptData,
+  getAppWalletNameError,
+  getAppWalletPassphraseError,
+  getAppWalletPassphraseWhitespaceError,
+} from "./app-wallet-helpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
@@ -158,11 +163,7 @@ export function CreateAppWalletModal(
             if (/^[a-zA-Z0-9 ]*$/.test(value)) {
               setWalletName(value);
             } else {
-              showAppWalletError(
-                timeoutRef,
-                setError,
-                "Name can only contain alphanumeric characters and spaces"
-              );
+              showAppWalletError(timeoutRef, setError, getAppWalletNameError());
             }
           }}
         />
@@ -190,7 +191,7 @@ export function CreateAppWalletModal(
               showAppWalletError(
                 timeoutRef,
                 setError,
-                "Password must not contain any whitespace characters"
+                getAppWalletPassphraseWhitespaceError()
               );
             }
           }}
@@ -377,7 +378,7 @@ export function UnlockAppWalletModal(
               showAppWalletError(
                 timeoutRef,
                 setError,
-                "Password must not contain any whitespace characters"
+                getAppWalletPassphraseWhitespaceError()
               );
             }
           }}

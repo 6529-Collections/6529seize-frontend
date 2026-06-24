@@ -316,6 +316,42 @@ describe("GithubLinkPreview", () => {
     );
   });
 
+  it("renders GitHub PDF files without an excerpt", async () => {
+    mockedFetchGithubPreview.mockResolvedValue({
+      type: "github.file",
+      owner: "6529-Collections",
+      repo: "6529Stream",
+      title: "safety-plan.pdf",
+      path: "docs/safety-plan.pdf",
+      ref: "main",
+      size: 4096,
+      itemCount: null,
+      extension: "pdf",
+      fileKind: "pdf",
+      mimeType: "application/pdf",
+      isBinary: true,
+      language: null,
+      lineCount: null,
+      lineStart: null,
+      lineEnd: null,
+      excerpt: null,
+      url: "https://github.com/6529-Collections/6529Stream/blob/main/docs/safety-plan.pdf",
+    });
+
+    render(
+      <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream/blob/main/docs/safety-plan.pdf" />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("safety-plan.pdf")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("PDF file")).toBeInTheDocument();
+    expect(screen.getByText("application/pdf")).toBeInTheDocument();
+    expect(screen.getAllByText(/4 KB/).length).toBeGreaterThan(0);
+    expect(screen.queryByTestId("github-file-excerpt")).toBeNull();
+  });
+
   it("renders enriched issue links", async () => {
     mockedFetchGithubPreview.mockResolvedValue({
       type: "github.issue",

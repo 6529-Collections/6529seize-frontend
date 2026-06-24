@@ -4,12 +4,20 @@ import { Col, Container, Row } from "react-bootstrap";
 
 import { AboutMenu } from "@/components/about/About";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.scss";
 import { AboutSection } from "@/types/enums";
 
-const WALLET_AUTH_TITLE = "Wallet Authentication Update";
-const WALLET_AUTH_DESCRIPTION =
-  "A simple explanation of the new 6529 wallet authentication session.";
+const WALLET_AUTH_LOCALE = DEFAULT_LOCALE;
+const WALLET_AUTH_TITLE = t(
+  WALLET_AUTH_LOCALE,
+  "about.tech.walletAuth.metadata.title"
+);
+const WALLET_AUTH_DESCRIPTION = t(
+  WALLET_AUTH_LOCALE,
+  "about.tech.walletAuth.metadata.description"
+);
 
 export const metadata: Metadata = getAppMetadata({
   title: WALLET_AUTH_TITLE,
@@ -34,20 +42,24 @@ export default function WalletAuthenticationPage() {
                         href="/about/tech"
                         className="hover:tw-text-primary-200 tw-mb-5 tw-inline-flex tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline"
                       >
-                        Back to Tech
+                        {t(
+                          WALLET_AUTH_LOCALE,
+                          "about.tech.walletAuth.backToTech"
+                        )}
                       </Link>
 
                       <header className="tw-max-w-4xl tw-pb-4">
                         <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                          Wallet Authentication
+                          {t(
+                            WALLET_AUTH_LOCALE,
+                            "about.tech.walletAuth.eyebrow"
+                          )}
                         </p>
                         <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
-                          Wallet Authentication Update
+                          {t(WALLET_AUTH_LOCALE, "about.tech.walletAuth.title")}
                         </h1>
                         <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
-                          6529 is moving wallet sign-in to a newer secure
-                          session. Most people only need to sign once when they
-                          are prompted.
+                          {t(WALLET_AUTH_LOCALE, "about.tech.walletAuth.lead")}
                         </p>
                       </header>
 
@@ -57,17 +69,22 @@ export default function WalletAuthenticationPage() {
                             id="what-is-changing-heading"
                             className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
                           >
-                            What is changing
+                            {t(
+                              WALLET_AUTH_LOCALE,
+                              "about.tech.walletAuth.whatIsChanging.title"
+                            )}
                           </h2>
                           <p className="tw-mb-3">
-                            Your wallet is still your identity. The update
-                            changes the browser session that 6529 creates after
-                            you sign in.
+                            {t(
+                              WALLET_AUTH_LOCALE,
+                              "about.tech.walletAuth.whatIsChanging.identity"
+                            )}
                           </p>
                           <p className="tw-mb-0">
-                            The new session is easier to refresh, easier to
-                            revoke, and better for sharing a connection with
-                            your own devices.
+                            {t(
+                              WALLET_AUTH_LOCALE,
+                              "about.tech.walletAuth.whatIsChanging.session"
+                            )}
                           </p>
                         </section>
 
@@ -76,21 +93,41 @@ export default function WalletAuthenticationPage() {
                             id="what-to-do-heading"
                             className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
                           >
-                            What you need to do
+                            {t(
+                              WALLET_AUTH_LOCALE,
+                              "about.tech.walletAuth.whatToDo.title"
+                            )}
                           </h2>
                           <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
                             <li>
-                              If you see the{" "}
-                              <strong>Upgrade Authentication</strong> prompt,
-                              connect the same wallet and sign the message.
+                              {t(
+                                WALLET_AUTH_LOCALE,
+                                "about.tech.walletAuth.whatToDo.upgrade",
+                                {
+                                  prompt: t(
+                                    WALLET_AUTH_LOCALE,
+                                    "about.tech.walletAuth.whatToDo.prompt"
+                                  ),
+                                }
+                              )}
                             </li>
                             <li>
-                              The signature does not cost gas and does not send
-                              a transaction.
+                              {t(
+                                WALLET_AUTH_LOCALE,
+                                "about.tech.walletAuth.whatToDo.noGas"
+                              )}
                             </li>
                             <li>
-                              If you choose <strong>Remind me later</strong>,
-                              you can still upgrade from your profile menu.
+                              {t(
+                                WALLET_AUTH_LOCALE,
+                                "about.tech.walletAuth.whatToDo.reminder",
+                                {
+                                  action: t(
+                                    WALLET_AUTH_LOCALE,
+                                    "about.tech.walletAuth.whatToDo.reminderAction"
+                                  ),
+                                }
+                              )}
                             </li>
                           </ul>
                         </section>
@@ -100,16 +137,22 @@ export default function WalletAuthenticationPage() {
                             id="why-now-heading"
                             className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
                           >
-                            Why you may see this prompt
+                            {t(
+                              WALLET_AUTH_LOCALE,
+                              "about.tech.walletAuth.whyNow.title"
+                            )}
                           </h2>
                           <p className="tw-mb-3">
-                            Some older sessions can keep working until the
-                            upgrade deadline. During that time, 6529 may remind
-                            you to upgrade before the older session expires.
+                            {t(
+                              WALLET_AUTH_LOCALE,
+                              "about.tech.walletAuth.whyNow.deadline"
+                            )}
                           </p>
                           <p className="tw-mb-0">
-                            Some newer features, including mobile connection
-                            sharing, need the new session before they can work.
+                            {t(
+                              WALLET_AUTH_LOCALE,
+                              "about.tech.walletAuth.whyNow.features"
+                            )}
                           </p>
                         </section>
 
@@ -118,16 +161,29 @@ export default function WalletAuthenticationPage() {
                             id="safe-heading"
                             className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
                           >
-                            What stays the same
+                            {t(
+                              WALLET_AUTH_LOCALE,
+                              "about.tech.walletAuth.same.title"
+                            )}
                           </h2>
                           <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
                             <li>
-                              Your wallet address and profile do not change.
+                              {t(
+                                WALLET_AUTH_LOCALE,
+                                "about.tech.walletAuth.same.profile"
+                              )}
                             </li>
-                            <li>You do not need to move tokens or assets.</li>
                             <li>
-                              The 6529 Desktop app continues using the existing
-                              connection flow during this rollout.
+                              {t(
+                                WALLET_AUTH_LOCALE,
+                                "about.tech.walletAuth.same.assets"
+                              )}
+                            </li>
+                            <li>
+                              {t(
+                                WALLET_AUTH_LOCALE,
+                                "about.tech.walletAuth.same.desktop"
+                              )}
                             </li>
                           </ul>
                         </section>

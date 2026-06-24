@@ -17,8 +17,12 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useChainSwitcher } from "@/components/header/useChainSwitcher";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+
+const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
 export default function HeaderUserMenuDropdown({
   isOpen,
@@ -59,6 +63,10 @@ export default function HeaderUserMenuDropdown({
 
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
+  const upgradeAuthenticationLabel = t(
+    HEADER_USER_MENU_LOCALE,
+    "auth.sessionUpgrade.action"
+  );
 
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
@@ -307,8 +315,8 @@ export default function HeaderUserMenuDropdown({
                         }}
                         disabled={pendingAction !== null}
                         type="button"
-                        aria-label="Upgrade Authentication"
-                        title="Upgrade Authentication"
+                        aria-label={upgradeAuthenticationLabel}
+                        title={upgradeAuthenticationLabel}
                         className="tw-relative tw-mt-2 tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
                         <FontAwesomeIcon
@@ -316,7 +324,7 @@ export default function HeaderUserMenuDropdown({
                           height={20}
                           width={20}
                         />
-                        <span>Upgrade Authentication</span>
+                        <span>{upgradeAuthenticationLabel}</span>
                       </button>
                     )}
                   </li>

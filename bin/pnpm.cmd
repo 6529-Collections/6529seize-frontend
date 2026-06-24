@@ -9,5 +9,5 @@ if not defined BASH_EXE (
   echo Git Bash or another bash-compatible shell must be available on PATH. 1>&2
   exit /b 1
 )
-"%BASH_EXE%" "./bin/6529" %*
+"%BASH_EXE%" "./bin/pnpm" %*
 exit /b %ERRORLEVEL%

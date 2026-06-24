@@ -7,6 +7,13 @@ import Link from "next/link";
 
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 import GithubPreviewStatusBadge from "@/components/waves/GithubPreviewStatusBadge";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import {
+  formatFileSizeLabel,
+  getLocalizedFileKindLabel,
+  getLocalizedGithubFileKindLabel,
+} from "@/lib/link-preview/filePreviewI18n";
 import {
   fetchGithubPreview,
   type GithubPreviewChecks,
@@ -61,6 +68,7 @@ interface GithubAccent {
 }
 
 const GITHUB_NUMBER_PATTERN = /^\d+$/;
+const GITHUB_PREVIEW_LOCALE = DEFAULT_LOCALE;
 
 const GITHUB_ACCENTS: Record<GithubLinkKind, Omit<GithubAccent, "kind">> = {
   pull: {
@@ -267,25 +275,6 @@ const formatCompactNumber = (
 const formatInteger = (value: number | null | undefined): string | null =>
   typeof value === "number" ? new Intl.NumberFormat().format(value) : null;
 
-const formatBytes = (value: number | null | undefined): string | null => {
-  if (typeof value !== "number") {
-    return null;
-  }
-
-  const units = ["B", "KB", "MB", "GB"] as const;
-  let size = value;
-  let unitIndex = 0;
-
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
-    unitIndex += 1;
-  }
-
-  return `${new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: unitIndex === 0 ? 0 : 1,
-  }).format(size)} ${units[unitIndex]}`;
-};
-
 const formatDate = (value: string | null | undefined): string | null => {
   if (!value) {
     return null;
@@ -436,8 +425,15 @@ const getKindLabelFromPreview = (
       return "Pull request";
     case "github.repository":
       return "Repository";
-    case "github.file":
-      return "File";
+    case "github.file": {
+      if (!preview.fileKind) {
+        return "File";
+      }
+      return getLocalizedGithubFileKindLabel(
+        GITHUB_PREVIEW_LOCALE,
+        preview.fileKind
+      );
+    }
     case "github.directory":
       return "Directory";
     case "github.commit":
@@ -556,8 +552,13 @@ const getDetailText = (
     return joinDetailParts([
       repoLabel,
       preview.path,
+      preview.type === "github.file" && preview.fileKind
+        ? getLocalizedFileKindLabel(GITHUB_PREVIEW_LOCALE, preview.fileKind)
+        : null,
       preview.ref,
-      preview.type === "github.file" ? formatBytes(preview.size) : null,
+      preview.type === "github.file"
+        ? formatFileSizeLabel(preview.size, GITHUB_PREVIEW_LOCALE)
+        : null,
       preview.type === "github.directory" && preview.itemCount !== null
         ? `${formatInteger(preview.itemCount)} items`
         : null,
@@ -784,12 +785,33 @@ const getPreviewFacts = (
       ]);
     case "github.file":
       return compactFacts([
-        preview.language
-          ? { label: "Language", value: preview.language }
+        preview.fileKind
+          ? {
+              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.github.fact.type"),
+              value: getLocalizedFileKindLabel(
+                GITHUB_PREVIEW_LOCALE,
+                preview.fileKind
+              ),
+            }
+          : null,
+        preview.language ? { label: "Language", value: preview.language } : null,
+        preview.mimeType &&
+        preview.fileKind !== "code" &&
+        preview.fileKind !== "text"
+          ? {
+              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.github.fact.mime"),
+              value: preview.mimeType,
+            }
           : null,
         preview.ref ? { label: "Ref", value: preview.ref } : null,
-        formatBytes(preview.size)
-          ? { label: "Size", value: formatBytes(preview.size)! }
+        formatFileSizeLabel(preview.size, GITHUB_PREVIEW_LOCALE)
+          ? {
+              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.file.fact.size"),
+              value: formatFileSizeLabel(
+                preview.size,
+                GITHUB_PREVIEW_LOCALE
+              )!,
+            }
           : null,
         formatCount(preview.lineCount, "line")
           ? { label: "Lines", value: formatCount(preview.lineCount, "line")! }

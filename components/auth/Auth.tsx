@@ -1,12 +1,13 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -33,6 +34,9 @@ import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   ConnectionMismatchError,
   MobileSigningError,
@@ -165,6 +169,7 @@ interface RunImmediateAuthValidationParams {
 
 const SESSION_UPGRADE_REMINDER_STORAGE_KEY =
   "6529-session-v2-upgrade-reminders";
+const AUTH_MODAL_LOCALE = DEFAULT_LOCALE;
 const SESSION_UPGRADE_REMINDER_MS = 2 * 60 * 60 * 1000;
 const DEFAULT_AUTH_ROLLOUT_SETTINGS: AuthRolloutSettings = {
   structuredSignaturesRequired: false,
@@ -334,7 +339,7 @@ const dismissSessionUpgradePrompt = (
 
 const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
   if (timeLeftMs <= 0) {
-    return "now";
+    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft.now");
   }
 
   const oneHourMs = 60 * 60 * 1000;
@@ -342,15 +347,27 @@ const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
   const wholeDays = Math.floor(timeLeftMs / oneDayMs);
 
   if (wholeDays > 3) {
-    return `${wholeDays} days`;
+    return t(
+      AUTH_MODAL_LOCALE,
+      wholeDays === 1
+        ? "auth.signModal.timeLeft.days.one"
+        : "auth.signModal.timeLeft.days.many",
+      { count: formatInteger(AUTH_MODAL_LOCALE, wholeDays) }
+    );
   }
 
   const wholeHours = Math.floor(timeLeftMs / oneHourMs);
   if (wholeHours < 1) {
-    return "less than 1 hour";
+    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft.lessThanOneHour");
   }
 
-  return `${wholeHours} ${wholeHours === 1 ? "hour" : "hours"}`;
+  return t(
+    AUTH_MODAL_LOCALE,
+    wholeHours === 1
+      ? "auth.signModal.timeLeft.hours.one"
+      : "auth.signModal.timeLeft.hours.many",
+    { count: formatInteger(AUTH_MODAL_LOCALE, wholeHours) }
+  );
 };
 
 const getSessionUpgradePromptMode = (
@@ -504,7 +521,6 @@ export default function Auth({
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const seizeSettingsContext = useSeizeSettingsOptional();
 
   const {
@@ -1375,7 +1391,14 @@ export default function Auth({
   };
 
   const navigateAfterProfileSwitch = useCallback(() => {
-    const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
+    if (typeof globalThis.location === "undefined") {
+      return;
+    }
+
+    const activeWaveId = getActiveWaveIdFromUrl({
+      pathname,
+      searchParams: new URLSearchParams(globalThis.location.search),
+    });
     if (!activeWaveId) {
       return;
     }
@@ -1392,7 +1415,7 @@ export default function Auth({
     if (isWavesRoute || pathname === "/") {
       router.replace("/waves");
     }
-  }, [pathname, router, searchParams]);
+  }, [pathname, router]);
 
   useEffect(() => {
     const onProfileSwitched = () => {
@@ -1480,44 +1503,49 @@ export default function Auth({
     () => formatSessionUpgradeTimeLeft(sessionUpgradeTimeLeftMs),
     [sessionUpgradeTimeLeftMs]
   );
+  const signModalTitleId = useId();
   const signModalTitle = (() => {
     if (isConnectionShareUpgradePrompt) {
-      return "Connection Update Required";
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.connectionUpdateRequired");
     }
     if (isSessionUpgradePrompt) {
-      return "Upgrade Authentication";
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.upgradeAuthentication");
     }
-    return "Sign Authentication Request";
+    return t(AUTH_MODAL_LOCALE, "auth.signModal.authenticationRequest");
   })();
   const signModalLead = (() => {
     if (isConnectionShareUpgradePrompt) {
-      return "This shared connection uses the previous authentication flow. Reshare the connection from a device that is already signed in with the new authentication.";
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.connectionShareLead");
     }
     if (isSessionUpgradePrompt) {
-      return "We have upgraded wallet authentication. Sign once to move this connected wallet to the new secure session.";
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.sessionUpgradeLead");
     }
-    return "To connect your wallet, you will need to sign a message to confirm your identity.";
+    return t(AUTH_MODAL_LOCALE, "auth.signModal.authLead");
   })();
   const signModalPrimaryListItem = (() => {
     if (isConnectionShareUpgradePrompt) {
-      return "Use connection sharing from an active session-v2 web connection, then open the new shared connection on this device.";
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.connectionSharePrimary");
     }
     if (isDisconnectedWebSessionUpgradePrompt) {
-      return "Reconnect this wallet and sign once to upgrade this browser session.";
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.disconnectedUpgradePrimary");
     }
     if (isSessionUpgradePrompt) {
-      return "Your current connection will stay available while the new session is created.";
+      return t(AUTH_MODAL_LOCALE, "auth.signModal.sessionUpgradePrimary");
     }
-    return "This signature will be used to generate a secure token (JWT) to authenticate your session.";
+    return t(AUTH_MODAL_LOCALE, "auth.signModal.authPrimary");
   })();
-  const signModalSharedConnectionListItem =
-    "If this is a shared connection, reshare the connection from a device that is already signed in with the new authentication.";
+  const signModalSharedConnectionListItem = t(
+    AUTH_MODAL_LOCALE,
+    "auth.signModal.sharedConnection"
+  );
   const signModalSecondaryListItem = isSessionUpgradePrompt
-    ? `Time left to upgrade: ${sessionUpgradeTimeLeftText}.`
-    : "Your signature will not cost any gas and is purely for authentication purposes.";
+    ? t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft", {
+        timeLeft: sessionUpgradeTimeLeftText,
+      })
+    : t(AUTH_MODAL_LOCALE, "auth.signModal.noGas");
   const signModalConfirmText = isDisconnectedWebSessionUpgradePrompt
-    ? "Connect"
-    : "Sign";
+    ? t(AUTH_MODAL_LOCALE, "auth.signModal.connect")
+    : t(AUTH_MODAL_LOCALE, "auth.signModal.sign");
   const reconnectActiveWalletForSessionUpgrade = async (): Promise<void> => {
     try {
       await seizeDisconnect();
@@ -1574,11 +1602,17 @@ export default function Auth({
           backdrop="static"
           keyboard={false}
           centered
+          aria-labelledby={signModalTitleId}
           dialogClassName={styles["signModalDialog"] ?? ""}
           contentClassName={styles["signModalSurface"] ?? ""}
         >
           <Modal.Header className={styles["signModalHeader"]}>
-            <div className={styles["signModalTitle"]}>{signModalTitle}</div>
+            <Modal.Title
+              id={signModalTitleId}
+              className={styles["signModalTitle"]}
+            >
+              {signModalTitle}
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body className={styles["signModalBody"]}>
             <p className={styles["signModalLead"]}>{signModalLead}</p>
@@ -1593,7 +1627,7 @@ export default function Auth({
             {isSessionUpgradePrompt && (
               <p className={styles["signModalLearnMore"]}>
                 <Link href="/about/tech/wallet-authentication">
-                  Learn more about this update
+                  {t(AUTH_MODAL_LOCALE, "auth.signModal.learnMore")}
                 </Link>
               </p>
             )}
@@ -1606,7 +1640,9 @@ export default function Auth({
                   className={styles["signModalCancelButton"]}
                   onClick={onCancelSignRequest}
                 >
-                  {isSessionUpgradePrompt ? "Remind me later" : "Cancel"}
+                  {isSessionUpgradePrompt
+                    ? t(AUTH_MODAL_LOCALE, "auth.signModal.remindLater")
+                    : t(AUTH_MODAL_LOCALE, "auth.signModal.cancel")}
                 </Button>
               )}
             {!isConnectionShareUpgradePrompt && (
@@ -1618,7 +1654,8 @@ export default function Auth({
               >
                 {isSigningPending ? (
                   <span className={styles["signModalButtonContent"]}>
-                    Confirm in your wallet <DotLoader />
+                    {t(AUTH_MODAL_LOCALE, "auth.signModal.confirmInWallet")}{" "}
+                    <DotLoader />
                   </span>
                 ) : (
                   signModalConfirmText

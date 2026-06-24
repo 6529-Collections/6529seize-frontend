@@ -206,6 +206,9 @@ describe("AcceptConnectionSharing page", () => {
       </TestProvider>
     );
 
+    expect(
+      screen.queryByText(/Open this connection link in the 6529 mobile app/)
+    ).not.toBeInTheDocument();
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
@@ -270,6 +273,44 @@ describe("AcceptConnectionSharing page", () => {
     expect(persistSessionResponse).not.toHaveBeenCalled();
     expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
     expect(push).toHaveBeenCalledWith("/");
+  });
+
+  it("rejects a legacy desktop token response for a different address", async () => {
+    const push = jest.fn();
+    const setToast = jest.fn();
+    const seizeAcceptConnection = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push });
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("token=legacy-refresh&address=0x123&role=client-role")
+    );
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      address: undefined,
+      seizeDisconnectAndLogout: jest.fn(),
+      seizeAcceptConnection,
+    });
+    (commonApiPost as jest.Mock).mockResolvedValue({
+      address: "0x999",
+      token: "legacy-access-token",
+    });
+
+    render(
+      <TestProvider setToast={setToast}>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    fireEvent.click(screen.getByText("Accept connection"));
+
+    await waitFor(() =>
+      expect(setToast).toHaveBeenCalledWith({
+        message: "Invalid connection response",
+        type: "error",
+      })
+    );
+    expect(setAuthJwt).not.toHaveBeenCalled();
+    expect(seizeAcceptConnection).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("does not show the current-profile notice when the incoming profile is already connected", () => {

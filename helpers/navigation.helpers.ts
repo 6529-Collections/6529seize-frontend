@@ -16,6 +16,28 @@ export const getMessagesBaseRoute = (_isApp: boolean): string => "/messages";
 export const getNotificationsRoute = (_isApp: boolean): string =>
   "/notifications";
 
+export const usesFixedMobileBottomNavigation = ({
+  pathname,
+  activeView,
+}: {
+  pathname: string | null | undefined;
+  activeView: string | null | undefined;
+}): boolean => {
+  if (!pathname) {
+    return false;
+  }
+
+  return (
+    pathname === "/notifications" ||
+    pathname.startsWith("/notifications/") ||
+    pathname === "/waves" ||
+    pathname.startsWith("/waves/") ||
+    pathname === "/messages" ||
+    pathname.startsWith("/messages/") ||
+    (pathname === "/" && (activeView === "waves" || activeView === "messages"))
+  );
+};
+
 interface SearchParamsLike {
   get: (key: string) => string | null;
 }

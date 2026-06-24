@@ -139,6 +139,48 @@ describe("OpenGraphPreview", () => {
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
   });
 
+  it("renders external file previews without scanned safety claims", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://files.example/Safety%20Plan.pdf"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://files.example/Safety%20Plan.pdf"
+        preview={{
+          type: "external.file",
+          title: "Safety Plan.pdf",
+          fileName: "Safety Plan.pdf",
+          extension: "pdf",
+          fileKind: "pdf",
+          contentType: "application/pdf",
+          sizeBytes: 2048,
+          sourceHost: "files.example",
+          trust: "external_unscanned",
+          links: {
+            open: "https://files.example/Safety%20Plan.pdf",
+          },
+        }}
+      />
+    );
+
+    const card = screen.getByTestId("external-file-preview-card");
+    expect(card).toHaveAttribute(
+      "href",
+      "https://files.example/Safety%20Plan.pdf"
+    );
+    expect(screen.getByText("PDF")).toBeInTheDocument();
+    expect(screen.getByText("Safety Plan.pdf")).toBeInTheDocument();
+    expect(screen.getByText("files.example")).toBeInTheDocument();
+    expect(screen.getByText("External source")).toBeInTheDocument();
+    expect(screen.getByText("MIME")).toBeInTheDocument();
+    expect(screen.getByText("application/pdf")).toBeInTheDocument();
+    expect(screen.getByText("Size")).toBeInTheDocument();
+    expect(screen.getByText("2 KB")).toBeInTheDocument();
+    expect(screen.getByText("Open source")).toBeInTheDocument();
+    expect(screen.queryByText(/scanned/i)).toBeNull();
+  });
+
   it("renders YouTube video previews with click-to-play iframe", () => {
     (removeBaseEndpoint as jest.Mock).mockReturnValue(
       "https://youtu.be/abc123XYZ_0?t=42"

@@ -1,5 +1,6 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
 import type { EnsPreview } from "@/components/waves/ens/types";
+import type { ExternalFileKind } from "@/lib/link-preview/fileKinds";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 export interface LinkPreviewMedia {
@@ -156,12 +157,28 @@ interface GenericLinkPreviewResponse extends LinkPreviewBase {
   readonly type?: string | null | undefined;
 }
 
+export interface ExternalFileLinkPreviewResponse extends LinkPreviewBase {
+  readonly type: "external.file";
+  readonly title: string;
+  readonly fileName: string;
+  readonly extension: string | null;
+  readonly fileKind: ExternalFileKind;
+  readonly contentType: string | null;
+  readonly sizeBytes: number | null;
+  readonly sourceHost: string;
+  readonly trust: "external_unscanned";
+  readonly links: {
+    readonly open: string;
+  };
+}
+
 type EnsLinkPreviewResponse = EnsPreview & LinkPreviewBase;
 
 export type LinkPreviewResponse =
   | GenericLinkPreviewResponse
   | EnsLinkPreviewResponse
   | ManifoldListingLinkPreview
+  | ExternalFileLinkPreviewResponse
   | SeizeCollectionLinkPreview
   | GoogleWorkspaceLinkPreview
   | YoutubeVideoLinkPreview
