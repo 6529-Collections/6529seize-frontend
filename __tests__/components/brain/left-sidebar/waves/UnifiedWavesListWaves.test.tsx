@@ -438,6 +438,8 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   expect(scoreBadgeText).toBeInTheDocument();
   expect(scoreBadgeText.closest("svg")).toHaveClass("-tw-bottom-1");
   expect(scoreBadgeText.closest("svg")).toHaveClass("-tw-right-1.5");
+  expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
+  expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
   expect(screen.getByText("Score 93")).toBeInTheDocument();
   expect(screen.queryByRole("link", { name: /new messages/ })).toBeNull();
   expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
