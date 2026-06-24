@@ -25,6 +25,7 @@ import {
   type ConnectedWalletAccount,
   getConnectedWalletAccounts,
   getWalletAddress,
+  hasActiveSessionV2Auth,
   isAuthAddressAuthorized,
   removeAuthJwt,
   setActiveWalletAccount,
@@ -485,7 +486,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       globalThis.window.location.hostname === "127.0.0.1" ||
       globalThis.window.location.hostname === "::1" ||
       globalThis.window.location.hostname.endsWith(".local"));
-  const impersonatedAddress =
+  const devAuthImpersonatedAddress =
     isDevLikeEnv &&
     isLocalHost &&
     publicEnv.USE_DEV_AUTH === "true" &&
@@ -493,6 +494,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
       ? getAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
       : undefined;
+  const agentLoginWalletAddress = getWalletAddress();
+  const agentLoginImpersonatedAddress =
+    isDevLikeEnv &&
+    isLocalHost &&
+    publicEnv.USE_DEV_AUTH !== "true" &&
+    agentLoginWalletAddress &&
+    isAddress(agentLoginWalletAddress) &&
+    hasActiveSessionV2Auth({ address: agentLoginWalletAddress })
+      ? getAddress(agentLoginWalletAddress)
+      : undefined;
+  const impersonatedAddress =
+    agentLoginImpersonatedAddress ?? devAuthImpersonatedAddress;
 
   const refreshStoredConnectedAccounts = useCallback(() => {
     setStoredConnectedAccounts(getConnectedWalletAccounts());
