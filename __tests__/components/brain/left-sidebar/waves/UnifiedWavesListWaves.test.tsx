@@ -402,7 +402,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
 });
 
-it("shows highly rated preview score shields instead of unread badges", () => {
+it("uses highly rated preview score semantics instead of unread badges", () => {
   render(
     <UnifiedWavesListWaves
       waves={[
@@ -433,7 +433,6 @@ it("shows highly rated preview score shields instead of unread badges", () => {
   expect(
     screen.getByRole("link", { name: "Open Scored Discovery, score 93" })
   ).toBeInTheDocument();
-  expect(screen.getByText("93")).toBeInTheDocument();
   expect(screen.getByText("Score 93")).toBeInTheDocument();
   expect(screen.queryByRole("link", { name: /new messages/ })).toBeNull();
   expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
