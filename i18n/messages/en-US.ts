@@ -585,6 +585,8 @@ export const EN_US_MESSAGES = {
   "auth.signModal.timeLeft.days.many": "{count} days",
   "auth.signModal.timeLeft.hours.one": "{count} hour",
   "auth.signModal.timeLeft.hours.many": "{count} hours",
+  "auth.signModal.manualUpgrade":
+    "Connection sharing and some newer features need the new secure session.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",

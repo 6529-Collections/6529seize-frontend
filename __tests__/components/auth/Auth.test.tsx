@@ -53,6 +53,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
   setAuthJwt: jest.fn(),
   syncConnectedWalletProfile: jest.fn(),
   getAuthJwt: jest.fn(() => null),
+  hasActiveSessionV2Auth: jest.fn(() => false),
   PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 
@@ -266,6 +267,24 @@ function RequestAuthButton() {
   );
 }
 
+function SessionUpgradeProbe() {
+  const { requestSessionUpgrade, sessionUpgradeRequired } = useAuth();
+  return (
+    <div>
+      <span data-testid="session-upgrade-required">
+        {String(sessionUpgradeRequired)}
+      </span>
+      <button
+        type="button"
+        onClick={() => void requestSessionUpgrade?.()}
+        data-testid="request-session-upgrade"
+      >
+        upgrade
+      </button>
+    </div>
+  );
+}
+
 describe("Auth component", () => {
   beforeEach(() => {
     walletAddress = "0x1";
@@ -289,6 +308,8 @@ describe("Auth component", () => {
       .getAuthJwt as jest.MockedFunction<any>;
     const mockGetWalletAddress =
       authUtils.getWalletAddress as jest.MockedFunction<any>;
+    const mockHasActiveSessionV2Auth =
+      authUtils.hasActiveSessionV2Auth as jest.MockedFunction<any>;
     const mockCanStoreAnotherWalletAccount =
       authUtils.canStoreAnotherWalletAccount as jest.MockedFunction<any>;
     const mockSetActiveWalletAccount =
@@ -296,6 +317,7 @@ describe("Auth component", () => {
     mockSeizeConnect.mockReset();
     mockGetAuthJwt.mockReturnValue(null);
     mockGetWalletAddress.mockReturnValue(null);
+    mockHasActiveSessionV2Auth.mockReturnValue(false);
     mockCanStoreAnotherWalletAccount.mockReturnValue(true);
     mockSetActiveWalletAccount.mockReturnValue(true);
     mockIsAuthAddressAuthorized.mockImplementation(
@@ -1503,7 +1525,7 @@ describe("Auth component", () => {
           value={{ invalidateAll: jest.fn() } as any}
         >
           <Auth>
-            <div data-testid="auth-component">Auth Component</div>
+            <SessionUpgradeProbe />
           </Auth>
         </ReactQueryWrapperContext.Provider>
       );
@@ -1512,10 +1534,63 @@ describe("Auth component", () => {
         expect(mockValidateAuthImmediate).toHaveBeenCalled();
       });
 
+      expect(screen.getByTestId("session-upgrade-required")).toHaveTextContent(
+        "true"
+      );
       expect(
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();
       expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
+    });
+
+    it("allows a disconnected legacy web session to start manual upgrade without a rollout deadline", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = null;
+      connectionState = "disconnected";
+      canSignActiveWallet = false;
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("legacy-jwt");
+      mockGetWalletAddress.mockReturnValue(validAddress);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("session-upgrade-required")
+        ).toHaveTextContent("true");
+      });
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("request-session-upgrade"));
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+      expect(
+        screen.getByText(
+          "Connection sharing and some newer features need the new secure session."
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByText("Cancel")).toBeInTheDocument();
+      expect(screen.queryByText("Remind me later")).not.toBeInTheDocument();
+
+      await user.click(screen.getByText("Connect"));
+
+      await waitFor(() => {
+        expect(mockSeizeDisconnect).toHaveBeenCalled();
+      });
+      expect(mockSeizeConnect).toHaveBeenCalled();
     });
 
     it("closes the upgrade modal after successful session-v2 sign-in", async () => {

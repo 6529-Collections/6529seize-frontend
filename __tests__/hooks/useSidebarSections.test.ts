@@ -65,4 +65,21 @@ describe("useSidebarSections", () => {
       allItems.some((item) => item.href === "/about/release-notes")
     ).toBe(false);
   });
+
+  it("includes Tech in About resources", () => {
+    const { result } = renderHook(() => useSidebarSections(false, false, "US"));
+
+    const aboutSection = result.current.find(
+      (section) => section.key === "about"
+    );
+    const resources = aboutSection?.subsections.find(
+      (subsection) => subsection.name === "Resources"
+    );
+
+    expect(
+      resources?.items.some(
+        (item) => item.name === "Tech" && item.href === "/about/tech"
+      )
+    ).toBe(true);
+  });
 });
