@@ -4,6 +4,8 @@ import useCapacitor from "@/hooks/useCapacitor";
 const listeners: Record<string, Function> = {};
 
 jest.mock("@capacitor/core", () => ({
+  registerPlugin: jest.fn(),
+  WebPlugin: class {},
   Capacitor: {
     isNativePlatform: jest.fn(),
     getPlatform: jest.fn(),
@@ -21,23 +23,11 @@ jest.mock("@capacitor/app", () => ({
   },
 }));
 
-jest.mock("@capacitor/keyboard", () => ({
-  Keyboard: {
-    addListener: jest.fn((event: string, cb: any) => {
-      listeners[event] = cb;
-      return Promise.resolve({ remove: jest.fn() });
-    }),
-    setAccessoryBarVisible: jest.fn().mockResolvedValue(undefined),
-  },
-}));
-
 const { Capacitor } = require("@capacitor/core");
 const { App } = require("@capacitor/app");
 
 beforeEach(() => {
   listeners["appStateChange"] = () => {};
-  listeners["keyboardWillShow"] = () => {};
-  listeners["keyboardWillHide"] = () => {};
   (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
   (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
   (App.getState as jest.Mock).mockResolvedValue({ isActive: false });
@@ -69,19 +59,6 @@ describe("useCapacitor", () => {
       window.dispatchEvent(new Event("orientationchange"));
     });
     expect(result.current.orientation).toBe(1); // LANDSCAPE
-
-    // Wait for async keyboard listeners to be set up
-    await waitFor(() => {
-      act(() => {
-        listeners["keyboardWillShow"]();
-      });
-      expect(result.current.keyboardVisible).toBe(true);
-    });
-
-    act(() => {
-      listeners["keyboardWillHide"]();
-    });
-    expect(result.current.keyboardVisible).toBe(false);
 
     act(() => {
       listeners["appStateChange"]({ isActive: true });

@@ -9,14 +9,13 @@ jest.mock("@/hooks/useDeviceInfo", () => () => ({
   isAppleMobile: false,
 }));
 
-// Mock useAndroidKeyboard with configurable values
+// Mock useNativeKeyboard with configurable values
 let mockKeyboardVisible = false;
 
-jest.mock("@/hooks/useAndroidKeyboard", () => ({
-  useAndroidKeyboard: () => ({
+jest.mock("@/hooks/useNativeKeyboard", () => ({
+  useNativeKeyboard: () => ({
     isVisible: mockKeyboardVisible,
     keyboardHeight: mockKeyboardVisible ? 350 : 0,
-    isAndroid: true,
   }),
 }));
 
@@ -55,17 +54,42 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
 }));
 
+// Mock globalThis.matchMedia for useDeviceInfo hook
+Object.defineProperty(globalThis, "matchMedia", {
+  writable: true,
+  value: jest.fn().mockImplementation(() => ({
+    matches: false,
+    media: "",
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
 describe("SingleWaveDropChat", () => {
-  const createWave = (overrides: Record<string, unknown> = {}) =>
-    ({
+  const createWave = (overrides: Record<string, unknown> = {}) => {
+    const waveDefaults = {
+      type: ApiWaveType.Rank,
+      winning_threshold: null,
+      authenticated_user_eligible_for_admin: false,
+    };
+
+    return {
       id: "w1",
       metrics: { muted: false, your_unread_drops_count: 0 },
-      wave: { type: ApiWaveType.Rank, winning_threshold: null },
       chat: { authenticated_user_eligible: true },
       voting: { authenticated_user_eligible: true },
       participation: { authenticated_user_eligible: true },
       ...overrides,
-    }) as any;
+      wave: {
+        ...waveDefaults,
+        ...((overrides["wave"] as Record<string, unknown> | undefined) ?? {}),
+      },
+    } as any;
+  };
 
   beforeEach(() => {
     mockKeyboardVisible = false;

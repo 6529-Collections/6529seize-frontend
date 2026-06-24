@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import useCapacitor from "@/hooks/useCapacitor";
 import type { ReactNode } from "react";
 
@@ -71,6 +71,58 @@ type LayoutRefType =
   | "spacer"
   | "mobileTabs"
   | "mobileNav";
+
+type MeasuredLayoutSpaceKey = Exclude<
+  keyof LayoutSpaces,
+  "contentSpace" | "measurementsComplete"
+>;
+
+const layoutMeasurementConfigs: readonly {
+  readonly key: MeasuredLayoutSpaceKey;
+  readonly refType: LayoutRefType;
+  readonly label: string;
+}[] = [
+  { key: "headerSpace", refType: "header", label: "header" },
+  { key: "pinnedSpace", refType: "pinned", label: "pinned" },
+  { key: "tabsSpace", refType: "tabs", label: "tabs" },
+  { key: "spacerSpace", refType: "spacer", label: "spacer" },
+  { key: "mobileTabsSpace", refType: "mobileTabs", label: "mobile tabs" },
+  { key: "mobileNavSpace", refType: "mobileNav", label: "mobile nav" },
+];
+
+const measureElementHeight = (
+  element: HTMLDivElement | null,
+  label: string
+): number => {
+  if (!element) {
+    return 0;
+  }
+
+  try {
+    return element.getBoundingClientRect().height;
+  } catch (error) {
+    console.error(`Error measuring ${label} element:`, error);
+    return 0;
+  }
+};
+
+const measureLayoutSpaces = (
+  refs: Record<LayoutRefType, HTMLDivElement | null>
+): Record<MeasuredLayoutSpaceKey, number> =>
+  layoutMeasurementConfigs.reduce(
+    (measurements, { key, refType, label }) => ({
+      ...measurements,
+      [key]: measureElementHeight(refs[refType], label),
+    }),
+    {
+      headerSpace: 0,
+      pinnedSpace: 0,
+      tabsSpace: 0,
+      spacerSpace: 0,
+      mobileTabsSpace: 0,
+      mobileNavSpace: 0,
+    }
+  );
 
 interface LayoutContextType {
   // Calculated spaces
@@ -158,12 +210,8 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const {
-    isAndroid,
-    isIos,
-    keyboardVisible: isIosKeyboardVisible,
-  } = useCapacitor();
-  const { isVisible: isAndroidKeyboardVisible } = useAndroidKeyboard();
+  const { isAndroid } = useCapacitor();
+  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
 
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
@@ -217,88 +265,13 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   // Calculate spaces based on current measurements
   const calculateSpaces = useCallback(() => {
-    // Default values in case we can't measure
-    let headerHeight = 0;
-    let pinnedHeight = 0;
-    let tabsHeight = 0;
-    let spacerHeight = 0;
-    let mobileTabsHeight = 0;
-    let mobileNavHeight = 0;
-    // Get elements from refMap (source of truth)
-    const headerElement = refMap.current.header;
-    const pinnedElement = refMap.current.pinned;
-    const tabsElement = refMap.current.tabs;
-    const spacerElement = refMap.current.spacer;
-    const mobileTabsElement = refMap.current.mobileTabs;
-    const mobileNavElement = refMap.current.mobileNav;
-    // Measure header space if element exists
-    if (headerElement) {
-      try {
-        const rect = headerElement.getBoundingClientRect();
-        headerHeight = rect.height;
-      } catch (e) {
-        console.error("Error measuring header element:", e);
-      }
-    }
-
-    // Measure pinned space if element exists
-    if (pinnedElement) {
-      try {
-        const rect = pinnedElement.getBoundingClientRect();
-        pinnedHeight = rect.height;
-      } catch (e) {
-        console.error("Error measuring pinned element:", e);
-      }
-    }
-
-    // Measure tabs space if element exists
-    if (tabsElement) {
-      try {
-        const rect = tabsElement.getBoundingClientRect();
-        tabsHeight = rect.height;
-      } catch (e) {
-        console.error("Error measuring tabs element:", e);
-      }
-    }
-
-    // Measure spacer element if it exists
-    if (spacerElement) {
-      try {
-        const rect = spacerElement.getBoundingClientRect();
-        spacerHeight = rect.height;
-      } catch (e) {
-        console.error("Error measuring spacer element:", e);
-      }
-    }
-
-    // Measure mobile tabs element if it exists
-    if (mobileTabsElement) {
-      try {
-        const rect = mobileTabsElement.getBoundingClientRect();
-        mobileTabsHeight = rect.height;
-      } catch (e) {
-        console.error("Error measuring mobile tabs element:", e);
-      }
-    }
-
-    // Measure mobile nav element if it exists
-    if (mobileNavElement) {
-      try {
-        const rect = mobileNavElement.getBoundingClientRect();
-        mobileNavHeight = rect.height;
-      } catch (e) {
-        console.error("Error measuring mobile nav element:", e);
-      }
-    }
+    const measuredSpaces = measureLayoutSpaces(refMap.current);
 
     // Calculate total occupied space
-    const totalOccupiedSpace =
-      headerHeight +
-      pinnedHeight +
-      tabsHeight +
-      spacerHeight +
-      mobileTabsHeight +
-      mobileNavHeight;
+    const totalOccupiedSpace = Object.values(measuredSpaces).reduce(
+      (totalSpace, measuredSpace) => totalSpace + measuredSpace,
+      0
+    );
 
     // Ensure content space is at least 0 to prevent negative values
     const calculatedContentSpace = Math.max(
@@ -307,12 +280,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     );
 
     const nextSpaces: LayoutSpaces = {
-      headerSpace: headerHeight,
-      pinnedSpace: pinnedHeight,
-      tabsSpace: tabsHeight,
-      spacerSpace: spacerHeight,
-      mobileTabsSpace: mobileTabsHeight,
-      mobileNavSpace: mobileNavHeight,
+      ...measuredSpaces,
       contentSpace: calculatedContentSpace,
       measurementsComplete: true,
     };
@@ -342,7 +310,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     window.addEventListener("resize", calculateSpaces);
 
     // Initial calculation
-    calculateSpaces();
+    const initialCalculationFrame = requestAnimationFrame(calculateSpaces);
 
     // Cleanup function
     return () => {
@@ -350,6 +318,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
         resizeObserverRef.current.disconnect();
         resizeObserverRef.current = null;
       }
+      cancelAnimationFrame(initialCalculationFrame);
       window.removeEventListener("resize", calculateSpaces);
     };
   }, [calculateSpaces]);
@@ -371,8 +340,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
 
-  const isNavHiddenForKeyboard =
-    (isAndroid && isAndroidKeyboardVisible) || (isIos && isIosKeyboardVisible);
+  const isNavHiddenForKeyboard = isKeyboardVisible;
 
   const navAdjustedSpaces = useMemo(
     () => (isNavHiddenForKeyboard ? { ...spaces, mobileNavSpace: 0 } : spaces),
@@ -386,10 +354,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     let navSpace = navAdjustedSpaces.mobileNavSpace;
 
     if (isAndroid) {
-      navSpace = isAndroidKeyboardVisible
-        ? 0
-        : navAdjustedSpaces.mobileNavSpace;
-      capSpace = isAndroidKeyboardVisible ? 0 : Math.max(0, 128 - navSpace);
+      navSpace = isKeyboardVisible ? 0 : navAdjustedSpaces.mobileNavSpace;
+      capSpace = isKeyboardVisible ? 0 : Math.max(0, 128 - navSpace);
     }
 
     const style = calculateHeightStyle(
@@ -404,7 +370,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       };
     }
     return style;
-  }, [navAdjustedSpaces, isAndroid, isAndroidKeyboardVisible]);
+  }, [navAdjustedSpaces, isAndroid, isKeyboardVisible]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!navAdjustedSpaces.measurementsComplete) return {};
