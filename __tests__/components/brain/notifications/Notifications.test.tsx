@@ -106,7 +106,9 @@ jest.mock("@/contexts/TitleContext", () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import Notifications from "@/components/brain/notifications";
+import Notifications, {
+  floatingDockClearanceClassName,
+} from "@/components/brain/notifications";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
@@ -119,6 +121,20 @@ const getDefaultDeviceInfo = () => ({
   isAppleMobile: false,
   isMobileDevice: false,
 });
+
+const mockSuccessfulNotificationsQuery = () => {
+  useNotificationsQueryMock.mockReturnValue({
+    items: ["a"],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn().mockResolvedValue(undefined),
+    refetch: jest.fn().mockResolvedValue(undefined),
+    isInitialQueryDone: true,
+    isSuccess: true,
+    error: null,
+  });
+};
 
 describe("Notifications component", () => {
   beforeEach(() => {
@@ -159,24 +175,32 @@ describe("Notifications component", () => {
   });
 
   it("renders wrapper with items", async () => {
-    useNotificationsQueryMock.mockReturnValue({
-      items: ["a"],
-      isFetching: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn().mockResolvedValue(undefined),
-      refetch: jest.fn().mockResolvedValue(undefined),
-      isInitialQueryDone: true,
-      isSuccess: true,
-      error: null,
-    });
+    mockSuccessfulNotificationsQuery();
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();
     expect(
       document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
-    ).toHaveClass("tw-pb-6");
+    ).not.toHaveClass(floatingDockClearanceClassName);
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
+  });
+
+  it("does not add floating dock clearance on mobile web", async () => {
+    useDeviceInfoMock.mockReturnValue({
+      ...getDefaultDeviceInfo(),
+      hasTouchScreen: true,
+      isMobileDevice: true,
+    });
+    mockSuccessfulNotificationsQuery();
+
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+
+    expect(
+      document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
+    ).not.toHaveClass(floatingDockClearanceClassName);
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
@@ -189,23 +213,13 @@ describe("Notifications component", () => {
       isApp: true,
       isMobileDevice: true,
     });
-    useNotificationsQueryMock.mockReturnValue({
-      items: ["a"],
-      isFetching: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn().mockResolvedValue(undefined),
-      refetch: jest.fn().mockResolvedValue(undefined),
-      isInitialQueryDone: true,
-      isSuccess: true,
-      error: null,
-    });
+    mockSuccessfulNotificationsQuery();
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(
       document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
-    ).toHaveClass("tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]");
+    ).toHaveClass(floatingDockClearanceClassName);
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });

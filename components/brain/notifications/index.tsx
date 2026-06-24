@@ -42,7 +42,7 @@ const compareNotificationCause = (
   NOTIFICATION_CAUSE_PRIORITY[firstCause] -
   NOTIFICATION_CAUSE_PRIORITY[secondCause];
 
-const floatingDockClearanceClassName =
+export const floatingDockClearanceClassName =
   "tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]";
 
 export default function Notifications({
