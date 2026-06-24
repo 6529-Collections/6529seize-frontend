@@ -14,6 +14,7 @@ jest.mock("@/hooks/useElectron", () => ({
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
+    ensureActiveSessionV2WebSession: jest.fn(async () => true),
     requestSessionUpgrade: jest.fn(),
   })),
 }));
@@ -170,6 +171,7 @@ describe("HeaderShare", () => {
 
     const auth = require("@/components/auth/Auth");
     auth.useAuth.mockReturnValue({
+      ensureActiveSessionV2WebSession: jest.fn(async () => true),
       requestSessionUpgrade: jest.fn(),
     });
 
@@ -437,6 +439,7 @@ describe("HeaderShare", () => {
         success: true,
       });
       auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession: jest.fn(async () => true),
         requestSessionUpgrade,
       });
       const sessionV2 = require("@/services/auth/session-v2.utils");
@@ -463,6 +466,93 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "Update" }));
 
       expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows an upgrade action without calling the share endpoint when the web session is missing", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      const ensureActiveSessionV2WebSession = jest
+        .fn()
+        .mockResolvedValue(false);
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession,
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByText("Update Authentication")
+      ).toBeInTheDocument();
+      expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
+        expect.objectContaining({ aborted: false })
+      );
+      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      expect(requestSessionUpgrade).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole("button", { name: "Update" }));
+
+      expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
+    });
+
+    it("fails closed without calling the share endpoint when the web-session verifier is unavailable", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      auth.useAuth.mockReturnValue({
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByText("Update Authentication")
+      ).toBeInTheDocument();
+      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      expect(requestSessionUpgrade).not.toHaveBeenCalled();
+    });
+
+    it("fails closed without calling the share endpoint when web-session verification errors", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      const ensureActiveSessionV2WebSession = jest
+        .fn()
+        .mockRejectedValue(new Error("verification failed"));
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession,
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+
+      try {
+        renderWithProviders(<HeaderShare />);
+
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+        expect(
+          await screen.findByText("Update Authentication")
+        ).toBeInTheDocument();
+        expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
+          expect.objectContaining({ aborted: false })
+        );
+        expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      } finally {
+        consoleErrorSpy.mockRestore();
+      }
     });
 
     it("generates connection QR codes from one-time connection share codes even when the local v2 marker is stale", async () => {

@@ -25,11 +25,11 @@
 }
 
 .signModalTitle {
-  margin: 0;
-  color: #f5f5f5;
-  font-size: clamp(1.1rem, 1.8vw, 1.45rem);
-  font-weight: 600;
-  line-height: 1.2;
+  margin: 0 !important;
+  color: #f5f5f5 !important;
+  font-size: clamp(1.1rem, 1.8vw, 1.45rem) !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
 }
 
 .signModalBody {
