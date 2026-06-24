@@ -20,7 +20,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import PullToRefresh from "../providers/PullToRefresh";
 import {
   getActiveWaveIdFromUrl,
-  usesFixedMobileBottomNavigation,
+  hidesMobileBottomNavigation,
 } from "@/helpers/navigation.helpers";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
@@ -96,13 +96,9 @@ function AppLayoutContent({ children }: Props) {
     activeWaveId: waveParam,
     searchParams,
   });
-  const hasWaveParam = Boolean(waveParam);
-  const usesFixedBottomNavigation = usesFixedMobileBottomNavigation({
+  const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
     pathname,
-    activeView,
   });
-  const isStreamRoute =
-    usesFixedBottomNavigation || (pathname === "/" && hasWaveParam);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const { isVisible: isAndroidKeyboardVisible, isAndroid } =
@@ -111,7 +107,7 @@ function AppLayoutContent({ children }: Props) {
   const isEditingOnMobile = isApp && editingDropId !== null;
   const isKeyboardVisible =
     (isAndroid && isAndroidKeyboardVisible) || (isIos && isIosKeyboardVisible);
-  const shouldHideBottomNav = isKeyboardVisible;
+  const shouldHideBottomNav = isKeyboardVisible || shouldHideBottomNavForRoute;
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -124,6 +120,7 @@ function AppLayoutContent({ children }: Props) {
 
   const isNavVisible =
     !isSingleDropOpen && !isEditingOnMobile && !shouldHideBottomNav;
+  const shouldRenderBottomNav = !isSingleDropOpen && !isEditingOnMobile;
   const routeLoadingHeaderReserve = spaces.measurementsComplete
     ? `${spaces.headerSpace}px`
     : STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE;
@@ -161,10 +158,8 @@ function AppLayoutContent({ children }: Props) {
         <TouchDeviceHeader />
       </div>
       {activeContent}
-      {!isSingleDropOpen && !isStreamRoute && (
-        <div className="tw-h-[104px] tw-w-full" />
-      )}
-      {!isSingleDropOpen && !isEditingOnMobile && (
+      {isNavVisible && <div className="tw-h-[104px] tw-w-full" />}
+      {shouldRenderBottomNav && (
         <BottomNavigation hidden={shouldHideBottomNav} />
       )}
     </div>

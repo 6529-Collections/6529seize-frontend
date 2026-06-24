@@ -136,15 +136,18 @@ describe("BottomNavigation", () => {
     expect(NavItem).not.toHaveBeenCalled();
   });
 
-  it("uses the original fixed dock on brain routes", () => {
+  it("uses the floating dock on brain routes", () => {
     (usePathname as jest.Mock).mockReturnValue("/notifications");
 
     const { container } = render(<BottomNavigation />);
 
-    expect(container.querySelector("nav")).toHaveClass("tw-h-[85px]");
+    expect(container.querySelector("nav")).toHaveClass(
+      "tw-pointer-events-none"
+    );
+    expect(container.querySelector("nav")).not.toHaveClass("tw-h-[85px]");
     expect(
       (NavItem as jest.Mock).mock.calls.every(([props]) => {
-        return props.variant === "fixed" && props.compact === undefined;
+        return props.variant === "floating" && props.compact === false;
       })
     ).toBe(true);
   });
@@ -153,6 +156,30 @@ describe("BottomNavigation", () => {
     Object.defineProperty(globalThis, "scrollY", {
       configurable: true,
       value: 0,
+      writable: true,
+    });
+
+    render(<BottomNavigation />);
+
+    act(() => {
+      globalThis.scrollY = 24;
+      fireEvent.scroll(globalThis);
+    });
+
+    await waitFor(() => {
+      expect(
+        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+          return props.variant === "floating" && props.compact === true;
+        })
+      ).toBe(true);
+    });
+  });
+
+  it("compacts the notifications dock on reverse scroll", async () => {
+    (usePathname as jest.Mock).mockReturnValue("/notifications");
+    Object.defineProperty(globalThis, "scrollY", {
+      configurable: true,
+      value: 48,
       writable: true,
     });
 
