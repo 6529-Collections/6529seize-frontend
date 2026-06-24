@@ -5,6 +5,7 @@ import React, {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -281,7 +282,7 @@ const floatingNavInnerClassName = "tw-relative tw-h-full";
 
 const getFloatingNavListClassName = (compact: boolean) =>
   `tw-flex tw-h-full tw-items-center ${
-    compact ? "tw-gap-0 tw-px-1.5" : "tw-gap-0.5 tw-px-2"
+    compact ? "tw-gap-0 tw-px-2.5" : "tw-gap-0.5 tw-px-4"
   }`;
 
 const getFloatingActivePillClassName = ({
@@ -292,8 +293,8 @@ const getFloatingActivePillClassName = ({
   readonly visible: boolean;
 }) => {
   const sizeClassName = compact
-    ? "tw-h-11 tw-w-[3.75rem] sm:tw-h-12 sm:tw-w-[4.25rem]"
-    : "tw-h-12 tw-w-[4.05rem] sm:tw-h-[3.15rem] sm:tw-w-[4.45rem]";
+    ? "tw-h-11 tw-w-[3.5rem] sm:tw-h-12 sm:tw-w-16"
+    : "tw-h-12 tw-w-[3.65rem] sm:tw-h-[3.15rem] sm:tw-w-[4.05rem]";
   const visibilityClassName = visible ? "tw-opacity-100" : "tw-opacity-0";
 
   return `tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[left,width,height,opacity] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${sizeClassName} ${visibilityClassName}`;
@@ -301,13 +302,42 @@ const getFloatingActivePillClassName = ({
 
 const getFloatingActivePillStyle = ({
   activeItemIndex,
+  compact,
+  itemCount,
+  measuredLeft,
+}: {
+  readonly activeItemIndex: number;
+  readonly compact: boolean;
+  readonly itemCount: number;
+  readonly measuredLeft: number | null;
+}): React.CSSProperties => ({
+  left:
+    measuredLeft === null
+      ? getFloatingActivePillFallbackLeft({
+          activeItemIndex,
+          compact,
+          itemCount,
+        })
+      : `${measuredLeft}px`,
+});
+
+const getFloatingActivePillFallbackLeft = ({
+  activeItemIndex,
+  compact,
   itemCount,
 }: {
   readonly activeItemIndex: number;
+  readonly compact: boolean;
   readonly itemCount: number;
-}): React.CSSProperties => ({
-  left: `${((activeItemIndex + 0.5) / itemCount) * 100}%`,
-});
+}) => {
+  const paddingX = compact ? "0.625rem" : "1rem";
+  const gap = compact ? "0rem" : "0.125rem";
+  const gapCount = Math.max(0, itemCount - 1);
+
+  return `calc(${paddingX} + ((100% - (${paddingX} * 2) - (${gap} * ${gapCount})) / ${itemCount} * ${
+    activeItemIndex + 0.5
+  }) + (${gap} * ${activeItemIndex}))`;
+};
 
 const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
@@ -337,6 +367,9 @@ const BottomNavigationResolvedContent: React.FC<
   const searchParams = useSearchParams();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
+  const floatingNavInnerRef = useRef<HTMLDivElement | null>(null);
+  const navItemRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const [activePillLeft, setActivePillLeft] = useState<number | null>(null);
   const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
     activeWaveId: waveIdFromQuery,
@@ -359,6 +392,12 @@ const BottomNavigationResolvedContent: React.FC<
   const setMobileNavRef = useCallback((node: HTMLDivElement | null) => {
     mobileNavRef.current = node;
   }, []);
+  const setNavItemRef = useCallback(
+    (index: number, node: HTMLLIElement | null) => {
+      navItemRefs.current[index] = node;
+    },
+    []
+  );
 
   useEffect(() => {
     registerRef("mobileNav", hidden ? null : mobileNavRef.current);
@@ -397,6 +436,67 @@ const BottomNavigationResolvedContent: React.FC<
       }).isActive
   );
   const hasActiveItem = activeItemIndex >= 0;
+  const updateActivePillLayout = useCallback(() => {
+    if (!hasActiveItem) {
+      setActivePillLeft(null);
+      return;
+    }
+
+    const innerElement = floatingNavInnerRef.current;
+    const activeItemElement = navItemRefs.current[activeItemIndex] ?? null;
+    if (innerElement === null || activeItemElement === null) {
+      setActivePillLeft(null);
+      return;
+    }
+
+    const innerRect = innerElement.getBoundingClientRect();
+    const activeItemRect = activeItemElement.getBoundingClientRect();
+    if (innerRect.width <= 0 || activeItemRect.width <= 0) {
+      setActivePillLeft(null);
+      return;
+    }
+
+    const nextLeft =
+      activeItemRect.left - innerRect.left + activeItemRect.width / 2;
+    setActivePillLeft((currentLeft) =>
+      currentLeft !== null && Math.abs(currentLeft - nextLeft) < 0.5
+        ? currentLeft
+        : nextLeft
+    );
+  }, [activeItemIndex, hasActiveItem]);
+
+  useLayoutEffect(() => {
+    navItemRefs.current.length = navItems.length;
+    updateActivePillLayout();
+  }, [compact, navItems.length, updateActivePillLayout]);
+
+  useEffect(() => {
+    if (!hasActiveItem) {
+      return;
+    }
+
+    const handleResize = () => updateActivePillLayout();
+    globalThis.addEventListener("resize", handleResize);
+
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(handleResize);
+    const innerElement = floatingNavInnerRef.current;
+    if (innerElement !== null) {
+      resizeObserver?.observe(innerElement);
+    }
+    navItemRefs.current.forEach((itemElement) => {
+      if (itemElement !== null) {
+        resizeObserver?.observe(itemElement);
+      }
+    });
+
+    return () => {
+      globalThis.removeEventListener("resize", handleResize);
+      resizeObserver?.disconnect();
+    };
+  }, [compact, hasActiveItem, navItems.length, updateActivePillLayout]);
 
   return (
     <nav
@@ -407,7 +507,11 @@ const BottomNavigationResolvedContent: React.FC<
       inert={hidden}
     >
       <div className={getDockClassName(compact)}>
-        <div className={floatingNavInnerClassName}>
+        <div
+          ref={floatingNavInnerRef}
+          data-testid="mobile-dock-inner"
+          className={floatingNavInnerClassName}
+        >
           <div
             aria-hidden="true"
             data-testid="mobile-dock-active-pill"
@@ -417,13 +521,17 @@ const BottomNavigationResolvedContent: React.FC<
             })}
             style={getFloatingActivePillStyle({
               activeItemIndex: hasActiveItem ? activeItemIndex : 0,
+              compact,
               itemCount: navItems.length,
+              measuredLeft: activePillLeft,
             })}
           />
           <ul className={getFloatingNavListClassName(compact)}>
-            {navItems.map((item) => (
+            {navItems.map((item, index) => (
               <li
                 key={item.name}
+                ref={(node) => setNavItemRef(index, node)}
+                data-mobile-dock-item-index={index}
                 className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
               >
                 <NavItem
