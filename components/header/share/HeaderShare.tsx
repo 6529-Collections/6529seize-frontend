@@ -438,7 +438,7 @@ export function HeaderQRModal({
   const [isVisible, setIsVisible] = useState(show);
 
   const { hasValidWalletAuth } = useSeizeConnectContext();
-  const { requestSessionUpgrade } = useAuth();
+  const { ensureActiveSessionV2WebSession, requestSessionUpgrade } = useAuth();
   const activeWalletAddress = getWalletAddress();
   const hasWalletAddress = Boolean(activeWalletAddress);
 
@@ -661,6 +661,19 @@ export function HeaderQRModal({
 
     try {
       setMobileConnectionShareStatus("loading");
+      if (ensureActiveSessionV2WebSession) {
+        const hasActiveSession =
+          await ensureActiveSessionV2WebSession(signal);
+        if (!hasActiveSession) {
+          terminalConnectionShareFailuresRef.current.set(
+            failureKey,
+            "legacy-auth"
+          );
+          setUnavailableMobileConnectionShare("legacy-auth");
+          return "";
+        }
+      }
+
       const cachedShare = getCachedConnectionShare(
         cachedConnectionShareRef.current,
         addressKey

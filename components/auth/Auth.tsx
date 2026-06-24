@@ -63,6 +63,7 @@ import {
   getSessionNonce,
   loginWithSessionV2,
   persistSessionResponse,
+  verifyActiveSessionV2WebSession,
 } from "@/services/auth/session-v2.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
@@ -113,6 +114,9 @@ type AuthContextType = {
   readonly sessionUpgradeRequired: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade?: () => Promise<{ success: boolean }>;
+  readonly ensureActiveSessionV2WebSession?: (
+    abortSignal?: AbortSignal
+  ) => Promise<boolean>;
   readonly setToast: (toast: AppToastInput) => void;
   readonly setActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
@@ -167,6 +171,10 @@ interface RunImmediateAuthValidationParams {
   readonly setShowSignModal: (show: boolean) => void;
   readonly invalidateAll: () => void;
   readonly reset: () => void;
+  readonly verifyActiveSessionV2WebSession: (
+    address: string,
+    abortSignal: AbortSignal
+  ) => Promise<boolean>;
   readonly authRolloutSettings: AuthRolloutSettings;
 }
 
@@ -276,12 +284,11 @@ const getSessionUpgradeEffectiveDeadline = (
   return getSessionUpgradeGlobalDeadline(settings);
 };
 
-const getManualSessionUpgradePromptStatus =
-  (): SessionUpgradePromptStatus => ({
-    shouldShow: true,
-    canDismiss: true,
-    timeLeftMs: 0,
-  });
+const getManualSessionUpgradePromptStatus = (): SessionUpgradePromptStatus => ({
+  shouldShow: true,
+  canDismiss: true,
+  timeLeftMs: 0,
+});
 
 const getStoredLegacySessionUpgradeAddress = (): string | null => {
   const walletAddress = getWalletAddress();
@@ -434,6 +441,7 @@ const runImmediateAuthValidation = async ({
   setShowSignModal,
   invalidateAll,
   reset,
+  verifyActiveSessionV2WebSession,
   authRolloutSettings,
 }: RunImmediateAuthValidationParams): Promise<void> => {
   if (
@@ -451,7 +459,51 @@ const runImmediateAuthValidation = async ({
   abortControllerRef.current = abortController;
   setAuthLoadingState("validating");
 
+  const markSessionUpgradeRequired = () => {
+    setSessionUpgradeRequired(true);
+    if (!hasSessionUpgradeRollout(authRolloutSettings)) {
+      setSessionUpgradeHasDeadline(false);
+      return;
+    }
+
+    setSessionUpgradeHasDeadline(true);
+    const status = getOrCreateSessionUpgradePromptStatus(
+      currentAddress,
+      authRolloutSettings
+    );
+    setSignModalReason("session-upgrade");
+    setSessionUpgradePromptMode(
+      getSessionUpgradePromptMode(canSignActiveWallet)
+    );
+    setSessionUpgradeTimeLeftMs(status.timeLeftMs);
+    setSessionUpgradeCanDismiss(status.canDismiss);
+    setShowSignModal(status.shouldShow);
+  };
+
   try {
+    if (
+      hasActiveSessionV2Auth({ address: currentAddress }) &&
+      getSessionClientType() === "web"
+    ) {
+      const hasActiveWebSession = await verifyActiveSessionV2WebSession(
+        currentAddress,
+        abortController.signal
+      );
+
+      if (
+        !hasActiveWebSession &&
+        isCurrentValidationOperation({
+          latestAddressRef,
+          activeValidationOperationIdRef,
+          currentAddress,
+          operationId,
+        })
+      ) {
+        markSessionUpgradeRequired();
+        return;
+      }
+    }
+
     const result = await measureMobileLaunchAsync(
       "auth_immediate_validation",
       () =>
@@ -467,26 +519,7 @@ const runImmediateAuthValidation = async ({
           },
           callbacks: {
             onShowSignModal: setShowSignModal,
-            onSessionUpgradeRequired: () => {
-              setSessionUpgradeRequired(true);
-              if (!hasSessionUpgradeRollout(authRolloutSettings)) {
-                setSessionUpgradeHasDeadline(false);
-                return;
-              }
-
-              setSessionUpgradeHasDeadline(true);
-              const status = getOrCreateSessionUpgradePromptStatus(
-                currentAddress,
-                authRolloutSettings
-              );
-              setSignModalReason("session-upgrade");
-              setSessionUpgradePromptMode(
-                getSessionUpgradePromptMode(canSignActiveWallet)
-              );
-              setSessionUpgradeTimeLeftMs(status.timeLeftMs);
-              setSessionUpgradeCanDismiss(status.canDismiss);
-              setShowSignModal(status.shouldShow);
-            },
+            onSessionUpgradeRequired: markSessionUpgradeRequired,
             onInvalidateCache: invalidateAll,
             onReset: reset,
             onRemoveJwt: () => removeAuthJwt(),
@@ -528,6 +561,7 @@ export const AuthContext = createContext<AuthContextType>({
   requestAuth: async () => ({ success: false }),
   sessionUpgradeRequired: false,
   requestSessionUpgrade: async () => ({ success: false }),
+  ensureActiveSessionV2WebSession: async () => false,
   setToast: () => {},
   setActiveProfileProxy: async () => {},
 });
@@ -746,6 +780,55 @@ export default function Auth({
     );
   }, [address, connectedProfile?.id, connectedProfile?.handle]);
 
+  const ensureActiveWebSessionForAddress = useCallback(
+    async (
+      walletAddress: string,
+      abortSignal?: AbortSignal
+    ): Promise<boolean> => {
+      if (!hasActiveSessionV2Auth({ address: walletAddress })) {
+        setSessionUpgradeRequired(true);
+        setSessionUpgradeHasDeadline(false);
+        return false;
+      }
+
+      try {
+        const hasActiveWebSession = await verifyActiveSessionV2WebSession({
+          address: walletAddress,
+          abortSignal,
+        });
+
+        if (!hasActiveWebSession) {
+          setSessionUpgradeRequired(true);
+          setSessionUpgradeHasDeadline(false);
+          return false;
+        }
+
+        setSessionUpgradeRequired(false);
+        return true;
+      } catch (error) {
+        if (!abortSignal?.aborted) {
+          logErrorSecurely("session_v2_web_session_verification", error);
+        }
+        return true;
+      }
+    },
+    []
+  );
+
+  const ensureActiveSessionV2WebSessionForActiveWallet = useCallback(
+    async (abortSignal?: AbortSignal): Promise<boolean> => {
+      const walletAddress = address ?? getWalletAddress();
+      if (!walletAddress || !getAuthJwt()) {
+        setSessionUpgradeRequired(false);
+        setSessionUpgradeHasDeadline(false);
+        return false;
+      }
+
+      return await ensureActiveWebSessionForAddress(walletAddress, abortSignal);
+    },
+    [address, ensureActiveWebSessionForAddress]
+  );
+
   // Immediate authentication effect with race condition prevention
   useEffect(() => {
     if (!enableWalletAuthentication) {
@@ -753,7 +836,7 @@ export default function Auth({
       setShowSignModal(false);
       setAuthLoadingState("idle");
       setSessionUpgradeRequired(false);
-      return;
+      return undefined;
     }
 
     // Clear previous operations when dependencies change
@@ -761,17 +844,24 @@ export default function Auth({
 
     // Don't start validation during transitional states
     if (connectionState === "connecting") {
-      return;
+      return undefined;
     }
 
     if (!address || connectionState !== "connected") {
       setShowSignModal(false);
-      const legacyUpgradeAddress = getStoredLegacySessionUpgradeAddress();
-      setSessionUpgradeRequired(legacyUpgradeAddress !== null);
-      if (legacyUpgradeAddress === null) {
+      const storedAuthAddress = getWalletAddress();
+      if (!storedAuthAddress || !getAuthJwt()) {
+        setSessionUpgradeRequired(false);
         setSessionUpgradeHasDeadline(false);
+        return undefined;
       }
-      return;
+
+      const controller = new AbortController();
+      void ensureActiveWebSessionForAddress(
+        storedAuthAddress,
+        controller.signal
+      );
+      return () => controller.abort();
     }
 
     if (!isAddressAuthorized) {
@@ -780,7 +870,7 @@ export default function Auth({
         setSignModalReason("auth");
         setShowSignModal(true);
       }
-      return;
+      return undefined;
     }
 
     // Clear stale non-upgrade sign modal state when returning to an authorized
@@ -826,12 +916,14 @@ export default function Auth({
       setShowSignModal,
       invalidateAll,
       reset,
+      verifyActiveSessionV2WebSession: ensureActiveWebSessionForAddress,
       authRolloutSettings,
     }).catch((error) => {
       logErrorSecurely("auth_immediate_validation_unhandled", error);
     });
 
     // No cleanup needed - immediate execution prevents stale timeouts
+    return undefined;
   }, [
     address,
     activeProfileProxy,
@@ -842,6 +934,7 @@ export default function Auth({
     hasActiveWalletAddress,
     canSignActiveWallet,
     abortCurrentAuthOperation,
+    ensureActiveWebSessionForAddress,
     invalidateAll,
     reset,
     authRolloutSettings,
@@ -1695,6 +1788,8 @@ export default function Auth({
           isProxy: !!activeProfileProxy,
         }),
         requestSessionUpgrade,
+        ensureActiveSessionV2WebSession:
+          ensureActiveSessionV2WebSessionForActiveWallet,
         setActiveProfileProxy: onActiveProfileProxy,
       }}
     >
