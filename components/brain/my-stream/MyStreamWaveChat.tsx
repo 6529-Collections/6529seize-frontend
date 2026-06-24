@@ -21,6 +21,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { selectEditingDropId } from "@/store/editSlice";
@@ -100,6 +101,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   onCloseChatSubmitDrop,
 }) => {
   const router = useRouter();
+  const { fetchAroundSerialNo } = useMyStream();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -186,6 +188,14 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   } else if (capturedDividerState.waveId === wave.id) {
     dividerTarget = capturedDividerState.serialNo;
   }
+
+  useEffect(() => {
+    if (!initialDropState || viewMode === "gallery") {
+      return;
+    }
+
+    fetchAroundSerialNo(wave.id, initialDropState.serialNo);
+  }, [fetchAroundSerialNo, initialDropState, viewMode, wave.id]);
 
   useEffect(() => {
     if (!initialDropState || viewMode === "gallery") {
