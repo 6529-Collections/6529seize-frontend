@@ -1,9 +1,9 @@
-import { render } from '@testing-library/react';
-import React from 'react';
+import { render } from "@testing-library/react";
+import React from "react";
 
 const directMessagesListMock = jest.fn();
 
-jest.mock('@/components/brain/direct-messages/DirectMessagesList', () => ({
+jest.mock("@/components/brain/direct-messages/DirectMessagesList", () => ({
   __esModule: true,
   default: (props: any) => {
     directMessagesListMock(props);
@@ -12,19 +12,19 @@ jest.mock('@/components/brain/direct-messages/DirectMessagesList', () => ({
 }));
 
 const useLayoutMock = jest.fn();
-jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => useLayoutMock(),
 }));
 
-import BrainMobileMessages from '@/components/brain/mobile/BrainMobileMessages';
+import BrainMobileMessages from "@/components/brain/mobile/BrainMobileMessages";
 
-describe('BrainMobileMessages', () => {
+describe("BrainMobileMessages", () => {
   beforeEach(() => {
     directMessagesListMock.mockClear();
-    useLayoutMock.mockReturnValue({ mobileWavesViewStyle: { height: '42px' } });
+    useLayoutMock.mockReturnValue({ mobileWavesViewStyle: { height: "42px" } });
   });
 
-  it('renders and passes scrollContainerRef to DirectMessagesList', () => {
+  it("renders and passes scrollContainerRef to DirectMessagesList", () => {
     const { container } = render(<BrainMobileMessages />);
 
     expect(directMessagesListMock).toHaveBeenCalledTimes(1);
@@ -34,6 +34,9 @@ describe('BrainMobileMessages', () => {
     // ref should point to the rendered div
     expect(scrollContainerRef.current).toBe(rootDiv);
     // style from useLayout should be applied
-    expect(rootDiv).toHaveAttribute('style', 'height: 42px;');
+    expect(rootDiv).toHaveAttribute("style", "height: 42px;");
+    expect(rootDiv).toHaveClass(
+      "tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]"
+    );
   });
 });

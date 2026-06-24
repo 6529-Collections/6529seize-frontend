@@ -198,7 +198,7 @@ describe("AppLayout", () => {
     );
   });
 
-  it("uses visible floating bottom nav spacing on stream list routes", () => {
+  it("lets notification route content own floating bottom nav clearance", () => {
     usePathname.mockReturnValue("/notifications");
 
     const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
@@ -209,7 +209,31 @@ describe("AppLayout", () => {
       "false"
     );
     expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
-      "104px"
+      "0px"
+    );
+  });
+
+  it("lets waves and messages routes own floating bottom nav clearance", () => {
+    usePathname.mockReturnValue("/waves");
+
+    const { container, rerender } = renderWithProvider(
+      <AppLayout>child</AppLayout>
+    );
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
+
+    usePathname.mockReturnValue("/messages");
+    rerender(
+      <Provider store={store}>
+        <AppLayout>child</AppLayout>
+      </Provider>
+    );
+
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
     );
   });
 
@@ -275,8 +299,15 @@ describe("AppLayout", () => {
 
   it("renders waves or messages view based on the view query param", () => {
     getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
-    const { rerender } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const { container, rerender } = renderWithProvider(
+      <AppLayout>child</AppLayout>
+    );
+    const appWrapper = container.firstElementChild as HTMLElement;
+
     expect(screen.getByTestId("waves")).toBeInTheDocument();
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
 
     getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
     rerender(
@@ -285,6 +316,9 @@ describe("AppLayout", () => {
       </Provider>
     );
     expect(screen.getByTestId("messages")).toBeInTheDocument();
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
   });
 
   it("uses root view params for app shell content instead of route children", () => {
