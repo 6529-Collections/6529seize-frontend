@@ -223,6 +223,7 @@ type ReactQueryWrapperContextType = {
     following: boolean;
   }) => void;
   invalidateAll: () => void;
+  invalidateAuthSensitiveQueries: () => void;
   invalidateNotifications: () => void;
   invalidateIdentityTdhStats: (params: { identity: string }) => void;
 };
@@ -253,9 +254,33 @@ export const ReactQueryWrapperContext =
     onWaveCreated: () => {},
     onWaveFollowChange: () => {},
     invalidateAll: () => {},
+    invalidateAuthSensitiveQueries: () => {},
     invalidateNotifications: () => {},
     invalidateIdentityTdhStats: () => {},
   });
+
+const AUTH_SENSITIVE_QUERY_KEYS = [
+  QueryKey.PROFILE,
+  QueryKey.PROFILE_PROFILE_PROXIES,
+  QueryKey.PROFILE_PROXY,
+  QueryKey.IDENTITY_AVAILABLE_CREDIT,
+  QueryKey.IDENTITY_NOTIFICATIONS,
+  QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
+  QueryKey.WAVES_OVERVIEW,
+  QueryKey.WAVES_V2,
+  QueryKey.WAVE_SUBWAVES,
+  QueryKey.OFFICIAL_WAVES,
+  QueryKey.WAVES,
+  QueryKey.WAVE,
+  QueryKey.DROPS,
+  QueryKey.DROPS_LEADERBOARD,
+  QueryKey.DROP,
+  QueryKey.FEED_ITEMS,
+] as const;
+
+const AUTH_SENSITIVE_QUERY_KEY_SET = new Set<QueryKey>(
+  AUTH_SENSITIVE_QUERY_KEYS
+);
 
 const getHandlesFromProfile = (profile: ApiIdentity): string[] => {
   const handles: string[] = [];
@@ -1065,6 +1090,18 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries();
   };
 
+  const invalidateAuthSensitiveQueries = () => {
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const [queryKey] = query.queryKey;
+        return (
+          typeof queryKey === "string" &&
+          AUTH_SENSITIVE_QUERY_KEY_SET.has(queryKey as QueryKey)
+        );
+      },
+    });
+  };
+
   const invalidateNotifications = () => {
     queryClient
       .invalidateQueries({
@@ -1107,6 +1144,7 @@ const createReactQueryContextValue = (
     onWaveCreated,
     onWaveFollowChange,
     invalidateAll,
+    invalidateAuthSensitiveQueries,
     onIdentityFollowChange,
     invalidateDrops,
     invalidateNotifications,

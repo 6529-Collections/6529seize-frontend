@@ -127,7 +127,10 @@ beforeEach(() => {
     error: null,
     refetch: jest.fn(),
   });
-  useSeizeConnectContextMock.mockReturnValue({ address: "0xabc" });
+  useSeizeConnectContextMock.mockReturnValue({
+    address: "0xabc",
+    hasValidWalletAuth: true,
+  });
   useSeizeSettingsOptionalMock.mockReturnValue({
     isAnnouncementsWave: (waveId: string | null | undefined) =>
       waveId === "announcement-wave",
@@ -159,6 +162,29 @@ test("keeps the pinned cache key at the logical limit but requests API pages of 
     pageSize: 20,
     overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pinned: ApiWavesPinFilter.Pinned,
+  });
+});
+
+test("disables pinned and official wave reads while wallet auth is invalid", () => {
+  useSeizeConnectContextMock.mockReturnValue({
+    address: "0xabc",
+    hasValidWalletAuth: false,
+  });
+
+  renderHook(() => usePinnedWavesServer(), { wrapper });
+
+  expect(useQueryMock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      enabled: false,
+      queryKey: expect.arrayContaining([
+        expect.anything(),
+        expect.not.objectContaining({ viewer_identity: expect.any(String) }),
+      ]),
+    })
+  );
+  expect(useOfficialWavesMock).toHaveBeenCalledWith({
+    viewerIdentityKey: null,
+    enabled: false,
   });
 });
 

@@ -6,6 +6,7 @@ import { useContext, useMemo, useState } from "react";
 
 import { useDebounce } from "react-use";
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -28,6 +29,8 @@ interface UseWavesParams {
   readonly directMessage?: boolean | undefined;
 }
 
+const noopAsyncWaveAction = async () => undefined;
+
 export function useWaves({
   identity,
   waveName,
@@ -36,9 +39,25 @@ export function useWaves({
   enabled = true,
   directMessage,
 }: UseWavesParams) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const {
+    connectedProfile,
+    activeProfileProxy,
+    fetchingProfile,
+    isAuthenticated,
+  } = useContext(AuthContext);
+  const { address, hasValidWalletAuth } = useSeizeConnectContext();
 
-  const usePublicWaves = !connectedProfile?.handle || !!activeProfileProxy;
+  const hasValidWalletAuthorization = hasValidWalletAuth !== false;
+  const hasAuthenticatedProfile =
+    hasValidWalletAuthorization &&
+    (isAuthenticated ?? !!connectedProfile?.handle);
+  const isPendingAuthSwitch = Boolean(
+    address && (!hasValidWalletAuthorization || fetchingProfile)
+  );
+  const usePublicWaves =
+    !connectedProfile?.handle ||
+    !!activeProfileProxy ||
+    !hasAuthenticatedProfile;
 
   const params = useMemo<SearchWavesParams>(
     () => ({
@@ -79,7 +98,7 @@ export function useWaves({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    enabled: enabled && !usePublicWaves,
+    enabled: enabled && !usePublicWaves && !isPendingAuthSwitch,
     refetchInterval,
     ...getDefaultQueryRetry(),
   });
@@ -107,33 +126,40 @@ export function useWaves({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    enabled: enabled && usePublicWaves,
+    enabled: enabled && usePublicWaves && !isPendingAuthSwitch,
     refetchInterval,
     ...getDefaultQueryRetry(),
   });
 
+  const shouldMaskWaveData = !enabled || isPendingAuthSwitch;
   const waves = useMemo<ApiWave[]>(() => {
-    if (!enabled) {
+    if (shouldMaskWaveData) {
       return [];
     }
     if (usePublicWaves) {
       return publicQuery.data?.pages.flat() ?? [];
     }
     return authQuery.data?.pages.flat() ?? [];
-  }, [enabled, authQuery.data, publicQuery.data, usePublicWaves]);
+  }, [authQuery.data, publicQuery.data, shouldMaskWaveData, usePublicWaves]);
 
   const activeQuery = usePublicWaves ? publicQuery : authQuery;
-  const lastPageSize = activeQuery.data?.pages.at(-1)?.length ?? 0;
+  const lastPageSize = shouldMaskWaveData
+    ? 0
+    : (activeQuery.data?.pages.at(-1)?.length ?? 0);
 
   return {
     waves,
-    isFetching: activeQuery.isFetching,
-    isFetchingNextPage: activeQuery.isFetchingNextPage,
-    hasNextPage: activeQuery.hasNextPage,
+    isFetching: shouldMaskWaveData ? false : activeQuery.isFetching,
+    isFetchingNextPage: shouldMaskWaveData
+      ? false
+      : activeQuery.isFetchingNextPage,
+    hasNextPage: shouldMaskWaveData ? false : activeQuery.hasNextPage,
     lastPageSize,
-    fetchNextPage: activeQuery.fetchNextPage,
-    status: activeQuery.status,
-    error: activeQuery.error,
-    refetch: activeQuery.refetch,
+    fetchNextPage: shouldMaskWaveData
+      ? noopAsyncWaveAction
+      : activeQuery.fetchNextPage,
+    status: shouldMaskWaveData ? "pending" : activeQuery.status,
+    error: shouldMaskWaveData ? null : activeQuery.error,
+    refetch: shouldMaskWaveData ? noopAsyncWaveAction : activeQuery.refetch,
   };
 }

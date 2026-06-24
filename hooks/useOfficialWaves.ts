@@ -10,6 +10,7 @@ interface UseOfficialWavesProps {
   readonly viewerIdentityKey?: string | null | undefined;
   readonly refetchInterval?: number | undefined;
   readonly refetchIntervalInBackground?: boolean | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 interface OfficialWavesQueryKeyParams {
@@ -31,6 +32,7 @@ export function useOfficialWaves({
   viewerIdentityKey,
   refetchInterval = Infinity,
   refetchIntervalInBackground = false,
+  enabled = true,
 }: UseOfficialWavesProps = {}) {
   const queryKeyParams = useMemo(
     () => getOfficialWavesQueryKeyParams(viewerIdentityKey),
@@ -48,6 +50,7 @@ export function useOfficialWaves({
     queryFn: fetchOfficialWaves,
     refetchInterval,
     refetchIntervalInBackground,
+    enabled,
     ...getDefaultQueryRetry(handleRetryFailure),
   });
 

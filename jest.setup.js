@@ -5,7 +5,63 @@ import {
   TransformStream,
   WritableStream,
 } from "node:stream/web";
-import { MessageChannel, MessagePort } from "node:worker_threads";
+import { MessagePort } from "node:worker_threads";
+
+class TestMessagePort {
+  constructor() {
+    this.onmessage = null;
+    this.onmessageerror = null;
+    this.target = null;
+    this.listeners = new Set();
+  }
+
+  postMessage(data) {
+    const timeout = setTimeout(() => {
+      const event = { data, target: this.target };
+      this.target?.onmessage?.(event);
+      this.target?.listeners.forEach((listener) => listener(event));
+    }, 0);
+    timeout.unref?.();
+  }
+
+  addEventListener(type, listener) {
+    if (type === "message") {
+      this.listeners.add(listener);
+    }
+  }
+
+  removeEventListener(type, listener) {
+    if (type === "message") {
+      this.listeners.delete(listener);
+    }
+  }
+
+  dispatchEvent(event) {
+    this.listeners.forEach((listener) => listener(event));
+    return true;
+  }
+
+  close() {
+    this.listeners.clear();
+    this.onmessage = null;
+    this.onmessageerror = null;
+  }
+
+  start() {}
+
+  ref() {}
+
+  unref() {}
+}
+
+class TestMessageChannel {
+  constructor() {
+    this.port1 = new TestMessagePort();
+    this.port2 = new TestMessagePort();
+    this.port1.target = this.port2;
+    this.port2.target = this.port1;
+  }
+}
 
 // Load environment variables for tests
 config({ path: ".env.development" });
@@ -15,7 +71,7 @@ globalThis.TextDecoder = TextDecoder;
 globalThis.ReadableStream = globalThis.ReadableStream ?? ReadableStream;
 globalThis.TransformStream = globalThis.TransformStream ?? TransformStream;
 globalThis.WritableStream = globalThis.WritableStream ?? WritableStream;
-globalThis.MessageChannel = globalThis.MessageChannel ?? MessageChannel;
+globalThis.MessageChannel = TestMessageChannel;
 globalThis.MessagePort = globalThis.MessagePort ?? MessagePort;
 
 require("@testing-library/jest-dom");
@@ -45,6 +101,9 @@ globalThis.css = (element, property, value) => {
 
 // Only set up window mocks in jsdom environment
 if (globalThis.window !== undefined) {
+  globalThis.window.MessageChannel = TestMessageChannel;
+  globalThis.window.MessagePort = globalThis.window.MessagePort ?? MessagePort;
+
   // Mock CSS parsing for react-bootstrap and other CSS-dependent components
   Object.defineProperty(window, "getComputedStyle", {
     value: () => ({

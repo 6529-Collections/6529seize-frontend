@@ -222,6 +222,8 @@ function setupMocks(options: MockSetupOptions = {}) {
   scrollButtonProps = undefined;
   mockFetchNextPage.mockReset();
   mockFetchNextPage.mockResolvedValue(undefined);
+  mockWaitAndRevealDrop.mockReset();
+  mockWaitAndRevealDrop.mockResolvedValue(false);
 
   // Setup useVirtualizedWaveDrops mock
   const defaultWaveMessages: WaveMessagesMock = {
@@ -478,7 +480,6 @@ describe("WaveDropsAll", () => {
         waveId: "test-wave",
         dropId: "target-drop",
         activeDrop: mockActiveDrop,
-        initialDrop: 5,
         winningThreshold: 11,
         winningThresholdMinDurationMs: 120_000,
         isVotingClosed: true,
@@ -552,7 +553,7 @@ describe("WaveDropsAll", () => {
       expect(mockPush).toHaveBeenCalledWith("/waves/other-wave?serialNo=42");
     });
 
-    it("sets serial number for same wave quote navigation", () => {
+    it("sets serial number for same wave quote navigation", async () => {
       const mockDrop = createMockDrop({
         wave: {
           id: "current-wave",
@@ -574,7 +575,19 @@ describe("WaveDropsAll", () => {
       });
 
       expect(mockPush).not.toHaveBeenCalled();
-      // Serial number state change is internal - we test the behavior, not the state
+      await waitFor(() => {
+        expect(mockFetchNextPage).toHaveBeenCalledWith(
+          {
+            waveId: "current-wave",
+            type: "LIGHT",
+            targetSerialNo: 42,
+          },
+          null
+        );
+      });
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
     });
   });
 
