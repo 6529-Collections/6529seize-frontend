@@ -186,6 +186,11 @@ it("shows chat message placeholder for the base chat composer", () => {
   expect(screen.getByTestId("placeholder")).toHaveTextContent(
     "Write a chat message"
   );
+  expect(screen.getByText("Write a chat message")).toHaveClass(
+    "tw-whitespace-nowrap",
+    "tw-overflow-hidden",
+    "tw-text-ellipsis"
+  );
 });
 
 it("renders validation helper text when provided", () => {
