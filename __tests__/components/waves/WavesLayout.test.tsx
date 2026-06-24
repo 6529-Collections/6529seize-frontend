@@ -87,6 +87,23 @@ describe("WavesLayout", () => {
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 
+  it("keeps the Waves shell mounted without children while auth state is loading", () => {
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState: "loading",
+    });
+
+    render(
+      <WavesLayout>
+        <div data-testid="wave-content">Real wave content</div>
+      </WavesLayout>
+    );
+
+    expect(screen.getByTestId("waves-desktop")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("setup-profile")).not.toBeInTheDocument();
+  });
+
   it("shows setup CTA instead of Waves content when profile setup is needed", () => {
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "needs-profile",

@@ -6,6 +6,13 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
+const mockQueryClient = {
+  getQueryData: jest.fn(),
+};
+const mockRouterReplace = jest.fn();
+const mockRouterPush = jest.fn();
+const mockUsePathname = jest.fn(() => "/");
+
 jest.mock("react-toastify", () => ({
   toast: jest.fn(),
   ToastContainer: () => <div data-testid="toast" />,
@@ -60,6 +67,7 @@ jest.mock("@/services/auth/session-v2.utils", () => ({
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(() => ({ data: undefined })),
+  useQueryClient: jest.fn(() => mockQueryClient),
 }));
 
 jest.mock("@reown/appkit/react", () => ({
@@ -105,11 +113,11 @@ jest.mock("@/services/auth/jwt-validation.utils", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
-  usePathname: jest.fn(() => "/"),
-  useRouter: jest.fn(() => ({
-    replace: jest.fn(),
-    push: jest.fn(),
-  })),
+  usePathname: () => mockUsePathname(),
+  useRouter: () => ({
+    replace: mockRouterReplace,
+    push: mockRouterPush,
+  }),
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }));
 
@@ -236,6 +244,19 @@ function ShowWaves() {
   return <span data-testid="waves">{String(showWaves)}</span>;
 }
 
+function ShowAuthState() {
+  const { connectedProfile, fetchingProfile, isAuthenticated, showWaves } =
+    useAuth();
+  return (
+    <div>
+      <span data-testid="profile-id">{connectedProfile?.id ?? "none"}</span>
+      <span data-testid="fetching">{String(fetchingProfile)}</span>
+      <span data-testid="authenticated">{String(isAuthenticated)}</span>
+      <span data-testid="waves">{String(showWaves)}</span>
+    </div>
+  );
+}
+
 function RequestAuthButton() {
   const { requestAuth } = useAuth();
   return (
@@ -258,6 +279,8 @@ describe("Auth component", () => {
     };
     globalThis.localStorage?.clear();
     jest.clearAllMocks();
+    mockQueryClient.getQueryData.mockReturnValue(undefined);
+    mockUsePathname.mockReturnValue("/");
 
     const authUtils = require("@/services/auth/auth.utils");
     const mockIsAuthAddressAuthorized =
@@ -372,7 +395,13 @@ describe("Auth component", () => {
     it("returns showWaves true when wallet and profile", async () => {
       // Set up profile mock to return a profile with handle
       mockUseIdentity.mockReturnValue({
-        profile: { id: "1", handle: "testuser", query: "testuser" },
+        profile: {
+          id: "1",
+          handle: "testuser",
+          query: "testuser",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
         isLoading: false,
       });
 
@@ -1061,7 +1090,13 @@ describe("Auth component", () => {
         wasCancelled: false,
         shouldShowModal: false,
       });
-      const mockProfile = { id: "1", handle: "testuser", query: "testuser" };
+      const mockProfile = {
+        id: "1",
+        handle: "testuser",
+        query: "testuser",
+        primary_wallet: walletAddress,
+        wallets: [],
+      };
 
       // Mock useIdentity to return the profile immediately
       mockUseIdentity.mockReturnValue({
@@ -1121,7 +1156,13 @@ describe("Auth component", () => {
         wasCancelled: false,
         shouldShowModal: false,
       });
-      const mockProfile = { id: "1", handle: "testuser", query: "testuser" };
+      const mockProfile = {
+        id: "1",
+        handle: "testuser",
+        query: "testuser",
+        primary_wallet: walletAddress,
+        wallets: [],
+      };
 
       // Mock useIdentity to simulate profile fetching
       mockUseIdentity.mockReturnValue({
@@ -1188,6 +1229,180 @@ describe("Auth component", () => {
       });
 
       expect(contextValues.connectedProfile).toBeNull();
+    });
+
+    it("does not authenticate a profile loaded for a different wallet address", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "stale-profile",
+          handle: "stale",
+          query: "stale",
+          primary_wallet: "0x2222222222222222222222222222222222222222",
+          wallets: [],
+        },
+        isLoading: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <ShowAuthState />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("profile-id")).toHaveTextContent("none");
+      });
+      expect(screen.getByTestId("fetching")).toHaveTextContent("true");
+      expect(screen.getByTestId("authenticated")).toHaveTextContent("false");
+      expect(screen.getByTestId("waves")).toHaveTextContent("false");
+    });
+
+    it("does not authenticate a profile without any usable wallet addresses", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "malformed-profile",
+          handle: "malformed",
+          query: "malformed",
+          primary_wallet: null,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <ShowAuthState />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("profile-id")).toHaveTextContent("none");
+      });
+      expect(screen.getByTestId("fetching")).toHaveTextContent("true");
+      expect(screen.getByTestId("authenticated")).toHaveTextContent("false");
+      expect(screen.getByTestId("waves")).toHaveTextContent("false");
+    });
+
+    it("invalidates auth-sensitive queries and exits private message waves after a profile switch", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      mockUsePathname.mockReturnValue("/messages/private-wave");
+      mockQueryClient.getQueryData.mockReturnValue({
+        id: "private-wave",
+        visibility: { scope: { group: { id: "private-group" } } },
+      });
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-1",
+          handle: "profile",
+          query: "profile",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const invalidateAuthSensitiveQueries = jest.fn();
+      mockGetWalletAddress.mockReturnValue(walletAddress);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={
+            {
+              invalidateAll: jest.fn(),
+              invalidateAuthSensitiveQueries,
+            } as any
+          }
+        >
+          <Auth>
+            <ShowAuthState />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("authenticated")).toHaveTextContent("true");
+      });
+
+      window.dispatchEvent(new Event(authUtils.PROFILE_SWITCHED_EVENT));
+
+      await waitFor(() => {
+        expect(invalidateAuthSensitiveQueries).toHaveBeenCalledTimes(1);
+      });
+      expect(mockQueryClient.getQueryData).toHaveBeenCalledWith([
+        expect.anything(),
+        { wave_id: "private-wave" },
+      ]);
+      expect(
+        mockQueryClient.getQueryData.mock.invocationCallOrder[0]
+      ).toBeLessThan(
+        invalidateAuthSensitiveQueries.mock.invocationCallOrder[0]
+      );
+      expect(mockRouterReplace).toHaveBeenCalledWith("/messages");
+
+      window.dispatchEvent(new Event(authUtils.PROFILE_SWITCHED_EVENT));
+
+      await waitFor(() => {
+        expect(invalidateAuthSensitiveQueries).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it("uses the conservative waves fallback when profile switching from an uncached wave route", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      mockUsePathname.mockReturnValue("/waves/uncached-wave");
+      mockQueryClient.getQueryData.mockReturnValue(undefined);
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-1",
+          handle: "profile",
+          query: "profile",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const invalidateAuthSensitiveQueries = jest.fn();
+      mockGetWalletAddress.mockReturnValue(walletAddress);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={
+            {
+              invalidateAll: jest.fn(),
+              invalidateAuthSensitiveQueries,
+            } as any
+          }
+        >
+          <Auth>
+            <ShowAuthState />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("authenticated")).toHaveTextContent("true");
+      });
+
+      window.dispatchEvent(new Event(authUtils.PROFILE_SWITCHED_EVENT));
+
+      await waitFor(() => {
+        expect(mockRouterReplace).toHaveBeenCalledWith("/waves");
+      });
+      expect(invalidateAuthSensitiveQueries).toHaveBeenCalledTimes(1);
     });
   });
 

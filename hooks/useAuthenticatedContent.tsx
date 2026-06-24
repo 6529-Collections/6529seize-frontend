@@ -14,40 +14,49 @@ type ContentState =
   | "ready";
 
 export function useAuthenticatedContent() {
-  const { showWaves, connectedProfile, fetchingProfile } =
+  const { showWaves, connectedProfile, fetchingProfile, isAuthenticated } =
     useContext(AuthContext);
   const { spaces } = useLayout();
-  const { hasValidWalletAuth } = useSeizeConnectContext();
+  const { address, hasValidWalletAuth } = useSeizeConnectContext();
+  const hasValidWalletAuthorization = hasValidWalletAuth !== false;
+  const hasAuthenticatedProfile =
+    hasValidWalletAuthorization &&
+    (isAuthenticated ?? (!!connectedProfile?.handle && showWaves));
 
   const contentState = useMemo<ContentState>(() => {
-    if (!hasValidWalletAuth) {
+    if (!address) {
       return "not-authenticated";
     }
 
-    // Only check fetching if we're authenticated
+    if (!hasValidWalletAuthorization && !fetchingProfile) {
+      return "not-authenticated";
+    }
+
     if (fetchingProfile) {
       return "loading";
     }
 
-    // Authenticated but no profile
     if (!connectedProfile?.handle) {
-      return "needs-profile";
+      return hasValidWalletAuthorization ? "needs-profile" : "loading";
     }
 
-    // Profile exists but waves not enabled (proxy or other reason)
+    if (!hasAuthenticatedProfile) {
+      return "loading";
+    }
+
     if (!showWaves) {
       return "not-available";
     }
 
-    // Everything ready but still measuring layout
     if (!spaces.measurementsComplete) {
       return "measuring";
     }
 
-    // All good, show content
     return "ready";
   }, [
-    hasValidWalletAuth,
+    address,
+    hasValidWalletAuthorization,
+    hasAuthenticatedProfile,
     fetchingProfile,
     connectedProfile,
     showWaves,
@@ -56,7 +65,7 @@ export function useAuthenticatedContent() {
 
   return {
     contentState,
-    isAuthenticated: hasValidWalletAuth,
+    isAuthenticated: hasAuthenticatedProfile,
     connectedProfile,
     showWaves,
     fetchingProfile,

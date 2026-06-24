@@ -380,14 +380,27 @@ function usePinnedWaveMutations(
 }
 
 export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
-  const { connectedProfile, activeProfileProxy } = useAuth();
-  const { address } = useSeizeConnectContext();
+  const {
+    connectedProfile,
+    activeProfileProxy,
+    fetchingProfile,
+    isAuthenticated,
+  } = useAuth();
+  const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const queryClient = useQueryClient();
   const ongoingOperations = useRef<Set<string>>(new Set());
-  const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
+  const hasValidWalletAuthorization = hasValidWalletAuth !== false;
+  const hasAuthContextProfile =
+    isAuthenticated ??
+    (!!connectedProfile?.handle && hasValidWalletAuthorization);
+  const hasAuthenticatedProfile =
+    !!connectedProfile?.handle && !activeProfileProxy && hasAuthContextProfile;
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
+  const isPendingAuthSwitch = Boolean(
+    address && (!hasValidWalletAuthorization || fetchingProfile)
+  );
   const viewerIdentityKey = useMemo(() => {
-    if (!address) {
+    if (!address || !hasValidWalletAuthorization || isPendingAuthSwitch) {
       return null;
     }
 
@@ -397,9 +410,17 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     }
 
     return `${normalizedAddress}:primary`;
-  }, [address, activeProfileProxyId]);
+  }, [
+    address,
+    activeProfileProxyId,
+    hasValidWalletAuthorization,
+    isPendingAuthSwitch,
+  ]);
   const pinnedWavesQueryKey = usePinnedWavesQueryKey(viewerIdentityKey);
-  const { waves: officialWaves } = useOfficialWaves({ viewerIdentityKey });
+  const { waves: officialWaves } = useOfficialWaves({
+    viewerIdentityKey,
+    enabled: !isPendingAuthSwitch,
+  });
   const officialWaveIds = useMemo(
     () => new Set(officialWaves.map((wave) => wave.id)),
     [officialWaves]
@@ -407,7 +428,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const { data, isLoading, isError, error, refetch } = usePinnedWavesQuery(
     queryClient,
     pinnedWavesQueryKey,
-    isAuthenticated
+    hasAuthenticatedProfile && !isPendingAuthSwitch
   );
   const pinnedWaves = data ?? [];
   const { pinnedIds, canPinWave } = usePinnedWavesBudget(

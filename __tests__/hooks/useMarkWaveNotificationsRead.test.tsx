@@ -505,7 +505,7 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
-  it("rejects an old cached account callback after switching accounts", async () => {
+  it("skips an old cached account callback after switching accounts", async () => {
     const invalidateNotifications = jest.fn();
 
     setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
@@ -522,9 +522,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(result.current).not.toBe(accountCallback);
 
-    await expect(accountCallback("wave-1")).rejects.toThrow(
-      "wallet address changed or disconnected"
-    );
+    await expect(accountCallback("wave-1")).resolves.toBe("skipped");
 
     expect(apiPostMock).not.toHaveBeenCalled();
     expect(invalidateNotifications).not.toHaveBeenCalled();
@@ -898,7 +896,7 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects a cleared queued proxy read on wallet address switch", async () => {
+  it("skips a cleared queued proxy read on wallet address switch", async () => {
     const invalidateNotifications = jest.fn();
 
     setActiveIdentity({
@@ -923,9 +921,7 @@ describe("useMarkWaveNotificationsRead", () => {
     rerender();
 
     const firstAccountPromise = result.current("wave-1");
-    const rejection = expect(firstAccountPromise).rejects.toThrow(
-      "wallet address changed or disconnected"
-    );
+    const skipped = expect(firstAccountPromise).resolves.toBe("skipped");
 
     expect(apiPostMock).not.toHaveBeenCalled();
 
@@ -937,7 +933,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await rejection;
+    await skipped;
 
     expect(apiPostMock).not.toHaveBeenCalled();
 
@@ -1318,7 +1314,7 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects a queued read when the wallet disconnects", async () => {
+  it("skips a queued read when the wallet disconnects", async () => {
     const invalidateNotifications = jest.fn();
 
     setActiveIdentity({ address: "0xAAA", jwt: null });
@@ -1330,20 +1326,18 @@ describe("useMarkWaveNotificationsRead", () => {
     );
 
     const queuedPromise = result.current("wave-disconnect");
-    const rejection = expect(queuedPromise).rejects.toThrow(
-      "wallet address changed or disconnected"
-    );
+    const skipped = expect(queuedPromise).resolves.toBe("skipped");
 
     setActiveIdentity({ address: undefined, jwt: null });
     rerender();
 
-    await rejection;
+    await skipped;
 
     expect(apiPostMock).not.toHaveBeenCalled();
     expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
-  it("rejects a queued read when the wallet address switches", async () => {
+  it("skips a queued read when the wallet address switches", async () => {
     const invalidateNotifications = jest.fn();
 
     setActiveIdentity({ address: "0xAAA", jwt: null });
@@ -1355,20 +1349,18 @@ describe("useMarkWaveNotificationsRead", () => {
     );
 
     const queuedPromise = result.current("wave-address-switch");
-    const rejection = expect(queuedPromise).rejects.toThrow(
-      "wallet address changed or disconnected"
-    );
+    const skipped = expect(queuedPromise).resolves.toBe("skipped");
 
     setActiveIdentity({ address: "0xBBB", jwt: "jwt-b" });
     rerender();
 
-    await rejection;
+    await skipped;
 
     expect(apiPostMock).not.toHaveBeenCalled();
     expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
-  it("clears queued reads when the last marker hook unmounts", async () => {
+  it("skips queued reads when the last marker hook unmounts", async () => {
     jest.useFakeTimers();
     const invalidateNotifications = jest.fn();
 
@@ -1383,9 +1375,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
       const queuedPromise = result.current("wave-last-unmount");
       const queuedSettlement = trackPromiseSettlement(queuedPromise);
-      const rejection = expect(queuedPromise).rejects.toThrow(
-        "no marker hooks are mounted"
-      );
+      const skipped = expect(queuedPromise).resolves.toBe("skipped");
 
       unmount();
       await flushMicrotasks();
@@ -1396,7 +1386,7 @@ describe("useMarkWaveNotificationsRead", () => {
         jest.runOnlyPendingTimers();
       });
 
-      await rejection;
+      await skipped;
 
       expect(apiPostMock).not.toHaveBeenCalled();
       expect(invalidateNotifications).not.toHaveBeenCalled();
@@ -1483,7 +1473,7 @@ describe("useMarkWaveNotificationsRead", () => {
     }
   });
 
-  it("rejects queued reads when a different wallet remounts before deferred cleanup runs", async () => {
+  it("skips queued reads when a different wallet remounts before deferred cleanup runs", async () => {
     jest.useFakeTimers();
     const invalidateNotifications = jest.fn();
 
@@ -1496,9 +1486,7 @@ describe("useMarkWaveNotificationsRead", () => {
       const queuedPromise = firstHook.result.current(
         "wave-remount-address-switch"
       );
-      const rejection = expect(queuedPromise).rejects.toThrow(
-        "wallet address changed or disconnected"
-      );
+      const skipped = expect(queuedPromise).resolves.toBe("skipped");
 
       firstHook.unmount();
 
@@ -1507,7 +1495,7 @@ describe("useMarkWaveNotificationsRead", () => {
         wrapper: createWrapper(invalidateNotifications),
       });
 
-      await rejection;
+      await skipped;
 
       act(() => {
         jest.runOnlyPendingTimers();
@@ -2020,7 +2008,7 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects an old temporary proxy-role callback after wallet address switch", async () => {
+  it("skips an old temporary proxy-role callback after wallet address switch", async () => {
     const invalidateNotifications = jest.fn();
 
     setActiveIdentity({
@@ -2041,9 +2029,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(result.current).not.toBe(oldRoleCallback);
 
-    await expect(oldRoleCallback("wave-1")).rejects.toThrow(
-      "wallet address changed or disconnected"
-    );
+    await expect(oldRoleCallback("wave-1")).resolves.toBe("skipped");
 
     expect(apiPostMock).not.toHaveBeenCalled();
 
@@ -2222,7 +2208,7 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects an old missing-auth account callback after wallet address switch", async () => {
+  it("skips an old missing-auth account callback after wallet address switch", async () => {
     const invalidateNotifications = jest.fn();
 
     setActiveIdentity({ address: "0xAAA", jwt: null });
@@ -2239,9 +2225,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(result.current).not.toBe(oldAccountCallback);
 
-    await expect(oldAccountCallback("wave-1")).rejects.toThrow(
-      "wallet address changed or disconnected"
-    );
+    await expect(oldAccountCallback("wave-1")).resolves.toBe("skipped");
 
     expect(apiPostMock).not.toHaveBeenCalled();
 
@@ -2264,16 +2248,14 @@ describe("useMarkWaveNotificationsRead", () => {
     );
 
     const firstAccountPromise = result.current("wave-1");
-    const rejection = expect(firstAccountPromise).rejects.toThrow(
-      "wallet address changed or disconnected"
-    );
+    const skipped = expect(firstAccountPromise).resolves.toBe("skipped");
 
     expect(apiPostMock).not.toHaveBeenCalled();
 
     setActiveIdentity({ address: "0xBBB", jwt: "jwt-b" });
     rerender();
 
-    await rejection;
+    await skipped;
 
     expect(apiPostMock).not.toHaveBeenCalled();
 
@@ -2481,7 +2463,7 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
-  it("rejects a queued missing-JWT read that becomes stale before JWT verification", async () => {
+  it("skips a queued missing-JWT read that becomes stale before JWT verification", async () => {
     const invalidateNotifications = jest.fn();
     const addressKey = "0xaaa";
     const waveId = "wave-stale-missing-jwt";
@@ -2509,9 +2491,7 @@ describe("useMarkWaveNotificationsRead", () => {
         shouldSend: undefined,
         queueIfBlocked: true,
       });
-      const rejection = expect(queuedPromise).rejects.toThrow(
-        "wallet address changed or disconnected"
-      );
+      const skipped = expect(queuedPromise).resolves.toBe("skipped");
 
       latestAddressEpochRef.current = {};
       flushPendingWaveReadRequests({
@@ -2519,7 +2499,7 @@ describe("useMarkWaveNotificationsRead", () => {
         invalidateNotificationsRef: { current: invalidateNotifications },
       });
 
-      await rejection;
+      await skipped;
       expect(apiPostMock).not.toHaveBeenCalled();
       expect(invalidateNotifications).not.toHaveBeenCalled();
     } finally {
@@ -2581,9 +2561,7 @@ describe("useMarkWaveNotificationsRead", () => {
         shouldSend: undefined,
         queueIfBlocked: true,
       });
-      const staleRejection = expect(stalePromise).rejects.toThrow(
-        "wallet address changed or disconnected"
-      );
+      const staleSkipped = expect(stalePromise).resolves.toBe("skipped");
 
       staleEpochState.latestAddressEpochRef.current = {};
       flushPendingWaveReadRequests({
@@ -2591,7 +2569,7 @@ describe("useMarkWaveNotificationsRead", () => {
         invalidateNotificationsRef: { current: invalidateNotifications },
       });
 
-      await staleRejection;
+      await staleSkipped;
       await expect(freshPromise).resolves.toBe("sent");
       expect(apiPostMock).toHaveBeenCalledTimes(1);
       expect(apiPostMock).toHaveBeenCalledWith({
@@ -2604,7 +2582,7 @@ describe("useMarkWaveNotificationsRead", () => {
     }
   });
 
-  it("rejects a stale queued read on the cleared-auth flush path", async () => {
+  it("skips a stale queued read on the cleared-auth flush path", async () => {
     const invalidateNotifications = jest.fn();
     const addressKey = "0xaaa";
     const waveId = "wave-stale-cleared-auth";
@@ -2630,9 +2608,7 @@ describe("useMarkWaveNotificationsRead", () => {
         shouldSend: undefined,
         queueIfBlocked: true,
       });
-      const rejection = expect(queuedPromise).rejects.toThrow(
-        "wallet address changed or disconnected"
-      );
+      const skipped = expect(queuedPromise).resolves.toBe("skipped");
 
       latestAddressEpochRef.current = {};
       flushPendingClearedWaveReadRequests({
@@ -2640,7 +2616,7 @@ describe("useMarkWaveNotificationsRead", () => {
         invalidateNotificationsRef: { current: invalidateNotifications },
       });
 
-      await rejection;
+      await skipped;
       expect(apiPostMock).not.toHaveBeenCalled();
       expect(invalidateNotifications).not.toHaveBeenCalled();
     } finally {
