@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useEffect } from "react";
-import { LazyMotion, domAnimation, m } from "framer-motion";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
@@ -50,26 +49,17 @@ const ActiveNavIndicator = ({
   readonly compact: boolean;
   readonly variant: "floating" | "fixed";
 }) => (
-  <LazyMotion features={domAnimation}>
-    <m.div
-      layoutId={`bottom-navigation-${variant}-active-indicator`}
-      transition={{
-        type: "spring",
-        stiffness: 420,
-        damping: 38,
-        mass: 0.7,
-      }}
-      className={
-        variant === "fixed"
-          ? "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
-          : `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-              compact
-                ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
-                : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]"
-            }`
-      }
-    />
-  </LazyMotion>
+  <div
+    className={
+      variant === "fixed"
+        ? "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
+        : `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+            compact
+              ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
+              : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]"
+          }`
+    }
+  />
 );
 
 const getHomeIconSizeClass = ({

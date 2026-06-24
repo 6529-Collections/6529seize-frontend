@@ -301,7 +301,7 @@ const CreateDropInput = forwardRef<
                 }
                 placeholder={
                   <span
-                    className={`editor-placeholder ${
+                    className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap ${
                       submitting ? "tw-opacity-50" : ""
                     }`}
                   >
