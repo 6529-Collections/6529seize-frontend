@@ -50,10 +50,7 @@ export const WaveDropsReverseContainer = forwardRef<
 
         if (typeof ref === "function") {
           ref(node);
-          return;
-        }
-
-        if (ref) {
+        } else if (ref) {
           ref.current = node;
         }
       },

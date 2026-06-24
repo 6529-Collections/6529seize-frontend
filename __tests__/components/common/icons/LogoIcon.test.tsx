@@ -1,21 +1,20 @@
-import { render } from '@testing-library/react';
-import LogoIcon from '@/components/common/icons/LogoIcon';
+import { render } from "@testing-library/react";
+import LogoIcon from "@/components/common/icons/LogoIcon";
 
-describe('LogoIcon', () => {
-  it('renders svg with viewBox and custom class', () => {
+describe("LogoIcon", () => {
+  it("renders the white logo asset with a custom class", () => {
     const { container } = render(<LogoIcon className="brand" />);
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveAttribute('viewBox', '0 0 1920 1920');
-    expect(svg).toHaveClass('brand');
+    const image = container.querySelector("img");
+    expect(image).toBeInTheDocument();
+    expect(image).toHaveAttribute("src", "/6529.svg");
+    expect(image).toHaveAttribute("aria-hidden", "true");
+    expect(image).toHaveClass("brand");
   });
 
-  it('contains polygon and path elements', () => {
-    const { container } = render(<LogoIcon />);
-    const polygon = container.querySelector('polygon');
-    const paths = container.querySelectorAll('path');
-    expect(polygon).toBeInTheDocument();
-    expect(paths.length).toBeGreaterThan(1);
-    expect(paths[0]?.getAttribute('fill')).toBe('currentColor');
+  it("renders the black logo asset when requested", () => {
+    const { container } = render(<LogoIcon color="black" />);
+    const image = container.querySelector("img");
+    expect(image).toBeInTheDocument();
+    expect(image).toHaveAttribute("src", "/6529-black.svg");
   });
 });

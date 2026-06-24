@@ -180,7 +180,7 @@ describe("AppLayout", () => {
     const appWrapper = container.firstElementChild as HTMLElement;
 
     expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
-      "85px"
+      "104px"
     );
   });
 
