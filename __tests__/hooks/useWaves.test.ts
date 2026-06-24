@@ -1,9 +1,10 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useWaves } from "@/hooks/useWaves";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import React from "react";
 import { commonApiFetch } from "@/services/api/common-api";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
 
 // Mock dependencies
 jest.mock("react-use", () => ({
@@ -11,7 +12,7 @@ jest.mock("react-use", () => ({
 }));
 
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn().mockResolvedValue({ waves: [], count: 0 }),
+  commonApiFetch: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -41,7 +42,7 @@ const createWrapper = () => {
     setToast: jest.fn(),
     setActiveProfileProxy: jest.fn(),
     fetchingProfile: false,
-    connectionStatus: "DISCONNECTED" as any,
+    connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
     receivedProfileProxies: [],
     showWaves: false,
     title: "",
@@ -101,6 +102,46 @@ describe("useWaves", () => {
     );
 
     await Promise.resolve();
+
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
+  });
+
+  it("masks cached waves and live methods while connected wallet auth is invalid", async () => {
+    commonApiFetchMock.mockResolvedValueOnce([{ id: "cached", serial_no: 10 }]);
+    useSeizeConnectContextMock.mockReturnValue({
+      address: undefined,
+      hasValidWalletAuth: true,
+    });
+
+    const { result, rerender } = renderHook(
+      () =>
+        useWaves({
+          identity: null,
+          waveName: null,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.waves).toEqual([
+        expect.objectContaining({ id: "cached" }),
+      ]);
+    });
+
+    commonApiFetchMock.mockClear();
+    useSeizeConnectContextMock.mockReturnValue({
+      address: "0xABC",
+      hasValidWalletAuth: false,
+    });
+    rerender();
+
+    expect(result.current.waves).toEqual([]);
+    expect(result.current.hasNextPage).toBe(false);
+    expect(result.current.lastPageSize).toBe(0);
+    expect(result.current.status).toBe("pending");
+
+    await result.current.fetchNextPage();
+    await result.current.refetch();
 
     expect(commonApiFetchMock).not.toHaveBeenCalled();
   });

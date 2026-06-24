@@ -24,7 +24,12 @@ const useWavesV2Mock = require("@/hooks/useWavesV2").useWavesV2 as jest.Mock;
 describe("useDmWavesList", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuthMock.mockReturnValue({ activeProfileProxy: null });
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { handle: "me" },
+      fetchingProfile: false,
+      isAuthenticated: true,
+    });
     useSeizeConnectContextMock.mockReturnValue({
       address: "0xABC",
       hasValidWalletAuth: true,
@@ -64,12 +69,26 @@ describe("useDmWavesList", () => {
   });
 
   it("disables the DM query while wallet auth is invalid", () => {
+    const fetchNextPage = jest.fn();
+    const refetch = jest.fn();
     useSeizeConnectContextMock.mockReturnValue({
       address: "0xABC",
       hasValidWalletAuth: false,
     });
+    useWavesV2Mock.mockReturnValue({
+      waves: [
+        { id: "older", latestDropTimestamp: 100 },
+        { id: "newer", latestDropTimestamp: 200 },
+      ],
+      isFetching: true,
+      isFetchingNextPage: true,
+      hasNextPage: true,
+      fetchNextPage,
+      status: "success",
+      refetch,
+    });
 
-    renderHook(() => useDmWavesList());
+    const { result } = renderHook(() => useDmWavesList());
 
     expect(useWavesV2Mock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -78,6 +97,18 @@ describe("useDmWavesList", () => {
         enabled: false,
       })
     );
+    expect(result.current.waves).toEqual([]);
+    expect(result.current.mainWaves).toEqual([]);
+    expect(result.current.isFetching).toBe(false);
+    expect(result.current.isFetchingNextPage).toBe(false);
+    expect(result.current.hasNextPage).toBe(false);
+
+    result.current.fetchNextPage();
+    result.current.mainWavesRefetch();
+    result.current.refetchAllWaves();
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+    expect(refetch).not.toHaveBeenCalled();
   });
 
   it("re-enables the DM query after profile loading settles", () => {

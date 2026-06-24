@@ -246,12 +246,36 @@ beforeEach(() => {
 });
 
 test("pauses viewer-scoped wave sources while wallet auth is invalid", () => {
+  const fetchNextPage = jest.fn();
+  const refetch = jest.fn();
+  const pinnedRefetch = jest.fn();
+  const pinWave = jest.fn();
+  const unpinWave = jest.fn();
+  const prefetchSpy = jest.spyOn(queryClient, "prefetchQuery");
   useSeizeConnectContextMock.mockReturnValue({
     address: "0xABC",
     hasValidWalletAuth: false,
   });
+  useWavesV2Mock.mockReturnValue({
+    waves: [mainWave],
+    isFetching: true,
+    isFetchingNextPage: true,
+    hasNextPage: true,
+    fetchNextPage,
+    status: "success",
+    refetch,
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: ["2", "3"],
+    pinnedWaves: [pinnedExtra],
+    pinWave,
+    unpinWave,
+    isLoading: false,
+    isError: false,
+    refetch: pinnedRefetch,
+  });
 
-  renderHook(() => useWavesList(), { wrapper });
+  const { result } = renderHook(() => useWavesList(), { wrapper });
 
   expect(useWavesV2Mock).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -266,6 +290,29 @@ test("pauses viewer-scoped wave sources while wallet auth is invalid", () => {
   expect(
     useWavesV2Mock.mock.calls.every(([args]) => args.viewerIdentityKey === null)
   ).toBe(true);
+  expect(result.current.waves).toEqual([]);
+  expect(result.current.mainWaves).toEqual([]);
+  expect(result.current.pinnedWaves).toEqual([]);
+  expect(result.current.isFetching).toBe(false);
+  expect(result.current.isFetchingNextPage).toBe(false);
+  expect(result.current.hasNextPage).toBe(false);
+
+  act(() => {
+    result.current.fetchNextPage();
+    result.current.mainWavesRefetch();
+    result.current.refetchAllWaves();
+    result.current.addPinnedWave("2");
+    result.current.removePinnedWave("2");
+    result.current.loadSubwavesForParent("2");
+    result.current.prefetchSubwavesForParent("2");
+  });
+
+  expect(fetchNextPage).not.toHaveBeenCalled();
+  expect(refetch).not.toHaveBeenCalled();
+  expect(pinnedRefetch).not.toHaveBeenCalled();
+  expect(pinWave).not.toHaveBeenCalled();
+  expect(unpinWave).not.toHaveBeenCalled();
+  expect(prefetchSpy).not.toHaveBeenCalled();
 });
 
 test("re-enables viewer-scoped wave sources after profile loading settles", () => {

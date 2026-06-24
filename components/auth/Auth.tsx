@@ -215,7 +215,7 @@ const isProfileForAddress = ({
   );
 
   if (walletAddresses.length === 0) {
-    return true;
+    return false;
   }
 
   return walletAddresses.some(

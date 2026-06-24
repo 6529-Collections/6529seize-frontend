@@ -20,7 +20,8 @@ export function useAuthenticatedContent() {
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const hasValidWalletAuthorization = hasValidWalletAuth !== false;
   const hasAuthenticatedProfile =
-    isAuthenticated ?? (!!connectedProfile?.handle && showWaves);
+    hasValidWalletAuthorization &&
+    (isAuthenticated ?? (!!connectedProfile?.handle && showWaves));
 
   const contentState = useMemo<ContentState>(() => {
     if (!address) {

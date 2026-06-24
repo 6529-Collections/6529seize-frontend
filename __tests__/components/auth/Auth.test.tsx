@@ -395,7 +395,13 @@ describe("Auth component", () => {
     it("returns showWaves true when wallet and profile", async () => {
       // Set up profile mock to return a profile with handle
       mockUseIdentity.mockReturnValue({
-        profile: { id: "1", handle: "testuser", query: "testuser" },
+        profile: {
+          id: "1",
+          handle: "testuser",
+          query: "testuser",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
         isLoading: false,
       });
 
@@ -1084,7 +1090,13 @@ describe("Auth component", () => {
         wasCancelled: false,
         shouldShowModal: false,
       });
-      const mockProfile = { id: "1", handle: "testuser", query: "testuser" };
+      const mockProfile = {
+        id: "1",
+        handle: "testuser",
+        query: "testuser",
+        primary_wallet: walletAddress,
+        wallets: [],
+      };
 
       // Mock useIdentity to return the profile immediately
       mockUseIdentity.mockReturnValue({
@@ -1144,7 +1156,13 @@ describe("Auth component", () => {
         wasCancelled: false,
         shouldShowModal: false,
       });
-      const mockProfile = { id: "1", handle: "testuser", query: "testuser" };
+      const mockProfile = {
+        id: "1",
+        handle: "testuser",
+        query: "testuser",
+        primary_wallet: walletAddress,
+        wallets: [],
+      };
 
       // Mock useIdentity to simulate profile fetching
       mockUseIdentity.mockReturnValue({
@@ -1221,6 +1239,37 @@ describe("Auth component", () => {
           handle: "stale",
           query: "stale",
           primary_wallet: "0x2222222222222222222222222222222222222222",
+          wallets: [],
+        },
+        isLoading: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <ShowAuthState />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("profile-id")).toHaveTextContent("none");
+      });
+      expect(screen.getByTestId("fetching")).toHaveTextContent("true");
+      expect(screen.getByTestId("authenticated")).toHaveTextContent("false");
+      expect(screen.getByTestId("waves")).toHaveTextContent("false");
+    });
+
+    it("does not authenticate a profile without any usable wallet addresses", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "malformed-profile",
+          handle: "malformed",
+          query: "malformed",
+          primary_wallet: null,
           wallets: [],
         },
         isLoading: false,
