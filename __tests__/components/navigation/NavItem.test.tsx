@@ -288,6 +288,39 @@ describe("NavItem notifications", () => {
     expect(logo).toHaveClass("tw-text-black");
   });
 
+  it("keeps inactive floating home logo white", () => {
+    const item = {
+      kind: "route",
+      name: "Home",
+      href: "/",
+      icon: "/6529.svg",
+      iconComponent: LogoIcon,
+    } as any;
+
+    const { container } = render(<NavItem item={item} />);
+    const logo = container.querySelector("span[aria-hidden='true']");
+
+    expect(logo).toHaveClass("tw-text-white");
+    expect(logo).not.toHaveClass("tw-text-iron-300");
+  });
+
+  it("keeps fixed home logo white even when active", () => {
+    (isNavItemActive as jest.Mock).mockReturnValue(true);
+    const item = {
+      kind: "route",
+      name: "Home",
+      href: "/",
+      icon: "/6529.svg",
+      iconComponent: LogoIcon,
+    } as any;
+
+    const { container } = render(<NavItem item={item} variant="fixed" />);
+    const logo = container.querySelector("span[aria-hidden='true']");
+
+    expect(logo).toHaveClass("tw-text-white");
+    expect(logo).not.toHaveClass("tw-text-iron-500");
+  });
+
   it("renders disabled item when disabled flag set", () => {
     (useUnreadNotifications as jest.Mock).mockReturnValue({});
     const item = { name: "Feed", icon: "/i", disabled: true } as any;

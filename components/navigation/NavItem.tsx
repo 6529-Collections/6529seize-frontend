@@ -42,31 +42,9 @@ const getIconSlotClass = ({
   return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
 };
 
-const getActiveNavIndicatorClassName = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) => {
-  if (variant === "fixed") {
-    return "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white";
-  }
-
-  const sizeClassName = compact
-    ? "tw-h-11 tw-w-[3.75rem] sm:tw-h-12 sm:tw-w-[4.25rem]"
-    : "tw-h-12 tw-w-[4.05rem] sm:tw-h-[3.15rem] sm:tw-w-[4.45rem]";
-
-  return `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${sizeClassName}`;
-};
-
-const ActiveNavIndicator = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) => <div className={getActiveNavIndicatorClassName({ compact, variant })} />;
+const FixedActiveNavIndicator = () => (
+  <div className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white" />
+);
 
 const getHomeIconSizeClass = ({
   compact,
@@ -85,15 +63,29 @@ const getHomeIconSizeClass = ({
 const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
   isHighlighted ? "tw-text-white" : "tw-text-iron-300";
 
+const getHomeIconTextColorClass = ({
+  isActive,
+  variant,
+}: {
+  readonly isActive: boolean;
+  readonly variant: "floating" | "fixed";
+}) => (variant === "floating" && isActive ? "tw-text-black" : "tw-text-white");
+
 const getIconTextColorClass = ({
   isActive,
   isHighlighted,
+  item,
   variant,
 }: {
   readonly isActive: boolean;
   readonly isHighlighted: boolean;
+  readonly item: NavItemData;
   readonly variant: "floating" | "fixed";
 }) => {
+  if (item.name === "Home") {
+    return getHomeIconTextColorClass({ isActive, variant });
+  }
+
   if (variant === "fixed") {
     return isHighlighted ? "tw-text-white" : "tw-text-iron-500";
   }
@@ -181,6 +173,7 @@ const NavItemLinkContent = ({
   const iconTextColorClass = getIconTextColorClass({
     isActive,
     isHighlighted,
+    item,
     variant,
   });
   const resolvedIconSizeClass =
@@ -190,7 +183,7 @@ const NavItemLinkContent = ({
 
   return (
     <div className={getIconSlotClass({ compact, variant })}>
-      {isActive && <ActiveNavIndicator compact={compact} variant={variant} />}
+      {isActive && variant === "fixed" && <FixedActiveNavIndicator />}
       {IconComponent ? (
         <IconComponent
           className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}
