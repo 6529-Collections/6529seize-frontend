@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 interface WaveAvatarProps {
   readonly isActive: boolean;
   readonly isDropWave: boolean;
+  readonly dropBadgePlacement?: "bottom-left" | "bottom-right" | undefined;
   readonly showNewDropsBadge: boolean;
   readonly showUnreadDropsBadge?: boolean | undefined;
   readonly wave: MinimalWave;
@@ -34,7 +35,26 @@ const MUTED_BADGE_CLASSES =
   "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm";
 const MUTED_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0";
 
+const getDropBadgePlacementClasses = ({
+  isSmall,
+  placement,
+}: {
+  readonly isSmall: boolean;
+  readonly placement: "bottom-left" | "bottom-right";
+}) => {
+  if (placement === "bottom-left") {
+    return isSmall
+      ? "tw-bottom-[-1px] tw-left-[-1px]"
+      : "tw-bottom-[-2px] tw-left-[-2px]";
+  }
+
+  return isSmall
+    ? "tw-bottom-[-1px] tw-right-[-1px]"
+    : "tw-bottom-[-2px] tw-right-[-2px]";
+};
+
 export const WaveAvatar = ({
+  dropBadgePlacement = "bottom-right",
   isActive,
   isDropWave,
   showNewDropsBadge,
@@ -54,9 +74,11 @@ export const WaveAvatar = ({
   const activeRingClasses = isSmall
     ? "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
     : "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-2 tw-ring-offset-iron-950";
-  const dropBadgeClasses = isSmall
-    ? "tw-absolute tw-bottom-[-1px] tw-right-[-1px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg"
-    : "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg";
+  const dropBadgePlacementClasses = getDropBadgePlacementClasses({
+    isSmall,
+    placement: dropBadgePlacement,
+  });
+  const dropBadgeClasses = `tw-absolute ${dropBadgePlacementClasses} tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg`;
 
   return (
     <div
