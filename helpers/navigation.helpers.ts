@@ -16,7 +16,7 @@ export const getMessagesBaseRoute = (_isApp: boolean): string => "/messages";
 export const getNotificationsRoute = (_isApp: boolean): string =>
   "/notifications";
 
-export const MOBILE_BOTTOM_NAV_SCROLL_TARGET_ATTRIBUTE =
+const MOBILE_BOTTOM_NAV_SCROLL_TARGET_ATTRIBUTE =
   "data-mobile-bottom-nav-scroll-target";
 export const MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR = `[${MOBILE_BOTTOM_NAV_SCROLL_TARGET_ATTRIBUTE}="true"]`;
 
