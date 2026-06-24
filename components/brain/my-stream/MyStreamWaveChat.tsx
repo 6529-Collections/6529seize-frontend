@@ -458,7 +458,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           isVotingControlsLocked={isVotingControlsLocked}
         />
         {!(isApp && editingDropId) && (
-          <div className="tw-mt-auto tw-bg-black tw-pb-[max(env(safe-area-inset-bottom,0px),0.5rem)] lg:tw-pb-0">
+          <div className="tw-mt-auto tw-bg-iron-950 tw-pb-[max(env(safe-area-inset-bottom,0px),0.5rem)] lg:tw-pb-0">
             <CreateDropWaveWrapper>
               <PrivilegedDropCreator
                 activeDrop={activeDrop}
