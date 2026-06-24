@@ -144,18 +144,18 @@ const getWaveScoreLabel = (wave: MinimalWave): string | null => {
 
 const getScoreBadgeFontSize = (scoreLabel: string) => {
   if (scoreLabel.length >= 5) {
-    return 5;
+    return 5.1;
   }
 
   if (scoreLabel.length === 4) {
-    return 5.8;
+    return 5.9;
   }
 
   if (scoreLabel.length === 3) {
-    return 7;
+    return 6.9;
   }
 
-  return 8.8;
+  return 8.5;
 };
 
 export const getFittingPreviewCount = ({
@@ -264,28 +264,28 @@ function HighlyRatedWavePreviewScoreBadge({
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 24 28"
-      className="tw-pointer-events-none tw-absolute -tw-bottom-1.5 -tw-left-1.5 tw-z-10 tw-h-6 tw-w-5 tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]"
+      viewBox="0 0 32 26"
+      className="tw-pointer-events-none tw-absolute -tw-bottom-0.5 -tw-right-1 tw-z-10 tw-h-[18px] tw-w-[22px] tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]"
     >
       <path
-        d="M12 1.8 21.4 5.45v7.35c0 6.1-3.7 11.05-9.4 13.4-5.7-2.35-9.4-7.3-9.4-13.4V5.45L12 1.8Z"
+        d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
         className="tw-fill-iron-800 tw-stroke-iron-950"
-        strokeWidth="2.8"
+        strokeWidth="2.4"
         strokeLinejoin="round"
       />
       <path
-        d="M12 3.9 19.1 6.65v6.1c0 4.95-2.65 8.95-7.1 11-4.45-2.05-7.1-6.05-7.1-11v-6.1L12 3.9Z"
+        d="M16 4.7 25.35 7.75v5.1c0 4.15-3.2 7.15-9.35 8.75-6.15-1.6-9.35-4.6-9.35-8.75v-5.1L16 4.7Z"
         className="tw-fill-none tw-stroke-white/20"
         strokeWidth="1"
         strokeLinejoin="round"
       />
       <text
-        x="12"
-        y="14.2"
+        x="16"
+        y="13.2"
         dominantBaseline="middle"
         textAnchor="middle"
         fontSize={getScoreBadgeFontSize(scoreLabel)}
-        fontWeight="800"
+        fontWeight="700"
         className="tw-fill-iron-50"
       >
         {scoreLabel}
@@ -338,6 +338,7 @@ function HighlyRatedWavePreviewLink({
       className="tw-group/preview tw-relative tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
     >
       <WaveAvatar
+        dropBadgePlacement="bottom-left"
         isActive={item.isActive}
         isDropWave={isDropWave}
         showNewDropsBadge={false}
@@ -361,11 +362,11 @@ function HighlyRatedWavePreviewLink({
             <span className="tw-ml-auto tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
               <svg
                 className="tw-size-3 tw-flex-shrink-0 tw-text-iron-400"
-                viewBox="0 0 24 28"
+                viewBox="0 0 32 26"
                 aria-hidden="true"
               >
                 <path
-                  d="M12 2.2 21 5.7v7.1c0 5.9-3.55 10.6-9 12.9-5.45-2.3-9-7-9-12.9V5.7L12 2.2Z"
+                  d="M16 2.4 27.3 6.2v6.65c0 5.25-4.1 9.15-11.3 10.85-7.2-1.7-11.3-5.6-11.3-10.85V6.2L16 2.4Z"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"

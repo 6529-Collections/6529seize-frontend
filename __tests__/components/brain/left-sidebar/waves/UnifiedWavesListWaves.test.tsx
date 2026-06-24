@@ -58,6 +58,7 @@ jest.mock(
     WaveAvatar: (props: any) => (
       <div
         data-testid={`preview-avatar-${props.wave.id}`}
+        data-drop-badge-placement={props.dropBadgePlacement}
         data-is-drop-wave={String(props.isDropWave)}
         data-show-new-drops-badge={String(props.showNewDropsBadge)}
         data-show-unread-drops-badge={String(props.showUnreadDropsBadge)}
@@ -433,9 +434,16 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   expect(
     screen.getByRole("link", { name: "Open Scored Discovery, score 93" })
   ).toBeInTheDocument();
-  expect(screen.getByText("93", { selector: "text" })).toBeInTheDocument();
+  const scoreBadgeText = screen.getByText("93", { selector: "text" });
+  expect(scoreBadgeText).toBeInTheDocument();
+  expect(scoreBadgeText.closest("svg")).toHaveClass("-tw-bottom-0.5");
+  expect(scoreBadgeText.closest("svg")).toHaveClass("-tw-right-1");
   expect(screen.getByText("Score 93")).toBeInTheDocument();
   expect(screen.queryByRole("link", { name: /new messages/ })).toBeNull();
+  expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
+    "data-drop-badge-placement",
+    "bottom-left"
+  );
   expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
     "data-show-new-drops-badge",
     "false"
