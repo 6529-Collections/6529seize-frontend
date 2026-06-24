@@ -1894,6 +1894,48 @@ describe("Auth component", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("dismisses the session upgrade prompt when opening the learn more page", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+
+      const user = userEvent.setup();
+      await user.click(screen.getByText("Learn more about this update"));
+
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        "/about/tech/wallet-authentication"
+      );
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Upgrade Authentication")
+        ).not.toBeInTheDocument();
+      });
+    });
+
     it("keeps session upgrade dismiss reminders scoped to each connected account", async () => {
       const firstAddress = "0x1111111111111111111111111111111111111111";
       const secondAddress = "0x2222222222222222222222222222222222222222";

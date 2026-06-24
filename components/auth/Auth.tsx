@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { MouseEvent } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { isAddress } from "viem";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
@@ -1799,6 +1800,13 @@ export default function Auth({
     }
     void requestAuth();
   };
+  const onSessionUpgradeLearnMore = (
+    event: MouseEvent<HTMLAnchorElement>
+  ) => {
+    event.preventDefault();
+    onCancelSignRequest();
+    router.push("/about/tech/wallet-authentication");
+  };
 
   return (
     <AuthContext.Provider
@@ -1864,7 +1872,10 @@ export default function Auth({
             </ul>
             {isSessionUpgradePrompt && (
               <p className={styles["signModalLearnMore"]}>
-                <Link href="/about/tech/wallet-authentication">
+                <Link
+                  href="/about/tech/wallet-authentication"
+                  onClick={onSessionUpgradeLearnMore}
+                >
                   {t(AUTH_MODAL_LOCALE, "auth.signModal.learnMore")}
                 </Link>
               </p>
