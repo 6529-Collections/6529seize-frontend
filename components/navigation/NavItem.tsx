@@ -14,7 +14,7 @@ import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { isNavItemActive } from "./isNavItemActive";
 import { getActiveViewFromUrl, useViewContext } from "./ViewContext";
-import type { NavIconColor, NavItem as NavItemData, ViewKey } from "./navTypes";
+import type { NavItem as NavItemData, ViewKey } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
@@ -85,6 +85,14 @@ const getHomeIconSizeClass = ({
 const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
   isHighlighted ? "tw-text-white" : "tw-text-iron-300";
 
+const getHomeIconTextColorClass = ({
+  isActive,
+  variant,
+}: {
+  readonly isActive: boolean;
+  readonly variant: "floating" | "fixed";
+}) => (variant === "floating" && isActive ? "tw-text-black" : "tw-text-white");
+
 const getIconTextColorClass = ({
   isActive,
   isHighlighted,
@@ -97,7 +105,7 @@ const getIconTextColorClass = ({
   readonly variant: "floating" | "fixed";
 }) => {
   if (item.name === "Home") {
-    return "";
+    return getHomeIconTextColorClass({ isActive, variant });
   }
 
   if (variant === "fixed") {
@@ -184,8 +192,6 @@ const NavItemLinkContent = ({
 }) => {
   const isHighlighted = isActive;
   const IconComponent = item.iconComponent;
-  const activeIconColor: NavIconColor =
-    isActive && variant === "floating" ? "black" : "white";
   const iconTextColorClass = getIconTextColorClass({
     isActive,
     isHighlighted,
@@ -203,7 +209,6 @@ const NavItemLinkContent = ({
       {IconComponent ? (
         <IconComponent
           className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}
-          color={activeIconColor}
         />
       ) : (
         <Image
