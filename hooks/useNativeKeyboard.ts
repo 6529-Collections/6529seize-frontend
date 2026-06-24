@@ -5,9 +5,9 @@ import type { PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { useSyncExternalStore } from "react";
 
-export type NativeKeyboardPhase = "hidden" | "showing" | "visible" | "hiding";
+type NativeKeyboardPhase = "hidden" | "showing" | "visible" | "hiding";
 
-export interface NativeKeyboardState {
+interface NativeKeyboardState {
   readonly isVisible: boolean;
   readonly keyboardHeight: number;
   readonly phase: NativeKeyboardPhase;
