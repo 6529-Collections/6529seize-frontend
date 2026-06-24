@@ -1,7 +1,9 @@
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import BottomNavigation from "@/components/navigation/BottomNavigation";
 import NavItem from "@/components/navigation/NavItem";
+import { useAuth } from "@/components/auth/Auth";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -13,6 +15,10 @@ import {
 jest.mock("@/components/navigation/NavItem", () => ({
   __esModule: true,
   default: jest.fn(() => <div data-testid="nav-item" />),
+}));
+jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
 }));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: jest.fn(),
@@ -30,6 +36,8 @@ jest.mock("next/navigation", () => ({
 
 const registerRef = jest.fn();
 (useLayout as jest.Mock).mockReturnValue({ registerRef });
+(useAuth as jest.Mock).mockReturnValue({ connectedProfile: null });
+(useSeizeConnectContext as jest.Mock).mockReturnValue({ address: undefined });
 (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
 (useWaveData as jest.Mock).mockReturnValue({ data: null });
 (useWave as jest.Mock).mockReturnValue({ isDm: false });
@@ -58,6 +66,9 @@ const flushAnimationFrame = async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 };
+
+const getExpectedActivePillLeft = (index: number, itemCount = 7) =>
+  `left: ${((index + 0.5) / itemCount) * 100}%`;
 
 const createScrollableElement = ({
   tracked,
@@ -117,6 +128,10 @@ beforeEach(() => {
       }
     });
   (useLayout as jest.Mock).mockReturnValue({ registerRef });
+  (useAuth as jest.Mock).mockReturnValue({ connectedProfile: null });
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({
+    address: undefined,
+  });
   (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
   (useWaveData as jest.Mock).mockReturnValue({ data: null });
   (useWave as jest.Mock).mockReturnValue({ isDm: false });
@@ -204,7 +219,9 @@ describe("BottomNavigation", () => {
     const { getByTestId, rerender } = render(<BottomNavigation />);
     const activePill = getByTestId("mobile-dock-active-pill");
 
-    expect(activePill.getAttribute("style")).toContain("left: 50%");
+    expect(activePill.getAttribute("style")).toContain(
+      getExpectedActivePillLeft(3)
+    );
     expect(activePill).toHaveClass("tw-transition-[left,width,height,opacity]");
 
     (usePathname as jest.Mock).mockReturnValue("/notifications");
@@ -213,8 +230,19 @@ describe("BottomNavigation", () => {
     const movedActivePill = getByTestId("mobile-dock-active-pill");
     expect(movedActivePill).toBe(activePill);
     expect(movedActivePill.getAttribute("style")).toContain(
-      "left: 92.85714285714286%"
+      getExpectedActivePillLeft(6)
     );
+  });
+
+  it("hides the active pill when no dock item matches the route", () => {
+    (usePathname as jest.Mock).mockReturnValue("/my-handle");
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: { handle: "my-handle", normalised_handle: "my-handle" },
+    });
+
+    const { getByTestId } = render(<BottomNavigation />);
+
+    expect(getByTestId("mobile-dock-active-pill")).toHaveClass("tw-opacity-0");
   });
 
   it("compacts the floating dock from window scroll", async () => {
