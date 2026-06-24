@@ -119,3 +119,41 @@ test("replaces existing websocket drops instead of duplicating them", () => {
     drop,
   ]);
 });
+
+test("skips media-only caches when a websocket drop omits parts", () => {
+  const qc = new QueryClient();
+  const mediaKey = [
+    QueryKey.DROPS,
+    {
+      waveId: "w",
+      limit: 20,
+      dropType: null,
+      containsMedia: true,
+      curationId: null,
+      context: "wave-drops",
+    },
+  ];
+  const regularKey = [
+    QueryKey.DROPS,
+    {
+      waveId: "w",
+      limit: 20,
+      dropType: null,
+      containsMedia: false,
+      curationId: null,
+      context: "wave-drops",
+    },
+  ];
+  qc.setQueryData(mediaKey, { pages: [{ drops: [{ id: "media-old" }] }] });
+  qc.setQueryData(regularKey, { pages: [{ drops: [{ id: "regular-old" }] }] });
+
+  const drop: any = { id: "partial-websocket-drop", wave: { id: "w" } };
+  upsertDropIntoMatchingDropsQueries(qc, { drop });
+
+  expect((qc.getQueryData(mediaKey) as any).pages[0].drops[0].id).toBe(
+    "media-old"
+  );
+  expect((qc.getQueryData(regularKey) as any).pages[0].drops[0].id).toBe(
+    "partial-websocket-drop"
+  );
+});

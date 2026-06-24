@@ -336,6 +336,53 @@ describe("useWaveRealtimeUpdater", () => {
     );
   });
 
+  it("does not sync newest messages after helpbot reactions without a known serial", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "helpbot-no-serial",
+            type: DropSize.FULL,
+            stableKey: "helpbot-no-serial",
+            stableHash: "helpbot-no-serial",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: null,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "helpbot-no-serial",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "helpbot-no-serial",
+      wave: { id: "wave1" },
+      author: {},
+      reactions: [
+        {
+          reaction: ":white_check_mark:",
+          profiles: [{ handle: "help6529" }],
+        },
+      ],
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("helpbot-no-serial");
+    expect(props.syncNewestMessages).not.toHaveBeenCalled();
+  });
+
   it("marks active wave as read after visible reaction updates", async () => {
     const store = {
       wave1: {

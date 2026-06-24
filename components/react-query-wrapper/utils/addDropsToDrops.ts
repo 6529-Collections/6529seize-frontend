@@ -94,7 +94,7 @@ export const addDropToDrops = (
 };
 
 function hasMedia(drop: ApiDrop): boolean {
-  return drop.parts.some((part) => part.media.length > 0);
+  return (drop.parts ?? []).some((part) => part.media.length > 0);
 }
 
 function readDropsQueryParams(queryKey: readonly unknown[]) {

@@ -57,7 +57,7 @@ type ProcessIncomingDropFn = (
   options?: ProcessIncomingDropOptions
 ) => Promise<void>;
 
-export interface ProcessIncomingDropOptions {
+interface ProcessIncomingDropOptions {
   readonly preferExistingPollVote?: boolean;
 }
 
@@ -119,7 +119,7 @@ const updateCachedDrop = ({
     return;
   }
 
-    updateDropInCachedDrops(queryClient, drop, { preferExistingPollVote });
+  updateDropInCachedDrops(queryClient, drop, { preferExistingPollVote });
 };
 
 const normalizeHandle = (handle: string | null | undefined): string =>
