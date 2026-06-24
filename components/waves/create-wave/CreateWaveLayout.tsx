@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { CreateWaveConfig, CreateWaveStep } from "@/types/waves.types";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveActions from "./utils/CreateWaveActions";
 
@@ -24,7 +25,8 @@ export default function CreateWaveLayout({
   ) => void;
   readonly onComplete: () => Promise<void>;
 }) {
-  const { isIos, keyboardVisible } = useCapacitor();
+  const { isIos } = useCapacitor();
+  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
 
   return (
     <div className="tw-h-full tw-w-full lg:tw-flex">
@@ -37,7 +39,7 @@ export default function CreateWaveLayout({
       </div>
       <div
         className={`tw-min-w-0 tw-flex-1 tw-bg-iron-950 tw-shadow-[-10px_0_30px_rgba(0,0,0,0.5)] ${
-          isIos && !keyboardVisible ? "tw-mb-10" : ""
+          isIos && !isKeyboardVisible ? "tw-mb-10" : ""
         }`}
       >
         <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">

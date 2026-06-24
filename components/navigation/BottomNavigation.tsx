@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGroup } from "framer-motion";
+import { LayoutGroup, LazyMotion, domAnimation } from "framer-motion";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   Suspense,
@@ -12,6 +12,7 @@ import React, {
 } from "react";
 import {
   getActiveWaveIdFromUrl,
+  MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
   getNotificationsRoute,
   usesReverseMobileBottomNavigationScroll,
 } from "@/helpers/navigation.helpers";
@@ -110,16 +111,45 @@ const getWindowScrollPosition = () => {
   );
 };
 
+const isTrackedScrollElement = (
+  target: EventTarget | null | undefined
+): target is Element =>
+  typeof Element !== "undefined" &&
+  target instanceof Element &&
+  target.matches(MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR) &&
+  target.scrollHeight > target.clientHeight;
+
 const getScrollPosition = (target: EventTarget | null | undefined) => {
-  if (
-    typeof Element !== "undefined" &&
-    target instanceof Element &&
-    target.scrollHeight > target.clientHeight
-  ) {
+  if (isTrackedScrollElement(target)) {
     return target.scrollTop;
   }
 
   return getWindowScrollPosition();
+};
+
+const getTrackedScrollTarget = ({
+  browserWindow,
+  target,
+}: {
+  readonly browserWindow: Window;
+  readonly target: EventTarget | null | undefined;
+}): EventTarget | null => {
+  const browserDocument = globalThis.document;
+
+  if (isTrackedScrollElement(target)) {
+    return target;
+  }
+
+  if (
+    target === browserWindow ||
+    target === browserDocument ||
+    target === browserDocument?.documentElement ||
+    target === browserDocument?.body
+  ) {
+    return browserWindow;
+  }
+
+  return null;
 };
 
 const useCompactDock = ({
@@ -134,7 +164,7 @@ const useCompactDock = ({
     new WeakMap()
   );
   const frameRef = useRef<number | null>(null);
-  const pendingScrollTargetRef = useRef<EventTarget | null>(null);
+  const pendingScrollTargetsRef = useRef<Set<EventTarget>>(new Set());
 
   useEffect(() => {
     if (hidden) {
@@ -149,6 +179,7 @@ const useCompactDock = ({
     }
 
     previousScrollPositionsRef.current = new WeakMap();
+    pendingScrollTargetsRef.current = new Set();
 
     const syncCompactState = (target: EventTarget) => {
       const currentScrollPosition = getScrollPosition(target);
@@ -173,18 +204,28 @@ const useCompactDock = ({
       }
 
       previousScrollPositionsRef.current.set(target, currentScrollPosition);
-      frameRef.current = null;
     };
 
     const handleScroll = (event?: Event) => {
-      pendingScrollTargetRef.current = event?.target ?? browserWindow;
+      const target = getTrackedScrollTarget({
+        browserWindow,
+        target: event?.target ?? browserWindow,
+      });
+      if (target === null) {
+        return;
+      }
+
+      pendingScrollTargetsRef.current.add(target);
 
       if (frameRef.current !== null) {
         return;
       }
 
       frameRef.current = globalThis.requestAnimationFrame(() => {
-        syncCompactState(pendingScrollTargetRef.current ?? browserWindow);
+        const targets = Array.from(pendingScrollTargetsRef.current);
+        pendingScrollTargetsRef.current.clear();
+        targets.forEach(syncCompactState);
+        frameRef.current = null;
       });
     };
 
@@ -203,6 +244,7 @@ const useCompactDock = ({
       if (frameRef.current !== null) {
         globalThis.cancelAnimationFrame(frameRef.current);
       }
+      pendingScrollTargetsRef.current.clear();
     };
   }, [hidden, reverseScrollDirection]);
 
@@ -298,22 +340,24 @@ const BottomNavigationResolvedContent: React.FC<
       <div className={getDockClassName(compact)}>
         <div className={floatingNavInnerClassName}>
           <ul className={getFloatingNavListClassName(compact)}>
-            <LayoutGroup id="bottom-navigation">
-              {navItems.map((item) => (
-                <li
-                  key={item.name}
-                  className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
-                >
-                  <NavItem
-                    variant="floating"
-                    compact={compact}
-                    item={item}
-                    isCurrentWaveDm={isCurrentWaveDm}
-                    fullPrefetch={isApp && item.kind === "view"}
-                  />
-                </li>
-              ))}
-            </LayoutGroup>
+            <LazyMotion features={domAnimation}>
+              <LayoutGroup id="bottom-navigation">
+                {navItems.map((item) => (
+                  <li
+                    key={item.name}
+                    className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
+                  >
+                    <NavItem
+                      variant="floating"
+                      compact={compact}
+                      item={item}
+                      isCurrentWaveDm={isCurrentWaveDm}
+                      fullPrefetch={isApp && item.kind === "view"}
+                    />
+                  </li>
+                ))}
+              </LayoutGroup>
+            </LazyMotion>
           </ul>
         </div>
       </div>

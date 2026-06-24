@@ -5,7 +5,10 @@ import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
-import { getNotificationsRoute } from "@/helpers/navigation.helpers";
+import {
+  getNotificationsRoute,
+  MOBILE_BOTTOM_NAV_SCROLL_TARGET_ATTRIBUTE,
+} from "@/helpers/navigation.helpers";
 
 jest.mock("@/components/navigation/NavItem", () => ({
   __esModule: true,
@@ -36,6 +39,38 @@ const { usePathname, useSearchParams } = require("next/navigation");
 (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 
 let originalScrollYDescriptor: PropertyDescriptor | undefined;
+
+const flushAnimationFrame = async () => {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+};
+
+const createScrollableElement = ({
+  tracked,
+}: {
+  readonly tracked: boolean;
+}) => {
+  const element = document.createElement("div");
+  if (tracked) {
+    element.setAttribute(MOBILE_BOTTOM_NAV_SCROLL_TARGET_ATTRIBUTE, "true");
+  }
+  Object.defineProperty(element, "clientHeight", {
+    configurable: true,
+    value: 120,
+  });
+  Object.defineProperty(element, "scrollHeight", {
+    configurable: true,
+    value: 240,
+  });
+  Object.defineProperty(element, "scrollTop", {
+    configurable: true,
+    value: 0,
+    writable: true,
+  });
+  document.body.appendChild(element);
+  return element;
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -197,6 +232,57 @@ describe("BottomNavigation", () => {
         })
       ).toBe(true);
     });
+  });
+
+  it("compacts from marked element scroll containers", async () => {
+    const scroller = createScrollableElement({ tracked: true });
+    render(<BottomNavigation />);
+
+    act(() => {
+      scroller.scrollTop = 0;
+      fireEvent.scroll(scroller);
+    });
+    await flushAnimationFrame();
+
+    act(() => {
+      scroller.scrollTop = 24;
+      fireEvent.scroll(scroller);
+    });
+
+    await waitFor(() => {
+      expect(
+        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+          return props.variant === "floating" && props.compact === true;
+        })
+      ).toBe(true);
+    });
+
+    scroller.remove();
+  });
+
+  it("ignores unmarked nested scroll containers", async () => {
+    const scroller = createScrollableElement({ tracked: false });
+    render(<BottomNavigation />);
+
+    act(() => {
+      scroller.scrollTop = 0;
+      fireEvent.scroll(scroller);
+    });
+    await flushAnimationFrame();
+
+    act(() => {
+      scroller.scrollTop = 24;
+      fireEvent.scroll(scroller);
+    });
+    await flushAnimationFrame();
+
+    expect(
+      (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+        return props.variant === "floating" && props.compact === false;
+      })
+    ).toBe(true);
+
+    scroller.remove();
   });
 
   it("resets floating dock compact state when the route view changes", async () => {
