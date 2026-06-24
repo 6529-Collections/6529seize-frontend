@@ -249,7 +249,7 @@ function HighlyRatedWavePreviewScoreBadge({
   return (
     <span
       aria-hidden="true"
-      className="tw-pointer-events-none tw-absolute -tw-bottom-1 -tw-right-1 tw-z-10 tw-flex tw-h-4 tw-min-w-[1.75rem] tw-items-center tw-justify-center tw-gap-0.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-800/95 tw-px-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-100 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.10),0_6px_14px_rgba(0,0,0,0.36)]"
+      className="tw-pointer-events-none tw-absolute -tw-bottom-1 -tw-left-1 tw-z-10 tw-flex tw-h-4 tw-min-w-[1.75rem] tw-items-center tw-justify-center tw-gap-0.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-800/95 tw-px-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-100 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.10),0_6px_14px_rgba(0,0,0,0.36)]"
     >
       <ShieldCheckIcon
         className="tw-size-2.5 tw-flex-shrink-0 tw-text-iron-300"
@@ -305,7 +305,7 @@ function HighlyRatedWavePreviewLink({
     >
       <WaveAvatar
         isActive={item.isActive}
-        isDropWave={isDropWave && scoreLabel === null}
+        isDropWave={isDropWave}
         showNewDropsBadge={false}
         showUnreadDropsBadge={false}
         wave={wave}

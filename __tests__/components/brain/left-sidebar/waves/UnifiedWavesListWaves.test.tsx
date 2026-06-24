@@ -22,6 +22,7 @@ import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 let mockDeviceInfo = { isApp: false, hasTouchScreen: false };
 
@@ -408,6 +409,7 @@ it("shows highly rated preview score shields instead of unread badges", () => {
         createMockMinimalWave({
           id: "h-score",
           name: "Scored Discovery",
+          type: ApiWaveType.Rank,
           sidebarSection: "highly-rated",
           unreadDropsCount: 24,
           newDropsCount: {
@@ -441,6 +443,10 @@ it("shows highly rated preview score shields instead of unread badges", () => {
   expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
     "data-show-unread-drops-badge",
     "false"
+  );
+  expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
+    "data-is-drop-wave",
+    "true"
   );
 });
 
