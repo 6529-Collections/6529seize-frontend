@@ -81,6 +81,16 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ notificationsViewStyle: { height: "10px" } }),
 }));
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    hasTouchScreen: false,
+    isApp: false,
+    isAppleMobile: false,
+    isMobileDevice: false,
+  })),
+}));
+
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
@@ -97,6 +107,18 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 import Notifications from "@/components/brain/notifications";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
+const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
+  typeof useDeviceInfo
+>;
+
+const getDefaultDeviceInfo = () => ({
+  hasTouchScreen: false,
+  isApp: false,
+  isAppleMobile: false,
+  isMobileDevice: false,
+});
 
 describe("Notifications component", () => {
   beforeEach(() => {
@@ -109,6 +131,7 @@ describe("Notifications component", () => {
     setActiveProfileProxyMock.mockClear();
     setActiveProfileProxyMock.mockResolvedValue(undefined);
     setToastMock.mockClear();
+    useDeviceInfoMock.mockReturnValue(getDefaultDeviceInfo());
   });
 
   it("shows loader when fetching and no items", async () => {
@@ -151,6 +174,35 @@ describe("Notifications component", () => {
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
+    ).toHaveClass("tw-pb-6");
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
+  });
+
+  it("keeps floating dock clearance in the Capacitor app", async () => {
+    useDeviceInfoMock.mockReturnValue({
+      ...getDefaultDeviceInfo(),
+      hasTouchScreen: true,
+      isApp: true,
+      isMobileDevice: true,
+    });
+    useNotificationsQueryMock.mockReturnValue({
+      items: ["a"],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn().mockResolvedValue(undefined),
+      refetch: jest.fn().mockResolvedValue(undefined),
+      isInitialQueryDone: true,
+      isSuccess: true,
+      error: null,
+    });
+
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+
     expect(
       document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
     ).toHaveClass("tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]");
