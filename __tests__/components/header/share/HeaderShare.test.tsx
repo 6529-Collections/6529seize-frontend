@@ -499,6 +499,37 @@ describe("HeaderShare", () => {
       expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
     });
 
+    it("fails closed without calling the share endpoint when web-session verification errors", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      const ensureActiveSessionV2WebSession = jest
+        .fn()
+        .mockRejectedValue(new Error("verification failed"));
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession,
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByText("Update Authentication")
+      ).toBeInTheDocument();
+      expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
+        expect.objectContaining({ aborted: false })
+      );
+      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
+    });
+
     it("generates connection QR codes from one-time connection share codes even when the local v2 marker is stale", async () => {
       const qrcode = require("qrcode");
       const sessionV2 = require("@/services/auth/session-v2.utils");

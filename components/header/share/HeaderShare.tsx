@@ -662,8 +662,21 @@ export function HeaderQRModal({
     try {
       setMobileConnectionShareStatus("loading");
       if (ensureActiveSessionV2WebSession) {
-        const hasActiveSession =
-          await ensureActiveSessionV2WebSession(signal);
+        let hasActiveSession = false;
+        try {
+          hasActiveSession = await ensureActiveSessionV2WebSession(signal);
+        } catch (error: unknown) {
+          if (isStaleGeneration() || isAbortError(error, signal)) {
+            return "";
+          }
+
+          console.error("Failed to verify active web session", error);
+        }
+
+        if (isStaleGeneration() || signal?.aborted) {
+          return "";
+        }
+
         if (!hasActiveSession) {
           terminalConnectionShareFailuresRef.current.set(
             failureKey,
