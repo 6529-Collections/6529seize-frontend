@@ -85,15 +85,29 @@ const getHomeIconSizeClass = ({
 const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
   isHighlighted ? "tw-text-white" : "tw-text-iron-300";
 
+const getHomeIconTextColorClass = ({
+  isActive,
+  variant,
+}: {
+  readonly isActive: boolean;
+  readonly variant: "floating" | "fixed";
+}) => (variant === "floating" && isActive ? "tw-text-black" : "tw-text-white");
+
 const getIconTextColorClass = ({
   isActive,
   isHighlighted,
+  item,
   variant,
 }: {
   readonly isActive: boolean;
   readonly isHighlighted: boolean;
+  readonly item: NavItemData;
   readonly variant: "floating" | "fixed";
 }) => {
+  if (item.name === "Home") {
+    return getHomeIconTextColorClass({ isActive, variant });
+  }
+
   if (variant === "fixed") {
     return isHighlighted ? "tw-text-white" : "tw-text-iron-500";
   }
@@ -181,6 +195,7 @@ const NavItemLinkContent = ({
   const iconTextColorClass = getIconTextColorClass({
     isActive,
     isHighlighted,
+    item,
     variant,
   });
   const resolvedIconSizeClass =
