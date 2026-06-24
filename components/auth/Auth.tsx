@@ -832,14 +832,40 @@ export default function Auth({
     );
   }, [address, connectedProfile?.id, connectedProfile?.handle]);
 
+  const verifyActiveWebSessionForAddress = useCallback(
+    async (
+      walletAddress: string,
+      abortSignal?: AbortSignal
+    ): Promise<boolean> => {
+      if (!hasActiveSessionV2Auth({ address: walletAddress })) {
+        return false;
+      }
+
+      try {
+        return await verifyActiveSessionV2WebSession({
+          address: walletAddress,
+          abortSignal,
+        });
+      } catch (error) {
+        if (!abortSignal?.aborted) {
+          logErrorSecurely("session_v2_web_session_verification", error);
+        }
+        return false;
+      }
+    },
+    []
+  );
+
   const ensureActiveWebSessionForAddress = useCallback(
     async (
       walletAddress: string,
       abortSignal?: AbortSignal
     ): Promise<boolean> => {
       if (!hasActiveSessionV2Auth({ address: walletAddress })) {
-        setSessionUpgradeRequired(true);
-        setSessionUpgradeHasDeadline(false);
+        if (!abortSignal?.aborted) {
+          setSessionUpgradeRequired(true);
+          setSessionUpgradeHasDeadline(false);
+        }
         return false;
       }
 
@@ -848,6 +874,10 @@ export default function Auth({
           address: walletAddress,
           abortSignal,
         });
+
+        if (abortSignal?.aborted) {
+          return true;
+        }
 
         if (!hasActiveWebSession) {
           setSessionUpgradeRequired(true);
@@ -871,14 +901,12 @@ export default function Auth({
     async (abortSignal?: AbortSignal): Promise<boolean> => {
       const walletAddress = address ?? getWalletAddress();
       if (!walletAddress || !getAuthJwt()) {
-        setSessionUpgradeRequired(false);
-        setSessionUpgradeHasDeadline(false);
         return false;
       }
 
-      return await ensureActiveWebSessionForAddress(walletAddress, abortSignal);
+      return await verifyActiveWebSessionForAddress(walletAddress, abortSignal);
     },
-    [address, ensureActiveWebSessionForAddress]
+    [address, verifyActiveWebSessionForAddress]
   );
 
   // Immediate authentication effect with race condition prevention
