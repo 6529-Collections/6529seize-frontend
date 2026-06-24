@@ -14,6 +14,8 @@ describe("LogoIcon", () => {
     expect(images[0]).toHaveAttribute("aria-hidden", "true");
     expect(images[0]).toHaveClass("tw-opacity-100");
     expect(images[1]).toHaveClass("tw-opacity-0");
+    expect(images[0]).not.toHaveClass("tw-transition-opacity");
+    expect(images[1]).not.toHaveClass("tw-transition-opacity");
   });
 
   it("shows the black logo asset when requested", () => {
