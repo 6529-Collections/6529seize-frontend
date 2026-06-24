@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useEffect } from "react";
-import { m } from "framer-motion";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
@@ -50,14 +49,7 @@ const ActiveNavIndicator = ({
   readonly compact: boolean;
   readonly variant: "floating" | "fixed";
 }) => (
-  <m.div
-    layoutId={`bottom-navigation-${variant}-active-indicator`}
-    transition={{
-      type: "spring",
-      stiffness: 420,
-      damping: 38,
-      mass: 0.7,
-    }}
+  <div
     className={
       variant === "fixed"
         ? "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"

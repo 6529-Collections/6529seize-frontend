@@ -1,6 +1,5 @@
 "use client";
 
-import { LayoutGroup, LazyMotion, domAnimation } from "framer-motion";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   Suspense,
@@ -340,24 +339,20 @@ const BottomNavigationResolvedContent: React.FC<
       <div className={getDockClassName(compact)}>
         <div className={floatingNavInnerClassName}>
           <ul className={getFloatingNavListClassName(compact)}>
-            <LazyMotion features={domAnimation}>
-              <LayoutGroup id="bottom-navigation">
-                {navItems.map((item) => (
-                  <li
-                    key={item.name}
-                    className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
-                  >
-                    <NavItem
-                      variant="floating"
-                      compact={compact}
-                      item={item}
-                      isCurrentWaveDm={isCurrentWaveDm}
-                      fullPrefetch={isApp && item.kind === "view"}
-                    />
-                  </li>
-                ))}
-              </LayoutGroup>
-            </LazyMotion>
+            {navItems.map((item) => (
+              <li
+                key={item.name}
+                className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
+              >
+                <NavItem
+                  variant="floating"
+                  compact={compact}
+                  item={item}
+                  isCurrentWaveDm={isCurrentWaveDm}
+                  fullPrefetch={isApp && item.kind === "view"}
+                />
+              </li>
+            ))}
           </ul>
         </div>
       </div>
