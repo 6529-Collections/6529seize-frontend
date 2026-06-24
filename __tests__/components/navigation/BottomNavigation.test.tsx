@@ -67,56 +67,16 @@ const flushAnimationFrame = async () => {
   });
 };
 
-const createRect = ({
-  left,
-  width,
+const expectActivePillLayoutCalc = ({
+  compact = false,
+  style,
 }: {
-  readonly left: number;
-  readonly width: number;
-}): DOMRect =>
-  ({
-    bottom: 64,
-    height: 64,
-    left,
-    right: left + width,
-    top: 0,
-    width,
-    x: left,
-    y: 0,
-    toJSON: () => ({}),
-  }) as DOMRect;
-
-const mockFloatingDockGeometry = () => {
-  const innerLeft = 40;
-  const itemWidth = 88;
-  const itemLefts = Array.from(
-    { length: 7 },
-    (_unused, index) => 52 + index * 96
-  );
-
-  jest
-    .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-    .mockImplementation(function getBoundingClientRect() {
-      const element = this as HTMLElement;
-      if (element.getAttribute("data-testid") === "mobile-dock-inner") {
-        return createRect({ left: innerLeft, width: 704 });
-      }
-
-      const itemIndex = element.getAttribute("data-mobile-dock-item-index");
-      if (itemIndex !== null) {
-        return createRect({
-          left: itemLefts[Number(itemIndex)] ?? 0,
-          width: itemWidth,
-        });
-      }
-
-      return createRect({ left: 0, width: 0 });
-    });
-
-  return {
-    getExpectedMeasuredLeft: (index: number) =>
-      itemLefts[index]! - innerLeft + itemWidth / 2,
-  };
+  readonly compact?: boolean;
+  readonly style: string | null;
+}) => {
+  expect(style).toContain("left: calc(");
+  expect(style).toContain("100%");
+  expect(style).toContain(compact ? "0.625rem" : "1rem");
 };
 
 const createScrollableElement = ({
@@ -265,13 +225,11 @@ describe("BottomNavigation", () => {
   });
 
   it("keeps one active pill mounted while moving it between active items", () => {
-    const { getExpectedMeasuredLeft } = mockFloatingDockGeometry();
     const { getByTestId, rerender } = render(<BottomNavigation />);
     const activePill = getByTestId("mobile-dock-active-pill");
+    const initialStyle = activePill.getAttribute("style");
 
-    expect(activePill.getAttribute("style")).toContain(
-      `left: ${getExpectedMeasuredLeft(3)}px`
-    );
+    expectActivePillLayoutCalc({ style: initialStyle });
     expect(activePill).toHaveClass("tw-transition-[left,width,height,opacity]");
 
     (usePathname as jest.Mock).mockReturnValue("/notifications");
@@ -279,9 +237,10 @@ describe("BottomNavigation", () => {
 
     const movedActivePill = getByTestId("mobile-dock-active-pill");
     expect(movedActivePill).toBe(activePill);
-    expect(movedActivePill.getAttribute("style")).toContain(
-      `left: ${getExpectedMeasuredLeft(6)}px`
-    );
+    expect(movedActivePill.getAttribute("style")).not.toBe(initialStyle);
+    expectActivePillLayoutCalc({
+      style: movedActivePill.getAttribute("style"),
+    });
   });
 
   it("hides the active pill when no dock item matches the route", () => {
@@ -302,7 +261,7 @@ describe("BottomNavigation", () => {
       writable: true,
     });
 
-    render(<BottomNavigation />);
+    const { getByTestId } = render(<BottomNavigation />);
 
     act(() => {
       globalThis.scrollY = 24;
@@ -315,6 +274,13 @@ describe("BottomNavigation", () => {
           return props.variant === "floating" && props.compact === true;
         })
       ).toBe(true);
+    });
+
+    const activePill = getByTestId("mobile-dock-active-pill");
+    expect(activePill).toHaveClass("tw-h-10", "tw-w-12");
+    expectActivePillLayoutCalc({
+      compact: true,
+      style: activePill.getAttribute("style"),
     });
   });
 
