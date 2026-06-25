@@ -323,6 +323,12 @@ describe("NewVersionToast", () => {
 
   it("tracks the mobile dock when its root mounts after the toast", async () => {
     mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: true,
+      isAppleMobile: true,
+      isMobileDevice: true,
+    });
     setMobileDockViewport(true);
 
     const { container } = render(<NewVersionToast />);
@@ -332,7 +338,7 @@ describe("NewVersionToast", () => {
       toastLayer.style.getPropertyValue(
         NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
       )
-    ).toBe(NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM);
+    ).toBe(NEW_VERSION_TOAST_APP_FALLBACK_BOTTOM);
 
     const dockRoot = createDockRoot();
     createMeasuredDock({
@@ -351,6 +357,30 @@ describe("NewVersionToast", () => {
     expect(
       toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
     ).toBe("1");
+  });
+
+  it("does not watch body mutations when mobile web has no dock root", async () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+    setMobileDockViewport(true);
+
+    render(<NewVersionToast />);
+
+    const requestAnimationFrameMock =
+      globalThis.requestAnimationFrame as jest.Mock;
+    await waitFor(() => expect(requestAnimationFrameMock).toHaveBeenCalled());
+
+    const frameCountAfterInitialMeasurement =
+      requestAnimationFrameMock.mock.calls.length;
+    const unrelatedMutation = document.createElement("div");
+    document.body.appendChild(unrelatedMutation);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(requestAnimationFrameMock).toHaveBeenCalledTimes(
+      frameCountAfterInitialMeasurement
+    );
+
+    unrelatedMutation.remove();
   });
 
   it("keeps desktop positioning independent from mobile dock measurements", async () => {

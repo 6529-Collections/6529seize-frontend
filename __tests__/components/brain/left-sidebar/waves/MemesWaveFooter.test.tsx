@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import MemesWaveFooter from "@/components/brain/left-sidebar/waves/MemesWaveFooter";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 import {
   MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE,
@@ -14,11 +15,16 @@ import {
 jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
   useMemesWaveFooterStats: jest.fn(),
 }));
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 const useMemesWaveFooterStatsMock =
   useMemesWaveFooterStats as jest.MockedFunction<
     typeof useMemesWaveFooterStats
   >;
+const useDeviceInfoMock = useDeviceInfo as jest.Mock;
 
 describe("MemesWaveFooter", () => {
   const onOpenQuickVote = jest.fn();
@@ -113,6 +119,12 @@ describe("MemesWaveFooter", () => {
     Object.defineProperty(globalThis, "innerHeight", {
       configurable: true,
       value: 900,
+    });
+    useDeviceInfoMock.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: true,
+      isAppleMobile: true,
+      isMobileDevice: true,
     });
     useMemesWaveFooterStatsMock.mockReturnValue({
       isAvailable: false,

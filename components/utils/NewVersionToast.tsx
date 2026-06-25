@@ -82,6 +82,7 @@ const NewVersionToast = (): JSX.Element | null => {
     resetOnDisabled: false,
     targetProperty: NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY,
     targetScaleProperty: NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY,
+    watchForDockRoot: isApp,
   });
 
   if (!isVersionStale) {
