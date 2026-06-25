@@ -255,14 +255,14 @@ describe("NewVersionToast", () => {
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
-  it("uses browser locale translations for visible and accessible copy", () => {
+  it("uses browser locale translations for visible and accessible copy", async () => {
     setBrowserLanguages(["fr-FR"]);
     mockedUseIsVersionStale.mockReturnValue(true);
 
     render(<NewVersionToast />);
 
     expect(
-      screen.getByText("Une nouvelle version est disponible")
+      await screen.findByText("Une nouvelle version est disponible")
     ).toBeInTheDocument();
     expect(screen.getByText("Oui, encore !")).toBeInTheDocument();
     expect(

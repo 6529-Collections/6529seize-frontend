@@ -3,6 +3,8 @@ import React from "react";
 import MemesWaveFooter from "@/components/brain/left-sidebar/waves/MemesWaveFooter";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import {
   MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE,
   MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY,
@@ -25,6 +27,13 @@ const useMemesWaveFooterStatsMock =
     typeof useMemesWaveFooterStats
   >;
 const useDeviceInfoMock = useDeviceInfo as jest.Mock;
+
+const setBrowserLanguages = (languages: readonly string[]) => {
+  Object.defineProperty(globalThis.navigator, "languages", {
+    configurable: true,
+    value: languages,
+  });
+};
 
 describe("MemesWaveFooter", () => {
   const onOpenQuickVote = jest.fn();
@@ -83,6 +92,7 @@ describe("MemesWaveFooter", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setBrowserLanguages(["en-US"]);
     originalRequestAnimationFrame = globalThis.requestAnimationFrame;
     originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
     originalInnerHeightDescriptor = Object.getOwnPropertyDescriptor(
@@ -197,6 +207,57 @@ describe("MemesWaveFooter", () => {
     expect(screen.getByText("5,000 TDH")).toBeInTheDocument();
     expect(screen.getByText("3 left this round")).toBeInTheDocument();
     expect(screen.getByText("12 unrated")).toBeInTheDocument();
+  });
+
+  it("uses browser locale for expanded footer copy and numbers", async () => {
+    setBrowserLanguages(["fr-FR"]);
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 3,
+      uncastPower: 5000,
+      unratedCount: 12,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+    const formattedPower = formatInteger("fr-FR", 5000);
+    const leftThisRoundText = t("fr-FR", "memes.quickVote.leftThisRound", {
+      count: formatInteger("fr-FR", 3),
+    });
+    const unratedText = t("fr-FR", "memes.quickVote.unrated", {
+      count: formatInteger("fr-FR", 12),
+    });
+    const visiblePowerText = t(
+      "fr-FR",
+      "memes.waveFooter.uncastPower.visibleValue",
+      {
+        power: formattedPower,
+        votingLabel: "TDH",
+      }
+    );
+
+    render(<MemesWaveFooter onOpenQuickVote={onOpenQuickVote} />);
+
+    expect(
+      await screen.findByRole("button", {
+        name: t("fr-FR", "memes.waveFooter.uncastPower.ariaLabel", {
+          leftThisRound: leftThisRoundText,
+          power: formattedPower,
+          unrated: unratedText,
+          votingLabel: "TDH",
+        }),
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(t("fr-FR", "memes.waveFooter.uncastPower.title"))
+    ).toBeInTheDocument();
+    const visiblePowerElements = screen.getAllByText(
+      (_, element) => element?.textContent === visiblePowerText
+    );
+    expect(visiblePowerElements.map((element) => element.tagName)).toContain(
+      "SPAN"
+    );
+    expect(screen.getByText(leftThisRoundText)).toBeInTheDocument();
+    expect(screen.getByText(unratedText)).toBeInTheDocument();
   });
 
   it("renders the expanded footer as a floating mobile overlay", () => {
@@ -422,6 +483,42 @@ describe("MemesWaveFooter", () => {
         name: "4 left this round, 9 unrated in the memes wave",
       })
     ).toBeInTheDocument();
+  });
+
+  it("uses browser locale for the compact collapsed pill", async () => {
+    setBrowserLanguages(["fr-FR"]);
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 4,
+      uncastPower: 5000,
+      unratedCount: 9,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+    const leftThisRoundText = t("fr-FR", "memes.quickVote.leftThisRound", {
+      count: formatInteger("fr-FR", 4),
+    });
+    const unratedText = t("fr-FR", "memes.quickVote.unrated", {
+      count: formatInteger("fr-FR", 9),
+    });
+
+    render(<MemesWaveFooter collapsed onOpenQuickVote={onOpenQuickVote} />);
+
+    expect(
+      await screen.findByRole("button", {
+        name: t("fr-FR", "memes.quickVote.inMemesWave", {
+          leftThisRound: leftThisRoundText,
+          unrated: unratedText,
+        }),
+      })
+    ).toHaveAttribute(
+      "title",
+      t("fr-FR", "memes.quickVote.summary", {
+        leftThisRound: leftThisRoundText,
+        unrated: unratedText,
+      })
+    );
+    expect(screen.getByText(formatInteger("fr-FR", 4))).toBeInTheDocument();
   });
 
   it("calls onOpenQuickVote from the collapsed pill", () => {

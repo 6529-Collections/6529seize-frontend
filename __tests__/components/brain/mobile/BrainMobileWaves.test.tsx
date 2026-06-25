@@ -4,9 +4,21 @@ import {
   MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME,
   MEMES_WAVE_FLOATING_FOOTER_SCROLL_CLEARANCE_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
+import { t } from "@/i18n/messages";
 
 let receivedRef: any;
 let receivedFooterProps: any;
+
+const setBrowserLanguages = (languages: readonly string[]) => {
+  Object.defineProperty(globalThis.navigator, "languages", {
+    configurable: true,
+    value: languages,
+  });
+};
+
+beforeEach(() => {
+  setBrowserLanguages(["en-US"]);
+});
 
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaves",
@@ -80,4 +92,17 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   fireEvent.click(screen.getByTestId("footer"));
 
   expect(onOpenQuickVote).toHaveBeenCalledTimes(1);
+});
+
+test("uses browser locale for the profile feed link", async () => {
+  setBrowserLanguages(["fr-FR"]);
+
+  render(<BrainMobileWaves onOpenQuickVote={jest.fn()} />);
+
+  expect(
+    await screen.findByText(t("fr-FR", "waves.mobile.profileFeed.title"))
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(t("fr-FR", "waves.mobile.profileFeed.subtitle"))
+  ).toBeInTheDocument();
 });

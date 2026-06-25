@@ -254,6 +254,8 @@ const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
 const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
   leftThisRound: "{count} left this round",
   unrated: "{count} unrated",
+  summary: "{leftThisRound}, {unrated}",
+  inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {

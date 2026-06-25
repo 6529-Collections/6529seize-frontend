@@ -16,9 +16,10 @@ import {
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
 import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import React, { useEffect } from "react";
@@ -142,7 +143,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     votingLabel,
   } = useMemesWaveFooterStats();
   const { isApp } = useDeviceInfo();
-  const locale = DEFAULT_LOCALE;
+  const locale = useBrowserLocale();
   const floatingFooterRef = useMeasuredMobileBottomNavDockBottom({
     dockGapPx: MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX,
     enabled: floating,
@@ -215,6 +216,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
               <MemesWaveQuickVoteTrigger
                 isAvailable={isAvailable}
                 leftThisRoundCount={leftThisRoundCount}
+                locale={locale}
                 onOpenQuickVote={handleOpenQuickVote}
                 onPrefetchQuickVote={handlePrefetchQuickVote}
                 unratedCount={unratedCount}
