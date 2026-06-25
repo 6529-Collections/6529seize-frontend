@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import MemesWaveFooter from "@/components/brain/left-sidebar/waves/MemesWaveFooter";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
+import { MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 
 jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
   useMemesWaveFooterStats: jest.fn(),
@@ -72,6 +73,9 @@ describe("MemesWaveFooter", () => {
     expect(floatingLayer).toHaveClass("tw-z-40");
     expect(floatingLayer).toHaveClass("tw-pointer-events-none");
     expect(floatingLayer).not.toHaveClass("tw-bg-black");
+    expect((floatingLayer as HTMLElement).style.bottom).toBe(
+      MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE.bottom
+    );
 
     const button = screen.getByRole("button", {
       name: "Uncast Power, 5,000 TDH left, 3 left this round, 12 unrated",

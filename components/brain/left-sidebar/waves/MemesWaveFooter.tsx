@@ -9,7 +9,7 @@ import {
   formatMemesQuickVoteUnratedText,
 } from "@/hooks/memesQuickVote.helpers";
 import {
-  MEMES_WAVE_FLOATING_FOOTER_BOTTOM_CLASS_NAME,
+  MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE,
   MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import { AnimatePresence, motion } from "framer-motion";
@@ -88,11 +88,14 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
   const containerClassName = collapsed
     ? "tw-z-10 tw-flex tw-flex-shrink-0 tw-justify-center tw-gap-2 tw-px-4 tw-pb-2 tw-pt-1"
     : floating
-      ? `tw-pointer-events-none tw-fixed tw-inset-x-0 ${MEMES_WAVE_FLOATING_FOOTER_BOTTOM_CLASS_NAME} tw-z-40 tw-flex tw-justify-center tw-px-4`
+      ? "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-z-40 tw-flex tw-justify-center tw-px-4"
       : "tw-relative tw-z-20 tw-mt-auto tw-flex-shrink-0";
   const expandedFrameClassName = floating
     ? `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-flex-shrink-0`
     : "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4";
+  const containerStyle = (floating
+    ? MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE
+    : {}) as NonNullable<React.ComponentProps<typeof motion.div>["style"]>;
 
   return (
     <AnimatePresence>
@@ -103,6 +106,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 16 }}
           transition={revealTransition}
+          style={containerStyle}
           className={containerClassName}
         >
           {collapsed ? (
