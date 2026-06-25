@@ -2,7 +2,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import MemesWaveFooter from "@/components/brain/left-sidebar/waves/MemesWaveFooter";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
-import { MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
+import {
+  MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE,
+  MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY,
+} from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
@@ -208,6 +211,11 @@ describe("MemesWaveFooter", () => {
     expect((floatingLayer as HTMLElement).style.bottom).toBe(
       MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE.bottom
     );
+    expect(
+      (floatingLayer as HTMLElement).style.getPropertyValue(
+        MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY
+      )
+    ).toBe("1");
 
     const button = screen.getByRole("button", {
       name: "Uncast Power, 5,000 TDH left, 3 left this round, 12 unrated",
@@ -216,6 +224,9 @@ describe("MemesWaveFooter", () => {
       '[data-memes-wave-footer-frame="floating"]'
     );
     expect(floatingFrame).toHaveClass("tw-pointer-events-auto");
+    expect(floatingFrame).toHaveClass(
+      "tw-scale-[var(--memes-wave-floating-footer-scale)]"
+    );
   });
 
   it("tracks the measured mobile dock top while the dock compacts", async () => {
@@ -238,6 +249,11 @@ describe("MemesWaveFooter", () => {
     ) as HTMLElement;
 
     await waitFor(() => expect(floatingLayer.style.bottom).toBe("88px"));
+    expect(
+      floatingLayer.style.getPropertyValue(
+        MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY
+      )
+    ).toBe("1");
 
     (dock.getBoundingClientRect as jest.Mock).mockReturnValue(
       createDockRect({ height: 54, top: 826 })
@@ -245,6 +261,11 @@ describe("MemesWaveFooter", () => {
     dock.dispatchEvent(new Event("transitionrun"));
 
     await waitFor(() => expect(floatingLayer.style.bottom).toBe("78px"));
+    expect(
+      floatingLayer.style.getPropertyValue(
+        MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY
+      )
+    ).toBe("0.88");
   });
 
   it("rebinds measurement when the mobile dock node is replaced", async () => {
