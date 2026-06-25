@@ -7,6 +7,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import RepCategorySearchDropdown from "./RepCategorySearchDropdown";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { isHelpBotCreditRepCategory } from "./repCategoryConstants";
 export enum RepCategorySearchSize {
   SM = "SM",
   MD = "MD",
@@ -103,7 +104,13 @@ export default function RepCategorySearch({
     }
 
     if (disableInputCategoryAsValue) {
-      setCategories(data ?? []);
+      setCategories(
+        (data ?? []).filter((item) => !isHelpBotCreditRepCategory(item))
+      );
+      return;
+    }
+    if (isHelpBotCreditRepCategory(debouncedValue)) {
+      setCategories([]);
       return;
     }
     if (!data?.length) {
@@ -112,9 +119,11 @@ export default function RepCategorySearch({
     }
     setCategories([
       debouncedValue,
-      ...data.filter((i) => i !== debouncedValue),
+      ...data.filter(
+        (i) => i !== debouncedValue && !isHelpBotCreditRepCategory(i)
+      ),
     ]);
-  }, [data, debouncedValue]);
+  }, [data, debouncedValue, disableInputCategoryAsValue]);
 
   return (
     <div className="tw-relative tw-w-full" ref={wrapperRef}>

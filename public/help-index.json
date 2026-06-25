@@ -509,7 +509,8 @@
         "Each Help6529 question costs 1 Help6529 Credit REP.",
         "Automatic grants are signup +5, profile setup +5, and daily activity +5 when the user sends any message that day.",
         "Automatic daily activity grants do not have a balance cap.",
-        "Only Help6529 Credit REP granted by help6529 counts toward bot-question balance; ratings from other profiles in that category do not count."
+        "Help6529 Credits is a reserved REP category managed by help6529; normal users cannot grant REP in this category.",
+        "The bot checks the user's Help6529 Credits category balance before answering."
       ],
       "canonical_path": "/rep/categories",
       "related_paths": ["/waves"],
