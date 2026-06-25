@@ -9,13 +9,15 @@ import {
   formatMemesQuickVoteUnratedText,
 } from "@/hooks/memesQuickVote.helpers";
 import {
-  MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE,
+  MEMES_WAVE_FLOATING_FOOTER_COMPACT_BOTTOM_STYLE,
+  MEMES_WAVE_FLOATING_FOOTER_EXPANDED_BOTTOM_STYLE,
   MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect } from "react";
 
 interface MemesWaveFooterProps {
+  readonly bottomNavCompact?: boolean | undefined;
   readonly collapsed?: boolean | undefined;
   readonly floating?: boolean | undefined;
   readonly onAvailabilityChange?: ((isAvailable: boolean) => void) | undefined;
@@ -29,6 +31,7 @@ const revealTransition = {
 } as const;
 
 const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
+  bottomNavCompact = false,
   collapsed = false,
   floating = false,
   onAvailabilityChange,
@@ -88,14 +91,18 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
   const containerClassName = collapsed
     ? "tw-z-10 tw-flex tw-flex-shrink-0 tw-justify-center tw-gap-2 tw-px-4 tw-pb-2 tw-pt-1"
     : floating
-      ? "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-z-40 tw-flex tw-justify-center tw-px-4"
+      ? "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-z-40 tw-flex tw-justify-center tw-px-4 tw-transition-[bottom] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none"
       : "tw-relative tw-z-20 tw-mt-auto tw-flex-shrink-0";
   const expandedFrameClassName = floating
     ? `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-flex-shrink-0`
     : "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4";
-  const containerStyle = (floating
-    ? MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE
-    : {}) as NonNullable<React.ComponentProps<typeof motion.div>["style"]>;
+  const containerStyle = (
+    floating
+      ? bottomNavCompact
+        ? MEMES_WAVE_FLOATING_FOOTER_COMPACT_BOTTOM_STYLE
+        : MEMES_WAVE_FLOATING_FOOTER_EXPANDED_BOTTOM_STYLE
+      : {}
+  ) as NonNullable<React.ComponentProps<typeof motion.div>["style"]>;
 
   return (
     <AnimatePresence>

@@ -91,6 +91,7 @@ const items: NavItemData[] = [
 
 interface BottomNavigationProps {
   readonly hidden?: boolean | undefined;
+  readonly onCompactChange?: ((compact: boolean) => void) | undefined;
 }
 
 const COMPACT_SCROLL_DELTA_PX = 10;
@@ -352,7 +353,7 @@ interface BottomNavigationResolvedContentProps extends BottomNavigationProps {
 
 const BottomNavigationResolvedContent: React.FC<
   BottomNavigationResolvedContentProps
-> = ({ hidden = false, pathname, routeStateKey }) => {
+> = ({ hidden = false, onCompactChange, pathname, routeStateKey }) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
@@ -383,6 +384,17 @@ const BottomNavigationResolvedContent: React.FC<
   const setMobileNavRef = useCallback((node: HTMLDivElement | null) => {
     mobileNavRef.current = node;
   }, []);
+
+  useEffect(() => {
+    onCompactChange?.(compact);
+  }, [compact, onCompactChange]);
+
+  useEffect(
+    () => () => {
+      onCompactChange?.(false);
+    },
+    [onCompactChange]
+  );
 
   useEffect(() => {
     registerRef("mobileNav", hidden ? null : mobileNavRef.current);
@@ -469,6 +481,7 @@ const BottomNavigationResolvedContent: React.FC<
 
 const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   hidden = false,
+  onCompactChange,
 }) => {
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
@@ -479,6 +492,7 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   return (
     <BottomNavigationResolvedContent
       hidden={hidden}
+      onCompactChange={onCompactChange}
       pathname={pathname}
       routeStateKey={routeStateKey}
     />
@@ -487,9 +501,13 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
   hidden = false,
+  onCompactChange,
 }) => (
   <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
-    <BottomNavigationContent hidden={hidden} />
+    <BottomNavigationContent
+      hidden={hidden}
+      onCompactChange={onCompactChange}
+    />
   </Suspense>
 );
 

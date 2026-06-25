@@ -22,6 +22,7 @@ jest.mock(
 jest.mock("@/components/brain/left-sidebar/waves/MemesWaveFooter", () => ({
   __esModule: true,
   default: (props: {
+    readonly bottomNavCompact?: boolean;
     readonly floating?: boolean;
     readonly onAvailabilityChange?: (isAvailable: boolean) => void;
     readonly onOpenQuickVote: () => void;
@@ -67,6 +68,7 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   expect(receivedRef.current).toHaveClass(
     MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME
   );
+  expect(receivedFooterProps.bottomNavCompact).toBe(false);
   expect(receivedFooterProps.floating).toBe(true);
 
   act(() => {
@@ -80,4 +82,10 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   fireEvent.click(screen.getByTestId("footer"));
 
   expect(onOpenQuickVote).toHaveBeenCalledTimes(1);
+});
+
+test("passes the compact dock state to the floating footer", () => {
+  render(<BrainMobileWaves bottomNavCompact onOpenQuickVote={jest.fn()} />);
+
+  expect(receivedFooterProps.bottomNavCompact).toBe(true);
 });

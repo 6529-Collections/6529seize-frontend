@@ -12,11 +12,13 @@ import {
 } from "../left-sidebar/waves/MemesWaveFooter.constants";
 
 interface BrainMobileWavesProps {
+  readonly bottomNavCompact?: boolean | undefined;
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
 }
 
 const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
+  bottomNavCompact = false,
   onOpenQuickVote,
   onPrefetchQuickVote,
 }) => {
@@ -61,6 +63,7 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
         <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
       </div>
       <MemesWaveFooter
+        bottomNavCompact={bottomNavCompact}
         floating
         onAvailabilityChange={handleFooterAvailabilityChange}
         onOpenQuickVote={onOpenQuickVote}

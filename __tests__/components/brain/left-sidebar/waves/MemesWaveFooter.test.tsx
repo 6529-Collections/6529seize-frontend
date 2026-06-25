@@ -2,7 +2,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import MemesWaveFooter from "@/components/brain/left-sidebar/waves/MemesWaveFooter";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
-import { MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
+import {
+  MEMES_WAVE_FLOATING_FOOTER_COMPACT_BOTTOM_STYLE,
+  MEMES_WAVE_FLOATING_FOOTER_EXPANDED_BOTTOM_STYLE,
+} from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 
 jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
   useMemesWaveFooterStats: jest.fn(),
@@ -72,9 +75,10 @@ describe("MemesWaveFooter", () => {
     );
     expect(floatingLayer).toHaveClass("tw-z-40");
     expect(floatingLayer).toHaveClass("tw-pointer-events-none");
+    expect(floatingLayer).toHaveClass("tw-transition-[bottom]");
     expect(floatingLayer).not.toHaveClass("tw-bg-black");
     expect((floatingLayer as HTMLElement).style.bottom).toBe(
-      MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE.bottom
+      MEMES_WAVE_FLOATING_FOOTER_EXPANDED_BOTTOM_STYLE.bottom
     );
 
     const button = screen.getByRole("button", {
@@ -84,6 +88,33 @@ describe("MemesWaveFooter", () => {
       '[data-memes-wave-footer-frame="floating"]'
     );
     expect(floatingFrame).toHaveClass("tw-pointer-events-auto");
+  });
+
+  it("moves the floating mobile overlay down when the dock compacts", () => {
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 3,
+      uncastPower: 5000,
+      unratedCount: 12,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+
+    const { container } = render(
+      <MemesWaveFooter
+        bottomNavCompact
+        floating
+        onOpenQuickVote={onOpenQuickVote}
+      />
+    );
+
+    const floatingLayer = container.querySelector(
+      '[data-memes-wave-footer-layer="floating"]'
+    ) as HTMLElement;
+
+    expect(floatingLayer.style.bottom).toBe(
+      MEMES_WAVE_FLOATING_FOOTER_COMPACT_BOTTOM_STYLE.bottom
+    );
   });
 
   it("reports footer availability changes", () => {
