@@ -240,19 +240,6 @@ export default function HoverCard({
     ]
   );
 
-  const handleCardClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      if (stopClickPropagation) {
-        event.stopPropagation();
-      }
-
-      if (closeOnContentClick) {
-        closeCardImmediately();
-      }
-    },
-    [closeCardImmediately, closeOnContentClick, stopClickPropagation]
-  );
-
   const handleCardMouseEnter = useCallback(() => {
     isPointerOverCardRef.current = true;
     cancelHideTimer();
@@ -355,6 +342,37 @@ export default function HoverCard({
       childObserverRef.current = null;
     };
   }, [calculatePosition, isVisible, resolveTriggerNode]);
+
+  useEffect(() => {
+    if (!isVisible || (!closeOnContentClick && !stopClickPropagation)) {
+      return undefined;
+    }
+
+    const card = cardRef.current;
+    if (card === null) {
+      return undefined;
+    }
+
+    const handleCardClick = (event: MouseEvent) => {
+      if (stopClickPropagation) {
+        event.stopPropagation();
+      }
+
+      if (closeOnContentClick) {
+        closeCardImmediately();
+      }
+    };
+
+    card.addEventListener("click", handleCardClick);
+    return () => {
+      card.removeEventListener("click", handleCardClick);
+    };
+  }, [
+    closeCardImmediately,
+    closeOnContentClick,
+    isVisible,
+    stopClickPropagation,
+  ]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -489,7 +507,6 @@ export default function HoverCard({
               onMouseLeave={handleCardMouseLeave}
               onFocus={handleCardFocus}
               onBlur={handleCardBlur}
-              onClick={handleCardClick}
             >
               <div
                 className={joinTooltipClassNames(
