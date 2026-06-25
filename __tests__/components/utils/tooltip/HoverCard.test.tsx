@@ -201,6 +201,36 @@ describe("HoverCard", () => {
     });
   });
 
+  it("can stop click propagation and close when the card is clicked", async () => {
+    const handleParentClick = jest.fn();
+
+    render(
+      <div onClick={handleParentClick}>
+        <HoverCard
+          content="Card content"
+          ariaLabel={hoverCardAriaLabel}
+          openOnClick
+          closeOnContentClick
+          stopClickPropagation
+        >
+          <button type="button">Trigger</button>
+        </HoverCard>
+      </div>
+    );
+
+    fireEvent.click(screen.getByText("Trigger"));
+
+    expect(handleParentClick).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("dialog"));
+
+    expect(handleParentClick).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+  });
+
   it("closes on escape", async () => {
     render(
       <HoverCard

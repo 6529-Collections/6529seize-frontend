@@ -32,6 +32,8 @@ interface HoverCardProps {
   readonly offset?: number | undefined;
   readonly hoverTransitionDelay?: number | undefined;
   readonly openOnClick?: boolean | undefined;
+  readonly closeOnContentClick?: boolean | undefined;
+  readonly stopClickPropagation?: boolean | undefined;
   readonly triggerDisplay?: CSSProperties["display"] | undefined;
   readonly contentStyle?: CSSProperties | undefined;
 }
@@ -46,6 +48,8 @@ export default function HoverCard({
   offset = 8,
   hoverTransitionDelay = 150,
   openOnClick = false,
+  closeOnContentClick = false,
+  stopClickPropagation = false,
   triggerDisplay = "contents",
   contentStyle,
 }: HoverCardProps) {
@@ -209,6 +213,10 @@ export default function HoverCard({
 
   const handleTriggerClick = useCallback(
     (event: React.MouseEvent<HTMLSpanElement>) => {
+      if (stopClickPropagation) {
+        event.stopPropagation();
+      }
+
       if (!openOnClick || event.defaultPrevented) {
         return;
       }
@@ -228,6 +236,7 @@ export default function HoverCard({
       openOnClick,
       resolveTriggerNode,
       showImmediately,
+      stopClickPropagation,
     ]
   );
 
@@ -333,6 +342,37 @@ export default function HoverCard({
       childObserverRef.current = null;
     };
   }, [calculatePosition, isVisible, resolveTriggerNode]);
+
+  useEffect(() => {
+    if (!isVisible || (!closeOnContentClick && !stopClickPropagation)) {
+      return undefined;
+    }
+
+    const card = cardRef.current;
+    if (card === null) {
+      return undefined;
+    }
+
+    const handleCardClick = (event: MouseEvent) => {
+      if (stopClickPropagation) {
+        event.stopPropagation();
+      }
+
+      if (closeOnContentClick) {
+        closeCardImmediately();
+      }
+    };
+
+    card.addEventListener("click", handleCardClick);
+    return () => {
+      card.removeEventListener("click", handleCardClick);
+    };
+  }, [
+    closeCardImmediately,
+    closeOnContentClick,
+    isVisible,
+    stopClickPropagation,
+  ]);
 
   useEffect(() => {
     if (!isVisible) return;

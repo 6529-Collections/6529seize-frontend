@@ -15,6 +15,10 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
 let mockIsTouchDevice = false;
+let mockAuthResult = {
+  connectedProfile: { handle: "alice" } as { readonly handle: string } | null,
+  activeProfileProxy: null,
+};
 
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
   <button onClick={props.onClicked}>{props.children}</button>
@@ -31,10 +35,7 @@ jest.mock("@/hooks/usePrefetchWaveData", () => ({
   usePrefetchWaveData: () => jest.fn(),
 }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({
-    connectedProfile: { handle: "alice" },
-    activeProfileProxy: null,
-  }),
+  useAuth: () => mockAuthResult,
 }));
 jest.mock(
   "@/components/brain/left-sidebar/waves/SectionHeader",
@@ -54,8 +55,14 @@ jest.mock(
 jest.mock(
   "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar",
   () => ({
-    WaveAvatar: (props: { readonly wave: { readonly id: string } }) => (
-      <div data-testid={`preview-avatar-${props.wave.id}`} />
+    WaveAvatar: (props: {
+      readonly size?: string | undefined;
+      readonly wave: { readonly id: string };
+    }) => (
+      <div
+        data-testid={`preview-avatar-${props.wave.id}`}
+        data-size={props.size ?? "default"}
+      />
     ),
   })
 );
@@ -105,6 +112,10 @@ beforeEach(() => {
   globalThis.localStorage.clear();
   globalThis.sessionStorage.clear();
   mockIsTouchDevice = false;
+  mockAuthResult = {
+    connectedProfile: { handle: "alice" },
+    activeProfileProxy: null,
+  };
   mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   mockUseMyStream.mockReturnValue({
     activeWave: { id: null, set: jest.fn() },
@@ -177,9 +188,26 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
       name: "Highly rated waves you don’t follow yet.",
     })
   ).toHaveClass("tw-size-6");
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  );
   expect(
-    screen.getByTestId("tooltip-web-waves-worth-checking-out-info")
-  ).toHaveAttribute("data-open-on-click", "true");
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toBeInTheDocument();
+  fireEvent.click(
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  );
+  expect(
+    screen.queryByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
   expect(
     screen.queryByRole("button", {
       name: "Expand Worth Checking Out, 1 wave",
@@ -222,9 +250,48 @@ it("keeps the worth checking out info tooltip available on touch devices", () =>
       name: "Highly rated waves you don’t follow yet.",
     })
   ).toHaveClass("tw-size-6");
+  expect(screen.getByTestId("preview-avatar-h1")).toHaveAttribute(
+    "data-size",
+    "lg"
+  );
+  const infoButton = screen.getByRole("button", {
+    name: "Highly rated waves you don’t follow yet.",
+  });
+  fireEvent.click(infoButton);
   expect(
-    screen.getByTestId("tooltip-web-waves-worth-checking-out-info")
-  ).toHaveAttribute("data-open-on-click", "true");
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toBeInTheDocument();
+  fireEvent.click(infoButton);
+  expect(
+    screen.queryByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
+});
+
+it("hides the worth checking out info tooltip when no profile is connected", () => {
+  mockAuthResult = {
+    connectedProfile: null,
+    activeProfileProxy: null,
+  };
+
+  render(
+    <WebUnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
 });
 
 it("caps highly rated previews at ten without rendering an overflow control", () => {

@@ -7,12 +7,10 @@ import React, {
   useImperativeHandle,
   useRef,
 } from "react";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip as ReactTooltip } from "react-tooltip";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
+import { SidebarCategoryLabel } from "./SidebarCategoryLabel";
 import {
   buildHighlyRatedWavePreviewItems,
   getHighlyRatedPreviewWaves,
@@ -51,17 +49,6 @@ const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
 const SUBWAVE_ROW_HEIGHT = 54 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
-const HIGHLY_RATED_INFO_TOOLTIP_ID = "waves-worth-checking-out-info";
-const TOOLTIP_STYLE = {
-  padding: "6px 10px",
-  background: "#37373E",
-  color: "white",
-  fontSize: "12px",
-  fontWeight: 500,
-  borderRadius: "6px",
-  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-  zIndex: 10000,
-} as const satisfies React.CSSProperties;
 
 // Common styles for positioned elements
 const listContainerStyle = {
@@ -92,37 +79,6 @@ function SidebarCategoryHeader({
       {rightContent !== undefined && rightContent !== null && (
         <div className="tw-flex tw-items-center">{rightContent}</div>
       )}
-    </div>
-  );
-}
-
-function SidebarCategoryLabel({
-  label,
-  tooltipContent,
-  tooltipId,
-}: {
-  readonly label: string;
-  readonly tooltipContent?: string | undefined;
-  readonly tooltipId?: string | undefined;
-}) {
-  return (
-    <div className="tw-px-4 tw-pb-2 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-500">
-      <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
-        <span>{label}</span>
-        {tooltipContent && tooltipId && (
-          <span className="tw-relative tw-inline-flex tw-size-3 tw-items-center tw-justify-center">
-            <button
-              type="button"
-              aria-label={tooltipContent}
-              data-tooltip-id={tooltipId}
-              data-tooltip-content={tooltipContent}
-              className="tw-absolute tw-left-1/2 tw-top-1/2 tw-inline-flex tw-size-6 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors active:tw-text-iron-300 focus:tw-text-iron-300 focus:tw-outline-none desktop-hover:hover:tw-text-iron-400"
-            >
-              <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3" />
-            </button>
-          </span>
-        )}
-      </span>
     </div>
   );
 }
@@ -271,10 +227,9 @@ const UnifiedWavesListWaves = forwardRef<
     const bottomListLabel = isJoinedFilterActive
       ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
       : t(SIDEBAR_LOCALE, "waves.sidebar.all");
-    const highlyRatedInfoTooltip = t(
-      SIDEBAR_LOCALE,
-      "waves.sidebar.highlyRatedInfoTooltip"
-    );
+    const highlyRatedInfoTooltip = connectedProfile?.handle
+      ? t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedInfoTooltip")
+      : undefined;
     const shouldShowBottomHeader = !hideHeaders;
     let virtualizedKey = "unified-waves-all";
     if (isJoinedFilterActive) {
@@ -430,10 +385,11 @@ const UnifiedWavesListWaves = forwardRef<
               <>
                 <SidebarCategoryLabel
                   label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                  paddingClassName="tw-px-4"
                   tooltipContent={highlyRatedInfoTooltip}
-                  tooltipId={HIGHLY_RATED_INFO_TOOLTIP_ID}
                 />
                 <HighlyRatedWavesToggle
+                  isTouchPreview={hasTouchScreen}
                   paddingClassName="tw-px-4"
                   previewItems={highlyRatedPreviewItems}
                 />
@@ -556,24 +512,6 @@ const UnifiedWavesListWaves = forwardRef<
         ) : (
           <div ref={listContainerRef} style={emptyPlaceholderStyle} />
         )}
-        <ReactTooltip
-          id={HIGHLY_RATED_INFO_TOOLTIP_ID}
-          place="top"
-          offset={8}
-          opacity={1}
-          openOnClick
-          closeOnScroll
-          openEvents={{ mouseover: true, focus: true, click: true }}
-          closeEvents={{ mouseout: true, blur: true }}
-          globalCloseEvents={{
-            escape: true,
-            scroll: true,
-            resize: true,
-            clickOutsideAnchor: true,
-          }}
-          style={TOOLTIP_STYLE}
-          border="1px solid #4C4C55"
-        />
       </div>
     );
   }
