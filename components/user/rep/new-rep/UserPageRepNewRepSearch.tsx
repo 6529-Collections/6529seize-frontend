@@ -24,6 +24,10 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
+import {
+  HELP_BOT_CREDIT_REP_CATEGORY_ERROR,
+  isHelpBotCreditRepCategory,
+} from "@/components/utils/input/rep-category/repCategoryConstants";
 
 const SEARCH_LENGTH = {
   MIN: 3,
@@ -126,6 +130,10 @@ export default function UserPageRepNewRepSearch({
   const onRepSelect = async (rep: string) => {
     if (rep.length < SEARCH_LENGTH.MIN || rep.length > SEARCH_LENGTH.MAX)
       return;
+    if (isHelpBotCreditRepCategory(rep)) {
+      setErrorMsg(HELP_BOT_CREDIT_REP_CATEGORY_ERROR);
+      return;
+    }
     if (checkingAvailability) return;
     setCheckingAvailability(true);
     try {
@@ -183,6 +191,10 @@ export default function UserPageRepNewRepSearch({
 
   const onGrantRep = async () => {
     if (mutating || !selectedCategory || !amountStr || !profile.query) return;
+    if (isHelpBotCreditRepCategory(selectedCategory)) {
+      setErrorMsg(HELP_BOT_CREDIT_REP_CATEGORY_ERROR);
+      return;
+    }
     const amount = Number.parseInt(amountStr, 10);
     if (Number.isNaN(amount)) return;
     if (!haveChanged) return;
@@ -208,10 +220,16 @@ export default function UserPageRepNewRepSearch({
   const categoriesToDisplay = useMemo(() => {
     const items: string[] = [];
     if (matchingSearchLength) {
-      items.push(debouncedValue);
+      if (!isHelpBotCreditRepCategory(debouncedValue)) {
+        items.push(debouncedValue);
+      }
     }
     if ((categories?.length ?? 0) > 0) {
-      items.push(...categories!.filter((c) => c !== debouncedValue));
+      items.push(
+        ...categories!.filter(
+          (c) => c !== debouncedValue && !isHelpBotCreditRepCategory(c)
+        )
+      );
     }
     return items;
   }, [debouncedValue, categories, matchingSearchLength]);
