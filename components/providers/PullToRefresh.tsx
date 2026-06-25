@@ -24,6 +24,7 @@ const RELEASE_TRANSITION_DURATION_MS = 300;
 
 interface PullToRefreshProps {
   readonly triggerZoneRef: RefObject<HTMLElement | null>;
+  readonly contentRef?: RefObject<HTMLElement | null>;
 }
 
 const useFixedOverlayPullOffset = () => {
@@ -76,14 +77,17 @@ const useFixedOverlayPullOffset = () => {
   );
 };
 
-export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
+export default function PullToRefresh({
+  contentRef: providedContentRef,
+  triggerZoneRef,
+}: PullToRefreshProps) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { globalRefresh } = useGlobalRefresh();
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
-  const contentRef = useRef<HTMLElement | null>(null);
+  const transformedContentRef = useRef<HTMLElement | null>(null);
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pullDistanceRef = useRef(0);
   const isRefreshingRef = useRef(false);
@@ -109,19 +113,19 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
   );
 
   const resetContentStyles = useCallback(() => {
-    if (contentRef.current) {
-      contentRef.current.style.transform = "";
-      contentRef.current.style.transition = "";
+    if (transformedContentRef.current) {
+      transformedContentRef.current.style.transform = "";
+      transformedContentRef.current.style.transition = "";
     }
     setFixedOverlayPullOffset(0, 0);
   }, [setFixedOverlayPullOffset]);
 
   const releaseContentToOffset = useCallback(
     (distance: number) => {
-      if (contentRef.current) {
-        contentRef.current.style.transform =
+      if (transformedContentRef.current) {
+        transformedContentRef.current.style.transform =
           distance === 0 ? "" : `translateY(${distance}px)`;
-        contentRef.current.style.transition = RELEASE_TRANSITION;
+        transformedContentRef.current.style.transition = RELEASE_TRANSITION;
       }
 
       setFixedOverlayPullOffset(distance, RELEASE_TRANSITION_DURATION_MS);
@@ -145,10 +149,11 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
       touchStartY.current = touch.clientY;
 
       isPulling.current = true;
-      contentRef.current = document.body;
+      transformedContentRef.current =
+        providedContentRef?.current ?? document.body;
       setFixedOverlayPullOffset(0, 0);
     },
-    [isAtTop, setFixedOverlayPullOffset, triggerZoneRef]
+    [isAtTop, providedContentRef, setFixedOverlayPullOffset, triggerZoneRef]
   );
 
   const handleTouchMove = useCallback(
@@ -185,9 +190,9 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
       setPullDistance(distance);
       setFixedOverlayPullOffset(distance, 0);
 
-      if (contentRef.current) {
-        contentRef.current.style.transform = `translateY(${distance}px)`;
-        contentRef.current.style.transition = "none";
+      if (transformedContentRef.current) {
+        transformedContentRef.current.style.transform = `translateY(${distance}px)`;
+        transformedContentRef.current.style.transition = "none";
       }
 
       if (distance > 10) {
@@ -246,9 +251,9 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
     pullDistanceRef.current = 0;
     setPullDistance(0);
 
-    if (contentRef.current) {
-      contentRef.current.style.transform = "";
-      contentRef.current.style.transition = "";
+    if (transformedContentRef.current) {
+      transformedContentRef.current.style.transform = "";
+      transformedContentRef.current.style.transition = "";
     }
     setFixedOverlayPullOffset(0, 0);
   }, [setFixedOverlayPullOffset]);
@@ -273,9 +278,9 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
         clearTimeout(refreshTimeoutRef.current);
         refreshTimeoutRef.current = null;
       }
-      if (contentRef.current) {
-        contentRef.current.style.transform = "";
-        contentRef.current.style.transition = "";
+      if (transformedContentRef.current) {
+        transformedContentRef.current.style.transform = "";
+        transformedContentRef.current.style.transition = "";
       }
       setFixedOverlayPullOffset(0, 0);
     };

@@ -79,7 +79,8 @@
     --pull-to-refresh-fixed-overlay-transition-duration: 0ms;
   }
 
-  [data-pull-to-refresh-fixed-overlay="true"] {
+  [data-pull-to-refresh-transform-root="true"]
+    [data-pull-to-refresh-fixed-overlay="true"] {
     translate: 0 calc(var(--pull-to-refresh-fixed-overlay-offset, 0px) * -1);
     transition-property: translate;
     transition-duration: var(
@@ -90,12 +91,14 @@
   }
 
   :root[data-pull-to-refresh-active="true"]
+    [data-pull-to-refresh-transform-root="true"]
     [data-pull-to-refresh-fixed-overlay="true"] {
     will-change: translate;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-pull-to-refresh-fixed-overlay="true"] {
+    [data-pull-to-refresh-transform-root="true"]
+      [data-pull-to-refresh-fixed-overlay="true"] {
       transition-duration: 0ms;
     }
   }
