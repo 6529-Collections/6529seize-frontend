@@ -227,7 +227,7 @@ describe("NewVersionToast", () => {
     expect(screen.getByText(/new version/i)).toBeInTheDocument();
     expect(screen.getByText("Yes, again!")).toBeInTheDocument();
     expect(container.firstChild).toHaveClass(
-      "tw-bottom-[var(--new-version-toast-mobile-bottom)]"
+      "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)]"
     );
     expect(container.firstChild).toHaveClass("sm:tw-bottom-7");
     expect(
@@ -318,6 +318,11 @@ describe("NewVersionToast", () => {
     const toastLayer = container.firstChild as HTMLElement;
 
     expect(toastLayer).toHaveClass("sm:tw-bottom-7");
+    expect(
+      toastLayer.style.getPropertyValue(
+        NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
+      )
+    ).toBe(NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM);
 
     await waitFor(() =>
       expect(dock.getBoundingClientRect).not.toHaveBeenCalled()
