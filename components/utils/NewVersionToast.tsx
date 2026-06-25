@@ -13,11 +13,15 @@ const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
 const NEW_VERSION_TOAST_MOBILE_DOCK_QUERY = "(max-width: 639px)";
 const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
   "--new-version-toast-mobile-bottom";
+const NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY =
+  "--new-version-toast-mobile-scale";
 const NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM = "1rem";
 const NEW_VERSION_TOAST_APP_FALLBACK_BOTTOM = "6rem";
+const NEW_VERSION_TOAST_FALLBACK_SCALE = "1";
 
 type NewVersionToastStyle = CSSProperties & {
   readonly [NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY]: string;
+  readonly [NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY]: string;
 };
 
 const getNewVersionToastStyle = (
@@ -25,6 +29,7 @@ const getNewVersionToastStyle = (
 ): NewVersionToastStyle =>
   ({
     [NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY]: fallbackBottom,
+    [NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY]: NEW_VERSION_TOAST_FALLBACK_SCALE,
   }) as NewVersionToastStyle;
 
 const removeNewVersionToastOverrideFromCurrentPath = () => {
@@ -76,6 +81,7 @@ const NewVersionToast = (): JSX.Element | null => {
     measurementWindowMs: MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS,
     resetOnDisabled: false,
     targetProperty: NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY,
+    targetScaleProperty: NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY,
   });
 
   if (!isVersionStale) {
@@ -89,7 +95,7 @@ const NewVersionToast = (): JSX.Element | null => {
     <div
       ref={toastLayerRef}
       style={getNewVersionToastStyle(fallbackBottom)}
-      className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-z-[1000] tw-w-auto tw-will-change-[bottom] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7"
+      className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-z-[1000] tw-w-auto tw-origin-bottom tw-scale-[var(--new-version-toast-mobile-scale,1)] tw-transform-gpu tw-will-change-[bottom,transform] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7 sm:tw-scale-100"
     >
       <button
         type="button"

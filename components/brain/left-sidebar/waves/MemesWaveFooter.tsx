@@ -11,6 +11,7 @@ import {
   MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX,
   MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
   MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE,
+  MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY,
   MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
@@ -104,7 +105,7 @@ const getContainerClassName = ({
 
 const getExpandedFrameClassName = (floating: boolean): string => {
   if (floating) {
-    return `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-flex-shrink-0`;
+    return `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-origin-bottom tw-scale-[var(--memes-wave-floating-footer-scale)] tw-flex-shrink-0 tw-transform-gpu tw-will-change-transform`;
   }
 
   return "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4";
@@ -145,6 +146,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     enabled: floating,
     fallbackBottom: MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
     measurementWindowMs: MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS,
+    targetScaleProperty: MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY,
   });
   const leftThisRoundText = formatMemesQuickVoteLeftThisRoundText(
     leftThisRoundCount,

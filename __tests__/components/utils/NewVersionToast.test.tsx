@@ -18,6 +18,8 @@ const mockedUseIsVersionStale = useIsVersionStale as jest.Mock;
 const mockedUseDeviceInfo = useDeviceInfo as jest.Mock;
 const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
   "--new-version-toast-mobile-bottom";
+const NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY =
+  "--new-version-toast-mobile-scale";
 const NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM = "1rem";
 const NEW_VERSION_TOAST_APP_FALLBACK_BOTTOM = "6rem";
 const NEW_VERSION_TOAST_MOBILE_DOCK_QUERY = "(max-width: 639px)";
@@ -229,12 +231,21 @@ describe("NewVersionToast", () => {
     expect(container.firstChild).toHaveClass(
       "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)]"
     );
+    expect(container.firstChild).toHaveClass(
+      "tw-scale-[var(--new-version-toast-mobile-scale,1)]"
+    );
+    expect(container.firstChild).toHaveClass("sm:tw-scale-100");
     expect(container.firstChild).toHaveClass("sm:tw-bottom-7");
     expect(
       (container.firstChild as HTMLElement).style.getPropertyValue(
         NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
       )
     ).toBe(NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM);
+    expect(
+      (container.firstChild as HTMLElement).style.getPropertyValue(
+        NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY
+      )
+    ).toBe("1");
     expect(
       container.querySelector('img[src="/emojis/sgt_wink.webp"]')
     ).toBeInTheDocument();
@@ -289,6 +300,9 @@ describe("NewVersionToast", () => {
         )
       ).toBe("88px")
     );
+    expect(
+      toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
+    ).toBe("1");
 
     (dock.getBoundingClientRect as jest.Mock).mockReturnValue(
       createDockRect({ height: 54, top: 826 })
@@ -302,6 +316,41 @@ describe("NewVersionToast", () => {
         )
       ).toBe("78px")
     );
+    expect(
+      toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
+    ).toBe("0.88");
+  });
+
+  it("tracks the mobile dock when its root mounts after the toast", async () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+    setMobileDockViewport(true);
+
+    const { container } = render(<NewVersionToast />);
+    const toastLayer = container.firstChild as HTMLElement;
+
+    expect(
+      toastLayer.style.getPropertyValue(
+        NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
+      )
+    ).toBe(NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM);
+
+    const dockRoot = createDockRoot();
+    createMeasuredDock({
+      height: 64,
+      parentElement: dockRoot,
+      top: 816,
+    });
+
+    await waitFor(() =>
+      expect(
+        toastLayer.style.getPropertyValue(
+          NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
+        )
+      ).toBe("88px")
+    );
+    expect(
+      toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
+    ).toBe("1");
   });
 
   it("keeps desktop positioning independent from mobile dock measurements", async () => {
@@ -323,6 +372,9 @@ describe("NewVersionToast", () => {
         NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
       )
     ).toBe(NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM);
+    expect(
+      toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
+    ).toBe("1");
 
     await waitFor(() =>
       expect(dock.getBoundingClientRect).not.toHaveBeenCalled()

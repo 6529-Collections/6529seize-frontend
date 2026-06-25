@@ -13,20 +13,26 @@ const MEMES_WAVE_FLOATING_FOOTER_SAFE_BOTTOM_STYLE = {
     "max(calc(env(safe-area-inset-bottom, 0px) - 0.875rem), 0px)",
 } as const;
 
-type MemesWaveFloatingFooterBottomStyle = CSSProperties & {
-  readonly "--memes-wave-floating-footer-safe-bottom": string;
-};
-
 export const MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX = 4;
+export const MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY =
+  "--memes-wave-floating-footer-scale";
+const MEMES_WAVE_FLOATING_FOOTER_FALLBACK_SCALE = "1";
 export const MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM =
   "calc(4.25rem + var(--memes-wave-floating-footer-safe-bottom))";
+
+type MemesWaveFloatingFooterStyle = CSSProperties & {
+  readonly "--memes-wave-floating-footer-safe-bottom": string;
+  readonly [MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY]: string;
+};
 
 // Fallback used until the mobile dock has been measured. Runtime positioning
 // follows the actual dock top edge so expanded/compact transitions stay in sync.
 export const MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE = {
   ...MEMES_WAVE_FLOATING_FOOTER_SAFE_BOTTOM_STYLE,
+  [MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY]:
+    MEMES_WAVE_FLOATING_FOOTER_FALLBACK_SCALE,
   bottom: MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
-} as MemesWaveFloatingFooterBottomStyle;
+} as MemesWaveFloatingFooterStyle;
 
 // Match the expanded mobile dock width so the overlay reads as part of the same
 // bottom stack on narrow screens.
