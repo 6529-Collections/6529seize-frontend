@@ -8,7 +8,7 @@ import MemesWaveFooter from "../left-sidebar/waves/MemesWaveFooter";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 
 const floatingDockClearanceClassName =
-  "tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]";
+  "tw-pb-[calc(10rem+env(safe-area-inset-bottom,0px))]";
 
 interface BrainMobileWavesProps {
   readonly onOpenQuickVote: () => void;
@@ -21,15 +21,16 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
 }) => {
   const { mobileWavesViewStyle } = useLayout();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  // We'll use the mobileWavesViewStyle for capacitor spacing
-  const scrollContainerClassName = `tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-space-y-4 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-pt-2 ${floatingDockClearanceClassName}`;
+  const scrollContainerClassName = `tw-space-y-4 tw-overflow-y-auto tw-px-2 tw-pt-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4 md:tw-px-6 ${floatingDockClearanceClassName}`;
 
   return (
-    <div
-      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col"
-      style={mobileWavesViewStyle}
-    >
-      <div className={scrollContainerClassName} ref={scrollContainerRef}>
+    <>
+      <div
+        data-mobile-bottom-nav-scroll-target="true"
+        className={scrollContainerClassName}
+        ref={scrollContainerRef}
+        style={mobileWavesViewStyle}
+      >
         <Link
           href="/waves?view=profile-feed"
           prefetch={false}
@@ -50,10 +51,11 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
         <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
       </div>
       <MemesWaveFooter
+        floating
         onOpenQuickVote={onOpenQuickVote}
         onPrefetchQuickVote={onPrefetchQuickVote}
       />
-    </div>
+    </>
   );
 };
 
