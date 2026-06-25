@@ -1,4 +1,5 @@
 import { editSlice } from "@/store/editSlice";
+import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import { configureStore } from "@reduxjs/toolkit";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -8,6 +9,7 @@ const registerRef = jest.fn();
 const setHeaderRef = jest.fn();
 const usePathname = jest.fn();
 const getSearchParams = jest.fn();
+const mockPullToRefresh = jest.fn();
 let mockDialogMountCount = 0;
 let mockLayoutSpaces = {
   headerSpace: 0,
@@ -73,7 +75,10 @@ jest.mock("next/navigation", () => ({
 }));
 jest.mock("@/components/providers/PullToRefresh", () => ({
   __esModule: true,
-  default: () => null,
+  default: (props: unknown) => {
+    mockPullToRefresh(props);
+    return null;
+  },
 }));
 jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
   useMemesQuickVoteDialogController: () => {
@@ -154,6 +159,7 @@ describe("AppLayout", () => {
     usePathname.mockReturnValue("/");
     getSearchParams.mockReturnValue(new URLSearchParams());
     mockDialogMountCount = 0;
+    mockPullToRefresh.mockClear();
     mockLayoutSpaces = {
       headerSpace: 0,
       pinnedSpace: 0,
@@ -182,9 +188,21 @@ describe("AppLayout", () => {
     const scrollTarget = container.querySelector(
       '[data-mobile-bottom-nav-scroll-target="true"]'
     );
+    const transformRoot = container.querySelector(
+      `[${PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE}="true"]`
+    );
+    const bottomNav = screen.getByTestId("bottom-nav");
 
     expect(scrollTarget).toBeInTheDocument();
-    expect(scrollTarget).not.toContainElement(screen.getByTestId("bottom-nav"));
+    expect(transformRoot).toBeInTheDocument();
+    expect(scrollTarget).toContainElement(transformRoot as HTMLElement);
+    expect(scrollTarget).not.toContainElement(bottomNav);
+    expect(transformRoot).not.toContainElement(bottomNav);
+    expect(mockPullToRefresh).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentRef: expect.objectContaining({ current: transformRoot }),
+      })
+    );
   });
 
   it("sets stream loading reserve when bottom nav is visible", () => {

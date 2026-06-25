@@ -21,6 +21,7 @@ import {
   getActiveWaveIdFromUrl,
   hidesMobileBottomNavigation,
 } from "@/helpers/navigation.helpers";
+import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 
@@ -104,6 +105,7 @@ function AppLayoutContent({ children }: Props) {
   const { registerRef, spaces } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const headerRef = useRef<HTMLDivElement | null>(null);
+  const pullContentRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -173,14 +175,19 @@ function AppLayoutContent({ children }: Props) {
         className={`${safeAreaClass} ${"tw-overflow-auto"}`}
         style={streamRouteLoadingReserveStyle}
       >
-        <PullToRefresh triggerZoneRef={headerRef} />
-        <div ref={headerWrapperRef}>
-          <TouchDeviceHeader />
+        <PullToRefresh contentRef={pullContentRef} triggerZoneRef={headerRef} />
+        <div
+          ref={pullContentRef}
+          {...{ [PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE]: "true" }}
+        >
+          <div ref={headerWrapperRef}>
+            <TouchDeviceHeader />
+          </div>
+          {activeContent}
+          {isNavVisible && !shouldUseContentBottomClearance && (
+            <div className="tw-h-[104px] tw-w-full" />
+          )}
         </div>
-        {activeContent}
-        {isNavVisible && !shouldUseContentBottomClearance && (
-          <div className="tw-h-[104px] tw-w-full" />
-        )}
       </div>
       {shouldRenderBottomNav && (
         <BottomNavigation hidden={shouldHideBottomNav} />

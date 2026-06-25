@@ -127,6 +127,48 @@ describe("PullToRefresh", () => {
     triggerZone.remove();
   });
 
+  it("transforms a provided content target instead of document body", () => {
+    const content = document.createElement("div");
+    const triggerZone = document.createElement("div");
+    content.appendChild(triggerZone);
+    document.body.appendChild(content);
+    const triggerZoneRef: RefObject<HTMLElement | null> = {
+      current: triggerZone,
+    };
+    const contentRef: RefObject<HTMLElement | null> = {
+      current: content,
+    };
+
+    const { unmount } = render(
+      <RefreshProvider>
+        <PullToRefresh
+          contentRef={contentRef}
+          triggerZoneRef={triggerZoneRef}
+        />
+      </RefreshProvider>
+    );
+
+    act(() => {
+      dispatchTouchEvent({
+        clientY: 0,
+        target: triggerZone,
+        type: "touchstart",
+      });
+      dispatchTouchEvent({
+        clientY: 120,
+        target: triggerZone,
+        type: "touchmove",
+      });
+    });
+
+    expect(content.style.transform).toBe("translateY(60px)");
+    expect(content.style.transition).toBe("none");
+    expect(document.body.style.transform).toBe("");
+
+    unmount();
+    content.remove();
+  });
+
   it("keeps fixed overlays offset while refresh is committed and then clears the active state", () => {
     jest.useFakeTimers();
 
