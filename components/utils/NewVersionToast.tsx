@@ -1,7 +1,6 @@
 "use client";
 
 import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
-import { PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -91,7 +90,6 @@ const NewVersionToast = (): JSX.Element | null => {
   return (
     <div
       ref={toastLayerRef}
-      {...{ [PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE]: "true" }}
       style={getNewVersionToastStyle(fallbackBottom)}
       className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-z-[1000] tw-w-auto tw-origin-bottom tw-scale-[var(--new-version-toast-mobile-scale,1)] tw-transform-gpu tw-will-change-[bottom,transform] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7 sm:tw-scale-100"
     >
