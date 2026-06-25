@@ -1,26 +1,28 @@
 import { useAuth } from "@/components/auth/Auth";
 import HeaderQRScanner from "@/components/header/share/HeaderQRScanner";
 import useCapacitor from "@/hooks/useCapacitor";
-
-const SCANNER_FALLBACK_GUIDANCE =
-  "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
-import React, { Fragment } from "react";
+import { Fragment } from "react";
+
+const SCANNER_FALLBACK_GUIDANCE =
+  "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.";
 
 jest.mock("@/hooks/useCapacitor");
 jest.mock("@/components/auth/Auth");
 jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img alt={props.alt ?? ""} {...props} />
-  ),
+  default: () => null,
 }));
 jest.mock("@capacitor/barcode-scanner", () => ({
   CapacitorBarcodeScanner: { scanBarcode: jest.fn() },
-  CapacitorBarcodeScannerTypeHint: { QR_CODE: 1 },
+  CapacitorBarcodeScannerAndroidScanningLibrary: { MLKIT: "mlkit" },
+  CapacitorBarcodeScannerCameraDirection: { BACK: 1 },
+  CapacitorBarcodeScannerScanOrientation: { ADAPTIVE: 3 },
+  CapacitorBarcodeScannerTypeHint: { QR_CODE: 0 },
+  CapacitorBarcodeScannerTypeHintALLOption: { ALL: 17 },
 }));
 
 const mockedCapacitor = useCapacitor as jest.Mock;
@@ -61,7 +63,40 @@ describe("HeaderQRScanner", () => {
     await userEvent.click(btn);
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
+    expect(CapacitorBarcodeScanner.scanBarcode).toHaveBeenCalledWith({
+      hint: 0,
+      scanInstructions: "Point your camera at a valid QR code on 6529.io",
+      scanButton: false,
+      cameraDirection: 1,
+      scanOrientation: 3,
+    });
     expect(toast).not.toHaveBeenCalled();
+  });
+
+  it("uses Android scanner options on Capacitor Android", async () => {
+    mockedCapacitor.mockReturnValue({ isCapacitor: true, isAndroid: true });
+    const push = jest.fn();
+    mockedRouter.mockReturnValue({ push });
+    mockedAuth.mockReturnValue({ setToast: jest.fn() });
+    (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockResolvedValue({
+      ScanResult: "https://test.6529.io/profile",
+    });
+
+    render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
+    const btn = await screen.findByRole("button", { name: "QR Code Scanner" });
+    await userEvent.click(btn);
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
+    expect(CapacitorBarcodeScanner.scanBarcode).toHaveBeenCalledWith({
+      hint: 17,
+      scanInstructions: "Point your camera at a valid QR code on 6529.io",
+      scanButton: false,
+      cameraDirection: 1,
+      scanOrientation: 3,
+      android: {
+        scanningLibrary: "mlkit",
+      },
+    });
   });
 
   it("handles deep link navigation", async () => {
@@ -133,6 +168,38 @@ describe("HeaderQRScanner", () => {
     ).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
   });
+
+  it.each([
+    {
+      code: "OS-PLUG-BARC-0006",
+      message: "Couldn’t scan because the process was cancelled.",
+    },
+    new Error("Couldn’t scan because the process was cancelled."),
+  ])(
+    "does not show an error toast when the scanner is cancelled",
+    async (error) => {
+      mockedCapacitor.mockReturnValue({ isCapacitor: true, isIos: true });
+      const push = jest.fn();
+      mockedRouter.mockReturnValue({ push });
+      const toast = jest.fn();
+      mockedAuth.mockReturnValue({ setToast: toast });
+      (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockRejectedValue(
+        error
+      );
+
+      render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
+      const btn = await screen.findByRole("button", {
+        name: "QR Code Scanner",
+      });
+      await userEvent.click(btn);
+
+      await waitFor(() =>
+        expect(CapacitorBarcodeScanner.scanBarcode).toHaveBeenCalled()
+      );
+      expect(toast).not.toHaveBeenCalled();
+      expect(push).not.toHaveBeenCalled();
+    }
+  );
 
   it("shows fallback scanner guidance when the scan error has no message", async () => {
     mockedCapacitor.mockReturnValue({ isCapacitor: true });
