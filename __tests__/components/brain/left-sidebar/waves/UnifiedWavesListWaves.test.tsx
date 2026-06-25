@@ -62,6 +62,7 @@ jest.mock(
         data-is-drop-wave={String(props.isDropWave)}
         data-show-new-drops-badge={String(props.showNewDropsBadge)}
         data-show-unread-drops-badge={String(props.showUnreadDropsBadge)}
+        data-size={props.size ?? "default"}
       />
     ),
   })
@@ -198,6 +199,13 @@ it("calculates how many highly rated preview avatars fit", () => {
   expect(getFittingPreviewCount({ itemCount: 10, width: 32 })).toBe(1);
   expect(getFittingPreviewCount({ itemCount: 10, width: 70 })).toBe(2);
   expect(getFittingPreviewCount({ itemCount: 12, width: 1000 })).toBe(10);
+  expect(
+    getFittingPreviewCount({
+      isTouchPreview: true,
+      itemCount: 10,
+      width: 220,
+    })
+  ).toBe(4);
 });
 
 it("aligns edge preview tooltips inward to avoid sidebar clipping", () => {
@@ -658,6 +666,10 @@ it("keeps the worth checking out info tooltip available on touch devices", () =>
       name: "Highly rated waves you don’t follow yet.",
     })
   ).toHaveClass("tw-size-6");
+  expect(screen.getByTestId("preview-avatar-h1")).toHaveAttribute(
+    "data-size",
+    "lg"
+  );
   const infoButton = screen.getByRole("button", {
     name: "Highly rated waves you don’t follow yet.",
   });
@@ -670,6 +682,28 @@ it("keeps the worth checking out info tooltip available on touch devices", () =>
   fireEvent.click(infoButton);
   expect(
     screen.queryByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
+});
+
+it("hides the worth checking out info tooltip when no profile is connected", () => {
+  mockUseAuth.mockReturnValue({
+    connectedProfile: null,
+    activeProfileProxy: null,
+  });
+
+  render(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", {
       name: "Highly rated waves you don’t follow yet.",
     })
   ).not.toBeInTheDocument();

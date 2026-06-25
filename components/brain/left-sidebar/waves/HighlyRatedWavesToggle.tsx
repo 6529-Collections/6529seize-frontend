@@ -15,7 +15,9 @@ import { t } from "@/i18n/messages";
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 10 as const;
 const PREVIEW_THUMBNAIL_WIDTH_PX = 32;
+const PREVIEW_TOUCH_THUMBNAIL_WIDTH_PX = 44;
 const PREVIEW_GAP_PX = 6;
+const PREVIEW_TOUCH_GAP_PX = 8;
 type PreviewTooltipAlignment = "start" | "center" | "end";
 const PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES: Record<
   PreviewTooltipAlignment,
@@ -160,9 +162,11 @@ const getScoreBadgeFontSize = (scoreLabel: string) => {
 };
 
 export const getFittingPreviewCount = ({
+  isTouchPreview = false,
   itemCount,
   width,
 }: {
+  readonly isTouchPreview?: boolean | undefined;
   readonly itemCount: number;
   readonly width: number;
 }) => {
@@ -175,9 +179,11 @@ export const getFittingPreviewCount = ({
     return maxVisibleCount;
   }
 
-  const fittingCount = Math.floor(
-    (width + PREVIEW_GAP_PX) / (PREVIEW_THUMBNAIL_WIDTH_PX + PREVIEW_GAP_PX)
-  );
+  const thumbnailWidth = isTouchPreview
+    ? PREVIEW_TOUCH_THUMBNAIL_WIDTH_PX
+    : PREVIEW_THUMBNAIL_WIDTH_PX;
+  const gap = isTouchPreview ? PREVIEW_TOUCH_GAP_PX : PREVIEW_GAP_PX;
+  const fittingCount = Math.floor((width + gap) / (thumbnailWidth + gap));
 
   return Math.max(1, Math.min(maxVisibleCount, fittingCount));
 };
@@ -254,10 +260,12 @@ export const getHighlyRatedPreviewTooltipAlignment = ({
 };
 
 function HighlyRatedWavePreviewScoreBadge({
+  isTouchPreview,
   onMouseEnter,
   scoreLabel,
   wave,
 }: {
+  readonly isTouchPreview: boolean;
   readonly onMouseEnter?: (() => void) | undefined;
   readonly scoreLabel: string | null;
   readonly wave: MinimalWave;
@@ -280,12 +288,12 @@ function HighlyRatedWavePreviewScoreBadge({
           score: scoreLabel,
         })}
         onMouseEnter={onMouseEnter}
-        className="tw-absolute -tw-bottom-1 -tw-right-1.5 tw-z-20 tw-inline-flex tw-h-5 tw-w-6 tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400"
+        className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2 tw-h-6 tw-w-7" : "-tw-bottom-1 -tw-right-1.5 tw-h-5 tw-w-6"} tw-z-20 tw-inline-flex tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
       >
         <svg
           aria-hidden="true"
           viewBox="0 0 32 26"
-          className="tw-pointer-events-none tw-h-5 tw-w-6 tw-overflow-visible"
+          className={`tw-pointer-events-none ${isTouchPreview ? "tw-h-6 tw-w-7" : "tw-h-5 tw-w-6"} tw-overflow-visible`}
         >
           <path
             d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
@@ -317,9 +325,11 @@ function HighlyRatedWavePreviewScoreBadge({
 }
 
 function HighlyRatedWavePreviewLink({
+  isTouchPreview,
   item,
   tooltipAlignment,
 }: {
+  readonly isTouchPreview: boolean;
   readonly item: HighlyRatedWavePreviewItem;
   readonly tooltipAlignment: PreviewTooltipAlignment;
 }) {
@@ -351,14 +361,16 @@ function HighlyRatedWavePreviewLink({
         );
 
   return (
-    <span className="tw-relative tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center">
+    <span
+      className={`tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-items-center tw-justify-center`}
+    >
       <Link
         href={item.href}
         prefetch={false}
         aria-label={linkLabel}
         onClick={item.onClick}
         {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
-        className="tw-group/preview tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className={`tw-group/preview tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-items-center tw-justify-center tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
       >
         <WaveAvatar
           dropBadgePlacement="bottom-left"
@@ -366,10 +378,11 @@ function HighlyRatedWavePreviewLink({
           isDropWave={isDropWave}
           showNewDropsBadge={false}
           showUnreadDropsBadge={false}
+          size={isTouchPreview ? "lg" : "default"}
           wave={wave}
         />
         <span
-          className={`tw-pointer-events-none tw-absolute tw-top-10 tw-z-30 tw-hidden tw-w-48 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-shadow-xl group-hover/preview:tw-block group-focus-visible/preview:tw-block ${PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES[tooltipAlignment]}`}
+          className={`tw-pointer-events-none tw-absolute ${isTouchPreview ? "tw-top-12" : "tw-top-10"} tw-z-30 tw-hidden tw-w-48 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-shadow-xl group-hover/preview:tw-block group-focus-visible/preview:tw-block ${PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES[tooltipAlignment]}`}
         >
           <span className="tw-block tw-truncate tw-text-xs tw-font-semibold tw-text-iron-100">
             {wave.name}
@@ -404,6 +417,7 @@ function HighlyRatedWavePreviewLink({
         </span>
       </Link>
       <HighlyRatedWavePreviewScoreBadge
+        isTouchPreview={isTouchPreview}
         onMouseEnter={item.onMouseEnter}
         scoreLabel={scoreLabel}
         wave={wave}
@@ -413,9 +427,11 @@ function HighlyRatedWavePreviewLink({
 }
 
 export function HighlyRatedWavesToggle({
+  isTouchPreview = false,
   paddingClassName,
   previewItems,
 }: {
+  readonly isTouchPreview?: boolean | undefined;
   readonly paddingClassName: string;
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
 }) {
@@ -429,9 +445,13 @@ export function HighlyRatedWavesToggle({
   const updateVisiblePreviewCount = useCallback(() => {
     const width = previewStripRef.current?.clientWidth ?? 0;
     setVisiblePreviewCount(
-      getFittingPreviewCount({ itemCount: previewItems.length, width })
+      getFittingPreviewCount({
+        isTouchPreview,
+        itemCount: previewItems.length,
+        width,
+      })
     );
-  }, [previewItems.length]);
+  }, [isTouchPreview, previewItems.length]);
 
   useEffect(() => {
     const previewStrip = previewStripRef.current;
@@ -469,13 +489,16 @@ export function HighlyRatedWavesToggle({
   );
 
   return (
-    <div className={`${paddingClassName} tw-pb-1`}>
+    <div
+      className={`${paddingClassName} ${isTouchPreview ? "tw-pb-3 tw-pt-1" : "tw-pb-1"}`}
+    >
       <div
         ref={previewStripRef}
-        className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-1.5"
+        className={`tw-flex tw-min-w-0 tw-items-center tw-justify-between ${isTouchPreview ? "tw-gap-x-2" : "tw-gap-x-1.5"}`}
       >
         {visiblePreviewItems.map((item, index) => (
           <HighlyRatedWavePreviewLink
+            isTouchPreview={isTouchPreview}
             key={item.wave.id}
             item={item}
             tooltipAlignment={getHighlyRatedPreviewTooltipAlignment({
