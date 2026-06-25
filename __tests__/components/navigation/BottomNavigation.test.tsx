@@ -255,13 +255,16 @@ describe("BottomNavigation", () => {
   });
 
   it("compacts the floating dock from window scroll", async () => {
+    const onCompactChange = jest.fn();
     Object.defineProperty(globalThis, "scrollY", {
       configurable: true,
       value: 0,
       writable: true,
     });
 
-    const { getByTestId } = render(<BottomNavigation />);
+    const { getByTestId } = render(
+      <BottomNavigation onCompactChange={onCompactChange} />
+    );
 
     act(() => {
       globalThis.scrollY = 24;
@@ -278,6 +281,7 @@ describe("BottomNavigation", () => {
 
     const activePill = getByTestId("mobile-dock-active-pill");
     expect(activePill).toHaveClass("tw-h-10", "tw-w-12");
+    expect(onCompactChange).toHaveBeenLastCalledWith(true);
     expectActivePillLayoutCalc({
       compact: true,
       style: activePill.getAttribute("style"),

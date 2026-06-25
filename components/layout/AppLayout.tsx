@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
-import { Suspense, useCallback, useMemo, useRef } from "react";
+import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
@@ -72,12 +72,17 @@ const contentOwnsBottomNavClearance = ({
   );
 };
 
-function WavesQuickVoteView() {
+function WavesQuickVoteView({
+  bottomNavCompact,
+}: {
+  readonly bottomNavCompact: boolean;
+}) {
   const quickVote = useMemesQuickVoteDialogController();
 
   return (
     <>
       <BrainMobileWaves
+        bottomNavCompact={bottomNavCompact}
         onOpenQuickVote={quickVote.openQuickVote}
         onPrefetchQuickVote={quickVote.prefetchQuickVote}
       />
@@ -119,6 +124,7 @@ function AppLayoutContent({ children }: Props) {
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
+  const [isBottomNavCompact, setIsBottomNavCompact] = useState(false);
   const isEditingOnMobile = isApp && editingDropId !== null;
   const shouldHideBottomNav = isKeyboardVisible || shouldHideBottomNavForRoute;
 
@@ -161,7 +167,9 @@ function AppLayoutContent({ children }: Props) {
   if (activeView === "messages") {
     activeContent = <BrainMobileMessages />;
   } else if (activeView === "waves") {
-    activeContent = <WavesQuickVoteView />;
+    activeContent = (
+      <WavesQuickVoteView bottomNavCompact={isBottomNavCompact} />
+    );
   } else {
     activeContent = <main>{children}</main>;
   }
@@ -181,7 +189,10 @@ function AppLayoutContent({ children }: Props) {
         <div className="tw-h-[104px] tw-w-full" />
       )}
       {shouldRenderBottomNav && (
-        <BottomNavigation hidden={shouldHideBottomNav} />
+        <BottomNavigation
+          hidden={shouldHideBottomNav}
+          onCompactChange={setIsBottomNavCompact}
+        />
       )}
     </div>
   );
