@@ -16,6 +16,7 @@ import {
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
 import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -140,6 +141,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     unratedCount,
     votingLabel,
   } = useMemesWaveFooterStats();
+  const { isApp } = useDeviceInfo();
   const locale = DEFAULT_LOCALE;
   const floatingFooterRef = useMeasuredMobileBottomNavDockBottom({
     dockGapPx: MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX,
@@ -147,6 +149,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     fallbackBottom: MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
     measurementWindowMs: MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS,
     targetScaleProperty: MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY,
+    watchForDockRoot: floating && isApp,
   });
   const leftThisRoundText = formatMemesQuickVoteLeftThisRoundText(
     leftThisRoundCount,

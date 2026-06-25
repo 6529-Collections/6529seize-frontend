@@ -8,6 +8,7 @@ import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 
 const DEFAULT_DOCK_GAP_PX = 4;
+// Keep these paired with BottomNavigation's compact and expanded dock heights.
 const COMPACT_DOCK_HEIGHT_PX = 54;
 const EXPANDED_DOCK_HEIGHT_PX = 64;
 const COMPACT_OVERLAY_SCALE = 0.88;
@@ -21,6 +22,7 @@ interface UseMeasuredMobileBottomNavDockBottomOptions {
   readonly targetScaleProperty?: `--${string}` | undefined;
   readonly dockGapPx?: number | undefined;
   readonly resetOnDisabled?: boolean | undefined;
+  readonly watchForDockRoot?: boolean | undefined;
 }
 
 interface MeasuredDockStyle {
@@ -111,6 +113,7 @@ export const useMeasuredMobileBottomNavDockBottom = ({
   resetOnDisabled = true,
   targetProperty = "bottom",
   targetScaleProperty,
+  watchForDockRoot = false,
 }: UseMeasuredMobileBottomNavDockBottomOptions): RefObject<HTMLDivElement | null> => {
   const targetElementRef = useRef<HTMLDivElement>(null);
 
@@ -309,7 +312,9 @@ export const useMeasuredMobileBottomNavDockBottom = ({
       dockRootElement = nextDockRootElement;
 
       if (!dockRootElement) {
-        observeDockRootPresence();
+        if (watchForDockRoot) {
+          observeDockRootPresence();
+        }
         return;
       }
 
@@ -389,6 +394,7 @@ export const useMeasuredMobileBottomNavDockBottom = ({
     resetOnDisabled,
     targetProperty,
     targetScaleProperty,
+    watchForDockRoot,
   ]);
 
   return targetElementRef;
