@@ -270,8 +270,11 @@ const useCompactDock = ({
   return hidden ? false : compact;
 };
 
+const navShellClassName =
+  "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)-0.875rem),0px)]";
+
 const getNavClassName = ({ hidden }: { readonly hidden: boolean }) =>
-  `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)-0.875rem),0px)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
+  `${getHiddenStyle(hidden)} tw-pointer-events-none tw-flex tw-justify-center tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
 
 const getDockClassName = (compact: boolean) =>
   `tw-pointer-events-auto tw-relative tw-overflow-hidden tw-border tw-border-white/[0.13] tw-bg-black/[0.76] tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-2xl tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
@@ -339,11 +342,11 @@ const getFloatingActivePillLeft = ({
 const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => (
-  <nav aria-hidden="true" className={getNavClassName({ hidden })}>
-    <div
-      {...{ [PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE]: "true" }}
-      className="tw-flex tw-justify-center"
-    >
+  <div
+    {...{ [PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE]: "true" }}
+    className={navShellClassName}
+  >
+    <nav aria-hidden="true" className={getNavClassName({ hidden })}>
       <div
         {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
         className={getDockClassName(false)}
@@ -352,8 +355,8 @@ const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
           <ul className={getFloatingNavListClassName(false)} />
         </div>
       </div>
-    </div>
-  </nav>
+    </nav>
+  </div>
 );
 
 interface BottomNavigationResolvedContentProps extends BottomNavigationProps {
@@ -434,16 +437,16 @@ const BottomNavigationResolvedContent: React.FC<
   const hasActiveItem = activeItemIndex >= 0;
 
   return (
-    <nav
+    <div
       ref={setMobileNavRef}
-      aria-label={t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.ariaLabel")}
-      aria-hidden={hidden ? "true" : undefined}
-      className={getNavClassName({ hidden })}
-      inert={hidden}
+      {...{ [PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE]: "true" }}
+      className={navShellClassName}
     >
-      <div
-        {...{ [PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE]: "true" }}
-        className="tw-flex tw-justify-center"
+      <nav
+        aria-label={t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.ariaLabel")}
+        aria-hidden={hidden ? "true" : undefined}
+        className={getNavClassName({ hidden })}
+        inert={hidden}
       >
         <div
           {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
@@ -481,8 +484,8 @@ const BottomNavigationResolvedContent: React.FC<
             </ul>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 };
 
