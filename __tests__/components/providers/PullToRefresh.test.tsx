@@ -1,6 +1,7 @@
 import PullToRefresh from "@/components/providers/PullToRefresh";
 import { RefreshProvider } from "@/contexts/RefreshContext";
 import {
+  PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
   PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY,
   PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY,
 } from "@/helpers/pull-to-refresh.helpers";
@@ -48,6 +49,8 @@ describe("PullToRefresh", () => {
     document.documentElement.style.removeProperty(
       PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
     );
+    document.documentElement.removeAttribute(PULL_TO_REFRESH_ACTIVE_ATTRIBUTE);
+    jest.useRealTimers();
 
     if (originalScrollYDescriptor === undefined) {
       delete (globalThis as { scrollY?: unknown }).scrollY;
@@ -94,6 +97,10 @@ describe("PullToRefresh", () => {
         PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
       )
     ).toBe("0ms");
+    expect(document.documentElement).toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
+      "true"
+    );
 
     act(() => {
       dispatchTouchEvent({ target: triggerZone, type: "touchend" });
@@ -111,8 +118,185 @@ describe("PullToRefresh", () => {
         PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
       )
     ).toBe("300ms");
+    expect(document.documentElement).toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
+      "true"
+    );
 
     unmount();
+    triggerZone.remove();
+  });
+
+  it("keeps fixed overlays offset while refresh is committed and then clears the active state", () => {
+    jest.useFakeTimers();
+
+    const triggerZone = document.createElement("div");
+    document.body.appendChild(triggerZone);
+    const triggerZoneRef: RefObject<HTMLElement | null> = {
+      current: triggerZone,
+    };
+
+    const { unmount } = render(
+      <RefreshProvider>
+        <PullToRefresh triggerZoneRef={triggerZoneRef} />
+      </RefreshProvider>
+    );
+
+    act(() => {
+      dispatchTouchEvent({
+        clientY: 0,
+        target: triggerZone,
+        type: "touchstart",
+      });
+      dispatchTouchEvent({
+        clientY: 200,
+        target: triggerZone,
+        type: "touchmove",
+      });
+      dispatchTouchEvent({ target: triggerZone, type: "touchend" });
+    });
+
+    expect(document.body.style.transform).toBe("translateY(56px)");
+    expect(document.body.style.transition).toBe("transform 0.3s ease-out");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
+      )
+    ).toBe("56px");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
+      )
+    ).toBe("300ms");
+    expect(document.documentElement).toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
+      "true"
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(document.body.style.transform).toBe("");
+    expect(document.body.style.transition).toBe("transform 0.3s ease-out");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
+      )
+    ).toBe("0px");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
+      )
+    ).toBe("300ms");
+    expect(document.documentElement).toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
+      "true"
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(document.documentElement).not.toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE
+    );
+
+    unmount();
+    triggerZone.remove();
+  });
+
+  it("clears fixed overlay offset on touch cancel", () => {
+    const triggerZone = document.createElement("div");
+    document.body.appendChild(triggerZone);
+    const triggerZoneRef: RefObject<HTMLElement | null> = {
+      current: triggerZone,
+    };
+
+    const { unmount } = render(
+      <RefreshProvider>
+        <PullToRefresh triggerZoneRef={triggerZoneRef} />
+      </RefreshProvider>
+    );
+
+    act(() => {
+      dispatchTouchEvent({
+        clientY: 0,
+        target: triggerZone,
+        type: "touchstart",
+      });
+      dispatchTouchEvent({
+        clientY: 120,
+        target: triggerZone,
+        type: "touchmove",
+      });
+      dispatchTouchEvent({ target: triggerZone, type: "touchcancel" });
+    });
+
+    expect(document.body.style.transform).toBe("");
+    expect(document.body.style.transition).toBe("");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
+      )
+    ).toBe("0px");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
+      )
+    ).toBe("0ms");
+    expect(document.documentElement).not.toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE
+    );
+
+    unmount();
+    triggerZone.remove();
+  });
+
+  it("clears fixed overlay offset when unmounted during a pull", () => {
+    const triggerZone = document.createElement("div");
+    document.body.appendChild(triggerZone);
+    const triggerZoneRef: RefObject<HTMLElement | null> = {
+      current: triggerZone,
+    };
+
+    const { unmount } = render(
+      <RefreshProvider>
+        <PullToRefresh triggerZoneRef={triggerZoneRef} />
+      </RefreshProvider>
+    );
+
+    act(() => {
+      dispatchTouchEvent({
+        clientY: 0,
+        target: triggerZone,
+        type: "touchstart",
+      });
+      dispatchTouchEvent({
+        clientY: 120,
+        target: triggerZone,
+        type: "touchmove",
+      });
+    });
+
+    unmount();
+
+    expect(document.body.style.transform).toBe("");
+    expect(document.body.style.transition).toBe("");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
+      )
+    ).toBe("0px");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
+      )
+    ).toBe("0ms");
+    expect(document.documentElement).not.toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE
+    );
+
     triggerZone.remove();
   });
 });

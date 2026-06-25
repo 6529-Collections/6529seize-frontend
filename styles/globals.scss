@@ -87,6 +87,10 @@
       0ms
     );
     transition-timing-function: ease-out;
+  }
+
+  :root[data-pull-to-refresh-active="true"]
+    [data-pull-to-refresh-fixed-overlay="true"] {
     will-change: translate;
   }
 

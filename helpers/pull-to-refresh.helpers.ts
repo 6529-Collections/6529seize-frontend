@@ -1,6 +1,8 @@
 export const PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE =
   "data-pull-to-refresh-fixed-overlay";
 
+export const PULL_TO_REFRESH_ACTIVE_ATTRIBUTE = "data-pull-to-refresh-active";
+
 export const PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY =
   "--pull-to-refresh-fixed-overlay-offset";
 
