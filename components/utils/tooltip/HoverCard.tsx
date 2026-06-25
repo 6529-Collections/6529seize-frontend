@@ -32,6 +32,8 @@ interface HoverCardProps {
   readonly offset?: number | undefined;
   readonly hoverTransitionDelay?: number | undefined;
   readonly openOnClick?: boolean | undefined;
+  readonly closeOnContentClick?: boolean | undefined;
+  readonly stopClickPropagation?: boolean | undefined;
   readonly triggerDisplay?: CSSProperties["display"] | undefined;
   readonly contentStyle?: CSSProperties | undefined;
 }
@@ -46,6 +48,8 @@ export default function HoverCard({
   offset = 8,
   hoverTransitionDelay = 150,
   openOnClick = false,
+  closeOnContentClick = false,
+  stopClickPropagation = false,
   triggerDisplay = "contents",
   contentStyle,
 }: HoverCardProps) {
@@ -209,6 +213,10 @@ export default function HoverCard({
 
   const handleTriggerClick = useCallback(
     (event: React.MouseEvent<HTMLSpanElement>) => {
+      if (stopClickPropagation) {
+        event.stopPropagation();
+      }
+
       if (!openOnClick || event.defaultPrevented) {
         return;
       }
@@ -228,7 +236,21 @@ export default function HoverCard({
       openOnClick,
       resolveTriggerNode,
       showImmediately,
+      stopClickPropagation,
     ]
+  );
+
+  const handleCardClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (stopClickPropagation) {
+        event.stopPropagation();
+      }
+
+      if (closeOnContentClick) {
+        closeCardImmediately();
+      }
+    },
+    [closeCardImmediately, closeOnContentClick, stopClickPropagation]
   );
 
   const handleCardMouseEnter = useCallback(() => {
@@ -467,6 +489,7 @@ export default function HoverCard({
               onMouseLeave={handleCardMouseLeave}
               onFocus={handleCardFocus}
               onBlur={handleCardBlur}
+              onClick={handleCardClick}
             >
               <div
                 className={joinTooltipClassNames(

@@ -177,9 +177,26 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
       name: "Highly rated waves you don’t follow yet.",
     })
   ).toHaveClass("tw-size-6");
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  );
   expect(
-    screen.getByTestId("tooltip-web-waves-worth-checking-out-info")
-  ).toHaveAttribute("data-open-on-click", "true");
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toBeInTheDocument();
+  fireEvent.click(
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  );
+  expect(
+    screen.queryByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
   expect(
     screen.queryByRole("button", {
       name: "Expand Worth Checking Out, 1 wave",
@@ -222,9 +239,21 @@ it("keeps the worth checking out info tooltip available on touch devices", () =>
       name: "Highly rated waves you don’t follow yet.",
     })
   ).toHaveClass("tw-size-6");
+  const infoButton = screen.getByRole("button", {
+    name: "Highly rated waves you don’t follow yet.",
+  });
+  fireEvent.click(infoButton);
   expect(
-    screen.getByTestId("tooltip-web-waves-worth-checking-out-info")
-  ).toHaveAttribute("data-open-on-click", "true");
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toBeInTheDocument();
+  fireEvent.click(infoButton);
+  expect(
+    screen.queryByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
 });
 
 it("caps highly rated previews at ten without rendering an overflow control", () => {
