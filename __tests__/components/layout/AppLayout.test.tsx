@@ -177,6 +177,16 @@ describe("AppLayout", () => {
     expect(screen.getByTestId("bottom-nav")).toBeInTheDocument();
   });
 
+  it("keeps bottom nav outside the pull-to-refresh scroll target", () => {
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const scrollTarget = container.querySelector(
+      '[data-mobile-bottom-nav-scroll-target="true"]'
+    );
+
+    expect(scrollTarget).toBeInTheDocument();
+    expect(scrollTarget).not.toContainElement(screen.getByTestId("bottom-nav"));
+  });
+
   it("sets stream loading reserve when bottom nav is visible", () => {
     const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
     const appWrapper = container.firstElementChild as HTMLElement;

@@ -167,23 +167,25 @@ function AppLayoutContent({ children }: Props) {
   }
 
   return (
-    <div
-      data-mobile-bottom-nav-scroll-target="true"
-      className={`${safeAreaClass} ${"tw-overflow-auto"}`}
-      style={streamRouteLoadingReserveStyle}
-    >
-      <PullToRefresh triggerZoneRef={headerRef} />
-      <div ref={headerWrapperRef}>
-        <TouchDeviceHeader />
+    <>
+      <div
+        data-mobile-bottom-nav-scroll-target="true"
+        className={`${safeAreaClass} ${"tw-overflow-auto"}`}
+        style={streamRouteLoadingReserveStyle}
+      >
+        <PullToRefresh triggerZoneRef={headerRef} />
+        <div ref={headerWrapperRef}>
+          <TouchDeviceHeader />
+        </div>
+        {activeContent}
+        {isNavVisible && !shouldUseContentBottomClearance && (
+          <div className="tw-h-[104px] tw-w-full" />
+        )}
       </div>
-      {activeContent}
-      {isNavVisible && !shouldUseContentBottomClearance && (
-        <div className="tw-h-[104px] tw-w-full" />
-      )}
       {shouldRenderBottomNav && (
         <BottomNavigation hidden={shouldHideBottomNav} />
       )}
-    </div>
+    </>
   );
 }
 
