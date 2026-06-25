@@ -10,17 +10,25 @@ import {
   MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME,
   MEMES_WAVE_FLOATING_FOOTER_SCROLL_CLEARANCE_CLASS_NAME,
 } from "../left-sidebar/waves/MemesWaveFooter.constants";
+import { normalizeLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface BrainMobileWavesProps {
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
 }
 
+const getBrowserLocale = () =>
+  normalizeLocale(
+    globalThis.navigator?.languages?.[0] ?? globalThis.navigator?.language
+  );
+
 const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
   onOpenQuickVote,
   onPrefetchQuickVote,
 }) => {
   const { mobileWavesViewStyle } = useLayout();
+  const locale = getBrowserLocale();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hasFloatingFooter, setHasFloatingFooter] = useState(false);
   const scrollClearanceClassName = hasFloatingFooter
@@ -51,10 +59,10 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
           </span>
           <span className="tw-min-w-0">
             <span className="tw-block tw-text-sm tw-font-semibold">
-              Profile Waves Feed
+              {t(locale, "waves.mobile.profileFeed.title")}
             </span>
             <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-              Featured drops from profile waves
+              {t(locale, "waves.mobile.profileFeed.subtitle")}
             </span>
           </span>
         </Link>

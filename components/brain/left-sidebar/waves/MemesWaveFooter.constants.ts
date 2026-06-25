@@ -3,6 +3,8 @@ import type { CSSProperties } from "react";
 export const MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME =
   "tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]";
 
+// Keep this clearance with the floating card width and the measured dock
+// fallback: it covers the 64px expanded dock plus the quick-vote card height.
 export const MEMES_WAVE_FLOATING_FOOTER_SCROLL_CLEARANCE_CLASS_NAME =
   "tw-pb-[calc(10rem+env(safe-area-inset-bottom,0px))]";
 
@@ -26,5 +28,7 @@ export const MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE = {
   bottom: MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
 } as MemesWaveFloatingFooterBottomStyle;
 
+// Match the expanded mobile dock width so the overlay reads as part of the same
+// bottom stack on narrow screens.
 export const MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME =
   "tw-w-[min(calc(100vw-2.25rem),38rem)]";

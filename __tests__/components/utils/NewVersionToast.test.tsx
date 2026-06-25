@@ -3,17 +3,23 @@ import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
 } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 jest.mock("@/hooks/useIsVersionStale", () => ({
   useIsVersionStale: jest.fn(),
 }));
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 const mockedUseIsVersionStale = useIsVersionStale as jest.Mock;
+const mockedUseDeviceInfo = useDeviceInfo as jest.Mock;
 const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
   "--new-version-toast-mobile-bottom";
-const NEW_VERSION_TOAST_MOBILE_FALLBACK_BOTTOM =
-  "calc(4.25rem + max(calc(env(safe-area-inset-bottom, 0px) - 0.875rem), 0px))";
+const NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM = "1rem";
+const NEW_VERSION_TOAST_APP_FALLBACK_BOTTOM = "6rem";
 const NEW_VERSION_TOAST_MOBILE_DOCK_QUERY = "(max-width: 639px)";
 
 const setBrowserLanguages = (languages: readonly string[]) => {
@@ -102,6 +108,12 @@ describe("NewVersionToast", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: false,
+      isAppleMobile: true,
+      isMobileDevice: true,
+    });
     setBrowserLanguages(["en-US"]);
     globalThis.history.replaceState(
       { test: true },
@@ -209,6 +221,7 @@ describe("NewVersionToast", () => {
 
   it("renders toast", () => {
     mockedUseIsVersionStale.mockReturnValue(true);
+    setMobileDockViewport(true);
 
     const { container } = render(<NewVersionToast />);
     expect(screen.getByText(/new version/i)).toBeInTheDocument();
@@ -221,7 +234,13 @@ describe("NewVersionToast", () => {
       (container.firstChild as HTMLElement).style.getPropertyValue(
         NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
       )
-    ).toBe(NEW_VERSION_TOAST_MOBILE_FALLBACK_BOTTOM);
+    ).toBe(NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM);
+    expect(
+      container.querySelector('img[src="/emojis/sgt_wink.webp"]')
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('img[src="/rocket-refresh.png"]')
+    ).toBeInTheDocument();
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
@@ -299,14 +318,31 @@ describe("NewVersionToast", () => {
     const toastLayer = container.firstChild as HTMLElement;
 
     expect(toastLayer).toHaveClass("sm:tw-bottom-7");
-    expect(
-      toastLayer.style.getPropertyValue(
-        NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
-      )
-    ).toBe(NEW_VERSION_TOAST_MOBILE_FALLBACK_BOTTOM);
 
     await waitFor(() =>
       expect(dock.getBoundingClientRect).not.toHaveBeenCalled()
+    );
+  });
+
+  it("uses the previous native-app fallback when no mobile dock is measurable", async () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: true,
+      isAppleMobile: true,
+      isMobileDevice: true,
+    });
+    setMobileDockViewport(true);
+
+    const { container } = render(<NewVersionToast />);
+    const toastLayer = container.firstChild as HTMLElement;
+
+    await waitFor(() =>
+      expect(
+        toastLayer.style.getPropertyValue(
+          NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
+        )
+      ).toBe(NEW_VERSION_TOAST_APP_FALLBACK_BOTTOM)
     );
   });
 });

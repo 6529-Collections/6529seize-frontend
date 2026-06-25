@@ -3,7 +3,6 @@
 import MemesWaveQuickVoteTrigger from "@/components/brain/left-sidebar/waves/MemesWaveQuickVoteTrigger";
 import MemesWaveZapIcon from "@/components/brain/left-sidebar/waves/MemesWaveZapIcon";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   formatMemesQuickVoteLeftThisRoundText,
   formatMemesQuickVoteUnratedText,
@@ -16,6 +15,10 @@ import {
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
 import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
+import { formatInteger } from "@/i18n/format";
+import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+// react-doctor-disable-next-line react-doctor/use-lazy-motion covered by BrainMobile's LazyMotion provider on mobile; adding a local provider would nest contexts.
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect } from "react";
 
@@ -38,41 +41,52 @@ interface MemesWaveFooterLabels {
   readonly buttonValue: string;
 }
 
+const getBrowserLocale = () =>
+  normalizeLocale(
+    globalThis.navigator?.languages?.[0] ?? globalThis.navigator?.language
+  );
+
 const getMemesWaveFooterLabels = ({
   isReady,
-  leftThisRoundCount,
+  leftThisRoundText,
+  locale,
   uncastPower,
-  unratedCount,
+  unratedText,
   votingLabel,
 }: {
   readonly isReady: boolean;
-  readonly leftThisRoundCount: number;
+  readonly leftThisRoundText: string;
+  readonly locale: SupportedLocale;
   readonly uncastPower: number | null;
-  readonly unratedCount: number;
+  readonly unratedText: string;
   readonly votingLabel: string | null;
 }): MemesWaveFooterLabels => {
   if (!isReady || typeof uncastPower !== "number") {
     return {
-      buttonAriaLabel: "Quick vote",
-      buttonTitle: "Quick vote",
-      buttonValue: "Open quick vote",
+      buttonAriaLabel: t(locale, "memes.waveFooter.quickVote.label"),
+      buttonTitle: t(locale, "memes.waveFooter.quickVote.label"),
+      buttonValue: t(locale, "memes.waveFooter.quickVote.open"),
     };
   }
 
-  const formattedPower = formatNumberWithCommas(uncastPower);
-  const leftThisRoundText =
-    formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount);
-  const unratedText = formatMemesQuickVoteUnratedText(unratedCount);
-  const ariaVotingLabel = votingLabel ?? "Votes";
-  let visibleVotingLabel = " votes";
-  if (votingLabel) {
-    visibleVotingLabel = ` ${votingLabel}`;
-  }
+  const formattedPower = formatInteger(locale, uncastPower);
+  const resolvedAriaVotingLabel =
+    votingLabel ?? t(locale, "memes.waveFooter.uncastPower.votes");
+  const resolvedVisibleVotingLabel =
+    votingLabel ?? t(locale, "memes.waveFooter.uncastPower.votesVisible");
 
   return {
-    buttonAriaLabel: `Uncast Power, ${formattedPower} ${ariaVotingLabel} left, ${leftThisRoundText}, ${unratedText}`,
-    buttonTitle: "Uncast Power",
-    buttonValue: `${formattedPower}${visibleVotingLabel}`,
+    buttonAriaLabel: t(locale, "memes.waveFooter.uncastPower.ariaLabel", {
+      leftThisRound: leftThisRoundText,
+      power: formattedPower,
+      unrated: unratedText,
+      votingLabel: resolvedAriaVotingLabel,
+    }),
+    buttonTitle: t(locale, "memes.waveFooter.uncastPower.title"),
+    buttonValue: t(locale, "memes.waveFooter.uncastPower.visibleValue", {
+      power: formattedPower,
+      votingLabel: resolvedVisibleVotingLabel,
+    }),
   };
 };
 
@@ -131,18 +145,25 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     unratedCount,
     votingLabel,
   } = useMemesWaveFooterStats();
+  const locale = getBrowserLocale();
   const floatingFooterRef = useMeasuredMobileBottomNavDockBottom({
     dockGapPx: MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX,
     enabled: floating,
     fallbackBottom: MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
     measurementWindowMs: MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS,
   });
+  const leftThisRoundText = formatMemesQuickVoteLeftThisRoundText(
+    leftThisRoundCount,
+    locale
+  );
+  const unratedText = formatMemesQuickVoteUnratedText(unratedCount, locale);
   const { buttonAriaLabel, buttonTitle, buttonValue } =
     getMemesWaveFooterLabels({
       isReady,
-      leftThisRoundCount,
+      leftThisRoundText,
+      locale,
       uncastPower,
-      unratedCount,
+      unratedText,
       votingLabel,
     });
 
@@ -233,12 +254,10 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                     {isReady && (
                       <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-items-end tw-gap-0.5 tw-text-right">
                         <span className="tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
-                          {formatMemesQuickVoteLeftThisRoundText(
-                            leftThisRoundCount
-                          )}
+                          {leftThisRoundText}
                         </span>
                         <span className="tw-text-[11px] tw-font-medium tw-text-iron-400">
-                          {formatMemesQuickVoteUnratedText(unratedCount)}
+                          {unratedText}
                         </span>
                       </div>
                     )}
