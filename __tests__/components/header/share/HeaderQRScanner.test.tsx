@@ -19,11 +19,10 @@ jest.mock("next/image", () => ({
 }));
 jest.mock("@capacitor/barcode-scanner", () => ({
   CapacitorBarcodeScanner: { scanBarcode: jest.fn() },
-  CapacitorBarcodeScannerAndroidScanningLibrary: { MLKIT: "mlkit" },
+  CapacitorBarcodeScannerAndroidScanningLibrary: { ZXING: "zxing" },
   CapacitorBarcodeScannerCameraDirection: { BACK: 1 },
   CapacitorBarcodeScannerScanOrientation: { ADAPTIVE: 3 },
   CapacitorBarcodeScannerTypeHint: { QR_CODE: 0 },
-  CapacitorBarcodeScannerTypeHintALLOption: { ALL: 17 },
 }));
 
 const mockedCapacitor = useCapacitor as jest.Mock;
@@ -94,13 +93,13 @@ describe("HeaderQRScanner", () => {
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
     expect(CapacitorBarcodeScanner.scanBarcode).toHaveBeenCalledWith({
-      hint: 17,
+      hint: 0,
       scanInstructions: t("en-US", "qrScanner.instructions"),
       scanButton: false,
       cameraDirection: 1,
       scanOrientation: 3,
       android: {
-        scanningLibrary: "mlkit",
+        scanningLibrary: "zxing",
       },
     });
   });

@@ -14,7 +14,6 @@ import {
   type CapacitorBarcodeScannerOptions,
   CapacitorBarcodeScannerScanOrientation,
   CapacitorBarcodeScannerTypeHint,
-  CapacitorBarcodeScannerTypeHintALLOption,
 } from "@capacitor/barcode-scanner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -28,9 +27,7 @@ function getScannerOptions(
   scanInstructions: string
 ): CapacitorBarcodeScannerOptions {
   const scannerOptions: CapacitorBarcodeScannerOptions = {
-    hint: isAndroid
-      ? CapacitorBarcodeScannerTypeHintALLOption.ALL
-      : CapacitorBarcodeScannerTypeHint.QR_CODE,
+    hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
     scanInstructions,
     scanButton: false,
     cameraDirection: CapacitorBarcodeScannerCameraDirection.BACK,
@@ -44,7 +41,7 @@ function getScannerOptions(
   return {
     ...scannerOptions,
     android: {
-      scanningLibrary: CapacitorBarcodeScannerAndroidScanningLibrary.MLKIT,
+      scanningLibrary: CapacitorBarcodeScannerAndroidScanningLibrary.ZXING,
     },
   };
 }
