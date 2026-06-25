@@ -1,11 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import MemesWaveFooter from "@/components/brain/left-sidebar/waves/MemesWaveFooter";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
-import {
-  MEMES_WAVE_FLOATING_FOOTER_COMPACT_BOTTOM_STYLE,
-  MEMES_WAVE_FLOATING_FOOTER_EXPANDED_BOTTOM_STYLE,
-} from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
+import { MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
+import { MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE } from "@/helpers/navigation.helpers";
 
 jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
   useMemesWaveFooterStats: jest.fn(),
@@ -19,9 +17,87 @@ const useMemesWaveFooterStatsMock =
 describe("MemesWaveFooter", () => {
   const onOpenQuickVote = jest.fn();
   const onPrefetchQuickVote = jest.fn();
+  let originalRequestAnimationFrame:
+    | typeof globalThis.requestAnimationFrame
+    | undefined;
+  let originalCancelAnimationFrame:
+    | typeof globalThis.cancelAnimationFrame
+    | undefined;
+  let originalInnerHeightDescriptor: PropertyDescriptor | undefined;
+
+  const createDockRect = ({
+    height,
+    top,
+  }: {
+    readonly height: number;
+    readonly top: number;
+  }): DOMRect =>
+    ({
+      bottom: top + height,
+      height,
+      left: 0,
+      right: 390,
+      top,
+      width: 390,
+      x: 0,
+      y: top,
+      toJSON: () => ({}),
+    }) as DOMRect;
+
+  const createMeasuredDock = ({
+    height,
+    top,
+  }: {
+    readonly height: number;
+    readonly top: number;
+  }) => {
+    const dock = document.createElement("div");
+    dock.setAttribute(MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE, "true");
+    dock.getBoundingClientRect = jest.fn(() => createDockRect({ height, top }));
+    document.body.appendChild(dock);
+
+    return dock;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+    originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
+    originalInnerHeightDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "innerHeight"
+    );
+    let animationFrameId = 0;
+    const animationFrameTimeouts = new Map<
+      number,
+      ReturnType<typeof setTimeout>
+    >();
+    Object.defineProperty(globalThis, "requestAnimationFrame", {
+      configurable: true,
+      value: jest.fn((callback: FrameRequestCallback) => {
+        const frameId = ++animationFrameId;
+        const timeoutId = setTimeout(() => {
+          animationFrameTimeouts.delete(frameId);
+          callback(globalThis.performance.now());
+        }, 0);
+        animationFrameTimeouts.set(frameId, timeoutId);
+        return frameId;
+      }),
+    });
+    Object.defineProperty(globalThis, "cancelAnimationFrame", {
+      configurable: true,
+      value: jest.fn((frameId: number) => {
+        const timeoutId = animationFrameTimeouts.get(frameId);
+        if (timeoutId !== undefined) {
+          clearTimeout(timeoutId);
+          animationFrameTimeouts.delete(frameId);
+        }
+      }),
+    });
+    Object.defineProperty(globalThis, "innerHeight", {
+      configurable: true,
+      value: 900,
+    });
     useMemesWaveFooterStatsMock.mockReturnValue({
       isAvailable: false,
       leftThisRoundCount: 0,
@@ -30,6 +106,42 @@ describe("MemesWaveFooter", () => {
       votingLabel: null,
       isReady: false,
     });
+  });
+
+  afterEach(() => {
+    document
+      .querySelectorAll(`[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`)
+      .forEach((dock) => dock.remove());
+
+    if (originalRequestAnimationFrame === undefined) {
+      delete (globalThis as { requestAnimationFrame?: unknown })
+        .requestAnimationFrame;
+    } else {
+      Object.defineProperty(globalThis, "requestAnimationFrame", {
+        configurable: true,
+        value: originalRequestAnimationFrame,
+      });
+    }
+
+    if (originalCancelAnimationFrame === undefined) {
+      delete (globalThis as { cancelAnimationFrame?: unknown })
+        .cancelAnimationFrame;
+    } else {
+      Object.defineProperty(globalThis, "cancelAnimationFrame", {
+        configurable: true,
+        value: originalCancelAnimationFrame,
+      });
+    }
+
+    if (originalInnerHeightDescriptor === undefined) {
+      delete (globalThis as { innerHeight?: unknown }).innerHeight;
+    } else {
+      Object.defineProperty(
+        globalThis,
+        "innerHeight",
+        originalInnerHeightDescriptor
+      );
+    }
   });
 
   it("stays hidden until stats are ready", () => {
@@ -78,7 +190,7 @@ describe("MemesWaveFooter", () => {
     expect(floatingLayer).toHaveClass("tw-transition-[bottom]");
     expect(floatingLayer).not.toHaveClass("tw-bg-black");
     expect((floatingLayer as HTMLElement).style.bottom).toBe(
-      MEMES_WAVE_FLOATING_FOOTER_EXPANDED_BOTTOM_STYLE.bottom
+      MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE.bottom
     );
 
     const button = screen.getByRole("button", {
@@ -90,7 +202,7 @@ describe("MemesWaveFooter", () => {
     expect(floatingFrame).toHaveClass("tw-pointer-events-auto");
   });
 
-  it("moves the floating mobile overlay down when the dock compacts", () => {
+  it("tracks the measured mobile dock top while the dock compacts", async () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
       isAvailable: true,
       leftThisRoundCount: 3,
@@ -99,22 +211,24 @@ describe("MemesWaveFooter", () => {
       votingLabel: "TDH",
       isReady: true,
     });
+    const dock = createMeasuredDock({ height: 64, top: 816 });
 
     const { container } = render(
-      <MemesWaveFooter
-        bottomNavCompact
-        floating
-        onOpenQuickVote={onOpenQuickVote}
-      />
+      <MemesWaveFooter floating onOpenQuickVote={onOpenQuickVote} />
     );
 
     const floatingLayer = container.querySelector(
       '[data-memes-wave-footer-layer="floating"]'
     ) as HTMLElement;
 
-    expect(floatingLayer.style.bottom).toBe(
-      MEMES_WAVE_FLOATING_FOOTER_COMPACT_BOTTOM_STYLE.bottom
+    await waitFor(() => expect(floatingLayer.style.bottom).toBe("88px"));
+
+    (dock.getBoundingClientRect as jest.Mock).mockReturnValue(
+      createDockRect({ height: 54, top: 826 })
     );
+    dock.dispatchEvent(new Event("transitionrun"));
+
+    await waitFor(() => expect(floatingLayer.style.bottom).toBe("78px"));
   });
 
   it("reports footer availability changes", () => {

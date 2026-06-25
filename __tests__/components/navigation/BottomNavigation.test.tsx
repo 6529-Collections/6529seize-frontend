@@ -8,6 +8,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
 import {
+  MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   getNotificationsRoute,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
 } from "@/helpers/navigation.helpers";
@@ -218,6 +219,9 @@ describe("BottomNavigation", () => {
     );
     expect(container.querySelector("nav")).not.toHaveClass("tw-h-[85px]");
     expect(
+      container.querySelector(`[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`)
+    ).toBeInTheDocument();
+    expect(
       (NavItem as jest.Mock).mock.calls.every(([props]) => {
         return props.variant === "floating" && props.compact === false;
       })
@@ -255,16 +259,13 @@ describe("BottomNavigation", () => {
   });
 
   it("compacts the floating dock from window scroll", async () => {
-    const onCompactChange = jest.fn();
     Object.defineProperty(globalThis, "scrollY", {
       configurable: true,
       value: 0,
       writable: true,
     });
 
-    const { getByTestId } = render(
-      <BottomNavigation onCompactChange={onCompactChange} />
-    );
+    const { getByTestId } = render(<BottomNavigation />);
 
     act(() => {
       globalThis.scrollY = 24;
@@ -281,7 +282,6 @@ describe("BottomNavigation", () => {
 
     const activePill = getByTestId("mobile-dock-active-pill");
     expect(activePill).toHaveClass("tw-h-10", "tw-w-12");
-    expect(onCompactChange).toHaveBeenLastCalledWith(true);
     expectActivePillLayoutCalc({
       compact: true,
       style: activePill.getAttribute("style"),
