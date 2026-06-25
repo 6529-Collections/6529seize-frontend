@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import MemesWaveFooter from "@/components/brain/left-sidebar/waves/MemesWaveFooter";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
+import { MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 
 jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
   useMemesWaveFooterStats: jest.fn(),
@@ -66,17 +67,56 @@ describe("MemesWaveFooter", () => {
       <MemesWaveFooter floating onOpenQuickVote={onOpenQuickVote} />
     );
 
-    const floatingLayer = container.querySelector(".tw-fixed");
+    const floatingLayer = container.querySelector(
+      '[data-memes-wave-footer-layer="floating"]'
+    );
     expect(floatingLayer).toHaveClass("tw-z-40");
     expect(floatingLayer).toHaveClass("tw-pointer-events-none");
     expect(floatingLayer).not.toHaveClass("tw-bg-black");
+    expect((floatingLayer as HTMLElement).style.bottom).toBe(
+      MEMES_WAVE_FLOATING_FOOTER_BOTTOM_STYLE.bottom
+    );
 
     const button = screen.getByRole("button", {
       name: "Uncast Power, 5,000 TDH left, 3 left this round, 12 unrated",
     });
-    expect(button.parentElement?.parentElement).toHaveClass(
-      "tw-pointer-events-auto"
+    const floatingFrame = button.closest(
+      '[data-memes-wave-footer-frame="floating"]'
     );
+    expect(floatingFrame).toHaveClass("tw-pointer-events-auto");
+  });
+
+  it("reports footer availability changes", () => {
+    const onAvailabilityChange = jest.fn();
+    const { rerender, unmount } = render(
+      <MemesWaveFooter
+        onAvailabilityChange={onAvailabilityChange}
+        onOpenQuickVote={onOpenQuickVote}
+      />
+    );
+
+    expect(onAvailabilityChange).toHaveBeenLastCalledWith(false);
+
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 3,
+      uncastPower: 5000,
+      unratedCount: 12,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+    rerender(
+      <MemesWaveFooter
+        onAvailabilityChange={onAvailabilityChange}
+        onOpenQuickVote={onOpenQuickVote}
+      />
+    );
+
+    expect(onAvailabilityChange).toHaveBeenLastCalledWith(true);
+
+    unmount();
+
+    expect(onAvailabilityChange).toHaveBeenLastCalledWith(false);
   });
 
   it("calls onOpenQuickVote from the expanded card", () => {

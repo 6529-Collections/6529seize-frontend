@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { Squares2X2Icon } from "@heroicons/react/24/outline";
 import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
 import MemesWaveFooter from "../left-sidebar/waves/MemesWaveFooter";
 import { useLayout } from "../my-stream/layout/LayoutContext";
-
-const floatingDockClearanceClassName =
-  "tw-pb-[calc(10rem+env(safe-area-inset-bottom,0px))]";
+import {
+  MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME,
+  MEMES_WAVE_FLOATING_FOOTER_SCROLL_CLEARANCE_CLASS_NAME,
+} from "../left-sidebar/waves/MemesWaveFooter.constants";
 
 interface BrainMobileWavesProps {
   readonly onOpenQuickVote: () => void;
@@ -21,15 +22,24 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
 }) => {
   const { mobileWavesViewStyle } = useLayout();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollContainerClassName = `tw-space-y-4 tw-overflow-y-auto tw-px-2 tw-pt-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4 md:tw-px-6 ${floatingDockClearanceClassName}`;
+  const [hasFloatingFooter, setHasFloatingFooter] = useState(false);
+  const scrollClearanceClassName = hasFloatingFooter
+    ? MEMES_WAVE_FLOATING_FOOTER_SCROLL_CLEARANCE_CLASS_NAME
+    : MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME;
+  const scrollContainerClassName = `tw-min-h-0 tw-flex-1 tw-space-y-4 tw-overflow-y-auto tw-px-2 tw-pt-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4 md:tw-px-6 ${scrollClearanceClassName}`;
+  const handleFooterAvailabilityChange = useCallback((isAvailable: boolean) => {
+    setHasFloatingFooter(isAvailable);
+  }, []);
 
   return (
-    <>
+    <div
+      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col"
+      style={mobileWavesViewStyle}
+    >
       <div
         data-mobile-bottom-nav-scroll-target="true"
         className={scrollContainerClassName}
         ref={scrollContainerRef}
-        style={mobileWavesViewStyle}
       >
         <Link
           href="/waves?view=profile-feed"
@@ -52,10 +62,11 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
       </div>
       <MemesWaveFooter
         floating
+        onAvailabilityChange={handleFooterAvailabilityChange}
         onOpenQuickVote={onOpenQuickVote}
         onPrefetchQuickVote={onPrefetchQuickVote}
       />
-    </>
+    </div>
   );
 };
 
