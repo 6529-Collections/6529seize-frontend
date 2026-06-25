@@ -26,6 +26,10 @@ export const MOBILE_BOTTOM_NAV_DOCK_SELECTOR = `[${MOBILE_BOTTOM_NAV_DOCK_ATTRIB
 export const MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE = "data-mobile-bottom-nav-root";
 export const MOBILE_BOTTOM_NAV_ROOT_SELECTOR = `[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`;
 
+// BottomNavigation dock transitions use tw-duration-300; this window keeps
+// overlay measurements running through the full animation plus settling margin.
+export const MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS = 420;
+
 export const usesReverseMobileBottomNavigationScroll = ({
   pathname,
 }: {

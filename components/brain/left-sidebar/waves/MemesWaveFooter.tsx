@@ -14,12 +14,10 @@ import {
   MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE,
   MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
-import {
-  MOBILE_BOTTOM_NAV_DOCK_SELECTOR,
-  MOBILE_BOTTOM_NAV_ROOT_SELECTOR,
-} from "@/helpers/navigation.helpers";
+import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
+import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 
 interface MemesWaveFooterProps {
   readonly collapsed?: boolean | undefined;
@@ -33,47 +31,6 @@ const revealTransition = {
   duration: 0.22,
   ease: "easeOut",
 } as const;
-
-// BottomNavigation dock transitions use tw-duration-300; this window keeps
-// measurements running through the full animation plus a small settling margin.
-const DOCK_TRANSITION_MEASUREMENT_WINDOW_MS = 420;
-
-const getViewportHeight = (): number => {
-  const viewportHeight = globalThis.visualViewport?.height;
-  if (typeof viewportHeight === "number" && viewportHeight > 0) {
-    return viewportHeight;
-  }
-
-  if (
-    typeof globalThis.innerHeight === "number" &&
-    globalThis.innerHeight > 0
-  ) {
-    return globalThis.innerHeight;
-  }
-
-  return globalThis.document?.documentElement?.clientHeight ?? 0;
-};
-
-const getMeasuredDockBottom = (dockElement: HTMLElement): string | null => {
-  const rect = dockElement.getBoundingClientRect();
-  const viewportHeight = getViewportHeight();
-
-  if (
-    !Number.isFinite(rect.top) ||
-    !Number.isFinite(rect.height) ||
-    rect.height <= 0 ||
-    viewportHeight <= 0
-  ) {
-    return null;
-  }
-
-  const bottom = Math.max(
-    0,
-    viewportHeight - rect.top + MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX
-  );
-
-  return `${Math.round(bottom)}px`;
-};
 
 interface MemesWaveFooterLabels {
   readonly buttonAriaLabel: string;
@@ -159,168 +116,6 @@ const getContainerStyle = ({
   >;
 };
 
-const useMeasuredMobileDockFooterBottom = (
-  enabled: boolean
-): React.RefObject<HTMLDivElement | null> => {
-  const footerElementRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const applyFooterBottom = (nextBottom: string | null) => {
-      const footerElement = footerElementRef.current;
-      if (!footerElement) {
-        return;
-      }
-
-      const bottom = nextBottom ?? MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM;
-      if (footerElement.style.bottom === bottom) {
-        return;
-      }
-
-      footerElement.style.bottom = bottom;
-    };
-
-    const resetFooterBottom = () => {
-      footerElementRef.current?.style.removeProperty("bottom");
-    };
-
-    if (!enabled || globalThis.document === undefined) {
-      resetFooterBottom();
-      return;
-    }
-
-    let dockElement: HTMLElement | null = null;
-    let animationFrameId: number | null = null;
-    let transitionTrackingUntil = 0;
-    let resizeObserver: ResizeObserver | null = null;
-    let dockRootObserver: MutationObserver | null = null;
-    let cancelled = false;
-
-    const getDockRootElement = (): HTMLElement | null =>
-      globalThis.document.querySelector<HTMLElement>(
-        MOBILE_BOTTOM_NAV_ROOT_SELECTOR
-      );
-
-    const getLiveDockElement = (): HTMLElement | null =>
-      globalThis.document.querySelector<HTMLElement>(
-        MOBILE_BOTTOM_NAV_DOCK_SELECTOR
-      );
-
-    const removeDockListeners = () => {
-      dockElement?.removeEventListener("transitionrun", trackDockTransition);
-      dockElement?.removeEventListener("transitionstart", trackDockTransition);
-      dockElement?.removeEventListener("transitionend", updateMeasuredBottom);
-    };
-
-    const bindDockElement = (nextDockElement: HTMLElement | null) => {
-      if (dockElement === nextDockElement) {
-        return;
-      }
-
-      resizeObserver?.disconnect();
-      resizeObserver = null;
-      removeDockListeners();
-      dockElement = nextDockElement;
-
-      if (typeof ResizeObserver !== "undefined" && dockElement) {
-        resizeObserver = new ResizeObserver(trackDockTransition);
-        resizeObserver.observe(dockElement);
-      }
-
-      dockElement?.addEventListener("transitionrun", trackDockTransition);
-      dockElement?.addEventListener("transitionstart", trackDockTransition);
-      dockElement?.addEventListener("transitionend", updateMeasuredBottom);
-    };
-
-    const updateMeasuredBottom = () => {
-      if (cancelled) {
-        return;
-      }
-
-      const liveDockElement = getLiveDockElement();
-      bindDockElement(liveDockElement);
-
-      if (!dockElement) {
-        applyFooterBottom(null);
-        return;
-      }
-
-      const nextBottom = getMeasuredDockBottom(dockElement);
-      applyFooterBottom(nextBottom);
-    };
-
-    const scheduleMeasurement = () => {
-      if (animationFrameId !== null) {
-        return;
-      }
-
-      animationFrameId = globalThis.requestAnimationFrame(() => {
-        animationFrameId = null;
-        updateMeasuredBottom();
-      });
-    };
-
-    const trackDockTransition = () => {
-      transitionTrackingUntil =
-        globalThis.performance.now() + DOCK_TRANSITION_MEASUREMENT_WINDOW_MS;
-
-      const tick = () => {
-        animationFrameId = null;
-        updateMeasuredBottom();
-
-        if (
-          !cancelled &&
-          globalThis.performance.now() < transitionTrackingUntil
-        ) {
-          animationFrameId = globalThis.requestAnimationFrame(tick);
-        }
-      };
-
-      animationFrameId ??= globalThis.requestAnimationFrame(tick);
-    };
-
-    const observeDockRoot = () => {
-      dockRootObserver?.disconnect();
-      dockRootObserver = null;
-
-      const dockRootElement = getDockRootElement();
-      if (typeof MutationObserver === "undefined" || !dockRootElement) {
-        return;
-      }
-
-      dockRootObserver = new MutationObserver(scheduleMeasurement);
-      dockRootObserver.observe(dockRootElement, { childList: true });
-    };
-
-    updateMeasuredBottom();
-    globalThis.addEventListener("resize", trackDockTransition, {
-      passive: true,
-    });
-    globalThis.visualViewport?.addEventListener("resize", trackDockTransition, {
-      passive: true,
-    });
-    observeDockRoot();
-    scheduleMeasurement();
-
-    return () => {
-      cancelled = true;
-      if (animationFrameId !== null) {
-        globalThis.cancelAnimationFrame(animationFrameId);
-      }
-      dockRootObserver?.disconnect();
-      resizeObserver?.disconnect();
-      removeDockListeners();
-      resetFooterBottom();
-      globalThis.removeEventListener("resize", trackDockTransition);
-      globalThis.visualViewport?.removeEventListener(
-        "resize",
-        trackDockTransition
-      );
-    };
-  }, [enabled]);
-
-  return footerElementRef;
-};
-
 const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
   collapsed = false,
   floating = false,
@@ -336,7 +131,12 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     unratedCount,
     votingLabel,
   } = useMemesWaveFooterStats();
-  const floatingFooterRef = useMeasuredMobileDockFooterBottom(floating);
+  const floatingFooterRef = useMeasuredMobileBottomNavDockBottom({
+    dockGapPx: MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX,
+    enabled: floating,
+    fallbackBottom: MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
+    measurementWindowMs: MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS,
+  });
   const { buttonAriaLabel, buttonTitle, buttonValue } =
     getMemesWaveFooterLabels({
       isReady,
