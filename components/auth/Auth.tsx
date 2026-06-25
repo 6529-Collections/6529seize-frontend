@@ -848,7 +848,7 @@ export default function Auth({
 
   const ensureActiveSessionV2WebSessionForActiveWallet = useCallback(
     async (abortSignal?: AbortSignal): Promise<boolean> => {
-      const walletAddress = address ?? getWalletAddress();
+      const walletAddress = getWalletAddress() ?? address;
       if (!walletAddress || !getAuthJwt()) {
         return false;
       }
