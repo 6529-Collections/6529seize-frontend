@@ -13,6 +13,7 @@ import {
   getNotificationsRoute,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
 } from "@/helpers/navigation.helpers";
+import { PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 
 jest.mock("@/components/navigation/NavItem", () => ({
   __esModule: true,
@@ -193,6 +194,11 @@ describe("BottomNavigation", () => {
     expect(
       container.querySelector(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
     ).toBeInTheDocument();
+    expect(
+      container.querySelector(
+        `[${PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE}="true"]`
+      )
+    ).toBeInTheDocument();
   });
 
   it("renders a stable nav fallback when search params suspend", () => {
@@ -212,6 +218,11 @@ describe("BottomNavigation", () => {
     expect(container.querySelector("ul")).toBeInTheDocument();
     expect(
       container.querySelector(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector(
+        `[${PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE}="true"]`
+      )
     ).toBeInTheDocument();
     expect(NavItem).not.toHaveBeenCalled();
   });

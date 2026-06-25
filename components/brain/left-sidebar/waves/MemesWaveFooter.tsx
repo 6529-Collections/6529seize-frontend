@@ -15,6 +15,7 @@ import {
   MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
+import { PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -205,6 +206,9 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           <m.div
             ref={floatingFooterRef}
             data-memes-wave-footer-layer={floating ? "floating" : undefined}
+            {...(floating
+              ? { [PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE]: "true" }
+              : {})}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}

@@ -75,6 +75,25 @@
   /* Android keyboard height adjustments */
   :root {
     --android-keyboard-height: 0px;
+    --pull-to-refresh-fixed-overlay-offset: 0px;
+    --pull-to-refresh-fixed-overlay-transition-duration: 0ms;
+  }
+
+  [data-pull-to-refresh-fixed-overlay="true"] {
+    translate: 0 calc(var(--pull-to-refresh-fixed-overlay-offset, 0px) * -1);
+    transition-property: translate;
+    transition-duration: var(
+      --pull-to-refresh-fixed-overlay-transition-duration,
+      0ms
+    );
+    transition-timing-function: ease-out;
+    will-change: translate;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-pull-to-refresh-fixed-overlay="true"] {
+      transition-duration: 0ms;
+    }
   }
 
   #sticky-social-icons-container {

@@ -17,6 +17,7 @@ import {
   getNotificationsRoute,
   usesReverseMobileBottomNavigationScroll,
 } from "@/helpers/navigation.helpers";
+import { PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -340,11 +341,16 @@ const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
 }) => (
   <nav aria-hidden="true" className={getNavClassName({ hidden })}>
     <div
-      {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
-      className={getDockClassName(false)}
+      {...{ [PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE]: "true" }}
+      className="tw-flex tw-justify-center"
     >
-      <div className={floatingNavInnerClassName}>
-        <ul className={getFloatingNavListClassName(false)} />
+      <div
+        {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
+        className={getDockClassName(false)}
+      >
+        <div className={floatingNavInnerClassName}>
+          <ul className={getFloatingNavListClassName(false)} />
+        </div>
       </div>
     </div>
   </nav>
@@ -436,39 +442,44 @@ const BottomNavigationResolvedContent: React.FC<
       inert={hidden}
     >
       <div
-        {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
-        className={getDockClassName(compact)}
+        {...{ [PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE]: "true" }}
+        className="tw-flex tw-justify-center"
       >
-        <div className={floatingNavInnerClassName}>
-          <div
-            aria-hidden="true"
-            data-testid="mobile-dock-active-pill"
-            className={getFloatingActivePillClassName({
-              compact,
-              visible: hasActiveItem,
-            })}
-            style={getFloatingActivePillStyle({
-              activeItemIndex: hasActiveItem ? activeItemIndex : 0,
-              compact,
-              itemCount: navItems.length,
-            })}
-          />
-          <ul className={getFloatingNavListClassName(compact)}>
-            {navItems.map((item) => (
-              <li
-                key={item.name}
-                className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
-              >
-                <NavItem
-                  variant="floating"
-                  compact={compact}
-                  item={item}
-                  isCurrentWaveDm={isCurrentWaveDm}
-                  fullPrefetch={isApp && item.kind === "view"}
-                />
-              </li>
-            ))}
-          </ul>
+        <div
+          {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
+          className={getDockClassName(compact)}
+        >
+          <div className={floatingNavInnerClassName}>
+            <div
+              aria-hidden="true"
+              data-testid="mobile-dock-active-pill"
+              className={getFloatingActivePillClassName({
+                compact,
+                visible: hasActiveItem,
+              })}
+              style={getFloatingActivePillStyle({
+                activeItemIndex: hasActiveItem ? activeItemIndex : 0,
+                compact,
+                itemCount: navItems.length,
+              })}
+            />
+            <ul className={getFloatingNavListClassName(compact)}>
+              {navItems.map((item) => (
+                <li
+                  key={item.name}
+                  className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
+                >
+                  <NavItem
+                    variant="floating"
+                    compact={compact}
+                    item={item}
+                    isCurrentWaveDm={isCurrentWaveDm}
+                    fullPrefetch={isApp && item.kind === "view"}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </nav>
