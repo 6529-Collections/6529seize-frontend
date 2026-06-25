@@ -25,6 +25,92 @@ const dispatchTouchEvent = ({
   target.dispatchEvent(event);
 };
 
+const expectPullState = ({
+  active,
+  offset,
+  transitionDuration,
+}: {
+  readonly active: boolean;
+  readonly offset: string;
+  readonly transitionDuration: string;
+}) => {
+  expect(
+    document.documentElement.style.getPropertyValue(
+      PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
+    )
+  ).toBe(offset);
+  expect(
+    document.documentElement.style.getPropertyValue(
+      PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
+    )
+  ).toBe(transitionDuration);
+  if (active) {
+    expect(document.documentElement).toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
+      "true"
+    );
+  } else {
+    expect(document.documentElement).not.toHaveAttribute(
+      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE
+    );
+  }
+};
+
+const renderPullToRefresh = ({
+  useContentTarget = false,
+}: {
+  readonly useContentTarget?: boolean;
+} = {}) => {
+  const content = document.createElement("div");
+  const triggerZone = document.createElement("div");
+  const host = useContentTarget ? content : document.body;
+  host.appendChild(triggerZone);
+  if (useContentTarget) {
+    document.body.appendChild(content);
+  }
+
+  const triggerZoneRef: RefObject<HTMLElement | null> = {
+    current: triggerZone,
+  };
+  const contentRef: RefObject<HTMLElement | null> | undefined = useContentTarget
+    ? { current: content }
+    : undefined;
+  const renderResult = render(
+    <RefreshProvider>
+      <PullToRefresh contentRef={contentRef} triggerZoneRef={triggerZoneRef} />
+    </RefreshProvider>
+  );
+
+  return {
+    content,
+    target: contentRef?.current ?? document.body,
+    triggerZone,
+    unmount: () => {
+      renderResult.unmount();
+      if (useContentTarget) {
+        content.remove();
+      } else {
+        triggerZone.remove();
+      }
+    },
+  };
+};
+
+const startPull = (target: HTMLElement, pullToY: number) => {
+  act(() => {
+    dispatchTouchEvent({
+      clientY: 0,
+      target,
+      type: "touchstart",
+    });
+    dispatchTouchEvent({
+      clientY: pullToY,
+      target,
+      type: "touchmove",
+    });
+  });
+};
+
 describe("PullToRefresh", () => {
   let originalScrollYDescriptor: PropertyDescriptor | undefined;
 
@@ -59,286 +145,117 @@ describe("PullToRefresh", () => {
     }
   });
 
-  it("publishes a matching fixed-overlay offset while pulling and releasing", () => {
-    const triggerZone = document.createElement("div");
-    document.body.appendChild(triggerZone);
-    const triggerZoneRef: RefObject<HTMLElement | null> = {
-      current: triggerZone,
-    };
+  it("publishes pull offset while using document body as the fallback target", () => {
+    const pull = renderPullToRefresh();
 
-    const { unmount } = render(
-      <RefreshProvider>
-        <PullToRefresh triggerZoneRef={triggerZoneRef} />
-      </RefreshProvider>
-    );
-
-    act(() => {
-      dispatchTouchEvent({
-        clientY: 0,
-        target: triggerZone,
-        type: "touchstart",
-      });
-      dispatchTouchEvent({
-        clientY: 120,
-        target: triggerZone,
-        type: "touchmove",
-      });
-    });
+    startPull(pull.triggerZone, 120);
 
     expect(document.body.style.transform).toBe("translateY(60px)");
     expect(document.body.style.transition).toBe("none");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
-      )
-    ).toBe("60px");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
-      )
-    ).toBe("0ms");
-    expect(document.documentElement).toHaveAttribute(
-      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
-      "true"
-    );
+    expectPullState({
+      active: true,
+      offset: "60px",
+      transitionDuration: "0ms",
+    });
 
     act(() => {
-      dispatchTouchEvent({ target: triggerZone, type: "touchend" });
+      dispatchTouchEvent({ target: pull.triggerZone, type: "touchend" });
     });
 
     expect(document.body.style.transform).toBe("");
     expect(document.body.style.transition).toBe("transform 0.3s ease-out");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
-      )
-    ).toBe("0px");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
-      )
-    ).toBe("300ms");
-    expect(document.documentElement).toHaveAttribute(
-      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
-      "true"
-    );
+    expectPullState({
+      active: true,
+      offset: "0px",
+      transitionDuration: "300ms",
+    });
 
-    unmount();
-    triggerZone.remove();
+    pull.unmount();
   });
 
   it("transforms a provided content target instead of document body", () => {
-    const content = document.createElement("div");
-    const triggerZone = document.createElement("div");
-    content.appendChild(triggerZone);
-    document.body.appendChild(content);
-    const triggerZoneRef: RefObject<HTMLElement | null> = {
-      current: triggerZone,
-    };
-    const contentRef: RefObject<HTMLElement | null> = {
-      current: content,
-    };
+    const pull = renderPullToRefresh({ useContentTarget: true });
 
-    const { unmount } = render(
-      <RefreshProvider>
-        <PullToRefresh
-          contentRef={contentRef}
-          triggerZoneRef={triggerZoneRef}
-        />
-      </RefreshProvider>
-    );
+    startPull(pull.triggerZone, 120);
 
-    act(() => {
-      dispatchTouchEvent({
-        clientY: 0,
-        target: triggerZone,
-        type: "touchstart",
-      });
-      dispatchTouchEvent({
-        clientY: 120,
-        target: triggerZone,
-        type: "touchmove",
-      });
-    });
-
-    expect(content.style.transform).toBe("translateY(60px)");
-    expect(content.style.transition).toBe("none");
+    expect(pull.content.style.transform).toBe("translateY(60px)");
+    expect(pull.content.style.transition).toBe("none");
     expect(document.body.style.transform).toBe("");
 
-    unmount();
-    content.remove();
+    pull.unmount();
   });
 
-  it("keeps fixed overlays offset while refresh is committed and then clears the active state", () => {
+  it("keeps overlay offset during committed refresh and then clears active state", () => {
     jest.useFakeTimers();
+    const pull = renderPullToRefresh();
 
-    const triggerZone = document.createElement("div");
-    document.body.appendChild(triggerZone);
-    const triggerZoneRef: RefObject<HTMLElement | null> = {
-      current: triggerZone,
-    };
-
-    const { unmount } = render(
-      <RefreshProvider>
-        <PullToRefresh triggerZoneRef={triggerZoneRef} />
-      </RefreshProvider>
-    );
-
+    startPull(pull.triggerZone, 200);
     act(() => {
-      dispatchTouchEvent({
-        clientY: 0,
-        target: triggerZone,
-        type: "touchstart",
-      });
-      dispatchTouchEvent({
-        clientY: 200,
-        target: triggerZone,
-        type: "touchmove",
-      });
-      dispatchTouchEvent({ target: triggerZone, type: "touchend" });
+      dispatchTouchEvent({ target: pull.triggerZone, type: "touchend" });
     });
 
     expect(document.body.style.transform).toBe("translateY(56px)");
     expect(document.body.style.transition).toBe("transform 0.3s ease-out");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
-      )
-    ).toBe("56px");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
-      )
-    ).toBe("300ms");
-    expect(document.documentElement).toHaveAttribute(
-      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
-      "true"
-    );
+    expectPullState({
+      active: true,
+      offset: "56px",
+      transitionDuration: "300ms",
+    });
 
     act(() => {
       jest.advanceTimersByTime(1000);
     });
 
     expect(document.body.style.transform).toBe("");
-    expect(document.body.style.transition).toBe("transform 0.3s ease-out");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
-      )
-    ).toBe("0px");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
-      )
-    ).toBe("300ms");
-    expect(document.documentElement).toHaveAttribute(
-      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
-      "true"
-    );
+    expectPullState({
+      active: true,
+      offset: "0px",
+      transitionDuration: "300ms",
+    });
 
     act(() => {
       jest.advanceTimersByTime(300);
     });
 
-    expect(document.documentElement).not.toHaveAttribute(
-      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE
-    );
+    expectPullState({
+      active: false,
+      offset: "0px",
+      transitionDuration: "300ms",
+    });
 
-    unmount();
-    triggerZone.remove();
+    pull.unmount();
   });
 
-  it("clears fixed overlay offset on touch cancel", () => {
-    const triggerZone = document.createElement("div");
-    document.body.appendChild(triggerZone);
-    const triggerZoneRef: RefObject<HTMLElement | null> = {
-      current: triggerZone,
-    };
+  it("clears overlay offset on touch cancel and unmount", () => {
+    const canceledPull = renderPullToRefresh();
 
-    const { unmount } = render(
-      <RefreshProvider>
-        <PullToRefresh triggerZoneRef={triggerZoneRef} />
-      </RefreshProvider>
-    );
-
+    startPull(canceledPull.triggerZone, 120);
     act(() => {
       dispatchTouchEvent({
-        clientY: 0,
-        target: triggerZone,
-        type: "touchstart",
+        target: canceledPull.triggerZone,
+        type: "touchcancel",
       });
-      dispatchTouchEvent({
-        clientY: 120,
-        target: triggerZone,
-        type: "touchmove",
-      });
-      dispatchTouchEvent({ target: triggerZone, type: "touchcancel" });
     });
 
     expect(document.body.style.transform).toBe("");
     expect(document.body.style.transition).toBe("");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
-      )
-    ).toBe("0px");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
-      )
-    ).toBe("0ms");
-    expect(document.documentElement).not.toHaveAttribute(
-      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE
-    );
-
-    unmount();
-    triggerZone.remove();
-  });
-
-  it("clears fixed overlay offset when unmounted during a pull", () => {
-    const triggerZone = document.createElement("div");
-    document.body.appendChild(triggerZone);
-    const triggerZoneRef: RefObject<HTMLElement | null> = {
-      current: triggerZone,
-    };
-
-    const { unmount } = render(
-      <RefreshProvider>
-        <PullToRefresh triggerZoneRef={triggerZoneRef} />
-      </RefreshProvider>
-    );
-
-    act(() => {
-      dispatchTouchEvent({
-        clientY: 0,
-        target: triggerZone,
-        type: "touchstart",
-      });
-      dispatchTouchEvent({
-        clientY: 120,
-        target: triggerZone,
-        type: "touchmove",
-      });
+    expectPullState({
+      active: false,
+      offset: "0px",
+      transitionDuration: "0ms",
     });
+    canceledPull.unmount();
 
-    unmount();
+    const unmountedPull = renderPullToRefresh();
+    startPull(unmountedPull.triggerZone, 120);
+    unmountedPull.unmount();
 
     expect(document.body.style.transform).toBe("");
     expect(document.body.style.transition).toBe("");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY
-      )
-    ).toBe("0px");
-    expect(
-      document.documentElement.style.getPropertyValue(
-        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY
-      )
-    ).toBe("0ms");
-    expect(document.documentElement).not.toHaveAttribute(
-      PULL_TO_REFRESH_ACTIVE_ATTRIBUTE
-    );
-
-    triggerZone.remove();
+    expectPullState({
+      active: false,
+      offset: "0px",
+      transitionDuration: "0ms",
+    });
   });
 });

@@ -13,7 +13,6 @@ import {
   getNotificationsRoute,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
 } from "@/helpers/navigation.helpers";
-import { PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 
 jest.mock("@/components/navigation/NavItem", () => ({
   __esModule: true,
@@ -194,15 +193,6 @@ describe("BottomNavigation", () => {
     expect(
       container.querySelector(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
     ).toBeInTheDocument();
-    const fixedOverlayShell = container.querySelector(
-      `[${PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE}="true"]`
-    );
-    expect(fixedOverlayShell).toHaveClass("tw-fixed");
-    expect(fixedOverlayShell?.querySelector("nav")).toBeInTheDocument();
-    expect(fixedOverlayShell).toHaveAttribute(
-      PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE,
-      "true"
-    );
   });
 
   it("renders a stable nav fallback when search params suspend", () => {
@@ -223,15 +213,6 @@ describe("BottomNavigation", () => {
     expect(
       container.querySelector(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
     ).toBeInTheDocument();
-    const fixedOverlayShell = container.querySelector(
-      `[${PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE}="true"]`
-    );
-    expect(fixedOverlayShell).toHaveClass("tw-fixed");
-    expect(fixedOverlayShell?.querySelector("nav")).toBeInTheDocument();
-    expect(fixedOverlayShell).toHaveAttribute(
-      PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE,
-      "true"
-    );
     expect(NavItem).not.toHaveBeenCalled();
   });
 

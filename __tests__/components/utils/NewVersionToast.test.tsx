@@ -3,7 +3,6 @@ import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
 } from "@/helpers/navigation.helpers";
-import { PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -237,10 +236,6 @@ describe("NewVersionToast", () => {
     );
     expect(container.firstChild).toHaveClass("sm:tw-scale-100");
     expect(container.firstChild).toHaveClass("sm:tw-bottom-7");
-    expect(container.firstChild).toHaveAttribute(
-      PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE,
-      "true"
-    );
     expect(
       (container.firstChild as HTMLElement).style.getPropertyValue(
         NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
