@@ -2,10 +2,10 @@
 
 import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
 import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { normalizeLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { type CSSProperties, type JSX } from "react";
 
@@ -43,11 +43,6 @@ const refreshWithoutToastOverride = () => {
   globalThis.location.reload();
 };
 
-const getBrowserLocale = () =>
-  normalizeLocale(
-    globalThis.navigator?.languages?.[0] ?? globalThis.navigator?.language
-  );
-
 const SGT_WINK_IMAGE = (
   // react-doctor-disable-next-line react-doctor/nextjs-no-img-element restored plain img to preserve pre-existing decorative toast asset behavior.
   <img
@@ -69,6 +64,7 @@ const ROCKET_REFRESH_IMAGE = (
 const NewVersionToast = (): JSX.Element | null => {
   const isVersionStale = useIsVersionStale();
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const shouldTrackMobileDock = useMediaQuery(
     NEW_VERSION_TOAST_MOBILE_DOCK_QUERY
   );
@@ -89,7 +85,6 @@ const NewVersionToast = (): JSX.Element | null => {
     return null;
   }
 
-  const locale = getBrowserLocale();
   const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
 
   return (
