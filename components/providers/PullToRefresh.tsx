@@ -2,6 +2,11 @@
 
 import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import {
+  PULL_TO_REFRESH_ACTIVE_ATTRIBUTE,
+  PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY,
+  PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY,
+} from "@/helpers/pull-to-refresh.helpers";
+import {
   useCallback,
   useContext,
   useEffect,
@@ -14,22 +19,79 @@ import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapp
 const PULL_THRESHOLD = 80;
 const PULL_MAX = 140;
 const INDICATOR_SIZE = 36;
+const RELEASE_TRANSITION = "transform 0.3s ease-out";
+const RELEASE_TRANSITION_DURATION_MS = 300;
 
 interface PullToRefreshProps {
   readonly triggerZoneRef: RefObject<HTMLElement | null>;
+  readonly contentRef?: RefObject<HTMLElement | null>;
 }
 
-export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
+const useFixedOverlayPullOffset = () => {
+  const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearResetTimeout = useCallback(() => {
+    if (!resetTimeoutRef.current) {
+      return;
+    }
+
+    clearTimeout(resetTimeoutRef.current);
+    resetTimeoutRef.current = null;
+  }, []);
+
+  useEffect(() => clearResetTimeout, [clearResetTimeout]);
+
+  return useCallback(
+    (distance: number, transitionDurationMs: number) => {
+      clearResetTimeout();
+
+      const documentElement = document.documentElement;
+      const hasActiveOverlayOffset =
+        distance !== 0 || transitionDurationMs !== 0;
+
+      if (hasActiveOverlayOffset) {
+        documentElement.setAttribute(PULL_TO_REFRESH_ACTIVE_ATTRIBUTE, "true");
+      } else {
+        documentElement.removeAttribute(PULL_TO_REFRESH_ACTIVE_ATTRIBUTE);
+      }
+
+      documentElement.style.setProperty(
+        PULL_TO_REFRESH_FIXED_OVERLAY_TRANSITION_DURATION_PROPERTY,
+        `${transitionDurationMs}ms`
+      );
+      documentElement.style.setProperty(
+        PULL_TO_REFRESH_FIXED_OVERLAY_OFFSET_PROPERTY,
+        `${distance}px`
+      );
+
+      if (distance === 0 && transitionDurationMs > 0) {
+        resetTimeoutRef.current = setTimeout(() => {
+          document.documentElement.removeAttribute(
+            PULL_TO_REFRESH_ACTIVE_ATTRIBUTE
+          );
+          resetTimeoutRef.current = null;
+        }, transitionDurationMs);
+      }
+    },
+    [clearResetTimeout]
+  );
+};
+
+export default function PullToRefresh({
+  contentRef: providedContentRef,
+  triggerZoneRef,
+}: PullToRefreshProps) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { globalRefresh } = useGlobalRefresh();
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
-  const contentRef = useRef<HTMLElement | null>(null);
+  const transformedContentRef = useRef<HTMLElement | null>(null);
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pullDistanceRef = useRef(0);
   const isRefreshingRef = useRef(false);
+  const setFixedOverlayPullOffset = useFixedOverlayPullOffset();
 
   const isAtTop = useCallback(() => {
     return window.scrollY <= 0;
@@ -51,10 +113,25 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
   );
 
   const resetContentStyles = useCallback(() => {
-    if (!contentRef.current) return;
-    contentRef.current.style.transform = "";
-    contentRef.current.style.transition = "";
-  }, []);
+    if (transformedContentRef.current) {
+      transformedContentRef.current.style.transform = "";
+      transformedContentRef.current.style.transition = "";
+    }
+    setFixedOverlayPullOffset(0, 0);
+  }, [setFixedOverlayPullOffset]);
+
+  const releaseContentToOffset = useCallback(
+    (distance: number) => {
+      if (transformedContentRef.current) {
+        transformedContentRef.current.style.transform =
+          distance === 0 ? "" : `translateY(${distance}px)`;
+        transformedContentRef.current.style.transition = RELEASE_TRANSITION;
+      }
+
+      setFixedOverlayPullOffset(distance, RELEASE_TRANSITION_DURATION_MS);
+    },
+    [setFixedOverlayPullOffset]
+  );
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
@@ -72,9 +149,11 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
       touchStartY.current = touch.clientY;
 
       isPulling.current = true;
-      contentRef.current = document.body;
+      transformedContentRef.current =
+        providedContentRef?.current ?? document.body;
+      setFixedOverlayPullOffset(0, 0);
     },
-    [isAtTop, triggerZoneRef]
+    [isAtTop, providedContentRef, setFixedOverlayPullOffset, triggerZoneRef]
   );
 
   const handleTouchMove = useCallback(
@@ -109,17 +188,23 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
       const distance = Math.min(diff * resistance, PULL_MAX);
       pullDistanceRef.current = distance;
       setPullDistance(distance);
+      setFixedOverlayPullOffset(distance, 0);
 
-      if (contentRef.current) {
-        contentRef.current.style.transform = `translateY(${distance}px)`;
-        contentRef.current.style.transition = "none";
+      if (transformedContentRef.current) {
+        transformedContentRef.current.style.transform = `translateY(${distance}px)`;
+        transformedContentRef.current.style.transition = "none";
       }
 
       if (distance > 10) {
         e.preventDefault();
       }
     },
-    [isAtTop, getScrollableParent, resetContentStyles]
+    [
+      isAtTop,
+      getScrollableParent,
+      resetContentStyles,
+      setFixedOverlayPullOffset,
+    ]
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -130,12 +215,10 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
       isRefreshingRef.current = true;
       setIsRefreshing(true);
 
-      if (contentRef.current) {
-        contentRef.current.style.transform = `translateY(${INDICATOR_SIZE + 20}px)`;
-        contentRef.current.style.transition = "transform 0.3s ease-out";
-      }
-      pullDistanceRef.current = INDICATOR_SIZE + 20;
-      setPullDistance(INDICATOR_SIZE + 20);
+      const refreshingPullDistance = INDICATOR_SIZE + 20;
+      releaseContentToOffset(refreshingPullDistance);
+      pullDistanceRef.current = refreshingPullDistance;
+      setPullDistance(refreshingPullDistance);
 
       invalidateAll();
       globalRefresh();
@@ -145,21 +228,15 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
         setIsRefreshing(false);
         pullDistanceRef.current = 0;
         setPullDistance(0);
-        if (contentRef.current) {
-          contentRef.current.style.transform = "";
-          contentRef.current.style.transition = "transform 0.3s ease-out";
-        }
+        releaseContentToOffset(0);
         refreshTimeoutRef.current = null;
       }, 1000);
     } else {
       pullDistanceRef.current = 0;
       setPullDistance(0);
-      if (contentRef.current) {
-        contentRef.current.style.transform = "";
-        contentRef.current.style.transition = "transform 0.3s ease-out";
-      }
+      releaseContentToOffset(0);
     }
-  }, [invalidateAll, globalRefresh]);
+  }, [invalidateAll, globalRefresh, releaseContentToOffset]);
 
   const handleTouchCancel = useCallback(() => {
     isPulling.current = false;
@@ -174,16 +251,18 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
     pullDistanceRef.current = 0;
     setPullDistance(0);
 
-    if (contentRef.current) {
-      contentRef.current.style.transform = "";
-      contentRef.current.style.transition = "";
+    if (transformedContentRef.current) {
+      transformedContentRef.current.style.transform = "";
+      transformedContentRef.current.style.transition = "";
     }
-  }, []);
+    setFixedOverlayPullOffset(0, 0);
+  }, [setFixedOverlayPullOffset]);
 
   useEffect(() => {
     document.addEventListener("touchstart", handleTouchStart, {
       passive: true,
     });
+    // react-doctor-disable-next-line react-doctor/client-passive-event-listeners pull-to-refresh must call preventDefault after the gesture commits.
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
     document.addEventListener("touchend", handleTouchEnd, { passive: true });
     document.addEventListener("touchcancel", handleTouchCancel, {
@@ -199,12 +278,19 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
         clearTimeout(refreshTimeoutRef.current);
         refreshTimeoutRef.current = null;
       }
-      if (contentRef.current) {
-        contentRef.current.style.transform = "";
-        contentRef.current.style.transition = "";
+      if (transformedContentRef.current) {
+        transformedContentRef.current.style.transform = "";
+        transformedContentRef.current.style.transition = "";
       }
+      setFixedOverlayPullOffset(0, 0);
     };
-  }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel]);
+  }, [
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    handleTouchCancel,
+    setFixedOverlayPullOffset,
+  ]);
 
   if (pullDistance === 0) return null;
 

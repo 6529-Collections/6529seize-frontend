@@ -13,6 +13,7 @@ import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
 } from "@/helpers/navigation.helpers";
+import { PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 
 jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
   useMemesWaveFooterStats: jest.fn(),
@@ -280,6 +281,10 @@ describe("MemesWaveFooter", () => {
     expect(floatingLayer).toHaveClass("tw-z-40");
     expect(floatingLayer).toHaveClass("tw-pointer-events-none");
     expect(floatingLayer).toHaveClass("tw-will-change-[bottom]");
+    expect(floatingLayer).toHaveAttribute(
+      PULL_TO_REFRESH_FIXED_OVERLAY_ATTRIBUTE,
+      "true"
+    );
     expect(floatingLayer).not.toHaveClass("tw-bg-black");
     expect((floatingLayer as HTMLElement).style.bottom).toBe(
       MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE.bottom
