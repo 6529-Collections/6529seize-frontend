@@ -288,7 +288,7 @@ function HighlyRatedWavePreviewScoreBadge({
           score: scoreLabel,
         })}
         onMouseEnter={onMouseEnter}
-        className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2 tw-h-6 tw-w-7" : "-tw-bottom-1 -tw-right-1.5 tw-h-5 tw-w-6"} tw-z-20 tw-inline-flex tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
+        className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
       >
         <svg
           aria-hidden="true"

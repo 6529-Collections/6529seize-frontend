@@ -463,6 +463,8 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   expect(scoreBadgeText).toBeInTheDocument();
   expect(scoreBadgeText.closest("button")).toHaveClass("-tw-bottom-1");
   expect(scoreBadgeText.closest("button")).toHaveClass("-tw-right-1.5");
+  expect(scoreBadgeText.closest("button")).toHaveClass("tw-h-6");
+  expect(scoreBadgeText.closest("button")).toHaveClass("tw-w-7");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
   fireEvent.click(screen.getByRole("button", { name: "Score 93" }));
