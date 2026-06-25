@@ -1,12 +1,36 @@
 "use client";
 
+import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
+import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
-import { normalizeLocale } from "@/i18n/locales";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { t } from "@/i18n/messages";
-import { type JSX } from "react";
+import { type CSSProperties, type JSX } from "react";
 
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
+const NEW_VERSION_TOAST_MOBILE_DOCK_QUERY = "(max-width: 639px)";
+const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
+  "--new-version-toast-mobile-bottom";
+const NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY =
+  "--new-version-toast-mobile-scale";
+const NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM = "1rem";
+const NEW_VERSION_TOAST_APP_FALLBACK_BOTTOM = "6rem";
+const NEW_VERSION_TOAST_FALLBACK_SCALE = "1";
+
+type NewVersionToastStyle = CSSProperties & {
+  readonly [NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY]: string;
+  readonly [NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY]: string;
+};
+
+const getNewVersionToastStyle = (
+  fallbackBottom: string
+): NewVersionToastStyle =>
+  ({
+    [NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY]: fallbackBottom,
+    [NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY]: NEW_VERSION_TOAST_FALLBACK_SCALE,
+  }) as NewVersionToastStyle;
 
 const removeNewVersionToastOverrideFromCurrentPath = () => {
   const url = new URL(globalThis.location.href);
@@ -19,27 +43,55 @@ const refreshWithoutToastOverride = () => {
   globalThis.location.reload();
 };
 
-const getBrowserLocale = () =>
-  normalizeLocale(
-    globalThis.navigator?.languages?.[0] ?? globalThis.navigator?.language
-  );
+const SGT_WINK_IMAGE = (
+  // react-doctor-disable-next-line react-doctor/nextjs-no-img-element restored plain img to preserve pre-existing decorative toast asset behavior.
+  <img
+    src="/emojis/sgt_wink.webp"
+    alt=""
+    className="tw-size-4 tw-flex-shrink-0 tw-self-end tw-opacity-85 sm:tw-size-[18px]"
+  />
+);
+
+const ROCKET_REFRESH_IMAGE = (
+  // react-doctor-disable-next-line react-doctor/nextjs-no-img-element restored plain img to avoid unrelated next/image optimization behavior in this dock-positioning PR.
+  <img
+    src="/rocket-refresh.png"
+    alt=""
+    className="tw-relative tw-z-10 tw-h-12 tw-w-auto tw-flex-shrink-0 tw-text-[#dfffe8] tw-transition-all tw-duration-200 tw-ease-out group-active:tw-scale-[0.985] desktop-hover:group-hover:tw-brightness-150 desktop-hover:group-hover:tw-saturate-150"
+  />
+);
 
 const NewVersionToast = (): JSX.Element | null => {
   const isVersionStale = useIsVersionStale();
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
+  const shouldTrackMobileDock = useMediaQuery(
+    NEW_VERSION_TOAST_MOBILE_DOCK_QUERY
+  );
+  const fallbackBottom = isApp
+    ? NEW_VERSION_TOAST_APP_FALLBACK_BOTTOM
+    : NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM;
+  const toastLayerRef = useMeasuredMobileBottomNavDockBottom({
+    enabled: isVersionStale && shouldTrackMobileDock,
+    fallbackBottom,
+    measurementWindowMs: MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS,
+    resetOnDisabled: false,
+    targetProperty: NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY,
+    targetScaleProperty: NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY,
+    watchForDockRoot: isApp,
+  });
 
   if (!isVersionStale) {
     return null;
   }
 
-  const locale = getBrowserLocale();
   const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
 
   return (
     <div
-      className={`tw-fixed ${
-        isApp ? "tw-bottom-24" : "tw-bottom-4"
-      } tailwind-scope tw-pointer-events-none tw-left-4 tw-right-4 tw-z-[1000] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7`}
+      ref={toastLayerRef}
+      style={getNewVersionToastStyle(fallbackBottom)}
+      className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-z-[1000] tw-w-auto tw-origin-bottom tw-scale-[var(--new-version-toast-mobile-scale,1)] tw-transform-gpu tw-will-change-[bottom,transform] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7 sm:tw-scale-100"
     >
       <button
         type="button"
@@ -54,20 +106,12 @@ const NewVersionToast = (): JSX.Element | null => {
           </div>
           <div className="tw-mt-0.5 tw-flex tw-items-center tw-gap-1 tw-text-[13px] tw-font-semibold tw-leading-none tw-text-[#b9c0c4] sm:tw-text-sm">
             <span>{t(locale, "newVersionToast.eyebrow")}</span>
-            <img
-              src="/emojis/sgt_wink.webp"
-              alt=""
-              className="tw-size-4 tw-flex-shrink-0 tw-self-end tw-opacity-85 sm:tw-size-[18px]"
-            />
+            {SGT_WINK_IMAGE}
           </div>
         </div>
 
         <span className="tw-relative tw-z-10 tw-flex tw-h-14 tw-w-fit tw-flex-shrink-0 tw-items-center tw-justify-center">
-          <img
-            src="/rocket-refresh.png"
-            alt=""
-            className="tw-relative tw-z-10 tw-h-12 tw-w-auto tw-flex-shrink-0 tw-text-[#dfffe8] tw-transition-all tw-duration-200 tw-ease-out group-active:tw-scale-[0.985] desktop-hover:group-hover:tw-brightness-150 desktop-hover:group-hover:tw-saturate-150"
-          />
+          {ROCKET_REFRESH_IMAGE}
         </span>
       </button>
     </div>

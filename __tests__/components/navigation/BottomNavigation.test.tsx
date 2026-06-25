@@ -8,6 +8,8 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
 import {
+  MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
+  MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
   getNotificationsRoute,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
 } from "@/helpers/navigation.helpers";
@@ -188,6 +190,9 @@ describe("BottomNavigation", () => {
     expect(navItemCalls.every((call) => call[0].variant === "floating")).toBe(
       true
     );
+    expect(
+      container.querySelector(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
+    ).toBeInTheDocument();
   });
 
   it("renders a stable nav fallback when search params suspend", () => {
@@ -205,6 +210,9 @@ describe("BottomNavigation", () => {
       "true"
     );
     expect(container.querySelector("ul")).toBeInTheDocument();
+    expect(
+      container.querySelector(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
+    ).toBeInTheDocument();
     expect(NavItem).not.toHaveBeenCalled();
   });
 
@@ -217,6 +225,9 @@ describe("BottomNavigation", () => {
       "tw-pointer-events-none"
     );
     expect(container.querySelector("nav")).not.toHaveClass("tw-h-[85px]");
+    expect(
+      container.querySelector(`[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`)
+    ).toBeInTheDocument();
     expect(
       (NavItem as jest.Mock).mock.calls.every(([props]) => {
         return props.variant === "floating" && props.compact === false;
