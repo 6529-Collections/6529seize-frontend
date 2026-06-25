@@ -1,15 +1,16 @@
 import { useAuth } from "@/components/auth/Auth";
 import HeaderQRScanner from "@/components/header/share/HeaderQRScanner";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 
-const SCANNER_FALLBACK_GUIDANCE =
-  "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.";
-
 jest.mock("@/hooks/useCapacitor");
+jest.mock("@/hooks/useBrowserLocale");
 jest.mock("@/components/auth/Auth");
 jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
 jest.mock("next/image", () => ({
@@ -26,11 +27,15 @@ jest.mock("@capacitor/barcode-scanner", () => ({
 }));
 
 const mockedCapacitor = useCapacitor as jest.Mock;
+const mockedBrowserLocale = useBrowserLocale as jest.Mock;
 const mockedAuth = useAuth as jest.Mock;
 const mockedRouter = useRouter as jest.Mock;
 const { CapacitorBarcodeScanner } = require("@capacitor/barcode-scanner");
 
 describe("HeaderQRScanner", () => {
+  const getTriggerName = (locale: SupportedLocale = "en-US") =>
+    t(locale, "qrScanner.trigger.ariaLabel");
+
   const renderErrorToastMessage = (toast: jest.Mock) => {
     const toastArg = toast.mock.calls.at(-1)?.[0];
     expect(toastArg?.type).toBe("error");
@@ -39,6 +44,7 @@ describe("HeaderQRScanner", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedBrowserLocale.mockReturnValue("en-US");
     mockedAuth.mockReturnValue({ setToast: jest.fn() });
   });
 
@@ -59,13 +65,13 @@ describe("HeaderQRScanner", () => {
     });
 
     render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
-    const btn = await screen.findByRole("button", { name: "QR Code Scanner" });
+    const btn = await screen.findByRole("button", { name: getTriggerName() });
     await userEvent.click(btn);
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
     expect(CapacitorBarcodeScanner.scanBarcode).toHaveBeenCalledWith({
       hint: 0,
-      scanInstructions: "Point your camera at a valid QR code on 6529.io",
+      scanInstructions: t("en-US", "qrScanner.instructions"),
       scanButton: false,
       cameraDirection: 1,
       scanOrientation: 3,
@@ -83,13 +89,13 @@ describe("HeaderQRScanner", () => {
     });
 
     render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
-    const btn = await screen.findByRole("button", { name: "QR Code Scanner" });
+    const btn = await screen.findByRole("button", { name: getTriggerName() });
     await userEvent.click(btn);
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
     expect(CapacitorBarcodeScanner.scanBarcode).toHaveBeenCalledWith({
       hint: 17,
-      scanInstructions: "Point your camera at a valid QR code on 6529.io",
+      scanInstructions: t("en-US", "qrScanner.instructions"),
       scanButton: false,
       cameraDirection: 1,
       scanOrientation: 3,
@@ -97,6 +103,30 @@ describe("HeaderQRScanner", () => {
         scanningLibrary: "mlkit",
       },
     });
+  });
+
+  it("uses localized scanner copy", async () => {
+    mockedBrowserLocale.mockReturnValue("fr-FR");
+    mockedCapacitor.mockReturnValue({ isCapacitor: true });
+    const push = jest.fn();
+    mockedRouter.mockReturnValue({ push });
+    mockedAuth.mockReturnValue({ setToast: jest.fn() });
+    (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockResolvedValue({
+      ScanResult: "https://test.6529.io/profile",
+    });
+
+    render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
+    const btn = await screen.findByRole("button", {
+      name: getTriggerName("fr-FR"),
+    });
+    await userEvent.click(btn);
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
+    expect(CapacitorBarcodeScanner.scanBarcode).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scanInstructions: t("fr-FR", "qrScanner.instructions"),
+      })
+    );
   });
 
   it("handles deep link navigation", async () => {
@@ -110,7 +140,7 @@ describe("HeaderQRScanner", () => {
     });
 
     render(<HeaderQRScanner onScanSuccess={onScan} />);
-    const btn = await screen.findByRole("button", { name: "QR Code Scanner" });
+    const btn = await screen.findByRole("button", { name: getTriggerName() });
     await userEvent.click(btn);
 
     await waitFor(() =>
@@ -130,12 +160,12 @@ describe("HeaderQRScanner", () => {
     (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockResolvedValue({});
 
     render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
-    const btn = await screen.findByRole("button", { name: "QR Code Scanner" });
+    const btn = await screen.findByRole("button", { name: getTriggerName() });
     await userEvent.click(btn);
 
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith({
-        message: "This QR code is not valid.",
+        message: t("en-US", "qrScanner.invalidCode"),
         type: "error",
       })
     );
@@ -155,12 +185,14 @@ describe("HeaderQRScanner", () => {
     );
 
     render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
-    const btn = await screen.findByRole("button", { name: "QR Code Scanner" });
+    const btn = await screen.findByRole("button", { name: getTriggerName() });
     await userEvent.click(btn);
 
     await waitFor(() => expect(toast).toHaveBeenCalled());
     renderErrorToastMessage(toast);
-    expect(screen.getByText("Scan failed.")).toBeInTheDocument();
+    expect(
+      screen.getByText(t("en-US", "qrScanner.error.scanFailed"))
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         "Couldn’t scan because camera access wasn’t provided. Check your camera permissions and try again."
@@ -171,25 +203,29 @@ describe("HeaderQRScanner", () => {
 
   it.each([
     {
+      capacitor: { isCapacitor: true, isIos: true },
       code: "OS-PLUG-BARC-0006",
       message: "Couldn’t scan because the process was cancelled.",
     },
-    new Error("Couldn’t scan because the process was cancelled."),
+    {
+      capacitor: { isCapacitor: true, isAndroid: true },
+      error: new Error("Couldn’t scan because the process was cancelled."),
+    },
   ])(
     "does not show an error toast when the scanner is cancelled",
-    async (error) => {
-      mockedCapacitor.mockReturnValue({ isCapacitor: true, isIos: true });
+    async (testCase) => {
+      mockedCapacitor.mockReturnValue(testCase.capacitor);
       const push = jest.fn();
       mockedRouter.mockReturnValue({ push });
       const toast = jest.fn();
       mockedAuth.mockReturnValue({ setToast: toast });
       (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockRejectedValue(
-        error
+        "error" in testCase ? testCase.error : testCase
       );
 
       render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
       const btn = await screen.findByRole("button", {
-        name: "QR Code Scanner",
+        name: getTriggerName(),
       });
       await userEvent.click(btn);
 
@@ -212,13 +248,17 @@ describe("HeaderQRScanner", () => {
     });
 
     render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
-    const btn = await screen.findByRole("button", { name: "QR Code Scanner" });
+    const btn = await screen.findByRole("button", { name: getTriggerName() });
     await userEvent.click(btn);
 
     await waitFor(() => expect(toast).toHaveBeenCalled());
     renderErrorToastMessage(toast);
-    expect(screen.getByText("Scan failed.")).toBeInTheDocument();
-    expect(screen.getByText(SCANNER_FALLBACK_GUIDANCE)).toBeInTheDocument();
+    expect(
+      screen.getByText(t("en-US", "qrScanner.error.scanFailed"))
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(t("en-US", "qrScanner.error.fallbackGuidance"))
+    ).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
   });
 });

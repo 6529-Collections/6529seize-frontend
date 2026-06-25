@@ -55,6 +55,17 @@ export const DE_DE_MESSAGES = {
   "drop.media.retry": "Erneut versuchen",
   "drop.media.processingFailed": "Bildverarbeitung fehlgeschlagen.",
   "drop.media.processingTimedOut": "Zeitlimit fuer Bildverarbeitung erreicht.",
+  "qrScanner.instructions":
+    "Richte deine Kamera auf einen gueltigen QR-Code auf 6529.io",
+  "qrScanner.error.scanFailed": "Scan fehlgeschlagen.",
+  "qrScanner.error.fallbackGuidance":
+    "Stelle sicher, dass du die neueste Version der mobilen 6529-App verwendest und dass der Kamerazugriff in den Geraeteeinstellungen aktiviert ist.",
+  "qrScanner.invalidCode": "Dieser QR-Code ist nicht gueltig.",
+  "qrScanner.sidebar.ariaLabel": "QR-Code scannen",
+  "qrScanner.sidebar.label": "QR-Code scannen",
+  "qrScanner.trigger.ariaLabel": "QR-Code-Scanner",
+  "qrScanner.trigger.title": "QR-Code-Scanner",
+  "qrScanner.iconAlt": "QR-Scanner",
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
