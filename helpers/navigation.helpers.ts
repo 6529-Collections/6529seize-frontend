@@ -23,6 +23,9 @@ export const MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR = `[${MOBILE_BOTTOM_NAV_SC
 export const MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE = "data-mobile-bottom-nav-dock";
 export const MOBILE_BOTTOM_NAV_DOCK_SELECTOR = `[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`;
 
+export const MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE = "data-mobile-bottom-nav-root";
+export const MOBILE_BOTTOM_NAV_ROOT_SELECTOR = `[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`;
+
 export const usesReverseMobileBottomNavigationScroll = ({
   pathname,
 }: {
