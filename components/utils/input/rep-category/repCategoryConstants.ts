@@ -1,4 +1,4 @@
-export const HELP_BOT_CREDIT_REP_CATEGORY = "Help6529 Credits";
+const HELP_BOT_CREDIT_REP_CATEGORY = "Help6529 Credits";
 
 export const HELP_BOT_CREDIT_REP_CATEGORY_ERROR =
   "Help6529 Credits is managed by help6529.";
