@@ -28,20 +28,9 @@ jest.mock("next/dynamic", () => () => {
 jest.mock(
   "@/components/navigation/BottomNavigation",
   () =>
-    function BottomNavigation({
-      hidden,
-      onCompactChange,
-    }: {
-      readonly hidden?: boolean;
-      readonly onCompactChange?: (compact: boolean) => void;
-    }) {
+    function BottomNavigation({ hidden }: { readonly hidden?: boolean }) {
       return (
-        <button
-          type="button"
-          data-testid="bottom-nav"
-          data-hidden={`${Boolean(hidden)}`}
-          onClick={() => onCompactChange?.(true)}
-        />
+        <div data-testid="bottom-nav" data-hidden={`${Boolean(hidden)}`} />
       );
     }
 );
@@ -49,17 +38,12 @@ jest.mock(
   "@/components/brain/mobile/BrainMobileWaves",
   () =>
     function BrainMobileWaves({
-      bottomNavCompact,
       onOpenQuickVote,
     }: {
-      readonly bottomNavCompact?: boolean;
       readonly onOpenQuickVote: () => void;
     }) {
       return (
-        <div
-          data-testid="waves"
-          data-bottom-nav-compact={`${Boolean(bottomNavCompact)}`}
-        >
+        <div data-testid="waves">
           <button type="button" onClick={onOpenQuickVote}>
             Open quick vote from app layout
           </button>
@@ -377,24 +361,6 @@ describe("AppLayout", () => {
     );
     expect(screen.getByText("Session 2")).toBeInTheDocument();
     expect(mockDialogMountCount).toBe(1);
-  });
-
-  it("passes bottom nav compact state to the waves quick-vote view", () => {
-    getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
-
-    renderWithProvider(<AppLayout>child</AppLayout>);
-
-    expect(screen.getByTestId("waves")).toHaveAttribute(
-      "data-bottom-nav-compact",
-      "false"
-    );
-
-    fireEvent.click(screen.getByTestId("bottom-nav"));
-
-    expect(screen.getByTestId("waves")).toHaveAttribute(
-      "data-bottom-nav-compact",
-      "true"
-    );
   });
 
   it("closes the quick-vote dialog when leaving the waves view", () => {

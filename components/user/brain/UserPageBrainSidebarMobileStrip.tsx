@@ -127,11 +127,11 @@ export default function UserPageBrainSidebarMobileStrip({
   return (
     <section
       aria-label="Brain waves strip"
-      className="lg:tw-hidden"
+      className="tw-mb-4 lg:tw-hidden"
       data-testid="brain-sidebar-mobile-strip"
     >
-      <div className="tw-relative tw-overflow-hidden">
-        <div className="tw-flex tw-items-end tw-gap-4 tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden">
+      <div className="tw-relative">
+        <div className="tw-flex tw-items-end tw-gap-4 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1.5 tw-pr-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
           {shouldShowCreatedSection && (
             <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
               <span className="tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
