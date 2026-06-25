@@ -5,13 +5,16 @@ import {
   formatMemesQuickVoteLeftThisRoundText,
   formatMemesQuickVoteUnratedText,
 } from "@/hooks/memesQuickVote.helpers";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React from "react";
 
 interface MemesWaveQuickVoteTriggerProps {
   readonly isAvailable?: boolean | undefined;
   readonly className?: string | undefined;
   readonly leftThisRoundCount: number;
+  readonly locale?: SupportedLocale | undefined;
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
   readonly unratedCount: number;
@@ -21,6 +24,7 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
   isAvailable = true,
   className,
   leftThisRoundCount,
+  locale = DEFAULT_LOCALE,
   onOpenQuickVote,
   onPrefetchQuickVote,
   unratedCount,
@@ -29,18 +33,26 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
     return null;
   }
 
+  const leftThisRoundText = formatMemesQuickVoteLeftThisRoundText(
+    leftThisRoundCount,
+    locale
+  );
+  const unratedText = formatMemesQuickVoteUnratedText(unratedCount, locale);
+  const summaryLabel = t(locale, "memes.quickVote.summary", {
+    leftThisRound: leftThisRoundText,
+    unrated: unratedText,
+  });
   const label =
     leftThisRoundCount > 0
-      ? `${formatMemesQuickVoteLeftThisRoundText(
-          leftThisRoundCount
-        )}, ${formatMemesQuickVoteUnratedText(unratedCount)} in the memes wave`
-      : "Quick vote";
+      ? t(locale, "memes.quickVote.inMemesWave", {
+          leftThisRound: leftThisRoundText,
+          unrated: unratedText,
+        })
+      : t(locale, "memes.waveFooter.quickVote.label");
   const title =
     leftThisRoundCount > 0
-      ? `${formatMemesQuickVoteLeftThisRoundText(
-          leftThisRoundCount
-        )}, ${formatMemesQuickVoteUnratedText(unratedCount)}`
-      : "Quick vote";
+      ? summaryLabel
+      : t(locale, "memes.waveFooter.quickVote.label");
 
   return (
     <button
@@ -57,7 +69,7 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
       <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-300/20" />
       {leftThisRoundCount > 0 && (
         <span className="tw-text-xs tw-font-semibold">
-          {formatNumberWithCommas(leftThisRoundCount)}
+          {formatInteger(locale, leftThisRoundCount)}
         </span>
       )}
     </button>
