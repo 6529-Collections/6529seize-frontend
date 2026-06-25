@@ -53,6 +53,24 @@ const getDropBadgePlacementClasses = ({
     : "tw-bottom-[-2px] tw-right-[-2px]";
 };
 
+const getAvatarSizeClasses = ({
+  isLarge,
+  isSmall,
+}: {
+  readonly isLarge: boolean;
+  readonly isSmall: boolean;
+}) => {
+  if (isSmall) {
+    return "tw-size-7";
+  }
+
+  if (isLarge) {
+    return "tw-size-11";
+  }
+
+  return "tw-size-8";
+};
+
 export const WaveAvatar = ({
   dropBadgePlacement = "bottom-right",
   isActive,
@@ -71,11 +89,7 @@ export const WaveAvatar = ({
     rawCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : rawCount;
   const isSmall = size === "sm";
   const isLarge = size === "lg";
-  const avatarSizeClasses = isSmall
-    ? "tw-size-7"
-    : isLarge
-      ? "tw-size-11"
-      : "tw-size-8";
+  const avatarSizeClasses = getAvatarSizeClasses({ isLarge, isSmall });
   const activeRingClasses = isSmall
     ? "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
     : "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-2 tw-ring-offset-iron-950";
