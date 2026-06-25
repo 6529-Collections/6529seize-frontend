@@ -7,11 +7,10 @@ import React, {
   useImperativeHandle,
   useRef,
 } from "react";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
+import { SidebarCategoryLabel } from "./SidebarCategoryLabel";
 import {
   buildHighlyRatedWavePreviewItems,
   getHighlyRatedPreviewWaves,
@@ -41,7 +40,6 @@ import {
 } from "./sidebarWaveListUtils";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import HoverCard from "@/components/utils/tooltip/HoverCard";
 
 // Height for empty waves placeholder to maintain consistent layout (matches UnifiedWavesListEmpty)
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
@@ -51,16 +49,6 @@ const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
 const SUBWAVE_ROW_HEIGHT = 54 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
-const INFO_TOOLTIP_STYLE = {
-  padding: "6px 10px",
-  background: "#37373E",
-  color: "white",
-  fontSize: "12px",
-  fontWeight: 500,
-  borderRadius: "6px",
-  border: "1px solid #4C4C55",
-  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-} as const satisfies React.CSSProperties;
 
 // Common styles for positioned elements
 const listContainerStyle = {
@@ -91,50 +79,6 @@ function SidebarCategoryHeader({
       {rightContent !== undefined && rightContent !== null && (
         <div className="tw-flex tw-items-center">{rightContent}</div>
       )}
-    </div>
-  );
-}
-
-function SidebarCategoryLabel({
-  label,
-  tooltipContent,
-}: {
-  readonly label: string;
-  readonly tooltipContent?: string | undefined;
-}) {
-  return (
-    <div className="tw-px-4 tw-pb-2 tw-pt-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-500">
-      <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
-        <span>{label}</span>
-        {tooltipContent && (
-          <span className="tw-relative tw-inline-flex tw-size-3 tw-items-center tw-justify-center">
-            <HoverCard
-              ariaLabel={tooltipContent}
-              placement="top"
-              delayShow={100}
-              delayHide={120}
-              hoverTransitionDelay={80}
-              offset={8}
-              openOnClick
-              closeOnContentClick
-              stopClickPropagation
-              triggerDisplay="inline-flex"
-              contentStyle={INFO_TOOLTIP_STYLE}
-              content={
-                <span className="tw-block tw-max-w-48">{tooltipContent}</span>
-              }
-            >
-              <button
-                type="button"
-                aria-label={tooltipContent}
-                className="tw-absolute tw-left-1/2 tw-top-1/2 tw-inline-flex tw-size-6 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors focus:tw-text-iron-300 focus:tw-outline-none active:tw-text-iron-300 desktop-hover:hover:tw-text-iron-400"
-              >
-                <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3" />
-              </button>
-            </HoverCard>
-          </span>
-        )}
-      </span>
     </div>
   );
 }
@@ -442,6 +386,7 @@ const UnifiedWavesListWaves = forwardRef<
               <>
                 <SidebarCategoryLabel
                   label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+                  paddingClassName="tw-px-4"
                   tooltipContent={highlyRatedInfoTooltip}
                 />
                 <HighlyRatedWavesToggle
