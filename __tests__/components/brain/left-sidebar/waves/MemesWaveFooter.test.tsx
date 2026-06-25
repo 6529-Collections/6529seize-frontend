@@ -52,6 +52,33 @@ describe("MemesWaveFooter", () => {
     expect(screen.getByText("12 unrated")).toBeInTheDocument();
   });
 
+  it("renders the expanded footer as a floating mobile overlay", () => {
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 3,
+      uncastPower: 5000,
+      unratedCount: 12,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+
+    const { container } = render(
+      <MemesWaveFooter floating onOpenQuickVote={onOpenQuickVote} />
+    );
+
+    const floatingLayer = container.querySelector(".tw-fixed");
+    expect(floatingLayer).toHaveClass("tw-z-40");
+    expect(floatingLayer).toHaveClass("tw-pointer-events-none");
+    expect(floatingLayer).not.toHaveClass("tw-bg-black");
+
+    const button = screen.getByRole("button", {
+      name: "Uncast Power, 5,000 TDH left, 3 left this round, 12 unrated",
+    });
+    expect(button.parentElement?.parentElement).toHaveClass(
+      "tw-pointer-events-auto"
+    );
+  });
+
   it("calls onOpenQuickVote from the expanded card", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
       isAvailable: true,

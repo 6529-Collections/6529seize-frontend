@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import BrainMobileWaves from "@/components/brain/mobile/BrainMobileWaves";
 
 let receivedRef: any;
+let receivedFooterProps: any;
 
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaves",
@@ -16,11 +17,22 @@ jest.mock(
 
 jest.mock("@/components/brain/left-sidebar/waves/MemesWaveFooter", () => ({
   __esModule: true,
-  default: ({ onOpenQuickVote }: { readonly onOpenQuickVote: () => void }) => (
-    <button type="button" data-testid="footer" onClick={onOpenQuickVote}>
-      footer
-    </button>
-  ),
+  default: (props: {
+    readonly floating?: boolean;
+    readonly onOpenQuickVote: () => void;
+    readonly onPrefetchQuickVote?: () => void;
+  }) => {
+    receivedFooterProps = props;
+    return (
+      <button
+        type="button"
+        data-testid="footer"
+        onClick={props.onOpenQuickVote}
+      >
+        footer
+      </button>
+    );
+  },
 }));
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
@@ -38,11 +50,12 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
     screen.getByRole("link", { name: /profile waves feed/i })
   ).toHaveAttribute("href", "/waves?view=profile-feed");
   expect(receivedRef).toBeDefined();
-  expect(receivedRef.current).not.toBe(container.firstChild);
+  expect(receivedRef.current).toBe(container.firstChild);
   expect(receivedRef.current).toContainElement(screen.getByTestId("waves"));
   expect(receivedRef.current).toHaveClass(
-    "tw-pb-[calc(4rem+env(safe-area-inset-bottom,0px))]"
+    "tw-pb-[calc(10rem+env(safe-area-inset-bottom,0px))]"
   );
+  expect(receivedFooterProps.floating).toBe(true);
 
   fireEvent.click(screen.getByTestId("footer"));
 
