@@ -14,7 +14,10 @@ import {
   MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE,
   MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
-import { MOBILE_BOTTOM_NAV_DOCK_SELECTOR } from "@/helpers/navigation.helpers";
+import {
+  MOBILE_BOTTOM_NAV_DOCK_SELECTOR,
+  MOBILE_BOTTOM_NAV_ROOT_SELECTOR,
+} from "@/helpers/navigation.helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef } from "react";
 
@@ -189,8 +192,13 @@ const useMeasuredMobileDockFooterBottom = (
     let animationFrameId: number | null = null;
     let transitionTrackingUntil = 0;
     let resizeObserver: ResizeObserver | null = null;
-    let mutationObserver: MutationObserver | null = null;
+    let dockRootObserver: MutationObserver | null = null;
     let cancelled = false;
+
+    const getDockRootElement = (): HTMLElement | null =>
+      globalThis.document.querySelector<HTMLElement>(
+        MOBILE_BOTTOM_NAV_ROOT_SELECTOR
+      );
 
     const getLiveDockElement = (): HTMLElement | null =>
       globalThis.document.querySelector<HTMLElement>(
@@ -267,9 +275,20 @@ const useMeasuredMobileDockFooterBottom = (
         }
       };
 
-      if (animationFrameId === null) {
-        animationFrameId = globalThis.requestAnimationFrame(tick);
+      animationFrameId ??= globalThis.requestAnimationFrame(tick);
+    };
+
+    const observeDockRoot = () => {
+      dockRootObserver?.disconnect();
+      dockRootObserver = null;
+
+      const dockRootElement = getDockRootElement();
+      if (typeof MutationObserver === "undefined" || !dockRootElement) {
+        return;
       }
+
+      dockRootObserver = new MutationObserver(scheduleMeasurement);
+      dockRootObserver.observe(dockRootElement, { childList: true });
     };
 
     updateMeasuredBottom();
@@ -279,13 +298,7 @@ const useMeasuredMobileDockFooterBottom = (
     globalThis.visualViewport?.addEventListener("resize", trackDockTransition, {
       passive: true,
     });
-    if (typeof MutationObserver !== "undefined") {
-      mutationObserver = new MutationObserver(scheduleMeasurement);
-      mutationObserver.observe(globalThis.document.body, {
-        childList: true,
-        subtree: true,
-      });
-    }
+    observeDockRoot();
     scheduleMeasurement();
 
     return () => {
@@ -293,7 +306,7 @@ const useMeasuredMobileDockFooterBottom = (
       if (animationFrameId !== null) {
         globalThis.cancelAnimationFrame(animationFrameId);
       }
-      mutationObserver?.disconnect();
+      dockRootObserver?.disconnect();
       resizeObserver?.disconnect();
       removeDockListeners();
       resetFooterBottom();

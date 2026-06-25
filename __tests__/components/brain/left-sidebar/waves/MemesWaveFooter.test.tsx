@@ -3,7 +3,10 @@ import React from "react";
 import MemesWaveFooter from "@/components/brain/left-sidebar/waves/MemesWaveFooter";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 import { MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
-import { MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE } from "@/helpers/navigation.helpers";
+import {
+  MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
+  MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
+} from "@/helpers/navigation.helpers";
 
 jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
   useMemesWaveFooterStats: jest.fn(),
@@ -46,17 +49,27 @@ describe("MemesWaveFooter", () => {
 
   const createMeasuredDock = ({
     height,
+    parentElement = document.body,
     top,
   }: {
     readonly height: number;
+    readonly parentElement?: HTMLElement | undefined;
     readonly top: number;
   }) => {
     const dock = document.createElement("div");
     dock.setAttribute(MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE, "true");
     dock.getBoundingClientRect = jest.fn(() => createDockRect({ height, top }));
-    document.body.appendChild(dock);
+    parentElement.appendChild(dock);
 
     return dock;
+  };
+
+  const createDockRoot = () => {
+    const dockRoot = document.createElement("div");
+    dockRoot.setAttribute(MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE, "true");
+    document.body.appendChild(dockRoot);
+
+    return dockRoot;
   };
 
   beforeEach(() => {
@@ -112,6 +125,9 @@ describe("MemesWaveFooter", () => {
     document
       .querySelectorAll(`[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`)
       .forEach((dock) => dock.remove());
+    document
+      .querySelectorAll(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
+      .forEach((dockRoot) => dockRoot.remove());
 
     if (originalRequestAnimationFrame === undefined) {
       delete (globalThis as { requestAnimationFrame?: unknown })
@@ -240,7 +256,12 @@ describe("MemesWaveFooter", () => {
       votingLabel: "TDH",
       isReady: true,
     });
-    const fallbackDock = createMeasuredDock({ height: 64, top: 816 });
+    const dockRoot = createDockRoot();
+    const fallbackDock = createMeasuredDock({
+      height: 64,
+      parentElement: dockRoot,
+      top: 816,
+    });
 
     const { container } = render(
       <MemesWaveFooter floating onOpenQuickVote={onOpenQuickVote} />
@@ -253,7 +274,7 @@ describe("MemesWaveFooter", () => {
     await waitFor(() => expect(floatingLayer.style.bottom).toBe("88px"));
 
     fallbackDock.remove();
-    createMeasuredDock({ height: 54, top: 826 });
+    createMeasuredDock({ height: 54, parentElement: dockRoot, top: 826 });
 
     await waitFor(() => expect(floatingLayer.style.bottom).toBe("78px"));
   });

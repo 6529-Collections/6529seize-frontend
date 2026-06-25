@@ -12,6 +12,7 @@ import React, {
 import {
   getActiveWaveIdFromUrl,
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
+  MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
   getNotificationsRoute,
   usesReverseMobileBottomNavigationScroll,
@@ -495,9 +496,14 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => (
-  <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
-    <BottomNavigationContent hidden={hidden} />
-  </Suspense>
+  <div
+    {...{ [MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE]: "true" }}
+    className="tw-contents"
+  >
+    <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
+      <BottomNavigationContent hidden={hidden} />
+    </Suspense>
+  </div>
 );
 
 export default BottomNavigation;
