@@ -3,19 +3,68 @@
 import { useAuth } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
 import { areEqualURLS } from "@/helpers/Helpers";
+import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
   CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerAndroidScanningLibrary,
+  CapacitorBarcodeScannerCameraDirection,
+  type CapacitorBarcodeScannerOptions,
+  CapacitorBarcodeScannerScanOrientation,
   CapacitorBarcodeScannerTypeHint,
+  CapacitorBarcodeScannerTypeHintALLOption,
 } from "@capacitor/barcode-scanner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
-const SCANNER_FALLBACK_GUIDANCE =
-  "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.";
+const SCANNER_CANCELLED_ERROR_CODE = "OS-PLUG-BARC-0006";
+
+function getScannerOptions(
+  isAndroid: boolean,
+  scanInstructions: string
+): CapacitorBarcodeScannerOptions {
+  const scannerOptions: CapacitorBarcodeScannerOptions = {
+    hint: isAndroid
+      ? CapacitorBarcodeScannerTypeHintALLOption.ALL
+      : CapacitorBarcodeScannerTypeHint.QR_CODE,
+    scanInstructions,
+    scanButton: false,
+    cameraDirection: CapacitorBarcodeScannerCameraDirection.BACK,
+    scanOrientation: CapacitorBarcodeScannerScanOrientation.ADAPTIVE,
+  };
+
+  if (!isAndroid) {
+    return scannerOptions;
+  }
+
+  return {
+    ...scannerOptions,
+    android: {
+      scanningLibrary: CapacitorBarcodeScannerAndroidScanningLibrary.MLKIT,
+    },
+  };
+}
+
+function getQRScannerErrorField(
+  error: unknown,
+  field: "code" | "message"
+): string | null {
+  if (!error || typeof error !== "object" || !(field in error)) {
+    return null;
+  }
+
+  const errorRecord = error as Partial<Record<"code" | "message", unknown>>;
+  const fieldValue = errorRecord[field];
+  if (typeof fieldValue === "string" && fieldValue.trim()) {
+    return fieldValue.trim();
+  }
+
+  return null;
+}
 
 function getQRScannerErrorReason(error: unknown): string | null {
   if (typeof error === "string" && error.trim()) {
@@ -26,23 +75,37 @@ function getQRScannerErrorReason(error: unknown): string | null {
     return error.message.trim();
   }
 
-  if (error && typeof error === "object") {
-    const maybeMessage = "message" in error ? error.message : null;
-    if (typeof maybeMessage === "string" && maybeMessage.trim()) {
-      return maybeMessage.trim();
-    }
-  }
-
-  return null;
+  return getQRScannerErrorField(error, "message");
 }
 
-function getQRScannerErrorToastMessage(error: unknown): ReactNode {
+function isQRScannerCancellation(error: unknown): boolean {
+  const code = getQRScannerErrorField(error, "code");
+  if (code === SCANNER_CANCELLED_ERROR_CODE) {
+    return true;
+  }
+
+  const reason = getQRScannerErrorReason(error)?.toLowerCase() ?? "";
+  return (
+    reason.includes("process was cancelled") ||
+    reason.includes("process was canceled")
+  );
+}
+
+function getQRScannerErrorToastMessage({
+  error,
+  fallbackGuidance,
+  scanFailed,
+}: {
+  readonly error: unknown;
+  readonly fallbackGuidance: string;
+  readonly scanFailed: string;
+}): ReactNode {
   const reason = getQRScannerErrorReason(error);
 
   return (
     <>
-      <p>Scan failed.</p>
-      <p className="tw-font-light">{reason ?? SCANNER_FALLBACK_GUIDANCE}</p>
+      <p>{scanFailed}</p>
+      <p className="tw-font-light">{reason ?? fallbackGuidance}</p>
     </>
   );
 }
@@ -59,7 +122,11 @@ export default function HeaderQRScanner({
 
   const { setToast } = useAuth();
   const capacitor = useCapacitor();
+  const locale = useBrowserLocale();
   const router = useRouter();
+  const invalidQRCodeMessage = t(locale, "qrScanner.invalidCode");
+  const scanFailedMessage = t(locale, "qrScanner.error.scanFailed");
+  const scannerFallbackGuidance = t(locale, "qrScanner.error.fallbackGuidance");
 
   const [scanning, setScanning] = useState(false);
   const [scannerAvailable, setScannerAvailable] = useState(false);
@@ -80,12 +147,12 @@ export default function HeaderQRScanner({
     setScanning(true);
 
     try {
-      const result = await CapacitorBarcodeScanner.scanBarcode({
-        hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
-        scanInstructions: "Point your camera at a valid QR code on 6529.io",
-        scanButton: false,
-        cameraDirection: 1,
-      });
+      const result = await CapacitorBarcodeScanner.scanBarcode(
+        getScannerOptions(
+          capacitor.isAndroid,
+          t(locale, "qrScanner.instructions")
+        )
+      );
 
       setScanning(false);
 
@@ -93,15 +160,23 @@ export default function HeaderQRScanner({
         handleQRCode(result.ScanResult);
       } else {
         setToast({
-          message: "This QR code is not valid.",
+          message: invalidQRCodeMessage,
           type: "error",
         });
       }
     } catch (error) {
-      console.error("QR Scan failed:", error);
       setScanning(false);
+      if (isQRScannerCancellation(error)) {
+        return;
+      }
+
+      console.error("QR Scan failed:", error);
       setToast({
-        message: getQRScannerErrorToastMessage(error),
+        message: getQRScannerErrorToastMessage({
+          error,
+          fallbackGuidance: scannerFallbackGuidance,
+          scanFailed: scanFailedMessage,
+        }),
         type: "error",
       });
     }
@@ -149,7 +224,7 @@ export default function HeaderQRScanner({
           default:
             console.warn("Unknown Deep Link Scope", scope);
             setToast({
-              message: "This QR code is not valid.",
+              message: invalidQRCodeMessage,
               type: "error",
             });
             return;
@@ -163,14 +238,14 @@ export default function HeaderQRScanner({
         router.push(routerPath);
       } else {
         setToast({
-          message: "This QR code is not valid.",
+          message: invalidQRCodeMessage,
           type: "error",
         });
       }
     } catch (error) {
       console.error("Error parsing QR code:", error);
       setToast({
-        message: "This QR code is not valid.",
+        message: invalidQRCodeMessage,
         type: "error",
       });
     }
@@ -181,10 +256,13 @@ export default function HeaderQRScanner({
       <button
         onClick={startScan}
         className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-        aria-label="Scan QR Code"
+        aria-label={t(locale, "qrScanner.sidebar.ariaLabel")}
       >
-        <HeaderQRScannerIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-        <span>Scan QR Code</span>
+        <HeaderQRScannerIcon
+          alt={t(locale, "qrScanner.iconAlt")}
+          className="tw-h-6 tw-w-6 tw-flex-shrink-0"
+        />
+        <span>{t(locale, "qrScanner.sidebar.label")}</span>
       </button>
     );
   }
@@ -194,20 +272,22 @@ export default function HeaderQRScanner({
       <button
         disabled={scanning}
         type="button"
-        aria-label="QR Code Scanner"
-        title="QR Code Scanner"
+        aria-label={t(locale, "qrScanner.trigger.ariaLabel")}
+        title={t(locale, "qrScanner.trigger.title")}
         onClick={startScan}
         className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
-        <HeaderQRScannerIcon />
+        <HeaderQRScannerIcon alt={t(locale, "qrScanner.iconAlt")} />
       </button>
     </div>
   );
 }
 
 function HeaderQRScannerIcon({
+  alt,
   className,
 }: {
+  readonly alt: string;
   readonly className?: string | undefined;
 }) {
   return (
@@ -216,7 +296,7 @@ function HeaderQRScannerIcon({
       priority
       loading="eager"
       src="/barcode-scanner.png"
-      alt="QR Scanner"
+      alt={alt}
       width={20}
       height={20}
       className={className ?? "tw-h-5 tw-w-5 tw-flex-shrink-0"}

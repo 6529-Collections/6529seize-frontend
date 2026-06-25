@@ -1,4 +1,5 @@
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
@@ -55,6 +56,7 @@ export const ES_ES_MESSAGES = {
   "drop.media.retry": "Reintentar",
   "drop.media.processingFailed": "El procesamiento de la imagen fallo.",
   "drop.media.processingTimedOut": "El procesamiento de la imagen expiro.",
+  ...ES_ES_QR_SCANNER_MESSAGES,
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restantes esta ronda",
   "memes.quickVote.unrated": "{count} sin valorar",
