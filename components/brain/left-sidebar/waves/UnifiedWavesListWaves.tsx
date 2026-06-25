@@ -227,10 +227,9 @@ const UnifiedWavesListWaves = forwardRef<
     const bottomListLabel = isJoinedFilterActive
       ? t(SIDEBAR_LOCALE, "waves.sidebar.filterJoined")
       : t(SIDEBAR_LOCALE, "waves.sidebar.all");
-    const highlyRatedInfoTooltip = t(
-      SIDEBAR_LOCALE,
-      "waves.sidebar.highlyRatedInfoTooltip"
-    );
+    const highlyRatedInfoTooltip = connectedProfile?.handle
+      ? t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedInfoTooltip")
+      : undefined;
     const shouldShowBottomHeader = !hideHeaders;
     let virtualizedKey = "unified-waves-all";
     if (isJoinedFilterActive) {
@@ -390,6 +389,7 @@ const UnifiedWavesListWaves = forwardRef<
                   tooltipContent={highlyRatedInfoTooltip}
                 />
                 <HighlyRatedWavesToggle
+                  isTouchPreview={hasTouchScreen}
                   paddingClassName="tw-px-4"
                   previewItems={highlyRatedPreviewItems}
                 />

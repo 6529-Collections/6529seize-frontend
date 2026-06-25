@@ -5,15 +5,19 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 
-const INFO_TOOLTIP_STYLE = {
+export const SIDEBAR_TOOLTIP_BORDER = "1px solid #4C4C55" as const;
+export const SIDEBAR_TOOLTIP_STYLE = {
   padding: "6px 10px",
   background: "#37373E",
   color: "white",
   fontSize: "12px",
   fontWeight: 500,
   borderRadius: "6px",
-  border: "1px solid #4C4C55",
   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+} as const satisfies CSSProperties;
+const INFO_TOOLTIP_STYLE = {
+  ...SIDEBAR_TOOLTIP_STYLE,
+  border: SIDEBAR_TOOLTIP_BORDER,
 } as const satisfies CSSProperties;
 
 export function SidebarCategoryLabel({

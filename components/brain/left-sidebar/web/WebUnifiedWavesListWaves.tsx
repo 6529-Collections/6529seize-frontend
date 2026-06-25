@@ -19,7 +19,11 @@ import {
   getHighlyRatedPreviewWaves,
   HighlyRatedWavesToggle,
 } from "../waves/HighlyRatedWavesToggle";
-import { SidebarCategoryLabel } from "../waves/SidebarCategoryLabel";
+import {
+  SIDEBAR_TOOLTIP_BORDER,
+  SIDEBAR_TOOLTIP_STYLE,
+  SidebarCategoryLabel,
+} from "../waves/SidebarCategoryLabel";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
@@ -49,13 +53,7 @@ const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
 const PROFILE_FEED_LABEL = "Profile Waves Feed";
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 const TOOLTIP_STYLE = {
-  padding: "6px 10px",
-  background: "#37373E",
-  color: "white",
-  fontSize: "12px",
-  fontWeight: 500,
-  borderRadius: "6px",
-  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+  ...SIDEBAR_TOOLTIP_STYLE,
   zIndex: 10000,
 } as const satisfies React.CSSProperties;
 
@@ -440,10 +438,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     isJoinedFilterActive,
   });
   const bottomListLabel = getBottomListLabel(isJoinedFilterActive);
-  const highlyRatedInfoTooltip = t(
-    SIDEBAR_LOCALE,
-    "waves.sidebar.highlyRatedInfoTooltip"
-  );
+  const highlyRatedInfoTooltip = connectedProfile?.handle
+    ? t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedInfoTooltip")
+    : undefined;
   const shouldUseHighlyRatedToggle = !hideHeaders && !isCollapsed;
   const shouldShowHighlyRatedRows =
     hasHighlyRatedRows && !shouldUseHighlyRatedToggle;
@@ -607,6 +604,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     tooltipContent={highlyRatedInfoTooltip}
                   />
                   <HighlyRatedWavesToggle
+                    isTouchPreview={isTouchDevice}
                     paddingClassName="tw-px-5"
                     previewItems={highlyRatedPreviewItems}
                   />
@@ -742,7 +740,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
             offset={8}
             opacity={1}
             style={TOOLTIP_STYLE}
-            border="1px solid #4C4C55"
+            border={SIDEBAR_TOOLTIP_BORDER}
           />
           {shouldShowProfileFeedShortcut && (
             <ReactTooltip
@@ -751,7 +749,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               offset={8}
               opacity={1}
               style={TOOLTIP_STYLE}
-              border="1px solid #4C4C55"
+              border={SIDEBAR_TOOLTIP_BORDER}
             />
           )}
         </>
