@@ -5,6 +5,8 @@ import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import type * as AuthUtilsModule from "@/services/auth/auth.utils";
+import type * as SessionV2Module from "@/services/auth/session-v2.utils";
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
@@ -12,6 +14,43 @@ const mockQueryClient = {
 const mockRouterReplace = jest.fn();
 const mockRouterPush = jest.fn();
 const mockUsePathname = jest.fn(() => "/");
+
+type ReactQueryWrapperContextValue = React.ContextType<
+  typeof ReactQueryWrapperContext
+>;
+
+const createReactQueryWrapperContextValue = (
+  overrides: Partial<ReactQueryWrapperContextValue> = {}
+): ReactQueryWrapperContextValue => ({
+  setProfile: jest.fn(),
+  setWave: jest.fn(),
+  setWavesOverviewPage: jest.fn(),
+  setWaveDrops: jest.fn(),
+  setProfileProxy: jest.fn(),
+  onProfileProxyModify: jest.fn(),
+  onProfileCICModify: jest.fn(),
+  onProfileRepModify: jest.fn(),
+  onProfileEdit: jest.fn(),
+  onProfileStatementAdd: jest.fn(),
+  onProfileStatementRemove: jest.fn(),
+  onIdentityFollowChange: jest.fn(),
+  initProfileRepPage: jest.fn(),
+  initCommunityActivityPage: jest.fn(),
+  waitAndInvalidateDrops: jest.fn(async () => {}),
+  addOptimisticDrop: jest.fn(async () => {}),
+  invalidateDrops: jest.fn(),
+  onGroupRemoved: jest.fn(),
+  onGroupChanged: jest.fn(),
+  onGroupCreate: jest.fn(),
+  onIdentityBulkRate: jest.fn(),
+  onWaveCreated: jest.fn(),
+  onWaveFollowChange: jest.fn(),
+  invalidateAll: jest.fn(),
+  invalidateAuthSensitiveQueries: jest.fn(),
+  invalidateNotifications: jest.fn(),
+  invalidateIdentityTdhStats: jest.fn(),
+  ...overrides,
+});
 
 jest.mock("react-toastify", () => ({
   toast: jest.fn(),
@@ -1611,6 +1650,81 @@ describe("Auth component", () => {
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();
       expect(mockValidateAuthImmediate).not.toHaveBeenCalled();
+    });
+
+    it("verifies the active stored v2 session when the live wallet provider address differs", async () => {
+      const activeStoredAddress = "0x1111111111111111111111111111111111111111";
+      const liveProviderAddress = "0x2222222222222222222222222222222222222222";
+      walletAddress = liveProviderAddress;
+      connectedAccountsOverride = [
+        {
+          address: activeStoredAddress,
+          role: null,
+          isActive: true,
+          isConnected: false,
+        },
+        {
+          address: liveProviderAddress,
+          role: null,
+          isActive: false,
+          isConnected: true,
+        },
+      ];
+
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const sessionV2 =
+        require("@/services/auth/session-v2.utils") as typeof SessionV2Module;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
+      const mockHasActiveSessionV2Auth =
+        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<
+          typeof authUtils.hasActiveSessionV2Auth
+        >;
+      const mockVerifyActiveSessionV2WebSession =
+        sessionV2.verifyActiveSessionV2WebSession as jest.MockedFunction<
+          typeof sessionV2.verifyActiveSessionV2WebSession
+        >;
+      mockGetAuthJwt.mockReturnValue("v2-jwt");
+      mockGetWalletAddress.mockReturnValue(activeStoredAddress);
+      mockHasActiveSessionV2Auth.mockImplementation(({ address }) =>
+        address.toLowerCase() === activeStoredAddress.toLowerCase()
+      );
+      mockVerifyActiveSessionV2WebSession.mockResolvedValue(true);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("verify-session"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-verify-result")).toHaveTextContent(
+          "true"
+        );
+      });
+      expect(mockVerifyActiveSessionV2WebSession).toHaveBeenCalledWith({
+        address: activeStoredAddress,
+        abortSignal: undefined,
+      });
+      const verifiedAddresses =
+        mockVerifyActiveSessionV2WebSession.mock.calls.map(
+          ([params]: [{ readonly address: string }]) => params.address
+        );
+      expect(verifiedAddresses).toContain(activeStoredAddress);
+      expect(verifiedAddresses).not.toContain(liveProviderAddress);
     });
 
     it("fails closed when context web-session verification errors without changing upgrade state", async () => {
