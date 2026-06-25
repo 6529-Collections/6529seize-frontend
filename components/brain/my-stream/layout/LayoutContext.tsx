@@ -382,20 +382,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
     if (!navAdjustedSpaces.measurementsComplete) return {};
 
-    let capSpace = 0;
-    let navSpace = navAdjustedSpaces.mobileNavSpace;
-
-    if (isAndroid) {
-      navSpace = isAndroidKeyboardVisible
-        ? 0
-        : navAdjustedSpaces.mobileNavSpace;
-      capSpace = isAndroidKeyboardVisible ? 0 : Math.max(0, 128 - navSpace);
-    }
-
-    const style = calculateHeightStyle(
-      { ...navAdjustedSpaces, mobileNavSpace: navSpace },
-      capSpace
-    );
+    const style = calculateHeightStyle(navAdjustedSpaces, 0);
 
     if (isAndroid) {
       return {
@@ -404,7 +391,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       };
     }
     return style;
-  }, [navAdjustedSpaces, isAndroid, isAndroidKeyboardVisible]);
+  }, [navAdjustedSpaces, isAndroid]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!navAdjustedSpaces.measurementsComplete) return {};

@@ -7,7 +7,12 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
   CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerAndroidScanningLibrary,
+  CapacitorBarcodeScannerCameraDirection,
+  type CapacitorBarcodeScannerOptions,
+  CapacitorBarcodeScannerScanOrientation,
   CapacitorBarcodeScannerTypeHint,
+  CapacitorBarcodeScannerTypeHintALLOption,
 } from "@capacitor/barcode-scanner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -16,6 +21,48 @@ import { useEffect, useState } from "react";
 
 const SCANNER_FALLBACK_GUIDANCE =
   "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.";
+const SCANNER_INSTRUCTIONS = "Point your camera at a valid QR code on 6529.io";
+const SCANNER_CANCELLED_ERROR_CODE = "OS-PLUG-BARC-0006";
+
+function getScannerOptions(isAndroid: boolean): CapacitorBarcodeScannerOptions {
+  const scannerOptions: CapacitorBarcodeScannerOptions = {
+    hint: isAndroid
+      ? CapacitorBarcodeScannerTypeHintALLOption.ALL
+      : CapacitorBarcodeScannerTypeHint.QR_CODE,
+    scanInstructions: SCANNER_INSTRUCTIONS,
+    scanButton: false,
+    cameraDirection: CapacitorBarcodeScannerCameraDirection.BACK,
+    scanOrientation: CapacitorBarcodeScannerScanOrientation.ADAPTIVE,
+  };
+
+  if (!isAndroid) {
+    return scannerOptions;
+  }
+
+  return {
+    ...scannerOptions,
+    android: {
+      scanningLibrary: CapacitorBarcodeScannerAndroidScanningLibrary.MLKIT,
+    },
+  };
+}
+
+function getQRScannerErrorField(
+  error: unknown,
+  field: "code" | "message"
+): string | null {
+  if (!error || typeof error !== "object" || !(field in error)) {
+    return null;
+  }
+
+  const errorRecord = error as Partial<Record<"code" | "message", unknown>>;
+  const fieldValue = errorRecord[field];
+  if (typeof fieldValue === "string" && fieldValue.trim()) {
+    return fieldValue.trim();
+  }
+
+  return null;
+}
 
 function getQRScannerErrorReason(error: unknown): string | null {
   if (typeof error === "string" && error.trim()) {
@@ -26,14 +73,20 @@ function getQRScannerErrorReason(error: unknown): string | null {
     return error.message.trim();
   }
 
-  if (error && typeof error === "object") {
-    const maybeMessage = "message" in error ? error.message : null;
-    if (typeof maybeMessage === "string" && maybeMessage.trim()) {
-      return maybeMessage.trim();
-    }
+  return getQRScannerErrorField(error, "message");
+}
+
+function isQRScannerCancellation(error: unknown): boolean {
+  const code = getQRScannerErrorField(error, "code");
+  if (code === SCANNER_CANCELLED_ERROR_CODE) {
+    return true;
   }
 
-  return null;
+  const reason = getQRScannerErrorReason(error)?.toLowerCase() ?? "";
+  return (
+    reason.includes("process was cancelled") ||
+    reason.includes("process was canceled")
+  );
 }
 
 function getQRScannerErrorToastMessage(error: unknown): ReactNode {
@@ -80,12 +133,9 @@ export default function HeaderQRScanner({
     setScanning(true);
 
     try {
-      const result = await CapacitorBarcodeScanner.scanBarcode({
-        hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
-        scanInstructions: "Point your camera at a valid QR code on 6529.io",
-        scanButton: false,
-        cameraDirection: 1,
-      });
+      const result = await CapacitorBarcodeScanner.scanBarcode(
+        getScannerOptions(capacitor.isAndroid)
+      );
 
       setScanning(false);
 
@@ -98,8 +148,12 @@ export default function HeaderQRScanner({
         });
       }
     } catch (error) {
-      console.error("QR Scan failed:", error);
       setScanning(false);
+      if (isQRScannerCancellation(error)) {
+        return;
+      }
+
+      console.error("QR Scan failed:", error);
       setToast({
         message: getQRScannerErrorToastMessage(error),
         type: "error",
