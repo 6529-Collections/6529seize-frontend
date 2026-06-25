@@ -1613,6 +1613,70 @@ describe("Auth component", () => {
       expect(mockValidateAuthImmediate).not.toHaveBeenCalled();
     });
 
+    it("verifies the active stored v2 session when the live wallet provider address differs", async () => {
+      const activeStoredAddress = "0x1111111111111111111111111111111111111111";
+      const liveProviderAddress = "0x2222222222222222222222222222222222222222";
+      walletAddress = liveProviderAddress;
+      connectedAccountsOverride = [
+        {
+          address: activeStoredAddress,
+          role: null,
+          isActive: true,
+          isConnected: false,
+        },
+        {
+          address: liveProviderAddress,
+          role: null,
+          isActive: false,
+          isConnected: true,
+        },
+      ];
+
+      const authUtils = require("@/services/auth/auth.utils");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const mockHasActiveSessionV2Auth =
+        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("v2-jwt");
+      mockGetWalletAddress.mockReturnValue(activeStoredAddress);
+      mockHasActiveSessionV2Auth.mockImplementation(
+        ({ address }: { readonly address: string }) =>
+          address.toLowerCase() === activeStoredAddress.toLowerCase()
+      );
+      sessionV2.verifyActiveSessionV2WebSession.mockResolvedValue(true);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("verify-session"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-verify-result")).toHaveTextContent(
+          "true"
+        );
+      });
+      expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledWith({
+        address: activeStoredAddress,
+        abortSignal: undefined,
+      });
+      const verifiedAddresses =
+        sessionV2.verifyActiveSessionV2WebSession.mock.calls.map(
+          ([params]: [{ readonly address: string }]) => params.address
+        );
+      expect(verifiedAddresses).toContain(activeStoredAddress);
+      expect(verifiedAddresses).not.toContain(liveProviderAddress);
+    });
+
     it("fails closed when context web-session verification errors without changing upgrade state", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
