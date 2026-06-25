@@ -9,14 +9,14 @@ import {
   formatMemesQuickVoteUnratedText,
 } from "@/hooks/memesQuickVote.helpers";
 import {
-  getMemesWaveFloatingFooterMeasuredBottomStyle,
   MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX,
+  MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
   MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE,
   MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import { MOBILE_BOTTOM_NAV_DOCK_SELECTOR } from "@/helpers/navigation.helpers";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 interface MemesWaveFooterProps {
   readonly collapsed?: boolean | undefined;
@@ -31,6 +31,8 @@ const revealTransition = {
   ease: "easeOut",
 } as const;
 
+// BottomNavigation dock transitions use tw-duration-300; this window keeps
+// measurements running through the full animation plus a small settling margin.
 const DOCK_TRANSITION_MEASUREMENT_WINDOW_MS = 420;
 
 const getViewportHeight = (): number => {
@@ -70,46 +72,172 @@ const getMeasuredDockBottom = (dockElement: HTMLElement): string | null => {
   return `${Math.round(bottom)}px`;
 };
 
-const useMeasuredMobileDockFooterBottom = (enabled: boolean): string | null => {
-  const [measuredBottom, setMeasuredBottom] = useState<string | null>(null);
-  const commitMeasuredBottom = useCallback((nextBottom: string | null) => {
-    setMeasuredBottom((currentBottom) =>
-      currentBottom === nextBottom ? currentBottom : nextBottom
-    );
-  }, []);
+interface MemesWaveFooterLabels {
+  readonly buttonAriaLabel: string;
+  readonly buttonTitle: string;
+  readonly buttonValue: string;
+}
+
+const getMemesWaveFooterLabels = ({
+  isReady,
+  leftThisRoundCount,
+  uncastPower,
+  unratedCount,
+  votingLabel,
+}: {
+  readonly isReady: boolean;
+  readonly leftThisRoundCount: number;
+  readonly uncastPower: number | null;
+  readonly unratedCount: number;
+  readonly votingLabel: string | null;
+}): MemesWaveFooterLabels => {
+  if (!isReady || typeof uncastPower !== "number") {
+    return {
+      buttonAriaLabel: "Quick vote",
+      buttonTitle: "Quick vote",
+      buttonValue: "Open quick vote",
+    };
+  }
+
+  const formattedPower = formatNumberWithCommas(uncastPower);
+  const leftThisRoundText =
+    formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount);
+  const unratedText = formatMemesQuickVoteUnratedText(unratedCount);
+  const ariaVotingLabel = votingLabel ?? "Votes";
+  let visibleVotingLabel = " votes";
+  if (votingLabel) {
+    visibleVotingLabel = ` ${votingLabel}`;
+  }
+
+  return {
+    buttonAriaLabel: `Uncast Power, ${formattedPower} ${ariaVotingLabel} left, ${leftThisRoundText}, ${unratedText}`,
+    buttonTitle: "Uncast Power",
+    buttonValue: `${formattedPower}${visibleVotingLabel}`,
+  };
+};
+
+const getContainerClassName = ({
+  collapsed,
+  floating,
+}: {
+  readonly collapsed: boolean;
+  readonly floating: boolean;
+}): string => {
+  if (collapsed) {
+    return "tw-z-10 tw-flex tw-flex-shrink-0 tw-justify-center tw-gap-2 tw-px-4 tw-pb-2 tw-pt-1";
+  }
+
+  if (floating) {
+    return "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-z-40 tw-flex tw-justify-center tw-px-4 tw-will-change-[bottom]";
+  }
+
+  return "tw-relative tw-z-20 tw-mt-auto tw-flex-shrink-0";
+};
+
+const getExpandedFrameClassName = (floating: boolean): string => {
+  if (floating) {
+    return `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-flex-shrink-0`;
+  }
+
+  return "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4";
+};
+
+const getContainerStyle = ({
+  floating,
+}: {
+  readonly floating: boolean;
+}): NonNullable<React.ComponentProps<typeof motion.div>["style"]> => {
+  if (!floating) {
+    return {};
+  }
+
+  return MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE as NonNullable<
+    React.ComponentProps<typeof motion.div>["style"]
+  >;
+};
+
+const useMeasuredMobileDockFooterBottom = (
+  enabled: boolean
+): React.RefObject<HTMLDivElement | null> => {
+  const footerElementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!enabled || typeof globalThis.document === "undefined") {
-      commitMeasuredBottom(null);
+    const applyFooterBottom = (nextBottom: string | null) => {
+      const footerElement = footerElementRef.current;
+      if (!footerElement) {
+        return;
+      }
+
+      const bottom = nextBottom ?? MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM;
+      if (footerElement.style.bottom === bottom) {
+        return;
+      }
+
+      footerElement.style.bottom = bottom;
+    };
+
+    const resetFooterBottom = () => {
+      footerElementRef.current?.style.removeProperty("bottom");
+    };
+
+    if (!enabled || globalThis.document === undefined) {
+      resetFooterBottom();
       return;
     }
 
-    let dockElement = globalThis.document.querySelector<HTMLElement>(
-      MOBILE_BOTTOM_NAV_DOCK_SELECTOR
-    );
+    let dockElement: HTMLElement | null = null;
     let animationFrameId: number | null = null;
     let transitionTrackingUntil = 0;
     let resizeObserver: ResizeObserver | null = null;
+    let mutationObserver: MutationObserver | null = null;
     let cancelled = false;
+
+    const getLiveDockElement = (): HTMLElement | null =>
+      globalThis.document.querySelector<HTMLElement>(
+        MOBILE_BOTTOM_NAV_DOCK_SELECTOR
+      );
+
+    const removeDockListeners = () => {
+      dockElement?.removeEventListener("transitionrun", trackDockTransition);
+      dockElement?.removeEventListener("transitionstart", trackDockTransition);
+      dockElement?.removeEventListener("transitionend", updateMeasuredBottom);
+    };
+
+    const bindDockElement = (nextDockElement: HTMLElement | null) => {
+      if (dockElement === nextDockElement) {
+        return;
+      }
+
+      resizeObserver?.disconnect();
+      resizeObserver = null;
+      removeDockListeners();
+      dockElement = nextDockElement;
+
+      if (typeof ResizeObserver !== "undefined" && dockElement) {
+        resizeObserver = new ResizeObserver(trackDockTransition);
+        resizeObserver.observe(dockElement);
+      }
+
+      dockElement?.addEventListener("transitionrun", trackDockTransition);
+      dockElement?.addEventListener("transitionstart", trackDockTransition);
+      dockElement?.addEventListener("transitionend", updateMeasuredBottom);
+    };
 
     const updateMeasuredBottom = () => {
       if (cancelled) {
         return;
       }
 
-      dockElement =
-        dockElement ??
-        globalThis.document.querySelector<HTMLElement>(
-          MOBILE_BOTTOM_NAV_DOCK_SELECTOR
-        );
+      const liveDockElement = getLiveDockElement();
+      bindDockElement(liveDockElement);
 
       if (!dockElement) {
-        commitMeasuredBottom(null);
+        applyFooterBottom(null);
         return;
       }
 
       const nextBottom = getMeasuredDockBottom(dockElement);
-      commitMeasuredBottom(nextBottom);
+      applyFooterBottom(nextBottom);
     };
 
     const scheduleMeasurement = () => {
@@ -145,25 +273,19 @@ const useMeasuredMobileDockFooterBottom = (enabled: boolean): string | null => {
     };
 
     updateMeasuredBottom();
-
-    if (typeof ResizeObserver !== "undefined" && dockElement) {
-      resizeObserver = new ResizeObserver(trackDockTransition);
-      resizeObserver.observe(dockElement);
-    }
-
-    dockElement?.addEventListener("transitionrun", trackDockTransition);
-    dockElement?.addEventListener("transitionstart", trackDockTransition);
-    dockElement?.addEventListener("transitionend", updateMeasuredBottom);
     globalThis.addEventListener("resize", trackDockTransition, {
       passive: true,
     });
     globalThis.visualViewport?.addEventListener("resize", trackDockTransition, {
       passive: true,
     });
-    globalThis.document.addEventListener("scroll", trackDockTransition, {
-      capture: true,
-      passive: true,
-    });
+    if (typeof MutationObserver !== "undefined") {
+      mutationObserver = new MutationObserver(scheduleMeasurement);
+      mutationObserver.observe(globalThis.document.body, {
+        childList: true,
+        subtree: true,
+      });
+    }
     scheduleMeasurement();
 
     return () => {
@@ -171,22 +293,19 @@ const useMeasuredMobileDockFooterBottom = (enabled: boolean): string | null => {
       if (animationFrameId !== null) {
         globalThis.cancelAnimationFrame(animationFrameId);
       }
+      mutationObserver?.disconnect();
       resizeObserver?.disconnect();
-      dockElement?.removeEventListener("transitionrun", trackDockTransition);
-      dockElement?.removeEventListener("transitionstart", trackDockTransition);
-      dockElement?.removeEventListener("transitionend", updateMeasuredBottom);
+      removeDockListeners();
+      resetFooterBottom();
       globalThis.removeEventListener("resize", trackDockTransition);
       globalThis.visualViewport?.removeEventListener(
         "resize",
         trackDockTransition
       );
-      globalThis.document.removeEventListener("scroll", trackDockTransition, {
-        capture: true,
-      });
     };
-  }, [commitMeasuredBottom, enabled]);
+  }, [enabled]);
 
-  return measuredBottom;
+  return footerElementRef;
 };
 
 const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
@@ -204,21 +323,15 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     unratedCount,
     votingLabel,
   } = useMemesWaveFooterStats();
-  const measuredDockBottom = useMeasuredMobileDockFooterBottom(floating);
-  const buttonAriaLabel =
-    isReady && typeof uncastPower === "number"
-      ? `Uncast Power, ${formatNumberWithCommas(uncastPower)} ${
-          votingLabel ?? "Votes"
-        } left, ${formatMemesQuickVoteLeftThisRoundText(
-          leftThisRoundCount
-        )}, ${formatMemesQuickVoteUnratedText(unratedCount)}`
-      : "Quick vote";
-  const buttonTitle = isReady ? "Uncast Power" : "Quick vote";
-  const votingPowerLabel = votingLabel ? ` ${votingLabel}` : " votes";
-  const buttonValue =
-    isReady && typeof uncastPower === "number"
-      ? `${formatNumberWithCommas(uncastPower)}${votingPowerLabel}`
-      : "Open quick vote";
+  const floatingFooterRef = useMeasuredMobileDockFooterBottom(floating);
+  const { buttonAriaLabel, buttonTitle, buttonValue } =
+    getMemesWaveFooterLabels({
+      isReady,
+      leftThisRoundCount,
+      uncastPower,
+      unratedCount,
+      votingLabel,
+    });
 
   const handleOpenQuickVote = () => {
     if (!isAvailable) {
@@ -247,26 +360,15 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     [onAvailabilityChange]
   );
 
-  const containerClassName = collapsed
-    ? "tw-z-10 tw-flex tw-flex-shrink-0 tw-justify-center tw-gap-2 tw-px-4 tw-pb-2 tw-pt-1"
-    : floating
-      ? "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-z-40 tw-flex tw-justify-center tw-px-4 tw-transition-[bottom] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none"
-      : "tw-relative tw-z-20 tw-mt-auto tw-flex-shrink-0";
-  const expandedFrameClassName = floating
-    ? `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-flex-shrink-0`
-    : "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4";
-  const containerStyle = (
-    floating
-      ? measuredDockBottom
-        ? getMemesWaveFloatingFooterMeasuredBottomStyle(measuredDockBottom)
-        : MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE
-      : {}
-  ) as NonNullable<React.ComponentProps<typeof motion.div>["style"]>;
+  const containerClassName = getContainerClassName({ collapsed, floating });
+  const expandedFrameClassName = getExpandedFrameClassName(floating);
+  const containerStyle = getContainerStyle({ floating });
 
   return (
     <AnimatePresence>
       {isAvailable && (
         <motion.div
+          ref={floatingFooterRef}
           data-memes-wave-footer-layer={floating ? "floating" : undefined}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}

@@ -187,7 +187,7 @@ describe("MemesWaveFooter", () => {
     );
     expect(floatingLayer).toHaveClass("tw-z-40");
     expect(floatingLayer).toHaveClass("tw-pointer-events-none");
-    expect(floatingLayer).toHaveClass("tw-transition-[bottom]");
+    expect(floatingLayer).toHaveClass("tw-will-change-[bottom]");
     expect(floatingLayer).not.toHaveClass("tw-bg-black");
     expect((floatingLayer as HTMLElement).style.bottom).toBe(
       MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE.bottom
@@ -227,6 +227,33 @@ describe("MemesWaveFooter", () => {
       createDockRect({ height: 54, top: 826 })
     );
     dock.dispatchEvent(new Event("transitionrun"));
+
+    await waitFor(() => expect(floatingLayer.style.bottom).toBe("78px"));
+  });
+
+  it("rebinds measurement when the mobile dock node is replaced", async () => {
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 3,
+      uncastPower: 5000,
+      unratedCount: 12,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+    const fallbackDock = createMeasuredDock({ height: 64, top: 816 });
+
+    const { container } = render(
+      <MemesWaveFooter floating onOpenQuickVote={onOpenQuickVote} />
+    );
+
+    const floatingLayer = container.querySelector(
+      '[data-memes-wave-footer-layer="floating"]'
+    ) as HTMLElement;
+
+    await waitFor(() => expect(floatingLayer.style.bottom).toBe("88px"));
+
+    fallbackDock.remove();
+    createMeasuredDock({ height: 54, top: 826 });
 
     await waitFor(() => expect(floatingLayer.style.bottom).toBe("78px"));
   });

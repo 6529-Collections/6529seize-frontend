@@ -16,20 +16,15 @@ type MemesWaveFloatingFooterBottomStyle = CSSProperties & {
 };
 
 export const MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX = 4;
+export const MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM =
+  "calc(4.25rem + var(--memes-wave-floating-footer-safe-bottom))";
 
 // Fallback used until the mobile dock has been measured. Runtime positioning
 // follows the actual dock top edge so expanded/compact transitions stay in sync.
 export const MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE = {
   ...MEMES_WAVE_FLOATING_FOOTER_SAFE_BOTTOM_STYLE,
-  bottom: "calc(4.25rem + var(--memes-wave-floating-footer-safe-bottom))",
+  bottom: MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM,
 } as MemesWaveFloatingFooterBottomStyle;
-
-export const getMemesWaveFloatingFooterMeasuredBottomStyle = (
-  measuredBottom: string
-): MemesWaveFloatingFooterBottomStyle => ({
-  ...MEMES_WAVE_FLOATING_FOOTER_SAFE_BOTTOM_STYLE,
-  bottom: measuredBottom,
-});
 
 export const MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME =
   "tw-w-[min(calc(100vw-2.25rem),38rem)]";
