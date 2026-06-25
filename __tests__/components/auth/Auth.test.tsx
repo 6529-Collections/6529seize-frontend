@@ -5,6 +5,52 @@ import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import type * as AuthUtilsModule from "@/services/auth/auth.utils";
+import type * as SessionV2Module from "@/services/auth/session-v2.utils";
+
+const mockQueryClient = {
+  getQueryData: jest.fn(),
+};
+const mockRouterReplace = jest.fn();
+const mockRouterPush = jest.fn();
+const mockUsePathname = jest.fn(() => "/");
+
+type ReactQueryWrapperContextValue = React.ContextType<
+  typeof ReactQueryWrapperContext
+>;
+
+const createReactQueryWrapperContextValue = (
+  overrides: Partial<ReactQueryWrapperContextValue> = {}
+): ReactQueryWrapperContextValue => ({
+  setProfile: jest.fn(),
+  setWave: jest.fn(),
+  setWavesOverviewPage: jest.fn(),
+  setWaveDrops: jest.fn(),
+  setProfileProxy: jest.fn(),
+  onProfileProxyModify: jest.fn(),
+  onProfileCICModify: jest.fn(),
+  onProfileRepModify: jest.fn(),
+  onProfileEdit: jest.fn(),
+  onProfileStatementAdd: jest.fn(),
+  onProfileStatementRemove: jest.fn(),
+  onIdentityFollowChange: jest.fn(),
+  initProfileRepPage: jest.fn(),
+  initCommunityActivityPage: jest.fn(),
+  waitAndInvalidateDrops: jest.fn(async () => {}),
+  addOptimisticDrop: jest.fn(async () => {}),
+  invalidateDrops: jest.fn(),
+  onGroupRemoved: jest.fn(),
+  onGroupChanged: jest.fn(),
+  onGroupCreate: jest.fn(),
+  onIdentityBulkRate: jest.fn(),
+  onWaveCreated: jest.fn(),
+  onWaveFollowChange: jest.fn(),
+  invalidateAll: jest.fn(),
+  invalidateAuthSensitiveQueries: jest.fn(),
+  invalidateNotifications: jest.fn(),
+  invalidateIdentityTdhStats: jest.fn(),
+  ...overrides,
+});
 
 jest.mock("react-toastify", () => ({
   toast: jest.fn(),
@@ -1417,24 +1463,35 @@ describe("Auth component", () => {
         },
       ];
 
-      const authUtils = require("@/services/auth/auth.utils");
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const sessionV2 =
+        require("@/services/auth/session-v2.utils") as typeof SessionV2Module;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
       const mockGetWalletAddress =
-        authUtils.getWalletAddress as jest.MockedFunction<any>;
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
       const mockHasActiveSessionV2Auth =
-        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<any>;
+        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<
+          typeof authUtils.hasActiveSessionV2Auth
+        >;
+      const mockVerifyActiveSessionV2WebSession =
+        sessionV2.verifyActiveSessionV2WebSession as jest.MockedFunction<
+          typeof sessionV2.verifyActiveSessionV2WebSession
+        >;
       mockGetAuthJwt.mockReturnValue("v2-jwt");
       mockGetWalletAddress.mockReturnValue(activeStoredAddress);
-      mockHasActiveSessionV2Auth.mockImplementation(
-        ({ address }: { readonly address: string }) =>
-          address.toLowerCase() === activeStoredAddress.toLowerCase()
+      mockHasActiveSessionV2Auth.mockImplementation(({ address }) =>
+        address.toLowerCase() === activeStoredAddress.toLowerCase()
       );
-      sessionV2.verifyActiveSessionV2WebSession.mockResolvedValue(true);
+      mockVerifyActiveSessionV2WebSession.mockResolvedValue(true);
 
       render(
         <ReactQueryWrapperContext.Provider
-          value={{ invalidateAll: jest.fn() } as any}
+          value={createReactQueryWrapperContextValue()}
         >
           <Auth>
             <SessionUpgradeProbe />
@@ -1450,12 +1507,12 @@ describe("Auth component", () => {
           "true"
         );
       });
-      expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledWith({
+      expect(mockVerifyActiveSessionV2WebSession).toHaveBeenCalledWith({
         address: activeStoredAddress,
         abortSignal: undefined,
       });
       const verifiedAddresses =
-        sessionV2.verifyActiveSessionV2WebSession.mock.calls.map(
+        mockVerifyActiveSessionV2WebSession.mock.calls.map(
           ([params]: [{ readonly address: string }]) => params.address
         );
       expect(verifiedAddresses).toContain(activeStoredAddress);
