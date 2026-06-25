@@ -13,6 +13,7 @@ import {
   THE_MEMES_DETAIL_TIMELINE_MESSAGES,
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
+import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
 type MessageEntry = readonly [key: string, value: string];
@@ -1186,16 +1187,7 @@ export const EN_US_MESSAGES = {
   "drop.media.retry": "Retry",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
-  "qrScanner.instructions": "Point your camera at a valid QR code on 6529.io",
-  "qrScanner.error.scanFailed": "Scan failed.",
-  "qrScanner.error.fallbackGuidance":
-    "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.",
-  "qrScanner.invalidCode": "This QR code is not valid.",
-  "qrScanner.sidebar.ariaLabel": "Scan QR Code",
-  "qrScanner.sidebar.label": "Scan QR Code",
-  "qrScanner.trigger.ariaLabel": "QR Code Scanner",
-  "qrScanner.trigger.title": "QR Code Scanner",
-  "qrScanner.iconAlt": "QR Scanner",
+  ...QR_SCANNER_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",

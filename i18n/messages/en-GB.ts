@@ -1,4 +1,5 @@
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
@@ -55,16 +56,7 @@ export const EN_GB_MESSAGES = {
   "drop.media.retry": "Retry",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
-  "qrScanner.instructions": "Point your camera at a valid QR code on 6529.io",
-  "qrScanner.error.scanFailed": "Scan failed.",
-  "qrScanner.error.fallbackGuidance":
-    "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.",
-  "qrScanner.invalidCode": "This QR code is not valid.",
-  "qrScanner.sidebar.ariaLabel": "Scan QR Code",
-  "qrScanner.sidebar.label": "Scan QR Code",
-  "qrScanner.trigger.ariaLabel": "QR Code Scanner",
-  "qrScanner.trigger.title": "QR Code Scanner",
-  "qrScanner.iconAlt": "QR Scanner",
+  ...EN_GB_QR_SCANNER_MESSAGES,
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} left this round",
   "memes.quickVote.unrated": "{count} unrated",

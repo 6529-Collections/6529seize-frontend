@@ -1,4 +1,5 @@
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
@@ -55,16 +56,7 @@ export const ES_ES_MESSAGES = {
   "drop.media.retry": "Reintentar",
   "drop.media.processingFailed": "El procesamiento de la imagen fallo.",
   "drop.media.processingTimedOut": "El procesamiento de la imagen expiro.",
-  "qrScanner.instructions": "Apunta la camara a un codigo QR valido en 6529.io",
-  "qrScanner.error.scanFailed": "El escaneo fallo.",
-  "qrScanner.error.fallbackGuidance":
-    "Asegurate de usar la ultima version de la app movil de 6529 y de que el acceso a la camara este activado en los ajustes del dispositivo.",
-  "qrScanner.invalidCode": "Este codigo QR no es valido.",
-  "qrScanner.sidebar.ariaLabel": "Escanear codigo QR",
-  "qrScanner.sidebar.label": "Escanear codigo QR",
-  "qrScanner.trigger.ariaLabel": "Escaner de codigo QR",
-  "qrScanner.trigger.title": "Escaner de codigo QR",
-  "qrScanner.iconAlt": "Escaner QR",
+  ...ES_ES_QR_SCANNER_MESSAGES,
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restantes esta ronda",
   "memes.quickVote.unrated": "{count} sin valorar",
