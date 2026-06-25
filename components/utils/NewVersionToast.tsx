@@ -74,6 +74,7 @@ const NewVersionToast = (): JSX.Element | null => {
     enabled: isVersionStale && shouldTrackMobileDock,
     fallbackBottom,
     measurementWindowMs: MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS,
+    resetOnDisabled: false,
     targetProperty: NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY,
   });
 
@@ -88,7 +89,7 @@ const NewVersionToast = (): JSX.Element | null => {
     <div
       ref={toastLayerRef}
       style={getNewVersionToastStyle(fallbackBottom)}
-      className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-[var(--new-version-toast-mobile-bottom)] tw-left-4 tw-right-4 tw-z-[1000] tw-w-auto tw-will-change-[bottom] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7"
+      className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-z-[1000] tw-w-auto tw-will-change-[bottom] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7"
     >
       <button
         type="button"

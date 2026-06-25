@@ -15,6 +15,7 @@ interface UseMeasuredMobileBottomNavDockBottomOptions {
   readonly measurementWindowMs: number;
   readonly targetProperty?: "bottom" | `--${string}`;
   readonly dockGapPx?: number | undefined;
+  readonly resetOnDisabled?: boolean | undefined;
 }
 
 const getViewportHeight = (): number => {
@@ -66,6 +67,7 @@ export const useMeasuredMobileBottomNavDockBottom = ({
   enabled,
   fallbackBottom,
   measurementWindowMs,
+  resetOnDisabled = true,
   targetProperty = "bottom",
 }: UseMeasuredMobileBottomNavDockBottomOptions): RefObject<HTMLDivElement | null> => {
   const targetElementRef = useRef<HTMLDivElement>(null);
@@ -109,6 +111,10 @@ export const useMeasuredMobileBottomNavDockBottom = ({
     };
 
     if (!enabled || globalThis.document === undefined) {
+      if (!resetOnDisabled) {
+        return;
+      }
+
       resetBottom();
       return;
     }
@@ -199,6 +205,8 @@ export const useMeasuredMobileBottomNavDockBottom = ({
         }
       };
 
+      // A transition replaces any queued one-shot measurement with the full
+      // transition loop so the overlay tracks every compact/expand frame.
       if (animationFrameId !== null) {
         globalThis.cancelAnimationFrame(animationFrameId);
       }
@@ -243,7 +251,14 @@ export const useMeasuredMobileBottomNavDockBottom = ({
         trackDockTransition
       );
     };
-  }, [dockGapPx, enabled, fallbackBottom, measurementWindowMs, targetProperty]);
+  }, [
+    dockGapPx,
+    enabled,
+    fallbackBottom,
+    measurementWindowMs,
+    resetOnDisabled,
+    targetProperty,
+  ]);
 
   return targetElementRef;
 };
