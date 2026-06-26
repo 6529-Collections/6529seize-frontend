@@ -2,7 +2,12 @@ import HeaderShare from "@/components/header/share/HeaderShare";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -661,6 +666,45 @@ describe("HeaderShare", () => {
       expect(
         screen.queryByText("Update Authentication")
       ).not.toBeInTheDocument();
+    });
+
+    it("clears the closing QR snapshot before the share modal opens again", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.createConnectionShare
+        .mockResolvedValueOnce({
+          connection_share_code: "snapshot-share-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=snapshot-share-code",
+        })
+        .mockImplementationOnce(() => createPendingPromise());
+
+      renderWithProviders(<HeaderShare />);
+
+      const shareButton = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(shareButton);
+
+      expect(
+        await screen.findByTitle(/snapshot-share-code/)
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId("header-share-modal")
+      );
+
+      await userEvent.click(shareButton);
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+      );
+      expect(
+        screen.queryByTitle(/snapshot-share-code/)
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("Preparing Connection")).toBeInTheDocument();
     });
 
     it("uses an existing legacy refresh token for 6529 Desktop connection sharing", async () => {

@@ -868,6 +868,7 @@ export function HeaderQRModal({
       return;
     }
 
+    visibleDisplayContentRef.current = null;
     connectionShareAbortRef.current?.abort();
     const controller = new AbortController();
     connectionShareAbortRef.current = controller;
