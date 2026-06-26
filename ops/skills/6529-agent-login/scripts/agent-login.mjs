@@ -101,7 +101,7 @@ function loadState(statePath) {
     throw new Error(`Unsupported account pool version: ${parsed.version}`);
   }
   if (!Array.isArray(parsed.accounts) || !Array.isArray(parsed.leases)) {
-    throw new Error("Invalid account pool file");
+    throw new TypeError("Invalid account pool file");
   }
   return parsed;
 }
@@ -133,7 +133,12 @@ function randomId(prefix = "agent") {
 }
 
 function normalizeCapabilities(value) {
-  const values = Array.isArray(value) ? value : value ? [value] : [];
+  let values = [];
+  if (Array.isArray(value)) {
+    values = value;
+  } else if (value) {
+    values = [value];
+  }
   return Array.from(
     new Set(
       values
@@ -149,7 +154,7 @@ function parseEnvFile(filePath, target) {
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
-    const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    const match = trimmed.match(/^([A-Za-z_]\w*)=(.*)$/);
     if (!match) continue;
     const key = match[1];
     if (target[key] !== undefined) continue;
@@ -160,7 +165,7 @@ function parseEnvFile(filePath, target) {
     ) {
       value = value.slice(1, -1);
     }
-    target[key] = value.replace(/\\n/g, "\n");
+    target[key] = value.replaceAll("\\n", "\n");
   }
 }
 
@@ -185,7 +190,10 @@ function normalizeApiBase(value) {
   if (!value) {
     throw new Error("Missing API endpoint. Pass --api or set API_ENDPOINT.");
   }
-  const withoutSlash = String(value).replace(/\/+$/, "");
+  let withoutSlash = String(value);
+  while (withoutSlash.endsWith("/")) {
+    withoutSlash = withoutSlash.slice(0, -1);
+  }
   return withoutSlash.endsWith("/api") ? withoutSlash : `${withoutSlash}/api`;
 }
 
@@ -764,24 +772,25 @@ async function main() {
       ethers,
     });
 
-    writeOutput(
-      format === "browser-script"
-        ? buildLoginBrowserScript(payload)
-        : format === "storage-state" || format === "playwright-storage"
-          ? buildPlaywrightStorageState(
-              payload,
-              args["base-url"] || env.BASE_ENDPOINT || "http://localhost:3001"
-            )
-          : payload,
-      format
-    );
+    let output = payload;
+    if (format === "browser-script") {
+      output = buildLoginBrowserScript(payload);
+    } else if (format === "storage-state" || format === "playwright-storage") {
+      output = buildPlaywrightStorageState(
+        payload,
+        args["base-url"] || env.BASE_ENDPOINT || "http://localhost:3001"
+      );
+    }
+    writeOutput(output, format);
     return;
   }
 
   throw new Error(`Unknown command: ${command}`);
 }
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
-});
+}
