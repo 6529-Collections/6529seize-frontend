@@ -48,6 +48,8 @@ jest.mock("@/hooks/useUnreadNotifications", () => ({
 
 jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
+  clearAgentLoginActiveAddress: jest.fn(),
+  getAgentLoginActiveAddress: jest.fn(() => null),
   getConnectedWalletAccounts: jest.fn(() => []),
   getWalletAddress: jest.fn(() => null),
   isAuthAddressAuthorized: jest.fn(
