@@ -23,8 +23,10 @@ const STORAGE_KEYS = {
   legacyAddress: "6529-wallet-address",
   legacyRefreshToken: "6529-wallet-refresh-token",
   legacyRole: "6529-wallet-role",
+  agentLoginActiveAddress: "6529-agent-login-active-address",
   authCookie: "wallet-auth",
 };
+const FETCH_TIMEOUT_MS = 15_000;
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -386,24 +388,36 @@ function requireString(value, name) {
 }
 
 async function fetchJson(url, options) {
-  const response = await fetch(url, options);
-  const text = await response.text();
-  let body = null;
-  if (text) {
-    try {
-      body = JSON.parse(text);
-    } catch {
-      body = text;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, FETCH_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    const text = await response.text();
+    let body = null;
+    if (text) {
+      try {
+        body = JSON.parse(text);
+      } catch {
+        body = text;
+      }
     }
+    if (!response.ok) {
+      const message =
+        body && typeof body === "object"
+          ? body.error || body.message || JSON.stringify(body)
+          : body || response.statusText;
+      throw new Error(`API request failed (${response.status}): ${message}`);
+    }
+    return body;
+  } finally {
+    clearTimeout(timeout);
   }
-  if (!response.ok) {
-    const message =
-      body && typeof body === "object"
-        ? body.error || body.message || JSON.stringify(body)
-        : body || response.statusText;
-    throw new Error(`API request failed (${response.status}): ${message}`);
-  }
-  return body;
 }
 
 function buildApiHeaders(env) {
@@ -482,6 +496,7 @@ function buildLoginBrowserScript(payload) {
   localStorage.setItem(${JSON.stringify(STORAGE_KEYS.accounts)}, JSON.stringify([account]));
   localStorage.setItem(${JSON.stringify(STORAGE_KEYS.activeAddress)}, account.address);
   localStorage.setItem(${JSON.stringify(STORAGE_KEYS.legacyAddress)}, account.address);
+  localStorage.setItem(${JSON.stringify(STORAGE_KEYS.agentLoginActiveAddress)}, account.address);
   localStorage.removeItem(${JSON.stringify(STORAGE_KEYS.legacyRefreshToken)});
   if (account.role) {
     localStorage.setItem(${JSON.stringify(STORAGE_KEYS.legacyRole)}, account.role);
@@ -527,6 +542,10 @@ function buildLocalStorageEntries(payload) {
     },
     {
       name: STORAGE_KEYS.legacyAddress,
+      value: account.address,
+    },
+    {
+      name: STORAGE_KEYS.agentLoginActiveAddress,
       value: account.address,
     },
   ];

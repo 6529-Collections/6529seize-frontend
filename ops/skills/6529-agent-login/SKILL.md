@@ -87,6 +87,7 @@ Use that file as a Playwright browser context storage state. It writes:
 - `6529-wallet-accounts`
 - `6529-wallet-active-address`
 - `6529-wallet-address`
+- `6529-agent-login-active-address`
 - role keys when present
 
 It follows the storage shape used by `services/auth/auth.utils.ts`.

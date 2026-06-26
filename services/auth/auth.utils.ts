@@ -18,6 +18,15 @@ const WALLET_ACCOUNTS_STORAGE_KEY = "6529-wallet-accounts";
 const WALLET_ACTIVE_ADDRESS_STORAGE_KEY = "6529-wallet-active-address";
 export const AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY =
   "6529-agent-login-active-address";
+export const AUTH_STORAGE_KEYS = {
+  accounts: WALLET_ACCOUNTS_STORAGE_KEY,
+  activeAddress: WALLET_ACTIVE_ADDRESS_STORAGE_KEY,
+  legacyAddress: WALLET_ADDRESS_STORAGE_KEY,
+  legacyRefreshToken: WALLET_REFRESH_TOKEN_STORAGE_KEY,
+  legacyRole: WALLET_ROLE_STORAGE_KEY,
+  agentLoginActiveAddress: AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY,
+  authCookie: WALLET_AUTH_COOKIE,
+} as const;
 
 export interface ConnectedWalletAccount {
   readonly address: string;

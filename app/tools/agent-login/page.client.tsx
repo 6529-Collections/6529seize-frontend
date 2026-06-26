@@ -7,21 +7,15 @@ import {
   type FormEvent,
 } from "react";
 import { getAddress, isAddress } from "viem";
-import { AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY } from "@/services/auth/auth.utils";
+import {
+  AUTH_STORAGE_KEYS,
+  AUTH_TOKEN_CHANGED_EVENT,
+  PROFILE_SWITCHED_EVENT,
+  WALLET_ACCOUNTS_UPDATED_EVENT,
+  type ConnectedWalletAccount,
+} from "@/services/auth/auth.utils";
 
-const STORAGE_KEYS = {
-  accounts: "6529-wallet-accounts",
-  activeAddress: "6529-wallet-active-address",
-  legacyAddress: "6529-wallet-address",
-  legacyRefreshToken: "6529-wallet-refresh-token",
-  legacyRole: "6529-wallet-role",
-  agentLoginActiveAddress: AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY,
-  authCookie: "wallet-auth",
-} as const;
-
-const WALLET_ACCOUNTS_UPDATED_EVENT = "6529-wallet-accounts-updated";
-const AUTH_TOKEN_CHANGED_EVENT = "6529-auth-token-changed";
-const PROFILE_SWITCHED_EVENT = "6529-profile-switched";
+const STORAGE_KEYS = AUTH_STORAGE_KEYS;
 
 type Status = {
   readonly kind: "idle" | "success" | "error";
@@ -40,13 +34,10 @@ type AgentLoginPayload = {
   };
 };
 
-type StoredWalletAccount = {
-  readonly address: string;
+type AgentLoginStoredWalletAccount = ConnectedWalletAccount & {
   readonly refreshToken: null;
-  readonly role: string | null;
   readonly jwt: string;
   readonly profileId: null;
-  readonly profileHandle: string | null;
   readonly authSessionVersion: "v2";
 };
 
@@ -232,7 +223,7 @@ function dispatchAuthEvents(): void {
 }
 
 function applyLoginPayload(payload: AgentLoginPayload): void {
-  const account: StoredWalletAccount = {
+  const account: AgentLoginStoredWalletAccount = {
     address: payload.session.address,
     refreshToken: null,
     role: payload.session.role,

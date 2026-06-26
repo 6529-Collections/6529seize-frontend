@@ -557,6 +557,23 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Use debounced state update to prevent race conditions
     debounceTimeoutRef.current = setTimeout(() => {
+      if (
+        agentLoginImpersonatedAddress &&
+        account.address &&
+        account.isConnected &&
+        isAddress(account.address)
+      ) {
+        const checksummedConnectedAddress = getAddress(account.address);
+        clearAgentLoginActiveAddress();
+        const isAlreadyConnected =
+          walletState.status === "connected" &&
+          walletState.address === checksummedConnectedAddress;
+        if (!isAlreadyConnected) {
+          setConnected(checksummedConnectedAddress);
+        }
+        return;
+      }
+
       if (impersonatedAddress) {
         const isAlreadyConnected =
           walletState.status === "connected" &&
@@ -727,6 +744,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setConnected,
     setDisconnected,
     setConnecting,
+    agentLoginImpersonatedAddress,
     impersonatedAddress,
     isAddingConnectedAccount,
   ]);
