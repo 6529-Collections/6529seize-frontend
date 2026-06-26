@@ -302,7 +302,7 @@ const getChipLabelClasses = (variant: WaveTrustSignalsVariant): string => {
 
 const getIconClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
-    return "tw-size-3.5 tw-flex-shrink-0 tw-opacity-[0.68]";
+    return "tw-size-[13px] tw-flex-shrink-0 tw-opacity-[0.64]";
   }
 
   if (isInlineHeaderVariant(variant)) {

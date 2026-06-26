@@ -83,13 +83,11 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   // Detect touch device on component mount
   useEffect(() => {
     const checkTouch = () => {
-      // Check if device supports touch events
-      setIsTouchDevice(
-        "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0 ||
-          // @ts-ignore: matchMedia may not be available in all environments
-          (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
-      );
+      const hasCoarsePointer =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(pointer: coarse)").matches;
+
+      setIsTouchDevice((navigator.maxTouchPoints ?? 0) > 0 || hasCoarsePointer);
     };
 
     checkTouch();
@@ -144,11 +142,10 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     }
   };
 
-  // Apply visibility logic: always show pinned waves on desktop, hide unpinned until hover
+  // Desktop rows reserve the pin slot and reveal the control on hover or focus.
   const getOpacityClass = () => {
     if (isTouchDevice) return "tw-opacity-100";
-    if (isPinned) return "tw-opacity-100";
-    return "tw-opacity-0 group-hover:tw-opacity-100";
+    return "tw-opacity-0 group-hover:tw-opacity-100 group-focus-within:tw-opacity-100 focus:tw-opacity-100 focus-visible:tw-opacity-100";
   };
   const opacityClass = getOpacityClass();
 
@@ -162,7 +159,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
   const getButtonStyles = () => {
     if (isPinned) {
-      return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-iron-100 active:tw-bg-transparent tw-opacity-100";
+      return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-iron-100 active:tw-bg-transparent";
     }
     return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-100 active:tw-bg-iron-700";
   };
@@ -172,8 +169,8 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
 
   const positionClasses = compact ? "" : "-tw-mr-2 tw-mt-0.5";
-  const sizeClasses = compact ? "tw-size-8" : "tw-size-7 sm:tw-size-6";
-  const iconSizeClasses = "tw-size-4";
+  const sizeClasses = compact ? "tw-size-7" : "tw-size-7 sm:tw-size-6";
+  const iconSizeClasses = compact ? "tw-size-3.5" : "tw-size-4";
 
   return (
     <>

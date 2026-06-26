@@ -84,6 +84,10 @@ function setup(
 describe("BrainLeftSidebarWavePin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(navigator, "maxTouchPoints", {
+      configurable: true,
+      value: 0,
+    });
     localStorage.clear();
   });
 
@@ -119,12 +123,33 @@ describe("BrainLeftSidebarWavePin", () => {
     expect(removePinnedWave).not.toHaveBeenCalled();
   });
 
-  it("uses a larger compact hit target while keeping the icon compact", () => {
+  it("uses a compact row hit target while keeping the icon compact", () => {
     setup(false, [], undefined, connectedAuth, true);
     const button = screen.getByRole("button", { name: /pin wave/i });
 
-    expect(button).toHaveClass("tw-size-8");
-    expect(button.querySelector("svg")).toHaveClass("tw-size-4");
+    expect(button).toHaveClass("tw-size-7");
+    expect(button.querySelector("svg")).toHaveClass("tw-size-3.5");
+  });
+
+  it("hides pinned desktop controls until row hover or keyboard focus", () => {
+    setup(true, ["1"]);
+    const button = screen.getByRole("button", { name: /unpin wave/i });
+
+    expect(button).toHaveClass("tw-opacity-0");
+    expect(button).toHaveClass("group-hover:tw-opacity-100");
+    expect(button).toHaveClass("group-focus-within:tw-opacity-100");
+    expect(button).toHaveClass("focus-visible:tw-opacity-100");
+  });
+
+  it("keeps pinned touch controls visible", () => {
+    Object.defineProperty(navigator, "maxTouchPoints", {
+      configurable: true,
+      value: 1,
+    });
+    setup(true, ["1"]);
+    const button = screen.getByRole("button", { name: /unpin wave/i });
+
+    expect(button).toHaveClass("tw-opacity-100");
   });
 
   it("shows tooltip and does not pin when max limit reached", async () => {
