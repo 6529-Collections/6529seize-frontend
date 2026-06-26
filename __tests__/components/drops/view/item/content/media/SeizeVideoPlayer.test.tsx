@@ -417,7 +417,7 @@ describe("SeizeVideoPlayer", () => {
     expect(muteButton.parentElement).toHaveClass("tw-right-3");
   });
 
-  it("toggles minimal playback from video clicks", () => {
+  it("pauses minimal playback from video clicks without starting playback", () => {
     let paused = false;
     const { container } = render(
       <SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay={false} />
@@ -448,7 +448,7 @@ describe("SeizeVideoPlayer", () => {
     fireEvent.click(video);
 
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(
-      playCallsBeforeClick + 1
+      playCallsBeforeClick
     );
   });
 

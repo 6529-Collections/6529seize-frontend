@@ -897,7 +897,13 @@ export default function SeizeVideoPlayer({
     }
 
     event.preventDefault();
-    togglePlayback();
+    const video = internalVideoRef.current;
+    if (video && !video.paused && !video.ended) {
+      if (playerOwnsAutoplay) {
+        setUserPausedAutoplaySrc(directSrc ?? null);
+      }
+      video.pause();
+    }
     revealControls();
   }
 
