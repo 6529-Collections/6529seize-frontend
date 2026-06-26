@@ -38,6 +38,10 @@ const HELP_BOT_FINAL_REACTIONS = new Set([
   ":warning:",
 ]);
 
+type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
+  readonly serial_no: unknown;
+};
+
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
   readonly registerWave: (waveId: string) => void;
@@ -90,6 +94,38 @@ function replaceAttachmentInPart(
 const getIncomingWaveId = (drop: ApiDrop): string | null => {
   const wave = (drop as { readonly wave?: { readonly id?: unknown } }).wave;
   return typeof wave?.id === "string" && wave.id.length > 0 ? wave.id : null;
+};
+
+const parseRealtimeSerialNo = (value: unknown): number | null => {
+  if (typeof value === "number" && Number.isSafeInteger(value)) {
+    return value;
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  if (!/^\d+$/.test(normalized)) {
+    return null;
+  }
+
+  const parsed = Number(normalized);
+  return Number.isSafeInteger(parsed) ? parsed : null;
+};
+
+const normalizeRealtimeDrop = (drop: ApiDrop): ApiDrop => {
+  const rawSerialNo = (drop as ApiDropWithUnknownSerialNo).serial_no;
+  const serialNo = parseRealtimeSerialNo(rawSerialNo);
+
+  if (serialNo === null || serialNo === rawSerialNo) {
+    return drop;
+  }
+
+  return {
+    ...drop,
+    serial_no: serialNo,
+  };
 };
 
 const isCanonicalDropUpdate = (type: ProcessIncomingDropType): boolean =>
@@ -633,15 +669,19 @@ const useProcessIncomingDrop = ({
 
   return useCallback(
     async (
-      drop: ApiDrop,
+      dropData: ApiDrop,
       type: ProcessIncomingDropType,
       options: ProcessIncomingDropOptions = {}
     ) => {
+      const drop = normalizeRealtimeDrop(dropData);
       const waveId = getIncomingWaveId(drop);
       const debugHelpBotDrop = isHelpBotRealtimeDebugDrop(drop);
       if (debugHelpBotDrop) {
         logHelpBotRealtimeDebug("wave realtime received", {
           ...getHelpBotRealtimeDebugSummary(drop),
+          rawSerialNo: (dropData as ApiDropWithUnknownSerialNo).serial_no,
+          rawSerialNoType: typeof (dropData as ApiDropWithUnknownSerialNo)
+            .serial_no,
           activeWaveId,
           type,
         });
