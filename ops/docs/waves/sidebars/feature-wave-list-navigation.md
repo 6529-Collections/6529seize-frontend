@@ -8,6 +8,9 @@ Wave and DM rows in the left list control which thread is open.
 - Click the body of the active row to clear selection and return to section
   home.
 - Row pin and subwave expand/collapse buttons remain separate controls.
+- On expanded rows, pin/unpin sits in the trailing metadata cluster before the
+  wave score instead of beside the wave name, keeping the score at the far
+  right.
 - Browser back/forward keeps the active row and URL in sync.
 
 ## Location in the Site
@@ -52,6 +55,8 @@ Wave and DM rows in the left list control which thread is open.
 - If first unread is known, row navigation can add `divider={serialNo}`.
 - Row pin/unpin and subwave expand/collapse buttons do not trigger row
   navigation.
+- Long wave names truncate before the trailing score and visible pin controls;
+  idle desktop rows do not reserve the hidden pin width.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
