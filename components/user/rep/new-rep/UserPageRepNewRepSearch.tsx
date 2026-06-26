@@ -28,7 +28,7 @@ import {
   HELP_BOT_CREDIT_REP_CATEGORY,
   isHelpBotCreditRepCategory,
 } from "@/components/utils/input/rep-category/repCategoryConstants";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const SEARCH_LENGTH = {
@@ -52,12 +52,6 @@ const getErrorMessage = (error: unknown): string => {
   return "Couldn't complete this request. Please try again.";
 };
 
-const HELP_BOT_CREDIT_REP_CATEGORY_ERROR = t(
-  DEFAULT_LOCALE,
-  "rep.categories.helpBotReserved.error",
-  { category: HELP_BOT_CREDIT_REP_CATEGORY }
-);
-
 export default function UserPageRepNewRepSearch({
   overview,
   profile,
@@ -69,9 +63,15 @@ export default function UserPageRepNewRepSearch({
   readonly onSuccess?: (() => void) | undefined;
   readonly onCancel?: (() => void) | undefined;
 }) {
+  const locale = useBrowserLocale();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const helpBotCreditRepCategoryError = t(
+    locale,
+    "rep.categories.helpBotReserved.error",
+    { category: HELP_BOT_CREDIT_REP_CATEGORY }
+  );
 
   const [repSearch, setRepSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -138,7 +138,7 @@ export default function UserPageRepNewRepSearch({
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
   const showHelpBotCreditRepCategoryError = () => {
-    setErrorMsg(HELP_BOT_CREDIT_REP_CATEGORY_ERROR);
+    setErrorMsg(helpBotCreditRepCategoryError);
     setShowErrorDetails(false);
   };
 
