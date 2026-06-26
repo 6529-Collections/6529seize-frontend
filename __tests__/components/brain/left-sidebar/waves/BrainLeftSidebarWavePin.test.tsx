@@ -123,11 +123,15 @@ describe("BrainLeftSidebarWavePin", () => {
     expect(removePinnedWave).not.toHaveBeenCalled();
   });
 
-  it("uses a compact row hit target while keeping the icon compact", () => {
+  it("collapses compact desktop row width until hover or keyboard focus", () => {
     setup(false, [], undefined, connectedAuth, true);
     const button = screen.getByRole("button", { name: /pin wave/i });
 
-    expect(button).toHaveClass("tw-size-7");
+    expect(button).toHaveClass("tw-h-7");
+    expect(button).toHaveClass("tw-w-0");
+    expect(button).toHaveClass("group-hover:tw-w-7");
+    expect(button).toHaveClass("group-focus-within:tw-w-7");
+    expect(button).toHaveClass("focus-visible:tw-w-7");
     expect(button.querySelector("svg")).toHaveClass("tw-size-3.5");
   });
 
@@ -150,6 +154,7 @@ describe("BrainLeftSidebarWavePin", () => {
     const button = screen.getByRole("button", { name: /unpin wave/i });
 
     expect(button).toHaveClass("tw-opacity-100");
+    expect(button).toHaveClass("tw-size-7");
   });
 
   it("shows tooltip and does not pin when max limit reached", async () => {
