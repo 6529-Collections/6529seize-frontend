@@ -1,4 +1,5 @@
 import React from "react";
+import userEvent from "@testing-library/user-event";
 import {
   act,
   fireEvent,
@@ -10,7 +11,6 @@ import type { UnifiedWavesListWavesHandle } from "@/components/brain/left-sideba
 import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import {
   getFittingPreviewCount,
-  getHighlyRatedPreviewTooltipAlignment,
   getHighlyRatedPreviewWaves,
   getVisibleHighlyRatedPreviewItems,
   type HighlyRatedWavePreviewItem,
@@ -206,24 +206,6 @@ it("calculates how many highly rated preview avatars fit", () => {
       width: 220,
     })
   ).toBe(4);
-});
-
-it("aligns edge preview tooltips inward to avoid sidebar clipping", () => {
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 0, itemCount: 7 })
-  ).toBe("start");
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 1, itemCount: 7 })
-  ).toBe("start");
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 3, itemCount: 7 })
-  ).toBe("center");
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 5, itemCount: 7 })
-  ).toBe("end");
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 3, itemCount: 4 })
-  ).toBe("center");
 });
 
 it("keeps the active highly rated preview visible within the capped strip", () => {
@@ -429,6 +411,8 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
 });
 
 it("uses highly rated preview score semantics instead of unread badges", () => {
+  const latestDropTimestamp = Date.now() - 60 * 60 * 1000;
+
   render(
     <UnifiedWavesListWaves
       waves={[
@@ -440,7 +424,7 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
           unreadDropsCount: 24,
           newDropsCount: {
             count: 99,
-            latestDropTimestamp: 123,
+            latestDropTimestamp,
             firstUnreadSerialNo: 42,
           },
           waveScore: {
@@ -459,18 +443,31 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   expect(
     screen.getByRole("link", { name: "Open Scored Discovery, score 93" })
   ).toBeInTheDocument();
+  const scoreDetailsButton = screen.getByRole("button", {
+    name: "Open Scored Discovery score details, score 93",
+  });
   const scoreBadgeText = screen.getByText("93", { selector: "text" });
   expect(scoreBadgeText).toBeInTheDocument();
-  expect(scoreBadgeText.closest("button")).toHaveClass("-tw-bottom-1");
-  expect(scoreBadgeText.closest("button")).toHaveClass("-tw-right-1.5");
-  expect(scoreBadgeText.closest("button")).toHaveClass("tw-h-6");
-  expect(scoreBadgeText.closest("button")).toHaveClass("tw-w-7");
+  expect(scoreBadgeText.closest("button")).toBe(scoreDetailsButton);
+  expect(scoreDetailsButton).toHaveClass("-tw-bottom-1");
+  expect(scoreDetailsButton).toHaveClass("-tw-right-1.5");
+  expect(scoreDetailsButton).toHaveClass("tw-h-6");
+  expect(scoreDetailsButton).toHaveClass("tw-w-7");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
-  fireEvent.click(screen.getByRole("button", { name: "Score 93" }));
+  fireEvent.click(
+    screen.getByRole("link", { name: "Open Scored Discovery, score 93" })
+  );
+  expect(
+    screen.queryByRole("dialog", { name: "Wave score details" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(scoreDetailsButton);
   expect(
     screen.getByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
+  expect(screen.getByText("Scored Discovery")).toBeInTheDocument();
+  expect(screen.getByText("Last message")).toBeInTheDocument();
+  expect(screen.getByText("1h")).toBeInTheDocument();
   expect(screen.getByText("Quality")).toBeInTheDocument();
   expect(screen.getByText("Hotness")).toBeInTheDocument();
   expect(screen.getByText("Wave REP")).toBeInTheDocument();
@@ -491,6 +488,76 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
     "data-is-drop-wave",
     "true"
   );
+});
+
+it("uses no-message copy in the combined highly rated score card", () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "h-score-empty",
+          name: "Quiet Discovery",
+          type: ApiWaveType.Rank,
+          sidebarSection: "highly-rated",
+          waveScore: {
+            visibility_score: 88,
+            quality_score: 90,
+            hotness_score: 70,
+            rep_sort_score: 64,
+          } as any,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Open Quiet Discovery score details, score 88",
+    })
+  );
+  expect(
+    screen.getByRole("dialog", { name: "Wave score details" })
+  ).toBeInTheDocument();
+  expect(screen.getByText("Quiet Discovery")).toBeInTheDocument();
+  expect(screen.getByText("No messages yet")).toBeInTheDocument();
+});
+
+it("opens the combined highly rated score card from keyboard score activation", async () => {
+  const user = userEvent.setup();
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "h-score-keyboard",
+          name: "Keyboard Discovery",
+          type: ApiWaveType.Rank,
+          sidebarSection: "highly-rated",
+          waveScore: {
+            visibility_score: 86,
+            quality_score: 90,
+            hotness_score: 70,
+            rep_sort_score: 64,
+          } as any,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  screen
+    .getByRole("button", {
+      name: "Open Keyboard Discovery score details, score 86",
+    })
+    .focus();
+  await user.keyboard("{Enter}");
+
+  expect(
+    await screen.findByRole("dialog", { name: "Wave score details" })
+  ).toBeInTheDocument();
+  expect(screen.getByText("Keyboard Discovery")).toBeInTheDocument();
 });
 
 it("caps highly rated previews at ten without rendering an overflow control", () => {
