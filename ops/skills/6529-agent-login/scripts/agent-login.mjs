@@ -165,7 +165,7 @@ function parseEnvFile(filePath, target) {
     ) {
       value = value.slice(1, -1);
     }
-    target[key] = value.replaceAll("\\n", "\n");
+    target[key] = value.replaceAll(String.raw`\n`, "\n");
   }
 }
 
@@ -791,6 +791,6 @@ async function main() {
 try {
   await main();
 } catch (error) {
-  console.error(error instanceof Error ? error.message : String(error));
+  console.error("Agent login command failed.");
   process.exitCode = 1;
 }
