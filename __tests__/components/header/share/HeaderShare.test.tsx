@@ -635,6 +635,34 @@ describe("HeaderShare", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("keeps the connection QR visible while the share modal closes", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.createConnectionShare.mockResolvedValue({
+        connection_share_code: "closing-share-code",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: null,
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?connection_share_code=closing-share-code",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByTitle(/closing-share-code/)
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+
+      expect(screen.getByTitle(/closing-share-code/)).toBeInTheDocument();
+      expect(
+        screen.queryByText("Update Authentication")
+      ).not.toBeInTheDocument();
+    });
+
     it("uses an existing legacy refresh token for 6529 Desktop connection sharing", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       mockAuthUtils.getRefreshToken.mockReturnValue(
