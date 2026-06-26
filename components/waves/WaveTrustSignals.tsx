@@ -302,7 +302,7 @@ const getChipLabelClasses = (variant: WaveTrustSignalsVariant): string => {
 
 const getIconClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
-    return "tw-size-3 tw-flex-shrink-0 tw-opacity-[0.55]";
+    return "tw-size-[13px] tw-flex-shrink-0 tw-opacity-[0.64]";
   }
 
   if (isInlineHeaderVariant(variant)) {
@@ -581,25 +581,32 @@ function WaveScoreSummaryPopoverContent({
   );
 }
 
-function WaveScoreSummaryHoverCard({
+export function WaveScoreSummaryHoverCard({
   children,
+  closeOnContentClick,
   learnMoreHref,
+  stopClickPropagation,
   triggerDisplay,
-  visibilityScore,
-  qualityScore,
-  hotnessScore,
-  repSortScore,
   waveRep,
+  waveScore,
 }: {
   readonly children: ReactElement;
+  readonly closeOnContentClick?: boolean | undefined;
   readonly learnMoreHref?: string | undefined;
+  readonly stopClickPropagation?: boolean | undefined;
   readonly triggerDisplay?: "contents" | "inline-flex" | undefined;
-  readonly visibilityScore: string;
-  readonly qualityScore: string | null;
-  readonly hotnessScore: string | null;
-  readonly repSortScore: string | null;
   readonly waveRep: ApiWaveRepSummary | null | undefined;
+  readonly waveScore: ApiWaveScore | null | undefined;
 }) {
+  const visibilityScore = formatScore(waveScore?.visibility_score);
+  const qualityScore = formatScore(waveScore?.quality_score);
+  const hotnessScore = formatScore(waveScore?.hotness_score);
+  const repSortScore = formatScore(waveScore?.rep_sort_score);
+
+  if (visibilityScore === null) {
+    return children;
+  }
+
   return (
     <HoverCard
       ariaLabel={t(WAVE_TRUST_LOCALE, "waves.score.summary.detailsAriaLabel")}
@@ -609,6 +616,8 @@ function WaveScoreSummaryHoverCard({
       hoverTransitionDelay={80}
       offset={8}
       openOnClick
+      closeOnContentClick={closeOnContentClick}
+      stopClickPropagation={stopClickPropagation}
       triggerDisplay={triggerDisplay}
       contentStyle={{ padding: "10px 12px" }}
       content={
@@ -759,11 +768,8 @@ export function WaveTrustSignals({
               triggerDisplay={
                 isInlineSidebarVariant(variant) ? "inline-flex" : undefined
               }
-              visibilityScore={visibilityScore}
-              qualityScore={qualityScore}
-              hotnessScore={hotnessScore}
-              repSortScore={repSortScore}
               waveRep={waveRep}
+              waveScore={waveScore}
             >
               <button
                 type="button"

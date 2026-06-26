@@ -189,6 +189,7 @@ function getAboutSection(hideSubscriptions: boolean): SidebarSection {
       {
         name: "Resources",
         items: [
+          { name: "Tech", href: `/about/${AboutSection.TECH}` },
           {
             name: "Data Decentralization",
             href: `/about/${AboutSection.DATA_DECENTR}`,

@@ -1,4 +1,5 @@
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
@@ -14,8 +15,7 @@ export const ES_ES_MESSAGES = {
   "media.video.playPreview": "Reproducir vista previa del video",
   "media.video.seek": "Cambiar la posicion del video",
   "media.video.unmute": "Activar sonido del video",
-  "media.video.unsupported":
-    "Tu navegador no admite la etiqueta de video.",
+  "media.video.unsupported": "Tu navegador no admite la etiqueta de video.",
   "attachment.safety.ariaLabel": "Adjunto escaneado y validado",
   "attachment.safety.badge": "Escaneado y validado",
   "attachment.safety.heading": "Seguridad del adjunto",
@@ -56,7 +56,22 @@ export const ES_ES_MESSAGES = {
   "drop.media.retry": "Reintentar",
   "drop.media.processingFailed": "El procesamiento de la imagen fallo.",
   "drop.media.processingTimedOut": "El procesamiento de la imagen expiro.",
+  ...ES_ES_QR_SCANNER_MESSAGES,
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
+  "memes.quickVote.leftThisRound": "{count} restantes esta ronda",
+  "memes.quickVote.unrated": "{count} sin valorar",
+  "memes.quickVote.summary": "{leftThisRound}, {unrated}",
+  "memes.quickVote.inMemesWave": "{leftThisRound}, {unrated} en la wave memes",
+  "memes.waveFooter.quickVote.label": "Voto rápido",
+  "memes.waveFooter.quickVote.open": "Abrir voto rápido",
+  "memes.waveFooter.uncastPower.ariaLabel":
+    "Poder sin usar, quedan {power} {votingLabel}, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.title": "Poder sin usar",
+  "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
+  "memes.waveFooter.uncastPower.votes": "Votos",
+  "memes.waveFooter.uncastPower.votesVisible": "votos",
+  "waves.mobile.profileFeed.title": "Feed de Profile Waves",
+  "waves.mobile.profileFeed.subtitle": "Drops destacados de profile waves",
   "theMemes.documentTitle": "The Memes | Colecciones",
   "theMemes.description.collections": "Colecciones",
   "theMemes.sorting.regionLabel": "Orden de memes",

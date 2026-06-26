@@ -12,9 +12,9 @@ import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
-import { isNavItemActive } from "./isNavItemActive";
+import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import { getActiveViewFromUrl, useViewContext } from "./ViewContext";
-import type { NavIconColor, NavItem as NavItemData, ViewKey } from "./navTypes";
+import type { NavItem as NavItemData } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
@@ -42,24 +42,8 @@ const getIconSlotClass = ({
   return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
 };
 
-const ActiveNavIndicator = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) => (
-  <div
-    className={
-      variant === "fixed"
-        ? "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
-        : `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-            compact
-              ? "tw-h-11 tw-w-[3.75rem] sm:tw-h-12 sm:tw-w-[4.25rem]"
-              : "tw-h-12 tw-w-[4.05rem] sm:tw-h-[3.15rem] sm:tw-w-[4.45rem]"
-          }`
-    }
-  />
+const FixedActiveNavIndicator = () => (
+  <div className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white" />
 );
 
 const getHomeIconSizeClass = ({
@@ -79,6 +63,14 @@ const getHomeIconSizeClass = ({
 const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
   isHighlighted ? "tw-text-white" : "tw-text-iron-300";
 
+const getHomeIconTextColorClass = ({
+  isActive,
+  variant,
+}: {
+  readonly isActive: boolean;
+  readonly variant: "floating" | "fixed";
+}) => (variant === "floating" && isActive ? "tw-text-black" : "tw-text-white");
+
 const getIconTextColorClass = ({
   isActive,
   isHighlighted,
@@ -91,7 +83,7 @@ const getIconTextColorClass = ({
   readonly variant: "floating" | "fixed";
 }) => {
   if (item.name === "Home") {
-    return "";
+    return getHomeIconTextColorClass({ isActive, variant });
   }
 
   if (variant === "fixed") {
@@ -110,51 +102,6 @@ const getDisabledButtonClassName = (variant: "floating" | "fixed") => {
       : "tw-justify-center tw-rounded-full";
 
   return `tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none ${layoutClassName}`;
-};
-
-const getResolvedProfileState = ({
-  activeView,
-  isCurrentWaveDm,
-  item,
-  pathname,
-  profileHref,
-  searchParams,
-}: {
-  readonly activeView: ViewKey | null;
-  readonly isCurrentWaveDm: boolean;
-  readonly item: NavItemData;
-  readonly pathname: string;
-  readonly profileHref: string | null;
-  readonly searchParams: ReturnType<typeof useSearchParams>;
-}) => {
-  const isProfileItem = item.kind === "route" && item.name === "Profile";
-  const normalizedPathname = pathname.toLowerCase();
-
-  if (isProfileItem && profileHref !== null) {
-    const isProfileActive =
-      activeView === null &&
-      (normalizedPathname === profileHref ||
-        normalizedPathname.startsWith(`${profileHref}/`));
-
-    return {
-      isActive: isProfileActive,
-      resolvedItem: {
-        ...item,
-        href: profileHref,
-      },
-    };
-  }
-
-  return {
-    isActive: isNavItemActive(
-      item,
-      pathname,
-      searchParams,
-      activeView,
-      isCurrentWaveDm
-    ),
-    resolvedItem: item,
-  };
 };
 
 const NavItemLinkContent = ({
@@ -178,8 +125,6 @@ const NavItemLinkContent = ({
 }) => {
   const isHighlighted = isActive;
   const IconComponent = item.iconComponent;
-  const activeIconColor: NavIconColor =
-    isActive && variant === "floating" ? "black" : "white";
   const iconTextColorClass = getIconTextColorClass({
     isActive,
     isHighlighted,
@@ -193,11 +138,10 @@ const NavItemLinkContent = ({
 
   return (
     <div className={getIconSlotClass({ compact, variant })}>
-      {isActive && <ActiveNavIndicator compact={compact} variant={variant} />}
+      {isActive && variant === "fixed" && <FixedActiveNavIndicator />}
       {IconComponent ? (
         <IconComponent
           className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}
-          color={activeIconColor}
         />
       ) : (
         <Image
@@ -242,12 +186,11 @@ const NavItemContent = ({
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
-  const normalizedConnectedHandle = (
-    connectedProfile?.normalised_handle ?? connectedProfile?.handle
-  )?.toLowerCase();
-  const normalizedConnectedAddress = address?.toLowerCase();
-  const profileSlug = normalizedConnectedHandle ?? normalizedConnectedAddress;
-  const profileHref = profileSlug ? `/${profileSlug}` : null;
+  const profileHref = getProfileHref({
+    address,
+    handle: connectedProfile?.handle,
+    normalisedHandle: connectedProfile?.normalised_handle,
+  });
   const { setTitle } = useTitle();
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
     item.name === "Notifications" ? (connectedProfile?.handle ?? null) : null
@@ -312,7 +255,7 @@ const NavItemContent = ({
   }
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
-  const { isActive, resolvedItem } = getResolvedProfileState({
+  const { isActive, resolvedItem } = getResolvedNavItemState({
     activeView,
     isCurrentWaveDm,
     item,

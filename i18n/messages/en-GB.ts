@@ -1,4 +1,5 @@
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
@@ -55,7 +56,22 @@ export const EN_GB_MESSAGES = {
   "drop.media.retry": "Retry",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  ...EN_GB_QR_SCANNER_MESSAGES,
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
+  "memes.quickVote.leftThisRound": "{count} left this round",
+  "memes.quickVote.unrated": "{count} unrated",
+  "memes.quickVote.summary": "{leftThisRound}, {unrated}",
+  "memes.quickVote.inMemesWave": "{leftThisRound}, {unrated} in the memes wave",
+  "memes.waveFooter.quickVote.label": "Quick vote",
+  "memes.waveFooter.quickVote.open": "Open quick vote",
+  "memes.waveFooter.uncastPower.ariaLabel":
+    "Uncast Power, {power} {votingLabel} left, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.title": "Uncast Power",
+  "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
+  "memes.waveFooter.uncastPower.votes": "Votes",
+  "memes.waveFooter.uncastPower.votesVisible": "votes",
+  "waves.mobile.profileFeed.title": "Profile Waves Feed",
+  "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
 } satisfies Partial<Record<MessageKey, string>>;

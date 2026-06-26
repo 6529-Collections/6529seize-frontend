@@ -1,4 +1,5 @@
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
@@ -56,7 +57,23 @@ export const FR_FR_MESSAGES = {
   "drop.media.retry": "Reessayer",
   "drop.media.processingFailed": "Le traitement de l'image a echoue.",
   "drop.media.processingTimedOut": "Le traitement de l'image a expire.",
+  ...FR_FR_QR_SCANNER_MESSAGES,
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
+  "memes.quickVote.leftThisRound": "{count} restant ce tour",
+  "memes.quickVote.unrated": "{count} non notés",
+  "memes.quickVote.summary": "{leftThisRound}, {unrated}",
+  "memes.quickVote.inMemesWave":
+    "{leftThisRound}, {unrated} dans la wave memes",
+  "memes.waveFooter.quickVote.label": "Vote rapide",
+  "memes.waveFooter.quickVote.open": "Ouvrir le vote rapide",
+  "memes.waveFooter.uncastPower.ariaLabel":
+    "Pouvoir non utilisé, {power} {votingLabel} restants, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.title": "Pouvoir non utilisé",
+  "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
+  "memes.waveFooter.uncastPower.votes": "Votes",
+  "memes.waveFooter.uncastPower.votesVisible": "votes",
+  "waves.mobile.profileFeed.title": "Flux Profile Waves",
+  "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.sorting.regionLabel": "Tri des memes",

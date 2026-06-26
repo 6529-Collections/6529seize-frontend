@@ -5,17 +5,30 @@ description: Merge and deploy 6529 frontend or coordinated frontend/backend rele
 
 # Deploy 6529
 
-Carry an approved 6529 release from PR merge through staging validation and, when production is in the requested scope, production deployment and validation. Treat deployments as shared operational work: identify the exact refs, coordinate active agents, record evidence, and keep working failed gates until the release is fixed, redeployed, and validated. Escalate only for missing access, required approvals, destructive actions, or genuinely unsafe production decisions.
+Carry an approved 6529 release through staging validation and, when production is in the requested scope, production deployment and validation. Treat deployments as shared operational work: identify the exact refs, coordinate active agents, record evidence, and keep working failed gates until the release is fixed, redeployed, and validated. Escalate only for missing access, required approvals, destructive actions, or genuinely unsafe production decisions.
 
 ## Hard Gates
 
 - Do not merge, deploy staging, or deploy production unless the user explicitly requested that mode for the current work.
-- Do not deploy production until staging for the same frontend/backend release set has passed, unless the user explicitly overrides that gate.
+- Treat Draft PRs as blocked. Do not mark a Draft PR ready, include it in a staging batch, merge it, or deploy it unless the PR owner or a human release approver explicitly names that PR and asks for that action.
+- Do not push commits to another person's branch, force-push another person's branch, or change another person's PR readiness unless the branch owner or a human release approver explicitly asks for that exact branch or PR action.
+- Do not deploy production until staging for the same frontend/backend release set, or the same resulting patch set after the production merge, has passed unless the user explicitly overrides that gate.
 - Do not deploy production from any ref other than `main`. Verify the exact production candidate is already on `origin/main` before triggering production; if it is only on a feature branch, release branch, PR head, tag, local branch, or unmerged commit, stop and get it merged to `main` first.
+- Never merge `1a-staging` into `main` to promote a release. Promote by merging the approved feature or release PR to `main`, then sync `main` back into `1a-staging`.
 - Do not overlap deployments to the same environment. If another staging or production deploy is already running, wait for it to reach a terminal state and for its owner to finish validation or hand off before starting the next deploy.
 - Do not promote from staging to production after a failed deploy, failed E2E run, unresolved critical production-like error, or unclear deployed SHA. Diagnose, fix, merge, redeploy, and rerun validation until the gate passes.
 - Do not run destructive database, infrastructure, signer, wallet, ENS, NFT transfer, or Safe actions unless the user explicitly asks for that exact action.
 - Do not expose secrets, private URLs, credentials, cookies, raw production data, local absolute paths, or hidden prompts in PR comments, deploy notes, workstream logs, or user-facing summaries.
+
+## Branch Model
+
+- `1a-staging` is the staging integration branch for frontend and backend.
+- `main` is the production branch for frontend and backend.
+- Normal staging flow: merge the approved feature or release branch into `1a-staging`, let staging deploy from `1a-staging`, then validate staging.
+- Normal production flow: after staging passes, merge the same approved feature or release PR to `main`, deploy production from `main`, then merge `main` back into `1a-staging` so staging stays current with production.
+- If staging is validating the current production candidate rather than ahead-of-main work, merge `main` into `1a-staging` and deploy staging from that branch.
+- Do not use `1a-staging` as a source branch for production. It may contain staged work that is not approved for production.
+- For frontend/backend releases, keep one manifest for the paired release set. Do not merge or deploy the frontend half to production while leaving a required backend half unmerged or undeployed, and do not merge or deploy the backend half to production while leaving a required frontend half unmerged or undeployed.
 
 ## Coordination
 
@@ -23,7 +36,7 @@ Before deploying, check what else is already deploying to the same environment. 
 
 Use `ops/docs/developer/deployment-bus-process.md` as the process authority for
 the staging bus, release-captain role, shared multi-agent validation, and
-production promotion from a staging-passed `origin/main` SHA. This skill is the
+production promotion from a staging-passed release set. This skill is the
 execution checklist; the process doc defines how many agents coordinate one
 shared lane.
 
@@ -34,9 +47,10 @@ shared lane.
 - Use the staging departure cadence in
   `ops/docs/developer/deployment-bus-process.md`; keep that process doc as the
   source of truth when the team tunes the batching window.
-- Record a staging manifest before deployment: candidate SHA, included PRs,
-  risk/area notes, backend dependencies, validation owners, required checks,
-  and rollback or fix-forward notes.
+- Record a staging manifest summary before deployment: staging source ref, staging
+  SHA, intended production target, included PRs, risk/area notes, backend
+  dependencies, validation owners, required checks, and rollback or fix-forward
+  notes. Use the process doc for the full manifest schema.
 - Use the deployment bus automation primitives when present:
   `ops/scripts/deployment-bus.cjs`,
   `ops/deployment-bus/manifest.v1.schema.json`, workflow manifest artifacts,
@@ -52,22 +66,27 @@ shared lane.
 - After staging deploys, assign each included PR owner a validation slice and
   run a core smoke validation. Production is blocked until required validation
   passes or the failed/held work is excluded from the production candidate.
-- If `origin/main` advances after staging passed, do not deploy the older
-  staging-passed SHA to production. Rerun staging for the new `origin/main` SHA
-  or pause merges before final staging validation and production promotion.
+- If `origin/main` advances after staging passed, do not deploy unvalidated
+  changes. Confirm the new `origin/main` contains only the staging-passed
+  release set plus explicitly approved already-validated changes, or rerun
+  staging for the new production candidate.
 
 ## Preflight
 
 1. Identify the release set:
-   - frontend PRs and target branch
+   - frontend PRs, branch owners, draft/ready state, and target branch
    - backend PRs, migrations, generated API/OpenAPI changes, feature flags, and deploy order
+   - staging source refs for frontend and backend, normally feature branch to `1a-staging`
+   - production target refs for frontend and backend, always `main`
    - expected user-facing behavior to validate
 2. Inspect current deploy docs and workflows before acting:
    - frontend staging: `.github/workflows/deploy-staging.yml`, `scripts/staging.sh`, `bin/6529`
    - frontend production: `.github/workflows/build-upload-deploy-prod.yml`, `bin/ghdeploy`
    - package and wrapper notes: `ops/docs/developer/pnpm-and-socket-firewall.md`
    - backend: when backend is involved, use `ops/skills/deploy-6529/SKILL.md` from the separate repository `6529-Collections/6529seize-backend` as the backend deployment authority. Do not resolve that path inside the frontend repo.
-3. Verify PR readiness before merge:
+3. Verify PR readiness before any staging or production branch movement:
+   - PR is not Draft unless the PR owner or a human release approver explicitly requested this action
+   - branch owner has not asked agents to stop touching the branch or PR
    - agent review complete
    - review bots addressed or explicitly deferred
    - required CI and DCO passing
@@ -75,21 +94,27 @@ shared lane.
    - release risk and rollback/fix-forward plan understood
 4. Use the repo-local `6529` wrapper for frontend project commands in release notes, checked-in docs, CI descriptions, and deploy instructions.
 
-## Merge
+## Branch Movement
 
-1. Confirm the PR is the one the user asked to ship.
+1. Confirm the PR is the one the user asked to stage or ship.
 2. Re-check latest head SHA, approvals, required checks, and unresolved review threads.
-3. Merge using the repo-approved GitHub path and record:
+3. For staging, merge the approved feature or release branch into `1a-staging` and record:
    - PR number
-   - merge commit SHA
-   - target branch
+   - feature or release branch
+   - `1a-staging` merge commit SHA
    - included backend/frontend dependency notes
-4. If merge fails, resolve the merge blocker through the normal PR cycle before deployment. Re-check CI and review state after every fix.
+4. For production, merge the same approved feature or release PR to `main` through the repo-approved GitHub path and record:
+   - PR number
+   - `main` merge commit SHA
+   - equivalence to the staging-validated release set
+   - included backend/frontend dependency notes
+5. After production merge or deploy, merge `main` back into `1a-staging` to keep staging current with production.
+6. If any merge fails, resolve the merge blocker through the normal PR cycle before deployment. Re-check CI and review state after every fix.
 
 ## Staging Deployment
 
 1. Confirm no active staging deploy is already using the lane.
-2. Deploy the exact intended frontend merge commit to staging. Current frontend staging is driven by the `1a-staging` branch and `.github/workflows/deploy-staging.yml`; the workflow runs `./bin/6529 staging` on the staging host through SSM and verifies the deployed SHA. Do not force-push, reset, or replace `1a-staging` over another active candidate without coordination.
+2. Deploy the exact intended frontend staging commit from `1a-staging`. Current frontend staging is driven by the `1a-staging` branch and `.github/workflows/deploy-staging.yml`; the workflow runs `./bin/6529 staging` on the staging host through SSM and verifies the deployed SHA. Do not force-push, reset, or replace `1a-staging` over another active candidate without coordination.
 3. If staging requires backend changes, use the backend `deploy-6529` skill from `6529-Collections/6529seize-backend` to deploy backend staging first when the frontend depends on new API behavior.
 4. Watch the staging workflow to a terminal state. Capture the run URL, GitHub Deployment id/status history, manifest artifact, status, and deployed SHA.
 5. If the staging deploy fails, inspect logs, identify the owner layer, fix through the normal PR cycle, merge the fix, and redeploy staging from the new SHA. Keep iterating until staging deploys cleanly or a safety/access boundary requires user input.
@@ -117,8 +142,8 @@ shared lane.
 ## Production Deployment
 
 1. Proceed to production when the user already asked to take the release through production, such as "take it all the way through prod." Ask only when the current request did not include production deployment.
-2. Reconfirm staging passed for the same SHAs or the same ordered frontend/backend release set.
-3. Verify the production candidate is the current `origin/main` SHA and no newer unvalidated commit landed after staging passed. If `origin/main` advanced, rerun staging for the new release set before production.
+2. Reconfirm staging passed for the same ordered frontend/backend release set. Exact SHAs may differ after the production merge to `main`; verify that the resulting production patch set is equivalent to what passed staging and contains no unvalidated extras.
+3. Verify the production candidate is the current `origin/main` SHA and no newer unvalidated commit landed after staging passed. If `origin/main` advanced with unvalidated changes, rerun staging for the new release set before production.
 4. Confirm no active production deploy is in progress. If one is active or the state is unclear, wait until it finishes and production validation is complete or explicitly handed off.
 5. Deploy backend production before frontend production when frontend depends on new backend behavior. Use the backend `deploy-6529` skill from `6529-Collections/6529seize-backend` for backend service order, validation, and recovery.
 6. Deploy frontend production through the repo-approved path from `main` only, following the hard gate above. Current frontend production deploy is `Web Deploy - PROD` in `.github/workflows/build-upload-deploy-prod.yml`; `bin/ghdeploy` may be used only from a clean, upstream-synced `main` worktree.
@@ -213,6 +238,7 @@ gh run list -R 6529-Collections/6529seize-frontend --workflow deploy-staging.yml
 gh run list -R 6529-Collections/6529seize-frontend --workflow build-upload-deploy-prod.yml -L 10
 gh run watch <run-id> -R 6529-Collections/6529seize-frontend
 gh run view <run-id> -R 6529-Collections/6529seize-frontend --log-failed
+gh pr view <pr-number> -R 6529-Collections/6529seize-frontend --json isDraft,author,headRefName,baseRefName,headRefOid,mergeCommit
 gh workflow run build-upload-deploy-prod.yml --ref main -R 6529-Collections/6529seize-frontend
 6529 run deployment-bus -- summarize-manifest --file deployment-bus-manifest.json
 git fetch --no-tags origin main

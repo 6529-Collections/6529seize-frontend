@@ -1,10 +1,12 @@
 import type { NavItem as NavItemData, ViewKey } from "./navTypes";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
+export type NavSearchParams = Pick<URLSearchParams, "get">;
+
 export const isNavItemActive = (
   item: NavItemData,
   pathname: string,
-  searchParams: URLSearchParams,
+  searchParams: NavSearchParams,
   activeView: ViewKey | null,
   isCurrentWaveDm: boolean
 ): boolean => {

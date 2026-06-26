@@ -11,6 +11,8 @@ import React, {
 } from "react";
 import {
   getActiveWaveIdFromUrl,
+  MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
+  MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
   getNotificationsRoute,
   usesReverseMobileBottomNavigationScroll,
@@ -20,6 +22,8 @@ import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
@@ -29,7 +33,9 @@ import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
+import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import type { NavItem as NavItemData } from "./navTypes";
+import { getActiveViewFromUrl } from "./ViewContext";
 
 const items: NavItemData[] = [
   {
@@ -153,9 +159,11 @@ const getTrackedScrollTarget = ({
 
 const useCompactDock = ({
   hidden,
+  resetKey,
   reverseScrollDirection,
 }: {
   readonly hidden: boolean;
+  readonly resetKey: string;
   readonly reverseScrollDirection: boolean;
 }) => {
   const [compact, setCompact] = useState(false);
@@ -164,6 +172,16 @@ const useCompactDock = ({
   );
   const frameRef = useRef<number | null>(null);
   const pendingScrollTargetsRef = useRef<Set<EventTarget>>(new Set());
+
+  useEffect(() => {
+    setCompact(false);
+    previousScrollPositionsRef.current = new WeakMap();
+    pendingScrollTargetsRef.current.clear();
+    if (frameRef.current !== null) {
+      globalThis.cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+  }, [resetKey]);
 
   useEffect(() => {
     if (hidden) {
@@ -265,14 +283,66 @@ const floatingNavInnerClassName = "tw-relative tw-h-full";
 
 const getFloatingNavListClassName = (compact: boolean) =>
   `tw-flex tw-h-full tw-items-center ${
-    compact ? "tw-gap-0 tw-px-1.5" : "tw-gap-0.5 tw-px-2"
+    compact ? "tw-gap-0 tw-px-2.5" : "tw-gap-0.5 tw-px-4"
   }`;
+
+const getFloatingActivePillClassName = ({
+  compact,
+  visible,
+}: {
+  readonly compact: boolean;
+  readonly visible: boolean;
+}) => {
+  const sizeClassName = compact
+    ? "tw-h-10 tw-w-12 sm:tw-h-11 sm:tw-w-14"
+    : "tw-h-12 tw-w-[3.65rem] sm:tw-h-[3.15rem] sm:tw-w-[4.05rem]";
+  const visibilityClassName = visible ? "tw-opacity-100" : "tw-opacity-0";
+
+  return `tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[left,width,height,opacity] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${sizeClassName} ${visibilityClassName}`;
+};
+
+const getFloatingActivePillStyle = ({
+  activeItemIndex,
+  compact,
+  itemCount,
+}: {
+  readonly activeItemIndex: number;
+  readonly compact: boolean;
+  readonly itemCount: number;
+}): React.CSSProperties => ({
+  left: getFloatingActivePillLeft({
+    activeItemIndex,
+    compact,
+    itemCount,
+  }),
+});
+
+const getFloatingActivePillLeft = ({
+  activeItemIndex,
+  compact,
+  itemCount,
+}: {
+  readonly activeItemIndex: number;
+  readonly compact: boolean;
+  readonly itemCount: number;
+}) => {
+  const paddingX = compact ? "0.625rem" : "1rem";
+  const gap = compact ? "0rem" : "0.125rem";
+  const gapCount = Math.max(0, itemCount - 1);
+
+  return `calc(${paddingX} + ((100% - (${paddingX} * 2) - (${gap} * ${gapCount})) / ${itemCount} * ${
+    activeItemIndex + 0.5
+  }) + (${gap} * ${activeItemIndex}))`;
+};
 
 const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => (
   <nav aria-hidden="true" className={getNavClassName({ hidden })}>
-    <div className={getDockClassName(false)}>
+    <div
+      {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
+      className={getDockClassName(false)}
+    >
       <div className={floatingNavInnerClassName}>
         <ul className={getFloatingNavListClassName(false)} />
       </div>
@@ -282,22 +352,33 @@ const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
 
 interface BottomNavigationResolvedContentProps extends BottomNavigationProps {
   readonly pathname: string;
+  readonly routeStateKey: string;
 }
 
 const BottomNavigationResolvedContent: React.FC<
   BottomNavigationResolvedContentProps
-> = ({ hidden = false, pathname }) => {
+> = ({ hidden = false, pathname, routeStateKey }) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
+  const { connectedProfile } = useAuth();
+  const { address } = useSeizeConnectContext();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const activeView = getActiveViewFromUrl({
+    activeWaveId: waveIdFromQuery,
+    searchParams,
+  });
   const reverseScrollDirection = usesReverseMobileBottomNavigationScroll({
     pathname,
   });
-  const compact = useCompactDock({ hidden, reverseScrollDirection });
+  const compact = useCompactDock({
+    hidden,
+    resetKey: routeStateKey,
+    reverseScrollDirection,
+  });
   const { data: waveData } = useWaveData({
     waveId: waveIdFromQuery,
     onWaveNotFound: () => {},
@@ -328,6 +409,23 @@ const BottomNavigationResolvedContent: React.FC<
       ),
     [isApp]
   );
+  const profileHref = getProfileHref({
+    address,
+    handle: connectedProfile?.handle,
+    normalisedHandle: connectedProfile?.normalised_handle,
+  });
+  const activeItemIndex = navItems.findIndex(
+    (item) =>
+      getResolvedNavItemState({
+        activeView,
+        isCurrentWaveDm,
+        item,
+        pathname,
+        profileHref,
+        searchParams,
+      }).isActive
+  );
+  const hasActiveItem = activeItemIndex >= 0;
 
   return (
     <nav
@@ -337,8 +435,24 @@ const BottomNavigationResolvedContent: React.FC<
       className={getNavClassName({ hidden })}
       inert={hidden}
     >
-      <div className={getDockClassName(compact)}>
+      <div
+        {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
+        className={getDockClassName(compact)}
+      >
         <div className={floatingNavInnerClassName}>
+          <div
+            aria-hidden="true"
+            data-testid="mobile-dock-active-pill"
+            className={getFloatingActivePillClassName({
+              compact,
+              visible: hasActiveItem,
+            })}
+            style={getFloatingActivePillStyle({
+              activeItemIndex: hasActiveItem ? activeItemIndex : 0,
+              compact,
+              itemCount: navItems.length,
+            })}
+          />
           <ul className={getFloatingNavListClassName(compact)}>
             {navItems.map((item) => (
               <li
@@ -372,9 +486,9 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
 
   return (
     <BottomNavigationResolvedContent
-      key={routeStateKey}
       hidden={hidden}
       pathname={pathname}
+      routeStateKey={routeStateKey}
     />
   );
 };
@@ -382,9 +496,14 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => (
-  <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
-    <BottomNavigationContent hidden={hidden} />
-  </Suspense>
+  <div
+    {...{ [MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE]: "true" }}
+    className="tw-contents"
+  >
+    <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
+      <BottomNavigationContent hidden={hidden} />
+    </Suspense>
+  </div>
 );
 
 export default BottomNavigation;

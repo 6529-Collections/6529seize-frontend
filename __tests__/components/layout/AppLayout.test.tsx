@@ -1,4 +1,5 @@
 import { editSlice } from "@/store/editSlice";
+import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import { configureStore } from "@reduxjs/toolkit";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -8,6 +9,7 @@ const registerRef = jest.fn();
 const setHeaderRef = jest.fn();
 const usePathname = jest.fn();
 const getSearchParams = jest.fn();
+const mockPullToRefresh = jest.fn();
 let mockDialogMountCount = 0;
 let mockLayoutSpaces = {
   headerSpace: 0,
@@ -73,7 +75,10 @@ jest.mock("next/navigation", () => ({
 }));
 jest.mock("@/components/providers/PullToRefresh", () => ({
   __esModule: true,
-  default: () => null,
+  default: (props: unknown) => {
+    mockPullToRefresh(props);
+    return null;
+  },
 }));
 jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
   useMemesQuickVoteDialogController: () => {
@@ -154,6 +159,7 @@ describe("AppLayout", () => {
     usePathname.mockReturnValue("/");
     getSearchParams.mockReturnValue(new URLSearchParams());
     mockDialogMountCount = 0;
+    mockPullToRefresh.mockClear();
     mockLayoutSpaces = {
       headerSpace: 0,
       pinnedSpace: 0,
@@ -177,6 +183,28 @@ describe("AppLayout", () => {
     expect(screen.getByTestId("bottom-nav")).toBeInTheDocument();
   });
 
+  it("keeps bottom nav outside the pull-to-refresh scroll target", () => {
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const scrollTarget = container.querySelector(
+      '[data-mobile-bottom-nav-scroll-target="true"]'
+    );
+    const transformRoot = container.querySelector(
+      `[${PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE}="true"]`
+    );
+    const bottomNav = screen.getByTestId("bottom-nav");
+
+    expect(scrollTarget).toBeInTheDocument();
+    expect(transformRoot).toBeInTheDocument();
+    expect(scrollTarget).toContainElement(transformRoot as HTMLElement);
+    expect(scrollTarget).not.toContainElement(bottomNav);
+    expect(transformRoot).not.toContainElement(bottomNav);
+    expect(mockPullToRefresh).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentRef: expect.objectContaining({ current: transformRoot }),
+      })
+    );
+  });
+
   it("sets stream loading reserve when bottom nav is visible", () => {
     const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
     const appWrapper = container.firstElementChild as HTMLElement;
@@ -198,7 +226,7 @@ describe("AppLayout", () => {
     );
   });
 
-  it("uses visible floating bottom nav spacing on stream list routes", () => {
+  it("lets notification route content own floating bottom nav clearance", () => {
     usePathname.mockReturnValue("/notifications");
 
     const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
@@ -209,7 +237,31 @@ describe("AppLayout", () => {
       "false"
     );
     expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
-      "104px"
+      "0px"
+    );
+  });
+
+  it("lets waves and messages routes own floating bottom nav clearance", () => {
+    usePathname.mockReturnValue("/waves");
+
+    const { container, rerender } = renderWithProvider(
+      <AppLayout>child</AppLayout>
+    );
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
+
+    usePathname.mockReturnValue("/messages");
+    rerender(
+      <Provider store={store}>
+        <AppLayout>child</AppLayout>
+      </Provider>
+    );
+
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
     );
   });
 
@@ -275,8 +327,15 @@ describe("AppLayout", () => {
 
   it("renders waves or messages view based on the view query param", () => {
     getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
-    const { rerender } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const { container, rerender } = renderWithProvider(
+      <AppLayout>child</AppLayout>
+    );
+    const appWrapper = container.firstElementChild as HTMLElement;
+
     expect(screen.getByTestId("waves")).toBeInTheDocument();
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
 
     getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
     rerender(
@@ -285,6 +344,9 @@ describe("AppLayout", () => {
       </Provider>
     );
     expect(screen.getByTestId("messages")).toBeInTheDocument();
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
+      "0px"
+    );
   });
 
   it("uses root view params for app shell content instead of route children", () => {

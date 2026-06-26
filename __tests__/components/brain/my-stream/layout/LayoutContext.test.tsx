@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import {
   LayoutProvider,
   useLayout,
@@ -66,6 +66,36 @@ function TestComponent() {
   );
 }
 
+function MobileWavesTestComponent() {
+  const { registerRef, mobileWavesViewStyle } = useLayout();
+  const headerRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (headerRef.current) {
+      (headerRef.current as any).getBoundingClientRect = () => ({
+        height: 100,
+      });
+      registerRef("header", headerRef.current);
+    }
+
+    if (navRef.current) {
+      (navRef.current as any).getBoundingClientRect = () => ({
+        height: 80,
+      });
+      registerRef("mobileNav", navRef.current);
+    }
+  }, [registerRef]);
+
+  return (
+    <>
+      <div ref={headerRef} />
+      <div ref={navRef} />
+      <div data-testid="mobile-waves" style={mobileWavesViewStyle} />
+    </>
+  );
+}
+
 describe("LayoutProvider", () => {
   it("calculates spaces and styles", () => {
     Object.defineProperty(globalThis, "innerHeight", {
@@ -82,7 +112,7 @@ describe("LayoutProvider", () => {
     expect(content.style.height).toContain("100px");
   });
 
-  it("applies 128px capSpace on Android when keyboard is closed", () => {
+  it("does not apply fallback capSpace on Android when keyboard is closed", () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: true };
     mockKeyboardValues = { isVisible: false, keyboardHeight: 0 };
 
@@ -96,11 +126,11 @@ describe("LayoutProvider", () => {
       </LayoutProvider>
     );
     const content = screen.getByTestId("content");
-    // Should include 128px capSpace
-    expect(content.style.height).toContain("128px");
+    expect(content.style.height).not.toContain("- 128px");
+    expect(content.style.height).not.toContain("128px");
   });
 
-  it("removes capSpace on Android when keyboard is open", () => {
+  it("does not apply fallback capSpace on Android when keyboard is open", () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: true };
     mockKeyboardValues = { isVisible: true, keyboardHeight: 350 };
 
@@ -114,7 +144,6 @@ describe("LayoutProvider", () => {
       </LayoutProvider>
     );
     const content = screen.getByTestId("content");
-    // Should NOT include 128px capSpace when keyboard is open (capSpace = 0)
     expect(content.style.height).not.toContain("- 128px");
     expect(content.style.height).not.toContain("128px");
   });
@@ -158,5 +187,25 @@ describe("LayoutProvider", () => {
     // Should not include any capSpace
     expect(content.style.height).not.toContain("- 128px");
     expect(content.style.height).not.toContain("- 20px");
+  });
+
+  it("does not subtract the floating mobile nav from mobile waves list height", async () => {
+    Object.defineProperty(globalThis, "innerHeight", {
+      value: 1000,
+      configurable: true,
+    });
+
+    render(
+      <LayoutProvider>
+        <MobileWavesTestComponent />
+      </LayoutProvider>
+    );
+
+    const content = screen.getByTestId("mobile-waves");
+
+    await waitFor(() => {
+      expect(content.style.maxHeight).toContain("- 100px");
+    });
+    expect(content.style.maxHeight).not.toContain("- 80px");
   });
 });

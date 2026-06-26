@@ -6,9 +6,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 interface WaveAvatarProps {
   readonly isActive: boolean;
   readonly isDropWave: boolean;
+  readonly dropBadgePlacement?: "bottom-left" | "bottom-right" | undefined;
   readonly showNewDropsBadge: boolean;
+  readonly showUnreadDropsBadge?: boolean | undefined;
   readonly wave: MinimalWave;
-  readonly size?: "default" | "sm" | undefined;
+  readonly size?: "default" | "sm" | "lg" | undefined;
 }
 
 const DropIcon = ({ className }: { readonly className: string }) => (
@@ -33,26 +35,72 @@ const MUTED_BADGE_CLASSES =
   "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm";
 const MUTED_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0";
 
+const getDropBadgePlacementClasses = ({
+  isSmall,
+  placement,
+}: {
+  readonly isSmall: boolean;
+  readonly placement: "bottom-left" | "bottom-right";
+}) => {
+  if (placement === "bottom-left") {
+    return isSmall
+      ? "tw-bottom-[-1px] tw-left-[-1px]"
+      : "tw-bottom-[-2px] tw-left-[-2px]";
+  }
+
+  return isSmall
+    ? "tw-bottom-[-1px] tw-right-[-1px]"
+    : "tw-bottom-[-2px] tw-right-[-2px]";
+};
+
+const getAvatarSizeClasses = ({
+  isLarge,
+  isSmall,
+}: {
+  readonly isLarge: boolean;
+  readonly isSmall: boolean;
+}) => {
+  if (isSmall) {
+    return "tw-size-7";
+  }
+
+  if (isLarge) {
+    return "tw-size-11";
+  }
+
+  return "tw-size-8";
+};
+
 export const WaveAvatar = ({
+  dropBadgePlacement = "bottom-right",
   isActive,
   isDropWave,
   showNewDropsBadge,
+  showUnreadDropsBadge = true,
   wave,
   size = "default",
 }: WaveAvatarProps) => {
   const showBadge =
-    !wave.isMuted && (wave.unreadDropsCount > 0 || showNewDropsBadge);
+    showUnreadDropsBadge &&
+    !wave.isMuted &&
+    (wave.unreadDropsCount > 0 || showNewDropsBadge);
   const rawCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
   const displayCount =
     rawCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : rawCount;
   const isSmall = size === "sm";
-  const avatarSizeClasses = isSmall ? "tw-size-7" : "tw-size-8";
+  const isLarge = size === "lg";
+  const avatarSizeClasses = getAvatarSizeClasses({ isLarge, isSmall });
   const activeRingClasses = isSmall
     ? "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
     : "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-2 tw-ring-offset-iron-950";
-  const dropBadgeClasses = isSmall
-    ? "tw-absolute tw-bottom-[-1px] tw-right-[-1px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg"
-    : "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg";
+  const dropBadgePlacementClasses = getDropBadgePlacementClasses({
+    isSmall,
+    placement: dropBadgePlacement,
+  });
+  const dropBadgeClasses = `tw-absolute ${dropBadgePlacementClasses} tw-flex ${isLarge ? "tw-size-4" : "tw-size-3.5"} tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg`;
+  const dropIconClasses = isLarge
+    ? "tw-size-3 tw-flex-shrink-0 tw-text-[#E8D48A]"
+    : DROP_ICON_CLASSES;
 
   return (
     <div
@@ -69,7 +117,7 @@ export const WaveAvatar = ({
       />
       {isDropWave && (
         <div className={dropBadgeClasses}>
-          <DropIcon className={DROP_ICON_CLASSES} />
+          <DropIcon className={dropIconClasses} />
         </div>
       )}
       {showBadge && <div className={UNREAD_BADGE_CLASSES}>{displayCount}</div>}

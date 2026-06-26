@@ -1,4 +1,5 @@
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
+import type { SidebarSection } from "@/components/navigation/navTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -114,7 +115,7 @@ jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
 
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
 
-const defaultSidebarSections = [
+const defaultSidebarSections: SidebarSection[] = [
   {
     key: "network",
     name: "Network",
@@ -168,7 +169,7 @@ interface SetupOptions {
   profilesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   nftsRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   wavesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
-  sidebarSections?: typeof defaultSidebarSections | undefined;
+  sidebarSections?: SidebarSection[] | undefined;
   dropForgePermissions?: typeof DEFAULT_DROP_FORGE_PERMISSIONS | undefined;
 }
 
@@ -306,6 +307,40 @@ describe("HeaderSearchModal", () => {
       .map((element) => element.textContent ?? "");
     expect(
       renderedItems.some((content) => content.includes('"type":"PAGE"'))
+    ).toBe(true);
+  });
+
+  it("finds the Tech about page from sidebar pages", () => {
+    setup({
+      sidebarSections: [
+        ...defaultSidebarSections,
+        {
+          key: "about",
+          name: "About",
+          icon: () => null,
+          items: [],
+          subsections: [
+            {
+              name: "Resources",
+              items: [{ name: "Tech", href: "/about/tech" }],
+            },
+          ],
+        },
+      ],
+    });
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "tech" } });
+
+    const renderedItems = screen
+      .getAllByTestId("item")
+      .map((element) => element.textContent ?? "");
+    expect(
+      renderedItems.some(
+        (content) =>
+          content.includes('"title":"Tech"') &&
+          content.includes('"/about/tech"') &&
+          content.includes('"breadcrumbs":["About","Resources"]')
+      )
     ).toBe(true);
   });
 

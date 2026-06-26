@@ -1,11 +1,9 @@
 import type React from "react";
 
 export type ViewKey = "waves" | "messages";
-export type NavIconColor = "white" | "black";
 
 type NavIconComponent = React.ComponentType<{
   className?: string | undefined;
-  color?: NavIconColor | undefined;
 }>;
 
 type RouteNavItem = {

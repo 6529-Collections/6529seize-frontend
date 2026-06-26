@@ -11,6 +11,7 @@ import useCapacitor from "./useCapacitor";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
 import {
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
@@ -133,6 +134,7 @@ export function useDropMessages(
           return;
         }
 
+        upsertDropIntoMatchingDropsQueries(queryClient, { drop: message });
         updateDropInCachedDrops(queryClient, message, {
           preferExistingPollVote: true,
         });

@@ -11,6 +11,7 @@ import { isNavItemActive } from "@/components/navigation/isNavItemActive";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useWave } from "@/hooks/useWave";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import LogoIcon from "@/components/common/icons/LogoIcon";
 
 const mockUseLinkStatus = jest.fn(() => ({ pending: false }));
 
@@ -269,6 +270,55 @@ describe("NavItem notifications", () => {
     const { queryByTestId } = render(<NavItem item={item} />);
 
     expect(queryByTestId("nav-item-pending-indicator")).not.toBeInTheDocument();
+  });
+
+  it("colors the home logo through the active nav text color", () => {
+    (isNavItemActive as jest.Mock).mockReturnValue(true);
+    const item = {
+      kind: "route",
+      name: "Home",
+      href: "/",
+      icon: "/6529.svg",
+      iconComponent: LogoIcon,
+    } as any;
+
+    const { container } = render(<NavItem item={item} />);
+    const logo = container.querySelector("span[aria-hidden='true']");
+
+    expect(logo).toHaveClass("tw-text-black");
+  });
+
+  it("keeps inactive floating home logo white", () => {
+    const item = {
+      kind: "route",
+      name: "Home",
+      href: "/",
+      icon: "/6529.svg",
+      iconComponent: LogoIcon,
+    } as any;
+
+    const { container } = render(<NavItem item={item} />);
+    const logo = container.querySelector("span[aria-hidden='true']");
+
+    expect(logo).toHaveClass("tw-text-white");
+    expect(logo).not.toHaveClass("tw-text-iron-300");
+  });
+
+  it("keeps fixed home logo white even when active", () => {
+    (isNavItemActive as jest.Mock).mockReturnValue(true);
+    const item = {
+      kind: "route",
+      name: "Home",
+      href: "/",
+      icon: "/6529.svg",
+      iconComponent: LogoIcon,
+    } as any;
+
+    const { container } = render(<NavItem item={item} variant="fixed" />);
+    const logo = container.querySelector("span[aria-hidden='true']");
+
+    expect(logo).toHaveClass("tw-text-white");
+    expect(logo).not.toHaveClass("tw-text-iron-500");
   });
 
   it("renders disabled item when disabled flag set", () => {

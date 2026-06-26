@@ -2,7 +2,12 @@ import HeaderShare from "@/components/header/share/HeaderShare";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -14,6 +19,7 @@ jest.mock("@/hooks/useElectron", () => ({
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
+    ensureActiveSessionV2WebSession: jest.fn(async () => true),
     requestSessionUpgrade: jest.fn(),
   })),
 }));
@@ -170,6 +176,7 @@ describe("HeaderShare", () => {
 
     const auth = require("@/components/auth/Auth");
     auth.useAuth.mockReturnValue({
+      ensureActiveSessionV2WebSession: jest.fn(async () => true),
       requestSessionUpgrade: jest.fn(),
     });
 
@@ -437,6 +444,7 @@ describe("HeaderShare", () => {
         success: true,
       });
       auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession: jest.fn(async () => true),
         requestSessionUpgrade,
       });
       const sessionV2 = require("@/services/auth/session-v2.utils");
@@ -463,6 +471,93 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "Update" }));
 
       expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows an upgrade action without calling the share endpoint when the web session is missing", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      const ensureActiveSessionV2WebSession = jest
+        .fn()
+        .mockResolvedValue(false);
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession,
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByText("Update Authentication")
+      ).toBeInTheDocument();
+      expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
+        expect.objectContaining({ aborted: false })
+      );
+      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      expect(requestSessionUpgrade).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole("button", { name: "Update" }));
+
+      expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
+    });
+
+    it("fails closed without calling the share endpoint when the web-session verifier is unavailable", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      auth.useAuth.mockReturnValue({
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByText("Update Authentication")
+      ).toBeInTheDocument();
+      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      expect(requestSessionUpgrade).not.toHaveBeenCalled();
+    });
+
+    it("fails closed without calling the share endpoint when web-session verification errors", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      const ensureActiveSessionV2WebSession = jest
+        .fn()
+        .mockRejectedValue(new Error("verification failed"));
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession,
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+
+      try {
+        renderWithProviders(<HeaderShare />);
+
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+        expect(
+          await screen.findByText("Update Authentication")
+        ).toBeInTheDocument();
+        expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
+          expect.objectContaining({ aborted: false })
+        );
+        expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      } finally {
+        consoleErrorSpy.mockRestore();
+      }
     });
 
     it("generates connection QR codes from one-time connection share codes even when the local v2 marker is stale", async () => {
@@ -543,6 +638,73 @@ describe("HeaderShare", () => {
       expect(
         screen.queryByText("Update Authentication")
       ).not.toBeInTheDocument();
+    });
+
+    it("keeps the connection QR visible while the share modal closes", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.createConnectionShare.mockResolvedValue({
+        connection_share_code: "closing-share-code",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: null,
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?connection_share_code=closing-share-code",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByTitle(/closing-share-code/)
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+
+      expect(screen.getByTitle(/closing-share-code/)).toBeInTheDocument();
+      expect(
+        screen.queryByText("Update Authentication")
+      ).not.toBeInTheDocument();
+    });
+
+    it("clears the closing QR snapshot before the share modal opens again", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.createConnectionShare
+        .mockResolvedValueOnce({
+          connection_share_code: "snapshot-share-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=snapshot-share-code",
+        })
+        .mockImplementationOnce(() => createPendingPromise());
+
+      renderWithProviders(<HeaderShare />);
+
+      const shareButton = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(shareButton);
+
+      expect(
+        await screen.findByTitle(/snapshot-share-code/)
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId("header-share-modal")
+      );
+
+      await userEvent.click(shareButton);
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+      );
+      expect(
+        screen.queryByTitle(/snapshot-share-code/)
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("Preparing Connection")).toBeInTheDocument();
     });
 
     it("uses an existing legacy refresh token for 6529 Desktop connection sharing", async () => {

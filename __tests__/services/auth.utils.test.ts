@@ -305,6 +305,24 @@ describe("auth.utils", () => {
     expect(storage.get(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY)).toBeUndefined();
   });
 
+  it("tracks session v2 auth per stored account instead of only the active account", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", null, "role-a", {
+      authSessionVersion: "v2",
+    });
+    setAuthJwt("0xBbB", "jwt-b", null, "role-b", {
+      authSessionVersion: "v2",
+    });
+
+    expect(getWalletAddress()).toBe("0xBbB");
+    expect(hasActiveSessionV2Auth({ address: "0xaaa" })).toBe(true);
+    expect(hasActiveSessionV2Auth({ address: "0xbbb" })).toBe(true);
+    expect(hasActiveSessionV2Auth({ address: "0xccc" })).toBe(false);
+  });
+
   it("getStagingAuth returns cookie or env", () => {
     const { publicEnv } = require("@/config/env");
     (Cookies.get as jest.Mock).mockReturnValueOnce("c");

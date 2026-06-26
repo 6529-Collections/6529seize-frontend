@@ -1,28 +1,28 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import { render, screen, waitFor } from "@testing-library/react";
+import React from "react";
 
 const mutateAsyncMock = jest.fn();
 const requestAuthMock = jest.fn().mockResolvedValue({ success: true });
 const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
 const setToastMock = jest.fn();
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock("@tanstack/react-query", () => ({
   useMutation: () => ({ mutateAsync: mutateAsyncMock }),
 }));
 
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
-  usePathname: () => '/notifications',
+  usePathname: () => "/notifications",
 }));
 
 const setTitleMock = jest.fn();
 
-jest.mock('@/components/auth/Auth', () => {
-  const React = require('react');
+jest.mock("@/components/auth/Auth", () => {
+  const React = require("react");
   return {
     AuthContext: React.createContext({
-      connectedProfile: { handle: 'bob', id: '1' },
+      connectedProfile: { handle: "bob", id: "1" },
       activeProfileProxy: null,
       fetchingProfile: false,
       requestAuth: requestAuthMock,
@@ -39,48 +39,62 @@ jest.mock('@/components/auth/Auth', () => {
 });
 
 const invalidateNotifications = jest.fn();
-jest.mock('@/components/react-query-wrapper/ReactQueryWrapper', () => {
-  const React = require('react');
-  return { ReactQueryWrapperContext: React.createContext({ invalidateNotifications }) };
+jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => {
+  const React = require("react");
+  return {
+    ReactQueryWrapperContext: React.createContext({ invalidateNotifications }),
+  };
 });
 
-jest.mock('@/components/brain/notifications/NotificationsWrapper', () => ({
+jest.mock("@/components/brain/notifications/NotificationsWrapper", () => ({
   __esModule: true,
   default: () => <div data-testid="wrapper" />,
 }));
 
-jest.mock('@/components/brain/notifications/NotificationsCauseFilter', () => ({
+jest.mock("@/components/brain/notifications/NotificationsCauseFilter", () => ({
   __esModule: true,
   default: () => <div data-testid="filter" />,
 }));
 
-jest.mock('@/components/brain/content/input/BrainContentInput', () => ({
+jest.mock("@/components/brain/content/input/BrainContentInput", () => ({
   __esModule: true,
   default: () => <div data-testid="input" />,
 }));
 
-jest.mock('@/components/brain/my-stream/layout/MyStreamNoItems', () => ({
+jest.mock("@/components/brain/my-stream/layout/MyStreamNoItems", () => ({
   __esModule: true,
   default: () => <div data-testid="no-items" />,
 }));
 
 const useNotificationsQueryMock = jest.fn();
-jest.mock('@/hooks/useNotificationsQuery', () => ({
+jest.mock("@/hooks/useNotificationsQuery", () => ({
   useNotificationsQuery: () => useNotificationsQueryMock(),
 }));
 
-jest.mock('@/components/notifications/NotificationsContext', () => ({
-  useNotificationsContext: () => ({ removeAllDeliveredNotifications: jest.fn() }),
+jest.mock("@/components/notifications/NotificationsContext", () => ({
+  useNotificationsContext: () => ({
+    removeAllDeliveredNotifications: jest.fn(),
+  }),
 }));
 
-jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
-  useLayout: () => ({ notificationsViewStyle: { height: '10px' } }),
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ notificationsViewStyle: { height: "10px" } }),
+}));
+
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    hasTouchScreen: false,
+    isApp: false,
+    isAppleMobile: false,
+    isMobileDevice: false,
+  })),
 }));
 
 // Mock TitleContext
-jest.mock('@/contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -92,9 +106,36 @@ jest.mock('@/contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import Notifications from '@/components/brain/notifications';
+import Notifications from "@/components/brain/notifications";
+import { floatingDockClearanceClassName } from "@/components/brain/notifications/notifications.constants";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
-describe('Notifications component', () => {
+const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
+  typeof useDeviceInfo
+>;
+
+const getDefaultDeviceInfo = () => ({
+  hasTouchScreen: false,
+  isApp: false,
+  isAppleMobile: false,
+  isMobileDevice: false,
+});
+
+const mockSuccessfulNotificationsQuery = () => {
+  useNotificationsQueryMock.mockReturnValue({
+    items: ["a"],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn().mockResolvedValue(undefined),
+    refetch: jest.fn().mockResolvedValue(undefined),
+    isInitialQueryDone: true,
+    isSuccess: true,
+    error: null,
+  });
+};
+
+describe("Notifications component", () => {
   beforeEach(() => {
     mutateAsyncMock.mockClear();
     mutateAsyncMock.mockResolvedValue(undefined);
@@ -105,9 +146,10 @@ describe('Notifications component', () => {
     setActiveProfileProxyMock.mockClear();
     setActiveProfileProxyMock.mockResolvedValue(undefined);
     setToastMock.mockClear();
+    useDeviceInfoMock.mockReturnValue(getDefaultDeviceInfo());
   });
 
-  it('shows loader when fetching and no items', async () => {
+  it("shows loader when fetching and no items", async () => {
     useNotificationsQueryMock.mockReturnValue({
       items: [],
       isFetching: true,
@@ -122,35 +164,67 @@ describe('Notifications component', () => {
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
-    expect(screen.getByText('Loading notifications...', { selector: 'div' })).toBeInTheDocument();
+    expect(
+      screen.getByText("Loading notifications...", { selector: "div" })
+    ).toBeInTheDocument();
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
     // Title is set via TitleContext hooks
   });
 
-  it('renders wrapper with items', async () => {
-    useNotificationsQueryMock.mockReturnValue({
-      items: ['a'],
-      isFetching: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn().mockResolvedValue(undefined),
-      refetch: jest.fn().mockResolvedValue(undefined),
-      isInitialQueryDone: true,
-      isSuccess: true,
-      error: null,
-    });
+  it("renders wrapper with items", async () => {
+    mockSuccessfulNotificationsQuery();
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
-    expect(screen.getByTestId('wrapper')).toBeInTheDocument();
+    expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
+    ).not.toHaveClass(floatingDockClearanceClassName);
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
   });
 
-  it('shows no items component when query done but empty', async () => {
+  it("does not add floating dock clearance on mobile web", async () => {
+    useDeviceInfoMock.mockReturnValue({
+      ...getDefaultDeviceInfo(),
+      hasTouchScreen: true,
+      isMobileDevice: true,
+    });
+    mockSuccessfulNotificationsQuery();
+
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+
+    expect(
+      document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
+    ).not.toHaveClass(floatingDockClearanceClassName);
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
+  });
+
+  it("keeps floating dock clearance in the Capacitor app", async () => {
+    useDeviceInfoMock.mockReturnValue({
+      ...getDefaultDeviceInfo(),
+      hasTouchScreen: true,
+      isApp: true,
+      isMobileDevice: true,
+    });
+    mockSuccessfulNotificationsQuery();
+
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+
+    expect(
+      document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
+    ).toHaveClass(floatingDockClearanceClassName);
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
+  });
+
+  it("shows no items component when query done but empty", async () => {
     useNotificationsQueryMock.mockReturnValue({
       items: [],
       isFetching: false,
@@ -165,7 +239,7 @@ describe('Notifications component', () => {
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
-    expect(screen.getByTestId('no-items')).toBeInTheDocument();
+    expect(screen.getByTestId("no-items")).toBeInTheDocument();
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });

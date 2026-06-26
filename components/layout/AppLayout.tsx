@@ -21,6 +21,7 @@ import {
   getActiveWaveIdFromUrl,
   hidesMobileBottomNavigation,
 } from "@/helpers/navigation.helpers";
+import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 
@@ -52,6 +53,24 @@ const streamRouteLoadingReserveVisibleStyle: StreamRouteLoadingReserveStyle = {
   [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: BOTTOM_NAV_RESERVE,
   [STREAM_ROUTE_LOADING_HEADER_RESERVE]:
     STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE,
+};
+
+const contentOwnsBottomNavClearance = ({
+  activeView,
+  pathname,
+}: {
+  readonly activeView: string | null;
+  readonly pathname: string | null | undefined;
+}): boolean => {
+  if (activeView === "waves" || activeView === "messages") {
+    return true;
+  }
+
+  return (
+    pathname === "/waves" ||
+    pathname === "/messages" ||
+    pathname === "/notifications"
+  );
 };
 
 function WavesQuickVoteView() {
@@ -86,6 +105,7 @@ function AppLayoutContent({ children }: Props) {
   const { registerRef, spaces } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const headerRef = useRef<HTMLDivElement | null>(null);
+  const pullContentRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -116,18 +136,23 @@ function AppLayoutContent({ children }: Props) {
   const isNavVisible =
     !isSingleDropOpen && !isEditingOnMobile && !shouldHideBottomNav;
   const shouldRenderBottomNav = !isSingleDropOpen && !isEditingOnMobile;
+  const shouldUseContentBottomClearance = contentOwnsBottomNavClearance({
+    activeView,
+    pathname,
+  });
   const routeLoadingHeaderReserve = spaces.measurementsComplete
     ? `${spaces.headerSpace}px`
     : STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE;
   const streamRouteLoadingReserveStyle =
     useMemo<StreamRouteLoadingReserveStyle>(
       () => ({
-        [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: isNavVisible
-          ? BOTTOM_NAV_RESERVE
-          : "0px",
+        [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]:
+          isNavVisible && !shouldUseContentBottomClearance
+            ? BOTTOM_NAV_RESERVE
+            : "0px",
         [STREAM_ROUTE_LOADING_HEADER_RESERVE]: routeLoadingHeaderReserve,
       }),
-      [isNavVisible, routeLoadingHeaderReserve]
+      [isNavVisible, routeLoadingHeaderReserve, shouldUseContentBottomClearance]
     );
   const safeAreaClass =
     !isNavVisible && !isKeyboardVisible
@@ -144,21 +169,30 @@ function AppLayoutContent({ children }: Props) {
   }
 
   return (
-    <div
-      data-mobile-bottom-nav-scroll-target="true"
-      className={`${safeAreaClass} ${"tw-overflow-auto"}`}
-      style={streamRouteLoadingReserveStyle}
-    >
-      <PullToRefresh triggerZoneRef={headerRef} />
-      <div ref={headerWrapperRef}>
-        <TouchDeviceHeader />
+    <>
+      <div
+        data-mobile-bottom-nav-scroll-target="true"
+        className={`${safeAreaClass} ${"tw-overflow-auto"}`}
+        style={streamRouteLoadingReserveStyle}
+      >
+        <PullToRefresh contentRef={pullContentRef} triggerZoneRef={headerRef} />
+        <div
+          ref={pullContentRef}
+          {...{ [PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE]: "true" }}
+        >
+          <div ref={headerWrapperRef}>
+            <TouchDeviceHeader />
+          </div>
+          {activeContent}
+          {isNavVisible && !shouldUseContentBottomClearance && (
+            <div className="tw-h-[104px] tw-w-full" />
+          )}
+        </div>
       </div>
-      {activeContent}
-      {isNavVisible && <div className="tw-h-[104px] tw-w-full" />}
       {shouldRenderBottomNav && (
         <BottomNavigation hidden={shouldHideBottomNav} />
       )}
-    </div>
+    </>
   );
 }
 
