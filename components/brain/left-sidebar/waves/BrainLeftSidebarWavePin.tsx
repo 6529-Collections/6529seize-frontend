@@ -18,6 +18,11 @@ interface BrainLeftSidebarWavePinProps {
   readonly className?: string | undefined;
 }
 
+interface MaxLimitTooltipRequest {
+  readonly waveId: string;
+  readonly pinnedIdsKey: string;
+}
+
 const WavePinIcon = ({
   className,
   filled,
@@ -52,51 +57,44 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
+  const [maxLimitTooltipRequest, setMaxLimitTooltipRequest] =
+    useState<MaxLimitTooltipRequest | null>(null);
 
   // Check if this specific wave operation is in progress
   const isCurrentlyProcessing = isOperationInProgress(waveId);
+  const pinnedIdsKey = useMemo(() => pinnedIds.join("|"), [pinnedIds]);
   const canPinCurrentWave = useMemo(
     () => canPinWave(waveId),
     [canPinWave, waveId]
   );
-
-  // // Reset tooltip state when pinned state changes
-  useEffect(() => {
-    setShowMaxLimitTooltip(false);
-  }, [isPinned]);
-
-  // Also reset tooltip state when pinnedIds array changes
-  useEffect(() => {
-    if (canPinCurrentWave) {
-      setShowMaxLimitTooltip(false);
-    }
-  }, [pinnedIds, canPinCurrentWave]);
+  const showMaxLimitTooltip =
+    maxLimitTooltipRequest?.waveId === waveId &&
+    maxLimitTooltipRequest.pinnedIdsKey === pinnedIdsKey &&
+    !isPinned &&
+    !canPinCurrentWave;
 
   // Auto-hide tooltip after 3 seconds with proper cleanup
   useEffect(() => {
     if (!showMaxLimitTooltip) return;
-    const timer = setTimeout(() => setShowMaxLimitTooltip(false), 3000);
+    const timer = setTimeout(() => setMaxLimitTooltipRequest(null), 3000);
     return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
 
   // Detect touch device on component mount
   useEffect(() => {
     const checkTouch = () => {
-      // Check if device supports touch events
-      setIsTouchDevice(
-        "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0 ||
-          // @ts-ignore: matchMedia may not be available in all environments
-          (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
-      );
+      const hasCoarsePointer =
+        typeof globalThis.matchMedia === "function" &&
+        globalThis.matchMedia("(pointer: coarse)").matches;
+
+      setIsTouchDevice((navigator.maxTouchPoints ?? 0) > 0 || hasCoarsePointer);
     };
 
     checkTouch();
-    window.addEventListener("resize", checkTouch);
+    globalThis.addEventListener("resize", checkTouch);
 
     return () => {
-      window.removeEventListener("resize", checkTouch);
+      globalThis.removeEventListener("resize", checkTouch);
     };
   }, []);
 
@@ -116,14 +114,14 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     try {
       if (isPinned) {
         waves.removePinnedWave(waveId);
-        setShowMaxLimitTooltip(false);
+        setMaxLimitTooltipRequest(null);
       } else {
         const canPin = canPinWave(waveId);
 
         if (canPin) {
           waves.addPinnedWave(waveId);
         } else {
-          setShowMaxLimitTooltip(true);
+          setMaxLimitTooltipRequest({ waveId, pinnedIdsKey });
           setToast({
             type: "error",
             message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
@@ -144,25 +142,27 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     }
   };
 
-  // Apply visibility logic: always show pinned waves on desktop, hide unpinned until hover
+  // Desktop rows reveal the pin on hover or focus without reserving idle width.
   const getOpacityClass = () => {
     if (isTouchDevice) return "tw-opacity-100";
-    if (isPinned) return "tw-opacity-100";
-    return "tw-opacity-0 group-hover:tw-opacity-100";
+    return "tw-opacity-0 group-hover:tw-opacity-100 group-focus-within:tw-opacity-100 focus:tw-opacity-100 focus-visible:tw-opacity-100";
   };
   const opacityClass = getOpacityClass();
 
-  // Ensure tooltip is updated immediately by always checking the current state
+  // Only show max-limit guidance for the keyed request window after a failed pin.
   const getTooltipContent = () => {
     if (isPinned) return "Unpin";
     if (canPinCurrentWave) return "Pin";
-    return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+    if (showMaxLimitTooltip) {
+      return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+    }
+    return null;
   };
   const tooltipContent = getTooltipContent();
 
   const getButtonStyles = () => {
     if (isPinned) {
-      return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-iron-100 active:tw-bg-transparent tw-opacity-100";
+      return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-iron-100 active:tw-bg-transparent";
     }
     return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-100 active:tw-bg-iron-700";
   };
@@ -172,7 +172,12 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
 
   const positionClasses = compact ? "" : "-tw-mr-2 tw-mt-0.5";
-  const sizeClasses = compact ? "tw-size-5" : "tw-size-7 sm:tw-size-6";
+  const getSizeClasses = () => {
+    if (!compact) return "tw-size-7 sm:tw-size-6";
+    if (isTouchDevice) return "tw-size-7";
+    return "tw-h-7 tw-w-0 group-hover:tw-w-7 group-focus-within:tw-w-7 focus:tw-w-7 focus-visible:tw-w-7";
+  };
+  const sizeClasses = getSizeClasses();
   const iconSizeClasses = compact ? "tw-size-3.5" : "tw-size-4";
 
   return (
@@ -180,7 +185,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`${positionClasses} tw-flex ${sizeClasses} tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()} ${className ?? ""} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
+        className={`${positionClasses} tw-flex ${sizeClasses} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border-0 tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()} ${className ?? ""} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
         aria-label={getAriaLabel()}
         data-tooltip-id={`wave-pin-${waveId}`}
         data-tooltip-content={tooltipContent}

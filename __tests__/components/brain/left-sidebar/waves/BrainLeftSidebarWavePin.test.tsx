@@ -64,7 +64,8 @@ function setup(
   isPinned = false,
   storedPinned: string[] = [],
   canPinWave = (waveId: string) => isPinned || !storedPinned.includes(waveId),
-  auth: AuthMock = connectedAuth
+  auth: AuthMock = connectedAuth,
+  compact = false
 ) {
   mockedUseMyStream.mockReturnValue({
     waves: { addPinnedWave, removePinnedWave },
@@ -75,12 +76,18 @@ function setup(
     canPinWave: jest.fn().mockImplementation(canPinWave),
   });
   mockedUseAuth.mockReturnValue(auth);
-  return render(<BrainLeftSidebarWavePin waveId="1" isPinned={isPinned} />);
+  return render(
+    <BrainLeftSidebarWavePin waveId="1" isPinned={isPinned} compact={compact} />
+  );
 }
 
 describe("BrainLeftSidebarWavePin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(navigator, "maxTouchPoints", {
+      configurable: true,
+      value: 0,
+    });
     localStorage.clear();
   });
 
@@ -116,11 +123,49 @@ describe("BrainLeftSidebarWavePin", () => {
     expect(removePinnedWave).not.toHaveBeenCalled();
   });
 
+  it("collapses compact desktop row width until hover or keyboard focus", () => {
+    setup(false, [], undefined, connectedAuth, true);
+    const button = screen.getByRole("button", { name: /pin wave/i });
+
+    expect(button).toHaveClass("tw-h-7");
+    expect(button).toHaveClass("tw-w-0");
+    expect(button).toHaveClass("group-hover:tw-w-7");
+    expect(button).toHaveClass("group-focus-within:tw-w-7");
+    expect(button).toHaveClass("focus-visible:tw-w-7");
+    expect(button.querySelector("svg")).toHaveClass("tw-size-3.5");
+  });
+
+  it("hides pinned desktop controls until row hover or keyboard focus", () => {
+    setup(true, ["1"]);
+    const button = screen.getByRole("button", { name: /unpin wave/i });
+
+    expect(button).toHaveClass("tw-opacity-0");
+    expect(button).toHaveClass("group-hover:tw-opacity-100");
+    expect(button).toHaveClass("group-focus-within:tw-opacity-100");
+    expect(button).toHaveClass("focus-visible:tw-opacity-100");
+  });
+
+  it("keeps pinned touch controls visible", () => {
+    Object.defineProperty(navigator, "maxTouchPoints", {
+      configurable: true,
+      value: 1,
+    });
+    setup(true, ["1"]);
+    const button = screen.getByRole("button", { name: /unpin wave/i });
+
+    expect(button).toHaveClass("tw-opacity-100");
+    expect(button).toHaveClass("tw-size-7");
+  });
+
   it("shows tooltip and does not pin when max limit reached", async () => {
     const user = userEvent.setup();
     const maxList = Array(MAX_PINNED_WAVES).fill("x");
     setup(false, maxList, () => false);
-    await user.click(screen.getByRole("button", { name: /pin wave/i }));
+    const button = screen.getByRole("button", { name: /pin wave/i });
+
+    expect(button).not.toHaveAttribute("data-tooltip-content");
+
+    await user.click(button);
     expect(addPinnedWave).not.toHaveBeenCalled();
     expect(setToast).toHaveBeenCalledWith({
       type: "error",
