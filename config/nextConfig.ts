@@ -17,6 +17,15 @@ const SASS_LOAD_PATHS = [
 const BOOTSTRAP_PROGRESS_PARTIAL =
   "./node_modules/bootstrap/scss/_progress.scss";
 
+function getAllowedDevOrigins(): string[] {
+  return (
+    process.env["NEXT_ALLOWED_DEV_ORIGINS"]
+      ?.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean) ?? []
+  );
+}
+
 export function sharedConfig(
   publicEnv: PublicEnv,
   assetPrefix: string
@@ -37,7 +46,7 @@ export function sharedConfig(
         "import",
       ],
     },
-    allowedDevOrigins: ["172.20.10.3", "192.168.1.77"],
+    allowedDevOrigins: getAllowedDevOrigins(),
     images: {
       loader: "default",
       remotePatterns: [
