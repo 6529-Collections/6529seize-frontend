@@ -1,6 +1,5 @@
 import { jwtDecode } from "jwt-decode";
 import {
-  getWalletAddress,
   getWalletRole,
   hasActiveSessionV2Auth,
   syncWalletRoleWithServer,
@@ -202,20 +201,18 @@ const handleTokenRefresh = async ({
   abortSignal: AbortSignal;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
 }): Promise<ValidateJwtResult> => {
-  const walletAddress = getWalletAddress();
-
   // Check for cancellation before proceeding
   if (abortSignal.aborted) {
     return CANCELLED_JWT_RESULT;
   }
 
   try {
-    if (!walletAddress) {
+    if (!wallet) {
       return INVALID_JWT_RESULT;
     }
 
     const refreshedSession = await refreshSessionV2({
-      address: walletAddress,
+      address: wallet,
       abortSignal,
     });
 
