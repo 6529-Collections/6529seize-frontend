@@ -409,6 +409,7 @@ const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
   waveRep: "Wave REP",
   learnMore: "Learn more",
   detailsAriaLabel: "Wave score details",
+  openDetailsAriaLabel: "Open {waveName} score details, score {score}",
   scoreAria: "Wave score {visibilityScore}",
   qualityAria: "Quality {qualityScore}, 65% of visibility",
   hotnessAria: "Hotness {hotnessScore}, gated, 35% of visibility",
@@ -419,6 +420,8 @@ const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
   hotnessValue: "{hotnessScore} / 35% gated",
   repRawAndScoreValue: "{rawRep} / score {repSortScore}",
   repScoreValue: "score {repSortScore}",
+  lastMessage: "Last message",
+  noMessagesYet: "No messages yet",
 } as const);
 
 const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
