@@ -6,6 +6,7 @@ import {
   type CSSProperties,
   type FormEvent,
 } from "react";
+import { getAddress, isAddress } from "viem";
 import { AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY } from "@/services/auth/auth.utils";
 
 const STORAGE_KEYS = {
@@ -98,7 +99,6 @@ const styles = {
     fontSize: 13,
     lineHeight: 1.45,
     padding: 12,
-    outline: "none",
   },
   actions: {
     display: "flex",
@@ -180,13 +180,18 @@ function parseAgentLoginPayload(rawPayload: string): AgentLoginPayload {
   const parsed = getRecord(JSON.parse(rawPayload), "Payload");
   const account = getRecord(parsed["account"], "account");
   const session = getRecord(parsed["session"], "session");
+  const sessionAddress = getRequiredString(session, "address");
+
+  if (!isAddress(sessionAddress)) {
+    throw new Error("address must be a valid Ethereum address.");
+  }
 
   return {
     account: {
       profileHandle: getOptionalString(account, "profileHandle"),
     },
     session: {
-      address: getRequiredString(session, "address"),
+      address: getAddress(sessionAddress),
       role: getOptionalString(session, "role"),
       accessToken: getRequiredString(session, "accessToken"),
       accessTokenExpiresAt: getOptionalString(session, "accessTokenExpiresAt"),
@@ -311,7 +316,11 @@ function getCurrentAuthStatus(): Status {
 
     const activeAccount = parsedAccounts
       .filter(isRecord)
-      .find((account) => account["address"] === activeAddress);
+      .find(
+        (account) =>
+          typeof account["address"] === "string" &&
+          account["address"].toLowerCase() === activeAddress.toLowerCase()
+      );
     const hasToken =
       typeof activeAccount?.["jwt"] === "string" &&
       activeAccount["jwt"].trim().length > 0;

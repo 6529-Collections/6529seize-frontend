@@ -495,13 +495,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
       ? getAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
       : undefined;
-  const agentLoginActiveAddress = getAgentLoginActiveAddress();
+  const canUseAgentLoginImpersonation =
+    isDevLikeEnv && isLocalHost && publicEnv.USE_DEV_AUTH !== "true";
+  const agentLoginActiveAddress = canUseAgentLoginImpersonation
+    ? getAgentLoginActiveAddress()
+    : null;
   const agentLoginImpersonatedAddress =
-    isDevLikeEnv &&
-    isLocalHost &&
-    publicEnv.USE_DEV_AUTH !== "true" &&
-    agentLoginActiveAddress &&
-    isAddress(agentLoginActiveAddress)
+    agentLoginActiveAddress && isAddress(agentLoginActiveAddress)
       ? getAddress(agentLoginActiveAddress)
       : undefined;
   const impersonatedAddress =
