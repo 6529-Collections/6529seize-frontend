@@ -10,7 +10,6 @@ import type { UnifiedWavesListWavesHandle } from "@/components/brain/left-sideba
 import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import {
   getFittingPreviewCount,
-  getHighlyRatedPreviewTooltipAlignment,
   getHighlyRatedPreviewWaves,
   getVisibleHighlyRatedPreviewItems,
   type HighlyRatedWavePreviewItem,
@@ -206,24 +205,6 @@ it("calculates how many highly rated preview avatars fit", () => {
       width: 220,
     })
   ).toBe(4);
-});
-
-it("aligns edge preview tooltips inward to avoid sidebar clipping", () => {
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 0, itemCount: 7 })
-  ).toBe("start");
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 1, itemCount: 7 })
-  ).toBe("start");
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 3, itemCount: 7 })
-  ).toBe("center");
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 5, itemCount: 7 })
-  ).toBe("end");
-  expect(
-    getHighlyRatedPreviewTooltipAlignment({ index: 3, itemCount: 4 })
-  ).toBe("center");
 });
 
 it("keeps the active highly rated preview visible within the capped strip", () => {
@@ -463,13 +444,20 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   ).toBeInTheDocument();
   const scoreBadgeText = screen.getByText("93", { selector: "text" });
   expect(scoreBadgeText).toBeInTheDocument();
-  expect(scoreBadgeText.closest("button")).toHaveClass("-tw-bottom-1");
-  expect(scoreBadgeText.closest("button")).toHaveClass("-tw-right-1.5");
-  expect(scoreBadgeText.closest("button")).toHaveClass("tw-h-6");
-  expect(scoreBadgeText.closest("button")).toHaveClass("tw-w-7");
+  expect(scoreBadgeText.closest("span")).toHaveClass("-tw-bottom-1");
+  expect(scoreBadgeText.closest("span")).toHaveClass("-tw-right-1.5");
+  expect(scoreBadgeText.closest("span")).toHaveClass("tw-h-6");
+  expect(scoreBadgeText.closest("span")).toHaveClass("tw-w-7");
+  expect(scoreBadgeText.closest("span")).toHaveAttribute("aria-hidden", "true");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
-  fireEvent.click(screen.getByRole("button", { name: "Score 93" }));
+  fireEvent.click(
+    screen.getByRole("link", { name: "Open Scored Discovery, score 93" })
+  );
+  expect(
+    screen.queryByRole("dialog", { name: "Wave score details" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(scoreBadgeText);
   expect(
     screen.getByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
@@ -496,6 +484,36 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
     "data-is-drop-wave",
     "true"
   );
+});
+
+it("uses no-message copy in the combined highly rated score card", () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "h-score-empty",
+          name: "Quiet Discovery",
+          type: ApiWaveType.Rank,
+          sidebarSection: "highly-rated",
+          waveScore: {
+            visibility_score: 88,
+            quality_score: 90,
+            hotness_score: 70,
+            rep_sort_score: 64,
+          } as any,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  fireEvent.click(screen.getByText("88", { selector: "text" }));
+  expect(
+    screen.getByRole("dialog", { name: "Wave score details" })
+  ).toBeInTheDocument();
+  expect(screen.getByText("Quiet Discovery")).toBeInTheDocument();
+  expect(screen.getByText("No messages yet")).toBeInTheDocument();
 });
 
 it("caps highly rated previews at ten without rendering an overflow control", () => {

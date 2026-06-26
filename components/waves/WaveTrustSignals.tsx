@@ -19,7 +19,7 @@ type WaveTrustSignalsVariant =
   | "header-inline";
 type WaveTrustSignalsMode = "details" | "summary";
 interface WaveScoreSummaryHeader {
-  readonly title: ReactNode;
+  readonly title: string;
   readonly meta?: ReactNode | undefined;
 }
 
@@ -554,7 +554,10 @@ function WaveScoreSummaryPopoverContent({
     >
       {summaryHeader !== undefined && (
         <div className="tw-mb-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2">
-          <div className="tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-white">
+          <div
+            className="tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-white"
+            title={summaryHeader.title}
+          >
             {summaryHeader.title}
           </div>
           {summaryHeader.meta !== undefined && (

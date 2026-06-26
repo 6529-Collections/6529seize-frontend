@@ -18,7 +18,6 @@ const PREVIEW_THUMBNAIL_WIDTH_PX = 32;
 const PREVIEW_TOUCH_THUMBNAIL_WIDTH_PX = 44;
 const PREVIEW_GAP_PX = 6;
 const PREVIEW_TOUCH_GAP_PX = 8;
-type PreviewTooltipAlignment = "start" | "center" | "end";
 
 export interface HighlyRatedWavePreviewItem {
   readonly wave: MinimalWave;
@@ -240,24 +239,6 @@ export const getVisibleHighlyRatedPreviewItems = ({
   ];
 };
 
-export const getHighlyRatedPreviewTooltipAlignment = ({
-  index,
-  itemCount,
-}: {
-  readonly index: number;
-  readonly itemCount: number;
-}): PreviewTooltipAlignment => {
-  if (index <= 1) {
-    return "start";
-  }
-
-  if (itemCount >= 5 && index >= itemCount - 2) {
-    return "end";
-  }
-
-  return "center";
-};
-
 function HighlyRatedWavePreviewScoreBadge({
   isTouchPreview,
   onMouseEnter,
@@ -272,13 +253,10 @@ function HighlyRatedWavePreviewScoreBadge({
   }
 
   return (
-    <button
-      type="button"
-      aria-label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedPreviewScore", {
-        score: scoreLabel,
-      })}
+    <span
+      aria-hidden="true"
       onMouseEnter={onMouseEnter}
-      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
+      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-help tw-items-center tw-justify-center tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]`}
     >
       <svg
         aria-hidden="true"
@@ -309,7 +287,7 @@ function HighlyRatedWavePreviewScoreBadge({
           {scoreLabel}
         </text>
       </svg>
-    </button>
+    </span>
   );
 }
 
@@ -342,8 +320,12 @@ function HighlyRatedWavePreviewLink({
           }
         );
   const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    const shouldKeepClickOnLink =
+      event.defaultPrevented || isModifiedAnchorClick(event);
     item.onClick(event);
-    event.stopPropagation();
+    if (shouldKeepClickOnLink || event.defaultPrevented) {
+      event.stopPropagation();
+    }
   };
 
   return (
