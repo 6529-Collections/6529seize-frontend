@@ -84,17 +84,17 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   useEffect(() => {
     const checkTouch = () => {
       const hasCoarsePointer =
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(pointer: coarse)").matches;
+        typeof globalThis.matchMedia === "function" &&
+        globalThis.matchMedia("(pointer: coarse)").matches;
 
       setIsTouchDevice((navigator.maxTouchPoints ?? 0) > 0 || hasCoarsePointer);
     };
 
     checkTouch();
-    window.addEventListener("resize", checkTouch);
+    globalThis.addEventListener("resize", checkTouch);
 
     return () => {
-      window.removeEventListener("resize", checkTouch);
+      globalThis.removeEventListener("resize", checkTouch);
     };
   }, []);
 
