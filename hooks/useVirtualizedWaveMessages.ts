@@ -7,11 +7,6 @@ import type { Drop } from "@/helpers/waves/drop.helpers";
 import type { WaveMessages } from "@/contexts/wave/hooks/types";
 import { useDropMessages } from "./useDropMessages";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import {
-  getHelpBotRealtimeDebugDropsSummary,
-  isHelpBotRealtimeDebugDrop,
-  logHelpBotRealtimeDebug,
-} from "@/utils/helpBotRealtimeDebug";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   readonly drops: Drop[];
@@ -243,35 +238,6 @@ export function useVirtualizedWaveMessages(
     // render inputs and should not be synchronized through an effect.
     setAppendTrackingState(nextAppendTrackingState);
   }
-
-  const activeMessagesHelpBotDebugKey =
-    activeMessages?.drops
-      .filter(isHelpBotRealtimeDebugDrop)
-      .map((drop) => `${drop.id}:${drop.serial_no}:${typeof drop.serial_no}`)
-      .join("|") ?? "";
-
-  useEffect(() => {
-    if (!activeMessages || !activeMessagesHelpBotDebugKey) {
-      return;
-    }
-
-    logHelpBotRealtimeDebug("wave virtualized source", {
-      waveId,
-      dropId,
-      activeMessagesCount,
-      effectiveVirtualLimit,
-      hasMoreLocal,
-      source: getHelpBotRealtimeDebugDropsSummary(activeMessages.drops),
-    });
-  }, [
-    activeMessages,
-    activeMessagesCount,
-    activeMessagesHelpBotDebugKey,
-    dropId,
-    effectiveVirtualLimit,
-    hasMoreLocal,
-    waveId,
-  ]);
 
   useEffect(() => {
     latestScopeKeyRef.current = scopeKey;
