@@ -49,8 +49,9 @@ Both lists are capped at **20** items. They are independent and do not sync.
 
 - The same control flips label by state (`Pin wave` vs `Unpin wave`).
 - Pin/unpin controls are disabled while that wave request is in progress.
-- In desktop expanded sidebars, row pin and unpin controls appear on row hover
-  or keyboard focus; on touch devices, they remain visible.
+- In desktop expanded sidebars, row pin and unpin controls collapse while idle
+  and appear on row hover or keyboard focus; on touch devices, they remain
+  visible.
 - In collapsed web sidebars, row pin controls are hidden.
 - DM lists do not expose row pin controls.
 - When app shortcuts reach 20, opening another thread keeps the newest 20 and

@@ -55,7 +55,8 @@ Wave and DM rows in the left list control which thread is open.
 - If first unread is known, row navigation can add `divider={serialNo}`.
 - Row pin/unpin and subwave expand/collapse buttons do not trigger row
   navigation.
-- Long wave names truncate before the trailing pin and score controls.
+- Long wave names truncate before the trailing score and visible pin controls;
+  idle desktop rows do not reserve the hidden pin width.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
