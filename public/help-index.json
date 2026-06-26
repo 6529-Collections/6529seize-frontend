@@ -1428,6 +1428,42 @@
       "source_refs": ["ops/docs/media/README.md", "ops/docs/nextgen/README.md"]
     },
     {
+      "id": "nextgen.pebbles",
+      "kind": "route",
+      "title": "Pebbles",
+      "aliases": [
+        "pebbles",
+        "pebble",
+        "nextgen pebbles",
+        "pebbles collection"
+      ],
+      "keywords": [
+        "pebbles",
+        "pebble",
+        "nextgen",
+        "collection",
+        "generative",
+        "art",
+        "zeblocks"
+      ],
+      "facts": [
+        "Pebbles is the first NextGen collection.",
+        "Pebbles lives at /nextgen/collection/pebbles.",
+        "The Pebbles collection pages include overview, art, trait sets, provenance, mint, and distribution-plan views."
+      ],
+      "canonical_path": "/nextgen/collection/pebbles",
+      "related_paths": [
+        "/nextgen",
+        "/nextgen/collection/pebbles/art",
+        "/nextgen/collection/pebbles/trait-sets"
+      ],
+      "tags": ["nextgen", "collections", "pebbles"],
+      "source_refs": [
+        "components/nextGen/collections/collectionParts/NextGenCollectionDetails.tsx",
+        "ops/docs/nextgen/feature-nextgen-collection-routes-and-art-browser.md"
+      ]
+    },
+    {
       "id": "nextgen.manager",
       "kind": "route",
       "title": "NextGen manager",
