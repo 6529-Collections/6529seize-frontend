@@ -808,6 +808,7 @@ export default function SeizeVideoPlayer({
       setUserPausedAutoplaySrc(directSrc ?? null);
     }
     video.pause();
+    handlePause();
   }
 
   function togglePlayback() {

@@ -440,7 +440,6 @@ describe("SeizeVideoPlayer", () => {
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledTimes(
       pauseCallsBeforeClick + 1
     );
-    fireEvent.pause(video);
     expect(screen.getByRole("button", { name: "Play video" })).toBeVisible();
 
     paused = true;
@@ -451,6 +450,35 @@ describe("SeizeVideoPlayer", () => {
 
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(
       playCallsBeforeClick
+    );
+  });
+
+  it("does not pause ended videos from video clicks", () => {
+    let paused = false;
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay={false} />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => paused,
+    });
+    Object.defineProperty(video, "ended", {
+      configurable: true,
+      value: true,
+    });
+    fireEvent.play(video);
+
+    const pauseCallsBeforeClick = jest.mocked(HTMLMediaElement.prototype.pause)
+      .mock.calls.length;
+
+    fireEvent.click(video);
+
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledTimes(
+      pauseCallsBeforeClick
     );
   });
 
