@@ -24,6 +24,10 @@ let dropdownProps: any = null;
 (useQuery as jest.Mock).mockReturnValue({ data: ['Art'] });
 
 describe('RepCategorySearch', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('passes categories to dropdown', () => {
     const setCategory = jest.fn();
     jest.useFakeTimers();
