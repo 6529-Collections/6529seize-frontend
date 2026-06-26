@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable security/detect-non-literal-fs-filename -- This local-only skill CLI intentionally reads and writes user-selected account-state and env files. */
+
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
