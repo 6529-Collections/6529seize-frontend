@@ -64,7 +64,8 @@ function setup(
   isPinned = false,
   storedPinned: string[] = [],
   canPinWave = (waveId: string) => isPinned || !storedPinned.includes(waveId),
-  auth: AuthMock = connectedAuth
+  auth: AuthMock = connectedAuth,
+  compact = false
 ) {
   mockedUseMyStream.mockReturnValue({
     waves: { addPinnedWave, removePinnedWave },
@@ -75,7 +76,9 @@ function setup(
     canPinWave: jest.fn().mockImplementation(canPinWave),
   });
   mockedUseAuth.mockReturnValue(auth);
-  return render(<BrainLeftSidebarWavePin waveId="1" isPinned={isPinned} />);
+  return render(
+    <BrainLeftSidebarWavePin waveId="1" isPinned={isPinned} compact={compact} />
+  );
 }
 
 describe("BrainLeftSidebarWavePin", () => {
@@ -114,6 +117,14 @@ describe("BrainLeftSidebarWavePin", () => {
     await user.click(screen.getByRole("button", { name: /pin wave/i }));
     expect(addPinnedWave).toHaveBeenCalledWith("1");
     expect(removePinnedWave).not.toHaveBeenCalled();
+  });
+
+  it("uses a larger compact hit target while keeping the icon compact", () => {
+    setup(false, [], undefined, connectedAuth, true);
+    const button = screen.getByRole("button", { name: /pin wave/i });
+
+    expect(button).toHaveClass("tw-size-8");
+    expect(button.querySelector("svg")).toHaveClass("tw-size-4");
   });
 
   it("shows tooltip and does not pin when max limit reached", async () => {

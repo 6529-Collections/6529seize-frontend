@@ -18,6 +18,11 @@ interface BrainLeftSidebarWavePinProps {
   readonly className?: string | undefined;
 }
 
+interface MaxLimitTooltipRequest {
+  readonly waveId: string;
+  readonly pinnedIdsKey: string;
+}
+
 const WavePinIcon = ({
   className,
   filled,
@@ -52,31 +57,26 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
+  const [maxLimitTooltipRequest, setMaxLimitTooltipRequest] =
+    useState<MaxLimitTooltipRequest | null>(null);
 
   // Check if this specific wave operation is in progress
   const isCurrentlyProcessing = isOperationInProgress(waveId);
+  const pinnedIdsKey = useMemo(() => pinnedIds.join("|"), [pinnedIds]);
   const canPinCurrentWave = useMemo(
     () => canPinWave(waveId),
     [canPinWave, waveId]
   );
-
-  // // Reset tooltip state when pinned state changes
-  useEffect(() => {
-    setShowMaxLimitTooltip(false);
-  }, [isPinned]);
-
-  // Also reset tooltip state when pinnedIds array changes
-  useEffect(() => {
-    if (canPinCurrentWave) {
-      setShowMaxLimitTooltip(false);
-    }
-  }, [pinnedIds, canPinCurrentWave]);
+  const showMaxLimitTooltip =
+    maxLimitTooltipRequest?.waveId === waveId &&
+    maxLimitTooltipRequest.pinnedIdsKey === pinnedIdsKey &&
+    !isPinned &&
+    !canPinCurrentWave;
 
   // Auto-hide tooltip after 3 seconds with proper cleanup
   useEffect(() => {
     if (!showMaxLimitTooltip) return;
-    const timer = setTimeout(() => setShowMaxLimitTooltip(false), 3000);
+    const timer = setTimeout(() => setMaxLimitTooltipRequest(null), 3000);
     return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
 
@@ -116,14 +116,14 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     try {
       if (isPinned) {
         waves.removePinnedWave(waveId);
-        setShowMaxLimitTooltip(false);
+        setMaxLimitTooltipRequest(null);
       } else {
         const canPin = canPinWave(waveId);
 
         if (canPin) {
           waves.addPinnedWave(waveId);
         } else {
-          setShowMaxLimitTooltip(true);
+          setMaxLimitTooltipRequest({ waveId, pinnedIdsKey });
           setToast({
             type: "error",
             message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
@@ -172,8 +172,8 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
 
   const positionClasses = compact ? "" : "-tw-mr-2 tw-mt-0.5";
-  const sizeClasses = compact ? "tw-size-5" : "tw-size-7 sm:tw-size-6";
-  const iconSizeClasses = compact ? "tw-size-3.5" : "tw-size-4";
+  const sizeClasses = compact ? "tw-size-8" : "tw-size-7 sm:tw-size-6";
+  const iconSizeClasses = "tw-size-4";
 
   return (
     <>

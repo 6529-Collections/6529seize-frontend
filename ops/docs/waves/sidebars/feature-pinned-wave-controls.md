@@ -17,7 +17,8 @@ Both lists are capped at **20** items. They are independent and do not sync.
   - `/waves/{waveId}`
   - `/messages/{waveId}` (DM route)
 - Left sidebar wave rows in the Waves list (`/waves*` only; DM rows do not show
-  row pin controls).
+  row pin controls). In expanded rows, the control sits at the far right after
+  the wave score.
 - Native app small-screen (`<1024px`) shortcuts rail above Waves or Messages
   content.
 - Legacy `/waves?wave={waveId}` links redirect to `/waves/{waveId}`.
@@ -48,8 +49,8 @@ Both lists are capped at **20** items. They are independent and do not sync.
 
 - The same control flips label by state (`Pin wave` vs `Unpin wave`).
 - Pin/unpin controls are disabled while that wave request is in progress.
-- In desktop expanded sidebars, unpinned row controls appear on hover; pinned
-  rows keep the control visible.
+- In desktop expanded sidebars, unpinned row controls appear on hover at the
+  trailing edge of the row; pinned rows keep the control visible.
 - In collapsed web sidebars, row pin controls are hidden.
 - DM lists do not expose row pin controls.
 - When app shortcuts reach 20, opening another thread keeps the newest 20 and
