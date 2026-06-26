@@ -50,6 +50,7 @@ describe("DropListItemContentMediaVideo", () => {
 
     // Mock HTMLVideoElement.play to return a promise
     Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
       writable: true,
       value: jest.fn().mockResolvedValue(undefined),
     });
@@ -106,6 +107,7 @@ describe("DropListItemContentMediaVideo", () => {
 
     const playSpy = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
       writable: true,
       value: playSpy,
     });
@@ -127,6 +129,7 @@ describe("DropListItemContentMediaVideo", () => {
     const pauseSpy = jest.fn();
     Object.defineProperty(HTMLVideoElement.prototype, "pause", {
       configurable: true,
+      writable: true,
       value: pauseSpy,
     });
 
@@ -154,6 +157,7 @@ describe("DropListItemContentMediaVideo", () => {
     const pauseSpy = jest.fn();
     Object.defineProperty(HTMLVideoElement.prototype, "pause", {
       configurable: true,
+      writable: true,
       value: pauseSpy,
     });
     Object.defineProperty(document, "fullscreenElement", {
@@ -290,5 +294,57 @@ describe("DropListItemContentMediaVideo", () => {
         dialogTitle: "Save video",
       })
     );
+  });
+
+  it("pauses video-surface clicks without starting paused videos", () => {
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const playSpy = jest.fn().mockResolvedValue(undefined);
+    const pauseSpy = jest.fn();
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
+      writable: true,
+      value: playSpy,
+    });
+    Object.defineProperty(HTMLVideoElement.prototype, "pause", {
+      configurable: true,
+      writable: true,
+      value: pauseSpy,
+    });
+
+    const { container } = render(
+      <DropListItemContentMediaVideo src="foo.mp4" />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+
+    let paused = false;
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => paused,
+    });
+
+    const playCallsBeforeClick = playSpy.mock.calls.length;
+    const pauseCallsBeforeClick = pauseSpy.mock.calls.length;
+
+    fireEvent.click(video);
+
+    expect(pauseSpy).toHaveBeenCalledTimes(pauseCallsBeforeClick + 1);
+    expect(playSpy).toHaveBeenCalledTimes(playCallsBeforeClick);
+
+    paused = true;
+    fireEvent.click(video);
+
+    expect(pauseSpy).toHaveBeenCalledTimes(pauseCallsBeforeClick + 1);
+    expect(playSpy).toHaveBeenCalledTimes(playCallsBeforeClick);
   });
 });
