@@ -791,6 +791,10 @@ async function main() {
 try {
   await main();
 } catch (error) {
-  console.error("Agent login command failed.");
+  if (error instanceof Error && error.name === "AbortError") {
+    console.error("Agent login command aborted.");
+  } else {
+    console.error("Agent login command failed.");
+  }
   process.exitCode = 1;
 }
