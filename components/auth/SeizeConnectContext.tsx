@@ -22,10 +22,11 @@ import { getNodeEnv, publicEnv } from "@/config/env";
 import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import {
   canStoreAnotherWalletAccount,
+  clearAgentLoginActiveAddress,
   type ConnectedWalletAccount,
+  getAgentLoginActiveAddress,
   getConnectedWalletAccounts,
   getWalletAddress,
-  hasActiveSessionV2Auth,
   isAuthAddressAuthorized,
   removeAuthJwt,
   setActiveWalletAccount,
@@ -494,15 +495,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
       ? getAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
       : undefined;
-  const agentLoginWalletAddress = getWalletAddress();
+  const agentLoginActiveAddress = getAgentLoginActiveAddress();
   const agentLoginImpersonatedAddress =
     isDevLikeEnv &&
     isLocalHost &&
     publicEnv.USE_DEV_AUTH !== "true" &&
-    agentLoginWalletAddress &&
-    isAddress(agentLoginWalletAddress) &&
-    hasActiveSessionV2Auth({ address: agentLoginWalletAddress })
-      ? getAddress(agentLoginWalletAddress)
+    agentLoginActiveAddress &&
+    isAddress(agentLoginActiveAddress)
+      ? getAddress(agentLoginActiveAddress)
       : undefined;
   const impersonatedAddress =
     agentLoginImpersonatedAddress ?? devAuthImpersonatedAddress;
@@ -574,6 +574,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         isAddress(account.address)
       ) {
         const checksummedConnectedAddress = getAddress(account.address);
+        clearAgentLoginActiveAddress();
         const isAlreadyConnected =
           walletState.status === "connected" &&
           walletState.address === checksummedConnectedAddress;
@@ -591,6 +592,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         isAddress(account.address)
       ) {
         const checksummedConnectedAddress = getAddress(account.address);
+        clearAgentLoginActiveAddress();
         const isKnownStoredAccount = storedConnectedAccounts.some(
           (storedAccount) =>
             normalizeAddress(storedAccount.address) ===
@@ -689,6 +691,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const checksummedAddress = getAddress(account.address);
+        clearAgentLoginActiveAddress();
         const isAlreadyConnected =
           walletState.status === "connected" &&
           walletState.address === checksummedAddress;
@@ -1002,6 +1005,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Normalize address to checksummed format for consistency
       const checksummedAddress = getAddress(address);
+      clearAgentLoginActiveAddress();
       setConnected(checksummedAddress);
       refreshStoredConnectedAccounts();
     },

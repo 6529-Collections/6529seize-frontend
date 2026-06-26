@@ -6,6 +6,7 @@ import {
   type CSSProperties,
   type FormEvent,
 } from "react";
+import { AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY } from "@/services/auth/auth.utils";
 
 const STORAGE_KEYS = {
   accounts: "6529-wallet-accounts",
@@ -13,6 +14,7 @@ const STORAGE_KEYS = {
   legacyAddress: "6529-wallet-address",
   legacyRefreshToken: "6529-wallet-refresh-token",
   legacyRole: "6529-wallet-role",
+  agentLoginActiveAddress: AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY,
   authCookie: "wallet-auth",
 } as const;
 
@@ -239,6 +241,7 @@ function applyLoginPayload(payload: AgentLoginPayload): void {
   localStorage.setItem(STORAGE_KEYS.accounts, JSON.stringify([account]));
   localStorage.setItem(STORAGE_KEYS.activeAddress, account.address);
   localStorage.setItem(STORAGE_KEYS.legacyAddress, account.address);
+  localStorage.setItem(STORAGE_KEYS.agentLoginActiveAddress, account.address);
   localStorage.removeItem(STORAGE_KEYS.legacyRefreshToken);
 
   if (account.role) {
@@ -265,6 +268,7 @@ function clearAuthState(): void {
   localStorage.removeItem(STORAGE_KEYS.legacyAddress);
   localStorage.removeItem(STORAGE_KEYS.legacyRefreshToken);
   localStorage.removeItem(STORAGE_KEYS.legacyRole);
+  localStorage.removeItem(STORAGE_KEYS.agentLoginActiveAddress);
   clearStoredRoleKeys();
   document.cookie = `${
     STORAGE_KEYS.authCookie
@@ -281,9 +285,16 @@ function shortAddress(address: string): string {
 function getCurrentAuthStatus(): Status {
   try {
     const activeAddress = localStorage.getItem(STORAGE_KEYS.activeAddress);
+    const agentLoginAddress = localStorage.getItem(
+      STORAGE_KEYS.agentLoginActiveAddress
+    );
     const rawAccounts = localStorage.getItem(STORAGE_KEYS.accounts);
 
-    if (!activeAddress || !rawAccounts) {
+    if (
+      !activeAddress ||
+      !rawAccounts ||
+      agentLoginAddress?.toLowerCase() !== activeAddress.toLowerCase()
+    ) {
       return {
         kind: "idle",
         message: "No active agent auth.",

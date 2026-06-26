@@ -1,8 +1,11 @@
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import {
+  AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY,
   AUTH_TOKEN_CHANGED_EVENT,
   canStoreAnotherWalletAccount,
   clearAllWalletAuth,
+  clearAgentLoginActiveAddress,
+  getAgentLoginActiveAddress,
   getConnectedWalletAccounts,
   getAuthJwt,
   getRefreshToken,
@@ -12,6 +15,7 @@ import {
   isAuthAddressAuthorized,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
+  setAgentLoginActiveAddress,
   setActiveWalletAccount,
   setAuthJwt,
   syncConnectedWalletProfile,
@@ -243,6 +247,62 @@ describe("auth.utils", () => {
 
     expect(hasActiveSessionV2Auth({ address: "0xaaa" })).toBe(true);
     expect(hasActiveSessionV2Auth({ address: "0xbbb" })).toBe(false);
+  });
+
+  it("returns the active agent-login address only when the marker matches session v2 auth", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", null, "role-a", {
+      authSessionVersion: "v2",
+    });
+    setAgentLoginActiveAddress("0xaaa");
+
+    expect(getAgentLoginActiveAddress()).toBe("0xAaA");
+
+    setAgentLoginActiveAddress("0xbbb");
+
+    expect(getAgentLoginActiveAddress()).toBeNull();
+  });
+
+  it("does not return an agent-login address for unmarked session v2 auth", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", null, "role-a", {
+      authSessionVersion: "v2",
+    });
+
+    expect(getAgentLoginActiveAddress()).toBeNull();
+  });
+
+  it("clears the agent-login marker when the active account changes", () => {
+    const storage = setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", null, "role-a", {
+      authSessionVersion: "v2",
+    });
+    setAgentLoginActiveAddress("0xAaA");
+
+    setAuthJwt("0xBbB", "jwt-b", null, "role-b", {
+      authSessionVersion: "v2",
+    });
+
+    expect(storage.get(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY)).toBeUndefined();
+    expect(getAgentLoginActiveAddress()).toBeNull();
+  });
+
+  it("clears the explicit agent-login marker", () => {
+    const storage = setupStorageMocks();
+
+    setAgentLoginActiveAddress("0xAaA");
+    clearAgentLoginActiveAddress();
+
+    expect(storage.get(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY)).toBeUndefined();
   });
 
   it("getStagingAuth returns cookie or env", () => {

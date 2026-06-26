@@ -16,6 +16,8 @@ const WALLET_REFRESH_TOKEN_STORAGE_KEY = "6529-wallet-refresh-token";
 const WALLET_ROLE_STORAGE_KEY = "6529-wallet-role";
 const WALLET_ACCOUNTS_STORAGE_KEY = "6529-wallet-accounts";
 const WALLET_ACTIVE_ADDRESS_STORAGE_KEY = "6529-wallet-active-address";
+export const AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY =
+  "6529-agent-login-active-address";
 
 export interface ConnectedWalletAccount {
   readonly address: string;
@@ -44,6 +46,24 @@ const getAddressRoleStorageKey = (address: string): string => {
 };
 
 const normalizeAddress = (address: string): string => address.toLowerCase();
+
+const clearAgentLoginMarkerIfAddressChanged = (
+  activeAddress: string | null
+): void => {
+  const agentLoginAddress = safeLocalStorage.getItem(
+    AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY
+  );
+  if (!agentLoginAddress) {
+    return;
+  }
+
+  if (
+    !activeAddress ||
+    normalizeAddress(agentLoginAddress) !== normalizeAddress(activeAddress)
+  ) {
+    safeLocalStorage.removeItem(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY);
+  }
+};
 
 export const isAuthAddressAuthorized = ({
   address,
@@ -326,6 +346,7 @@ const persistAccountsWithActive = (
 ): void => {
   writeAccountsToStorage(accounts);
   setActiveAddressInStorage(activeAddress);
+  clearAgentLoginMarkerIfAddressChanged(activeAddress);
 
   const activeAccount =
     activeAddress === null
@@ -479,6 +500,33 @@ export const hasActiveSessionV2Auth = ({
     activeAccount?.authSessionVersion === "v2" &&
     normalizeAddress(activeAccount.address) === normalizeAddress(address)
   );
+};
+
+export const setAgentLoginActiveAddress = (address: string): void => {
+  safeLocalStorage.setItem(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY, address);
+};
+
+export const clearAgentLoginActiveAddress = (): void => {
+  safeLocalStorage.removeItem(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY);
+};
+
+export const getAgentLoginActiveAddress = (): string | null => {
+  const agentLoginAddress = safeLocalStorage.getItem(
+    AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY
+  );
+  if (!agentLoginAddress) {
+    return null;
+  }
+
+  const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
+  if (
+    activeAccount?.authSessionVersion !== "v2" ||
+    normalizeAddress(activeAccount.address) !== normalizeAddress(agentLoginAddress)
+  ) {
+    return null;
+  }
+
+  return activeAccount.address;
 };
 
 export const getRefreshToken = () => {
