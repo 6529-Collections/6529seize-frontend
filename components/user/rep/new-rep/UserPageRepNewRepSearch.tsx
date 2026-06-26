@@ -79,12 +79,14 @@ export default function UserPageRepNewRepSearch({
   const [mutating, setMutating] = useState<boolean>(false);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showErrorDetails, setShowErrorDetails] = useState<boolean>(true);
 
   const [debouncedValue, setDebouncedValue] = useState<string>("");
   useDebounce(
     () => {
       setDebouncedValue(repSearch);
       setErrorMsg(null);
+      setShowErrorDetails(true);
     },
     500,
     [repSearch]
@@ -135,11 +137,16 @@ export default function UserPageRepNewRepSearch({
 
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
+  const showHelpBotCreditRepCategoryError = () => {
+    setErrorMsg(HELP_BOT_CREDIT_REP_CATEGORY_ERROR);
+    setShowErrorDetails(false);
+  };
+
   const onRepSelect = async (rep: string) => {
     if (rep.length < SEARCH_LENGTH.MIN || rep.length > SEARCH_LENGTH.MAX)
       return;
     if (isHelpBotCreditRepCategory(rep)) {
-      setErrorMsg(HELP_BOT_CREDIT_REP_CATEGORY_ERROR);
+      showHelpBotCreditRepCategoryError();
       return;
     }
     if (checkingAvailability) return;
@@ -154,9 +161,11 @@ export default function UserPageRepNewRepSearch({
       setSelectedCategory(rep);
       setRepSearch(rep);
       setErrorMsg(null);
+      setShowErrorDetails(true);
       setIsOpen(false);
     } catch (error: unknown) {
       setErrorMsg(getErrorMessage(error));
+      setShowErrorDetails(true);
     } finally {
       setCheckingAvailability(false);
     }
@@ -200,7 +209,7 @@ export default function UserPageRepNewRepSearch({
   const onGrantRep = async () => {
     if (mutating || !selectedCategory || !amountStr || !profile.query) return;
     if (isHelpBotCreditRepCategory(selectedCategory)) {
-      setErrorMsg(HELP_BOT_CREDIT_REP_CATEGORY_ERROR);
+      showHelpBotCreditRepCategoryError();
       return;
     }
     const amount = Number.parseInt(amountStr, 10);
@@ -412,7 +421,11 @@ export default function UserPageRepNewRepSearch({
           {!!errorMsg && (
             <UserPageRepNewRepError
               msg={errorMsg}
-              closeError={() => setErrorMsg(null)}
+              showDetails={showErrorDetails}
+              closeError={() => {
+                setErrorMsg(null);
+                setShowErrorDetails(true);
+              }}
             />
           )}
         </AnimatePresence>

@@ -481,7 +481,7 @@
       "id": "help-bot.credits",
       "kind": "business_rule",
       "title": "Help6529 Credits",
-      "link_label": "REP Categories",
+      "link_label": "Help6529 Credits",
       "aliases": [
         "help6529 credits",
         "help bot credits",
@@ -512,7 +512,7 @@
         "Help6529 Credits is a reserved REP category managed by help6529; normal users cannot grant REP in this category.",
         "The bot checks the user's Help6529 Credits category balance before answering."
       ],
-      "canonical_path": "/rep/categories",
+      "canonical_path": "/rep/categories/Help6529%20Credits",
       "related_paths": ["/waves"],
       "tags": ["help-bot", "credits", "rep"],
       "source_refs": [
