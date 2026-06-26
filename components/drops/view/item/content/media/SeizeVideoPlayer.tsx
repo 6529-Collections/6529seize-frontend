@@ -798,6 +798,19 @@ export default function SeizeVideoPlayer({
     updateProgress();
   }
 
+  function pauseCurrentVideo() {
+    const video = internalVideoRef.current;
+    if (!video || video.paused || video.ended) {
+      return;
+    }
+
+    if (playerOwnsAutoplay) {
+      setUserPausedAutoplaySrc(directSrc ?? null);
+    }
+    video.pause();
+    handlePause();
+  }
+
   function togglePlayback() {
     const video = internalVideoRef.current;
     if (!video) return;
@@ -811,10 +824,7 @@ export default function SeizeVideoPlayer({
       return;
     }
 
-    if (playerOwnsAutoplay) {
-      setUserPausedAutoplaySrc(directSrc ?? null);
-    }
-    video.pause();
+    pauseCurrentVideo();
   }
 
   function seekToProgress(nextProgress: number) {
@@ -897,7 +907,7 @@ export default function SeizeVideoPlayer({
     }
 
     event.preventDefault();
-    togglePlayback();
+    pauseCurrentVideo();
     revealControls();
   }
 
