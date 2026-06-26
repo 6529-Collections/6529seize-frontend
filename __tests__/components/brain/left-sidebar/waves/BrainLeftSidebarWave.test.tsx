@@ -388,7 +388,7 @@ describe("BrainLeftSidebarWave", () => {
     expect(expandButton.querySelector("svg")).toHaveClass("tw-animate-spin");
   });
 
-  it("places the timestamp below the title and keeps score and pin in the trailing cluster", () => {
+  it("places the timestamp below the title and keeps pin before the far-right score", () => {
     render(
       <BrainLeftSidebarWave
         wave={{ ...baseWave, waveScore }}
@@ -405,6 +405,7 @@ describe("BrainLeftSidebarWave", () => {
       .closest("[aria-label]")
       ?.closest(".tw-ml-auto");
     const pin = screen.getByTestId("pin");
+    const score = screen.getByText("83").closest("[aria-label]");
 
     expect(timestamp).toHaveTextContent("123");
     expect(textStack?.children[1]).toBe(timestampWrapper);
@@ -413,7 +414,8 @@ describe("BrainLeftSidebarWave", () => {
     expect(timestampWrapper).not.toHaveClass("-tw-mt-0.5");
     expect(trailingCluster).toHaveClass("tw-ml-auto");
     expect(trailingCluster).toHaveClass("tw-items-center");
-    expect(trailingCluster).toContainElement(pin);
+    expect(trailingCluster?.firstElementChild).toBe(pin);
+    expect(trailingCluster?.lastElementChild).toContainElement(score);
   });
 
   it("cancels subwave prefetch when hover intent ends early", () => {

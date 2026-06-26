@@ -231,21 +231,21 @@ export const ExpandedWave = ({
               )}
             </div>
             {(hasSummaryScore || shouldShowPinButton) && (
-              <div className="tw-relative tw-z-10 tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-1.5">
-                {hasSummaryScore && (
-                  <WaveTrustSignals
-                    waveRep={wave.waveRep}
-                    waveScore={wave.waveScore}
-                    variant="sidebar-inline"
-                    mode="summary"
-                  />
-                )}
+              <div className="tw-relative tw-z-10 tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-0.5">
                 {shouldShowPinButton && (
                   <BrainLeftSidebarWavePin
                     waveId={waveId}
                     isPinned={isPinned}
                     compact
                     className="tw-shrink-0"
+                  />
+                )}
+                {hasSummaryScore && (
+                  <WaveTrustSignals
+                    waveRep={wave.waveRep}
+                    waveScore={wave.waveScore}
+                    variant="sidebar-inline"
+                    mode="summary"
                   />
                 )}
               </div>

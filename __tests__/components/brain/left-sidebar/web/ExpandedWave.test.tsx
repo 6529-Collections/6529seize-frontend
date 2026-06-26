@@ -257,7 +257,7 @@ describe("ExpandedWave", () => {
     expect(expandButton).toHaveClass("tw-opacity-100");
   });
 
-  it("places the timestamp below the title and keeps score and pin in the trailing cluster", () => {
+  it("places the timestamp below the title and keeps pin before the far-right score", () => {
     renderExpandedWave({
       showPin: true,
       wave: createMockMinimalWave({
@@ -276,6 +276,7 @@ describe("ExpandedWave", () => {
       .closest("[aria-label]")
       ?.closest(".tw-ml-auto");
     const pin = screen.getByTestId("pin");
+    const score = screen.getByText("83").closest("[aria-label]");
 
     expect(textStack?.children[1]).toBe(timestampWrapper);
     expect(metadataRow?.children[1]).toBe(trailingCluster);
@@ -283,7 +284,8 @@ describe("ExpandedWave", () => {
     expect(timestampWrapper).not.toHaveClass("-tw-mt-0.5");
     expect(trailingCluster).toHaveClass("tw-ml-auto");
     expect(trailingCluster).toHaveClass("tw-items-center");
-    expect(trailingCluster).toContainElement(pin);
+    expect(trailingCluster?.firstElementChild).toBe(pin);
+    expect(trailingCluster?.lastElementChild).toContainElement(score);
   });
 
   it("overlaps non-final child rails to avoid visible line gaps", () => {
