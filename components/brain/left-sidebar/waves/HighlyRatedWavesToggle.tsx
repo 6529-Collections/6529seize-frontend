@@ -240,11 +240,15 @@ export const getVisibleHighlyRatedPreviewItems = ({
 };
 
 function HighlyRatedWavePreviewScoreBadge({
+  ariaLabel,
   isTouchPreview,
+  onClick,
   onMouseEnter,
   scoreLabel,
 }: {
+  readonly ariaLabel: string;
   readonly isTouchPreview: boolean;
+  readonly onClick: () => void;
   readonly onMouseEnter?: (() => void) | undefined;
   readonly scoreLabel: string | null;
 }) {
@@ -253,10 +257,12 @@ function HighlyRatedWavePreviewScoreBadge({
   }
 
   return (
-    <span
-      aria-hidden="true"
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={onClick}
       onMouseEnter={onMouseEnter}
-      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-help tw-items-center tw-justify-center tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]`}
+      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-help tw-appearance-none tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
     >
       <svg
         aria-hidden="true"
@@ -287,7 +293,7 @@ function HighlyRatedWavePreviewScoreBadge({
           {scoreLabel}
         </text>
       </svg>
-    </span>
+    </button>
   );
 }
 
@@ -319,13 +325,22 @@ function HighlyRatedWavePreviewLink({
             score: scoreLabel,
           }
         );
+  const scoreDetailsLabel =
+    scoreLabel === null
+      ? null
+      : t(SIDEBAR_LOCALE, "waves.score.summary.openDetailsAriaLabel", {
+          waveName: wave.name,
+          score: scoreLabel,
+        });
   const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    const shouldKeepClickOnLink =
-      event.defaultPrevented || isModifiedAnchorClick(event);
     item.onClick(event);
-    if (shouldKeepClickOnLink || event.defaultPrevented) {
+    if (event.defaultPrevented || isModifiedAnchorClick(event)) {
       event.stopPropagation();
     }
+  };
+  const handleScoreBadgeClick = () => {
+    // Keep the click bubbling into WaveScoreSummaryHoverCard so touch, mouse, and keyboard use the shared card state.
+    item.onMouseEnter?.();
   };
 
   return (
@@ -373,11 +388,15 @@ function HighlyRatedWavePreviewLink({
             wave={wave}
           />
         </Link>
-        <HighlyRatedWavePreviewScoreBadge
-          isTouchPreview={isTouchPreview}
-          onMouseEnter={item.onMouseEnter}
-          scoreLabel={scoreLabel}
-        />
+        {scoreDetailsLabel !== null && (
+          <HighlyRatedWavePreviewScoreBadge
+            ariaLabel={scoreDetailsLabel}
+            isTouchPreview={isTouchPreview}
+            onClick={handleScoreBadgeClick}
+            onMouseEnter={item.onMouseEnter}
+            scoreLabel={scoreLabel}
+          />
+        )}
       </span>
     </WaveScoreSummaryHoverCard>
   );
