@@ -90,12 +90,7 @@ export const ExpandedWave = ({
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowDropTime = presentLatestDropTimestamp !== null;
   const rowVerticalPaddingClasses = isChildRow ? "tw-py-1.5" : "tw-py-2";
-  const {
-    rowPaddingClasses,
-    rowGapClasses,
-    linkGapClasses,
-    rowHeightClasses,
-  } =
+  const { rowPaddingClasses, rowGapClasses, linkGapClasses, rowHeightClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
       variant: "web",
@@ -192,7 +187,7 @@ export const ExpandedWave = ({
           )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-0.5">
               <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
                 <Link
@@ -226,14 +221,6 @@ export const ExpandedWave = ({
                     />
                   </span>
                 )}
-                {shouldShowPinButton && (
-                  <BrainLeftSidebarWavePin
-                    waveId={waveId}
-                    isPinned={isPinned}
-                    compact
-                    className="tw-relative tw-z-10 tw-shrink-0"
-                  />
-                )}
               </div>
               {shouldShowDropTime && (
                 <div className="tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-leading-none tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
@@ -243,15 +230,25 @@ export const ExpandedWave = ({
                 </div>
               )}
             </div>
-            {hasSummaryScore && (
-              <span className="tw-relative tw-z-10 tw-ml-auto tw-mt-[1px] tw-shrink-0">
-                <WaveTrustSignals
-                  waveRep={wave.waveRep}
-                  waveScore={wave.waveScore}
-                  variant="sidebar-inline"
-                  mode="summary"
-                />
-              </span>
+            {(hasSummaryScore || shouldShowPinButton) && (
+              <div className="tw-relative tw-z-10 tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-1.5">
+                {hasSummaryScore && (
+                  <WaveTrustSignals
+                    waveRep={wave.waveRep}
+                    waveScore={wave.waveScore}
+                    variant="sidebar-inline"
+                    mode="summary"
+                  />
+                )}
+                {shouldShowPinButton && (
+                  <BrainLeftSidebarWavePin
+                    waveId={waveId}
+                    isPinned={isPinned}
+                    compact
+                    className="tw-shrink-0"
+                  />
+                )}
+              </div>
             )}
           </div>
         </div>
