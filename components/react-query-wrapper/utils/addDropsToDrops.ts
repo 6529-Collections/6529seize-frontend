@@ -196,9 +196,11 @@ function getUpsertDebugState(
     upsertAction:
       pages.length === 0
         ? "skipped-no-pages"
-        : existingPageIndex === -1
-          ? "insert-first-page"
-          : "replace-existing",
+        : !pages[0]?.drops
+          ? "skipped-no-first-page-drops"
+          : existingPageIndex === -1
+            ? "insert-first-page"
+            : "replace-existing",
   };
 }
 
