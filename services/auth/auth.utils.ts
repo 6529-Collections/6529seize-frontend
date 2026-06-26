@@ -432,10 +432,15 @@ export const hasActiveSessionV2Auth = ({
 }: {
   readonly address: string;
 }): boolean => {
-  const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
+  const normalizedAddress = normalizeAddress(address);
+  const storedAccount =
+    getStoredAccounts().find(
+      (account) => normalizeAddress(account.address) === normalizedAddress
+    ) ?? null;
+
   return (
-    activeAccount?.authSessionVersion === "v2" &&
-    normalizeAddress(activeAccount.address) === normalizeAddress(address)
+    storedAccount?.authSessionVersion === "v2" &&
+    normalizeAddress(storedAccount.address) === normalizedAddress
   );
 };
 

@@ -194,6 +194,33 @@ describe("jwt-validation.utils", () => {
     expect(syncWalletRoleWithServer).toHaveBeenCalledWith(null, "0x123");
   });
 
+  it("refreshes the wallet being validated instead of another active stored account", async () => {
+    const refreshedSession = {
+      client_type: "native" as const,
+      address: "0x123",
+      role: null,
+      access_token: "fresh-access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "new-native-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    };
+    mockedGetWalletAddress.mockReturnValue("0x456");
+    mockedJwtDecode
+      .mockReturnValueOnce(expiredPayload)
+      .mockReturnValueOnce({ ...expiredPayload, role: null });
+    mockedRefreshSessionV2.mockResolvedValue(refreshedSession);
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: true,
+      wasCancelled: false,
+    });
+    expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
+      address: "0x123",
+      abortSignal: validParams.abortSignal,
+    });
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+  });
+
   it("decodes the refreshed access token before persisting a rotated session", async () => {
     const refreshedSession = {
       client_type: "web" as const,
