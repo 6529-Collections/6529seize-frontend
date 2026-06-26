@@ -26,11 +26,6 @@ import {
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
 import { isWaveDropNearViewport } from "@/contexts/wave/drop-visibility";
-import {
-  getHelpBotRealtimeDebugSummary,
-  isHelpBotRealtimeDebugDrop,
-  logHelpBotRealtimeDebug,
-} from "@/utils/helpBotRealtimeDebug";
 
 const HELP_BOT_HANDLE = "help6529";
 const HELP_BOT_FINAL_REACTIONS = new Set([
@@ -146,14 +141,6 @@ const updateCachedDrop = ({
   readonly queryClient: QueryClient;
   readonly type: ProcessIncomingDropType;
 }): void => {
-  if (isHelpBotRealtimeDebugDrop(drop)) {
-    logHelpBotRealtimeDebug("wave realtime cache update", {
-      ...getHelpBotRealtimeDebugSummary(drop),
-      shouldUpdateCachedDrop: shouldUpdateCachedDrop(type),
-      type,
-    });
-  }
-
   if (!shouldUpdateCachedDrop(type)) {
     return;
   }
@@ -675,39 +662,14 @@ const useProcessIncomingDrop = ({
     ) => {
       const drop = normalizeRealtimeDrop(dropData);
       const waveId = getIncomingWaveId(drop);
-      const debugHelpBotDrop = isHelpBotRealtimeDebugDrop(drop);
-      if (debugHelpBotDrop) {
-        logHelpBotRealtimeDebug("wave realtime received", {
-          ...getHelpBotRealtimeDebugSummary(drop),
-          rawSerialNo: (dropData as ApiDropWithUnknownSerialNo).serial_no,
-          rawSerialNoType: typeof (dropData as ApiDropWithUnknownSerialNo)
-            .serial_no,
-          activeWaveId,
-          type,
-        });
-      }
 
       if (waveId === null) {
-        if (debugHelpBotDrop) {
-          logHelpBotRealtimeDebug("wave realtime skipped no wave", {
-            ...getHelpBotRealtimeDebugSummary(drop),
-            activeWaveId,
-            type,
-          });
-        }
         return;
       }
 
       updateCachedDrop({ drop, options, queryClient, type });
 
       if (isWaveMuted(waveId)) {
-        if (debugHelpBotDrop) {
-          logHelpBotRealtimeDebug("wave realtime skipped muted wave", {
-            ...getHelpBotRealtimeDebugSummary(drop),
-            activeWaveId,
-            type,
-          });
-        }
         return;
       }
 
@@ -715,50 +677,19 @@ const useProcessIncomingDrop = ({
 
       const currentData = getData(waveId);
       if (!currentData) {
-        if (debugHelpBotDrop) {
-          logHelpBotRealtimeDebug("wave realtime register wave no data", {
-            ...getHelpBotRealtimeDebugSummary(drop),
-            activeWaveId,
-            type,
-          });
-        }
         registerWave(waveId);
         return;
       }
 
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
-      if (debugHelpBotDrop) {
-        logHelpBotRealtimeDebug("wave realtime current data", {
-          ...getHelpBotRealtimeDebugSummary(drop),
-          activeWaveId,
-          currentDropsCount: currentData.drops.length,
-          existingDropType: existingDrop?.type ?? null,
-          latestFetchedSerialNo: currentData.latestFetchedSerialNo,
-          type,
-        });
-      }
 
       if (existingDrop?.type === DropSize.LIGHT) {
-        if (debugHelpBotDrop) {
-          logHelpBotRealtimeDebug("wave realtime skipped light drop", {
-            ...getHelpBotRealtimeDebugSummary(drop),
-            activeWaveId,
-            type,
-          });
-        }
         return;
       }
 
       const existingFullDrop = existingDrop ?? null;
       if (isCanonicalDropUpdate(type)) {
         if (existingFullDrop === null) {
-          if (debugHelpBotDrop) {
-            logHelpBotRealtimeDebug("wave realtime canonical skipped missing existing", {
-              ...getHelpBotRealtimeDebugSummary(drop),
-              activeWaveId,
-              type,
-            });
-          }
           return;
         }
         await applyCanonicalDropUpdateForExistingDrop({
@@ -773,27 +704,11 @@ const useProcessIncomingDrop = ({
           isHelpBotFinalReactionUpdate(drop)
         ) {
           const newestKnownSerialNo = getNewestKnownSerialNo(currentData);
-          if (debugHelpBotDrop) {
-            logHelpBotRealtimeDebug("wave realtime helpbot reaction sync start", {
-              ...getHelpBotRealtimeDebugSummary(drop),
-              activeWaveId,
-              newestKnownSerialNo,
-              type,
-            });
-          }
           await syncNewestMessagesAfterDropUpdate(
             waveId,
             newestKnownSerialNo,
             drop.id
           );
-          if (debugHelpBotDrop) {
-            logHelpBotRealtimeDebug("wave realtime helpbot reaction sync finished", {
-              ...getHelpBotRealtimeDebugSummary(drop),
-              activeWaveId,
-              newestKnownSerialNo,
-              type,
-            });
-          }
         }
         if (
           type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
@@ -814,28 +729,12 @@ const useProcessIncomingDrop = ({
         key: waveId,
         drops: [optimisticDrop],
       });
-      if (debugHelpBotDrop) {
-        logHelpBotRealtimeDebug("wave realtime inserted optimistic drop", {
-          ...getHelpBotRealtimeDebugSummary(drop),
-          activeWaveId,
-          latestFetchedSerialNo: currentData.latestFetchedSerialNo,
-          type,
-        });
-      }
 
       await syncNewestMessagesAfterDropUpdate(
         waveId,
         currentData.latestFetchedSerialNo,
         optimisticDrop.id
       );
-      if (debugHelpBotDrop) {
-        logHelpBotRealtimeDebug("wave realtime newest sync after insert finished", {
-          ...getHelpBotRealtimeDebugSummary(drop),
-          activeWaveId,
-          latestFetchedSerialNo: currentData.latestFetchedSerialNo,
-          type,
-        });
-      }
 
       markActiveWaveAsRead(waveId);
     },

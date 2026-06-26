@@ -10,11 +10,6 @@ import { useWaveById } from "@/hooks/useWaveById";
 import useWavesList from "@/hooks/useWavesList";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
-import {
-  getHelpBotRealtimeDebugDropsSummary,
-  isHelpBotRealtimeDebugDrop,
-  logHelpBotRealtimeDebug,
-} from "@/utils/helpBotRealtimeDebug";
 import type { ReactNode } from "react";
 import React, {
   createContext,
@@ -429,13 +424,11 @@ export function useMyStreamWaveMessages(
   const [data, setData] = useState<WaveMessages | undefined>(() =>
     waveId ? getData(waveId) : undefined
   );
-  const dataRef = useRef<WaveMessages | undefined>(data);
 
   useEffect(() => {
     // If waveId is null or undefined, don't subscribe
     if (!waveId) {
       setData(undefined); // Clear data if waveId becomes null/undefined
-      dataRef.current = undefined;
       return;
     }
 
@@ -443,27 +436,6 @@ export function useMyStreamWaveMessages(
     const listener: WaveMessagesListener = (
       newData: WaveMessages | undefined
     ) => {
-      const currentData = dataRef.current;
-      const shouldDebug =
-        currentData?.drops.some(isHelpBotRealtimeDebugDrop) ||
-        newData?.drops.some(isHelpBotRealtimeDebugDrop);
-      const didChange = JSON.stringify(currentData) !== JSON.stringify(newData);
-
-      if (shouldDebug) {
-        logHelpBotRealtimeDebug("wave stream listener", {
-          waveId,
-          didChange,
-          current: getHelpBotRealtimeDebugDropsSummary(
-            currentData?.drops ?? []
-          ),
-          next: getHelpBotRealtimeDebugDropsSummary(newData?.drops ?? []),
-        });
-      }
-
-      if (didChange) {
-        dataRef.current = newData;
-      }
-
       // Update local state only if data actually differs
       // Use a proper comparison if needed (e.g., deep compare for complex objects)
       setData((currentData: WaveMessages | undefined) => {
@@ -490,7 +462,6 @@ export function useMyStreamWaveMessages(
   // This handles cases where the component using the hook changes the key it's interested in.
   useEffect(() => {
     const nextData = waveId ? getData(waveId) : undefined;
-    dataRef.current = nextData;
     setData(nextData);
   }, [waveId, getData]);
 

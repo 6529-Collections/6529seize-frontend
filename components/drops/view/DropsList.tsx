@@ -11,15 +11,10 @@ import type {
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject } from "react";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import UnreadDivider from "./UnreadDivider";
-import {
-  getHelpBotRealtimeDebugDropsSummary,
-  isHelpBotRealtimeDebugDrop,
-  logHelpBotRealtimeDebug,
-} from "@/utils/helpBotRealtimeDebug";
 
 // Logarithmic positions for boost cards (visual positions, 1-indexed)
 const BOOST_CARD_POSITIONS = [5, 10, 20, 40, 80, 160];
@@ -102,23 +97,6 @@ const DropsList = memo(
 
       return drops;
     }, [drops, location]);
-
-    const orderedHelpBotDebugKey = orderedDrops
-      .filter(isHelpBotRealtimeDebugDrop)
-      .map((drop) => `${drop.id}:${drop.serial_no}:${typeof drop.serial_no}`)
-      .join("|");
-
-    useEffect(() => {
-      if (!orderedHelpBotDebugKey) {
-        return;
-      }
-
-      logHelpBotRealtimeDebug("drops list rendered props", {
-        location,
-        dropViewDropId,
-        ordered: getHelpBotRealtimeDebugDropsSummary(orderedDrops),
-      });
-    }, [dropViewDropId, location, orderedDrops, orderedHelpBotDebugKey]);
 
     // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
     const getItemData = useMemo(() => {
