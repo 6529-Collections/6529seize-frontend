@@ -43,7 +43,7 @@ const SORT_DIRECTION_MAP: Record<
   [WaveDropsLeaderboardSort.REALTIME_VOTE]: "DESC",
   [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
   [WaveDropsLeaderboardSort.TREND]: "DESC",
-  [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
+  [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: "DESC",
   [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
 };
 

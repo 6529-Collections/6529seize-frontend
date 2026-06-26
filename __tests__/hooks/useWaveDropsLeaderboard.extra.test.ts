@@ -85,6 +85,30 @@ describe("useWaveDropsLeaderboard extra", () => {
     expect(call.queryKey[1].sort).toBe(WaveDropsLeaderboardSort.CREATED_AT);
   });
 
+  it("requests my realtime votes in descending order", async () => {
+    renderHook(() =>
+      useWaveDropsLeaderboard({
+        waveId: "2",
+        sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
+      })
+    );
+
+    const call = getMainQueryOptions();
+    expect(call.queryKey[1].sort_direction).toBe("DESC");
+
+    await call.queryFn({ pageParam: null });
+
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/waves/2/leaderboard",
+        params: expect.objectContaining({
+          sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
+          sort_direction: "DESC",
+        }),
+      })
+    );
+  });
+
   it("does not prefetch or start a polling query on mount", () => {
     renderHook(() => useWaveDropsLeaderboard({ waveId: "2" }));
 
