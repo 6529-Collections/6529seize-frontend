@@ -10,6 +10,11 @@ import { useWaveById } from "@/hooks/useWaveById";
 import useWavesList from "@/hooks/useWavesList";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
+import {
+  getHelpBotRealtimeDebugDropsSummary,
+  isHelpBotRealtimeDebugDrop,
+  logHelpBotRealtimeDebug,
+} from "@/utils/helpBotRealtimeDebug";
 import type { ReactNode } from "react";
 import React, {
   createContext,
@@ -439,7 +444,23 @@ export function useMyStreamWaveMessages(
       // Update local state only if data actually differs
       // Use a proper comparison if needed (e.g., deep compare for complex objects)
       setData((currentData: WaveMessages | undefined) => {
-        if (JSON.stringify(currentData) !== JSON.stringify(newData)) {
+        const shouldDebug =
+          currentData?.drops.some(isHelpBotRealtimeDebugDrop) ||
+          newData?.drops.some(isHelpBotRealtimeDebugDrop);
+        const didChange = JSON.stringify(currentData) !== JSON.stringify(newData);
+
+        if (shouldDebug) {
+          logHelpBotRealtimeDebug("wave stream listener", {
+            waveId,
+            didChange,
+            current: getHelpBotRealtimeDebugDropsSummary(
+              currentData?.drops ?? []
+            ),
+            next: getHelpBotRealtimeDebugDropsSummary(newData?.drops ?? []),
+          });
+        }
+
+        if (didChange) {
           return newData;
         }
         return currentData;

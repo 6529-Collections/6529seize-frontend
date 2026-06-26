@@ -30,6 +30,11 @@ import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
+import {
+  getHelpBotRealtimeDebugDropsSummary,
+  isHelpBotRealtimeDebugDrop,
+  logHelpBotRealtimeDebug,
+} from "@/utils/helpBotRealtimeDebug";
 
 const EMPTY_DROPS: Drop[] = [];
 
@@ -141,6 +146,37 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     waveMessages,
     shouldPinToBottom,
   });
+
+  const renderedHelpBotDebugKey =
+    renderedWaveMessages?.drops
+      .filter(isHelpBotRealtimeDebugDrop)
+      .map((drop) => `${drop.id}:${drop.serial_no}:${typeof drop.serial_no}`)
+      .join("|") ?? "";
+
+  useEffect(() => {
+    if (!renderedWaveMessages || !renderedHelpBotDebugKey) {
+      return;
+    }
+
+    logHelpBotRealtimeDebug("wave rendered messages", {
+      waveId,
+      dropId,
+      pendingDropsCount,
+      shouldPinToBottom,
+      rendered: getHelpBotRealtimeDebugDropsSummary(
+        renderedWaveMessages.drops
+      ),
+      sourceCount: waveMessages?.drops.length ?? null,
+    });
+  }, [
+    dropId,
+    pendingDropsCount,
+    renderedHelpBotDebugKey,
+    renderedWaveMessages,
+    shouldPinToBottom,
+    waveId,
+    waveMessages?.drops.length,
+  ]);
 
   const renderedWaveMessagesWithFullWave = useMemo(() => {
     if (!renderedWaveMessages || !wave) {

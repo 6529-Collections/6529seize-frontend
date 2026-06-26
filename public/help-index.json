@@ -507,7 +507,7 @@
       "facts": [
         "Help6529 Credits are REP in the `Help6529 Credits` category.",
         "Each Help6529 question costs 1 Help6529 Credit REP.",
-        "Automatic grants are signup +5, profile setup +5, and daily activity +5 when the user sends any message that day.",
+        "Automatic grants use the configured Help6529 credit grant amount for signup, profile setup, and daily activity when the user sends any message that day.",
         "Automatic daily activity grants do not have a balance cap.",
         "Help6529 Credits is a reserved REP category managed by help6529; normal users cannot grant REP in this category.",
         "The bot checks the user's Help6529 Credits category balance before answering."
@@ -1324,7 +1324,7 @@
       "id": "the-memes.overview",
       "kind": "route",
       "title": "The Memes",
-      "aliases": ["the memes", "memes", "meme cards", "meme card"],
+      "aliases": ["the memes", "memes", "meme", "meme cards", "meme card"],
       "keywords": [
         "memes",
         "meme",
@@ -3863,7 +3863,7 @@
       "id": "gradients.collection",
       "kind": "route",
       "title": "6529 Gradient collection",
-      "aliases": ["6529 gradient", "gradients", "gradient collection"],
+      "aliases": ["6529 gradient", "gradients", "gradient", "gradient collection"],
       "keywords": ["gradient", "gradients", "collection", "nft"],
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",

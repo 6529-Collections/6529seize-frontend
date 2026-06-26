@@ -137,6 +137,30 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.syncNewestMessages).toHaveBeenCalled();
   });
 
+  it("normalizes string serial numbers before inserting realtime drops", async () => {
+    const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
+    const props = baseProps(store);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "helpbot-reply",
+      serial_no: "6831",
+      wave: { id: "wave1" },
+      author: { handle: "help6529" },
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    const insertedDrop = props.updateData.mock.calls[0][0].drops[0];
+    expect(insertedDrop.serial_no).toBe(6831);
+    expect(typeof insertedDrop.serial_no).toBe("number");
+  });
+
   it("handles aborted fetch without logging", async () => {
     const consoleLog = jest.spyOn(console, "log").mockImplementation(() => {});
     const consoleError = jest
