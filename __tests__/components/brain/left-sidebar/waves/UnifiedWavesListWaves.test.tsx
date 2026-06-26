@@ -429,6 +429,8 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
 });
 
 it("uses highly rated preview score semantics instead of unread badges", () => {
+  const latestDropTimestamp = Date.now() - 60 * 60 * 1000;
+
   render(
     <UnifiedWavesListWaves
       waves={[
@@ -440,7 +442,7 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
           unreadDropsCount: 24,
           newDropsCount: {
             count: 99,
-            latestDropTimestamp: 123,
+            latestDropTimestamp,
             firstUnreadSerialNo: 42,
           },
           waveScore: {
@@ -471,6 +473,9 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   expect(
     screen.getByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
+  expect(screen.getByText("Scored Discovery")).toBeInTheDocument();
+  expect(screen.getByText("Last message")).toBeInTheDocument();
+  expect(screen.getByText("1h")).toBeInTheDocument();
   expect(screen.getByText("Quality")).toBeInTheDocument();
   expect(screen.getByText("Hotness")).toBeInTheDocument();
   expect(screen.getByText("Wave REP")).toBeInTheDocument();

@@ -18,6 +18,10 @@ type WaveTrustSignalsVariant =
   | "sidebar-inline"
   | "header-inline";
 type WaveTrustSignalsMode = "details" | "summary";
+interface WaveScoreSummaryHeader {
+  readonly title: ReactNode;
+  readonly meta?: ReactNode | undefined;
+}
 
 interface WaveTrustSignalsProps {
   readonly waveRep?: ApiWaveRepSummary | null | undefined;
@@ -484,6 +488,7 @@ const buildRepDetails = ({
 
 function WaveScoreSummaryPopoverContent({
   learnMoreHref,
+  summaryHeader,
   visibilityScore,
   qualityScore,
   hotnessScore,
@@ -491,6 +496,7 @@ function WaveScoreSummaryPopoverContent({
   waveRep,
 }: {
   readonly learnMoreHref?: string | undefined;
+  readonly summaryHeader?: WaveScoreSummaryHeader | undefined;
   readonly visibilityScore: string;
   readonly qualityScore: string | null;
   readonly hotnessScore: string | null;
@@ -543,7 +549,21 @@ function WaveScoreSummaryPopoverContent({
   ];
 
   return (
-    <div className="tw-w-48 tw-bg-transparent tw-text-left tw-text-[11px] tw-leading-4 tw-text-iron-300">
+    <div
+      className={`${summaryHeader === undefined ? "tw-w-48" : "tw-w-64"} tw-bg-transparent tw-text-left tw-text-[11px] tw-leading-4 tw-text-iron-300`}
+    >
+      {summaryHeader !== undefined && (
+        <div className="tw-mb-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2">
+          <div className="tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-white">
+            {summaryHeader.title}
+          </div>
+          {summaryHeader.meta !== undefined && (
+            <div className="tw-mt-0.5 tw-flex tw-items-center tw-gap-1.5 tw-text-[11px] tw-leading-4 tw-text-iron-400">
+              {summaryHeader.meta}
+            </div>
+          )}
+        </div>
+      )}
       <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-3">
         <span className="tw-font-semibold tw-text-white">
           {t(WAVE_TRUST_LOCALE, "waves.score.summary.title")}
@@ -586,6 +606,7 @@ export function WaveScoreSummaryHoverCard({
   closeOnContentClick,
   learnMoreHref,
   stopClickPropagation,
+  summaryHeader,
   triggerDisplay,
   waveRep,
   waveScore,
@@ -594,6 +615,7 @@ export function WaveScoreSummaryHoverCard({
   readonly closeOnContentClick?: boolean | undefined;
   readonly learnMoreHref?: string | undefined;
   readonly stopClickPropagation?: boolean | undefined;
+  readonly summaryHeader?: WaveScoreSummaryHeader | undefined;
   readonly triggerDisplay?: "contents" | "inline-flex" | undefined;
   readonly waveRep: ApiWaveRepSummary | null | undefined;
   readonly waveScore: ApiWaveScore | null | undefined;
@@ -623,6 +645,7 @@ export function WaveScoreSummaryHoverCard({
       content={
         <WaveScoreSummaryPopoverContent
           learnMoreHref={learnMoreHref}
+          summaryHeader={summaryHeader}
           visibilityScore={visibilityScore}
           qualityScore={qualityScore}
           hotnessScore={hotnessScore}

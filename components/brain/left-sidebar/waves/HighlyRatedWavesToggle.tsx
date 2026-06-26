@@ -19,14 +19,6 @@ const PREVIEW_TOUCH_THUMBNAIL_WIDTH_PX = 44;
 const PREVIEW_GAP_PX = 6;
 const PREVIEW_TOUCH_GAP_PX = 8;
 type PreviewTooltipAlignment = "start" | "center" | "end";
-const PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES: Record<
-  PreviewTooltipAlignment,
-  string
-> = {
-  start: "tw-left-0 tw-translate-x-0",
-  center: "tw-left-1/2 -tw-translate-x-1/2",
-  end: "tw-right-0 tw-translate-x-0",
-};
 
 export interface HighlyRatedWavePreviewItem {
   readonly wave: MinimalWave;
@@ -161,6 +153,13 @@ const getScoreBadgeFontSize = (scoreLabel: string) => {
   return 9.2;
 };
 
+const getLatestDropTimestamp = (wave: MinimalWave): number | null =>
+  wave.newDropsCount.latestDropTimestamp !== null &&
+  wave.newDropsCount.latestDropTimestamp !== 0 &&
+  Number.isFinite(wave.newDropsCount.latestDropTimestamp)
+    ? wave.newDropsCount.latestDropTimestamp
+    : null;
+
 export const getFittingPreviewCount = ({
   isTouchPreview = false,
   itemCount,
@@ -263,85 +262,68 @@ function HighlyRatedWavePreviewScoreBadge({
   isTouchPreview,
   onMouseEnter,
   scoreLabel,
-  wave,
 }: {
   readonly isTouchPreview: boolean;
   readonly onMouseEnter?: (() => void) | undefined;
   readonly scoreLabel: string | null;
-  readonly wave: MinimalWave;
 }) {
   if (scoreLabel === null) {
     return null;
   }
 
   return (
-    <WaveScoreSummaryHoverCard
-      closeOnContentClick
-      stopClickPropagation
-      triggerDisplay="inline-flex"
-      waveRep={wave.waveRep}
-      waveScore={wave.waveScore}
+    <button
+      type="button"
+      aria-label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedPreviewScore", {
+        score: scoreLabel,
+      })}
+      onMouseEnter={onMouseEnter}
+      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
     >
-      <button
-        type="button"
-        aria-label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedPreviewScore", {
-          score: scoreLabel,
-        })}
-        onMouseEnter={onMouseEnter}
-        className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 32 26"
+        className={`tw-pointer-events-none ${isTouchPreview ? "tw-h-6 tw-w-7" : "tw-h-5 tw-w-6"} tw-overflow-visible`}
       >
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 32 26"
-          className={`tw-pointer-events-none ${isTouchPreview ? "tw-h-6 tw-w-7" : "tw-h-5 tw-w-6"} tw-overflow-visible`}
+        <path
+          d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
+          className="tw-fill-iron-800 tw-stroke-iron-950"
+          strokeWidth="2.4"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M16 4.7 25.35 7.75v5.1c0 4.15-3.2 7.15-9.35 8.75-6.15-1.6-9.35-4.6-9.35-8.75v-5.1L16 4.7Z"
+          className="tw-fill-none tw-stroke-white/20"
+          strokeWidth="1"
+          strokeLinejoin="round"
+        />
+        <text
+          x="16"
+          y="13.2"
+          dominantBaseline="middle"
+          textAnchor="middle"
+          fontSize={getScoreBadgeFontSize(scoreLabel)}
+          fontWeight="700"
+          className="tw-fill-iron-50"
         >
-          <path
-            d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
-            className="tw-fill-iron-800 tw-stroke-iron-950"
-            strokeWidth="2.4"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M16 4.7 25.35 7.75v5.1c0 4.15-3.2 7.15-9.35 8.75-6.15-1.6-9.35-4.6-9.35-8.75v-5.1L16 4.7Z"
-            className="tw-fill-none tw-stroke-white/20"
-            strokeWidth="1"
-            strokeLinejoin="round"
-          />
-          <text
-            x="16"
-            y="13.2"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize={getScoreBadgeFontSize(scoreLabel)}
-            fontWeight="700"
-            className="tw-fill-iron-50"
-          >
-            {scoreLabel}
-          </text>
-        </svg>
-      </button>
-    </WaveScoreSummaryHoverCard>
+          {scoreLabel}
+        </text>
+      </svg>
+    </button>
   );
 }
 
 function HighlyRatedWavePreviewLink({
   isTouchPreview,
   item,
-  tooltipAlignment,
 }: {
   readonly isTouchPreview: boolean;
   readonly item: HighlyRatedWavePreviewItem;
-  readonly tooltipAlignment: PreviewTooltipAlignment;
 }) {
   const { wave } = item;
   const isDropWave = wave.type !== ApiWaveType.Chat;
   const scoreLabel = getWaveScoreLabel(wave);
-  const latestDropTimestamp =
-    wave.newDropsCount.latestDropTimestamp !== null &&
-    wave.newDropsCount.latestDropTimestamp !== 0 &&
-    Number.isFinite(wave.newDropsCount.latestDropTimestamp)
-      ? wave.newDropsCount.latestDropTimestamp
-      : null;
+  const latestDropTimestamp = getLatestDropTimestamp(wave);
   const linkLabel =
     scoreLabel === null
       ? t(
@@ -359,70 +341,63 @@ function HighlyRatedWavePreviewLink({
             score: scoreLabel,
           }
         );
+  const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    item.onClick(event);
+    event.stopPropagation();
+  };
 
   return (
-    <span
-      className={`tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-items-center tw-justify-center`}
+    <WaveScoreSummaryHoverCard
+      closeOnContentClick
+      stopClickPropagation
+      summaryHeader={{
+        title: wave.name,
+        meta:
+          latestDropTimestamp === null ? (
+            <span>
+              {t(SIDEBAR_LOCALE, "waves.score.summary.noMessagesYet")}
+            </span>
+          ) : (
+            <>
+              <span>
+                {t(SIDEBAR_LOCALE, "waves.score.summary.lastMessage")}
+              </span>
+              <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
+            </>
+          ),
+      }}
+      triggerDisplay="inline-flex"
+      waveRep={wave.waveRep}
+      waveScore={wave.waveScore}
     >
-      <Link
-        href={item.href}
-        prefetch={false}
-        aria-label={linkLabel}
-        onClick={item.onClick}
-        {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
-        className={`tw-group/preview tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-items-center tw-justify-center tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+      <span
+        className={`tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-items-center tw-justify-center`}
       >
-        <WaveAvatar
-          dropBadgePlacement="bottom-left"
-          isActive={item.isActive}
-          isDropWave={isDropWave}
-          showNewDropsBadge={false}
-          showUnreadDropsBadge={false}
-          size={isTouchPreview ? "lg" : "default"}
-          wave={wave}
-        />
-        <span
-          className={`tw-pointer-events-none tw-absolute ${isTouchPreview ? "tw-top-12" : "tw-top-10"} tw-z-30 tw-hidden tw-w-48 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-shadow-xl group-hover/preview:tw-block group-focus-visible/preview:tw-block ${PREVIEW_TOOLTIP_ALIGNMENT_CLASSNAMES[tooltipAlignment]}`}
+        <Link
+          href={item.href}
+          prefetch={false}
+          aria-label={linkLabel}
+          onClick={handleLinkClick}
+          {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
+          className={`tw-group/preview tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-items-center tw-justify-center tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
         >
-          <span className="tw-block tw-truncate tw-text-xs tw-font-semibold tw-text-iron-100">
-            {wave.name}
-          </span>
-          <span className="tw-mt-1 tw-flex tw-items-center tw-gap-2 tw-text-[11px] tw-text-iron-400">
-            {latestDropTimestamp !== null && (
-              <span className="tw-whitespace-nowrap">
-                <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
-              </span>
-            )}
-            {scoreLabel !== null && (
-              <span className="tw-ml-auto tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
-                <svg
-                  className="tw-size-3 tw-flex-shrink-0 tw-text-iron-400"
-                  viewBox="0 0 32 26"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M16 2.4 27.3 6.2v6.65c0 5.25-4.1 9.15-11.3 10.85-7.2-1.7-11.3-5.6-11.3-10.85V6.2L16 2.4Z"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                {t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedPreviewScore", {
-                  score: scoreLabel,
-                })}
-              </span>
-            )}
-          </span>
-        </span>
-      </Link>
-      <HighlyRatedWavePreviewScoreBadge
-        isTouchPreview={isTouchPreview}
-        onMouseEnter={item.onMouseEnter}
-        scoreLabel={scoreLabel}
-        wave={wave}
-      />
-    </span>
+          <WaveAvatar
+            dropBadgePlacement="bottom-left"
+            isActive={item.isActive}
+            isDropWave={isDropWave}
+            showNewDropsBadge={false}
+            showUnreadDropsBadge={false}
+            size={isTouchPreview ? "lg" : "default"}
+            wave={wave}
+          />
+        </Link>
+        <HighlyRatedWavePreviewScoreBadge
+          isTouchPreview={isTouchPreview}
+          onMouseEnter={item.onMouseEnter}
+          scoreLabel={scoreLabel}
+        />
+      </span>
+    </WaveScoreSummaryHoverCard>
   );
 }
 
@@ -496,15 +471,11 @@ export function HighlyRatedWavesToggle({
         ref={previewStripRef}
         className={`tw-flex tw-min-w-0 tw-items-center tw-justify-between ${isTouchPreview ? "tw-gap-x-2" : "tw-gap-x-1.5"}`}
       >
-        {visiblePreviewItems.map((item, index) => (
+        {visiblePreviewItems.map((item) => (
           <HighlyRatedWavePreviewLink
             isTouchPreview={isTouchPreview}
             key={item.wave.id}
             item={item}
-            tooltipAlignment={getHighlyRatedPreviewTooltipAlignment({
-              index,
-              itemCount: visiblePreviewItems.length,
-            })}
           />
         ))}
       </div>
