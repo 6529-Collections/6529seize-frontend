@@ -149,11 +149,14 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
   const opacityClass = getOpacityClass();
 
-  // Ensure tooltip is updated immediately by always checking the current state
+  // Only show max-limit guidance for the keyed request window after a failed pin.
   const getTooltipContent = () => {
     if (isPinned) return "Unpin";
     if (canPinCurrentWave) return "Pin";
-    return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+    if (showMaxLimitTooltip) {
+      return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+    }
+    return null;
   };
   const tooltipContent = getTooltipContent();
 
