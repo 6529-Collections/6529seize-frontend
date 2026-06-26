@@ -189,15 +189,20 @@ function normalizeApiBase(value) {
   return withoutSlash.endsWith("/api") ? withoutSlash : `${withoutSlash}/api`;
 }
 
+function is6529Host(hostname) {
+  return hostname === "6529.io" || hostname.endsWith(".6529.io");
+}
+
 function inferFirstPartyOrigin(apiEndpoint) {
   try {
     const hostname = new URL(String(apiEndpoint)).hostname;
-    if (hostname.includes("staging") && hostname.endsWith("6529.io")) {
+    if (!is6529Host(hostname)) {
+      return null;
+    }
+    if (hostname.split(".").includes("staging")) {
       return "https://staging.6529.io";
     }
-    if (hostname.endsWith("6529.io")) {
-      return "https://6529.io";
-    }
+    return "https://6529.io";
   } catch {}
   return null;
 }
