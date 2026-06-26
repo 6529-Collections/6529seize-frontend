@@ -62,6 +62,7 @@ jest.mock(
         data-is-drop-wave={String(props.isDropWave)}
         data-show-new-drops-badge={String(props.showNewDropsBadge)}
         data-show-unread-drops-badge={String(props.showUnreadDropsBadge)}
+        data-size={props.size ?? "default"}
       />
     ),
   })
@@ -198,6 +199,13 @@ it("calculates how many highly rated preview avatars fit", () => {
   expect(getFittingPreviewCount({ itemCount: 10, width: 32 })).toBe(1);
   expect(getFittingPreviewCount({ itemCount: 10, width: 70 })).toBe(2);
   expect(getFittingPreviewCount({ itemCount: 12, width: 1000 })).toBe(10);
+  expect(
+    getFittingPreviewCount({
+      isTouchPreview: true,
+      itemCount: 10,
+      width: 220,
+    })
+  ).toBe(4);
 });
 
 it("aligns edge preview tooltips inward to avoid sidebar clipping", () => {
@@ -374,9 +382,26 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
       name: "Highly rated waves you don’t follow yet.",
     })
   ).toHaveClass("tw-size-6");
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  );
   expect(
-    screen.getByTestId("tooltip-waves-worth-checking-out-info")
-  ).toHaveAttribute("data-open-on-click", "true");
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toBeInTheDocument();
+  fireEvent.click(
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  );
+  expect(
+    screen.queryByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
   expect(
     screen.queryByRole("button", {
       name: "Expand Worth Checking Out, 1 wave",
@@ -436,11 +461,19 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   ).toBeInTheDocument();
   const scoreBadgeText = screen.getByText("93", { selector: "text" });
   expect(scoreBadgeText).toBeInTheDocument();
-  expect(scoreBadgeText.closest("svg")).toHaveClass("-tw-bottom-1");
-  expect(scoreBadgeText.closest("svg")).toHaveClass("-tw-right-1.5");
+  expect(scoreBadgeText.closest("button")).toHaveClass("-tw-bottom-1");
+  expect(scoreBadgeText.closest("button")).toHaveClass("-tw-right-1.5");
+  expect(scoreBadgeText.closest("button")).toHaveClass("tw-h-6");
+  expect(scoreBadgeText.closest("button")).toHaveClass("tw-w-7");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
-  expect(screen.getByText("Score 93")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Score 93" }));
+  expect(
+    screen.getByRole("dialog", { name: "Wave score details" })
+  ).toBeInTheDocument();
+  expect(screen.getByText("Quality")).toBeInTheDocument();
+  expect(screen.getByText("Hotness")).toBeInTheDocument();
+  expect(screen.getByText("Wave REP")).toBeInTheDocument();
   expect(screen.queryByRole("link", { name: /new messages/ })).toBeNull();
   expect(screen.getByTestId("preview-avatar-h-score")).toHaveAttribute(
     "data-drop-badge-placement",
@@ -635,9 +668,47 @@ it("keeps the worth checking out info tooltip available on touch devices", () =>
       name: "Highly rated waves you don’t follow yet.",
     })
   ).toHaveClass("tw-size-6");
+  expect(screen.getByTestId("preview-avatar-h1")).toHaveAttribute(
+    "data-size",
+    "lg"
+  );
+  const infoButton = screen.getByRole("button", {
+    name: "Highly rated waves you don’t follow yet.",
+  });
+  fireEvent.click(infoButton);
   expect(
-    screen.getByTestId("tooltip-waves-worth-checking-out-info")
-  ).toHaveAttribute("data-open-on-click", "true");
+    screen.getByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).toBeInTheDocument();
+  fireEvent.click(infoButton);
+  expect(
+    screen.queryByRole("dialog", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
+});
+
+it("hides the worth checking out info tooltip when no profile is connected", () => {
+  mockUseAuth.mockReturnValue({
+    connectedProfile: null,
+    activeProfileProxy: null,
+  });
+
+  render(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", {
+      name: "Highly rated waves you don’t follow yet.",
+    })
+  ).not.toBeInTheDocument();
 });
 
 it("passes pin controls through for pinned announcement waves", () => {

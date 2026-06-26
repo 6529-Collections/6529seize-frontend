@@ -1,4 +1,6 @@
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 const QUICK_VOTE_DEFAULT_PERCENTAGE = 0.01;
 const MAX_QUICK_VOTE_AMOUNTS = 5;
@@ -84,11 +86,21 @@ export const getDisplayQuickVoteAmounts = (
   amounts: readonly number[]
 ): number[] => [...amounts].sort((left, right) => left - right);
 
-export const formatMemesQuickVoteLeftThisRoundText = (count: number): string =>
-  `${formatNumberWithCommas(count)} left this round`;
+export const formatMemesQuickVoteLeftThisRoundText = (
+  count: number,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string =>
+  t(locale, "memes.quickVote.leftThisRound", {
+    count: formatInteger(locale, count),
+  });
 
-export const formatMemesQuickVoteUnratedText = (count: number): string =>
-  `${formatNumberWithCommas(count)} unrated`;
+export const formatMemesQuickVoteUnratedText = (
+  count: number,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string =>
+  t(locale, "memes.quickVote.unrated", {
+    count: formatInteger(locale, count),
+  });
 
 export const getDefaultQuickVoteAmount = (maxRating: number): number => {
   const normalizedMaxRating = Math.max(1, Math.floor(maxRating));

@@ -11,6 +11,8 @@ import React, {
 } from "react";
 import {
   getActiveWaveIdFromUrl,
+  MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
+  MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
   getNotificationsRoute,
   usesReverseMobileBottomNavigationScroll,
@@ -337,7 +339,10 @@ const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => (
   <nav aria-hidden="true" className={getNavClassName({ hidden })}>
-    <div className={getDockClassName(false)}>
+    <div
+      {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
+      className={getDockClassName(false)}
+    >
       <div className={floatingNavInnerClassName}>
         <ul className={getFloatingNavListClassName(false)} />
       </div>
@@ -430,7 +435,10 @@ const BottomNavigationResolvedContent: React.FC<
       className={getNavClassName({ hidden })}
       inert={hidden}
     >
-      <div className={getDockClassName(compact)}>
+      <div
+        {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
+        className={getDockClassName(compact)}
+      >
         <div className={floatingNavInnerClassName}>
           <div
             aria-hidden="true"
@@ -488,9 +496,14 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => (
-  <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
-    <BottomNavigationContent hidden={hidden} />
-  </Suspense>
+  <div
+    {...{ [MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE]: "true" }}
+    className="tw-contents"
+  >
+    <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
+      <BottomNavigationContent hidden={hidden} />
+    </Suspense>
+  </div>
 );
 
 export default BottomNavigation;

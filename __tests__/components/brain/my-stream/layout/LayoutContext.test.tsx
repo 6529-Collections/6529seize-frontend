@@ -112,7 +112,7 @@ describe("LayoutProvider", () => {
     expect(content.style.height).toContain("100px");
   });
 
-  it("applies 128px capSpace on Android when keyboard is closed", () => {
+  it("does not apply fallback capSpace on Android when keyboard is closed", () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: true };
     mockKeyboardValues = { isVisible: false, keyboardHeight: 0 };
 
@@ -126,11 +126,11 @@ describe("LayoutProvider", () => {
       </LayoutProvider>
     );
     const content = screen.getByTestId("content");
-    // Should include 128px capSpace
-    expect(content.style.height).toContain("128px");
+    expect(content.style.height).not.toContain("- 128px");
+    expect(content.style.height).not.toContain("128px");
   });
 
-  it("removes capSpace on Android when keyboard is open", () => {
+  it("does not apply fallback capSpace on Android when keyboard is open", () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: true };
     mockKeyboardValues = { isVisible: true, keyboardHeight: 350 };
 
@@ -144,7 +144,6 @@ describe("LayoutProvider", () => {
       </LayoutProvider>
     );
     const content = screen.getByTestId("content");
-    // Should NOT include 128px capSpace when keyboard is open (capSpace = 0)
     expect(content.style.height).not.toContain("- 128px");
     expect(content.style.height).not.toContain("128px");
   });

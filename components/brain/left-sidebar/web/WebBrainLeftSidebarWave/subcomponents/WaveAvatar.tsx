@@ -10,7 +10,7 @@ interface WaveAvatarProps {
   readonly showNewDropsBadge: boolean;
   readonly showUnreadDropsBadge?: boolean | undefined;
   readonly wave: MinimalWave;
-  readonly size?: "default" | "sm" | undefined;
+  readonly size?: "default" | "sm" | "lg" | undefined;
 }
 
 const DropIcon = ({ className }: { readonly className: string }) => (
@@ -53,6 +53,24 @@ const getDropBadgePlacementClasses = ({
     : "tw-bottom-[-2px] tw-right-[-2px]";
 };
 
+const getAvatarSizeClasses = ({
+  isLarge,
+  isSmall,
+}: {
+  readonly isLarge: boolean;
+  readonly isSmall: boolean;
+}) => {
+  if (isSmall) {
+    return "tw-size-7";
+  }
+
+  if (isLarge) {
+    return "tw-size-11";
+  }
+
+  return "tw-size-8";
+};
+
 export const WaveAvatar = ({
   dropBadgePlacement = "bottom-right",
   isActive,
@@ -70,7 +88,8 @@ export const WaveAvatar = ({
   const displayCount =
     rawCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : rawCount;
   const isSmall = size === "sm";
-  const avatarSizeClasses = isSmall ? "tw-size-7" : "tw-size-8";
+  const isLarge = size === "lg";
+  const avatarSizeClasses = getAvatarSizeClasses({ isLarge, isSmall });
   const activeRingClasses = isSmall
     ? "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
     : "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-2 tw-ring-offset-iron-950";
@@ -78,7 +97,10 @@ export const WaveAvatar = ({
     isSmall,
     placement: dropBadgePlacement,
   });
-  const dropBadgeClasses = `tw-absolute ${dropBadgePlacementClasses} tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg`;
+  const dropBadgeClasses = `tw-absolute ${dropBadgePlacementClasses} tw-flex ${isLarge ? "tw-size-4" : "tw-size-3.5"} tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg`;
+  const dropIconClasses = isLarge
+    ? "tw-size-3 tw-flex-shrink-0 tw-text-[#E8D48A]"
+    : DROP_ICON_CLASSES;
 
   return (
     <div
@@ -95,7 +117,7 @@ export const WaveAvatar = ({
       />
       {isDropWave && (
         <div className={dropBadgeClasses}>
-          <DropIcon className={DROP_ICON_CLASSES} />
+          <DropIcon className={dropIconClasses} />
         </div>
       )}
       {showBadge && <div className={UNREAD_BADGE_CLASSES}>{displayCount}</div>}

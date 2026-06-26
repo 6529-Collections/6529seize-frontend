@@ -13,6 +13,7 @@ import {
   THE_MEMES_DETAIL_TIMELINE_MESSAGES,
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
+import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
 type MessageEntry = readonly [key: string, value: string];
@@ -251,6 +252,29 @@ const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
   eyebrow: "Yes, again!",
 } as const);
 
+const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
+  leftThisRound: "{count} left this round",
+  unrated: "{count} unrated",
+  summary: "{leftThisRound}, {unrated}",
+  inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
+} as const);
+
+const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
+  "quickVote.label": "Quick vote",
+  "quickVote.open": "Open quick vote",
+  "uncastPower.ariaLabel":
+    "Uncast Power, {power} {votingLabel} left, {leftThisRound}, {unrated}",
+  "uncastPower.title": "Uncast Power",
+  "uncastPower.visibleValue": "{power} {votingLabel}",
+  "uncastPower.votes": "Votes",
+  "uncastPower.votesVisible": "votes",
+} as const);
+
+const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
+  "profileFeed.title": "Profile Waves Feed",
+  "profileFeed.subtitle": "Featured drops from profile waves",
+} as const);
+
 const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.walletActivity",
   {
@@ -342,8 +366,7 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   highlyRated: "Worth Checking Out",
   highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
   "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
-  "highlyRatedPreviewOpenAriaLabel.withScore":
-    "Open {waveName}, score {score}",
+  "highlyRatedPreviewOpenAriaLabel.withScore": "Open {waveName}, score {score}",
   highlyRatedPreviewScore: "Score {score}",
   pinned: "Pinned",
   allWaves: "All Waves",
@@ -1164,6 +1187,7 @@ export const EN_US_MESSAGES = {
   "drop.media.retry": "Retry",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  ...QR_SCANNER_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
@@ -1186,6 +1210,9 @@ export const EN_US_MESSAGES = {
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
+  ...MEMES_QUICK_VOTE_MESSAGES,
+  ...MEMES_WAVE_FOOTER_MESSAGES,
+  ...WAVES_MOBILE_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;
