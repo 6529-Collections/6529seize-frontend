@@ -24,6 +24,12 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
+import {
+  HELP_BOT_CREDIT_REP_CATEGORY,
+  isHelpBotCreditRepCategory,
+} from "@/components/utils/input/rep-category/repCategoryConstants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const SEARCH_LENGTH = {
   MIN: 3,
@@ -57,9 +63,15 @@ export default function UserPageRepNewRepSearch({
   readonly onSuccess?: (() => void) | undefined;
   readonly onCancel?: (() => void) | undefined;
 }) {
+  const locale = useBrowserLocale();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const helpBotCreditRepCategoryError = t(
+    locale,
+    "rep.categories.helpBotReserved.error",
+    { category: HELP_BOT_CREDIT_REP_CATEGORY }
+  );
 
   const [repSearch, setRepSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -67,12 +79,14 @@ export default function UserPageRepNewRepSearch({
   const [mutating, setMutating] = useState<boolean>(false);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showErrorDetails, setShowErrorDetails] = useState<boolean>(true);
 
   const [debouncedValue, setDebouncedValue] = useState<string>("");
   useDebounce(
     () => {
       setDebouncedValue(repSearch);
       setErrorMsg(null);
+      setShowErrorDetails(true);
     },
     500,
     [repSearch]
@@ -123,9 +137,18 @@ export default function UserPageRepNewRepSearch({
 
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
+  const showHelpBotCreditRepCategoryError = () => {
+    setErrorMsg(helpBotCreditRepCategoryError);
+    setShowErrorDetails(false);
+  };
+
   const onRepSelect = async (rep: string) => {
     if (rep.length < SEARCH_LENGTH.MIN || rep.length > SEARCH_LENGTH.MAX)
       return;
+    if (isHelpBotCreditRepCategory(rep)) {
+      showHelpBotCreditRepCategoryError();
+      return;
+    }
     if (checkingAvailability) return;
     setCheckingAvailability(true);
     try {
@@ -138,9 +161,11 @@ export default function UserPageRepNewRepSearch({
       setSelectedCategory(rep);
       setRepSearch(rep);
       setErrorMsg(null);
+      setShowErrorDetails(true);
       setIsOpen(false);
     } catch (error: unknown) {
       setErrorMsg(getErrorMessage(error));
+      setShowErrorDetails(true);
     } finally {
       setCheckingAvailability(false);
     }
@@ -183,6 +208,10 @@ export default function UserPageRepNewRepSearch({
 
   const onGrantRep = async () => {
     if (mutating || !selectedCategory || !amountStr || !profile.query) return;
+    if (isHelpBotCreditRepCategory(selectedCategory)) {
+      showHelpBotCreditRepCategoryError();
+      return;
+    }
     const amount = Number.parseInt(amountStr, 10);
     if (Number.isNaN(amount)) return;
     if (!haveChanged) return;
@@ -208,10 +237,16 @@ export default function UserPageRepNewRepSearch({
   const categoriesToDisplay = useMemo(() => {
     const items: string[] = [];
     if (matchingSearchLength) {
-      items.push(debouncedValue);
+      if (!isHelpBotCreditRepCategory(debouncedValue)) {
+        items.push(debouncedValue);
+      }
     }
     if ((categories?.length ?? 0) > 0) {
-      items.push(...categories!.filter((c) => c !== debouncedValue));
+      items.push(
+        ...categories!.filter(
+          (c) => c !== debouncedValue && !isHelpBotCreditRepCategory(c)
+        )
+      );
     }
     return items;
   }, [debouncedValue, categories, matchingSearchLength]);
@@ -386,7 +421,11 @@ export default function UserPageRepNewRepSearch({
           {!!errorMsg && (
             <UserPageRepNewRepError
               msg={errorMsg}
-              closeError={() => setErrorMsg(null)}
+              showDetails={showErrorDetails}
+              closeError={() => {
+                setErrorMsg(null);
+                setShowErrorDetails(true);
+              }}
             />
           )}
         </AnimatePresence>

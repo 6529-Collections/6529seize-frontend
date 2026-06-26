@@ -439,7 +439,9 @@ export function useMyStreamWaveMessages(
       // Update local state only if data actually differs
       // Use a proper comparison if needed (e.g., deep compare for complex objects)
       setData((currentData: WaveMessages | undefined) => {
-        if (JSON.stringify(currentData) !== JSON.stringify(newData)) {
+        const didChange = JSON.stringify(currentData) !== JSON.stringify(newData);
+
+        if (didChange) {
           return newData;
         }
         return currentData;
@@ -459,7 +461,8 @@ export function useMyStreamWaveMessages(
   // Re-initialize state if the key changes and getData is available
   // This handles cases where the component using the hook changes the key it's interested in.
   useEffect(() => {
-    setData(waveId ? getData(waveId) : undefined);
+    const nextData = waveId ? getData(waveId) : undefined;
+    setData(nextData);
   }, [waveId, getData]);
 
   return data;

@@ -11,6 +11,25 @@ test('shows message and triggers close', async () => {
   const close = jest.fn();
   render(<UserPageRepNewRepError msg="oops" closeError={close} />);
   expect(screen.getByText('oops')).toBeInTheDocument();
+  expect(screen.getByText(/Rep is not meant for insults/)).toBeInTheDocument();
   await user.click(screen.getByTestId('wrapper'));
   expect(close).toHaveBeenCalled();
+});
+
+test('can hide the abuse-filter details for reserved categories', () => {
+  const close = jest.fn();
+  render(
+    <UserPageRepNewRepError
+      msg="Help6529 Credits is managed by help6529."
+      showDetails={false}
+      closeError={close}
+    />
+  );
+
+  expect(
+    screen.getByText('Help6529 Credits is managed by help6529.')
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText(/Rep is not meant for insults/)
+  ).not.toBeInTheDocument();
 });

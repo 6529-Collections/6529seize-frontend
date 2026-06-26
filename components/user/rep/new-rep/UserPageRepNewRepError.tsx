@@ -2,9 +2,11 @@ import UserPageErrorWrapper from "@/components/user/utils/UserPageErrorWrapper";
 
 export default function UserPageRepNewRepError({
   msg,
+  showDetails = true,
   closeError,
 }: {
   readonly msg: string;
+  readonly showDetails?: boolean;
   readonly closeError: () => void;
 }) {
   return (
@@ -14,7 +16,7 @@ export default function UserPageRepNewRepError({
           <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-red">
             {msg}
           </h3>
-          <div>
+          {showDetails && (
             <p className="tw-text-justify tw-mt-2 tw-mb-0 tw-text-sm tw-text-iron-300 tw-font-normal">
               Rep is not meant for insults or doxxing so we run proposed rep
               categories through an AI filter. If you think the filter got your
@@ -22,7 +24,7 @@ export default function UserPageRepNewRepError({
               know. In the meantime, perhaps you can rephrase that you are
               trying to say.
             </p>
-          </div>
+          )}
         </div>
       </div>
     </UserPageErrorWrapper>
