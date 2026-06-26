@@ -22,6 +22,11 @@ import { WsMessageType } from "@/helpers/Types";
 import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
+import {
+  getHelpBotRealtimeDebugSummary,
+  isHelpBotRealtimeDebugDrop,
+  logHelpBotRealtimeDebug,
+} from "@/utils/helpBotRealtimeDebug";
 
 const DEFAULT_WAVE_DROPS_LIMIT = 20;
 
@@ -175,7 +180,21 @@ export function useWaveDrops({
     WsMessageType.DROP_UPDATE,
     useCallback(
       (message) => {
+        if (isHelpBotRealtimeDebugDrop(message)) {
+          logHelpBotRealtimeDebug("useWaveDrops DROP_UPDATE received", {
+            ...getHelpBotRealtimeDebugSummary(message),
+            hookWaveId: waveId,
+            matchesWave: waveId === message.wave.id,
+          });
+        }
+
         if (waveId !== message.wave.id) {
+          if (isHelpBotRealtimeDebugDrop(message)) {
+            logHelpBotRealtimeDebug("useWaveDrops skipped wave mismatch", {
+              ...getHelpBotRealtimeDebugSummary(message),
+              hookWaveId: waveId,
+            });
+          }
           return;
         }
 
@@ -184,6 +203,12 @@ export function useWaveDrops({
           preferExistingPollVote: true,
         });
         requestRefetch();
+        if (isHelpBotRealtimeDebugDrop(message)) {
+          logHelpBotRealtimeDebug("useWaveDrops requested refetch", {
+            ...getHelpBotRealtimeDebugSummary(message),
+            hookWaveId: waveId,
+          });
+        }
       },
       [queryClient, requestRefetch, waveId]
     )

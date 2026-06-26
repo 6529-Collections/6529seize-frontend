@@ -33,6 +33,11 @@ import {
   fetchDropRepliesV2,
   type ApiWaveDropsV2PageFeed,
 } from "@/services/api/wave-drops-v2-api";
+import {
+  getHelpBotRealtimeDebugSummary,
+  isHelpBotRealtimeDebugDrop,
+  logHelpBotRealtimeDebug,
+} from "@/utils/helpBotRealtimeDebug";
 
 export function useDropMessages(
   waveId: string,
@@ -127,10 +132,34 @@ export function useDropMessages(
     WsMessageType.DROP_UPDATE,
     useCallback(
       (message) => {
+        if (isHelpBotRealtimeDebugDrop(message)) {
+          logHelpBotRealtimeDebug("useDropMessages DROP_UPDATE received", {
+            ...getHelpBotRealtimeDebugSummary(message),
+            hookDropId: dropId,
+            hookWaveId: waveId,
+            matchesWave: waveId === message.wave.id,
+          });
+        }
+
         // Skip if no dropId
-        if (!dropId) return;
+        if (!dropId) {
+          if (isHelpBotRealtimeDebugDrop(message)) {
+            logHelpBotRealtimeDebug("useDropMessages skipped no dropId", {
+              ...getHelpBotRealtimeDebugSummary(message),
+              hookWaveId: waveId,
+            });
+          }
+          return;
+        }
 
         if (waveId !== message.wave.id) {
+          if (isHelpBotRealtimeDebugDrop(message)) {
+            logHelpBotRealtimeDebug("useDropMessages skipped wave mismatch", {
+              ...getHelpBotRealtimeDebugSummary(message),
+              hookDropId: dropId,
+              hookWaveId: waveId,
+            });
+          }
           return;
         }
 
@@ -139,6 +168,13 @@ export function useDropMessages(
           preferExistingPollVote: true,
         });
         requestRefetch();
+        if (isHelpBotRealtimeDebugDrop(message)) {
+          logHelpBotRealtimeDebug("useDropMessages requested refetch", {
+            ...getHelpBotRealtimeDebugSummary(message),
+            hookDropId: dropId,
+            hookWaveId: waveId,
+          });
+        }
       },
       [dropId, queryClient, requestRefetch, waveId]
     )

@@ -2,6 +2,11 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  getHelpBotRealtimeDebugSummary,
+  isHelpBotRealtimeDebugDrop,
+  logHelpBotRealtimeDebug,
+} from "@/utils/helpBotRealtimeDebug";
 
 type DropsQueryData = {
   pages?: ApiWaveDropsFeed[] | undefined;
@@ -175,23 +180,72 @@ function upsertDropInQueryData(
   return { ...oldData, pages };
 }
 
+function getUpsertDebugState(
+  oldData: DropsInfiniteData | undefined,
+  drop: ApiDrop
+) {
+  const pages = oldData?.pages ?? [];
+  const existingPageIndex = pages.findIndex((page) =>
+    page.drops?.some((cachedDrop) => cachedDrop.id === drop.id)
+  );
+
+  return {
+    existingPageIndex,
+    firstPageDropCount: pages[0]?.drops?.length ?? null,
+    pageCount: pages.length,
+    upsertAction:
+      pages.length === 0
+        ? "skipped-no-pages"
+        : existingPageIndex === -1
+          ? "insert-first-page"
+          : "replace-existing",
+  };
+}
+
 export function upsertDropIntoMatchingDropsQueries(
   queryClient: QueryClient,
   { drop }: { readonly drop: ApiDrop }
 ): void {
+  const debugHelpBotDrop = isHelpBotRealtimeDebugDrop(drop);
   const queries = queryClient
     .getQueryCache()
     .findAll({ queryKey: [QueryKey.DROPS] });
 
+  if (debugHelpBotDrop) {
+    logHelpBotRealtimeDebug("cache upsert scan", {
+      ...getHelpBotRealtimeDebugSummary(drop),
+      dropsQueryCount: queries.length,
+    });
+  }
+
   for (const query of queries) {
     const params = readDropsQueryParams(query.queryKey);
-    if (!params || !isMatchingDropsQuery(params, drop)) {
+    const matches = params ? isMatchingDropsQuery(params, drop) : false;
+
+    if (debugHelpBotDrop) {
+      logHelpBotRealtimeDebug("cache upsert candidate", {
+        ...getHelpBotRealtimeDebugSummary(drop),
+        matches,
+        params,
+      });
+    }
+
+    if (!params || !matches) {
       continue;
     }
 
     queryClient.setQueryData<DropsInfiniteData | undefined>(
       query.queryKey,
-      (oldData) => upsertDropInQueryData(oldData, drop),
+      (oldData) => {
+        if (debugHelpBotDrop) {
+          logHelpBotRealtimeDebug("cache upsert applying", {
+            ...getHelpBotRealtimeDebugSummary(drop),
+            ...getUpsertDebugState(oldData, drop),
+            params,
+          });
+        }
+        return upsertDropInQueryData(oldData, drop);
+      },
       { updatedAt: Date.now() }
     );
   }
