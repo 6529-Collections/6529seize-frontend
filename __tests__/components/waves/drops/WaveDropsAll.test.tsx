@@ -629,6 +629,37 @@ describe("WaveDropsAll", () => {
       expect(mockScrollToVisualBottom).toHaveBeenCalled();
     });
 
+    it("scrolls to bottom for incoming real drops when shouldPinToBottom is true", () => {
+      const existingDrop = createMockDrop({ id: "drop-1", serial_no: 1 });
+      const incomingDrop = createMockDrop({ id: "drop-2", serial_no: 2 });
+
+      const { setWaveMessages } = setupMocks({
+        waveMessages: { drops: [existingDrop] },
+        scrollBehavior: { shouldPinToBottom: true },
+      });
+
+      const { rerender, props } = renderComponent();
+
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+      mockScrollToVisualBottom.mockClear();
+
+      setWaveMessages({
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: false,
+        drops: [incomingDrop, existingDrop],
+      });
+      rerender(<WaveDropsAll {...props} />);
+
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+
+      expect(mockScrollToVisualBottom).toHaveBeenCalled();
+    });
+
     it("does not scroll to bottom for temp drops when user is reading", () => {
       const tempDrop = createMockDrop({ id: "temp-123", serial_no: 1 });
 

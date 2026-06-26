@@ -179,6 +179,7 @@ export const useWaveDropsSerialScroll = ({
   const latestRenderedWaveMessagesRef = useRef(renderedWaveMessages);
   const smallestSerialNo = useRef<number | null>(null);
   const lastScrolledToSerialRef = useRef<number | null>(null);
+  const lastAutoPinnedNewestDropKeyRef = useRef<string | null>(null);
   const [init, setInit] = useState(false);
 
   const queueSerialTarget = useCallback((serialNo: number) => {
@@ -267,12 +268,25 @@ export const useWaveDropsSerialScroll = ({
   useEffect(() => {
     const currentMessages = latestWaveMessagesRef.current;
     if (currentMessages && currentMessages.drops.length > 0) {
+      const newestDrop = currentMessages.drops[0];
+      const newestDropKey = newestDrop
+        ? `${newestDrop.id}:${newestDrop.serial_no}`
+        : null;
+      const previousNewestDropKey = lastAutoPinnedNewestDropKeyRef.current;
+
       if (!init) {
         setInit(true);
       }
 
-      const lastDrop = currentMessages.drops[0];
-      if (lastDrop?.id.startsWith("temp-") && shouldPinToBottom) {
+      const shouldAutoPinNewestDrop =
+        shouldPinToBottom &&
+        newestDropKey !== null &&
+        newestDropKey !== previousNewestDropKey &&
+        (init || previousNewestDropKey !== null || newestDrop?.id.startsWith("temp-"));
+
+      lastAutoPinnedNewestDropKeyRef.current = newestDropKey;
+
+      if (shouldAutoPinNewestDrop) {
         setTimeout(() => {
           scrollToVisualBottom();
         }, 100);
