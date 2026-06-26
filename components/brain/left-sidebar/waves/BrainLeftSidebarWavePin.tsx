@@ -84,17 +84,17 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   useEffect(() => {
     const checkTouch = () => {
       const hasCoarsePointer =
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(pointer: coarse)").matches;
+        typeof globalThis.matchMedia === "function" &&
+        globalThis.matchMedia("(pointer: coarse)").matches;
 
       setIsTouchDevice((navigator.maxTouchPoints ?? 0) > 0 || hasCoarsePointer);
     };
 
     checkTouch();
-    window.addEventListener("resize", checkTouch);
+    globalThis.addEventListener("resize", checkTouch);
 
     return () => {
-      window.removeEventListener("resize", checkTouch);
+      globalThis.removeEventListener("resize", checkTouch);
     };
   }, []);
 
@@ -149,11 +149,14 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
   const opacityClass = getOpacityClass();
 
-  // Ensure tooltip is updated immediately by always checking the current state
+  // Only show max-limit guidance for the keyed request window after a failed pin.
   const getTooltipContent = () => {
     if (isPinned) return "Unpin";
     if (canPinCurrentWave) return "Pin";
-    return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+    if (showMaxLimitTooltip) {
+      return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+    }
+    return null;
   };
   const tooltipContent = getTooltipContent();
 

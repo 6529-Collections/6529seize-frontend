@@ -161,7 +161,11 @@ describe("BrainLeftSidebarWavePin", () => {
     const user = userEvent.setup();
     const maxList = Array(MAX_PINNED_WAVES).fill("x");
     setup(false, maxList, () => false);
-    await user.click(screen.getByRole("button", { name: /pin wave/i }));
+    const button = screen.getByRole("button", { name: /pin wave/i });
+
+    expect(button).not.toHaveAttribute("data-tooltip-content");
+
+    await user.click(button);
     expect(addPinnedWave).not.toHaveBeenCalled();
     expect(setToast).toHaveBeenCalledWith({
       type: "error",
