@@ -25,9 +25,11 @@ import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjus
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import {
-  HELP_BOT_CREDIT_REP_CATEGORY_ERROR,
+  HELP_BOT_CREDIT_REP_CATEGORY,
   isHelpBotCreditRepCategory,
 } from "@/components/utils/input/rep-category/repCategoryConstants";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 const SEARCH_LENGTH = {
   MIN: 3,
@@ -49,6 +51,12 @@ const getErrorMessage = (error: unknown): string => {
   }
   return "Couldn't complete this request. Please try again.";
 };
+
+const HELP_BOT_CREDIT_REP_CATEGORY_ERROR = t(
+  DEFAULT_LOCALE,
+  "rep.categories.helpBotReserved.error",
+  { category: HELP_BOT_CREDIT_REP_CATEGORY }
+);
 
 export default function UserPageRepNewRepSearch({
   overview,

@@ -170,6 +170,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.label": "Search REP categories",
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
+  "helpBotReserved.error": "{category} is managed by help6529.",
   "suggested.loading": "Loading active REP categories",
   "suggested.error": "Could not load active REP categories.",
   "suggested.empty": "No active REP categories found yet.",
