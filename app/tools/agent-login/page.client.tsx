@@ -222,13 +222,13 @@ function getCookieExpiresAttribute(expiresAt: string | null): string {
 }
 
 function getSecureCookieAttribute(): string {
-  return window.location.protocol === "https:" ? "; Secure" : "";
+  return globalThis.location.protocol === "https:" ? "; Secure" : "";
 }
 
 function dispatchAuthEvents(): void {
-  window.dispatchEvent(new CustomEvent(WALLET_ACCOUNTS_UPDATED_EVENT));
-  window.dispatchEvent(new CustomEvent(AUTH_TOKEN_CHANGED_EVENT));
-  window.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+  globalThis.dispatchEvent(new CustomEvent(WALLET_ACCOUNTS_UPDATED_EVENT));
+  globalThis.dispatchEvent(new CustomEvent(AUTH_TOKEN_CHANGED_EVENT));
+  globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
 }
 
 function applyLoginPayload(payload: AgentLoginPayload): void {
@@ -340,8 +340,8 @@ function getCurrentAuthStatus(): Status {
 }
 
 function redirectHomeSoon(): void {
-  window.setTimeout(() => {
-    window.location.assign("/");
+  globalThis.setTimeout(() => {
+    globalThis.location.assign("/");
   }, 250);
 }
 
@@ -351,7 +351,7 @@ export default function AgentLoginClient() {
     kind: "idle",
     message: "",
   });
-  const canApply = rawPayload.trim().length > 0;
+  const isApplyDisabled = rawPayload.trim().length === 0;
 
   useEffect(() => {
     setStatus(getCurrentAuthStatus());
@@ -416,10 +416,10 @@ export default function AgentLoginClient() {
           <div style={styles.actions}>
             <button
               type="submit"
-              disabled={!canApply}
+              disabled={isApplyDisabled}
               style={{
                 ...styles.button,
-                ...(!canApply ? styles.disabledButton : undefined),
+                ...(isApplyDisabled ? styles.disabledButton : undefined),
               }}>
               Apply
             </button>
