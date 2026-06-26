@@ -127,9 +127,6 @@ const MediaDisplayVideo: React.FC<Props> = ({
         onOpen={showControls ? openMedia : undefined}
         openLabel={showControls ? openLabel : undefined}
         isDownloading={isDownloading}
-        onVideoClick={(event) => {
-          event.preventDefault();
-        }}
       />
     </div>
   );

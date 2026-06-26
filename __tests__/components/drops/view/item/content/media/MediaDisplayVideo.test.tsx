@@ -122,20 +122,26 @@ describe("MediaDisplayVideo", () => {
     );
   });
 
-  it("does not add playback toggles from ambient video clicks", async () => {
+  it("pauses ambient video clicks without starting paused videos", async () => {
     const user = userEvent.setup();
     const { container } = render(<MediaDisplayVideo src="foo.mp4" />);
     const video = container.querySelector("video") as HTMLVideoElement;
-    Object.defineProperty(video, "paused", { writable: true, value: true });
+    let paused = false;
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => paused,
+    });
 
     const playCallsBeforeClick = playMock.mock.calls.length;
     const pauseCallsBeforeClick = pauseMock.mock.calls.length;
 
     await user.click(video);
     expect(playMock).toHaveBeenCalledTimes(playCallsBeforeClick);
+    expect(pauseMock).toHaveBeenCalledTimes(pauseCallsBeforeClick + 1);
 
-    (video as any).paused = false;
+    paused = true;
     await user.click(video);
-    expect(pauseMock).toHaveBeenCalledTimes(pauseCallsBeforeClick);
+    expect(playMock).toHaveBeenCalledTimes(playCallsBeforeClick);
+    expect(pauseMock).toHaveBeenCalledTimes(pauseCallsBeforeClick + 1);
   });
 });
