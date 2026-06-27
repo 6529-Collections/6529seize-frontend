@@ -198,7 +198,19 @@ function redactSecretText(value) {
       "[redacted-jwt]"
     )
     .replace(
-      /(access[_-]?token|refresh[_-]?token|jwt|private[_-]?key|client[_-]?signature|server[_-]?signature|authorization)(["']?\s*[:=]\s*["']?)[^"',\s}]+/gi,
+      /(access[_-]?token|refresh[_-]?token)(["']?\s*[:=]\s*["']?)[^"',\s}]+/gi,
+      "$1$2[redacted]"
+    )
+    .replace(
+      /(jwt|authorization)(["']?\s*[:=]\s*["']?)[^"',\s}]+/gi,
+      "$1$2[redacted]"
+    )
+    .replace(
+      /(private[_-]?key)(["']?\s*[:=]\s*["']?)[^"',\s}]+/gi,
+      "$1$2[redacted]"
+    )
+    .replace(
+      /((?:client|server)[_-]?signature)(["']?\s*[:=]\s*["']?)[^"',\s}]+/gi,
       "$1$2[redacted]"
     );
 }
