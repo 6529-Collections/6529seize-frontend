@@ -115,7 +115,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   // Get unread notifications using the dedicated hook
   const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.handle ?? null,
+    hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
     { enabled: hasValidWalletAuth }
   );
 

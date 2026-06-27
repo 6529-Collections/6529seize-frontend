@@ -47,7 +47,7 @@ function WebSidebar({
     initialProfile: null,
   });
   const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.handle ?? null,
+    hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
     { enabled: hasValidWalletAuth }
   );
   const profilePath = useMemo(() => {

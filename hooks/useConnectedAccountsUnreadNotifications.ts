@@ -3,15 +3,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import {
-  getAuthAwareQueryRetry,
-  isUnauthorizedQueryError,
-} from "@/components/react-query-wrapper/utils/query-utils";
+import { isUnauthorizedQueryError } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import {
   isAuthJwtUsable,
   type ConnectedWalletAccount,
 } from "@/services/auth/auth.utils";
+import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { commonApiFetch } from "@/services/api/common-api";
 import useCapacitor from "./useCapacitor";
 
@@ -21,12 +19,64 @@ const POLL_INTERVAL_MS = 15000;
 
 const toAddressKey = (address: string): string => address.toLowerCase();
 
-const getTokenFingerprint = (jwt: string): string => {
-  let hash = 0;
-  for (let index = 0; index < jwt.length; index += 1) {
-    hash = (hash * 31 + jwt.charCodeAt(index)) >>> 0;
+type UnauthorizedConnectedAccountFailure = {
+  readonly addressKey: string;
+  readonly jwtFingerprint: string;
+};
+
+type ConnectedAccountAuthPollingError = Error & {
+  readonly status: 401;
+  readonly unauthorizedFailures: readonly UnauthorizedConnectedAccountFailure[];
+  readonly cause?: unknown;
+};
+
+const createConnectedAccountAuthPollingError = (
+  unauthorizedFailures: readonly UnauthorizedConnectedAccountFailure[],
+  cause?: unknown
+): ConnectedAccountAuthPollingError => {
+  const error = new Error(
+    "Connected account unread notification polling requires valid auth"
+  ) as ConnectedAccountAuthPollingError;
+  Object.defineProperty(error, "status", {
+    value: 401,
+    enumerable: true,
+  });
+  Object.defineProperty(error, "unauthorizedFailures", {
+    value: unauthorizedFailures,
+    enumerable: true,
+  });
+  if (cause !== undefined) {
+    Object.defineProperty(error, "cause", {
+      value: cause,
+      enumerable: false,
+    });
   }
-  return `${jwt.length}:${hash.toString(36)}`;
+  return error;
+};
+
+const getUnauthorizedFailuresFromError = (
+  error: unknown
+): readonly UnauthorizedConnectedAccountFailure[] => {
+  if (!isUnauthorizedQueryError(error)) {
+    return [];
+  }
+  if (typeof error !== "object" || error === null) {
+    return [];
+  }
+
+  const failures = (error as { readonly unauthorizedFailures?: unknown })
+    .unauthorizedFailures;
+  return Array.isArray(failures)
+    ? failures.filter(
+        (failure): failure is UnauthorizedConnectedAccountFailure =>
+          typeof failure === "object" &&
+          failure !== null &&
+          typeof (failure as UnauthorizedConnectedAccountFailure).addressKey ===
+            "string" &&
+          typeof (failure as UnauthorizedConnectedAccountFailure)
+            .jwtFingerprint === "string"
+      )
+    : [];
 };
 
 const clampUnreadCount = (count: number | null | undefined): number => {
@@ -42,15 +92,34 @@ const fetchUnreadCountForAccount = async (
   if (!account.jwt) {
     return 0;
   }
+  const addressKey = toAddressKey(account.address);
+  const jwtFingerprint = getAuthTokenFingerprint(account.jwt);
 
-  const notifications = await commonApiFetch<ApiNotificationsResponseV2>({
-    endpoint: "v2/notifications",
-    params: { limit: "1" },
-    headers: {
-      Authorization: `Bearer ${account.jwt}`,
-    },
-  });
-  return clampUnreadCount(notifications.unread_count);
+  if (!isAuthJwtUsable(account.jwt)) {
+    throw createConnectedAccountAuthPollingError([
+      { addressKey, jwtFingerprint },
+    ]);
+  }
+
+  try {
+    const notifications = await commonApiFetch<ApiNotificationsResponseV2>({
+      endpoint: "v2/notifications",
+      params: { limit: "1" },
+      headers: {
+        Authorization: `Bearer ${account.jwt}`,
+      },
+      errorMode: "structured",
+    });
+    return clampUnreadCount(notifications.unread_count);
+  } catch (error) {
+    if (isUnauthorizedQueryError(error)) {
+      throw createConnectedAccountAuthPollingError(
+        [{ addressKey, jwtFingerprint }],
+        error
+      );
+    }
+    throw error;
+  }
 };
 
 export function useConnectedAccountsUnreadNotifications(
@@ -74,7 +143,7 @@ export function useConnectedAccountsUnreadNotifications(
 
         return (
           unauthorizedJwtFingerprintByAddress[toAddressKey(account.address)] !==
-          getTokenFingerprint(jwt)
+          getAuthTokenFingerprint(jwt)
         );
       }),
     [accounts, unauthorizedJwtFingerprintByAddress]
@@ -101,7 +170,7 @@ export function useConnectedAccountsUnreadNotifications(
       const nextCounts: Record<string, number> = {};
       const unauthorizedFailures: {
         readonly addressKey: string;
-        readonly jwt: string;
+        readonly jwtFingerprint: string;
         readonly error: unknown;
       }[] = [];
 
@@ -123,9 +192,21 @@ export function useConnectedAccountsUnreadNotifications(
         }
 
         if (account.jwt && isUnauthorizedQueryError(result.reason)) {
+          const nestedUnauthorizedFailures =
+            getUnauthorizedFailuresFromError(result.reason);
+          if (nestedUnauthorizedFailures.length > 0) {
+            nestedUnauthorizedFailures.forEach((failure) => {
+              unauthorizedFailures.push({
+                ...failure,
+                error: result.reason,
+              });
+            });
+            return;
+          }
+
           unauthorizedFailures.push({
             addressKey,
-            jwt: getTokenFingerprint(account.jwt),
+            jwtFingerprint: getAuthTokenFingerprint(account.jwt),
             error: result.reason,
           });
           return;
@@ -139,14 +220,13 @@ export function useConnectedAccountsUnreadNotifications(
 
       const firstUnauthorizedFailure = unauthorizedFailures[0];
       if (firstUnauthorizedFailure) {
-        setUnauthorizedJwtFingerprintByAddress((previous) => {
-          const next = { ...previous };
-          for (const failure of unauthorizedFailures) {
-            next[failure.addressKey] = failure.jwt;
-          }
-          return next;
-        });
-        throw firstUnauthorizedFailure.error;
+        throw createConnectedAccountAuthPollingError(
+          unauthorizedFailures.map(({ addressKey, jwtFingerprint }) => ({
+            addressKey,
+            jwtFingerprint,
+          })),
+          firstUnauthorizedFailure.error
+        );
       }
 
       return nextCounts;
@@ -157,7 +237,31 @@ export function useConnectedAccountsUnreadNotifications(
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
-    ...getAuthAwareQueryRetry(),
+    retry: (failureCount: number, error: unknown) => {
+      const unauthorizedFailures = getUnauthorizedFailuresFromError(error);
+      if (unauthorizedFailures.length > 0) {
+        setUnauthorizedJwtFingerprintByAddress((previous) => {
+          let didChange = false;
+          const next = { ...previous };
+          for (const failure of unauthorizedFailures) {
+            if (next[failure.addressKey] !== failure.jwtFingerprint) {
+              next[failure.addressKey] = failure.jwtFingerprint;
+              didChange = true;
+            }
+          }
+          return didChange ? next : previous;
+        });
+        return false;
+      }
+      if (isUnauthorizedQueryError(error)) {
+        return false;
+      }
+
+      return failureCount < 3;
+    },
+    retryDelay: (failureCount: number) => {
+      return failureCount * 1000;
+    },
   });
 
   return data ?? {};

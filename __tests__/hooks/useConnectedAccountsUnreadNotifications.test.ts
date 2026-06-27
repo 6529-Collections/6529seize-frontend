@@ -134,4 +134,26 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
     await expect(queryOptions.queryFn()).rejects.toMatchObject({ status: 401 });
   });
+
+  it("blocks connected-account fetches when the JWT expires between renders", async () => {
+    isAuthJwtUsableMock.mockReturnValueOnce(true).mockReturnValueOnce(false);
+    useQueryMock.mockReturnValue({ data: {} });
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token",
+          role: null,
+          jwt: "jwt-token",
+          profileId: null,
+          profileHandle: "alice",
+        },
+      ])
+    );
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    await expect(queryOptions.queryFn()).rejects.toMatchObject({ status: 401 });
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
+  });
 });

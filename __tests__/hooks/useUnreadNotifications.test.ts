@@ -51,15 +51,19 @@ describe("useUnreadNotifications", () => {
   });
 
   it("does not start polling when caller disables the hook", () => {
-    useQueryMock.mockReturnValue({ data: undefined });
+    useQueryMock.mockReturnValue({ data: { unread_count: 2 } });
 
-    renderHook(() => useUnreadNotifications("bob", { enabled: false }));
+    const { result } = renderHook(() =>
+      useUnreadNotifications("bob", { enabled: false })
+    );
 
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: false,
       })
     );
+    expect(result.current.notifications).toBeUndefined();
+    expect(result.current.haveUnreadNotifications).toBe(false);
   });
 
   it("does not start polling when the active auth token is missing or expired", () => {
@@ -82,6 +86,7 @@ describe("useUnreadNotifications", () => {
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
     expect(queryOptions.retry(0, { status: 401 })).toBe(false);
+    expect(queryOptions.retry(0, new Error("temporary failure"))).toBe(true);
   });
 
   it("blocks polling before fetch when the token expires between renders", async () => {

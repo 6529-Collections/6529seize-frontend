@@ -193,7 +193,9 @@ const NavItemContent = ({
   });
   const { setTitle } = useTitle();
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
-    item.name === "Notifications" ? (connectedProfile?.handle ?? null) : null,
+    item.name === "Notifications" && hasValidWalletAuth
+      ? (connectedProfile?.handle ?? null)
+      : null,
     { enabled: hasValidWalletAuth }
   );
 

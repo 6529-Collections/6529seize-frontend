@@ -1,42 +1,60 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import { commonApiFetch } from "@/services/api/common-api";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import {
-  getAuthAwareQueryRetry,
-  isUnauthorizedQueryError,
-} from "@/components/react-query-wrapper/utils/query-utils";
+import { isUnauthorizedQueryError } from "@/components/react-query-wrapper/utils/query-utils";
 import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
+import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 
 interface UseUnreadNotificationsOptions {
   readonly enabled?: boolean | undefined;
 }
 
-const createMissingAuthError = (): Error & { readonly status: 401 } => {
-  const error = new Error("Unread notification polling requires valid auth") as
-    | Error
-    | (Error & { status: 401 });
+type AuthPollingError = Error & {
+  readonly status: 401;
+  readonly authPollingKey: string;
+  readonly cause?: unknown;
+};
+
+const createAuthPollingError = (
+  authPollingKey: string,
+  cause?: unknown
+): AuthPollingError => {
+  const error = new Error(
+    "Unread notification polling requires valid auth"
+  ) as AuthPollingError;
   Object.defineProperty(error, "status", {
     value: 401,
     enumerable: true,
   });
-  return error as Error & { readonly status: 401 };
+  Object.defineProperty(error, "authPollingKey", {
+    value: authPollingKey,
+    enumerable: true,
+  });
+  if (cause !== undefined) {
+    Object.defineProperty(error, "cause", {
+      value: cause,
+      enumerable: false,
+    });
+  }
+  return error;
 };
 
-const getTokenFingerprint = (jwt: string | null): string => {
-  if (!jwt) {
-    return "none";
+const getAuthPollingKeyFromError = (error: unknown): string | null => {
+  if (!isUnauthorizedQueryError(error)) {
+    return null;
+  }
+  if (typeof error !== "object" || error === null) {
+    return null;
   }
 
-  let hash = 0;
-  for (let index = 0; index < jwt.length; index += 1) {
-    hash = (hash * 31 + jwt.charCodeAt(index)) >>> 0;
-  }
-  return `${jwt.length}:${hash.toString(36)}`;
+  const authPollingKey = (error as { readonly authPollingKey?: unknown })
+    .authPollingKey;
+  return typeof authPollingKey === "string" ? authPollingKey : null;
 };
 
 export function useUnreadNotifications(
@@ -46,7 +64,7 @@ export function useUnreadNotifications(
   const { isCapacitor } = useCapacitor();
   const authJwt = getAuthJwt();
   const hasUsableAuthJwt = isAuthJwtUsable(authJwt);
-  const authPollingKey = `${handle ?? ""}:${getTokenFingerprint(authJwt)}`;
+  const authPollingKey = `${handle ?? ""}:${getAuthTokenFingerprint(authJwt)}`;
   const [blockedAuthPollingKey, setBlockedAuthPollingKey] = useState<
     string | null
   >(null);
@@ -64,8 +82,7 @@ export function useUnreadNotifications(
     ],
     queryFn: async () => {
       if (!isAuthJwtUsable(getAuthJwt())) {
-        setBlockedAuthPollingKey(authPollingKey);
-        throw createMissingAuthError();
+        throw createAuthPollingError(authPollingKey);
       }
 
       try {
@@ -74,10 +91,11 @@ export function useUnreadNotifications(
           params: {
             limit: "1",
           },
+          errorMode: "structured",
         });
       } catch (error) {
         if (isUnauthorizedQueryError(error)) {
-          setBlockedAuthPollingKey(authPollingKey);
+          throw createAuthPollingError(authPollingKey, error);
         }
         throw error;
       }
@@ -88,14 +106,28 @@ export function useUnreadNotifications(
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
-    ...getAuthAwareQueryRetry(),
+    retry: (failureCount: number, error: unknown) => {
+      const blockedKey = getAuthPollingKeyFromError(error);
+      if (blockedKey) {
+        setBlockedAuthPollingKey((previous) =>
+          previous === blockedKey ? previous : blockedKey
+        );
+        return false;
+      }
+      if (isUnauthorizedQueryError(error)) {
+        return false;
+      }
+
+      return failureCount < 3;
+    },
+    retryDelay: (failureCount: number) => {
+      return failureCount * 1000;
+    },
   });
 
-  const [haveUnreadNotifications, setHaveUnreadNotifications] = useState(false);
+  const effectiveNotifications = isEnabled ? notifications : undefined;
+  const haveUnreadNotifications =
+    (effectiveNotifications?.unread_count ?? 0) > 0;
 
-  useEffect(() => {
-    setHaveUnreadNotifications(!!notifications?.unread_count);
-  }, [notifications]);
-
-  return { notifications, haveUnreadNotifications };
+  return { notifications: effectiveNotifications, haveUnreadNotifications };
 }
