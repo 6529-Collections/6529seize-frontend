@@ -128,7 +128,9 @@ export function useDropMessages(
     useCallback(
       (message) => {
         // Skip if no dropId
-        if (!dropId) return;
+        if (!dropId) {
+          return;
+        }
 
         if (waveId !== message.wave.id) {
           return;

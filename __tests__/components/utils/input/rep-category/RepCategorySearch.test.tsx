@@ -24,6 +24,10 @@ let dropdownProps: any = null;
 (useQuery as jest.Mock).mockReturnValue({ data: ['Art'] });
 
 describe('RepCategorySearch', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('passes categories to dropdown', () => {
     const setCategory = jest.fn();
     jest.useFakeTimers();
@@ -33,5 +37,23 @@ describe('RepCategorySearch', () => {
     fireEvent.change(getByRole('textbox'), { target: { value: 'art' } });
     act(() => { jest.runAllTimers(); });
     expect(dropdownProps.categories).toEqual(['art', 'Art']);
+  });
+
+  it('filters the reserved Help6529 Credits category', () => {
+    (useQuery as jest.Mock).mockReturnValue({
+      data: ['Help6529 Credits', 'Art']
+    });
+    const setCategory = jest.fn();
+    jest.useFakeTimers();
+    const { getByRole } = render(
+      <RepCategorySearch category={null} setCategory={setCategory} />
+    );
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'Help6529 Credits' }
+    });
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(dropdownProps.categories).toEqual([]);
   });
 });
