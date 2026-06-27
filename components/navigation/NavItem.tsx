@@ -182,7 +182,7 @@ const NavItemContent = ({
 
   const { name } = item;
   const { icon } = item;
-  const { address, seizeConnect } = useSeizeConnectContext();
+  const { address, seizeConnect, hasValidWalletAuth } = useSeizeConnectContext();
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
@@ -193,7 +193,8 @@ const NavItemContent = ({
   });
   const { setTitle } = useTitle();
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
-    item.name === "Notifications" ? (connectedProfile?.handle ?? null) : null
+    item.name === "Notifications" ? (connectedProfile?.handle ?? null) : null,
+    { enabled: hasValidWalletAuth }
   );
 
   // Add unread messages logic

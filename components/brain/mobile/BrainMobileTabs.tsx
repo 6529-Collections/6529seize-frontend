@@ -11,6 +11,7 @@ import { ArrowLeftIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAuth } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import MyStreamWaveCurationCreateDialog from "../my-stream/tabs/MyStreamWaveCurationCreateDialog";
@@ -70,6 +71,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const searchParams = useSearchParams();
   const { registerRef } = useLayout();
   const { connectedProfile } = useAuth();
+  const { hasValidWalletAuth } = useSeizeConnectContext();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const shouldShowCurationTabs = Boolean(isApp && waveActive && wave?.id);
@@ -113,7 +115,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   // Get unread notifications using the dedicated hook
   const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.handle ?? null
+    connectedProfile?.handle ?? null,
+    { enabled: hasValidWalletAuth }
   );
 
   const scrollActiveButtonIntoView = useCallback(

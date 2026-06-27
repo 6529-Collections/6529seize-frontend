@@ -40,3 +40,60 @@ export const getDefaultQueryRetry = (errorCallback?: () => void) => {
     },
   };
 };
+
+type QueryErrorWithStatus = {
+  readonly status?: unknown;
+  readonly response?: {
+    readonly status?: unknown;
+  };
+  readonly cause?: {
+    readonly status?: unknown;
+  };
+};
+
+export const getQueryErrorStatus = (error: unknown): number | null => {
+  if (typeof error !== "object" || error === null) {
+    return null;
+  }
+
+  const statusError = error as QueryErrorWithStatus;
+  const status =
+    statusError.status ??
+    statusError.response?.status ??
+    statusError.cause?.status;
+
+  return typeof status === "number" ? status : null;
+};
+
+export const isUnauthorizedQueryError = (error: unknown): boolean => {
+  if (getQueryErrorStatus(error) === 401) {
+    return true;
+  }
+
+  if (typeof error === "string") {
+    return /unauthorized/i.test(error);
+  }
+
+  return error instanceof Error && /unauthorized/i.test(error.message);
+};
+
+export const getAuthAwareQueryRetry = (errorCallback?: () => void) => {
+  return {
+    retry: (failureCount: number, error: unknown) => {
+      if (isUnauthorizedQueryError(error)) {
+        errorCallback?.();
+        return false;
+      }
+
+      if (failureCount >= 3) {
+        errorCallback?.();
+        return false;
+      }
+
+      return true;
+    },
+    retryDelay: (failureCount: number) => {
+      return failureCount * 1000;
+    },
+  };
+};

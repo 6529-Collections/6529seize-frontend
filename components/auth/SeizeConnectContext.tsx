@@ -1266,7 +1266,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     useConnectedAccountsUnreadNotifications(jwtPollingStoredConnectedAccounts);
 
   const { notifications: activeUnreadNotifications } = useUnreadNotifications(
-    activeStoredAccount?.profileHandle ?? null
+    activeStoredAccount?.profileHandle ?? null,
+    { enabled: hasValidWalletAuth }
   );
 
   const connectedAccountUnreadNotifications = useMemo(() => {
