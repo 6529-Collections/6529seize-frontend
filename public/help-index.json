@@ -47,6 +47,41 @@
       ]
     },
     {
+      "id": "about.faq",
+      "kind": "route",
+      "title": "6529 FAQ",
+      "aliases": [
+        "faq",
+        "6529 faq",
+        "about faq",
+        "what is 6529",
+        "how do i get started",
+        "how does 6529 work",
+        "what can i do on 6529"
+      ],
+      "keywords": [
+        "faq",
+        "about",
+        "6529",
+        "started",
+        "profile",
+        "waves",
+        "memes",
+        "tdh",
+        "rep",
+        "nic"
+      ],
+      "facts": [
+        "The 6529 FAQ lives at /about/faq.",
+        "The FAQ explains what 6529 is, how to get started, Waves, profiles, TDH, REP, NIC, The Memes, Meme drops, and related core product concepts.",
+        "Use the FAQ when users ask broad getting-started questions or ask where general 6529 product explanations live."
+      ],
+      "canonical_path": "/about/faq",
+      "related_paths": ["/", "/waves", "/network", "/about/the-memes"],
+      "tags": ["about", "faq", "getting-started"],
+      "source_refs": ["components/about/AboutFAQ.tsx"]
+    },
+    {
       "id": "navigation.search",
       "kind": "ui_affordance",
       "title": "Header search",
@@ -1064,6 +1099,264 @@
         "ops/docs/delegation/feature-delegation-action-flows.md",
         "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md",
         "ops/docs/delegation/source-of-truth-spec.md"
+      ]
+    },
+    {
+      "id": "delegation.wallet-architecture",
+      "kind": "workflow",
+      "title": "Wallet Architecture",
+      "aliases": [
+        "wallet architecture",
+        "4 wallet architecture",
+        "four wallet architecture",
+        "three address protocol",
+        "tap",
+        "vault wallet",
+        "transaction wallet",
+        "minting wallet",
+        "hot wallet",
+        "cold wallet",
+        "wallet setup",
+        "safe wallet architecture"
+      ],
+      "keywords": [
+        "wallet",
+        "architecture",
+        "vault",
+        "transaction",
+        "minting",
+        "hot",
+        "cold",
+        "safe",
+        "gnosis",
+        "tap",
+        "phishing",
+        "malware"
+      ],
+      "facts": [
+        "Wallet Architecture lives at /delegation/wallet-architecture and is part of the Delegation Center docs.",
+        "The recommended architecture separates a vault wallet for long-term NFT storage, a transaction wallet for trusted marketplace activity, and a minting wallet for unknown or higher-risk minting activity.",
+        "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
+        "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet."
+      ],
+      "canonical_path": "/delegation/wallet-architecture",
+      "related_paths": [
+        "/delegation/delegation-faq",
+        "/delegation/consolidation-use-cases",
+        "/delegation/register-delegation",
+        "/delegation/register-consolidation"
+      ],
+      "tags": ["delegation", "wallet", "security", "architecture"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/reference-overview-wallet-architecture.html",
+        "components/delegation/delegation-page-metadata.ts"
+      ]
+    },
+    {
+      "id": "delegation.consolidation-use-cases",
+      "kind": "workflow",
+      "title": "Consolidation Use Cases",
+      "aliases": [
+        "consolidation use cases",
+        "4 wallet consolidation",
+        "four wallet consolidation",
+        "three wallet consolidation",
+        "two wallet consolidation",
+        "compromised wallet consolidation",
+        "consolidation architecture",
+        "how do consolidations affect tdh"
+      ],
+      "keywords": [
+        "consolidation",
+        "wallet",
+        "wallets",
+        "tdh",
+        "cards",
+        "unique",
+        "vault",
+        "minting",
+        "transaction",
+        "compromised",
+        "reciprocal"
+      ],
+      "facts": [
+        "Consolidation Use Cases lives at /delegation/consolidation-use-cases.",
+        "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
+        "The docs cover two-address and three-address patterns, plus a four-address scenario where an old hot wallet was compromised and cards moved through temporary, vault, and new minting wallets.",
+        "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
+      ],
+      "canonical_path": "/delegation/consolidation-use-cases",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/register-consolidation",
+        "/delegation/delegation-faq",
+        "/consolidation-mapping-tool"
+      ],
+      "tags": ["delegation", "consolidation", "wallet", "tdh"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/consolidation-use-cases.html",
+        "public/delegation-content/delegation-docs-2026-06-16/html/reference-consolidations-3address.html",
+        "public/delegation-content/delegation-docs-2026-06-16/html/reference-consolidations-3address-del-manager.html"
+      ]
+    },
+    {
+      "id": "delegation.faq",
+      "kind": "route",
+      "title": "Delegation FAQ",
+      "aliases": [
+        "delegation faq",
+        "delegation how to",
+        "delegation docs",
+        "delegation help",
+        "delegation guide",
+        "consolidation faq",
+        "wallet delegation faq"
+      ],
+      "keywords": [
+        "delegation",
+        "faq",
+        "how",
+        "register",
+        "view",
+        "manage",
+        "revoke",
+        "lock",
+        "unlock",
+        "safe",
+        "usecase"
+      ],
+      "facts": [
+        "The Delegation FAQ lives at /delegation/delegation-faq.",
+        "It indexes how-to articles for registering delegations, delegation managers, consolidations, SAFE transaction-builder flows, supported use cases, viewing records, updating, revoking, locking, and unlocking wallets.",
+        "Use it when users ask broad Delegation Center how-to questions or ask where the delegation docs live."
+      ],
+      "canonical_path": "/delegation/delegation-faq",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/wallet-architecture",
+        "/delegation/consolidation-use-cases"
+      ],
+      "tags": ["delegation", "faq", "docs"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+        "components/delegation/html/delegationContent.ts"
+      ]
+    },
+    {
+      "id": "delegation.register-delegation-doc",
+      "kind": "workflow",
+      "title": "How to Register a Delegation",
+      "aliases": [
+        "how to register a delegation",
+        "register delegation docs",
+        "register delegation faq",
+        "delegate a wallet",
+        "delegate hot wallet",
+        "delegate minting wallet"
+      ],
+      "keywords": [
+        "delegation",
+        "register",
+        "delegate",
+        "wallet",
+        "collection",
+        "expiry",
+        "token",
+        "utility"
+      ],
+      "facts": [
+        "The register-delegation help article lives at /delegation/delegation-faq/register-delegation.",
+        "To register a delegation, open Delegation Center, choose Register Delegation, choose the collection, enter the delegate wallet, select a use case such as #1 All, choose expiry and token scope, then submit and execute the transaction.",
+        "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet."
+      ],
+      "canonical_path": "/delegation/delegation-faq/register-delegation",
+      "related_paths": [
+        "/delegation/register-delegation",
+        "/delegation/delegation-center",
+        "/delegation/wallet-architecture"
+      ],
+      "tags": ["delegation", "workflow", "faq"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/register-delegation.html"
+      ]
+    },
+    {
+      "id": "delegation.delegation-manager-doc",
+      "kind": "workflow",
+      "title": "Delegation Manager",
+      "aliases": [
+        "delegation manager",
+        "sub delegation",
+        "sub-delegation",
+        "register delegation manager",
+        "delegation management rights",
+        "manager wallet",
+        "use case 998"
+      ],
+      "keywords": [
+        "delegation",
+        "manager",
+        "sub",
+        "wallet",
+        "rights",
+        "998",
+        "register",
+        "maintain",
+        "consolidations"
+      ],
+      "facts": [
+        "The Delegation Manager help article lives at /delegation/delegation-faq/register-sub-delegation.",
+        "A delegation manager gives a manager wallet permission to maintain delegations and consolidations for another wallet.",
+        "The docs describe registering a manager from the vault wallet to a delegated wallet, then using that delegated wallet to register future delegations or consolidations."
+      ],
+      "canonical_path": "/delegation/delegation-faq/register-sub-delegation",
+      "related_paths": [
+        "/delegation/register-sub-delegation",
+        "/delegation/delegation-faq/register-delegation-using-sub-delegation",
+        "/delegation/delegation-faq/revoke-delegation-using-sub-delegation"
+      ],
+      "tags": ["delegation", "manager", "wallet", "faq"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/register-sub-delegation.html",
+        "public/delegation-content/delegation-docs-2026-06-16/html/register-delegation-using-sub-delegation.html"
+      ]
+    },
+    {
+      "id": "delegation.safe-doc",
+      "kind": "workflow",
+      "title": "Delegate using SAFE",
+      "aliases": [
+        "delegate using safe",
+        "delegate using gnosis",
+        "safe transaction builder",
+        "gnosis transaction builder",
+        "safe wallet delegation",
+        "safe delegation manager"
+      ],
+      "keywords": [
+        "safe",
+        "gnosis",
+        "delegation",
+        "transaction",
+        "builder",
+        "manager",
+        "998",
+        "contract",
+        "abi"
+      ],
+      "facts": [
+        "The SAFE delegation help article lives at /delegation/delegation-faq/using-safe.",
+        "The docs show using the SAFE Transaction Builder with the NFTDelegation.com contract to register delegation manager rights.",
+        "The SAFE flow uses the Any Collection value, no-expiry value, use case 998 for Delegation Management, allTokens true, tokenId 0, then creates and sends the batch transaction."
+      ],
+      "canonical_path": "/delegation/delegation-faq/using-safe",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/delegation-faq/register-sub-delegation"
+      ],
+      "tags": ["delegation", "safe", "wallet", "faq"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/using-safe.html"
       ]
     },
     {
