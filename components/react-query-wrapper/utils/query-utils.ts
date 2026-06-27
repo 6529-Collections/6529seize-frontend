@@ -51,7 +51,7 @@ type QueryErrorWithStatus = {
   };
 };
 
-export const getQueryErrorStatus = (error: unknown): number | null => {
+const getQueryErrorStatus = (error: unknown): number | null => {
   if (typeof error !== "object" || error === null) {
     return null;
   }
