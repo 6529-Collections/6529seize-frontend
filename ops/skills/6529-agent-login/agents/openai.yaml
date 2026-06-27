@@ -1,4 +1,4 @@
 interface:
   display_name: "6529 Agent Login"
-  short_description: "Login helpers for local 6529 agents"
+  short_description: "Manage local 6529 test-wallet browser logins without committing wallet secrets."
   default_prompt: "Use $6529-agent-login to log a local browser agent into 6529 with a test wallet."

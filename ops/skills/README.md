@@ -6,6 +6,8 @@ This folder stores repo-local Codex skills and agent guidance.
 
 ## Repo-Local Skills
 
+- [6529 Agent Login](6529-agent-login/SKILL.md): manages local
+  browser-agent test wallet logins without committing wallet secrets.
 - [6529 Autonomous Manager](6529-autonomous-manager/SKILL.md): owns scoped
   6529 frontend workstreams from instruction to validated closeout.
 - [Commit Docs Updater](commit-docs-updater/SKILL.md):

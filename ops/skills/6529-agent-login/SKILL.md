@@ -18,6 +18,10 @@ dedicated test key. Do not commit account pool files, private keys, emitted JSON
 payloads, storage-state files, cookies, access tokens, or generated login
 scripts.
 
+If the configured API endpoint is production and the QA task will create
+profiles, direct messages, drops, or other persistent data, get explicit user
+confirmation before performing those browser actions.
+
 ## Helper
 
 From the repository root, use:
@@ -40,6 +44,9 @@ Use `--state /path/to/accounts.json` only for a developer-local account pool.
 Never point `--state` at a tracked file.
 
 ## Account Pool
+
+Use `accounts.example.json` as a shape reference only. Do not fill that file, or
+any other tracked file under `ops/`, with real private keys.
 
 List accounts:
 
@@ -170,18 +177,51 @@ active wallet state.
 
 The shared skill and helper live in the repo. Wallet material does not.
 
-Preferred local account pool:
+Preferred local account pool for real local test wallet keys:
 
 ```text
 ~/.codex/6529-agent-login/accounts.json
 ```
 
 This path survives worktree changes and branch switches while staying outside
-Git. If a developer chooses a repo-local account pool for temporary work, keep
-it under `.codex/` or pass `--state`, and confirm it is ignored before adding
-files.
+Git. It is the default for the helper and should be used for seeded local QA
+wallet pools.
+
+If a developer intentionally chooses repo-associated local state, prefer:
+
+```text
+.codex/6529-agent-login/accounts.json
+```
+
+That path is ignored by Git and follows the repo's local agent-state convention.
+Avoid putting real wallet keys under `ops/skills/6529-agent-login/`; the
+repo-local ignores there are a last line of defense for accidental outputs, not
+the preferred storage location.
+
+## Validation
+
+For skill or helper changes, use focused checks:
+
+```bash
+node ops/skills/6529-agent-login/scripts/agent-login.mjs help
+node ops/skills/6529-agent-login/scripts/agent-login.mjs list
+git status --short
+```
+
+Before closing a login QA task, confirm no wallet material or emitted auth
+payloads were added to tracked files.
+
+Useful evidence to report:
+
+- account ids, short addresses, and handles used
+- browser route used for login or logout
+- local wallet-state path touched
+- visible UI proof of the authenticated account or action
+- repo dirty state and tracked-secret check result
 
 ## Limits
 
 This bypasses the wallet connect modal. It is good for app QA after login. It is
 not a test of MetaMask, Reown/AppKit wallet selection, or signature modal UX.
+It is also not a shortcut for creating messages, drops, profiles, or other app
+data directly through APIs when the task requires real UI coverage.

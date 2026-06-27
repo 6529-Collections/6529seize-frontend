@@ -190,6 +190,19 @@ function loadEthers(repoRoot) {
   return requireFromRepo("ethers");
 }
 
+function redactSecretText(value) {
+  return String(value)
+    .replace(/\b0x[a-fA-F0-9]{64,}\b/g, "0x[redacted]")
+    .replace(
+      /\b[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/g,
+      "[redacted-jwt]"
+    )
+    .replace(
+      /(access[_-]?token|refresh[_-]?token|jwt|private[_-]?key|client[_-]?signature|server[_-]?signature|authorization)(["']?\s*[:=]\s*["']?)[^"',\s}]+/gi,
+      "$1$2[redacted]"
+    );
+}
+
 function normalizeApiBase(value) {
   if (!value) {
     throw new Error("Missing API endpoint. Pass --api or set API_ENDPOINT.");
@@ -632,9 +645,6 @@ async function main() {
   const command = args._[0] || "help";
   const format = String(args.format || "json");
   const statePath = path.resolve(String(args.state || DEFAULT_STATE_PATH));
-  const repoRoot = resolveRepoRoot(args);
-  const env = loadRepoEnv(repoRoot);
-  const ethers = loadEthers(repoRoot);
 
   if (command === "help") {
     writeOutput(
@@ -686,6 +696,8 @@ async function main() {
   }
 
   if (command === "create" || command === "import") {
+    const repoRoot = resolveRepoRoot(args);
+    const ethers = loadEthers(repoRoot);
     const account = withStateLock(statePath, (state) =>
       addAccount(
         state,
@@ -716,6 +728,8 @@ async function main() {
   }
 
   if (command === "claim") {
+    const repoRoot = resolveRepoRoot(args);
+    const ethers = loadEthers(repoRoot);
     let redacted;
     withStateLock(statePath, (state) => {
       const account = claimAccount(
@@ -740,6 +754,8 @@ async function main() {
   }
 
   if (command === "release") {
+    const repoRoot = resolveRepoRoot(args);
+    const ethers = loadEthers(repoRoot);
     const released = withStateLock(statePath, (state) =>
       releaseAccount(
         state,
@@ -756,6 +772,9 @@ async function main() {
   }
 
   if (command === "login") {
+    const repoRoot = resolveRepoRoot(args);
+    const env = loadRepoEnv(repoRoot);
+    const ethers = loadEthers(repoRoot);
     let account;
     withStateLock(statePath, (state) => {
       account = claimAccount(
@@ -814,6 +833,10 @@ try {
 } catch (error) {
   if (error instanceof Error && error.name === "AbortError") {
     console.error("Agent login command aborted.");
+  } else if (error instanceof Error) {
+    console.error(
+      `Agent login command failed: ${redactSecretText(error.message)}`
+    );
   } else {
     console.error("Agent login command failed.");
   }
