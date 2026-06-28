@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "accounts": [
+    {
+      "id": "seeded-a",
+      "label": "Seeded QA A",
+      "address": "0x0000000000000000000000000000000000000000",
+      "privateKey": "0xREPLACE_WITH_DEDICATED_TEST_PRIVATE_KEY",
+      "capabilities": [],
+      "profileHandle": "optional-profile-handle",
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "leases": []
+}
