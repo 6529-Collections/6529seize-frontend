@@ -22,6 +22,7 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country: "US" }),
+  useOptionalCookieConsent: () => ({ country: "US" }),
 }));
 
 // ✅ Mock Groups component

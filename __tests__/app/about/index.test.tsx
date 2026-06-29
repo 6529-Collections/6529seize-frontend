@@ -23,6 +23,7 @@ jest.mock("@/hooks/useCapacitor", () => ({
 let country = "US";
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country }),
+  useOptionalCookieConsent: () => ({ country }),
 }));
 
 describe("About index page", () => {

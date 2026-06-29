@@ -12,6 +12,7 @@ jest.mock("@/components/levels/TableOfLevels", () => () => (
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country: "US" }),
+  useOptionalCookieConsent: () => ({ country: "US" }),
 }));
 
 // Mock TitleContext

@@ -1,7 +1,7 @@
 "use client";
 
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -30,12 +30,13 @@ export function AboutContentsDropdown({
 }: AboutContentsDropdownProps) {
   const locale = DEFAULT_LOCALE;
   const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const cookieConsent = useOptionalCookieConsent();
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: capacitor.isIos,
-    country,
+    country: cookieConsent?.country,
   });
   const groups = getVisibleAboutNavGroups(hideSubscriptions);
+  const normalizedCurrentHref = normalizeAboutHref(currentHref);
   const currentItem = groups
     .flatMap((group) => group.items)
     .find((item) => {
@@ -43,7 +44,9 @@ export function AboutContentsDropdown({
         return currentSection === item.section;
       }
 
-      return currentHref === getAboutNavItemHref(item);
+      return (
+        normalizedCurrentHref === normalizeAboutHref(getAboutNavItemHref(item))
+      );
     });
   const currentLabel =
     currentItem !== undefined
@@ -62,7 +65,7 @@ export function AboutContentsDropdown({
       const itemHref = getAboutNavItemHref(item);
       const isCurrent = isAboutSectionNavItem(item)
         ? currentSection === item.section
-        : currentHref === itemHref;
+        : normalizedCurrentHref === normalizeAboutHref(itemHref);
 
       return {
         id: getAboutNavItemId(item),
@@ -117,6 +120,15 @@ export function AboutContentsDropdown({
       />
     </div>
   );
+}
+
+function normalizeAboutHref(href: string | undefined): string | undefined {
+  if (href === undefined) {
+    return undefined;
+  }
+
+  const path = href.split(/[?#]/, 1)[0]?.replace(/\/+$/, "");
+  return path === "" ? "/" : path;
 }
 
 function AboutContentsDropdownHeader() {

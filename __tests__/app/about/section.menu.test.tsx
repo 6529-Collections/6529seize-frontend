@@ -18,6 +18,7 @@ jest.mock("@/hooks/useCapacitor", () => ({
 let country = "DE";
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country }),
+  useOptionalCookieConsent: () => ({ country }),
 }));
 
 const setTitle = jest.fn();
@@ -153,7 +154,9 @@ describe("About contents dropdown", () => {
 
   it("marks a network resource as current when rendered on that route", () => {
     country = "US";
-    render(<AboutContentsDropdown currentHref="/network/health/network-tdh" />);
+    render(
+      <AboutContentsDropdown currentHref="/network/health/network-tdh/?tab=tdh" />
+    );
 
     const trigger = screen.getByRole("button", {
       name: /open about contents navigation/i,

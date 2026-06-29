@@ -221,6 +221,7 @@ const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>([
   ...ABOUT_CONTENTS_NAV_ITEMS.map((item) =>
     "section" in item ? ([item.section, item.labelKey] as const) : undefined
   ).filter((item): item is readonly [AboutSection, MessageKey] => !!item),
+  [AboutSection.MISSION, "about.contents.pages.mission"],
 ]);
 
 const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
