@@ -44,9 +44,9 @@ export default function GroupItemWrapper({
   const getClasses = () => {
     if (isMobileSheet) {
       if (isActive) {
-        return "tw-rounded-xl tw-border-[#263b65] tw-bg-[#0f1523]";
+        return "tw-rounded-xl tw-border-primary-400/30 tw-bg-primary-500/10";
       }
-      return "tw-rounded-xl tw-border-[#37373E] tw-bg-[#1C1C21] tw-cursor-pointer active:tw-scale-[0.99] desktop-hover:hover:tw-border-[#60606C] desktop-hover:hover:tw-bg-[#26272B]";
+      return "tw-rounded-xl tw-border-iron-700 tw-bg-iron-900 tw-cursor-pointer active:tw-scale-[0.99] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800";
     }
 
     if (!isActive)

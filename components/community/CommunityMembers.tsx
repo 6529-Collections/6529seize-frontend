@@ -58,13 +58,13 @@ function NetworkHeaderActionButton({
   readonly onClick: () => void;
 }) {
   const buttonClassName = [
-    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-[13px] tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40 sm:tw-text-xs",
+    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40 sm:tw-text-xs",
     compact
       ? "tw-h-9 tw-w-9 tw-px-0 sm:tw-h-8 sm:tw-w-8"
       : "tw-h-9 tw-min-w-9 tw-px-2.5 sm:tw-h-8 sm:tw-min-w-8 sm:tw-px-2",
     active
-      ? "tw-bg-primary-500/15 tw-text-primary-200 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-      : "tw-bg-transparent tw-text-iron-300 hover:tw-bg-white/[0.06] hover:tw-text-iron-50",
+      ? "tw-bg-primary-500/15 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-white/10"
+      : "tw-bg-transparent tw-text-iron-300 hover:tw-bg-white/5 hover:tw-text-iron-50",
   ].join(" ");
 
   return (
@@ -330,7 +330,7 @@ export default function CommunityMembers() {
           <h1 className="tw-mb-0 tw-flex-shrink-0 tw-text-xl tw-font-semibold tw-text-iron-50">
             Network
           </h1>
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-[0_14px_34px_rgba(0,0,0,0.26)] tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
             <NetworkHeaderActionButton
               active={!!activeGroupId}
               compact
@@ -339,7 +339,7 @@ export default function CommunityMembers() {
               onClick={() => setMobileFilterOpen(true)}
               label="Open group filters"
             >
-              <FunnelIcon className="tw-h-[18px] tw-w-[18px]" />
+              <FunnelIcon className="tw-size-4" />
             </NetworkHeaderActionButton>
             <div className="sm:tw-hidden">
               <NetworkHeaderActionButton
@@ -350,13 +350,13 @@ export default function CommunityMembers() {
                 onClick={() => setMobileSortOpen(true)}
                 label="Open sort options"
               >
-                <BarsArrowDownIcon className="tw-h-[18px] tw-w-[18px]" />
+                <BarsArrowDownIcon className="tw-size-4" />
               </NetworkHeaderActionButton>
             </div>
           </div>
         </div>
         <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center">
-          <div className="tw-flex tw-items-center tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-[0_14px_34px_rgba(0,0,0,0.26)] tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-items-center tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
             <NetworkHeaderActionButton
               label="Open Nerd view"
               onClick={goToNerd}
@@ -406,9 +406,9 @@ export default function CommunityMembers() {
         noPadding
         showDragHandle
         showHeaderCloseButton
-        surfaceClassName="tw-bg-[#131316] tw-ring-1 tw-ring-inset tw-ring-[#26272B] tw-shadow-[0_-18px_48px_rgba(0,0,0,0.55)]"
+        surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
         titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
-        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-[#26272B] tw-pb-3.5"
+        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5"
         headerCloseButtonClassName="-tw-mt-1"
       >
         <GroupsSidebar variant="mobile-sheet" />
@@ -421,9 +421,9 @@ export default function CommunityMembers() {
         noPadding
         showDragHandle
         showHeaderCloseButton
-        surfaceClassName="tw-bg-[#131316] tw-ring-1 tw-ring-inset tw-ring-[#26272B] tw-shadow-[0_-18px_48px_rgba(0,0,0,0.55)]"
+        surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
         titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
-        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-[#26272B] tw-pb-3.5"
+        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5"
         headerCloseButtonClassName="-tw-mt-1"
       >
         <CommunityMembersMobileSortContent

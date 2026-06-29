@@ -29,7 +29,7 @@ function DialogCloseButton({
       title="Close panel"
       aria-label="Close panel"
       className={clsx(
-        "-tw-mr-2 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.04] hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
+        "-tw-mr-2 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/5 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
         className
       )}
       onClick={onClick}
@@ -427,7 +427,7 @@ export default function MobileWrapperDialog({
                     >
                       {showDragHandle && (
                         <div className="tw-flex tw-justify-center tw-pt-3">
-                          <div className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-[#37373E]" />
+                          <div className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-iron-700" />
                         </div>
                       )}
                       <DialogHeader

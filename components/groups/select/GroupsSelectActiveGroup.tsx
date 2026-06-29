@@ -94,12 +94,12 @@ export default function GroupsSelectActiveGroup({
     return (
       <div className="tw-px-4 tw-pt-4">
         <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
-          <p className="tw-mb-0 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-[#93939F]">
+          <p className="tw-mb-0 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-iron-400">
             Active filter
           </p>
           {typeof membersCount === "number" && (
-            <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-[#37373E] tw-bg-[#1C1C21] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-bold tw-text-[#93939F]">
-              <UsersIcon className="tw-size-3 tw-text-[#93939F]" />
+            <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-bold tw-text-iron-400">
+              <UsersIcon className="tw-size-3 tw-text-iron-400" />
               {membersCount}
             </span>
           )}

@@ -35,8 +35,8 @@ function MobileMyGroupsButton({
       type="button"
       className={`tw-inline-flex tw-min-h-9 tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-4 tw-text-[11px] tw-font-bold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40 ${
         isActive
-          ? "tw-border-[#ECECEE] tw-bg-[#ECECEE] tw-text-[#131316]"
-          : "tw-border-[#37373E] tw-bg-transparent tw-text-[#93939F] desktop-hover:hover:tw-border-[#848490] desktop-hover:hover:tw-text-[#F5F5F5]"
+          ? "tw-border-iron-200 tw-bg-iron-200 tw-text-iron-950"
+          : "tw-border-iron-700 tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-iron-50"
       }`}
     >
       My groups
@@ -106,7 +106,7 @@ function MobileGroupSearchControls({
   return (
     <>
       <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <p className="tw-mb-0 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-[#93939F]">
+        <p className="tw-mb-0 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-iron-400">
           Find group
         </p>
         {showMyGroups && (

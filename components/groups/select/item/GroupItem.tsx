@@ -46,7 +46,7 @@ export default function GroupItem({
     <div
       className={
         isMobileSheet
-          ? "tw-relative tw-size-11 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-[#26272B]"
+          ? "tw-relative tw-size-11 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800"
           : "tw-relative -tw-mt-1.5 tw-h-7 tw-w-7 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
       }
     >
@@ -62,7 +62,7 @@ export default function GroupItem({
     <div
       className={
         isMobileSheet
-          ? "tw-size-11 tw-flex-shrink-0 tw-rounded-lg tw-bg-[#26272B]"
+          ? "tw-size-11 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800"
           : "-tw-mt-1 tw-h-7 tw-w-7 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-contain tw-ring-2 tw-ring-iron-900"
       }
     ></div>
@@ -82,18 +82,18 @@ export default function GroupItem({
           <div className="tw-min-w-0 tw-flex-1">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
               <div className="tw-min-w-0 tw-flex-1">
-                <span className="tw-block tw-truncate tw-pr-3 tw-text-xs tw-font-medium tw-text-[#93939F]">
+                <span className="tw-block tw-truncate tw-pr-3 tw-text-xs tw-font-medium tw-text-iron-400">
                   {group.created_by.handle}
                 </span>
                 <div className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
                   {isActive && (
-                    <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-[#4f86ff]" />
+                    <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-primary-400" />
                   )}
                   <p
                     className={`tw-mb-0 tw-truncate tw-text-sm tw-font-bold ${
                       isActive
-                        ? "tw-text-[#F5F5F5]"
-                        : "tw-text-[#EFEFF1] group-hover:tw-text-[#F5F5F5]"
+                        ? "tw-text-iron-50"
+                        : "tw-text-iron-100 group-hover:tw-text-iron-50"
                     }`}
                   >
                     {group.name}
@@ -101,7 +101,7 @@ export default function GroupItem({
                 </div>
               </div>
               <div className="tw-flex tw-min-w-[4.5rem] tw-flex-shrink-0 tw-flex-col tw-items-end tw-gap-2">
-                <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-text-[#848490]">
+                <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-text-iron-500">
                   {timeAgo}
                 </span>
                 {isActive && onActiveGroupId && (
@@ -113,7 +113,7 @@ export default function GroupItem({
                     onMouseEnter={() => setDeactivateHover(true)}
                     onMouseLeave={() => setDeactivateHover(false)}
                     type="button"
-                    className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-[#263b65] tw-bg-[#0f1523] tw-text-[#6a95ff] tw-transition tw-duration-200 tw-ease-out hover:tw-bg-[#263b65]/50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/30"
+                    className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/10 tw-text-primary-300 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-primary-500/20 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/30"
                   >
                     <span className="tw-sr-only">Remove</span>
                     <XMarkIcon className="tw-size-3.5" aria-hidden="true" />

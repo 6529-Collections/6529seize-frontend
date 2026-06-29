@@ -28,13 +28,13 @@ export default function GroupHeaderSelect({
       return (
         <Link
           href="/network/groups"
-          className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-[#37373E] tw-bg-[#1C1C21] tw-p-3 tw-text-[#F5F5F5] tw-no-underline tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 active:tw-scale-[0.99] desktop-hover:hover:tw-border-[#60606C] desktop-hover:hover:tw-bg-[#26272B]"
+          className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-3 tw-text-iron-50 tw-no-underline tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 active:tw-scale-[0.99] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800"
         >
           <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-text-sm tw-font-medium">
-            <PlusIcon className="tw-size-4 tw-flex-shrink-0 tw-text-[#4f86ff]" />
+            <PlusIcon className="tw-size-4 tw-flex-shrink-0 tw-text-primary-400" />
             <span>Create group</span>
           </span>
-          <ChevronRightIcon className="tw-size-4 tw-flex-shrink-0 tw-text-[#60606C] tw-transition tw-duration-200 tw-ease-out group-hover:tw-translate-x-0.5 group-hover:tw-text-[#93939F]" />
+          <ChevronRightIcon className="tw-size-4 tw-flex-shrink-0 tw-text-iron-600 tw-transition tw-duration-200 tw-ease-out group-hover:tw-translate-x-0.5 group-hover:tw-text-iron-400" />
         </Link>
       );
     }
