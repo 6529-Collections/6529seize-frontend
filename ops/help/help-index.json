@@ -52,9 +52,15 @@
       "title": "6529 FAQ",
       "aliases": [
         "faq",
+        "6529",
+        "6529.io",
         "6529 faq",
+        "what is 6529.io",
         "about faq",
         "what is 6529",
+        "what is 6529 trying to do",
+        "what is 6529 building",
+        "what is the goal of 6529",
         "how do i get started",
         "how does 6529 work",
         "what can i do on 6529"
@@ -69,17 +75,71 @@
         "memes",
         "tdh",
         "rep",
-        "nic"
+        "nic",
+        "network",
+        "state",
+        "coordination",
+        "public",
+        "goods"
       ],
       "facts": [
         "The 6529 FAQ lives at /about/faq.",
-        "The FAQ explains what 6529 is, how to get started, Waves, profiles, TDH, REP, NIC, The Memes, Meme drops, and related core product concepts.",
+        "6529 and 6529.io refer to the same product ecosystem in user questions.",
+        "6529 is building a decentralized network state: a permissionless global network society that funds, builds, and coordinates public-goods work across art, science, culture, and technology.",
+        "In product terms, 6529 is not only an NFT collection site; it is a coordination system built around wallet identity, profiles, The Memes, Meme Lab, Gradients, NextGen, Waves, voting, groups, delegation, REP/CIC reputation, TDH/xTDH network metrics, open data, minting/claims infrastructure, and help tooling such as @help6529.",
+        "The long-term goal is nation-scale positive impact.",
+        "The core idea is to extend what Bitcoin and Ethereum proved for money and code into human coordination itself, so communities can organize, allocate attention, vote, build, and distribute work permissionlessly.",
         "Use the FAQ when users ask broad getting-started questions or ask where general 6529 product explanations live."
       ],
       "canonical_path": "/about/faq",
       "related_paths": ["/", "/waves", "/network", "/about/the-memes"],
       "tags": ["about", "faq", "getting-started"],
       "source_refs": ["components/about/AboutFAQ.tsx"]
+    },
+    {
+      "id": "about.terms-of-service",
+      "kind": "route",
+      "title": "Terms of Service",
+      "aliases": [
+        "terms of service",
+        "terms",
+        "tos",
+        "6529 terms",
+        "6529 terms of service",
+        "platform terms",
+        "legal terms",
+        "what are terms of service"
+      ],
+      "keywords": [
+        "terms",
+        "service",
+        "legal",
+        "platform",
+        "privacy",
+        "copyright",
+        "liability",
+        "arbitration",
+        "sanctions",
+        "cc0"
+      ],
+      "facts": [
+        "The Terms of Service page lives at /about/terms-of-service.",
+        "The page defines the terms for using the 6529 platform and was last updated February 23, 2023.",
+        "The terms cover platform access, 6529 NFTs, incorporated about pages, privacy, copyright, delegation and consolidation, wallet responsibility, phishing, CC0, disclaimers, liability limits, arbitration, and related legal topics.",
+        "Use this page when users ask where the 6529 Terms of Service live or ask about the public legal terms for using 6529.io."
+      ],
+      "canonical_path": "/about/terms-of-service",
+      "related_paths": [
+        "/about/privacy-policy",
+        "/about/cookie-policy",
+        "/about/copyright",
+        "/dispute-resolution"
+      ],
+      "tags": ["about", "terms", "legal"],
+      "source_refs": [
+        "components/about/AboutTermsOfService.tsx",
+        "components/footer/Footer.tsx"
+      ]
     },
     {
       "id": "about.nakamoto-threshold",
@@ -595,22 +655,44 @@
         "total",
         "days",
         "held",
+        "raw",
         "boost",
         "boosted",
         "unboosted",
+        "edition",
+        "weighting",
         "metric",
         "rate",
-        "hodl"
+        "hodl",
+        "category",
+        "sets",
+        "leaderboard",
+        "levels"
       ],
       "facts": [
-        "TDH stands for Total Days Held.",
+        "TDH means Total Days Held.",
         "TDH does not stand for Total Dynamic Head.",
-        "TDH is a time-weighted NFT holding metric that starts from days held and applies edition-size weighting plus active boosters.",
-        "TDH updates on a daily cadence and is used across Network surfaces.",
-        "The Memes and other NFT surfaces can show a per-card TDH or HODL rate."
+        "TDH is 6529's time-weighted holding metric for eligible NFTs.",
+        "Conceptually, TDH measures long-term participation and skin in the 6529 ecosystem.",
+        "Each eligible NFT contributes value based on how long it has been held; that base holding time is then adjusted by edition-size weighting and by collection boosters.",
+        "The calculation has three layers: unweighted days, edition weighting, and boosts.",
+        "Unweighted days means each NFT contributes 1 unit per day it is held.",
+        "Edition weighting means days held are multiplied by a HODL or edition-size rate; on the frontend TDH page, FirstGM with edition size 3,941 is the 1.0 baseline.",
+        "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
+        "The backend stores the distinctions separately: tdh__raw is raw full days held, tdh is raw days multiplied by HODL or edition weighting, and boosted_tdh is weighted TDH multiplied by the active boost.",
+        "Current TDH 1.4 rules use the higher of Category A or Category B boosters, plus Category C.",
+        "Category A is the complete Meme Card set boost, with diminishing additional-set boosts.",
+        "Category B covers season, genesis, and nakamoto set boosts.",
+        "Category C is the Gradient boost, up to 5 Gradients.",
+        "TDH is calculated daily at 00:00 UTC and is used throughout the network: profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
       ],
       "canonical_path": "/network/tdh",
-      "related_paths": ["/network/definitions", "/network/tdh/historic-boosts"],
+      "related_paths": [
+        "/network/definitions",
+        "/network/tdh/historic-boosts",
+        "/network/health/network-tdh",
+        "/network/levels"
+      ],
       "tags": ["network", "tdh", "glossary"],
       "source_refs": [
         "ops/docs/network/feature-tdh-boost-rules.md",
@@ -645,7 +727,12 @@
         "For a single TDH explanation, point users to the TDH page."
       ],
       "canonical_path": "/network/definitions",
-      "related_paths": ["/network/tdh", "/network/levels"],
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/historic-boosts",
+        "/network/health/network-tdh",
+        "/network/levels"
+      ],
       "tags": ["network", "glossary"],
       "source_refs": ["ops/docs/network/feature-network-definitions.md"]
     },
@@ -669,19 +756,52 @@
       "id": "network.xtdh",
       "kind": "glossary",
       "title": "xTDH",
-      "aliases": ["xtdh", "x tdh", "extended tdh", "grants"],
+      "aliases": [
+        "xtdh",
+        "x tdh",
+        "extended tdh",
+        "what is xtdh",
+        "what is x tdh",
+        "xtdh grants",
+        "xTDH grants",
+        "grants"
+      ],
       "keywords": [
         "xtdh",
+        "tdh",
+        "extension",
+        "external",
+        "eligible",
+        "erc721",
+        "coefficient",
         "grants",
         "received",
         "granted",
+        "produced",
+        "allocation",
+        "tokens",
+        "collections",
         "network",
         "profile"
       ],
       "facts": [
-        "xTDH is an extended TDH-related surface with granted and received views on profiles.",
-        "Profile xTDH information is available under /{user}/xtdh when visible.",
-        "Network xTDH overview and formulas live under the Network area."
+        "xTDH is an extension of TDH that lets TDH-like network participation flow beyond core 6529 holders to other NFT holders and communities.",
+        "xTDH can be earned by holding eligible cards outside The Memes ecosystem.",
+        "The frontend /network/xtdh page describes xTDH as an extension of TDH that helps include other NFT holders in the 6529 ecosystem and offer them the benefits of TDH.",
+        "xTDH tracks how much xTDH your Memes produce, how much xTDH you receive from grants on tokens you own, and how much xTDH you have granted away.",
+        "Produced xTDH comes from TDH production: produced_xTDH_today = TDH gained today * xTDH_coefficient.",
+        "The current backend coefficient is 0.1.",
+        "Daily xTDH rate is xtdh_rate = produced_today - granted_out_today + received_today.",
+        "Total xTDH accumulates as xtdh_total = xtdh_total_previous + xtdh_rate.",
+        "The key idea is grants: a profile that produces xTDH can grant future xTDH flow to all tokens in an external ERC-721 collection or to a selected subset of tokens.",
+        "If you own a token with an active grant, you receive your share of that grant while you own the token.",
+        "Per-token grant flow is grant_amount_per_token = rate / denominator, where the denominator is either the collection total supply for full-collection grants or the number of selected tokens for partial grants.",
+        "Transfers inside the same consolidation group do not reset the ownership window; sales or transfers across groups do reset it.",
+        "The first grant increment requires the grant and token ownership to have matured past the required midnight or 24-hour windows.",
+        "xTDH is not simply TDH for external NFTs; it is a grant and allocation layer where TDH producers create xTDH, can grant future production outward, external token owners can receive it, and ungranted or ineligible flow remains with the grantor.",
+        "No produced xTDH is intended to disappear; it is allocated to someone.",
+        "The live xTDH allocations dashboard at /xtdh shows network-wide stats and lets users drill down through Collections, Tokens, Contributors, and Grant details.",
+        "Profile xTDH information is available under /{user}/xtdh when visible."
       ],
       "canonical_path": "/network/xtdh",
       "related_paths": ["/{user}/xtdh", "/network"],
@@ -709,9 +829,58 @@
         "A dedicated Network TDH health route exists under /network/health/network-tdh."
       ],
       "canonical_path": "/network/health",
-      "related_paths": ["/network/health/network-tdh"],
+      "related_paths": ["/network/health/network-tdh", "/network/tdh"],
       "tags": ["network", "health"],
       "source_refs": ["ops/docs/network/feature-health-dashboard.md"]
+    },
+    {
+      "id": "network.tdh-stats",
+      "kind": "route",
+      "title": "Network TDH stats",
+      "aliases": [
+        "network tdh stats",
+        "network stats",
+        "tdh stats",
+        "tdh history",
+        "tdh charts",
+        "global tdh history",
+        "network tdh health",
+        "network tdh chart",
+        "network tdh page"
+      ],
+      "keywords": [
+        "network",
+        "tdh",
+        "stats",
+        "history",
+        "charts",
+        "global",
+        "daily",
+        "change",
+        "checkpoint",
+        "health"
+      ],
+      "facts": [
+        "Network TDH stats live at /network/health/network-tdh.",
+        "The page shows global TDH history in a fixed 10-row view.",
+        "It includes summary values for Network TDH, Daily Change, and Daily % Change.",
+        "It includes checkpoint estimates for the next 250,000,000 TDH checkpoints.",
+        "It shows Total TDH, Net TDH Daily Change, Created TDH Daily Change, and Destroyed TDH Change charts.",
+        "Each chart has boosted, unboosted, and unweighted series.",
+        "Use Network TDH stats when users ask for TDH history, TDH charts, global TDH movement, or deeper Network TDH health information."
+      ],
+      "canonical_path": "/network/health/network-tdh",
+      "related_paths": [
+        "/network/tdh",
+        "/network/definitions",
+        "/network/tdh/historic-boosts",
+        "/network/health"
+      ],
+      "tags": ["network", "tdh", "stats", "health"],
+      "source_refs": [
+        "app/network/health/network-tdh/page.tsx",
+        "ops/docs/network/feature-network-stats.md"
+      ]
     },
     {
       "id": "network.activity",
@@ -1315,6 +1484,57 @@
       ]
     },
     {
+      "id": "delegation.wallet-checker",
+      "kind": "route",
+      "title": "Wallet Checker",
+      "aliases": [
+        "wallet checker",
+        "check wallet",
+        "check my wallet",
+        "check wallet architecture",
+        "check my wallet architecture",
+        "view delegations",
+        "view consolidations",
+        "view delegations and consolidations",
+        "check delegations",
+        "check consolidations",
+        "active delegations",
+        "active consolidations"
+      ],
+      "keywords": [
+        "wallet",
+        "checker",
+        "check",
+        "view",
+        "delegation",
+        "delegations",
+        "manager",
+        "consolidation",
+        "consolidations",
+        "architecture",
+        "address",
+        "ens"
+      ],
+      "facts": [
+        "Wallet Checker lives at /delegation/wallet-checker.",
+        "Wallet Checker is a read-only diagnostics page for one wallet.",
+        "It checks delegations, delegation managers, and consolidation relationships for an entered Ethereum address or .eth ENS.",
+        "It can show Delegations, Active Minting Delegation for The Memes, Delegation Managers, Consolidations, Active Consolidation, and Incomplete Consolidation.",
+        "Use Wallet Checker when users ask how to check or view active delegations, consolidations, delegation managers, or wallet-architecture-related setup for an address."
+      ],
+      "canonical_path": "/delegation/wallet-checker",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/consolidation-use-cases",
+        "/delegation/delegation-center"
+      ],
+      "tags": ["delegation", "wallet", "checker", "diagnostics"],
+      "source_refs": [
+        "ops/docs/delegation/feature-wallet-checker.md",
+        "components/delegation/delegation-page-metadata.ts"
+      ]
+    },
+    {
       "id": "delegation.register-consolidation-doc",
       "kind": "workflow",
       "title": "How to Register a Consolidation",
@@ -1453,6 +1673,7 @@
       ],
       "canonical_path": "/delegation/wallet-architecture",
       "related_paths": [
+        "/delegation/wallet-checker",
         "/delegation/consolidation-use-cases",
         "/delegation/delegation-faq/register-consolidation",
         "/delegation/register-consolidation",
@@ -3790,7 +4011,12 @@
         "Use the main TDH page for the current TDH explanation."
       ],
       "canonical_path": "/network/tdh/historic-boosts",
-      "related_paths": ["/network/tdh"],
+      "related_paths": [
+        "/network/tdh",
+        "/network/definitions",
+        "/network/health/network-tdh",
+        "/network/levels"
+      ],
       "tags": ["network", "tdh", "historic"],
       "source_refs": [
         "app/network/tdh/historic-boosts/page.tsx",
