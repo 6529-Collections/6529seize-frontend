@@ -40,14 +40,15 @@ function WebSidebar({
 }: WebSidebarProps) {
   const navRef = useRef<{ closeSubmenu: () => void }>(null);
   const pathname = usePathname();
-  const { address } = useSeizeConnectContext();
+  const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const { connectedProfile } = useAuth();
   const { profile } = useIdentity({
     handleOrWallet: address || "",
     initialProfile: null,
   });
   const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.handle ?? null
+    hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
+    { enabled: hasValidWalletAuth }
   );
   const profilePath = useMemo(() => {
     if (connectedProfile?.handle) return `/${connectedProfile.handle}`;
