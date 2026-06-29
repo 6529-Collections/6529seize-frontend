@@ -738,6 +738,285 @@
       "source_refs": ["ops/docs/network/feature-network-definitions.md"]
     },
     {
+      "id": "network.definitions.cards-collected",
+      "kind": "glossary",
+      "title": "Cards Collected",
+      "aliases": [
+        "cards collected",
+        "card collected",
+        "what are cards collected",
+        "what is cards collected",
+        "total cards",
+        "total meme cards"
+      ],
+      "keywords": ["cards", "collected", "total", "memes", "metric"],
+      "facts": [
+        "Cards Collected is the total number of The Memes NFTs owned.",
+        "The Network Definitions page lists Cards Collected as a core Network metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "cards"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.unique-memes",
+      "kind": "glossary",
+      "title": "Unique Memes",
+      "aliases": [
+        "unique memes",
+        "unique meme",
+        "what are unique memes",
+        "what is unique memes",
+        "unique meme cards",
+        "unique cards"
+      ],
+      "keywords": ["unique", "memes", "cards", "metric"],
+      "facts": [
+        "Unique Memes is the total number of unique Meme NFTs owned.",
+        "Use Unique Memes when comparing breadth of holdings rather than total card count."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "memes"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.meme-sets",
+      "kind": "glossary",
+      "title": "Meme Sets",
+      "aliases": [
+        "meme set",
+        "meme sets",
+        "what is meme set",
+        "what are meme sets",
+        "complete meme set",
+        "complete meme sets",
+        "season set",
+        "season sets"
+      ],
+      "keywords": ["meme", "memes", "set", "sets", "complete", "szn", "season"],
+      "facts": [
+        "Meme Sets means the number of complete sets of The Memes owned, across all SZNs or for a specific SZN.",
+        "The Network Definitions page lists Meme Sets as a core Network metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/tdh/historic-boosts"],
+      "tags": ["network", "glossary", "concept", "memes", "sets"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.meme-sets-minus",
+      "kind": "glossary",
+      "title": "Meme Sets -1 / -2",
+      "aliases": [
+        "meme sets -1",
+        "meme set -1",
+        "meme sets minus 1",
+        "meme set minus one",
+        "meme sets -2",
+        "meme set -2",
+        "meme sets minus 2",
+        "meme set minus two",
+        "sets missing one card",
+        "sets missing two cards"
+      ],
+      "keywords": [
+        "meme",
+        "memes",
+        "set",
+        "sets",
+        "minus",
+        "missing",
+        "one",
+        "two",
+        "cards"
+      ],
+      "facts": [
+        "Meme Sets -1 and Meme Sets -2 are complete Meme sets missing 1 or 2 cards respectively.",
+        "Use this definition when users ask about near-complete Meme sets."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/tdh/historic-boosts"],
+      "tags": ["network", "glossary", "concept", "memes", "sets"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.genesis-sets",
+      "kind": "glossary",
+      "title": "Genesis Sets",
+      "aliases": [
+        "genesis set",
+        "genesis sets",
+        "what is genesis set",
+        "what are genesis sets",
+        "what is a genesis set",
+        "what are genesis set",
+        "genesis meme set",
+        "genesis meme sets"
+      ],
+      "keywords": ["genesis", "set", "sets", "memes", "first", "three", "tdh"],
+      "facts": [
+        "Genesis Sets are complete sets of the first three Meme NFTs.",
+        "Genesis Sets appear in Network Definitions and are also referenced by TDH Category B boost rules."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/tdh/historic-boosts"],
+      "tags": ["network", "glossary", "concept", "memes", "tdh"],
+      "source_refs": [
+        "ops/docs/network/feature-network-definitions.md",
+        "ops/docs/network/feature-tdh-boost-rules.md"
+      ]
+    },
+    {
+      "id": "network.definitions.purchases-sales",
+      "kind": "glossary",
+      "title": "Purchases and Sales",
+      "aliases": [
+        "purchases",
+        "sales",
+        "purchases sales",
+        "purchase count",
+        "sales count",
+        "purchases eth",
+        "sales eth",
+        "eth spent",
+        "eth received"
+      ],
+      "keywords": [
+        "purchases",
+        "purchase",
+        "sales",
+        "sale",
+        "bought",
+        "sold",
+        "eth",
+        "memes",
+        "gradients"
+      ],
+      "facts": [
+        "Purchases and Sales count bought and sold NFTs for Memes or Gradients.",
+        "Purchases (ETH) and Sales (ETH) show ETH spent or received for those NFTs."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/activity", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "activity"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.transfers",
+      "kind": "glossary",
+      "title": "Transfers In / Out",
+      "aliases": [
+        "transfers",
+        "transfer in",
+        "transfer out",
+        "transfers in",
+        "transfers out",
+        "nfts transferred",
+        "moved in",
+        "moved out"
+      ],
+      "keywords": ["transfers", "transfer", "in", "out", "nfts", "moved"],
+      "facts": [
+        "Transfers In and Transfers Out are NFTs moved into or out of an address.",
+        "The Network Definitions page lists transfers as a core Network activity metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/activity", "/feed"],
+      "tags": ["network", "glossary", "concept", "activity"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.tdh-unweighted",
+      "kind": "glossary",
+      "title": "TDH (unweighted)",
+      "aliases": [
+        "tdh unweighted",
+        "unweighted tdh",
+        "tdh raw",
+        "raw tdh",
+        "tdh__raw",
+        "what is tdh unweighted",
+        "what is unweighted tdh"
+      ],
+      "keywords": ["tdh", "unweighted", "raw", "days", "held", "daily"],
+      "facts": [
+        "TDH (unweighted) is Total Days Held summed daily at 00:00 UTC.",
+        "In unweighted TDH, each NFT contributes one unit per day held before edition weighting or boosters."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "tdh"],
+      "source_refs": [
+        "ops/docs/network/feature-network-definitions.md",
+        "ops/docs/network/feature-tdh-boost-rules.md"
+      ]
+    },
+    {
+      "id": "network.definitions.tdh-unboosted",
+      "kind": "glossary",
+      "title": "TDH (unboosted)",
+      "aliases": [
+        "tdh unboosted",
+        "unboosted tdh",
+        "weighted tdh",
+        "edition weighted tdh",
+        "what is tdh unboosted",
+        "what is unboosted tdh"
+      ],
+      "keywords": [
+        "tdh",
+        "unboosted",
+        "weighted",
+        "edition",
+        "hodl",
+        "firstgm",
+        "baseline"
+      ],
+      "facts": [
+        "TDH (unboosted) is TDH weighted by edition size before boosters are applied.",
+        "FirstGM with edition size 3,941 is the 1.0 baseline for edition weighting on the TDH page."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "tdh"],
+      "source_refs": [
+        "ops/docs/network/feature-network-definitions.md",
+        "ops/docs/network/feature-tdh-boost-rules.md"
+      ]
+    },
+    {
+      "id": "network.tdh.nakamoto-set",
+      "kind": "glossary",
+      "title": "Nakamoto Set",
+      "aliases": [
+        "nakamoto set",
+        "nakamoto sets",
+        "what is nakamoto set",
+        "what are nakamoto sets",
+        "nakamoto tdh boost",
+        "nakamoto boost"
+      ],
+      "keywords": ["nakamoto", "set", "sets", "tdh", "boost", "szn1", "category"],
+      "facts": [
+        "Nakamoto Set is a SZN1 Category B TDH boost term.",
+        "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
+        "The current Nakamoto Set boost shown on the TDH page is 1.01x."
+      ],
+      "canonical_path": "/network/tdh",
+      "related_paths": [
+        "/network/definitions",
+        "/network/tdh/historic-boosts",
+        "/about/nakamoto-threshold"
+      ],
+      "tags": ["network", "glossary", "concept", "tdh", "boost"],
+      "source_refs": [
+        "app/network/tdh/page.client.tsx",
+        "ops/docs/network/feature-tdh-boost-rules.md"
+      ]
+    },
+    {
       "id": "network.levels",
       "kind": "glossary",
       "title": "Network Levels",
@@ -1494,9 +1773,16 @@
         "check my wallet",
         "check wallet architecture",
         "check my wallet architecture",
+        "check architecture",
+        "check my architecture",
+        "check wallet setup",
+        "check my wallet setup",
+        "how can i check my architecture",
         "view delegations",
         "view consolidations",
         "view delegations and consolidations",
+        "view wallet architecture",
+        "view my architecture",
         "check delegations",
         "check consolidations",
         "active delegations",
@@ -1643,8 +1929,13 @@
         "how do i set up 4 wallet consolidation",
         "set up 4 wallet consolidation",
         "three address protocol",
+        "architecture",
         "what is tap",
         "tap wallet architecture",
+        "wallet roles",
+        "wallet security architecture",
+        "how does wallet architecture work",
+        "what is wallet architecture",
         "vault wallet",
         "transaction wallet",
         "minting wallet",
