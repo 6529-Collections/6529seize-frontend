@@ -101,6 +101,10 @@ const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>([
   [AboutSection.MISSION, "about.contents.pages.mission"],
 ]);
 
+const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
+  [AboutSection.GRADIENTS, "about.contents.documentTitles.gradient"],
+]);
+
 function getAboutSectionLabel(
   section: AboutSection | undefined,
   locale: SupportedLocale
@@ -118,9 +122,26 @@ function getAboutSectionLabel(
   return t(locale, "about.contents.aboutFallback");
 }
 
+function getAboutSectionDocumentTitle(
+  section: AboutSection | undefined,
+  locale: SupportedLocale
+): string {
+  if (section === undefined) {
+    return getAboutSectionLabel(section, locale);
+  }
+
+  const titleKey = ABOUT_SECTION_DOCUMENT_TITLE_KEYS.get(section);
+
+  if (titleKey !== undefined) {
+    return t(locale, titleKey);
+  }
+
+  return getAboutSectionLabel(section, locale);
+}
+
 export default function About({ section }: { readonly section: AboutSection }) {
   const locale = DEFAULT_LOCALE;
-  const sectionTitle = getAboutSectionLabel(section, locale);
+  const sectionTitle = getAboutSectionDocumentTitle(section, locale);
   useSetTitle(
     t(locale, "about.contents.documentTitle", { section: sectionTitle })
   );

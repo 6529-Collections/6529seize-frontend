@@ -535,6 +535,7 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   triggerAriaLabel: "Open About contents navigation. Current page: {page}",
   currentItemAriaLabel: "{page}, current About page",
   itemAriaLabel: "Go to About page: {page}",
+  "documentTitles.gradient": "6529 Gradient",
   "pages.mission": "Mission",
   "pages.theMemes": "The Memes",
   "pages.subscriptions": "Subscriptions",
