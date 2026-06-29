@@ -461,15 +461,14 @@ describe("BrainLeftSidebarWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(getWaveRow()).toHaveClass("tw-pl-[82px]");
-    expect(getWaveRow()).toHaveClass("md:tw-pl-[78px]");
+    expect(getWaveRow()).toHaveClass("tw-pl-[74px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-[70px]");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );
     const rail = getWaveRow().querySelector(".tw-w-px");
     expect(rail).not.toBeNull();
-    expect(rail).toHaveClass("tw-left-14");
-    expect(rail).toHaveClass("md:tw-left-[52px]");
+    expect(rail).toHaveClass("tw-left-[35.5px]");
     expect(rail).toHaveClass("-tw-top-1");
     expect(rail).toHaveClass("tw-bottom-4");
     expect(getWaveRow()).toHaveClass("tw-items-center");
