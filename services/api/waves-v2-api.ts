@@ -418,17 +418,12 @@ export async function searchWavesByName({
   readonly pageSize?: number | undefined;
   readonly headers?: Record<string, string> | undefined;
 }): Promise<SidebarWave[]> {
-  let completedSearches = 0;
-  let failedSearches = 0;
   let primarySearchError: unknown;
-  let firstSearchError: unknown;
 
   try {
     return await searchWavesV2ByName({ name, pageSize, headers });
   } catch (error) {
-    failedSearches += 1;
     primarySearchError = error;
-    firstSearchError ??= error;
     // Fall back while older API deployments still reject v2 SEARCH by name.
   }
 
@@ -438,22 +433,14 @@ export async function searchWavesByName({
       pageSize,
       headers,
     });
-    completedSearches += 1;
     if (waves.length > 0) {
       return waves;
     }
   } catch (error) {
-    failedSearches += 1;
-    firstSearchError ??= error;
+    throw createWaveSearchUnavailableError(primarySearchError ?? error);
   }
 
-  if (completedSearches === 0 || failedSearches > 0) {
-    throw createWaveSearchUnavailableError(
-      primarySearchError ?? firstSearchError
-    );
-  }
-
-  return [];
+  throw createWaveSearchUnavailableError(primarySearchError);
 }
 
 export async function fetchWaveSubwavesPage({

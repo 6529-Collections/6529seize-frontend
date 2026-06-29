@@ -77,7 +77,7 @@ export function useWaves({
     queryKey: [QueryKey.WAVES, debouncedParams],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const queryParams: Record<string, string> = {};
-      queryParams["limit"] = `${limit}`;
+      queryParams["limit"] = `${debouncedParams.limit}`;
 
       if (typeof pageParam === "number") {
         queryParams["serial_no_less_than"] = `${pageParam}`;
@@ -107,7 +107,7 @@ export function useWaves({
     queryKey: [QueryKey.WAVES_PUBLIC, debouncedParams],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const queryParams: Record<string, string> = {};
-      queryParams["limit"] = `${limit}`;
+      queryParams["limit"] = `${debouncedParams.limit}`;
 
       if (typeof pageParam === "number") {
         queryParams["serial_no_less_than"] = `${pageParam}`;
