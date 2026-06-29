@@ -10,7 +10,11 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
-import { getVisibleAboutNavGroups } from "./about.routes";
+import {
+  getAboutNavItemHref,
+  getAboutNavItemId,
+  getVisibleAboutNavGroups,
+} from "./about.routes";
 
 export default function AboutIndex() {
   const locale = DEFAULT_LOCALE;
@@ -60,8 +64,8 @@ export default function AboutIndex() {
 
                         return (
                           <Link
-                            key={item.section}
-                            href={`/about/${item.section}`}
+                            key={getAboutNavItemId(item)}
+                            href={getAboutNavItemHref(item)}
                             aria-label={t(locale, "about.index.cardAriaLabel", {
                               page: label,
                             })}

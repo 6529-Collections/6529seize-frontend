@@ -33,9 +33,12 @@ import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTech from "./tech/AboutTech";
 import AboutTermsOfService from "./AboutTermsOfService";
 import {
+  getAboutNavItemHref,
+  getAboutNavItemId,
   getAboutSectionDocumentTitle,
   getAboutSectionLabel,
   getVisibleAboutNavGroups,
+  isAboutSectionNavItem,
 } from "./about.routes";
 
 export default function About({ section }: { readonly section: AboutSection }) {
@@ -131,12 +134,13 @@ export function AboutContentsDropdown({
     },
     ...group.items.map((item): CompactMenuItem => {
       const label = t(locale, item.labelKey);
-      const isCurrent = currentSection === item.section;
+      const isCurrent =
+        isAboutSectionNavItem(item) && currentSection === item.section;
 
       return {
-        id: item.section,
+        id: getAboutNavItemId(item),
         label,
-        href: `/about/${item.section}`,
+        href: getAboutNavItemHref(item),
         icon: isCurrent ? (
           <CheckIcon
             className="tw-size-4 tw-flex-shrink-0"

@@ -534,7 +534,7 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   documentTitle: "{section} | About",
   triggerAriaLabel: "Open About contents navigation. Current page: {page}",
   currentItemAriaLabel: "{page}, current About page",
-  itemAriaLabel: "Go to About page: {page}",
+  itemAriaLabel: "Go to page: {page}",
   "documentTitles.gradient": "6529 Gradient",
   "groups.collections": "Collections",
   "groups.delegation": "Delegation",
@@ -549,6 +549,8 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   "pages.gdrc": "GDRC",
   "pages.nftDelegation": "NFT Delegation",
   "pages.primaryAddress": "Primary Address",
+  "pages.tdh": "TDH",
+  "pages.xtdh": "xTDH",
   "pages.faq": "FAQ",
   "pages.ens": "ENS",
   "pages.minting": "Minting",
@@ -571,6 +573,9 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   "descriptions.gdrc": "Global Delegation Rights Contract notes and context.",
   "descriptions.nftDelegation": "How NFT delegation works across 6529.",
   "descriptions.primaryAddress": "Set and understand primary wallet addresses.",
+  "descriptions.tdh":
+    "Total Days Held, calculation rules, and network context.",
+  "descriptions.xtdh": "How xTDH extends TDH through grants and allocations.",
   "descriptions.faq": "Common questions about collections, minting, and 6529.",
   "descriptions.ens": "ENS details and 6529 naming context.",
   "descriptions.minting": "Minting frequency, mechanics, and expectations.",
@@ -594,7 +599,7 @@ const ABOUT_INDEX_MESSAGES = objectMessages("about.index", {
   eyebrow: "About",
   title: "About 6529",
   lead: "Find the right About page for collections, delegation, technical notes, policies, and ways to connect.",
-  cardAriaLabel: "Open About page: {page}",
+  cardAriaLabel: "Open page: {page}",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
