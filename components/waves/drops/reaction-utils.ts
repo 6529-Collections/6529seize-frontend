@@ -2,6 +2,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
+import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
 
 type ReactionEntry = {
   reaction: string;
@@ -208,10 +209,12 @@ export const toProfileMin = (
 
 type StructuredReactionError = Error & {
   status?: unknown;
+  headers?: unknown;
   response?: {
     status?: unknown;
     statusText?: unknown;
     body?: unknown;
+    headers?: unknown;
   } | null;
 };
 
@@ -306,14 +309,38 @@ const getStructuredReactionStatus = (
   return null;
 };
 
+const formatRetryAfterDuration = (retryAfterMs: number): string => {
+  const seconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
+  if (seconds < 60) {
+    return `${seconds} ${seconds === 1 ? "second" : "seconds"}`;
+  }
+
+  const minutes = Math.ceil(seconds / 60);
+  return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+};
+
+const getRateLimitReactionMessage = (
+  error: StructuredReactionError
+): string => {
+  const retryAfterMs = extractRetryAfterMs(error);
+  if (retryAfterMs !== null && retryAfterMs > 0) {
+    return `You are reacting too quickly. Try again in ${formatRetryAfterDuration(
+      retryAfterMs
+    )}.`;
+  }
+
+  return "You are reacting too quickly. Try again in a moment.";
+};
+
 const getEmptyStructuredReactionStatusMessage = (
+  error: StructuredReactionError,
   status: number | null
 ): string | null => {
   switch (status) {
     case 401:
       return "Unauthorized";
     case 429:
-      return "Too Many Requests";
+      return getRateLimitReactionMessage(error);
     case null:
       return null;
     default:
@@ -361,6 +388,11 @@ export const getReactionErrorMessage = (
 ): string => {
   if (error !== null && typeof error === "object") {
     const structuredError = error as StructuredReactionError;
+    const structuredStatus = getStructuredReactionStatus(structuredError);
+    if (structuredStatus === 429) {
+      return getRateLimitReactionMessage(structuredError);
+    }
+
     const structuredResponse = structuredError.response;
     if (structuredResponse !== null && structuredResponse !== undefined) {
       const structuredBody = structuredResponse.body;
@@ -375,7 +407,8 @@ export const getReactionErrorMessage = (
     }
 
     const statusMessage = getEmptyStructuredReactionStatusMessage(
-      getStructuredReactionStatus(structuredError)
+      structuredError,
+      structuredStatus
     );
     if (statusMessage) {
       return statusMessage;

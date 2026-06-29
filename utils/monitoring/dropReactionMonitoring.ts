@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import * as Sentry from "@sentry/nextjs";
 
@@ -480,6 +481,8 @@ export function recordReactionRequestFailed(
   const { statusCode, errorKind } = classifyReactionError(error);
   const latencyMs = now - (context.requestSentAt ?? context.startedAt);
   const errorMessage = toErrorMessage(error);
+  const retryAfterMs =
+    errorKind === "rate-limit" ? extractRetryAfterMs(error, now) : null;
 
   addReactionBreadcrumb(
     "reaction.request_failed",
@@ -489,11 +492,17 @@ export function recordReactionRequestFailed(
       latency_ms: latencyMs,
       error_kind: errorKind,
       error_message: errorMessage,
+      retry_after_ms: retryAfterMs ?? undefined,
     },
     "warning"
   );
 
   if (!result.isLatestMutation) {
+    return result;
+  }
+
+  if (errorKind === "rate-limit") {
+    clearActiveIntentForContext(context);
     return result;
   }
 
@@ -542,6 +551,7 @@ export function recordReactionRequestFailed(
       latency_ms: latencyMs,
       error_kind: errorKind,
       error_message: errorMessage,
+      retry_after_ms: retryAfterMs ?? undefined,
     },
   });
 
