@@ -14,6 +14,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
 import { type ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -21,7 +22,11 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
-import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
+import {
+  AUTH_TOKEN_CHANGED_EVENT,
+  getAuthJwt,
+  isAuthJwtUsable,
+} from "@/services/auth/auth.utils";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { getStableDeviceId } from "./stable-device-id";
@@ -399,6 +404,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { isCapacitor, isIos, isActive } = useCapacitor();
   const { connectedProfile } = useAuth();
+  const [, setAuthTokenRevision] = useState(0);
   const authJwt = getAuthJwt();
   const pushRegistrationAuthKey = isAuthJwtUsable(authJwt)
     ? getAuthTokenFingerprint(authJwt)
@@ -426,6 +432,27 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     activeAddressRef.current = address;
   }, [address]);
+
+  useEffect(() => {
+    if (typeof globalThis.addEventListener !== "function") {
+      return;
+    }
+
+    const handleAuthTokenChanged = () => {
+      setAuthTokenRevision((revision) => revision + 1);
+    };
+
+    globalThis.addEventListener(
+      AUTH_TOKEN_CHANGED_EVENT,
+      handleAuthTokenChanged
+    );
+    return () => {
+      globalThis.removeEventListener(
+        AUTH_TOKEN_CHANGED_EVENT,
+        handleAuthTokenChanged
+      );
+    };
+  }, []);
 
   const removeDeliveredNotifications = useCallback(
     async (notifications: PushNotificationSchema[]) => {
@@ -741,7 +768,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 operation: "registerPushNotification",
                 attempt: attemptNumber,
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-                status_code: statusCode,
+                status_code: statusCode ?? undefined,
                 profile_id: profileId ?? undefined,
                 platform: deviceInfo.platform,
               },
@@ -977,7 +1004,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             operation: "initializeNotifications",
           },
         });
-        initializationRef.current = null;
+        if (initializationRef.current === initializationKey) {
+          initializationRef.current = null;
+        }
       });
     }
   }, [

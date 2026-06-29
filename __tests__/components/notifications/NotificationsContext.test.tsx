@@ -45,6 +45,7 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
 jest.mock("@/services/auth/auth.utils", () => ({
+  AUTH_TOKEN_CHANGED_EVENT: "6529-auth-token-changed",
   getAuthJwt: jest.fn(() => "test-jwt"),
   isAuthJwtUsable: jest.fn(
     (jwt: string | null | undefined) =>
@@ -315,7 +316,7 @@ describe("push registration behavior", () => {
     getAuthJwt.mockReturnValue(null);
     isAuthJwtUsable.mockReturnValue(false);
 
-    const { registrationCallback, getRegistrationCallback, rerender } =
+    const { registrationCallback, getRegistrationCallback } =
       await setupRegistrationCallback();
 
     await act(async () => {
@@ -328,7 +329,7 @@ describe("push registration behavior", () => {
     isAuthJwtUsable.mockReturnValue(true);
 
     await act(async () => {
-      rerender();
+      globalThis.dispatchEvent(new Event("6529-auth-token-changed"));
     });
 
     await waitFor(() => {
