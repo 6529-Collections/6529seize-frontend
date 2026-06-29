@@ -357,11 +357,29 @@ jobs:
             echo "No Jest-related source or test files need coverage."
           fi
 
+      - name: Restore Next.js build cache
+        id: nextjs_build_cache
+        if: needs.plan.outputs.build_required == 'true'
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-node22-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-${{ github.event.pull_request.head.sha }}
+          restore-keys: |
+            ${{ runner.os }}-node22-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-
+            ${{ runner.os }}-node22-nextjs-
+
       - name: Build app
         if: needs.plan.outputs.build_required == 'true'
         env:
           NODE_ENV: "production"
         run: ./bin/6529 run build
+
+      - name: Save Next.js build cache
+        if: needs.plan.outputs.build_required == 'true' && steps.nextjs_build_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
 
       - name: Install Playwright browser
         if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true'
