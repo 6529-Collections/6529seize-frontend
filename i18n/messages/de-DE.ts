@@ -75,6 +75,7 @@ export const DE_DE_MESSAGES = {
   "quickDm.showAll": "Alle anzeigen",
   "quickDm.openConversation": "Konversation öffnen",
   "quickDm.openConversationAriaLabel": "Konversation mit {name} öffnen",
+  "quickDm.unreadPreview": "Neue Nachrichten",
   "quickDm.emptyTitle": "Noch keine Direktnachrichten",
   "quickDm.loadingStatus": "Direktnachrichten werden geladen",
   "quickDm.chatLoadError": "Diese Konversation konnte nicht geladen werden.",
