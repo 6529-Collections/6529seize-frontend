@@ -29,6 +29,8 @@ describe("instrumentation-client", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const observedWasmModuleCspUnsafeEvalMessage =
+    "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
   const sentryRouteParameterizationMessage =
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
@@ -191,6 +193,32 @@ describe("instrumentation-client", () => {
                 {
                   filename: "app:///inject.js",
                   abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops observed injected WebAssembly.Module CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "CompileError",
+            value: observedWasmModuleCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "///inject.js",
+                  abs_path: "///inject.js",
                 },
               ],
             },
