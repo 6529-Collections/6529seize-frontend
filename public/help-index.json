@@ -281,7 +281,11 @@
         "Gradient NFTs are treated differently: they have not been released under CC0, and the page warns against uses that could confuse people into thinking a product or service is offered by 6529."
       ],
       "canonical_path": "/about/license",
-      "related_paths": ["/about/the-memes", "/about/meme-lab", "/about/6529-gradient"],
+      "related_paths": [
+        "/about/the-memes",
+        "/about/meme-lab",
+        "/about/6529-gradient"
+      ],
       "tags": ["about", "license", "cc0"],
       "source_refs": ["components/about/AboutLicense.tsx"]
     },
@@ -316,7 +320,14 @@
         "delegation about page",
         "where do i start delegation"
       ],
-      "keywords": ["nft", "delegation", "delegate", "wallet", "center", "about"],
+      "keywords": [
+        "nft",
+        "delegation",
+        "delegate",
+        "wallet",
+        "center",
+        "about"
+      ],
       "facts": [
         "The NFT Delegation about page lives at /about/nft-delegation.",
         "The page sends users to the Delegation Center to get started with delegation."
@@ -390,10 +401,7 @@
         "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
       ],
       "canonical_path": "/about/tech",
-      "related_paths": [
-        "/about/tech/wallet-authentication",
-        "/about/faq"
-      ],
+      "related_paths": ["/about/tech/wallet-authentication", "/about/faq"],
       "tags": ["about", "tech", "reports"],
       "source_refs": ["components/about/tech/AboutTech.tsx"]
     },
@@ -2634,12 +2642,7 @@
       "id": "nextgen.pebbles",
       "kind": "route",
       "title": "Pebbles",
-      "aliases": [
-        "pebbles",
-        "pebble",
-        "nextgen pebbles",
-        "pebbles collection"
-      ],
+      "aliases": ["pebbles", "pebble", "nextgen pebbles", "pebbles collection"],
       "keywords": [
         "pebbles",
         "pebble",
@@ -5107,7 +5110,12 @@
       "id": "gradients.collection",
       "kind": "route",
       "title": "6529 Gradient collection",
-      "aliases": ["6529 gradient", "gradients", "gradient", "gradient collection"],
+      "aliases": [
+        "6529 gradient",
+        "gradients",
+        "gradient",
+        "gradient collection"
+      ],
       "keywords": ["gradient", "gradients", "collection", "nft"],
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",

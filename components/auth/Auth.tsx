@@ -1836,9 +1836,7 @@ export default function Auth({
     }
     void requestAuth();
   };
-  const onSessionUpgradeLearnMore = (
-    event: MouseEvent<HTMLAnchorElement>
-  ) => {
+  const onSessionUpgradeLearnMore = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     onCancelSignRequest();
     router.push("/about/tech/wallet-authentication");
