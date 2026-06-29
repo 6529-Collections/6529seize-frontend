@@ -378,18 +378,16 @@ async function searchWavesV2ByName({
 }
 
 async function searchLegacyWavesByName({
-  endpoint,
   name,
   pageSize,
   headers,
 }: {
-  readonly endpoint: "waves" | "waves-public";
   readonly name: string;
   readonly pageSize: number;
   readonly headers?: Record<string, string> | undefined;
 }): Promise<SidebarWave[]> {
   const waves = await commonApiFetch<ApiWave[]>({
-    endpoint,
+    endpoint: "waves",
     params: {
       name,
       limit: `${pageSize}`,
@@ -420,60 +418,24 @@ export async function searchWavesByName({
   readonly pageSize?: number | undefined;
   readonly headers?: Record<string, string> | undefined;
 }): Promise<SidebarWave[]> {
-  let completedSearches = 0;
-  let failedSearches = 0;
   let primarySearchError: unknown;
-  let firstSearchError: unknown;
 
   try {
     return await searchWavesV2ByName({ name, pageSize, headers });
   } catch (error) {
-    failedSearches += 1;
     primarySearchError = error;
-    firstSearchError ??= error;
     // Fall back while older API deployments still reject v2 SEARCH by name.
   }
 
   try {
-    const waves = await searchLegacyWavesByName({
-      endpoint: "waves",
+    return await searchLegacyWavesByName({
       name,
       pageSize,
       headers,
     });
-    completedSearches += 1;
-    if (waves.length > 0) {
-      return waves;
-    }
   } catch (error) {
-    failedSearches += 1;
-    firstSearchError ??= error;
-    // Public search is the last fallback for unauthenticated sessions.
+    throw createWaveSearchUnavailableError(primarySearchError ?? error);
   }
-
-  try {
-    const waves = await searchLegacyWavesByName({
-      endpoint: "waves-public",
-      name,
-      pageSize,
-      headers,
-    });
-    completedSearches += 1;
-    if (waves.length > 0) {
-      return waves;
-    }
-  } catch (error) {
-    failedSearches += 1;
-    firstSearchError ??= error;
-  }
-
-  if (completedSearches === 0 || failedSearches > 0) {
-    throw createWaveSearchUnavailableError(
-      primarySearchError ?? firstSearchError
-    );
-  }
-
-  return [];
 }
 
 export async function fetchWaveSubwavesPage({
