@@ -140,6 +140,16 @@ const REACT_DOM_RUNTIME_FRAME_PATTERNS = [
   "react-dom/cjs/react-dom-client.production.js",
   "react-dom-client.production.js",
 ];
+const NEXT_STATIC_CHUNK_FRAME_PATTERNS = [
+  "/_next/static/chunks/",
+  "/_next/static/webpack/",
+];
+const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
+  "insertOrAppendPlacementNode",
+  "commitReconciliationEffects",
+  "commitMutationEffectsOnFiber",
+  "recursivelyTraverseMutationEffects",
+]);
 const WAVES_ROUTE_PATH = "/waves";
 
 const sentryRouteParameterizationMechanismType =
@@ -212,8 +222,24 @@ function getFramePaths(frame: SentryStackFrame): string[] {
 
 function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
   const paths = getFramePaths(frame);
+  if (
+    paths.some((path) =>
+      REACT_DOM_RUNTIME_FRAME_PATTERNS.some((pattern) => path.includes(pattern))
+    )
+  ) {
+    return true;
+  }
+
+  const functionName = frame.function?.trim();
+  if (
+    !functionName ||
+    !REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS.has(functionName)
+  ) {
+    return false;
+  }
+
   return paths.some((path) =>
-    REACT_DOM_RUNTIME_FRAME_PATTERNS.some((pattern) => path.includes(pattern))
+    NEXT_STATIC_CHUNK_FRAME_PATTERNS.some((pattern) => path.includes(pattern))
   );
 }
 
