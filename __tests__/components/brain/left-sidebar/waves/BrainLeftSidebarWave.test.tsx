@@ -469,6 +469,7 @@ describe("BrainLeftSidebarWave", () => {
     const rail = getWaveRow().querySelector(".tw-w-px");
     expect(rail).not.toBeNull();
     expect(rail).toHaveClass("tw-left-[35.5px]");
+    expect(rail).not.toHaveClass("md:tw-left-[52px]");
     expect(rail).toHaveClass("-tw-top-1");
     expect(rail).toHaveClass("tw-bottom-4");
     expect(getWaveRow()).toHaveClass("tw-items-center");
