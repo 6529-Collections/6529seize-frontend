@@ -6,7 +6,10 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React, { useCallback, useRef, useState } from "react";
+import { useContainedImageBoundsStyle } from "./containedImageBounds";
 import { InlineMediaActions } from "./MediaActionToolbar";
 import {
   ImageMediaModal,
@@ -41,40 +44,17 @@ function LoadingPlaceholder({
   );
 }
 
-function ImageButton({
-  children,
-  intrinsicHeight,
-  onClick,
-}: {
-  readonly children: React.ReactNode;
-  readonly intrinsicHeight: boolean;
-  readonly onClick: React.MouseEventHandler<HTMLButtonElement>;
-}) {
-  return (
-    <button
-      type="button"
-      className={`tw-border-0 tw-bg-transparent tw-p-0 ${
-        intrinsicHeight
-          ? "tw-block tw-w-full"
-          : "tw-absolute tw-inset-0 tw-h-full tw-w-full"
-      }`}
-      onClick={onClick}
-      aria-label="Open image preview"
-    >
-      {children}
-    </button>
-  );
-}
-
 function RetryImageMessage({ onRetry }: { readonly onRetry: () => void }) {
   return (
     <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2">
-      <span className="tw-text-sm tw-text-iron-400">Couldn’t load image.</span>
+      <span className="tw-text-sm tw-text-iron-400">
+        {t(DEFAULT_LOCALE, "drop.media.loadFailed")}
+      </span>
       <button
         onClick={onRetry}
         className="tw-rounded-md tw-bg-iron-700 tw-px-3 tw-py-1 tw-text-xs tw-text-white hover:tw-bg-iron-600"
       >
-        Retry
+        {t(DEFAULT_LOCALE, "drop.media.retry")}
       </button>
     </div>
   );
@@ -83,59 +63,77 @@ function RetryImageMessage({ onRetry }: { readonly onRetry: () => void }) {
 function DropImageContent({
   src,
   primarySrc,
-  currentSrc,
   retryTick,
   imgRef,
   loaded,
-  disableModal,
   intrinsicHeight,
   loadStrategy,
   resolvedObjectPosition,
   handleImageLoad,
-  handleImageClick,
   handleIntrinsicImageError,
   handleError,
 }: {
   readonly src: string;
   readonly primarySrc: string;
-  readonly currentSrc: string;
   readonly retryTick: number;
   readonly imgRef: React.RefObject<HTMLImageElement | null>;
   readonly loaded: boolean;
-  readonly disableModal: boolean;
   readonly intrinsicHeight: boolean;
   readonly loadStrategy: MediaLoadStrategy;
   readonly resolvedObjectPosition: string;
   readonly handleImageLoad: () => void;
-  readonly handleImageClick: React.MouseEventHandler<HTMLButtonElement>;
   readonly handleIntrinsicImageError: () => void;
   readonly handleError: () => void;
 }) {
+  const [aspectRatio, setAspectRatio] = useState<string | undefined>();
   const imageClassName = `${
-    intrinsicHeight ? "tw-max-w-full" : "tw-max-h-full tw-max-w-full"
-  } ${
-    loaded ? "tw-opacity-100" : "tw-opacity-0"
-  } ${disableModal ? "" : "tw-cursor-pointer"}`;
+    intrinsicHeight
+      ? "tw-max-h-64 tw-max-w-full"
+      : "tw-max-h-full tw-max-w-full"
+  } ${loaded ? "tw-opacity-100" : "tw-opacity-0"}`;
 
-  const image = intrinsicHeight ? (
-    <img
-      key={retryTick}
-      ref={imgRef}
-      src={currentSrc}
-      alt="Drop media"
-      loading={loadStrategy === "eager" ? "eager" : "lazy"}
-      className={`tw-block tw-h-auto tw-max-h-64 tw-w-full tw-object-contain ${imageClassName}`}
-      style={{ objectPosition: resolvedObjectPosition }}
-      onLoad={handleImageLoad}
-      onError={handleIntrinsicImageError}
-    />
+  const handleIntrinsicImageLoad = useCallback(
+    (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+      const { naturalHeight, naturalWidth } = event.currentTarget;
+
+      if (naturalHeight > 0 && naturalWidth > 0) {
+        setAspectRatio(`${naturalWidth} / ${naturalHeight}`);
+      }
+
+      handleImageLoad();
+    },
+    [handleImageLoad]
+  );
+
+  return intrinsicHeight ? (
+    <span
+      className="tw-relative tw-block tw-min-h-px tw-w-full tw-max-w-full tw-overflow-hidden"
+      style={{ aspectRatio, maxHeight: "16rem" }}
+    >
+      {/* Drop media can come from hosts outside next.config.ts image remotePatterns. */}
+      <FallbackImage
+        key={retryTick}
+        ref={imgRef}
+        primarySrc={primarySrc}
+        fallbackSrc={src}
+        alt={t(DEFAULT_LOCALE, "drop.media.alt")}
+        fill
+        optimize={false}
+        loading={loadStrategy === "eager" ? "eager" : undefined}
+        sizes="(max-width: 768px) 100vw, 768px"
+        className={`tw-object-contain ${imageClassName}`}
+        style={{ objectPosition: resolvedObjectPosition }}
+        onLoad={handleIntrinsicImageLoad}
+        onError={handleIntrinsicImageError}
+      />
+    </span>
   ) : (
     <FallbackImage
       key={retryTick}
       ref={imgRef}
       primarySrc={primarySrc}
       fallbackSrc={src}
-      alt="Drop media"
+      alt={t(DEFAULT_LOCALE, "drop.media.alt")}
       optimize={false}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -149,29 +147,36 @@ function DropImageContent({
       onError={handleError}
     />
   );
+}
 
-  if (disableModal) {
-    return image;
-  }
-
+function ImageInteractionLayer({
+  actions,
+  boundsStyle,
+  label,
+  onClick,
+}: {
+  readonly actions: React.ReactNode;
+  readonly boundsStyle: React.CSSProperties | null;
+  readonly label: string;
+  readonly onClick: React.MouseEventHandler<HTMLButtonElement>;
+}) {
   return (
-    <ImageButton intrinsicHeight={intrinsicHeight} onClick={handleImageClick}>
-      {image}
-    </ImageButton>
+    <div
+      className="tw-group/media tw-pointer-events-none tw-absolute tw-z-20"
+      style={boundsStyle ?? { inset: 0 }}
+    >
+      <button
+        type="button"
+        className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        onClick={onClick}
+        aria-label={label}
+      />
+      {actions}
+    </div>
   );
 }
 
-function DropListItemContentMediaImage({
-  src,
-  maxRetries = 0,
-  isCompetitionDrop = false,
-  disableModal = false,
-  imageObjectPosition,
-  imageScale = ImageScale.AUTOx450,
-  loadStrategy = "in-view",
-  intrinsicHeight = false,
-  galleryItemId,
-}: {
+type DropListItemContentMediaImageProps = {
   readonly src: string;
   readonly maxRetries?: number | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
@@ -181,7 +186,34 @@ function DropListItemContentMediaImage({
   readonly loadStrategy?: MediaLoadStrategy | undefined;
   readonly intrinsicHeight?: boolean | undefined;
   readonly galleryItemId?: string | undefined;
-}) {
+};
+
+function DropListItemContentMediaImage({
+  src,
+  imageScale = ImageScale.AUTOx450,
+  ...props
+}: DropListItemContentMediaImageProps) {
+  return (
+    <DropListItemContentMediaImageContent
+      key={`${src}:${imageScale}`}
+      src={src}
+      imageScale={imageScale}
+      {...props}
+    />
+  );
+}
+
+function DropListItemContentMediaImageContent({
+  src,
+  maxRetries = 0,
+  isCompetitionDrop = false,
+  disableModal = false,
+  imageObjectPosition,
+  imageScale,
+  loadStrategy = "in-view",
+  intrinsicHeight = false,
+  galleryItemId,
+}: DropListItemContentMediaImageProps & { readonly imageScale: ImageScale }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -191,15 +223,17 @@ function DropListItemContentMediaImage({
   const { hasTouchScreen } = useDeviceInfo();
   const imageGallery = useDropImageGallery();
 
+  const imageFrameRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
       fallbackFileName: "image",
-      dialogTitle: "Save image",
+      dialogTitle: t(DEFAULT_LOCALE, "drop.media.saveDialogTitle"),
       mimeType: "image",
     });
+  const primarySrc = getScaledImageUri(src, imageScale);
 
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
@@ -214,11 +248,11 @@ function DropListItemContentMediaImage({
     }, delay);
   }, [errorCount, maxRetries]);
 
-  const manualRetry = () => {
+  const manualRetry = useCallback(() => {
     setErrorCount(0);
     setLoaded(false);
     setRetryTick((t) => t + 1);
-  };
+  }, []);
 
   const openModal = useCallback(() => {
     if (disableModal) {
@@ -267,26 +301,15 @@ function DropListItemContentMediaImage({
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
-  const primarySrc = getScaledImageUri(src, imageScale);
-  const [currentSrc, setCurrentSrc] = useState(primarySrc);
-  const [usedFallback, setUsedFallback] = useState(false);
-
-  React.useEffect(() => {
-    setCurrentSrc(primarySrc);
-    setUsedFallback(false);
-  }, [primarySrc]);
-
+  const imageActionBoundsStyle = useContainedImageBoundsStyle({
+    containerRef: imageFrameRef,
+    imageRef: imgRef,
+    loaded,
+    objectPosition: resolvedObjectPosition,
+  });
   const handleIntrinsicImageError = useCallback(() => {
-    if (!usedFallback) {
-      if (currentSrc !== src) {
-        setCurrentSrc(src);
-        setUsedFallback(true);
-        return;
-      }
-    }
-
     handleError();
-  }, [currentSrc, handleError, src, usedFallback]);
+  }, [handleError]);
 
   return (
     <>
@@ -296,39 +319,53 @@ function DropListItemContentMediaImage({
           intrinsicHeight ? "tw-min-h-40" : "tw-h-full"
         } ${isCompetitionDrop ? "tw-justify-center" : ""}`}
       >
-        {!disableModal && (
-          <InlineMediaActions
-            variant="image"
-            onOpen={openMedia}
-            openLabel={openLabel}
-            onDownload={downloadMedia}
-            isDownloading={isDownloading}
-            onFullscreen={handleFullScreen}
-            fullscreenTargetAvailable={!isCapacitor}
-          />
-        )}
         {!loaded && errorCount <= maxRetries && (
           <LoadingPlaceholder hasTouchScreen={hasTouchScreen} />
         )}
 
-        {shouldLoadImage && errorCount <= maxRetries && (
-          <DropImageContent
-            src={src}
-            primarySrc={primarySrc}
-            currentSrc={currentSrc}
-            retryTick={retryTick}
-            imgRef={imgRef}
-            loaded={loaded}
-            disableModal={disableModal}
-            intrinsicHeight={intrinsicHeight}
-            loadStrategy={loadStrategy}
-            resolvedObjectPosition={resolvedObjectPosition}
-            handleImageLoad={handleImageLoad}
-            handleImageClick={handleImageClick}
-            handleIntrinsicImageError={handleIntrinsicImageError}
-            handleError={handleError}
-          />
-        )}
+        <div
+          ref={imageFrameRef}
+          className={`tw-relative ${
+            intrinsicHeight ? "tw-w-full" : "tw-h-full tw-w-full"
+          }`}
+        >
+          {shouldLoadImage && errorCount <= maxRetries && (
+            <DropImageContent
+              src={src}
+              primarySrc={primarySrc}
+              retryTick={retryTick}
+              imgRef={imgRef}
+              loaded={loaded}
+              intrinsicHeight={intrinsicHeight}
+              loadStrategy={loadStrategy}
+              resolvedObjectPosition={resolvedObjectPosition}
+              handleImageLoad={handleImageLoad}
+              handleIntrinsicImageError={handleIntrinsicImageError}
+              handleError={handleError}
+            />
+          )}
+          {!disableModal && (
+            <ImageInteractionLayer
+              boundsStyle={imageActionBoundsStyle}
+              label={t(DEFAULT_LOCALE, "drop.media.openPreview")}
+              onClick={handleImageClick}
+              actions={
+                loaded ? (
+                  <InlineMediaActions
+                    variant="image"
+                    onOpen={openMedia}
+                    openLabel={openLabel}
+                    onDownload={downloadMedia}
+                    isDownloading={isDownloading}
+                    onFullscreen={handleFullScreen}
+                    fullscreenTargetAvailable={!isCapacitor}
+                    visibility="desktop-hover"
+                  />
+                ) : null
+              }
+            />
+          )}
+        </div>
         {errorCount > maxRetries && <RetryImageMessage onRetry={manualRetry} />}
       </div>
       {!disableModal && isModalOpen && (

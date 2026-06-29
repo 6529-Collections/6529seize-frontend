@@ -1,7 +1,27 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react";
+import React, { createElement, forwardRef, type ComponentProps } from "react";
 import DropListItemContentMediaImage from "@/components/drops/view/item/content/media/DropListItemContentMediaImage";
 import useCapacitor from "@/hooks/useCapacitor";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
+type MockNextImageProps = ComponentProps<"img"> & {
+  readonly fill?: boolean | undefined;
+  readonly unoptimized?: boolean | undefined;
+};
+
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: forwardRef<HTMLImageElement, MockNextImageProps>(
+    // eslint-disable-next-line react/display-name
+    ({ fill: _fill, unoptimized: _unoptimized, alt, ...rest }, ref) =>
+      createElement("img", {
+        ...rest,
+        ref,
+        alt: alt ?? "",
+        "data-nimg": _fill ? "fill" : undefined,
+      })
+  ),
+}));
 
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: (_src: string) => _src,
@@ -17,12 +37,18 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: jest.fn(() => ({ isCapacitor: false })),
 }));
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ hasTouchScreen: false })),
+}));
+
 jest.mock("@/hooks/useInView", () => ({
   useInView: () => [jest.fn(), true],
 }));
 
 beforeEach(() => {
   (useCapacitor as jest.Mock).mockReturnValue({ isCapacitor: false });
+  (useDeviceInfo as jest.Mock).mockReturnValue({ hasTouchScreen: false });
 
   (globalThis as any).ResizeObserver = class {
     observe() {
@@ -39,7 +65,7 @@ describe("DropListItemContentMediaImage", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
-    fireEvent.click(img);
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
     const modalImage = screen.getByAltText("Full size drop media");
     expect(modalImage).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("modal-backdrop"));
@@ -52,7 +78,7 @@ describe("DropListItemContentMediaImage", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
-    fireEvent.click(img);
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
     fireEvent.click(screen.getByTestId("modal-backdrop"));
 
@@ -65,7 +91,7 @@ describe("DropListItemContentMediaImage", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
-    fireEvent.click(img);
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
     const modalImage = screen.getByAltText("Full size drop media");
     Object.defineProperty(modalImage, "naturalWidth", {
@@ -99,7 +125,7 @@ describe("DropListItemContentMediaImage", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
-    fireEvent.click(img);
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
     const modalImage = screen.getByAltText("Full size drop media");
     Object.defineProperty(modalImage, "naturalWidth", {
@@ -156,7 +182,31 @@ describe("DropListItemContentMediaImage", () => {
     expect(requestFullscreen).not.toHaveBeenCalled();
   });
 
-  it("renders intrinsic-height images without the fill container height", () => {
+  it("keeps desktop-hover actions mounted when image bounds are unmeasured", () => {
+    render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
+
+    fireEvent.load(screen.getByAltText("Drop media"));
+
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
+  });
+
+  it("exposes media actions from the modal after tapping on touch devices", () => {
+    (useDeviceInfo as jest.Mock).mockReturnValue({ hasTouchScreen: true });
+
+    render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
+
+    fireEvent.load(screen.getByAltText("Drop media"));
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
+
+    expect(screen.getByAltText("Full size drop media")).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", { name: "Download media" }).length
+    ).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders intrinsic-height images in a natural-height frame", () => {
     const { container } = render(
       <DropListItemContentMediaImage src="img" intrinsicHeight />
     );
@@ -166,9 +216,14 @@ describe("DropListItemContentMediaImage", () => {
 
     expect(wrapper).toHaveClass("tw-w-full", "tw-min-h-40");
     expect(wrapper).not.toHaveClass("tw-h-full");
-    expect(img).toHaveClass("tw-h-auto", "tw-w-full", "tw-max-h-64");
+    expect(img).toHaveClass(
+      "tw-object-contain",
+      "tw-max-h-64",
+      "tw-max-w-full"
+    );
+    expect(img).not.toHaveClass("tw-w-full");
     expect(img).not.toHaveClass("tw-max-h-full");
-    expect(img).not.toHaveAttribute("data-nimg", "fill");
+    expect(img).toHaveAttribute("data-nimg", "fill");
   });
 
   it("retries intrinsic-height images instead of swapping to the same fallback source", () => {
@@ -179,6 +234,7 @@ describe("DropListItemContentMediaImage", () => {
       <DropListItemContentMediaImage src="img" intrinsicHeight maxRetries={1} />
     );
 
+    fireEvent.error(screen.getByAltText("Drop media"));
     fireEvent.error(screen.getByAltText("Drop media"));
 
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 500);
