@@ -1724,7 +1724,7 @@ describe("Auth component", () => {
       expect(verifiedAddresses).not.toContain(liveProviderAddress);
     });
 
-    it("fails closed when context web-session verification errors without changing upgrade state", async () => {
+    it("does not change session upgrade state when context web-session verification errors", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       const authUtils = require("@/services/auth/auth.utils");
