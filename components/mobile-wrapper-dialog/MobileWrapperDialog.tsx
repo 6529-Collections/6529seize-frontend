@@ -52,19 +52,30 @@ function DialogHeader({
   onClose,
   className,
   headerActions,
+  showHeaderCloseButton,
+  headerCloseButtonClassName,
+  titleClassName,
 }: {
   readonly title: string | undefined;
   readonly showDesktopCloseButton: boolean;
   readonly onClose: () => void;
   readonly className?: string | undefined;
   readonly headerActions?: React.ReactNode;
+  readonly showHeaderCloseButton?: boolean | undefined;
+  readonly headerCloseButtonClassName?: string | undefined;
+  readonly titleClassName?: string | undefined;
 }) {
   return (
     <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2">
           {title && (
-            <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
+            <DialogTitle
+              className={clsx(
+                "tw-text-base tw-font-semibold tw-text-iron-50",
+                titleClassName
+              )}
+            >
               {title}
             </DialogTitle>
           )}
@@ -76,6 +87,12 @@ function DialogHeader({
           <DialogCloseButton
             onClick={onClose}
             className="tw-hidden md:tw-inline-flex"
+          />
+        )}
+        {showHeaderCloseButton && (
+          <DialogCloseButton
+            onClick={onClose}
+            className={clsx("tw-inline-flex", headerCloseButtonClassName)}
           />
         )}
       </div>
@@ -142,6 +159,11 @@ export default function MobileWrapperDialog({
   headerClassName,
   headerActions,
   mobileCloseButtonClassName,
+  showDragHandle,
+  showHeaderCloseButton,
+  headerCloseButtonClassName,
+  surfaceClassName,
+  titleClassName,
   dismissible = true,
 }: {
   readonly title?: string | undefined;
@@ -161,6 +183,11 @@ export default function MobileWrapperDialog({
   readonly headerClassName?: string | undefined;
   readonly headerActions?: React.ReactNode;
   readonly mobileCloseButtonClassName?: string | undefined;
+  readonly showDragHandle?: boolean | undefined;
+  readonly showHeaderCloseButton?: boolean | undefined;
+  readonly headerCloseButtonClassName?: string | undefined;
+  readonly surfaceClassName?: string | undefined;
+  readonly titleClassName?: string | undefined;
   readonly dismissible?: boolean | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
@@ -190,7 +217,8 @@ export default function MobileWrapperDialog({
 
   const slideTransition = getSlideTransition(tabletModal);
 
-  const showDesktopHeaderCloseButton = dismissible && !!tabletModal;
+  const showDesktopHeaderCloseButton =
+    dismissible && !!tabletModal && !showHeaderCloseButton;
 
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
@@ -231,7 +259,7 @@ export default function MobileWrapperDialog({
                   style={{ touchAction: "manipulation" }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {dismissible && (
+                  {dismissible && !showHeaderCloseButton && (
                     <TransitionChild
                       as={Fragment}
                       enter="tw-duration-250 tw-ease-in-out"
@@ -258,7 +286,8 @@ export default function MobileWrapperDialog({
                   )}
                   <div
                     className={clsx(
-                      "tw-flex tw-flex-col tw-rounded-t-xl tw-bg-iron-950",
+                      "tw-flex tw-flex-col tw-rounded-t-xl",
+                      surfaceClassName ?? "tw-bg-iron-950",
                       allowOverflow
                         ? "tw-overflow-visible"
                         : "tw-overflow-hidden",
@@ -283,12 +312,22 @@ export default function MobileWrapperDialog({
                       )}
                       style={{ paddingBottom: bottomPadding }}
                     >
+                      {showDragHandle && (
+                        <div className="tw-flex tw-justify-center tw-pt-3">
+                          <div className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-[#37373E]" />
+                        </div>
+                      )}
                       <DialogHeader
                         title={title}
                         showDesktopCloseButton={showDesktopHeaderCloseButton}
                         onClose={handleClose}
                         className={headerClassName}
                         headerActions={headerActions}
+                        showHeaderCloseButton={
+                          dismissible && !!showHeaderCloseButton
+                        }
+                        headerCloseButtonClassName={headerCloseButtonClassName}
+                        titleClassName={titleClassName}
                       />
                       {children}
                     </div>
