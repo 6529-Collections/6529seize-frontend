@@ -5,12 +5,14 @@
 import AboutIndexPage from "@/app/about/page";
 import { render, screen } from "@testing-library/react";
 
+const mockSetTitle = jest.fn();
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 
 jest.mock("@/contexts/TitleContext", () => ({
-  useSetTitle: jest.fn(),
+  useSetTitle: () => mockSetTitle,
 }));
 
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -26,6 +28,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 describe("About index page", () => {
   beforeEach(() => {
     country = "US";
+    mockSetTitle.mockClear();
   });
 
   it("renders grouped About links at /about", () => {
@@ -43,11 +46,26 @@ describe("About index page", () => {
       screen.getByRole("link", { name: /open page: the memes/i })
     ).toHaveAttribute("href", "/about/the-memes");
     expect(
+      screen.getByRole("link", { name: /open page: mission/i })
+    ).toHaveAttribute("href", "/about/mission");
+    expect(
       screen.getByRole("link", { name: /open page: tdh/i })
     ).toHaveAttribute("href", "/network/tdh");
     expect(
       screen.getByRole("link", { name: /open page: xtdh/i })
     ).toHaveAttribute("href", "/network/xtdh");
+    expect(
+      screen.getByRole("link", { name: /open page: health/i })
+    ).toHaveAttribute("href", "/network/health");
+    expect(
+      screen.getByRole("link", { name: /open page: definitions/i })
+    ).toHaveAttribute("href", "/network/definitions");
+    expect(
+      screen.getByRole("link", { name: /open page: levels/i })
+    ).toHaveAttribute("href", "/network/levels");
+    expect(
+      screen.getByRole("link", { name: /open page: network tdh/i })
+    ).toHaveAttribute("href", "/network/health/network-tdh");
   });
 
   it("does not render the sticky contents dropdown", () => {

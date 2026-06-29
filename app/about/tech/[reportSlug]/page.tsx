@@ -1,4 +1,4 @@
-import { AboutContentsDropdown } from "@/components/about/About";
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import TechReportPage from "@/components/about/tech/TechReportPage";
 import {
   TECH_PR_REPORTS,

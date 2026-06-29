@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 /* eslint-disable react/display-name */
 import AboutPage from "@/app/about/[section]/page";
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { AboutSection } from "@/types/enums";
 
 jest.mock("next/navigation", () => ({
@@ -135,6 +136,34 @@ describe("About contents dropdown", () => {
     expect(
       screen.getByRole("menuitem", { name: /go to page: xtdh/i })
     ).toHaveAttribute("href", "/network/xtdh");
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: health/i })
+    ).toHaveAttribute("href", "/network/health");
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: definitions/i })
+    ).toHaveAttribute("href", "/network/definitions");
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: levels/i })
+    ).toHaveAttribute("href", "/network/levels");
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: network tdh/i })
+    ).toHaveAttribute("href", "/network/health/network-tdh");
+  });
+
+  it("marks a network resource as current when rendered on that route", () => {
+    country = "US";
+    render(<AboutContentsDropdown currentHref="/network/health/network-tdh" />);
+
+    const trigger = screen.getByRole("button", {
+      name: /open about contents navigation/i,
+    });
+    expect(trigger).toHaveTextContent("Network TDH");
+
+    openContentsMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: /network tdh, current page/i })
+    ).toHaveAttribute("data-active", "true");
   });
 
   it("uses dropdown item styling without link underlines", async () => {
@@ -153,7 +182,7 @@ describe("About contents dropdown", () => {
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: /tech, current about page/i })
+      screen.getByRole("menuitem", { name: /tech, current page/i })
     ).toHaveAttribute("data-active", "true");
   });
 });
