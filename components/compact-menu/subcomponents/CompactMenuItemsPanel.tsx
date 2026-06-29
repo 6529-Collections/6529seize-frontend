@@ -67,7 +67,6 @@ export function CompactMenuItemsPanel({
           return (
             <div
               key={item.id}
-              role="presentation"
               className={clsx(
                 "tw-mt-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-3 tw-pb-1.5 tw-pt-3 first:tw-mt-0 first:tw-border-t-0 first:tw-pt-0",
                 item.className
