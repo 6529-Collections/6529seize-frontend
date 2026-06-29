@@ -120,6 +120,7 @@ const walletConnectMissingSessionTopicFunctions = new Set([
   "isValidSessionTopic",
   "onRelayMessage",
 ]);
+const stackLineLocationPattern = /\(([^)]+)\)/;
 const walletConnectPackagePathTokens = [
   "@walletconnect/",
   "@walletconnect+",
@@ -1144,18 +1145,47 @@ function isFirstPartySourcePath(path: string): boolean {
   );
 }
 
-function isAppOwnedWalletStackLine(value: string): boolean {
-  const normalizedValue = value.toLowerCase();
+function isFirstPartyStackLocation(path: string): boolean {
+  const normalizedPath = path.toLowerCase();
   if (
-    walletConnectPackagePathTokens.some((token) =>
-      normalizedValue.includes(token)
-    ) ||
-    normalizedValue.includes(nextStaticChunkPathToken)
+    !normalizedPath.startsWith("app:///") &&
+    !normalizedPath.startsWith("webpack://_n_e/./")
   ) {
     return false;
   }
 
-  return isFirstPartySourcePath(normalizedValue);
+  return isFirstPartySourcePath(path);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getStackLineLocation(value: string): string {
+  const parenthesizedLocation = stackLineLocationPattern.exec(value)?.[1];
+  if (parenthesizedLocation) {
+    return parenthesizedLocation;
+  }
+
+  const trimmedValue = value.trim();
+  return trimmedValue.startsWith("at ")
+    ? trimmedValue.slice("at ".length).trim()
+    : trimmedValue;
+}
+
+function isAppOwnedWalletStackLine(value: string): boolean {
+  const location = getStackLineLocation(value);
+  const normalizedLocation = location.toLowerCase();
+  if (
+    walletConnectPackagePathTokens.some((token) =>
+      normalizedLocation.includes(token)
+    ) ||
+    normalizedLocation.includes(nextStaticChunkPathToken)
+  ) {
+    return false;
+  }
+
+  return isFirstPartyStackLocation(location);
 }
 
 function hasAppOwnedWalletExceptionStack(hint?: SentryEventHint): boolean {
@@ -1195,15 +1225,27 @@ function getWalletConnectStackSignatureValues(
   );
 }
 
+function hasWalletConnectFunctionInStack(
+  stack: string,
+  functionName: string
+): boolean {
+  const escapedFunctionName = escapeRegExp(functionName);
+  return new RegExp(
+    `(?:^|\\n)\\s*at\\s+${escapedFunctionName}(?:\\s|\\()`
+  ).test(stack);
+}
+
 function hasWalletConnectMissingSessionTopicStackSignature(
   frames: SentryStackFrame[] | undefined,
   hint?: SentryEventHint
 ): boolean {
-  const signatureValues = getWalletConnectStackSignatureValues(frames, hint);
+  const signatureValues = getWalletConnectStackSignatureValues(frames);
+  const stack = getHintExceptionStack(hint);
 
   return Array.from(walletConnectMissingSessionTopicFunctions).every(
     (functionName) =>
-      signatureValues.some((value) => value.includes(functionName))
+      signatureValues.includes(functionName) ||
+      hasWalletConnectFunctionInStack(stack, functionName)
   );
 }
 

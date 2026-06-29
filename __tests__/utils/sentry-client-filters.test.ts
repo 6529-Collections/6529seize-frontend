@@ -2381,6 +2381,42 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters WalletConnect missing session-topic errors from module-only package frames", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  module: "@walletconnect/sign-client",
+                  function: "isValidSessionTopic",
+                },
+                {
+                  module: "@walletconnect/sign-client",
+                  function: "onRelayMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters WalletConnect missing session-topic errors from the original exception stack", () => {
     // Arrange
     const event = createWalletConnectMissingSessionTopicEvent({
@@ -2400,6 +2436,39 @@ describe("sentry-client-filters", () => {
     const error = new Error(walletConnectMissingSessionTopicMessage);
     error.stack = [
       `Error: ${walletConnectMissingSessionTopicMessage}`,
+      "    at isValidSessionTopic (node_modules/@walletconnect/sign-client/dist/index.es.js:11:154307)",
+      "    at onRelayMessage (node_modules/@walletconnect/sign-client/dist/index.es.js:11:152283)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters WalletConnect missing session-topic original stacks with non-app lib locations", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+          },
+        ],
+      },
+    });
+    const error = new Error(walletConnectMissingSessionTopicMessage);
+    error.stack = [
+      `Error: ${walletConnectMissingSessionTopicMessage}`,
+      "    at helper (/vendor/unknown/lib/index.js:1:1)",
       "    at isValidSessionTopic (node_modules/@walletconnect/sign-client/dist/index.es.js:11:154307)",
       "    at onRelayMessage (node_modules/@walletconnect/sign-client/dist/index.es.js:11:152283)",
     ].join("\n");
@@ -2487,6 +2556,44 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterWalletConnectMissingSessionTopic(event, {
       originalException: error,
     });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WalletConnect missing session-topic errors without exact stack functions", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "isValidSessionTopic",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "onRelayMessageHandler",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event);
 
     // Assert
     expect(result).toBe(false);
