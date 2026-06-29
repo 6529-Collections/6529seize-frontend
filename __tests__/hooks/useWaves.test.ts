@@ -92,6 +92,9 @@ const expectWaveSearchFetch = async () => {
       },
     });
   });
+  expect(commonApiFetchMock).not.toHaveBeenCalledWith(
+    expect.objectContaining({ endpoint: "waves-public" })
+  );
 };
 
 describe("useWaves", () => {
