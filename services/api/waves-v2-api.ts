@@ -428,19 +428,14 @@ export async function searchWavesByName({
   }
 
   try {
-    const waves = await searchLegacyWavesByName({
+    return await searchLegacyWavesByName({
       name,
       pageSize,
       headers,
     });
-    if (waves.length > 0) {
-      return waves;
-    }
   } catch (error) {
     throw createWaveSearchUnavailableError(primarySearchError ?? error);
   }
-
-  throw createWaveSearchUnavailableError(primarySearchError);
 }
 
 export async function fetchWaveSubwavesPage({

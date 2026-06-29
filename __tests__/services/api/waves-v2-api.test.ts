@@ -293,7 +293,7 @@ describe("waves-v2-api", () => {
     });
   });
 
-  it("surfaces primary search failure when fallback search completes empty", async () => {
+  it("returns empty results when legacy fallback search completes empty", async () => {
     const primaryError = new Error("v2 search failed");
 
     commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
@@ -303,10 +303,7 @@ describe("waves-v2-api", () => {
       return [];
     });
 
-    await expect(searchWavesByName({ name: "missing" })).rejects.toMatchObject({
-      message: "Wave search is unavailable. Try a wave URL or id.",
-      cause: primaryError,
-    });
+    await expect(searchWavesByName({ name: "missing" })).resolves.toEqual([]);
     expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
   });
 
