@@ -818,13 +818,14 @@ export default function Auth({
         return undefined;
       }
 
-      if (!hasActiveSessionV2Auth({ address: storedAuthAddress })) {
-        setSessionUpgradeRequired(true);
-        setSessionUpgradeHasDeadline(false);
-      } else {
-        setSessionUpgradeRequired(false);
-        setSessionUpgradeHasDeadline(false);
-      }
+      // Passive disconnected validation must not call session-refresh: that
+      // endpoint rotates the web session cookie and can race during reload.
+      // Explicit actions, such as connection sharing, still verify server
+      // session state before proceeding.
+      setSessionUpgradeHasDeadline(false);
+      setSessionUpgradeRequired(
+        !hasActiveSessionV2Auth({ address: storedAuthAddress })
+      );
       return undefined;
     }
 
