@@ -42,6 +42,12 @@ describe("sentry-client-filters", () => {
       "https://6529.io/_next/static/chunks/app/waves/%5Bwave%5D/page-1234567890abcdef.js",
     function: functionName,
   });
+  const reactDomStaticWebpackFrame = (
+    functionName: string
+  ): SentryStackFrame => ({
+    filename: "https://6529.io/_next/static/webpack/1234567890abcdef.webpack.js",
+    function: functionName,
+  });
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
   const wasmCspUnsafeEvalMessage = [
@@ -429,6 +435,28 @@ describe("sentry-client-filters", () => {
         tags: {
           transaction: "/waves/:wave",
           url: "/waves/aadd124b-e5c7-4c40-9644-a24d1ce5384b",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters React DOM insertBefore NotFoundError events from webpack static chunks", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames: [
+                  reactDomStaticWebpackFrame("insertOrAppendPlacementNode"),
+                ],
+              },
+            },
+          ],
         },
       })
     );
