@@ -14,7 +14,7 @@ const BASE_BUTTON_CLASS =
   "tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-100 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700 disabled:tw-cursor-default disabled:tw-opacity-60";
 
 const INLINE_MEDIA_ACTIONS_REVEAL_CLASS =
-  "tw-hidden desktop-hover:tw-flex desktop-hover:tw-pointer-events-none desktop-hover:tw-opacity-0 desktop-hover:tw-transition-opacity desktop-hover:tw-duration-200 desktop-hover:group-hover/media:tw-pointer-events-auto desktop-hover:group-hover/media:tw-opacity-100 group-focus-within/media:tw-pointer-events-auto group-focus-within/media:tw-opacity-100 motion-reduce:tw-transition-none";
+  "tw-hidden desktop-hover:tw-flex desktop-hover:tw-pointer-events-none desktop-hover:tw-opacity-0 desktop-hover:tw-transition-opacity desktop-hover:tw-duration-200 desktop-hover:group-hover/media:tw-pointer-events-auto desktop-hover:group-hover/media:tw-opacity-100 group-focus-within/media:tw-flex group-focus-within/media:tw-pointer-events-auto group-focus-within/media:tw-opacity-100 motion-reduce:tw-transition-none";
 
 type MediaActionLabels = {
   readonly close?: string | undefined;

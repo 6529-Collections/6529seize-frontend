@@ -117,6 +117,18 @@ describe("WaveDropPartContentMediaImage", () => {
     expect(requestFullscreen).not.toHaveBeenCalled();
   });
 
+  it("keeps desktop-hover actions mounted when image bounds are unmeasured", () => {
+    render(
+      <WaveDropPartContentMediaImage src="https://example.com/path/image.png" />
+    );
+
+    fireEvent.load(screen.getByAltText("Drop media"));
+
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
+  });
+
   it("auto-retries transient image load failures before showing manual retry", async () => {
     jest.useFakeTimers();
 

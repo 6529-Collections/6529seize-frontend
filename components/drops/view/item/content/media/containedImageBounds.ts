@@ -16,6 +16,8 @@ interface ContainedImageBoundsParams {
   readonly objectPosition: string;
 }
 
+const MAX_BOUNDS_MEASURE_RETRIES = 8;
+
 interface ContainedImageBounds {
   readonly height: number;
   readonly left: number;
@@ -117,7 +119,7 @@ export function useContainedImageBoundsStyle({
 
     if (!container || !image) {
       setBoundsStyle(null);
-      return;
+      return false;
     }
 
     const containerRect = container.getBoundingClientRect();
@@ -131,7 +133,7 @@ export function useContainedImageBoundsStyle({
 
     if (!bounds) {
       setBoundsStyle(null);
-      return;
+      return false;
     }
 
     setBoundsStyle({
@@ -140,32 +142,90 @@ export function useContainedImageBoundsStyle({
       top: `${bounds.top}px`,
       width: `${bounds.width}px`,
     });
+    return true;
   }, [containerRef, imageRef, objectPosition]);
 
   useEffect(() => {
     if (!loaded) {
+      setBoundsStyle(null);
       return;
     }
 
     const container = containerRef.current;
     if (!container) {
+      setBoundsStyle(null);
       return;
     }
 
-    const initialMeasureTimeout = globalThis.setTimeout(updateBounds, 0);
+    let disposed = false;
+    let measureFrame: number | null = null;
+    let measureTimeout: ReturnType<typeof globalThis.setTimeout> | null = null;
+    let retryAttempt = 0;
+
+    const cancelPendingMeasure = () => {
+      if (measureFrame !== null) {
+        globalThis.cancelAnimationFrame(measureFrame);
+        measureFrame = null;
+      }
+
+      if (measureTimeout !== null) {
+        globalThis.clearTimeout(measureTimeout);
+        measureTimeout = null;
+      }
+    };
+
+    const scheduleMeasure = () => {
+      cancelPendingMeasure();
+
+      const measure = () => {
+        measureFrame = null;
+        measureTimeout = null;
+
+        if (disposed) {
+          return;
+        }
+
+        const measured = updateBounds();
+        if (!measured && retryAttempt < MAX_BOUNDS_MEASURE_RETRIES) {
+          retryAttempt += 1;
+          scheduleMeasure();
+        }
+      };
+
+      if (typeof globalThis.requestAnimationFrame === "function") {
+        measureFrame = globalThis.requestAnimationFrame(measure);
+      } else {
+        measureTimeout = globalThis.setTimeout(measure, 16);
+      }
+    };
+
+    const resetAndScheduleMeasure = () => {
+      retryAttempt = 0;
+      scheduleMeasure();
+    };
+
+    const initialMeasureTimeout = globalThis.setTimeout(
+      resetAndScheduleMeasure,
+      0
+    );
     const resizeObserver =
       typeof ResizeObserver === "undefined"
         ? null
-        : new ResizeObserver(updateBounds);
+        : new ResizeObserver(resetAndScheduleMeasure);
     resizeObserver?.observe(container);
-    globalThis.addEventListener("resize", updateBounds);
+    if (imageRef.current) {
+      resizeObserver?.observe(imageRef.current);
+    }
+    globalThis.addEventListener("resize", resetAndScheduleMeasure);
 
     return () => {
+      disposed = true;
       globalThis.clearTimeout(initialMeasureTimeout);
+      cancelPendingMeasure();
       resizeObserver?.disconnect();
-      globalThis.removeEventListener("resize", updateBounds);
+      globalThis.removeEventListener("resize", resetAndScheduleMeasure);
     };
-  }, [containerRef, loaded, updateBounds]);
+  }, [containerRef, imageRef, loaded, updateBounds]);
 
   return loaded ? boundsStyle : null;
 }

@@ -114,7 +114,7 @@ function NaturalHeightImage({
         ref={imgRef}
         primarySrc={primarySrc}
         fallbackSrc={fallbackSrc}
-        alt="Drop media"
+        alt={t(DEFAULT_LOCALE, "drop.media.alt")}
         fill
         sizes="(max-width: 768px) 100vw, 768px"
         optimize={false}
@@ -152,7 +152,7 @@ function FillContainerImage({
         ref={imgRef}
         primarySrc={primarySrc}
         fallbackSrc={fallbackSrc}
-        alt="Drop media"
+        alt={t(DEFAULT_LOCALE, "drop.media.alt")}
         fill
         sizes="(max-width: 768px) 100vw, 768px"
         optimize={false}
@@ -236,7 +236,13 @@ function imageViewReducer(
       return { ...state, isModalOpen: true };
     case "close-modal":
       return { ...state, isModalOpen: false };
+    default:
+      return assertNever(action);
   }
+}
+
+function assertNever(value: never): never {
+  throw new Error(`Unhandled image view action: ${JSON.stringify(value)}`);
 }
 
 export default function WaveDropPartContentMediaImage({
@@ -274,7 +280,7 @@ function WaveDropPartContentMediaImageContent({
     useMediaActions({
       url: src,
       fallbackFileName: "image",
-      dialogTitle: "Save image",
+      dialogTitle: t(DEFAULT_LOCALE, "drop.media.saveDialogTitle"),
       mimeType: "image",
     });
 
@@ -384,10 +390,10 @@ function WaveDropPartContentMediaImageContent({
           <button
             type="button"
             onClick={handleOpenModal}
-            aria-label="Open drop media"
-            className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            aria-label={t(DEFAULT_LOCALE, "drop.media.openMedia")}
+            className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           />
-          {imageActionBoundsStyle ? (
+          {imageViewState.loaded ? (
             <InlineMediaActions
               variant="image"
               onOpen={openMedia}
@@ -404,7 +410,7 @@ function WaveDropPartContentMediaImageContent({
 
       {!imageViewState.loaded && (
         <div className="tw-sr-only" aria-live="polite">
-          Loading image
+          {t(DEFAULT_LOCALE, "drop.media.loading")}
         </div>
       )}
 

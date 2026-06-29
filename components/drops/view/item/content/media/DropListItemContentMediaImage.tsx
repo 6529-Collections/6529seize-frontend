@@ -6,6 +6,8 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React, { useCallback, useRef, useState } from "react";
 import { useContainedImageBoundsStyle } from "./containedImageBounds";
 import { InlineMediaActions } from "./MediaActionToolbar";
@@ -45,12 +47,14 @@ function LoadingPlaceholder({
 function RetryImageMessage({ onRetry }: { readonly onRetry: () => void }) {
   return (
     <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2">
-      <span className="tw-text-sm tw-text-iron-400">Couldn’t load image.</span>
+      <span className="tw-text-sm tw-text-iron-400">
+        {t(DEFAULT_LOCALE, "drop.media.loadFailed")}
+      </span>
       <button
         onClick={onRetry}
         className="tw-rounded-md tw-bg-iron-700 tw-px-3 tw-py-1 tw-text-xs tw-text-white hover:tw-bg-iron-600"
       >
-        Retry
+        {t(DEFAULT_LOCALE, "drop.media.retry")}
       </button>
     </div>
   );
@@ -112,7 +116,7 @@ function DropImageContent({
         ref={imgRef}
         primarySrc={primarySrc}
         fallbackSrc={src}
-        alt="Drop media"
+        alt={t(DEFAULT_LOCALE, "drop.media.alt")}
         fill
         optimize={false}
         loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -129,7 +133,7 @@ function DropImageContent({
       ref={imgRef}
       primarySrc={primarySrc}
       fallbackSrc={src}
-      alt="Drop media"
+      alt={t(DEFAULT_LOCALE, "drop.media.alt")}
       optimize={false}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -163,11 +167,11 @@ function ImageInteractionLayer({
     >
       <button
         type="button"
-        className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
         onClick={onClick}
         aria-label={label}
       />
-      {boundsStyle ? actions : null}
+      {actions}
     </div>
   );
 }
@@ -226,7 +230,7 @@ function DropListItemContentMediaImageContent({
     useMediaActions({
       url: src,
       fallbackFileName: "image",
-      dialogTitle: "Save image",
+      dialogTitle: t(DEFAULT_LOCALE, "drop.media.saveDialogTitle"),
       mimeType: "image",
     });
   const primarySrc = getScaledImageUri(src, imageScale);
@@ -343,19 +347,21 @@ function DropListItemContentMediaImageContent({
           {!disableModal && (
             <ImageInteractionLayer
               boundsStyle={imageActionBoundsStyle}
-              label="Open image preview"
+              label={t(DEFAULT_LOCALE, "drop.media.openPreview")}
               onClick={handleImageClick}
               actions={
-                <InlineMediaActions
-                  variant="image"
-                  onOpen={openMedia}
-                  openLabel={openLabel}
-                  onDownload={downloadMedia}
-                  isDownloading={isDownloading}
-                  onFullscreen={handleFullScreen}
-                  fullscreenTargetAvailable={!isCapacitor}
-                  visibility="desktop-hover"
-                />
+                loaded ? (
+                  <InlineMediaActions
+                    variant="image"
+                    onOpen={openMedia}
+                    openLabel={openLabel}
+                    onDownload={downloadMedia}
+                    isDownloading={isDownloading}
+                    onFullscreen={handleFullScreen}
+                    fullscreenTargetAvailable={!isCapacitor}
+                    visibility="desktop-hover"
+                  />
+                ) : null
               }
             />
           )}
