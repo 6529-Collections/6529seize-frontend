@@ -321,11 +321,16 @@ export default function MobileWrapperDialog({
   const panelStyle: CSSProperties = {
     touchAction: "manipulation",
   };
+  const dragSurfaceStyle: CSSProperties = canDragToClose
+    ? {
+        transform: `translate3d(0, ${dragOffset}px, 0)`,
+        transition: isDragging
+          ? "none"
+          : "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)",
+      }
+    : {};
   const surfaceStyle: CSSProperties = {
-    transform: `translate3d(0, ${dragOffset}px, 0)`,
-    transition: isDragging
-      ? "none"
-      : "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)",
+    ...dragSurfaceStyle,
     ...(fixedHeight ? { height: dialogHeight } : { maxHeight: dialogHeight }),
   };
 
