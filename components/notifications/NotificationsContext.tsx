@@ -13,6 +13,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
 } from "react";
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
@@ -20,6 +21,12 @@ import { type ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiPost } from "@/services/api/common-api";
+import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
+import {
+  AUTH_TOKEN_CHANGED_EVENT,
+  getAuthJwt,
+  isAuthJwtUsable,
+} from "@/services/auth/auth.utils";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { getStableDeviceId } from "./stable-device-id";
@@ -259,6 +266,9 @@ const isRateLimitError = (error: unknown): boolean => {
   );
 };
 
+const isUnauthorizedPushRegistrationError = (error: unknown): boolean =>
+  extractErrorStatusCode(error) === 401;
+
 const isTransientPushRegistrationError = (error: unknown): boolean => {
   if (isRateLimitError(error)) {
     return true;
@@ -394,6 +404,14 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { isCapacitor, isIos, isActive } = useCapacitor();
   const { connectedProfile } = useAuth();
+  const forceAuthTokenRefresh = useReducer(
+    (revision: number) => revision + 1,
+    0
+  )[1];
+  const authJwt = getAuthJwt();
+  const pushRegistrationAuthKey = isAuthJwtUsable(authJwt)
+    ? getAuthTokenFingerprint(authJwt)
+    : "no-usable-auth";
   const { address, connectedAccounts, seizeSwitchConnectedAccount } =
     useSeizeConnectContext();
   const router = useRouter();
@@ -417,6 +435,27 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     activeAddressRef.current = address;
   }, [address]);
+
+  useEffect(() => {
+    if (typeof globalThis.addEventListener !== "function") {
+      return;
+    }
+
+    const handleAuthTokenChanged = () => {
+      forceAuthTokenRefresh();
+    };
+
+    globalThis.addEventListener(
+      AUTH_TOKEN_CHANGED_EVENT,
+      handleAuthTokenChanged
+    );
+    return () => {
+      globalThis.removeEventListener(
+        AUTH_TOKEN_CHANGED_EVENT,
+        handleAuthTokenChanged
+      );
+    };
+  }, [forceAuthTokenRefresh]);
 
   const removeDeliveredNotifications = useCallback(
     async (notifications: PushNotificationSchema[]) => {
@@ -625,6 +664,33 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
         attempt++
       ) {
+        const currentAuthJwt = getAuthJwt();
+        if (!isAuthJwtUsable(currentAuthJwt)) {
+          console.warn(
+            "Skipping push registration: auth token is missing or expired",
+            {
+              attempt: attempt + 1,
+              maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+              profileId,
+              platform: deviceInfo.platform,
+            }
+          );
+          Sentry.addBreadcrumb({
+            category: "notifications",
+            level: "warning",
+            message: "Push registration skipped (auth token unavailable).",
+            data: {
+              component: "NotificationsProvider",
+              operation: "registerPushNotification",
+              attempt: attempt + 1,
+              max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+              profile_id: profileId ?? undefined,
+              platform: deviceInfo.platform,
+            },
+          });
+          return false;
+        }
+
         try {
           await commonApiPost({
             endpoint: `push-notifications/register`,
@@ -641,12 +707,15 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         } catch (error) {
           const attemptNumber = attempt + 1;
           const statusCode = extractErrorStatusCode(error);
+          const unauthorized = isUnauthorizedPushRegistrationError(error);
           const rateLimited = isRateLimitError(error);
           const retryAfterMs = extractRetryAfterMs(error);
           const hasRetriesLeft =
             attemptNumber < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
           const shouldRetry =
-            hasRetriesLeft && isTransientPushRegistrationError(error);
+            !unauthorized &&
+            hasRetriesLeft &&
+            isTransientPushRegistrationError(error);
 
           if (shouldRetry) {
             const delayMs = computePushRegistrationRetryDelayMs(
@@ -680,6 +749,34 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             });
             await new Promise((resolve) => setTimeout(resolve, delayMs));
             continue;
+          }
+
+          if (unauthorized) {
+            console.warn(
+              "Push registration unauthorized; treating as stale auth state",
+              {
+                attempt: attemptNumber,
+                maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+                statusCode,
+                profileId,
+                platform: deviceInfo.platform,
+              }
+            );
+            Sentry.addBreadcrumb({
+              category: "notifications",
+              level: "warning",
+              message: "Push registration skipped (stale auth).",
+              data: {
+                component: "NotificationsProvider",
+                operation: "registerPushNotification",
+                attempt: attemptNumber,
+                max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+                status_code: statusCode ?? undefined,
+                profile_id: profileId ?? undefined,
+                platform: deviceInfo.platform,
+              },
+            });
+            return false;
           }
 
           if (rateLimited) {
@@ -893,8 +990,15 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const profileId = connectedProfile?.id ?? null;
-    if (isCapacitor && isActive && initializationRef.current !== profileId) {
-      initializationRef.current = profileId;
+    const initializationKey = `${
+      profileId ?? "no-profile"
+    }:${pushRegistrationAuthKey}`;
+    if (
+      isCapacitor &&
+      isActive &&
+      initializationRef.current !== initializationKey
+    ) {
+      initializationRef.current = initializationKey;
       initializeNotifications(connectedProfile ?? undefined).catch((error) => {
         console.error("Failed to initialize push notifications", error);
         Sentry.captureException(error, {
@@ -903,10 +1007,18 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             operation: "initializeNotifications",
           },
         });
-        initializationRef.current = null;
+        if (initializationRef.current === initializationKey) {
+          initializationRef.current = null;
+        }
       });
     }
-  }, [connectedProfile, isCapacitor, isActive, initializeNotifications]);
+  }, [
+    connectedProfile,
+    isCapacitor,
+    isActive,
+    initializeNotifications,
+    pushRegistrationAuthKey,
+  ]);
 
   const removeWaveDeliveredNotifications = useCallback(
     async (waveId: string) => {

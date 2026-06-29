@@ -1689,8 +1689,9 @@ describe("Auth component", () => {
         >;
       mockGetAuthJwt.mockReturnValue("v2-jwt");
       mockGetWalletAddress.mockReturnValue(activeStoredAddress);
-      mockHasActiveSessionV2Auth.mockImplementation(({ address }) =>
-        address.toLowerCase() === activeStoredAddress.toLowerCase()
+      mockHasActiveSessionV2Auth.mockImplementation(
+        ({ address }) =>
+          address.toLowerCase() === activeStoredAddress.toLowerCase()
       );
       mockVerifyActiveSessionV2WebSession.mockResolvedValue(true);
 
