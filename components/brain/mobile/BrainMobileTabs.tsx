@@ -69,7 +69,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { registerRef } = useLayout();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, isAuthenticated } = useAuth();
+  const hasValidNotificationAuth = isAuthenticated === true;
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const shouldShowCurationTabs = Boolean(isApp && waveActive && wave?.id);
@@ -113,7 +114,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   // Get unread notifications using the dedicated hook
   const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.handle ?? null
+    hasValidNotificationAuth ? (connectedProfile?.handle ?? null) : null,
+    { enabled: hasValidNotificationAuth }
   );
 
   const scrollActiveButtonIntoView = useCallback(

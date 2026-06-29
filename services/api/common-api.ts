@@ -344,6 +344,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   headers?: Record<string, string> | undefined;
   params?: U | undefined;
   signal?: AbortSignal | undefined;
+  errorMode?: ApiErrorMode | undefined;
 }): Promise<T> => {
   const url = buildUrl(
     param.endpoint,
@@ -362,6 +363,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     method: "GET",
     headers: getHeaders(param.headers, false),
     signal: param.signal,
+    errorMode: param.errorMode ?? "legacy-string",
   });
 };
 
