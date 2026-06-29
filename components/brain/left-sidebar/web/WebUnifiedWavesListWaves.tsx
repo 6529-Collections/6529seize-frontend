@@ -316,7 +316,7 @@ function WebProfileFeedShortcut({
 
   return (
     <div
-      className={`tw-group tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-mt-2 tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
