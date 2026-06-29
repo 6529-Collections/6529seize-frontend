@@ -44,6 +44,14 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
+jest.mock("@/services/auth/auth.utils", () => ({
+  AUTH_TOKEN_CHANGED_EVENT: "6529-auth-token-changed",
+  getAuthJwt: jest.fn(() => "test-jwt"),
+  isAuthJwtUsable: jest.fn(
+    (jwt: string | null | undefined) =>
+      typeof jwt === "string" && jwt.length > 0
+  ),
+}));
 jest.mock("@sentry/nextjs", () => ({
   captureException: jest.fn(),
   addBreadcrumb: jest.fn(),
@@ -75,6 +83,18 @@ jest.mock("@/components/notifications/stable-device-id", () => ({
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <NotificationsProvider>{children}</NotificationsProvider>
 );
+
+beforeEach(() => {
+  const { getAuthJwt, isAuthJwtUsable } = require("@/services/auth/auth.utils");
+
+  getAuthJwt.mockReset();
+  getAuthJwt.mockReturnValue("test-jwt");
+  isAuthJwtUsable.mockReset();
+  isAuthJwtUsable.mockImplementation(
+    (jwt: string | null | undefined) =>
+      typeof jwt === "string" && jwt.length > 0
+  );
+});
 
 describe("NotificationsContext", () => {
   it("provides context functions", () => {
@@ -205,7 +225,9 @@ describe("push registration behavior", () => {
       }
     );
 
-    renderHook(() => useNotificationsContext(), { wrapper });
+    const renderedHook = renderHook(() => useNotificationsContext(), {
+      wrapper,
+    });
 
     await waitFor(() => {
       expect(PushNotifications.addListener).toHaveBeenCalled();
@@ -219,20 +241,139 @@ describe("push registration behavior", () => {
       registrationCallback: registrationCallback as (token: {
         value: string;
       }) => Promise<void>,
+      getRegistrationCallback: () => {
+        if (!registrationCallback) {
+          throw new Error("registration callback was not registered");
+        }
+        return registrationCallback;
+      },
+      rerender: renderedHook.rerender,
     };
   };
 
   beforeEach(() => {
     const { PushNotifications } = require("@capacitor/push-notifications");
     const { commonApiPost } = require("@/services/api/common-api");
+    const {
+      getAuthJwt,
+      isAuthJwtUsable,
+    } = require("@/services/auth/auth.utils");
     const sentry = require("@sentry/nextjs");
 
     jest.clearAllMocks();
     PushNotifications.addListener.mockClear();
     commonApiPost.mockReset();
     commonApiPost.mockResolvedValue({});
+    getAuthJwt.mockReturnValue("test-jwt");
+    isAuthJwtUsable.mockImplementation(
+      (jwt: string | null | undefined) =>
+        typeof jwt === "string" && jwt.length > 0
+    );
     sentry.captureException.mockClear();
     sentry.addBreadcrumb.mockClear();
+  });
+
+  it("skips registration when auth token is unavailable", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const {
+      getAuthJwt,
+      isAuthJwtUsable,
+    } = require("@/services/auth/auth.utils");
+    const sentry = require("@sentry/nextjs");
+
+    getAuthJwt.mockReturnValue(null);
+    isAuthJwtUsable.mockReturnValue(false);
+
+    const { registrationCallback } = await setupRegistrationCallback();
+
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push registration skipped (auth token unavailable).",
+        data: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "registerPushNotification",
+          profile_id: "test-profile-id",
+          platform: "ios",
+        }),
+      })
+    );
+  });
+
+  it("reinitializes registration when auth becomes usable", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const { commonApiPost } = require("@/services/api/common-api");
+    const {
+      getAuthJwt,
+      isAuthJwtUsable,
+    } = require("@/services/auth/auth.utils");
+
+    getAuthJwt.mockReturnValue(null);
+    isAuthJwtUsable.mockReturnValue(false);
+
+    const { registrationCallback, getRegistrationCallback } =
+      await setupRegistrationCallback();
+
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+
+    getAuthJwt.mockReturnValue("fresh-test-jwt");
+    isAuthJwtUsable.mockReturnValue(true);
+
+    await act(async () => {
+      globalThis.dispatchEvent(new Event("6529-auth-token-changed"));
+    });
+
+    await waitFor(() => {
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(2);
+    });
+
+    await act(async () => {
+      await getRegistrationCallback()({ value: "test-token" });
+    });
+
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+  });
+
+  it("treats unauthorized push registration as stale auth state", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    const unauthorizedError = Object.assign(new Error("Unauthorized"), {
+      status: 401,
+      response: {
+        status: 401,
+      },
+    });
+
+    commonApiPost.mockRejectedValue(unauthorizedError);
+    const { registrationCallback } = await setupRegistrationCallback();
+
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push registration skipped (stale auth).",
+        data: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "registerPushNotification",
+          status_code: 401,
+          profile_id: "test-profile-id",
+          platform: "ios",
+        }),
+      })
+    );
   });
 
   it("retries on rate limit and does not capture exception", async () => {
