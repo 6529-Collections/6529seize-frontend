@@ -135,12 +135,15 @@ export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
 const REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE =
   "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+const REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE =
+  "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
 const REACT_DOM_RUNTIME_FRAME_PATTERNS = [
   "next/dist/compiled/react-dom/",
   "react-dom/cjs/react-dom-client.production.js",
   "react-dom-client.production.js",
 ];
 const WAVES_ROUTE_PATH = "/waves";
+const THE_MEMES_MINT_ROUTE_PATH = "/the-memes/mint";
 
 const sentryRouteParameterizationMechanismType =
   "auto.browser.browserapierrors.setTimeout";
@@ -244,14 +247,28 @@ function getRoutePathFromString(value: string): string | null {
   }
 }
 
-function isWavesRoutePath(path: string | null): boolean {
+function isRoutePathAtOrBelow(
+  path: string | null,
+  routePath: string
+): boolean {
   return (
     path !== null &&
-    (path === WAVES_ROUTE_PATH || path.startsWith(`${WAVES_ROUTE_PATH}/`))
+    (path === routePath || path.startsWith(`${routePath}/`))
   );
 }
 
-function hasWavesRoute(event: SentryClientEvent): boolean {
+function isExactRoutePath(path: string | null, routePath: string): boolean {
+  return path !== null && (path === routePath || path === `${routePath}/`);
+}
+
+function isWavesRoutePath(path: string | null): boolean {
+  return isRoutePathAtOrBelow(path, WAVES_ROUTE_PATH);
+}
+
+function hasMatchingRoute(
+  event: SentryClientEvent,
+  predicate: (path: string | null) => boolean
+): boolean {
   const candidates = [
     event.transaction,
     getStringValue(event.tags?.["transaction"]),
@@ -260,8 +277,37 @@ function hasWavesRoute(event: SentryClientEvent): boolean {
   ];
 
   return candidates.some((candidate) =>
-    candidate ? isWavesRoutePath(getRoutePathFromString(candidate)) : false
+    candidate ? predicate(getRoutePathFromString(candidate)) : false
   );
+}
+
+function hasWavesRoute(event: SentryClientEvent): boolean {
+  return hasMatchingRoute(event, isWavesRoutePath);
+}
+
+function hasReactDomRemoveChildRoute(event: SentryClientEvent): boolean {
+  return hasMatchingRoute(
+    event,
+    (path) =>
+      isWavesRoutePath(path) ||
+      isExactRoutePath(path, THE_MEMES_MINT_ROUTE_PATH)
+  );
+}
+
+function hasReactDomNotFoundErrorSignature(
+  event: SentryClientEvent,
+  message: string
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (value?.type !== "NotFoundError") {
+    return false;
+  }
+
+  if (value.value !== message) {
+    return false;
+  }
+
+  return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
 }
 
 function getUrlCandidatesFromText(value: string): string[] {
@@ -1551,20 +1597,27 @@ export function shouldFilterDisconnectedWalletProviderRejection(
 export function shouldFilterReactDomInsertBeforeNotFoundError(
   event: SentryClientEvent
 ): boolean {
-  const value = event.exception?.values?.[0];
-  if (value?.type !== "NotFoundError") {
-    return false;
-  }
-
-  if (value.value !== REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE) {
-    return false;
-  }
-
   if (!hasWavesRoute(event)) {
     return false;
   }
 
-  return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
+  return hasReactDomNotFoundErrorSignature(
+    event,
+    REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE
+  );
+}
+
+export function shouldFilterReactDomRemoveChildNotFoundError(
+  event: SentryClientEvent
+): boolean {
+  if (!hasReactDomRemoveChildRoute(event)) {
+    return false;
+  }
+
+  return hasReactDomNotFoundErrorSignature(
+    event,
+    REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE
+  );
 }
 
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
@@ -1658,6 +1711,7 @@ export const __testing = {
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
   REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
+  REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE,
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,
   isCoinbaseWalletLinkWebSocket1006Message,

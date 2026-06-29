@@ -22,6 +22,7 @@ import {
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -136,6 +137,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterReactDomInsertBeforeNotFoundError(event)) {
+    return true;
+  }
+
+  if (shouldFilterReactDomRemoveChildNotFoundError(event)) {
     return true;
   }
 
