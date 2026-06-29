@@ -213,13 +213,20 @@ describe("push registration behavior", () => {
     let registrationCallback:
       | ((token: { value: string }) => Promise<void>)
       | null = null;
+    let registrationErrorCallback: ((error: unknown) => void) | null = null;
 
     PushNotifications.addListener.mockImplementation(
-      (event: string, callback: (arg: unknown) => Promise<void>) => {
+      (
+        event: string,
+        callback: (arg: unknown) => void | Promise<void>
+      ) => {
         if (event === "registration") {
           registrationCallback = callback as (token: {
             value: string;
           }) => Promise<void>;
+        }
+        if (event === "registrationError") {
+          registrationErrorCallback = callback as (error: unknown) => void;
         }
         return Promise.resolve();
       }
@@ -236,6 +243,9 @@ describe("push registration behavior", () => {
     await waitFor(() => {
       expect(registrationCallback).not.toBeNull();
     });
+    await waitFor(() => {
+      expect(registrationErrorCallback).not.toBeNull();
+    });
 
     return {
       registrationCallback: registrationCallback as (token: {
@@ -248,6 +258,9 @@ describe("push registration behavior", () => {
         return registrationCallback;
       },
       rerender: renderedHook.rerender,
+      registrationErrorCallback: registrationErrorCallback as (
+        error: unknown
+      ) => void,
     };
   };
 
@@ -485,6 +498,46 @@ describe("push registration behavior", () => {
     expect(sentry.captureException).not.toHaveBeenCalled();
   });
 
+  it("retries object-shaped network-lost token registration errors without capture", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    const networkLostError = { error: "The network connection was lost." };
+
+    commonApiPost
+      .mockRejectedValueOnce(networkLostError)
+      .mockResolvedValueOnce({});
+    const { registrationCallback } = await setupRegistrationCallback();
+
+    const setTimeoutSpy = jest.spyOn(global, "setTimeout").mockImplementation(((
+      handler: TimerHandler
+    ) => {
+      if (typeof handler === "function") {
+        handler();
+      }
+      return 0 as unknown as NodeJS.Timeout;
+    }) as typeof global.setTimeout);
+
+    try {
+      await act(async () => {
+        await registrationCallback({ value: "test-token" });
+      });
+    } finally {
+      setTimeoutSpy.mockRestore();
+    }
+
+    expect(commonApiPost).toHaveBeenCalledTimes(2);
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push registration attempt failed. Retrying.",
+        data: expect.objectContaining({
+          error_message: "The network connection was lost.",
+          rate_limited: false,
+        }),
+      })
+    );
+  });
+
   it("skips duplicate registration for identical fingerprint", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const sentry = require("@sentry/nextjs");
@@ -501,6 +554,61 @@ describe("push registration behavior", () => {
         message: "Push registration skipped (already registered in session).",
       })
     );
+  });
+
+  it("records transient native registration errors as warning breadcrumbs", async () => {
+    const sentry = require("@sentry/nextjs");
+    const nativeError = { error: "The network connection was lost." };
+    const { registrationErrorCallback } = await setupRegistrationCallback();
+
+    act(() => {
+      registrationErrorCallback(nativeError);
+    });
+
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        level: "warning",
+        message: "Push registration transient error.",
+        data: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "pushRegistrationError",
+          retryable: true,
+          error_message: "The network connection was lost.",
+        }),
+      })
+    );
+  });
+
+  it("captures non-transient native registration objects as Error instances", async () => {
+    const sentry = require("@sentry/nextjs");
+    const nativeError = {
+      code: "APNS_ENTITLEMENT_MISSING",
+      error: "Missing APNS entitlement",
+    };
+    const { registrationErrorCallback } = await setupRegistrationCallback();
+
+    act(() => {
+      registrationErrorCallback(nativeError);
+    });
+
+    expect(sentry.captureException).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "pushRegistrationError",
+        }),
+        extra: expect.objectContaining({
+          retryable: false,
+          error_code: "APNS_ENTITLEMENT_MISSING",
+          error_message: "Missing APNS entitlement",
+        }),
+      })
+    );
+    const capturedError = sentry.captureException.mock.calls[0][0] as Error;
+    expect(capturedError).toBeInstanceOf(Error);
+    expect(capturedError.message).toBe("Missing APNS entitlement");
   });
 
   it("captures non-rate-limit push registration errors", async () => {
