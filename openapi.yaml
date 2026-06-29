@@ -235,8 +235,8 @@ paths:
       description: >
         V2 wallet session nonce endpoint. Web session challenges derive their
         domain and client origin from the request Origin header and require a
-        configured first-party origin. Native challenges are selected with
-        client_type=native and never receive first-party web semantics.
+        configured first-party origin. Native and desktop challenges are
+        selected explicitly and never receive first-party web semantics.
       operationId: getWalletAuthSessionNonce
       security: []
       parameters:
@@ -254,10 +254,11 @@ paths:
             enum:
               - web
               - native
+              - desktop
             default: web
           description: >
-            Web challenges require an allowed Origin header. Native challenges
-            are explicitly requested by native clients.
+            Web challenges require an allowed Origin header. Native and desktop
+            challenges are explicitly requested by refresh-token clients.
         - name: chain_id
           in: query
           required: false
@@ -286,9 +287,9 @@ paths:
       summary: Authenticate and create a wallet auth session
       description: >
         V2 wallet sessions require structured authentication signatures. Web
-        cookie sessions require Session Type first_party_web; native refresh
-        token sessions require Session Type native. External clients should use
-        the non-cookie bearer-token login flow.
+        cookie sessions require Session Type first_party_web; native and
+        desktop refresh-token sessions require matching Session Type values.
+        External clients should use the non-cookie bearer-token login flow.
       operationId: createWalletAuthSession
       security: []
       requestBody:
@@ -11757,6 +11758,7 @@ components:
           type: string
           enum:
             - native
+            - desktop
         role:
           type: string
           nullable: true
@@ -11783,6 +11785,7 @@ components:
           type: string
           enum:
             - native
+            - desktop
         deep_link_path:
           type: string
     ApiCreateLegacyDesktopConnectionShareRequest:
@@ -17006,6 +17009,7 @@ components:
           type: string
           enum:
             - native
+            - desktop
     ApiRedeemConnectionShareResponse:
       type: object
       required:
@@ -17306,6 +17310,7 @@ components:
           enum:
             - web
             - native
+            - desktop
         client_address:
           type: string
         client_signature:
@@ -17315,8 +17320,9 @@ components:
           description: >-
             Server-signed structured challenge token. /auth/session-login only
             accepts first_party_web challenges for web cookie sessions and
-            native challenges for native refresh-token sessions; external_client
-            challenges use /auth/login bearer-token auth instead.
+            matching native or desktop challenges for refresh-token sessions;
+            external_client challenges use /auth/login bearer-token auth
+            instead.
         role:
           type: string
           nullable: true
@@ -17344,6 +17350,7 @@ components:
           type: string
           enum:
             - native
+            - desktop
         client_address:
           type: string
         native_refresh_token:
@@ -17393,6 +17400,7 @@ components:
           type: string
           enum:
             - native
+            - desktop
         native_refresh_token:
           type: string
         refresh_token_expires_at:
@@ -17412,6 +17420,7 @@ components:
           enum:
             - web
             - native
+            - desktop
           default: web
         chain_id:
           type: integer
@@ -17441,6 +17450,7 @@ components:
           type: string
           enum:
             - native
+            - desktop
         client_address:
           type: string
         native_refresh_token:

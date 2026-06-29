@@ -9,7 +9,8 @@ import {
   setNativeRefreshToken,
 } from "./native-refresh-token-storage";
 
-type AuthSessionClientType = "web" | "native";
+type AuthSessionClientType = "web" | "native" | "desktop";
+type RefreshTokenSessionClientType = Exclude<AuthSessionClientType, "web">;
 
 interface SessionLoginRequest {
   readonly client_type: AuthSessionClientType;
@@ -32,7 +33,7 @@ interface SessionNativeResponse {
   readonly role: string | null;
   readonly access_token: string;
   readonly access_token_expires_at: string;
-  readonly client_type: "native";
+  readonly client_type: RefreshTokenSessionClientType;
   readonly native_refresh_token: string;
   readonly refresh_token_expires_at: string;
 }
@@ -52,7 +53,7 @@ interface CreateConnectionShareResponse {
   readonly expires_at: string;
   readonly address: string;
   readonly role: string | null;
-  readonly target_client_type: "native";
+  readonly target_client_type: RefreshTokenSessionClientType;
   readonly deep_link_path: string;
 }
 
@@ -162,7 +163,7 @@ export async function refreshSessionV2({
   readonly abortSignal?: AbortSignal | undefined;
 }): Promise<SessionRefreshResponse | null> {
   const clientType = getSessionClientType();
-  if (clientType === "native") {
+  if (clientType !== "web") {
     const nativeRefreshToken = await getNativeRefreshToken(address);
     if (!nativeRefreshToken) {
       return null;
@@ -170,7 +171,7 @@ export async function refreshSessionV2({
     try {
       return await commonApiPost<
         {
-          readonly client_type: "native";
+          readonly client_type: RefreshTokenSessionClientType;
           readonly client_address: string;
           readonly native_refresh_token: string;
         },
@@ -178,7 +179,7 @@ export async function refreshSessionV2({
       >({
         endpoint: "auth/session-refresh",
         body: {
-          client_type: "native",
+          client_type: clientType,
           client_address: address,
           native_refresh_token: nativeRefreshToken,
         },
@@ -223,7 +224,7 @@ export async function persistSessionResponse(
   response: SessionLoginResponse | SessionRefreshResponse
 ): Promise<boolean> {
   let didPersistNativeRefreshToken = false;
-  if (response.client_type === "native") {
+  if (response.client_type !== "web") {
     if (!isNativeSecureStorageAvailable()) {
       return false;
     }
@@ -280,18 +281,20 @@ export async function verifyActiveSessionV2WebSession({
 
 export async function createConnectionShare({
   signal,
+  targetClientType = "native",
 }: {
   readonly signal?: AbortSignal | undefined;
+  readonly targetClientType?: RefreshTokenSessionClientType | undefined;
 }): Promise<CreateConnectionShareResponse> {
   return await commonApiPost<
     {
-      readonly target_client_type: "native";
+      readonly target_client_type: RefreshTokenSessionClientType;
     },
     CreateConnectionShareResponse
   >({
     endpoint: "auth/connection-share",
     body: {
-      target_client_type: "native",
+      target_client_type: targetClientType,
     },
     credentials: getSessionCredentialsMode(),
     signal,
@@ -322,7 +325,7 @@ export async function logoutSessionV2({
   readonly allSessions?: boolean | undefined;
 }): Promise<void> {
   const clientType = getSessionClientType();
-  if (clientType === "native") {
+  if (clientType !== "web") {
     if (!address) {
       return;
     }
@@ -333,7 +336,7 @@ export async function logoutSessionV2({
     try {
       await commonApiPost<
         {
-          readonly client_type: "native";
+          readonly client_type: RefreshTokenSessionClientType;
           readonly client_address: string;
           readonly native_refresh_token: string;
           readonly all_sessions: boolean;
@@ -342,7 +345,7 @@ export async function logoutSessionV2({
       >({
         endpoint: "auth/session-logout",
         body: {
-          client_type: "native",
+          client_type: clientType,
           client_address: address,
           native_refresh_token: nativeRefreshToken,
           all_sessions: allSessions,
@@ -376,25 +379,26 @@ export async function logoutSessionV2({
 }
 
 export async function redeemConnectionShare(
-  connectionShareCode: string
+  connectionShareCode: string,
+  targetClientType: RefreshTokenSessionClientType = "native"
 ): Promise<SessionNativeResponse> {
   const response = await commonApiPost<
     {
       readonly connection_share_code: string;
-      readonly target_client_type: "native";
+      readonly target_client_type: RefreshTokenSessionClientType;
     },
     RedeemConnectionShareResponse
   >({
     endpoint: "auth/connection-share/redeem",
     body: {
       connection_share_code: connectionShareCode,
-      target_client_type: "native",
+      target_client_type: targetClientType,
     },
     credentials: getSessionCredentialsMode(),
   });
 
   return {
     ...response,
-    client_type: "native",
+    client_type: targetClientType,
   };
 }
