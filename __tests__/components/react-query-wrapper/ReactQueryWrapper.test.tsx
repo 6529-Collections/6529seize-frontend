@@ -264,6 +264,7 @@ it("invalidates auth-sensitive queries without clearing unrelated cache", () => 
   const { client, ctx } = createTestSetup();
   client.setQueryData([QueryKey.PROFILE, "alice"], { handle: "alice" });
   client.setQueryData([QueryKey.WAVES_V2, { viewer_identity: "0x1" }], []);
+  client.setQueryData([QueryKey.WAVES_PUBLIC, { name: "memes" }], []);
   client.setQueryData(
     [QueryKey.OFFICIAL_WAVES, { viewer_identity: "0x1" }],
     []
@@ -283,6 +284,9 @@ it("invalidates auth-sensitive queries without clearing unrelated cache", () => 
   expect(predicate({ queryKey: [QueryKey.PROFILE, "alice"] })).toBe(true);
   expect(
     predicate({ queryKey: [QueryKey.WAVES_V2, { viewer_identity: "0x1" }] })
+  ).toBe(true);
+  expect(
+    predicate({ queryKey: [QueryKey.WAVES_PUBLIC, { name: "memes" }] })
   ).toBe(true);
   expect(
     predicate({

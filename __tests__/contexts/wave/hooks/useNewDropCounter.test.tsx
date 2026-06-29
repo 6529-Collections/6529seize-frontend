@@ -158,6 +158,54 @@ describe("useNewDropCounter", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
+  it("tracks own unknown-wave timestamps without refetching the list", () => {
+    const refetch = jest.fn();
+    const { result } = renderHook(
+      () =>
+        useNewDropCounter(null, waves, refetch, {
+          otherListWaveIds: new Set(),
+        }),
+      { wrapper }
+    );
+
+    emitDropUpdate({
+      authorHandle: "me",
+      createdAt: 55,
+      waveId: "unknown-own-wave",
+    });
+
+    expect(result.current.newDropsCounts["unknown-own-wave"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 55,
+      firstUnreadSerialNo: null,
+    });
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("tracks visible active unknown-wave timestamps without refetching the list", () => {
+    const refetch = jest.fn();
+    const { result } = renderHook(
+      () =>
+        useNewDropCounter("unknown-active-wave", waves, refetch, {
+          otherListWaveIds: new Set(),
+        }),
+      { wrapper }
+    );
+
+    emitDropUpdate({
+      createdAt: 56,
+      serialNo: 7,
+      waveId: "unknown-active-wave",
+    });
+
+    expect(result.current.newDropsCounts["unknown-active-wave"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 56,
+      firstUnreadSerialNo: null,
+    });
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
   it("throttles unknown-wave refetches within cooldown window", () => {
     const refetch = jest.fn();
     const nowSpy = jest.spyOn(Date, "now");
