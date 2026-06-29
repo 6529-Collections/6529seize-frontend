@@ -49,11 +49,11 @@ export function AboutContentsDropdown({
       );
     });
   const currentLabel =
-    currentItem !== undefined
-      ? t(locale, currentItem.labelKey)
-      : getAboutSectionLabel(currentSection, locale);
+    currentItem === undefined
+      ? getAboutSectionLabel(currentSection, locale)
+      : t(locale, currentItem.labelKey);
   const activeItemId =
-    currentItem !== undefined ? getAboutNavItemId(currentItem) : currentSection;
+    currentItem === undefined ? currentSection : getAboutNavItemId(currentItem);
   const items: CompactMenuItem[] = groups.flatMap((group) => [
     {
       id: `group-${group.id}`,
@@ -127,8 +127,27 @@ function normalizeAboutHref(href: string | undefined): string | undefined {
     return undefined;
   }
 
-  const path = href.split(/[?#]/, 1)[0]?.replace(/\/+$/, "");
+  let path = href.slice(0, getPathEndIndex(href));
+  while (path.length > 1 && path.endsWith("/")) {
+    path = path.slice(0, -1);
+  }
+
   return path === "" ? "/" : path;
+}
+
+function getPathEndIndex(href: string): number {
+  const queryIndex = href.indexOf("?");
+  const hashIndex = href.indexOf("#");
+
+  if (queryIndex === -1) {
+    return hashIndex === -1 ? href.length : hashIndex;
+  }
+
+  if (hashIndex === -1) {
+    return queryIndex;
+  }
+
+  return Math.min(queryIndex, hashIndex);
 }
 
 function AboutContentsDropdownHeader() {

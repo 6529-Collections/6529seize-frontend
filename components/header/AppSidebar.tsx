@@ -15,6 +15,11 @@ import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
+import {
+  getAboutNavGroupItems,
+  getAboutNavItemHref,
+  getAboutNavItemLabel,
+} from "@/components/about/about.routes";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -27,6 +32,12 @@ import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
 
 type SidebarMenu = Parameters<typeof AppSidebarMenuItems>[0]["menu"];
+
+const ABOUT_NETWORK_MENU_ITEMS: NonNullable<SidebarMenu[number]["children"]> =
+  getAboutNavGroupItems("network").map((item) => ({
+    label: getAboutNavItemLabel(item, DEFAULT_LOCALE),
+    path: getAboutNavItemHref(item),
+  }));
 
 const MENU: SidebarMenu = [
   { label: "Profile", path: "/profile", icon: UserIcon },
@@ -103,12 +114,7 @@ const MENU: SidebarMenu = [
       { label: "About NFTD", path: "/about/nft-delegation" },
       { label: "Primary Address", path: "/about/primary-address" },
       { label: "Network", section: true },
-      { label: "TDH", path: "/network/tdh" },
-      { label: "xTDH", path: "/network/xtdh" },
-      { label: "Health", path: "/network/health" },
-      { label: "Definitions", path: "/network/definitions" },
-      { label: "Levels", path: "/network/levels" },
-      { label: "Network TDH", path: "/network/health/network-tdh" },
+      ...ABOUT_NETWORK_MENU_ITEMS,
       { label: "6529 Capital", section: true },
       { label: "About 6529 Capital", path: "/capital" },
       { label: "Company Portfolio", path: "/capital/company-portfolio" },
