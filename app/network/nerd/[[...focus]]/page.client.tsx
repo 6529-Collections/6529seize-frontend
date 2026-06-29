@@ -4,6 +4,8 @@ import Leaderboard from "@/components/leaderboard/Leaderboard";
 import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { LeaderboardFocus } from "@/types/enums";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -63,8 +65,8 @@ export default function CommunityNerdPageClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [focus, setFocus] = useState<LeaderboardFocus>(
-    () => getFocusFromPathname(pathname, initialFocus)
+  const [focus, setFocus] = useState<LeaderboardFocus>(() =>
+    getFocusFromPathname(pathname, initialFocus)
   );
   const tdhView = getTdhViewFromSearchParams(searchParams);
 
@@ -89,6 +91,19 @@ export default function CommunityNerdPageClient({
 
   return (
     <NetworkPageLayout>
+      <div className="tw-mb-3 tw-flex tw-items-center">
+        <Link
+          href="/network"
+          aria-label="Back to main Network view"
+          className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        >
+          <ArrowLeftIcon
+            aria-hidden="true"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+          />
+          <span>Network</span>
+        </Link>
+      </div>
       <Leaderboard
         focus={focus}
         setFocus={handleSetFocus}

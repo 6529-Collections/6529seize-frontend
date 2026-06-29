@@ -44,6 +44,8 @@ export default function IdentitySearch({
   clearable = true,
   disabled = false,
   dropdownListClassName,
+  iconPositionClassName,
+  inputClassName,
   onSelectionChange,
   setIdentity,
 }: {
@@ -57,6 +59,8 @@ export default function IdentitySearch({
   readonly clearable?: boolean | undefined;
   readonly disabled?: boolean | undefined;
   readonly dropdownListClassName?: string | undefined;
+  readonly iconPositionClassName?: string | undefined;
+  readonly inputClassName?: string | undefined;
   readonly onSelectionChange?:
     | ((selection: SelectableIdentityOption | null) => void)
     | undefined;
@@ -73,7 +77,7 @@ export default function IdentitySearch({
     [IdentitySearchSize.MD]: "tw-text-md",
   };
 
-  const ICON_TOP_CLASS = "tw-top-3.5";
+  const iconPosition = iconPositionClassName ?? "tw-top-3.5";
   const SEARCH_ICON_SIZE_CLASSES: Record<IdentitySearchSize, string> = {
     [IdentitySearchSize.SM]: "tw-h-4 tw-w-4",
     [IdentitySearchSize.MD]: "tw-h-5 tw-w-5",
@@ -350,11 +354,11 @@ export default function IdentitySearch({
           searchCriteria
             ? "tw-text-primary-400 focus:tw-text-white"
             : "tw-text-white"
-        } disabled:tw-cursor-not-allowed disabled:tw-opacity-70`}
+        } disabled:tw-cursor-not-allowed disabled:tw-opacity-70 ${inputClassName ?? ""}`}
         placeholder=" "
       />
       <MagnifyingGlassIcon
-        className={`${ICON_TOP_CLASS} ${SEARCH_ICON_SIZE_CLASSES[size]} tw-pointer-events-none tw-absolute tw-left-3 tw-text-iron-300`}
+        className={`${iconPosition} ${SEARCH_ICON_SIZE_CLASSES[size]} tw-pointer-events-none tw-absolute tw-left-3 tw-text-iron-300`}
         aria-hidden="true"
       />
       {!disabled && clearable && hasIdentity && (
@@ -362,7 +366,7 @@ export default function IdentitySearch({
           type="button"
           aria-label="Clear identity"
           onClick={() => onValueChange(null)}
-          className={`${ICON_TOP_CLASS} tw-absolute tw-right-3 tw-flex tw-h-5 tw-w-5 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus:tw-outline-none focus:tw-ring-0`}
+          className={`${iconPosition} tw-absolute tw-right-3 tw-flex tw-h-5 tw-w-5 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus:tw-outline-none focus:tw-ring-0`}
         >
           <FontAwesomeIcon
             icon={faXmark}
