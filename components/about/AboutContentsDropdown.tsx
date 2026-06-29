@@ -31,10 +31,13 @@ export function AboutContentsDropdown({
   const locale = DEFAULT_LOCALE;
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
-  const hideSubscriptions = shouldHideSubscriptions({
-    capacitorIsIos: capacitor.isIos,
-    country: cookieConsent?.country,
-  });
+  const hideSubscriptions =
+    cookieConsent === undefined
+      ? false
+      : shouldHideSubscriptions({
+          capacitorIsIos: capacitor.isIos,
+          country: cookieConsent.country,
+        });
   const groups = getVisibleAboutNavGroups(hideSubscriptions);
   const normalizedCurrentHref = normalizeAboutHref(currentHref);
   const currentItem = groups

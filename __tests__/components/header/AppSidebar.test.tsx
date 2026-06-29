@@ -1,20 +1,30 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import AppSidebar from "@/components/header/AppSidebar";
+import type AppSidebarMenuItems from "@/components/header/AppSidebarMenuItems";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
 let headerProps: any = null;
-let menuProps: any = null;
 let connectProps: any = null;
+
+type AppSidebarMenuItemsProps = Parameters<typeof AppSidebarMenuItems>[0];
+type SidebarMenu = AppSidebarMenuItemsProps["menu"];
+type SidebarMenuItem = SidebarMenu[number];
+type SidebarMenuChildren = NonNullable<SidebarMenuItem["children"]>;
+
+let menuProps: AppSidebarMenuItemsProps | null = null;
 
 jest.mock("@/components/header/AppSidebarHeader", () => (props: any) => {
   headerProps = props;
   return <div data-testid="header" />;
 });
-jest.mock("@/components/header/AppSidebarMenuItems", () => (props: any) => {
-  menuProps = props;
-  return <div data-testid="menu" />;
-});
+jest.mock(
+  "@/components/header/AppSidebarMenuItems",
+  () => (props: AppSidebarMenuItemsProps) => {
+    menuProps = props;
+    return <div data-testid="menu" />;
+  }
+);
 jest.mock("@/components/header/AppUserConnect", () => (props: any) => {
   connectProps = props;
   return <div data-testid="connect" />;
@@ -29,9 +39,12 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: () => ({ isIos: true }),
 }));
 
-let country = "US";
+let optionalCookieConsentCountry: string | undefined = "US";
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
-  useOptionalCookieConsent: () => ({ country }),
+  useOptionalCookieConsent: () =>
+    optionalCookieConsentCountry === undefined
+      ? undefined
+      : { country: optionalCookieConsentCountry },
 }));
 
 ((describe) => {
@@ -40,9 +53,43 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
   } = require("@/components/app-wallets/AppWalletsContext");
 
   describe("AppSidebar", () => {
+    const setCookieCountry = (nextCountry: string) => {
+      optionalCookieConsentCountry = nextCountry;
+    };
+
+    const clearOptionalCookieConsent = () => {
+      optionalCookieConsentCountry = undefined;
+    };
+
+    const getMenu = (): SidebarMenu => {
+      if (menuProps === null) {
+        throw new Error("AppSidebarMenuItems was not rendered.");
+      }
+
+      return menuProps.menu;
+    };
+
+    const getMenuItem = (label: string): SidebarMenuItem => {
+      const item = getMenu().find((menuItem) => menuItem.label === label);
+      if (item === undefined) {
+        throw new Error(`Missing ${label} menu item.`);
+      }
+
+      return item;
+    };
+
+    const getMenuChildren = (label: string): SidebarMenuChildren => {
+      const children = getMenuItem(label).children;
+      if (children === undefined) {
+        throw new Error(`Missing ${label} menu children.`);
+      }
+
+      return children;
+    };
+
     beforeEach(() => {
       headerProps = menuProps = connectProps = null;
-      country = "US";
+      setCookieCountry("US");
     });
 
     it("includes App Wallets when supported and handles close", () => {
@@ -51,10 +98,8 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         appWalletsSupported: true,
       });
       render(<AppSidebar open={true} onClose={onClose} />);
-      const networkChildren = menuProps.menu.find(
-        (m: any) => m.label === "Network"
-      ).children;
-      expect(menuProps.menu).toEqual(
+      const networkChildren = getMenuChildren("Network");
+      expect(getMenu()).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ label: "Profile", path: "/profile" }),
           expect.objectContaining({ label: "Discovery", path: "/discover" }),
@@ -70,18 +115,17 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         ])
       );
       const xtdhIndex = networkChildren.findIndex(
-        (child: any) => child.label === "xTDH"
+        (child) => child.label === "xTDH"
       );
       const waveScoreIndex = networkChildren.findIndex(
-        (child: any) => child.label === "Wave Score"
+        (child) => child.label === "Wave Score"
       );
       expect(waveScoreIndex).toBe(xtdhIndex + 1);
-      expect(
-        menuProps.menu.find((m: any) => m.label === "Tools").children[0]
-      ).toEqual({ label: "App Wallets", path: "/tools/app-wallets" });
-      const aboutChildren = menuProps.menu.find(
-        (m: any) => m.label === "About"
-      ).children;
+      expect(getMenuChildren("Tools")[0]).toEqual({
+        label: "App Wallets",
+        path: "/tools/app-wallets",
+      });
+      const aboutChildren = getMenuChildren("About");
       expect(aboutChildren).toEqual([
         { label: "About", path: "/about" },
         { label: "Collections", section: true },
@@ -99,7 +143,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "Health", path: "/network/health" },
         { label: "Definitions", path: "/network/definitions" },
         { label: "Levels", path: "/network/levels" },
-        { label: "Network TDH", path: "/network/health/network-tdh" },
+        { label: "Network Stats", path: "/network/health/network-tdh" },
         { label: "Resources", section: true },
         { label: "FAQ", path: "/about/faq" },
         { label: "ENS", path: "/about/ens" },
@@ -131,9 +175,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         appWalletsSupported: false,
       });
       render(<AppSidebar open={true} onClose={() => {}} />);
-      expect(
-        menuProps.menu.find((m: any) => m.label === "Tools").children[0].label
-      ).not.toBe("App Wallets");
+      expect(getMenuChildren("Tools")[0].label).not.toBe("App Wallets");
     });
 
     it("renders nothing when closed", () => {
@@ -147,16 +189,14 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     });
 
     it("hides subscriptions in the About submenu for restricted iOS users", () => {
-      country = "DE";
+      setCookieCountry("DE");
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
       });
 
       render(<AppSidebar open={true} onClose={() => {}} />);
 
-      const aboutChildren = menuProps.menu.find(
-        (m: any) => m.label === "About"
-      ).children;
+      const aboutChildren = getMenuChildren("About");
       expect(aboutChildren).toEqual(
         expect.not.arrayContaining([
           expect.objectContaining({ label: "Subscriptions" }),
@@ -166,6 +206,21 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         expect.arrayContaining([
           expect.objectContaining({ label: "The Memes" }),
           expect.objectContaining({ label: "Meme Lab" }),
+        ])
+      );
+    });
+
+    it("keeps subscriptions visible when the optional consent provider is absent", () => {
+      clearOptionalCookieConsent();
+      (useAppWallets as jest.Mock).mockReturnValue({
+        appWalletsSupported: false,
+      });
+
+      render(<AppSidebar open={true} onClose={() => {}} />);
+
+      expect(getMenuChildren("About")).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ label: "Subscriptions" }),
         ])
       );
     });

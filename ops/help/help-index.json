@@ -76,7 +76,7 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network TDH links that keep their canonical /network paths.",
+        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links that keep their canonical /network paths.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, delegation, resource, community, or technical page."
       ],
       "canonical_path": "/about",

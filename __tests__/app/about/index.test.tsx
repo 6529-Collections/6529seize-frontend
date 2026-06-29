@@ -64,7 +64,7 @@ describe("About index page", () => {
       screen.getByRole("link", { name: /open page: levels/i })
     ).toHaveAttribute("href", "/network/levels");
     expect(
-      screen.getByRole("link", { name: /open page: network tdh/i })
+      screen.getByRole("link", { name: /open page: network stats/i })
     ).toHaveAttribute("href", "/network/health/network-tdh");
   });
 

@@ -212,11 +212,11 @@ const ABOUT_CONTENTS_NAV_ITEMS = ABOUT_CONTENTS_NAV_GROUPS.flatMap(
   (group) => group.items
 );
 
-const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>([
-  ...ABOUT_CONTENTS_NAV_ITEMS.map((item) =>
-    "section" in item ? ([item.section, item.labelKey] as const) : undefined
-  ).filter((item): item is readonly [AboutSection, MessageKey] => !!item),
-]);
+const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>(
+  ABOUT_CONTENTS_NAV_ITEMS.flatMap((item) =>
+    "section" in item ? [[item.section, item.labelKey] as const] : []
+  )
+);
 
 const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
   [AboutSection.GRADIENTS, "about.contents.documentTitles.gradient"],

@@ -116,10 +116,13 @@ export default function AppSidebar({
   const handleClose = useCallback(() => onClose(), [onClose]);
 
   const menu = useMemo(() => {
-    const hideSubscriptions = shouldHideSubscriptions({
-      capacitorIsIos: capacitor.isIos,
-      country: cookieConsent?.country,
-    });
+    const hideSubscriptions =
+      cookieConsent === undefined
+        ? false
+        : shouldHideSubscriptions({
+            capacitorIsIos: capacitor.isIos,
+            country: cookieConsent.country,
+          });
     const aboutChildren = getAboutSidebarChildren(hideSubscriptions);
     const updatedMenu = MENU.map((item) => {
       if (item.label === "Tools" && item.children) {

@@ -15,8 +15,8 @@ export default function CommunityStatsPage() {
                 <Col>
                   <div className="tailwind-scope">
                     <AboutContentsDropdown currentHref="/network/health/network-tdh" />
+                    <CommunityStatsComponent />
                   </div>
-                  <CommunityStatsComponent />
                 </Col>
               </Row>
             </Container>

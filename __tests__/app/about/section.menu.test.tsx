@@ -16,9 +16,13 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 
 let country = "DE";
+let optionalCookieConsentCountry: string | undefined = "DE";
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country }),
-  useOptionalCookieConsent: () => ({ country }),
+  useOptionalCookieConsent: () =>
+    optionalCookieConsentCountry === undefined
+      ? undefined
+      : { country: optionalCookieConsentCountry },
 }));
 
 const setTitle = jest.fn();
@@ -62,8 +66,17 @@ const renderAboutSection = async (section: AboutSection) => {
 };
 
 describe("About contents dropdown", () => {
+  const setCookieCountry = (nextCountry: string) => {
+    country = nextCountry;
+    optionalCookieConsentCountry = nextCountry;
+  };
+
+  const clearOptionalCookieConsent = () => {
+    optionalCookieConsentCountry = undefined;
+  };
+
   beforeEach(() => {
-    country = "DE";
+    setCookieCountry("DE");
   });
 
   it("hides subscriptions row when iOS users are not in the US", async () => {
@@ -75,7 +88,7 @@ describe("About contents dropdown", () => {
   });
 
   it("shows subscriptions row for iOS users in the US", async () => {
-    country = "US";
+    setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
@@ -95,7 +108,7 @@ describe("About contents dropdown", () => {
   });
 
   it("separates dropdown items by category", async () => {
-    country = "US";
+    setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
@@ -110,7 +123,7 @@ describe("About contents dropdown", () => {
   });
 
   it("does not link to retired release notes page", async () => {
-    country = "US";
+    setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
@@ -119,7 +132,7 @@ describe("About contents dropdown", () => {
   });
 
   it("keeps cookie policy reachable from the contents menu", async () => {
-    country = "US";
+    setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
     openContentsMenu();
 
@@ -129,7 +142,7 @@ describe("About contents dropdown", () => {
   });
 
   it("links to TDH and xTDH resource pages without moving their paths", async () => {
-    country = "US";
+    setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
     openContentsMenu();
 
@@ -149,12 +162,12 @@ describe("About contents dropdown", () => {
       screen.getByRole("menuitem", { name: /go to page: levels/i })
     ).toHaveAttribute("href", "/network/levels");
     expect(
-      screen.getByRole("menuitem", { name: /go to page: network tdh/i })
+      screen.getByRole("menuitem", { name: /go to page: network stats/i })
     ).toHaveAttribute("href", "/network/health/network-tdh");
   });
 
   it("marks a network resource as current when rendered on that route", () => {
-    country = "US";
+    setCookieCountry("US");
     render(
       <AboutContentsDropdown currentHref="/network/health/network-tdh/?tab=tdh" />
     );
@@ -162,17 +175,28 @@ describe("About contents dropdown", () => {
     const trigger = screen.getByRole("button", {
       name: /open about contents navigation/i,
     });
-    expect(trigger).toHaveTextContent("Network TDH");
+    expect(trigger).toHaveTextContent("Network Stats");
 
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: /network tdh, current page/i })
+      screen.getByRole("menuitem", { name: /network stats, current page/i })
     ).toHaveAttribute("data-active", "true");
   });
 
+  it("does not hide subscriptions when a network page has no cookie provider", () => {
+    clearOptionalCookieConsent();
+    render(<AboutContentsDropdown currentHref="/network/tdh" />);
+
+    openContentsMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: subscriptions/i })
+    ).toHaveAttribute("href", "/about/subscriptions");
+  });
+
   it("uses dropdown item styling without link underlines", async () => {
-    country = "US";
+    setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
     openContentsMenu();
 
@@ -182,7 +206,7 @@ describe("About contents dropdown", () => {
   });
 
   it("marks tech as current on deeper tech routes", async () => {
-    country = "US";
+    setCookieCountry("US");
     await renderAboutSection(AboutSection.TECH);
     openContentsMenu();
 
