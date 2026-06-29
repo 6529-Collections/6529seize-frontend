@@ -528,6 +528,33 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
   "subtitle.waveRep": "give Wave REP for",
 } as const);
 
+const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
+  label: "Contents",
+  aboutFallback: "About",
+  triggerAriaLabel: "Open About contents navigation. Current page: {page}",
+  currentItemAriaLabel: "{page}, current About page",
+  itemAriaLabel: "Go to About page: {page}",
+  "pages.theMemes": "The Memes",
+  "pages.subscriptions": "Subscriptions",
+  "pages.memeLab": "Meme Lab",
+  "pages.gradient": "Gradient",
+  "pages.gdrc": "GDRC",
+  "pages.nftDelegation": "NFT Delegation",
+  "pages.primaryAddress": "Primary Address",
+  "pages.faq": "FAQ",
+  "pages.ens": "ENS",
+  "pages.minting": "Minting",
+  "pages.nakamotoThreshold": "Nakamoto Threshold",
+  "pages.license": "License",
+  "pages.apply": "Apply",
+  "pages.contactUs": "Contact Us",
+  "pages.tech": "Tech",
+  "pages.dataDecentralization": "Data Decentralization",
+  "pages.termsOfService": "Terms of Service",
+  "pages.privacyPolicy": "Privacy Policy",
+  "pages.copyright": "Copyright",
+} as const);
+
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "metadata.title": "Tech",
   "metadata.description": "About",
@@ -1207,6 +1234,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
+  ...ABOUT_CONTENTS_MESSAGES,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
