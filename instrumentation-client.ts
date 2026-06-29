@@ -23,6 +23,7 @@ import {
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
@@ -120,6 +121,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterRabbyMobileUserRejectedRequest(event, hint)) {
     return true;
   }
 
