@@ -75,6 +75,18 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
       expect(
         aboutChildren.some((child: any) => child.label === "Release Notes")
       ).toBe(false);
+      expect(aboutChildren).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ label: "Network", section: true }),
+          expect.objectContaining({ label: "TDH", path: "/network/tdh" }),
+          expect.objectContaining({ label: "xTDH", path: "/network/xtdh" }),
+          expect.objectContaining({
+            label: "Definitions",
+            path: "/network/definitions",
+          }),
+          expect.objectContaining({ label: "Levels", path: "/network/levels" }),
+        ])
+      );
       headerProps.onClose();
       expect(onClose).toHaveBeenCalled();
       connectProps.onNavigate();

@@ -5,6 +5,7 @@ import { AboutSection } from "@/types/enums";
 type AboutContentsGroupId =
   | "collections"
   | "delegation"
+  | "network"
   | "resources"
   | "community"
   | "legal";
@@ -86,8 +87,8 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     ],
   },
   {
-    id: "resources",
-    labelKey: "about.contents.groups.resources",
+    id: "network",
+    labelKey: "about.contents.groups.network",
     items: [
       {
         id: "network-tdh",
@@ -125,6 +126,12 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
         labelKey: "about.contents.pages.networkTdhStats",
         descriptionKey: "about.contents.descriptions.networkTdhStats",
       },
+    ],
+  },
+  {
+    id: "resources",
+    labelKey: "about.contents.groups.resources",
+    items: [
       {
         section: AboutSection.FAQ,
         labelKey: "about.contents.pages.faq",

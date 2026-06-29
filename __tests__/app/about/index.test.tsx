@@ -39,6 +39,7 @@ describe("About index page", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Collections")).toBeInTheDocument();
     expect(screen.getByText("Delegation")).toBeInTheDocument();
+    expect(screen.getByText("Network")).toBeInTheDocument();
     expect(screen.getByText("Resources")).toBeInTheDocument();
     expect(screen.getByText("Community")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
