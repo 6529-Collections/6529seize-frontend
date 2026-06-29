@@ -1920,14 +1920,6 @@
       "title": "Wallet Architecture",
       "aliases": [
         "wallet architecture",
-        "4 wallet architecture",
-        "four wallet architecture",
-        "4 wallet consolidation",
-        "four wallet consolidation",
-        "4 wallet setup",
-        "four wallet setup",
-        "how do i set up 4 wallet consolidation",
-        "set up 4 wallet consolidation",
         "three address protocol",
         "architecture",
         "what is tap",
@@ -1962,7 +1954,8 @@
         "The recommended architecture separates a vault wallet for long-term NFT storage, a transaction wallet for trusted marketplace activity, and a minting wallet for unknown or higher-risk minting activity.",
         "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
         "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet.",
-        "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics."
+        "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics.",
+        "For consolidation metrics, 6529 currently recognizes up to 3 addresses as one consolidation group."
       ],
       "canonical_path": "/delegation/wallet-architecture",
       "related_paths": [
@@ -1986,6 +1979,15 @@
         "consolidation use cases",
         "4 wallet consolidation",
         "four wallet consolidation",
+        "4 wallet consolidation limit",
+        "four wallet consolidation limit",
+        "how do i consolidate 4 wallets",
+        "how do i consolidate four wallets",
+        "more than 3 wallet consolidation",
+        "more than three wallet consolidation",
+        "over 3 wallet consolidation",
+        "over three wallet consolidation",
+        "too many wallets consolidation",
         "three wallet consolidation",
         "two wallet consolidation",
         "compromised wallet consolidation",
@@ -2007,7 +2009,8 @@
       ],
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
-        "The docs cover two-address and three-address patterns, plus a four-address scenario where an old hot wallet was compromised and cards moved through temporary, vault, and new minting wallets.",
+        "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
+        "The docs cover two-address and three-address patterns, plus a four-address compromised-wallet scenario where the user chooses which three-address set should count.",
         "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
       ],
       "canonical_path": "/delegation/consolidation-use-cases",
