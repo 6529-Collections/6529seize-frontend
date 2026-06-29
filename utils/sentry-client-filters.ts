@@ -131,6 +131,25 @@ const objectCapturedPromiseRejectionMessage =
 const providerDisconnectedCode = 4900;
 const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
+const talismanExtensionOnboardingMessage =
+  "Talisman extension has not been configured yet. Please continue with onboarding.";
+const browserExtensionUrlPrefixes = [
+  "chrome-extension://",
+  "moz-extension://",
+  "safari-web-extension://",
+];
+const appOwnedFramePathTokens = [
+  "webpack-internal:///(app-",
+  "/_next/static/",
+  "app:///app/",
+  "app:///components/",
+  "app:///contexts/",
+  "app:///hooks/",
+  "app:///lib/",
+  "app:///services/",
+  "app:///store/",
+  "app:///utils/",
+];
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
 const REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE =
@@ -969,6 +988,38 @@ function isInjectedWasmCspAppUriFrame(frame: SentryStackFrame): boolean {
   );
 }
 
+function isInjectedOrThirdPartyWalletExtensionPath(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  if (
+    normalizedValue.includes(injectedAppUriPath) ||
+    normalizedValue.includes("app:///page.js")
+  ) {
+    return true;
+  }
+
+  return (
+    browserExtensionUrlPrefixes.some((prefix) =>
+      normalizedValue.includes(prefix)
+    ) && normalizedValue.includes("/page.js")
+  );
+}
+
+function isAppOwnedFramePath(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  if (isInjectedOrThirdPartyWalletExtensionPath(normalizedValue)) {
+    return false;
+  }
+
+  return hasAppOwnedFramePathSignature(normalizedValue);
+}
+
+function hasAppOwnedFramePathSignature(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  return appOwnedFramePathTokens.some((token) =>
+    normalizedValue.includes(token)
+  );
+}
+
 function hasOnlyAppUriFrames(
   frames: SentryStackFrame[] | undefined
 ): frames is SentryStackFrame[] {
@@ -1010,6 +1061,38 @@ function hasAppOwnedFrame(frames: SentryStackFrame[] | undefined): boolean {
   );
 }
 
+function hasAppOwnedNonExtensionFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) => {
+      if (isNativeJsonStringifyFrame(frame)) {
+        return false;
+      }
+
+      const framePaths = getFramePaths(frame);
+      if (framePaths.some(isInjectedOrThirdPartyWalletExtensionPath)) {
+        return false;
+      }
+
+      return frame.in_app === true || framePaths.some(isAppOwnedFramePath);
+    })
+  );
+}
+
+function hasAppOwnedNonExtensionSignature(
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  if (hasAppOwnedNonExtensionFrame(frames)) {
+    return true;
+  }
+
+  const stack = getHintExceptionStack(hint);
+  return stack ? hasAppOwnedFramePathSignature(stack) : false;
+}
+
 function hasNativeJsonStringifyFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
@@ -1042,6 +1125,13 @@ function getHintExceptionMessage(hint?: SentryEventHint): string {
     return exception.message;
   }
   return "";
+}
+
+function normalizeErrorPrefix(value: string): string {
+  const trimmedValue = value.trim();
+  return trimmedValue.startsWith("Error: ")
+    ? trimmedValue.slice("Error: ".length).trim()
+    : trimmedValue;
 }
 
 function getHintExceptionStack(hint?: SentryEventHint): string {
@@ -1344,6 +1434,29 @@ function hasWalletCollisionSignature(
   );
 }
 
+function hasTalismanExtensionOnboardingMessage(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const candidates = [value?.value, event.message, getHintExceptionMessage(hint)];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      normalizeErrorPrefix(candidate) === talismanExtensionOnboardingMessage
+  );
+}
+
+function hasInjectedOrThirdPartyWalletExtensionSignature(
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return getStackSignatureValues(frames, hint).some(
+    isInjectedOrThirdPartyWalletExtensionPath
+  );
+}
+
 function hasOnlyThirdPartyWalletExtensionFrames(
   frames: SentryStackFrame[] | undefined
 ): boolean {
@@ -1592,6 +1705,22 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
     hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint)
   );
+}
+
+export function shouldFilterTalismanExtensionOnboardingError(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  if (!hasTalismanExtensionOnboardingMessage(event, hint)) {
+    return false;
+  }
+
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (hasAppOwnedNonExtensionSignature(frames, hint)) {
+    return false;
+  }
+
+  return hasInjectedOrThirdPartyWalletExtensionSignature(frames, hint);
 }
 
 export function shouldFilterSentryRouteParameterizationError(
