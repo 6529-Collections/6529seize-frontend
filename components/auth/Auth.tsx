@@ -173,10 +173,6 @@ interface RunImmediateAuthValidationParams {
   readonly setShowSignModal: (show: boolean) => void;
   readonly invalidateAll: () => void;
   readonly reset: () => void;
-  readonly verifyActiveSessionV2WebSession: (
-    address: string,
-    abortSignal: AbortSignal
-  ) => Promise<boolean>;
   readonly authRolloutSettings: AuthRolloutSettings;
 }
 
@@ -443,7 +439,6 @@ const runImmediateAuthValidation = async ({
   setShowSignModal,
   invalidateAll,
   reset,
-  verifyActiveSessionV2WebSession,
   authRolloutSettings,
 }: RunImmediateAuthValidationParams): Promise<void> => {
   if (
@@ -483,29 +478,6 @@ const runImmediateAuthValidation = async ({
   };
 
   try {
-    if (
-      hasActiveSessionV2Auth({ address: currentAddress }) &&
-      getSessionClientType() === "web"
-    ) {
-      const hasActiveWebSession = await verifyActiveSessionV2WebSession(
-        currentAddress,
-        abortController.signal
-      );
-
-      if (
-        !hasActiveWebSession &&
-        isCurrentValidationOperation({
-          latestAddressRef,
-          activeValidationOperationIdRef,
-          currentAddress,
-          operationId,
-        })
-      ) {
-        markSessionUpgradeRequired();
-        return;
-      }
-    }
-
     const result = await measureMobileLaunchAsync(
       "auth_immediate_validation",
       () =>
@@ -807,47 +779,6 @@ export default function Auth({
     []
   );
 
-  const ensureActiveWebSessionForAddress = useCallback(
-    async (
-      walletAddress: string,
-      abortSignal?: AbortSignal
-    ): Promise<boolean> => {
-      if (!hasActiveSessionV2Auth({ address: walletAddress })) {
-        if (!abortSignal?.aborted) {
-          setSessionUpgradeRequired(true);
-          setSessionUpgradeHasDeadline(false);
-        }
-        return false;
-      }
-
-      try {
-        const hasActiveWebSession = await verifyActiveSessionV2WebSession({
-          address: walletAddress,
-          abortSignal,
-        });
-
-        if (abortSignal?.aborted) {
-          return true;
-        }
-
-        if (!hasActiveWebSession) {
-          setSessionUpgradeRequired(true);
-          setSessionUpgradeHasDeadline(false);
-          return false;
-        }
-
-        setSessionUpgradeRequired(false);
-        return true;
-      } catch (error) {
-        if (!abortSignal?.aborted) {
-          logErrorSecurely("session_v2_web_session_verification", error);
-        }
-        return true;
-      }
-    },
-    []
-  );
-
   const ensureActiveSessionV2WebSessionForActiveWallet = useCallback(
     async (abortSignal?: AbortSignal): Promise<boolean> => {
       const walletAddress = getWalletAddress() ?? address;
@@ -887,12 +818,14 @@ export default function Auth({
         return undefined;
       }
 
-      const controller = new AbortController();
-      void ensureActiveWebSessionForAddress(
-        storedAuthAddress,
-        controller.signal
-      );
-      return () => controller.abort();
+      if (!hasActiveSessionV2Auth({ address: storedAuthAddress })) {
+        setSessionUpgradeRequired(true);
+        setSessionUpgradeHasDeadline(false);
+      } else {
+        setSessionUpgradeRequired(false);
+        setSessionUpgradeHasDeadline(false);
+      }
+      return undefined;
     }
 
     if (!isAddressAuthorized) {
@@ -947,7 +880,6 @@ export default function Auth({
       setShowSignModal,
       invalidateAll,
       reset,
-      verifyActiveSessionV2WebSession: ensureActiveWebSessionForAddress,
       authRolloutSettings,
     }).catch((error) => {
       logErrorSecurely("auth_immediate_validation_unhandled", error);
@@ -965,7 +897,6 @@ export default function Auth({
     hasActiveWalletAddress,
     canSignActiveWallet,
     abortCurrentAuthOperation,
-    ensureActiveWebSessionForAddress,
     invalidateAll,
     reset,
     authRolloutSettings,
