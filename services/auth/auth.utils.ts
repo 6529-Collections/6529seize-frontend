@@ -50,6 +50,21 @@ const getJwtExpiration = (jwt: string): number => {
   return decodedJwt.exp;
 };
 
+export const isAuthJwtUsable = (
+  jwt: string | null | undefined,
+  nowSeconds = Date.now() / 1000
+): boolean => {
+  if (!jwt) {
+    return false;
+  }
+
+  try {
+    return getJwtExpiration(jwt) > nowSeconds;
+  } catch {
+    return false;
+  }
+};
+
 const getAddressRoleStorageKey = (address: string): string => {
   return `auth-role-${address.toLowerCase()}`;
 };

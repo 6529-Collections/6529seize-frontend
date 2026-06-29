@@ -1315,14 +1315,20 @@
       ]
     },
     {
-      "id": "delegation.register-consolidation",
+      "id": "delegation.register-consolidation-doc",
       "kind": "workflow",
-      "title": "Register Consolidation",
-      "link_label": "Register Consolidation",
+      "title": "How to Register a Consolidation",
+      "link_label": "Register Consolidation Guide",
       "aliases": [
+        "how to register a consolidation",
+        "how do i register a consolidation",
+        "how do i set up a consolidation",
+        "set up consolidation",
+        "setup consolidation",
+        "register consolidation docs",
+        "register consolidation faq",
         "register consolidation",
         "register a consolidation",
-        "how do i register a consolidation",
         "wallet consolidation",
         "consolidate wallets",
         "tdh consolidation",
@@ -1341,16 +1347,57 @@
         "999"
       ],
       "facts": [
-        "Register Consolidation lives at /delegation/register-consolidation and can also be opened from the Delegation Center.",
-        "Use Register Consolidation to connect wallets you control for supported 6529 metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
-        "The form requires a connected wallet, Collection, and Consolidating With address; for TDH consolidation, use Any Collection or The Memes.",
+        "A consolidation connects wallets you control so 6529 can treat them together for supported metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
+        "To register a consolidation, open Register Consolidation from the Delegation Center, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
+        "For TDH consolidation, use Any Collection or The Memes.",
         "Consolidation should be reciprocal when two wallets are intended to be treated together, and it is not a delegation and does not grant rights."
+      ],
+      "canonical_path": "/delegation/delegation-faq/register-consolidation",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/consolidation-use-cases",
+        "/delegation/register-consolidation"
+      ],
+      "tags": ["delegation", "consolidation", "wallet", "faq"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/register-consolidation.html",
+        "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md"
+      ]
+    },
+    {
+      "id": "delegation.register-consolidation",
+      "kind": "workflow",
+      "title": "Register Consolidation Form",
+      "link_label": "Register Consolidation",
+      "aliases": [
+        "register consolidation form",
+        "open register consolidation",
+        "where is register consolidation",
+        "register a consolidation form"
+      ],
+      "keywords": [
+        "consolidation",
+        "consolidate",
+        "register",
+        "wallet",
+        "wallets",
+        "tdh",
+        "primary",
+        "address",
+        "reciprocal",
+        "999"
+      ],
+      "facts": [
+        "The Register Consolidation form is the Delegation Center action for connecting wallets you control for supported 6529 metrics.",
+        "The form requires a connected wallet, Collection, and Consolidating With address.",
+        "For TDH consolidation, use Any Collection or The Memes."
       ],
       "canonical_path": "/delegation/register-consolidation",
       "related_paths": [
-        "/delegation/delegation-center",
-        "/delegation/wallet-checker",
+        "/delegation/delegation-faq/register-consolidation",
+        "/delegation/wallet-architecture",
         "/delegation/consolidation-use-cases",
+        "/delegation/delegation-center",
         "/delegation/assign-primary-address"
       ],
       "tags": ["delegation", "consolidation", "wallet"],
@@ -1368,6 +1415,12 @@
         "wallet architecture",
         "4 wallet architecture",
         "four wallet architecture",
+        "4 wallet consolidation",
+        "four wallet consolidation",
+        "4 wallet setup",
+        "four wallet setup",
+        "how do i set up 4 wallet consolidation",
+        "set up 4 wallet consolidation",
         "three address protocol",
         "tap",
         "vault wallet",
@@ -1393,17 +1446,17 @@
         "malware"
       ],
       "facts": [
-        "Wallet Architecture lives at /delegation/wallet-architecture and is part of the Delegation Center docs.",
         "The recommended architecture separates a vault wallet for long-term NFT storage, a transaction wallet for trusted marketplace activity, and a minting wallet for unknown or higher-risk minting activity.",
         "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
-        "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet."
+        "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet.",
+        "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics."
       ],
       "canonical_path": "/delegation/wallet-architecture",
       "related_paths": [
-        "/delegation/delegation-faq",
         "/delegation/consolidation-use-cases",
-        "/delegation/register-delegation",
-        "/delegation/register-consolidation"
+        "/delegation/delegation-faq/register-consolidation",
+        "/delegation/register-consolidation",
+        "/delegation/delegation-faq"
       ],
       "tags": ["delegation", "wallet", "security", "architecture"],
       "source_refs": [
@@ -1439,7 +1492,6 @@
         "reciprocal"
       ],
       "facts": [
-        "Consolidation Use Cases lives at /delegation/consolidation-use-cases.",
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
         "The docs cover two-address and three-address patterns, plus a four-address scenario where an old hot wallet was compromised and cards moved through temporary, vault, and new minting wallets.",
         "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
@@ -1447,6 +1499,7 @@
       "canonical_path": "/delegation/consolidation-use-cases",
       "related_paths": [
         "/delegation/wallet-architecture",
+        "/delegation/delegation-faq/register-consolidation",
         "/delegation/register-consolidation",
         "/delegation/delegation-faq",
         "/consolidation-mapping-tool"
@@ -1485,7 +1538,6 @@
         "usecase"
       ],
       "facts": [
-        "The Delegation FAQ lives at /delegation/delegation-faq.",
         "It indexes how-to articles for registering delegations, delegation managers, consolidations, SAFE transaction-builder flows, supported use cases, viewing records, updating, revoking, locking, and unlocking wallets.",
         "Use it when users ask broad Delegation Center how-to questions or ask where the delegation docs live."
       ],
@@ -1499,6 +1551,91 @@
       "source_refs": [
         "public/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
         "components/delegation/html/delegationContent.ts"
+      ]
+    },
+    {
+      "id": "delegation.manage-revoke-doc",
+      "kind": "workflow",
+      "title": "How to Revoke a Delegation",
+      "link_label": "Revoke Delegation",
+      "aliases": [
+        "how to revoke a delegation",
+        "how do i revoke a delegation",
+        "revoke delegation",
+        "remove delegation",
+        "cancel delegation",
+        "delete delegation",
+        "revoke a consolidation",
+        "revoke consolidation",
+        "revoke delegation manager"
+      ],
+      "keywords": [
+        "delegation",
+        "revoke",
+        "remove",
+        "cancel",
+        "delete",
+        "manager",
+        "consolidation",
+        "wallet",
+        "manage",
+        "view"
+      ],
+      "facts": [
+        "To revoke a delegation, delegation manager, or consolidation, open the Delegation Center and choose View/Manage for the relevant collection.",
+        "On the Manage/View Collection page, find the address or record you want to revoke and click Revoke.",
+        "Execute the transaction to remove the delegation, manager permission, or consolidation record."
+      ],
+      "canonical_path": "/delegation/delegation-faq/manage-revoke",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/delegation-faq",
+        "/delegation/delegation-faq/revoke-delegation-using-sub-delegation"
+      ],
+      "tags": ["delegation", "workflow", "faq", "revoke"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/manage-revoke.html"
+      ]
+    },
+    {
+      "id": "delegation.manage-update-doc",
+      "kind": "workflow",
+      "title": "How to Update a Delegation",
+      "link_label": "Update Delegation",
+      "aliases": [
+        "how to update a delegation",
+        "how do i update a delegation",
+        "update delegation",
+        "edit delegation",
+        "change delegation",
+        "update consolidation",
+        "update delegation manager"
+      ],
+      "keywords": [
+        "delegation",
+        "update",
+        "edit",
+        "change",
+        "manager",
+        "consolidation",
+        "expiry",
+        "token",
+        "wallet",
+        "manage"
+      ],
+      "facts": [
+        "To update a delegation, delegation manager, or consolidation, open View/Manage in the Delegation Center for the relevant collection.",
+        "Find the address or record you want to update, click Update, adjust the delegated wallet, expiry, or token scope, then submit.",
+        "Execute the transaction to apply the update."
+      ],
+      "canonical_path": "/delegation/delegation-faq/manage-update",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/delegation-faq"
+      ],
+      "tags": ["delegation", "workflow", "faq", "update"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/manage-update.html"
       ]
     },
     {
@@ -1524,7 +1661,6 @@
         "utility"
       ],
       "facts": [
-        "The register-delegation help article lives at /delegation/delegation-faq/register-delegation.",
         "To register a delegation, open Delegation Center, choose Register Delegation, choose the collection, enter the delegate wallet, select a use case such as #1 All, choose expiry and token scope, then submit and execute the transaction.",
         "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet."
       ],
@@ -1564,7 +1700,6 @@
         "consolidations"
       ],
       "facts": [
-        "The Delegation Manager help article lives at /delegation/delegation-faq/register-sub-delegation.",
         "A delegation manager gives a manager wallet permission to maintain delegations and consolidations for another wallet.",
         "The docs describe registering a manager from the vault wallet to a delegated wallet, then using that delegated wallet to register future delegations or consolidations."
       ],
@@ -1604,7 +1739,6 @@
         "abi"
       ],
       "facts": [
-        "The SAFE delegation help article lives at /delegation/delegation-faq/using-safe.",
         "The docs show using the SAFE Transaction Builder with the NFTDelegation.com contract to register delegation manager rights.",
         "The SAFE flow uses the Any Collection value, no-expiry value, use case 998 for Delegation Management, allTokens true, tokenId 0, then creates and sends the batch transaction."
       ],
