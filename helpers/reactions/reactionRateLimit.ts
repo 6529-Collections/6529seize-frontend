@@ -34,7 +34,7 @@ const parseRetryAfterDelaySeconds = (value: string): number | null => {
   return Number.isFinite(seconds) ? seconds : null;
 };
 
-export const parseRetryAfterHeaderValue = (
+const parseRetryAfterHeaderValue = (
   value: string,
   nowMs: number = Date.now()
 ): number | null => {
@@ -56,7 +56,7 @@ export const parseRetryAfterHeaderValue = (
   return null;
 };
 
-export const extractRetryAfterMsFromHeaders = (
+const extractRetryAfterMsFromHeaders = (
   headers: unknown,
   nowMs: number = Date.now()
 ): number | null => {
