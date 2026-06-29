@@ -7,7 +7,14 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import clsx from "clsx";
-import { Fragment, useCallback, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { CSSProperties, HTMLAttributes, ReactNode, TouchEvent } from "react";
 
 const DISMISS_DRAG_DISTANCE_PX = 44;
@@ -394,6 +401,7 @@ function useMobileDialogDrag({
   const dragStartYRef = useRef<number | null>(null);
   const dragStartedAtRef = useRef(0);
   const dragOffsetRef = useRef(0);
+  const dragFrameRef = useRef<number | null>(null);
 
   const handleClose = useCallback(() => {
     if (dismissible) {
@@ -403,19 +411,57 @@ function useMobileDialogDrag({
 
   const canDragToClose = dismissible && !!showDragHandle && !tabletModal;
 
-  const setClampedDragOffset = useCallback((offset: number) => {
-    const clampedOffset = Math.min(Math.max(offset, 0), MAX_DRAG_OFFSET_PX);
-    dragOffsetRef.current = clampedOffset;
-    setDragOffset(clampedOffset);
+  const cancelScheduledDragFrame = useCallback(() => {
+    if (dragFrameRef.current === null) {
+      return;
+    }
+
+    if (typeof globalThis.cancelAnimationFrame === "function") {
+      globalThis.cancelAnimationFrame(dragFrameRef.current);
+    }
+
+    dragFrameRef.current = null;
   }, []);
 
+  const scheduleDragOffsetUpdate = useCallback(() => {
+    if (typeof globalThis.requestAnimationFrame !== "function") {
+      setDragOffset(dragOffsetRef.current);
+      return;
+    }
+
+    if (dragFrameRef.current !== null) {
+      return;
+    }
+
+    dragFrameRef.current = globalThis.requestAnimationFrame(() => {
+      dragFrameRef.current = null;
+      setDragOffset(dragOffsetRef.current);
+    });
+  }, []);
+
+  const setClampedDragOffset = useCallback(
+    (offset: number) => {
+      const clampedOffset = Math.min(Math.max(offset, 0), MAX_DRAG_OFFSET_PX);
+      if (dragOffsetRef.current === clampedOffset) {
+        return;
+      }
+
+      dragOffsetRef.current = clampedOffset;
+      scheduleDragOffsetUpdate();
+    },
+    [scheduleDragOffsetUpdate]
+  );
+
   const resetDrag = useCallback(() => {
+    cancelScheduledDragFrame();
     dragStartYRef.current = null;
     dragStartedAtRef.current = 0;
     dragOffsetRef.current = 0;
     setIsDragging(false);
     setDragOffset(0);
-  }, []);
+  }, [cancelScheduledDragFrame]);
+
+  useEffect(() => cancelScheduledDragFrame, [cancelScheduledDragFrame]);
 
   const handleDragStart = useCallback(
     (event: TouchEvent<HTMLDivElement>) => {
@@ -469,13 +515,17 @@ function useMobileDialogDrag({
     onAfterLeave?.();
   }, [onAfterLeave, resetDrag]);
 
-  const dragTouchHandlers = getDragTouchHandlers({
-    canDragToClose,
-    handleDragStart,
-    handleDragMove,
-    handleDragEnd,
-    resetDrag,
-  });
+  const dragTouchHandlers = useMemo(
+    () =>
+      getDragTouchHandlers({
+        canDragToClose,
+        handleDragStart,
+        handleDragMove,
+        handleDragEnd,
+        resetDrag,
+      }),
+    [canDragToClose, handleDragStart, handleDragMove, handleDragEnd, resetDrag]
+  );
 
   return {
     canDragToClose,
