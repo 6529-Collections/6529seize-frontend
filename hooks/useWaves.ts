@@ -31,6 +31,32 @@ interface UseWavesParams {
 
 const noopAsyncWaveAction = async () => undefined;
 
+function getWavesQueryParams({
+  params,
+  pageParam,
+}: {
+  readonly params: SearchWavesParams;
+  readonly pageParam: number | null;
+}): Record<string, string> {
+  const queryParams: Record<string, string> = {
+    limit: `${params.limit}`,
+  };
+
+  if (typeof pageParam === "number") {
+    queryParams["serial_no_less_than"] = `${pageParam}`;
+  }
+  if (params.author) {
+    queryParams["author"] = params.author;
+  }
+  if (params.name) {
+    queryParams["name"] = params.name;
+  }
+  if (params.direct_message !== undefined) {
+    queryParams["direct_message"] = `${params.direct_message}`;
+  }
+  return queryParams;
+}
+
 export function useWaves({
   identity,
   waveName,
@@ -73,29 +99,19 @@ export function useWaves({
     useState<SearchWavesParams>(params);
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
+  const fetchWavesPage = async ({
+    pageParam,
+  }: {
+    pageParam: number | null;
+  }) =>
+    await commonApiFetch<ApiWave[]>({
+      endpoint: `waves`,
+      params: getWavesQueryParams({ params: debouncedParams, pageParam }),
+    });
+
   const authQuery = useInfiniteQuery({
     queryKey: [QueryKey.WAVES, debouncedParams],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const queryParams: Record<string, string> = {};
-      queryParams["limit"] = `${debouncedParams.limit}`;
-
-      if (typeof pageParam === "number") {
-        queryParams["serial_no_less_than"] = `${pageParam}`;
-      }
-      if (debouncedParams.author) {
-        queryParams["author"] = debouncedParams.author;
-      }
-      if (debouncedParams.name) {
-        queryParams["name"] = debouncedParams.name;
-      }
-      if (debouncedParams.direct_message !== undefined) {
-        queryParams["direct_message"] = `${debouncedParams.direct_message}`;
-      }
-      return await commonApiFetch<ApiWave[]>({
-        endpoint: `waves`,
-        params: queryParams,
-      });
-    },
+    queryFn: fetchWavesPage,
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     enabled: enabled && !usePublicWaves && !isPendingAuthSwitch,
@@ -105,27 +121,7 @@ export function useWaves({
 
   const publicQuery = useInfiniteQuery({
     queryKey: [QueryKey.WAVES_PUBLIC, debouncedParams],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const queryParams: Record<string, string> = {};
-      queryParams["limit"] = `${debouncedParams.limit}`;
-
-      if (typeof pageParam === "number") {
-        queryParams["serial_no_less_than"] = `${pageParam}`;
-      }
-      if (debouncedParams.author) {
-        queryParams["author"] = debouncedParams.author;
-      }
-      if (debouncedParams.name) {
-        queryParams["name"] = debouncedParams.name;
-      }
-      if (debouncedParams.direct_message !== undefined) {
-        queryParams["direct_message"] = `${debouncedParams.direct_message}`;
-      }
-      return await commonApiFetch<ApiWave[]>({
-        endpoint: `waves`,
-        params: queryParams,
-      });
-    },
+    queryFn: fetchWavesPage,
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     enabled: enabled && usePublicWaves && !isPendingAuthSwitch,
