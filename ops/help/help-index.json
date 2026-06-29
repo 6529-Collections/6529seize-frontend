@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-19T00:00:00.000Z",
-  "commit_sha": "frontend-owned-curated-v1",
+  "generated_at": "2026-06-29T09:23:18.000Z",
+  "commit_sha": "01a39b18db2f",
   "base_url": "https://6529.io",
   "records": [
     {
@@ -51,9 +51,6 @@
       "kind": "route",
       "title": "6529 FAQ",
       "aliases": [
-        "faq",
-        "6529",
-        "6529.io",
         "6529 faq",
         "what is 6529.io",
         "about faq",
@@ -764,7 +761,7 @@
         "what is x tdh",
         "xtdh grants",
         "xTDH grants",
-        "grants"
+        "xTDH grant allocations"
       ],
       "keywords": [
         "xtdh",
@@ -1642,7 +1639,8 @@
         "how do i set up 4 wallet consolidation",
         "set up 4 wallet consolidation",
         "three address protocol",
-        "tap",
+        "what is tap",
+        "tap wallet architecture",
         "vault wallet",
         "transaction wallet",
         "minting wallet",
