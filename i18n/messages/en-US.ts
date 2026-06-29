@@ -404,7 +404,12 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   showAll: "Show all",
   openConversation: "Open conversation",
   openConversationAriaLabel: "Open conversation with {name}",
-  unreadPreview: "New messages",
+  openConversationMetaAriaLabel:
+    "Open conversation with {name}. Last message {time}. Wave score {score}",
+  openConversationTimeAriaLabel:
+    "Open conversation with {name}. Last message {time}",
+  scoreLabel: "Wave score {score}",
+  noMessagesYet: "No messages yet",
   emptyTitle: "No direct messages yet",
   loadingStatus: "Loading direct messages",
   chatLoadError: "Unable to load this conversation.",

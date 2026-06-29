@@ -75,7 +75,12 @@ export const ES_ES_MESSAGES = {
   "quickDm.showAll": "Ver todos",
   "quickDm.openConversation": "Abrir conversación",
   "quickDm.openConversationAriaLabel": "Abrir conversación con {name}",
-  "quickDm.unreadPreview": "Mensajes nuevos",
+  "quickDm.openConversationMetaAriaLabel":
+    "Abrir conversación con {name}. Último mensaje {time}. Puntuación de wave {score}",
+  "quickDm.openConversationTimeAriaLabel":
+    "Abrir conversación con {name}. Último mensaje {time}",
+  "quickDm.scoreLabel": "Puntuación de wave {score}",
+  "quickDm.noMessagesYet": "Aún no hay mensajes",
   "quickDm.emptyTitle": "Aún no hay mensajes directos",
   "quickDm.loadingStatus": "Cargando mensajes directos",
   "quickDm.chatLoadError": "No se pudo cargar esta conversación.",
