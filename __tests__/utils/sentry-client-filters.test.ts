@@ -2405,6 +2405,37 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter no-frame websocket 1006 errors when the original exception stack is app-owned", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+    const error = new Error("websocket error 1006:");
+    error.stack = [
+      "Error: websocket error 1006:",
+      "    at connect (webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter AppKit websocket 1006 errors without a wallet connector breadcrumb", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
@@ -2425,6 +2456,14 @@ describe("sentry-client-filters", () => {
             category: "console",
             message:
               "[AppKitInitialization] Initializing AppKit adapter (web) with",
+            data: {
+              arguments: [
+                {
+                  enableCoinbase: false,
+                  featuredWalletIds: ["metamask"],
+                },
+              ],
+            },
           },
         ],
       },

@@ -1209,7 +1209,9 @@ function addBreadcrumbSignatureValues(
   }
 
   Object.entries(value).forEach(([key, item]) => {
-    values.push(key);
+    if (item === true) {
+      values.push(key);
+    }
     addBreadcrumbSignatureValues(item, values, depth + 1);
   });
 }
