@@ -284,7 +284,9 @@ describe("SeizeConnectContext switch sync guard", () => {
       expect(mockUseConnectedAccountsUnreadNotifications).toHaveBeenCalledWith([
         inactiveAccount,
       ]);
-      expect(mockUseUnreadNotifications).toHaveBeenCalledWith("alice");
+      expect(mockUseUnreadNotifications).toHaveBeenCalledWith("alice", {
+        enabled: true,
+      });
     });
 
     const unreadMap = JSON.parse(
@@ -346,7 +348,9 @@ describe("SeizeConnectContext switch sync guard", () => {
         activeAccount,
         inactiveAccount,
       ]);
-      expect(mockUseUnreadNotifications).toHaveBeenCalledWith(null);
+      expect(mockUseUnreadNotifications).toHaveBeenCalledWith(null, {
+        enabled: false,
+      });
     });
 
     const unreadMap = JSON.parse(

@@ -40,3 +40,31 @@ export const getDefaultQueryRetry = (errorCallback?: () => void) => {
     },
   };
 };
+
+type QueryErrorWithStatus = {
+  readonly status?: unknown;
+  readonly response?: {
+    readonly status?: unknown;
+  };
+  readonly cause?: {
+    readonly status?: unknown;
+  };
+};
+
+const getQueryErrorStatus = (error: unknown): number | null => {
+  if (typeof error !== "object" || error === null) {
+    return null;
+  }
+
+  const statusError = error as QueryErrorWithStatus;
+  const status =
+    statusError.status ??
+    statusError.response?.status ??
+    statusError.cause?.status;
+
+  return typeof status === "number" ? status : null;
+};
+
+export const isUnauthorizedQueryError = (error: unknown): boolean => {
+  return getQueryErrorStatus(error) === 401;
+};
