@@ -20,6 +20,7 @@ import type { CSSProperties, HTMLAttributes, ReactNode, TouchEvent } from "react
 const DISMISS_DRAG_DISTANCE_PX = 44;
 const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
 const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
+const DISMISS_DRAG_SETTLE_MS = 180;
 const DRAG_START_REGION_PX = 112;
 const MAX_DRAG_OFFSET_PX = 260;
 
@@ -391,6 +392,14 @@ function shouldDismissDrag(releasedOffset: number, startedAt: number): boolean {
   );
 }
 
+function getDismissDragOffset(): number {
+  return Math.max(
+    globalThis.visualViewport?.height ?? 0,
+    globalThis.innerHeight ?? 0,
+    MAX_DRAG_OFFSET_PX
+  );
+}
+
 function useMobileDialogDrag({
   dismissible,
   showDragHandle,
@@ -404,6 +413,7 @@ function useMobileDialogDrag({
   const dragStartedAtRef = useRef(0);
   const dragOffsetRef = useRef(0);
   const dragFrameRef = useRef<number | null>(null);
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleClose = useCallback(() => {
     if (dismissible) {
@@ -423,6 +433,15 @@ function useMobileDialogDrag({
     }
 
     dragFrameRef.current = null;
+  }, []);
+
+  const cancelScheduledDismiss = useCallback(() => {
+    if (dismissTimerRef.current === null) {
+      return;
+    }
+
+    globalThis.clearTimeout(dismissTimerRef.current);
+    dismissTimerRef.current = null;
   }, []);
 
   const scheduleDragOffsetUpdate = useCallback(() => {
@@ -456,14 +475,21 @@ function useMobileDialogDrag({
 
   const resetDrag = useCallback(() => {
     cancelScheduledDragFrame();
+    cancelScheduledDismiss();
     dragStartYRef.current = null;
     dragStartedAtRef.current = 0;
     dragOffsetRef.current = 0;
     setIsDragging(false);
     setDragOffset(0);
-  }, [cancelScheduledDragFrame]);
+  }, [cancelScheduledDismiss, cancelScheduledDragFrame]);
 
-  useEffect(() => cancelScheduledDragFrame, [cancelScheduledDragFrame]);
+  useEffect(
+    () => () => {
+      cancelScheduledDragFrame();
+      cancelScheduledDismiss();
+    },
+    [cancelScheduledDismiss, cancelScheduledDragFrame]
+  );
 
   const handleDragStart = useCallback(
     (event: TouchEvent<HTMLDivElement>) => {
@@ -505,12 +531,25 @@ function useMobileDialogDrag({
 
     const releasedOffset = dragOffsetRef.current;
     const startedAt = dragStartedAtRef.current;
-    resetDrag();
+    dragStartYRef.current = null;
+    dragStartedAtRef.current = 0;
+    cancelScheduledDragFrame();
 
     if (shouldDismissDrag(releasedOffset, startedAt)) {
-      handleClose();
+      dragOffsetRef.current = getDismissDragOffset();
+      setIsDragging(false);
+      setDragOffset(dragOffsetRef.current);
+      dismissTimerRef.current = globalThis.setTimeout(() => {
+        dismissTimerRef.current = null;
+        handleClose();
+      }, DISMISS_DRAG_SETTLE_MS);
+      return;
     }
-  }, [canDragToClose, handleClose, resetDrag]);
+
+    dragOffsetRef.current = 0;
+    setIsDragging(false);
+    setDragOffset(0);
+  }, [canDragToClose, cancelScheduledDragFrame, handleClose, resetDrag]);
 
   const handleAfterLeave = useCallback(() => {
     resetDrag();
