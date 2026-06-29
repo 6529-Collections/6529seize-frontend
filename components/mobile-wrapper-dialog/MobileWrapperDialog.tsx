@@ -202,15 +202,18 @@ function getPanelClassNames({
   isIos,
   tabletModal,
   maxWidthClass,
+  canDragToClose,
 }: {
   readonly isIos: boolean;
   readonly tabletModal?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
+  readonly canDragToClose: boolean;
 }) {
   return clsx(
     "mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen",
     !tabletModal && "md:tw-max-w-screen-md",
-    !isIos && "tw-transform-gpu tw-will-change-transform",
+    !isIos && "tw-transform-gpu",
+    (!isIos || canDragToClose) && "tw-will-change-transform",
     tabletModal && ["md:tw-w-full", maxWidthClass ?? "md:tw-max-w-md"]
   );
 }
@@ -225,19 +228,16 @@ function getContainerClassNames(tabletModal?: boolean | undefined) {
 function getSurfaceClassNames({
   surfaceClassName,
   allowOverflow,
-  canDragToClose,
   tabletModal,
 }: {
   readonly surfaceClassName?: string | undefined;
   readonly allowOverflow?: boolean | undefined;
-  readonly canDragToClose: boolean;
   readonly tabletModal?: boolean | undefined;
 }) {
   return clsx(
     "tw-flex tw-flex-col tw-rounded-t-xl",
     surfaceClassName ?? "tw-bg-iron-950",
     allowOverflow ? "tw-overflow-visible" : "tw-overflow-hidden",
-    canDragToClose && "tw-will-change-transform",
     tabletModal && "md:tw-rounded-xl"
   );
 }
@@ -261,34 +261,36 @@ function getContentClassNames({
   );
 }
 
-function getSurfaceStyle({
+function getPanelStyle({
   canDragToClose,
-  dialogHeight,
   dragOffset,
-  fixedHeight,
   isDragging,
 }: {
   readonly canDragToClose: boolean;
-  readonly dialogHeight: string;
   readonly dragOffset: number;
-  readonly fixedHeight?: boolean | undefined;
   readonly isDragging: boolean;
 }): CSSProperties {
-  const sizeStyle = fixedHeight
-    ? { height: dialogHeight }
-    : { maxHeight: dialogHeight };
-
   if (!canDragToClose) {
-    return sizeStyle;
+    return { touchAction: "manipulation" };
   }
 
   return {
-    ...sizeStyle,
+    touchAction: "manipulation",
     transform: `translate3d(0, ${dragOffset}px, 0)`,
     transition: isDragging
       ? "none"
       : "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)",
   };
+}
+
+function getSurfaceStyle({
+  dialogHeight,
+  fixedHeight,
+}: {
+  readonly dialogHeight: string;
+  readonly fixedHeight?: boolean | undefined;
+}): CSSProperties {
+  return fixedHeight ? { height: dialogHeight } : { maxHeight: dialogHeight };
 }
 
 function FloatingCloseButton({
@@ -588,16 +590,18 @@ export default function MobileWrapperDialog({
     isIos,
     tabletModal,
     maxWidthClass,
+    canDragToClose,
   });
   const containerClassNames = getContainerClassNames(tabletModal);
   const slideTransition = getSlideTransition(tabletModal);
-  const panelStyle: CSSProperties = {
-    touchAction: "manipulation",
-  };
+  const panelStyle = getPanelStyle({
+    canDragToClose,
+    dragOffset,
+    isDragging,
+  });
   const surfaceClassNames = getSurfaceClassNames({
     surfaceClassName,
     allowOverflow,
-    canDragToClose,
     tabletModal,
   });
   const contentClassNames = getContentClassNames({
@@ -606,11 +610,8 @@ export default function MobileWrapperDialog({
     showScrollbar,
   });
   const surfaceStyle = getSurfaceStyle({
-    canDragToClose,
     dialogHeight,
-    dragOffset,
     fixedHeight,
-    isDragging,
   });
   const showDesktopHeaderCloseButton =
     dismissible && !!tabletModal && !showHeaderCloseButton;
