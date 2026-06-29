@@ -82,6 +82,265 @@
       "source_refs": ["components/about/AboutFAQ.tsx"]
     },
     {
+      "id": "about.nakamoto-threshold",
+      "kind": "route",
+      "title": "Nakamoto Threshold",
+      "aliases": [
+        "nakamoto threshold",
+        "naka threshold",
+        "what is the nakamoto threshold",
+        "card 4 lowest edition",
+        "meme card 4 edition count",
+        "lowest edition meme card",
+        "300 edition threshold",
+        "the memes threshold"
+      ],
+      "keywords": [
+        "nakamoto",
+        "threshold",
+        "naka",
+        "meme",
+        "memes",
+        "card",
+        "edition",
+        "300",
+        "lowest",
+        "cc0"
+      ],
+      "facts": [
+        "The Nakamoto Threshold page lives at /about/nakamoto-threshold.",
+        "Meme Card #4 is an homage to the first Rare Pepe and has an edition count of 300.",
+        "The Nakamoto Threshold is the commitment that Meme Card #4 remains the lowest-edition Meme Card, so other Meme Cards should exceed 300 editions.",
+        "The page frames the Nakamoto Threshold and CC0 as fixed commitments for The Memes."
+      ],
+      "canonical_path": "/about/nakamoto-threshold",
+      "related_paths": ["/about/the-memes", "/the-memes", "/about/license"],
+      "tags": ["about", "memes", "nakamoto-threshold"],
+      "source_refs": ["components/about/AboutNakamotoThreshold.tsx"]
+    },
+    {
+      "id": "about.data-decentralization",
+      "kind": "route",
+      "title": "Data Decentralization",
+      "aliases": [
+        "data decentralization",
+        "decentralized data",
+        "6529 data sources",
+        "where does 6529 data come from",
+        "can i replicate 6529 data",
+        "open data sources",
+        "public data"
+      ],
+      "keywords": [
+        "data",
+        "decentralization",
+        "decentralized",
+        "on-chain",
+        "ethereum",
+        "arweave",
+        "opensea",
+        "open",
+        "csv",
+        "tdh"
+      ],
+      "facts": [
+        "The Data Decentralization page lives at /about/data-decentralization.",
+        "6529's goal is to demonstrate how applications can be built in a decentralized manner.",
+        "The page explains that effectively all information on 6529.io comes from on-chain or public sources, or is derived transparently from those sources.",
+        "Listed data sources include Ethereum, Arweave decentralized storage, OpenSea API data, internal team-address records, computed thumbnails and TDH values, and compiled daily data exports.",
+        "The page points users to /open-data for daily compiled CSV exports."
+      ],
+      "canonical_path": "/about/data-decentralization",
+      "related_paths": ["/open-data", "/about/faq"],
+      "tags": ["about", "open-data", "decentralization"],
+      "source_refs": ["components/about/AboutDataDecentral.tsx"]
+    },
+    {
+      "id": "about.minting-meme-cards",
+      "kind": "route",
+      "title": "Minting Meme Cards",
+      "aliases": [
+        "minting meme cards",
+        "meme card minting",
+        "how do memes mint",
+        "where do memes mint",
+        "memes mint schedule",
+        "memes mint price",
+        "allowlist minting"
+      ],
+      "keywords": [
+        "minting",
+        "mint",
+        "meme",
+        "memes",
+        "allowlist",
+        "price",
+        "schedule",
+        "primary",
+        "sale"
+      ],
+      "facts": [
+        "The Minting Meme Cards page lives at /about/minting.",
+        "The Memes minting website is /the-memes/mint; there is no other official minting website for The Memes.",
+        "The page says Meme Cards are minted when the art for the next Meme Card is ready, currently about three times per week, though frequency and timing can vary.",
+        "The page says The Memes generally use an allowlist model to avoid gas wars and bot wars and to give a broad range of people a chance to mint.",
+        "Users should follow @6529collections for current mint dates and times."
+      ],
+      "canonical_path": "/about/minting",
+      "related_paths": ["/the-memes/mint", "/the-memes", "/about/the-memes"],
+      "tags": ["about", "memes", "minting"],
+      "source_refs": ["components/about/AboutMinting.tsx"]
+    },
+    {
+      "id": "about.license",
+      "kind": "route",
+      "title": "6529 License",
+      "aliases": [
+        "license",
+        "6529 license",
+        "memes license",
+        "meme lab license",
+        "gradient license",
+        "cc0",
+        "can i use meme card art",
+        "can i use gradient art"
+      ],
+      "keywords": [
+        "license",
+        "cc0",
+        "copyright",
+        "memes",
+        "meme",
+        "lab",
+        "gradient",
+        "commercial",
+        "derivative",
+        "rememes"
+      ],
+      "facts": [
+        "The License page lives at /about/license.",
+        "The Memes and Meme Lab NFTs are released by the artists under a Creative Commons 0 public-domain license to the maximum extent allowed by law.",
+        "The page says people can use The Memes and Meme Lab art for commercial or non-commercial purposes without seeking permission from the artists, subject to rights the artists do not control.",
+        "Gradient NFTs are treated differently: they have not been released under CC0, and the page warns against uses that could confuse people into thinking a product or service is offered by 6529."
+      ],
+      "canonical_path": "/about/license",
+      "related_paths": ["/about/the-memes", "/about/meme-lab", "/about/6529-gradient"],
+      "tags": ["about", "license", "cc0"],
+      "source_refs": ["components/about/AboutLicense.tsx"]
+    },
+    {
+      "id": "about.gdrc1",
+      "kind": "route",
+      "title": "Global Digital Rights Charter",
+      "aliases": [
+        "gdrc1",
+        "gdrc 1",
+        "global digital rights charter",
+        "digital rights charter"
+      ],
+      "keywords": ["gdrc1", "gdrc", "charter", "digital", "rights", "about"],
+      "facts": [
+        "The GDRC1 page lives at /about/gdrc1.",
+        "The page states that 6529 supports the Global Digital Rights Charter 1.",
+        "The page links to digitalrightscharter.org and displays the full text of GDRC1."
+      ],
+      "canonical_path": "/about/gdrc1",
+      "related_paths": ["/about/faq"],
+      "tags": ["about", "rights", "gdrc1"],
+      "source_refs": ["components/about/AboutGDRC1.tsx"]
+    },
+    {
+      "id": "about.nft-delegation",
+      "kind": "route",
+      "title": "NFT Delegation",
+      "aliases": [
+        "nft delegation",
+        "about nft delegation",
+        "delegation about page",
+        "where do i start delegation"
+      ],
+      "keywords": ["nft", "delegation", "delegate", "wallet", "center", "about"],
+      "facts": [
+        "The NFT Delegation about page lives at /about/nft-delegation.",
+        "The page sends users to the Delegation Center to get started with delegation."
+      ],
+      "canonical_path": "/about/nft-delegation",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/delegation-faq"
+      ],
+      "tags": ["about", "delegation"],
+      "source_refs": ["components/about/AboutNFTDelegation.tsx"]
+    },
+    {
+      "id": "about.ens",
+      "kind": "route",
+      "title": "ENS",
+      "aliases": [
+        "ens",
+        "ens domain",
+        "ens name",
+        "register ens",
+        "set primary ens",
+        "create ens subdomain",
+        "primary name"
+      ],
+      "keywords": [
+        "ens",
+        "domain",
+        "name",
+        "primary",
+        "subdomain",
+        "subname",
+        "ethereum"
+      ],
+      "facts": [
+        "The ENS page lives at /about/ens.",
+        "The page explains how to register an ENS domain name through ens.domains.",
+        "The page explains how to set an ENS primary name and how to create a subdomain."
+      ],
+      "canonical_path": "/about/ens",
+      "related_paths": ["/about/primary-address", "/{user}/identity"],
+      "tags": ["about", "ens", "identity"],
+      "source_refs": ["public/ens.html", "components/about/AboutHTML.tsx"]
+    },
+    {
+      "id": "about.tech-updates",
+      "kind": "route",
+      "title": "Tech Updates",
+      "aliases": [
+        "tech updates",
+        "about tech",
+        "technical updates",
+        "repo updates",
+        "build reports",
+        "wallet authentication upgrade"
+      ],
+      "keywords": [
+        "tech",
+        "updates",
+        "repo",
+        "reports",
+        "bot",
+        "release",
+        "wallet",
+        "authentication"
+      ],
+      "facts": [
+        "The Tech Updates page lives at /about/tech.",
+        "It is a longer-form area for 6529 tech updates, repo work, bot notes, release context, and build reports.",
+        "Shorter live repo activity still belongs in Follow The Repo.",
+        "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
+      ],
+      "canonical_path": "/about/tech",
+      "related_paths": [
+        "/about/tech/wallet-authentication",
+        "/about/faq"
+      ],
+      "tags": ["about", "tech", "reports"],
+      "source_refs": ["components/about/tech/AboutTech.tsx"]
+    },
+    {
       "id": "navigation.search",
       "kind": "ui_affordance",
       "title": "Header search",
