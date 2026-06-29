@@ -15,6 +15,24 @@ describe("fetchTwitterPreview", () => {
       json: async () => body,
     }) as Response;
 
+  const createPreview = (
+    url: string,
+    tweetId: string,
+    text: string
+  ): TweetPreview => ({
+    tweetId,
+    url,
+    text,
+  });
+
+  const createBatchSuccessResponse = (previews: readonly TweetPreview[]) =>
+    createResponse({
+      results: Object.fromEntries(
+        previews.map((preview) => [preview.url, preview])
+      ),
+      errors: {},
+    });
+
   const createDeferred = <T>() => {
     let resolve!: (value: T) => void;
     let reject!: (reason?: unknown) => void;
@@ -52,24 +70,10 @@ describe("fetchTwitterPreview", () => {
   it("batches same-tick calls into one POST", async () => {
     const firstUrl = "https://x.com/first/status/1001";
     const secondUrl = "https://twitter.com/second/status/1002";
-    const firstPreview: TweetPreview = {
-      tweetId: "1001",
-      url: firstUrl,
-      text: "First post",
-    };
-    const secondPreview: TweetPreview = {
-      tweetId: "1002",
-      url: secondUrl,
-      text: "Second post",
-    };
+    const firstPreview = createPreview(firstUrl, "1001", "First post");
+    const secondPreview = createPreview(secondUrl, "1002", "Second post");
     fetchMock.mockResolvedValueOnce(
-      createResponse({
-        results: {
-          [firstUrl]: firstPreview,
-          [secondUrl]: secondPreview,
-        },
-        errors: {},
-      })
+      createBatchSuccessResponse([firstPreview, secondPreview])
     );
 
     const { fetchTwitterPreview } = await loadApi();
@@ -100,29 +104,12 @@ describe("fetchTwitterPreview", () => {
       (_value, index) => `https://x.com/user/status/${4000 + index}`
     );
     const previews = urls.map(
-      (url, index): TweetPreview => ({
-        tweetId: `${4000 + index}`,
-        url,
-        text: `Post ${index + 1}`,
-      })
+      (url, index) =>
+        createPreview(url, `${4000 + index}`, `Post ${index + 1}`)
     );
     fetchMock
-      .mockResolvedValueOnce(
-        createResponse({
-          results: Object.fromEntries(
-            urls.slice(0, 5).map((url, index) => [url, previews[index]])
-          ),
-          errors: {},
-        })
-      )
-      .mockResolvedValueOnce(
-        createResponse({
-          results: {
-            [urls[5]!]: previews[5],
-          },
-          errors: {},
-        })
-      );
+      .mockResolvedValueOnce(createBatchSuccessResponse(previews.slice(0, 5)))
+      .mockResolvedValueOnce(createBatchSuccessResponse(previews.slice(5, 6)));
 
     const { fetchTwitterPreview } = await loadApi();
     const requests = urls.map((url) => fetchTwitterPreview(url));
@@ -149,27 +136,17 @@ describe("fetchTwitterPreview", () => {
       (_value, index) => `https://x.com/user/status/${5000 + index}`
     );
     const previews = urls.map(
-      (url, index): TweetPreview => ({
-        tweetId: `${5000 + index}`,
-        url,
-        text: `Post ${index + 1}`,
-      })
+      (url, index) =>
+        createPreview(url, `${5000 + index}`, `Post ${index + 1}`)
     );
-    const batchBody = (start: number, end: number) => ({
-      results: Object.fromEntries(
-        urls.slice(start, end).map((url, index) => [
-          url,
-          previews[start + index],
-        ])
-      ),
-      errors: {},
-    });
+    const batchResponse = (start: number, end: number) =>
+      createBatchSuccessResponse(previews.slice(start, end));
     const firstBatch = createDeferred<Response>();
     const secondBatch = createDeferred<Response>();
     fetchMock
       .mockReturnValueOnce(firstBatch.promise)
       .mockReturnValueOnce(secondBatch.promise)
-      .mockResolvedValueOnce(createResponse(batchBody(10, 11)));
+      .mockResolvedValueOnce(batchResponse(10, 11));
 
     const { fetchTwitterPreview } = await loadApi();
     const requests = urls.map((url) => fetchTwitterPreview(url));
@@ -188,7 +165,7 @@ describe("fetchTwitterPreview", () => {
       })
     );
 
-    firstBatch.resolve(createResponse(batchBody(0, 5)));
+    firstBatch.resolve(batchResponse(0, 5));
     await waitForFetchCalls(3);
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
@@ -198,7 +175,7 @@ describe("fetchTwitterPreview", () => {
       })
     );
 
-    secondBatch.resolve(createResponse(batchBody(5, 10)));
+    secondBatch.resolve(batchResponse(5, 10));
 
     await expect(Promise.all(requests)).resolves.toEqual(previews);
   });
@@ -206,18 +183,9 @@ describe("fetchTwitterPreview", () => {
   it("shares one pending promise for duplicate tweet IDs", async () => {
     const firstUrl = "https://x.com/first/status/1001";
     const secondUrl = "https://twitter.com/second/status/1001";
-    const preview: TweetPreview = {
-      tweetId: "1001",
-      url: firstUrl,
-      text: "Shared post",
-    };
+    const preview = createPreview(firstUrl, "1001", "Shared post");
     fetchMock.mockResolvedValueOnce(
-      createResponse({
-        results: {
-          [firstUrl]: preview,
-        },
-        errors: {},
-      })
+      createBatchSuccessResponse([preview])
     );
 
     const { fetchTwitterPreview } = await loadApi();
@@ -240,16 +208,8 @@ describe("fetchTwitterPreview", () => {
   it("rejects only the URL that failed in the batch and clears it for retry", async () => {
     const goodUrl = "https://x.com/good/status/2001";
     const badUrl = "https://x.com/bad/status/2002";
-    const goodPreview: TweetPreview = {
-      tweetId: "2001",
-      url: goodUrl,
-      text: "Good post",
-    };
-    const retryPreview: TweetPreview = {
-      tweetId: "2002",
-      url: badUrl,
-      text: "Recovered post",
-    };
+    const goodPreview = createPreview(goodUrl, "2001", "Good post");
+    const retryPreview = createPreview(badUrl, "2002", "Recovered post");
     fetchMock
       .mockResolvedValueOnce(
         createResponse({
@@ -261,14 +221,7 @@ describe("fetchTwitterPreview", () => {
           },
         })
       )
-      .mockResolvedValueOnce(
-        createResponse({
-          results: {
-            [badUrl]: retryPreview,
-          },
-          errors: {},
-        })
-      );
+      .mockResolvedValueOnce(createBatchSuccessResponse([retryPreview]));
 
     const { fetchTwitterPreview } = await loadApi();
     const good = fetchTwitterPreview(goodUrl);
@@ -288,11 +241,7 @@ describe("fetchTwitterPreview", () => {
 
   it("rejects and clears cache when the batch omits the requested URL", async () => {
     const url = "https://x.com/missing/status/2003";
-    const retryPreview: TweetPreview = {
-      tweetId: "2003",
-      url,
-      text: "Recovered post",
-    };
+    const retryPreview = createPreview(url, "2003", "Recovered post");
     fetchMock
       .mockResolvedValueOnce(
         createResponse({
@@ -300,14 +249,7 @@ describe("fetchTwitterPreview", () => {
           errors: {},
         })
       )
-      .mockResolvedValueOnce(
-        createResponse({
-          results: {
-            [url]: retryPreview,
-          },
-          errors: {},
-        })
-      );
+      .mockResolvedValueOnce(createBatchSuccessResponse([retryPreview]));
 
     const { fetchTwitterPreview } = await loadApi();
     const request = fetchTwitterPreview(url);
@@ -328,16 +270,8 @@ describe("fetchTwitterPreview", () => {
   it("falls back to single GET requests when the POST batch fails", async () => {
     const firstUrl = "https://x.com/first/status/3001";
     const secondUrl = "https://x.com/second/status/3002";
-    const firstPreview: TweetPreview = {
-      tweetId: "3001",
-      url: firstUrl,
-      text: "First post",
-    };
-    const secondPreview: TweetPreview = {
-      tweetId: "3002",
-      url: secondUrl,
-      text: "Second post",
-    };
+    const firstPreview = createPreview(firstUrl, "3001", "First post");
+    const secondPreview = createPreview(secondUrl, "3002", "Second post");
     fetchMock
       .mockRejectedValueOnce(new Error("batch unavailable"))
       .mockResolvedValueOnce(createResponse(firstPreview))
