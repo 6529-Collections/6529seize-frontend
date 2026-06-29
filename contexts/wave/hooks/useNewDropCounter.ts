@@ -89,6 +89,36 @@ const updateLatestDropTimestamp = ({
   };
 };
 
+const addUnreadDropCount = ({
+  createdAt,
+  newDropsCounts,
+  serialNo,
+  waveId,
+}: {
+  readonly createdAt: number;
+  readonly newDropsCounts: Record<string, MinimalWaveNewDropsCount>;
+  readonly serialNo: number;
+  readonly waveId: string;
+}): Record<string, MinimalWaveNewDropsCount> => {
+  const currentCount = newDropsCounts[waveId]?.count ?? 0;
+  const currentLatestDropTimestamp =
+    newDropsCounts[waveId]?.latestDropTimestamp ?? null;
+  const currentFirstUnread =
+    newDropsCounts[waveId]?.firstUnreadSerialNo ?? null;
+
+  return {
+    ...newDropsCounts,
+    [waveId]: {
+      count: currentCount + 1,
+      latestDropTimestamp: Math.max(createdAt, currentLatestDropTimestamp ?? 0),
+      firstUnreadSerialNo:
+        currentFirstUnread === null
+          ? serialNo
+          : Math.min(currentFirstUnread, serialNo),
+    },
+  };
+};
+
 /**
  * Hook to manage new drop counts via WebSockets
  *
@@ -227,6 +257,43 @@ function useNewDropCounter(
             return;
           }
 
+          const isOwnDrop =
+            connectedProfile?.handle?.toLowerCase() ===
+            message.author.handle?.toLowerCase();
+          const isVisibleActiveWave =
+            waveId === activeWaveId && document.visibilityState === "visible";
+
+          if (isOwnDrop) {
+            setNewDropsCounts((prev) =>
+              updateLatestDropTimestamp({
+                createdAt: message.created_at,
+                newDropsCounts: prev,
+                waveId,
+              })
+            );
+            return;
+          }
+
+          if (isVisibleActiveWave) {
+            setNewDropsCounts((prev) =>
+              updateLatestDropTimestamp({
+                createdAt: message.created_at,
+                newDropsCounts: prev,
+                waveId,
+              })
+            );
+            return;
+          }
+
+          setNewDropsCounts((prev) => {
+            return addUnreadDropCount({
+              createdAt: message.created_at,
+              newDropsCounts: prev,
+              serialNo: message.serial_no,
+              waveId,
+            });
+          });
+
           // Prevent refetch storms on bursts of unknown-wave websocket events.
           const now = Date.now();
           if (
@@ -277,24 +344,12 @@ function useNewDropCounter(
         }
 
         setNewDropsCounts((prev) => {
-          const currentCount = prev[waveId]?.count ?? 0;
-          const currentLatestDropTimestamp =
-            prev[waveId]?.latestDropTimestamp ?? null;
-          const currentFirstUnread = prev[waveId]?.firstUnreadSerialNo ?? null;
-          return {
-            ...prev,
-            [waveId]: {
-              count: currentCount + 1,
-              latestDropTimestamp: Math.max(
-                message.created_at,
-                currentLatestDropTimestamp ?? 0
-              ),
-              firstUnreadSerialNo:
-                currentFirstUnread === null
-                  ? message.serial_no
-                  : Math.min(currentFirstUnread, message.serial_no),
-            },
-          };
+          return addUnreadDropCount({
+            createdAt: message.created_at,
+            newDropsCounts: prev,
+            serialNo: message.serial_no,
+            waveId,
+          });
         });
       },
       [
