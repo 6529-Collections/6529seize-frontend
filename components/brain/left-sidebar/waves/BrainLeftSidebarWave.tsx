@@ -225,11 +225,16 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const isChildRow = depth === 1;
   const shouldShowExpandControl = canExpand && depth === 0;
   const shouldShowPinButton = showPin && depth === 0;
-  const { rowPaddingClasses, rowGapClasses, linkGapClasses, rowHeightClasses } =
-    getSidebarWaveRowLayoutClasses({
-      isChildRow,
-      variant: "app",
-    });
+  const {
+    rowPaddingClasses,
+    rowGapClasses,
+    linkGapClasses,
+    rowHeightClasses,
+    guideLineOffsetClasses,
+  } = getSidebarWaveRowLayoutClasses({
+    isChildRow,
+    variant: "app",
+  });
   const avatarSizeClasses = isChildRow ? "tw-size-7" : "tw-size-8";
   const activeRingClasses = isChildRow
     ? "tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-900 tw-ring-primary-400"
@@ -254,7 +259,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       {isChildRow && (
         <span
           aria-hidden="true"
-          className={`tw-absolute -tw-top-1 tw-left-[35.5px] tw-w-px tw-bg-iron-700/60 ${
+          className={`tw-absolute -tw-top-1 ${guideLineOffsetClasses} tw-w-px tw-bg-iron-700/60 ${
             isLastSubwave ? "tw-bottom-4" : "-tw-bottom-1"
           }`}
         />

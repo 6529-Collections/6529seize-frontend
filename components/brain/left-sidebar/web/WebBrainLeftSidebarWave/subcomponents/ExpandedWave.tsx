@@ -90,11 +90,16 @@ export const ExpandedWave = ({
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowDropTime = presentLatestDropTimestamp !== null;
   const rowVerticalPaddingClasses = isChildRow ? "tw-py-1.5" : "tw-py-2";
-  const { rowPaddingClasses, rowGapClasses, linkGapClasses, rowHeightClasses } =
-    getSidebarWaveRowLayoutClasses({
-      isChildRow,
-      variant: "web",
-    });
+  const {
+    rowPaddingClasses,
+    rowGapClasses,
+    linkGapClasses,
+    rowHeightClasses,
+    guideLineOffsetClasses,
+  } = getSidebarWaveRowLayoutClasses({
+    isChildRow,
+    variant: "web",
+  });
   const subwavePrefetchTimerRef = useRef<ReturnType<
     typeof globalThis.setTimeout
   > | null>(null);
@@ -155,7 +160,7 @@ export const ExpandedWave = ({
       {isChildRow && (
         <span
           aria-hidden="true"
-          className={`tw-absolute -tw-top-1 tw-left-[35.5px] tw-w-px tw-bg-iron-700/60 ${
+          className={`tw-absolute -tw-top-1 ${guideLineOffsetClasses} tw-w-px tw-bg-iron-700/60 ${
             isLastSubwave ? "tw-bottom-4" : "-tw-bottom-1"
           }`}
         />
