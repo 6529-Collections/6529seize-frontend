@@ -141,6 +141,13 @@ const REACT_DOM_RUNTIME_FRAME_PATTERNS = [
   "react-dom-client.production.js",
 ];
 const WAVES_ROUTE_PATH = "/waves";
+const gifPickerTenorUndefinedTagsMessage =
+  "undefined is not an object (evaluating 'e.tags')";
+const gifPickerReactPackageToken = "gif-picker-react";
+const gifPickerTenorManagerPathToken = "TenorManager.ts";
+const gifPickerTenorFailureMessage =
+  "[gif-picker-react] Failed to fetch data from Tenor API";
+const tenorCategoriesPath = "/v2/categories";
 
 const sentryRouteParameterizationMechanismType =
   "auto.browser.browserapierrors.setTimeout";
@@ -1016,6 +1023,25 @@ function hasNativeJsonStringifyFrame(
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
 }
 
+function isGifPickerTenorManagerPath(path: string | undefined): boolean {
+  return (
+    typeof path === "string" &&
+    path.includes(gifPickerReactPackageToken) &&
+    path.includes(gifPickerTenorManagerPathToken)
+  );
+}
+
+function hasGifPickerTenorManagerFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) =>
+      [frame.filename, frame.abs_path].some(isGifPickerTenorManagerPath)
+    )
+  );
+}
+
 function getHintException(hint?: SentryEventHint): unknown {
   return hint?.originalException ?? hint?.syntheticException;
 }
@@ -1162,6 +1188,57 @@ function hasNavigationBreadcrumb(event: SentryClientEvent): boolean {
       typeof data?.["to"] === "string"
     );
   });
+}
+
+function hasGifPickerTenorFailureBreadcrumb(
+  event: SentryClientEvent
+): boolean {
+  return getBreadcrumbMessages(event).some((message) =>
+    message.includes(gifPickerTenorFailureMessage)
+  );
+}
+
+function isTenorCategoriesPath(value: string | undefined): boolean {
+  if (getRequestPathname(value) === tenorCategoriesPath) {
+    return true;
+  }
+
+  return typeof value === "string" && value.includes(tenorCategoriesPath);
+}
+
+function hasTenorCategoriesRequestBreadcrumb(
+  event: SentryClientEvent
+): boolean {
+  return getBreadcrumbValues(event).some((breadcrumb) => {
+    if (!isHttpBreadcrumb(breadcrumb)) {
+      return false;
+    }
+
+    if (
+      getBreadcrumbUrlIsFirstParty(breadcrumb) !== false ||
+      getBreadcrumbUrlIsFirstPartyApi(breadcrumb) !== false
+    ) {
+      return false;
+    }
+
+    if (getBreadcrumbFailureKind(breadcrumb) === null) {
+      return false;
+    }
+
+    return (
+      isTenorCategoriesPath(getBreadcrumbUrl(breadcrumb)) ||
+      isTenorCategoriesPath(breadcrumb.message)
+    );
+  });
+}
+
+function hasGifPickerTenorBreadcrumbSignature(
+  event: SentryClientEvent
+): boolean {
+  return (
+    hasGifPickerTenorFailureBreadcrumb(event) &&
+    hasTenorCategoriesRequestBreadcrumb(event)
+  );
 }
 
 function getContextString(
@@ -1567,6 +1644,39 @@ export function shouldFilterReactDomInsertBeforeNotFoundError(
   return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
 }
 
+export function shouldFilterGifPickerTenorCategoriesError(
+  event: SentryClientEvent
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== gifPickerTenorUndefinedTagsMessage
+  ) {
+    return false;
+  }
+
+  if (
+    value.mechanism?.type !== browserUnhandledRejectionMechanism ||
+    value.mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  if (!hasWavesRoute(event)) {
+    return false;
+  }
+
+  const frames = value.stacktrace?.frames;
+  if (hasAppOwnedFrame(frames)) {
+    return false;
+  }
+
+  return (
+    hasGifPickerTenorManagerFrame(frames) ||
+    hasGifPickerTenorBreadcrumbSignature(event)
+  );
+}
+
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1658,6 +1768,7 @@ export const __testing = {
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
   REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
+  gifPickerTenorUndefinedTagsMessage,
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,
   isCoinbaseWalletLinkWebSocket1006Message,

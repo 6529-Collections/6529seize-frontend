@@ -6,6 +6,7 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -31,9 +32,16 @@ describe("sentry-client-filters", () => {
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
+  const gifPickerTenorUndefinedTagsMessage =
+    __testing.gifPickerTenorUndefinedTagsMessage;
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+  };
+  const gifPickerTenorManagerFrame = {
+    filename:
+      "node_modules/.pnpm/gif-picker-react@1.5.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/gif-picker-react/src/managers/TenorManager.ts",
+    function: "<anonymous>",
   };
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
@@ -312,6 +320,58 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createGifPickerTenorCategoriesEvent = (
+    overrides: Partial<SentryClientEvent> = {}
+  ): SentryClientEvent => ({
+    transaction: "/waves/:wave",
+    request: {
+      url: "https://6529.io/waves/b38288e6-ca9d-45ce-8323-3dc5e094f04e",
+    },
+    tags: {
+      transaction: "/waves/:wave",
+      url: "/waves/b38288e6-ca9d-45ce-8323-3dc5e094f04e",
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: gifPickerTenorUndefinedTagsMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [gifPickerTenorManagerFrame],
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        category: "console",
+        level: "error",
+        message: "[gif-picker-react] Failed to fetch data from Tenor API",
+      },
+      {
+        category: "console",
+        level: "error",
+        message: "TypeError: Load failed (tenor.googleapis.com)",
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        message: "GET: /v2/categories",
+        data: {
+          url: "/v2/categories",
+          "url.is_first_party": false,
+          "url.is_first_party_api": false,
+        },
+      },
+    ],
+    ...overrides,
+  });
+
   it("filters events when a stack frame matches a filename exception", () => {
     // Arrange
     const frames: SentryStackFrame[] = [
@@ -466,6 +526,112 @@ describe("sentry-client-filters", () => {
               },
             },
           ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("filters gif-picker Tenor category errors on waves routes with no app-owned frames", () => {
+    const result = shouldFilterGifPickerTenorCategoriesError(
+      createGifPickerTenorCategoriesEvent()
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters gif-picker Tenor category errors from the breadcrumb signature when source frames are unavailable", () => {
+    const event = createGifPickerTenorCategoriesEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: gifPickerTenorUndefinedTagsMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = shouldFilterGifPickerTenorCategoriesError(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps gif-picker Tenor category errors when an app-owned frame is present", () => {
+    const event = createGifPickerTenorCategoriesEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: gifPickerTenorUndefinedTagsMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                gifPickerTenorManagerFrame,
+                {
+                  filename:
+                    "https://6529.io/_next/static/chunks/app-client.js",
+                  function: "loadGifCategories",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = shouldFilterGifPickerTenorCategoriesError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps matching undefined tags errors without gif-picker or Tenor evidence", () => {
+    const event = createGifPickerTenorCategoriesEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: gifPickerTenorUndefinedTagsMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: [],
+    });
+
+    const result = shouldFilterGifPickerTenorCategoriesError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps gif-picker Tenor category errors outside waves routes", () => {
+    const result = shouldFilterGifPickerTenorCategoriesError(
+      createGifPickerTenorCategoriesEvent({
+        transaction: "/about",
+        tags: {
+          transaction: "/about",
+          url: "/about",
+        },
+        request: {
+          url: "https://6529.io/about",
         },
       })
     );
