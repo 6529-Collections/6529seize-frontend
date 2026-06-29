@@ -120,8 +120,21 @@ describe("About contents dropdown", () => {
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: /go to about page: cookie policy/i })
+      screen.getByRole("menuitem", { name: /go to page: cookie policy/i })
     ).toHaveAttribute("href", "/about/cookie-policy");
+  });
+
+  it("links to TDH and xTDH resource pages without moving their paths", async () => {
+    country = "US";
+    await renderAboutSection(AboutSection.MEMES);
+    openContentsMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: tdh/i })
+    ).toHaveAttribute("href", "/network/tdh");
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: xtdh/i })
+    ).toHaveAttribute("href", "/network/xtdh");
   });
 
   it("uses dropdown item styling without link underlines", async () => {
@@ -130,7 +143,7 @@ describe("About contents dropdown", () => {
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: /go to about page: cookie policy/i })
+      screen.getByRole("menuitem", { name: /go to page: cookie policy/i })
     ).toHaveClass("!tw-no-underline");
   });
 

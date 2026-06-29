@@ -9,11 +9,22 @@ type AboutContentsGroupId =
   | "community"
   | "legal";
 
-type AboutContentsNavItem = {
+type AboutContentsAboutNavItem = {
   readonly section: AboutSection;
   readonly labelKey: MessageKey;
   readonly descriptionKey: MessageKey;
 };
+
+type AboutContentsExternalNavItem = {
+  readonly id: string;
+  readonly href: string;
+  readonly labelKey: MessageKey;
+  readonly descriptionKey: MessageKey;
+};
+
+type AboutContentsNavItem =
+  | AboutContentsAboutNavItem
+  | AboutContentsExternalNavItem;
 
 type AboutContentsNavGroup = {
   readonly id: AboutContentsGroupId;
@@ -73,6 +84,18 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     id: "resources",
     labelKey: "about.contents.groups.resources",
     items: [
+      {
+        id: "network-tdh",
+        href: "/network/tdh",
+        labelKey: "about.contents.pages.tdh",
+        descriptionKey: "about.contents.descriptions.tdh",
+      },
+      {
+        id: "network-xtdh",
+        href: "/network/xtdh",
+        labelKey: "about.contents.pages.xtdh",
+        descriptionKey: "about.contents.descriptions.xtdh",
+      },
       {
         section: AboutSection.FAQ,
         labelKey: "about.contents.pages.faq",
@@ -159,9 +182,9 @@ const ABOUT_CONTENTS_NAV_ITEMS = ABOUT_CONTENTS_NAV_GROUPS.flatMap(
 );
 
 const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>([
-  ...ABOUT_CONTENTS_NAV_ITEMS.map(
-    (item) => [item.section, item.labelKey] as const
-  ),
+  ...ABOUT_CONTENTS_NAV_ITEMS.map((item) =>
+    "section" in item ? ([item.section, item.labelKey] as const) : undefined
+  ).filter((item): item is readonly [AboutSection, MessageKey] => !!item),
   [AboutSection.MISSION, "about.contents.pages.mission"],
 ]);
 
@@ -210,7 +233,23 @@ export function getVisibleAboutNavGroups(
     ...group,
     items: group.items.filter(
       (item) =>
-        item.section !== AboutSection.SUBSCRIPTIONS || !hideSubscriptions
+        !("section" in item) ||
+        item.section !== AboutSection.SUBSCRIPTIONS ||
+        !hideSubscriptions
     ),
   })).filter((group) => group.items.length > 0);
+}
+
+export function getAboutNavItemHref(item: AboutContentsNavItem): string {
+  return "href" in item ? item.href : `/about/${item.section}`;
+}
+
+export function getAboutNavItemId(item: AboutContentsNavItem): string {
+  return isAboutSectionNavItem(item) ? item.section : item.id;
+}
+
+export function isAboutSectionNavItem(
+  item: AboutContentsNavItem
+): item is AboutContentsAboutNavItem {
+  return "section" in item;
 }

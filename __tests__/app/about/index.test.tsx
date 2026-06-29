@@ -40,8 +40,14 @@ describe("About index page", () => {
     expect(screen.getByText("Community")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /open about page: the memes/i })
+      screen.getByRole("link", { name: /open page: the memes/i })
     ).toHaveAttribute("href", "/about/the-memes");
+    expect(
+      screen.getByRole("link", { name: /open page: tdh/i })
+    ).toHaveAttribute("href", "/network/tdh");
+    expect(
+      screen.getByRole("link", { name: /open page: xtdh/i })
+    ).toHaveAttribute("href", "/network/xtdh");
   });
 
   it("does not render the sticky contents dropdown", () => {

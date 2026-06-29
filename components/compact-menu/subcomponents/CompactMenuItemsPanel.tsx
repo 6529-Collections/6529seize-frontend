@@ -1,7 +1,7 @@
 import { Fragment, useCallback } from "react";
 import { MenuItem } from "@headlessui/react";
 import clsx from "clsx";
-import type { CompactMenuItem, CompactMenuProps } from "../types";
+import type { CompactMenuActionItem, CompactMenuProps } from "../types";
 import { CompactMenuItemButton } from "./CompactMenuItemButton";
 
 interface CompactMenuItemsPanelProps {
@@ -44,7 +44,7 @@ export function CompactMenuItemsPanel({
   unstyledItems = false,
 }: CompactMenuItemsPanelProps) {
   const handleItemClick = useCallback(
-    (item: CompactMenuItem) => {
+    (item: CompactMenuActionItem) => {
       if (item.disabled) {
         return;
       }
