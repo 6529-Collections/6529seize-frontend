@@ -531,9 +531,11 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
 const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   label: "Contents",
   aboutFallback: "About",
+  documentTitle: "{section} | About",
   triggerAriaLabel: "Open About contents navigation. Current page: {page}",
   currentItemAriaLabel: "{page}, current About page",
   itemAriaLabel: "Go to About page: {page}",
+  "pages.mission": "Mission",
   "pages.theMemes": "The Memes",
   "pages.subscriptions": "Subscriptions",
   "pages.memeLab": "Meme Lab",
@@ -552,6 +554,7 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   "pages.dataDecentralization": "Data Decentralization",
   "pages.termsOfService": "Terms of Service",
   "pages.privacyPolicy": "Privacy Policy",
+  "pages.cookiePolicy": "Cookie Policy",
   "pages.copyright": "Copyright",
 } as const);
 

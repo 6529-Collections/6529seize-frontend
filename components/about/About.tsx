@@ -1,14 +1,15 @@
 "use client";
 
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useSetTitle } from "@/contexts/TitleContext";
+import useCapacitor from "@/hooks/useCapacitor";
 import { AboutSection } from "@/types/enums";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
 
 // Section components
-import { capitalizeEveryWord } from "@/helpers/Helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { Col, Container, Row } from "react-bootstrap";
 import AboutApply from "./AboutApply";
@@ -84,32 +85,45 @@ const ABOUT_CONTENTS_NAV_ITEMS: readonly AboutContentsNavItem[] = [
     labelKey: "about.contents.pages.privacyPolicy",
   },
   {
+    section: AboutSection.COOKIE_POLICY,
+    labelKey: "about.contents.pages.cookiePolicy",
+  },
+  {
     section: AboutSection.COPYRIGHT,
     labelKey: "about.contents.pages.copyright",
   },
 ] as const;
 
-const ABOUT_CONTENTS_LOCALE = DEFAULT_LOCALE;
+const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>([
+  ...ABOUT_CONTENTS_NAV_ITEMS.map(
+    (item) => [item.section, item.labelKey] as const
+  ),
+  [AboutSection.MISSION, "about.contents.pages.mission"],
+]);
 
-function getAboutSectionLabel(section: AboutSection | undefined): string {
+function getAboutSectionLabel(
+  section: AboutSection | undefined,
+  locale: SupportedLocale
+): string {
   if (section === undefined) {
-    return t(ABOUT_CONTENTS_LOCALE, "about.contents.aboutFallback");
+    return t(locale, "about.contents.aboutFallback");
   }
 
-  const navItem = ABOUT_CONTENTS_NAV_ITEMS.find(
-    (item) => item.section === section
-  );
+  const labelKey = ABOUT_SECTION_LABEL_KEYS.get(section);
 
-  if (navItem !== undefined) {
-    return t(ABOUT_CONTENTS_LOCALE, navItem.labelKey);
+  if (labelKey !== undefined) {
+    return t(locale, labelKey);
   }
 
-  return capitalizeEveryWord(section.replaceAll("-", " "));
+  return t(locale, "about.contents.aboutFallback");
 }
 
 export default function About({ section }: { readonly section: AboutSection }) {
-  const sectionTitle = getAboutSectionLabel(section);
-  useSetTitle(`${sectionTitle} | About`);
+  const locale = DEFAULT_LOCALE;
+  const sectionTitle = getAboutSectionLabel(section, locale);
+  useSetTitle(
+    t(locale, "about.contents.documentTitle", { section: sectionTitle })
+  );
 
   return (
     <Container className="pt-2">
@@ -179,15 +193,25 @@ export function AboutContentsDropdown({
 }: {
   readonly currentSection: AboutSection | undefined;
 }) {
-  const router = useRouter();
-  const currentLabel = getAboutSectionLabel(currentSection);
-  const items: CompactMenuItem[] = ABOUT_CONTENTS_NAV_ITEMS.map((item) => {
-    const label = t(ABOUT_CONTENTS_LOCALE, item.labelKey);
+  const locale = DEFAULT_LOCALE;
+  const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
+  const currentLabel = getAboutSectionLabel(currentSection, locale);
+  const hideSubscriptions = shouldHideSubscriptions({
+    capacitorIsIos: capacitor.isIos,
+    country,
+  });
+  const navItems = ABOUT_CONTENTS_NAV_ITEMS.filter(
+    (item) => item.section !== AboutSection.SUBSCRIPTIONS || !hideSubscriptions
+  );
+  const items: CompactMenuItem[] = navItems.map((item) => {
+    const label = t(locale, item.labelKey);
     const isCurrent = currentSection === item.section;
 
     return {
       id: item.section,
       label,
+      href: `/about/${item.section}`,
       icon: isCurrent ? (
         <CheckIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
       ) : (
@@ -195,47 +219,30 @@ export function AboutContentsDropdown({
       ),
       active: isCurrent,
       ariaLabel: isCurrent
-        ? t(ABOUT_CONTENTS_LOCALE, "about.contents.currentItemAriaLabel", {
+        ? t(locale, "about.contents.currentItemAriaLabel", {
             page: label,
           })
-        : t(ABOUT_CONTENTS_LOCALE, "about.contents.itemAriaLabel", {
+        : t(locale, "about.contents.itemAriaLabel", {
             page: label,
           }),
-      onSelect: () => router.push(`/about/${item.section}`),
     };
   });
 
   return (
     <div className="tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-justify-end tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-4">
       <CompactMenu
-        aria-label={t(
-          ABOUT_CONTENTS_LOCALE,
-          "about.contents.triggerAriaLabel",
-          { page: currentLabel }
-        )}
+        aria-label={t(locale, "about.contents.triggerAriaLabel", {
+          page: currentLabel,
+        })}
         unstyledTrigger
         triggerClassName="tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-3 tw-py-2 tw-text-left tw-shadow-sm tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
-        trigger={({ isOpen }) => (
-          <>
-            <span className="tw-hidden tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400 sm:tw-inline">
-              {t(ABOUT_CONTENTS_LOCALE, "about.contents.label")}
-            </span>
-            <span
-              className="tw-hidden tw-h-4 tw-w-px tw-bg-white/10 sm:tw-inline-block"
-              aria-hidden="true"
-            />
-            <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-50">
-              {currentLabel}
-            </span>
-            <ChevronDownIcon
-              className={`tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform ${
-                isOpen ? "tw-rotate-180" : ""
-              }`}
-              aria-hidden="true"
-            />
-          </>
-        )}
-        header={t(ABOUT_CONTENTS_LOCALE, "about.contents.label")}
+        trigger={
+          <AboutContentsDropdownTrigger
+            currentLabel={currentLabel}
+            locale={locale}
+          />
+        }
+        header={t(locale, "about.contents.label")}
         headerClassName="tw-px-3 tw-pb-2 tw-pt-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-500"
         items={items}
         activeItemId={currentSection}
@@ -247,5 +254,32 @@ export function AboutContentsDropdown({
         focusItemClassName="tw-bg-iron-900 tw-text-iron-50"
       />
     </div>
+  );
+}
+
+function AboutContentsDropdownTrigger({
+  currentLabel,
+  locale,
+}: {
+  readonly currentLabel: string;
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <>
+      <span className="tw-hidden tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400 sm:tw-inline">
+        {t(locale, "about.contents.label")}
+      </span>
+      <span
+        className="tw-hidden tw-h-4 tw-w-px tw-bg-white/10 sm:tw-inline-block"
+        aria-hidden="true"
+      />
+      <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-50">
+        {currentLabel}
+      </span>
+      <ChevronDownIcon
+        className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400"
+        aria-hidden="true"
+      />
+    </>
   );
 }

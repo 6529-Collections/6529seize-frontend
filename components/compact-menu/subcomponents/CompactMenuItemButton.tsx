@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import Link from "next/link";
 import type { CompactMenuItem } from "../types";
 import {
   DEFAULT_ACTIVE_ITEM_CLASSES,
@@ -46,13 +47,52 @@ export function CompactMenuItemButton({
 
   const focusClasses =
     menuActive && !item.disabled && !isActive
-      ? clsx(
-          focusDefaultClasses,
-          focusItemClassName,
-        )
+      ? clsx(focusDefaultClasses, focusItemClassName)
       : undefined;
 
   const role = item.role ?? "menuitem";
+  const className = clsx(
+    unstyledItems ? undefined : DEFAULT_ITEM_CLASSES,
+    stateClasses,
+    focusClasses,
+    itemClassName,
+    item.className,
+    item.disabled &&
+      !unstyledItems &&
+      "tw-cursor-not-allowed tw-text-iron-500 tw-opacity-60"
+  );
+  const showIcon =
+    item.icon !== undefined && item.icon !== null && item.icon !== false;
+  const contents = (
+    <>
+      {showIcon && (
+        <span className="tw-flex tw-shrink-0 tw-items-center tw-justify-center">
+          {item.icon}
+        </span>
+      )}
+      <span className="tw-flex-1 tw-text-left">{item.label}</span>
+    </>
+  );
+
+  if (item.href !== undefined && !item.disabled) {
+    return (
+      <Link
+        href={item.href}
+        role={role}
+        aria-selected={item.ariaSelected}
+        aria-label={item.ariaLabel}
+        data-compact-menu-item="true"
+        data-menu-item-id={item.id}
+        data-active={isActive ? "true" : "false"}
+        data-disabled="false"
+        data-testid={item["data-testid"]}
+        onClick={onClick}
+        className={className}
+      >
+        {contents}
+      </Link>
+    );
+  }
 
   return (
     <button
@@ -67,23 +107,9 @@ export function CompactMenuItemButton({
       data-disabled={item.disabled ? "true" : "false"}
       data-testid={item["data-testid"]}
       onClick={onClick}
-      className={clsx(
-        unstyledItems ? undefined : DEFAULT_ITEM_CLASSES,
-        stateClasses,
-        focusClasses,
-        itemClassName,
-        item.className,
-        item.disabled &&
-          !unstyledItems &&
-          "tw-cursor-not-allowed tw-opacity-60 tw-text-iron-500",
-      )}
+      className={className}
     >
-      {item.icon && (
-        <span className="tw-flex tw-shrink-0 tw-items-center tw-justify-center">
-          {item.icon}
-        </span>
-      )}
-      <span className="tw-flex-1 tw-text-left">{item.label}</span>
+      {contents}
     </button>
   );
 }

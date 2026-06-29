@@ -1,5 +1,5 @@
 import { AuthContext } from "@/components/auth/Auth";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 /* eslint-disable react/display-name */
 import AboutPage from "@/app/about/[section]/page";
@@ -42,25 +42,39 @@ jest.mock("@/contexts/TitleContext", () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe("AboutMenu subscriptions row", () => {
+const openContentsMenu = () => {
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: /open about contents navigation/i,
+    })
+  );
+};
+
+describe("About contents dropdown", () => {
   beforeEach(() => {
     country = "DE";
   });
 
-  it("hides subscriptions row when not US", async () => {
+  it("hides subscriptions row when iOS users are not in the US", async () => {
     const element = await AboutPage({
       params: Promise.resolve({ section: AboutSection.MEMES }),
     } as any);
     render(element, { wrapper: Wrapper });
+
+    openContentsMenu();
+
     expect(screen.queryByText("Subscriptions")).toBeNull();
   });
 
-  it("shows subscriptions row in US", async () => {
+  it("shows subscriptions row for iOS users in the US", async () => {
     country = "US";
     const element = await AboutPage({
       params: Promise.resolve({ section: AboutSection.MEMES }),
     } as any);
     render(element, { wrapper: Wrapper });
+
+    openContentsMenu();
+
     expect(screen.getAllByText("Subscriptions").length).toBeGreaterThan(0);
   });
 
@@ -72,6 +86,36 @@ describe("AboutMenu subscriptions row", () => {
 
     render(element, { wrapper: Wrapper });
 
+    openContentsMenu();
+
     expect(screen.queryByText("Release Notes")).toBeNull();
+  });
+
+  it("keeps cookie policy reachable from the contents menu", async () => {
+    country = "US";
+    const element = await AboutPage({
+      params: Promise.resolve({ section: AboutSection.MEMES }),
+    } as any);
+
+    render(element, { wrapper: Wrapper });
+    openContentsMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: /go to about page: cookie policy/i })
+    ).toHaveAttribute("href", "/about/cookie-policy");
+  });
+
+  it("marks tech as current on deeper tech routes", async () => {
+    country = "US";
+    const element = await AboutPage({
+      params: Promise.resolve({ section: AboutSection.TECH }),
+    } as any);
+
+    render(element, { wrapper: Wrapper });
+    openContentsMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: /tech, current about page/i })
+    ).toHaveAttribute("data-active", "true");
   });
 });
