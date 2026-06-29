@@ -2,7 +2,7 @@ import { type MessageKey, t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { AboutSection } from "@/types/enums";
 
-export type AboutContentsGroupId =
+type AboutContentsGroupId =
   | "collections"
   | "delegation"
   | "network"
@@ -254,14 +254,6 @@ export function getAboutSectionDocumentTitle(
   }
 
   return getAboutSectionLabel(section, locale);
-}
-
-export function getAboutNavGroupItems(
-  groupId: AboutContentsGroupId
-): readonly AboutContentsNavItem[] {
-  return (
-    ABOUT_CONTENTS_NAV_GROUPS.find((group) => group.id === groupId)?.items ?? []
-  );
 }
 
 export function getAboutNavItemLabel(
