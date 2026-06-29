@@ -99,7 +99,11 @@ export function useWaves({
     useState<SearchWavesParams>(params);
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
-  const fetchWavesPage = async ({ pageParam }: { pageParam: number | null }) =>
+  const fetchWavesPage = async ({
+    pageParam,
+  }: {
+    pageParam: number | null;
+  }) =>
     await commonApiFetch<ApiWave[]>({
       endpoint: `waves`,
       params: getWavesQueryParams({ params: debouncedParams, pageParam }),
