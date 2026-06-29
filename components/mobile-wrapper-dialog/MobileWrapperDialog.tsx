@@ -10,8 +10,11 @@ import clsx from "clsx";
 import { Fragment, useCallback, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, TouchEvent } from "react";
 
-const DISMISS_DRAG_THRESHOLD_PX = 84;
-const MAX_DRAG_OFFSET_PX = 220;
+const DISMISS_DRAG_DISTANCE_PX = 44;
+const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
+const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
+const DRAG_START_REGION_PX = 112;
+const MAX_DRAG_OFFSET_PX = 260;
 
 function DialogCloseButton({
   onClick,
@@ -196,7 +199,9 @@ export default function MobileWrapperDialog({
 }) {
   const { isCapacitor, isIos } = useCapacitor();
   const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const dragStartYRef = useRef<number | null>(null);
+  const dragStartedAtRef = useRef(0);
   const dragOffsetRef = useRef(0);
 
   const handleClose = useCallback(() => {
@@ -208,17 +213,16 @@ export default function MobileWrapperDialog({
   const canDragToClose = dismissible && !!showDragHandle && !tabletModal;
 
   const setClampedDragOffset = useCallback((offset: number) => {
-    const clampedOffset = Math.min(
-      Math.max(offset, 0),
-      MAX_DRAG_OFFSET_PX
-    );
+    const clampedOffset = Math.min(Math.max(offset, 0), MAX_DRAG_OFFSET_PX);
     dragOffsetRef.current = clampedOffset;
     setDragOffset(clampedOffset);
   }, []);
 
   const resetDrag = useCallback(() => {
     dragStartYRef.current = null;
+    dragStartedAtRef.current = 0;
     dragOffsetRef.current = 0;
+    setIsDragging(false);
     setDragOffset(0);
   }, []);
 
@@ -228,7 +232,18 @@ export default function MobileWrapperDialog({
         return;
       }
 
-      dragStartYRef.current = event.touches.item(0).clientY;
+      const touch = event.touches.item(0);
+      const startsInDragRegion =
+        touch.clientY - event.currentTarget.getBoundingClientRect().top <=
+        DRAG_START_REGION_PX;
+
+      if (!startsInDragRegion) {
+        return;
+      }
+
+      dragStartYRef.current = touch.clientY;
+      dragStartedAtRef.current = performance.now();
+      setIsDragging(true);
       setClampedDragOffset(0);
     },
     [canDragToClose, setClampedDragOffset]
@@ -258,13 +273,31 @@ export default function MobileWrapperDialog({
       return;
     }
 
-    const shouldClose = dragOffsetRef.current >= DISMISS_DRAG_THRESHOLD_PX;
-    resetDrag();
+    const releasedOffset = dragOffsetRef.current;
+    const elapsed = Math.max(performance.now() - dragStartedAtRef.current, 1);
+    const velocity = releasedOffset / elapsed;
+    const shouldClose =
+      releasedOffset >= DISMISS_DRAG_DISTANCE_PX ||
+      (releasedOffset >= DISMISS_DRAG_FLICK_DISTANCE_PX &&
+        velocity >= DISMISS_DRAG_FLICK_VELOCITY_PX_MS);
+
+    dragStartYRef.current = null;
+    dragStartedAtRef.current = 0;
+    dragOffsetRef.current = 0;
+    setIsDragging(false);
 
     if (shouldClose) {
       handleClose();
+      return;
     }
+
+    setDragOffset(0);
   }, [canDragToClose, handleClose, resetDrag]);
+
+  const handleAfterLeave = useCallback(() => {
+    resetDrag();
+    onAfterLeave?.();
+  }, [onAfterLeave, resetDrag]);
 
   const bottomPadding = getBottomPadding(noPadding);
   const dialogHeight = getDialogHeight({
@@ -287,12 +320,13 @@ export default function MobileWrapperDialog({
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle: CSSProperties = {
     touchAction: "manipulation",
-    ...(dragOffset > 0
-      ? {
-          transform: `translateY(${dragOffset}px)`,
-          transition: "none",
-        }
-      : {}),
+  };
+  const surfaceStyle: CSSProperties = {
+    transform: `translate3d(0, ${dragOffset}px, 0)`,
+    transition: isDragging
+      ? "none"
+      : "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)",
+    ...(fixedHeight ? { height: dialogHeight } : { maxHeight: dialogHeight }),
   };
 
   const showDesktopHeaderCloseButton =
@@ -314,7 +348,7 @@ export default function MobileWrapperDialog({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
           {...(onBeforeLeave ? { beforeLeave: onBeforeLeave } : {})}
-          {...(onAfterLeave ? { afterLeave: onAfterLeave } : {})}
+          afterLeave={handleAfterLeave}
         >
           <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60" />
         </TransitionChild>
@@ -335,6 +369,10 @@ export default function MobileWrapperDialog({
                 <DialogPanel
                   className={panelClassNames}
                   style={panelStyle}
+                  onTouchStart={canDragToClose ? handleDragStart : undefined}
+                  onTouchMove={canDragToClose ? handleDragMove : undefined}
+                  onTouchEnd={canDragToClose ? handleDragEnd : undefined}
+                  onTouchCancel={resetDrag}
                   onClick={(e) => e.stopPropagation()}
                 >
                   {dismissible && !showHeaderCloseButton && (
@@ -369,13 +407,10 @@ export default function MobileWrapperDialog({
                       allowOverflow
                         ? "tw-overflow-visible"
                         : "tw-overflow-hidden",
+                      canDragToClose && "tw-will-change-transform",
                       tabletModal && "md:tw-rounded-xl"
                     )}
-                    style={{
-                      ...(fixedHeight
-                        ? { height: dialogHeight }
-                        : { maxHeight: dialogHeight }),
-                    }}
+                    style={surfaceStyle}
                   >
                     <div
                       className={clsx(
@@ -391,22 +426,7 @@ export default function MobileWrapperDialog({
                       style={{ paddingBottom: bottomPadding }}
                     >
                       {showDragHandle && (
-                        <div
-                          className="tw-flex tw-justify-center tw-pt-3"
-                          onTouchStart={
-                            canDragToClose ? handleDragStart : undefined
-                          }
-                          onTouchMove={
-                            canDragToClose ? handleDragMove : undefined
-                          }
-                          onTouchEnd={
-                            canDragToClose ? handleDragEnd : undefined
-                          }
-                          onTouchCancel={resetDrag}
-                          style={
-                            canDragToClose ? { touchAction: "none" } : undefined
-                          }
-                        >
+                        <div className="tw-flex tw-justify-center tw-pt-3">
                           <div className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-[#37373E]" />
                         </div>
                       )}
