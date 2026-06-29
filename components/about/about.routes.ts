@@ -38,6 +38,11 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     labelKey: "about.contents.groups.collections",
     items: [
       {
+        section: AboutSection.MISSION,
+        labelKey: "about.contents.pages.mission",
+        descriptionKey: "about.contents.descriptions.mission",
+      },
+      {
         section: AboutSection.MEMES,
         labelKey: "about.contents.pages.theMemes",
         descriptionKey: "about.contents.descriptions.theMemes",
@@ -95,6 +100,30 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
         href: "/network/xtdh",
         labelKey: "about.contents.pages.xtdh",
         descriptionKey: "about.contents.descriptions.xtdh",
+      },
+      {
+        id: "network-health",
+        href: "/network/health",
+        labelKey: "about.contents.pages.networkHealth",
+        descriptionKey: "about.contents.descriptions.networkHealth",
+      },
+      {
+        id: "network-definitions",
+        href: "/network/definitions",
+        labelKey: "about.contents.pages.networkDefinitions",
+        descriptionKey: "about.contents.descriptions.networkDefinitions",
+      },
+      {
+        id: "network-levels",
+        href: "/network/levels",
+        labelKey: "about.contents.pages.networkLevels",
+        descriptionKey: "about.contents.descriptions.networkLevels",
+      },
+      {
+        id: "network-tdh-stats",
+        href: "/network/health/network-tdh",
+        labelKey: "about.contents.pages.networkTdhStats",
+        descriptionKey: "about.contents.descriptions.networkTdhStats",
       },
       {
         section: AboutSection.FAQ,
@@ -185,7 +214,6 @@ const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>([
   ...ABOUT_CONTENTS_NAV_ITEMS.map((item) =>
     "section" in item ? ([item.section, item.labelKey] as const) : undefined
   ).filter((item): item is readonly [AboutSection, MessageKey] => !!item),
-  [AboutSection.MISSION, "about.contents.pages.mission"],
 ]);
 
 const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([

@@ -68,11 +68,15 @@
         "community",
         "legal",
         "tdh",
-        "xtdh"
+        "xtdh",
+        "network",
+        "health",
+        "definitions",
+        "levels"
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into Collections, Delegation, Resources, Community, and Legal link cards, including TDH and xTDH resource links that keep their canonical /network paths.",
+        "It groups About pages into Collections, Delegation, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network TDH resource links that keep their canonical /network paths.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, delegation, resource, community, or technical page."
       ],
       "canonical_path": "/about",
@@ -82,7 +86,11 @@
         "/about/tech",
         "/about/terms-of-service",
         "/network/tdh",
-        "/network/xtdh"
+        "/network/xtdh",
+        "/network/health",
+        "/network/definitions",
+        "/network/levels",
+        "/network/health/network-tdh"
       ],
       "tags": ["about", "navigation", "getting-started"],
       "source_refs": [

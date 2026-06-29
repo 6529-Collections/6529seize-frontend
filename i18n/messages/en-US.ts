@@ -559,7 +559,7 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   aboutFallback: "About",
   documentTitle: "{section} | About",
   triggerAriaLabel: "Open About contents navigation. Current page: {page}",
-  currentItemAriaLabel: "{page}, current About page",
+  currentItemAriaLabel: "{page}, current page",
   itemAriaLabel: "Go to page: {page}",
   "documentTitles.gradient": "6529 Gradient",
   "groups.collections": "Collections",
@@ -577,6 +577,10 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   "pages.primaryAddress": "Primary Address",
   "pages.tdh": "TDH",
   "pages.xtdh": "xTDH",
+  "pages.networkHealth": "Health",
+  "pages.networkDefinitions": "Definitions",
+  "pages.networkLevels": "Levels",
+  "pages.networkTdhStats": "Network TDH",
   "pages.faq": "FAQ",
   "pages.ens": "ENS",
   "pages.minting": "Minting",
@@ -590,6 +594,7 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   "pages.privacyPolicy": "Privacy Policy",
   "pages.cookiePolicy": "Cookie Policy",
   "pages.copyright": "Copyright",
+  "descriptions.mission": "6529 mission and open metaverse context.",
   "descriptions.theMemes":
     "The core collection, mint context, and related links.",
   "descriptions.subscriptions":
@@ -602,6 +607,14 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   "descriptions.tdh":
     "Total Days Held, calculation rules, and network context.",
   "descriptions.xtdh": "How xTDH extends TDH through grants and allocations.",
+  "descriptions.networkHealth":
+    "Network activity, minting, voting, and metric health.",
+  "descriptions.networkDefinitions":
+    "Definitions for cards, sets, TDH variants, and activity metrics.",
+  "descriptions.networkLevels":
+    "How Levels combine TDH and REP into an integrated score.",
+  "descriptions.networkTdhStats":
+    "Network TDH totals, daily movement, charts, and checkpoints.",
   "descriptions.faq": "Common questions about collections, minting, and 6529.",
   "descriptions.ens": "ENS details and 6529 naming context.",
   "descriptions.minting": "Minting frequency, mechanics, and expectations.",

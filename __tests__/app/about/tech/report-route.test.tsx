@@ -20,7 +20,7 @@ jest.mock("next/navigation", () => ({
   notFound: jest.fn(),
 }));
 
-jest.mock("@/components/about/About", () => ({
+jest.mock("@/components/about/AboutContentsDropdown", () => ({
   AboutContentsDropdown: () => <nav data-testid="about-contents-dropdown" />,
 }));
 

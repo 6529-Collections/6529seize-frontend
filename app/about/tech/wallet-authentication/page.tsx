@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Col, Container, Row } from "react-bootstrap";
 
-import { AboutContentsDropdown } from "@/components/about/About";
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
