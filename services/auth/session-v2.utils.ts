@@ -275,7 +275,7 @@ export async function verifyActiveSessionV2WebSession({
     return false;
   }
 
-  return true;
+  return await persistSessionResponse(refreshedSession);
 }
 
 export async function createConnectionShare({
