@@ -13,6 +13,9 @@ import type React from "react";
 const BASE_BUTTON_CLASS =
   "tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-100 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700 disabled:tw-cursor-default disabled:tw-opacity-60";
 
+const INLINE_MEDIA_ACTIONS_REVEAL_CLASS =
+  "tw-hidden desktop-hover:tw-flex desktop-hover:tw-pointer-events-none desktop-hover:tw-opacity-0 desktop-hover:tw-transition-opacity desktop-hover:tw-duration-200 desktop-hover:group-hover/media:tw-pointer-events-auto desktop-hover:group-hover/media:tw-opacity-100 group-focus-within/media:tw-pointer-events-auto group-focus-within/media:tw-opacity-100 motion-reduce:tw-transition-none";
+
 type MediaActionLabels = {
   readonly close?: string | undefined;
   readonly download?: string | undefined;
@@ -54,7 +57,7 @@ function ToolbarButton({
   );
 }
 
-function getMediaActionLabels(labels?: MediaActionLabels | undefined) {
+function getMediaActionLabels(labels?: MediaActionLabels) {
   return {
     close: labels?.close ?? DEFAULT_MEDIA_ACTION_LABELS.close,
     download: labels?.download ?? DEFAULT_MEDIA_ACTION_LABELS.download,
@@ -78,7 +81,10 @@ export function InlineMediaActions({
   fullscreenTargetAvailable,
   variant,
   position = "top-right",
+  visibility = "always",
   labels,
+  className,
+  style,
 }: {
   readonly onDownload?: (() => void) | undefined;
   readonly onOpen?: (() => void) | undefined;
@@ -88,7 +94,10 @@ export function InlineMediaActions({
   readonly fullscreenTargetAvailable?: boolean | undefined;
   readonly variant: "image" | "video" | "html";
   readonly position?: "top-right" | "bottom-right" | undefined;
+  readonly visibility?: "always" | "desktop-hover" | undefined;
   readonly labels?: MediaActionLabels | undefined;
+  readonly className?: string | undefined;
+  readonly style?: React.CSSProperties | undefined;
 }) {
   const actionLabels = getMediaActionLabels(labels);
   const canFullscreen =
@@ -103,9 +112,14 @@ export function InlineMediaActions({
 
   return (
     <div
+      style={style}
       className={clsx(
-        "tw-absolute tw-z-30 tw-flex tw-overflow-hidden tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur",
-        positionClassName
+        "tw-absolute tw-z-30 tw-overflow-hidden tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur",
+        visibility === "desktop-hover"
+          ? INLINE_MEDIA_ACTIONS_REVEAL_CLASS
+          : "tw-flex",
+        positionClassName,
+        className
       )}
     >
       {canFullscreen && (

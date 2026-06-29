@@ -6,13 +6,20 @@ import {
   requestCenteredImageFullscreen,
 } from "@/components/drops/view/item/content/media/ImageMediaModal";
 import { InlineMediaActions } from "@/components/drops/view/item/content/media/MediaActionToolbar";
+import { useContainedImageBoundsStyle } from "@/components/drops/view/item/content/media/containedImageBounds";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 const AUTO_RETRY_DELAY_MS = 1500;
 const MAX_AUTO_RETRY_ATTEMPTS = 40;
@@ -166,6 +173,72 @@ type WaveDropPartContentMediaImageProps = {
   readonly fillContainer?: boolean | undefined;
 };
 
+type ImageViewState = {
+  readonly loaded: boolean;
+  readonly isModalOpen: boolean;
+  readonly failedAttempts: number;
+  readonly retryPending: boolean;
+  readonly retryTick: number;
+};
+
+type ImageViewAction =
+  | { readonly type: "image-loaded" }
+  | { readonly type: "image-error" }
+  | { readonly type: "manual-retry" }
+  | { readonly type: "auto-retry" }
+  | { readonly type: "open-modal" }
+  | { readonly type: "close-modal" };
+
+const initialImageViewState: ImageViewState = {
+  loaded: false,
+  isModalOpen: false,
+  failedAttempts: 0,
+  retryPending: false,
+  retryTick: 0,
+};
+
+function imageViewReducer(
+  state: ImageViewState,
+  action: ImageViewAction
+): ImageViewState {
+  switch (action.type) {
+    case "image-loaded":
+      return {
+        ...state,
+        loaded: true,
+        failedAttempts: 0,
+        retryPending: false,
+      };
+    case "image-error": {
+      const failedAttempts = state.failedAttempts + 1;
+      return {
+        ...state,
+        loaded: false,
+        failedAttempts,
+        retryPending: failedAttempts <= MAX_AUTO_RETRY_ATTEMPTS,
+      };
+    }
+    case "manual-retry":
+      return {
+        ...state,
+        loaded: false,
+        failedAttempts: 0,
+        retryPending: false,
+        retryTick: state.retryTick + 1,
+      };
+    case "auto-retry":
+      return {
+        ...state,
+        retryPending: false,
+        retryTick: state.retryTick + 1,
+      };
+    case "open-modal":
+      return { ...state, isModalOpen: true };
+    case "close-modal":
+      return { ...state, isModalOpen: false };
+  }
+}
+
 export default function WaveDropPartContentMediaImage({
   src,
   imageScale = ImageScale.AUTOx450,
@@ -188,13 +261,13 @@ function WaveDropPartContentMediaImageContent({
   galleryItemId,
   fillContainer = false,
 }: WaveDropPartContentMediaImageProps & { readonly imageScale: ImageScale }) {
-  const [loaded, setLoaded] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [retryPending, setRetryPending] = useState(false);
-  const [retryTick, setRetryTick] = useState(0);
+  const [imageViewState, dispatchImageView] = useReducer(
+    imageViewReducer,
+    initialImageViewState
+  );
   const { isCapacitor } = useCapacitor();
   const imageGallery = useDropImageGallery();
+  const imageFrameRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
@@ -206,41 +279,28 @@ function WaveDropPartContentMediaImageContent({
     });
 
   const handleImageLoad = useCallback(() => {
-    setLoaded(true);
-    setFailedAttempts(0);
-    setRetryPending(false);
+    dispatchImageView({ type: "image-loaded" });
   }, []);
 
   const handleError = useCallback(() => {
-    setLoaded(false);
-    setFailedAttempts((currentAttempts) => {
-      const nextAttempts = currentAttempts + 1;
-      if (nextAttempts <= MAX_AUTO_RETRY_ATTEMPTS) {
-        setRetryPending(true);
-      }
-      return nextAttempts;
-    });
+    dispatchImageView({ type: "image-error" });
   }, []);
 
   const manualRetry = useCallback(() => {
-    setLoaded(false);
-    setFailedAttempts(0);
-    setRetryPending(false);
-    setRetryTick((currentTick) => currentTick + 1);
+    dispatchImageView({ type: "manual-retry" });
   }, []);
 
   useEffect(() => {
-    if (!retryPending) {
+    if (!imageViewState.retryPending) {
       return;
     }
 
     const retryTimeout = window.setTimeout(() => {
-      setRetryPending(false);
-      setRetryTick((currentTick) => currentTick + 1);
+      dispatchImageView({ type: "auto-retry" });
     }, AUTO_RETRY_DELAY_MS);
 
     return () => window.clearTimeout(retryTimeout);
-  }, [retryPending]);
+  }, [imageViewState.retryPending]);
 
   const handleOpenModal = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -249,13 +309,13 @@ function WaveDropPartContentMediaImageContent({
         return;
       }
 
-      setIsModalOpen(true);
+      dispatchImageView({ type: "open-modal" });
     },
     [galleryItemId, imageGallery]
   );
 
   const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
+    dispatchImageView({ type: "close-modal" });
   }, []);
 
   const handleFullScreen = useCallback(() => {
@@ -264,38 +324,44 @@ function WaveDropPartContentMediaImageContent({
       requestCenteredImageFullscreen(fullscreenTarget);
     }
   }, []);
+  const imageActionBoundsStyle = useContainedImageBoundsStyle({
+    containerRef: imageFrameRef,
+    imageRef: imgRef,
+    loaded: imageViewState.loaded,
+    objectPosition: imageObjectPosition,
+  });
 
-  if (failedAttempts >= MAX_FAILED_LOAD_ATTEMPTS) {
+  if (imageViewState.failedAttempts >= MAX_FAILED_LOAD_ATTEMPTS) {
     return <ImageLoadErrorState onRetry={manualRetry} />;
   }
 
-  if (retryPending) {
+  if (imageViewState.retryPending) {
     return <ImageProcessingRetryState />;
   }
 
   const primarySrc = withRetryCacheBust(
     getScaledImageUri(src, imageScale),
-    retryTick
+    imageViewState.retryTick
   );
-  const fallbackSrc = withRetryCacheBust(src, retryTick);
+  const fallbackSrc = withRetryCacheBust(src, imageViewState.retryTick);
   const image = fillContainer ? (
     <FillContainerImage
-      key={retryTick}
+      key={imageViewState.retryTick}
       imgRef={imgRef}
       primarySrc={primarySrc}
       fallbackSrc={fallbackSrc}
-      retryTick={retryTick}
+      retryTick={imageViewState.retryTick}
       onLoad={handleImageLoad}
       onFinalError={handleError}
       imageObjectPosition={imageObjectPosition}
     />
   ) : (
     <NaturalHeightImage
-      key={retryTick}
+      key={imageViewState.retryTick}
       imgRef={imgRef}
       primarySrc={primarySrc}
       fallbackSrc={fallbackSrc}
-      retryTick={retryTick}
+      retryTick={imageViewState.retryTick}
       onLoad={handleImageLoad}
       onFinalError={handleError}
       imageObjectPosition={imageObjectPosition}
@@ -305,38 +371,44 @@ function WaveDropPartContentMediaImageContent({
   return (
     <>
       <div
+        ref={imageFrameRef}
         className={`tw-relative tw-w-full tw-min-w-0 ${
           fillContainer ? "tw-h-full" : ""
         }`}
       >
-        <InlineMediaActions
-          variant="image"
-          onOpen={openMedia}
-          openLabel={openLabel}
-          onDownload={downloadMedia}
-          isDownloading={isDownloading}
-          onFullscreen={handleFullScreen}
-          fullscreenTargetAvailable={!isCapacitor}
-        />
-        <button
-          type="button"
-          onClick={handleOpenModal}
-          aria-label="Open drop media"
-          className={`tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 ${
-            fillContainer ? "tw-h-full" : ""
-          }`}
+        {image}
+        <div
+          className="tw-group/media tw-pointer-events-none tw-absolute tw-z-20"
+          style={imageActionBoundsStyle ?? { inset: 0 }}
         >
-          {image}
-        </button>
+          <button
+            type="button"
+            onClick={handleOpenModal}
+            aria-label="Open drop media"
+            className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          />
+          {imageActionBoundsStyle ? (
+            <InlineMediaActions
+              variant="image"
+              onOpen={openMedia}
+              openLabel={openLabel}
+              onDownload={downloadMedia}
+              isDownloading={isDownloading}
+              onFullscreen={handleFullScreen}
+              fullscreenTargetAvailable={!isCapacitor}
+              visibility="desktop-hover"
+            />
+          ) : null}
+        </div>
       </div>
 
-      {!loaded && (
+      {!imageViewState.loaded && (
         <div className="tw-sr-only" aria-live="polite">
           Loading image
         </div>
       )}
 
-      {isModalOpen && (
+      {imageViewState.isModalOpen && (
         <ImageMediaModal
           src={src}
           imageRef={modalImageRef}

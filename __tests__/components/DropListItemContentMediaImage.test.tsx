@@ -39,7 +39,7 @@ describe("DropListItemContentMediaImage", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
-    fireEvent.click(img);
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
     const modalImage = screen.getByAltText("Full size drop media");
     expect(modalImage).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("modal-backdrop"));
@@ -52,7 +52,7 @@ describe("DropListItemContentMediaImage", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
-    fireEvent.click(img);
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
     fireEvent.click(screen.getByTestId("modal-backdrop"));
 
@@ -65,7 +65,7 @@ describe("DropListItemContentMediaImage", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
-    fireEvent.click(img);
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
     const modalImage = screen.getByAltText("Full size drop media");
     Object.defineProperty(modalImage, "naturalWidth", {
@@ -99,7 +99,7 @@ describe("DropListItemContentMediaImage", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
-    fireEvent.click(img);
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
     const modalImage = screen.getByAltText("Full size drop media");
     Object.defineProperty(modalImage, "naturalWidth", {
@@ -156,7 +156,7 @@ describe("DropListItemContentMediaImage", () => {
     expect(requestFullscreen).not.toHaveBeenCalled();
   });
 
-  it("renders intrinsic-height images without the fill container height", () => {
+  it("renders intrinsic-height images in a natural-height frame", () => {
     const { container } = render(
       <DropListItemContentMediaImage src="img" intrinsicHeight />
     );
@@ -166,9 +166,14 @@ describe("DropListItemContentMediaImage", () => {
 
     expect(wrapper).toHaveClass("tw-w-full", "tw-min-h-40");
     expect(wrapper).not.toHaveClass("tw-h-full");
-    expect(img).toHaveClass("tw-h-auto", "tw-w-full", "tw-max-h-64");
+    expect(img).toHaveClass(
+      "tw-object-contain",
+      "tw-max-h-64",
+      "tw-max-w-full"
+    );
+    expect(img).not.toHaveClass("tw-w-full");
     expect(img).not.toHaveClass("tw-max-h-full");
-    expect(img).not.toHaveAttribute("data-nimg", "fill");
+    expect(img).toHaveAttribute("data-nimg", "fill");
   });
 
   it("retries intrinsic-height images instead of swapping to the same fallback source", () => {
@@ -179,6 +184,7 @@ describe("DropListItemContentMediaImage", () => {
       <DropListItemContentMediaImage src="img" intrinsicHeight maxRetries={1} />
     );
 
+    fireEvent.error(screen.getByAltText("Drop media"));
     fireEvent.error(screen.getByAltText("Drop media"));
 
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 500);

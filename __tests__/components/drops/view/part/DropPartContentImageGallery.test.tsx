@@ -29,12 +29,10 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 
 jest.mock("@/hooks/useInView", () => ({
-  useInView: jest.fn(
-    (): [React.RefObject<HTMLDivElement | null>, boolean] => [
-      createRef<HTMLDivElement>(),
-      true,
-    ]
-  ),
+  useInView: jest.fn((): [React.RefObject<HTMLDivElement | null>, boolean] => [
+    createRef<HTMLDivElement>(),
+    true,
+  ]),
 }));
 
 jest.mock("@/helpers/Helpers", () => ({
@@ -58,9 +56,8 @@ jest.mock("next/image", () => ({
   __esModule: true,
   default: forwardRef<HTMLImageElement, MockNextImageProps>(
     // eslint-disable-next-line react/display-name
-    ({ fill: _fill, unoptimized: _unoptimized, alt, ...rest }, ref) => (
-      <img ref={ref} alt={alt ?? ""} {...rest} />
-    )
+    ({ fill: _fill, unoptimized: _unoptimized, alt, ...rest }, ref) =>
+      React.createElement("img", { ...rest, ref, alt: alt ?? "" })
   ),
 }));
 
@@ -84,12 +81,14 @@ describe("DropPartContent image gallery", () => {
       />
     );
 
-    const [bodyImage] = screen.getAllByAltText("Drop media");
-    if (!bodyImage) {
-      throw new Error("Expected body image to render");
+    const [bodyImageButton] = screen.getAllByRole("button", {
+      name: "Open image preview",
+    });
+    if (!bodyImageButton) {
+      throw new Error("Expected body image button to render");
     }
 
-    fireEvent.click(bodyImage);
+    fireEvent.click(bodyImageButton);
 
     expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
       "src",
@@ -113,12 +112,14 @@ describe("DropPartContent image gallery", () => {
       />
     );
 
-    const [, uploadedImage] = screen.getAllByAltText("Drop media");
-    if (!uploadedImage) {
-      throw new Error("Expected uploaded image to render");
+    const [, uploadedImageButton] = screen.getAllByRole("button", {
+      name: "Open image preview",
+    });
+    if (!uploadedImageButton) {
+      throw new Error("Expected uploaded image button to render");
     }
 
-    fireEvent.click(uploadedImage);
+    fireEvent.click(uploadedImageButton);
 
     expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
       "src",
