@@ -159,17 +159,27 @@ const chunkRequests = (
   requests: readonly PendingTwitterPreviewRequest[]
 ): readonly PendingTwitterPreviewRequest[][] => {
   const chunks: PendingTwitterPreviewRequest[][] = [];
+  let activeChunk: PendingTwitterPreviewRequest[] | undefined;
 
-  for (
-    let index = 0;
-    index < requests.length;
-    index += TWITTER_PREVIEW_BATCH_MAX_URLS
-  ) {
-    chunks.push(requests.slice(index, index + TWITTER_PREVIEW_BATCH_MAX_URLS));
+  for (const request of requests) {
+    if (
+      activeChunk === undefined ||
+      activeChunk.length >= TWITTER_PREVIEW_BATCH_MAX_URLS
+    ) {
+      activeChunk = [];
+      chunks.push(activeChunk);
+    }
+
+    activeChunk.push(request);
   }
 
   return chunks;
 };
+
+const toTwitterPreviewError = (error: unknown): Error =>
+  error instanceof Error
+    ? error
+    : new Error(TWITTER_PREVIEW_METADATA_ERROR_MESSAGE);
 
 const rejectPendingRequest = (
   request: PendingTwitterPreviewRequest,
@@ -186,27 +196,58 @@ const resolveWithSingleRequestFallback = async (
     const data = await fetchSingleTwitterPreview(request.url);
     request.resolve(data);
   } catch (error: unknown) {
-    rejectPendingRequest(
-      request,
-      error instanceof Error
-        ? error
-        : new Error(TWITTER_PREVIEW_METADATA_ERROR_MESSAGE)
-    );
+    rejectPendingRequest(request, toTwitterPreviewError(error));
   }
 };
 
-const rejectBatchChunk = (
+const rejectBatchRequests = (
   requests: readonly PendingTwitterPreviewRequest[],
   error: unknown
 ): void => {
-  const rejection =
-    error instanceof Error
-      ? error
-      : new Error(TWITTER_PREVIEW_METADATA_ERROR_MESSAGE);
+  const rejection = toTwitterPreviewError(error);
 
   for (const request of requests) {
     rejectPendingRequest(request, rejection);
   }
+};
+
+const getBatchErrorMessage = (
+  batchResponse: TwitterPreviewBatchResponse,
+  url: string
+): string => {
+  const errorMessage = hasOwnRecordKey(batchResponse.errors, url)
+    ? batchResponse.errors[url]
+    : undefined;
+
+  return errorMessage && errorMessage.length > 0
+    ? errorMessage
+    : TWITTER_PREVIEW_METADATA_ERROR_MESSAGE;
+};
+
+const settleBatchRequest = (
+  request: PendingTwitterPreviewRequest,
+  batchResponse: TwitterPreviewBatchResponse
+): void => {
+  if (hasOwnRecordKey(batchResponse.results, request.url)) {
+    const result = batchResponse.results[request.url];
+    if (result !== undefined) {
+      request.resolve(result);
+      return;
+    }
+  }
+
+  rejectPendingRequest(
+    request,
+    new Error(getBatchErrorMessage(batchResponse, request.url))
+  );
+};
+
+const resolveViaSingleRequests = async (
+  requests: readonly PendingTwitterPreviewRequest[]
+): Promise<void> => {
+  await Promise.allSettled(
+    requests.map((request) => resolveWithSingleRequestFallback(request))
+  );
 };
 
 const resolveBatchChunk = async (
@@ -219,34 +260,12 @@ const resolveBatchChunk = async (
       requests.map((request) => request.url)
     );
   } catch {
-    await Promise.all(
-      requests.map(async (request) => {
-        await resolveWithSingleRequestFallback(request);
-      })
-    );
+    await resolveViaSingleRequests(requests);
     return;
   }
 
   for (const request of requests) {
-    const result = hasOwnRecordKey(batchResponse.results, request.url)
-      ? batchResponse.results[request.url]
-      : undefined;
-    if (result !== undefined) {
-      request.resolve(result);
-      continue;
-    }
-
-    const errorMessage = hasOwnRecordKey(batchResponse.errors, request.url)
-      ? batchResponse.errors[request.url]
-      : undefined;
-    rejectPendingRequest(
-      request,
-      new Error(
-        errorMessage && errorMessage.length > 0
-          ? errorMessage
-          : TWITTER_PREVIEW_METADATA_ERROR_MESSAGE
-      )
-    );
+    settleBatchRequest(request, batchResponse);
   }
 };
 
@@ -256,29 +275,33 @@ const resolveBatchChunkSafely = async (
   try {
     await resolveBatchChunk(requests);
   } catch (error: unknown) {
-    rejectBatchChunk(requests, error);
+    rejectBatchRequests(requests, error);
   }
 };
 
+const hasBatchCapacity = (): boolean =>
+  activeTwitterPreviewBatchChunks < TWITTER_PREVIEW_BATCH_MAX_ACTIVE_CHUNKS;
+
+const finishBatchChunk = (): void => {
+  activeTwitterPreviewBatchChunks -= 1;
+  processQueuedBatchChunks();
+};
+
+const startBatchChunk = (
+  requests: readonly PendingTwitterPreviewRequest[]
+): void => {
+  activeTwitterPreviewBatchChunks += 1;
+  void resolveBatchChunkSafely(requests).finally(finishBatchChunk);
+};
+
 const processQueuedBatchChunks = (): void => {
-  while (
-    activeTwitterPreviewBatchChunks <
-      TWITTER_PREVIEW_BATCH_MAX_ACTIVE_CHUNKS &&
-    queuedTwitterPreviewBatchChunks.length > 0
-  ) {
+  while (hasBatchCapacity()) {
     const chunk = queuedTwitterPreviewBatchChunks.shift();
     if (chunk === undefined) {
       return;
     }
 
-    activeTwitterPreviewBatchChunks += 1;
-
-    const handleChunkCompletion = (): void => {
-      activeTwitterPreviewBatchChunks -= 1;
-      processQueuedBatchChunks();
-    };
-
-    void resolveBatchChunkSafely(chunk).finally(handleChunkCompletion);
+    startBatchChunk(chunk);
   }
 };
 
