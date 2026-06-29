@@ -211,6 +211,39 @@ const getQuickDmScoreLabel = (
   return formatInteger(locale, Math.round(score));
 };
 
+const getQuickDmConversationAriaLabel = ({
+  locale,
+  scoreLabel,
+  timeLabel,
+  title,
+  unreadCount,
+}: {
+  readonly locale: SupportedLocale;
+  readonly scoreLabel: string | null;
+  readonly timeLabel: string;
+  readonly title: string;
+  readonly unreadCount: number;
+}): string => {
+  const metadata = [
+    timeLabel,
+    scoreLabel === null
+      ? null
+      : t(locale, "waves.score.summary.scoreAria", {
+          visibilityScore: scoreLabel,
+        }),
+    unreadCount <= 0
+      ? null
+      : t(locale, "quickDm.unreadCountAriaLabel", {
+          count: formatInteger(locale, unreadCount),
+        }),
+  ].filter((value): value is string => value !== null);
+
+  return [
+    t(locale, "quickDm.openConversationAriaLabel", { name: title }),
+    ...metadata,
+  ].join(". ");
+};
+
 const getFormattedWaveName = (wave: Pick<MinimalWave, "name">): string => {
   const marker = "id-";
   const addressPrefix = `${marker}0x`;
@@ -446,9 +479,16 @@ const QuickDmConversationRow = ({
   const latestMessageTimestamp = getQuickDmLatestMessageTimestamp(wave);
   const timeLabel =
     latestMessageTimestamp === null
-      ? "-"
+      ? t(locale, "quickDm.noMessagesYet")
       : getQuickDmTimeLabel({ locale, timestamp: latestMessageTimestamp });
   const scoreLabel = getQuickDmScoreLabel(wave, locale);
+  const rowAriaLabel = getQuickDmConversationAriaLabel({
+    locale,
+    scoreLabel,
+    timeLabel,
+    title,
+    unreadCount,
+  });
 
   return (
     <button
@@ -457,9 +497,7 @@ const QuickDmConversationRow = ({
       onFocus={() => onHover(wave.id)}
       onMouseEnter={() => onHover(wave.id)}
       className="tw-group tw-flex tw-w-full tw-appearance-none tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-px-2 tw-py-2.5 tw-text-left tw-text-inherit tw-ring-1 tw-ring-white/10 tw-transition hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-      aria-label={t(locale, "quickDm.openConversationAriaLabel", {
-        name: title,
-      })}
+      aria-label={rowAriaLabel}
     >
       <div className="tw-relative tw-size-10 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/15">
         <WavePicture
