@@ -12,6 +12,7 @@ import {
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  shouldFilterWalletConnectMissingSessionTopic,
   tagSampledLowValueNetworkError,
   type SentryClientEvent,
   type SentryStackFrame,
@@ -29,6 +30,10 @@ describe("sentry-client-filters", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const walletConnectMissingSessionTopicMessage =
+    "No matching key. session topic doesn't exist: a95ee7fe3f399b96e9c576b19c6722a29f27b20d91d9b36535a2fab436cb6f5e";
+  const walletConnectUnhandledRejectionMechanism =
+    "auto.browser.global_handlers.onunhandledrejection";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
@@ -172,6 +177,50 @@ describe("sentry-client-filters", () => {
                   filename: "<anonymous>",
                   abs_path: "<anonymous>",
                   function: "__mm__updateUrl",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    });
+
+  const createWalletConnectMissingSessionTopicEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    ({
+      transaction: "/notifications",
+      request: {
+        url: "/notifications",
+      },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  abs_path: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "isValidSessionTopic",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  abs_path: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  abs_path: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "onRelayMessage",
+                  in_app: true,
                 },
               ],
             },
@@ -2281,6 +2330,243 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters WalletConnect missing session-topic errors on notifications", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent();
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters WalletConnect missing session-topic errors from package stack frames", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@walletconnect+sign-client@2.23.7/node_modules/@walletconnect/sign-client/dist/index.es.js",
+                  function: "isValidSessionTopic",
+                },
+                {
+                  filename:
+                    "node_modules/.pnpm/@walletconnect+sign-client@2.23.7/node_modules/@walletconnect/sign-client/dist/index.es.js",
+                  function: "onRelayMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters WalletConnect missing session-topic errors from the original exception stack", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+          },
+        ],
+      },
+    });
+    const error = new Error(walletConnectMissingSessionTopicMessage);
+    error.stack = [
+      `Error: ${walletConnectMissingSessionTopicMessage}`,
+      "    at isValidSessionTopic (node_modules/@walletconnect/sign-client/dist/index.es.js:11:154307)",
+      "    at onRelayMessage (node_modules/@walletconnect/sign-client/dist/index.es.js:11:152283)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter WalletConnect missing session-topic errors with app-owned frames", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///components/providers/WagmiSetup.tsx",
+                  abs_path: "app:///components/providers/WagmiSetup.tsx",
+                  function: "connectWallet",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  abs_path: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "isValidSessionTopic",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  abs_path: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "onRelayMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WalletConnect missing session-topic errors with app-owned original stacks", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+          },
+        ],
+      },
+    });
+    const error = new Error(walletConnectMissingSessionTopicMessage);
+    error.stack = [
+      `Error: ${walletConnectMissingSessionTopicMessage}`,
+      "    at connectWallet (app:///components/providers/WagmiSetup.tsx:10:5)",
+      "    at isValidSessionTopic (node_modules/@walletconnect/sign-client/dist/index.es.js:11:154307)",
+      "    at onRelayMessage (node_modules/@walletconnect/sign-client/dist/index.es.js:11:152283)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter handled WalletConnect missing session-topic errors", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: true,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "isValidSessionTopic",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "onRelayMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WalletConnect pairing-topic errors", () => {
+    // Arrange
+    const event = createWalletConnectMissingSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value:
+              "No matching key. pairing topic doesn't exist: a95ee7fe3f399b96e9c576b19c6722a29f27b20d91d9b36535a2fab436cb6f5e",
+            mechanism: {
+              type: walletConnectUnhandledRejectionMechanism,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "isValidSessionTopic",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "onRelayMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterWalletConnectMissingSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("does not filter app-owned websocket 1006 errors", () => {

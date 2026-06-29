@@ -2,6 +2,7 @@ export type SentryStackFrame = {
   filename?: string | undefined;
   abs_path?: string | undefined;
   function?: string | undefined;
+  module?: string | undefined;
   in_app?: boolean | undefined;
 };
 
@@ -113,6 +114,31 @@ const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
 const coinbaseWalletLinkWebSocket1006Pattern =
   /^websocket error 1006(?::.*)?$/i;
+const walletConnectMissingSessionTopicPattern =
+  /^No matching key\. session topic doesn't exist: [a-f0-9]{64}$/i;
+const walletConnectMissingSessionTopicFunctions = new Set([
+  "isValidSessionTopic",
+  "onRelayMessage",
+]);
+const walletConnectPackagePathTokens = [
+  "@walletconnect/",
+  "@walletconnect+",
+  "@reown/",
+  "@reown+",
+];
+const nextStaticChunkPathToken = "/_next/static/chunks/";
+const firstPartySourcePathTokens = [
+  "/app/",
+  "/components/",
+  "/contexts/",
+  "/helpers/",
+  "/hooks/",
+  "/lib/",
+  "/services/",
+  "/store/",
+  "/utils/",
+  "/wagmiconfig/",
+];
 const metaMaskMobileUpdateUrlFunction = "__mm__updateUrl";
 const jsonStringifyFunction = "JSON.stringify";
 const circularReactMetaElementMessagePatterns = [
@@ -1056,6 +1082,10 @@ function isCoinbaseWalletLinkWebSocket1006Message(value: string): boolean {
   return coinbaseWalletLinkWebSocket1006Pattern.test(value.trim());
 }
 
+function isWalletConnectMissingSessionTopicMessage(value: string): boolean {
+  return walletConnectMissingSessionTopicPattern.test(value.trim());
+}
+
 function isCoinbaseWalletLinkWebSocketPath(path: string | undefined): boolean {
   return (
     typeof path === "string" &&
@@ -1072,6 +1102,108 @@ function hasCoinbaseWalletLinkWebSocketFrame(
     frames.some((frame) =>
       [frame.filename, frame.abs_path].some(isCoinbaseWalletLinkWebSocketPath)
     )
+  );
+}
+
+function getFrameSignatureValues(frame: SentryStackFrame): string[] {
+  return [
+    frame.function,
+    frame.filename,
+    frame.abs_path,
+    frame.module,
+  ].filter((value): value is string => typeof value === "string");
+}
+
+function isWalletConnectPackageFrame(frame: SentryStackFrame): boolean {
+  return getFrameSignatureValues(frame).some((value) => {
+    const normalizedValue = value.toLowerCase();
+    return walletConnectPackagePathTokens.some((token) =>
+      normalizedValue.includes(token)
+    );
+  });
+}
+
+function isBundledNextStaticChunkFrame(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some((path) =>
+    path.toLowerCase().includes(nextStaticChunkPathToken)
+  );
+}
+
+function isFirstPartySourcePath(path: string): boolean {
+  const normalizedPath = path.toLowerCase();
+  if (normalizedPath.includes(nextStaticChunkPathToken)) {
+    return false;
+  }
+
+  return (
+    normalizedPath.startsWith("app:///") ||
+    normalizedPath.startsWith("webpack://_n_e/./") ||
+    firstPartySourcePathTokens.some((token) =>
+      normalizedPath.includes(token)
+    )
+  );
+}
+
+function isAppOwnedWalletStackLine(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  if (
+    walletConnectPackagePathTokens.some((token) =>
+      normalizedValue.includes(token)
+    ) ||
+    normalizedValue.includes(nextStaticChunkPathToken)
+  ) {
+    return false;
+  }
+
+  return isFirstPartySourcePath(normalizedValue);
+}
+
+function hasAppOwnedWalletExceptionStack(hint?: SentryEventHint): boolean {
+  const stack = getHintExceptionStack(hint);
+  return stack.split("\n").some(isAppOwnedWalletStackLine);
+}
+
+function isAppOwnedWalletFrame(frame: SentryStackFrame): boolean {
+  if (
+    isWalletConnectPackageFrame(frame) ||
+    isBundledNextStaticChunkFrame(frame)
+  ) {
+    return false;
+  }
+
+  return (
+    frame.in_app === true || getFramePaths(frame).some(isFirstPartySourcePath)
+  );
+}
+
+function hasAppOwnedWalletFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return Array.isArray(frames) && frames.some(isAppOwnedWalletFrame);
+}
+
+function getWalletConnectStackSignatureValues(
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): string[] {
+  const frameValues = Array.isArray(frames)
+    ? frames.flatMap(getFrameSignatureValues)
+    : [];
+
+  return [...frameValues, getHintExceptionStack(hint)].filter(
+    (value): value is string => value.length > 0
+  );
+}
+
+function hasWalletConnectMissingSessionTopicStackSignature(
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const signatureValues = getWalletConnectStackSignatureValues(frames, hint);
+
+  return Array.from(walletConnectMissingSessionTopicFunctions).every(
+    (functionName) =>
+      signatureValues.some((value) => value.includes(functionName))
   );
 }
 
@@ -1592,6 +1724,41 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
     hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint)
   );
+}
+
+export function shouldFilterWalletConnectMissingSessionTopic(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const messageCandidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+  const hasTargetMessage = messageCandidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      isWalletConnectMissingSessionTopicMessage(candidate)
+  );
+
+  if (!hasTargetMessage) {
+    return false;
+  }
+
+  if (
+    value?.mechanism?.type !== browserUnhandledRejectionMechanism ||
+    value.mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  const frames = value.stacktrace?.frames;
+  if (hasAppOwnedWalletFrame(frames) || hasAppOwnedWalletExceptionStack(hint)) {
+    return false;
+  }
+
+  return hasWalletConnectMissingSessionTopicStackSignature(frames, hint);
 }
 
 export function shouldFilterSentryRouteParameterizationError(

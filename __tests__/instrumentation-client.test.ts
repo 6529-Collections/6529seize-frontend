@@ -16,6 +16,8 @@ describe("instrumentation-client", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const walletConnectMissingSessionTopicMessage =
+    "No matching key. session topic doesn't exist: a95ee7fe3f399b96e9c576b19c6722a29f27b20d91d9b36535a2fab436cb6f5e";
   const reactDomInsertBeforeMessage =
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
   const reactDomFrame = {
@@ -232,6 +234,50 @@ describe("instrumentation-client", () => {
 
     const result = beforeSend(event, {
       originalException: new Error("websocket error 1006:"),
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("drops WalletConnect missing session-topic unhandled rejections on notifications", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      transaction: "/notifications",
+      request: {
+        url: "/notifications",
+      },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectMissingSessionTopicMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  abs_path: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "isValidSessionTopic",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  abs_path: "app:///_next/static/chunks/0~zy23p9fyira.js",
+                  function: "onRelayMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event, {
+      originalException: new Error(walletConnectMissingSessionTopicMessage),
     });
 
     expect(result).toBeNull();

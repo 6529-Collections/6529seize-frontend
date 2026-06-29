@@ -26,6 +26,7 @@ import {
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  shouldFilterWalletConnectMissingSessionTopic,
   tagSampledLowValueNetworkError,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
@@ -128,6 +129,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterWalletConnectMissingSessionTopic(event, hint)) {
     return true;
   }
 
