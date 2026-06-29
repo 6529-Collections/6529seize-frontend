@@ -1,3 +1,4 @@
+import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
@@ -76,7 +77,9 @@ export const FR_FR_MESSAGES = {
   "quickDm.showAll": "Tout afficher",
   "quickDm.openConversation": "Ouvrir la conversation",
   "quickDm.openConversationAriaLabel": "Ouvrir la conversation avec {name}",
+  "quickDm.unreadCountAriaLabel": "{count} messages non lus",
   "quickDm.unreadPreview": "Nouveaux messages",
+  "quickDm.noMessagesYet": "Aucun message pour le moment",
   "quickDm.emptyTitle": "Aucun message direct pour le moment",
   "quickDm.loadingStatus": "Chargement des messages directs",
   "quickDm.chatLoadError": "Impossible de charger cette conversation.",
@@ -97,6 +100,7 @@ export const FR_FR_MESSAGES = {
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votes",
   "memes.waveFooter.uncastPower.votesVisible": "votes",
+  ...FR_FR_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Flux Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
   "theMemes.documentTitle": "The Memes | Collections",

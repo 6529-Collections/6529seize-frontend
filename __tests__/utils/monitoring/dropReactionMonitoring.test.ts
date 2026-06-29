@@ -165,6 +165,55 @@ describe("dropReactionMonitoring", () => {
     );
   });
 
+  it("records rate-limit warning metadata without capturing an exception", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-rate-limit",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-rate-limit/reaction",
+      method: "POST",
+    });
+
+    const headers = new Headers({ "Retry-After": "2" });
+    const error = Object.assign(new Error("Rate limit exceeded"), {
+      status: 429,
+      headers,
+      response: {
+        status: 429,
+        headers,
+      },
+    });
+
+    dateNowSpy.mockReturnValue(1_200);
+    const result = recordReactionRequestFailed(mutation, error);
+
+    expect(result).toEqual({
+      isLatestMutation: true,
+      supersededByMutationId: null,
+    });
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.request_failed",
+        data: expect.objectContaining({
+          status_code: 429,
+          error_kind: "rate-limit",
+          retry_after_ms: 2000,
+        }),
+      })
+    );
+    expect(withScopeMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
   it("breadcrumbs an older success as superseded without capturing an issue", () => {
     const olderMutation = beginReactionMutation({
       dropId: "drop-3",
