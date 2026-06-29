@@ -13,8 +13,8 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
-  useState,
 } from "react";
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
 import { type ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -404,7 +404,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { isCapacitor, isIos, isActive } = useCapacitor();
   const { connectedProfile } = useAuth();
-  const [, setAuthTokenRevision] = useState(0);
+  const forceAuthTokenRefresh = useReducer(
+    (revision: number) => revision + 1,
+    0
+  )[1];
   const authJwt = getAuthJwt();
   const pushRegistrationAuthKey = isAuthJwtUsable(authJwt)
     ? getAuthTokenFingerprint(authJwt)
@@ -439,7 +442,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     const handleAuthTokenChanged = () => {
-      setAuthTokenRevision((revision) => revision + 1);
+      forceAuthTokenRefresh();
     };
 
     globalThis.addEventListener(
@@ -452,7 +455,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         handleAuthTokenChanged
       );
     };
-  }, []);
+  }, [forceAuthTokenRefresh]);
 
   const removeDeliveredNotifications = useCallback(
     async (notifications: PushNotificationSchema[]) => {
