@@ -113,6 +113,36 @@ const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
 const coinbaseWalletLinkWebSocket1006Pattern =
   /^websocket error 1006(?::.*)?$/i;
+const walletWebSocketBreadcrumbAppKitTokens = [
+  "appkit",
+  "reown",
+  "wagmi",
+  "w3m",
+];
+const walletWebSocketBreadcrumbConnectorTokens = [
+  "coinbase",
+  "walletlink",
+  "@coinbase/wallet-sdk",
+  "@coinbase+wallet-sdk",
+  "walletconnect",
+];
+const appOwnedFramePathPrefixes = [
+  "app/",
+  "components/",
+  "config/",
+  "constants/",
+  "contexts/",
+  "entities/",
+  "helpers/",
+  "hooks/",
+  "lib/",
+  "services/",
+  "src/",
+  "store/",
+  "types/",
+  "utils/",
+  "wagmiConfig/",
+];
 const metaMaskMobileUpdateUrlFunction = "__mm__updateUrl";
 const jsonStringifyFunction = "JSON.stringify";
 const circularReactMetaElementMessagePatterns = [
@@ -1102,6 +1132,119 @@ function hasCoinbaseWalletLinkWebSocketCloseStack(
   );
 }
 
+function normalizeStackPath(value: string): string {
+  const webpackPrefix = "webpack-internal:///";
+  let normalized = value;
+
+  if (normalized.startsWith(webpackPrefix)) {
+    normalized = normalized.slice(webpackPrefix.length);
+    if (normalized.startsWith("(")) {
+      const groupEnd = normalized.indexOf(")/");
+      if (groupEnd >= 0) {
+        normalized = normalized.slice(groupEnd + 2);
+      }
+    }
+    if (normalized.startsWith("./")) {
+      normalized = normalized.slice(2);
+    }
+  }
+
+  while (normalized.startsWith("/")) {
+    normalized = normalized.slice(1);
+  }
+
+  return normalized;
+}
+
+function isAppOwnedStackPath(value: string | undefined): boolean {
+  if (typeof value !== "string" || value.length === 0) {
+    return false;
+  }
+
+  const normalized = normalizeStackPath(value);
+  return appOwnedFramePathPrefixes.some((prefix) =>
+    normalized.startsWith(prefix)
+  );
+}
+
+function hasAppOwnedSourceFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) =>
+      [frame.filename, frame.abs_path].some(isAppOwnedStackPath)
+    )
+  );
+}
+
+function hasAppOwnedSourceStack(hint?: SentryEventHint): boolean {
+  const stack = getHintExceptionStack(hint);
+  return appOwnedFramePathPrefixes.some((prefix) => stack.includes(prefix));
+}
+
+function addBreadcrumbSignatureValues(
+  value: unknown,
+  values: string[],
+  depth: number
+): void {
+  if (depth > 4) {
+    return;
+  }
+
+  if (typeof value === "string") {
+    values.push(value);
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) =>
+      addBreadcrumbSignatureValues(item, values, depth + 1)
+    );
+    return;
+  }
+
+  if (!isRecord(value)) {
+    return;
+  }
+
+  Object.entries(value).forEach(([key, item]) => {
+    values.push(key);
+    addBreadcrumbSignatureValues(item, values, depth + 1);
+  });
+}
+
+function getBreadcrumbSignatureText(event: SentryClientEvent): string {
+  const values: string[] = [];
+  getBreadcrumbValues(event).forEach((breadcrumb) => {
+    addBreadcrumbSignatureValues(
+      [breadcrumb.category, breadcrumb.message, breadcrumb.data],
+      values,
+      0
+    );
+  });
+
+  return values.join("\n").toLowerCase();
+}
+
+function hasThirdPartyWalletAppKitBreadcrumbSignature(
+  event: SentryClientEvent
+): boolean {
+  const text = getBreadcrumbSignatureText(event);
+  if (!text) {
+    return false;
+  }
+
+  const hasAppKitToken = walletWebSocketBreadcrumbAppKitTokens.some((token) =>
+    text.includes(token)
+  );
+  const hasConnectorToken = walletWebSocketBreadcrumbConnectorTokens.some(
+    (token) => text.includes(token)
+  );
+
+  return hasAppKitToken && hasConnectorToken;
+}
+
 function hasWalletLinkWebSocketUnhandledRejectionSignature(
   value: SentryExceptionValue | undefined,
   hint?: SentryEventHint
@@ -1590,7 +1733,11 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   return (
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
-    hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint)
+    hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint) ||
+    (!hasAppOwnedFrame(value?.stacktrace?.frames) &&
+      !hasAppOwnedSourceFrame(value?.stacktrace?.frames) &&
+      !hasAppOwnedSourceStack(hint) &&
+      hasThirdPartyWalletAppKitBreadcrumbSignature(event))
   );
 }
 
