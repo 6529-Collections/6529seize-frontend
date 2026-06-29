@@ -271,6 +271,19 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
   "uncastPower.votesVisible": "votes",
 } as const);
 
+const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  "rateLimit.retryAfter.moment":
+    "You are reacting too quickly. Try again in a moment.",
+  "rateLimit.retryAfter.seconds.one":
+    "You are reacting too quickly. Try again in {count} second.",
+  "rateLimit.retryAfter.seconds.other":
+    "You are reacting too quickly. Try again in {count} seconds.",
+  "rateLimit.retryAfter.minutes.one":
+    "You are reacting too quickly. Try again in {count} minute.",
+  "rateLimit.retryAfter.minutes.other":
+    "You are reacting too quickly. Try again in {count} minutes.",
+} as const);
+
 const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
   "profileFeed.title": "Profile Waves Feed",
   "profileFeed.subtitle": "Featured drops from profile waves",
@@ -1251,6 +1264,7 @@ export const EN_US_MESSAGES = {
   ...NEW_VERSION_TOAST_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
+  ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
 } as const;
 

@@ -1,3 +1,4 @@
+import { ES_ES_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
@@ -97,6 +98,7 @@ export const ES_ES_MESSAGES = {
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votos",
   "memes.waveFooter.uncastPower.votesVisible": "votos",
+  ...ES_ES_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Feed de Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops destacados de profile waves",
   "theMemes.documentTitle": "The Memes | Colecciones",
