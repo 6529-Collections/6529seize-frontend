@@ -46,7 +46,7 @@ export default function GroupItemWrapper({
       if (isActive) {
         return "tw-rounded-xl tw-border-primary-400/30 tw-bg-primary-500/10";
       }
-      return "tw-rounded-xl tw-border-iron-700 tw-bg-iron-900 tw-cursor-pointer active:tw-scale-[0.99] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800";
+      return "tw-rounded-xl tw-border-iron-800 tw-bg-iron-900 tw-cursor-pointer active:tw-scale-[0.99] desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-800";
     }
 
     if (!isActive)

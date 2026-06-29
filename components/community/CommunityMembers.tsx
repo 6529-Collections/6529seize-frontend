@@ -326,6 +326,37 @@ export default function CommunityMembers() {
   const showMembersSkeleton =
     !hasMemberContent && (isLoading || isFetching || !members);
 
+  let membersContent: ReactNode = null;
+  if (showMembersSkeleton) {
+    membersContent = <CommunityMembersTableSkeleton />;
+  } else if (members) {
+    membersContent = (
+      <>
+        <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
+          <CommunityMembersTable
+            members={members.data}
+            activeSort={params.sort}
+            sortDirection={params.sort_direction}
+            page={members.page}
+            pageSize={params.page_size}
+            isLoading={isFetching}
+            onSort={setSortBy}
+          />
+        </div>
+        {totalPages > 1 && (
+          <CommonTablePagination
+            currentPage={members.page}
+            setCurrentPage={setPage}
+            totalPages={totalPages}
+            haveNextPage={members.next}
+            small={false}
+            loading={isLoading}
+          />
+        )}
+      </>
+    );
+  }
+
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
@@ -371,33 +402,7 @@ export default function CommunityMembers() {
         </div>
       </div>
       <div className="tailwind-scope tw-mt-2 tw-flow-root lg:tw-mt-3">
-        {showMembersSkeleton ? (
-          <CommunityMembersTableSkeleton />
-        ) : members ? (
-          <>
-            <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
-              <CommunityMembersTable
-                members={members.data}
-                activeSort={params.sort}
-                sortDirection={params.sort_direction}
-                page={members.page}
-                pageSize={params.page_size}
-                isLoading={isFetching}
-                onSort={setSortBy}
-              />
-            </div>
-            {totalPages > 1 && (
-              <CommonTablePagination
-                currentPage={members.page}
-                setCurrentPage={setPage}
-                totalPages={totalPages}
-                haveNextPage={members.next}
-                small={false}
-                loading={isLoading}
-              />
-            )}
-          </>
-        ) : null}
+        {membersContent}
       </div>
 
       <MobileWrapperDialog

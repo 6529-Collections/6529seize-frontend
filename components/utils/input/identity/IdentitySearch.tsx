@@ -45,6 +45,7 @@ export default function IdentitySearch({
   disabled = false,
   dropdownListClassName,
   iconPositionClassName,
+  inputClassName,
   onSelectionChange,
   setIdentity,
 }: {
@@ -59,6 +60,7 @@ export default function IdentitySearch({
   readonly disabled?: boolean | undefined;
   readonly dropdownListClassName?: string | undefined;
   readonly iconPositionClassName?: string | undefined;
+  readonly inputClassName?: string | undefined;
   readonly onSelectionChange?:
     | ((selection: SelectableIdentityOption | null) => void)
     | undefined;
@@ -352,7 +354,7 @@ export default function IdentitySearch({
           searchCriteria
             ? "tw-text-primary-400 focus:tw-text-white"
             : "tw-text-white"
-        } disabled:tw-cursor-not-allowed disabled:tw-opacity-70`}
+        } disabled:tw-cursor-not-allowed disabled:tw-opacity-70 ${inputClassName ?? ""}`}
         placeholder=" "
       />
       <MagnifyingGlassIcon

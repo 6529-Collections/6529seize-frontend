@@ -6,12 +6,13 @@ export default function CommunityMembersTableSkeleton({
   readonly rows?: number;
 }) {
   const rowKeys = useMemo(
-    () => Array.from({ length: rows }, (_, index) => `member-skeleton-${index}`),
+    () =>
+      Array.from({ length: rows }, (_, index) => `member-skeleton-${index}`),
     [rows]
   );
 
   return (
-    <div role="status" aria-label="Loading Network members">
+    <output className="tw-block" aria-label="Loading Network members">
       <div className="tw-hidden tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-block sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
         <div className="tw-animate-pulse">
           <div className="tw-h-12 tw-border-b tw-border-iron-700 tw-bg-iron-900" />
@@ -65,6 +66,6 @@ export default function CommunityMembersTableSkeleton({
         ))}
       </div>
       <span className="tw-sr-only">Loading Network members</span>
-    </div>
+    </output>
   );
 }

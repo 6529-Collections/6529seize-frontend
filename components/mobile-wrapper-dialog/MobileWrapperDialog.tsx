@@ -15,7 +15,12 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CSSProperties, HTMLAttributes, ReactNode, TouchEvent } from "react";
+import type {
+  CSSProperties,
+  HTMLAttributes,
+  ReactNode,
+  TouchEvent,
+} from "react";
 
 const DISMISS_DRAG_DISTANCE_PX = 44;
 const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
@@ -173,6 +178,17 @@ function getSlideTransition(tabletModal?: boolean) {
   };
 }
 
+function getOverlayTransition() {
+  return {
+    enter: "tw-transition-opacity tw-duration-250 tw-ease-out",
+    enterFrom: "tw-opacity-0",
+    enterTo: "tw-opacity-100",
+    leave: "tw-transition-opacity tw-duration-250 tw-ease-in",
+    leaveFrom: "tw-opacity-100",
+    leaveTo: "tw-opacity-0",
+  };
+}
+
 function getBottomPadding(noPadding?: boolean): string {
   return noPadding
     ? "env(safe-area-inset-bottom,0px)"
@@ -197,6 +213,25 @@ function getDialogHeight({
 
 function getBeforeLeaveProps(onBeforeLeave?: (() => void) | undefined) {
   return onBeforeLeave ? { beforeLeave: onBeforeLeave } : {};
+}
+
+function MobileDialogOverlay({
+  onBeforeLeave,
+  onAfterLeave,
+}: {
+  readonly onBeforeLeave?: (() => void) | undefined;
+  readonly onAfterLeave: () => void;
+}) {
+  return (
+    <TransitionChild
+      as={Fragment}
+      {...getOverlayTransition()}
+      {...getBeforeLeaveProps(onBeforeLeave)}
+      afterLeave={onAfterLeave}
+    >
+      <div className="tw-fixed tw-inset-0 tw-transform-gpu tw-bg-gray-700/60" />
+    </TransitionChild>
+  );
 }
 
 function getPanelClassNames({
@@ -664,19 +699,10 @@ export default function MobileWrapperDialog({
         className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
         onClose={handleClose}
       >
-        <TransitionChild
-          as={Fragment}
-          enter="tw-duration-250 tw-ease-in-out"
-          enterFrom="tw-opacity-0"
-          enterTo="tw-opacity-100"
-          leave="tw-duration-250 tw-ease-in-out"
-          leaveFrom="tw-opacity-100"
-          leaveTo="tw-opacity-0"
-          {...getBeforeLeaveProps(onBeforeLeave)}
-          afterLeave={handleAfterLeave}
-        >
-          <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60" />
-        </TransitionChild>
+        <MobileDialogOverlay
+          onBeforeLeave={onBeforeLeave}
+          onAfterLeave={handleAfterLeave}
+        />
 
         <div
           className="tw-fixed tw-inset-0"
