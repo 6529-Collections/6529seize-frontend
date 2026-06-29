@@ -5,6 +5,7 @@ export interface CompactMenuItem {
   readonly id: string;
   readonly label: ReactNode;
   readonly icon?: ReactNode | undefined;
+  readonly href?: string | undefined;
   readonly onSelect?: (() => void) | undefined;
   readonly disabled?: boolean | undefined;
   readonly className?: string | undefined;
