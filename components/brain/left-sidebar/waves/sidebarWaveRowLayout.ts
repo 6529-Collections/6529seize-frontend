@@ -19,7 +19,7 @@ const CHILD_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[54px]";
 const rowLayoutByVariant = {
   app: {
     child: {
-      rowPaddingClasses: "tw-pl-[82px] tw-pr-5 md:tw-pl-[78px]",
+      rowPaddingClasses: "tw-pl-[74px] tw-pr-5 md:tw-pl-[70px]",
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
       rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
@@ -33,7 +33,7 @@ const rowLayoutByVariant = {
   },
   web: {
     child: {
-      rowPaddingClasses: "tw-pl-[82px] tw-pr-5 md:tw-pl-[70px]",
+      rowPaddingClasses: "tw-pl-[74px] tw-pr-5 md:tw-pl-[66px]",
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
       rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,

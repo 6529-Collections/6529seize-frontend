@@ -254,7 +254,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       {isChildRow && (
         <span
           aria-hidden="true"
-          className={`tw-absolute -tw-top-1 tw-left-14 tw-w-px tw-bg-iron-700/60 md:tw-left-[52px] ${
+          className={`tw-absolute -tw-top-1 tw-left-[35.5px] tw-w-px tw-bg-iron-700/60 ${
             isLastSubwave ? "tw-bottom-4" : "-tw-bottom-1"
           }`}
         />
@@ -321,8 +321,8 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-0.5">
-              <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-1">
+              <div className="-tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
                 <Link
                   href={href}
                   prefetch={false}
@@ -352,7 +352,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                 )}
               </div>
               {shouldShowDropTime && (
-                <div className="tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-leading-none tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
+                <div className="tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-leading-tight tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
                   <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
                 </div>
               )}
