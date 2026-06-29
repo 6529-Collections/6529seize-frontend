@@ -234,6 +234,7 @@ const QuickDmPanelHeader = ({
   avatar,
   hasBackUnreadIndicator = false,
   locale,
+  openAllHref,
   title,
   onBack,
   onClose,
@@ -242,6 +243,7 @@ const QuickDmPanelHeader = ({
   readonly avatar?: React.ReactNode;
   readonly hasBackUnreadIndicator?: boolean;
   readonly locale: SupportedLocale;
+  readonly openAllHref?: string | undefined;
   readonly title: string;
   readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
@@ -268,12 +270,14 @@ const QuickDmPanelHeader = ({
         {title}
       </h2>
     </div>
-    {onOpenAll && (
+    {onOpenAll && openAllHref && (
       <Link
-        href={getMessagesBaseRoute(false)}
+        href={openAllHref}
         onClick={onOpenAll}
-        aria-label={t(locale, "quickDm.openAllAriaLabel")}
-        title={t(locale, "quickDm.openAll")}
+        aria-label={t(locale, "quickDm.openConversationAriaLabel", {
+          name: title,
+        })}
+        title={t(locale, "quickDm.openConversation")}
         className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition hover:tw-bg-white/10 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
       >
         <ArrowTopRightOnSquareIcon className="tw-size-4" aria-hidden="true" />
@@ -575,6 +579,7 @@ const QuickDmChat = ({
         locale={locale}
         title={title || t(locale, "quickDm.chatTitleFallback")}
         avatar={avatar ? <QuickDmHeaderAvatar avatar={avatar} /> : undefined}
+        openAllHref={getMessagePathRoute(waveId)}
         onBack={onBack}
         onClose={onClose}
         onOpenAll={onOpenAll}
