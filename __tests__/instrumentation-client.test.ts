@@ -86,8 +86,10 @@ describe("instrumentation-client", () => {
   };
 
   const createSentryRouteParameterizationEvent = (
-    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame]
+    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame],
+    overrides: Record<string, unknown> = {}
   ) => ({
+    transaction: "/waves/:wave",
     exception: {
       values: [
         {
@@ -103,6 +105,21 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+    request: {
+      url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    contexts: {
+      app: {
+        app_name: "MetaMaskMobile",
+      },
+      browser: {
+        name: "Mobile Safari UI/WKWebView",
+      },
+    },
+    tags: {
+      browser: "Mobile Safari UI/WKWebView",
+      "browser.name": "Mobile Safari UI/WKWebView",
+    },
     breadcrumbs: [
       {
         category: "navigation",
@@ -112,6 +129,7 @@ describe("instrumentation-client", () => {
         },
       },
     ],
+    ...overrides,
   });
 
   beforeEach(() => {
@@ -244,6 +262,28 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("keeps route parameterization cyclic JSON errors without MetaMaskMobile WKWebView context", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent(
+      [nativeJsonStringifyFrame],
+      {
+        contexts: {
+          browser: {
+            name: "Mobile Safari",
+          },
+        },
+        tags: {
+          browser: "Mobile Safari",
+          "browser.name": "Mobile Safari",
+        },
+      }
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps cyclic JSON errors with app-owned frames", () => {
