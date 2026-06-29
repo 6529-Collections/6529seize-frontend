@@ -562,6 +562,11 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   currentItemAriaLabel: "{page}, current About page",
   itemAriaLabel: "Go to About page: {page}",
   "documentTitles.gradient": "6529 Gradient",
+  "groups.collections": "Collections",
+  "groups.delegation": "Delegation",
+  "groups.resources": "Resources",
+  "groups.community": "Community",
+  "groups.legal": "Legal",
   "pages.mission": "Mission",
   "pages.theMemes": "The Memes",
   "pages.subscriptions": "Subscriptions",
@@ -583,6 +588,39 @@ const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
   "pages.privacyPolicy": "Privacy Policy",
   "pages.cookiePolicy": "Cookie Policy",
   "pages.copyright": "Copyright",
+  "descriptions.theMemes":
+    "The core collection, mint context, and related links.",
+  "descriptions.subscriptions":
+    "Remote minting subscriptions and how they work.",
+  "descriptions.memeLab": "The Meme Lab collection and artist experiments.",
+  "descriptions.gradient": "The 6529 Gradient collection overview.",
+  "descriptions.gdrc": "Global Delegation Rights Contract notes and context.",
+  "descriptions.nftDelegation": "How NFT delegation works across 6529.",
+  "descriptions.primaryAddress": "Set and understand primary wallet addresses.",
+  "descriptions.faq": "Common questions about collections, minting, and 6529.",
+  "descriptions.ens": "ENS details and 6529 naming context.",
+  "descriptions.minting": "Minting frequency, mechanics, and expectations.",
+  "descriptions.nakamotoThreshold":
+    "Why decentralization thresholds matter for 6529.",
+  "descriptions.license": "License terms for 6529 imagery and marks.",
+  "descriptions.apply": "Apply to collaborate or participate.",
+  "descriptions.contactUs": "Ways to reach the 6529 team.",
+  "descriptions.tech": "Technical notes, reports, and platform changes.",
+  "descriptions.dataDecentralization":
+    "How 6529 thinks about data, persistence, and decentralization.",
+  "descriptions.termsOfService": "Service terms for using 6529.",
+  "descriptions.privacyPolicy": "How 6529 handles privacy and data.",
+  "descriptions.cookiePolicy": "Cookie use and browser storage policy.",
+  "descriptions.copyright": "Copyright policy and reporting process.",
+} as const);
+
+const ABOUT_INDEX_MESSAGES = objectMessages("about.index", {
+  "metadata.title": "About",
+  "metadata.description": "About 6529",
+  eyebrow: "About",
+  title: "About 6529",
+  lead: "Find the right About page for collections, delegation, technical notes, policies, and ways to connect.",
+  cardAriaLabel: "Open About page: {page}",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
@@ -1272,6 +1310,7 @@ export const EN_US_MESSAGES = {
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
   ...ABOUT_CONTENTS_MESSAGES,
+  ...ABOUT_INDEX_MESSAGES,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,

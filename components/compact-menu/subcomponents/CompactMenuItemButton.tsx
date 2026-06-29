@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import Link from "next/link";
-import type { CompactMenuItem } from "../types";
+import type { CompactMenuActionItem } from "../types";
 import {
   DEFAULT_ACTIVE_ITEM_CLASSES,
   DEFAULT_FOCUS_ITEM_CLASSES,
@@ -9,7 +9,7 @@ import {
 } from "../constants";
 
 interface CompactMenuItemButtonProps {
-  readonly item: CompactMenuItem;
+  readonly item: CompactMenuActionItem;
   readonly isActive: boolean;
   readonly menuActive: boolean;
   readonly onClick: () => void;
