@@ -115,3 +115,10 @@ CLAUDE.md
 .agent
 
 .direnv/
+
+# Local agent-login wallet material and emitted auth payloads
+ops/skills/6529-agent-login/accounts.json
+ops/skills/6529-agent-login/*.payload.json
+ops/skills/6529-agent-login/*storage-state*.json
+ops/skills/6529-agent-login/*agent-login*.json
+ops/skills/6529-agent-login/*agent-login*.js

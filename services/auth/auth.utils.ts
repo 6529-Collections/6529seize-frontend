@@ -15,6 +15,17 @@ const WALLET_REFRESH_TOKEN_STORAGE_KEY = "6529-wallet-refresh-token";
 const WALLET_ROLE_STORAGE_KEY = "6529-wallet-role";
 const WALLET_ACCOUNTS_STORAGE_KEY = "6529-wallet-accounts";
 const WALLET_ACTIVE_ADDRESS_STORAGE_KEY = "6529-wallet-active-address";
+export const AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY =
+  "6529-agent-login-active-address";
+export const AUTH_STORAGE_KEYS = {
+  accounts: WALLET_ACCOUNTS_STORAGE_KEY,
+  activeAddress: WALLET_ACTIVE_ADDRESS_STORAGE_KEY,
+  legacyAddress: WALLET_ADDRESS_STORAGE_KEY,
+  legacyRefreshToken: WALLET_REFRESH_TOKEN_STORAGE_KEY,
+  legacyRole: WALLET_ROLE_STORAGE_KEY,
+  agentLoginActiveAddress: AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY,
+  authCookie: WALLET_AUTH_COOKIE,
+} as const;
 
 export interface ConnectedWalletAccount {
   readonly address: string;
@@ -43,6 +54,24 @@ const getAddressRoleStorageKey = (address: string): string => {
 };
 
 const normalizeAddress = (address: string): string => address.toLowerCase();
+
+const clearAgentLoginMarkerIfAddressChanged = (
+  activeAddress: string | null
+): void => {
+  const agentLoginAddress = safeLocalStorage.getItem(
+    AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY
+  );
+  if (!agentLoginAddress) {
+    return;
+  }
+
+  if (
+    !activeAddress ||
+    normalizeAddress(agentLoginAddress) !== normalizeAddress(activeAddress)
+  ) {
+    safeLocalStorage.removeItem(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY);
+  }
+};
 
 export const isAuthAddressAuthorized = ({
   address,
@@ -288,6 +317,7 @@ const persistAccountsWithActive = (
 ): void => {
   writeAccountsToStorage(accounts);
   setActiveAddressInStorage(activeAddress);
+  clearAgentLoginMarkerIfAddressChanged(activeAddress);
 
   const activeAccount =
     activeAddress === null
@@ -442,6 +472,33 @@ export const hasActiveSessionV2Auth = ({
     storedAccount?.authSessionVersion === "v2" &&
     normalizeAddress(storedAccount.address) === normalizedAddress
   );
+};
+
+export const setAgentLoginActiveAddress = (address: string): void => {
+  safeLocalStorage.setItem(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY, address);
+};
+
+export const clearAgentLoginActiveAddress = (): void => {
+  safeLocalStorage.removeItem(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY);
+};
+
+export const getAgentLoginActiveAddress = (): string | null => {
+  const agentLoginAddress = safeLocalStorage.getItem(
+    AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY
+  );
+  if (!agentLoginAddress) {
+    return null;
+  }
+
+  const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
+  if (
+    activeAccount?.authSessionVersion !== "v2" ||
+    normalizeAddress(activeAccount.address) !== normalizeAddress(agentLoginAddress)
+  ) {
+    return null;
+  }
+
+  return activeAccount.address;
 };
 
 export const getRefreshToken = () => {

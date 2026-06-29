@@ -73,6 +73,8 @@ jest.mock("@/hooks/useUnreadNotifications", () => ({
 jest.mock("@/services/auth/auth.utils", () => ({
   WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
   canStoreAnotherWalletAccount: jest.fn(() => true),
+  clearAgentLoginActiveAddress: jest.fn(),
+  getAgentLoginActiveAddress: jest.fn(() => null),
   getConnectedWalletAccounts: jest.fn(() => [
     {
       address: ACTIVE_ADDRESS,
