@@ -81,6 +81,30 @@ describe("About contents dropdown", () => {
     expect(screen.getAllByText("Subscriptions").length).toBeGreaterThan(0);
   });
 
+  it("shows only the current page in the sticky trigger", async () => {
+    await renderAboutSection(AboutSection.PRIMARY_ADDRESS);
+
+    const trigger = screen.getByRole("button", {
+      name: /open about contents navigation/i,
+    });
+
+    expect(trigger).toHaveTextContent("Primary Address");
+    expect(trigger).not.toHaveTextContent("Contents");
+  });
+
+  it("separates dropdown items by category", async () => {
+    country = "US";
+    await renderAboutSection(AboutSection.MEMES);
+
+    openContentsMenu();
+
+    expect(screen.getByText("Collections")).toBeInTheDocument();
+    expect(screen.getByText("Delegation")).toBeInTheDocument();
+    expect(screen.getByText("Resources")).toBeInTheDocument();
+    expect(screen.getByText("Community")).toBeInTheDocument();
+    expect(screen.getByText("Legal")).toBeInTheDocument();
+  });
+
   it("does not link to retired release notes page", async () => {
     country = "US";
     await renderAboutSection(AboutSection.MEMES);
@@ -98,6 +122,16 @@ describe("About contents dropdown", () => {
     expect(
       screen.getByRole("menuitem", { name: /go to about page: cookie policy/i })
     ).toHaveAttribute("href", "/about/cookie-policy");
+  });
+
+  it("uses dropdown item styling without link underlines", async () => {
+    country = "US";
+    await renderAboutSection(AboutSection.MEMES);
+    openContentsMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: /go to about page: cookie policy/i })
+    ).toHaveClass("!tw-no-underline");
   });
 
   it("marks tech as current on deeper tech routes", async () => {

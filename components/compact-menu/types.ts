@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import type { MenuItemsProps } from "@headlessui/react";
 
-export interface CompactMenuItem {
+export interface CompactMenuActionItem {
   readonly id: string;
+  readonly kind?: "item" | undefined;
   readonly label: ReactNode;
   readonly icon?: ReactNode | undefined;
   readonly href?: string | undefined;
@@ -15,6 +16,15 @@ export interface CompactMenuItem {
   readonly ariaSelected?: boolean | undefined;
   readonly ariaLabel?: string | undefined;
 }
+
+export interface CompactMenuSectionItem {
+  readonly id: string;
+  readonly kind: "section";
+  readonly label: ReactNode;
+  readonly className?: string | undefined;
+}
+
+export type CompactMenuItem = CompactMenuActionItem | CompactMenuSectionItem;
 
 export interface CompactMenuProps {
   readonly trigger:

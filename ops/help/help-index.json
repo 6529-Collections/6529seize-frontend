@@ -47,6 +47,47 @@
       ]
     },
     {
+      "id": "about.index",
+      "kind": "route",
+      "title": "About 6529 index",
+      "aliases": [
+        "about",
+        "about 6529",
+        "about pages",
+        "about index",
+        "contents",
+        "about navigation"
+      ],
+      "keywords": [
+        "about",
+        "contents",
+        "navigation",
+        "collections",
+        "delegation",
+        "resources",
+        "community",
+        "legal"
+      ],
+      "facts": [
+        "The About index page lives at /about.",
+        "It groups About pages into Collections, Delegation, Resources, Community, and Legal link cards.",
+        "Use the About index when users want to browse all About pages or find the right policy, collection, delegation, resource, community, or technical page."
+      ],
+      "canonical_path": "/about",
+      "related_paths": [
+        "/about/the-memes",
+        "/about/faq",
+        "/about/tech",
+        "/about/terms-of-service"
+      ],
+      "tags": ["about", "navigation", "getting-started"],
+      "source_refs": [
+        "app/about/page.tsx",
+        "components/about/AboutIndex.tsx",
+        "components/about/about.routes.ts"
+      ]
+    },
+    {
       "id": "about.faq",
       "kind": "route",
       "title": "6529 FAQ",
