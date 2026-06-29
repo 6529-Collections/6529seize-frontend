@@ -9,11 +9,7 @@ import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import {
-  formatAddress,
-  getTimeAgoShort,
-  isValidEthAddress,
-} from "@/helpers/Helpers";
+import { formatAddress, isValidEthAddress } from "@/helpers/Helpers";
 import {
   getMessagePathRoute,
   getMessagesBaseRoute,
@@ -23,7 +19,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useWaveData } from "@/hooks/useWaveData";
-import { formatInteger } from "@/i18n/format";
+import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getDropQueryKey } from "@/services/api/drop-api";
@@ -139,6 +135,44 @@ const getQuickDmLatestMessageTimestamp = (wave: MinimalWave): number | null => {
   return timestamp !== null && timestamp > 0 && Number.isFinite(timestamp)
     ? timestamp
     : null;
+};
+
+const getQuickDmTimeLabel = ({
+  locale,
+  referenceTime = Date.now(),
+  timestamp,
+}: {
+  readonly locale: SupportedLocale;
+  readonly referenceTime?: number;
+  readonly timestamp: number;
+}): string => {
+  const timeDifference = referenceTime - timestamp;
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 1) {
+    return formatDate(locale, timestamp, { month: "short", day: "numeric" });
+  }
+
+  if (days === 1) {
+    return t(locale, "quickDm.timeYesterday");
+  }
+
+  if (hours > 0) {
+    return t(locale, "quickDm.timeHours", {
+      count: formatInteger(locale, hours),
+    });
+  }
+
+  if (minutes > 0) {
+    return t(locale, "quickDm.timeMinutes", {
+      count: formatInteger(locale, minutes),
+    });
+  }
+
+  return t(locale, "quickDm.timeJustNow");
 };
 
 const getQuickDmScoreLabel = (
@@ -414,7 +448,7 @@ const QuickDmConversationRow = ({
   const timeLabel =
     latestMessageTimestamp === null
       ? t(locale, "quickDm.noMessagesYet")
-      : getTimeAgoShort(latestMessageTimestamp);
+      : getQuickDmTimeLabel({ locale, timestamp: latestMessageTimestamp });
   const scoreLabel = getQuickDmScoreLabel(wave, locale);
   const rowAriaLabel = getQuickDmConversationAriaLabel({
     locale,
