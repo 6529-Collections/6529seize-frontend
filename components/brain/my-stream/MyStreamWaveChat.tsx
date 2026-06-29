@@ -18,11 +18,13 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import { t } from "@/i18n/messages";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -62,6 +64,7 @@ interface MyStreamWaveChatProps {
   readonly chatSubmitDrop?: ChatSubmitDropState | null | undefined;
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
   readonly onCloseChatSubmitDrop?: (() => void) | undefined;
+  readonly waveViewStyleOverride?: React.CSSProperties | undefined;
 }
 
 interface WaveChatLeaveHandlerProps {
@@ -99,6 +102,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   chatSubmitDrop = null,
   chatSubmitDropAction = null,
   onCloseChatSubmitDrop,
+  waveViewStyleOverride,
 }) => {
   const router = useRouter();
   const { fetchAroundSerialNo } = useMyStream();
@@ -111,6 +115,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const { connectedProfile, setToast } = useAuth();
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const [isDragDropActive, setIsDragDropActive] = useState(false);
   const [externalAttachmentDrop, setExternalAttachmentDrop] = useState<{
     readonly token: number;
@@ -215,6 +220,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   }, [initialDropState, pathname, router, searchParams, viewMode]);
 
   const { waveViewStyle } = useLayout();
+  const effectiveWaveViewStyle = waveViewStyleOverride ?? waveViewStyle;
 
   const containerClassName = useMemo(() => {
     const baseStyles =
@@ -413,7 +419,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       <div
         ref={galleryContainerRef}
         className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden"
-        style={waveViewStyle}
+        style={effectiveWaveViewStyle}
       >
         <WaveGallery wave={wave} onDropClick={onDropClick} />
       </div>
@@ -431,8 +437,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       />
       <section
         className={`${containerClassName} tw-relative`}
-        style={waveViewStyle}
-        aria-label="Wave chat file upload area"
+        style={effectiveWaveViewStyle}
+        aria-label={t(locale, "waves.chat.fileUploadAreaAriaLabel")}
         onDragEnter={onContainerDragEnter}
         onDragOver={onContainerDragOver}
         onDragLeave={onContainerDragLeave}
