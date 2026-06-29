@@ -322,6 +322,9 @@ export default function CommunityMembers() {
   const hasCustomSort =
     params.sort !== defaultSortBy ||
     params.sort_direction !== defaultSortDirection;
+  const hasMemberContent = Boolean(members?.data.length);
+  const showMembersSkeleton =
+    !hasMemberContent && (isLoading || isFetching || !members);
 
   return (
     <div>
@@ -368,7 +371,9 @@ export default function CommunityMembers() {
         </div>
       </div>
       <div className="tailwind-scope tw-mt-2 tw-flow-root lg:tw-mt-3">
-        {members ? (
+        {showMembersSkeleton ? (
+          <CommunityMembersTableSkeleton />
+        ) : members ? (
           <>
             <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
               <CommunityMembersTable
@@ -392,9 +397,7 @@ export default function CommunityMembers() {
               />
             )}
           </>
-        ) : (
-          <CommunityMembersTableSkeleton />
-        )}
+        ) : null}
       </div>
 
       <MobileWrapperDialog
