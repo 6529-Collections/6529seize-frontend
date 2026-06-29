@@ -15,6 +15,27 @@ describe("fetchTwitterPreview", () => {
       json: async () => body,
     }) as Response;
 
+  const createDeferred = <T>() => {
+    let resolve!: (value: T) => void;
+    let reject!: (reason?: unknown) => void;
+    const promise = new Promise<T>((promiseResolve, promiseReject) => {
+      resolve = promiseResolve;
+      reject = promiseReject;
+    });
+
+    return { promise, resolve, reject };
+  };
+
+  const waitForFetchCalls = async (count: number): Promise<void> => {
+    for (
+      let attempts = 0;
+      attempts < 20 && fetchMock.mock.calls.length < count;
+      attempts += 1
+    ) {
+      await Promise.resolve();
+    }
+  };
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.resetModules();
@@ -122,6 +143,66 @@ describe("fetchTwitterPreview", () => {
     );
   });
 
+  it("limits active POST chunks and starts queued chunks after completion", async () => {
+    const urls = Array.from(
+      { length: 11 },
+      (_value, index) => `https://x.com/user/status/${5000 + index}`
+    );
+    const previews = urls.map(
+      (url, index): TweetPreview => ({
+        tweetId: `${5000 + index}`,
+        url,
+        text: `Post ${index + 1}`,
+      })
+    );
+    const batchBody = (start: number, end: number) => ({
+      results: Object.fromEntries(
+        urls.slice(start, end).map((url, index) => [
+          url,
+          previews[start + index],
+        ])
+      ),
+      errors: {},
+    });
+    const firstBatch = createDeferred<Response>();
+    const secondBatch = createDeferred<Response>();
+    fetchMock
+      .mockReturnValueOnce(firstBatch.promise)
+      .mockReturnValueOnce(secondBatch.promise)
+      .mockResolvedValueOnce(createResponse(batchBody(10, 11)));
+
+    const { fetchTwitterPreview } = await loadApi();
+    const requests = urls.map((url) => fetchTwitterPreview(url));
+
+    jest.runOnlyPendingTimers();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: urls.slice(0, 5) }),
+      })
+    );
+    expect(fetchMock.mock.calls[1]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: urls.slice(5, 10) }),
+      })
+    );
+
+    firstBatch.resolve(createResponse(batchBody(0, 5)));
+    await waitForFetchCalls(3);
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[2]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: urls.slice(10, 11) }),
+      })
+    );
+
+    secondBatch.resolve(createResponse(batchBody(5, 10)));
+
+    await expect(Promise.all(requests)).resolves.toEqual(previews);
+  });
+
   it("shares one pending promise for duplicate tweet IDs", async () => {
     const firstUrl = "https://x.com/first/status/1001";
     const secondUrl = "https://twitter.com/second/status/1001";
@@ -199,6 +280,45 @@ describe("fetchTwitterPreview", () => {
     await expect(bad).rejects.toThrow("Invalid Twitter/X status URL.");
 
     const retry = fetchTwitterPreview(badUrl);
+    jest.runOnlyPendingTimers();
+
+    await expect(retry).resolves.toEqual(retryPreview);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects and clears cache when the batch omits the requested URL", async () => {
+    const url = "https://x.com/missing/status/2003";
+    const retryPreview: TweetPreview = {
+      tweetId: "2003",
+      url,
+      text: "Recovered post",
+    };
+    fetchMock
+      .mockResolvedValueOnce(
+        createResponse({
+          results: {},
+          errors: {},
+        })
+      )
+      .mockResolvedValueOnce(
+        createResponse({
+          results: {
+            [url]: retryPreview,
+          },
+          errors: {},
+        })
+      );
+
+    const { fetchTwitterPreview } = await loadApi();
+    const request = fetchTwitterPreview(url);
+
+    jest.runOnlyPendingTimers();
+
+    await expect(request).rejects.toThrow(
+      "Failed to fetch Twitter/X preview metadata."
+    );
+
+    const retry = fetchTwitterPreview(url);
     jest.runOnlyPendingTimers();
 
     await expect(retry).resolves.toEqual(retryPreview);

@@ -51,8 +51,8 @@ const createBatchRecords = (
   readonly results: Record<string, TweetPreview>;
   readonly errors: Record<string, string>;
 } => {
-  const results = Object.create(null) as Record<string, TweetPreview>;
-  const errors = Object.create(null) as Record<string, string>;
+  const results: Record<string, TweetPreview> = {};
+  const errors: Record<string, string> = {};
 
   for (const item of items) {
     if ("preview" in item) {

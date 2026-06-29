@@ -278,10 +278,7 @@ const processQueuedBatchChunks = (): void => {
       processQueuedBatchChunks();
     };
 
-    void resolveBatchChunkSafely(chunk).then(
-      handleChunkCompletion,
-      handleChunkCompletion
-    );
+    void resolveBatchChunkSafely(chunk).finally(handleChunkCompletion);
   }
 };
 
@@ -346,6 +343,7 @@ const queueTwitterPreviewRequest = (
     resolve: resolveRequest,
     reject: rejectRequest,
   });
+  twitterPreviewCache.set(cacheKey, promise);
   scheduleBatchFlush();
 
   return promise;
@@ -363,8 +361,5 @@ export const fetchTwitterPreview = (url: string): Promise<TweetPreview> => {
     return cachedResponse;
   }
 
-  const requestPromise = queueTwitterPreviewRequest(normalizedUrl, cacheKey);
-  twitterPreviewCache.set(cacheKey, requestPromise);
-
-  return requestPromise;
+  return queueTwitterPreviewRequest(normalizedUrl, cacheKey);
 };
