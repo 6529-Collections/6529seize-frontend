@@ -50,16 +50,22 @@ const openContentsMenu = () => {
   );
 };
 
+const renderAboutSection = async (section: AboutSection) => {
+  const props: Parameters<typeof AboutPage>[0] = {
+    params: Promise.resolve({ section }),
+  };
+  const element = await AboutPage(props);
+
+  render(element, { wrapper: Wrapper });
+};
+
 describe("About contents dropdown", () => {
   beforeEach(() => {
     country = "DE";
   });
 
   it("hides subscriptions row when iOS users are not in the US", async () => {
-    const element = await AboutPage({
-      params: Promise.resolve({ section: AboutSection.MEMES }),
-    } as any);
-    render(element, { wrapper: Wrapper });
+    await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
 
@@ -68,10 +74,7 @@ describe("About contents dropdown", () => {
 
   it("shows subscriptions row for iOS users in the US", async () => {
     country = "US";
-    const element = await AboutPage({
-      params: Promise.resolve({ section: AboutSection.MEMES }),
-    } as any);
-    render(element, { wrapper: Wrapper });
+    await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
 
@@ -80,11 +83,7 @@ describe("About contents dropdown", () => {
 
   it("does not link to retired release notes page", async () => {
     country = "US";
-    const element = await AboutPage({
-      params: Promise.resolve({ section: AboutSection.MEMES }),
-    } as any);
-
-    render(element, { wrapper: Wrapper });
+    await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
 
@@ -93,11 +92,7 @@ describe("About contents dropdown", () => {
 
   it("keeps cookie policy reachable from the contents menu", async () => {
     country = "US";
-    const element = await AboutPage({
-      params: Promise.resolve({ section: AboutSection.MEMES }),
-    } as any);
-
-    render(element, { wrapper: Wrapper });
+    await renderAboutSection(AboutSection.MEMES);
     openContentsMenu();
 
     expect(
@@ -107,11 +102,7 @@ describe("About contents dropdown", () => {
 
   it("marks tech as current on deeper tech routes", async () => {
     country = "US";
-    const element = await AboutPage({
-      params: Promise.resolve({ section: AboutSection.TECH }),
-    } as any);
-
-    render(element, { wrapper: Wrapper });
+    await renderAboutSection(AboutSection.TECH);
     openContentsMenu();
 
     expect(
