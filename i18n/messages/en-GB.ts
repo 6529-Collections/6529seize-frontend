@@ -75,16 +75,6 @@ export const EN_GB_MESSAGES = {
   "quickDm.showAll": "Show all",
   "quickDm.openConversation": "Open conversation",
   "quickDm.openConversationAriaLabel": "Open conversation with {name}",
-  "quickDm.openConversationMetaAriaLabel":
-    "Open conversation with {name}. Last message {time}. Wave score {score}",
-  "quickDm.openConversationTimeAriaLabel":
-    "Open conversation with {name}. Last message {time}",
-  "quickDm.scoreLabel": "Wave score {score}",
-  "quickDm.noMessagesYet": "No messages yet",
-  "quickDm.timeJustNow": "Just now",
-  "quickDm.timeYesterday": "Yesterday",
-  "quickDm.timeMinutes": "{count}m",
-  "quickDm.timeHours": "{count}h",
   "quickDm.emptyTitle": "No direct messages yet",
   "quickDm.loadingStatus": "Loading direct messages",
   "quickDm.chatLoadError": "Unable to load this conversation.",

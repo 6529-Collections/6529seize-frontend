@@ -75,16 +75,6 @@ export const DE_DE_MESSAGES = {
   "quickDm.showAll": "Alle anzeigen",
   "quickDm.openConversation": "Konversation öffnen",
   "quickDm.openConversationAriaLabel": "Konversation mit {name} öffnen",
-  "quickDm.openConversationMetaAriaLabel":
-    "Konversation mit {name} öffnen. Letzte Nachricht {time}. Wave-Score {score}",
-  "quickDm.openConversationTimeAriaLabel":
-    "Konversation mit {name} öffnen. Letzte Nachricht {time}",
-  "quickDm.scoreLabel": "Wave-Score {score}",
-  "quickDm.noMessagesYet": "Noch keine Nachrichten",
-  "quickDm.timeJustNow": "Gerade eben",
-  "quickDm.timeYesterday": "Gestern",
-  "quickDm.timeMinutes": "{count} Min.",
-  "quickDm.timeHours": "{count} Std.",
   "quickDm.emptyTitle": "Noch keine Direktnachrichten",
   "quickDm.loadingStatus": "Direktnachrichten werden geladen",
   "quickDm.chatLoadError": "Diese Konversation konnte nicht geladen werden.",
