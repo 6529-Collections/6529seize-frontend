@@ -106,6 +106,7 @@ describe("About contents dropdown", () => {
     expect(screen.getByText("Resources")).toBeInTheDocument();
     expect(screen.getByText("Community")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
+    expect(screen.queryByText("Mission")).toBeNull();
   });
 
   it("does not link to retired release notes page", async () => {

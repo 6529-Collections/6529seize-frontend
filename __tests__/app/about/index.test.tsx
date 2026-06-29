@@ -47,9 +47,7 @@ describe("About index page", () => {
     expect(
       screen.getByRole("link", { name: /open page: the memes/i })
     ).toHaveAttribute("href", "/about/the-memes");
-    expect(
-      screen.getByRole("link", { name: /open page: mission/i })
-    ).toHaveAttribute("href", "/about/mission");
+    expect(screen.queryByRole("link", { name: /mission/i })).toBeNull();
     expect(
       screen.getByRole("link", { name: /open page: tdh/i })
     ).toHaveAttribute("href", "/network/tdh");

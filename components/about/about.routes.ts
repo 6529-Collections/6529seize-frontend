@@ -39,11 +39,6 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     labelKey: "about.contents.groups.collections",
     items: [
       {
-        section: AboutSection.MISSION,
-        labelKey: "about.contents.pages.mission",
-        descriptionKey: "about.contents.descriptions.mission",
-      },
-      {
         section: AboutSection.MEMES,
         labelKey: "about.contents.pages.theMemes",
         descriptionKey: "about.contents.descriptions.theMemes",
@@ -221,7 +216,6 @@ const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>([
   ...ABOUT_CONTENTS_NAV_ITEMS.map((item) =>
     "section" in item ? ([item.section, item.labelKey] as const) : undefined
   ).filter((item): item is readonly [AboutSection, MessageKey] => !!item),
-  [AboutSection.MISSION, "about.contents.pages.mission"],
 ]);
 
 const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
