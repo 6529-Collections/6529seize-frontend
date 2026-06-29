@@ -1,3 +1,4 @@
+import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
@@ -72,16 +73,7 @@ export const FR_FR_MESSAGES = {
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votes",
   "memes.waveFooter.uncastPower.votesVisible": "votes",
-  "drops.reactions.rateLimit.retryAfter.moment":
-    "Vous réagissez trop vite. Réessayez dans un instant.",
-  "drops.reactions.rateLimit.retryAfter.seconds.one":
-    "Vous réagissez trop vite. Réessayez dans {count} seconde.",
-  "drops.reactions.rateLimit.retryAfter.seconds.other":
-    "Vous réagissez trop vite. Réessayez dans {count} secondes.",
-  "drops.reactions.rateLimit.retryAfter.minutes.one":
-    "Vous réagissez trop vite. Réessayez dans {count} minute.",
-  "drops.reactions.rateLimit.retryAfter.minutes.other":
-    "Vous réagissez trop vite. Réessayez dans {count} minutes.",
+  ...FR_FR_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Flux Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
   "theMemes.documentTitle": "The Memes | Collections",

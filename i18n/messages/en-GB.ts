@@ -70,16 +70,6 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votes",
   "memes.waveFooter.uncastPower.votesVisible": "votes",
-  "drops.reactions.rateLimit.retryAfter.moment":
-    "You are reacting too quickly. Try again in a moment.",
-  "drops.reactions.rateLimit.retryAfter.seconds.one":
-    "You are reacting too quickly. Try again in {count} second.",
-  "drops.reactions.rateLimit.retryAfter.seconds.other":
-    "You are reacting too quickly. Try again in {count} seconds.",
-  "drops.reactions.rateLimit.retryAfter.minutes.one":
-    "You are reacting too quickly. Try again in {count} minute.",
-  "drops.reactions.rateLimit.retryAfter.minutes.other":
-    "You are reacting too quickly. Try again in {count} minutes.",
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
   "theMemes.documentTitle": "The Memes | Collections",

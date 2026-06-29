@@ -1,3 +1,4 @@
+import { ES_ES_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
@@ -70,16 +71,7 @@ export const ES_ES_MESSAGES = {
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votos",
   "memes.waveFooter.uncastPower.votesVisible": "votos",
-  "drops.reactions.rateLimit.retryAfter.moment":
-    "Estás reaccionando demasiado rápido. Inténtalo de nuevo en un momento.",
-  "drops.reactions.rateLimit.retryAfter.seconds.one":
-    "Estás reaccionando demasiado rápido. Inténtalo de nuevo en {count} segundo.",
-  "drops.reactions.rateLimit.retryAfter.seconds.other":
-    "Estás reaccionando demasiado rápido. Inténtalo de nuevo en {count} segundos.",
-  "drops.reactions.rateLimit.retryAfter.minutes.one":
-    "Estás reaccionando demasiado rápido. Inténtalo de nuevo en {count} minuto.",
-  "drops.reactions.rateLimit.retryAfter.minutes.other":
-    "Estás reaccionando demasiado rápido. Inténtalo de nuevo en {count} minutos.",
+  ...ES_ES_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Feed de Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops destacados de profile waves",
   "theMemes.documentTitle": "The Memes | Colecciones",
