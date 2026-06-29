@@ -107,6 +107,8 @@ export function useWaves({
     queryKey: [QueryKey.WAVES_PUBLIC, debouncedParams],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const queryParams: Record<string, string> = {};
+      queryParams["limit"] = `${limit}`;
+
       if (typeof pageParam === "number") {
         queryParams["serial_no_less_than"] = `${pageParam}`;
       }
@@ -120,7 +122,7 @@ export function useWaves({
         queryParams["direct_message"] = `${debouncedParams.direct_message}`;
       }
       return await commonApiFetch<ApiWave[]>({
-        endpoint: `waves-public`,
+        endpoint: `waves`,
         params: queryParams,
       });
     },

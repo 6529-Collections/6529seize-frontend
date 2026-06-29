@@ -86,6 +86,30 @@ describe("useWaves", () => {
     expect(result.current).toHaveProperty("isFetchingNextPage");
   });
 
+  it("fetches logged-out wave search from the documented waves endpoint", async () => {
+    renderHook(
+      () =>
+        useWaves({
+          identity: null,
+          waveName: "memes",
+          limit: 20,
+          directMessage: false,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(commonApiFetchMock).toHaveBeenCalledWith({
+        endpoint: "waves",
+        params: {
+          limit: "20",
+          name: "memes",
+          direct_message: "false",
+        },
+      });
+    });
+  });
+
   it("does not fetch public or private waves while a connected wallet lacks valid auth", async () => {
     useSeizeConnectContextMock.mockReturnValue({
       address: "0xABC",

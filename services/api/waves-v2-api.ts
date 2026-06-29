@@ -378,18 +378,16 @@ async function searchWavesV2ByName({
 }
 
 async function searchLegacyWavesByName({
-  endpoint,
   name,
   pageSize,
   headers,
 }: {
-  readonly endpoint: "waves" | "waves-public";
   readonly name: string;
   readonly pageSize: number;
   readonly headers?: Record<string, string> | undefined;
 }): Promise<SidebarWave[]> {
   const waves = await commonApiFetch<ApiWave[]>({
-    endpoint,
+    endpoint: "waves",
     params: {
       name,
       limit: `${pageSize}`,
@@ -436,24 +434,6 @@ export async function searchWavesByName({
 
   try {
     const waves = await searchLegacyWavesByName({
-      endpoint: "waves",
-      name,
-      pageSize,
-      headers,
-    });
-    completedSearches += 1;
-    if (waves.length > 0) {
-      return waves;
-    }
-  } catch (error) {
-    failedSearches += 1;
-    firstSearchError ??= error;
-    // Public search is the last fallback for unauthenticated sessions.
-  }
-
-  try {
-    const waves = await searchLegacyWavesByName({
-      endpoint: "waves-public",
       name,
       pageSize,
       headers,
