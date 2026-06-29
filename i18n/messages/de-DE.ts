@@ -70,6 +70,16 @@ export const DE_DE_MESSAGES = {
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Stimmen",
   "memes.waveFooter.uncastPower.votesVisible": "Stimmen",
+  "drops.reactions.rateLimit.retryAfter.moment":
+    "Du reagierst zu schnell. Versuche es gleich erneut.",
+  "drops.reactions.rateLimit.retryAfter.seconds.one":
+    "Du reagierst zu schnell. Versuche es in {count} Sekunde erneut.",
+  "drops.reactions.rateLimit.retryAfter.seconds.other":
+    "Du reagierst zu schnell. Versuche es in {count} Sekunden erneut.",
+  "drops.reactions.rateLimit.retryAfter.minutes.one":
+    "Du reagierst zu schnell. Versuche es in {count} Minute erneut.",
+  "drops.reactions.rateLimit.retryAfter.minutes.other":
+    "Du reagierst zu schnell. Versuche es in {count} Minuten erneut.",
   "waves.mobile.profileFeed.title": "Profile-Waves-Feed",
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
   "theMemes.documentTitle": "The Memes | Sammlungen",

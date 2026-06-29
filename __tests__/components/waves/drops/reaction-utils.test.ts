@@ -189,6 +189,23 @@ describe("getReactionErrorMessage", () => {
     ).toBe("You are reacting too quickly. Try again in 2 seconds.");
   });
 
+  it("localizes rate-limit retry-after messages", () => {
+    const headers = new Headers({ "Retry-After": "3600000" });
+
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          headers,
+          message: "Rate limit exceeded",
+          status: 429,
+          statusText: "Too Many Requests",
+        }),
+        "Error adding reaction",
+        "de-DE"
+      )
+    ).toBe("Du reagierst zu schnell. Versuche es in 60.000 Minuten erneut.");
+  });
+
   it("surfaces the structured status text when the structured body is missing", () => {
     expect(
       getReactionErrorMessage(

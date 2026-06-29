@@ -72,6 +72,16 @@ export const FR_FR_MESSAGES = {
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votes",
   "memes.waveFooter.uncastPower.votesVisible": "votes",
+  "drops.reactions.rateLimit.retryAfter.moment":
+    "Vous réagissez trop vite. Réessayez dans un instant.",
+  "drops.reactions.rateLimit.retryAfter.seconds.one":
+    "Vous réagissez trop vite. Réessayez dans {count} seconde.",
+  "drops.reactions.rateLimit.retryAfter.seconds.other":
+    "Vous réagissez trop vite. Réessayez dans {count} secondes.",
+  "drops.reactions.rateLimit.retryAfter.minutes.one":
+    "Vous réagissez trop vite. Réessayez dans {count} minute.",
+  "drops.reactions.rateLimit.retryAfter.minutes.other":
+    "Vous réagissez trop vite. Réessayez dans {count} minutes.",
   "waves.mobile.profileFeed.title": "Flux Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
