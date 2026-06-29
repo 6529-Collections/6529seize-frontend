@@ -107,6 +107,7 @@ class NonceResponseValidationError extends Error {
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
+  readonly isAuthenticated?: boolean;
   readonly fetchingProfile: boolean;
   readonly connectionStatus: ProfileConnectedStatus;
   readonly receivedProfileProxies: ApiProfileProxy[];
@@ -554,6 +555,7 @@ const runImmediateAuthValidation = async ({
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
+  isAuthenticated: false,
   fetchingProfile: false,
   receivedProfileProxies: [],
   activeProfileProxy: null,
@@ -1800,9 +1802,7 @@ export default function Auth({
     }
     void requestAuth();
   };
-  const onSessionUpgradeLearnMore = (
-    event: MouseEvent<HTMLAnchorElement>
-  ) => {
+  const onSessionUpgradeLearnMore = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     onCancelSignRequest();
     router.push("/about/tech/wallet-authentication");
@@ -1814,6 +1814,9 @@ export default function Auth({
         requestAuth,
         setToast,
         connectedProfile: connectedProfile ?? null,
+        isAuthenticated: Boolean(
+          connectedProfile?.handle && isAddressAuthorized
+        ),
         fetchingProfile,
         receivedProfileProxies,
         activeProfileProxy,
