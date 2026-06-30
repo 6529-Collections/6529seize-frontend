@@ -9,7 +9,13 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplay",
-  () => (props: any) => <div data-testid="media" data-url={props.media_url} />
+  () => (props: any) => (
+    <div
+      data-testid="media"
+      data-url={props.media_url}
+      data-preview-image-url={props.previewImageUrl ?? ""}
+    />
+  )
 );
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes",
@@ -375,6 +381,31 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(screen.getByTestId("identity")).toHaveAttribute(
       "data-variant",
       "condensed"
+    );
+  });
+
+  it("uses preview images for video media when metadata provides one", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={{
+          ...drop,
+          metadata: [
+            {
+              data_key: "additional_media",
+              data_value: JSON.stringify({
+                preview_image: "https://example.com/preview.jpg",
+              }),
+            },
+          ],
+          parts: [{ media: [{ url: "video.mp4", mime_type: "video/mp4" }] }],
+        }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-preview-image-url",
+      "https://example.com/preview.jpg"
     );
   });
 });

@@ -4,9 +4,11 @@ import React, { useRef } from "react";
 import WebBrainLeftSidebarWaves from "./WebBrainLeftSidebarWaves";
 import WebDirectMessagesList from "./WebDirectMessagesList";
 import MemesWaveFooter from "../waves/MemesWaveFooter";
-import MemesQuickVoteDialog from "../waves/memes-quick-vote/MemesQuickVoteDialog";
+import {
+  LazyMemesQuickVoteRuntime,
+  useMemesQuickVoteRuntimeLauncher,
+} from "../waves/memes-quick-vote/MemesQuickVoteRuntimeLoader";
 import { usePathname } from "next/navigation";
-import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 
@@ -28,7 +30,7 @@ interface WebLeftSidebarProps {
 const WebLeftSidebarQuickVoteOwner: React.FC<{
   readonly isCollapsed: boolean;
 }> = ({ isCollapsed }) => {
-  const quickVote = useMemesQuickVoteDialogController();
+  const quickVote = useMemesQuickVoteRuntimeLauncher();
 
   return (
     <>
@@ -39,7 +41,12 @@ const WebLeftSidebarQuickVoteOwner: React.FC<{
           onPrefetchQuickVote={quickVote.prefetchQuickVote}
         />
       </div>
-      <MemesQuickVoteDialog {...quickVote.dialogState} />
+      {quickVote.shouldMountRuntime && quickVote.runtimeIntent && (
+        <LazyMemesQuickVoteRuntime
+          intent={quickVote.runtimeIntent}
+          onIdle={quickVote.resetQuickVoteRuntime}
+        />
+      )}
     </>
   );
 };

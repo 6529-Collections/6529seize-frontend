@@ -86,4 +86,19 @@ describe("useMemesQuickVoteDialogController", () => {
     expect(result.current.quickVoteSessionId).toBe(1);
     expect(retryDiscovery).toHaveBeenCalledTimes(1);
   });
+
+  it("uses a runtime-provided session id when quick vote opens", () => {
+    const { result } = renderHook(() => useMemesQuickVoteDialogController());
+
+    act(() => {
+      result.current.openQuickVote(7);
+    });
+
+    expect(result.current.isQuickVoteOpen).toBe(true);
+    expect(result.current.quickVoteSessionId).toBe(7);
+    expect(useMemesQuickVoteQueueMock).toHaveBeenLastCalledWith({
+      enabled: true,
+      sessionId: 7,
+    });
+  });
 });

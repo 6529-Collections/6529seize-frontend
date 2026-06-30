@@ -97,6 +97,13 @@ interface SeizeConnectContextType {
   seizeConnect: () => void;
 
   /**
+   * Disconnects any live provider wallet before opening the connection modal.
+   * Use this for user-facing "Connect Wallet" actions that should connect a
+   * different authenticated profile.
+   */
+  seizeConnectFresh: () => Promise<void>;
+
+  /**
    * Disconnects the current wallet connection
    * @throws {WalletDisconnectionError} When disconnection fails
    */
@@ -275,6 +282,7 @@ interface AddressValidationResult {
 const normalizeAddress = (address: string): string => address.toLowerCase();
 
 const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
+const CONNECT_AFTER_DISCONNECT_DELAY_MS: number = 100;
 
 const validateStoredAddress = (
   storedAddress: string
@@ -847,6 +855,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     liveConnectedAddress &&
     normalizeAddress(activeAddress) === normalizeAddress(liveConnectedAddress)
   );
+  const activeConnectorType = wagmiAccount.connector?.type;
+  const isActiveAppWalletConnector =
+    activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
 
   const seizeConnect = useCallback((): void => {
     try {
@@ -872,6 +883,46 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       throw connectionError;
     }
   }, [open]);
+
+  const seizeConnectFresh = useCallback(async (): Promise<void> => {
+    const liveConnectedWallet =
+      account.address && account.isConnected && isAddress(account.address)
+        ? getAddress(account.address)
+        : null;
+
+    if (!liveConnectedWallet || isActiveAppWalletConnector) {
+      seizeConnect();
+      return;
+    }
+
+    try {
+      await disconnect();
+    } catch (error: unknown) {
+      const walletError = createWalletError(
+        WalletDisconnectionError,
+        "disconnect wallet before opening connection modal",
+        error
+      );
+      logError("seizeConnectFresh", walletError);
+      throw walletError;
+    }
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, CONNECT_AFTER_DISCONNECT_DELAY_MS);
+    });
+
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    seizeConnect();
+  }, [
+    account.address,
+    account.isConnected,
+    disconnect,
+    isActiveAppWalletConnector,
+    seizeConnect,
+  ]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
     const hasLiveProviderConnection = !!(
@@ -1063,10 +1114,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     return storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
   }, [storedConnectedAccounts]);
 
-  const activeConnectorType = wagmiAccount.connector?.type;
-  const isActiveAppWalletConnector =
-    activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
-
   const seizeAddConnectedAccount = useCallback((): void => {
     const clearAddConnectedAccountGuard = (): void => {
       isAddingConnectedAccountRef.current = false;
@@ -1161,7 +1208,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
               );
               logError("seizeAddConnectedAccount", connectionError);
             }
-          }, 100);
+          }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
         })
         .catch((error: unknown) => {
           clearAddConnectedAccountGuard();
@@ -1305,6 +1352,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       walletIcon: isActiveWalletConnected ? walletInfo?.icon : undefined,
       isSafeWallet: isSafeWalletInfo(walletInfo),
       seizeConnect,
+      seizeConnectFresh,
       seizeDisconnect,
       seizeDisconnectAndLogout,
       seizeDisconnectAndLogoutAll,
@@ -1334,6 +1382,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       walletInfo?.name,
       walletInfo?.icon,
       seizeConnect,
+      seizeConnectFresh,
       seizeDisconnect,
       seizeDisconnectAndLogout,
       seizeDisconnectAndLogoutAll,

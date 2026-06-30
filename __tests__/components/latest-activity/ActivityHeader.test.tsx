@@ -16,17 +16,19 @@ describe("ActivityHeader", () => {
     expect(screen.getByText(/Activity/)).toBeInTheDocument();
   });
 
-  it("renders with correct Bootstrap column classes", () => {
+  it("renders with correct Tailwind layout classes", () => {
     const { container } = render(
       <ActivityHeader showViewAll={false} fetching={false} />
     );
 
-    const colElement = container.firstChild as HTMLElement;
-    expect(colElement).toHaveClass("col-sm-12");
-    expect(colElement).toHaveClass("col-md-6");
-    expect(colElement).toHaveClass("d-flex");
-    expect(colElement).toHaveClass("align-items-center");
-    expect(colElement).toHaveClass("justify-content-between");
+    const wrapper = container.firstElementChild;
+    expect(wrapper).toHaveClass(
+      "tw-flex",
+      "tw-w-full",
+      "tw-items-center",
+      "tw-justify-between",
+      "md:tw-w-1/2"
+    );
   });
 
   describe("when showViewAll is true", () => {
@@ -150,11 +152,13 @@ describe("ActivityHeader", () => {
         <ActivityHeader showViewAll={false} fetching={false} />
       );
 
-      const spanElement = container.querySelector("span.d-flex");
-      expect(spanElement).toHaveClass("d-flex");
-      expect(spanElement).toHaveClass("flex-wrap");
-      expect(spanElement).toHaveClass("align-items-center");
-      expect(spanElement).toHaveClass("gap-3");
+      const spanElement = container.querySelector("span.tw-flex");
+      expect(spanElement).toHaveClass(
+        "tw-flex",
+        "tw-flex-wrap",
+        "tw-items-center",
+        "tw-gap-3"
+      );
     });
 
     it("displays NFT Activity heading text", () => {

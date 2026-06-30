@@ -525,9 +525,7 @@ describe("WaveDropReactions", () => {
     );
 
     const request = createDeferred<unknown>();
-    (commonApi.commonApiPost as jest.Mock).mockReturnValueOnce(
-      request.promise
-    );
+    (commonApi.commonApiPost as jest.Mock).mockReturnValueOnce(request.promise);
 
     render(
       <WaveDropReactions

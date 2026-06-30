@@ -91,15 +91,13 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const { canShowVote } = useDropInteractionRules(drop);
     const canShowVotingAction = canShowVote && !isVotingActionLocked;
     const primaryMedia = drop.parts[0]?.media[0];
-    const isPrimaryMediaVideo = primaryMedia?.mime_type.startsWith("video/");
     const mediaImageScale = isTabletOrSmaller
       ? ImageScale.AUTOx450
       : ImageScale.AUTOx1080;
 
     const previewImageUrl = useMemo(
-      () =>
-        isPrimaryMediaVideo ? null : getDropPreviewImageUrl(drop.metadata),
-      [drop.metadata, isPrimaryMediaVideo]
+      () => getDropPreviewImageUrl(drop.metadata),
+      [drop.metadata]
     );
 
     const isFirstRenderRef = useRef(true);
@@ -228,7 +226,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               </div>
             </div>
             {drop.title && (
-              <h3 className="tw-mb-0 tw-mt-2 tw-min-w-0 tw-whitespace-normal tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
+              <h3 className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-mt-2 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
                 {drop.title}
               </h3>
             )}

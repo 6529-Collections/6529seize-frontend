@@ -668,44 +668,46 @@ export default function MemesQuickVoteDialog({
     };
   }, [onClose]);
 
-  let dialogBody: ReactNode;
+  let dialogBody: ReactNode = null;
 
-  if (isRestartingRound) {
-    dialogBody = <MemesQuickVoteDialogRestartState />;
-  } else if (isExhausted) {
-    dialogBody = (
-      <MemesQuickVoteDialogDoneState
-        description="No unrated memes are left in quick vote right now."
-        onClose={onClose}
-        title="You're all caught up"
-      />
-    );
-  } else if (!activeDrop && hasDiscoveryError) {
-    dialogBody = <MemesQuickVoteDialogErrorState onRetry={retryDiscovery} />;
-  } else if (!activeDrop) {
-    dialogBody = <MemesQuickVoteDialogSkeleton />;
-  } else {
-    const contentResetKey = `${sessionId}:${activeDrop.id}:${isOpen ? "open" : "closed"}`;
-    const preloadedNextDrop = getQuickVotePreloadedNextDrop(isOpen, nextDrop);
+  if (isOpen) {
+    if (isRestartingRound) {
+      dialogBody = <MemesQuickVoteDialogRestartState />;
+    } else if (isExhausted) {
+      dialogBody = (
+        <MemesQuickVoteDialogDoneState
+          description="No unrated memes are left in quick vote right now."
+          onClose={onClose}
+          title="You're all caught up"
+        />
+      );
+    } else if (!activeDrop && hasDiscoveryError) {
+      dialogBody = <MemesQuickVoteDialogErrorState onRetry={retryDiscovery} />;
+    } else if (!activeDrop) {
+      dialogBody = <MemesQuickVoteDialogSkeleton />;
+    } else {
+      const contentResetKey = `${sessionId}:${activeDrop.id}:open`;
+      const preloadedNextDrop = getQuickVotePreloadedNextDrop(isOpen, nextDrop);
 
-    dialogBody = (
-      <MemesQuickVoteDialogContent
-        key={contentResetKey}
-        activeDrop={activeDrop}
-        isMobile={isMobile}
-        leftThisRoundCount={leftThisRoundCount}
-        latestUsedAmount={latestUsedAmount}
-        nextDrop={preloadedNextDrop}
-        onClose={onClose}
-        recentAmounts={recentAmounts}
-        sessionId={sessionId}
-        submitVote={submitVote}
-        skipDrop={skipDrop}
-        uncastPower={uncastPower}
-        unratedCount={unratedCount}
-        votingLabel={votingLabel}
-      />
-    );
+      dialogBody = (
+        <MemesQuickVoteDialogContent
+          key={contentResetKey}
+          activeDrop={activeDrop}
+          isMobile={isMobile}
+          leftThisRoundCount={leftThisRoundCount}
+          latestUsedAmount={latestUsedAmount}
+          nextDrop={preloadedNextDrop}
+          onClose={onClose}
+          recentAmounts={recentAmounts}
+          sessionId={sessionId}
+          submitVote={submitVote}
+          skipDrop={skipDrop}
+          uncastPower={uncastPower}
+          unratedCount={unratedCount}
+          votingLabel={votingLabel}
+        />
+      );
+    }
   }
 
   return (
@@ -715,38 +717,40 @@ export default function MemesQuickVoteDialog({
       className="tailwind-scope tw-fixed tw-inset-0 tw-m-0 tw-h-[100dvh] tw-max-h-[100dvh] tw-w-screen tw-max-w-none tw-overflow-hidden tw-border-none tw-bg-transparent tw-p-0"
       aria-label="Memes quick vote"
     >
-      <div
-        className="tw-flex tw-h-full tw-w-full tw-items-stretch tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] md:tw-items-center md:tw-p-6"
-        onClick={(event) => {
-          if (event.target !== event.currentTarget) {
-            return;
-          }
-
-          onClose();
-        }}
-      >
-        <div className="tw-relative tw-flex tw-h-full tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
-          <button
-            type="button"
-            data-autofocus={
-              !isMobile || showStandaloneStateShellClose ? "true" : undefined
+      {isOpen && (
+        <div
+          className="tw-flex tw-h-full tw-w-full tw-items-stretch tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] md:tw-items-center md:tw-p-6"
+          onClick={(event) => {
+            if (event.target !== event.currentTarget) {
+              return;
             }
-            onClick={onClose}
-            className={`tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-iron-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white md:tw-right-6 md:tw-top-6 ${
-              showStandaloneStateShellClose
-                ? "tw-inline-flex md:tw-inline-flex"
-                : "tw-hidden md:tw-inline-flex"
-            }`}
-            aria-label="Close quick vote"
-          >
-            <XMarkIcon className="tw-size-5 tw-shrink-0" />
-          </button>
 
-          <div className="tw-relative tw-z-10 tw-min-h-0 tw-flex-1 tw-overflow-hidden md:tw-p-0">
-            {dialogBody}
+            onClose();
+          }}
+        >
+          <div className="tw-relative tw-flex tw-h-full tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
+            <button
+              type="button"
+              data-autofocus={
+                !isMobile || showStandaloneStateShellClose ? "true" : undefined
+              }
+              onClick={onClose}
+              className={`tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-iron-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white md:tw-right-6 md:tw-top-6 ${
+                showStandaloneStateShellClose
+                  ? "tw-inline-flex md:tw-inline-flex"
+                  : "tw-hidden md:tw-inline-flex"
+              }`}
+              aria-label="Close quick vote"
+            >
+              <XMarkIcon className="tw-size-5 tw-shrink-0" />
+            </button>
+
+            <div className="tw-relative tw-z-10 tw-min-h-0 tw-flex-1 tw-overflow-hidden md:tw-p-0">
+              {dialogBody}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </dialog>
   );
 }

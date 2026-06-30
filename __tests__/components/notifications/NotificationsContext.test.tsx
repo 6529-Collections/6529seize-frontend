@@ -216,10 +216,7 @@ describe("push registration behavior", () => {
     let registrationErrorCallback: ((error: unknown) => void) | null = null;
 
     PushNotifications.addListener.mockImplementation(
-      (
-        event: string,
-        callback: (arg: unknown) => void | Promise<void>
-      ) => {
+      (event: string, callback: (arg: unknown) => void | Promise<void>) => {
         if (event === "registration") {
           registrationCallback = callback as (token: {
             value: string;
