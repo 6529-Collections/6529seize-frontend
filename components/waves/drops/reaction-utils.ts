@@ -2,6 +2,10 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
+import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 
 type ReactionEntry = {
   reaction: string;
@@ -208,10 +212,12 @@ export const toProfileMin = (
 
 type StructuredReactionError = Error & {
   status?: unknown;
+  headers?: unknown;
   response?: {
     status?: unknown;
     statusText?: unknown;
     body?: unknown;
+    headers?: unknown;
   } | null;
 };
 
@@ -306,14 +312,73 @@ const getStructuredReactionStatus = (
   return null;
 };
 
+type RetryAfterDurationUnit = "seconds" | "minutes";
+
+const RETRY_AFTER_MESSAGE_KEYS = {
+  seconds: {
+    one: "drops.reactions.rateLimit.retryAfter.seconds.one",
+    other: "drops.reactions.rateLimit.retryAfter.seconds.other",
+  },
+  minutes: {
+    one: "drops.reactions.rateLimit.retryAfter.minutes.one",
+    other: "drops.reactions.rateLimit.retryAfter.minutes.other",
+  },
+} as const satisfies Record<
+  RetryAfterDurationUnit,
+  Record<"one" | "other", MessageKey>
+>;
+
+const getRetryAfterMessageKey = (
+  locale: SupportedLocale,
+  unit: RetryAfterDurationUnit,
+  count: number
+): MessageKey => {
+  const pluralCategory = new Intl.PluralRules(locale).select(count);
+
+  return RETRY_AFTER_MESSAGE_KEYS[unit][
+    pluralCategory === "one" ? "one" : "other"
+  ];
+};
+
+const getRetryAfterDurationMessage = (
+  retryAfterMs: number,
+  locale: SupportedLocale
+): string => {
+  const seconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
+  if (seconds < 60) {
+    return t(locale, getRetryAfterMessageKey(locale, "seconds", seconds), {
+      count: formatInteger(locale, seconds),
+    });
+  }
+
+  const minutes = Math.ceil(seconds / 60);
+  return t(locale, getRetryAfterMessageKey(locale, "minutes", minutes), {
+    count: formatInteger(locale, minutes),
+  });
+};
+
+const getRateLimitReactionMessage = (
+  error: StructuredReactionError,
+  locale: SupportedLocale
+): string => {
+  const retryAfterMs = extractRetryAfterMs(error);
+  if (retryAfterMs !== null && retryAfterMs > 0) {
+    return getRetryAfterDurationMessage(retryAfterMs, locale);
+  }
+
+  return t(locale, "drops.reactions.rateLimit.retryAfter.moment");
+};
+
 const getEmptyStructuredReactionStatusMessage = (
-  status: number | null
+  error: StructuredReactionError,
+  status: number | null,
+  locale: SupportedLocale
 ): string | null => {
   switch (status) {
     case 401:
       return "Unauthorized";
     case 429:
-      return "Too Many Requests";
+      return getRateLimitReactionMessage(error, locale);
     case null:
       return null;
     default:
@@ -357,10 +422,16 @@ const getEmptyStructuredReactionFallbackMessage = (
 
 export const getReactionErrorMessage = (
   error: unknown,
-  fallback: string
+  fallback: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): string => {
   if (error !== null && typeof error === "object") {
     const structuredError = error as StructuredReactionError;
+    const structuredStatus = getStructuredReactionStatus(structuredError);
+    if (structuredStatus === 429) {
+      return getRateLimitReactionMessage(structuredError, locale);
+    }
+
     const structuredResponse = structuredError.response;
     if (structuredResponse !== null && structuredResponse !== undefined) {
       const structuredBody = structuredResponse.body;
@@ -375,7 +446,9 @@ export const getReactionErrorMessage = (
     }
 
     const statusMessage = getEmptyStructuredReactionStatusMessage(
-      getStructuredReactionStatus(structuredError)
+      structuredError,
+      structuredStatus,
+      locale
     );
     if (statusMessage) {
       return statusMessage;

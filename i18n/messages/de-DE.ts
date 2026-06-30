@@ -1,3 +1,4 @@
+import { DE_DE_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
@@ -61,8 +62,30 @@ export const DE_DE_MESSAGES = {
   "drop.media.saveDialogTitle": "Bild speichern",
   "drop.media.processingFailed": "Bildverarbeitung fehlgeschlagen.",
   "drop.media.processingTimedOut": "Zeitlimit fuer Bildverarbeitung erreicht.",
+  "quickDm.regionAriaLabel": "Schnelle Direktnachrichten",
+  "quickDm.openButtonAriaLabel": "Schnelle Direktnachrichten öffnen",
+  "quickDm.openButtonUnreadAriaLabel":
+    "Schnelle Direktnachrichten öffnen, {count} ungelesene Nachrichten",
+  "quickDm.openButtonTitle": "Direktnachrichten",
+  "quickDm.listTitle": "Nachrichten",
+  "quickDm.chatTitleFallback": "Nachrichten",
+  "quickDm.closeAriaLabel": "Schnelle Direktnachrichten schließen",
+  "quickDm.backAriaLabel": "Zurück zur Direktnachrichtenliste",
+  "quickDm.openAll": "Alle Nachrichten öffnen",
+  "quickDm.openAllAriaLabel": "Alle Direktnachrichten öffnen",
+  "quickDm.showAll": "Alle anzeigen",
+  "quickDm.openConversation": "Konversation öffnen",
+  "quickDm.openConversationAriaLabel": "Konversation mit {name} öffnen",
+  "quickDm.unreadCountAriaLabel": "{count} ungelesene Nachrichten",
+  "quickDm.unreadPreview": "Neue Nachrichten",
+  "quickDm.noMessagesYet": "Noch keine Nachrichten",
+  "quickDm.emptyTitle": "Noch keine Direktnachrichten",
+  "quickDm.loadingStatus": "Direktnachrichten werden geladen",
+  "quickDm.chatLoadError": "Diese Konversation konnte nicht geladen werden.",
   ...DE_DE_QR_SCANNER_MESSAGES,
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
+  "waves.chat.fileUploadAreaAriaLabel":
+    "Datei-Upload-Bereich für den Wave-Chat",
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
@@ -75,6 +98,7 @@ export const DE_DE_MESSAGES = {
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Stimmen",
   "memes.waveFooter.uncastPower.votesVisible": "Stimmen",
+  ...DE_DE_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Profile-Waves-Feed",
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
   "theMemes.documentTitle": "The Memes | Sammlungen",

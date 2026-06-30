@@ -271,6 +271,19 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
   "uncastPower.votesVisible": "votes",
 } as const);
 
+const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  "rateLimit.retryAfter.moment":
+    "You are reacting too quickly. Try again in a moment.",
+  "rateLimit.retryAfter.seconds.one":
+    "You are reacting too quickly. Try again in {count} second.",
+  "rateLimit.retryAfter.seconds.other":
+    "You are reacting too quickly. Try again in {count} seconds.",
+  "rateLimit.retryAfter.minutes.one":
+    "You are reacting too quickly. Try again in {count} minute.",
+  "rateLimit.retryAfter.minutes.other":
+    "You are reacting too quickly. Try again in {count} minutes.",
+} as const);
+
 const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
   "profileFeed.title": "Profile Waves Feed",
   "profileFeed.subtitle": "Featured drops from profile waves",
@@ -388,10 +401,38 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
 } as const);
 
+const QUICK_DM_MESSAGES = objectMessages("quickDm", {
+  regionAriaLabel: "Quick direct messages",
+  openButtonAriaLabel: "Open quick direct messages",
+  openButtonUnreadAriaLabel:
+    "Open quick direct messages, {count} unread messages",
+  openButtonTitle: "Direct messages",
+  listTitle: "Messages",
+  chatTitleFallback: "Messages",
+  closeAriaLabel: "Close quick direct messages",
+  backAriaLabel: "Back to direct message list",
+  backUnreadAriaLabel: "Back to direct message list, unread messages available",
+  openAll: "Open all messages",
+  openAllAriaLabel: "Open all direct messages",
+  showAll: "Show all",
+  openConversation: "Open conversation",
+  openConversationAriaLabel: "Open conversation with {name}",
+  unreadCountAriaLabel: "{count} unread messages",
+  unreadPreview: "New messages",
+  noMessagesYet: "No messages yet",
+  emptyTitle: "No direct messages yet",
+  loadingStatus: "Loading direct messages",
+  chatLoadError: "Unable to load this conversation.",
+} as const);
+
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
   "postsCount.one": "{count} Post",
   "postsCount.other": "{count} Posts",
+} as const);
+
+const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
+  fileUploadAreaAriaLabel: "Wave chat file upload area",
 } as const);
 
 const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
@@ -1203,6 +1244,8 @@ export const EN_US_MESSAGES = {
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
+  ...QUICK_DM_MESSAGES,
+  ...WAVE_CHAT_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
@@ -1221,6 +1264,7 @@ export const EN_US_MESSAGES = {
   ...NEW_VERSION_TOAST_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
+  ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
 } as const;
 
