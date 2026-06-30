@@ -235,8 +235,9 @@ paths:
       description: >
         V2 wallet session nonce endpoint. Web session challenges derive their
         domain and client origin from the request Origin header and require a
-        configured first-party origin. Native and desktop challenges are
-        selected explicitly and never receive first-party web semantics.
+        configured first-party origin. Native challenges are selected explicitly.
+        Desktop challenges are selected explicitly and require a loopback
+        localhost Origin, which is signed into the challenge.
       operationId: getWalletAuthSessionNonce
       security: []
       parameters:
@@ -257,8 +258,9 @@ paths:
               - desktop
             default: web
           description: >
-            Web challenges require an allowed Origin header. Native and desktop
-            challenges are explicitly requested by refresh-token clients.
+            Web challenges require an allowed Origin header. Desktop challenges
+            require a localhost Origin. Native challenges are explicitly
+            requested by refresh-token clients.
         - name: chain_id
           in: query
           required: false
@@ -289,7 +291,9 @@ paths:
         V2 wallet sessions require structured authentication signatures. Web
         cookie sessions require Session Type first_party_web; native and
         desktop refresh-token sessions require matching Session Type values.
-        External clients should use the non-cookie bearer-token login flow.
+        Desktop sessions also require the signed Client Origin to be a
+        localhost loopback origin. External clients should use the non-cookie
+        bearer-token login flow.
       operationId: createWalletAuthSession
       security: []
       requestBody:
