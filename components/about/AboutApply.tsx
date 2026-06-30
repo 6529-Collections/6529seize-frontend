@@ -1,6 +1,10 @@
 import { faArrowRight, faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 
 export default function AboutApply() {
   const borderBottom = "1px solid rgb(40, 40, 40)";
@@ -11,11 +15,11 @@ export default function AboutApply() {
           <h1>Apply</h1>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <section className="mb-5">
+          <section className="tw-mb-5">
             <h4
-              className="pb-2 mb-4"
+              className="tw-pb-2 tw-mb-4"
               style={{
                 color: "rgb(215, 215, 215)",
                 borderBottom: "1px solid rgb(68, 68, 68)",
@@ -25,25 +29,25 @@ export default function AboutApply() {
             </h4>
 
             <div
-              className="p-4 rounded mb-4"
+              className="tw-p-4 tw-rounded tw-mb-4"
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
               }}
             >
-              <p className="fw-bold mb-3">
+              <p className="tw-font-bold tw-mb-3">
                 There are two ways you can be eligible to submit:
               </p>
-              <ul className="list-unstyled mb-0">
-                <li className="d-flex mb-3">
-                  <span className="text-success me-2">✓</span>
+              <ul className="tw-list-none tw-mb-0">
+                <li className="tw-flex tw-mb-3">
+                  <span className="tw-text-[#198754] tw-mr-2">✓</span>
                   <span>
                     <strong>Previous Meme Artist:</strong> You've previously
                     dropped a Meme Card.
                   </span>
                 </li>
-                <li className="d-flex">
-                  <span className="text-success me-2">✓</span>
+                <li className="tw-flex">
+                  <span className="tw-text-[#198754] tw-mr-2">✓</span>
                   <span>
                     <strong>Community Nomination:</strong> You've been nominated
                     by one or more people giving you at least 50,000
@@ -54,9 +58,9 @@ export default function AboutApply() {
             </div>
           </section>
 
-          <section className="mb-5">
+          <section className="tw-mb-5">
             <h4
-              className="pb-2 mb-4"
+              className="tw-pb-2 tw-mb-4"
               style={{
                 color: "rgb(215, 215, 215)",
                 borderBottom: "1px solid rgb(68, 68, 68)",
@@ -66,19 +70,19 @@ export default function AboutApply() {
             </h4>
 
             <div
-              className="p-4 rounded mb-4"
+              className="tw-p-4 tw-rounded tw-mb-4"
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
               }}
             >
-              <p className="mb-4">
+              <p className="tw-mb-4">
                 Visit the{" "}
                 <a
                   href="https://6529.io/waves/0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="link-info"
+                  className="tw-text-[#0dcaf0]"
                 >
                   The Memes - Seeking Nomination
                 </a>{" "}
@@ -86,15 +90,15 @@ export default function AboutApply() {
                 may then nominate you.
               </p>
 
-              <div className="mb-4 pb-3" style={{ borderBottom: borderBottom }}>
-                <div className="mb-1 fw-bold">Gather Support</div>
+              <div className="tw-mb-4 tw-pb-3" style={{ borderBottom: borderBottom }}>
+                <div className="tw-mb-1 tw-font-bold">Gather Support</div>
                 <div style={{ color: "rgb(154, 154, 154)" }}>
                   Community members nominate you by allocating their
                   MemesNominee rep. You'll need 50,000 rep total to qualify.
                 </div>
               </div>
               <div>
-                <div className="mb-1 fw-bold">Qualify</div>
+                <div className="tw-mb-1 tw-font-bold">Qualify</div>
                 <div style={{ color: "rgb(154, 154, 154)" }}>
                   Once you reach 50,000 rep, you become eligible to submit Meme
                   Cards.
@@ -103,9 +107,9 @@ export default function AboutApply() {
             </div>
           </section>
 
-          <section className="mb-5">
+          <section className="tw-mb-5">
             <h4
-              className="pb-2 mb-4"
+              className="tw-pb-2 tw-mb-4"
               style={{
                 color: "rgb(215, 215, 215)",
                 borderBottom: "1px solid rgb(68, 68, 68)",
@@ -115,22 +119,22 @@ export default function AboutApply() {
             </h4>
 
             <div
-              className="p-4 rounded mb-4"
+              className="tw-p-4 tw-rounded tw-mb-4"
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
               }}
             >
-              <div className="mb-4 pb-3" style={{ borderBottom: borderBottom }}>
-                <div className="mb-1 fw-bold">Three Active Submissions</div>
+              <div className="tw-mb-4 tw-pb-3" style={{ borderBottom: borderBottom }}>
+                <div className="tw-mb-1 tw-font-bold">Three Active Submissions</div>
                 <div style={{ color: "rgb(154, 154, 154)" }}>
                   You can have up to 3 Meme Card designs submitted
                   simultaneously.
                 </div>
               </div>
 
-              <div className="mb-4 pb-3" style={{ borderBottom: borderBottom }}>
-                <div className="mb-1 fw-bold">Replace Submissions</div>
+              <div className="tw-mb-4 tw-pb-3" style={{ borderBottom: borderBottom }}>
+                <div className="tw-mb-1 tw-font-bold">Replace Submissions</div>
                 <div style={{ color: "rgb(154, 154, 154)" }}>
                   If you remove a submission or one of your submissions is
                   selected to be minted, you can submit another card to fill
@@ -139,7 +143,7 @@ export default function AboutApply() {
               </div>
 
               <div>
-                <div className="mb-1 fw-bold">Selection & Scheduling</div>
+                <div className="tw-mb-1 tw-font-bold">Selection & Scheduling</div>
                 <div style={{ color: "rgb(154, 154, 154)" }}>
                   Submitted cards appear on a public leaderboard. Cards are
                   ranked based on community support over the past 24 hours
@@ -147,25 +151,25 @@ export default function AboutApply() {
                   spikes.
                 </div>
                 <div
-                  className="mt-3 p-3 rounded"
+                  className="tw-mt-3 tw-p-3 tw-rounded"
                   style={{
                     backgroundColor: "rgb(20, 20, 20)",
                     border: borderBottom,
                   }}
                 >
                   <div
-                    className="mb-2 fw-bold"
+                    className="tw-mb-2 tw-font-bold"
                     style={{ color: "rgb(215, 215, 215)" }}
                   >
                     <FontAwesomeIcon
                       icon={faCalendar}
                       width={16}
-                      className="me-2"
+                      className="tw-mr-2"
                     />{" "}
                     Checkpoint Schedule
                   </div>
                   <div style={{ color: "rgb(154, 154, 154)" }}>
-                    <div className="d-flex align-items-center mb-1">
+                    <div className="tw-flex tw-items-center tw-mb-1">
                       <span
                         style={{
                           color: "#0dcaf0",
@@ -175,17 +179,17 @@ export default function AboutApply() {
                       >
                         Monday
                       </span>
-                      <span className="ms-2">
+                      <span className="tw-ml-2">
                         17:00 GMT{" "}
                         <FontAwesomeIcon
                           icon={faArrowRight}
                           width={12}
-                          className="mx-1"
+                          className="tw-mx-1"
                         />{" "}
                         minted Wednesday
                       </span>
                     </div>
-                    <div className="d-flex align-items-center mb-1">
+                    <div className="tw-flex tw-items-center tw-mb-1">
                       <span
                         style={{
                           color: "#0dcaf0",
@@ -195,17 +199,17 @@ export default function AboutApply() {
                       >
                         Wednesday
                       </span>
-                      <span className="ms-2">
+                      <span className="tw-ml-2">
                         17:00 GMT{" "}
                         <FontAwesomeIcon
                           icon={faArrowRight}
                           width={12}
-                          className="mx-1"
+                          className="tw-mx-1"
                         />{" "}
                         minted Friday
                       </span>
                     </div>
-                    <div className="d-flex align-items-center">
+                    <div className="tw-flex tw-items-center">
                       <span
                         style={{
                           color: "#0dcaf0",
@@ -215,12 +219,12 @@ export default function AboutApply() {
                       >
                         Friday
                       </span>
-                      <span className="ms-2">
+                      <span className="tw-ml-2">
                         17:00 GMT{" "}
                         <FontAwesomeIcon
                           icon={faArrowRight}
                           width={12}
-                          className="mx-1"
+                          className="tw-mx-1"
                         />{" "}
                         minted Monday
                       </span>
@@ -231,9 +235,9 @@ export default function AboutApply() {
             </div>
           </section>
 
-          <section className="mb-5">
+          <section className="tw-mb-5">
             <h4
-              className="pb-2 mb-4"
+              className="tw-pb-2 tw-mb-4"
               style={{
                 color: "rgb(215, 215, 215)",
                 borderBottom: "1px solid rgb(68, 68, 68)",
@@ -243,19 +247,19 @@ export default function AboutApply() {
             </h4>
 
             <div
-              className="p-4 rounded mb-4"
+              className="tw-p-4 tw-rounded tw-mb-4"
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
               }}
             >
-              <p style={{ color: "rgb(154, 154, 154)" }} className="mb-3">
+              <p style={{ color: "rgb(154, 154, 154)" }} className="tw-mb-3">
                 Carefully read the{" "}
                 <a
                   href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="link-info"
+                  className="tw-text-[#0dcaf0]"
                 >
                   Artist Brief
                 </a>{" "}
@@ -265,43 +269,43 @@ export default function AboutApply() {
                 are unlikely to be chosen.
               </p>
 
-              <p style={{ color: "rgb(154, 154, 154)" }} className="mb-3">
+              <p style={{ color: "rgb(154, 154, 154)" }} className="tw-mb-3">
                 Your Meme Card can be made in any medium — art, photo, video,
                 interactive code, or something more experimental.
               </p>
 
-              <p style={{ color: "rgb(154, 154, 154)" }} className="mb-4">
+              <p style={{ color: "rgb(154, 154, 154)" }} className="tw-mb-4">
                 You're the expert on your art — we're here to help with The
                 Memes style and mission. Sharing drafts or brainstorming early
                 often leads to better outcomes for everyone.
               </p>
 
-              <div className="mt-4 pt-4" style={{ borderTop: borderBottom }}>
+              <div className="tw-mt-4 tw-pt-4" style={{ borderTop: borderBottom }}>
                 <div
-                  className="mb-4 pb-3"
+                  className="tw-mb-4 tw-pb-3"
                   style={{ borderBottom: borderBottom }}
                 >
-                  <div className="mb-1 fw-bold">Need Artistic Feedback?</div>
+                  <div className="tw-mb-1 tw-font-bold">Need Artistic Feedback?</div>
                   <div style={{ color: "rgb(154, 154, 154)" }}>
-                    <span className="text-success me-2">✓</span> DM{" "}
-                    <span className="text-light">@6529er</span>
+                    <span className="tw-text-[#198754] tw-mr-2">✓</span> DM{" "}
+                    <span className="tw-text-[#f8f9fa]">@6529er</span>
                     {", "}
-                    <span className="text-light">@teexels</span>
+                    <span className="tw-text-[#f8f9fa]">@teexels</span>
                     {", and "}
-                    <span className="text-light">@darrensrs</span> into a group
+                    <span className="tw-text-[#f8f9fa]">@darrensrs</span> into a group
                     chat for feedback and creative guidance.
                   </div>
                 </div>
 
                 <div>
-                  <div className="mb-1 fw-bold">General Questions?</div>
+                  <div className="tw-mb-1 tw-font-bold">General Questions?</div>
                   <div style={{ color: "rgb(154, 154, 154)" }}>
                     Visit{" "}
                     <a
                       href="https://6529.io/waves/e2dae377-d27d-4a69-8b77-38d88fad4d01"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link-info"
+                      className="tw-text-[#0dcaf0]"
                     >
                       The Memes - FAQ wave
                     </a>{" "}
@@ -310,20 +314,20 @@ export default function AboutApply() {
                       href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link-info"
+                      className="tw-text-[#0dcaf0]"
                     >
                       Artist Brief
                     </a>
                     {"."}
                   </div>
-                  <div style={{ color: "rgb(154, 154, 154)" }} className="mt-2">
-                    <span className="text-success me-2">✓</span>
+                  <div style={{ color: "rgb(154, 154, 154)" }} className="tw-mt-2">
+                    <span className="tw-text-[#198754] tw-mr-2">✓</span>
                     For other inquiries, email us at{" "}
                     <a
                       href="mailto:collections@6529.io"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link-info"
+                      className="tw-text-[#0dcaf0]"
                     >
                       collections@6529.io
                     </a>
@@ -333,14 +337,14 @@ export default function AboutApply() {
               </div>
 
               <div
-                className="p-3 rounded text-center mt-4"
+                className="tw-p-3 tw-rounded tw-text-center tw-mt-4"
                 style={{
                   backgroundColor: "rgb(20, 20, 20)",
                   border: borderBottom,
                 }}
               >
                 <p
-                  className="mb-0 fst-italic small"
+                  className="tw-mb-0 tw-italic tw-text-sm"
                   style={{ color: "rgb(154, 154, 154)" }}
                 >
                   We receive many messages; thank you for your patience if
