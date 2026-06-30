@@ -71,6 +71,8 @@ export const ES_ES_MESSAGES = {
   "quickDm.chatTitleFallback": "Mensajes",
   "quickDm.closeAriaLabel": "Cerrar mensajes directos rápidos",
   "quickDm.newDirectMessageAriaLabel": "Nuevo mensaje directo",
+  "quickDm.createModalTitle": "Nuevo mensaje directo",
+  "quickDm.createModalCloseAriaLabel": "Cerrar modal de nuevo mensaje directo",
   "quickDm.backAriaLabel": "Volver a la lista de mensajes directos",
   "quickDm.openAll": "Abrir todos los mensajes",
   "quickDm.openAllAriaLabel": "Abrir todos los mensajes directos",

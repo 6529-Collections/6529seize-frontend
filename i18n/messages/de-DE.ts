@@ -71,6 +71,9 @@ export const DE_DE_MESSAGES = {
   "quickDm.chatTitleFallback": "Nachrichten",
   "quickDm.closeAriaLabel": "Schnelle Direktnachrichten schließen",
   "quickDm.newDirectMessageAriaLabel": "Neue Direktnachricht",
+  "quickDm.createModalTitle": "Neue Direktnachricht",
+  "quickDm.createModalCloseAriaLabel":
+    "Modal für neue Direktnachricht schließen",
   "quickDm.backAriaLabel": "Zurück zur Direktnachrichtenliste",
   "quickDm.openAll": "Alle Nachrichten öffnen",
   "quickDm.openAllAriaLabel": "Alle Direktnachrichten öffnen",
