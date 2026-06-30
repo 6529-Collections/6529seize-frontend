@@ -1,4 +1,8 @@
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "@/components/about/AboutLayout";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Link from "next/link";
 
@@ -24,7 +28,7 @@ export default function PdfViewer({ file, name }: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
+    <Container className="tailwind-scope !tw-px-0">
       <Row>
         <Col>
           <iframe

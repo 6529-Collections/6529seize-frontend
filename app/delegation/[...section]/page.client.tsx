@@ -101,7 +101,7 @@ export default function DelegationPageClient(props: {
   }, [addressQuery, collectionQuery, useCaseQuery]);
 
   return (
-    <main className={styles["main"]}>
+    <main className={`${styles["main"]} tailwind-scope`}>
       <DelegationCenterMenu
         section={section}
         path={props.path}

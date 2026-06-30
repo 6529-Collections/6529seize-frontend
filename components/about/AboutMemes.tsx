@@ -1,7 +1,11 @@
 import { AboutSection } from "@/types/enums";
 import Image from "next/image";
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 
 export default function AboutMemes() {
   return (
@@ -11,8 +15,8 @@ export default function AboutMemes() {
           <h1>Memes Are The Most Important Thing In The World</h1>
         </Col>
       </Row>
-      <Row className="pt-2 pb-2">
-        <Col className="pt-3 pb-3 text-center">
+      <Row className="tw-pt-2 tw-pb-2">
+        <Col className="tw-pt-3 tw-pb-3 tw-text-center">
           <Image
             unoptimized
             loading="eager"
@@ -30,7 +34,7 @@ export default function AboutMemes() {
           />
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
           <p>Memes are intersubjective myths.</p>
           <p>

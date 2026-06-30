@@ -1,5 +1,4 @@
 import styles from "@/components/nft-image/NFTImage.module.scss";
-import { Col } from "react-bootstrap";
 import type { Rememe } from "@/entities/INFT";
 import Image from "next/image";
 import { parseIpfsUrl, parseIpfsUrlToGateway } from "@/helpers/Helpers";
@@ -100,10 +99,10 @@ export default function RememeImage(props: Readonly<Props>) {
     getText(props.nft.image).endsWith(".mp4")
   ) {
     return (
-      <Col
+      <div
         className={`${styles["nftAnimation"]} ${
           props.height === 650 ? styles["height650"] : styles["height300"]
-        } d-flex justify-content-center align-items-center`}
+        } tw-flex tw-items-center tw-justify-center`}
       >
         <SeizeVideoPlayer
           id={`${props.nft.contract}-${props.nft.id}`}
@@ -116,15 +115,14 @@ export default function RememeImage(props: Readonly<Props>) {
           layout={props.height === 650 ? "prominent" : "natural"}
           align="center"
         />
-      </Col>
+      </div>
     );
   }
 
   if (!imageFallbackUrls[0]) {
     return (
-      <Col
-        xs={12}
-        className={`mb-2 text-center d-flex align-items-center justify-content-center ${
+      <div
+        className={`tw-mb-2 tw-flex tw-w-full tw-items-center tw-justify-center tw-text-center ${
           styles["imageWrapper"]
         } ${props.height === 300 ? styles["height300"] : ""}`}
       >
@@ -145,14 +143,13 @@ export default function RememeImage(props: Readonly<Props>) {
           alt={imageAlt}
           className={props.height === 650 ? styles["height650"] : ""}
         />
-      </Col>
+      </div>
     );
   }
 
   return (
-    <Col
-      xs={12}
-      className={`mb-2 text-center d-flex align-items-center justify-content-center ${
+    <div
+      className={`tw-mb-2 tw-flex tw-w-full tw-items-center tw-justify-center tw-text-center ${
         styles["imageWrapper"]
       } ${props.height === 300 ? styles["height300"] : ""}`}
     >
@@ -179,6 +176,6 @@ export default function RememeImage(props: Readonly<Props>) {
         alt={imageAlt}
         className={props.height === 650 ? styles["height650"] : ""}
       />
-    </Col>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { Col, Container, Row } from "react-bootstrap";
 import styles from "./Delegation.module.scss";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -17,6 +16,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useEffectEvent, useState } from "react";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
+
 interface Props {
   setSection(section: DelegationCenterSection): any;
 }
@@ -62,20 +62,17 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
 
   function printCollectionSelection() {
     return (
-      <Container className="no-padding">
-        <Row className="pt-4 pb-2">
-          <Col>
+      <div className="tw-w-full tw-p-0">
+        <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4 tw-pb-2">
+          <div className="tw-w-full tw-px-3">
             <h4>Manage by Collection</h4>
-          </Col>
-        </Row>
-        <Row>
+          </div>
+        </div>
+        <div className="tw-flex tw-flex-wrap -tw-mx-3">
           {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
-            <Col
+            <div
               key={c.contract}
-              xs={12}
-              sm={6}
-              md={3}
-              className="pt-2 pb-2 d-flex flex-wrap gap-3"
+              className="tw-flex tw-w-full tw-flex-wrap tw-gap-3 tw-px-3 tw-py-2 sm:tw-w-1/2 md:tw-w-1/4"
             >
               <button
                 key={c.contract}
@@ -98,7 +95,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   }
                 }}
               >
-                <span className="d-flex align-items-center gap-3">
+                <span className="tw-flex tw-items-center tw-gap-3">
                   <Image
                     unoptimized
                     className={styles["collectionSelectionImage"]}
@@ -113,38 +110,36 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   <span>{c.title}</span>
                 </span>
               </button>
-            </Col>
+            </div>
           ))}
-        </Row>
-      </Container>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container>
-      <Row className="pb-2">
-        <Col>
+    <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pb-2">
+        <div className="tw-w-full tw-px-3">
           <h1>Delegation Center</h1>
           <p className={styles["delegationCenterIntro"]}>
             Register wallet relationships for NFT utility and 6529 collection
             metrics. These actions do not transfer NFTs.
           </p>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Container
-            className={`${styles["delegationCenterSection"]} pt-4 pb-4`}
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-w-full tw-px-3">
+          <div
+            className={`${styles["delegationCenterSection"]} tw-py-4`}
           >
-            <Row>
-              <Col
-                sm={12}
-                md={9}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2"
+            <div className="tw-flex tw-flex-wrap -tw-mx-3">
+              <div
+                className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
               >
-                <span className="d-flex flex-column">
-                  <h3 className="pb-4">Delegations</h3>
-                  <span className="d-flex align-items-center gap-3">
+                <span className="tw-flex tw-flex-col">
+                  <h3 className="tw-pb-4">Delegations</h3>
+                  <span className="tw-flex tw-items-center tw-gap-3">
                     <Image
                       unoptimized
                       loading="eager"
@@ -154,7 +149,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                       width={50}
                       height={50}
                     />
-                    <ul className="mb-0">
+                    <ul className="tw-mb-0">
                       <li>
                         Let a hot wallet use NFT utility held by a vault wallet
                       </li>
@@ -162,11 +157,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     </ul>
                   </span>
                 </span>
-              </Col>
-              <Col
-                sm={12}
-                md={3}
-                className="pt-2 pb-2 d-flex flex-column gap-2 align-items-center justify-content-center"
+              </div>
+              <div
+                className="tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-2 md:tw-w-1/4"
               >
                 <button
                   className={`${styles["addNewDelegationBtn"]}`}
@@ -180,25 +173,23 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   />
                   Register Delegation
                 </button>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Container
-            className={`${styles["delegationCenterSection"]} pt-4 pb-4`}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+        <div className="tw-w-full tw-px-3">
+          <div
+            className={`${styles["delegationCenterSection"]} tw-py-4`}
           >
-            <Row>
-              <Col
-                sm={12}
-                md={9}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2"
+            <div className="tw-flex tw-flex-wrap -tw-mx-3">
+              <div
+                className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
               >
-                <span className="d-flex flex-column">
-                  <h3 className="pb-4">Consolidations</h3>
-                  <span className="d-flex align-items-center gap-3">
+                <span className="tw-flex tw-flex-col">
+                  <h3 className="tw-pb-4">Consolidations</h3>
+                  <span className="tw-flex tw-items-center tw-gap-3">
                     <Image
                       unoptimized
                       loading="eager"
@@ -208,7 +199,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                       width={50}
                       height={50}
                     />
-                    <ul className="mb-0">
+                    <ul className="tw-mb-0">
                       <li>
                         Link wallets you control for TDH and collection metrics
                       </li>
@@ -216,11 +207,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     </ul>
                   </span>
                 </span>
-              </Col>
-              <Col
-                sm={12}
-                md={3}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-center"
+              </div>
+              <div
+                className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-py-2 md:tw-w-1/4"
               >
                 <button
                   className={`${styles["addNewDelegationBtn"]}`}
@@ -234,25 +223,23 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   />
                   Register Consolidation
                 </button>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Container
-            className={`${styles["delegationCenterSection"]} pt-4 pb-4`}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+        <div className="tw-w-full tw-px-3">
+          <div
+            className={`${styles["delegationCenterSection"]} tw-py-4`}
           >
-            <Row>
-              <Col
-                sm={12}
-                md={9}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2"
+            <div className="tw-flex tw-flex-wrap -tw-mx-3">
+              <div
+                className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
               >
-                <span className="d-flex flex-column">
-                  <h3 className="pb-4">Delegation Management</h3>
-                  <span className="d-flex align-items-center gap-3">
+                <span className="tw-flex tw-flex-col">
+                  <h3 className="tw-pb-4">Delegation Management</h3>
+                  <span className="tw-flex tw-items-center tw-gap-3">
                     <Image
                       unoptimized
                       loading="eager"
@@ -262,7 +249,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                       width={50}
                       height={50}
                     />
-                    <ul className="mb-0">
+                    <ul className="tw-mb-0">
                       <li>
                         Let one wallet maintain delegations for another wallet
                       </li>
@@ -270,11 +257,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     </ul>
                   </span>
                 </span>
-              </Col>
-              <Col
-                sm={12}
-                md={3}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-center"
+              </div>
+              <div
+                className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-py-2 md:tw-w-1/4"
               >
                 <button
                   className={`${styles["addNewDelegationBtn"]}`}
@@ -288,20 +273,20 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   />
                   Register Delegation Manager
                 </button>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+        <div className="tw-w-full tw-px-3">
           <p className={styles["delegationCenterIntro"]}>
             Manage existing records by collection scope, including locks that
             block incoming delegations.
           </p>
           {printCollectionSelection()}
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
