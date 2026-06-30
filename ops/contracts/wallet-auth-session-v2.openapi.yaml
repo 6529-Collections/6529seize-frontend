@@ -216,18 +216,33 @@ components:
           type: string
           enum: [web]
     SessionNativeResponse:
-      allOf:
-        - $ref: "#/components/schemas/SessionWebResponse"
-        - type: object
-          required: [native_refresh_token, refresh_token_expires_at]
-          properties:
-            client_type:
-              $ref: "#/components/schemas/RefreshTokenClientType"
-            native_refresh_token:
-              type: string
-            refresh_token_expires_at:
-              type: string
-              format: date-time
+      type: object
+      required:
+        - address
+        - access_token
+        - access_token_expires_at
+        - client_type
+        - native_refresh_token
+        - refresh_token_expires_at
+      additionalProperties: false
+      properties:
+        address:
+          $ref: "#/components/schemas/EthereumAddress"
+        role:
+          type: string
+          nullable: true
+        access_token:
+          type: string
+        access_token_expires_at:
+          type: string
+          format: date-time
+        client_type:
+          $ref: "#/components/schemas/RefreshTokenClientType"
+        native_refresh_token:
+          type: string
+        refresh_token_expires_at:
+          type: string
+          format: date-time
     SessionRefreshWebRequest:
       type: object
       required: [client_type]
