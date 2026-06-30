@@ -21,7 +21,10 @@ import { useWaveHasPolls } from "@/hooks/useWaveHasPolls";
 import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import MemesQuickVoteDialog from "./left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
+import {
+  LazyMemesQuickVoteRuntime,
+  useMemesQuickVoteRuntimeLauncher,
+} from "./left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntimeLoader";
 import {
   getActiveWaveIdFromUrl,
   getHomeRoute,
@@ -33,7 +36,6 @@ import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectM
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
-import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import MobileWaveSubwavesBar from "./mobile/MobileWaveSubwavesBar";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
 import { BrainView } from "./mobile/brainMobileViews";
@@ -56,7 +58,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
-  const quickVote = useMemesQuickVoteDialogController();
+  const quickVote = useMemesQuickVoteRuntimeLauncher();
   const hydrated = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -193,12 +195,13 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     return null;
   }, [isApp, searchParams, connectedProfile, closeCreateOverlay]);
 
-  const shouldMountQuickVoteDialog =
-    quickVote.isQuickVoteOpen || activeView === BrainView.WAVES;
-
   const dropOverlayClass = isApp
     ? "tw-fixed tw-inset-0 tw-z-[1010] tw-bg-black tailwind-scope"
     : "tw-absolute tw-inset-0 tw-z-[1010]";
+  const quickVoteRuntimeIntent =
+    activeView === BrainView.WAVES && quickVote.shouldMountRuntime
+      ? quickVote.runtimeIntent
+      : null;
 
   return (
     <div className="tw-relative tw-flex tw-h-full tw-flex-col">
@@ -259,8 +262,11 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           </m.div>
         </AnimatePresence>
       </LazyMotion>
-      {shouldMountQuickVoteDialog && (
-        <MemesQuickVoteDialog {...quickVote.dialogState} />
+      {quickVoteRuntimeIntent === null ? null : (
+        <LazyMemesQuickVoteRuntime
+          intent={quickVoteRuntimeIntent}
+          onIdle={quickVote.resetQuickVoteRuntime}
+        />
       )}
     </div>
   );

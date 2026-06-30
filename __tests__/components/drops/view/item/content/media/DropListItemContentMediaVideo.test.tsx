@@ -62,6 +62,17 @@ describe("DropListItemContentMediaVideo", () => {
     const vid = document.querySelector("video") as HTMLVideoElement;
     expect(vid).toBeTruthy();
     expect(vid.autoplay).toBe(false); // Component uses useEffect for controlled playback
+    expect(mockUseInView).toHaveBeenCalledWith(
+      expect.objectContaining({
+        freezeOnceVisible: false,
+        rootMargin: "400px 0px",
+        threshold: 0.1,
+      })
+    );
+    expect(mockUseOptimizedVideo).toHaveBeenCalledWith(
+      "foo.mp4",
+      expect.objectContaining({ enabled: true })
+    );
   });
 
   it("centers the natural video player when requested", () => {
@@ -81,7 +92,7 @@ describe("DropListItemContentMediaVideo", () => {
     );
   });
 
-  it("renders video even when not in view (but paused)", () => {
+  it("keeps video optimization disabled until the wrapper is in view", () => {
     const ref = {
       current: document.createElement("div"),
     } as React.RefObject<HTMLDivElement>;
@@ -92,7 +103,11 @@ describe("DropListItemContentMediaVideo", () => {
     });
 
     render(<DropListItemContentMediaVideo src="foo.mp4" />);
-    expect(document.querySelector("video")).toBeTruthy(); // Video is still rendered, just paused
+    expect(document.querySelector("video")).toBeTruthy();
+    expect(mockUseOptimizedVideo).toHaveBeenCalledWith(
+      "foo.mp4",
+      expect.objectContaining({ enabled: false })
+    );
   });
 
   it("does not autoplay when disableAutoPlay is true", () => {

@@ -37,42 +37,6 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({ isApp }),
 }));
-jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
-  useMemesQuickVoteDialogController: () => {
-    const React = require("react");
-    const [isQuickVoteOpen, setIsQuickVoteOpen] = React.useState(false);
-    const [quickVoteSessionId, setQuickVoteSessionId] = React.useState(0);
-    const nextSessionIdRef = React.useRef(1);
-    const reservedSessionIdRef = React.useRef(null as number | null);
-    const closeQuickVote = () => setIsQuickVoteOpen(false);
-    const openQuickVote = () => {
-      const sessionId =
-        reservedSessionIdRef.current ?? nextSessionIdRef.current;
-      reservedSessionIdRef.current = null;
-      nextSessionIdRef.current = sessionId + 1;
-      setQuickVoteSessionId(sessionId);
-      setIsQuickVoteOpen(true);
-    };
-    const prefetchQuickVote = () => {
-      if (reservedSessionIdRef.current === null) {
-        reservedSessionIdRef.current = nextSessionIdRef.current;
-      }
-    };
-
-    return {
-      closeQuickVote,
-      dialogState: {
-        isOpen: isQuickVoteOpen,
-        onClose: closeQuickVote,
-        sessionId: quickVoteSessionId,
-      },
-      isQuickVoteOpen,
-      openQuickVote,
-      prefetchQuickVote,
-      quickVoteSessionId,
-    };
-  },
-}));
 
 let dropData: any = null;
 let waveData: any = null;
@@ -173,17 +137,15 @@ jest.mock("@/components/brain/mobile/BrainMobileMessages", () => ({
 
 let mockDialogMountCount = 0;
 jest.mock(
-  "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog",
+  "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntimeLoader",
   () => ({
     __esModule: true,
-    default: ({
-      isOpen,
-      onClose,
-      sessionId,
+    LazyMemesQuickVoteRuntime: ({
+      intent,
+      onIdle,
     }: {
-      readonly isOpen: boolean;
-      readonly sessionId: number;
-      readonly onClose: () => void;
+      readonly intent: { readonly id: number };
+      readonly onIdle: () => void;
     }) => {
       const React = require("react");
 
@@ -191,14 +153,38 @@ jest.mock(
         mockDialogMountCount += 1;
       }, []);
 
-      return isOpen ? (
+      return (
         <div data-testid="quick-vote-dialog">
-          <div>Session {sessionId}</div>
-          <button type="button" onClick={onClose}>
+          <div>Session {intent.id}</div>
+          <button
+            type="button"
+            onClick={() => {
+              onIdle();
+            }}
+          >
             Close Quick Vote
           </button>
         </div>
-      ) : null;
+      );
+    },
+    useMemesQuickVoteRuntimeLauncher: () => {
+      const React = require("react");
+      const [runtimeIntent, setRuntimeIntent] = React.useState(null);
+      const nextIntentIdRef = React.useRef(0);
+
+      return {
+        openQuickVote: () => {
+          nextIntentIdRef.current += 1;
+          setRuntimeIntent({
+            action: "open",
+            id: nextIntentIdRef.current,
+          });
+        },
+        prefetchQuickVote: jest.fn(),
+        resetQuickVoteRuntime: () => setRuntimeIntent(null),
+        runtimeIntent,
+        shouldMountRuntime: runtimeIntent !== null,
+      };
     },
   })
 );
@@ -420,7 +406,7 @@ describe("BrainMobile", () => {
     });
   });
 
-  it("mounts the quick-vote dialog owner on the waves shell", async () => {
+  it("keeps the quick-vote runtime off the idle waves shell", async () => {
     mockPathname = "/waves";
 
     render(<BrainMobile>child</BrainMobile>);
@@ -429,7 +415,7 @@ describe("BrainMobile", () => {
       expect(screen.getByTestId("waves")).toBeInTheDocument();
     });
 
-    expect(mockDialogMountCount).toBe(1);
+    expect(mockDialogMountCount).toBe(0);
     expect(screen.queryByTestId("quick-vote-dialog")).toBeNull();
   });
 
@@ -572,7 +558,7 @@ describe("BrainMobile", () => {
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it("reuses the page-owned quick-vote dialog across repeated waves footer openings", async () => {
+  it("loads and reuses the page-owned quick-vote runtime across repeated waves footer openings", async () => {
     mockPathname = "/waves";
 
     render(<BrainMobile>child</BrainMobile>);
@@ -581,7 +567,7 @@ describe("BrainMobile", () => {
       expect(screen.getByTestId("waves")).toBeInTheDocument();
     });
 
-    expect(mockDialogMountCount).toBe(1);
+    expect(mockDialogMountCount).toBe(0);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -589,7 +575,9 @@ describe("BrainMobile", () => {
       })
     );
 
-    expect(screen.getByText("Session 1")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Session 1")).toBeInTheDocument();
+    });
     fireEvent.click(screen.getByRole("button", { name: "Close Quick Vote" }));
     expect(screen.queryByTestId("quick-vote-dialog")).not.toBeInTheDocument();
 
@@ -599,8 +587,10 @@ describe("BrainMobile", () => {
       })
     );
 
-    expect(screen.getByText("Session 2")).toBeInTheDocument();
-    expect(mockDialogMountCount).toBe(1);
+    await waitFor(() => {
+      expect(screen.getByText("Session 2")).toBeInTheDocument();
+    });
+    expect(mockDialogMountCount).toBe(2);
   });
 
   it("renders the Sales view for non-rank curation waves and falls back when unavailable", async () => {
