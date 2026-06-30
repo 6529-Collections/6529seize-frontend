@@ -76,10 +76,7 @@ function getLocalLegacyDesktopAuth(walletAddress: string): {
   }
 
   const activeWalletAddress = getWalletAddress();
-  if (
-    !activeWalletAddress ||
-    activeWalletAddress.toLowerCase() !== walletAddress.toLowerCase()
-  ) {
+  if (activeWalletAddress?.toLowerCase() !== walletAddress.toLowerCase()) {
     return null;
   }
 
@@ -702,9 +699,13 @@ export function HeaderQRModal({
     try {
       setMobileConnectionShareStatus("loading");
       let hasActiveSession = false;
+      let didVerificationError = false;
       try {
         if (ensureActiveSessionV2WebSession) {
-          hasActiveSession = await ensureActiveSessionV2WebSession(signal);
+          hasActiveSession = await ensureActiveSessionV2WebSession({
+            address: walletAddress,
+            abortSignal: signal,
+          });
         }
       } catch (error: unknown) {
         if (isStaleGeneration() || isAbortError(error, signal)) {
@@ -712,9 +713,15 @@ export function HeaderQRModal({
         }
 
         console.error("Failed to verify active web session", error);
+        didVerificationError = true;
       }
 
       if (isStaleGeneration() || signal?.aborted) {
+        return "";
+      }
+
+      if (didVerificationError) {
+        setUnavailableMobileConnectionShare("error");
         return "";
       }
 
@@ -814,9 +821,13 @@ export function HeaderQRModal({
     try {
       setDesktopConnectionShareStatus("loading");
       let hasActiveSession = false;
+      let didVerificationError = false;
       try {
         if (ensureActiveSessionV2WebSession) {
-          hasActiveSession = await ensureActiveSessionV2WebSession(signal);
+          hasActiveSession = await ensureActiveSessionV2WebSession({
+            address: walletAddress,
+            abortSignal: signal,
+          });
         }
       } catch (error: unknown) {
         if (isStaleGeneration() || isAbortError(error, signal)) {
@@ -824,9 +835,15 @@ export function HeaderQRModal({
         }
 
         console.error("Failed to verify active web session", error);
+        didVerificationError = true;
       }
 
       if (isStaleGeneration() || signal?.aborted) {
+        return "";
+      }
+
+      if (didVerificationError) {
+        setUnavailableDesktopConnectionShare("error");
         return "";
       }
 
