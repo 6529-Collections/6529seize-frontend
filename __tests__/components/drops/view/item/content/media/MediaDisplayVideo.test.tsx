@@ -4,7 +4,7 @@ import MediaDisplayVideo from "@/components/drops/view/item/content/media/MediaD
 
 // mock hooks used inside component
 jest.mock("@/hooks/useInView", () => ({
-  useInView: () => [jest.fn(), true],
+  useInView: jest.fn(() => [jest.fn(), true]),
 }));
 
 const playMock = jest.fn().mockResolvedValue(undefined);
@@ -25,6 +25,7 @@ jest.mock("@/hooks/useOptimizedVideo", () => ({
 
 const mockUseOptimizedVideo = require("@/hooks/useOptimizedVideo")
   .useOptimizedVideo as jest.Mock;
+const mockUseInView = require("@/hooks/useInView").useInView as jest.Mock;
 
 jest.mock("@/helpers/media-download.helpers", () => ({
   __esModule: true,
@@ -46,6 +47,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   jest.useRealTimers();
+  mockUseInView.mockReturnValue([jest.fn(), true]);
   playMock.mockClear();
   pauseMock.mockClear();
   downloadMediaUrlMock.mockClear();
@@ -60,9 +62,27 @@ describe("MediaDisplayVideo", () => {
 
   it("keeps preferring HLS renditions when native controls are shown", () => {
     render(<MediaDisplayVideo src="foo.mp4" showControls />);
+    expect(mockUseInView).toHaveBeenCalledWith(
+      expect.objectContaining({
+        freezeOnceVisible: false,
+        rootMargin: "400px 0px",
+        threshold: 0.1,
+      })
+    );
     expect(mockUseOptimizedVideo).toHaveBeenCalledWith(
       "foo.mp4",
-      expect.objectContaining({ preferHls: true })
+      expect.objectContaining({ enabled: true, preferHls: true })
+    );
+  });
+
+  it("keeps video optimization disabled until the wrapper is in view", () => {
+    mockUseInView.mockReturnValue([jest.fn(), false]);
+
+    render(<MediaDisplayVideo src="foo.mp4" showControls />);
+
+    expect(mockUseOptimizedVideo).toHaveBeenCalledWith(
+      "foo.mp4",
+      expect.objectContaining({ enabled: false })
     );
   });
 

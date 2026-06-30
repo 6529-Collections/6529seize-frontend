@@ -17,10 +17,11 @@ type StructuredApiError = Error & {
 
 const getHeaders = (
   headers?: Record<string, string>,
-  contentType: boolean = true
+  contentType: boolean = true,
+  includeWalletAuth: boolean = true
 ) => {
   const apiAuth = getStagingAuth();
-  const walletAuth = getAuthJwt();
+  const walletAuth = includeWalletAuth ? getAuthJwt() : null;
   return {
     ...(contentType ? { "Content-Type": "application/json" } : {}),
     ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
@@ -345,6 +346,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   params?: U | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
+  includeWalletAuth?: boolean | undefined;
 }): Promise<T> => {
   const url = buildUrl(
     param.endpoint,
@@ -361,7 +363,11 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   return executeApiRequest<T>({
     url,
     method: "GET",
-    headers: getHeaders(param.headers, false),
+    headers: getHeaders(
+      param.headers,
+      false,
+      param.includeWalletAuth !== false
+    ),
     signal: param.signal,
     errorMode: param.errorMode ?? "legacy-string",
   });
@@ -404,6 +410,7 @@ export const commonApiFetchWithRetry = async <
   readonly headers?: Record<string, string> | undefined;
   readonly params?: U | undefined;
   readonly signal?: AbortSignal | undefined;
+  readonly includeWalletAuth?: boolean | undefined;
   readonly retryOptions?: RetryOptions | undefined;
 }): Promise<T> => {
   const { retryOptions, ...fetchParams } = param;
@@ -494,6 +501,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   errorMode?: ApiErrorMode | undefined;
   credentials?: RequestCredentials | undefined;
   parseJson?: boolean | undefined;
+  includeWalletAuth?: boolean | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -503,7 +511,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   return executeApiRequest<U>({
     url,
     method: "POST",
-    headers: getHeaders(param.headers, true),
+    headers: getHeaders(param.headers, true, param.includeWalletAuth !== false),
     body: JSON.stringify(param.body),
     signal: param.signal,
     parseJson: param.parseJson ?? true,

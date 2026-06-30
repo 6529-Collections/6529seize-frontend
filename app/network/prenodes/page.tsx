@@ -1,23 +1,18 @@
 import styles from "@/styles/Home.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
 import PrenodesStatus from "@/components/prenodes/PrenodesStatus";
 import { getAppMetadata } from "@/components/providers/metadata";
 
 export default function PrenodesPage() {
   return (
-    <main className={styles["main"]}>
-      <Container fluid className={styles["leaderboardContainer"]}>
-        <Row>
-          <Col>
-            <PrenodesStatus />
-          </Col>
-        </Row>
-      </Container>
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <section className={`${styles["leaderboardContainer"]} tailwind-scope`}>
+        <PrenodesStatus />
+      </section>
     </main>
   );
 }
 
-export const generateMetadata = async () => {
+export const generateMetadata = () => {
   return getAppMetadata({
     title: "Prenodes",
     description: "Network",
