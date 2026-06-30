@@ -69,6 +69,7 @@ interface RedeemConnectionShareResponse {
   readonly role: string | null;
   readonly access_token: string;
   readonly access_token_expires_at: string;
+  readonly client_type?: RefreshTokenSessionClientType | undefined;
   readonly native_refresh_token: string;
   readonly refresh_token_expires_at: string;
 }
@@ -401,6 +402,6 @@ export async function redeemConnectionShare(
 
   return {
     ...response,
-    client_type: targetClientType,
+    client_type: response.client_type ?? targetClientType,
   };
 }
