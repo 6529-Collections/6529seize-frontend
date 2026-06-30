@@ -69,6 +69,7 @@ export const EN_GB_MESSAGES = {
   "quickDm.listTitle": "Messages",
   "quickDm.chatTitleFallback": "Messages",
   "quickDm.closeAriaLabel": "Close quick direct messages",
+  "quickDm.newDirectMessageAriaLabel": "New direct message",
   "quickDm.backAriaLabel": "Back to direct message list",
   "quickDm.openAll": "Open all messages",
   "quickDm.openAllAriaLabel": "Open all direct messages",

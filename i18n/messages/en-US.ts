@@ -411,6 +411,7 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   listTitle: "Messages",
   chatTitleFallback: "Messages",
   closeAriaLabel: "Close quick direct messages",
+  newDirectMessageAriaLabel: "New direct message",
   backAriaLabel: "Back to direct message list",
   backUnreadAriaLabel: "Back to direct message list, unread messages available",
   openAll: "Open all messages",
