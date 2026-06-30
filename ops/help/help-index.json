@@ -463,6 +463,61 @@
       "source_refs": ["ops/docs/navigation/feature-wallet-account-controls.md"]
     },
     {
+      "id": "wallet.connection-sharing",
+      "kind": "workflow",
+      "title": "Connection sharing",
+      "link_label": "Connection sharing",
+      "aliases": [
+        "share connection",
+        "share my connection",
+        "how to share connection",
+        "how do i share connection",
+        "connection sharing",
+        "share login",
+        "share session",
+        "share wallet connection",
+        "connect mobile with qr",
+        "mobile qr connection",
+        "connect desktop app",
+        "share current page",
+        "send page to mobile",
+        "send page to desktop"
+      ],
+      "keywords": [
+        "share",
+        "connection",
+        "sharing",
+        "session",
+        "login",
+        "wallet",
+        "profile",
+        "menu",
+        "qr",
+        "mobile",
+        "desktop",
+        "deep",
+        "link",
+        "current",
+        "page"
+      ],
+      "facts": [
+        "Use the profile or account menu in the header to open the Share menu.",
+        "Choose Connection when you want to share your authenticated connection to another 6529 client.",
+        "Connection sharing can show a QR code for 6529 Mobile or a deep link for 6529 Desktop.",
+        "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
+        "If the Share menu says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
+        "The same Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection."
+      ],
+      "canonical_path": "/",
+      "suppress_source_links": true,
+      "tags": ["auth", "wallet", "navigation", "mobile", "desktop"],
+      "source_refs": [
+        "components/header/share/HeaderShare.tsx",
+        "ops/docs/navigation/feature-share-modal.md",
+        "ops/contracts/wallet-auth-session-v2.md"
+      ]
+    },
+    {
       "id": "profiles.overview",
       "kind": "route",
       "title": "Profiles",
