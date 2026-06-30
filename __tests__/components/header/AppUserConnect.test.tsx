@@ -24,6 +24,7 @@ const { useChainSwitcher } = require("@/components/header/useChainSwitcher");
 
 function setup(address: string | undefined, isConnected: boolean) {
   const seizeConnect = jest.fn();
+  const seizeConnectFresh = jest.fn().mockResolvedValue(undefined);
   const seizeDisconnect = jest.fn().mockResolvedValue(undefined);
   const seizeDisconnectAndLogout = jest.fn();
   const seizeDisconnectAndLogoutAll = jest.fn().mockResolvedValue(undefined);
@@ -34,6 +35,7 @@ function setup(address: string | undefined, isConnected: boolean) {
       ? [{ address, role: null, isActive: true, isConnected }]
       : [],
     seizeConnect,
+    seizeConnectFresh,
     seizeDisconnect,
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
@@ -48,6 +50,7 @@ function setup(address: string | undefined, isConnected: boolean) {
   render(<AppUserConnect onNavigate={onNavigate} />);
   return {
     seizeConnect,
+    seizeConnectFresh,
     seizeDisconnect,
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
@@ -66,6 +69,7 @@ function setupWithAccounts(options: {
   }[];
 }) {
   const seizeConnect = jest.fn();
+  const seizeConnectFresh = jest.fn().mockResolvedValue(undefined);
   const seizeDisconnect = jest.fn().mockResolvedValue(undefined);
   const seizeDisconnectAndLogout = jest.fn();
   const seizeDisconnectAndLogoutAll = jest.fn().mockResolvedValue(undefined);
@@ -74,6 +78,7 @@ function setupWithAccounts(options: {
     isConnected: options.isConnected,
     connectedAccounts: options.connectedAccounts,
     seizeConnect,
+    seizeConnectFresh,
     seizeDisconnect,
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
@@ -95,13 +100,15 @@ function setupWithAccounts(options: {
 describe("AppUserConnect", () => {
   afterEach(() => jest.clearAllMocks());
 
-  it("renders connect button when not connected", () => {
-    const { seizeConnect, onNavigate } = setup(undefined, false);
+  it("renders connect button when not connected", async () => {
+    const { seizeConnectFresh, onNavigate } = setup(undefined, false);
     const btn = screen.getByRole("button", { name: "Connect" });
     expect(btn).toBeInTheDocument();
     fireEvent.click(btn);
-    expect(seizeConnect).toHaveBeenCalled();
-    expect(onNavigate).toHaveBeenCalled();
+    expect(seizeConnectFresh).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onNavigate).toHaveBeenCalled();
+    });
     expect(screen.getByTestId("scanner")).toBeInTheDocument();
   });
 
@@ -131,7 +138,7 @@ describe("AppUserConnect", () => {
   });
 
   it("renders connect wallet + logout when authorized-only", async () => {
-    const { seizeConnect, seizeDisconnectAndLogout, onNavigate } = setup(
+    const { seizeConnectFresh, seizeDisconnectAndLogout, onNavigate } = setup(
       "0xabc",
       false
     );
@@ -143,8 +150,10 @@ describe("AppUserConnect", () => {
       .closest("button") as HTMLButtonElement;
 
     fireEvent.click(connectWalletBtn);
-    expect(seizeConnect).toHaveBeenCalled();
-    expect(onNavigate).toHaveBeenCalled();
+    expect(seizeConnectFresh).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onNavigate).toHaveBeenCalled();
+    });
 
     fireEvent.click(logoutBtn);
     await waitFor(() => {
@@ -162,6 +171,7 @@ describe("AppUserConnect", () => {
         { address: "0xabc", role: null, isActive: true, isConnected: true },
       ],
       seizeConnect: jest.fn(),
+      seizeConnectFresh: jest.fn().mockResolvedValue(undefined),
       seizeDisconnect: jest.fn().mockResolvedValue(undefined),
       seizeDisconnectAndLogout: jest.fn(),
       seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),

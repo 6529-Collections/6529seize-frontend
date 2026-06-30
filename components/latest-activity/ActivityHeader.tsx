@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Col } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 
 interface ActivityHeaderProps {
@@ -14,12 +13,8 @@ export default function ActivityHeader({
   fetching,
 }: ActivityHeaderProps) {
   return (
-    <Col
-      sm={12}
-      md={6}
-      className="d-flex align-items-center justify-content-between tw-py-2"
-    >
-      <span className="d-flex flex-wrap align-items-center gap-3">
+    <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-py-2 md:tw-w-1/2">
+      <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         <h1 className="tw-mb-0">NFT Activity</h1>
         {showViewAll ? (
           <Link href="/nft-activity">
@@ -31,6 +26,6 @@ export default function ActivityHeader({
           fetching && <DotLoader />
         )}
       </span>
-    </Col>
+    </div>
   );
 }

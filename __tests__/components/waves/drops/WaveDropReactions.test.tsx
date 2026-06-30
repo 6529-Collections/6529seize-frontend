@@ -103,22 +103,32 @@ const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const setToastMock = jest.fn();
 const createStructuredReactionError = ({
   body,
+  headers,
   message = "technical error",
   status,
   statusText,
 }: {
   body?: unknown;
+  headers?: unknown;
   message?: string;
   status?: number;
   statusText?: string;
 }): Error & {
+  headers?: unknown;
   status?: number;
-  response: { body?: unknown; status?: number; statusText?: string };
+  response: {
+    body?: unknown;
+    headers?: unknown;
+    status?: number;
+    statusText?: string;
+  };
 } =>
   Object.assign(new Error(message), {
+    ...(headers !== undefined ? { headers } : {}),
     ...(status !== undefined ? { status } : {}),
     response: {
       ...(body !== undefined ? { body } : {}),
+      ...(headers !== undefined ? { headers } : {}),
       ...(status !== undefined ? { status } : {}),
       ...(statusText !== undefined ? { statusText } : {}),
     },
@@ -499,6 +509,69 @@ describe("WaveDropReactions", () => {
         type: "error",
       });
     });
+  });
+
+  it("shows rate-limit guidance and rolls back chip state after a 429", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    const request = createDeferred<unknown>();
+    (commonApi.commonApiPost as jest.Mock).mockReturnValueOnce(request.promise);
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                count: 1,
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toHaveTextContent("1");
+
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(button).toHaveTextContent("2");
+    });
+
+    await act(async () => {
+      request.reject(
+        createStructuredReactionError({
+          body: JSON.stringify({ error: "Rate limit exceeded" }),
+          headers: new Headers({ "retry-after": "2" }),
+          message: "Rate limit exceeded",
+          status: 429,
+          statusText: "Too Many Requests",
+        })
+      );
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(setToastMock).toHaveBeenCalledWith({
+        message: "You are reacting too quickly. Try again in 2 seconds.",
+        type: "error",
+      });
+    });
+    expect(button).toHaveTextContent("1");
   });
 
   it("ignores a stale chip failure after a newer click", async () => {

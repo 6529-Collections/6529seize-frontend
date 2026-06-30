@@ -54,6 +54,8 @@ export const useCookieConsent = () => {
   return context;
 };
 
+export const useOptionalCookieConsent = () => useContext(CookieConsentContext);
+
 type CookieConsentProviderProps = {
   children: ReactNode;
   disabled?: boolean;

@@ -26,7 +26,11 @@ function DropListItemContentMediaVideo({
   align = "left",
   showFullscreen = true,
 }: Props) {
-  const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const [wrapperRef, inView] = useInView<HTMLDivElement>({
+    freezeOnceVisible: false,
+    rootMargin: "400px 0px",
+    threshold: 0.1,
+  });
   const wasFullscreenRef = useRef(false);
   const { isApp } = useDeviceInfo();
   const { downloadMedia, isDownloading, openLabel, openMedia } =
@@ -39,6 +43,7 @@ function DropListItemContentMediaVideo({
 
   // 1) Pick up the best URL (HLS or MP4)
   const { playableUrl, isHls } = useOptimizedVideo(src, {
+    enabled: inView,
     pollInterval: 10000,
     maxRetries: 8,
     preferHls: true,
@@ -47,6 +52,7 @@ function DropListItemContentMediaVideo({
 
   // 2) Setup HLS (or native) once and get back the videoRef + loading state
   const { videoRef, isLoading } = useHlsPlayer({
+    enabled: inView,
     src: playableUrl,
     isHls,
     fallbackSrc: src,

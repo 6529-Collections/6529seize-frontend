@@ -13,6 +13,7 @@ import {
   THE_MEMES_DETAIL_TIMELINE_MESSAGES,
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
+import aboutMessages from "@/i18n/messages/about.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
@@ -271,6 +272,19 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
   "uncastPower.votesVisible": "votes",
 } as const);
 
+const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  "rateLimit.retryAfter.moment":
+    "You are reacting too quickly. Try again in a moment.",
+  "rateLimit.retryAfter.seconds.one":
+    "You are reacting too quickly. Try again in {count} second.",
+  "rateLimit.retryAfter.seconds.other":
+    "You are reacting too quickly. Try again in {count} seconds.",
+  "rateLimit.retryAfter.minutes.one":
+    "You are reacting too quickly. Try again in {count} minute.",
+  "rateLimit.retryAfter.minutes.other":
+    "You are reacting too quickly. Try again in {count} minutes.",
+} as const);
+
 const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
   "profileFeed.title": "Profile Waves Feed",
   "profileFeed.subtitle": "Featured drops from profile waves",
@@ -404,7 +418,9 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   showAll: "Show all",
   openConversation: "Open conversation",
   openConversationAriaLabel: "Open conversation with {name}",
+  unreadCountAriaLabel: "{count} unread messages",
   unreadPreview: "New messages",
+  noMessagesYet: "No messages yet",
   emptyTitle: "No direct messages yet",
   loadingStatus: "Loading direct messages",
   chatLoadError: "Unable to load this conversation.",
@@ -1213,8 +1229,10 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
+  "drop.media.processingGeneric": "Processing media",
   "drop.media.loading": "Loading image",
   "drop.media.unavailable": "Image unavailable",
+  "drop.media.unavailableGeneric": "Media unavailable",
   "drop.media.loadFailed": "Couldn’t load image.",
   "drop.media.retry": "Retry",
   "drop.media.openPreview": "Open image preview",
@@ -1240,6 +1258,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
+  ...aboutMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
@@ -1249,6 +1268,7 @@ export const EN_US_MESSAGES = {
   ...NEW_VERSION_TOAST_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
+  ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
 } as const;
 

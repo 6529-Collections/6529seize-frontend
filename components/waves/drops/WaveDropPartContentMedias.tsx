@@ -10,8 +10,9 @@ import WaveDropPartContentMediaImage from "./WaveDropPartContentMediaImage";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useOptionalDropContext } from "./DropContext";
 
 function isRenderableMedia(mimeType: string, url: string): boolean {
   return (
@@ -26,37 +27,59 @@ function isRenderableMedia(mimeType: string, url: string): boolean {
   );
 }
 
-function isImageMediaProcessing(
-  media: ApiDropPart["media"][number]
-): boolean {
+function isMediaProcessing(media: ApiDropPart["media"][number]): boolean {
   return (
-    media.mime_type.includes("image") &&
-    (media.media_status === ApiDropMediaStatus.Uploading ||
-      media.media_status === ApiDropMediaStatus.Processing)
+    media.media_status === ApiDropMediaStatus.Uploading ||
+    media.media_status === ApiDropMediaStatus.Processing
   );
 }
 
-function isImageMediaFailed(media: ApiDropPart["media"][number]): boolean {
-  return (
-    media.mime_type.includes("image") &&
-    media.media_status === ApiDropMediaStatus.Failed
-  );
+function isMediaFailed(media: ApiDropPart["media"][number]): boolean {
+  return media.media_status === ApiDropMediaStatus.Failed;
 }
 
-const ImageProcessingPlaceholder: React.FC<{
+function getMediaProcessingPlaceholderMessageKey({
+  failed,
+  useImageCopy,
+}: {
   readonly failed: boolean;
-}> = ({ failed }) => (
-  <div className="tw-flex tw-h-full tw-min-h-40 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-center">
-    <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
-      {!failed && <CircleLoader size={CircleLoaderSize.LARGE} />}
-      <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-        {failed
-          ? t(DEFAULT_LOCALE, "drop.media.unavailable")
-          : t(DEFAULT_LOCALE, "drop.media.processing")}
-      </span>
+  readonly useImageCopy: boolean;
+}): MessageKey {
+  if (failed) {
+    if (useImageCopy) {
+      return "drop.media.unavailable";
+    }
+
+    return "drop.media.unavailableGeneric";
+  }
+
+  if (useImageCopy) {
+    return "drop.media.processing";
+  }
+
+  return "drop.media.processingGeneric";
+}
+
+const MediaProcessingPlaceholder: React.FC<{
+  readonly failed: boolean;
+  readonly useImageCopy: boolean;
+}> = ({ failed, useImageCopy }) => {
+  const messageKey = getMediaProcessingPlaceholderMessageKey({
+    failed,
+    useImageCopy,
+  });
+
+  return (
+    <div className="tw-flex tw-h-full tw-min-h-40 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-center">
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
+        {!failed && <CircleLoader size={CircleLoaderSize.LARGE} />}
+        <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+          {t(DEFAULT_LOCALE, messageKey)}
+        </span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface WaveDropPartContentMediasProps {
   readonly activePart: ApiDropPart;
@@ -75,6 +98,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   mediaContainerHeightClassName = "tw-h-64",
   fullWidthMedia = false,
 }) => {
+  const dropContext = useOptionalDropContext();
+
   if (!activePart.media.length) {
     return null;
   }
@@ -142,18 +167,26 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     i: number,
     groupedImage = false
   ) => {
+    const reserveFullWidthMediaHeight =
+      fullWidthMedia && Boolean(dropContext?.reserveMediaHeight);
     const useNaturalHeightImage =
-      fullWidthMedia && media.mime_type.includes("image");
+      fullWidthMedia &&
+      media.mime_type.includes("image") &&
+      !reserveFullWidthMediaHeight;
     const useImageReservedHeight =
-      !fullWidthMedia && media.mime_type.includes("image");
-    const useVideoReservedHeight = false;
-    const useNaturalHeightVideo = media.mime_type.includes("video");
+      media.mime_type.includes("image") &&
+      (!fullWidthMedia || reserveFullWidthMediaHeight);
+    const useVideoReservedHeight =
+      media.mime_type.includes("video") && reserveFullWidthMediaHeight;
+    const useNaturalHeightVideo =
+      media.mime_type.includes("video") && !useVideoReservedHeight;
     const galleryItemId = media.mime_type.includes("image")
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
     const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
-    const isProcessingImage = isImageMediaProcessing(media);
-    const isFailedImage = isImageMediaFailed(media);
+    const isImageMedia = media.mime_type.includes("image");
+    const isProcessingMedia = isMediaProcessing(media);
+    const isFailedMedia = isMediaFailed(media);
     const mediaContainerClassName = getMediaContainerClassName({
       groupedImage,
       reserveMediaHeight: useImageReservedHeight || useVideoReservedHeight,
@@ -163,8 +196,13 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     });
     let mediaContent;
 
-    if (isProcessingImage || isFailedImage) {
-      mediaContent = <ImageProcessingPlaceholder failed={isFailedImage} />;
+    if (isProcessingMedia || isFailedMedia) {
+      mediaContent = (
+        <MediaProcessingPlaceholder
+          failed={isFailedMedia}
+          useImageCopy={isImageMedia}
+        />
+      );
     } else if (disableMediaInteraction) {
       mediaContent = (
         <MediaDisplay
@@ -179,7 +217,9 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
         <WaveDropPartContentMediaImage
           src={media.url}
           imageScale={imageScale}
-          imageObjectPosition={useImageReservedHeight ? "left top" : "center"}
+          imageObjectPosition={
+            useImageReservedHeight && !fullWidthMedia ? "left top" : "center"
+          }
           galleryItemId={galleryItemId}
           fillContainer={useImageReservedHeight}
         />
@@ -236,7 +276,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   };
 
   activePart.media.forEach((media, i) => {
-    if (isImageMediaProcessing(media) || isImageMediaFailed(media)) {
+    if (isMediaProcessing(media) || isMediaFailed(media)) {
       flushImageRun();
       mediaElements.push(renderMedia(media, i));
       return;

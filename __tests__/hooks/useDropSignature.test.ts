@@ -82,4 +82,26 @@ describe("useDropSignature", () => {
       type: "error",
     });
   });
+
+  it("shows signature rejected for legacy 4001 wallet rejection objects", async () => {
+    (useSignMessage as jest.Mock).mockReturnValue({
+      signMessageAsync: jest.fn().mockRejectedValue({
+        code: 4001,
+        message: "Not Allowed",
+        stack:
+          "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)",
+      }),
+    });
+    const { result } = renderHook(() => useDropSignature());
+    const drop = { parts: [], drop_type: 0 } as any;
+    let res: any;
+    await act(async () => {
+      res = await result.current.signDrop({ drop, termsOfService: null });
+    });
+    expect(res).toEqual({ success: false });
+    expect(mockSetToast).toHaveBeenCalledWith({
+      message: "Signature request was canceled in your wallet.",
+      type: "error",
+    });
+  });
 });

@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import WaveDropPartContentMedias from "@/components/waves/drops/WaveDropPartContentMedias";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import DropContext from "@/components/waves/drops/DropContext";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 
 jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
   __esModule: true,
@@ -139,6 +141,28 @@ describe("WaveDropPartContentMedias", () => {
     expect(video.parentElement).not.toHaveClass("tw-h-64");
   });
 
+  it("reserves full-width media height when the drop context requests stable media layout", () => {
+    render(
+      <DropContext.Provider
+        value={{
+          drop: null,
+          location: DropLocation.MY_STREAM,
+          reserveMediaHeight: true,
+        }}
+      >
+        <WaveDropPartContentMedias activePart={basePart} fullWidthMedia />
+      </DropContext.Provider>
+    );
+
+    const image = screen.getByTestId("wave-image-media");
+    const video = screen.getByTestId("drop-media");
+
+    expect(image).toHaveAttribute("data-fill-container", "true");
+    expect(image.parentElement).toHaveClass("tw-h-64", "tw-w-full");
+    expect(video).toHaveAttribute("data-fill-video-container", "true");
+    expect(video.parentElement).toHaveClass("tw-h-64", "tw-w-full");
+  });
+
   it("uses custom reserved height classes for normal image media only", () => {
     render(
       <WaveDropPartContentMedias
@@ -215,5 +239,45 @@ describe("WaveDropPartContentMedias", () => {
 
     expect(screen.getByText("Image unavailable")).toBeInTheDocument();
     expect(screen.queryByTestId("wave-image-media")).toBeNull();
+  });
+
+  it("shows a processing placeholder for video media that is not ready", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            {
+              mime_type: "video/mp4",
+              url: "u1",
+              media_status: ApiDropMediaStatus.Processing,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Processing media")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop-media")).toBeNull();
+  });
+
+  it("shows a failed placeholder for video media that failed processing", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            {
+              mime_type: "video/mp4",
+              url: "u1",
+              media_status: ApiDropMediaStatus.Failed,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Media unavailable")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop-media")).toBeNull();
   });
 });
