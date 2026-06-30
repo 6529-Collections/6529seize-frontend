@@ -354,7 +354,8 @@ export default function AppWalletComponent(
       </div>
       <div className={`${appWalletRowClassName} tw-pt-4`}>
         <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}
+        >
           <h3 className="tw-mb-0 tw-flex tw-items-center tw-gap-2">
             <AppWalletAvatar address={appWallet.address} size={50} />
             {appWallet.name}
@@ -369,10 +370,11 @@ export default function AppWalletComponent(
       </div>
       <div className={`${appWalletRowClassName} tw-pt-4`}>
         <div
-          className={`${appWalletColClassName} tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2`}>
+          className={`${appWalletColClassName} tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2`}
+        >
           <span>
             Wallet Address:{" "}
-            <span className="tw-text-[larger] tw-font-bold">
+            <span className="tw-text-lg tw-font-bold">
               {appWallet.address.toLowerCase()}
             </span>
           </span>
@@ -492,7 +494,8 @@ export default function AppWalletComponent(
       </div>
       <div className={`${appWalletRowClassName} tw-pt-5`}>
         <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}
+        >
           <span>Mnemonic Phrase</span>
           {mnemonicAvailable && (
             <span className="tw-flex tw-items-center tw-gap-3">
@@ -593,7 +596,8 @@ export default function AppWalletComponent(
       </div>
       <div className={`${appWalletRowClassName} tw-pt-4`}>
         <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}
+        >
           <span>Private Key</span>
           <span className="tw-flex tw-items-center tw-gap-3">
             <>
@@ -682,7 +686,8 @@ export default function AppWalletComponent(
       </div>
       <div className={`${appWalletRowClassName} tw-pt-5`}>
         <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-gap-2`}>
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-gap-2`}
+        >
           <button
             type="button"
             className={appWalletButtonClassName("danger")}
@@ -715,13 +720,15 @@ function AppWalletPhraseWord(
     <div
       className={`${
         props.full_width ? appWalletCol12ClassName : appWalletPhraseColClassName
-      } tw-pb-2 tw-pt-2`}>
+      } tw-pb-2 tw-pt-2`}
+    >
       <div className={styles["phrase"]}>
         <div className={appWalletRowClassName}>
           <div
-            className={`${appWalletColClassName} tw-flex tw-select-none tw-gap-2`}>
+            className={`${appWalletColClassName} tw-flex tw-select-none tw-gap-2`}
+          >
             {props.index && (
-              <span className="tw-text-iron-400 tw-font-extralight">
+              <span className="tw-font-extralight tw-text-iron-400">
                 {props.index}
               </span>
             )}

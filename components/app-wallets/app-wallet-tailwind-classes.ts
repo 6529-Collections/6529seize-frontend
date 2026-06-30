@@ -9,8 +9,7 @@ export const appWalletColClassName =
 export const appWalletCol12ClassName =
   "tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3";
 
-export const appWalletWalletCardColClassName =
-  `${appWalletCol12ClassName} min-[576px]:tw-w-1/2 min-[768px]:tw-w-1/3`;
+export const appWalletWalletCardColClassName = `${appWalletCol12ClassName} min-[576px]:tw-w-1/2 min-[768px]:tw-w-1/3`;
 
 export const appWalletPhraseColClassName =
   "tw-relative tw-w-1/2 tw-max-w-full tw-flex-none tw-px-3 min-[576px]:tw-w-1/3 min-[768px]:tw-w-1/4";
@@ -26,7 +25,7 @@ type AppWalletButtonVariant =
   | "warning";
 
 const appWalletButtonBaseClassName =
-  "tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-[0.375rem] tw-border tw-border-solid tw-px-3 tw-py-[0.375rem] tw-text-base tw-font-normal tw-leading-6 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]";
+  "tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]";
 
 const appWalletButtonVariantClassNames: Record<AppWalletButtonVariant, string> =
   {
