@@ -329,9 +329,10 @@ describe("sentry-client-filters", () => {
   });
 
   const createSentryRouteParameterizationEvent = (
-    overrides: Record<string, unknown> = {}
-  ) =>
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
     ({
+      transaction: "/waves/:wave",
       exception: {
         values: [
           {
@@ -353,6 +354,21 @@ describe("sentry-client-filters", () => {
           },
         ],
       },
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+      },
+      contexts: {
+        app: {
+          app_name: "MetaMaskMobile",
+        },
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+      },
       breadcrumbs: [
         {
           category: "navigation",
@@ -363,7 +379,7 @@ describe("sentry-client-filters", () => {
         },
       ],
       ...overrides,
-    }) as any;
+    });
 
   const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -2366,6 +2382,70 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(false);
+  });
+
+  it("does not filter cyclic JSON route parameterization errors without MetaMaskMobile WKWebView context", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      contexts: {
+        browser: {
+          name: "Mobile Safari",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari",
+        "browser.name": "Mobile Safari",
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter MetaMaskMobile route parameterization errors outside waves routes", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: "/about",
+      request: {
+        url: "https://6529.io/about",
+      },
+      breadcrumbs: [
+        {
+          category: "navigation",
+          data: {
+            from: "/about",
+            to: "/about",
+          },
+        },
+      ],
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters MetaMaskMobile route parameterization errors when waves route appears only in navigation breadcrumbs", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: undefined,
+      request: undefined,
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
   });
 
   it("filters injected wallet collisions for tronlinkParams in app URI stacks", () => {
