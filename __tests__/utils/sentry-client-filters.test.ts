@@ -41,6 +41,19 @@ describe("sentry-client-filters", () => {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
   };
+  const reactDomStaticChunkFrame = (
+    functionName: string
+  ): SentryStackFrame => ({
+    filename:
+      "https://6529.io/_next/static/chunks/app/waves/%5Bwave%5D/page-1234567890abcdef.js",
+    function: functionName,
+  });
+  const reactDomStaticWebpackFrame = (
+    functionName: string
+  ): SentryStackFrame => ({
+    filename: "https://6529.io/_next/static/webpack/1234567890abcdef.webpack.js",
+    function: functionName,
+  });
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
   const wasmCspUnsafeEvalMessage = [
@@ -513,6 +526,58 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters React DOM insertBefore NotFoundError events before Sentry source-map symbolication", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        transaction: "/waves/:wave",
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames: [
+                  reactDomStaticChunkFrame("insertOrAppendPlacementNode"),
+                  reactDomStaticChunkFrame("commitReconciliationEffects"),
+                  reactDomStaticChunkFrame("commitMutationEffectsOnFiber"),
+                  reactDomStaticChunkFrame("recursivelyTraverseMutationEffects"),
+                ],
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction: "/waves/:wave",
+          url: "/waves/aadd124b-e5c7-4c40-9644-a24d1ce5384b",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters React DOM insertBefore NotFoundError events from webpack static chunks", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames: [
+                  reactDomStaticWebpackFrame("insertOrAppendPlacementNode"),
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
   it("filters React DOM insertBefore NotFoundError events when request URL identifies a waves route", () => {
     const result = shouldFilterReactDomInsertBeforeNotFoundError(
       createReactDomInsertBeforeEvent({
@@ -542,6 +607,29 @@ describe("sentry-client-filters", () => {
                     filename:
                       "webpack-internal:///(app-pages-browser)/./components/waves/drops/WaveDrop.tsx",
                   },
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps pre-symbolicated insertBefore events when a non-React DOM frame is present", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames: [
+                  reactDomStaticChunkFrame("insertOrAppendPlacementNode"),
+                  reactDomStaticChunkFrame("WaveDrop"),
                 ],
               },
             },
