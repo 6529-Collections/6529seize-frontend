@@ -293,7 +293,7 @@ describe("session-v2.utils", () => {
     });
   });
 
-  it("verifies an active web session without rewriting local auth", async () => {
+  it("verifies an active web session and persists the refreshed auth", async () => {
     const sessionResponse = {
       client_type: "web",
       address: "0xabc",
@@ -317,7 +317,42 @@ describe("session-v2.utils", () => {
       credentials: "include",
       errorMode: "structured",
     });
-    expect(setAuthJwt).not.toHaveBeenCalled();
+    expect(setAuthJwt).toHaveBeenCalledWith(
+      "0xabc",
+      "access-token",
+      null,
+      undefined,
+      { authSessionVersion: "v2" }
+    );
+  });
+
+  it("returns false when refreshed web session auth cannot be persisted", async () => {
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (setAuthJwt as jest.Mock).mockReturnValue(false);
+    (commonApiPost as jest.Mock)
+      .mockResolvedValueOnce(sessionResponse)
+      .mockResolvedValueOnce(undefined);
+
+    await expect(
+      verifyActiveSessionV2WebSession({ address: "0xabc" })
+    ).resolves.toBe(false);
+
+    expect(commonApiPost).toHaveBeenNthCalledWith(2, {
+      endpoint: "auth/session-logout",
+      body: {
+        client_type: "web",
+        client_address: "0xabc",
+        all_sessions: false,
+      },
+      credentials: "include",
+      parseJson: false,
+    });
   });
 
   it("returns false when the active web session cannot be refreshed", async () => {
