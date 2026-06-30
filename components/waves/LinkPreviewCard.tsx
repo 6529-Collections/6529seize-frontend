@@ -76,6 +76,41 @@ const isKnownBarePreviewHostname = (hostname: string): boolean => {
   );
 };
 
+const containsAsciiWhitespace = (value: string): boolean => {
+  for (const character of value) {
+    if (
+      character === " " ||
+      character === "\t" ||
+      character === "\n" ||
+      character === "\r" ||
+      character === "\f"
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const parseBarePreviewHref = (trimmedHref: string): URL | null => {
+  if (containsAsciiWhitespace(trimmedHref)) {
+    return null;
+  }
+
+  const slashIndex = trimmedHref.indexOf("/");
+  if (slashIndex <= 0 || slashIndex >= trimmedHref.length - 1) {
+    return null;
+  }
+
+  const hostnameCandidate = trimmedHref.slice(0, slashIndex);
+  if (!hostnameCandidate.includes(".") || hostnameCandidate.includes(":")) {
+    return null;
+  }
+
+  const bareUrl = new URL(`https://${trimmedHref}`);
+  return isKnownBarePreviewHostname(bareUrl.hostname) ? bareUrl : null;
+};
+
 const parsePreviewHref = (href: string): URL | null => {
   const trimmedHref = href.trim();
   if (!trimmedHref) {
@@ -94,12 +129,7 @@ const parsePreviewHref = (href: string): URL | null => {
       return new URL(trimmedHref, "https://6529.io");
     }
 
-    if (/^[^\s/]+\.[^\s/]+\/\S+$/u.test(trimmedHref)) {
-      const bareUrl = new URL(`https://${trimmedHref}`);
-      if (isKnownBarePreviewHostname(bareUrl.hostname)) {
-        return bareUrl;
-      }
-    }
+    return parseBarePreviewHref(trimmedHref);
   } catch {
     return null;
   }
