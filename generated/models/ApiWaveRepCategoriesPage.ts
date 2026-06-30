@@ -12,7 +12,6 @@
  */
 
 import { ApiWaveRepCategory } from '../models/ApiWaveRepCategory';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveRepCategoriesPage {
     'data': Array<ApiWaveRepCategory>;

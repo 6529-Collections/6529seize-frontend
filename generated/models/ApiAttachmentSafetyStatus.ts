@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+
 export enum ApiAttachmentSafetyStatus {
     Pending = 'pending',
     ScannedValidated = 'scanned_validated',

@@ -82,6 +82,76 @@ function addTsNoCheck(rootDir) {
   }
 }
 
+function removeUnusedHttpFileImports(rootDir) {
+  const importLine = "import { HttpFile } from '../http/http';";
+
+  for (const entry of fs.readdirSync(rootDir, { withFileTypes: true })) {
+    const entryPath = path.join(rootDir, entry.name);
+
+    if (entry.isDirectory()) {
+      removeUnusedHttpFileImports(entryPath);
+      continue;
+    }
+
+    if (!entry.isFile() || !entry.name.endsWith(".ts")) {
+      continue;
+    }
+
+    const content = fs.readFileSync(entryPath, "utf8");
+
+    if (!content.includes(importLine)) {
+      continue;
+    }
+
+    const withoutImport = content.replace(`${importLine}\n`, "");
+
+    if (/\bHttpFile\b/.test(withoutImport)) {
+      continue;
+    }
+
+    fs.writeFileSync(entryPath, withoutImport, "utf8");
+  }
+}
+
+function isPureEnumModel(modelsDir, modelName) {
+  const modelPath = path.join(modelsDir, `${modelName}.ts`);
+
+  if (!fs.existsSync(modelPath)) {
+    return false;
+  }
+
+  const content = fs.readFileSync(modelPath, "utf8");
+
+  return (
+    new RegExp(`export enum ${modelName}\\b`).test(content) &&
+    !/\bexport (class|interface) \b/.test(content)
+  );
+}
+
+function removeObjectSerializerPureEnumImports(modelsDir) {
+  const objectSerializerPath = path.join(modelsDir, "ObjectSerializer.ts");
+
+  if (!fs.existsSync(objectSerializerPath)) {
+    return;
+  }
+
+  const content = fs.readFileSync(objectSerializerPath, "utf8");
+  const updated = content
+    .split("\n")
+    .filter((line) => {
+      const match = line.match(
+        /^import \{ ([A-Za-z0-9_]+) \} from '\.\.\/models\/\1';$/
+      );
+
+      return !match || !isPureEnumModel(modelsDir, match[1]);
+    })
+    .join("\n");
+
+  if (updated !== content) {
+    fs.writeFileSync(objectSerializerPath, updated, "utf8");
+  }
+}
+
 function replaceGeneratedDir() {
   const hadGeneratedDir = fs.existsSync(generatedDir);
 
@@ -180,6 +250,8 @@ try {
 
   removePath(path.join(tmpFinalDir, "models", "all.ts"));
   addTsNoCheck(tmpFinalDir);
+  removeUnusedHttpFileImports(tmpFinalDir);
+  removeObjectSerializerPureEnumImports(path.join(tmpFinalDir, "models"));
   replaceGeneratedDir();
 
   removePath(tmpGeneratorDir);

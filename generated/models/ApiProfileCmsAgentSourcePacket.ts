@@ -14,7 +14,6 @@
 import { ApiProfileCmsAgentSourcePacketSafety } from '../models/ApiProfileCmsAgentSourcePacketSafety';
 import { ApiProfileCmsAgentSourcePacketValidationDiagnostics } from '../models/ApiProfileCmsAgentSourcePacketValidationDiagnostics';
 import { ApiProfileCmsPackageStatus } from '../models/ApiProfileCmsPackageStatus';
-import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsAgentSourcePacket {
     'schema': ApiProfileCmsAgentSourcePacketSchemaEnum;

@@ -12,7 +12,6 @@
  */
 
 import { ApiProfileCmsValidationResult } from '../models/ApiProfileCmsValidationResult';
-import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsAgentSourcePacketValidationDiagnostics {
     'stored_result'?: ApiProfileCmsValidationResult;

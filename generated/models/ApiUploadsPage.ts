@@ -12,7 +12,6 @@
  */
 
 import { ApiUploadItem } from '../models/ApiUploadItem';
-import { HttpFile } from '../http/http';
 
 export class ApiUploadsPage {
     'data': Array<ApiUploadItem>;

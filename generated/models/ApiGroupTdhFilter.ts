@@ -12,7 +12,6 @@
  */
 
 import { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStrategy';
-import { HttpFile } from '../http/http';
 
 export class ApiGroupTdhFilter {
     'min': number | null;

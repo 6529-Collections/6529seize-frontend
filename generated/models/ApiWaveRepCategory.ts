@@ -12,7 +12,6 @@
  */
 
 import { ApiWaveRepContributor } from '../models/ApiWaveRepContributor';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveRepCategory {
     'category': string;

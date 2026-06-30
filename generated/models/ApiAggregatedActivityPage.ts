@@ -12,7 +12,6 @@
  */
 
 import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
-import { HttpFile } from '../http/http';
 
 export class ApiAggregatedActivityPage {
     'data': Array<ApiAggregatedActivity>;

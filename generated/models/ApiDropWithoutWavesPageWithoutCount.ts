@@ -12,7 +12,6 @@
  */
 
 import { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
-import { HttpFile } from '../http/http';
 
 export class ApiDropWithoutWavesPageWithoutCount {
     'data': Array<ApiDropWithoutWave>;

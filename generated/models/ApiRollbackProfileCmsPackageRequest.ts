@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
 
 export class ApiRollbackProfileCmsPackageRequest {
     'expected_current_package_id': string;

@@ -14,7 +14,6 @@
 import { ApiWaveScoreHotnessComponentWeights } from '../models/ApiWaveScoreHotnessComponentWeights';
 import { ApiWaveScoreQualityComponentWeights } from '../models/ApiWaveScoreQualityComponentWeights';
 import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVisibilityComponentWeights';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveScoreFormula {
     'max_level_raw_for_score': number;

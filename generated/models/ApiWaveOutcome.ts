@@ -14,7 +14,6 @@
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveOutcome {
     'type': ApiWaveOutcomeType;

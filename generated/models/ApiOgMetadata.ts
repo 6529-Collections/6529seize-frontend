@@ -15,7 +15,6 @@ import { ApiOgMetadataDrop } from '../models/ApiOgMetadataDrop';
 import { ApiOgMetadataEntityType } from '../models/ApiOgMetadataEntityType';
 import { ApiOgMetadataProfile } from '../models/ApiOgMetadataProfile';
 import { ApiOgMetadataWave } from '../models/ApiOgMetadataWave';
-import { HttpFile } from '../http/http';
 
 export class ApiOgMetadata {
     'entity_type': ApiOgMetadataEntityType;

@@ -13,7 +13,6 @@
 
 import { ApiGroupDescription } from '../models/ApiGroupDescription';
 import { ApiProfileMin } from '../models/ApiProfileMin';
-import { HttpFile } from '../http/http';
 
 export class ApiGroupFull {
     'id': string;

@@ -13,7 +13,6 @@
 
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
 import { ApiProfileMin } from '../models/ApiProfileMin';
-import { HttpFile } from '../http/http';
 
 export class ApiIdentityAndSubscriptionActions {
     'identity': ApiProfileMin;

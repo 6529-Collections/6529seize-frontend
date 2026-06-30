@@ -14,7 +14,6 @@
 import { ApiCmsAgentPatchOperation } from '../models/ApiCmsAgentPatchOperation';
 import { ApiCmsAgentPatchProvenance } from '../models/ApiCmsAgentPatchProvenance';
 import { ApiCmsAgentPatchTarget } from '../models/ApiCmsAgentPatchTarget';
-import { HttpFile } from '../http/http';
 
 export class ApiCmsAgentPatch {
     'schema': ApiCmsAgentPatchSchemaEnum;

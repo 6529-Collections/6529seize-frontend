@@ -15,7 +15,6 @@ import { ApiIdentityOverviewBadges } from '../models/ApiIdentityOverviewBadges';
 import { ApiIdentityOverviewContextProfileContext } from '../models/ApiIdentityOverviewContextProfileContext';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileRepCategorySummary } from '../models/ApiProfileRepCategorySummary';
-import { HttpFile } from '../http/http';
 
 export class ApiDropResolvedIdentityProfileV2 {
     'id': string;

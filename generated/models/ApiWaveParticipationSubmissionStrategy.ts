@@ -13,7 +13,6 @@
 
 import { ApiWaveParticipationSubmissionStrategyIdentityConf } from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
 import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveParticipationSubmissionStrategy {
     'type': ApiWaveParticipationSubmissionStrategyType;

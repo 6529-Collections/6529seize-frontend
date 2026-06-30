@@ -12,7 +12,6 @@
  */
 
 import { ApiIdentityOverview } from '../models/ApiIdentityOverview';
-import { HttpFile } from '../http/http';
 
 export class ApiDropReactionV2 {
     'reaction': string;

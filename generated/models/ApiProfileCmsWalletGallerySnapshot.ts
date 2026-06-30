@@ -15,7 +15,6 @@ import { ApiProfileCmsWalletGalleryAsset } from '../models/ApiProfileCmsWalletGa
 import { ApiProfileCmsWalletGalleryExcludedAsset } from '../models/ApiProfileCmsWalletGalleryExcludedAsset';
 import { ApiProfileCmsWalletGalleryTotals } from '../models/ApiProfileCmsWalletGalleryTotals';
 import { ApiProfileCmsWalletGalleryWallet } from '../models/ApiProfileCmsWalletGalleryWallet';
-import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsWalletGallerySnapshot {
     'generated_at': number;

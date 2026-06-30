@@ -25,7 +25,6 @@ import { ApiWaveScore } from '../models/ApiWaveScore';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
 import { ApiWaveVotingConfig } from '../models/ApiWaveVotingConfig';
-import { HttpFile } from '../http/http';
 
 export class ApiWave {
     /**

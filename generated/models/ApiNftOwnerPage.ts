@@ -12,7 +12,6 @@
  */
 
 import { ApiNftOwner } from '../models/ApiNftOwner';
-import { HttpFile } from '../http/http';
 
 export class ApiNftOwnerPage {
     'data': Array<ApiNftOwner>;

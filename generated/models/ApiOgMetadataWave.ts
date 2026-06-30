@@ -12,7 +12,6 @@
  */
 
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
-import { HttpFile } from '../http/http';
 
 export class ApiOgMetadataWave {
     'id': string;

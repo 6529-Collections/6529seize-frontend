@@ -12,7 +12,6 @@
  */
 
 import { ApiWaveMin } from '../models/ApiWaveMin';
-import { HttpFile } from '../http/http';
 
 export class ApiMentionedWave {
     'wave_name_in_content': string;

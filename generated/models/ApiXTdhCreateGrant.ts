@@ -12,7 +12,6 @@
  */
 
 import { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
-import { HttpFile } from '../http/http';
 
 export class ApiXTdhCreateGrant {
     'target_chain': ApiXTdhGrantTargetChain;

@@ -12,7 +12,6 @@
  */
 
 import { ApiProfileCmsWalletGalleryAssetIdentifier } from '../models/ApiProfileCmsWalletGalleryAssetIdentifier';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateProfileCmsWalletGallerySnapshotRequest {
     /**

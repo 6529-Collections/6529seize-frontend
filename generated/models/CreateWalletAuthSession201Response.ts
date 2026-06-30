@@ -13,7 +13,6 @@
 
 import { ApiSessionNativeResponse } from '../models/ApiSessionNativeResponse';
 import { ApiSessionWebResponse } from '../models/ApiSessionWebResponse';
-import { HttpFile } from '../http/http';
 
 /**
  * @type CreateWalletAuthSession201Response

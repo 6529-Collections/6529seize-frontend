@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
 
 /**
 * Drop metadata. data_value maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.

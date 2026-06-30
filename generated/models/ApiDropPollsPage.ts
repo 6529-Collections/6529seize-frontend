@@ -12,7 +12,6 @@
  */
 
 import { ApiDropV2 } from '../models/ApiDropV2';
-import { HttpFile } from '../http/http';
 
 export class ApiDropPollsPage {
     'open_unanswered': number;

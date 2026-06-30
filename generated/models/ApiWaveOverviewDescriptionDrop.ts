@@ -12,7 +12,6 @@
  */
 
 import { ApiDropMedia } from '../models/ApiDropMedia';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveOverviewDescriptionDrop {
     'contents'?: string;

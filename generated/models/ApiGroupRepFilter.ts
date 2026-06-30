@@ -12,7 +12,6 @@
  */
 
 import { ApiGroupFilterDirection } from '../models/ApiGroupFilterDirection';
-import { HttpFile } from '../http/http';
 
 export class ApiGroupRepFilter {
     'min': number | null;

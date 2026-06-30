@@ -12,7 +12,6 @@
  */
 
 import { DistributionNormalized } from '../models/DistributionNormalized';
-import { HttpFile } from '../http/http';
 
 export class DistributionNormalizedPage {
     'data': Array<DistributionNormalized>;

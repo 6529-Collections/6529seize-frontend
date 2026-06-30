@@ -12,7 +12,6 @@
  */
 
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateMediaUploadUrlRequest {
     'content_type': ApiMediaUploadMimeType;

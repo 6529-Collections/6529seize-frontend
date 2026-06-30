@@ -12,7 +12,6 @@
  */
 
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateOrUpdateProfileRequest {
     'handle': string;

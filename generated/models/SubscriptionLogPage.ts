@@ -12,7 +12,6 @@
  */
 
 import { SubscriptionLog } from '../models/SubscriptionLog';
-import { HttpFile } from '../http/http';
 
 export class SubscriptionLogPage {
     'data': Array<SubscriptionLog>;

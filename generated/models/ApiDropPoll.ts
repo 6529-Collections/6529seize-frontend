@@ -12,7 +12,6 @@
  */
 
 import { ApiDropPollOption } from '../models/ApiDropPollOption';
-import { HttpFile } from '../http/http';
 
 export class ApiDropPoll {
     'id': string;

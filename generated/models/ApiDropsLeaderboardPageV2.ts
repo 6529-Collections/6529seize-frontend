@@ -13,7 +13,6 @@
 
 import { ApiDropV2 } from '../models/ApiDropV2';
 import { ApiWaveMin } from '../models/ApiWaveMin';
-import { HttpFile } from '../http/http';
 
 export class ApiDropsLeaderboardPageV2 {
     'drops': Array<ApiDropV2>;

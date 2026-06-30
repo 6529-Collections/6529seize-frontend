@@ -13,7 +13,6 @@
 
 import { ApiSessionLogoutNativeRequest } from '../models/ApiSessionLogoutNativeRequest';
 import { ApiSessionLogoutWebRequest } from '../models/ApiSessionLogoutWebRequest';
-import { HttpFile } from '../http/http';
 
 /**
  * @type LogoutWalletAuthSessionRequest

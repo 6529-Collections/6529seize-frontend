@@ -12,7 +12,6 @@
  */
 
 import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
-import { HttpFile } from '../http/http';
 
 export class ApiCommunityMetrics {
     'drops_created': ApiCommunityMetric;

@@ -13,7 +13,6 @@
 
 import { ApiGlobalRepCategoryWave } from '../models/ApiGlobalRepCategoryWave';
 import { ApiGlobalRepCategoryWaveContributor } from '../models/ApiGlobalRepCategoryWaveContributor';
-import { HttpFile } from '../http/http';
 
 export class ApiGlobalRepCategoryWaveOverview {
     'category': string;

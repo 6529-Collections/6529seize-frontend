@@ -14,7 +14,6 @@
 import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { ApiWaveType } from '../models/ApiWaveType';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveConfig {
     'type': ApiWaveType;

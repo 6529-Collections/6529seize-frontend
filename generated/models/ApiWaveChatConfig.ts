@@ -12,7 +12,6 @@
  */
 
 import { ApiWaveScope } from '../models/ApiWaveScope';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveChatConfig {
     'scope': ApiWaveScope;

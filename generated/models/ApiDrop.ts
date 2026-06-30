@@ -28,7 +28,6 @@ import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiWaveMin } from '../models/ApiWaveMin';
-import { HttpFile } from '../http/http';
 
 export class ApiDrop {
     'id': string;

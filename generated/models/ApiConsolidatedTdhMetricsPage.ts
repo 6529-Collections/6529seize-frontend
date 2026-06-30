@@ -12,7 +12,6 @@
  */
 
 import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
-import { HttpFile } from '../http/http';
 
 export class ApiConsolidatedTdhMetricsPage {
     'data': Array<ApiConsolidatedTdhMetrics>;

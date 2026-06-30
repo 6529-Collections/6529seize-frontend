@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+
 export enum ApiAttachmentSafetyValidation {
     PublicIpfsValidated = 'public_ipfs_validated'
 }

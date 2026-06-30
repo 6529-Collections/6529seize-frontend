@@ -17,7 +17,6 @@ import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveScope } from '../models/ApiWaveScope';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveVotingConfig {
     'scope': ApiWaveScope;

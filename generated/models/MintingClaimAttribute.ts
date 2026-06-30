@@ -12,7 +12,6 @@
  */
 
 import { MintingClaimAttributeValue } from '../models/MintingClaimAttributeValue';
-import { HttpFile } from '../http/http';
 
 export class MintingClaimAttribute {
     'trait_type': string;

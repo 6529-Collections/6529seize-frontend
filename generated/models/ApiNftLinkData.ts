@@ -12,7 +12,6 @@
  */
 
 import { ApiNftLinkMediaPreview } from '../models/ApiNftLinkMediaPreview';
-import { HttpFile } from '../http/http';
 
 export class ApiNftLinkData {
     'canonical_id': string;

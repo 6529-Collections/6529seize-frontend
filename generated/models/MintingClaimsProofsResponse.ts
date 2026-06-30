@@ -12,7 +12,6 @@
  */
 
 import { MintingClaimsProofItem } from '../models/MintingClaimsProofItem';
-import { HttpFile } from '../http/http';
 
 export class MintingClaimsProofsResponse {
     'proofs': Array<MintingClaimsProofItem>;

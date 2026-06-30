@@ -12,7 +12,6 @@
  */
 
 import { ApiPaymentDetails } from '../models/ApiPaymentDetails';
-import { HttpFile } from '../http/http';
 
 export class ApiMemesMintStat {
     'id': number;

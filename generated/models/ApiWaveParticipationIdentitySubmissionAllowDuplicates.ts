@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
 
 export enum ApiWaveParticipationIdentitySubmissionAllowDuplicates {
     AlwaysAllow = 'ALWAYS_ALLOW',

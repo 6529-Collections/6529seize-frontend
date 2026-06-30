@@ -12,7 +12,6 @@
  */
 
 import { ApiWaveDecisionV2 } from '../models/ApiWaveDecisionV2';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveDecisionsPageV2 {
     'data': Array<ApiWaveDecisionV2>;
