@@ -31,6 +31,11 @@ describe("useSidebarSections", () => {
           item.name === "REP Categories" && item.href === "/rep/categories"
       )
     ).toBe(true);
+    expect(
+      networkSection?.subsections[0]?.items.find(
+        (item) => item.href === "/network/definitions"
+      )?.activatesSection
+    ).not.toBe(false);
     const xtdhIndex =
       networkSection?.items.findIndex((item) => item.name === "xTDH") ?? -1;
     const waveScoreIndex =
@@ -88,12 +93,20 @@ describe("useSidebarSections", () => {
       aboutSection?.subsections[0]?.items.map((item) => item.name)
     ).toEqual(["The Memes", "Subscriptions", "Meme Lab", "Gradient"]);
     expect(aboutSection?.subsections[2]?.items).toEqual([
-      { name: "TDH", href: "/network/tdh" },
-      { name: "xTDH", href: "/network/xtdh" },
-      { name: "Health", href: "/network/health" },
-      { name: "Definitions", href: "/network/definitions" },
-      { name: "Levels", href: "/network/levels" },
-      { name: "Network Stats", href: "/network/health/network-tdh" },
+      { name: "TDH", href: "/network/tdh", activatesSection: false },
+      { name: "xTDH", href: "/network/xtdh", activatesSection: false },
+      { name: "Health", href: "/network/health", activatesSection: false },
+      {
+        name: "Definitions",
+        href: "/network/definitions",
+        activatesSection: false,
+      },
+      { name: "Levels", href: "/network/levels", activatesSection: false },
+      {
+        name: "Network Stats",
+        href: "/network/health/network-tdh",
+        activatesSection: false,
+      },
     ]);
     expect(
       aboutSection?.subsections.some((subsection) => subsection.name === "NFTs")
