@@ -66,6 +66,7 @@ export type SentryClientEvent = {
   request?:
     | {
         url?: string | undefined;
+        headers?: Record<string, unknown> | undefined;
       }
     | undefined;
   tags?: SentryTags | undefined;
@@ -162,6 +163,8 @@ const providerDisconnectedCode = 4900;
 const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
+const RABBY_MOBILE_USER_AGENT_TOKEN = "rabbymobile";
+const RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE = "not found rainbowkit";
 
 const REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE =
   "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
@@ -1323,6 +1326,40 @@ function getContextString(
   return typeof value === "string" ? value : undefined;
 }
 
+function getRequestHeaderString(
+  event: SentryClientEvent,
+  headerName: string
+): string | undefined {
+  const headers = event.request?.headers;
+  if (!headers) {
+    return undefined;
+  }
+
+  const normalizedHeaderName = headerName.toLowerCase();
+  const matchingEntry = Object.entries(headers).find(
+    ([key]) => key.toLowerCase() === normalizedHeaderName
+  );
+  const value = matchingEntry?.[1];
+  return typeof value === "string" ? value : undefined;
+}
+
+function hasRabbyMobileContext(event: SentryClientEvent): boolean {
+  const candidates = [
+    getContextString(event, "browser", "name"),
+    getRequestHeaderString(event, "user-agent"),
+    getStringValue(event.tags?.["browser"]),
+    getStringValue(event.tags?.["browser.name"]),
+    getStringValue(event.tags?.["user_agent"]),
+    getStringValue(event.tags?.["userAgent"]),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      candidate.toLowerCase().includes(RABBY_MOBILE_USER_AGENT_TOKEN)
+  );
+}
+
 function isFirstPartyHost(hostname: string): boolean {
   const normalized = hostname.toLowerCase();
   return normalized === "6529.io" || normalized.endsWith(".6529.io");
@@ -1710,6 +1747,33 @@ export function shouldFilterReactDomInsertBeforeNotFoundError(
   }
 
   return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
+}
+
+export function shouldFilterRabbyMobileRainbowKitNotFoundError(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const messageCandidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+  const hasExactMessage = messageCandidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      candidate.trim() === RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE
+  );
+
+  if (!hasExactMessage) {
+    return false;
+  }
+
+  if (!hasRabbyMobileContext(event)) {
+    return false;
+  }
+
+  return !hasAppOwnedFrame(value?.stacktrace?.frames);
 }
 
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
