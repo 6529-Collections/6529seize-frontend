@@ -54,11 +54,21 @@ export function useHlsPlayer({
   const hlsRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const manifestRetryCountRef = useRef(0);
   const networkRecoveryCountRef = useRef(0);
+  const setupVersionRef = useRef(0);
   const isCleaningUpRef = useRef(false);
   const isFirstMountRef = useRef(true);
   const previousSrcRef = useRef<string>("");
 
   const [isLoading, setIsLoading] = useState(true);
+
+  function isCurrentSetup(
+    setupVersion: number,
+    videoEl: HTMLVideoElement
+  ): boolean {
+    return (
+      setupVersionRef.current === setupVersion && videoRef.current === videoEl
+    );
+  }
 
   /**
    * Cleanup function to destroy an Hls instance safely.
@@ -181,10 +191,17 @@ export function useHlsPlayer({
   /**
    * Sets up the Hls instance, attaches to the <video>, and starts loading.
    */
-  async function initHls(videoEl: HTMLVideoElement, changedSource: boolean) {
+  async function initHls(
+    videoEl: HTMLVideoElement,
+    changedSource: boolean,
+    setupVersion: number
+  ) {
     try {
       const mod = await import("hls.js");
       const HlsConstructor = mod.default; // typed import (no "as any")
+      if (!isCurrentSetup(setupVersion, videoEl)) {
+        return;
+      }
 
       // If Hls is unsupported in this browser, fallback to direct src
       if (!HlsConstructor.isSupported()) {
@@ -251,8 +268,11 @@ export function useHlsPlayer({
   }
 
   useEffect(() => {
+    setupVersionRef.current += 1;
+    const setupVersion = setupVersionRef.current;
     const videoEl = videoRef.current;
     if (!videoEl) return;
+    let nativeErrorHandler: (() => void) | null = null;
 
     if (!enabled) {
       setIsLoading(false);
@@ -293,6 +313,13 @@ export function useHlsPlayer({
     // Setup HLS or fallback to direct MP4
     if (isHls) {
       if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
+        nativeErrorHandler = () => {
+          if (!isCurrentSetup(setupVersion, videoEl)) {
+            return;
+          }
+          fallbackToSrc(videoEl, fallbackSrc ?? src);
+        };
+        videoEl.addEventListener("error", nativeErrorHandler, { once: true });
         videoEl.src = src;
         videoEl.load();
         setIsLoading(false);
@@ -300,7 +327,7 @@ export function useHlsPlayer({
           void videoEl.play().catch(() => {});
         }
       } else {
-        void initHls(videoEl, changedSource);
+        void initHls(videoEl, changedSource, setupVersion);
       }
     } else {
       // Not HLS => just assign the src
@@ -314,6 +341,10 @@ export function useHlsPlayer({
 
     // Cleanup on unmount
     return () => {
+      setupVersionRef.current += 1;
+      if (nativeErrorHandler !== null) {
+        videoEl.removeEventListener("error", nativeErrorHandler);
+      }
       if (cleanupTimeoutRef.current !== null) {
         clearTimeout(cleanupTimeoutRef.current);
       }

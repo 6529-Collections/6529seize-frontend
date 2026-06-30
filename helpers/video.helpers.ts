@@ -83,6 +83,7 @@ export function isVideoUrl(url: string): boolean {
 const POSITIVE_HEAD_CACHE_TTL_MS = 10 * 60 * 1000;
 const NEGATIVE_HEAD_CACHE_TTL_MS = 60 * 1000;
 const NETWORK_FAILURE_HEAD_CACHE_TTL_MS = 15 * 1000;
+const MAX_HEAD_CACHE_ENTRIES = 500;
 
 interface HeadCacheEntry {
   readonly ok: boolean;
@@ -92,12 +93,34 @@ interface HeadCacheEntry {
 const HEAD_CACHE = new Map<string, HeadCacheEntry>();
 const IN_FLIGHT_HEAD_CHECKS = new Map<string, Promise<boolean>>();
 
+function pruneHeadCache(now: number): void {
+  for (const [cachedUrl, entry] of HEAD_CACHE) {
+    if (entry.expiresAt <= now) {
+      HEAD_CACHE.delete(cachedUrl);
+    }
+  }
+
+  while (HEAD_CACHE.size > MAX_HEAD_CACHE_ENTRIES) {
+    const oldestUrl = HEAD_CACHE.keys().next().value;
+    if (oldestUrl === undefined) {
+      return;
+    }
+    HEAD_CACHE.delete(oldestUrl);
+  }
+}
+
+function setHeadCacheEntry(url: string, entry: HeadCacheEntry): void {
+  HEAD_CACHE.set(url, entry);
+  pruneHeadCache(Date.now());
+}
+
 /**
  * HEAD request to see if a URL is present (200) or missing (404).
  * Uses a small in-memory cache to avoid repeat HEAD requests.
  */
 export async function checkVideoAvailability(url: string): Promise<boolean> {
   const now = Date.now();
+  pruneHeadCache(now);
   const cached = HEAD_CACHE.get(url);
   if (cached && cached.expiresAt > now) {
     return cached.ok;
@@ -120,10 +143,10 @@ export async function checkVideoAvailability(url: string): Promise<boolean> {
       const ttl = response.ok
         ? POSITIVE_HEAD_CACHE_TTL_MS
         : NEGATIVE_HEAD_CACHE_TTL_MS;
-      HEAD_CACHE.set(url, { ok: response.ok, expiresAt: Date.now() + ttl });
+      setHeadCacheEntry(url, { ok: response.ok, expiresAt: Date.now() + ttl });
       return response.ok;
     } catch {
-      HEAD_CACHE.set(url, {
+      setHeadCacheEntry(url, {
         ok: false,
         expiresAt: Date.now() + NETWORK_FAILURE_HEAD_CACHE_TTL_MS,
       });

@@ -54,4 +54,20 @@ describe("video helpers", () => {
     expect(second).toBe(false);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it("evicts old availability cache entries when the cache grows too large", async () => {
+    const fetchMock = jest.fn().mockResolvedValue({ ok: true });
+    (global as any).fetch = fetchMock;
+    const urls = Array.from(
+      { length: 501 },
+      (_, i) => `bounded-cache-${i}.mp4`
+    );
+
+    for (const url of urls) {
+      await checkVideoAvailability(url);
+    }
+    await checkVideoAvailability(urls[0]!);
+
+    expect(fetchMock).toHaveBeenCalledTimes(502);
+  });
 });

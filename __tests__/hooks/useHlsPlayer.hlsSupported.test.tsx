@@ -12,7 +12,13 @@ jest.mock("hls.js", () => {
       return true;
     }
     static Events = { MANIFEST_PARSED: "manifest", ERROR: "error" };
-    static ErrorTypes = { NETWORK_ERROR: "network", MEDIA_ERROR: "media" };
+    static ErrorTypes = {
+      KEY_SYSTEM_ERROR: "key",
+      MEDIA_ERROR: "media",
+      MUX_ERROR: "mux",
+      NETWORK_ERROR: "network",
+      OTHER_ERROR: "other",
+    };
     static ErrorDetails = {
       MANIFEST_LOAD_ERROR: "load",
       MANIFEST_LOAD_TIMEOUT: "timeout",
@@ -68,6 +74,10 @@ function TestComp(props: any) {
 }
 
 describe("useHlsPlayer hls supported", () => {
+  beforeEach(() => {
+    (require("hls.js").default as any).instances.length = 0;
+  });
+
   it("initializes Hls and handles manifest parsed", async () => {
     const onParsed = jest.fn();
     const { getByTestId } = render(
@@ -116,5 +126,20 @@ describe("useHlsPlayer hls supported", () => {
 
     expect(hlsInstance.loadSource).toHaveBeenCalledTimes(3);
     expect(video.src).toContain("fallback.mp4");
+  });
+
+  it("does not attach Hls if disabled before the dynamic import resolves", async () => {
+    const Hls = require("hls.js").default as any;
+    const { rerender } = render(
+      <TestComp src="late.m3u8" isHls enabled={true} />
+    );
+
+    rerender(<TestComp src="late.m3u8" isHls enabled={false} />);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(Hls.instances).toHaveLength(0);
   });
 });

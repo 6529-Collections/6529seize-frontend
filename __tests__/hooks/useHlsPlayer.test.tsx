@@ -71,6 +71,24 @@ describe("useHlsPlayer", () => {
     expect(video.getAttribute("data-loading")).toBe("false");
   });
 
+  it("falls back when native HLS emits an error", () => {
+    (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue(
+      "probably"
+    );
+
+    const { getByTestId } = render(
+      <TestComponent src="video.m3u8" isHls fallbackSrc="fallback.mp4" />
+    );
+    const video = getByTestId("vid") as HTMLVideoElement;
+
+    act(() => {
+      video.dispatchEvent(new Event("error"));
+    });
+
+    expect(video.src).toContain("fallback.mp4");
+    expect(video.getAttribute("data-loading")).toBe("false");
+  });
+
   it("sets src correctly for HLS when fallback is provided and HLS fails", async () => {
     const { getByTestId } = render(
       <TestComponent src="video.m3u8" isHls={true} fallbackSrc="fallback.mp4" />
