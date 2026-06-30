@@ -12,7 +12,7 @@ import Link from "next/link";
 import type React from "react";
 import type { QuickDmAvatarSource } from "./QuickDirectMessagesUtils";
 
-export const QuickDmIconButton = ({
+const QuickDmIconButton = ({
   hasUnreadIndicator = false,
   label,
   onClick,
