@@ -532,13 +532,13 @@ export async function persistSessionResponse(
     throw error;
   }
 
-  if (!didPersistAuth) {
-    await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
-  } else {
+  if (didPersistAuth) {
     clearSessionRefreshFailureForSession(response);
+    return true;
   }
 
-  return didPersistAuth;
+  await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
+  return false;
 }
 
 export async function verifyActiveSessionV2WebSession({
