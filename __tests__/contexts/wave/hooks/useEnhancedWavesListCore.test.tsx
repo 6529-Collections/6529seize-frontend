@@ -7,6 +7,7 @@ jest.mock("@/contexts/wave/hooks/useNewDropCounter", () => ({
   default: jest.fn(() => ({
     newDropsCounts: {},
     resetAllWavesNewDropsCount: jest.fn(),
+    resetWaveNewDropsCount: jest.fn(),
   })),
   getNewestTimestamp: jest.fn(
     (cached: number | null | undefined, server: number | null | undefined) => {
@@ -79,6 +80,11 @@ const createSidebarWave = (overrides: Record<string, unknown> = {}) =>
 describe("useEnhancedWavesListCore", () => {
   beforeEach(() => {
     mockedUseNewDropCounter.mockClear();
+    mockedUseNewDropCounter.mockReturnValue({
+      newDropsCounts: {},
+      resetAllWavesNewDropsCount: jest.fn(),
+      resetWaveNewDropsCount: jest.fn(),
+    });
   });
 
   it("uses the full waves refetch for live unknown-wave recovery", () => {
@@ -222,5 +228,39 @@ describe("useEnhancedWavesListCore", () => {
       "middle-unmuted",
       "older-unmuted",
     ]);
+  });
+
+  it("does not double-count websocket drops already covered by API unread data", () => {
+    mockedUseNewDropCounter.mockReturnValue({
+      newDropsCounts: {
+        "wave-1": {
+          count: 2,
+          latestDropTimestamp: 90,
+          firstUnreadSerialNo: 12,
+        },
+      },
+      resetAllWavesNewDropsCount: jest.fn(),
+      resetWaveNewDropsCount: jest.fn(),
+    });
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [
+        createSidebarWave({
+          latestDropTimestamp: 100,
+          unreadDropsCount: 3,
+          firstUnreadDropSerialNo: 10,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: true,
+      })
+    );
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(3);
+    expect(result.current.waves[0]?.firstUnreadDropSerialNo).toBe(10);
   });
 });

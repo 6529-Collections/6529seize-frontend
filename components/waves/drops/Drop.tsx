@@ -46,6 +46,7 @@ interface DropProps {
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly reserveMediaHeight?: boolean | undefined;
   readonly showVideoFullscreen?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -80,6 +81,7 @@ export default function Drop({
   mediaImageScale,
   fullWidthMedia,
   fullWidthLinkPreviews,
+  reserveMediaHeight,
   showVideoFullscreen = true,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -188,8 +190,8 @@ export default function Drop({
   };
 
   const memoizedValue = useMemo(
-    () => ({ drop, location, showVideoFullscreen }),
-    [drop, location, showVideoFullscreen]
+    () => ({ drop, location, reserveMediaHeight, showVideoFullscreen }),
+    [drop, location, reserveMediaHeight, showVideoFullscreen]
   );
 
   return (

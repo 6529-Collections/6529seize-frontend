@@ -86,4 +86,65 @@ describe("twitter preview API route", () => {
       "https://twitter.com/Mayudropsphotos/status/2057513333985554492"
     );
   });
+
+  it("returns POST batch results and per-url errors", async () => {
+    const goodUrl = "https://x.com/Mayudropsphotos/status/2057513333985554492";
+    mockFetchTweetPreview.mockImplementation(async (url: string) => {
+      if (url === "not-a-tweet") {
+        throw new Error("Invalid Twitter/X status URL.");
+      }
+
+      return {
+        tweetId: "2057513333985554492",
+        url,
+        text: "Post text",
+      };
+    });
+
+    const { POST } = await import("../../../app/api/twitter/preview/route");
+    const response = await POST({
+      json: async () => ({
+        urls: [` ${goodUrl} `, "not-a-tweet", goodUrl],
+      }),
+    } as any);
+    const body = (await response.json()) as {
+      readonly results: Record<string, unknown>;
+      readonly errors: Record<string, string | undefined>;
+    };
+
+    expect(response.status).toBe(200);
+    expect(mockFetchTweetPreview).toHaveBeenCalledTimes(2);
+    expect(mockFetchTweetPreview).toHaveBeenCalledWith(goodUrl);
+    expect(mockFetchTweetPreview).toHaveBeenCalledWith("not-a-tweet");
+    expect(body.results[goodUrl]).toMatchObject({
+      tweetId: "2057513333985554492",
+      text: "Post text",
+    });
+    expect(body.errors["not-a-tweet"]).toBe("Invalid Twitter/X status URL.");
+  });
+
+  it("returns an error when the POST batch has no URLs", async () => {
+    const { POST } = await import("../../../app/api/twitter/preview/route");
+    const response = await POST({
+      json: async () => ({ urls: [] }),
+    } as any);
+
+    expect(response.status).toBe(400);
+    expect(mockFetchTweetPreview).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the POST batch exceeds the URL limit", async () => {
+    const urls = Array.from(
+      { length: 6 },
+      (_value, index) => `https://x.com/user/status/${index + 1}`
+    );
+
+    const { POST } = await import("../../../app/api/twitter/preview/route");
+    const response = await POST({
+      json: async () => ({ urls }),
+    } as any);
+
+    expect(response.status).toBe(400);
+    expect(mockFetchTweetPreview).not.toHaveBeenCalled();
+  });
 });
