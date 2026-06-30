@@ -111,6 +111,7 @@ describe("commonApiPost", () => {
       includeWalletAuth: false,
     });
 
+    expect(getAuthJwt).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/e",
       expect.objectContaining({

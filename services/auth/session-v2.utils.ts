@@ -39,24 +39,9 @@ interface SessionNativeResponse {
 
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
-type SessionRefreshFailureCooldown =
-  | {
-      readonly type: "empty";
-      readonly expiresAtMs: number;
-    }
-  | {
-      readonly type: "error";
-      readonly expiresAtMs: number;
-      readonly error: unknown;
-    };
-type SessionRefreshFailure =
-  | {
-      readonly type: "empty";
-    }
-  | {
-      readonly type: "error";
-      readonly error: unknown;
-    };
+type SessionRefreshFailureCooldown = {
+  readonly expiresAtMs: number;
+};
 type SessionRefreshInFlight = {
   readonly controller: AbortController;
   readonly promise: Promise<SessionRefreshResponse | null>;
@@ -152,17 +137,26 @@ function getActiveFailureCooldown(
 }
 
 function rememberSessionRefreshFailure(
-  key: string,
-  failure: SessionRefreshFailure
+  key: string
 ): void {
   sessionRefreshFailureCooldowns.set(key, {
-    ...failure,
     expiresAtMs: Date.now() + SESSION_REFRESH_FAILURE_COOLDOWN_MS,
   });
 }
 
 function clearSessionRefreshFailure(key: string): void {
   sessionRefreshFailureCooldowns.delete(key);
+}
+
+function clearSessionRefreshFailureForSession(
+  response: SessionLoginResponse | SessionRefreshResponse
+): void {
+  clearSessionRefreshFailure(
+    getSessionRefreshKey({
+      address: response.address,
+      clientType: response.client_type,
+    })
+  );
 }
 
 function settleSessionRefreshConsumer(
@@ -286,17 +280,21 @@ export async function loginWithSessionV2({
   readonly role: string | null;
 }): Promise<SessionLoginResponse> {
   const roleBody = role === null ? {} : { role };
-  return await commonApiPost<SessionLoginRequest, SessionLoginResponse>({
-    endpoint: "auth/session-login",
-    body: {
-      client_type: getSessionClientType(),
-      server_signature: serverSignature,
-      client_signature: clientSignature,
-      client_address: signerAddress,
-      ...roleBody,
-    },
-    credentials: getSessionCredentialsMode(),
-  });
+  const response = await commonApiPost<SessionLoginRequest, SessionLoginResponse>(
+    {
+      endpoint: "auth/session-login",
+      body: {
+        client_type: getSessionClientType(),
+        server_signature: serverSignature,
+        client_signature: clientSignature,
+        client_address: signerAddress,
+        ...roleBody,
+      },
+      credentials: getSessionCredentialsMode(),
+    }
+  );
+  clearSessionRefreshFailureForSession(response);
+  return response;
 }
 
 async function executeSessionRefreshV2({
@@ -329,7 +327,7 @@ async function executeSessionRefreshV2({
           native_refresh_token: nativeRefreshToken,
         },
         signal: abortSignal,
-        credentials: "include",
+        credentials: getSessionCredentialsMode(),
         errorMode: "structured",
         includeWalletAuth: false,
       });
@@ -355,7 +353,7 @@ async function executeSessionRefreshV2({
         client_address: address,
       },
       signal: abortSignal,
-      credentials: "include",
+      credentials: getSessionCredentialsMode(),
       errorMode: "structured",
       includeWalletAuth: false,
     });
@@ -382,11 +380,8 @@ export async function refreshSessionV2({
   const key = getSessionRefreshKey({ address, clientType });
   const cooldown = getActiveFailureCooldown(key);
 
-  if (cooldown?.type === "empty") {
+  if (cooldown) {
     return null;
-  }
-  if (cooldown?.type === "error") {
-    throw cooldown.error;
   }
 
   let existingEntry = sessionRefreshInFlight.get(key);
@@ -424,12 +419,11 @@ export async function refreshSessionV2({
         return;
       }
 
-      rememberSessionRefreshFailure(key, { type: "empty" });
+      rememberSessionRefreshFailure(key);
     } catch (error: unknown) {
       if (isAbortError(error)) {
         return;
       }
-      rememberSessionRefreshFailure(key, { type: "error", error });
     } finally {
       if (sessionRefreshInFlight.get(key) === entry) {
         sessionRefreshInFlight.delete(key);
@@ -484,6 +478,8 @@ export async function persistSessionResponse(
 
   if (!didPersistAuth) {
     await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
+  } else {
+    clearSessionRefreshFailureForSession(response);
   }
 
   return didPersistAuth;
