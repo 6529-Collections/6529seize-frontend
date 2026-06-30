@@ -264,7 +264,7 @@ export default function RememeAddPage() {
       <div className="tw-pb-5">
         <div>
           <div className="tw-container tw-mx-auto tw-px-3 tw-pt-4">
-            <div className="tw-grid tw-grid-cols-1 tw-pb-2 tw-pt-2">
+            <div className="tw-grid tw-grid-cols-1 tw-pb-2 tw-pt-2 md:tw-grid-cols-12">
               <div className="tw-flex tw-items-center tw-gap-2 md:tw-col-span-4">
                 <Image
                   unoptimized
