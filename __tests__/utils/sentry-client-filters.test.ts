@@ -13,6 +13,7 @@ import {
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
+  shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -30,6 +31,8 @@ describe("sentry-client-filters", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const talismanOnboardingMessage =
+    "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const rabbyMobileUserRejectedStack =
@@ -239,6 +242,36 @@ describe("sentry-client-filters", () => {
         },
       ],
     },
+    ...overrides,
+  });
+
+  const createTalismanExtensionOnboardingEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/the-memes/mint",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: talismanOnboardingMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "chrome-extension://talisman-wallet/page.js",
+                abs_path: "chrome-extension://talisman-wallet/page.js",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        category: "console",
+        message:
+          "Detected multiple injected wallet providers; Backpack override skipped.",
+      },
+    ],
     ...overrides,
   });
 
@@ -3321,6 +3354,131 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters exact Talisman onboarding errors from extension page.js frames", () => {
+    // Arrange
+    const event = createTalismanExtensionOnboardingEvent();
+
+    // Act
+    const result = shouldFilterTalismanExtensionOnboardingError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters exact Talisman onboarding errors from the original extension stack", () => {
+    // Arrange
+    const event = createTalismanExtensionOnboardingEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: `Error: ${talismanOnboardingMessage}`,
+          },
+        ],
+      },
+    });
+    const error = new Error(talismanOnboardingMessage);
+    error.stack = `Error: ${talismanOnboardingMessage}\n    at connect (chrome-extension://talisman-wallet/page.js:1:1)`;
+
+    // Act
+    const result = shouldFilterTalismanExtensionOnboardingError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter Talisman onboarding errors when an app frame is present", () => {
+    // Arrange
+    const event = createTalismanExtensionOnboardingEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: talismanOnboardingMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "chrome-extension://talisman-wallet/page.js",
+                  abs_path: "chrome-extension://talisman-wallet/page.js",
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/auth/WagmiSetup.tsx",
+                  function: "initializeWalletProviders",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterTalismanExtensionOnboardingError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Talisman onboarding errors when the original stack has app code", () => {
+    // Arrange
+    const event = createTalismanExtensionOnboardingEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: talismanOnboardingMessage,
+          },
+        ],
+      },
+    });
+    const error = new Error(talismanOnboardingMessage);
+    error.stack = [
+      `Error: ${talismanOnboardingMessage}`,
+      "    at connect (chrome-extension://talisman-wallet/page.js:1:1)",
+      "    at initializeWalletProviders (webpack-internal:///(app-pages-browser)/./components/auth/WagmiSetup.tsx:10:5)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterTalismanExtensionOnboardingError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter related Talisman errors without the exact onboarding message", () => {
+    // Arrange
+    const event = createTalismanExtensionOnboardingEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Talisman extension failed to initialize.",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "chrome-extension://talisman-wallet/page.js",
+                  abs_path: "chrome-extension://talisman-wallet/page.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterTalismanExtensionOnboardingError(event);
 
     // Assert
     expect(result).toBe(false);

@@ -28,6 +28,7 @@ import {
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
+  shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -136,6 +137,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterTalismanExtensionOnboardingError(event, hint)) {
     return true;
   }
 
