@@ -5,6 +5,7 @@ import {
   getAboutNavItemHref,
   getAboutNavItemLabel,
   getVisibleAboutNavGroups,
+  isAboutSectionNavItem,
 } from "@/components/about/about.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -143,10 +144,15 @@ function getAboutSection(hideSubscriptions: boolean): SidebarSection {
     items: [{ name: "About", href: "/about" }],
     subsections: getVisibleAboutNavGroups(hideSubscriptions).map((group) => ({
       name: t(DEFAULT_LOCALE, group.labelKey),
-      items: group.items.map((item) => ({
-        name: getAboutNavItemLabel(item, DEFAULT_LOCALE),
-        href: getAboutNavItemHref(item),
-      })),
+      items: group.items.map((item) => {
+        const href = getAboutNavItemHref(item);
+
+        return {
+          name: getAboutNavItemLabel(item, DEFAULT_LOCALE),
+          href,
+          ...(isAboutSectionNavItem(item) ? {} : { activatesSection: false }),
+        };
+      }),
     })),
   };
 }
