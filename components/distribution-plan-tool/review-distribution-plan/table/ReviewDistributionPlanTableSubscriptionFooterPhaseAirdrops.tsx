@@ -9,6 +9,10 @@ import {
 } from "@/helpers/Helpers";
 import { type ChangeEvent, useRef, useState } from "react";
 import { Modal } from "react-bootstrap";
+import {
+  subscriptionFooterModalContainerClass,
+  subscriptionFooterWarningAlertClass,
+} from "./ReviewDistributionPlanTableSubscriptionFooter.classes";
 
 export type DistributionAirdropsPhase = "artist" | "team";
 
@@ -235,7 +239,7 @@ export function DistributionPhaseAirdropsModal(
       </Modal.Header>
       <hr className="tw-my-0" />
       <Modal.Body>
-        <div className="tw-container tw-mx-auto">
+        <div className={subscriptionFooterModalContainerClass}>
           <div className="tw-py-2">
             <div>
               Contract: The Memes - <span>{formatAddress(contract)}</span>
@@ -256,6 +260,7 @@ export function DistributionPhaseAirdropsModal(
                   min={1}
                   step={1}
                   type="number"
+                  aria-label="Token ID"
                   value={tokenId}
                   onChange={(e) => {
                     setTokenId(e.target.value);
@@ -266,7 +271,7 @@ export function DistributionPhaseAirdropsModal(
           </div>
           <div className="tw-py-2">
             <div>
-              <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-[#664d03] tw-bg-[#fff3cd] tw-px-4 tw-py-3 tw-text-[#664d03]">
+              <div className={subscriptionFooterWarningAlertClass}>
                 This upload will replace the current {copy.successLabel}{" "}
                 airdrops list for this token.
               </div>

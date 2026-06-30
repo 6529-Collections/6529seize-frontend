@@ -4,6 +4,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { formatAddress } from "@/helpers/Helpers";
 import type { ReactNode } from "react";
 import { Modal } from "react-bootstrap";
+import { subscriptionFooterModalContainerClass } from "./ReviewDistributionPlanTableSubscriptionFooter.classes";
 
 interface ReviewDistributionPlanTableSubscriptionFooterModalProps {
   readonly title: string;
@@ -54,7 +55,7 @@ export function ReviewDistributionPlanTableSubscriptionFooterModal({
       </Modal.Header>
       <hr className="tw-my-0" />
       <Modal.Body data-testid={bodyTestId}>
-        <div className="tw-container tw-mx-auto">{children}</div>
+        <div className={subscriptionFooterModalContainerClass}>{children}</div>
       </Modal.Body>
       <Modal.Footer>{footer}</Modal.Footer>
     </Modal>

@@ -9,6 +9,10 @@ import {
 } from "@/helpers/Helpers";
 import { useRef, useState } from "react";
 import { Modal } from "react-bootstrap";
+import {
+  subscriptionFooterModalContainerClass,
+  subscriptionFooterWarningAlertClass,
+} from "./ReviewDistributionPlanTableSubscriptionFooter.classes";
 
 export function UploadDistributionPhotosModal(
   props: Readonly<{
@@ -125,7 +129,7 @@ export function UploadDistributionPhotosModal(
       </Modal.Header>
       <hr className="tw-my-0" />
       <Modal.Body>
-        <div className="tw-container tw-mx-auto">
+        <div className={subscriptionFooterModalContainerClass}>
           <div className="tw-py-2">
             <div>
               Contract: The Memes - <span>{formatAddress(contract)}</span>
@@ -146,6 +150,7 @@ export function UploadDistributionPhotosModal(
                   min={1}
                   step={1}
                   type="number"
+                  aria-label="Token ID"
                   value={tokenId}
                   onChange={(e) => {
                     setTokenId(e.target.value);
@@ -158,7 +163,7 @@ export function UploadDistributionPhotosModal(
             props.existingPhotosCount > 0 && (
               <div className="tw-py-2">
                 <div>
-                  <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-[#664d03] tw-bg-[#fff3cd] tw-px-4 tw-py-3 tw-text-[#664d03]">
+                  <div className={subscriptionFooterWarningAlertClass}>
                     ⚠️ {props.existingPhotosCount} photo(s) already exist. This
                     will replace all existing photos.
                   </div>
@@ -173,6 +178,7 @@ export function UploadDistributionPhotosModal(
                 type="file"
                 accept="image/*"
                 multiple
+                aria-label="Select photos"
                 onChange={handleFileChange}
                 style={{
                   color: "black",

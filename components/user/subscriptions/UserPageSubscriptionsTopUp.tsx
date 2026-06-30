@@ -60,6 +60,12 @@ function getTopUpModalEmoji(
   return emojiByStatus[status];
 }
 
+const TOP_UP_OPTION_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 sm:tw-gap-x-6";
+const TOP_UP_OPTION_GRID_PADDED_CLASS = `${TOP_UP_OPTION_GRID_CLASS} tw-pt-2`;
+const TOP_UP_RADIO_GRID_CLASS =
+  "tw-grid tw-grid-cols-[8.333333%_1fr] tw-items-center";
+
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
@@ -355,7 +361,7 @@ export default function UserPageSubscriptionsTopUp() {
 
   const topUpContent = (
     <>
-      <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 sm:tw-gap-x-6">
+      <div className={TOP_UP_OPTION_GRID_CLASS}>
         <div className="tw-pt-2">
           <CardCountOption
             count={1}
@@ -369,12 +375,12 @@ export default function UserPageSubscriptionsTopUp() {
         </div>
         {printRemainingMints(remainingMintsForSeason, "SZN", szn, "szn")}
       </div>
-      <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 sm:tw-gap-x-6">
+      <div className={TOP_UP_OPTION_GRID_CLASS}>
         {printRemainingMints(remainingMintsForYear, "Year", year, "year")}
         {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch, "epoch")}
       </div>
       {!showDeep && (
-        <div className="tw-grid tw-grid-cols-1 tw-pt-2 sm:tw-grid-cols-2 sm:tw-gap-x-6">
+        <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
           <div className="tw-text-iron-400">
             <div className="tw-pl-[calc(0.75rem+8.33%)]">
               <ShowMoreButton
@@ -389,7 +395,7 @@ export default function UserPageSubscriptionsTopUp() {
       )}
       {showDeep && (
         <>
-          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 sm:tw-gap-x-6">
+          <div className={TOP_UP_OPTION_GRID_CLASS}>
             {printRemainingMints(
               remainingMintsForPeriod,
               "Period",
@@ -398,10 +404,10 @@ export default function UserPageSubscriptionsTopUp() {
             )}
             {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
           </div>
-          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 sm:tw-gap-x-6">
+          <div className={TOP_UP_OPTION_GRID_CLASS}>
             {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
           </div>
-          <div className="tw-grid tw-grid-cols-1 tw-pt-2 sm:tw-grid-cols-2 sm:tw-gap-x-6">
+          <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
             <div className="tw-text-iron-400">
               <div className="tw-pl-[calc(0.75rem+8.33%)]">
                 <ShowMoreButton
@@ -415,7 +421,7 @@ export default function UserPageSubscriptionsTopUp() {
           </div>
         </>
       )}
-      <div className="tw-grid tw-grid-cols-1 tw-pt-2 sm:tw-grid-cols-2 sm:tw-gap-x-6">
+      <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
         <div className="tw-flex tw-items-center">
           <button
             type="button"
@@ -428,7 +434,7 @@ export default function UserPageSubscriptionsTopUp() {
             }`}
             onClick={handleSelectOther}
           >
-            <div className="tw-grid tw-grid-cols-[8.333333%_1fr] tw-items-center">
+            <div className={TOP_UP_RADIO_GRID_CLASS}>
               <div className="tw-flex tw-items-center tw-justify-center">
                 <input
                   type="radio"
@@ -608,7 +614,7 @@ function CardCountOption(
       }`}
       onClick={props.onSelect}
     >
-      <div className="tw-grid tw-grid-cols-[8.333333%_1fr] tw-items-center">
+      <div className={TOP_UP_RADIO_GRID_CLASS}>
         <div className="tw-flex tw-items-center tw-justify-center">
           <input
             type="radio"

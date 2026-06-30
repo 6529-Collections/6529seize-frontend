@@ -9,6 +9,7 @@ import {
 } from "@/helpers/Helpers";
 import { useState } from "react";
 import { Modal } from "react-bootstrap";
+import { subscriptionFooterModalContainerClass } from "./ReviewDistributionPlanTableSubscriptionFooter.classes";
 
 export function ConfirmTokenIdModal(
   props: Readonly<{
@@ -46,7 +47,7 @@ export function ConfirmTokenIdModal(
       </Modal.Header>
       <hr className="tw-my-0" />
       <Modal.Body>
-        <div className="tw-container tw-mx-auto">
+        <div className={subscriptionFooterModalContainerClass}>
           <div className="tw-py-2">
             <div>
               Contract: The Memes - <span>{formatAddress(contract)}</span>
@@ -63,6 +64,7 @@ export function ConfirmTokenIdModal(
                 min={1}
                 step={1}
                 type="number"
+                aria-label="Token ID"
                 value={tokenId}
                 onChange={(e) => {
                   setTokenId(e.target.value);
