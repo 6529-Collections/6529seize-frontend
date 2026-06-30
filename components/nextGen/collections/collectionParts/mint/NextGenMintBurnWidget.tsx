@@ -31,7 +31,7 @@ import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useChainId, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
-import { NextGenMintingFor } from "./NextGenMintShared";
+import { NextGenMintErrors, NextGenMintingFor } from "./NextGenMintShared";
 
 interface Props {
   collection: NextGenCollection;
@@ -329,10 +329,11 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
           <div>{mintForAddress}</div>
         </div>
         <div className="tw-py-1">
-          <label>
+          <label htmlFor={`burn-token-${props.collection.id}`}>
             <span>Select token from Burn collection</span>
           </label>
           <select
+            id={`burn-token-${props.collection.id}`}
             disabled={!tokensOwnedForBurnAddressLoaded}
             className={`${styles["mintSelect"]} tw-form-select tw-block tw-w-full tw-rounded-none`}
             value={tokenId}
@@ -362,16 +363,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
           </button>
         </div>
         {errors.length > 0 && (
-          <div className="tw-py-1">
-            <label className="tw-flex tw-items-center">Errors</label>
-            <div className="tw-flex tw-items-center">
-              <ul className="tw-mb-0">
-                {errors.map((e) => (
-                  <li key={`mint-error-${e.replaceAll(" ", "-")}`}>{e}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          <NextGenMintErrors errors={errors} className="tw-py-1" />
         )}
         <NextGenContractWriteStatus
           isLoading={mintWrite.isPending}

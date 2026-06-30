@@ -68,3 +68,24 @@ export function NextGenMintingFor(
     </div>
   );
 }
+
+export function NextGenMintErrors({
+  errors,
+  className = "tw-py-2",
+}: Readonly<{
+  errors: string[];
+  className?: string;
+}>) {
+  return (
+    <div className={className}>
+      <div className="tw-flex tw-items-center">Errors</div>
+      <div className="tw-flex tw-items-center">
+        <ul className="tw-mb-0">
+          {errors.map((error) => (
+            <li key={`mint-error-${error.replaceAll(" ", "-")}`}>{error}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}

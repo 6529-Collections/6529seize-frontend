@@ -129,20 +129,20 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           <table className="tw-w-full">
             <tbody>
               <tr>
-                <td className="tw-flex tw-justify-center tw-gap-3">
+                <th scope="row" className="tw-flex tw-justify-center tw-gap-3">
                   <span>
                     <b>Start</b>
                   </span>
                   <span>{printPhaseDateTime(startTime)}</span>
-                </td>
+                </th>
               </tr>
               <tr>
-                <td className="tw-flex tw-justify-center tw-gap-3">
+                <th scope="row" className="tw-flex tw-justify-center tw-gap-3">
                   <span>
                     <b>End</b>
                   </span>
                   <span>{printPhaseDateTime(endTime)}</span>
-                </td>
+                </th>
               </tr>
             </tbody>
           </table>

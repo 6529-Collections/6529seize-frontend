@@ -34,7 +34,7 @@ import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
-import { NextGenMintingFor } from "./NextGenMintShared";
+import { NextGenMintErrors, NextGenMintingFor } from "./NextGenMintShared";
 
 export function getJsonData(keccak: string, data: string) {
   const parsed = JSON.parse(data);
@@ -566,18 +566,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             </button>
           </div>
         </div>
-        {errors.length > 0 && (
-          <div className="tw-py-2">
-            <label className="tw-flex tw-items-center">Errors</label>
-            <div className="tw-flex tw-items-center">
-              <ul className="tw-mb-0">
-                {errors.map((e) => (
-                  <li key={`mint-error-${e.replaceAll(" ", "-")}`}>{e}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
+        {errors.length > 0 && <NextGenMintErrors errors={errors} />}
         <NextGenContractWriteStatus
           isLoading={mintWrite.isPending}
           hash={mintWrite.data}
