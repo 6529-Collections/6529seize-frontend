@@ -8,6 +8,7 @@ import {
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -34,10 +35,25 @@ describe("sentry-client-filters", () => {
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
+  const reactDomRemoveChildMessage =
+    __testing.REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
   };
+  const reactDomStaticChunkFrame = (
+    functionName: string
+  ): SentryStackFrame => ({
+    filename:
+      "https://6529.io/_next/static/chunks/app/waves/%5Bwave%5D/page-1234567890abcdef.js",
+    function: functionName,
+  });
+  const reactDomStaticWebpackFrame = (
+    functionName: string
+  ): SentryStackFrame => ({
+    filename: "https://6529.io/_next/static/webpack/1234567890abcdef.webpack.js",
+    function: functionName,
+  });
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
   const wasmCspUnsafeEvalMessage = [
@@ -286,9 +302,10 @@ describe("sentry-client-filters", () => {
     });
 
   const createSentryRouteParameterizationEvent = (
-    overrides: Record<string, unknown> = {}
-  ) =>
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
     ({
+      transaction: "/waves/:wave",
       exception: {
         values: [
           {
@@ -310,6 +327,21 @@ describe("sentry-client-filters", () => {
           },
         ],
       },
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+      },
+      contexts: {
+        app: {
+          app_name: "MetaMaskMobile",
+        },
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+      },
       breadcrumbs: [
         {
           category: "navigation",
@@ -320,7 +352,7 @@ describe("sentry-client-filters", () => {
         },
       ],
       ...overrides,
-    }) as any;
+    });
 
   const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -397,6 +429,28 @@ describe("sentry-client-filters", () => {
     tags: {
       transaction: "/waves",
       url: "/waves",
+    },
+    ...overrides,
+  });
+
+  const createReactDomRemoveChildEvent = (
+    overrides: Partial<SentryClientEvent> = {}
+  ): SentryClientEvent => ({
+    transaction: "/the-memes/mint",
+    exception: {
+      values: [
+        {
+          type: "NotFoundError",
+          value: reactDomRemoveChildMessage,
+          stacktrace: {
+            frames: [reactDomFrame],
+          },
+        },
+      ],
+    },
+    tags: {
+      transaction: "/the-memes/mint",
+      url: "/the-memes/mint",
     },
     ...overrides,
   });
@@ -488,6 +542,58 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters React DOM insertBefore NotFoundError events before Sentry source-map symbolication", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        transaction: "/waves/:wave",
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames: [
+                  reactDomStaticChunkFrame("insertOrAppendPlacementNode"),
+                  reactDomStaticChunkFrame("commitReconciliationEffects"),
+                  reactDomStaticChunkFrame("commitMutationEffectsOnFiber"),
+                  reactDomStaticChunkFrame("recursivelyTraverseMutationEffects"),
+                ],
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction: "/waves/:wave",
+          url: "/waves/aadd124b-e5c7-4c40-9644-a24d1ce5384b",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters React DOM insertBefore NotFoundError events from webpack static chunks", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames: [
+                  reactDomStaticWebpackFrame("insertOrAppendPlacementNode"),
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
   it("filters React DOM insertBefore NotFoundError events when request URL identifies a waves route", () => {
     const result = shouldFilterReactDomInsertBeforeNotFoundError(
       createReactDomInsertBeforeEvent({
@@ -528,6 +634,29 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("keeps pre-symbolicated insertBefore events when a non-React DOM frame is present", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames: [
+                  reactDomStaticChunkFrame("insertOrAppendPlacementNode"),
+                  reactDomStaticChunkFrame("WaveDrop"),
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
   it("keeps React DOM insertBefore NotFoundError events outside waves routes", () => {
     const result = shouldFilterReactDomInsertBeforeNotFoundError(
       createReactDomInsertBeforeEvent({
@@ -545,6 +674,93 @@ describe("sentry-client-filters", () => {
   it("keeps different NotFoundError messages from React DOM runtime frames", () => {
     const result = shouldFilterReactDomInsertBeforeNotFoundError(
       createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: "The requested node was not found.",
+              stacktrace: {
+                frames: [reactDomFrame],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("filters exact React DOM removeChild NotFoundError events on The Memes mint route with only runtime frames", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        tags: {
+          transaction: "/the-memes/mint",
+          url: "/the-memes/mint",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters React DOM removeChild NotFoundError events when request URL identifies a waves route", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        transaction: undefined,
+        tags: {},
+        request: {
+          url: "https://6529.io/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099?view=full",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps React DOM removeChild NotFoundError events when an app frame is present", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomRemoveChildMessage,
+              stacktrace: {
+                frames: [
+                  reactDomFrame,
+                  {
+                    filename:
+                      "webpack-internal:///(app-pages-browser)/./components/the-memes/TheMemesMint.tsx",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps React DOM removeChild NotFoundError events outside affected routes", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        transaction: "/the-memes",
+        tags: {
+          transaction: "/the-memes",
+          url: "/the-memes",
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps different removeChild NotFoundError messages from React DOM runtime frames", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
         exception: {
           values: [
             {
@@ -2141,6 +2357,70 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(false);
+  });
+
+  it("does not filter cyclic JSON route parameterization errors without MetaMaskMobile WKWebView context", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      contexts: {
+        browser: {
+          name: "Mobile Safari",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari",
+        "browser.name": "Mobile Safari",
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter MetaMaskMobile route parameterization errors outside waves routes", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: "/about",
+      request: {
+        url: "https://6529.io/about",
+      },
+      breadcrumbs: [
+        {
+          category: "navigation",
+          data: {
+            from: "/about",
+            to: "/about",
+          },
+        },
+      ],
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters MetaMaskMobile route parameterization errors when waves route appears only in navigation breadcrumbs", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: undefined,
+      request: undefined,
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
   });
 
   it("filters injected wallet collisions for tronlinkParams in app URI stacks", () => {

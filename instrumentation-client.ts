@@ -22,6 +22,7 @@ import {
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
@@ -142,6 +143,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterReactDomInsertBeforeNotFoundError(event)) {
+    return true;
+  }
+
+  if (shouldFilterReactDomRemoveChildNotFoundError(event)) {
     return true;
   }
 
