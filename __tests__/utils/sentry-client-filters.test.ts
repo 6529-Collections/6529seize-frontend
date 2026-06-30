@@ -9,6 +9,7 @@ import {
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
@@ -29,6 +30,8 @@ describe("sentry-client-filters", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const rabbyMobileUserRejectedStack =
+    "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
@@ -153,6 +156,41 @@ describe("sentry-client-filters", () => {
       },
       ...overrides,
     });
+
+  const createAppKitCoinbaseBreadcrumbs = (): NonNullable<
+    SentryClientEvent["breadcrumbs"]
+  > => ({
+    values: [
+      {
+        category: "console",
+        level: "debug",
+        message: "[AppKitInitialization] Initializing AppKit adapter (web) with",
+        data: {
+          arguments: [
+            "[AppKitInitialization] Initializing AppKit adapter (web) with",
+            0,
+            "AppWallets",
+          ],
+        },
+      },
+      {
+        category: "console",
+        level: "debug",
+        message: "AppKit config",
+        data: {
+          arguments: [
+            {
+              enableCoinbase: true,
+              featuredWalletIds: ["metamask", "walletConnect"],
+              features: {
+                connectMethodsOrder: ["wallet"],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  });
 
   const createMetaMaskUpdateUrlCircularEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -283,6 +321,32 @@ describe("sentry-client-filters", () => {
       ],
       ...overrides,
     }) as any;
+
+  const createRabbyMobileUserRejectedRequestEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    ({
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileUserRejectedStack,
+        },
+      },
+      ...overrides,
+    }) as TestSentryClientEvent;
 
   const createLowValueNetworkEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -2308,6 +2372,34 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters AppKit Coinbase websocket 1006 errors when Sentry has no app frames", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter app-owned websocket 1006 errors", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
@@ -2321,6 +2413,108 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "services/websocket/WebSocketProvider.tsx",
                   abs_path: "services/websocket/WebSocketProvider.tsx",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter app-owned websocket 1006 errors with AppKit Coinbase breadcrumbs", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "services/websocket/WebSocketProvider.tsx",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter no-frame websocket 1006 errors when the original exception stack is app-owned", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+    const error = new Error("websocket error 1006:");
+    error.stack = [
+      "Error: websocket error 1006:",
+      "    at connect (webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter AppKit websocket 1006 errors without a wallet connector breadcrumb", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [
+          {
+            category: "console",
+            message:
+              "[AppKitInitialization] Initializing AppKit adapter (web) with",
+            data: {
+              arguments: [
+                {
+                  enableCoinbase: false,
+                  featuredWalletIds: ["metamask"],
                 },
               ],
             },
@@ -2720,6 +2914,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters RabbyMobile 4001 user-rejected object rejections without app frames", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent();
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters injected WebAssembly CSP unsafe-eval errors", () => {
     // Arrange
     const event = createInjectedWasmCspUnsafeEvalEvent();
@@ -2772,6 +2977,34 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter RabbyMobile user-rejected object rejections with app-owned frames", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "hooks/drops/useDropSignature.ts",
+                  abs_path: "hooks/drops/useDropSignature.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
 
     // Assert
     expect(result).toBe(false);
@@ -2864,6 +3097,25 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter non-4001 RabbyMobile wallet object rejections", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4100,
+          message: "Not Allowed",
+          stack: rabbyMobileUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
 
     // Assert
     expect(result).toBe(false);

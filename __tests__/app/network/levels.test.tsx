@@ -10,6 +10,11 @@ jest.mock("@/components/levels/TableOfLevels", () => () => (
   <div data-testid="table-of-levels" />
 ));
 
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  useCookieConsent: () => ({ country: "US" }),
+  useOptionalCookieConsent: () => ({ country: "US" }),
+}));
+
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
@@ -29,7 +34,9 @@ describe("LevelsPage (App Router)", () => {
   it("sets title and renders components", () => {
     render(<LevelsClient />);
 
-    expect(screen.getByText("Levels")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Levels" })
+    ).toBeInTheDocument();
     expect(screen.getByTestId("progress-chart")).toBeInTheDocument();
     expect(screen.getByTestId("table-of-levels")).toBeInTheDocument();
 

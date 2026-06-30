@@ -46,6 +46,6 @@ describe("CommunityMembersMobileSortContent", () => {
     render(<CommunityMembersMobileSortContent {...defaultProps} />);
 
     const levelButton = screen.getByText("Level").closest("button");
-    expect(levelButton?.className).toContain("tw-border-primary-500");
+    expect(levelButton?.className).toContain("tw-border-primary-400/30");
   });
 });
