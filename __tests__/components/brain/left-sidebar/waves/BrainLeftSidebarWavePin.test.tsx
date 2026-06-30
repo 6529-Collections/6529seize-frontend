@@ -123,26 +123,28 @@ describe("BrainLeftSidebarWavePin", () => {
     expect(removePinnedWave).not.toHaveBeenCalled();
   });
 
-  it("collapses compact desktop row width until hover or keyboard focus", () => {
+  it("collapses compact desktop row width until row hover or direct keyboard focus", () => {
     setup(false, [], undefined, connectedAuth, true);
     const button = screen.getByRole("button", { name: /pin wave/i });
 
     expect(button).toHaveClass("tw-h-7");
     expect(button).toHaveClass("tw-w-0");
-    expect(button).toHaveClass("group-hover:tw-w-7");
-    expect(button).toHaveClass("group-focus-within:tw-w-7");
+    expect(button).toHaveClass("desktop-hover:group-hover:tw-w-7");
     expect(button).toHaveClass("focus-visible:tw-w-7");
+    expect(button).not.toHaveClass("group-focus-within:tw-w-7");
+    expect(button).not.toHaveClass("focus:tw-w-7");
     expect(button.querySelector("svg")).toHaveClass("tw-size-3.5");
   });
 
-  it("hides pinned desktop controls until row hover or keyboard focus", () => {
+  it("hides pinned desktop controls until row hover or direct keyboard focus", () => {
     setup(true, ["1"]);
     const button = screen.getByRole("button", { name: /unpin wave/i });
 
     expect(button).toHaveClass("tw-opacity-0");
-    expect(button).toHaveClass("group-hover:tw-opacity-100");
-    expect(button).toHaveClass("group-focus-within:tw-opacity-100");
+    expect(button).toHaveClass("desktop-hover:group-hover:tw-opacity-100");
     expect(button).toHaveClass("focus-visible:tw-opacity-100");
+    expect(button).not.toHaveClass("group-focus-within:tw-opacity-100");
+    expect(button).not.toHaveClass("focus:tw-opacity-100");
   });
 
   it("keeps pinned touch controls visible", () => {
