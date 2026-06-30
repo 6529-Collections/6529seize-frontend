@@ -432,25 +432,23 @@ export default function RememeAddPage() {
             {addRememe && submissionResult && (
               <div className="tw-pt-3">
                 <div className="tw-w-full">
-                  <>
-                    {submissionResult.success ? (
-                      <span className="tw-flex tw-items-center tw-gap-2">
-                        Status: Success
-                        <FontAwesomeIcon
-                          icon={faCheckCircle}
-                          className={styles["verifiedIcon"]}
-                        />
-                      </span>
-                    ) : (
-                      <span className="tw-flex tw-items-center tw-gap-2">
-                        Status: Fail
-                        <FontAwesomeIcon
-                          icon={faTimesCircle}
-                          className={styles["unverifiedIcon"]}
-                        />
-                      </span>
-                    )}
-                  </>
+                  {submissionResult.success ? (
+                    <span className="tw-flex tw-items-center tw-gap-2">
+                      Status: Success
+                      <FontAwesomeIcon
+                        icon={faCheckCircle}
+                        className={styles["verifiedIcon"]}
+                      />
+                    </span>
+                  ) : (
+                    <span className="tw-flex tw-items-center tw-gap-2">
+                      Status: Fail
+                      <FontAwesomeIcon
+                        icon={faTimesCircle}
+                        className={styles["unverifiedIcon"]}
+                      />
+                    </span>
+                  )}
                 </div>
                 {submissionResult.errors &&
                   submissionResult.errors.map((e) => (
