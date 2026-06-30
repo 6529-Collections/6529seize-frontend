@@ -507,12 +507,12 @@ export default function FarcasterCard({ href }: FarcasterCardProps) {
     setState({ status: "loading" });
 
     fetchFarcasterPreview(href)
-      .then((response) => {
+      .then((response: FarcasterPreviewResponse | null | undefined) => {
         if (!isActive) {
           return;
         }
 
-        if (response.type === "unsupported") {
+        if (!response || response.type === "unsupported") {
           setState({ status: "fallback" });
           return;
         }

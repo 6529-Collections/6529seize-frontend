@@ -327,6 +327,46 @@ describe("LinkPreviewCard", () => {
     }
   );
 
+  it.each([
+    {
+      href: "//6529.io/the-memes/509",
+      resolvedUrl: "https://6529.io/the-memes/509",
+    },
+    {
+      href: "6529.io/meme-lab/402",
+      resolvedUrl: "https://6529.io/meme-lab/402",
+    },
+  ])(
+    "uses a fixed 6529 collection frame for normalized href $href",
+    async ({ href, resolvedUrl }) => {
+      fetchLinkPreview.mockResolvedValue({
+        type: "6529.collection",
+        title: "Normalized collection",
+        url: resolvedUrl,
+        image: { url: "https://cdn.6529.io/collection.png" },
+      });
+
+      render(
+        <LinkPreviewCard
+          href={href}
+          renderFallback={() => <div data-testid="fallback">fallback</div>}
+        />
+      );
+
+      assertCollectionFrame();
+
+      await waitFor(() =>
+        expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            preview: expect.objectContaining({ type: "6529.collection" }),
+          })
+        )
+      );
+
+      assertCollectionFrame();
+    }
+  );
+
   it("uses a fixed YouTube video frame before and after preview resolution", async () => {
     fetchLinkPreview.mockResolvedValue({
       type: "youtube.video",

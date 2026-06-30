@@ -51,9 +51,25 @@ type ChatStableFrameKind =
   | "farcaster";
 
 const parsePreviewHref = (href: string): URL | null => {
+  const trimmedHref = href.trim();
+  if (!trimmedHref) {
+    return null;
+  }
+
   try {
-    if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("/")) {
-      return new URL(href, "https://6529.io");
+    if (trimmedHref.startsWith("//")) {
+      return new URL(`https:${trimmedHref}`);
+    }
+
+    if (
+      /^[a-z][a-z0-9+.-]*:/i.test(trimmedHref) ||
+      trimmedHref.startsWith("/")
+    ) {
+      return new URL(trimmedHref, "https://6529.io");
+    }
+
+    if (/^[^\s/]+\.[^\s/]+(?:\/.*)?$/u.test(trimmedHref)) {
+      return new URL(`https://${trimmedHref}`);
     }
   } catch {
     return null;
@@ -276,6 +292,8 @@ export default function LinkPreviewCard({
     return content;
   }
 
+  // Chat frames must not resize after async preview resolution; resolved cards
+  // clamp or scroll inside the href-classified reserve to avoid feed CLS.
   const stableFrameClasses = getChatStableFrameClasses(
     getChatStableFrameKind(href)
   );
