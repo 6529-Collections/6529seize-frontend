@@ -183,7 +183,8 @@ export default function ConsolidationMappingTool() {
       </div>
       <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
         <div className="tw-w-full tw-px-3">
-          <div
+          <button
+            type="button"
             className={`${styles["uploadArea"]} ${
               dragActive ? styles["uploadAreaActive"] : ""
             }`}
@@ -203,7 +204,7 @@ export default function ConsolidationMappingTool() {
             ) : (
               <div>Drag and drop your file here, or click to upload</div>
             )}
-          </div>
+          </button>
         </div>
       </div>
       {/* <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
@@ -220,6 +221,7 @@ export default function ConsolidationMappingTool() {
             className={`${styles["submitBtn"]} ${
               processing || !file ? styles["submitBtnDisabled"] : ""
             }`}
+            disabled={processing || !file}
             onClick={() => submit()}>
             {processing ? "Processing" : "Submit"}
             {processing && (
@@ -239,7 +241,7 @@ export default function ConsolidationMappingTool() {
         className={`tw-form-input ${styles["formInputHidden"]}`}
         type="file"
         accept=".csv"
-        value={file?.fileName}
+        aria-label="Upload CSV file"
         onChange={(e: any) => {
           if (e.target.files) {
             const f = e.target.files[0];

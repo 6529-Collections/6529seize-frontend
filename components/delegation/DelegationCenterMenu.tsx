@@ -22,6 +22,11 @@ import {
   MEMES_COLLECTION,
   MEME_LAB_COLLECTION,
 } from "./delegation-constants";
+import {
+  delegationColClass,
+  delegationContainerClass,
+  delegationRowClass,
+} from "./delegation-tailwind-classes";
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 
@@ -50,11 +55,6 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
     label: "Wallet Checker",
   },
 ];
-
-const containerClass =
-  "tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]";
-const rowClass = "tw-flex tw-flex-wrap -tw-mx-3";
-const colClass = "tw-w-full tw-px-3";
 
 interface Props {
   section: DelegationCenterSection;
@@ -270,10 +270,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   function printMenuRows() {
     return DELEGATION_MENU_ITEMS.map((item, index) => (
       <div
-        className={`${rowClass} ${index === 0 ? "tw-pt-2" : "tw-pt-1"} tw-pb-2`}
+        className={`${delegationRowClass} ${index === 0 ? "tw-pt-2" : "tw-pt-1"} tw-pb-2`}
         key={item.section}
       >
-        <div className={colClass}>
+        <div className={delegationColClass}>
           {printMenuButton(item.section, item.label)}
         </div>
       </div>
@@ -282,13 +282,13 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
 
   function printExternalLinkRows() {
     return [
-      <div className={`${rowClass} tw-py-2`} key="etherscan">
-        <div className={colClass}>
+      <div className={`${delegationRowClass} tw-py-2`} key="etherscan">
+        <div className={delegationColClass}>
           <EtherscanLink />
         </div>
       </div>,
-      <div className={`${rowClass} tw-py-2`} key="github">
-        <div className={colClass}>
+      <div className={`${delegationRowClass} tw-py-2`} key="github">
+        <div className={delegationColClass}>
           <GithubLink />
         </div>
       </div>,
@@ -296,10 +296,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   }
 
   return (
-    <div className={`${containerClass} tw-pt-4`}>
-      <div className={rowClass}>
+    <div className={`${delegationContainerClass} tw-pt-4`}>
+      <div className={delegationRowClass}>
         <div className={`${styles["menuLeft"]} tw-px-3`}>
-          <div className={containerClass}>
+          <div className={delegationContainerClass}>
             {printMenuRows()}
             {printExternalLinkRows()}
           </div>
@@ -308,10 +308,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           {printContent()}
         </div>
       </div>
-      <div className={`${rowClass} tw-pt-4`}>
+      <div className={`${delegationRowClass} tw-pt-4`}>
         <div className={`${styles["menuLeftFull"]} tw-px-3`}>
-          <div className={containerClass}>
-            <div className={rowClass}>
+          <div className={delegationContainerClass}>
+            <div className={delegationRowClass}>
               <div className="tw-flex-1 tw-px-3">
                 <div className="tw-w-full tw-p-0">{printMenuRows()}</div>
               </div>

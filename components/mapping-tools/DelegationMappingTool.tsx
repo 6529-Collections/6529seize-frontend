@@ -161,7 +161,8 @@ export default function DelegationMappingTool() {
       </div>
       <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
         <div className="tw-w-full tw-px-3">
-          <div
+          <button
+            type="button"
             className={`${styles["uploadArea"]} ${
               dragActive ? styles["uploadAreaActive"] : ""
             }`}
@@ -182,15 +183,18 @@ export default function DelegationMappingTool() {
             ) : (
               <div>Drag and drop your file here, or click to upload</div>
             )}
-          </div>
+          </button>
         </div>
       </div>
       <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
-        <div className="tw-w-full tw-px-3">Select Collection</div>
+        <label className="tw-w-full tw-px-3" htmlFor="delegation-collection">
+          Select Collection
+        </label>
       </div>
       <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
         <div className="tw-w-full tw-px-3">
           <select
+            id="delegation-collection"
             className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
             value={collection}
             onChange={(e) => {
@@ -214,11 +218,14 @@ export default function DelegationMappingTool() {
         </div>
       </div>
       <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
-        <div className="tw-w-full tw-px-3">Select Use Case</div>
+        <label className="tw-w-full tw-px-3" htmlFor="delegation-use-case">
+          Select Use Case
+        </label>
       </div>
       <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
         <div className="tw-w-full tw-px-3">
           <select
+            id="delegation-use-case"
             className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
             value={useCase}
             onChange={(e) => {
@@ -258,6 +265,7 @@ export default function DelegationMappingTool() {
                 ? styles["submitBtnDisabled"]
                 : ""
             }`}
+            disabled={useCase === 0 || processing || !file}
             onClick={() => submit()}
           >
             {processing ? "Processing" : "Submit"}
@@ -279,7 +287,7 @@ export default function DelegationMappingTool() {
         className={`tw-form-input ${styles["formInputHidden"]}`}
         type="file"
         accept=".csv"
-        value={file?.fileName}
+        aria-label="Upload CSV file"
         onChange={(e: any) => {
           if (e.target.files) {
             const f = e.target.files[0];

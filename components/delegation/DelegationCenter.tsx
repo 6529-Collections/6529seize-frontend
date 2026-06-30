@@ -16,11 +16,11 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useEffectEvent, useState } from "react";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
-
-const containerClass =
-  "tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]";
-const rowClass = "tw-flex tw-flex-wrap -tw-mx-3";
-const colClass = "tw-w-full tw-px-3";
+import {
+  delegationColClass,
+  delegationContainerClass,
+  delegationRowClass,
+} from "./delegation-tailwind-classes";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -68,12 +68,12 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   function printCollectionSelection() {
     return (
       <div className="tw-w-full tw-p-0">
-        <div className={`${rowClass} tw-pt-4 tw-pb-2`}>
-          <div className={colClass}>
+        <div className={`${delegationRowClass} tw-pt-4 tw-pb-2`}>
+          <div className={delegationColClass}>
             <h4>Manage by Collection</h4>
           </div>
         </div>
-        <div className={rowClass}>
+        <div className={delegationRowClass}>
           {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
             <div
               key={c.contract}
@@ -123,9 +123,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   }
 
   return (
-    <div className={containerClass}>
-      <div className={`${rowClass} tw-pb-2`}>
-        <div className={colClass}>
+    <div className={delegationContainerClass}>
+      <div className={`${delegationRowClass} tw-pb-2`}>
+        <div className={delegationColClass}>
           <h1>Delegation Center</h1>
           <p className={styles["delegationCenterIntro"]}>
             Register wallet relationships for NFT utility and 6529 collection
@@ -133,12 +133,12 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
           </p>
         </div>
       </div>
-      <div className={rowClass}>
-        <div className={colClass}>
+      <div className={delegationRowClass}>
+        <div className={delegationColClass}>
           <div
             className={`${styles["delegationCenterSection"]} tw-py-4`}
           >
-            <div className={rowClass}>
+            <div className={delegationRowClass}>
               <div
                 className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
               >
@@ -183,12 +183,12 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
           </div>
         </div>
       </div>
-      <div className={`${rowClass} tw-pt-2`}>
-        <div className={colClass}>
+      <div className={`${delegationRowClass} tw-pt-2`}>
+        <div className={delegationColClass}>
           <div
             className={`${styles["delegationCenterSection"]} tw-py-4`}
           >
-            <div className={rowClass}>
+            <div className={delegationRowClass}>
               <div
                 className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
               >
@@ -233,12 +233,12 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
           </div>
         </div>
       </div>
-      <div className={`${rowClass} tw-pt-2`}>
-        <div className={colClass}>
+      <div className={`${delegationRowClass} tw-pt-2`}>
+        <div className={delegationColClass}>
           <div
             className={`${styles["delegationCenterSection"]} tw-py-4`}
           >
-            <div className={rowClass}>
+            <div className={delegationRowClass}>
               <div
                 className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
               >
@@ -283,8 +283,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
           </div>
         </div>
       </div>
-      <div className={`${rowClass} tw-pt-4`}>
-        <div className={colClass}>
+      <div className={`${delegationRowClass} tw-pt-4`}>
+        <div className={delegationColClass}>
           <p className={styles["delegationCenterIntro"]}>
             Manage existing records by collection scope, including locks that
             block incoming delegations.
