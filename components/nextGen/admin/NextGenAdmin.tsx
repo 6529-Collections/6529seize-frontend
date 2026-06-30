@@ -1,9 +1,9 @@
 "use client";
 
-import { Container, Row, Col, Button } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import styles from "./NextGenAdmin.module.scss";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button, Col, Container, Row } from "./NextGenAdminShared";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -89,12 +89,12 @@ enum ArtistFocus {
 
 export function printAdminErrors(errors: string[]) {
   return (
-    <div className="mb-3">
+    <div className="tw-mb-3">
       <ul>
         {errors.map((error) => (
           <li
             key={`error-${error.replaceAll("", " ")}`}
-            className="text-danger">
+            className="tw-text-error">
             {error}
           </li>
         ))}
@@ -260,10 +260,10 @@ export default function NextGenAdmin() {
       <Container className="no-padding">
         <Row className="pt-2">
           <Col className="d-flex flex-column align-items-center gap-3">
-            <h4 className="font-color">
+            <h4 className="tw-text-white">
               ONLY ADMIN WALLETS CAN USE THIS dAPP.
             </h4>
-            <h4 className="font-color">
+            <h4 className="tw-text-white">
               PLEASE USE AN ADMIN WALLET TO CONTINUE.
             </h4>
           </Col>
@@ -869,7 +869,7 @@ export default function NextGenAdmin() {
         <Container>
           <Row className="pt-2">
             <Col className="d-flex flex-column align-items-center gap-3">
-              <h4 className="font-color">
+              <h4 className="tw-text-white">
                 ONLY COLLECTION ARTISTS CAN USE THIS SECTION.
               </h4>
             </Col>

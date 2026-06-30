@@ -1,6 +1,5 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import {
@@ -20,8 +19,13 @@ import {
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  Row,
 } from "./NextGenAdminShared";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
@@ -134,7 +138,7 @@ export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
 
             <Form.Group className="mb-3">
               <Form.Label>Metadata View</Form.Label>
-              <span className="d-flex align-items-center gap-3">
+              <span className="tw-flex tw-items-center tw-gap-3">
                 <Form.Check
                   checked={status}
                   type="radio"

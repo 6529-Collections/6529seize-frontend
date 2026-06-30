@@ -1,6 +1,5 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import {
@@ -19,8 +18,13 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  Row,
 } from "./NextGenAdminShared";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
@@ -327,7 +331,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Primary Addresses Status</Form.Label>
-              <span className="d-flex align-items-center gap-3">
+              <span className="tw-flex tw-items-center tw-gap-3">
                 <Form.Check
                   checked={primaryStatus}
                   type="radio"
@@ -350,7 +354,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Secondary Addresses Status</Form.Label>
-              <span className="d-flex align-items-center gap-3">
+              <span className="tw-flex tw-items-center tw-gap-3">
                 <Form.Check
                   checked={secondaryStatus}
                   type="radio"
@@ -372,12 +376,12 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
               </span>
             </Form.Group>
             {!loading && errors.length > 0 && (
-              <div className="mb-3">
+              <div className="tw-mb-3">
                 <ul>
                   {errors.map((error) => (
                     <li
                       key={`error-${error.replaceAll("", " ")}`}
-                      className="text-danger"
+                      className="tw-text-error"
                     >
                       {error}
                     </li>

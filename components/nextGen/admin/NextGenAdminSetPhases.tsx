@@ -6,7 +6,6 @@ import type { NextgenAllowlistCollection } from "@/entities/INextgen";
 import { NextgenAllowlistCollectionType } from "@/entities/INextgen";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { FunctionSelectors } from "../nextgen_contracts";
 import type { PhaseTimes } from "../nextgen_entities";
 import {
@@ -23,8 +22,13 @@ import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
 import styles from "./NextGenAdmin.module.scss";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenAdminHeadingRow,
   NextGenCollectionIdFormGroup,
+  Row,
 } from "./NextGenAdminShared";
 interface Props {
   close: () => void;
@@ -201,7 +205,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
             </Form.Group>
             {selectedAllowlist && (
               <Form.Group className="mb-3">
-                <span className="d-flex align-items-center gap-3">
+                <span className="tw-flex tw-items-center tw-gap-3">
                   <Form.Check
                     disabled
                     checked={
