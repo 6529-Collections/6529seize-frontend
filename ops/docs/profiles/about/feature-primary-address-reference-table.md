@@ -13,13 +13,14 @@ No wallet connection is required.
 
 - Route: `/about/primary-address`
 - Global sidebar: `About -> Primary Address`
-- About page menu: `Primary Address` on `/about/{section}` pages
+- About Contents dropdown: `Primary Address` on `/about/{section}` pages
 
 ## Entry Points
 
 - Open `/about/primary-address` directly.
 - Open `About -> Primary Address` from the global sidebar.
-- Open any `/about/{section}` page, then choose `Primary Address`.
+- Open any `/about/{section}` page, then choose `Primary Address` from the
+  sticky `Contents` dropdown.
 
 ## Access and Permissions
 

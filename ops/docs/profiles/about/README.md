@@ -3,8 +3,8 @@
 ## Overview
 
 This subarea owns `/about/primary-address`, available from the global sidebar
-(`About -> Primary Address`) and the in-page About menu (`Primary Address`) on
-`/about/{section}` routes.
+(`About -> Primary Address`) and the sticky About `Contents` dropdown
+(`Primary Address`) on `/about/{section}` routes.
 
 Use this area when the `Primary Address` page content, row links, or data
 states look wrong.

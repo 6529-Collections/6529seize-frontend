@@ -31,6 +31,11 @@ describe("useSidebarSections", () => {
           item.name === "REP Categories" && item.href === "/rep/categories"
       )
     ).toBe(true);
+    expect(
+      networkSection?.subsections[0]?.items.find(
+        (item) => item.href === "/network/definitions"
+      )?.activatesSection
+    ).not.toBe(false);
     const xtdhIndex =
       networkSection?.items.findIndex((item) => item.name === "xTDH") ?? -1;
     const waveScoreIndex =
@@ -66,20 +71,50 @@ describe("useSidebarSections", () => {
     ).toBe(false);
   });
 
-  it("includes Tech in About resources", () => {
+  it("matches the shared About contents structure in the sidebar menu", () => {
     const { result } = renderHook(() => useSidebarSections(false, false, "US"));
 
     const aboutSection = result.current.find(
       (section) => section.key === "about"
     );
-    const resources = aboutSection?.subsections.find(
-      (subsection) => subsection.name === "Resources"
-    );
 
+    expect(aboutSection?.items).toEqual([{ name: "About", href: "/about" }]);
     expect(
-      resources?.items.some(
-        (item) => item.name === "Tech" && item.href === "/about/tech"
+      aboutSection?.subsections.map((subsection) => subsection.name)
+    ).toEqual([
+      "Collections",
+      "Delegation",
+      "Network",
+      "Resources",
+      "Community",
+      "Legal",
+    ]);
+    expect(
+      aboutSection?.subsections[0]?.items.map((item) => item.name)
+    ).toEqual(["The Memes", "Subscriptions", "Meme Lab", "Gradient"]);
+    expect(aboutSection?.subsections[2]?.items).toEqual([
+      { name: "TDH", href: "/network/tdh", activatesSection: false },
+      { name: "xTDH", href: "/network/xtdh", activatesSection: false },
+      { name: "Health", href: "/network/health", activatesSection: false },
+      {
+        name: "Definitions",
+        href: "/network/definitions",
+        activatesSection: false,
+      },
+      { name: "Levels", href: "/network/levels", activatesSection: false },
+      {
+        name: "Network Stats",
+        href: "/network/health/network-tdh",
+        activatesSection: false,
+      },
+    ]);
+    expect(
+      aboutSection?.subsections.some((subsection) => subsection.name === "NFTs")
+    ).toBe(false);
+    expect(
+      aboutSection?.subsections.some(
+        (subsection) => subsection.name === "Support"
       )
-    ).toBe(true);
+    ).toBe(false);
   });
 });

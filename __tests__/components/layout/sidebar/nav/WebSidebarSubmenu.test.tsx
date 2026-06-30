@@ -64,4 +64,32 @@ describe("WebSidebarSubmenu", () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it("does not mark cross-listed discovery links as current", () => {
+    render(
+      <WebSidebarSubmenu
+        section={{
+          ...section,
+          subsections: [
+            {
+              name: "Network",
+              items: [
+                {
+                  name: "Definitions",
+                  href: "/network/definitions",
+                  activatesSection: false,
+                },
+              ],
+            },
+          ],
+        }}
+        pathname="/network/definitions"
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole("menuitem", { name: "Definitions" })
+    ).not.toHaveAttribute("aria-current");
+  });
 });

@@ -15,9 +15,17 @@ import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
+import {
+  getAboutNavItemHref,
+  getAboutNavItemLabel,
+  getVisibleAboutNavGroups,
+} from "@/components/about/about.routes";
+import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
 import DiscoverIcon from "../common/icons/DiscoverIcon";
@@ -27,6 +35,8 @@ import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
 
 type SidebarMenu = Parameters<typeof AppSidebarMenuItems>[0]["menu"];
+
+type SidebarMenuChildren = NonNullable<SidebarMenu[number]["children"]>;
 
 const MENU: SidebarMenu = [
   { label: "Profile", path: "/profile", icon: UserIcon },
@@ -88,29 +98,7 @@ const MENU: SidebarMenu = [
   {
     label: "About",
     icon: DocumentTextIcon,
-    children: [
-      { label: "Support", section: true },
-      { label: "FAQ", path: "/about/faq" },
-      { label: "Apply", path: "/about/apply" },
-      { label: "Contact Us", path: "/about/contact-us" },
-      { label: "GDRC1", path: "/about/gdrc1", dividerBefore: true },
-      { label: "NFTs", section: true },
-      { label: "The Memes", path: "/about/the-memes" },
-      { label: "Subscriptions", path: "/about/subscriptions" },
-      { label: "Meme Lab", path: "/about/meme-lab" },
-      { label: "Gradient", path: "/about/6529-gradient" },
-      { label: "NFT Delegation", section: true },
-      { label: "About NFTD", path: "/about/nft-delegation" },
-      { label: "Primary Address", path: "/about/primary-address" },
-      { label: "6529 Capital", section: true },
-      { label: "About 6529 Capital", path: "/capital" },
-      { label: "Company Portfolio", path: "/capital/company-portfolio" },
-      { label: "NFT Fund", path: "/capital/fund" },
-      { label: "Resources", section: true },
-      { label: "Data Decentralization", path: "/about/data-decentralization" },
-      { label: "ENS", path: "/about/ens" },
-      { label: "License", path: "/about/license" },
-    ],
+    children: [],
   },
 ];
 
@@ -123,9 +111,19 @@ export default function AppSidebar({
 }) {
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
+  const capacitor = useCapacitor();
+  const cookieConsent = useOptionalCookieConsent();
   const handleClose = useCallback(() => onClose(), [onClose]);
 
   const menu = useMemo(() => {
+    const hideSubscriptions =
+      cookieConsent === undefined
+        ? false
+        : shouldHideSubscriptions({
+            capacitorIsIos: capacitor.isIos,
+            country: cookieConsent.country,
+          });
+    const aboutChildren = getAboutSidebarChildren(hideSubscriptions);
     const updatedMenu = MENU.map((item) => {
       if (item.label === "Tools" && item.children) {
         const updatedChildren = [...item.children];
@@ -140,6 +138,13 @@ export default function AppSidebar({
         return {
           ...item,
           children: updatedChildren,
+        };
+      }
+
+      if (item.label === "About") {
+        return {
+          ...item,
+          children: aboutChildren,
         };
       }
 
@@ -164,7 +169,12 @@ export default function AppSidebar({
     }
 
     return updatedMenu;
-  }, [appWalletsSupported, showDropForge]);
+  }, [
+    appWalletsSupported,
+    capacitor.isIos,
+    cookieConsent?.country,
+    showDropForge,
+  ]);
 
   // Close on right-to-left swipe
   useEffect(() => {
@@ -240,4 +250,23 @@ export default function AppSidebar({
       </Dialog>
     </Transition>
   );
+}
+
+function getAboutSidebarChildren(
+  hideSubscriptions: boolean
+): SidebarMenuChildren {
+  const locale = DEFAULT_LOCALE;
+
+  return [
+    { label: t(locale, "about.contents.aboutFallback"), path: "/about" },
+    ...getVisibleAboutNavGroups(hideSubscriptions).flatMap(
+      (group): SidebarMenuChildren => [
+        { label: t(locale, group.labelKey), section: true },
+        ...group.items.map((item) => ({
+          label: getAboutNavItemLabel(item, locale),
+          path: getAboutNavItemHref(item),
+        })),
+      ]
+    ),
+  ];
 }

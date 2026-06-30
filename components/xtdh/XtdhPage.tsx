@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, type ReactElement } from "react";
 
 import { XtdhStats } from "@/components/xtdh/stats";
@@ -38,13 +39,21 @@ export default function XtdhPage(): ReactElement {
   return (
     <div className="tailwind-scope tw-space-y-6">
       <section className="tw-space-y-4">
-        <header>
-          <h1 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
-            xTDH Network Overview
-          </h1>
-          <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
-            Live network-wide TDH and xTDH metrics, including the share already granted.
-          </p>
+        <header className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+          <div>
+            <h1 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+              xTDH Network Overview
+            </h1>
+            <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
+              Live network-wide TDH and xTDH metrics, including the share already granted.
+            </p>
+          </div>
+          <Link
+            href="/network/xtdh"
+            className="tw-inline-flex tw-w-fit tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-iron-100 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+          >
+            What is xTDH
+          </Link>
         </header>
         <div className="tw-mt-2">
           {statsSection}
