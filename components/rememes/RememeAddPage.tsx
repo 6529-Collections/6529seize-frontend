@@ -19,7 +19,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
 import { useSignMessage } from "wagmi";
 import {
   buildRememeSignatureMessage,
@@ -35,6 +34,11 @@ interface CheckList {
   status: boolean;
   note: string;
 }
+
+const PRIMARY_BUTTON_CLASS =
+  "seize-btn tw-bg-[#267c93] tw-py-[0.375rem] tw-leading-6 tw-text-white tw-transition-colors disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#2b8aa3]";
+const WHITE_BUTTON_CLASS =
+  "seize-btn btn-white tw-py-[0.375rem] tw-leading-6 disabled:tw-pointer-events-none disabled:tw-opacity-65";
 
 function getSubmissionErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) {
@@ -256,12 +260,12 @@ export default function RememeAddPage() {
   }
 
   return (
-    <Container fluid className={styles["mainContainer"]}>
-      <Row className="pb-5">
-        <Col>
-          <Container className="pt-4">
-            <Row className="pt-2 pb-2">
-              <Col sm={12} md={4} className="d-flex align-items-center gap-2">
+    <div className={`${styles["mainContainer"]} tw-w-full`}>
+      <div className="tw-pb-5">
+        <div>
+          <div className="tw-container tw-mx-auto tw-px-3 tw-pt-4">
+            <div className="tw-grid tw-grid-cols-1 tw-pb-2 tw-pt-2">
+              <div className="tw-flex tw-items-center tw-gap-2 md:tw-col-span-4">
                 <Image
                   unoptimized
                   loading={"eager"}
@@ -271,19 +275,19 @@ export default function RememeAddPage() {
                   src="/re-memes.png"
                   alt="re-memes"
                 />
-              </Col>
-            </Row>
-            <Row className="pt-2">
-              <Col>
+              </div>
+            </div>
+            <div className="tw-pt-2">
+              <div>
                 Please use this page to only add ReMemes{" "}
                 <Link href="#requirements">view requirements</Link>
-              </Col>
-            </Row>
-            <Row className="pt-4">
-              <Col>
-                <Container>
-                  <Row className="pt-2 pb-4">
-                    <Col className="no-padding">
+              </div>
+            </div>
+            <div className="tw-pt-4">
+              <div>
+                <div className="tw-container tw-mx-auto">
+                  <div className="tw-pb-4 tw-pt-2">
+                    <div>
                       <RememeAddComponent
                         memes={memes}
                         verifiedRememe={(r, references) => {
@@ -297,20 +301,20 @@ export default function RememeAddPage() {
                           signMessage.reset();
                         }}
                       />
-                    </Col>
-                  </Row>
-                </Container>
-              </Col>
-            </Row>
-            <Row className="pt-2">
-              <Col className="d-flex justify-content-between align-items-center">
-                <span className="d-flex flex-column gap-2">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="tw-pt-2">
+              <div className="tw-flex tw-items-center tw-justify-between">
+                <span className="tw-flex tw-flex-col tw-gap-2">
                   {checkList.length > 0 && (
                     <ul className={styles["addRememeChecklist"]}>
                       {checkList.map((note, index) => (
                         <li
                           key={`ve-${index}`}
-                          className={`d-flex align-items-center gap-2`}
+                          className="tw-flex tw-items-center tw-gap-2"
                         >
                           {note.status ? (
                             <FontAwesomeIcon
@@ -334,7 +338,7 @@ export default function RememeAddPage() {
                       {signErrors.map((se, index) => (
                         <li
                           key={`se-${index}`}
-                          className={`d-flex align-items-center gap-2`}
+                          className="tw-flex tw-items-center tw-gap-2"
                         >
                           <FontAwesomeIcon
                             icon={faTimesCircle}
@@ -347,9 +351,10 @@ export default function RememeAddPage() {
                   )}
                 </span>
                 {isConnected ? (
-                  <span className="d-flex flex-column gap-2">
-                    <Button
-                      className="seize-btn"
+                  <span className="tw-flex tw-flex-col tw-gap-2">
+                    <button
+                      type="button"
+                      className={PRIMARY_BUTTON_CLASS}
                       disabled={
                         !addRememe ||
                         !addRememe.valid ||
@@ -394,41 +399,42 @@ export default function RememeAddPage() {
                       }}
                     >
                       Add Rememe
-                    </Button>
+                    </button>
                   </span>
                 ) : (
-                  <Button
-                    className="seize-btn btn-white"
+                  <button
+                    type="button"
+                    className={WHITE_BUTTON_CLASS}
                     disabled={seizeConnectOpen}
                     onClick={() => seizeConnect()}
                   >
                     {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
-                  </Button>
+                  </button>
                 )}
-              </Col>
-            </Row>
+              </div>
+            </div>
             {(submitting || signMessage.isPending) && (
-              <Row className="pt-3">
-                <Col xs={12}>
-                  <span className="d-inline-flex align-items-center gap-2">
+              <div className="tw-pt-3">
+                <div className="tw-w-full">
+                  <span className="tw-inline-flex tw-items-center tw-gap-2">
                     {signMessage.isPending && "Signing Message"}
                     {submitting && "Adding Rememe"}
                     <div
-                      className={`spinner-border ${styles["loader"]}`}
+                      className={`${styles["loader"]} tw-inline-block tw-animate-spin tw-rounded-full tw-border-solid tw-border-current tw-border-r-transparent`}
                       role="status"
                     >
-                      <span className="sr-only"></span>
+                      <span className="tw-sr-only"></span>
                     </div>
                   </span>
-                </Col>
-              </Row>
+                </div>
+              </div>
             )}
             {addRememe && submissionResult && (
-              <Row className="pt-3">
-                <Col xs={12}>
+              <div className="tw-pt-3">
+                <div className="tw-w-full">
                   <>
                     {submissionResult.success ? (
-                      <span className="d-flex align-items-center gap-2">
+                      <span className="tw-flex tw-items-center tw-gap-2">
                         Status: Success
                         <FontAwesomeIcon
                           icon={faCheckCircle}
@@ -436,7 +442,7 @@ export default function RememeAddPage() {
                         />
                       </span>
                     ) : (
-                      <span className="d-flex align-items-center gap-2">
+                      <span className="tw-flex tw-items-center tw-gap-2">
                         Status: Fail
                         <FontAwesomeIcon
                           icon={faTimesCircle}
@@ -445,23 +451,25 @@ export default function RememeAddPage() {
                       </span>
                     )}
                   </>
-                </Col>
+                </div>
                 {submissionResult.errors &&
                   submissionResult.errors.map((e) => (
-                    <Col xs={12} className="pt-2" key={getRandomObjectId()}>
+                    <div
+                      className="tw-w-full tw-pt-2"
+                      key={getRandomObjectId()}
+                    >
                       {e}
-                    </Col>
+                    </div>
                   ))}
                 {submissionResult.success && submissionResult.tokens && (
                   <>
-                    <Row className="pt-3">
-                      <Col xs={12}>
+                    <div className="tw-pt-3">
+                      <div className="tw-w-full">
                         <u>Rememes Added:</u>
-                      </Col>
+                      </div>
                       {submissionResult.tokens.map((t) => (
-                        <Col
-                          xs={12}
-                          className="pt-1 pb-1"
+                        <div
+                          className="tw-w-full tw-pb-1 tw-pt-1"
                           key={`submission-result-token-${t.id}`}
                         >
                           #{t.id} - {t.name}
@@ -474,49 +482,50 @@ export default function RememeAddPage() {
                           >
                             view
                           </a>
-                        </Col>
+                        </div>
                       ))}
-                    </Row>
-                    <Row className="pt-4">
-                      <Col>
-                        <Button
-                          className="seize-btn btn-white"
+                    </div>
+                    <div className="tw-pt-4">
+                      <div>
+                        <button
+                          type="button"
+                          className={WHITE_BUTTON_CLASS}
                           onClick={() => {
                             location.reload();
                           }}
                         >
                           Add Another
-                        </Button>
-                      </Col>
-                    </Row>
+                        </button>
+                      </div>
+                    </div>
                   </>
                 )}
-              </Row>
+              </div>
             )}
-            <Row className="pt-5" id="requirements">
-              <Col className="pt-5">
+            <div className="tw-pt-5" id="requirements">
+              <div className="tw-pt-5">
                 Submission Requirements:
-                <ol className="pt-2">
-                  <li className="pt-2">
+                <ol className="tw-pt-2">
+                  <li className="tw-pt-2">
                     This form will allow you to submit ReMemes if you are the
                     contract deployer or if you are not the contract deployer,
                     but have a TDH &gt; 6,942
                   </li>
-                  <li className="pt-2">
+                  <li className="tw-pt-2">
                     You must connect with your Ethereum wallet (from any of your
                     consolidated addresses)
                   </li>
-                  <li className="pt-2">
+                  <li className="tw-pt-2">
                     The contracts and tokens added must be a ReMeme of one or
                     more Meme Cards. Please do not submit other contracts or
                     there may be implications (for you!)
                   </li>
                 </ol>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

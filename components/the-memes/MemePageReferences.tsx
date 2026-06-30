@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useReducer, useRef } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { getRememeSortLabel } from "../rememes/rememesI18n";
 import { getRememeDetailHref } from "../rememes/rememesRouteParams";
@@ -241,8 +241,8 @@ export function MemePageReferencesSubMenu(props: {
 
   return (
     <>
-      <Row className="pt-3">
-        <Col>
+      <div className="tw-pt-3">
+        <div>
           <Image
             unoptimized
             width="0"
@@ -251,11 +251,11 @@ export function MemePageReferencesSubMenu(props: {
             src="/memelab.png"
             alt={t(locale, "theMemes.detail.references.memeLab.logoAlt")}
           />
-        </Col>
-      </Row>
-      <Row className="pt-4 pb-2">
-        <Col>{t(locale, "theMemes.detail.references.memeLab.description")}</Col>
-      </Row>
+        </div>
+      </div>
+      <div className="tw-pb-2 tw-pt-4">
+        <div>{t(locale, "theMemes.detail.references.memeLab.description")}</div>
+      </div>
       {printMemeReferences(
         memeLabState.nfts,
         "meme-lab",
@@ -263,9 +263,9 @@ export function MemePageReferencesSubMenu(props: {
         true,
         locale
       )}
-      <Row className="pt-3" ref={rememesTarget}>
-        <Col className="d-flex flex-wrap align-items-center justify-content-between">
-          <h1 className="mb-0 pt-2">
+      <div className="tw-pt-3" ref={rememesTarget}>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between">
+          <h1 className="tw-mb-0 tw-pt-2">
             <Image
               unoptimized
               width="0"
@@ -276,7 +276,7 @@ export function MemePageReferencesSubMenu(props: {
             />
           </h1>
           {rememesState.showSort && (
-            <span className="d-flex align-items-center gap-2 pt-2">
+            <span className="tw-flex tw-items-center tw-gap-2 tw-pt-2">
               <Dropdown
                 className={styles["rememesSortDropdown"]}
                 drop={"down-centered"}
@@ -336,28 +336,24 @@ export function MemePageReferencesSubMenu(props: {
               )}
             </span>
           )}
-        </Col>
-      </Row>
-      <Row className="pt-4 pb-2">
-        <Col>{t(locale, "theMemes.detail.references.rememes.description")}</Col>
-      </Row>
+        </div>
+      </div>
+      <div className="tw-pb-2 tw-pt-4">
+        <div>{t(locale, "theMemes.detail.references.rememes.description")}</div>
+      </div>
       {rememesState.loaded && rememesState.items.length === 0 && (
-        <Row className="pt-2 pb-4">
-          <Col>{t(locale, "theMemes.detail.references.empty.rememes")}</Col>
-        </Row>
+        <div className="tw-pb-4 tw-pt-2">
+          <div>{t(locale, "theMemes.detail.references.empty.rememes")}</div>
+        </div>
       )}
       {rememesState.items.length > 0 && (
         <>
-          <Row className="py-2">
+          <div className="tw-grid tw-grid-cols-2 tw-py-2 sm:tw-grid-cols-3 md:tw-grid-cols-4">
             {rememesState.items.map((rememe) => {
               return (
-                <Col
+                <div
                   key={`${rememe.contract}-${rememe.id}`}
-                  className="py-3"
-                  xs={{ span: 6 }}
-                  sm={{ span: 4 }}
-                  md={{ span: 3 }}
-                  lg={{ span: 3 }}
+                  className="tw-py-3"
                 >
                   <Link
                     href={getRememeDetailHref({
@@ -371,71 +367,67 @@ export function MemePageReferencesSubMenu(props: {
                     })}
                     className="decoration-none scale-hover"
                   >
-                    <Container fluid className="no-padding">
-                      <Row>
-                        <Col>
-                          <RememeImage
-                            nft={rememe}
-                            animation={false}
-                            height={300}
-                          />
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <Container>
-                            <Row>
-                              <Col className="font-smaller font-color-h d-flex justify-content-center align-items-center">
-                                {areEqualAddresses(
-                                  rememe.contract,
-                                  OPENSEA_STORE_FRONT_CONTRACT
-                                ) ? (
-                                  <>
-                                    {
-                                      rememe.contract_opensea_data
+                    <div className="tw-w-full">
+                      <div>
+                        <RememeImage
+                          nft={rememe}
+                          animation={false}
+                          height={300}
+                        />
+                      </div>
+                      <div>
+                        <div className="tw-container tw-mx-auto">
+                          <div>
+                            <div className="font-smaller font-color-h tw-flex tw-items-center tw-justify-center">
+                              {areEqualAddresses(
+                                rememe.contract,
+                                OPENSEA_STORE_FRONT_CONTRACT
+                              ) ? (
+                                <>
+                                  {
+                                    rememe.contract_opensea_data
+                                      .collectionName
+                                  }
+                                </>
+                              ) : (
+                                <>
+                                  {rememe.contract_opensea_data.collectionName
+                                    ? rememe.contract_opensea_data
                                         .collectionName
-                                    }
-                                  </>
-                                ) : (
-                                  <>
-                                    {rememe.contract_opensea_data.collectionName
-                                      ? rememe.contract_opensea_data
-                                          .collectionName
-                                      : formatAddress(rememe.contract)}{" "}
-                                    #{rememe.id}
-                                  </>
-                                )}
-                                {rememe.replicas.length > 1 && (
-                                  <>
-                                    &nbsp;
-                                    {t(locale, "rememes.card.replicaCount", {
-                                      count: formatInteger(
-                                        locale,
-                                        rememe.replicas.length
-                                      ),
-                                    })}
-                                  </>
-                                )}
-                              </Col>
-                            </Row>
-                            <Row>
-                              <Col className="d-flex justify-content-center align-items-center">
-                                <span className="text-center">
-                                  {getRememeName(rememe)}
-                                </span>
-                              </Col>
-                            </Row>
-                          </Container>
-                        </Col>
-                      </Row>
-                    </Container>
+                                    : formatAddress(rememe.contract)}{" "}
+                                  #{rememe.id}
+                                </>
+                              )}
+                              {rememe.replicas.length > 1 && (
+                                <>
+                                  &nbsp;
+                                  {t(locale, "rememes.card.replicaCount", {
+                                    count: formatInteger(
+                                      locale,
+                                      rememe.replicas.length
+                                    ),
+                                  })}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="tw-flex tw-items-center tw-justify-center">
+                              <span className="tw-text-center">
+                                {getRememeName(rememe)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </Link>
-                </Col>
+                </div>
               );
             })}
-          </Row>
+          </div>
           {rememesState.totalResults > REMEMES_PAGE_SIZE && (
-            <Row className="text-center pt-2 pb-3">
+            <div className="tw-pb-3 tw-pt-2 tw-text-center">
               <Pagination
                 page={rememesState.page}
                 pageSize={REMEMES_PAGE_SIZE}
@@ -452,7 +444,7 @@ export function MemePageReferencesSubMenu(props: {
                   }
                 }}
               />
-            </Row>
+            </div>
           )}
         </>
       )}
