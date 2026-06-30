@@ -8,6 +8,8 @@ import {
 } from "@/helpers/video.helpers";
 
 interface UseOptimizedVideoOptions {
+  /** if false, do not probe optimized renditions yet */
+  readonly enabled?: boolean | undefined;
   /** ms between checks */
   readonly pollInterval?: number | undefined;
   readonly maxRetries?: number | undefined;
@@ -37,6 +39,7 @@ export function useOptimizedVideo(
   options: UseOptimizedVideoOptions = {}
 ): UseOptimizedVideoResult {
   const {
+    enabled = true,
     pollInterval = 15000,
     maxRetries = 8,
     preferHls = true,
@@ -56,7 +59,12 @@ export function useOptimizedVideo(
     setPlayableUrl(originalUrl);
     setIsOptimized(false);
     setIsHls(false);
+    setIsChecking(false);
     retriesRef.current = 0;
+
+    if (!enabled) {
+      return;
+    }
 
     // Only proceed if recognized video URL (and presumably in /drops/)
     if (!originalUrl || !isVideoUrl(originalUrl)) {
@@ -123,7 +131,9 @@ export function useOptimizedVideo(
           ? pollInterval * Math.pow(2, retriesRef.current - 1)
           : pollInterval;
 
-        timeoutRef.current = window.setTimeout(checkOptimized, delay);
+        timeoutRef.current = window.setTimeout(() => {
+          void checkOptimized();
+        }, delay);
       } catch {
       } finally {
         if (isMounted) {
@@ -132,7 +142,7 @@ export function useOptimizedVideo(
       }
     };
 
-    checkOptimized();
+    void checkOptimized();
 
     return () => {
       isMounted = false;
@@ -140,7 +150,14 @@ export function useOptimizedVideo(
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [originalUrl, pollInterval, maxRetries, preferHls, exponentialBackoff]);
+  }, [
+    originalUrl,
+    enabled,
+    pollInterval,
+    maxRetries,
+    preferHls,
+    exponentialBackoff,
+  ]);
 
   return {
     playableUrl,

@@ -6,11 +6,15 @@ import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 jest.mock("@/services/6529api");
 jest.mock("@/services/api/common-api");
 jest.mock("@/hooks/isMobileScreen");
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(),
+}));
 jest.mock(
   "@/components/latest-activity/LatestActivityRow",
   () => (props: any) => <tr data-testid="activity-row" />
@@ -39,6 +43,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 const mockUseIsMobileScreen = useIsMobileScreen as jest.MockedFunction<
   typeof useIsMobileScreen
 >;
+const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 
 // Mock API responses
 const mockFetchUrl = fetchUrl as jest.Mock;
@@ -90,6 +95,7 @@ describe("LatestActivity", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseIsMobileScreen.mockReturnValue(false);
+    mockUsePathname.mockReturnValue("/");
     mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
     mockFetchAllPages.mockResolvedValue([]);
     mockCommonApiFetch.mockResolvedValue({ data: [] });
@@ -99,8 +105,6 @@ describe("LatestActivity", () => {
       value: mockScrollTo,
       writable: true,
     });
-
-    window.history.pushState({}, "", "/");
   });
 
   it("fetches with filters and updates on selection", async () => {
@@ -119,7 +123,7 @@ describe("LatestActivity", () => {
   });
 
   it("hides View All link on nft-activity page", async () => {
-    window.history.pushState({}, "", "/nft-activity");
+    mockUsePathname.mockReturnValue("/nft-activity");
     render(<LatestActivity page={1} pageSize={10} showMore />);
     // Wait for fetch
     await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
@@ -248,7 +252,7 @@ describe("LatestActivity", () => {
     });
 
     it("shows dot loader when fetching on nft-activity page", async () => {
-      window.history.pushState({}, "", "/nft-activity");
+      mockUsePathname.mockReturnValue("/nft-activity");
 
       // Set up a delayed response
       let resolvePromise: (value: any) => void;

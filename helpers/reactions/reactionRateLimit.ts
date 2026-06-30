@@ -103,7 +103,10 @@ export const extractRetryAfterMs = (
   return (
     extractRetryAfterMsFromHeaders(typedError.response?.headers, nowMs) ??
     extractRetryAfterMsFromHeaders(typedError.headers, nowMs) ??
-    extractRetryAfterMsFromHeaders(typedError.cause?.response?.headers, nowMs) ??
+    extractRetryAfterMsFromHeaders(
+      typedError.cause?.response?.headers,
+      nowMs
+    ) ??
     extractRetryAfterMsFromHeaders(typedError.cause?.headers, nowMs)
   );
 };

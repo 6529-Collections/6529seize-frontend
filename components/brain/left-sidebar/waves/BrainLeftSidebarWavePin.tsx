@@ -142,10 +142,10 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     }
   };
 
-  // Desktop rows reveal the pin on hover or focus without reserving idle width.
+  // Desktop rows reveal the pin on row hover or direct keyboard focus.
   const getOpacityClass = () => {
     if (isTouchDevice) return "tw-opacity-100";
-    return "tw-opacity-0 group-hover:tw-opacity-100 group-focus-within:tw-opacity-100 focus:tw-opacity-100 focus-visible:tw-opacity-100";
+    return "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 focus-visible:tw-opacity-100";
   };
   const opacityClass = getOpacityClass();
 
@@ -175,7 +175,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const getSizeClasses = () => {
     if (!compact) return "tw-size-7 sm:tw-size-6";
     if (isTouchDevice) return "tw-size-7";
-    return "tw-h-7 tw-w-0 group-hover:tw-w-7 group-focus-within:tw-w-7 focus:tw-w-7 focus-visible:tw-w-7";
+    return "tw-h-7 tw-w-0 desktop-hover:group-hover:tw-w-7 focus-visible:tw-w-7";
   };
   const sizeClasses = getSizeClasses();
   const iconSizeClasses = compact ? "tw-size-3.5" : "tw-size-4";
