@@ -23,6 +23,7 @@ import {
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -145,6 +146,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterSentryRouteParameterizationError(event)) {
+    return true;
+  }
+
+  if (shouldFilterRabbyMobileRainbowKitNotFoundError(event, hint)) {
     return true;
   }
 

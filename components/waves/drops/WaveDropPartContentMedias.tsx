@@ -12,6 +12,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { t } from "@/i18n/messages";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useOptionalDropContext } from "./DropContext";
 
 function isRenderableMedia(mimeType: string, url: string): boolean {
   return (
@@ -26,9 +27,7 @@ function isRenderableMedia(mimeType: string, url: string): boolean {
   );
 }
 
-function isImageMediaProcessing(
-  media: ApiDropPart["media"][number]
-): boolean {
+function isImageMediaProcessing(media: ApiDropPart["media"][number]): boolean {
   return (
     media.mime_type.includes("image") &&
     (media.media_status === ApiDropMediaStatus.Uploading ||
@@ -75,6 +74,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   mediaContainerHeightClassName = "tw-h-64",
   fullWidthMedia = false,
 }) => {
+  const dropContext = useOptionalDropContext();
+
   if (!activePart.media.length) {
     return null;
   }
@@ -142,12 +143,19 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     i: number,
     groupedImage = false
   ) => {
+    const reserveFullWidthMediaHeight =
+      fullWidthMedia && Boolean(dropContext?.reserveMediaHeight);
     const useNaturalHeightImage =
-      fullWidthMedia && media.mime_type.includes("image");
+      fullWidthMedia &&
+      media.mime_type.includes("image") &&
+      !reserveFullWidthMediaHeight;
     const useImageReservedHeight =
-      !fullWidthMedia && media.mime_type.includes("image");
-    const useVideoReservedHeight = false;
-    const useNaturalHeightVideo = media.mime_type.includes("video");
+      media.mime_type.includes("image") &&
+      (!fullWidthMedia || reserveFullWidthMediaHeight);
+    const useVideoReservedHeight =
+      media.mime_type.includes("video") && reserveFullWidthMediaHeight;
+    const useNaturalHeightVideo =
+      media.mime_type.includes("video") && !useVideoReservedHeight;
     const galleryItemId = media.mime_type.includes("image")
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
@@ -179,7 +187,9 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
         <WaveDropPartContentMediaImage
           src={media.url}
           imageScale={imageScale}
-          imageObjectPosition={useImageReservedHeight ? "left top" : "center"}
+          imageObjectPosition={
+            useImageReservedHeight && !fullWidthMedia ? "left top" : "center"
+          }
           galleryItemId={galleryItemId}
           fillContainer={useImageReservedHeight}
         />
