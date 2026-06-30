@@ -199,7 +199,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               }}
             />
             <Form.Group className="mb-3">
-              <span className="tw-flex tw-items-center tw-gap-3">
+              <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
                   checked={type == Type.ALLOWLIST}
                   type="radio"
@@ -271,7 +271,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               />
             </Form.Group>
             {!uploading && errors.length > 0 && printAdminErrors(errors)}
-            <div className="tw-flex tw-items-center tw-gap-3 tw-mt-4">
+            <div className="tw-flex tw-items-center tw-gap-4 tw-mt-6">
               <Button
                 className="seize-btn"
                 disabled={

@@ -331,7 +331,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Primary Addresses Status</Form.Label>
-              <span className="tw-flex tw-items-center tw-gap-3">
+              <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
                   checked={primaryStatus}
                   type="radio"
@@ -354,7 +354,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Secondary Addresses Status</Form.Label>
-              <span className="tw-flex tw-items-center tw-gap-3">
+              <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
                   checked={secondaryStatus}
                   type="radio"
@@ -376,7 +376,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
               </span>
             </Form.Group>
             {!loading && errors.length > 0 && (
-              <div className="tw-mb-3">
+              <div className="tw-mb-4">
                 <ul>
                   {errors.map((error) => (
                     <li

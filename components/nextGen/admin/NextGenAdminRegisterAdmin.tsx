@@ -185,7 +185,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
             )}
             <Form.Group className="mb-3">
               <Form.Label>REGISTER / REVOKE</Form.Label>
-              <span className="tw-flex tw-items-center tw-gap-3">
+              <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
                   checked={status}
                   type="radio"

@@ -205,7 +205,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
             </Form.Group>
             {selectedAllowlist && (
               <Form.Group className="mb-3">
-                <span className="tw-flex tw-items-center tw-gap-3">
+                <span className="tw-flex tw-items-center tw-gap-4">
                   <Form.Check
                     disabled
                     checked={
