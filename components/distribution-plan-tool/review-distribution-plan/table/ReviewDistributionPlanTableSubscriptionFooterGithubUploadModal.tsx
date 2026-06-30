@@ -3,7 +3,7 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Image from "next/image";
 import Link from "next/link";
-import { Button, Container, Modal } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 
 const GITHUB_BASE =
   "https://github.com/6529-Collections/thememecards/tree/main";
@@ -47,15 +47,16 @@ export function GithubUploadModal(
       onHide={canClose ? onClose : () => {}}
       backdrop={isLoading ? "static" : true}
       keyboard={canClose}
+      className="tailwind-scope"
     >
       <Modal.Header closeButton={canClose}>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           {modalTitle}
         </Modal.Title>
       </Modal.Header>
-      <hr className="mb-0 mt-0" />
+      <hr className="tw-my-0" />
       <Modal.Body>
-        <Container>
+        <div className="tw-container tw-mx-auto">
           {isLoading && (
             <div className="tw-flex tw-items-center tw-gap-3 tw-py-4">
               <CircleLoader />
@@ -121,18 +122,26 @@ export function GithubUploadModal(
               )}
             </div>
           )}
-        </Container>
+        </div>
       </Modal.Body>
       {!isLoading && (
         <Modal.Footer>
           {isError && onRetry && (
-            <Button variant="primary" onClick={onRetry} className="me-2">
+            <button
+              type="button"
+              onClick={onRetry}
+              className="tw-me-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
+            >
               Retry
-            </Button>
+            </button>
           )}
-          <Button variant="secondary" onClick={onClose}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
+          >
             Close
-          </Button>
+          </button>
         </Modal.Footer>
       )}
     </Modal>

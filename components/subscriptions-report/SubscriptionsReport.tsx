@@ -31,7 +31,6 @@ import Image from "next/image";
 import Link from "next/link";
 import useDownloader from "@/hooks/useDownloader";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
 
 const PAGE_SIZE = 10;
 
@@ -244,9 +243,9 @@ export default function SubscriptionsReportComponent() {
     !upcomingLoading && !redeemedLoading && seasonOptionsLoaded;
 
   return (
-    <Container className="tw-mx-auto tw-px-2 tw-py-5 lg:tw-px-6 xl:tw-px-8">
-      <Row>
-        <Col className="d-flex flex-wrap align-items-center justify-content-between">
+    <div className="tw-container tw-mx-auto tw-px-2 tw-py-5 lg:tw-px-6 xl:tw-px-8">
+      <div>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between">
           <h1>Subscriptions Report</h1>
           <div className="tw-flex tw-items-center tw-gap-3">
             {connectedProfile && !hideSubscriptions && (
@@ -268,19 +267,22 @@ export default function SubscriptionsReportComponent() {
               Learn More
             </Link>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
       <div ref={upcomingTableTopRef} />
-      <Row className="pt-3">
-        <Col className="tw-flex tw-items-center tw-gap-3">
+      <div className="tw-pt-3">
+        <div className="tw-flex tw-items-center tw-gap-3">
           <span className="font-larger font-bolder decoration-none">
             Upcoming Drops
           </span>
           {upcomingLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
-        </Col>
-      </Row>
-      <Row className="pt-3" data-testid="subscriptions-report-upcoming-drops">
-        <Col>
+        </div>
+      </div>
+      <div
+        className="tw-pt-3"
+        data-testid="subscriptions-report-upcoming-drops"
+      >
+        <div>
           {upcomingCounts?.length > 0 ? (
             <>
               <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
@@ -361,18 +363,18 @@ export default function SubscriptionsReportComponent() {
           ) : (
             renderEmptyState(upcomingLoading, "upcoming")
           )}
-        </Col>
-      </Row>
-      <Row className="pt-5">
-        <Col className="tw-flex tw-items-center tw-gap-3">
+        </div>
+      </div>
+      <div className="tw-pt-5">
+        <div className="tw-flex tw-items-center tw-gap-3">
           <span className="font-larger font-bolder decoration-none">
             Past Drops
           </span>
           {redeemedLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
-        </Col>
-      </Row>
-      <Row className="pt-3" data-testid="subscriptions-report-past-drops">
-        <Col>
+        </div>
+      </div>
+      <div className="tw-pt-3" data-testid="subscriptions-report-past-drops">
+        <div>
           {redeemedCounts?.length > 0 ? (
             <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
               <caption className="tw-sr-only">
@@ -406,8 +408,8 @@ export default function SubscriptionsReportComponent() {
           ) : (
             renderEmptyState(redeemedLoading, "past")
           )}
-        </Col>
-      </Row>
+        </div>
+      </div>
       {totalRedeemed > PAGE_SIZE && redeemedPage !== null && (
         <div
           className="tw-py-4 tw-text-center"
@@ -428,8 +430,8 @@ export default function SubscriptionsReportComponent() {
         </div>
       )}
       {shouldShowDownloadSection && (
-        <Row className="pt-5">
-          <Col>
+        <div className="tw-pt-5">
+          <div>
             <div className="tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900 tw-p-5">
               <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
                 <h2 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-white">
@@ -437,8 +439,8 @@ export default function SubscriptionsReportComponent() {
                 </h2>
                 <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center lg:tw-w-auto lg:tw-shrink-0">
                   {availableSeasons.length > 0 && (
-                    <Form.Group className="tw-mb-0 tw-min-w-[180px]">
-                      <Form.Select
+                    <div className="tw-mb-0 tw-min-w-[180px]">
+                      <select
                         id="redeemed-meme-subscription-season"
                         aria-label="Redeemed meme subscription counts season"
                         className={`tw-h-9 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${isDownloadingCsv ? "tw-pointer-events-none tw-opacity-50" : ""}`}
@@ -453,8 +455,8 @@ export default function SubscriptionsReportComponent() {
                             {season.display}
                           </option>
                         ))}
-                      </Form.Select>
-                    </Form.Group>
+                      </select>
+                    </div>
                   )}
                   <button
                     type="button"
@@ -494,10 +496,10 @@ export default function SubscriptionsReportComponent() {
                 </div>
               </div>
             </div>
-          </Col>
-        </Row>
+          </div>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }
 
@@ -551,7 +553,7 @@ function RedeemedSubscriptionDetails(
               alt={props.count.name || "Meme card"}
               width={0}
               height={0}
-              className="tw-rounded-xs tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full"
+              className="tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-rounded-sm"
             />
           </div>
           <div className="tw-flex tw-flex-col">
