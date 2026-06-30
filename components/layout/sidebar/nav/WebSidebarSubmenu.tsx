@@ -10,7 +10,11 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import type { SidebarSection } from "@/components/navigation/navTypes";
+import type {
+  SidebarNavItem,
+  SidebarSection,
+} from "@/components/navigation/navTypes";
+import { isSidebarNavItemActive } from "./sidebarActive";
 
 interface WebSidebarSubmenuProps {
   readonly section: SidebarSection;
@@ -117,8 +121,6 @@ function WebSidebarSubmenu({
     }
   }, [browserWindow, anchorTop, anchorHeight, section.key, totalItemCount]);
 
-  const isActive = useCallback((href: string) => pathname === href, [pathname]);
-
   if (browserDocument === undefined) {
     return null;
   }
@@ -134,11 +136,8 @@ function WebSidebarSubmenu({
       : `${leftOffset}px`;
 
   const topStyle = Number.isFinite(computedTop) ? `${computedTop}px` : "16px";
-  const renderLink = (
-    item: { name: string; href: string },
-    nested: boolean = false
-  ) => {
-    const active = isActive(item.href);
+  const renderLink = (item: SidebarNavItem, nested: boolean = false) => {
+    const active = isSidebarNavItemActive(item, pathname);
 
     return (
       <Link

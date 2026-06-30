@@ -18,6 +18,8 @@ describe("instrumentation-client", () => {
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const reactDomInsertBeforeMessage =
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+  const reactDomRemoveChildMessage =
+    "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
@@ -29,10 +31,15 @@ describe("instrumentation-client", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const observedWasmModuleCspUnsafeEvalMessage =
+    "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
   const sentryRouteParameterizationMessage =
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
     "auto.browser.browserapierrors.setTimeout";
+  const rabbyMobileUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 Mobile/15E148";
+  const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
     function: "stringify",
@@ -114,6 +121,65 @@ describe("instrumentation-client", () => {
     ],
   });
 
+  const createAppKitCoinbaseBreadcrumbs = () => [
+    {
+      category: "console",
+      level: "debug",
+      message: "[AppKitInitialization] Initializing AppKit adapter (web) with",
+      data: {
+        arguments: [
+          "[AppKitInitialization] Initializing AppKit adapter (web) with",
+          0,
+          "AppWallets",
+        ],
+      },
+    },
+    {
+      category: "console",
+      level: "debug",
+      message: "AppKit config",
+      data: {
+        arguments: [
+          {
+            enableCoinbase: true,
+            featuredWalletIds: ["metamask", "walletConnect"],
+            features: {
+              connectMethodsOrder: ["wallet"],
+            },
+          },
+        ],
+      },
+    },
+  ];
+
+  const createRabbyMobileRainbowKitNotFoundEvent = (
+    overrides: Record<string, unknown> = {}
+  ) => ({
+    event_id: "rabby-mobile-rainbowkit-not-found",
+    request: {
+      headers: {
+        "User-Agent": rabbyMobileUserAgent,
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: rainbowKitNotFoundMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "https://static.rabby.io/mobile-shell.js",
+                in_app: false,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
+
   beforeEach(() => {
     jest.resetModules();
     mockInit.mockReset();
@@ -178,6 +244,33 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "react-dom-remove-child-event",
+      transaction: "/the-memes/mint",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/the-memes/mint",
+        url: "/the-memes/mint",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops injected WebAssembly CSP unsafe-eval errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {
@@ -191,6 +284,32 @@ describe("instrumentation-client", () => {
                 {
                   filename: "app:///inject.js",
                   abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops observed injected WebAssembly.Module CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "CompileError",
+            value: observedWasmModuleCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "///inject.js",
+                  abs_path: "///inject.js",
                 },
               ],
             },
@@ -237,6 +356,61 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops no-frame AppKit Coinbase websocket 1006 errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps app-owned websocket 1006 errors with AppKit Coinbase breadcrumbs", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "services/websocket/WebSocketProvider.tsx",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
   it("drops Sentry route parameterization cyclic JSON errors", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
@@ -256,6 +430,79 @@ describe("instrumentation-client", () => {
         in_app: true,
       },
     ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("drops exact RabbyMobile RainbowKit lookup errors with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileRainbowKitNotFoundEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps exact RabbyMobile RainbowKit lookup errors with app-owned frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "https://6529.io/_next/static/chunks/app-client.js",
+                  function: "initializeWallet",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps exact RainbowKit lookup errors outside RabbyMobile", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      request: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile Safari/605.1.15",
+        },
+      },
+    });
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps non-exact RainbowKit lookup messages in RabbyMobile", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: not found rainbowkit",
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    });
 
     const result = beforeSend(event);
 

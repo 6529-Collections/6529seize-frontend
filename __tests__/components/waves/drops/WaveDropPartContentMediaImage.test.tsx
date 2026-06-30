@@ -5,7 +5,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { forwardRef, type ComponentProps } from "react";
+import { createElement, forwardRef, type ComponentProps } from "react";
 import WaveDropPartContentMediaImage from "@/components/waves/drops/WaveDropPartContentMediaImage";
 import useCapacitor from "@/hooks/useCapacitor";
 
@@ -18,9 +18,8 @@ jest.mock("next/image", () => ({
   __esModule: true,
   default: forwardRef<HTMLImageElement, MockNextImageProps>(
     // eslint-disable-next-line react/display-name
-    ({ fill: _fill, unoptimized: _unoptimized, alt, ...rest }, ref) => (
-      <img ref={ref} alt={alt ?? ""} {...rest} />
-    )
+    ({ fill: _fill, unoptimized: _unoptimized, alt, ...rest }, ref) =>
+      createElement("img", { ...rest, ref, alt: alt ?? "" })
   ),
 }));
 
@@ -78,10 +77,10 @@ describe("WaveDropPartContentMediaImage", () => {
 
     const outer = container.firstElementChild;
     const button = screen.getByRole("button", { name: /open drop media/i });
-    const imageWrapper = button.firstElementChild;
+    const imageWrapper = container.querySelector("span");
 
     expect(outer).toHaveClass("tw-h-full");
-    expect(button).toHaveClass("tw-h-full");
+    expect(button).toHaveClass("tw-absolute", "tw-inset-0");
     expect(imageWrapper).toHaveClass("tw-h-full", "tw-w-full");
     expect(imageWrapper).not.toHaveStyle({ maxHeight: "16rem" });
   });
@@ -116,6 +115,18 @@ describe("WaveDropPartContentMediaImage", () => {
     ).not.toBeInTheDocument();
 
     expect(requestFullscreen).not.toHaveBeenCalled();
+  });
+
+  it("keeps desktop-hover actions mounted when image bounds are unmeasured", () => {
+    render(
+      <WaveDropPartContentMediaImage src="https://example.com/path/image.png" />
+    );
+
+    fireEvent.load(screen.getByAltText("Drop media"));
+
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
   });
 
   it("auto-retries transient image load failures before showing manual retry", async () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
@@ -14,6 +15,7 @@ export default function TDHMainPage() {
     <Container className="tw-min-h-screen tw-pb-12 tw-pt-12">
       <Row>
         <Col>
+          <AboutContentsDropdown currentHref="/network/tdh" />
           <h1>TDH</h1>
           <p className="tw-mt-2">
             TDH (Total Days Held) is our time-weighted holding metric. Each NFT

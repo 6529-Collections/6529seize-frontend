@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import WaveDropPartContentMedias from "@/components/waves/drops/WaveDropPartContentMedias";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import DropContext from "@/components/waves/drops/DropContext";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 
 jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
   __esModule: true,
@@ -137,6 +139,28 @@ describe("WaveDropPartContentMedias", () => {
     expect(image.parentElement).not.toHaveClass("tw-h-64");
     expect(video).toHaveAttribute("data-fill-video-container", "false");
     expect(video.parentElement).not.toHaveClass("tw-h-64");
+  });
+
+  it("reserves full-width media height when the drop context requests stable media layout", () => {
+    render(
+      <DropContext.Provider
+        value={{
+          drop: null,
+          location: DropLocation.MY_STREAM,
+          reserveMediaHeight: true,
+        }}
+      >
+        <WaveDropPartContentMedias activePart={basePart} fullWidthMedia />
+      </DropContext.Provider>
+    );
+
+    const image = screen.getByTestId("wave-image-media");
+    const video = screen.getByTestId("drop-media");
+
+    expect(image).toHaveAttribute("data-fill-container", "true");
+    expect(image.parentElement).toHaveClass("tw-h-64", "tw-w-full");
+    expect(video).toHaveAttribute("data-fill-video-container", "true");
+    expect(video.parentElement).toHaveClass("tw-h-64", "tw-w-full");
   });
 
   it("uses custom reserved height classes for normal image media only", () => {
