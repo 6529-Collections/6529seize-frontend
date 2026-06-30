@@ -553,7 +553,7 @@ function RedeemedSubscriptionDetails(
               alt={props.count.name || "Meme card"}
               width={0}
               height={0}
-              className="tw-rounded-xs tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full"
+              className="tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-rounded-sm"
             />
           </div>
           <div className="tw-flex tw-flex-col">

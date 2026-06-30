@@ -560,7 +560,7 @@ export default function UserPageSubscriptionsTopUp() {
                     {isClosable && (
                       <button
                         onClick={closeModal}
-                        className="tw--mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
+                        className="-tw-mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
                         aria-label="Close modal"
                       >
                         <FontAwesomeIcon
