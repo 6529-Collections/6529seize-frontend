@@ -495,7 +495,10 @@ describe("HeaderShare", () => {
         await screen.findByText("Update Authentication")
       ).toBeInTheDocument();
       expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
-        expect.objectContaining({ aborted: false })
+        expect.objectContaining({
+          address: "0x1234567890123456789012345678901234567890",
+          abortSignal: expect.objectContaining({ aborted: false }),
+        })
       );
       expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
       expect(requestSessionUpgrade).not.toHaveBeenCalled();
@@ -526,7 +529,7 @@ describe("HeaderShare", () => {
       expect(requestSessionUpgrade).not.toHaveBeenCalled();
     });
 
-    it("fails closed without calling the share endpoint when web-session verification errors", async () => {
+    it("shows a retryable error without calling the share endpoint when web-session verification errors", async () => {
       const auth = require("@/components/auth/Auth");
       const requestSessionUpgrade = jest.fn().mockResolvedValue({
         success: true,
@@ -549,12 +552,16 @@ describe("HeaderShare", () => {
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
 
         expect(
-          await screen.findByText("Update Authentication")
+          await screen.findByText("Connection Sharing Unavailable")
         ).toBeInTheDocument();
         expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
-          expect.objectContaining({ aborted: false })
+          expect.objectContaining({
+            address: "0x1234567890123456789012345678901234567890",
+            abortSignal: expect.objectContaining({ aborted: false }),
+          })
         );
         expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+        expect(requestSessionUpgrade).not.toHaveBeenCalled();
       } finally {
         consoleErrorSpy.mockRestore();
       }
@@ -709,6 +716,7 @@ describe("HeaderShare", () => {
 
     it("uses an existing legacy refresh token for 6529 Desktop connection sharing", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
+      mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
       mockAuthUtils.getRefreshToken.mockReturnValue(
         "local-legacy-refresh-token"
       );
@@ -729,6 +737,125 @@ describe("HeaderShare", () => {
       expect(
         sessionV2.createLegacyDesktopConnectionShare
       ).not.toHaveBeenCalled();
+    });
+
+    it("ignores a local legacy refresh token for v2 Desktop connection sharing", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      mockAuthUtils.getRefreshToken.mockReturnValue(
+        "stale-local-legacy-refresh-token"
+      );
+      sessionV2.createLegacyDesktopConnectionShare.mockResolvedValue({
+        refresh_token: "bridged-v2-desktop-refresh-token",
+        address: "0x1234567890123456789012345678901234567890",
+        role: null,
+        deep_link_path:
+          "/accept-connection-sharing?token=bridged-v2-desktop-refresh-token&address=0x1234567890123456789012345678901234567890",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() =>
+        expect(
+          sessionV2.createLegacyDesktopConnectionShare
+        ).toHaveBeenCalledWith({
+          signal: expect.objectContaining({ aborted: false }),
+        })
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "6529 Desktop" })
+      );
+
+      expect(
+        await screen.findByTitle(/token=bridged-v2-desktop-refresh-token/)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTitle(/stale-local-legacy-refresh-token/)
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows an upgrade action for Desktop sharing when the web session is missing", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      const ensureActiveSessionV2WebSession = jest
+        .fn()
+        .mockResolvedValue(false);
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession,
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await screen.findByTestId("header-share-modal");
+      await userEvent.click(
+        screen.getByRole("button", { name: "6529 Desktop" })
+      );
+
+      expect(
+        await screen.findByText("Update Authentication")
+      ).toBeInTheDocument();
+      expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          address: "0x1234567890123456789012345678901234567890",
+          abortSignal: expect.objectContaining({ aborted: false }),
+        })
+      );
+      expect(
+        sessionV2.createLegacyDesktopConnectionShare
+      ).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole("button", { name: "Update" }));
+
+      expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows a retryable error for Desktop sharing when web-session verification errors", async () => {
+      const auth = require("@/components/auth/Auth");
+      const requestSessionUpgrade = jest.fn().mockResolvedValue({
+        success: true,
+      });
+      const ensureActiveSessionV2WebSession = jest
+        .fn()
+        .mockRejectedValue(new Error("verification failed"));
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession,
+        requestSessionUpgrade,
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+
+      try {
+        renderWithProviders(<HeaderShare />);
+
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+        await screen.findByTestId("header-share-modal");
+        await userEvent.click(
+          screen.getByRole("button", { name: "6529 Desktop" })
+        );
+
+        expect(
+          await screen.findByText("Connection Sharing Unavailable")
+        ).toBeInTheDocument();
+        expect(ensureActiveSessionV2WebSession).toHaveBeenCalledWith(
+          expect.objectContaining({
+            address: "0x1234567890123456789012345678901234567890",
+            abortSignal: expect.objectContaining({ aborted: false }),
+          })
+        );
+        expect(
+          sessionV2.createLegacyDesktopConnectionShare
+        ).not.toHaveBeenCalled();
+        expect(requestSessionUpgrade).not.toHaveBeenCalled();
+      } finally {
+        consoleErrorSpy.mockRestore();
+      }
     });
 
     it("uses the backend legacy desktop bridge when no local refresh token exists", async () => {
@@ -760,6 +887,70 @@ describe("HeaderShare", () => {
       ).toBeInTheDocument();
       expect(
         screen.queryByTitle(/connection_share_code=/)
+      ).not.toBeInTheDocument();
+    });
+
+    it("regenerates the Desktop connection share when the active wallet changes while the modal is open", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const firstAddress = "0x1111111111111111111111111111111111111111";
+      const secondAddress = "0x2222222222222222222222222222222222222222";
+      let activeAddress = firstAddress;
+      mockAuthUtils.getWalletAddress.mockImplementation(() => activeAddress);
+      mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
+        isAuthenticated: true,
+        hasValidWalletAuth: true,
+        seizeConnect: jest.fn(),
+        seizeAcceptConnection: jest.fn(),
+        address: activeAddress,
+        hasInitializationError: false,
+        initializationError: null,
+      }));
+      sessionV2.createLegacyDesktopConnectionShare
+        .mockResolvedValueOnce({
+          refresh_token: "first-desktop-refresh-token",
+          address: firstAddress,
+          role: null,
+          deep_link_path: `/accept-connection-sharing?token=first-desktop-refresh-token&address=${firstAddress}`,
+        })
+        .mockResolvedValueOnce({
+          refresh_token: "second-desktop-refresh-token",
+          address: secondAddress,
+          role: null,
+          deep_link_path: `/accept-connection-sharing?token=second-desktop-refresh-token&address=${secondAddress}`,
+        });
+
+      const { rerender } = renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() =>
+        expect(
+          sessionV2.createLegacyDesktopConnectionShare
+        ).toHaveBeenCalledTimes(1)
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "6529 Desktop" })
+      );
+      expect(
+        await screen.findByTitle(/token=first-desktop-refresh-token/)
+      ).toBeInTheDocument();
+
+      activeAddress = secondAddress;
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          <HeaderShare />
+        </QueryClientProvider>
+      );
+
+      await waitFor(() =>
+        expect(
+          sessionV2.createLegacyDesktopConnectionShare
+        ).toHaveBeenCalledTimes(2)
+      );
+      expect(
+        await screen.findByTitle(/token=second-desktop-refresh-token/)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTitle(/token=first-desktop-refresh-token/)
       ).not.toBeInTheDocument();
     });
 
