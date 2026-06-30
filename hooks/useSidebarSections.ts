@@ -1,7 +1,13 @@
 import CollectionsMenuIcon from "@/components/common/icons/CollectionsMenuIcon";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import { AboutSection } from "@/types/enums";
+import {
+  getAboutNavItemHref,
+  getAboutNavItemLabel,
+  getVisibleAboutNavGroups,
+} from "@/components/about/about.routes";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   DocumentTextIcon,
   UsersIcon,
@@ -134,71 +140,14 @@ function getAboutSection(hideSubscriptions: boolean): SidebarSection {
     key: "about",
     name: "About",
     icon: DocumentTextIcon,
-    items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
-    subsections: [
-      {
-        name: "Support",
-        items: [
-          { name: "FAQ", href: `/about/${AboutSection.FAQ}` },
-          { name: "Apply", href: `/about/${AboutSection.APPLY}` },
-          { name: "Contact Us", href: `/about/${AboutSection.CONTACT_US}` },
-        ],
-      },
-      {
-        name: "NFTs",
-        items: [
-          { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
-          ...(hideSubscriptions
-            ? []
-            : [
-                {
-                  name: "Subscriptions",
-                  href: `/about/${AboutSection.SUBSCRIPTIONS}`,
-                },
-              ]),
-          { name: "Minting", href: `/about/${AboutSection.MINTING}` },
-          {
-            name: "Nakamoto Threshold",
-            href: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-          },
-          { name: "Meme Lab", href: `/about/${AboutSection.MEME_LAB}` },
-          { name: "Gradients", href: `/about/${AboutSection.GRADIENTS}` },
-        ],
-      },
-      {
-        name: "NFT Delegation",
-        items: [
-          {
-            name: "About NFTD",
-            href: `/about/${AboutSection.NFT_DELEGATION}`,
-          },
-          {
-            name: "Primary Address",
-            href: `/about/${AboutSection.PRIMARY_ADDRESS}`,
-          },
-        ],
-      },
-      {
-        name: "6529 Capital",
-        items: [
-          { name: "About 6529 Capital", href: `/capital` },
-          { name: "Company Portfolio", href: `/capital/company-portfolio` },
-          { name: "NFT Fund", href: `/capital/fund` },
-        ],
-      },
-      {
-        name: "Resources",
-        items: [
-          { name: "Tech", href: `/about/${AboutSection.TECH}` },
-          {
-            name: "Data Decentralization",
-            href: `/about/${AboutSection.DATA_DECENTR}`,
-          },
-          { name: "ENS", href: `/about/${AboutSection.ENS}` },
-          { name: "License", href: `/about/${AboutSection.LICENSE}` },
-        ],
-      },
-    ],
+    items: [{ name: "About", href: "/about" }],
+    subsections: getVisibleAboutNavGroups(hideSubscriptions).map((group) => ({
+      name: t(DEFAULT_LOCALE, group.labelKey),
+      items: group.items.map((item) => ({
+        name: getAboutNavItemLabel(item, DEFAULT_LOCALE),
+        href: getAboutNavItemHref(item),
+      })),
+    })),
   };
 }
 
