@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type {
   ButtonHTMLAttributes,
   ComponentPropsWithoutRef,
-  KeyboardEvent,
   ReactNode,
 } from "react";
 import styles from "./NextGenAdmin.module.scss";
@@ -154,28 +153,31 @@ export function Col({
   md?: ColumnSpan | undefined;
   onClick?: (() => void) | undefined;
 }>) {
-  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (!onClick || (event.key !== "Enter" && event.key !== " ")) {
-      return;
-    }
-    event.preventDefault();
-    onClick();
+  const colClassName = adminClassName(
+    "tw-relative tw-block tw-w-full tw-min-w-0 tw-px-3",
+    !xs && !sm && !md && "tw-flex-1",
+    xs && xsColumnClasses[xs],
+    sm && smColumnClasses[sm],
+    md && mdColumnClasses[md],
+    className
+  );
+
+  if (onClick) {
+    return (
+      <button
+        className={adminClassName(
+          "tw-m-0 tw-appearance-none tw-border-0 tw-bg-transparent tw-py-0 tw-text-left tw-text-inherit",
+          colClassName
+        )}
+        onClick={onClick}
+        type="button">
+        {children}
+      </button>
+    );
   }
 
   return (
-    <div
-      className={adminClassName(
-        "tw-relative tw-w-full tw-min-w-0 tw-px-3",
-        !xs && !sm && !md && "tw-flex-1",
-        xs && xsColumnClasses[xs],
-        sm && smColumnClasses[sm],
-        md && mdColumnClasses[md],
-        className
-      )}
-      onClick={onClick}
-      onKeyDown={onClick ? onKeyDown : undefined}
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}>
+    <div className={colClassName}>
       {children}
     </div>
   );
