@@ -7,7 +7,6 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import Timeline from "../timeline/Timeline";
 
 export function MemePageTimeline(props: {
@@ -32,15 +31,13 @@ export function MemePageTimeline(props: {
   if (props.show && props.nft) {
     return (
       <section aria-label={t(locale, "theMemes.detail.timeline.region")}>
-        <Container className="pt-3 pb-5 no-padding">
-          <Row>
-            <Col xs={12} md={{ span: 10, offset: 1 }}>
-              {props.nft && (
-                <Timeline nft={props.nft} steps={nftHistory} locale={locale} />
-              )}
-            </Col>
-          </Row>
-        </Container>
+        <div className="tw-pb-5 tw-pt-3">
+          <div className="tw-w-full md:tw-mx-auto md:tw-w-10/12">
+            {props.nft && (
+              <Timeline nft={props.nft} steps={nftHistory} locale={locale} />
+            )}
+          </div>
+        </div>
       </section>
     );
   } else {

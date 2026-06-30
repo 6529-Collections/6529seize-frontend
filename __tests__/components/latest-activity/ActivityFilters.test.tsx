@@ -3,14 +3,6 @@ import { ContractFilter, TypeFilter } from "@/hooks/useActivityData";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-jest.mock("react-bootstrap", () => ({
-  Col: ({ children, sm, md, className }: any) => (
-    <div data-testid="col" data-sm={sm} data-md={md} className={className}>
-      {children}
-    </div>
-  ),
-}));
-
 jest.mock("framer-motion", () => ({
   useAnimate: () => [{ current: null }, jest.fn()],
   AnimatePresence: ({ children }: any) => <>{children}</>,
@@ -32,10 +24,18 @@ describe("ActivityFilters", () => {
     jest.clearAllMocks();
   });
 
+  function renderFilters(props = mockProps) {
+    const result = render(<ActivityFilters {...props} />);
+    return {
+      ...result,
+      wrapper: result.container.firstElementChild as HTMLElement,
+    };
+  }
+
   describe("Component Rendering", () => {
     it("renders without crashing", () => {
-      render(<ActivityFilters {...mockProps} />);
-      expect(screen.getByTestId("col")).toBeInTheDocument();
+      const { wrapper } = renderFilters();
+      expect(wrapper).toBeInTheDocument();
     });
 
     it("renders both dropdown filters", () => {
@@ -56,7 +56,9 @@ describe("ActivityFilters", () => {
         })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: `Transaction Type: ${TypeFilter.ALL}` })
+        screen.getByRole("button", {
+          name: `Transaction Type: ${TypeFilter.ALL}`,
+        })
       ).toBeInTheDocument();
     });
 
@@ -73,7 +75,9 @@ describe("ActivityFilters", () => {
         })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: `Transaction Type: ${TypeFilter.SALES}` })
+        screen.getByRole("button", {
+          name: `Transaction Type: ${TypeFilter.SALES}`,
+        })
       ).toBeInTheDocument();
     });
   });
@@ -81,34 +85,32 @@ describe("ActivityFilters", () => {
   describe("Responsive Layout", () => {
     it("applies center alignment on mobile", () => {
       const mobileProps = { ...mockProps, isMobile: true };
-      render(<ActivityFilters {...mobileProps} />);
-      const col = screen.getByTestId("col");
-      expect(col.className).toContain("justify-content-center");
+      const { wrapper } = renderFilters(mobileProps);
+      expect(wrapper).toHaveClass("tw-justify-center");
     });
 
     it("applies end alignment on desktop", () => {
       const desktopProps = { ...mockProps, isMobile: false };
-      render(<ActivityFilters {...desktopProps} />);
-      const col = screen.getByTestId("col");
-      expect(col.className).toContain("justify-content-end");
+      const { wrapper } = renderFilters(desktopProps);
+      expect(wrapper).toHaveClass("tw-justify-end");
     });
   });
 
   describe("CSS Classes", () => {
-    it("applies correct Bootstrap classes to Col", () => {
-      render(<ActivityFilters {...mockProps} />);
-      const col = screen.getByTestId("col");
-      expect(col).toHaveAttribute("data-sm", "12");
-      expect(col).toHaveAttribute("data-md", "6");
-      expect(col.className).toContain("d-flex");
-      expect(col.className).toContain("align-items-center");
-      expect(col.className).toContain("gap-4");
+    it("applies correct Tailwind layout classes", () => {
+      const { wrapper } = renderFilters();
+      expect(wrapper).toHaveClass(
+        "tw-flex",
+        "tw-w-full",
+        "tw-items-center",
+        "tw-gap-4",
+        "md:tw-w-1/2"
+      );
     });
 
-    it("applies tailwind-scope class to Col", () => {
-      render(<ActivityFilters {...mockProps} />);
-      const col = screen.getByTestId("col");
-      expect(col.className).toContain("tailwind-scope");
+    it("applies tailwind-scope class to the wrapper", () => {
+      const { wrapper } = renderFilters();
+      expect(wrapper).toHaveClass("tailwind-scope");
     });
   });
 
@@ -118,7 +120,9 @@ describe("ActivityFilters", () => {
         const props = { ...mockProps, typeFilter };
         const { unmount } = render(<ActivityFilters {...props} />);
         expect(
-          screen.getByRole("button", { name: `Transaction Type: ${typeFilter}` })
+          screen.getByRole("button", {
+            name: `Transaction Type: ${typeFilter}`,
+          })
         ).toBeInTheDocument();
         unmount();
       }
@@ -246,12 +250,9 @@ describe("ActivityFilters", () => {
 
   describe("Component Integration", () => {
     it("maintains proper component structure", () => {
-      const { container } = render(<ActivityFilters {...mockProps} />);
+      const { wrapper } = renderFilters();
 
-      const col = container.querySelector('[data-testid="col"]');
-      expect(col).toBeInTheDocument();
-
-      const buttons = within(col as HTMLElement).getAllByRole("button", {
+      const buttons = within(wrapper).getAllByRole("button", {
         name: /Collection:|Transaction Type:/i,
       });
       expect(buttons).toHaveLength(2);
@@ -261,10 +262,10 @@ describe("ActivityFilters", () => {
       const { rerender } = render(
         <ActivityFilters {...mockProps} isMobile={true} />
       );
-      expect(screen.getByTestId("col")).toBeInTheDocument();
+      expect(screen.getAllByRole("button")).toHaveLength(2);
 
       rerender(<ActivityFilters {...mockProps} isMobile={false} />);
-      expect(screen.getByTestId("col")).toBeInTheDocument();
+      expect(screen.getAllByRole("button")).toHaveLength(2);
     });
   });
 

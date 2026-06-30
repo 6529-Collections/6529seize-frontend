@@ -50,6 +50,7 @@ function renderDropdown(options: any) {
     canAddConnectedAccount: options.canAddConnectedAccount ?? false,
     seizeAddConnectedAccount: options.seizeAddConnectedAccount || jest.fn(),
     seizeConnect: options.seizeConnect || jest.fn(),
+    seizeConnectFresh: options.seizeConnectFresh || jest.fn(),
     seizeDisconnect:
       options.seizeDisconnect || jest.fn().mockResolvedValue(undefined),
     seizeDisconnectAndLogout:
@@ -101,16 +102,16 @@ describe("HeaderUserMenuDropdown", () => {
   });
 
   it("connects wallet when not connected", async () => {
-    const seizeConnect = jest.fn();
+    const seizeConnectFresh = jest.fn().mockResolvedValue(undefined);
     const { onClose } = renderDropdown({
       profile: profileBase,
       address: "0xabc",
       isConnected: false,
-      seizeConnect,
+      seizeConnectFresh,
     });
     fireEvent.click(screen.getAllByRole("button", { name: /connect/i })[0]);
     await waitFor(() => {
-      expect(seizeConnect).toHaveBeenCalled();
+      expect(seizeConnectFresh).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
   });
@@ -160,9 +161,7 @@ describe("HeaderUserMenuDropdown", () => {
       sessionUpgradeRequired: true,
     });
 
-    expect(
-      screen.getByRole("button", { name: "Connect" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Connect" })).toBeInTheDocument();
     expect(screen.getByText("Connect Wallet")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Upgrade Authentication" })

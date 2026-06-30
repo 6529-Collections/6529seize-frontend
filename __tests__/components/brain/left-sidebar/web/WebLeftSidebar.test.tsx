@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import WebLeftSidebar from "@/components/brain/left-sidebar/web/WebLeftSidebar";
 import { SidebarProvider } from "@/hooks/useSidebarState";
@@ -8,39 +8,6 @@ let mockDialogMountCount = 0;
 
 jest.mock("next/navigation", () => ({
   usePathname: () => usePathname(),
-}));
-jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
-  useMemesQuickVoteDialogController: () => {
-    const React = require("react");
-    const [isQuickVoteOpen, setIsQuickVoteOpen] = React.useState(false);
-    const [quickVoteSessionId, setQuickVoteSessionId] = React.useState(0);
-    const nextSessionIdRef = React.useRef(1);
-    const reservedSessionIdRef = React.useRef(null as number | null);
-
-    return {
-      closeQuickVote: () => setIsQuickVoteOpen(false),
-      dialogState: {
-        isOpen: isQuickVoteOpen,
-        onClose: () => setIsQuickVoteOpen(false),
-        sessionId: quickVoteSessionId,
-      },
-      isQuickVoteOpen,
-      openQuickVote: () => {
-        const sessionId =
-          reservedSessionIdRef.current ?? nextSessionIdRef.current;
-        reservedSessionIdRef.current = null;
-        nextSessionIdRef.current = sessionId + 1;
-        setQuickVoteSessionId(sessionId);
-        setIsQuickVoteOpen(true);
-      },
-      prefetchQuickVote: () => {
-        if (reservedSessionIdRef.current === null) {
-          reservedSessionIdRef.current = nextSessionIdRef.current;
-        }
-      },
-      quickVoteSessionId,
-    };
-  },
 }));
 
 jest.mock(
@@ -72,17 +39,15 @@ jest.mock("@/components/brain/left-sidebar/waves/MemesWaveFooter", () => ({
 }));
 
 jest.mock(
-  "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog",
+  "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntimeLoader",
   () => ({
     __esModule: true,
-    default: ({
-      isOpen,
-      onClose,
-      sessionId,
+    LazyMemesQuickVoteRuntime: ({
+      intent,
+      onIdle,
     }: {
-      readonly isOpen: boolean;
-      readonly sessionId: number;
-      readonly onClose: () => void;
+      readonly intent: { readonly id: number };
+      readonly onIdle: () => void;
     }) => {
       const React = require("react");
 
@@ -90,14 +55,38 @@ jest.mock(
         mockDialogMountCount += 1;
       }, []);
 
-      return isOpen ? (
+      return (
         <div data-testid="dialog">
-          <div>Session {sessionId}</div>
-          <button type="button" onClick={onClose}>
+          <div>Session {intent.id}</div>
+          <button
+            type="button"
+            onClick={() => {
+              onIdle();
+            }}
+          >
             Close Quick Vote
           </button>
         </div>
-      ) : null;
+      );
+    },
+    useMemesQuickVoteRuntimeLauncher: () => {
+      const React = require("react");
+      const [runtimeIntent, setRuntimeIntent] = React.useState(null);
+      const nextIntentIdRef = React.useRef(0);
+
+      return {
+        openQuickVote: () => {
+          nextIntentIdRef.current += 1;
+          setRuntimeIntent({
+            action: "open",
+            id: nextIntentIdRef.current,
+          });
+        },
+        prefetchQuickVote: jest.fn(),
+        resetQuickVoteRuntime: () => setRuntimeIntent(null),
+        runtimeIntent,
+        shouldMountRuntime: runtimeIntent !== null,
+      };
     },
   })
 );
@@ -128,33 +117,39 @@ describe("WebLeftSidebar", () => {
     expect(screen.getByTestId("footer")).toHaveTextContent("collapsed");
   });
 
-  it("opens the shared quick-vote dialog from the footer without remounting it", () => {
+  it("loads the shared quick-vote runtime from the footer without remounting it", async () => {
     usePathname.mockReturnValue("/waves");
 
     renderSidebar(<WebLeftSidebar />);
 
-    expect(mockDialogMountCount).toBe(1);
+    expect(mockDialogMountCount).toBe(0);
 
     fireEvent.click(screen.getByTestId("footer"));
-    expect(screen.getByText("Session 1")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Session 1")).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Close Quick Vote" }));
     expect(screen.queryByTestId("dialog")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("footer"));
-    expect(screen.getByText("Session 2")).toBeInTheDocument();
-    expect(mockDialogMountCount).toBe(1);
+    await waitFor(() => {
+      expect(screen.getByText("Session 2")).toBeInTheDocument();
+    });
+    expect(mockDialogMountCount).toBe(2);
   });
 
-  it("resets quick-vote state when switching between waves and messages", () => {
+  it("resets quick-vote state when switching between waves and messages", async () => {
     usePathname.mockReturnValue("/waves");
 
     const { rerender } = renderSidebar(<WebLeftSidebar />);
 
-    expect(mockDialogMountCount).toBe(1);
+    expect(mockDialogMountCount).toBe(0);
 
     fireEvent.click(screen.getByTestId("footer"));
-    expect(screen.getByText("Session 1")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Session 1")).toBeInTheDocument();
+    });
 
     usePathname.mockReturnValue("/messages/thread");
     rerender(
@@ -177,10 +172,13 @@ describe("WebLeftSidebar", () => {
     expect(screen.getByTestId("waves-list")).toBeInTheDocument();
     expect(screen.getByTestId("footer")).toBeInTheDocument();
     expect(screen.queryByTestId("dialog")).not.toBeInTheDocument();
-    expect(mockDialogMountCount).toBe(2);
+    expect(mockDialogMountCount).toBe(1);
 
     fireEvent.click(screen.getByTestId("footer"));
-    expect(screen.getByText("Session 1")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Session 1")).toBeInTheDocument();
+    });
+    expect(mockDialogMountCount).toBe(2);
   });
 
   it("hides the footer in messages view", () => {

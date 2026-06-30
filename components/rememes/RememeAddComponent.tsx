@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
+import { Dropdown, Form } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
 import type { Nft, NftContract } from "./alchemy-sdk-types";
@@ -35,6 +35,11 @@ interface Props {
   memes: NFT[];
   verifiedRememe(r: ProcessedRememe | undefined, references: number[]): void;
 }
+
+const PRIMARY_BUTTON_CLASS =
+  "seize-btn tw-bg-[#267c93] tw-py-[0.375rem] tw-leading-6 tw-text-white tw-transition-colors disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#2b8aa3]";
+const LINK_BUTTON_CLASS =
+  "seize-btn-link tw-bg-transparent tw-py-[0.375rem] tw-leading-6";
 
 export default function RememeAddComponent(props: Readonly<Props>) {
   const [contract, setContract] = useState("");
@@ -169,82 +174,79 @@ export default function RememeAddComponent(props: Readonly<Props>) {
 
   return (
     <Form className={styles["addRememeContainer"]}>
-      <Container>
-        <Row>
-          <Col sm={12} md={6}>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label className="d-flex align-items-center">
+      <div className="tw-container tw-mx-auto tw-px-3">
+        <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2">
+          <div>
+            <Form.Group className="tw-pb-4">
+              <Form.Label className="tw-flex tw-items-center">
                 Contract
               </Form.Label>
-              <Col>
-                <Form.Control
-                  autoFocus
-                  className={`${styles["formInput"]}`}
-                  type="text"
-                  placeholder="0x..."
-                  value={contract}
-                  disabled={verifying || verified}
-                  onChange={(e) => setContract(e.target.value)}
-                />
-              </Col>
+              <Form.Control
+                autoFocus
+                className={`${styles["formInput"]}`}
+                type="text"
+                placeholder="0x..."
+                value={contract}
+                disabled={verifying || verified}
+                onChange={(e) => setContract(e.target.value)}
+              />
             </Form.Group>
-          </Col>
-          <Col sm={12} md={6}>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label className="d-flex align-items-center">
+          </div>
+          <div>
+            <Form.Group className="tw-pb-4">
+              <Form.Label className="tw-flex tw-items-center">
                 Token IDs
               </Form.Label>
-              <Col>
-                <Form.Control
-                  className={`${styles["formInput"]}`}
-                  type="text"
-                  placeholder="1,2,3 or 1-3 or 1,2-5 or 1-3,5"
-                  value={tokenIdDisplay}
-                  disabled={verifying || verified}
-                  onChange={(e) => {
-                    setTokenIdDisplay(e.target.value);
-                  }}
-                />
-              </Col>
+              <Form.Control
+                className={`${styles["formInput"]}`}
+                type="text"
+                placeholder="1,2,3 or 1-3 or 1,2-5 or 1-3,5"
+                value={tokenIdDisplay}
+                disabled={verifying || verified}
+                onChange={(e) => {
+                  setTokenIdDisplay(e.target.value);
+                }}
+              />
             </Form.Group>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
+          </div>
+        </div>
+        <div>
+          <div>
             Meme References{references.length > 0 && ` (${references.length})`}
-          </Col>
-        </Row>
-        <Row className="pt-2">
-          <Col className="d-flex align-items-center flex-wrap gap-2">
+          </div>
+        </div>
+        <div className="tw-pt-2">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
             {references.map((m) => (
               <span className={styles["addMemeReferenceWrapper"]} key={m.id}>
-                <>
-                  <span
-                    className={`${styles["addMemeReferenceDisplayBtn"]} ${
-                      verifying || verified
-                        ? styles["addMemeReferenceDisplayBtnDisabled"]
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setReferences((r) => r.filter((s) => s.id != m.id))
-                    }
-                    data-tooltip-id={`clear-reference-${m.id}`}
-                  >
-                    x
-                  </span>
-                  <Tooltip
-                    id={`clear-reference-${m.id}`}
-                    place="top"
-                    delayShow={250}
-                    style={{
-                      backgroundColor: "#1F2937",
-                      color: "white",
-                      padding: "4px 8px",
-                    }}
-                  >
-                    Clear
-                  </Tooltip>
-                </>
+                <button
+                  type="button"
+                  className={`${styles["addMemeReferenceDisplayBtn"]} ${
+                    verifying || verified
+                      ? styles["addMemeReferenceDisplayBtnDisabled"]
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setReferences((r) => r.filter((s) => s.id != m.id))
+                  }
+                  disabled={verifying || verified}
+                  aria-label={`Clear reference #${m.id}`}
+                  data-tooltip-id={`clear-reference-${m.id}`}
+                >
+                  x
+                </button>
+                <Tooltip
+                  id={`clear-reference-${m.id}`}
+                  place="top"
+                  delayShow={250}
+                  style={{
+                    backgroundColor: "#1F2937",
+                    color: "white",
+                    padding: "4px 8px",
+                  }}
+                >
+                  Clear
+                </Tooltip>
                 <span className={styles["addMemeReferenceDisplay"]}>
                   #{m.id} - {m.name}
                 </span>
@@ -264,60 +266,60 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                     >
                       #{m.id} - {m.name}
                     </Dropdown.Item>
-                  ))}
+                ))}
               </Dropdown.Menu>
             </Dropdown>
-          </Col>
-        </Row>
+          </div>
+        </div>
         {(contractResponse || nftResponses.length > 0) && !verifying && (
-          <Row>
+          <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2">
             {contractResponse && !verifying && (
-              <Col className="pt-4">
-                <Container className="no-padding">
-                  <Row>
-                    <Col>
+              <div className="tw-pt-4">
+                <div>
+                  <div>
+                    <div>
                       <b>
                         <u>Contract</u>
                       </b>
-                    </Col>
-                  </Row>
+                    </div>
+                  </div>
                   {contractResponse.name && (
-                    <Row className="pt-1 pb-1">
-                      <Col>Name: {contractResponse.name}</Col>
-                    </Row>
+                    <div className="tw-pb-1 tw-pt-1">
+                      <div>Name: {contractResponse.name}</div>
+                    </div>
                   )}
                   {contractResponse.contractDeployer && (
-                    <Row className="pt-1 pb-1">
-                      <Col>
+                    <div className="tw-pb-1 tw-pt-1">
+                      <div>
                         Deployer:{" "}
                         {ensResolution.isSuccess &&
                           ensResolution.data &&
                           `${ensResolution.data} - `}
                         {formatAddress(contractResponse.contractDeployer)}
-                      </Col>
-                    </Row>
+                      </div>
+                    </div>
                   )}
                   {contractResponse.openSeaMetadata?.collectionName && (
-                    <Row className="pt-1 pb-1">
-                      <Col>
+                    <div className="tw-pb-1 tw-pt-1">
+                      <div>
                         Collection Name:{" "}
                         {contractResponse.openSeaMetadata.collectionName}
-                      </Col>
-                    </Row>
+                      </div>
+                    </div>
                   )}
-                </Container>
-              </Col>
+                </div>
+              </div>
             )}
             {nftResponses.length > 0 && !verifying && (
-              <Col className="pt-4">
-                <Container className="no-padding">
-                  <Row>
-                    <Col>
+              <div className="tw-pt-4">
+                <div>
+                  <div>
+                    <div>
                       <b>
                         <u>Tokens</u>
                       </b>
-                    </Col>
-                  </Row>
+                    </div>
+                  </div>
                   <ul className={styles["addRememeTokenList"]}>
                     {nftResponses.map((nftR) => (
                       <li key={`nftr-${nftR.tokenId}`}>
@@ -348,39 +350,40 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                       </li>
                     ))}
                   </ul>
-                </Container>
-              </Col>
+                </div>
+              </div>
             )}
-          </Row>
+          </div>
         )}
         {verificationErrors.length > 0 && (
           <>
-            <Row className="pt-4">
-              <Col xs={12}>
-                <span className="d-flex align-items-center justify-content-start gap-2">
+            <div className="tw-pt-4">
+              <div className="tw-w-full">
+                <span className="tw-flex tw-items-center tw-justify-start tw-gap-2">
                   <FontAwesomeIcon
                     icon={faTimesCircle}
                     className={styles["unverifiedIcon"]}
                   />
                   Verification Failed - Fix errors and revalidate
                 </span>
-              </Col>
-            </Row>
-            <Row className="pt-2">
+              </div>
+            </div>
+            <div className="tw-pt-2">
               {verificationErrors.map((ve) => (
-                <Col key={ve} xs={12}>
+                <div key={ve} className="tw-w-full">
                   - {ve}
-                </Col>
+                </div>
               ))}
-            </Row>
+            </div>
           </>
         )}
-        <Row className="pt-4">
-          <Col>
+        <div className="tw-pt-4">
+          <div>
             {!verified ? (
-              <Button
+              <button
+                type="button"
                 onClick={() => validate()}
-                className={`seize-btn ${styles["validateButton"]}`}
+                className={`${PRIMARY_BUTTON_CLASS} ${styles["validateButton"]}`}
                 disabled={
                   !contract || !tokenIdDisplay || references.length === 0
                 }
@@ -389,17 +392,17 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 {verifying && (
                   <span className={styles["loaderSlot"]}>
                     <span
-                      className={`spinner-border ${styles["loader"]}`}
+                      className={`${styles["loader"]} tw-inline-block tw-animate-spin tw-rounded-full tw-border-solid tw-border-current tw-border-r-transparent`}
                       role="status"
                     >
-                      <span className="sr-only"></span>
+                      <span className="tw-sr-only"></span>
                     </span>
                   </span>
                 )}
-              </Button>
+              </button>
             ) : (
-              <div className="d-flex align-items-center justify-content-start gap-2">
-                <span className="d-flex align-items-center justify-content-start gap-2">
+              <div className="tw-flex tw-items-center tw-justify-start tw-gap-2">
+                <span className="tw-flex tw-items-center tw-justify-start tw-gap-2">
                   <FontAwesomeIcon
                     icon={faCheckCircle}
                     className={styles["verifiedIcon"]}
@@ -408,22 +411,23 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                   {areEqualAddresses(contract, OPENSEA_STORE_FRONT_CONTRACT) &&
                     " (OpenSea Shared Storefront Contract)"}
                 </span>
-                <Button
+                <button
+                  type="button"
                   onClick={() => {
                     setVerified(false);
                     setNftResponses([]);
                     setContractResponse(undefined);
                     props.verifiedRememe(undefined, []);
                   }}
-                  className="seize-btn-link"
+                  className={LINK_BUTTON_CLASS}
                 >
                   Edit
-                </Button>
+                </button>
               </div>
             )}
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     </Form>
   );
 }

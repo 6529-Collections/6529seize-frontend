@@ -1,8 +1,9 @@
 "use client";
 
-import type { FC, RefObject } from "react";
+import { useEffect, type FC, type RefObject } from "react";
 import { WaveDropsScrollControlsBottomButton } from "./WaveDropsScrollControlsBottomButton";
 import { WaveDropsScrollControlsUnreadButton } from "./WaveDropsScrollControlsUnreadButton";
+import { registerWaveDropsScrollControlsVisible } from "./WaveDropsScrollControlsVisibility";
 import { useUnreadDividerVisibility } from "./useUnreadDividerVisibility";
 
 interface WaveDropsScrollControlsProps {
@@ -38,8 +39,17 @@ export const WaveDropsScrollControls: FC<WaveDropsScrollControlsProps> = ({
   const hasPending = newMessagesCount > 0;
   const isBottomVisible = hasPending || !isAtBottom;
   const isCombined = isUnreadVisible && isBottomVisible;
+  const isVisible = isUnreadVisible || isBottomVisible;
 
-  if (!isUnreadVisible && !isBottomVisible) {
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+
+    return registerWaveDropsScrollControlsVisible();
+  }, [isVisible]);
+
+  if (!isVisible) {
     return null;
   }
 

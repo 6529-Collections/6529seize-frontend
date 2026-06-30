@@ -14,13 +14,24 @@ describe("instrumentation-client", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const talismanOnboardingMessage =
+    "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const reactDomInsertBeforeMessage =
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+  const gifPickerTenorUndefinedTagsMessage =
+    "undefined is not an object (evaluating 'e.tags')";
+  const reactDomRemoveChildMessage =
+    "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+  };
+  const gifPickerTenorManagerFrame = {
+    filename:
+      "node_modules/.pnpm/gif-picker-react@1.5.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/gif-picker-react/src/managers/TenorManager.ts",
+    function: "<anonymous>",
   };
   const wasmCspUnsafeEvalMessage = [
     "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
@@ -29,6 +40,8 @@ describe("instrumentation-client", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const observedWasmModuleCspUnsafeEvalMessage =
+    "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
   const sentryRouteParameterizationMessage =
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
@@ -89,8 +102,10 @@ describe("instrumentation-client", () => {
   };
 
   const createSentryRouteParameterizationEvent = (
-    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame]
+    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame],
+    overrides: Record<string, unknown> = {}
   ) => ({
+    transaction: "/waves/:wave",
     exception: {
       values: [
         {
@@ -106,6 +121,21 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+    request: {
+      url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    contexts: {
+      app: {
+        app_name: "MetaMaskMobile",
+      },
+      browser: {
+        name: "Mobile Safari UI/WKWebView",
+      },
+    },
+    tags: {
+      browser: "Mobile Safari UI/WKWebView",
+      "browser.name": "Mobile Safari UI/WKWebView",
+    },
     breadcrumbs: [
       {
         category: "navigation",
@@ -115,6 +145,7 @@ describe("instrumentation-client", () => {
         },
       },
     ],
+    ...overrides,
   });
 
   const createAppKitCoinbaseBreadcrumbs = () => [
@@ -240,6 +271,33 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "react-dom-remove-child-event",
+      transaction: "/the-memes/mint",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/the-memes/mint",
+        url: "/the-memes/mint",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops injected WebAssembly CSP unsafe-eval errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {
@@ -253,6 +311,84 @@ describe("instrumentation-client", () => {
                 {
                   filename: "app:///inject.js",
                   abs_path: "app:///inject.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops gif-picker Tenor category errors with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "gif-picker-tenor-categories-event",
+      transaction: "/waves/:wave",
+      request: {
+        url: "https://6529.io/waves/b38288e6-ca9d-45ce-8323-3dc5e094f04e",
+      },
+      tags: {
+        transaction: "/waves/:wave",
+        url: "/waves/b38288e6-ca9d-45ce-8323-3dc5e094f04e",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: gifPickerTenorUndefinedTagsMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [gifPickerTenorManagerFrame],
+            },
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          category: "console",
+          level: "error",
+          message: "[gif-picker-react] Failed to fetch data from Tenor API",
+        },
+        {
+          type: "http",
+          category: "fetch",
+          level: "error",
+          message: "GET: /v2/categories",
+          data: {
+            url: "/v2/categories",
+            "url.is_first_party": false,
+            "url.is_first_party_api": false,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops observed injected WebAssembly.Module CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "CompileError",
+            value: observedWasmModuleCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "///inject.js",
+                  abs_path: "///inject.js",
                 },
               ],
             },
@@ -299,6 +435,40 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops exact Talisman onboarding errors from extension page.js frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      transaction: "/the-memes/mint",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: talismanOnboardingMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "chrome-extension://talisman-wallet/page.js",
+                  abs_path: "chrome-extension://talisman-wallet/page.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          category: "console",
+          message:
+            "Detected multiple injected wallet providers; Backpack override skipped.",
+        },
+      ],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops no-frame AppKit Coinbase websocket 1006 errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {
@@ -323,6 +493,39 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("keeps exact Talisman onboarding errors with app-owned frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      transaction: "/the-memes/mint",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: talismanOnboardingMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "chrome-extension://talisman-wallet/page.js",
+                  abs_path: "chrome-extension://talisman-wallet/page.js",
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/auth/WagmiSetup.tsx",
+                  function: "initializeWalletProviders",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps app-owned websocket 1006 errors with AppKit Coinbase breadcrumbs", () => {
@@ -361,6 +564,28 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("keeps route parameterization cyclic JSON errors without MetaMaskMobile WKWebView context", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent(
+      [nativeJsonStringifyFrame],
+      {
+        contexts: {
+          browser: {
+            name: "Mobile Safari",
+          },
+        },
+        tags: {
+          browser: "Mobile Safari",
+          "browser.name": "Mobile Safari",
+        },
+      }
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps cyclic JSON errors with app-owned frames", () => {
