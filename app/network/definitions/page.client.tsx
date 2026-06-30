@@ -3,7 +3,6 @@
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
 
 const NAV_LINKS = [
   { href: "/network/tdh", label: "TDH" },
@@ -19,98 +18,94 @@ export default function DefinitionsClient() {
   useSetTitle("Definitions | Network");
 
   return (
-    <Container className="tw-min-h-screen tw-pb-12 tw-pt-12">
-      <Row>
-        <Col>
-          <AboutContentsDropdown currentHref="/network/definitions" />
-          <h1>Definitions</h1>
+    <main className="tailwind-scope [min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-min-h-screen tw-w-full tw-px-3 tw-pb-12 tw-pt-12 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
+      <AboutContentsDropdown currentHref="/network/definitions" />
+      <h1>Definitions</h1>
 
-          <div className="tw-mt-6 tw-space-y-3 tw-text-base lg:tw-text-lg">
-            <p>
-              <b>
-                <u>Cards Collected:</u>
-              </b>{" "}
-              Total number of The Memes NFTs owned.
-            </p>
-            <p>
-              <b>
-                <u>Unique Memes:</u>
-              </b>{" "}
-              Total number of unique Meme NFTs owned.
-            </p>
-            <p>
-              <b>
-                <u>Meme Sets:</u>
-              </b>{" "}
-              Number of complete sets of The Memes (all SZNs or a specific SZN).
-            </p>
-            <p>
-              <b>
-                <u>Meme Sets -1 / -2:</u>
-              </b>{" "}
-              Complete sets missing 1 or 2 cards respectively.
-            </p>
-            <p>
-              <b>
-                <u>Genesis Sets:</u>
-              </b>{" "}
-              Complete set of the first three Meme NFTs.
-            </p>
-            <p>
-              <b>
-                <u>Purchases / Sales:</u>
-              </b>{" "}
-              Count of bought/sold NFTs (Memes or Gradients).
-            </p>
-            <p>
-              <b>
-                <u>Purchases (ETH) / Sales (ETH):</u>
-              </b>{" "}
-              ETH spent/received for those NFTs.
-            </p>
-            <p>
-              <b>
-                <u>Transfers In / Out:</u>
-              </b>{" "}
-              NFTs moved into/out of an address.
-            </p>
-            <p>
-              <b>
-                <u>TDH (unweighted):</u>
-              </b>{" "}
-              "Total Days Held" — each NFT contributes one unit per day held,
-              summed across NFTs, calculated daily at 00:00 UTC.
-            </p>
-            <p>
-              <b>
-                <u>TDH (unboosted):</u>
-              </b>{" "}
-              TDH weighted by edition size (FirstGM 3,941 = 1.0 baseline).
-            </p>
-            <p>
-              <b>
-                <u>TDH:</u>
-              </b>{" "}
-              TDH (unboosted) &times; boosters. For the current rules, see{" "}
-              <Link
-                href="/network/tdh"
-                className="tw-inline-block tw-rounded-md tw-border-solid tw-border-[#222] tw-bg-[#eee] tw-px-1 tw-py-0.5 tw-text-md tw-font-medium tw-text-black tw-no-underline hover:tw-bg-[#ddd] hover:tw-text-black"
-              >
-                TDH
-              </Link>
-              .
-            </p>
-          </div>
+      <div className="tw-mt-6 tw-space-y-3 tw-text-base lg:tw-text-lg">
+        <p>
+          <b>
+            <u>Cards Collected:</u>
+          </b>{" "}
+          Total number of The Memes NFTs owned.
+        </p>
+        <p>
+          <b>
+            <u>Unique Memes:</u>
+          </b>{" "}
+          Total number of unique Meme NFTs owned.
+        </p>
+        <p>
+          <b>
+            <u>Meme Sets:</u>
+          </b>{" "}
+          Number of complete sets of The Memes (all SZNs or a specific SZN).
+        </p>
+        <p>
+          <b>
+            <u>Meme Sets -1 / -2:</u>
+          </b>{" "}
+          Complete sets missing 1 or 2 cards respectively.
+        </p>
+        <p>
+          <b>
+            <u>Genesis Sets:</u>
+          </b>{" "}
+          Complete set of the first three Meme NFTs.
+        </p>
+        <p>
+          <b>
+            <u>Purchases / Sales:</u>
+          </b>{" "}
+          Count of bought/sold NFTs (Memes or Gradients).
+        </p>
+        <p>
+          <b>
+            <u>Purchases (ETH) / Sales (ETH):</u>
+          </b>{" "}
+          ETH spent/received for those NFTs.
+        </p>
+        <p>
+          <b>
+            <u>Transfers In / Out:</u>
+          </b>{" "}
+          NFTs moved into/out of an address.
+        </p>
+        <p>
+          <b>
+            <u>TDH (unweighted):</u>
+          </b>{" "}
+          &quot;Total Days Held&quot; — each NFT contributes one unit per day
+          held, summed across NFTs, calculated daily at 00:00 UTC.
+        </p>
+        <p>
+          <b>
+            <u>TDH (unboosted):</u>
+          </b>{" "}
+          TDH weighted by edition size (FirstGM 3,941 = 1.0 baseline).
+        </p>
+        <p>
+          <b>
+            <u>TDH:</u>
+          </b>{" "}
+          TDH (unboosted) &times; boosters. For the current rules, see{" "}
+          <Link
+            href="/network/tdh"
+            className="tw-inline-block tw-rounded-md tw-border-solid tw-border-[#222] tw-bg-[#eee] tw-px-1 tw-py-0.5 tw-text-md tw-font-medium tw-text-black tw-no-underline hover:tw-bg-[#ddd] hover:tw-text-black"
+          >
+            TDH
+          </Link>
+          .
+        </p>
+      </div>
 
-          <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-3">
-            {NAV_LINKS.map(({ href, label }) => (
-              <Link key={href} href={href} className={BUTTON_LINK_CLASSES}>
-                {label}
-              </Link>
-            ))}
-          </div>
-        </Col>
-      </Row>
-    </Container>
+      <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-3">
+        {NAV_LINKS.map(({ href, label }) => (
+          <Link key={href} href={href} className={BUTTON_LINK_CLASSES}>
+            {label}
+          </Link>
+        ))}
+      </div>
+    </main>
   );
 }

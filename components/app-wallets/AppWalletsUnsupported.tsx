@@ -1,4 +1,3 @@
-import { Row, Col } from "react-bootstrap";
 import Link from "next/link";
 import useCapacitor from "@/hooks/useCapacitor";
 
@@ -7,18 +6,22 @@ export default function AppWalletsUnsupported() {
 
   return (
     <>
-      <Row className="mt-4">
+      <div className="-tw-mx-3 tw-mt-4 tw-flex tw-flex-wrap">
         {capacitor.isCapacitor ? (
-          <Col>Update to the latest version of the app to use App Wallets</Col>
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
+            Update to the latest version of the app to use App Wallets
+          </div>
         ) : (
-          <Col>App Wallets are not supported on this platform</Col>
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
+            App Wallets are not supported on this platform
+          </div>
         )}
-      </Row>
-      <Row className="mt-4">
-        <Col>
+      </div>
+      <div className="-tw-mx-3 tw-mt-4 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
           <Link href="/">TAKE ME HOME</Link>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </>
   );
 }

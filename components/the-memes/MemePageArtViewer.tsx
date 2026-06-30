@@ -19,7 +19,7 @@ import {
 } from "@/helpers/nft.helpers";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
-import { Carousel, Col, Container, Row } from "react-bootstrap";
+import { Carousel } from "react-bootstrap";
 import { flushSync } from "react-dom";
 import styles from "./TheMemes.module.scss";
 
@@ -233,7 +233,7 @@ export function MemePageArtViewer({
     }
 
     return (
-      <Col xs={12} className={styles["artControls"]}>
+      <div className={`${styles["artControls"]} tw-w-full`}>
         <div className={styles["artControlsContent"]}>
           {showBalanceControl && (
             <div className={styles["artControlsBalance"] ?? ""}>
@@ -283,13 +283,13 @@ export function MemePageArtViewer({
             </div>
           )}
         </div>
-      </Col>
+      </div>
     );
   }
 
   return (
-    <Container className="p-0 tw-flex tw-h-full tw-flex-col">
-      <Row className="g-0 tw-flex-1 tw-flex-col">
+    <div className="tw-flex tw-h-full tw-flex-col tw-p-0">
+      <div className="tw-flex tw-flex-1 tw-flex-col">
         {hasAnimation ? (
           <>
             <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950 tw-p-0">
@@ -302,7 +302,7 @@ export function MemePageArtViewer({
                 wrap={false}
                 onSelect={carouselHandlerSlide}
               >
-                <Carousel.Item className="text-center">
+                <Carousel.Item className="tw-text-center">
                   <NFTImage
                     nft={nft}
                     animation={true}
@@ -317,7 +317,7 @@ export function MemePageArtViewer({
                   />
                 </Carousel.Item>
                 {hasImage && (
-                  <Carousel.Item className="text-center">
+                  <Carousel.Item className="tw-text-center">
                     <NFTImage
                       nft={nft}
                       animation={false}
@@ -357,7 +357,7 @@ export function MemePageArtViewer({
             {printArtworkControls()}
           </>
         )}
-      </Row>
-    </Container>
+      </div>
+    </div>
   );
 }

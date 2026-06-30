@@ -117,9 +117,10 @@ type AuthContextType = {
   readonly sessionUpgradeRequired: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade?: () => Promise<{ success: boolean }>;
-  readonly ensureActiveSessionV2WebSession?: (
-    abortSignal?: AbortSignal
-  ) => Promise<boolean>;
+  readonly ensureActiveSessionV2WebSession?: (params?: {
+    readonly address?: string | undefined;
+    readonly abortSignal?: AbortSignal | undefined;
+  }) => Promise<boolean>;
   readonly setToast: (toast: AppToastInput) => void;
   readonly setActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
@@ -822,6 +823,7 @@ export default function Auth({
       } catch (error) {
         if (!abortSignal?.aborted) {
           logErrorSecurely("session_v2_web_session_verification", error);
+          throw error;
         }
         return false;
       }
@@ -830,13 +832,19 @@ export default function Auth({
   );
 
   const ensureActiveSessionV2WebSessionForActiveWallet = useCallback(
-    async (abortSignal?: AbortSignal): Promise<boolean> => {
-      const walletAddress = getWalletAddress() ?? address;
+    async (params?: {
+      readonly address?: string | undefined;
+      readonly abortSignal?: AbortSignal | undefined;
+    }): Promise<boolean> => {
+      const walletAddress = params?.address ?? getWalletAddress() ?? address;
       if (!walletAddress || !getAuthJwt()) {
         return false;
       }
 
-      return await verifyActiveWebSessionForAddress(walletAddress, abortSignal);
+      return await verifyActiveWebSessionForAddress(
+        walletAddress,
+        params?.abortSignal
+      );
     },
     [address, verifyActiveWebSessionForAddress]
   );
