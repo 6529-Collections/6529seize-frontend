@@ -53,7 +53,7 @@ export const isQuickDmState = (value: unknown): value is QuickDmState => {
 };
 
 export const readStoredState = (): QuickDmState => {
-  if (typeof globalThis.window === "undefined") {
+  if (typeof window === "undefined") {
     return CLOSED_STATE;
   }
 
@@ -71,7 +71,7 @@ export const readStoredState = (): QuickDmState => {
 };
 
 export const storeState = (state: QuickDmState) => {
-  if (typeof globalThis.window === "undefined") {
+  if (typeof window === "undefined") {
     return;
   }
 

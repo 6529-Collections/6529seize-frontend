@@ -12,6 +12,8 @@ import Link from "next/link";
 import type React from "react";
 import type { QuickDmAvatarSource } from "./QuickDirectMessagesUtils";
 
+const QUICK_DM_LOADING_ROW_KEYS = ["primary", "secondary", "tertiary"] as const;
+
 const QuickDmIconButton = ({
   hasUnreadIndicator = false,
   label,
@@ -126,8 +128,8 @@ export const QuickDmLoadingRows = ({
       {t(locale, "quickDm.loadingStatus")}
     </span>
     <div className="tw-flex tw-flex-col tw-gap-2 tw-p-3" aria-hidden="true">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="tw-flex tw-items-center tw-gap-3 tw-p-2">
+      {QUICK_DM_LOADING_ROW_KEYS.map((rowKey) => (
+        <div key={rowKey} className="tw-flex tw-items-center tw-gap-3 tw-p-2">
           <div className="tw-size-10 tw-rounded-full tw-bg-white/10" />
           <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-2">
             <div className="tw-h-3 tw-w-32 tw-rounded-full tw-bg-white/10" />

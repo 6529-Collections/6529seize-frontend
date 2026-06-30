@@ -5,6 +5,7 @@ import { useSyncExternalStore } from "react";
 type VisibilityListener = () => void;
 
 const listeners = new Set<VisibilityListener>();
+// Shared ref count lets the launcher move while any wave scroll controls are visible.
 let visibleControlsCount = 0;
 
 const emitVisibilityChange = () => {
