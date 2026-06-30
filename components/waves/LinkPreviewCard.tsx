@@ -133,8 +133,6 @@ const parsePreviewHref = (href: string): URL | null => {
   } catch {
     return null;
   }
-
-  return null;
 };
 
 const isNumericPathSegment = (value: string | undefined): boolean =>
