@@ -39,9 +39,15 @@ interface SessionNativeResponse {
 
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
-type SessionRefreshFailureCooldown = {
-  readonly expiresAtMs: number;
-};
+type SessionRefreshFailureCooldown =
+  | {
+      readonly type: "empty";
+      readonly expiresAtMs: number;
+    }
+  | {
+      readonly type: "retry";
+      readonly expiresAtMs: number;
+    };
 type SessionRefreshInFlight = {
   readonly controller: AbortController;
   readonly promise: Promise<SessionRefreshResponse | null>;
@@ -80,7 +86,8 @@ interface RedeemConnectionShareResponse {
   readonly refresh_token_expires_at: string;
 }
 
-const SESSION_REFRESH_FAILURE_COOLDOWN_MS = 2000;
+const SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS = 2000;
+const SESSION_REFRESH_RETRY_COOLDOWN_MS = 250;
 const sessionRefreshInFlight = new Map<string, SessionRefreshInFlight>();
 const sessionRefreshFailureCooldowns = new Map<
   string,
@@ -137,10 +144,16 @@ function getActiveFailureCooldown(
 }
 
 function rememberSessionRefreshFailure(
-  key: string
+  key: string,
+  type: SessionRefreshFailureCooldown["type"]
 ): void {
   sessionRefreshFailureCooldowns.set(key, {
-    expiresAtMs: Date.now() + SESSION_REFRESH_FAILURE_COOLDOWN_MS,
+    type,
+    expiresAtMs:
+      Date.now() +
+      (type === "empty"
+        ? SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS
+        : SESSION_REFRESH_RETRY_COOLDOWN_MS),
   });
 }
 
@@ -157,6 +170,42 @@ function clearSessionRefreshFailureForSession(
       clientType: response.client_type,
     })
   );
+}
+
+async function waitForSessionRefreshRetryCooldown({
+  cooldown,
+  abortSignal,
+}: {
+  readonly cooldown: SessionRefreshFailureCooldown;
+  readonly abortSignal?: AbortSignal | undefined;
+}): Promise<void> {
+  const delayMs = Math.max(0, cooldown.expiresAtMs - Date.now());
+  if (delayMs === 0) {
+    return;
+  }
+  if (abortSignal?.aborted) {
+    throw createAbortError();
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined = undefined;
+    const cleanup = () => {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+      abortSignal?.removeEventListener("abort", onAbort);
+    };
+    const onAbort = () => {
+      cleanup();
+      reject(createAbortError());
+    };
+
+    timeoutId = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, delayMs);
+    abortSignal?.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 function settleSessionRefreshConsumer(
@@ -380,8 +429,14 @@ export async function refreshSessionV2({
   const key = getSessionRefreshKey({ address, clientType });
   const cooldown = getActiveFailureCooldown(key);
 
-  if (cooldown) {
+  if (cooldown?.type === "empty") {
     return null;
+  }
+  if (cooldown?.type === "retry") {
+    await waitForSessionRefreshRetryCooldown({ cooldown, abortSignal });
+    if (sessionRefreshFailureCooldowns.get(key) === cooldown) {
+      sessionRefreshFailureCooldowns.delete(key);
+    }
   }
 
   let existingEntry = sessionRefreshInFlight.get(key);
@@ -419,11 +474,12 @@ export async function refreshSessionV2({
         return;
       }
 
-      rememberSessionRefreshFailure(key);
+      rememberSessionRefreshFailure(key, "empty");
     } catch (error: unknown) {
       if (isAbortError(error)) {
         return;
       }
+      rememberSessionRefreshFailure(key, "retry");
     } finally {
       if (sessionRefreshInFlight.get(key) === entry) {
         sessionRefreshInFlight.delete(key);
