@@ -1,3 +1,4 @@
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import CommunityStatsComponent from "@/components/communityStats/CommunityStats";
 import { getAppMetadata } from "@/components/providers/metadata";
 import styles from "@/styles/Home.module.scss";
@@ -12,7 +13,10 @@ export default function CommunityStatsPage() {
             <Container className="no-padding">
               <Row>
                 <Col>
-                  <CommunityStatsComponent />
+                  <div className="tailwind-scope">
+                    <AboutContentsDropdown currentHref="/network/health/network-tdh" />
+                    <CommunityStatsComponent />
+                  </div>
                 </Col>
               </Row>
             </Container>

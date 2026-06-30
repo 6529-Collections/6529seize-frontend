@@ -9,6 +9,7 @@ import {
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -32,6 +33,8 @@ describe("sentry-client-filters", () => {
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const rabbyMobileUserRejectedStack =
+    "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
@@ -50,211 +53,240 @@ describe("sentry-client-filters", () => {
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
-  ): SentryTransactionSpan =>
-    ({
-      op: "http.client",
-      data: {
-        "http.url": "https://region1.google-analytics.com/g/collect",
-        "http.response.status_code": 0,
-        "url.same_origin": false,
-      },
-      ...overrides,
-    });
+  ): SentryTransactionSpan => ({
+    op: "http.client",
+    data: {
+      "http.url": "https://region1.google-analytics.com/g/collect",
+      "http.response.status_code": 0,
+      "url.same_origin": false,
+    },
+    ...overrides,
+  });
 
   const createTwitterConfigEvent = (
     overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "ReferenceError",
-            value: "Can't find variable: CONFIG",
-            stacktrace: {
-              frames: [
-                { filename: "app:///", abs_path: "app:///" },
-                { filename: "app:///", abs_path: "app:///" },
-              ],
-            },
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "ReferenceError",
+          value: "Can't find variable: CONFIG",
+          stacktrace: {
+            frames: [
+              { filename: "app:///", abs_path: "app:///" },
+              { filename: "app:///", abs_path: "app:///" },
+            ],
           },
-        ],
-      },
-      contexts: {
-        browser: {
-          name: "Twitter",
         },
+      ],
+    },
+    contexts: {
+      browser: {
+        name: "Twitter",
       },
-      tags: {
-        browser: "Twitter 11.62",
-        "browser.name": "Twitter",
-      },
-      ...overrides,
-    });
+    },
+    tags: {
+      browser: "Twitter 11.62",
+      "browser.name": "Twitter",
+    },
+    ...overrides,
+  });
 
   const createInjectedWalletCollisionEvent = (
     overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "TypeError",
-            value:
-              "'set' on proxy: trap returned falsish for property 'tronlinkParams'",
-            stacktrace: {
-              frames: [
-                {
-                  filename: "app:///injected/injected.js",
-                  abs_path: "app:///injected/injected.js",
-                },
-              ],
-            },
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value:
+            "'set' on proxy: trap returned falsish for property 'tronlinkParams'",
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///injected/injected.js",
+                abs_path: "app:///injected/injected.js",
+              },
+            ],
           },
-        ],
-      },
-      breadcrumbs: {
-        values: [
-          {
-            category: "console",
-            message:
-              "[WagmiSetup] Failed to install safe ethereum proxy Error: Cannot set property ethereum of #<Window> which has only a getter",
-            data: {
-              arguments: [
-                "[WagmiSetup] Failed to install safe ethereum proxy Error:",
-                "Cannot set property ethereum of #<Window> which has only a getter",
-              ],
-            },
-          },
-        ],
-      },
-      ...overrides,
-    });
-
-  const createCoinbaseWalletLinkWebSocketEvent = (
-    overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "Error",
-            value: "websocket error 1006:",
-            stacktrace: {
-              frames: [
-                {
-                  filename:
-                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
-                  abs_path:
-                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
-                },
-              ],
-            },
-          },
-        ],
-      },
-      ...overrides,
-    });
-
-  const createMetaMaskUpdateUrlCircularEvent = (
-    overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "TypeError",
-            value: metaMaskCircularMetaElementMessage,
-            stacktrace: {
-              frames: [
-                {
-                  filename: "<anonymous>",
-                  abs_path: "<anonymous>",
-                  function: "JSON.stringify",
-                },
-                {
-                  filename: "<anonymous>",
-                  abs_path: "<anonymous>",
-                  function: "__mm__updateUrl",
-                },
-              ],
-            },
-          },
-        ],
-      },
-      ...overrides,
-    });
-
-  const createInjectedWasmCspUnsafeEvalEvent = (
-    overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "RuntimeError",
-            value: wasmCspUnsafeEvalMessage,
-            stacktrace: {
-              frames: [
-                {
-                  filename: "app:///inject.js",
-                  abs_path: "app:///inject.js",
-                },
-                {
-                  filename: "app:///inject.js",
-                  abs_path: "app:///inject.js",
-                },
-              ],
-            },
-          },
-        ],
-      },
-      breadcrumbs: {
-        values: [
-          {
-            category: "console",
-            message: [
-              "failed to asynchronously prepare wasm: CompileError:",
-              "WebAssembly.instantiate(): Compiling or instantiating",
-              "WebAssembly module violates the following Content Security",
-              "policy directive because 'unsafe-eval' is not an allowed source",
-              "of script",
-            ].join(" "),
-          },
-        ],
-      },
-      ...overrides,
-    });
-
-  const createTalismanExtensionOnboardingEvent = (
-    overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      transaction: "/the-memes/mint",
-      exception: {
-        values: [
-          {
-            type: "Error",
-            value: talismanOnboardingMessage,
-            stacktrace: {
-              frames: [
-                {
-                  filename: "chrome-extension://talisman-wallet/page.js",
-                  abs_path: "chrome-extension://talisman-wallet/page.js",
-                },
-              ],
-            },
-          },
-        ],
-      },
-      breadcrumbs: [
+        },
+      ],
+    },
+    breadcrumbs: {
+      values: [
         {
           category: "console",
           message:
-            "Detected multiple injected wallet providers; Backpack override skipped.",
+            "[WagmiSetup] Failed to install safe ethereum proxy Error: Cannot set property ethereum of #<Window> which has only a getter",
+          data: {
+            arguments: [
+              "[WagmiSetup] Failed to install safe ethereum proxy Error:",
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            ],
+          },
         },
       ],
-      ...overrides,
-    });
+    },
+    ...overrides,
+  });
+
+  const createCoinbaseWalletLinkWebSocketEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "websocket error 1006:",
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                abs_path:
+                  "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
+
+  const createAppKitCoinbaseBreadcrumbs = (): NonNullable<
+    SentryClientEvent["breadcrumbs"]
+  > => ({
+    values: [
+      {
+        category: "console",
+        level: "debug",
+        message:
+          "[AppKitInitialization] Initializing AppKit adapter (web) with",
+        data: {
+          arguments: [
+            "[AppKitInitialization] Initializing AppKit adapter (web) with",
+            0,
+            "AppWallets",
+          ],
+        },
+      },
+      {
+        category: "console",
+        level: "debug",
+        message: "AppKit config",
+        data: {
+          arguments: [
+            {
+              enableCoinbase: true,
+              featuredWalletIds: ["metamask", "walletConnect"],
+              features: {
+                connectMethodsOrder: ["wallet"],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  const createMetaMaskUpdateUrlCircularEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: metaMaskCircularMetaElementMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "<anonymous>",
+                abs_path: "<anonymous>",
+                function: "JSON.stringify",
+              },
+              {
+                filename: "<anonymous>",
+                abs_path: "<anonymous>",
+                function: "__mm__updateUrl",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
+
+  const createInjectedWasmCspUnsafeEvalEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "RuntimeError",
+          value: wasmCspUnsafeEvalMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///inject.js",
+                abs_path: "app:///inject.js",
+              },
+              {
+                filename: "app:///inject.js",
+                abs_path: "app:///inject.js",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: {
+      values: [
+        {
+          category: "console",
+          message: [
+            "failed to asynchronously prepare wasm: CompileError:",
+            "WebAssembly.instantiate(): Compiling or instantiating",
+            "WebAssembly module violates the following Content Security",
+            "policy directive because 'unsafe-eval' is not an allowed source",
+            "of script",
+          ].join(" "),
+        },
+      ],
+    },
+    ...overrides,
+  });
+
+  const createTalismanExtensionOnboardingEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/the-memes/mint",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: talismanOnboardingMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "chrome-extension://talisman-wallet/page.js",
+                abs_path: "chrome-extension://talisman-wallet/page.js",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        category: "console",
+        message:
+          "Detected multiple injected wallet providers; Backpack override skipped.",
+      },
+    ],
+    ...overrides,
+  });
 
   const createSentryRouteParameterizationEvent = (
     overrides: Record<string, unknown> = {}
@@ -293,36 +325,61 @@ describe("sentry-client-filters", () => {
       ...overrides,
     }) as any;
 
-  const createLowValueNetworkEvent = (
+  const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
     ({
-      event_id: "network-drop-event",
       exception: {
         values: [
           {
-            type: "TypeError",
-            value: wrappedNetworkMessage,
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
           },
         ],
       },
-      tags: {
-        errorType: "network",
-        handled: true,
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileUserRejectedStack,
+        },
       },
-      breadcrumbs: [
+      ...overrides,
+    }) as TestSentryClientEvent;
+
+  const createLowValueNetworkEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    event_id: "network-drop-event",
+    exception: {
+      values: [
         {
-          type: "http",
-          category: "fetch",
-          data: {
-            status_code: 0,
-            url: "/api/waves-overview",
-            "url.is_first_party": true,
-          },
+          type: "TypeError",
+          value: wrappedNetworkMessage,
         },
       ],
-      ...overrides,
-    });
+    },
+    tags: {
+      errorType: "network",
+      handled: true,
+    },
+    breadcrumbs: [
+      {
+        type: "http",
+        category: "fetch",
+        data: {
+          status_code: 0,
+          url: "/api/waves-overview",
+          "url.is_first_party": true,
+        },
+      },
+    ],
+    ...overrides,
+  });
 
   const createReactDomInsertBeforeEvent = (
     overrides: Partial<SentryClientEvent> = {}
@@ -2023,8 +2080,7 @@ describe("sentry-client-filters", () => {
                   in_app: true,
                 },
                 {
-                  filename:
-                    "https://6529.io/_next/static/chunks/app-client.js",
+                  filename: "https://6529.io/_next/static/chunks/app-client.js",
                   function: "serializeWaveParams",
                   in_app: true,
                 },
@@ -2317,6 +2373,34 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters AppKit Coinbase websocket 1006 errors when Sentry has no app frames", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter app-owned websocket 1006 errors", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
@@ -2330,6 +2414,108 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "services/websocket/WebSocketProvider.tsx",
                   abs_path: "services/websocket/WebSocketProvider.tsx",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter app-owned websocket 1006 errors with AppKit Coinbase breadcrumbs", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "services/websocket/WebSocketProvider.tsx",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter no-frame websocket 1006 errors when the original exception stack is app-owned", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+    const error = new Error("websocket error 1006:");
+    error.stack = [
+      "Error: websocket error 1006:",
+      "    at connect (webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter AppKit websocket 1006 errors without a wallet connector breadcrumb", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [
+          {
+            category: "console",
+            message:
+              "[AppKitInitialization] Initializing AppKit adapter (web) with",
+            data: {
+              arguments: [
+                {
+                  enableCoinbase: false,
+                  featuredWalletIds: ["metamask"],
                 },
               ],
             },
@@ -2854,6 +3040,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters RabbyMobile 4001 user-rejected object rejections without app frames", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent();
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters injected WebAssembly CSP unsafe-eval errors", () => {
     // Arrange
     const event = createInjectedWasmCspUnsafeEvalEvent();
@@ -2895,6 +3092,34 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter RabbyMobile user-rejected object rejections with app-owned frames", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "hooks/drops/useDropSignature.ts",
+                  abs_path: "hooks/drops/useDropSignature.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
 
     // Assert
     expect(result).toBe(false);
@@ -2954,6 +3179,25 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter non-4001 RabbyMobile wallet object rejections", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4100,
+          message: "Not Allowed",
+          stack: rabbyMobileUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
 
     // Assert
     expect(result).toBe(false);

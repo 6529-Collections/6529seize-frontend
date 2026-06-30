@@ -23,8 +23,9 @@ const useSeizeConnectContextMock =
   require("@/components/auth/SeizeConnectContext")
     .useSeizeConnectContext as jest.Mock;
 const commonApiFetchMock = commonApiFetch as jest.Mock;
+type TestAuthContext = React.ContextType<typeof AuthContext>;
 
-const createWrapper = () => {
+const createWrapper = (authContextOverrides: Partial<TestAuthContext> = {}) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -34,18 +35,22 @@ const createWrapper = () => {
     },
   });
 
-  const defaultAuthContext = {
+  const defaultAuthContext: TestAuthContext = {
     connectedProfile: null,
+    isAuthenticated: false,
     activeProfileProxy: null,
-    setTitle: jest.fn(),
-    requestAuth: jest.fn(),
+    requestAuth: jest.fn(async () => ({ success: false })),
     setToast: jest.fn(),
-    setActiveProfileProxy: jest.fn(),
+    setActiveProfileProxy: jest.fn(async () => undefined),
     fetchingProfile: false,
     connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
     receivedProfileProxies: [],
     showWaves: false,
-    title: "",
+    sessionUpgradeRequired: false,
+  };
+  const authContext = {
+    ...defaultAuthContext,
+    ...authContextOverrides,
   };
 
   return ({ children }: { children: React.ReactNode }) =>
@@ -54,10 +59,40 @@ const createWrapper = () => {
       { client: queryClient },
       React.createElement(
         AuthContext.Provider,
-        { value: defaultAuthContext },
+        { value: authContext },
         children
       )
     );
+};
+
+const waveSearchHookParams = {
+  identity: null,
+  waveName: "memes",
+  limit: 20,
+  directMessage: false,
+};
+const proxySessionAuthContext = {
+  activeProfileProxy: {} as NonNullable<TestAuthContext["activeProfileProxy"]>,
+  connectedProfile: { handle: "alice" } as NonNullable<
+    TestAuthContext["connectedProfile"]
+  >,
+  isAuthenticated: true,
+};
+
+const expectWaveSearchFetch = async () => {
+  await waitFor(() => {
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "waves",
+      params: {
+        limit: "20",
+        name: "memes",
+        direct_message: "false",
+      },
+    });
+  });
+  expect(commonApiFetchMock).not.toHaveBeenCalledWith(
+    expect.objectContaining({ endpoint: "waves-public" })
+  );
 };
 
 describe("useWaves", () => {
@@ -84,6 +119,26 @@ describe("useWaves", () => {
     expect(result.current).toHaveProperty("fetchNextPage");
     expect(result.current).toHaveProperty("isFetching");
     expect(result.current).toHaveProperty("isFetchingNextPage");
+  });
+
+  it("fetches logged-out wave search from the documented waves endpoint", async () => {
+    renderHook(() => useWaves(waveSearchHookParams), {
+      wrapper: createWrapper(),
+    });
+
+    await expectWaveSearchFetch();
+  });
+
+  it("fetches proxy-session wave search from the documented waves endpoint", async () => {
+    useSeizeConnectContextMock.mockReturnValue({
+      address: "0xABC",
+      hasValidWalletAuth: true,
+    });
+    renderHook(() => useWaves(waveSearchHookParams), {
+      wrapper: createWrapper(proxySessionAuthContext),
+    });
+
+    await expectWaveSearchFetch();
   });
 
   it("does not fetch public or private waves while a connected wallet lacks valid auth", async () => {

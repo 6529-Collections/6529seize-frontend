@@ -1,4 +1,4 @@
-import { AboutMenu } from "@/components/about/About";
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import TechReportPage from "@/components/about/tech/TechReportPage";
 import {
   TECH_PR_REPORTS,
@@ -33,17 +33,9 @@ export default async function AboutTechReportRoute(props: Readonly<Props>) {
             <Container className="pt-2">
               <Row>
                 <Col>
-                  <div className="tw-flex tw-flex-col md:tw-flex-row">
-                    <div className="tw-hidden tw-w-1/5 md:tw-block">
-                      <AboutMenu currentSection={AboutSection.TECH} />
-                    </div>
-                    <div className="tw-w-full md:tw-w-4/5">
-                      <TechReportPage report={report} />
-                    </div>
-                  </div>
-
-                  <div className="tw-mt-6 tw-block tw-text-center md:tw-hidden">
-                    <AboutMenu currentSection={AboutSection.TECH} />
+                  <AboutContentsDropdown currentSection={AboutSection.TECH} />
+                  <div className="tw-w-full">
+                    <TechReportPage report={report} />
                   </div>
                 </Col>
               </Row>

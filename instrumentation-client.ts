@@ -23,6 +23,8 @@ import {
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyMobileRainbowKitNotFoundError,
+  shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -124,6 +126,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterRabbyMobileUserRejectedRequest(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterInjectedWasmCspUnsafeEval(event, hint)) {
     return true;
   }
@@ -145,6 +151,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterSentryRouteParameterizationError(event)) {
+    return true;
+  }
+
+  if (shouldFilterRabbyMobileRainbowKitNotFoundError(event, hint)) {
     return true;
   }
 
