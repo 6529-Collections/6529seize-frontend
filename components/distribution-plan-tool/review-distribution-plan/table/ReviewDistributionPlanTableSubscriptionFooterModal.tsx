@@ -26,8 +26,20 @@ interface ReviewDistributionPlanTableSubscriptionFooterMessageRowProps {
 }
 
 interface ReviewDistributionPlanTableSubscriptionFooterAlertRowProps extends ReviewDistributionPlanTableSubscriptionFooterMessageRowProps {
-  readonly variant: "danger" | "secondary";
+  readonly variant: "danger" | "secondary" | "warning";
 }
+
+const ALERT_ROW_CLASSNAMES: Record<
+  ReviewDistributionPlanTableSubscriptionFooterAlertRowProps["variant"],
+  string
+> = {
+  danger:
+    "tw-mb-0 tw-rounded-lg tw-border tw-border-red/30 tw-bg-red/10 tw-px-4 tw-py-3 tw-text-red",
+  secondary:
+    "tw-mb-0 tw-rounded-lg tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-4 tw-py-3 tw-text-iron-800",
+  warning:
+    "tw-mb-0 tw-rounded-lg tw-border tw-border-yellow-700 tw-bg-yellow-100 tw-px-4 tw-py-3 tw-text-yellow-900",
+};
 
 export function ReviewDistributionPlanTableSubscriptionFooterModal({
   title,
@@ -95,13 +107,7 @@ export function ReviewDistributionPlanTableSubscriptionFooterAlertRow({
   return (
     <div className="tw-py-2">
       <div>
-        <div
-          className={
-            variant === "danger"
-              ? "tw-mb-0 tw-rounded-lg tw-border tw-border-red/30 tw-bg-red/10 tw-px-4 tw-py-3 tw-text-red"
-              : "tw-mb-0 tw-rounded-lg tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-4 tw-py-3 tw-text-iron-800"
-          }
-        >
+        <div className={ALERT_ROW_CLASSNAMES[variant]}>
           {children}
         </div>
       </div>

@@ -9,6 +9,7 @@ import {
 } from "@/helpers/Helpers";
 import { type ChangeEvent, useRef, useState } from "react";
 import { Modal } from "react-bootstrap";
+import { ReviewDistributionPlanTableSubscriptionFooterAlertRow } from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 export type DistributionAirdropsPhase = "artist" | "team";
 
@@ -265,14 +266,10 @@ export function DistributionPhaseAirdropsModal(
               )}
             </div>
           </div>
-          <div className="tw-py-2">
-            <div>
-              <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-yellow-700 tw-bg-yellow-100 tw-px-4 tw-py-3 tw-text-yellow-900">
-                This upload will replace the current {copy.successLabel}{" "}
-                airdrops list for this token.
-              </div>
-            </div>
-          </div>
+          <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="warning">
+            This upload will replace the current {copy.successLabel} airdrops
+            list for this token.
+          </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
           <div className="tw-py-2">
             <div>
               <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-sky-300 tw-bg-sky-100 tw-px-4 tw-py-3 tw-text-sky-950">

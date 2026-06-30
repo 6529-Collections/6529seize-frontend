@@ -9,6 +9,7 @@ import {
 } from "@/helpers/Helpers";
 import { useRef, useState } from "react";
 import { Modal } from "react-bootstrap";
+import { ReviewDistributionPlanTableSubscriptionFooterAlertRow } from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 export function UploadDistributionPhotosModal(
   props: Readonly<{
@@ -157,14 +158,10 @@ export function UploadDistributionPhotosModal(
           </div>
           {props.existingPhotosCount !== undefined &&
             props.existingPhotosCount > 0 && (
-              <div className="tw-py-2">
-                <div>
-                  <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-yellow-700 tw-bg-yellow-100 tw-px-4 tw-py-3 tw-text-yellow-900">
-                    ⚠️ {props.existingPhotosCount} photo(s) already exist. This
-                    will replace all existing photos.
-                  </div>
-                </div>
-              </div>
+              <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="warning">
+                ⚠️ {props.existingPhotosCount} photo(s) already exist. This will
+                replace all existing photos.
+              </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
             )}
           <div className="tw-py-2">
             <div>
