@@ -66,6 +66,7 @@ export type SentryClientEvent = {
   request?:
     | {
         url?: string | undefined;
+        headers?: Record<string, unknown> | undefined;
       }
     | undefined;
   tags?: SentryTags | undefined;
@@ -95,6 +96,7 @@ const filenameExceptions = [
   "inject.chrome",
 ];
 const injectedWasmCspAppUriPath = "app:///inject.js";
+const injectedWasmCspCollapsedPath = "///inject.js";
 const injectedAppUriPath = "app:///injected/injected.js";
 const walletCollisionPatterns = [
   "tronlinkparams",
@@ -113,6 +115,36 @@ const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
 const coinbaseWalletLinkWebSocket1006Pattern =
   /^websocket error 1006(?::.*)?$/i;
+const walletWebSocketBreadcrumbAppKitTokens = [
+  "appkit",
+  "reown",
+  "wagmi",
+  "w3m",
+];
+const walletWebSocketBreadcrumbConnectorTokens = [
+  "coinbase",
+  "walletlink",
+  "@coinbase/wallet-sdk",
+  "@coinbase+wallet-sdk",
+  "walletconnect",
+];
+const appOwnedFramePathPrefixes = [
+  "app/",
+  "components/",
+  "config/",
+  "constants/",
+  "contexts/",
+  "entities/",
+  "helpers/",
+  "hooks/",
+  "lib/",
+  "services/",
+  "src/",
+  "store/",
+  "types/",
+  "utils/",
+  "wagmiConfig/",
+];
 const metaMaskMobileUpdateUrlFunction = "__mm__updateUrl";
 const jsonStringifyFunction = "JSON.stringify";
 const circularReactMetaElementMessagePatterns = [
@@ -131,7 +163,32 @@ const objectCapturedPromiseRejectionMessage =
 const providerDisconnectedCode = 4900;
 const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
+const rabbyMobileUserRejectedCode = 4001;
+const rabbyMobileUserRejectedMessage = "Not Allowed";
+const rabbyMobileStackPatterns = ["rabbymobile", "userrejectedrequest"];
+const appOwnedStackPatterns = [
+  "webpack-internal:///(app-pages-browser)",
+  "webpack://_n_e/./",
+  "/_next/static/",
+  "https://6529.io/",
+  "https://www.6529.io/",
+  "https://staging.6529.io/",
+  "http://localhost:",
+  "http://127.0.0.1:",
+  "app:///",
+  "app/",
+  "components/",
+  "contexts/",
+  "helpers/",
+  "hooks/",
+  "lib/",
+  "services/",
+  "store/",
+  "utils/",
+];
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
+const RABBY_MOBILE_USER_AGENT_TOKEN = "rabbymobile";
+const RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE = "not found rainbowkit";
 
 const REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE =
   "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
@@ -1008,11 +1065,49 @@ function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
   );
 }
 
-function isInjectedWasmCspAppUriFrame(frame: SentryStackFrame): boolean {
-  return [frame.filename, frame.abs_path].some(
-    (path) =>
-      typeof path === "string" && path.includes(injectedWasmCspAppUriPath)
+function isInjectedWasmCspFramePath(path: string): boolean {
+  const normalizedPath = path.trim();
+  return (
+    normalizedPath.includes(injectedWasmCspAppUriPath) ||
+    normalizedPath === injectedWasmCspCollapsedPath ||
+    normalizedPath.startsWith(`${injectedWasmCspCollapsedPath}:`)
   );
+}
+
+function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some(isInjectedWasmCspFramePath);
+}
+
+function isFirstPartyFramePath(path: string): boolean {
+  const normalizedPath = path.trim();
+  if (!normalizedPath) {
+    return false;
+  }
+
+  if (
+    normalizedPath.startsWith("app:///") &&
+    !isInjectedWasmCspFramePath(normalizedPath)
+  ) {
+    return true;
+  }
+
+  if (normalizedPath.includes("/_next/static/")) {
+    return true;
+  }
+
+  try {
+    return isFirstPartyHost(new URL(normalizedPath).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
+  if (frame.in_app === true && !isInjectedWasmCspFrame(frame)) {
+    return true;
+  }
+
+  return getFramePaths(frame).some(isFirstPartyFramePath);
 }
 
 function hasOnlyAppUriFrames(
@@ -1029,14 +1124,18 @@ function hasInjectedAppUriFrame(
   return Array.isArray(frames) && frames.some(isInjectedAppUriFrame);
 }
 
-function hasInjectedWasmCspAppUriSignature(
+function hasInjectedWasmCspFrameSignature(
   frames: SentryStackFrame[] | undefined
 ): boolean {
-  if (!hasOnlyAppUriFrames(frames)) {
+  if (!Array.isArray(frames) || frames.length === 0) {
     return false;
   }
 
-  return frames.some(isInjectedWasmCspAppUriFrame);
+  if (frames.some(isAppOwnedWasmCspFrame)) {
+    return false;
+  }
+
+  return frames.some(isInjectedWasmCspFrame);
 }
 
 function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
@@ -1060,6 +1159,26 @@ function hasNativeJsonStringifyFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
+}
+
+function hasAppOwnedStackPath(value: string | undefined): boolean {
+  const normalized = value?.toLowerCase();
+  return (
+    !!normalized &&
+    appOwnedStackPatterns.some((pattern) => normalized.includes(pattern))
+  );
+}
+
+function hasLikelyAppOwnedFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    hasAppOwnedFrame(frames) ||
+    (Array.isArray(frames) &&
+      frames.some((frame) =>
+        getFramePaths(frame).some((path) => hasAppOwnedStackPath(path))
+      ))
+  );
 }
 
 function getHintException(hint?: SentryEventHint): unknown {
@@ -1096,6 +1215,38 @@ function getHintExceptionStack(hint?: SentryEventHint): string {
     return exception.stack;
   }
   return "";
+}
+
+function matchesRabbyMobileUserRejectedStack(
+  value: string | undefined
+): boolean {
+  const normalized = value?.toLowerCase();
+  return (
+    !!normalized &&
+    rabbyMobileStackPatterns.every((pattern) => normalized.includes(pattern))
+  );
+}
+
+function hasRabbyMobileUserRejectedStack(
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return [serializedStack, getHintExceptionStack(hint)].some(
+    matchesRabbyMobileUserRejectedStack
+  );
+}
+
+function hasAppOwnedStackEvidence(
+  event: SentryClientEvent,
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  return (
+    hasLikelyAppOwnedFrame(frames) ||
+    hasAppOwnedStackPath(serializedStack) ||
+    hasAppOwnedStackPath(getHintExceptionStack(hint))
+  );
 }
 
 function isCoinbaseWalletLinkWebSocket1006Message(value: string): boolean {
@@ -1146,6 +1297,121 @@ function hasCoinbaseWalletLinkWebSocketCloseStack(
   return getHintExceptionStack(hint).includes(
     coinbaseWalletLinkWebSocketCloseFunction
   );
+}
+
+function normalizeStackPath(value: string): string {
+  const webpackPrefix = "webpack-internal:///";
+  let normalized = value;
+
+  if (normalized.startsWith(webpackPrefix)) {
+    normalized = normalized.slice(webpackPrefix.length);
+    if (normalized.startsWith("(")) {
+      const groupEnd = normalized.indexOf(")/");
+      if (groupEnd >= 0) {
+        normalized = normalized.slice(groupEnd + 2);
+      }
+    }
+    if (normalized.startsWith("./")) {
+      normalized = normalized.slice(2);
+    }
+  }
+
+  while (normalized.startsWith("/")) {
+    normalized = normalized.slice(1);
+  }
+
+  return normalized;
+}
+
+function isAppOwnedStackPath(value: string | undefined): boolean {
+  if (typeof value !== "string" || value.length === 0) {
+    return false;
+  }
+
+  const normalized = normalizeStackPath(value);
+  return appOwnedFramePathPrefixes.some((prefix) =>
+    normalized.startsWith(prefix)
+  );
+}
+
+function hasAppOwnedSourceFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) =>
+      [frame.filename, frame.abs_path].some(isAppOwnedStackPath)
+    )
+  );
+}
+
+function hasAppOwnedSourceStack(hint?: SentryEventHint): boolean {
+  const stack = getHintExceptionStack(hint);
+  return appOwnedFramePathPrefixes.some((prefix) => stack.includes(prefix));
+}
+
+function addBreadcrumbSignatureValues(
+  value: unknown,
+  values: string[],
+  depth: number
+): void {
+  if (depth > 4) {
+    return;
+  }
+
+  if (typeof value === "string") {
+    values.push(value);
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) =>
+      addBreadcrumbSignatureValues(item, values, depth + 1)
+    );
+    return;
+  }
+
+  if (!isRecord(value)) {
+    return;
+  }
+
+  Object.entries(value).forEach(([key, item]) => {
+    if (item === true) {
+      values.push(key);
+    }
+    addBreadcrumbSignatureValues(item, values, depth + 1);
+  });
+}
+
+function getBreadcrumbSignatureText(event: SentryClientEvent): string {
+  const values: string[] = [];
+  getBreadcrumbValues(event).forEach((breadcrumb) => {
+    addBreadcrumbSignatureValues(
+      [breadcrumb.category, breadcrumb.message, breadcrumb.data],
+      values,
+      0
+    );
+  });
+
+  return values.join("\n").toLowerCase();
+}
+
+function hasThirdPartyWalletAppKitBreadcrumbSignature(
+  event: SentryClientEvent
+): boolean {
+  const text = getBreadcrumbSignatureText(event);
+  if (!text) {
+    return false;
+  }
+
+  const hasAppKitToken = walletWebSocketBreadcrumbAppKitTokens.some((token) =>
+    text.includes(token)
+  );
+  const hasConnectorToken = walletWebSocketBreadcrumbConnectorTokens.some(
+    (token) => text.includes(token)
+  );
+
+  return hasAppKitToken && hasConnectorToken;
 }
 
 function hasWalletLinkWebSocketUnhandledRejectionSignature(
@@ -1222,6 +1488,40 @@ function getContextString(
 
   const value = context[valueKey];
   return typeof value === "string" ? value : undefined;
+}
+
+function getRequestHeaderString(
+  event: SentryClientEvent,
+  headerName: string
+): string | undefined {
+  const headers = event.request?.headers;
+  if (!headers) {
+    return undefined;
+  }
+
+  const normalizedHeaderName = headerName.toLowerCase();
+  const matchingEntry = Object.entries(headers).find(
+    ([key]) => key.toLowerCase() === normalizedHeaderName
+  );
+  const value = matchingEntry?.[1];
+  return typeof value === "string" ? value : undefined;
+}
+
+function hasRabbyMobileContext(event: SentryClientEvent): boolean {
+  const candidates = [
+    getContextString(event, "browser", "name"),
+    getRequestHeaderString(event, "user-agent"),
+    getStringValue(event.tags?.["browser"]),
+    getStringValue(event.tags?.["browser.name"]),
+    getStringValue(event.tags?.["user_agent"]),
+    getStringValue(event.tags?.["userAgent"]),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      candidate.toLowerCase().includes(RABBY_MOBILE_USER_AGENT_TOKEN)
+  );
 }
 
 function isFirstPartyHost(hostname: string): boolean {
@@ -1498,8 +1798,10 @@ function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
 function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return (
-    normalizedValue.includes("webassembly.instantiate") &&
-    normalizedValue.includes("content security") &&
+    (normalizedValue.includes("webassembly.instantiate") ||
+      normalizedValue.includes("webassembly.module")) &&
+    (normalizedValue.includes("content security") ||
+      /\bcsp\b/.test(normalizedValue)) &&
     normalizedValue.includes("unsafe-eval")
   );
 }
@@ -1594,6 +1896,37 @@ export function shouldFilterDisconnectedWalletProviderRejection(
   );
 }
 
+export function shouldFilterRabbyMobileUserRejectedRequest(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  if (getEventMessage(event) !== objectCapturedPromiseRejectionMessage) {
+    return false;
+  }
+
+  const serialized = getSerializedObjectRejection(event, hint);
+  if (!serialized) {
+    return false;
+  }
+
+  const code = getNumericValue(serialized["code"]);
+  const message = getStringValue(serialized["message"])?.trim();
+  const stack = getStringValue(serialized["stack"]);
+
+  if (
+    code !== rabbyMobileUserRejectedCode ||
+    message !== rabbyMobileUserRejectedMessage
+  ) {
+    return false;
+  }
+
+  if (!hasRabbyMobileUserRejectedStack(stack, hint)) {
+    return false;
+  }
+
+  return !hasAppOwnedStackEvidence(event, stack, hint);
+}
+
 export function shouldFilterReactDomInsertBeforeNotFoundError(
   event: SentryClientEvent
 ): boolean {
@@ -1620,6 +1953,33 @@ export function shouldFilterReactDomRemoveChildNotFoundError(
   );
 }
 
+export function shouldFilterRabbyMobileRainbowKitNotFoundError(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const messageCandidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+  const hasExactMessage = messageCandidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      candidate.trim() === RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE
+  );
+
+  if (!hasExactMessage) {
+    return false;
+  }
+
+  if (!hasRabbyMobileContext(event)) {
+    return false;
+  }
+
+  return !hasAppOwnedFrame(value?.stacktrace?.frames);
+}
+
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -1643,7 +2003,11 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   return (
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
-    hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint)
+    hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint) ||
+    (!hasAppOwnedFrame(value?.stacktrace?.frames) &&
+      !hasAppOwnedSourceFrame(value?.stacktrace?.frames) &&
+      !hasAppOwnedSourceStack(hint) &&
+      hasThirdPartyWalletAppKitBreadcrumbSignature(event))
   );
 }
 
@@ -1696,7 +2060,7 @@ export function shouldFilterInjectedWasmCspUnsafeEval(
   hint?: SentryEventHint
 ): boolean {
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
-  if (!hasInjectedWasmCspAppUriSignature(frames)) {
+  if (!hasInjectedWasmCspFrameSignature(frames)) {
     return false;
   }
 

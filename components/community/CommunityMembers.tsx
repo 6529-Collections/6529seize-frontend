@@ -7,6 +7,7 @@ import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "react-use";
 import CommunityMembersMobileSortContent from "./members-table/CommunityMembersMobileSortContent";
@@ -18,9 +19,11 @@ import CommonTablePagination from "@/components/utils/table/paginator/CommonTabl
 import { useSetTitle } from "@/contexts/TitleContext";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import { selectActiveGroupId } from "@/store/groupSlice";
-import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FunnelIcon } from "@heroicons/react/24/outline";
+import {
+  BarsArrowDownIcon,
+  ChevronRightIcon,
+  FunnelIcon,
+} from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
 import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
@@ -36,6 +39,53 @@ const SEARCH_PARAMS_FIELDS = {
   sortDirection: "sort-direction",
   group: "group",
 } as const;
+
+function NetworkHeaderActionButton({
+  active = false,
+  children,
+  compact = false,
+  expanded,
+  hasPopup = false,
+  label,
+  onClick,
+}: {
+  readonly active?: boolean | undefined;
+  readonly children: ReactNode;
+  readonly compact?: boolean | undefined;
+  readonly expanded?: boolean | undefined;
+  readonly hasPopup?: boolean | undefined;
+  readonly label: string;
+  readonly onClick: () => void;
+}) {
+  const buttonClassName = [
+    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40 sm:tw-text-xs",
+    compact
+      ? "tw-h-9 tw-w-9 tw-px-0 sm:tw-h-8 sm:tw-w-8"
+      : "tw-h-9 tw-min-w-9 tw-px-2.5 sm:tw-h-8 sm:tw-min-w-8 sm:tw-px-2",
+    active
+      ? "tw-bg-primary-500/15 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-white/10"
+      : "tw-bg-transparent tw-text-iron-300 hover:tw-bg-white/5 hover:tw-text-iron-50",
+  ].join(" ");
+
+  return (
+    <button
+      type="button"
+      className={buttonClassName}
+      onClick={onClick}
+      aria-label={active ? `${label} (active)` : label}
+      aria-haspopup={hasPopup ? "dialog" : undefined}
+      aria-expanded={hasPopup ? expanded : undefined}
+    >
+      {children}
+      {active && (
+        <span
+          aria-hidden="true"
+          className="tw-absolute tw-right-1.5 tw-top-1.5 tw-size-1.5 tw-rounded-full tw-bg-primary-300"
+        />
+      )}
+    </button>
+  );
+}
 
 export default function CommunityMembers() {
   useSetTitle("Network");
@@ -269,105 +319,120 @@ export default function CommunityMembers() {
     setMobileFilterOpen(false);
   }, [activeGroupId]);
 
+  const hasCustomSort =
+    params.sort !== defaultSortBy ||
+    params.sort_direction !== defaultSortDirection;
+  const hasMemberContent = Boolean(members?.data.length);
+  const showMembersSkeleton =
+    !hasMemberContent && (isLoading || isFetching || !members);
+
+  let membersContent: ReactNode = null;
+  if (showMembersSkeleton) {
+    membersContent = <CommunityMembersTableSkeleton />;
+  } else if (members) {
+    membersContent = (
+      <>
+        <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
+          <CommunityMembersTable
+            members={members.data}
+            activeSort={params.sort}
+            sortDirection={params.sort_direction}
+            page={members.page}
+            pageSize={params.page_size}
+            isLoading={isFetching}
+            onSort={setSortBy}
+          />
+        </div>
+        {totalPages > 1 && (
+          <CommonTablePagination
+            currentPage={members.page}
+            setCurrentPage={setPage}
+            totalPages={totalPages}
+            haveNextPage={members.next}
+            small={false}
+            loading={isLoading}
+          />
+        )}
+      </>
+    );
+  }
+
   return (
     <div>
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <div className="tw-flex tw-items-center tw-gap-x-3">
-          <h1 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
+          <h1 className="tw-mb-0 tw-flex-shrink-0 tw-text-xl tw-font-semibold tw-text-iron-50">
             Network
           </h1>
-          <button
-            type="button"
-            className={`tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
-              activeGroupId
-                ? "tw-border-primary-500 tw-bg-primary-500/20 tw-text-primary-300"
-                : "tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 hover:tw-bg-iron-700"
-            }`}
-            onClick={() => setMobileFilterOpen(true)}
-            aria-label="Open filter panel"
-          >
-            <FunnelIcon className="tw-h-5 tw-w-5" />
-          </button>
-          <button
-            type="button"
-            className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-outline-none sm:tw-hidden"
-            onClick={() => setMobileSortOpen(true)}
-            aria-label="Open sort options"
-          >
-            <FontAwesomeIcon
-              icon={faArrowDownWideShort}
-              className="tw-h-5 tw-w-5"
-            />
-          </button>
-        </div>
-        <div className="tw-ml-auto tw-inline-flex tw-items-center tw-space-x-3">
-          <button
-            type="button"
-            className="tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-            onClick={goToNerd}
-          >
-            <span>Nerd view</span>
-            <svg
-              className="-tw-mr-1.5 tw-h-5 tw-w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+            <NetworkHeaderActionButton
+              active={!!activeGroupId}
+              compact
+              expanded={mobileFilterOpen}
+              hasPopup
+              onClick={() => setMobileFilterOpen(true)}
+              label="Open group filters"
             >
-              <path
-                fillRule="evenodd"
-                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
+              <FunnelIcon className="tw-size-4" />
+            </NetworkHeaderActionButton>
+            <div className="sm:tw-hidden">
+              <NetworkHeaderActionButton
+                active={hasCustomSort}
+                compact
+                expanded={mobileSortOpen}
+                hasPopup
+                onClick={() => setMobileSortOpen(true)}
+                label="Open sort options"
+              >
+                <BarsArrowDownIcon className="tw-size-4" />
+              </NetworkHeaderActionButton>
+            </div>
+          </div>
+        </div>
+        <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center">
+          <div className="tw-flex tw-items-center tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+            <NetworkHeaderActionButton
+              label="Open Nerd view"
+              onClick={goToNerd}
+            >
+              <span className="tw-whitespace-nowrap">Nerd view</span>
+              <ChevronRightIcon className="-tw-mr-0.5 tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-500 tw-transition tw-duration-200 tw-ease-out group-hover:tw-translate-x-0.5 group-hover:tw-text-iron-200" />
+            </NetworkHeaderActionButton>
+          </div>
         </div>
       </div>
       <div className="tailwind-scope tw-mt-2 tw-flow-root lg:tw-mt-3">
-        {members ? (
-          <>
-            <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
-              <CommunityMembersTable
-                members={members.data}
-                activeSort={params.sort}
-                sortDirection={params.sort_direction}
-                page={members.page}
-                pageSize={params.page_size}
-                isLoading={isFetching}
-                onSort={setSortBy}
-              />
-            </div>
-            {totalPages > 1 && (
-              <CommonTablePagination
-                currentPage={members.page}
-                setCurrentPage={setPage}
-                totalPages={totalPages}
-                haveNextPage={members.next}
-                small={false}
-                loading={isLoading}
-              />
-            )}
-          </>
-        ) : (
-          <CommunityMembersTableSkeleton />
-        )}
+        {membersContent}
       </div>
 
       <MobileWrapperDialog
-        title="Filter"
+        title="Groups"
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
         tall
         fixedHeight
+        noPadding
+        showDragHandle
+        showHeaderCloseButton
+        surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
+        titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
+        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5"
+        headerCloseButtonClassName="-tw-mt-1"
       >
-        <div className="tw-px-4">
-          <GroupsSidebar />
-        </div>
+        <GroupsSidebar variant="mobile-sheet" />
       </MobileWrapperDialog>
 
       <MobileWrapperDialog
         title="Sort"
         isOpen={mobileSortOpen}
         onClose={() => setMobileSortOpen(false)}
+        noPadding
+        showDragHandle
+        showHeaderCloseButton
+        surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
+        titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
+        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5"
+        headerCloseButtonClassName="-tw-mt-1"
       >
         <CommunityMembersMobileSortContent
           activeSort={params.sort}
