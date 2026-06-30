@@ -114,12 +114,11 @@ export function MappingToolSubmitButton({
           {processing ? "Processing" : "Submit"}
           {processing && (
             <div className="tw-inline">
-              <div
+              <output
                 className={`tw-inline-block tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-current tw-border-r-transparent ${styles["loader"]}`}
-                role="status"
               >
                 <span className="tw-sr-only"></span>
-              </div>
+              </output>
             </div>
           )}
         </button>
