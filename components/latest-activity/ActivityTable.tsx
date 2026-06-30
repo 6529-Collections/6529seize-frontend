@@ -9,8 +9,8 @@ import type { NFT } from "@/entities/INFT";
 import type { NextGenCollection } from "@/entities/INextgen";
 
 interface ActivityTableProps {
-  readonly activity: Transaction[];
-  readonly nfts: NFT[];
+  readonly activity: Transaction[] | undefined;
+  readonly nfts: NFT[] | undefined;
   readonly nextgenCollections: NextGenCollection[];
 }
 
@@ -19,6 +19,10 @@ export default function ActivityTable({
   nfts,
   nextgenCollections,
 }: ActivityTableProps) {
+  if (activity === undefined || nfts === undefined) {
+    return null;
+  }
+
   return (
     <div className={`tw-pt-3 ${styles["scrollContainer"] ?? ""}`}>
       <table className={styles["activityTable"]}>
