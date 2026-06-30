@@ -3,7 +3,6 @@
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import type { ReactNode } from "react";
-import { Button } from "react-bootstrap";
 import { DistributionAirdropsPhase } from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdrops";
 import {
   ReviewDistributionPlanTableSubscriptionFooterAlertRow,
@@ -96,9 +95,13 @@ export function DistributionPhaseAirdropsViewerModal(
       size="lg"
       bodyTestId={`${props.phase}-airdrops-viewer-modal`}
       footer={
-        <Button variant="secondary" onClick={props.handleClose}>
+        <button
+          type="button"
+          onClick={props.handleClose}
+          className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
+        >
           Close
-        </Button>
+        </button>
       }
     >
       <ReviewDistributionPlanTableSubscriptionFooterContractRow

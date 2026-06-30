@@ -8,7 +8,6 @@ import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
 
 export default function UserPageSubscriptionsMode(
@@ -77,9 +76,9 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <Container className="no-padding">
-      <Row className="tw-pb-2">
-        <Col>
+    <div>
+      <div className="tw-pb-2">
+        <div>
           <h5 className="tw-mb-0">
             Mode{" "}
             {props.details && props.details.last_update > 0 && (
@@ -97,10 +96,10 @@ export default function UserPageSubscriptionsMode(
               </span>
             )}
           </h5>
-        </Col>
-      </Row>
-      <Row className="tw-pt-1">
-        <Col className="tw-flex tw-items-center tw-gap-2">
+        </div>
+      </div>
+      <div className="tw-pt-1">
+        <div className="tw-flex tw-items-center tw-gap-2">
           <label htmlFor={"subscription-mode"} className="font-color">
             <b>Manual</b>
           </label>
@@ -115,17 +114,17 @@ export default function UserPageSubscriptionsMode(
             <b>Automatic</b>
           </label>
           {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
-        </Col>
-      </Row>
+        </div>
+      </div>
       {!props.readonly && (
-        <Row className="tw-pt-1">
-          <Col className="tw-whitespace-nowrap">
+        <div className="tw-pt-1">
+          <div className="tw-whitespace-nowrap">
             {isAuto
               ? "Automatic airdrops of all eligible drops unless you opt-out"
               : "You have to opt-in to each specific drop"}
-          </Col>
-        </Row>
+          </div>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }

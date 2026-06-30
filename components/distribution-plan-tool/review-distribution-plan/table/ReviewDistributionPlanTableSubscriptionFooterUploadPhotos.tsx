@@ -8,7 +8,7 @@ import {
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
 import { useRef, useState } from "react";
-import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 
 export function UploadDistributionPhotosModal(
   props: Readonly<{
@@ -117,22 +117,22 @@ export function UploadDistributionPhotosModal(
   };
 
   return (
-    <Modal show onHide={handleClose}>
+    <Modal show onHide={handleClose} className="tailwind-scope">
       <Modal.Header closeButton>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           Upload Distribution Photos
         </Modal.Title>
       </Modal.Header>
-      <hr className="mb-0 mt-0" />
+      <hr className="tw-my-0" />
       <Modal.Body>
-        <Container>
-          <Row className="pt-2 pb-2">
-            <Col>
+        <div className="tw-container tw-mx-auto">
+          <div className="tw-py-2">
+            <div>
               Contract: The Memes - <span>{formatAddress(contract)}</span>
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col>
+            </div>
+          </div>
+          <div className="tw-py-2">
+            <div>
               Token ID:{" "}
               {props.confirmedTokenId !== undefined &&
               props.confirmedTokenId !== null ? (
@@ -152,21 +152,21 @@ export function UploadDistributionPhotosModal(
                   }}
                 />
               )}
-            </Col>
-          </Row>
+            </div>
+          </div>
           {props.existingPhotosCount !== undefined &&
             props.existingPhotosCount > 0 && (
-              <Row className="pt-2 pb-2">
-                <Col>
-                  <div className="alert alert-warning mb-0 border border-dark">
+              <div className="tw-py-2">
+                <div>
+                  <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-[#664d03] tw-bg-[#fff3cd] tw-px-4 tw-py-3 tw-text-[#664d03]">
                     ⚠️ {props.existingPhotosCount} photo(s) already exist. This
                     will replace all existing photos.
                   </div>
-                </Col>
-              </Row>
+                </div>
+              </div>
             )}
-          <Row className="pt-2 pb-2">
-            <Col>
+          <div className="tw-py-2">
+            <div>
               Select Photos:{" "}
               <input
                 ref={fileInputRef}
@@ -179,58 +179,63 @@ export function UploadDistributionPhotosModal(
                 }}
               />
               {fileErrors.length > 0 && (
-                <div className="mt-2">
+                <div className="tw-mt-2">
                   {fileErrors.map((error) => (
-                    <div key={error} className="text-danger">
+                    <div key={error} className="tw-text-red">
                       {error}
                     </div>
                   ))}
                 </div>
               )}
-            </Col>
-          </Row>
+            </div>
+          </div>
           {selectedFiles.length > 0 && (
-            <Row className="pt-2 pb-2">
-              <Col>
+            <div className="tw-py-2">
+              <div>
                 Selected Files ({selectedFiles.length}):
-                <div className="mt-2">
+                <div className="tw-mt-2">
                   {selectedFiles.map((file, index) => (
                     <div
                       key={`${file.name}-${file.size}-${file.lastModified}`}
-                      className="d-flex align-items-center justify-content-between mb-2 p-2 bg-light rounded"
+                      className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-rounded tw-bg-iron-100 tw-p-2"
                     >
-                      <span className="text-truncate flex-grow-1 me-2">
+                      <span className="tw-me-2 tw-grow tw-truncate">
                         {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveFile(index)}
-                        className="btn btn-sm btn-outline-danger"
+                        className="tw-rounded-md tw-border tw-border-red tw-bg-transparent tw-px-2 tw-py-1 tw-text-sm tw-text-red"
                       >
                         Remove
                       </button>
                     </div>
                   ))}
                 </div>
-              </Col>
-            </Row>
+              </div>
+            </div>
           )}
-        </Container>
+        </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <button
+          type="button"
+          onClick={handleClose}
+          className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
+        >
           Close
-        </Button>
-        <Button
+        </button>
+        <button
+          type="button"
           disabled={
             !isValidPositiveInteger(displayTokenId) ||
             selectedFiles.length === 0
           }
-          variant="primary"
           onClick={handleUpload}
+          className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
         >
           Upload Photos
-        </Button>
+        </button>
       </Modal.Footer>
     </Modal>
   );

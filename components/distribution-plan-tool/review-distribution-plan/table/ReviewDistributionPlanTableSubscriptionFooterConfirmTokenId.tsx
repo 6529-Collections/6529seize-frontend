@@ -8,7 +8,7 @@ import {
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
 import { useState } from "react";
-import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 
 export function ConfirmTokenIdModal(
   props: Readonly<{
@@ -32,22 +32,28 @@ export function ConfirmTokenIdModal(
   };
 
   return (
-    <Modal show onHide={() => {}} backdrop="static" keyboard={false}>
+    <Modal
+      show
+      onHide={() => {}}
+      backdrop="static"
+      keyboard={false}
+      className="tailwind-scope"
+    >
       <Modal.Header>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           Confirm Token ID
         </Modal.Title>
       </Modal.Header>
-      <hr className="mb-0 mt-0" />
+      <hr className="tw-my-0" />
       <Modal.Body>
-        <Container>
-          <Row className="pt-2 pb-2">
-            <Col>
+        <div className="tw-container tw-mx-auto">
+          <div className="tw-py-2">
+            <div>
               Contract: The Memes - <span>{formatAddress(contract)}</span>
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col>
+            </div>
+          </div>
+          <div className="tw-py-2">
+            <div>
               Token ID:{" "}
               <input
                 style={{
@@ -67,14 +73,19 @@ export function ConfirmTokenIdModal(
                   }
                 }}
               />
-            </Col>
-          </Row>
-        </Container>
+            </div>
+          </div>
+        </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button disabled={!isValid} variant="primary" onClick={handleConfirm}>
+        <button
+          disabled={!isValid}
+          onClick={handleConfirm}
+          type="button"
+          className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+        >
           Confirm
-        </Button>
+        </button>
       </Modal.Footer>
     </Modal>
   );

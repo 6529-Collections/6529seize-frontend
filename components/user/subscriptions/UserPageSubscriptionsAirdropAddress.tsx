@@ -2,7 +2,6 @@ import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants"
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 
 interface AirdropAddress {
@@ -22,14 +21,14 @@ export default function UserPageSubscriptionsAirdropAddress(
   }>
 ) {
   return (
-    <Container className="no-padding">
-      <Row className="pb-2">
-        <Col className="d-flex align-items-center gap-2">
-          <h5 className="no-wrap mb-0">Airdrop Address</h5>
-        </Col>
-      </Row>
-      <Row className="pt-1">
-        <Col className="d-flex gap-2">
+    <div>
+      <div className="tw-pb-2">
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <h5 className="tw-mb-0 tw-whitespace-nowrap">Airdrop Address</h5>
+        </div>
+      </div>
+      <div className="tw-pt-1">
+        <div className="tw-flex tw-gap-2">
           <span>
             {props.airdrop?.airdrop_address && (
               <>
@@ -64,8 +63,8 @@ export default function UserPageSubscriptionsAirdropAddress(
               <FontAwesomeIcon icon={faEdit} />
             </a>
           )}
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
