@@ -28,7 +28,6 @@ import type { OwnerNft } from "@/services/alchemy/types";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useChainId, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
@@ -266,136 +265,123 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col>
-          <Form
-            onChange={() => {
-              setErrors([]);
-              setIsMinting(false);
-            }}>
-            <Row>
-              <Col xs={12}>
-                <u>Burn Details</u>
-              </Col>
-              <Col xs={12}>
-                <Table className="mb-0">
-                  <tbody>
-                    <tr>
-                      <td>Contract</td>
-                      <td>{props.collection_merkle.burn_collection}</td>
-                    </tr>
-                    {!!props.collection_merkle.burn_collection_id && (
-                      <tr>
-                        <td>Collection</td>
-                        <td>{props.collection_merkle.burn_collection_id}</td>
-                      </tr>
-                    )}
-                    {props.collection_merkle.max_token_index > 0 && (
-                      <tr>
-                        <td>Tokens</td>
-                        <td>
-                          #{props.collection_merkle.min_token_index} - #
-                          {props.collection_merkle.max_token_index}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-            <NextGenMintingFor
-              title="Burn and Mint For"
-              delegators={props.delegators}
-              mintForAddress={mintForAddress}
-              setMintForAddress={setMintForAddress}
-            />
-            <Form.Group as={Row} className="pt-1 pb-1">
-              <Form.Label column sm={12} className="d-flex align-items-center">
-                Mint To
-                <FontAwesomeIcon
-                  className={styles["infoIcon"]}
-                  icon={faInfoCircle}
-                  data-tooltip-id={`mint-to-info-${props.collection.id}`}></FontAwesomeIcon>
-                <Tooltip
-                  id={`mint-to-info-${props.collection.id}`}
-                  content="In burns to mint, the token is minted to the address that burns the token."
-                  place="top"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                />
-              </Form.Label>
-              <Col sm={12}>{mintForAddress}</Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pt-1 pb-1">
-              <Form.Label column sm={12}>
-                <span>Select token from Burn collection</span>
-              </Form.Label>
-              <Col sm={12}>
-                <Form.Select
-                  disabled={!tokensOwnedForBurnAddressLoaded}
-                  className={styles["mintSelect"]}
-                  value={tokenId}
-                  onChange={(e: any) => setTokenId(e.currentTarget.value)}>
-                  <option value="" disabled>
-                    Select Token to burn -{" "}
-                    {tokensOwnedForBurnAddressLoaded
-                      ? `${tokensOwnedForBurnAddress.length} available`
-                      : "fetching..."}
-                  </option>
-                  {tokensOwnedForBurnAddress.map((token) => (
-                    <option
-                      value={token.tokenId}
-                      key={`token-${token.tokenId}`}>
-                      #{token.tokenId}
-                      {token.name ? ` - ${token.name}` : ""}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pt-4 mb-3">
-              <Col sm={12}>
-                <Button
-                  className={styles["mintBtn"]}
-                  disabled={disableMint()}
-                  onClick={handleMintClick}>
-                  {getButtonText()}
-                  {isMinting && <Spinner />}
-                </Button>
-              </Col>
-            </Form.Group>
-            {errors.length > 0 && (
-              <Form.Group as={Row} className={`pt-1 pb-1`}>
-                <Form.Label
-                  column
-                  sm={12}
-                  className="d-flex align-items-center">
-                  Errors
-                </Form.Label>
-                <Col sm={12} className="d-flex align-items-center">
-                  <ul className="mb-0">
-                    {errors.map((e) => (
-                      <li key={`mint-error-${e.replaceAll(" ", "-")}`}>{e}</li>
-                    ))}
-                  </ul>
-                </Col>
-              </Form.Group>
-            )}
-            <NextGenContractWriteStatus
-              isLoading={mintWrite.isPending}
-              hash={mintWrite.data}
-              error={mintWrite.error}
-              onSuccess={() => {
-                props.refreshMintCounts();
+    <div>
+      <form
+        onChange={() => {
+          setErrors([]);
+          setIsMinting(false);
+        }}>
+        <div>
+          <div>
+            <u>Burn Details</u>
+          </div>
+          <div>
+            <table className="tw-mb-0 tw-w-full">
+              <tbody>
+                <tr>
+                  <td>Contract</td>
+                  <td>{props.collection_merkle.burn_collection}</td>
+                </tr>
+                {!!props.collection_merkle.burn_collection_id && (
+                  <tr>
+                    <td>Collection</td>
+                    <td>{props.collection_merkle.burn_collection_id}</td>
+                  </tr>
+                )}
+                {props.collection_merkle.max_token_index > 0 && (
+                  <tr>
+                    <td>Tokens</td>
+                    <td>
+                      #{props.collection_merkle.min_token_index} - #
+                      {props.collection_merkle.max_token_index}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <NextGenMintingFor
+          title="Burn and Mint For"
+          delegators={props.delegators}
+          mintForAddress={mintForAddress}
+          setMintForAddress={setMintForAddress}
+        />
+        <div className="tw-py-1">
+          <label className="tw-flex tw-items-center">
+            Mint To
+            <FontAwesomeIcon
+              className={styles["infoIcon"]}
+              icon={faInfoCircle}
+              data-tooltip-id={`mint-to-info-${props.collection.id}`}
+            ></FontAwesomeIcon>
+            <Tooltip
+              id={`mint-to-info-${props.collection.id}`}
+              content="In burns to mint, the token is minted to the address that burns the token."
+              place="top"
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
               }}
             />
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+          </label>
+          <div>{mintForAddress}</div>
+        </div>
+        <div className="tw-py-1">
+          <label>
+            <span>Select token from Burn collection</span>
+          </label>
+          <select
+            disabled={!tokensOwnedForBurnAddressLoaded}
+            className={`${styles["mintSelect"]} tw-form-select tw-block tw-w-full tw-rounded-none`}
+            value={tokenId}
+            onChange={(e) => setTokenId(e.currentTarget.value)}>
+            <option value="" disabled>
+              Select Token to burn -{" "}
+              {tokensOwnedForBurnAddressLoaded
+                ? `${tokensOwnedForBurnAddress.length} available`
+                : "fetching..."}
+            </option>
+            {tokensOwnedForBurnAddress.map((token) => (
+              <option value={token.tokenId} key={`token-${token.tokenId}`}>
+                #{token.tokenId}
+                {token.name ? ` - ${token.name}` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="tw-mb-3 tw-pt-4">
+          <button
+            type="button"
+            className={styles["mintBtn"]}
+            disabled={disableMint()}
+            onClick={handleMintClick}>
+            {getButtonText()}
+            {isMinting && <Spinner />}
+          </button>
+        </div>
+        {errors.length > 0 && (
+          <div className="tw-py-1">
+            <label className="tw-flex tw-items-center">Errors</label>
+            <div className="tw-flex tw-items-center">
+              <ul className="tw-mb-0">
+                {errors.map((e) => (
+                  <li key={`mint-error-${e.replaceAll(" ", "-")}`}>{e}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+        <NextGenContractWriteStatus
+          isLoading={mintWrite.isPending}
+          hash={mintWrite.data}
+          error={mintWrite.error}
+          onSuccess={() => {
+            props.refreshMintCounts();
+          }}
+        />
+      </form>
+    </div>
   );
 }

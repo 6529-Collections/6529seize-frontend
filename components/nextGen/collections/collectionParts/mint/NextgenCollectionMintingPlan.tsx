@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import type {
   NextGenCollection,
   NextgenAllowlist,
@@ -39,7 +39,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
   const [selectedPhase, setSelectedPhase] =
     useState<NextgenAllowlistCollection>();
 
-  const allowlistScrollTarget = useRef<HTMLImageElement>(null);
+  const allowlistScrollTarget = useRef<HTMLDivElement>(null);
   const [allowlist, setAllowlist] = useState<NextgenAllowlist[]>([]);
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
@@ -119,65 +119,54 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     const startTime = Time.seconds(start);
     const endTime = Time.seconds(end);
     return (
-      <Col
-        xs={12}
-        sm={6}
-        md={4}
+      <div
         key={getRandomObjectId()}
-        className="pt-2 pb-2 d-flex flex-column">
-        <Container className={styles["phaseBox"]}>
-          <Row>
-            <Col>
-              <span className="d-flex align-items-center justify-content-center pb-4">
-                <h4 className="font-color mb-0">{phaseName}</h4>
-              </span>
-              <Table>
-                <tbody>
-                  <tr>
-                    <td className="d-flex justify-content-center gap-3">
-                      <span>
-                        <b>Start</b>
-                      </span>
-                      <span>{printPhaseDateTime(startTime)}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="d-flex justify-content-center gap-3">
-                      <span>
-                        <b>End</b>
-                      </span>
-                      <span>{printPhaseDateTime(endTime)}</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Col>
-          </Row>
-        </Container>
-      </Col>
+        className="tw-flex tw-flex-col tw-py-2">
+        <div className={styles["phaseBox"]}>
+          <span className="tw-flex tw-items-center tw-justify-center tw-pb-4">
+            <h4 className="font-color tw-mb-0">{phaseName}</h4>
+          </span>
+          <table className="tw-w-full">
+            <tbody>
+              <tr>
+                <td className="tw-flex tw-justify-center tw-gap-3">
+                  <span>
+                    <b>Start</b>
+                  </span>
+                  <span>{printPhaseDateTime(startTime)}</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="tw-flex tw-justify-center tw-gap-3">
+                  <span>
+                    <b>End</b>
+                  </span>
+                  <span>{printPhaseDateTime(endTime)}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="pt-4 pb-4">
-      <Row className="pb-4">
-        <Col>
-          <NextGenCollectionHeader
-            collection={props.collection}
-            collection_link={true}
-          />
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>
-          <h3 className="mb-0">Distribution Plan</h3>
-        </Col>
-      </Row>
+    <div className="tailwind-scope tw-mx-auto tw-w-full tw-px-3 tw-py-4 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] xl:tw-max-w-[1140px] 2xl:tw-max-w-[1320px]">
+      <div className="tw-pb-4">
+        <NextGenCollectionHeader
+          collection={props.collection}
+          collection_link={true}
+        />
+      </div>
+      <div className="tw-pt-4">
+        <h3 className="tw-mb-0">Distribution Plan</h3>
+      </div>
       <hr />
-      <Row className="pt-3">
-        <Col xs={12}>
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-6 tw-pt-3 sm:tw-grid-cols-2 md:tw-grid-cols-3">
+        <div className="tw-col-span-full">
           <h2>Phases</h2>
-        </Col>
+        </div>
         {phases.map((phase) =>
           printPhase(phase.phase, phase.start_time, phase.end_time)
         )}
@@ -187,19 +176,17 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
             props.collection.public_start,
             props.collection.public_end
           )}
-      </Row>
+      </div>
       {props.collection.distribution_plan && (
-        <Row className="pt-3">
-          <Col>
-            <PdfViewer
-              file={props.collection.distribution_plan}
-              name={`${props.collection.name} Distribution Plan`}
-            />
-          </Col>
-        </Row>
+        <div className="tw-pt-3">
+          <PdfViewer
+            file={props.collection.distribution_plan}
+            name={`${props.collection.name} Distribution Plan`}
+          />
+        </div>
       )}
-      <Row className="pt-4" ref={allowlistScrollTarget}>
-        <Col className="d-flex align-items-center justify-content-between">
+      <div className="tw-pt-4" ref={allowlistScrollTarget}>
+        <div className="tw-flex tw-items-center tw-justify-between">
           <Dropdown className={styles["filterDropdown"]} drop={"down-centered"}>
             <Dropdown.Toggle>
               {selectedPhase?.phase ?? "All Phases"}
@@ -222,47 +209,45 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
             setSearchWallets={setSearchWallets}
             setShowSearchModal={setShowSearchModal}
           />
-        </Col>
-      </Row>
-      <Row className="table-scroll-container">
-        <Col>
-          <Table className={styles["logsTable"]}>
-            <thead>
-              <tr>
-                <th>Address x{totalResults.toLocaleString()}</th>
-                <th className="text-center">Phase</th>
-                <th className="text-center">Spots</th>
-                <th className="text-center">Data</th>
+        </div>
+      </div>
+      <div className="table-scroll-container">
+        <table className={styles["logsTable"]}>
+          <thead>
+            <tr>
+              <th>Address x{totalResults.toLocaleString()}</th>
+              <th className="tw-text-center">Phase</th>
+              <th className="tw-text-center">Spots</th>
+              <th className="tw-text-center">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            {allowlist.map((al) => (
+              <tr key={`${al.address}-${al.spots}-${al.info}`}>
+                <td>
+                  <Link
+                    href={`/${al.address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="decoration-hover-underline">
+                    {al.wallet_display && `${al.wallet_display} - `}
+                    {al.address}
+                  </Link>
+                </td>
+                <td className="tw-text-center">{al.phase}</td>
+                <td className="tw-text-center">
+                  {adjustSpots(al.address, al.keccak)}
+                </td>
+                <td className="tw-flex tw-justify-center">
+                  {getJsonData(al.keccak, al.info)}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {allowlist.map((al) => (
-                <tr key={`${al.address}-${al.spots}-${al.info}`}>
-                  <td>
-                    <Link
-                      href={`/${al.address}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="decoration-hover-underline">
-                      {al.wallet_display && `${al.wallet_display} - `}
-                      {al.address}
-                    </Link>
-                  </td>
-                  <td className="text-center">{al.phase}</td>
-                  <td className="text-center">
-                    {adjustSpots(al.address, al.keccak)}
-                  </td>
-                  <td className="d-flex justify-content-center">
-                    {getJsonData(al.keccak, al.info)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Col>
-      </Row>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {totalResults > PAGE_SIZE && allowlistLoaded && (
-        <Row className="text-center pt-4 pb-4">
+        <div className="tw-py-4 tw-text-center">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
@@ -276,7 +261,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
               }
             }}
           />
-        </Row>
+        </div>
       )}
       <SearchModalDisplay
         show={showSearchModal}
@@ -284,6 +269,6 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
         searchWallets={searchWallets}
         setSearchWallets={setSearchWallets}
       />
-    </Container>
+    </div>
   );
 }
