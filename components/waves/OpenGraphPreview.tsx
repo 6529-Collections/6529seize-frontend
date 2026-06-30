@@ -367,12 +367,6 @@ function getFirstPartyOgKindFromImageUrl(
   return null;
 }
 
-export function getFirstPartyOpenGraphPreviewKind(
-  preview: OpenGraphPreviewData | null | undefined
-): FirstPartyOpenGraphPreviewKind | null {
-  return getFirstPartyOgKindFromImageUrl(extractImageUrl(preview));
-}
-
 function wrapLongUnbrokenSegments(value: string | undefined): ReactNode {
   if (!value) {
     return value ?? "";
@@ -1442,7 +1436,10 @@ function FarcasterEmbedPreviewCard({
     >
       <div
         className={[
-          "tw-relative tw-flex tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950/80 tw-shadow-sm tw-shadow-black/20",
+          "tw-relative tw-flex tw-h-full tw-min-h-0 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950/80 tw-shadow-sm tw-shadow-black/20",
+          isHome
+            ? "tw-overflow-hidden"
+            : "tw-overflow-y-auto tw-overflow-x-hidden",
           isHome ? "tw-border-white/10" : "tw-border-iron-700",
           !isHome && !hideActions ? "tw-pr-12 sm:tw-pr-14" : "",
         ].join(" ")}
@@ -1451,11 +1448,13 @@ function FarcasterEmbedPreviewCard({
         <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 tw-bg-[#855dcd]" />
         <div
           className={[
-            "tw-grid tw-h-full tw-w-full tw-min-w-0 tw-items-center tw-gap-3 tw-p-3 sm:tw-gap-4",
+            "tw-grid tw-w-full tw-min-w-0 tw-items-center tw-gap-3 tw-p-3 sm:tw-gap-4",
+            isHome ? "tw-h-full" : "tw-min-h-full",
             isHome
               ? "tw-grid-cols-1"
               : "tw-grid-cols-1 sm:tw-grid-cols-[minmax(9.5rem,13rem),minmax(0,1fr)]",
           ].join(" ")}
+          data-testid="farcaster-embed-preview-content"
         >
           <Link
             href={actionHref}
